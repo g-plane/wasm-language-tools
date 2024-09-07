@@ -27,6 +27,9 @@ pub enum SyntaxKind {
     FUNC_TYPE,
     PARAM,
     RESULT,
+    MODULE,
+    MODULE_FIELD,
+    MODULE_FIELD_TYPE,
     ROOT,
 }
 

@@ -1,4 +1,4 @@
-use self::token::*;
+use self::{module::module, token::*};
 use super::{SyntaxKind, SyntaxNode};
 use rowan::{GreenNode, GreenToken, NodeOrToken};
 use winnow::{
@@ -8,6 +8,7 @@ use winnow::{
     PResult, Parser as WinnowParser, RecoverableParser,
 };
 
+mod module;
 mod token;
 mod ty;
 
@@ -53,14 +54,18 @@ where
 
 fn root(input: &mut Input) -> PResult<SyntaxNode> {
     (
-        retry(self::ty::func_type),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry(module)),
         repeat(
             0..,
             alt((ws, line_comment, block_comment, error_token(true))),
         ),
     )
         .parse_next(input)
-        .map(|(mut children, mut trivias)| {
+        .map(|(modules, mut trivias)| {
+            let mut children = Vec::with_capacity(3 + modules.len());
+            modules
+                .into_iter()
+                .for_each(|mut module| children.append(&mut module));
             children.append(&mut trivias);
             SyntaxNode::new_root(GreenNode::new(SyntaxKind::ROOT.into(), children))
         })
