@@ -1,4 +1,7 @@
-use self::{module::module, token::*};
+use self::{
+    module::module,
+    token::{block_comment, error_token, line_comment, trivias, ws},
+};
 use super::{SyntaxKind, SyntaxNode};
 use rowan::{GreenNode, GreenToken, NodeOrToken};
 use winnow::{

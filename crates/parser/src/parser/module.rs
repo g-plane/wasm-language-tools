@@ -1,4 +1,9 @@
-use super::{node, resume, retry, token::*, ty::func_type, GreenResult, Input};
+use super::{
+    node, resume, retry,
+    token::{ident, keyword, l_paren, r_paren, trivias_prefixed},
+    ty::func_type,
+    GreenResult, Input,
+};
 use crate::SyntaxKind::*;
 use winnow::{
     combinator::{opt, repeat},

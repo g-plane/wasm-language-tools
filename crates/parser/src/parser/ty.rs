@@ -1,4 +1,8 @@
-use super::{node, resume, retry, tok, token::*, GreenResult, Input};
+use super::{
+    node, resume, retry, tok,
+    token::{ident, keyword, l_paren, r_paren, trivias_prefixed, word},
+    GreenResult, Input,
+};
 use crate::SyntaxKind::*;
 use winnow::{
     combinator::{alt, opt, repeat},
