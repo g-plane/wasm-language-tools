@@ -1,7 +1,7 @@
 use super::{node, resume, retry, tok, token::*, GreenResult, Input};
 use crate::SyntaxKind::*;
 use winnow::{
-    combinator::{empty, opt, repeat},
+    combinator::{alt, opt, repeat},
     error::{StrContext, StrContextValue},
     Parser,
 };
@@ -50,21 +50,26 @@ fn param(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("param")),
-        opt(trivias_prefixed(ident)),
-        trivias_prefixed(val_type).resume_after(empty),
+        alt((
+            repeat::<_, _, Vec<_>, _, _>(1.., trivias_prefixed(val_type))
+                .map(|types| types.into_iter().flatten().collect()),
+            (opt(trivias_prefixed(ident)), retry(val_type)).map(|(id, mut ty)| {
+                let mut children = Vec::with_capacity(2);
+                if let Some(mut id) = id {
+                    children.append(&mut id);
+                }
+                children.append(&mut ty);
+                children
+            }),
+        )),
         resume(r_paren),
     )
         .parse_next(input)
-        .map(|(l_paren, mut keyword, id, ty, r_paren)| {
+        .map(|(l_paren, mut keyword, mut types, r_paren)| {
             let mut children = Vec::with_capacity(5);
             children.push(l_paren);
             children.append(&mut keyword);
-            if let Some(mut id) = id {
-                children.append(&mut id);
-            }
-            if let Some(mut ty) = ty {
-                children.append(&mut ty);
-            }
+            children.append(&mut types);
             if let Some(mut r_paren) = r_paren {
                 children.append(&mut r_paren);
             }
