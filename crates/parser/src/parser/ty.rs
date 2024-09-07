@@ -54,12 +54,12 @@ fn param(input: &mut Input) -> GreenResult {
             repeat::<_, _, Vec<_>, _, _>(1.., trivias_prefixed(val_type))
                 .map(|types| types.into_iter().flatten().collect()),
             (opt(trivias_prefixed(ident)), retry(val_type)).map(|(id, mut ty)| {
-                let mut children = Vec::with_capacity(2);
                 if let Some(mut id) = id {
-                    children.append(&mut id);
+                    id.append(&mut ty);
+                    id
+                } else {
+                    ty
                 }
-                children.append(&mut ty);
-                children
             }),
         )),
         resume(r_paren),
