@@ -6,7 +6,7 @@ use winnow::{
     error::{ContextError, StrContext, StrContextValue},
     stream::AsChar,
     token::{any, one_of, take_till, take_while},
-    PResult, Parser as WinnowParser,
+    PResult, Parser,
 };
 
 pub(super) fn l_paren(input: &mut Input) -> GreenResult {
@@ -43,9 +43,9 @@ pub(super) fn trivias(input: &mut Input) -> PResult<Vec<GreenElement>> {
 
 pub(super) fn trivias_prefixed<'s, P>(
     parser: P,
-) -> impl WinnowParser<Input<'s>, Vec<GreenElement>, ContextError>
+) -> impl Parser<Input<'s>, Vec<GreenElement>, ContextError>
 where
-    P: WinnowParser<Input<'s>, GreenElement, ContextError>,
+    P: Parser<Input<'s>, GreenElement, ContextError>,
 {
     (trivias, parser).map(|(mut trivias, element)| {
         trivias.push(element);
@@ -92,7 +92,7 @@ fn block_comment_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str> {
 
 pub(super) fn keyword<'s>(
     keyword: &'static str,
-) -> impl WinnowParser<Input<'s>, GreenElement, ContextError> {
+) -> impl Parser<Input<'s>, GreenElement, ContextError> {
     word.verify(move |word: &str| word == keyword)
         .map(|text| tok(KEYWORD, text))
         .context(StrContext::Expected(StrContextValue::StringLiteral(
@@ -119,7 +119,7 @@ pub(super) fn ident(input: &mut Input) -> GreenResult {
 
 pub(super) fn error_token<'s>(
     allow_parens: bool,
-) -> impl WinnowParser<Input<'s>, GreenElement, ContextError> {
+) -> impl Parser<Input<'s>, GreenElement, ContextError> {
     dispatch! {any;
         '$' => take_while(1.., |c: char| {
             c.is_ascii_alphanumeric() ||

@@ -3,7 +3,7 @@ use crate::SyntaxKind::*;
 use winnow::{
     combinator::{empty, opt, repeat},
     error::{StrContext, StrContextValue},
-    Parser as WinnowParser,
+    Parser,
 };
 
 fn val_type(input: &mut Input) -> GreenResult {
