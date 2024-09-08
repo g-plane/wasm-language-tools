@@ -257,7 +257,15 @@ dependencies = [
  "insta",
  "rowan",
  "similar-asserts",
+ "wat_syntax",
  "winnow",
+]
+
+[[package]]
+name = "wat_syntax"
+version = "0.0.0"
+dependencies = [
+ "rowan",
 ]
 
 [[package]]

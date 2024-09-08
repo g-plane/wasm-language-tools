@@ -1,5 +1,5 @@
 use super::{tok, GreenElement, GreenResult, Input};
-use crate::SyntaxKind::*;
+use wat_syntax::SyntaxKind::*;
 use winnow::{
     ascii::{hex_digit0, line_ending, multispace1, take_escaped, till_line_ending},
     combinator::{alt, dispatch, empty, eof, fail, opt, peek, repeat, repeat_till},

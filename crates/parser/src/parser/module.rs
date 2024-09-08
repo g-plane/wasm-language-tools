@@ -4,7 +4,7 @@ use super::{
     ty::{func_type, memory_type, nat, param, result, table_type},
     GreenResult, Input,
 };
-use crate::SyntaxKind::*;
+use wat_syntax::SyntaxKind::*;
 use winnow::{
     combinator::{dispatch, fail, opt, peek, preceded, repeat, todo},
     error::{StrContext, StrContextValue},

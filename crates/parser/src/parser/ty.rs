@@ -3,7 +3,7 @@ use super::{
     token::{ident, keyword, l_paren, r_paren, trivias_prefixed, word},
     GreenResult, Input,
 };
-use crate::SyntaxKind::*;
+use wat_syntax::SyntaxKind::*;
 use winnow::{
     combinator::{alt, opt, repeat},
     error::{StrContext, StrContextValue},
