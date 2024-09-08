@@ -7,8 +7,21 @@ use crate::SyntaxKind::*;
 use winnow::{
     combinator::{alt, opt, repeat},
     error::{StrContext, StrContextValue},
+    stream::AsChar,
+    token::{one_of, take_while},
     Parser,
 };
+
+fn ref_type(input: &mut Input) -> GreenResult {
+    word.verify_map(|word| match word {
+        "funcref" | "externref" => Some(tok(REF_TYPE, word)),
+        _ => None,
+    })
+    .context(StrContext::Expected(StrContextValue::Description(
+        "ref type",
+    )))
+    .parse_next(input)
+}
 
 fn val_type(input: &mut Input) -> GreenResult {
     word.verify_map(|word| match word {
@@ -50,7 +63,7 @@ pub(super) fn func_type(input: &mut Input) -> GreenResult {
         })
 }
 
-fn param(input: &mut Input) -> GreenResult {
+pub(super) fn param(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("param")),
@@ -81,7 +94,7 @@ fn param(input: &mut Input) -> GreenResult {
         })
 }
 
-fn result(input: &mut Input) -> GreenResult {
+pub(super) fn result(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("result")),
@@ -101,4 +114,71 @@ fn result(input: &mut Input) -> GreenResult {
             }
             node(RESULT, children)
         })
+}
+
+pub(super) fn table_type(input: &mut Input) -> GreenResult {
+    (limits, resume(ref_type))
+        .parse_next(input)
+        .map(|(limits, ref_type)| {
+            if let Some(mut ref_type) = ref_type {
+                let mut children = vec![limits];
+                children.append(&mut ref_type);
+                node(TABLE_TYPE, children)
+            } else {
+                node(TABLE_TYPE, [limits])
+            }
+        })
+}
+
+pub(super) fn memory_type(input: &mut Input) -> GreenResult {
+    limits
+        .parse_next(input)
+        .map(|limits| node(MEMORY_TYPE, [limits]))
+}
+
+fn limits(input: &mut Input) -> GreenResult {
+    (
+        nat,
+        opt(trivias_prefixed(nat)),
+        opt(trivias_prefixed(share)),
+    )
+        .parse_next(input)
+        .map(|(min, max, share)| {
+            let mut children = Vec::with_capacity(3);
+            children.push(min);
+            if let Some(mut max) = max {
+                children.append(&mut max);
+            }
+            if let Some(mut share) = share {
+                children.append(&mut share);
+            }
+            node(LIMITS, children)
+        })
+}
+
+pub(super) fn nat(input: &mut Input) -> GreenResult {
+    alt((
+        (
+            one_of(AsChar::is_dec_digit),
+            take_while(0.., |c: char| c == '_' || c.is_ascii_digit()),
+        )
+            .take(),
+        (
+            "0x",
+            one_of(AsChar::is_hex_digit),
+            take_while(0.., |c: char| c == '_' || c.is_ascii_hexdigit()),
+        )
+            .take(),
+    ))
+    .context(StrContext::Expected(StrContextValue::Description(
+        "unsigned integer",
+    )))
+    .parse_next(input)
+    .map(|text| tok(NAT, text))
+}
+
+fn share(input: &mut Input) -> GreenResult {
+    word.verify(|word: &str| word == "shared" || word == "unshared")
+        .parse_next(input)
+        .map(|text| tok(SHARE, text))
 }

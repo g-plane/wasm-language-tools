@@ -1,8 +1,8 @@
 use super::{tok, GreenElement, GreenResult, Input};
 use crate::SyntaxKind::*;
 use winnow::{
-    ascii::{multispace1, till_line_ending},
-    combinator::{alt, dispatch, empty, fail, opt, peek, repeat, repeat_till},
+    ascii::{hex_digit0, line_ending, multispace1, take_escaped, till_line_ending},
+    combinator::{alt, dispatch, empty, eof, fail, opt, peek, repeat, repeat_till},
     error::{ContextError, StrContext, StrContextValue},
     stream::AsChar,
     token::{any, one_of, take_till, take_while},
@@ -113,8 +113,32 @@ pub(super) fn ident(input: &mut Input) -> GreenResult {
         }),
     )
         .take()
+        .context(StrContext::Expected(StrContextValue::Description(
+            "identifier",
+        )))
         .parse_next(input)
         .map(|text| tok(IDENT, text))
+}
+
+pub(super) fn string(input: &mut Input) -> GreenResult {
+    (
+        '"',
+        take_escaped(
+            take_till(0.., ['"', '\\', '\n', '\r']),
+            '\\',
+            dispatch! {any;
+                'u' => ('{', hex_digit0, '}').void(),
+                _ => empty,
+            },
+        ),
+        alt(("\"", peek(line_ending), eof)),
+    )
+        .take()
+        .context(StrContext::Expected(StrContextValue::Description(
+            "string literal",
+        )))
+        .parse_next(input)
+        .map(|text| tok(STRING, text))
 }
 
 pub(super) fn error_token<'s>(
