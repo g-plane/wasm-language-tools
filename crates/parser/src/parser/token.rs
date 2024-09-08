@@ -5,7 +5,7 @@ use winnow::{
     combinator::{alt, dispatch, empty, eof, fail, opt, peek, repeat, repeat_till},
     error::{ContextError, StrContext, StrContextValue},
     stream::AsChar,
-    token::{any, one_of, take_till, take_while},
+    token::{any, none_of, one_of, take_till, take_while},
     PResult, Parser,
 };
 
@@ -124,7 +124,7 @@ pub(super) fn string(input: &mut Input) -> GreenResult {
     (
         '"',
         take_escaped(
-            take_till(0.., ['"', '\\', '\n', '\r']),
+            none_of(['"', '\\', '\n', '\r']),
             '\\',
             dispatch! {any;
                 'u' => ('{', hex_digit0, '}').void(),
