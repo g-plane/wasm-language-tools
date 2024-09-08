@@ -5,7 +5,7 @@ use winnow::{
     combinator::{alt, dispatch, empty, eof, fail, opt, peek, repeat, repeat_till},
     error::{ContextError, StrContext, StrContextValue},
     stream::AsChar,
-    token::{any, none_of, one_of, take_till, take_while},
+    token::{any, none_of, one_of, take_till, take_until, take_while},
     PResult, Parser,
 };
 
@@ -77,7 +77,7 @@ fn block_comment_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str> {
         repeat_till::<_, _, (), _, _, _, _>(
             0..,
             (
-                take_till(0.., (b"(;", b";)")),
+                take_until(0.., ("(;", ";)")),
                 dispatch! {peek(opt("(;"));
                     Some(..) => opt(block_comment_impl).void(),
                     None => empty,
