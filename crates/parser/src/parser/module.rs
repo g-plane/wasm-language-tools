@@ -273,28 +273,6 @@ fn name(input: &mut Input) -> GreenResult {
     string.parse_next(input).map(|child| node(NAME, [child]))
 }
 
-fn table_use(input: &mut Input) -> GreenResult {
-    (
-        l_paren,
-        trivias_prefixed(keyword("table")),
-        resume(index),
-        resume(r_paren),
-    )
-        .parse_next(input)
-        .map(|(l_paren, mut keyword, index, r_paren)| {
-            let mut children = Vec::with_capacity(4);
-            children.push(l_paren);
-            children.append(&mut keyword);
-            if let Some(mut index) = index {
-                children.append(&mut index);
-            }
-            if let Some(mut r_paren) = r_paren {
-                children.append(&mut r_paren);
-            }
-            node(TABLE_USE, children)
-        })
-}
-
 fn type_use(input: &mut Input) -> GreenResult {
     (
         opt((
