@@ -4,10 +4,11 @@ use super::{
     ty::{func_type, memory_type, nat, param, result, table_type},
     GreenElement, GreenResult, Input,
 };
+use crate::error::SyntaxError;
 use wat_syntax::SyntaxKind::{self, *};
 use winnow::{
     combinator::{dispatch, fail, opt, peek, preceded, repeat, todo},
-    error::{ContextError, StrContext, StrContextValue},
+    error::{StrContext, StrContextValue},
     Parser,
 };
 
@@ -309,7 +310,7 @@ fn export_desc(input: &mut Input) -> GreenResult {
 fn export_desc_variant<'s>(
     keyword_literal: &'static str,
     kind: SyntaxKind,
-) -> impl Parser<Input<'s>, GreenElement, ContextError> {
+) -> impl Parser<Input<'s>, GreenElement, SyntaxError> {
     (
         l_paren,
         trivias_prefixed(keyword(keyword_literal)),

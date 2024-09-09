@@ -2,13 +2,14 @@ use self::{
     module::module,
     token::{block_comment, error_token, line_comment, trivias, ws},
 };
+use crate::error::SyntaxError;
 use rowan::{GreenNode, GreenToken, NodeOrToken};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 use winnow::{
     combinator::{alt, repeat},
-    error::{ContextError, ErrMode, FromRecoverableError, StrContext},
+    error::{ErrMode, FromRecoverableError, StrContext},
     stream::{Recover, Recoverable, Stream},
-    PResult, Parser as WinnowParser, RecoverableParser,
+    Located, PResult, Parser as WinnowParser, RecoverableParser,
 };
 
 mod module;
@@ -18,30 +19,30 @@ mod ty;
 #[derive(Debug)]
 pub struct Parser<'s> {
     input: Input<'s>,
-    errors: Vec<ContextError>,
+    errors: Vec<SyntaxError>,
 }
 impl<'s> Parser<'s> {
     pub fn new(source: &'s str) -> Self {
         Self {
-            input: Recoverable::new(source),
+            input: Recoverable::new(Located::new(source)),
             errors: Vec::new(),
         }
     }
 
     pub fn parse(&mut self) -> SyntaxNode {
-        let (_, tree, errors) = root.recoverable_parse(&self.input);
+        let (_, tree, errors) = root.recoverable_parse(*self.input);
         self.errors = errors;
         tree.expect("parser should always succeed even if there are syntax errors")
     }
 
-    pub fn errors(&self) -> &[ContextError] {
+    pub fn errors(&self) -> &[SyntaxError] {
         &self.errors
     }
 }
 
 type GreenElement = NodeOrToken<GreenNode, GreenToken>;
-type GreenResult = PResult<GreenElement>;
-type Input<'s> = Recoverable<&'s str, ContextError>;
+type GreenResult = PResult<GreenElement, SyntaxError>;
+pub(crate) type Input<'s> = Recoverable<Located<&'s str>, SyntaxError>;
 
 fn tok(kind: SyntaxKind, text: &str) -> GreenElement {
     NodeOrToken::Token(GreenToken::new(kind.into(), text))
@@ -55,7 +56,7 @@ where
     NodeOrToken::Node(GreenNode::new(kind.into(), children))
 }
 
-fn root(input: &mut Input) -> PResult<SyntaxNode> {
+fn root(input: &mut Input) -> PResult<SyntaxNode, SyntaxError> {
     (
         repeat::<_, _, Vec<_>, _, _>(0.., retry(module)),
         repeat(
@@ -75,9 +76,9 @@ fn root(input: &mut Input) -> PResult<SyntaxNode> {
 }
 
 // copied and modified from https://github.com/winnow-rs/winnow/blob/95e0c100656a98a0ff3bc8420fc8844edff6b615/src/combinator/parser.rs#L963
-fn retry<'s, P>(mut parser: P) -> impl WinnowParser<Input<'s>, Vec<GreenElement>, ContextError>
+fn retry<'s, P>(mut parser: P) -> impl WinnowParser<Input<'s>, Vec<GreenElement>, SyntaxError>
 where
-    P: WinnowParser<Input<'s>, GreenElement, ContextError>,
+    P: WinnowParser<Input<'s>, GreenElement, SyntaxError>,
 {
     move |input: &mut Input<'s>| {
         let mut error_parser = error_token(false).context(StrContext::Label("unexpected token"));
@@ -116,7 +117,7 @@ where
 
             input.reset(&trivia_start);
             err = err.map(|err| {
-                ContextError::from_recoverable_error(&token_start, &err_start, input, err)
+                SyntaxError::from_recoverable_error(&token_start, &err_start, input, err)
             });
             return Err(err);
         }
@@ -126,9 +127,9 @@ where
 // copied and modified from https://github.com/winnow-rs/winnow/blob/95e0c100656a98a0ff3bc8420fc8844edff6b615/src/combinator/parser.rs#L1061
 fn resume<'s, P>(
     mut parser: P,
-) -> impl WinnowParser<Input<'s>, Option<Vec<GreenElement>>, ContextError>
+) -> impl WinnowParser<Input<'s>, Option<Vec<GreenElement>>, SyntaxError>
 where
-    P: WinnowParser<Input<'s>, GreenElement, ContextError>,
+    P: WinnowParser<Input<'s>, GreenElement, SyntaxError>,
 {
     move |input: &mut Input<'s>| {
         let trivia_start = input.checkpoint();
@@ -146,15 +147,18 @@ where
             Err(err) => err,
         };
         let err_start = input.checkpoint();
-        input.reset(&trivia_start);
-        if let Err(err_) = input.record_err(&token_start, &err_start, err) {
-            err = err_;
-        } else {
-            return Ok(None);
+        if error_token(true).parse_next(input).is_ok() {
+            if let Err(err_) = input.record_err(&token_start, &err_start, err) {
+                err = err_;
+            } else {
+                input.reset(&trivia_start);
+                return Ok(None);
+            }
         }
 
+        input.reset(&trivia_start);
         err = err
-            .map(|err| ContextError::from_recoverable_error(&token_start, &err_start, input, err));
+            .map(|err| SyntaxError::from_recoverable_error(&token_start, &err_start, input, err));
         Err(err)
     }
 }

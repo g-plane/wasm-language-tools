@@ -1,9 +1,10 @@
 use super::{tok, GreenElement, GreenResult, Input};
+use crate::error::SyntaxError;
 use wat_syntax::SyntaxKind::*;
 use winnow::{
     ascii::{hex_digit0, line_ending, multispace1, take_escaped, till_line_ending},
     combinator::{alt, dispatch, empty, eof, fail, opt, peek, repeat, repeat_till},
-    error::{ContextError, StrContext, StrContextValue},
+    error::{StrContext, StrContextValue},
     stream::AsChar,
     token::{any, none_of, one_of, take_till, take_until, take_while},
     PResult, Parser,
@@ -21,7 +22,7 @@ pub(super) fn r_paren(input: &mut Input) -> GreenResult {
         .parse_next(input)
 }
 
-pub(super) fn word<'s>(input: &mut Input<'s>) -> PResult<&'s str> {
+pub(super) fn word<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
     (
         one_of(|c: char| c.is_ascii_lowercase()),
         take_while(0.., |c: char| {
@@ -37,15 +38,15 @@ pub(super) fn word<'s>(input: &mut Input<'s>) -> PResult<&'s str> {
         .parse_next(input)
 }
 
-pub(super) fn trivias(input: &mut Input) -> PResult<Vec<GreenElement>> {
+pub(super) fn trivias(input: &mut Input) -> PResult<Vec<GreenElement>, SyntaxError> {
     repeat(0.., alt((ws, line_comment, block_comment))).parse_next(input)
 }
 
 pub(super) fn trivias_prefixed<'s, P>(
     parser: P,
-) -> impl Parser<Input<'s>, Vec<GreenElement>, ContextError>
+) -> impl Parser<Input<'s>, Vec<GreenElement>, SyntaxError>
 where
-    P: Parser<Input<'s>, GreenElement, ContextError>,
+    P: Parser<Input<'s>, GreenElement, SyntaxError>,
 {
     (trivias, parser).map(|(mut trivias, element)| {
         trivias.push(element);
@@ -71,7 +72,7 @@ pub(super) fn block_comment(input: &mut Input) -> GreenResult {
         .parse_next(input)
         .map(|text| tok(BLOCK_COMMENT, text))
 }
-fn block_comment_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str> {
+fn block_comment_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
     (
         "(;",
         repeat_till::<_, _, (), _, _, _, _>(
@@ -92,7 +93,7 @@ fn block_comment_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str> {
 
 pub(super) fn keyword<'s>(
     keyword: &'static str,
-) -> impl Parser<Input<'s>, GreenElement, ContextError> {
+) -> impl Parser<Input<'s>, GreenElement, SyntaxError> {
     word.verify(move |word: &str| word == keyword)
         .map(|text| tok(KEYWORD, text))
         .context(StrContext::Expected(StrContextValue::StringLiteral(
@@ -143,7 +144,7 @@ pub(super) fn string(input: &mut Input) -> GreenResult {
 
 pub(super) fn error_token<'s>(
     allow_parens: bool,
-) -> impl Parser<Input<'s>, GreenElement, ContextError> {
+) -> impl Parser<Input<'s>, GreenElement, SyntaxError> {
     dispatch! {any;
         '$' => take_while(1.., |c: char| {
             c.is_ascii_alphanumeric() ||
