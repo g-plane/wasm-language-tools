@@ -2,12 +2,12 @@ use super::{
     node, resume, retry,
     token::{ident, keyword, l_paren, r_paren, string, trivias, trivias_prefixed, word},
     ty::{func_type, memory_type, nat, param, result, table_type},
-    GreenResult, Input,
+    GreenElement, GreenResult, Input,
 };
-use wat_syntax::SyntaxKind::*;
+use wat_syntax::SyntaxKind::{self, *};
 use winnow::{
     combinator::{dispatch, fail, opt, peek, preceded, repeat, todo},
-    error::{StrContext, StrContextValue},
+    error::{ContextError, StrContext, StrContextValue},
     Parser,
 };
 
@@ -39,6 +39,7 @@ pub(super) fn module(input: &mut Input) -> GreenResult {
 
 fn module_field(input: &mut Input) -> GreenResult {
     dispatch! {peek(preceded(('(', trivias), word));
+        "export" => module_field_export,
         "import" => module_field_import,
         "start" => module_field_start,
         "type" => module_field_type,
@@ -46,6 +47,36 @@ fn module_field(input: &mut Input) -> GreenResult {
     }
     .parse_next(input)
     .map(|children| node(MODULE_FIELD, [children]))
+}
+
+fn module_field_export(input: &mut Input) -> GreenResult {
+    (
+        l_paren,
+        trivias_prefixed(keyword("export")),
+        resume(name),
+        resume(
+            export_desc.context(StrContext::Expected(StrContextValue::Description(
+                "export desc",
+            ))),
+        ),
+        resume(r_paren),
+    )
+        .parse_next(input)
+        .map(|(l_paren, mut keyword, name, export_desc, r_paren)| {
+            let mut children = Vec::with_capacity(5);
+            children.push(l_paren);
+            children.append(&mut keyword);
+            if let Some(mut name) = name {
+                children.append(&mut name);
+            }
+            if let Some(mut export_desc) = export_desc {
+                children.append(&mut export_desc);
+            }
+            if let Some(mut r_paren) = r_paren {
+                children.append(&mut r_paren);
+            }
+            node(MODULE_FIELD_EXPORT, children)
+        })
 }
 
 fn module_field_import(input: &mut Input) -> GreenResult {
@@ -260,6 +291,42 @@ fn import_desc_type_use(input: &mut Input) -> GreenResult {
                 children.append(&mut r_paren);
             }
             node(IMPORT_DESC_TYPE_USE, children)
+        })
+}
+
+fn export_desc(input: &mut Input) -> GreenResult {
+    dispatch! {peek(preceded(('(', trivias), word));
+        "func" => export_desc_variant("func", EXPORT_DESC_FUNC),
+        "table" => export_desc_variant("table", EXPORT_DESC_TABLE),
+        "memory" => export_desc_variant("memory", EXPORT_DESC_MEMORY),
+        "global" => export_desc_variant("global", EXPORT_DESC_GLOBAL),
+        _ => fail,
+    }
+    .parse_next(input)
+    .map(|child| node(EXPORT_DESC, [child]))
+}
+
+fn export_desc_variant<'s>(
+    keyword_literal: &'static str,
+    kind: SyntaxKind,
+) -> impl Parser<Input<'s>, GreenElement, ContextError> {
+    (
+        l_paren,
+        trivias_prefixed(keyword(keyword_literal)),
+        resume(index),
+        resume(r_paren),
+    )
+        .map(move |(l_paren, mut keyword, index, r_paren)| {
+            let mut children = Vec::with_capacity(4);
+            children.push(l_paren);
+            children.append(&mut keyword);
+            if let Some(mut index) = index {
+                children.append(&mut index);
+            }
+            if let Some(mut r_paren) = r_paren {
+                children.append(&mut r_paren);
+            }
+            node(kind, children)
         })
 }
 
