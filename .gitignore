@@ -1,4 +1,5 @@
 /target
+.vscode
 
 # instant PoC
 /*.wat
