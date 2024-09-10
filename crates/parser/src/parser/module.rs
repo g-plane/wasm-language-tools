@@ -200,11 +200,10 @@ fn import_desc_global_type(input: &mut Input) -> GreenResult {
         trivias_prefixed(keyword("global")),
         opt(trivias_prefixed(ident)),
         resume(global_type),
-        todo::<_, (), _>,
         resume(r_paren),
     )
         .parse_next(input)
-        .map(|(l_paren, mut keyword, id, global_type, _expr, r_paren)| {
+        .map(|(l_paren, mut keyword, id, global_type, r_paren)| {
             let mut children = Vec::with_capacity(5);
             children.push(l_paren);
             children.append(&mut keyword);
