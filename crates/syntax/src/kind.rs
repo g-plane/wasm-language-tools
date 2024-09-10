@@ -31,6 +31,7 @@ pub enum SyntaxKind {
     TABLE_TYPE,
     TABLE_USE,
     MEMORY_TYPE,
+    GLOBAL_TYPE,
     TYPE_USE,
     LIMITS,
     IMPORT,

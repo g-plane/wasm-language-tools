@@ -136,6 +136,31 @@ pub(super) fn memory_type(input: &mut Input) -> GreenResult {
         .map(|limits| node(MEMORY_TYPE, [limits]))
 }
 
+pub(super) fn global_type(input: &mut Input) -> GreenResult {
+    alt((
+        val_type.map(|child| node(GLOBAL_TYPE, [child])),
+        (
+            l_paren,
+            trivias_prefixed(keyword("mut")),
+            resume(val_type),
+            resume(r_paren),
+        )
+            .map(|(l_paren, mut keyword, val_type, r_paren)| {
+                let mut children = Vec::with_capacity(4);
+                children.push(l_paren);
+                children.append(&mut keyword);
+                if let Some(mut val_type) = val_type {
+                    children.append(&mut val_type);
+                }
+                if let Some(mut r_paren) = r_paren {
+                    children.append(&mut r_paren);
+                }
+                node(GLOBAL_TYPE, children)
+            }),
+    ))
+    .parse_next(input)
+}
+
 fn limits(input: &mut Input) -> GreenResult {
     (
         nat,

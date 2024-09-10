@@ -1,7 +1,7 @@
 use super::{
     node, resume, retry,
     token::{ident, keyword, l_paren, r_paren, string, trivias, trivias_prefixed, word},
-    ty::{func_type, memory_type, nat, param, result, table_type},
+    ty::{func_type, global_type, memory_type, nat, param, result, table_type},
     GreenElement, GreenResult, Input,
 };
 use crate::error::SyntaxError;
@@ -199,16 +199,20 @@ fn import_desc_global_type(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("global")),
         opt(trivias_prefixed(ident)),
+        resume(global_type),
         todo::<_, (), _>,
         resume(r_paren),
     )
         .parse_next(input)
-        .map(|(l_paren, mut keyword, id, _global_type, r_paren)| {
+        .map(|(l_paren, mut keyword, id, global_type, _expr, r_paren)| {
             let mut children = Vec::with_capacity(5);
             children.push(l_paren);
             children.append(&mut keyword);
             if let Some(mut id) = id {
                 children.append(&mut id);
+            }
+            if let Some(mut global_type) = global_type {
+                children.append(&mut global_type);
             }
             if let Some(mut r_paren) = r_paren {
                 children.append(&mut r_paren);
