@@ -1,6 +1,6 @@
 use super::{
     node, resume, retry, tok,
-    token::{ident, keyword, l_paren, r_paren, trivias_prefixed, word},
+    token::{ident, keyword, l_paren, r_paren, trivias_prefixed, unsigned_int, word},
     GreenResult, Input,
 };
 use wat_syntax::SyntaxKind::*;
@@ -182,24 +182,9 @@ fn limits(input: &mut Input) -> GreenResult {
 }
 
 pub(super) fn nat(input: &mut Input) -> GreenResult {
-    alt((
-        (
-            one_of(AsChar::is_dec_digit),
-            take_while(0.., |c: char| c == '_' || c.is_ascii_digit()),
-        )
-            .take(),
-        (
-            "0x",
-            one_of(AsChar::is_hex_digit),
-            take_while(0.., |c: char| c == '_' || c.is_ascii_hexdigit()),
-        )
-            .take(),
-    ))
-    .context(StrContext::Expected(StrContextValue::Description(
-        "unsigned integer",
-    )))
-    .parse_next(input)
-    .map(|text| tok(NAT, text))
+    unsigned_int
+        .parse_next(input)
+        .map(|child| node(NAT, [child]))
 }
 
 fn share(input: &mut Input) -> GreenResult {

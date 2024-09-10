@@ -6,7 +6,7 @@ use winnow::{
     combinator::{alt, dispatch, empty, eof, fail, opt, peek, repeat, repeat_till},
     error::{StrContext, StrContextValue},
     stream::AsChar,
-    token::{any, none_of, one_of, take_till, take_until, take_while},
+    token::{any, none_of, one_of, take, take_till, take_until, take_while},
     PResult, Parser,
 };
 
@@ -140,12 +140,40 @@ fn string_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
         .parse_next(input)
 }
 
+pub(super) fn int(input: &mut Input) -> GreenResult {
+    int_impl.parse_next(input).map(|text| tok(INT, text))
+}
+fn int_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
+    (opt(one_of(['+', '-'])), unsigned_int_impl)
+        .take()
+        .parse_next(input)
+}
+
+pub(super) fn unsigned_int(input: &mut Input) -> GreenResult {
+    unsigned_int_impl
+        .parse_next(input)
+        .map(|text| tok(UNSIGNED_INT, text))
+}
+fn unsigned_int_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
+    dispatch! {take(2usize);
+        "0x" => (
+            one_of(AsChar::is_hex_digit),
+            take_while(0.., |c: char| c.is_ascii_hexdigit() || c == '_'),
+        ).take(),
+        _ => (
+            one_of(AsChar::is_dec_digit),
+            take_while(0.., |c: char| c.is_ascii_digit() || c == '_'),
+        ).take(),
+    }
+    .parse_next(input)
+}
+
 pub(super) fn error_token<'s>(
     allow_parens: bool,
 ) -> impl Parser<Input<'s>, GreenElement, SyntaxError> {
     dispatch! {peek(any);
         '$' => ident_impl,
-        '0'..='9' => take_while(1.., AsChar::is_dec_digit),
+        '0'..='9' => alt((int_impl, unsigned_int_impl)),
         '(' | ')' if allow_parens => alt(("(", ")")),
         '(' | ')' => fail,
         c if is_id_char(c) => word,
