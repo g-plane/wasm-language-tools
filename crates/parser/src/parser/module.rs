@@ -7,7 +7,7 @@ use super::{
 use crate::error::SyntaxError;
 use wat_syntax::SyntaxKind::{self, *};
 use winnow::{
-    combinator::{alt, dispatch, fail, opt, peek, preceded, repeat, todo},
+    combinator::{alt, dispatch, fail, opt, peek, preceded, repeat},
     error::{StrContext, StrContextValue},
     Parser,
 };
@@ -344,7 +344,7 @@ fn name(input: &mut Input) -> GreenResult {
     string.parse_next(input).map(|child| node(NAME, [child]))
 }
 
-fn type_use(input: &mut Input) -> GreenResult {
+pub(super) fn type_use(input: &mut Input) -> GreenResult {
     (
         opt((
             l_paren,

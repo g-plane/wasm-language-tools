@@ -12,6 +12,7 @@ use winnow::{
     Located, PResult, Parser as WinnowParser, RecoverableParser,
 };
 
+mod instr;
 mod module;
 mod token;
 mod ty;
