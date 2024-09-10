@@ -7,7 +7,7 @@ use super::{
 use crate::error::SyntaxError;
 use wat_syntax::SyntaxKind::{self, *};
 use winnow::{
-    combinator::{dispatch, fail, opt, peek, preceded, repeat, todo},
+    combinator::{alt, dispatch, fail, opt, peek, preceded, repeat, todo},
     error::{StrContext, StrContextValue},
     Parser,
 };
@@ -380,16 +380,10 @@ fn type_use(input: &mut Input) -> GreenResult {
 }
 
 fn index(input: &mut Input) -> GreenResult {
-    (resume(nat), resume(ident))
+    alt((ident, nat))
+        .context(StrContext::Expected(StrContextValue::Description(
+            "index (identifier or unsigned integer)",
+        )))
         .parse_next(input)
-        .map(|(nat, id)| {
-            let mut children = Vec::with_capacity(2);
-            if let Some(mut nat) = nat {
-                children.append(&mut nat);
-            }
-            if let Some(mut id) = id {
-                children.append(&mut id);
-            }
-            node(INDEX, children)
-        })
+        .map(|child| node(INDEX, [child]))
 }
