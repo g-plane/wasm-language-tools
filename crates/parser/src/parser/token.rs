@@ -25,14 +25,7 @@ pub(super) fn r_paren(input: &mut Input) -> GreenResult {
 pub(super) fn word<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
     (
         one_of(|c: char| c.is_ascii_lowercase()),
-        take_while(0.., |c: char| {
-            c.is_ascii_alphanumeric()
-                || c.is_ascii_punctuation()
-                    && !matches!(
-                        c,
-                        '\'' | '"' | ',' | ';' | '(' | ')' | '[' | ']' | '{' | '}'
-                    )
-        }),
+        take_while(0.., is_id_char),
     )
         .take()
         .parse_next(input)
@@ -102,26 +95,35 @@ pub(super) fn keyword<'s>(
 }
 
 pub(super) fn ident(input: &mut Input) -> GreenResult {
-    (
-        '$',
-        take_while(1.., |c: char| {
-            c.is_ascii_alphanumeric()
-                || c.is_ascii_punctuation()
-                    && !matches!(
-                        c,
-                        '\'' | '"' | ',' | ';' | '(' | ')' | '[' | ']' | '{' | '}'
-                    )
-        }),
-    )
+    ident_impl.parse_next(input).map(|text| tok(IDENT, text))
+}
+fn ident_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
+    ('$', take_while(1.., is_id_char))
         .take()
         .context(StrContext::Expected(StrContextValue::Description(
             "identifier",
         )))
         .parse_next(input)
-        .map(|text| tok(IDENT, text))
+}
+
+fn is_id_char(c: char) -> bool {
+    c.is_ascii_alphanumeric()
+        || c.is_ascii_punctuation()
+            && !matches!(
+                c,
+                '\'' | '"' | ',' | ';' | '(' | ')' | '[' | ']' | '{' | '}'
+            )
 }
 
 pub(super) fn string(input: &mut Input) -> GreenResult {
+    string_impl
+        .context(StrContext::Expected(StrContextValue::Description(
+            "string literal",
+        )))
+        .parse_next(input)
+        .map(|text| tok(STRING, text))
+}
+fn string_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
     (
         '"',
         take_escaped(
@@ -135,27 +137,19 @@ pub(super) fn string(input: &mut Input) -> GreenResult {
         alt(("\"", peek(line_ending), eof)),
     )
         .take()
-        .context(StrContext::Expected(StrContextValue::Description(
-            "string literal",
-        )))
         .parse_next(input)
-        .map(|text| tok(STRING, text))
 }
 
 pub(super) fn error_token<'s>(
     allow_parens: bool,
 ) -> impl Parser<Input<'s>, GreenElement, SyntaxError> {
-    dispatch! {any;
-        '$' => take_while(1.., |c: char| {
-            c.is_ascii_alphanumeric() ||
-                c.is_ascii_punctuation() && !matches!(c, '\'' | '"' | ',' | ';' | '(' | ')' | '[' | ']' | '{' | '}')
-            }).void(),
-        'a'..='z' | 'A'..='Z' => take_while(0.., AsChar::is_alphanum).void(),
-        '0'..='9' => take_while(0.., AsChar::is_dec_digit).void(),
-        '(' | ')' if allow_parens => empty,
+    dispatch! {peek(any);
+        '$' => ident_impl,
+        '0'..='9' => take_while(1.., AsChar::is_dec_digit),
+        '(' | ')' if allow_parens => alt(("(", ")")),
         '(' | ')' => fail,
-        _ => take_till(0.., |c:char| c == '(' || c == ')' || c.is_ascii_whitespace()).void(),
+        c if is_id_char(c) => word,
+        _ => take_till(0.., |c: char| c == '(' || c == ')' || c.is_ascii_whitespace()),
     }
-    .take()
     .map(|text| tok(ERROR, text))
 }
