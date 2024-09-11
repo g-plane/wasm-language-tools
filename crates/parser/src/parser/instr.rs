@@ -179,17 +179,16 @@ fn plain_instr(input: &mut Input) -> GreenResult {
             }),
         (
             repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(operand)),
-            instr_name,
+            resume(instr_name),
         )
             .map(|(operands, instr_name)| {
                 let mut children = Vec::with_capacity(2);
                 operands
                     .into_iter()
                     .for_each(|mut operand| children.append(&mut operand));
-                /* if let Some(mut instr_name) = instr_name {
+                if let Some(mut instr_name) = instr_name {
                     children.append(&mut instr_name);
-                } */
-                children.push(instr_name);
+                }
                 node(PLAIN_INSTR, children)
             }),
     ))
