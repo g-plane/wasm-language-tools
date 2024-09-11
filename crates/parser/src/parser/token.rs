@@ -2,7 +2,7 @@ use super::{tok, GreenElement, GreenResult, Input};
 use crate::error::SyntaxError;
 use wat_syntax::SyntaxKind::*;
 use winnow::{
-    ascii::{hex_digit0, line_ending, multispace1, take_escaped, till_line_ending, Caseless},
+    ascii::{hex_digit0, line_ending, multispace1, take_escaped, till_line_ending},
     combinator::{alt, dispatch, empty, eof, fail, opt, peek, repeat, repeat_till},
     error::{StrContext, StrContextValue},
     stream::AsChar,
@@ -202,8 +202,8 @@ fn float_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
                 opt((one_of(['p', 'P']), opt(one_of(['+', '-'])), unsigned_dec)),
             )
                 .void(),
-            Caseless("inf").void(),
-            (Caseless("nan"), opt((":0x", unsigned_hex))).void(),
+            "inf".void(),
+            ("nan", opt((":0x", unsigned_hex))).void(),
         )),
     )
         .take()
