@@ -1,18 +1,24 @@
 use super::{
     module::type_use,
-    node, resume, retry,
-    token::{ident, keyword, trivias_prefixed, word},
-    ty::result,
+    node, resume, retry, tok,
+    token::{
+        float, ident, int, keyword, l_paren, r_paren, string, trivias, trivias_prefixed,
+        unsigned_int_impl, word,
+    },
+    ty::{heap_type, result},
     GreenResult, Input,
 };
 use wat_syntax::SyntaxKind::*;
 use winnow::{
-    combinator::{alt, dispatch, fail, opt, peek, repeat},
+    combinator::{alt, dispatch, fail, opt, peek, preceded, repeat},
+    token::any,
     Parser,
 };
 
 pub(super) fn instr(input: &mut Input) -> GreenResult {
-    block_instr.parse_next(input)
+    alt((block_instr, plain_instr))
+        .parse_next(input)
+        .map(|child| node(INSTR, [child]))
 }
 
 fn block_instr(input: &mut Input) -> GreenResult {
@@ -149,4 +155,72 @@ fn block_if(input: &mut Input) -> GreenResult {
                 node(BLOCK_IF, children)
             },
         )
+}
+
+fn plain_instr(input: &mut Input) -> GreenResult {
+    alt((
+        (
+            l_paren,
+            trivias_prefixed(instr_name),
+            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(operand)),
+            resume(r_paren),
+        )
+            .map(|(l_paren, mut instr_name, operands, r_paren)| {
+                let mut children = Vec::with_capacity(4);
+                children.push(l_paren);
+                children.append(&mut instr_name);
+                operands
+                    .into_iter()
+                    .for_each(|mut operand| children.append(&mut operand));
+                if let Some(mut r_paren) = r_paren {
+                    children.append(&mut r_paren);
+                }
+                node(PLAIN_INSTR, children)
+            }),
+        (
+            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(operand)),
+            instr_name,
+        )
+            .map(|(operands, instr_name)| {
+                let mut children = Vec::with_capacity(2);
+                operands
+                    .into_iter()
+                    .for_each(|mut operand| children.append(&mut operand));
+                /* if let Some(mut instr_name) = instr_name {
+                    children.append(&mut instr_name);
+                } */
+                children.push(instr_name);
+                node(PLAIN_INSTR, children)
+            }),
+    ))
+    .parse_next(input)
+}
+
+fn instr_name(input: &mut Input) -> GreenResult {
+    word.parse_next(input).map(|text| tok(INSTR_NAME, text))
+}
+
+fn operand(input: &mut Input) -> GreenResult {
+    dispatch! {peek(any);
+        '0'..='9' | '+' | '-' => alt((float, int)),
+        '.' | 'i' | 'n' => float,
+        '"' => string,
+        '$' => ident,
+        '(' => dispatch! {peek(preceded(('(', trivias), word));
+            "type" => type_use,
+            _ => instr,
+        },
+        'o' | 'a' => mem_arg,
+        'f' | 'e' => heap_type,
+        _ => fail,
+    }
+    .parse_next(input)
+    .map(|child| node(OPERAND, [child]))
+}
+
+fn mem_arg(input: &mut Input) -> GreenResult {
+    (alt(("offset", "align")), '=', unsigned_int_impl)
+        .take()
+        .parse_next(input)
+        .map(|text| tok(MEM_ARG, text))
 }

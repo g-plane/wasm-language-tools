@@ -7,8 +7,6 @@ use wat_syntax::SyntaxKind::*;
 use winnow::{
     combinator::{alt, opt, repeat},
     error::{StrContext, StrContextValue},
-    stream::AsChar,
-    token::{one_of, take_while},
     Parser,
 };
 
@@ -35,6 +33,11 @@ fn val_type(input: &mut Input) -> GreenResult {
     )))
     .parse_next(input)
     .map(|ty| node(VAL_TYPE, [ty]))
+}
+
+pub(super) fn heap_type(input: &mut Input) -> GreenResult {
+    word.verify_map(|word| matches!(word, "func" | "extern").then(|| tok(HEAP_TYPE, word)))
+        .parse_next(input)
 }
 
 pub(super) fn func_type(input: &mut Input) -> GreenResult {

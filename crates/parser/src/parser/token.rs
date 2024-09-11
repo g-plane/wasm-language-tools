@@ -154,7 +154,7 @@ pub(super) fn unsigned_int(input: &mut Input) -> GreenResult {
         .parse_next(input)
         .map(|text| tok(UNSIGNED_INT, text))
 }
-fn unsigned_int_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
+pub(super) fn unsigned_int_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
     dispatch! {take(2usize);
         "0x" => unsigned_hex,
         _ => unsigned_dec,
@@ -178,7 +178,7 @@ fn unsigned_dec<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
         .parse_next(input)
 }
 
-fn float(input: &mut Input) -> GreenResult {
+pub(super) fn float(input: &mut Input) -> GreenResult {
     float_impl.parse_next(input).map(|text| tok(FLOAT, text))
 }
 fn float_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
