@@ -2,7 +2,7 @@ use super::{tok, GreenElement, GreenResult, Input};
 use crate::error::SyntaxError;
 use wat_syntax::SyntaxKind::*;
 use winnow::{
-    ascii::{hex_digit0, line_ending, multispace1, take_escaped, till_line_ending},
+    ascii::{hex_digit0, line_ending, multispace1, take_escaped, till_line_ending, Caseless},
     combinator::{alt, dispatch, empty, eof, fail, opt, peek, repeat, repeat_till},
     error::{StrContext, StrContextValue},
     stream::AsChar,
@@ -156,16 +156,58 @@ pub(super) fn unsigned_int(input: &mut Input) -> GreenResult {
 }
 fn unsigned_int_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
     dispatch! {take(2usize);
-        "0x" => (
-            one_of(AsChar::is_hex_digit),
-            take_while(0.., |c: char| c.is_ascii_hexdigit() || c == '_'),
-        ).take(),
-        _ => (
-            one_of(AsChar::is_dec_digit),
-            take_while(0.., |c: char| c.is_ascii_digit() || c == '_'),
-        ).take(),
+        "0x" => unsigned_hex,
+        _ => unsigned_dec,
     }
     .parse_next(input)
+}
+fn unsigned_hex<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
+    (
+        one_of(AsChar::is_hex_digit),
+        take_while(0.., |c: char| c.is_ascii_hexdigit() || c == '_'),
+    )
+        .take()
+        .parse_next(input)
+}
+fn unsigned_dec<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
+    (
+        one_of(AsChar::is_dec_digit),
+        take_while(0.., |c: char| c.is_ascii_digit() || c == '_'),
+    )
+        .take()
+        .parse_next(input)
+}
+
+fn float(input: &mut Input) -> GreenResult {
+    float_impl.parse_next(input).map(|text| tok(FLOAT, text))
+}
+fn float_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
+    (
+        opt(one_of(['+', '-'])),
+        alt((
+            (
+                alt((
+                    (unsigned_dec, opt(('.', opt(unsigned_dec)))).void(),
+                    ('.', unsigned_dec).void(),
+                )),
+                opt((one_of(['e', 'E']), opt(one_of(['+', '-'])), unsigned_dec)),
+            )
+                .void(),
+            (
+                "0x",
+                alt((
+                    (unsigned_hex, opt(('.', opt(unsigned_hex)))).void(),
+                    ('.', unsigned_hex).void(),
+                )),
+                opt((one_of(['p', 'P']), opt(one_of(['+', '-'])), unsigned_dec)),
+            )
+                .void(),
+            Caseless("inf").void(),
+            (Caseless("nan"), opt((":0x", unsigned_hex))).void(),
+        )),
+    )
+        .take()
+        .parse_next(input)
 }
 
 pub(super) fn error_token<'s>(
@@ -173,11 +215,11 @@ pub(super) fn error_token<'s>(
 ) -> impl Parser<Input<'s>, GreenElement, SyntaxError> {
     dispatch! {peek(any);
         '$' => ident_impl,
-        '0'..='9' => alt((int_impl, unsigned_int_impl)),
+        '0'..='9' => alt((float_impl, int_impl, unsigned_int_impl)),
         '(' | ')' if allow_parens => alt(("(", ")")),
         '(' | ')' => fail,
         c if is_id_char(c) => word,
-        _ => take_till(0.., |c: char| c == '(' || c == ')' || c.is_ascii_whitespace()),
+        _ => take_till(1.., |c: char| c == '(' || c == ')' || c.is_ascii_whitespace()),
     }
     .map(|text| tok(ERROR, text))
 }

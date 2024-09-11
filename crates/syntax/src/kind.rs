@@ -15,6 +15,7 @@ pub enum SyntaxKind {
     STRING,
     INT,
     UNSIGNED_INT,
+    FLOAT,
     NUM_TYPE,
     VEC_TYPE,
     REF_TYPE,
