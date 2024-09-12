@@ -49,6 +49,7 @@ fn module_field(input: &mut Input) -> GreenResult {
         "import" => module_field_import,
         "start" => module_field_start,
         "data" => module_field_data,
+        "table" => module_field_table,
         "global" => module_field_global,
         "elem" => module_field_elem,
         _ => fail,
@@ -297,6 +298,42 @@ fn module_field_start(input: &mut Input) -> GreenResult {
             }
             node(MODULE_FIELD_START, children)
         })
+}
+
+fn module_field_table(input: &mut Input) -> GreenResult {
+    (
+        l_paren,
+        trivias_prefixed(keyword("table")),
+        opt(trivias_prefixed(ident)),
+        opt(trivias_prefixed(table_type)),
+        opt(trivias_prefixed(ref_type)),
+        opt(trivias_prefixed(elem)),
+        resume(r_paren),
+    )
+        .parse_next(input)
+        .map(
+            |(l_paren, mut keyword, id, table_type, ref_type, elem, r_paren)| {
+                let mut children = Vec::with_capacity(7);
+                children.push(l_paren);
+                children.append(&mut keyword);
+                if let Some(mut id) = id {
+                    children.append(&mut id);
+                }
+                if let Some(mut table_type) = table_type {
+                    children.append(&mut table_type);
+                }
+                if let Some(mut ref_type) = ref_type {
+                    children.append(&mut ref_type);
+                }
+                if let Some(mut elem) = elem {
+                    children.append(&mut elem);
+                }
+                if let Some(mut r_paren) = r_paren {
+                    children.append(&mut r_paren);
+                }
+                node(MODULE_FIELD_TABLE, children)
+            },
+        )
 }
 
 fn module_field_type(input: &mut Input) -> GreenResult {
@@ -599,6 +636,31 @@ pub(super) fn type_use(input: &mut Input) -> GreenResult {
                 .into_iter()
                 .for_each(|mut result| children.append(&mut result));
             node(TYPE_USE, children)
+        })
+}
+
+fn elem(input: &mut Input) -> GreenResult {
+    (
+        l_paren,
+        trivias_prefixed(keyword("elem")),
+        alt((
+            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(elem_expr)),
+            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(unsigned_int)),
+        )),
+        resume(r_paren),
+    )
+        .parse_next(input)
+        .map(|(l_paren, mut keyword, items, r_paren)| {
+            let mut children = Vec::with_capacity(4);
+            children.push(l_paren);
+            children.append(&mut keyword);
+            items
+                .into_iter()
+                .for_each(|mut item| children.append(&mut item));
+            if let Some(mut r_paren) = r_paren {
+                children.append(&mut r_paren);
+            }
+            node(ELEM, children)
         })
 }
 

@@ -61,6 +61,7 @@ pub enum SyntaxKind {
     LOCAL,
     MEM_USE,
     OFFSET,
+    ELEM,
     ELEM_LIST,
     ELEM_EXPR,
     TABLE_USE,
@@ -73,6 +74,7 @@ pub enum SyntaxKind {
     MODULE_FIELD_GLOBAL,
     MODULE_FIELD_IMPORT,
     MODULE_FIELD_START,
+    MODULE_FIELD_TABLE,
     MODULE_FIELD_TYPE,
     ROOT,
 }
