@@ -56,7 +56,6 @@ fn module_field(input: &mut Input) -> GreenResult {
         _ => fail,
     }
     .parse_next(input)
-    .map(|children| node(MODULE_FIELD, [children]))
 }
 
 fn module_field_data(input: &mut Input) -> GreenResult {
@@ -497,7 +496,6 @@ fn import_desc(input: &mut Input) -> GreenResult {
         _ => fail,
     }
     .parse_next(input)
-    .map(|children| node(IMPORT_DESC, [children]))
 }
 
 fn import_desc_global_type(input: &mut Input) -> GreenResult {
@@ -613,7 +611,6 @@ fn export_desc(input: &mut Input) -> GreenResult {
         _ => fail,
     }
     .parse_next(input)
-    .map(|child| node(EXPORT_DESC, [child]))
 }
 
 fn export_desc_variant<'s>(
