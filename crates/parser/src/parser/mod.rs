@@ -148,7 +148,7 @@ where
             Err(err) => err,
         };
         let err_start = input.checkpoint();
-        if error_token(true).parse_next(input).is_ok() {
+        if error_token(true).parse_next(input).is_ok() || input.eof_offset() == 0 {
             if let Err(err_) = input.record_err(&token_start, &err_start, err) {
                 err = err_;
             } else {

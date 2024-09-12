@@ -8,7 +8,7 @@ use super::{
 use crate::error::SyntaxError;
 use wat_syntax::SyntaxKind::{self, *};
 use winnow::{
-    combinator::{alt, dispatch, fail, opt, peek, preceded, repeat, repeat_till},
+    combinator::{alt, dispatch, fail, opt, peek, preceded, repeat},
     error::{StrContext, StrContextValue},
     Parser,
 };
@@ -88,30 +88,28 @@ fn module_field_func(input: &mut Input) -> GreenResult {
         trivias_prefixed(keyword("func")),
         opt(trivias_prefixed(ident)),
         resume(type_use),
-        repeat_till::<_, _, Vec<_>, _, _, _, _>(0.., trivias_prefixed(instr), peek(')')),
+        repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(instr)),
         resume(r_paren),
     )
         .parse_next(input)
-        .map(
-            |(l_paren, mut keyword, id, type_use, (instrs, _), r_paren)| {
-                let mut children = Vec::with_capacity(7);
-                children.push(l_paren);
-                children.append(&mut keyword);
-                if let Some(mut id) = id {
-                    children.append(&mut id);
-                }
-                if let Some(mut type_use) = type_use {
-                    children.append(&mut type_use);
-                }
-                instrs
-                    .into_iter()
-                    .for_each(|mut instr| children.append(&mut instr));
-                if let Some(mut r_paren) = r_paren {
-                    children.append(&mut r_paren);
-                }
-                node(MODULE_FIELD_FUNC, children)
-            },
-        )
+        .map(|(l_paren, mut keyword, id, type_use, instrs, r_paren)| {
+            let mut children = Vec::with_capacity(7);
+            children.push(l_paren);
+            children.append(&mut keyword);
+            if let Some(mut id) = id {
+                children.append(&mut id);
+            }
+            if let Some(mut type_use) = type_use {
+                children.append(&mut type_use);
+            }
+            instrs
+                .into_iter()
+                .for_each(|mut instr| children.append(&mut instr));
+            if let Some(mut r_paren) = r_paren {
+                children.append(&mut r_paren);
+            }
+            node(MODULE_FIELD_FUNC, children)
+        })
 }
 
 fn module_field_import(input: &mut Input) -> GreenResult {
