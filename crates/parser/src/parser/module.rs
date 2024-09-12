@@ -48,6 +48,7 @@ fn module_field(input: &mut Input) -> GreenResult {
         "export" => module_field_export,
         "import" => module_field_import,
         "start" => module_field_start,
+        "global" => module_field_global,
         _ => fail,
     }
     .parse_next(input)
@@ -124,6 +125,46 @@ fn module_field_func(input: &mut Input) -> GreenResult {
                     children.append(&mut r_paren);
                 }
                 node(MODULE_FIELD_FUNC, children)
+            },
+        )
+}
+
+fn module_field_global(input: &mut Input) -> GreenResult {
+    (
+        l_paren,
+        trivias_prefixed(keyword("global")),
+        opt(trivias_prefixed(ident)),
+        opt(trivias_prefixed(import)), // postpone syntax error for using import with export or instr
+        opt(trivias_prefixed(export)),
+        resume(global_type),
+        repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(instr)),
+        resume(r_paren),
+    )
+        .parse_next(input)
+        .map(
+            |(l_paren, mut keyword, id, import, export, ty, instrs, r_paren)| {
+                let mut children = Vec::with_capacity(7);
+                children.push(l_paren);
+                children.append(&mut keyword);
+                if let Some(mut id) = id {
+                    children.append(&mut id);
+                }
+                if let Some(mut import) = import {
+                    children.append(&mut import);
+                }
+                if let Some(mut export) = export {
+                    children.append(&mut export);
+                }
+                if let Some(mut ty) = ty {
+                    children.append(&mut ty);
+                }
+                instrs
+                    .into_iter()
+                    .for_each(|mut instr| children.append(&mut instr));
+                if let Some(mut r_paren) = r_paren {
+                    children.append(&mut r_paren);
+                }
+                node(MODULE_FIELD_GLOBAL, children)
             },
         )
 }
