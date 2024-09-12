@@ -61,21 +61,24 @@ fn module_field_data(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("data")),
         opt(trivias_prefixed(ident)),
-        opt((trivias_prefixed(mem_use), trivias_prefixed(offset))),
+        opt(trivias_prefixed(mem_use)),
+        opt(trivias_prefixed(offset)),
         repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(string)),
         resume(r_paren),
     )
         .parse_next(input)
         .map(
-            |(l_paren, mut keyword, id, mem_use_and_offset, strings, r_paren)| {
+            |(l_paren, mut keyword, id, mem_use, offset, strings, r_paren)| {
                 let mut children = Vec::with_capacity(7);
                 children.push(l_paren);
                 children.append(&mut keyword);
                 if let Some(mut id) = id {
                     children.append(&mut id);
                 }
-                if let Some((mut mem_use, mut offset)) = mem_use_and_offset {
+                if let Some(mut mem_use) = mem_use {
                     children.append(&mut mem_use);
+                }
+                if let Some(mut offset) = offset {
                     children.append(&mut offset);
                 }
                 strings
@@ -609,15 +612,7 @@ fn offset(input: &mut Input) -> GreenResult {
                 }
                 node(OFFSET, children)
             }),
-        (l_paren, trivias_prefixed(instr), resume(r_paren)).map(|(l_paren, mut instr, r_paren)| {
-            let mut children = Vec::with_capacity(4);
-            children.push(l_paren);
-            children.append(&mut instr);
-            if let Some(mut r_paren) = r_paren {
-                children.append(&mut r_paren);
-            }
-            node(OFFSET, children)
-        }),
+        preceded(peek('('), instr).map(|child| node(OFFSET, [child])),
     ))
     .parse_next(input)
 }
