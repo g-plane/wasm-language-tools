@@ -166,8 +166,8 @@ pub(super) fn global_type(input: &mut Input) -> GreenResult {
 
 fn limits(input: &mut Input) -> GreenResult {
     (
-        nat,
-        opt(trivias_prefixed(nat)),
+        unsigned_int,
+        opt(trivias_prefixed(unsigned_int)),
         opt(trivias_prefixed(share)),
     )
         .parse_next(input)
@@ -182,12 +182,6 @@ fn limits(input: &mut Input) -> GreenResult {
             }
             node(LIMITS, children)
         })
-}
-
-pub(super) fn nat(input: &mut Input) -> GreenResult {
-    unsigned_int
-        .parse_next(input)
-        .map(|child| node(NAT, [child]))
 }
 
 fn share(input: &mut Input) -> GreenResult {

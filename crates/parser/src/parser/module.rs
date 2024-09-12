@@ -1,8 +1,10 @@
 use super::{
     instr::instr,
     node, resume, retry,
-    token::{ident, keyword, l_paren, r_paren, string, trivias, trivias_prefixed, word},
-    ty::{func_type, global_type, memory_type, nat, param, result, table_type},
+    token::{
+        ident, keyword, l_paren, r_paren, string, trivias, trivias_prefixed, unsigned_int, word,
+    },
+    ty::{func_type, global_type, memory_type, param, result, table_type},
     GreenElement, GreenResult, Input,
 };
 use crate::error::SyntaxError;
@@ -415,7 +417,7 @@ pub(super) fn type_use(input: &mut Input) -> GreenResult {
 }
 
 fn index(input: &mut Input) -> GreenResult {
-    alt((ident, nat))
+    alt((ident, unsigned_int))
         .context(StrContext::Expected(StrContextValue::Description(
             "index (identifier or unsigned integer)",
         )))

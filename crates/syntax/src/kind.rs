@@ -58,7 +58,6 @@ pub enum SyntaxKind {
     EXPORT_DESC_MEMORY,
     EXPORT_DESC_GLOBAL,
     INDEX,
-    NAT,
     MODULE,
     MODULE_FIELD,
     MODULE_FIELD_EXPORT,
