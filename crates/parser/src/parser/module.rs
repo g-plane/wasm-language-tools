@@ -50,6 +50,7 @@ fn module_field(input: &mut Input) -> GreenResult {
         "start" => module_field_start,
         "data" => module_field_data,
         "table" => module_field_table,
+        "memory" => module_field_memory,
         "global" => module_field_global,
         "elem" => module_field_elem,
         _ => fail,
@@ -276,6 +277,46 @@ fn module_field_import(input: &mut Input) -> GreenResult {
             }
             node(MODULE_FIELD_IMPORT, children)
         })
+}
+
+fn module_field_memory(input: &mut Input) -> GreenResult {
+    (
+        l_paren,
+        trivias_prefixed(keyword("memory")),
+        opt(trivias_prefixed(ident)),
+        opt(trivias_prefixed(import)), // postpone syntax error for using import with export or instr
+        opt(trivias_prefixed(export)),
+        opt(trivias_prefixed(memory_type)),
+        opt(trivias_prefixed(data)), // postpone syntax error for using data with mem type
+        resume(r_paren),
+    )
+        .parse_next(input)
+        .map(
+            |(l_paren, mut keyword, id, import, export, mem_type, data, r_paren)| {
+                let mut children = Vec::with_capacity(8);
+                children.push(l_paren);
+                children.append(&mut keyword);
+                if let Some(mut id) = id {
+                    children.append(&mut id);
+                }
+                if let Some(mut import) = import {
+                    children.append(&mut import);
+                }
+                if let Some(mut export) = export {
+                    children.append(&mut export);
+                }
+                if let Some(mut mem_type) = mem_type {
+                    children.append(&mut mem_type);
+                }
+                if let Some(mut data) = data {
+                    children.append(&mut data);
+                }
+                if let Some(mut r_paren) = r_paren {
+                    children.append(&mut r_paren);
+                }
+                node(MODULE_FIELD_MEMORY, children)
+            },
+        )
 }
 
 fn module_field_start(input: &mut Input) -> GreenResult {
@@ -676,7 +717,7 @@ fn elem_list(input: &mut Input) -> GreenResult {
     alt((
         (
             alt((keyword("func"), unsigned_int)),
-            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(unsigned_int)),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry(unsigned_int)),
         )
             .map(|(keyword_or_first_idx, indexes)| {
                 let mut children = Vec::with_capacity(2);
@@ -707,7 +748,7 @@ fn elem_expr(input: &mut Input) -> GreenResult {
         (
             l_paren,
             trivias_prefixed(keyword("item")),
-            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(instr)),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr)),
             resume(r_paren),
         )
             .map(|(l_paren, mut keyword, instrs, r_paren)| {
@@ -785,7 +826,7 @@ fn offset(input: &mut Input) -> GreenResult {
         (
             l_paren,
             trivias_prefixed(keyword("offset")),
-            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(instr)),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr)),
             resume(r_paren),
         )
             .map(|(l_paren, mut keyword, instrs, r_paren)| {
@@ -803,4 +844,26 @@ fn offset(input: &mut Input) -> GreenResult {
         preceded(peek('('), instr).map(|child| node(OFFSET, [child])),
     ))
     .parse_next(input)
+}
+
+fn data(input: &mut Input) -> GreenResult {
+    (
+        l_paren,
+        trivias_prefixed(keyword("data")),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry(string)),
+        resume(r_paren),
+    )
+        .parse_next(input)
+        .map(|(l_paren, mut keyword, strings, r_paren)| {
+            let mut children = Vec::with_capacity(4);
+            children.push(l_paren);
+            children.append(&mut keyword);
+            strings
+                .into_iter()
+                .for_each(|mut string| children.append(&mut string));
+            if let Some(mut r_paren) = r_paren {
+                children.append(&mut r_paren);
+            }
+            node(DATA, children)
+        })
 }
