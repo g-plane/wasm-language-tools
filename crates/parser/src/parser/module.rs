@@ -4,7 +4,7 @@ use super::{
     token::{
         ident, keyword, l_paren, r_paren, string, trivias, trivias_prefixed, unsigned_int, word,
     },
-    ty::{func_type, global_type, memory_type, param, result, table_type},
+    ty::{func_type, global_type, memory_type, param, result, table_type, val_type},
     GreenElement, GreenResult, Input,
 };
 use crate::error::SyntaxError;
@@ -89,29 +89,43 @@ fn module_field_func(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("func")),
         opt(trivias_prefixed(ident)),
+        opt(trivias_prefixed(import)), // postpone syntax error for using import with export or instr
+        opt(trivias_prefixed(export)),
         resume(type_use),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry(local)),
         repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(instr)),
         resume(r_paren),
     )
         .parse_next(input)
-        .map(|(l_paren, mut keyword, id, type_use, instrs, r_paren)| {
-            let mut children = Vec::with_capacity(7);
-            children.push(l_paren);
-            children.append(&mut keyword);
-            if let Some(mut id) = id {
-                children.append(&mut id);
-            }
-            if let Some(mut type_use) = type_use {
-                children.append(&mut type_use);
-            }
-            instrs
-                .into_iter()
-                .for_each(|mut instr| children.append(&mut instr));
-            if let Some(mut r_paren) = r_paren {
-                children.append(&mut r_paren);
-            }
-            node(MODULE_FIELD_FUNC, children)
-        })
+        .map(
+            |(l_paren, mut keyword, id, import, export, type_use, locals, instrs, r_paren)| {
+                let mut children = Vec::with_capacity(7);
+                children.push(l_paren);
+                children.append(&mut keyword);
+                if let Some(mut id) = id {
+                    children.append(&mut id);
+                }
+                if let Some(mut import) = import {
+                    children.append(&mut import);
+                }
+                if let Some(mut export) = export {
+                    children.append(&mut export);
+                }
+                if let Some(mut type_use) = type_use {
+                    children.append(&mut type_use);
+                }
+                locals
+                    .into_iter()
+                    .for_each(|mut local| children.append(&mut local));
+                instrs
+                    .into_iter()
+                    .for_each(|mut instr| children.append(&mut instr));
+                if let Some(mut r_paren) = r_paren {
+                    children.append(&mut r_paren);
+                }
+                node(MODULE_FIELD_FUNC, children)
+            },
+        )
 }
 
 fn module_field_import(input: &mut Input) -> GreenResult {
@@ -190,6 +204,37 @@ fn module_field_type(input: &mut Input) -> GreenResult {
         })
 }
 
+pub(super) fn local(input: &mut Input) -> GreenResult {
+    (
+        l_paren,
+        trivias_prefixed(keyword("local")),
+        alt((
+            repeat::<_, _, Vec<_>, _, _>(1.., trivias_prefixed(val_type))
+                .map(|types| types.into_iter().flatten().collect()),
+            (opt(trivias_prefixed(ident)), retry(val_type)).map(|(id, mut ty)| {
+                if let Some(mut id) = id {
+                    id.append(&mut ty);
+                    id
+                } else {
+                    ty
+                }
+            }),
+        )),
+        resume(r_paren),
+    )
+        .parse_next(input)
+        .map(|(l_paren, mut keyword, mut types, r_paren)| {
+            let mut children = Vec::with_capacity(5);
+            children.push(l_paren);
+            children.append(&mut keyword);
+            children.append(&mut types);
+            if let Some(mut r_paren) = r_paren {
+                children.append(&mut r_paren);
+            }
+            node(LOCAL, children)
+        })
+}
+
 fn import(input: &mut Input) -> GreenResult {
     (
         l_paren,
@@ -213,6 +258,28 @@ fn import(input: &mut Input) -> GreenResult {
                 children.append(&mut r_paren);
             }
             node(IMPORT, children)
+        })
+}
+
+fn export(input: &mut Input) -> GreenResult {
+    (
+        l_paren,
+        trivias_prefixed(keyword("export")),
+        resume(name),
+        resume(r_paren),
+    )
+        .parse_next(input)
+        .map(|(l_paren, mut keyword, name, r_paren)| {
+            let mut children = Vec::with_capacity(4);
+            children.push(l_paren);
+            children.append(&mut keyword);
+            if let Some(mut name) = name {
+                children.append(&mut name);
+            }
+            if let Some(mut r_paren) = r_paren {
+                children.append(&mut r_paren);
+            }
+            node(EXPORT, children)
         })
 }
 

@@ -21,7 +21,7 @@ fn ref_type(input: &mut Input) -> GreenResult {
     .parse_next(input)
 }
 
-fn val_type(input: &mut Input) -> GreenResult {
+pub(super) fn val_type(input: &mut Input) -> GreenResult {
     word.verify_map(|word| match word {
         "i32" | "i64" | "f32" | "f64" => Some(tok(NUM_TYPE, word)),
         "v128" => Some(tok(VEC_TYPE, word)),
