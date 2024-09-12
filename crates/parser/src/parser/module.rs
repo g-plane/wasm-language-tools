@@ -305,6 +305,8 @@ fn module_field_table(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("table")),
         opt(trivias_prefixed(ident)),
+        opt(trivias_prefixed(import)), // postpone syntax error for using import with export or instr
+        opt(trivias_prefixed(export)),
         opt(trivias_prefixed(table_type)),
         opt(trivias_prefixed(ref_type)),
         opt(trivias_prefixed(elem)),
@@ -312,12 +314,18 @@ fn module_field_table(input: &mut Input) -> GreenResult {
     )
         .parse_next(input)
         .map(
-            |(l_paren, mut keyword, id, table_type, ref_type, elem, r_paren)| {
+            |(l_paren, mut keyword, id, import, export, table_type, ref_type, elem, r_paren)| {
                 let mut children = Vec::with_capacity(7);
                 children.push(l_paren);
                 children.append(&mut keyword);
                 if let Some(mut id) = id {
                     children.append(&mut id);
+                }
+                if let Some(mut import) = import {
+                    children.append(&mut import);
+                }
+                if let Some(mut export) = export {
+                    children.append(&mut export);
                 }
                 if let Some(mut table_type) = table_type {
                     children.append(&mut table_type);
