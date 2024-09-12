@@ -155,8 +155,8 @@ pub(super) fn unsigned_int(input: &mut Input) -> GreenResult {
         .map(|text| tok(UNSIGNED_INT, text))
 }
 pub(super) fn unsigned_int_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
-    dispatch! {take(2usize);
-        "0x" => unsigned_hex,
+    dispatch! {peek(take(2usize));
+        "0x" => ("0x", unsigned_hex).take(),
         _ => unsigned_dec,
     }
     .parse_next(input)
