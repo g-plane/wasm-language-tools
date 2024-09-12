@@ -10,7 +10,7 @@ use winnow::{
     Parser,
 };
 
-fn ref_type(input: &mut Input) -> GreenResult {
+pub(super) fn ref_type(input: &mut Input) -> GreenResult {
     word.verify_map(|word| match word {
         "funcref" | "externref" => Some(tok(REF_TYPE, word)),
         _ => None,
