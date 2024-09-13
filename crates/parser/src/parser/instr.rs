@@ -16,9 +16,7 @@ use winnow::{
 };
 
 pub(super) fn instr(input: &mut Input) -> GreenResult {
-    alt((block_instr, plain_instr))
-        .parse_next(input)
-        .map(|child| node(INSTR, [child]))
+    alt((block_instr, plain_instr)).parse_next(input)
 }
 
 fn block_instr(input: &mut Input) -> GreenResult {

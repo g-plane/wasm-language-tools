@@ -36,7 +36,6 @@ pub enum SyntaxKind {
     MEMORY_TYPE,
     GLOBAL_TYPE,
     BLOCK_TYPE,
-    INSTR,
     PLAIN_INSTR,
     BLOCK_INSTR,
     BLOCK_BLOCK,
