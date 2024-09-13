@@ -20,7 +20,7 @@ pub(super) fn instr(input: &mut Input) -> GreenResult {
 }
 
 fn block_instr(input: &mut Input) -> GreenResult {
-    dispatch! {peek(word);
+    dispatch! {peek(preceded(opt(('(', trivias)), word));
         "if" => block_if,
         "loop" => block_loop,
         "block" => block_block,
@@ -44,67 +44,135 @@ fn block_type(input: &mut Input) -> GreenResult {
 }
 
 fn block_block(input: &mut Input) -> GreenResult {
-    (
-        keyword("block"),
-        resume(ident),
-        resume(block_type),
-        repeat::<_, _, Vec<_>, _, _>(0.., retry(instr)),
-        resume(keyword("end")),
-        opt(trivias_prefixed(ident)),
-    )
-        .parse_next(input)
-        .map(|(keyword, label, block_type, instrs, end, id)| {
-            let mut children = Vec::with_capacity(6);
-            children.push(keyword);
-            if let Some(mut label) = label {
-                children.append(&mut label);
-            }
-            if let Some(mut block_type) = block_type {
-                children.append(&mut block_type);
-            }
-            instrs
-                .into_iter()
-                .for_each(|mut instr| children.append(&mut instr));
-            if let Some(mut end) = end {
-                children.append(&mut end);
-            }
-            if let Some(mut id) = id {
-                children.append(&mut id);
-            }
-            node(BLOCK_BLOCK, children)
-        })
+    alt((
+        (
+            keyword("block"),
+            resume(ident),
+            resume(block_type),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr)),
+            resume(keyword("end")),
+            opt(trivias_prefixed(ident)),
+        )
+            .map(|(keyword, label, block_type, instrs, end, id)| {
+                let mut children = Vec::with_capacity(6);
+                children.push(keyword);
+                if let Some(mut label) = label {
+                    children.append(&mut label);
+                }
+                if let Some(mut block_type) = block_type {
+                    children.append(&mut block_type);
+                }
+                instrs
+                    .into_iter()
+                    .for_each(|mut instr| children.append(&mut instr));
+                if let Some(mut end) = end {
+                    children.append(&mut end);
+                }
+                if let Some(mut id) = id {
+                    children.append(&mut id);
+                }
+                node(BLOCK_BLOCK, children)
+            }),
+        (
+            l_paren,
+            trivias_prefixed(keyword("block")),
+            resume(ident),
+            resume(block_type),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr)),
+            resume(r_paren),
+            opt(trivias_prefixed(ident)),
+        )
+            .map(
+                |(l_paren, mut keyword, label, block_type, instrs, r_paren, id)| {
+                    let mut children = Vec::with_capacity(6);
+                    children.push(l_paren);
+                    children.append(&mut keyword);
+                    if let Some(mut label) = label {
+                        children.append(&mut label);
+                    }
+                    if let Some(mut block_type) = block_type {
+                        children.append(&mut block_type);
+                    }
+                    instrs
+                        .into_iter()
+                        .for_each(|mut instr| children.append(&mut instr));
+                    if let Some(mut r_paren) = r_paren {
+                        children.append(&mut r_paren);
+                    }
+                    if let Some(mut id) = id {
+                        children.append(&mut id);
+                    }
+                    node(BLOCK_BLOCK, children)
+                },
+            ),
+    ))
+    .parse_next(input)
 }
 
 fn block_loop(input: &mut Input) -> GreenResult {
-    (
-        keyword("loop"),
-        resume(ident),
-        resume(block_type),
-        repeat::<_, _, Vec<_>, _, _>(0.., retry(instr)),
-        resume(keyword("end")),
-        opt(trivias_prefixed(ident)),
-    )
-        .parse_next(input)
-        .map(|(keyword, label, block_type, instrs, end, id)| {
-            let mut children = Vec::with_capacity(6);
-            children.push(keyword);
-            if let Some(mut label) = label {
-                children.append(&mut label);
-            }
-            if let Some(mut block_type) = block_type {
-                children.append(&mut block_type);
-            }
-            instrs
-                .into_iter()
-                .for_each(|mut instr| children.append(&mut instr));
-            if let Some(mut end) = end {
-                children.append(&mut end);
-            }
-            if let Some(mut id) = id {
-                children.append(&mut id);
-            }
-            node(BLOCK_LOOP, children)
-        })
+    alt((
+        (
+            keyword("loop"),
+            resume(ident),
+            resume(block_type),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr)),
+            resume(keyword("end")),
+            opt(trivias_prefixed(ident)),
+        )
+            .map(|(keyword, label, block_type, instrs, end, id)| {
+                let mut children = Vec::with_capacity(6);
+                children.push(keyword);
+                if let Some(mut label) = label {
+                    children.append(&mut label);
+                }
+                if let Some(mut block_type) = block_type {
+                    children.append(&mut block_type);
+                }
+                instrs
+                    .into_iter()
+                    .for_each(|mut instr| children.append(&mut instr));
+                if let Some(mut end) = end {
+                    children.append(&mut end);
+                }
+                if let Some(mut id) = id {
+                    children.append(&mut id);
+                }
+                node(BLOCK_LOOP, children)
+            }),
+        (
+            l_paren,
+            trivias_prefixed(keyword("loop")),
+            resume(ident),
+            resume(block_type),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr)),
+            resume(r_paren),
+            opt(trivias_prefixed(ident)),
+        )
+            .map(
+                |(l_paren, mut keyword, label, block_type, instrs, r_paren, id)| {
+                    let mut children = Vec::with_capacity(6);
+                    children.push(l_paren);
+                    children.append(&mut keyword);
+                    if let Some(mut label) = label {
+                        children.append(&mut label);
+                    }
+                    if let Some(mut block_type) = block_type {
+                        children.append(&mut block_type);
+                    }
+                    instrs
+                        .into_iter()
+                        .for_each(|mut instr| children.append(&mut instr));
+                    if let Some(mut r_paren) = r_paren {
+                        children.append(&mut r_paren);
+                    }
+                    if let Some(mut id) = id {
+                        children.append(&mut id);
+                    }
+                    node(BLOCK_LOOP, children)
+                },
+            ),
+    ))
+    .parse_next(input)
 }
 
 fn block_if(input: &mut Input) -> GreenResult {
