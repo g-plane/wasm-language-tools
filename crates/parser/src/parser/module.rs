@@ -172,7 +172,7 @@ fn module_field_func(input: &mut Input) -> GreenResult {
         opt(trivias_prefixed(import)), // postpone syntax error for using import with export or instr
         opt(trivias_prefixed(export)),
         resume(type_use),
-        repeat::<_, _, Vec<_>, _, _>(0.., retry(local)),
+        repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(local)),
         repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(instr)),
         resume(r_paren),
     )
@@ -659,8 +659,8 @@ pub(super) fn type_use(input: &mut Input) -> GreenResult {
             ),
             resume(r_paren),
         )),
-        repeat::<_, _, Vec<_>, _, _>(0.., retry(param)),
-        repeat::<_, _, Vec<_>, _, _>(0.., retry(result)),
+        repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(param)),
+        repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(result)),
     )
         .parse_next(input)
         .map(|(type_index, params, results)| {
