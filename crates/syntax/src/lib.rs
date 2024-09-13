@@ -1,3 +1,4 @@
+pub mod ast;
 mod kind;
 
 pub use kind::SyntaxKind;
