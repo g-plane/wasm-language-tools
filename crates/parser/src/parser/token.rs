@@ -229,7 +229,13 @@ pub(super) fn error_term<'s, const N: usize>(
 ) -> impl Parser<Input<'s>, Vec<GreenElement>, SyntaxError> {
     repeat_till::<_, _, Vec<_>, _, _, _, _>(
         1..,
-        alt((ws, line_comment, block_comment, error_token(true))),
+        alt((
+            ws,
+            line_comment,
+            block_comment,
+            error_token(false),
+            '('.map(|_| tok(ERROR, "(")),
+        )),
         peek((
             trivias,
             '(',
