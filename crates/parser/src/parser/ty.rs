@@ -44,8 +44,8 @@ pub(super) fn func_type(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("func")),
-        repeat::<_, _, Vec<_>, _, _>(0.., retry(param)),
-        repeat::<_, _, Vec<_>, _, _>(0.., retry(result)),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry(param, ["result"])),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry(result, [])),
         resume(r_paren),
     )
         .parse_next(input)

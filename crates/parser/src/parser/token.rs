@@ -223,3 +223,19 @@ pub(super) fn error_token<'s>(
     }
     .map(|text| tok(ERROR, text))
 }
+
+pub(super) fn error_term<'s, const N: usize>(
+    allowed_names: [&'static str; N],
+) -> impl Parser<Input<'s>, Vec<GreenElement>, SyntaxError> {
+    repeat_till::<_, _, Vec<_>, _, _, _, _>(
+        1..,
+        alt((ws, line_comment, block_comment, error_token(true))),
+        peek((
+            trivias,
+            '(',
+            trivias,
+            word.verify(move |word| allowed_names.contains(word)),
+        )),
+    )
+    .map(|(tokens, _)| tokens)
+}

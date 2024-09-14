@@ -49,7 +49,7 @@ fn block_block(input: &mut Input) -> GreenResult {
             keyword("block"),
             resume(ident),
             resume(block_type),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr)),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
             resume(keyword("end")),
             opt(trivias_prefixed(ident)),
         )
@@ -78,7 +78,7 @@ fn block_block(input: &mut Input) -> GreenResult {
             trivias_prefixed(keyword("block")),
             resume(ident),
             resume(block_type),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr)),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
             resume(r_paren),
             opt(trivias_prefixed(ident)),
         )
@@ -115,7 +115,7 @@ fn block_loop(input: &mut Input) -> GreenResult {
             keyword("loop"),
             resume(ident),
             resume(block_type),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr)),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
             resume(keyword("end")),
             opt(trivias_prefixed(ident)),
         )
@@ -144,7 +144,7 @@ fn block_loop(input: &mut Input) -> GreenResult {
             trivias_prefixed(keyword("loop")),
             resume(ident),
             resume(block_type),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr)),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
             resume(r_paren),
             opt(trivias_prefixed(ident)),
         )
@@ -180,11 +180,11 @@ fn block_if(input: &mut Input) -> GreenResult {
         keyword("if"),
         resume(ident),
         resume(block_type),
-        repeat::<_, _, Vec<_>, _, _>(0.., retry(instr)),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
         opt((
             trivias_prefixed(keyword("else")),
             opt(trivias_prefixed(ident)),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr)),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
         )),
         resume(keyword("end")),
         opt(trivias_prefixed(ident)),

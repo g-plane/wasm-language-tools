@@ -1,6 +1,6 @@
 use self::{
     module::module,
-    token::{block_comment, error_token, line_comment, trivias, ws},
+    token::{block_comment, error_term, error_token, line_comment, trivias, ws},
 };
 use crate::error::SyntaxError;
 use rowan::{GreenNode, GreenToken, NodeOrToken};
@@ -59,7 +59,7 @@ where
 
 fn root(input: &mut Input) -> PResult<SyntaxNode, SyntaxError> {
     (
-        repeat::<_, _, Vec<_>, _, _>(0.., retry(module)),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry(module, [])),
         repeat(
             0..,
             alt((ws, line_comment, block_comment, error_token(true))),
@@ -77,12 +77,17 @@ fn root(input: &mut Input) -> PResult<SyntaxNode, SyntaxError> {
 }
 
 // copied and modified from https://github.com/winnow-rs/winnow/blob/95e0c100656a98a0ff3bc8420fc8844edff6b615/src/combinator/parser.rs#L963
-fn retry<'s, P>(mut parser: P) -> impl WinnowParser<Input<'s>, Vec<GreenElement>, SyntaxError>
+fn retry<'s, P, const N: usize>(
+    mut parser: P,
+    allowed_names: [&'static str; N],
+) -> impl WinnowParser<Input<'s>, Vec<GreenElement>, SyntaxError>
 where
     P: WinnowParser<Input<'s>, GreenElement, SyntaxError>,
 {
     move |input: &mut Input<'s>| {
-        let mut error_parser = error_token(false).context(StrContext::Label("unexpected token"));
+        let mut error_token_parser =
+            error_token(false).context(StrContext::Label("unexpected token"));
+        let mut error_term_parser = error_term(allowed_names);
         let mut tokens = Vec::with_capacity(1);
         loop {
             let trivia_start = input.checkpoint();
@@ -103,7 +108,7 @@ where
             input.reset(&token_start);
             let err_start = input.checkpoint();
             let err_start_eof_offset = input.eof_offset();
-            if let Ok(error_token) = error_parser.parse_next(input) {
+            if let Ok(error_token) = error_token_parser.parse_next(input) {
                 let i_eof_offset = input.eof_offset();
                 if err_start_eof_offset == i_eof_offset {
                     // didn't advance so bubble the error up
@@ -113,6 +118,19 @@ where
                     tokens.append(&mut trivia_tokens);
                     tokens.push(error_token);
                     continue;
+                }
+            } else if let Ok(mut error_tokens) = error_term_parser.parse_next(input) {
+                let i_eof_offset = input.eof_offset();
+                if err_start_eof_offset == i_eof_offset {
+                    // didn't advance so bubble the error up
+                } else if let Err(err_) = input.record_err(&token_start, &err_start, err) {
+                    err = err_;
+                } else {
+                    tokens.append(&mut trivia_tokens);
+                    tokens.append(&mut error_tokens);
+                    // unlike `error_token_parser`, `error_term_parser` consumes many tokens,
+                    // so we should exit the loop instead of continuing
+                    return Ok(tokens);
                 }
             }
 

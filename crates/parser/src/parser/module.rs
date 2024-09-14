@@ -20,7 +20,7 @@ pub(super) fn module(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("module")),
         opt(trivias_prefixed(ident)),
-        repeat::<_, _, Vec<_>, _, _>(0.., retry(module_field)),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry(module_field, [])),
         resume(r_paren),
     )
         .parse_next(input)
@@ -389,18 +389,20 @@ fn module_field_type(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("type")),
         opt(trivias_prefixed(ident)),
-        retry(func_type),
+        resume(func_type),
         resume(r_paren),
     )
         .parse_next(input)
-        .map(|(l_paren, mut keyword, id, mut ty, r_paren)| {
+        .map(|(l_paren, mut keyword, id, ty, r_paren)| {
             let mut children = Vec::with_capacity(5);
             children.push(l_paren);
             children.append(&mut keyword);
             if let Some(mut id) = id {
                 children.append(&mut id);
             }
-            children.append(&mut ty);
+            if let Some(mut ty) = ty {
+                children.append(&mut ty);
+            }
             if let Some(mut r_paren) = r_paren {
                 children.append(&mut r_paren);
             }
@@ -415,7 +417,7 @@ pub(super) fn local(input: &mut Input) -> GreenResult {
         alt((
             repeat::<_, _, Vec<_>, _, _>(1.., trivias_prefixed(val_type))
                 .map(|types| types.into_iter().flatten().collect()),
-            (opt(trivias_prefixed(ident)), retry(val_type)).map(|(id, mut ty)| {
+            (opt(trivias_prefixed(ident)), retry(val_type, [])).map(|(id, mut ty)| {
                 if let Some(mut id) = id {
                     id.append(&mut ty);
                     id
@@ -714,7 +716,7 @@ fn elem_list(input: &mut Input) -> GreenResult {
     alt((
         (
             alt((keyword("func"), unsigned_int)),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry(unsigned_int)),
+            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(unsigned_int)),
         )
             .map(|(keyword_or_first_idx, indexes)| {
                 let mut children = Vec::with_capacity(2);
@@ -745,7 +747,7 @@ fn elem_expr(input: &mut Input) -> GreenResult {
         (
             l_paren,
             trivias_prefixed(keyword("item")),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr)),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
             resume(r_paren),
         )
             .map(|(l_paren, mut keyword, instrs, r_paren)| {
@@ -823,7 +825,7 @@ fn offset(input: &mut Input) -> GreenResult {
         (
             l_paren,
             trivias_prefixed(keyword("offset")),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr)),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
             resume(r_paren),
         )
             .map(|(l_paren, mut keyword, instrs, r_paren)| {
@@ -847,7 +849,7 @@ fn data(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("data")),
-        repeat::<_, _, Vec<_>, _, _>(0.., retry(string)),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry(string, [])),
         resume(r_paren),
     )
         .parse_next(input)
