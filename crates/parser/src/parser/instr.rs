@@ -6,8 +6,9 @@ use super::{
         unsigned_int_impl, word,
     },
     ty::{heap_type, result},
-    GreenResult, Input,
+    GreenElement, GreenResult, Input,
 };
+use crate::error::SyntaxError;
 use wat_syntax::SyntaxKind::*;
 use winnow::{
     combinator::{alt, dispatch, fail, opt, peek, preceded, repeat},
@@ -228,7 +229,7 @@ fn plain_instr(input: &mut Input) -> GreenResult {
         (
             l_paren,
             trivias_prefixed(instr_name),
-            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(operand)),
+            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(operand(true))),
             resume(r_paren),
         )
             .map(|(l_paren, mut instr_name, operands, r_paren)| {
@@ -244,15 +245,15 @@ fn plain_instr(input: &mut Input) -> GreenResult {
                 node(PLAIN_INSTR, children)
             }),
         (
-            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(operand)),
-            trivias_prefixed(instr_name),
+            instr_name,
+            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(operand(false))),
         )
-            .map(|(operands, mut instr_name)| {
+            .map(|(instr_name, operands)| {
                 let mut children = Vec::with_capacity(2);
+                children.push(instr_name);
                 operands
                     .into_iter()
                     .for_each(|mut operand| children.append(&mut operand));
-                children.append(&mut instr_name);
                 node(PLAIN_INSTR, children)
             }),
     ))
@@ -263,7 +264,7 @@ fn instr_name(input: &mut Input) -> GreenResult {
     word.parse_next(input).map(|text| tok(INSTR_NAME, text))
 }
 
-fn operand(input: &mut Input) -> GreenResult {
+fn operand<'s>(allow_instr: bool) -> impl Parser<Input<'s>, GreenElement, SyntaxError> {
     dispatch! {peek(any);
         '0'..='9' | '+' | '-' => alt((float, int)),
         '.' | 'i' | 'n' => float,
@@ -271,13 +272,13 @@ fn operand(input: &mut Input) -> GreenResult {
         '$' => ident,
         '(' => dispatch! {peek(preceded(('(', trivias), word));
             "type" => type_use,
-            _ => instr,
+            _ if allow_instr => instr,
+            _ => fail,
         },
         'o' | 'a' => mem_arg,
         'f' | 'e' => heap_type,
         _ => fail,
     }
-    .parse_next(input)
     .map(|child| node(OPERAND, [child]))
 }
 
