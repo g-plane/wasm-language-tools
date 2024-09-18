@@ -41,6 +41,8 @@ pub enum SyntaxKind {
     BLOCK_BLOCK,
     BLOCK_LOOP,
     BLOCK_IF,
+    BLOCK_IF_THEN,
+    BLOCK_IF_ELSE,
     OPERAND,
     TYPE_USE,
     LIMITS,
