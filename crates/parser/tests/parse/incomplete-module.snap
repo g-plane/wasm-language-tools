@@ -1,0 +1,14 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..8
+  MODULE@0..7
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+  WHITESPACE@7..8 "\n"
+
+error: expected `)`
+  ┌─ incomplete-module.wat:2:1
+  │
+2 │ 
+  │ ^
