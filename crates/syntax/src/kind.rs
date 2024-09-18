@@ -37,7 +37,6 @@ pub enum SyntaxKind {
     GLOBAL_TYPE,
     BLOCK_TYPE,
     PLAIN_INSTR,
-    BLOCK_INSTR,
     BLOCK_BLOCK,
     BLOCK_LOOP,
     BLOCK_IF,
