@@ -42,7 +42,7 @@ fn block_block(input: &mut Input) -> GreenResult {
     alt((
         (
             keyword("block"),
-            resume(ident),
+            opt(trivias_prefixed(ident)),
             resume(block_type),
             repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
             resume(keyword("end")),
@@ -71,7 +71,7 @@ fn block_block(input: &mut Input) -> GreenResult {
         (
             l_paren,
             trivias_prefixed(keyword("block")),
-            resume(ident),
+            opt(trivias_prefixed(ident)),
             resume(block_type),
             repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
             resume(r_paren),
@@ -108,7 +108,7 @@ fn block_loop(input: &mut Input) -> GreenResult {
     alt((
         (
             keyword("loop"),
-            resume(ident),
+            opt(trivias_prefixed(ident)),
             resume(block_type),
             repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
             resume(keyword("end")),
@@ -137,7 +137,7 @@ fn block_loop(input: &mut Input) -> GreenResult {
         (
             l_paren,
             trivias_prefixed(keyword("loop")),
-            resume(ident),
+            opt(trivias_prefixed(ident)),
             resume(block_type),
             repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
             resume(r_paren),
@@ -175,7 +175,7 @@ fn block_if(input: &mut Input) -> GreenResult {
         (
             keyword("if"),
             opt(trivias_prefixed(ident)),
-            opt(trivias_prefixed(block_type)),
+            resume(block_type),
             repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
             opt((
                 trivias,
@@ -228,7 +228,7 @@ fn block_if(input: &mut Input) -> GreenResult {
             l_paren,
             trivias_prefixed(keyword("if")),
             opt(trivias_prefixed(ident)),
-            opt(trivias_prefixed(block_type)),
+            resume(block_type),
             repeat_till::<_, _, Vec<_>, _, _, _, _>(
                 0..,
                 retry(instr, []),
