@@ -32,13 +32,7 @@ fn block_instr(input: &mut Input) -> GreenResult {
 
 fn block_type(input: &mut Input) -> GreenResult {
     alt((
-        opt(result).map(|child| {
-            if let Some(child) = child {
-                node(BLOCK_TYPE, [child])
-            } else {
-                node(BLOCK_TYPE, [])
-            }
-        }),
+        result.map(|child| node(BLOCK_TYPE, [child])),
         type_use.map(|child| node(BLOCK_TYPE, [child])),
     ))
     .parse_next(input)
@@ -180,7 +174,7 @@ fn block_if(input: &mut Input) -> GreenResult {
     (
         keyword("if"),
         resume(ident),
-        resume(block_type),
+        opt(trivias_prefixed(block_type)),
         repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
         opt((
             trivias_prefixed(keyword("else")),
