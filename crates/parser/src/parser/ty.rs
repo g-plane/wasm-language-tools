@@ -1,5 +1,5 @@
 use super::{
-    node, resume, retry, tok,
+    node, resume, retry, retry_once, tok,
     token::{ident, keyword, l_paren, r_paren, trivias_prefixed, unsigned_int, word},
     GreenResult, Input,
 };
@@ -103,7 +103,7 @@ pub(super) fn result(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("result")),
-        repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(val_type)),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry_once(val_type, [])),
         resume(r_paren),
     )
         .parse_next(input)
