@@ -2,8 +2,8 @@ use super::{
     module::type_use,
     node, resume, retry, tok,
     token::{
-        float, ident, int, keyword, l_paren, r_paren, string, trivias, trivias_prefixed,
-        unsigned_int_impl, word,
+        error_token, float, ident, int, keyword, l_paren, r_paren, string, trivias,
+        trivias_prefixed, unsigned_int_impl, word,
     },
     ty::{heap_type, result},
     GreenElement, GreenResult, Input,
@@ -43,7 +43,7 @@ fn block_block(input: &mut Input) -> GreenResult {
         (
             keyword("block"),
             opt(trivias_prefixed(ident)),
-            resume(block_type),
+            opt(trivias_prefixed(block_type)),
             repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
             resume(keyword("end")),
             opt(trivias_prefixed(ident)),
@@ -72,7 +72,7 @@ fn block_block(input: &mut Input) -> GreenResult {
             l_paren,
             trivias_prefixed(keyword("block")),
             opt(trivias_prefixed(ident)),
-            resume(block_type),
+            opt(trivias_prefixed(block_type)),
             repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
             resume(r_paren),
             opt(trivias_prefixed(ident)),
@@ -313,7 +313,10 @@ fn plain_instr(input: &mut Input) -> GreenResult {
         (
             l_paren,
             trivias_prefixed(instr_name),
-            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(operand(true))),
+            repeat::<_, _, Vec<_>, _, _>(
+                0..,
+                trivias_prefixed(alt((operand(true), error_token(false)))),
+            ),
             resume(r_paren),
         )
             .map(|(l_paren, mut instr_name, operands, r_paren)| {
@@ -330,7 +333,10 @@ fn plain_instr(input: &mut Input) -> GreenResult {
             }),
         (
             instr_name,
-            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(operand(false))),
+            repeat::<_, _, Vec<_>, _, _>(
+                0..,
+                trivias_prefixed(alt((operand(false), error_token(false)))),
+            ),
         )
             .map(|(instr_name, operands)| {
                 let mut children = Vec::with_capacity(2);
@@ -350,7 +356,7 @@ fn instr_name(input: &mut Input) -> GreenResult {
 
 fn operand<'s>(allow_instr: bool) -> impl Parser<Input<'s>, GreenElement, SyntaxError> {
     dispatch! {peek(any);
-        '0'..='9' | '+' | '-' => alt((float, int)),
+        '0'..='9' | '+' | '-' => alt((int, float)),
         '.' | 'i' | 'n' => float,
         '"' => string,
         '$' => ident,
