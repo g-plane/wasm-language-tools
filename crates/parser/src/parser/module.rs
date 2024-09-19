@@ -10,8 +10,9 @@ use super::{
 use crate::error::SyntaxError;
 use wat_syntax::SyntaxKind::{self, *};
 use winnow::{
-    combinator::{alt, dispatch, fail, opt, peek, preceded, repeat},
+    combinator::{alt, dispatch, empty, fail, opt, peek, preceded, repeat},
     error::{StrContext, StrContextValue},
+    token::any,
     Parser,
 };
 
@@ -691,10 +692,11 @@ fn elem(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("elem")),
-        alt((
-            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(elem_expr)),
-            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(unsigned_int)),
-        )),
+        dispatch! {peek(preceded(trivias, any));
+            '(' => repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(elem_expr)),
+            ')' => empty.value(vec![]),
+            _ => repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(index)),
+        },
         resume(r_paren),
     )
         .parse_next(input)
