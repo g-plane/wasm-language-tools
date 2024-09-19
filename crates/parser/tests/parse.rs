@@ -8,7 +8,7 @@ use std::{fs, path::Path};
 
 #[test]
 fn parser_snapshot() {
-    glob!("parse/*.wat", |path| {
+    glob!("parse/**/*.wat", |path| {
         let input = fs::read_to_string(path).unwrap();
         let mut parser = wat_parser::Parser::new(&input);
         let tree = parser.parse();
@@ -19,7 +19,7 @@ fn parser_snapshot() {
             path.display()
         );
 
-        let file = SimpleFile::new(path.display().to_string(), &input);
+        let file = SimpleFile::new(path.file_name().unwrap().to_str().unwrap(), &input);
         let config = term::Config::default();
         let mut buffer = Buffer::no_color();
         parser

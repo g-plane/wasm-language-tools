@@ -1,0 +1,242 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..566
+  MODULE@0..565
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_MEMORY@10..20
+      L_PAREN@10..11 "("
+      KEYWORD@11..17 "memory"
+      WHITESPACE@17..18 " "
+      MEMORY_TYPE@18..19
+        LIMITS@18..19
+          UNSIGNED_INT@18..19 "1"
+      R_PAREN@19..20 ")"
+    WHITESPACE@20..23 "\n  "
+    MODULE_FIELD_DATA@23..72
+      L_PAREN@23..24 "("
+      KEYWORD@24..28 "data"
+      WHITESPACE@28..29 " "
+      OFFSET@29..42
+        PLAIN_INSTR@29..42
+          L_PAREN@29..30 "("
+          INSTR_NAME@30..39 "i32.const"
+          WHITESPACE@39..40 " "
+          OPERAND@40..41
+            INT@40..41 "0"
+          R_PAREN@41..42 ")"
+      WHITESPACE@42..43 " "
+      STRING@43..71 "\"abcdefghijklmnopqrst ..."
+      R_PAREN@71..72 ")"
+    WHITESPACE@72..76 "\n\n  "
+    MODULE_FIELD_FUNC@76..203
+      L_PAREN@76..77 "("
+      KEYWORD@77..81 "func"
+      WHITESPACE@81..82 " "
+      EXPORT@82..101
+        L_PAREN@82..83 "("
+        KEYWORD@83..89 "export"
+        WHITESPACE@89..90 " "
+        NAME@90..100
+          STRING@90..100 "\"8u_good1\""
+        R_PAREN@100..101 ")"
+      WHITESPACE@101..102 " "
+      TYPE_USE@102..129
+        PARAM@102..116
+          L_PAREN@102..103 "("
+          KEYWORD@103..108 "param"
+          WHITESPACE@108..109 " "
+          IDENT@109..111 "$i"
+          WHITESPACE@111..112 " "
+          VAL_TYPE@112..115
+            NUM_TYPE@112..115 "i32"
+          R_PAREN@115..116 ")"
+        WHITESPACE@116..117 " "
+        RESULT@117..129
+          L_PAREN@117..118 "("
+          KEYWORD@118..124 "result"
+          WHITESPACE@124..125 " "
+          VAL_TYPE@125..128
+            NUM_TYPE@125..128 "i32"
+          R_PAREN@128..129 ")"
+      WHITESPACE@129..134 "\n    "
+      PLAIN_INSTR@134..171
+        L_PAREN@134..135 "("
+        INSTR_NAME@135..146 "i32.load8_u"
+        WHITESPACE@146..147 " "
+        OPERAND@147..155
+          MEM_ARG@147..155 "offset=0"
+        WHITESPACE@155..156 " "
+        OPERAND@156..170
+          PLAIN_INSTR@156..170
+            L_PAREN@156..157 "("
+            INSTR_NAME@157..166 "local.get"
+            WHITESPACE@166..167 " "
+            OPERAND@167..169
+              IDENT@167..169 "$i"
+            R_PAREN@169..170 ")"
+        R_PAREN@170..171 ")"
+      WHITESPACE@171..190 "                   "
+      LINE_COMMENT@190..199 ";; 97 'a'"
+      WHITESPACE@199..202 "\n  "
+      R_PAREN@202..203 ")"
+    WHITESPACE@203..206 "\n  "
+    MODULE_FIELD_FUNC@206..333
+      L_PAREN@206..207 "("
+      KEYWORD@207..211 "func"
+      WHITESPACE@211..212 " "
+      EXPORT@212..231
+        L_PAREN@212..213 "("
+        KEYWORD@213..219 "export"
+        WHITESPACE@219..220 " "
+        NAME@220..230
+          STRING@220..230 "\"8u_good2\""
+        R_PAREN@230..231 ")"
+      WHITESPACE@231..232 " "
+      TYPE_USE@232..259
+        PARAM@232..246
+          L_PAREN@232..233 "("
+          KEYWORD@233..238 "param"
+          WHITESPACE@238..239 " "
+          IDENT@239..241 "$i"
+          WHITESPACE@241..242 " "
+          VAL_TYPE@242..245
+            NUM_TYPE@242..245 "i32"
+          R_PAREN@245..246 ")"
+        WHITESPACE@246..247 " "
+        RESULT@247..259
+          L_PAREN@247..248 "("
+          KEYWORD@248..254 "result"
+          WHITESPACE@254..255 " "
+          VAL_TYPE@255..258
+            NUM_TYPE@255..258 "i32"
+          R_PAREN@258..259 ")"
+      WHITESPACE@259..264 "\n    "
+      PLAIN_INSTR@264..300
+        L_PAREN@264..265 "("
+        INSTR_NAME@265..276 "i32.load8_u"
+        WHITESPACE@276..277 " "
+        OPERAND@277..284
+          MEM_ARG@277..284 "align=1"
+        WHITESPACE@284..285 " "
+        OPERAND@285..299
+          PLAIN_INSTR@285..299
+            L_PAREN@285..286 "("
+            INSTR_NAME@286..295 "local.get"
+            WHITESPACE@295..296 " "
+            OPERAND@296..298
+              IDENT@296..298 "$i"
+            R_PAREN@298..299 ")"
+        R_PAREN@299..300 ")"
+      WHITESPACE@300..320 "                    "
+      LINE_COMMENT@320..329 ";; 97 'a'"
+      WHITESPACE@329..332 "\n  "
+      R_PAREN@332..333 ")"
+    WHITESPACE@333..336 "\n  "
+    MODULE_FIELD_FUNC@336..463
+      L_PAREN@336..337 "("
+      KEYWORD@337..341 "func"
+      WHITESPACE@341..342 " "
+      EXPORT@342..361
+        L_PAREN@342..343 "("
+        KEYWORD@343..349 "export"
+        WHITESPACE@349..350 " "
+        NAME@350..360
+          STRING@350..360 "\"8u_good3\""
+        R_PAREN@360..361 ")"
+      WHITESPACE@361..362 " "
+      TYPE_USE@362..389
+        PARAM@362..376
+          L_PAREN@362..363 "("
+          KEYWORD@363..368 "param"
+          WHITESPACE@368..369 " "
+          IDENT@369..371 "$i"
+          WHITESPACE@371..372 " "
+          VAL_TYPE@372..375
+            NUM_TYPE@372..375 "i32"
+          R_PAREN@375..376 ")"
+        WHITESPACE@376..377 " "
+        RESULT@377..389
+          L_PAREN@377..378 "("
+          KEYWORD@378..384 "result"
+          WHITESPACE@384..385 " "
+          VAL_TYPE@385..388
+            NUM_TYPE@385..388 "i32"
+          R_PAREN@388..389 ")"
+      WHITESPACE@389..394 "\n    "
+      PLAIN_INSTR@394..439
+        L_PAREN@394..395 "("
+        INSTR_NAME@395..406 "i32.load8_u"
+        WHITESPACE@406..407 " "
+        OPERAND@407..415
+          MEM_ARG@407..415 "offset=1"
+        WHITESPACE@415..416 " "
+        OPERAND@416..423
+          MEM_ARG@416..423 "align=1"
+        WHITESPACE@423..424 " "
+        OPERAND@424..438
+          PLAIN_INSTR@424..438
+            L_PAREN@424..425 "("
+            INSTR_NAME@425..434 "local.get"
+            WHITESPACE@434..435 " "
+            OPERAND@435..437
+              IDENT@435..437 "$i"
+            R_PAREN@437..438 ")"
+        R_PAREN@438..439 ")"
+      WHITESPACE@439..450 "           "
+      LINE_COMMENT@450..459 ";; 98 'b'"
+      WHITESPACE@459..462 "\n  "
+      R_PAREN@462..463 ")"
+    WHITESPACE@463..466 "\n  "
+    MODULE_FIELD_FUNC@466..563
+      L_PAREN@466..467 "("
+      KEYWORD@467..471 "func"
+      WHITESPACE@471..472 " "
+      EXPORT@472..489
+        L_PAREN@472..473 "("
+        KEYWORD@473..479 "export"
+        WHITESPACE@479..480 " "
+        NAME@480..488
+          STRING@480..488 "\"32_bad\""
+        R_PAREN@488..489 ")"
+      WHITESPACE@489..490 " "
+      TYPE_USE@490..504
+        PARAM@490..504
+          L_PAREN@490..491 "("
+          KEYWORD@491..496 "param"
+          WHITESPACE@496..497 " "
+          IDENT@497..499 "$i"
+          WHITESPACE@499..500 " "
+          VAL_TYPE@500..503
+            NUM_TYPE@500..503 "i32"
+          R_PAREN@503..504 ")"
+      WHITESPACE@504..509 "\n    "
+      PLAIN_INSTR@509..559
+        L_PAREN@509..510 "("
+        INSTR_NAME@510..514 "drop"
+        WHITESPACE@514..515 " "
+        OPERAND@515..558
+          PLAIN_INSTR@515..558
+            L_PAREN@515..516 "("
+            INSTR_NAME@516..524 "i32.load"
+            WHITESPACE@524..525 " "
+            OPERAND@525..542
+              MEM_ARG@525..542 "offset=4294967295"
+            WHITESPACE@542..543 " "
+            OPERAND@543..557
+              PLAIN_INSTR@543..557
+                L_PAREN@543..544 "("
+                INSTR_NAME@544..553 "local.get"
+                WHITESPACE@553..554 " "
+                OPERAND@554..556
+                  IDENT@554..556 "$i"
+                R_PAREN@556..557 ")"
+            R_PAREN@557..558 ")"
+        R_PAREN@558..559 ")"
+      WHITESPACE@559..562 "\n  "
+      R_PAREN@562..563 ")"
+    WHITESPACE@563..564 "\n"
+    R_PAREN@564..565 ")"
+  WHITESPACE@565..566 "\n"
