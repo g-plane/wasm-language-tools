@@ -109,7 +109,7 @@ fn block_loop(input: &mut Input) -> GreenResult {
         (
             keyword("loop"),
             opt(trivias_prefixed(ident)),
-            resume(block_type),
+            opt(trivias_prefixed(block_type)),
             repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
             resume(keyword("end")),
             opt(trivias_prefixed(ident)),
@@ -138,7 +138,7 @@ fn block_loop(input: &mut Input) -> GreenResult {
             l_paren,
             trivias_prefixed(keyword("loop")),
             opt(trivias_prefixed(ident)),
-            resume(block_type),
+            opt(trivias_prefixed(block_type)),
             repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
             resume(r_paren),
             opt(trivias_prefixed(ident)),
@@ -175,7 +175,7 @@ fn block_if(input: &mut Input) -> GreenResult {
         (
             keyword("if"),
             opt(trivias_prefixed(ident)),
-            resume(block_type),
+            opt(trivias_prefixed(block_type)),
             repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
             opt((
                 trivias,
@@ -228,7 +228,7 @@ fn block_if(input: &mut Input) -> GreenResult {
             l_paren,
             trivias_prefixed(keyword("if")),
             opt(trivias_prefixed(ident)),
-            resume(block_type),
+            opt(trivias_prefixed(block_type)),
             repeat_till::<_, _, Vec<_>, _, _, _, _>(
                 0..,
                 retry(instr, []),

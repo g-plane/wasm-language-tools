@@ -172,7 +172,7 @@ fn module_field_func(input: &mut Input) -> GreenResult {
         opt(trivias_prefixed(ident)),
         opt(trivias_prefixed(import)), // postpone syntax error for using import with export or instr
         opt(trivias_prefixed(export)),
-        resume(type_use),
+        opt(trivias_prefixed(type_use)),
         repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(local)),
         repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(instr)),
         resume(r_paren),
@@ -584,7 +584,7 @@ fn import_desc_type_use(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("func")),
         opt(trivias_prefixed(ident)),
-        resume(type_use),
+        opt(trivias_prefixed(type_use)),
         resume(r_paren),
     )
         .parse_next(input)
@@ -651,8 +651,8 @@ fn name(input: &mut Input) -> GreenResult {
 }
 
 pub(super) fn type_use(input: &mut Input) -> GreenResult {
-    (
-        opt((
+    alt((
+        (
             l_paren,
             trivias_prefixed(keyword("type")),
             resume(
@@ -661,14 +661,11 @@ pub(super) fn type_use(input: &mut Input) -> GreenResult {
                 ))),
             ),
             resume(r_paren),
-        )),
-        repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(param)),
-        repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(result)),
-    )
-        .parse_next(input)
-        .map(|(type_index, params, results)| {
-            let mut children = Vec::with_capacity(4);
-            if let Some((l_paren, mut keyword, index, r_paren)) = type_index {
+            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(param)),
+            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(result)),
+        )
+            .map(|(l_paren, mut keyword, index, r_paren, params, results)| {
+                let mut children = Vec::with_capacity(4);
                 children.push(l_paren);
                 children.append(&mut keyword);
                 if let Some(mut index) = index {
@@ -677,15 +674,32 @@ pub(super) fn type_use(input: &mut Input) -> GreenResult {
                 if let Some(mut r_paren) = r_paren {
                     children.append(&mut r_paren);
                 }
-            }
-            params
-                .into_iter()
-                .for_each(|mut param| children.append(&mut param));
-            results
-                .into_iter()
-                .for_each(|mut result| children.append(&mut result));
-            node(TYPE_USE, children)
-        })
+                params
+                    .into_iter()
+                    .for_each(|mut param| children.append(&mut param));
+                results
+                    .into_iter()
+                    .for_each(|mut result| children.append(&mut result));
+                node(TYPE_USE, children)
+            }),
+        (
+            repeat::<_, _, Vec<_>, _, _>(1.., trivias_prefixed(param)),
+            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(result)),
+        )
+            .map(|(params, results)| {
+                let mut children = Vec::with_capacity(2);
+                params
+                    .into_iter()
+                    .for_each(|mut param| children.append(&mut param));
+                results
+                    .into_iter()
+                    .for_each(|mut result| children.append(&mut result));
+                node(TYPE_USE, children)
+            }),
+        repeat::<_, _, Vec<_>, _, _>(1.., trivias_prefixed(result))
+            .map(|results| node(TYPE_USE, results.into_iter().flatten().collect::<Vec<_>>())),
+    ))
+    .parse_next(input)
 }
 
 fn elem(input: &mut Input) -> GreenResult {
