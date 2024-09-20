@@ -159,6 +159,7 @@ pub(super) fn unsigned_int_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, S
         Some(..) => unsigned_hex,
         None => unsigned_dec,
     }
+    .take()
     .parse_next(input)
 }
 fn unsigned_hex<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
