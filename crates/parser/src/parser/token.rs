@@ -144,7 +144,11 @@ pub(super) fn int(input: &mut Input) -> GreenResult {
     int_impl.parse_next(input).map(|text| tok(INT, text))
 }
 fn int_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
-    (opt(one_of(['+', '-'])), unsigned_int_impl)
+    (
+        opt(one_of(['+', '-'])),
+        unsigned_int_impl,
+        peek(none_of(['.', 'e', 'E', 'p', 'P'])),
+    )
         .take()
         .parse_next(input)
 }
