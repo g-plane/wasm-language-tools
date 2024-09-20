@@ -1,0 +1,641 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..1101
+  MODULE@0..1100
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_MEMORY@10..23
+      L_PAREN@10..11 "("
+      KEYWORD@11..17 "memory"
+      WHITESPACE@17..18 " "
+      IDENT@18..20 "$m"
+      WHITESPACE@20..21 " "
+      MEMORY_TYPE@21..22
+        LIMITS@21..22
+          UNSIGNED_INT@21..22 "1"
+      R_PAREN@22..23 ")"
+    WHITESPACE@23..26 "\n  "
+    MODULE_FIELD_DATA@26..46
+      L_PAREN@26..27 "("
+      KEYWORD@27..31 "data"
+      WHITESPACE@31..32 " "
+      OFFSET@32..45
+        PLAIN_INSTR@32..45
+          L_PAREN@32..33 "("
+          INSTR_NAME@33..42 "i32.const"
+          WHITESPACE@42..43 " "
+          OPERAND@43..44
+            INT@43..44 "0"
+          R_PAREN@44..45 ")"
+      R_PAREN@45..46 ")"
+    WHITESPACE@46..49 "\n  "
+    MODULE_FIELD_DATA@49..82
+      L_PAREN@49..50 "("
+      KEYWORD@50..54 "data"
+      WHITESPACE@54..55 " "
+      OFFSET@55..68
+        PLAIN_INSTR@55..68
+          L_PAREN@55..56 "("
+          INSTR_NAME@56..65 "i32.const"
+          WHITESPACE@65..66 " "
+          OPERAND@66..67
+            INT@66..67 "1"
+          R_PAREN@67..68 ")"
+      WHITESPACE@68..69 " "
+      STRING@69..72 "\"a\""
+      WHITESPACE@72..73 " "
+      STRING@73..75 "\"\""
+      WHITESPACE@75..76 " "
+      STRING@76..81 "\"bcd\""
+      R_PAREN@81..82 ")"
+    WHITESPACE@82..85 "\n  "
+    MODULE_FIELD_DATA@85..114
+      L_PAREN@85..86 "("
+      KEYWORD@86..90 "data"
+      WHITESPACE@90..91 " "
+      OFFSET@91..113
+        L_PAREN@91..92 "("
+        KEYWORD@92..98 "offset"
+        WHITESPACE@98..99 " "
+        PLAIN_INSTR@99..112
+          L_PAREN@99..100 "("
+          INSTR_NAME@100..109 "i32.const"
+          WHITESPACE@109..110 " "
+          OPERAND@110..111
+            INT@110..111 "0"
+          R_PAREN@111..112 ")"
+        R_PAREN@112..113 ")"
+      R_PAREN@113..114 ")"
+    WHITESPACE@114..117 "\n  "
+    MODULE_FIELD_DATA@117..161
+      L_PAREN@117..118 "("
+      KEYWORD@118..122 "data"
+      WHITESPACE@122..123 " "
+      OFFSET@123..145
+        L_PAREN@123..124 "("
+        KEYWORD@124..130 "offset"
+        WHITESPACE@130..131 " "
+        PLAIN_INSTR@131..144
+          L_PAREN@131..132 "("
+          INSTR_NAME@132..141 "i32.const"
+          WHITESPACE@141..142 " "
+          OPERAND@142..143
+            INT@142..143 "0"
+          R_PAREN@143..144 ")"
+        R_PAREN@144..145 ")"
+      WHITESPACE@145..146 " "
+      STRING@146..148 "\"\""
+      WHITESPACE@148..149 " "
+      STRING@149..152 "\"a\""
+      WHITESPACE@152..153 " "
+      STRING@153..157 "\"bc\""
+      WHITESPACE@157..158 " "
+      STRING@158..160 "\"\""
+      R_PAREN@160..161 ")"
+    WHITESPACE@161..164 "\n  "
+    MODULE_FIELD_DATA@164..195
+      L_PAREN@164..165 "("
+      KEYWORD@165..169 "data"
+      WHITESPACE@169..170 " "
+      MEM_USE@170..180
+        L_PAREN@170..171 "("
+        KEYWORD@171..177 "memory"
+        WHITESPACE@177..178 " "
+        INDEX@178..179
+          UNSIGNED_INT@178..179 "0"
+        R_PAREN@179..180 ")"
+      WHITESPACE@180..181 " "
+      OFFSET@181..194
+        PLAIN_INSTR@181..194
+          L_PAREN@181..182 "("
+          INSTR_NAME@182..191 "i32.const"
+          WHITESPACE@191..192 " "
+          OPERAND@192..193
+            INT@192..193 "0"
+          R_PAREN@193..194 ")"
+      R_PAREN@194..195 ")"
+    WHITESPACE@195..198 "\n  "
+    MODULE_FIELD_DATA@198..244
+      L_PAREN@198..199 "("
+      KEYWORD@199..203 "data"
+      WHITESPACE@203..204 " "
+      MEM_USE@204..216
+        L_PAREN@204..205 "("
+        KEYWORD@205..211 "memory"
+        WHITESPACE@211..212 " "
+        INDEX@212..215
+          UNSIGNED_INT@212..215 "0x0"
+        R_PAREN@215..216 ")"
+      WHITESPACE@216..217 " "
+      OFFSET@217..230
+        PLAIN_INSTR@217..230
+          L_PAREN@217..218 "("
+          INSTR_NAME@218..227 "i32.const"
+          WHITESPACE@227..228 " "
+          OPERAND@228..229
+            INT@228..229 "1"
+          R_PAREN@229..230 ")"
+      WHITESPACE@230..231 " "
+      STRING@231..234 "\"a\""
+      WHITESPACE@234..235 " "
+      STRING@235..237 "\"\""
+      WHITESPACE@237..238 " "
+      STRING@238..243 "\"bcd\""
+      R_PAREN@243..244 ")"
+    WHITESPACE@244..247 "\n  "
+    MODULE_FIELD_DATA@247..291
+      L_PAREN@247..248 "("
+      KEYWORD@248..252 "data"
+      WHITESPACE@252..253 " "
+      MEM_USE@253..267
+        L_PAREN@253..254 "("
+        KEYWORD@254..260 "memory"
+        WHITESPACE@260..261 " "
+        INDEX@261..266
+          UNSIGNED_INT@261..266 "0x000"
+        R_PAREN@266..267 ")"
+      WHITESPACE@267..268 " "
+      OFFSET@268..290
+        L_PAREN@268..269 "("
+        KEYWORD@269..275 "offset"
+        WHITESPACE@275..276 " "
+        PLAIN_INSTR@276..289
+          L_PAREN@276..277 "("
+          INSTR_NAME@277..286 "i32.const"
+          WHITESPACE@286..287 " "
+          OPERAND@287..288
+            INT@287..288 "0"
+          R_PAREN@288..289 ")"
+        R_PAREN@289..290 ")"
+      R_PAREN@290..291 ")"
+    WHITESPACE@291..294 "\n  "
+    MODULE_FIELD_DATA@294..349
+      L_PAREN@294..295 "("
+      KEYWORD@295..299 "data"
+      WHITESPACE@299..300 " "
+      MEM_USE@300..310
+        L_PAREN@300..301 "("
+        KEYWORD@301..307 "memory"
+        WHITESPACE@307..308 " "
+        INDEX@308..309
+          UNSIGNED_INT@308..309 "0"
+        R_PAREN@309..310 ")"
+      WHITESPACE@310..311 " "
+      OFFSET@311..333
+        L_PAREN@311..312 "("
+        KEYWORD@312..318 "offset"
+        WHITESPACE@318..319 " "
+        PLAIN_INSTR@319..332
+          L_PAREN@319..320 "("
+          INSTR_NAME@320..329 "i32.const"
+          WHITESPACE@329..330 " "
+          OPERAND@330..331
+            INT@330..331 "0"
+          R_PAREN@331..332 ")"
+        R_PAREN@332..333 ")"
+      WHITESPACE@333..334 " "
+      STRING@334..336 "\"\""
+      WHITESPACE@336..337 " "
+      STRING@337..340 "\"a\""
+      WHITESPACE@340..341 " "
+      STRING@341..345 "\"bc\""
+      WHITESPACE@345..346 " "
+      STRING@346..348 "\"\""
+      R_PAREN@348..349 ")"
+    WHITESPACE@349..352 "\n  "
+    MODULE_FIELD_DATA@352..384
+      L_PAREN@352..353 "("
+      KEYWORD@353..357 "data"
+      WHITESPACE@357..358 " "
+      MEM_USE@358..369
+        L_PAREN@358..359 "("
+        KEYWORD@359..365 "memory"
+        WHITESPACE@365..366 " "
+        INDEX@366..368
+          IDENT@366..368 "$m"
+        R_PAREN@368..369 ")"
+      WHITESPACE@369..370 " "
+      OFFSET@370..383
+        PLAIN_INSTR@370..383
+          L_PAREN@370..371 "("
+          INSTR_NAME@371..380 "i32.const"
+          WHITESPACE@380..381 " "
+          OPERAND@381..382
+            INT@381..382 "0"
+          R_PAREN@382..383 ")"
+      R_PAREN@383..384 ")"
+    WHITESPACE@384..387 "\n  "
+    MODULE_FIELD_DATA@387..432
+      L_PAREN@387..388 "("
+      KEYWORD@388..392 "data"
+      WHITESPACE@392..393 " "
+      MEM_USE@393..404
+        L_PAREN@393..394 "("
+        KEYWORD@394..400 "memory"
+        WHITESPACE@400..401 " "
+        INDEX@401..403
+          IDENT@401..403 "$m"
+        R_PAREN@403..404 ")"
+      WHITESPACE@404..405 " "
+      OFFSET@405..418
+        PLAIN_INSTR@405..418
+          L_PAREN@405..406 "("
+          INSTR_NAME@406..415 "i32.const"
+          WHITESPACE@415..416 " "
+          OPERAND@416..417
+            INT@416..417 "1"
+          R_PAREN@417..418 ")"
+      WHITESPACE@418..419 " "
+      STRING@419..422 "\"a\""
+      WHITESPACE@422..423 " "
+      STRING@423..425 "\"\""
+      WHITESPACE@425..426 " "
+      STRING@426..431 "\"bcd\""
+      R_PAREN@431..432 ")"
+    WHITESPACE@432..435 "\n  "
+    MODULE_FIELD_DATA@435..476
+      L_PAREN@435..436 "("
+      KEYWORD@436..440 "data"
+      WHITESPACE@440..441 " "
+      MEM_USE@441..452
+        L_PAREN@441..442 "("
+        KEYWORD@442..448 "memory"
+        WHITESPACE@448..449 " "
+        INDEX@449..451
+          IDENT@449..451 "$m"
+        R_PAREN@451..452 ")"
+      WHITESPACE@452..453 " "
+      OFFSET@453..475
+        L_PAREN@453..454 "("
+        KEYWORD@454..460 "offset"
+        WHITESPACE@460..461 " "
+        PLAIN_INSTR@461..474
+          L_PAREN@461..462 "("
+          INSTR_NAME@462..471 "i32.const"
+          WHITESPACE@471..472 " "
+          OPERAND@472..473
+            INT@472..473 "0"
+          R_PAREN@473..474 ")"
+        R_PAREN@474..475 ")"
+      R_PAREN@475..476 ")"
+    WHITESPACE@476..479 "\n  "
+    MODULE_FIELD_DATA@479..535
+      L_PAREN@479..480 "("
+      KEYWORD@480..484 "data"
+      WHITESPACE@484..485 " "
+      MEM_USE@485..496
+        L_PAREN@485..486 "("
+        KEYWORD@486..492 "memory"
+        WHITESPACE@492..493 " "
+        INDEX@493..495
+          IDENT@493..495 "$m"
+        R_PAREN@495..496 ")"
+      WHITESPACE@496..497 " "
+      OFFSET@497..519
+        L_PAREN@497..498 "("
+        KEYWORD@498..504 "offset"
+        WHITESPACE@504..505 " "
+        PLAIN_INSTR@505..518
+          L_PAREN@505..506 "("
+          INSTR_NAME@506..515 "i32.const"
+          WHITESPACE@515..516 " "
+          OPERAND@516..517
+            INT@516..517 "0"
+          R_PAREN@517..518 ")"
+        R_PAREN@518..519 ")"
+      WHITESPACE@519..520 " "
+      STRING@520..522 "\"\""
+      WHITESPACE@522..523 " "
+      STRING@523..526 "\"a\""
+      WHITESPACE@526..527 " "
+      STRING@527..531 "\"bc\""
+      WHITESPACE@531..532 " "
+      STRING@532..534 "\"\""
+      R_PAREN@534..535 ")"
+    WHITESPACE@535..538 "\n  "
+    MODULE_FIELD_DATA@538..562
+      L_PAREN@538..539 "("
+      KEYWORD@539..543 "data"
+      WHITESPACE@543..544 " "
+      IDENT@544..547 "$d1"
+      WHITESPACE@547..548 " "
+      OFFSET@548..561
+        PLAIN_INSTR@548..561
+          L_PAREN@548..549 "("
+          INSTR_NAME@549..558 "i32.const"
+          WHITESPACE@558..559 " "
+          OPERAND@559..560
+            INT@559..560 "0"
+          R_PAREN@560..561 ")"
+      R_PAREN@561..562 ")"
+    WHITESPACE@562..565 "\n  "
+    MODULE_FIELD_DATA@565..602
+      L_PAREN@565..566 "("
+      KEYWORD@566..570 "data"
+      WHITESPACE@570..571 " "
+      IDENT@571..574 "$d2"
+      WHITESPACE@574..575 " "
+      OFFSET@575..588
+        PLAIN_INSTR@575..588
+          L_PAREN@575..576 "("
+          INSTR_NAME@576..585 "i32.const"
+          WHITESPACE@585..586 " "
+          OPERAND@586..587
+            INT@586..587 "1"
+          R_PAREN@587..588 ")"
+      WHITESPACE@588..589 " "
+      STRING@589..592 "\"a\""
+      WHITESPACE@592..593 " "
+      STRING@593..595 "\"\""
+      WHITESPACE@595..596 " "
+      STRING@596..601 "\"bcd\""
+      R_PAREN@601..602 ")"
+    WHITESPACE@602..605 "\n  "
+    MODULE_FIELD_DATA@605..638
+      L_PAREN@605..606 "("
+      KEYWORD@606..610 "data"
+      WHITESPACE@610..611 " "
+      IDENT@611..614 "$d3"
+      WHITESPACE@614..615 " "
+      OFFSET@615..637
+        L_PAREN@615..616 "("
+        KEYWORD@616..622 "offset"
+        WHITESPACE@622..623 " "
+        PLAIN_INSTR@623..636
+          L_PAREN@623..624 "("
+          INSTR_NAME@624..633 "i32.const"
+          WHITESPACE@633..634 " "
+          OPERAND@634..635
+            INT@634..635 "0"
+          R_PAREN@635..636 ")"
+        R_PAREN@636..637 ")"
+      R_PAREN@637..638 ")"
+    WHITESPACE@638..641 "\n  "
+    MODULE_FIELD_DATA@641..689
+      L_PAREN@641..642 "("
+      KEYWORD@642..646 "data"
+      WHITESPACE@646..647 " "
+      IDENT@647..650 "$d4"
+      WHITESPACE@650..651 " "
+      OFFSET@651..673
+        L_PAREN@651..652 "("
+        KEYWORD@652..658 "offset"
+        WHITESPACE@658..659 " "
+        PLAIN_INSTR@659..672
+          L_PAREN@659..660 "("
+          INSTR_NAME@660..669 "i32.const"
+          WHITESPACE@669..670 " "
+          OPERAND@670..671
+            INT@670..671 "0"
+          R_PAREN@671..672 ")"
+        R_PAREN@672..673 ")"
+      WHITESPACE@673..674 " "
+      STRING@674..676 "\"\""
+      WHITESPACE@676..677 " "
+      STRING@677..680 "\"a\""
+      WHITESPACE@680..681 " "
+      STRING@681..685 "\"bc\""
+      WHITESPACE@685..686 " "
+      STRING@686..688 "\"\""
+      R_PAREN@688..689 ")"
+    WHITESPACE@689..692 "\n  "
+    MODULE_FIELD_DATA@692..727
+      L_PAREN@692..693 "("
+      KEYWORD@693..697 "data"
+      WHITESPACE@697..698 " "
+      IDENT@698..701 "$d5"
+      WHITESPACE@701..702 " "
+      MEM_USE@702..712
+        L_PAREN@702..703 "("
+        KEYWORD@703..709 "memory"
+        WHITESPACE@709..710 " "
+        INDEX@710..711
+          UNSIGNED_INT@710..711 "0"
+        R_PAREN@711..712 ")"
+      WHITESPACE@712..713 " "
+      OFFSET@713..726
+        PLAIN_INSTR@713..726
+          L_PAREN@713..714 "("
+          INSTR_NAME@714..723 "i32.const"
+          WHITESPACE@723..724 " "
+          OPERAND@724..725
+            INT@724..725 "0"
+          R_PAREN@725..726 ")"
+      R_PAREN@726..727 ")"
+    WHITESPACE@727..730 "\n  "
+    MODULE_FIELD_DATA@730..780
+      L_PAREN@730..731 "("
+      KEYWORD@731..735 "data"
+      WHITESPACE@735..736 " "
+      IDENT@736..739 "$d6"
+      WHITESPACE@739..740 " "
+      MEM_USE@740..752
+        L_PAREN@740..741 "("
+        KEYWORD@741..747 "memory"
+        WHITESPACE@747..748 " "
+        INDEX@748..751
+          UNSIGNED_INT@748..751 "0x0"
+        R_PAREN@751..752 ")"
+      WHITESPACE@752..753 " "
+      OFFSET@753..766
+        PLAIN_INSTR@753..766
+          L_PAREN@753..754 "("
+          INSTR_NAME@754..763 "i32.const"
+          WHITESPACE@763..764 " "
+          OPERAND@764..765
+            INT@764..765 "1"
+          R_PAREN@765..766 ")"
+      WHITESPACE@766..767 " "
+      STRING@767..770 "\"a\""
+      WHITESPACE@770..771 " "
+      STRING@771..773 "\"\""
+      WHITESPACE@773..774 " "
+      STRING@774..779 "\"bcd\""
+      R_PAREN@779..780 ")"
+    WHITESPACE@780..783 "\n  "
+    MODULE_FIELD_DATA@783..831
+      L_PAREN@783..784 "("
+      KEYWORD@784..788 "data"
+      WHITESPACE@788..789 " "
+      IDENT@789..792 "$d7"
+      WHITESPACE@792..793 " "
+      MEM_USE@793..807
+        L_PAREN@793..794 "("
+        KEYWORD@794..800 "memory"
+        WHITESPACE@800..801 " "
+        INDEX@801..806
+          UNSIGNED_INT@801..806 "0x000"
+        R_PAREN@806..807 ")"
+      WHITESPACE@807..808 " "
+      OFFSET@808..830
+        L_PAREN@808..809 "("
+        KEYWORD@809..815 "offset"
+        WHITESPACE@815..816 " "
+        PLAIN_INSTR@816..829
+          L_PAREN@816..817 "("
+          INSTR_NAME@817..826 "i32.const"
+          WHITESPACE@826..827 " "
+          OPERAND@827..828
+            INT@827..828 "0"
+          R_PAREN@828..829 ")"
+        R_PAREN@829..830 ")"
+      R_PAREN@830..831 ")"
+    WHITESPACE@831..834 "\n  "
+    MODULE_FIELD_DATA@834..893
+      L_PAREN@834..835 "("
+      KEYWORD@835..839 "data"
+      WHITESPACE@839..840 " "
+      IDENT@840..843 "$d8"
+      WHITESPACE@843..844 " "
+      MEM_USE@844..854
+        L_PAREN@844..845 "("
+        KEYWORD@845..851 "memory"
+        WHITESPACE@851..852 " "
+        INDEX@852..853
+          UNSIGNED_INT@852..853 "0"
+        R_PAREN@853..854 ")"
+      WHITESPACE@854..855 " "
+      OFFSET@855..877
+        L_PAREN@855..856 "("
+        KEYWORD@856..862 "offset"
+        WHITESPACE@862..863 " "
+        PLAIN_INSTR@863..876
+          L_PAREN@863..864 "("
+          INSTR_NAME@864..873 "i32.const"
+          WHITESPACE@873..874 " "
+          OPERAND@874..875
+            INT@874..875 "0"
+          R_PAREN@875..876 ")"
+        R_PAREN@876..877 ")"
+      WHITESPACE@877..878 " "
+      STRING@878..880 "\"\""
+      WHITESPACE@880..881 " "
+      STRING@881..884 "\"a\""
+      WHITESPACE@884..885 " "
+      STRING@885..889 "\"bc\""
+      WHITESPACE@889..890 " "
+      STRING@890..892 "\"\""
+      R_PAREN@892..893 ")"
+    WHITESPACE@893..896 "\n  "
+    MODULE_FIELD_DATA@896..932
+      L_PAREN@896..897 "("
+      KEYWORD@897..901 "data"
+      WHITESPACE@901..902 " "
+      IDENT@902..905 "$d9"
+      WHITESPACE@905..906 " "
+      MEM_USE@906..917
+        L_PAREN@906..907 "("
+        KEYWORD@907..913 "memory"
+        WHITESPACE@913..914 " "
+        INDEX@914..916
+          IDENT@914..916 "$m"
+        R_PAREN@916..917 ")"
+      WHITESPACE@917..918 " "
+      OFFSET@918..931
+        PLAIN_INSTR@918..931
+          L_PAREN@918..919 "("
+          INSTR_NAME@919..928 "i32.const"
+          WHITESPACE@928..929 " "
+          OPERAND@929..930
+            INT@929..930 "0"
+          R_PAREN@930..931 ")"
+      R_PAREN@931..932 ")"
+    WHITESPACE@932..935 "\n  "
+    MODULE_FIELD_DATA@935..985
+      L_PAREN@935..936 "("
+      KEYWORD@936..940 "data"
+      WHITESPACE@940..941 " "
+      IDENT@941..945 "$d10"
+      WHITESPACE@945..946 " "
+      MEM_USE@946..957
+        L_PAREN@946..947 "("
+        KEYWORD@947..953 "memory"
+        WHITESPACE@953..954 " "
+        INDEX@954..956
+          IDENT@954..956 "$m"
+        R_PAREN@956..957 ")"
+      WHITESPACE@957..958 " "
+      OFFSET@958..971
+        PLAIN_INSTR@958..971
+          L_PAREN@958..959 "("
+          INSTR_NAME@959..968 "i32.const"
+          WHITESPACE@968..969 " "
+          OPERAND@969..970
+            INT@969..970 "1"
+          R_PAREN@970..971 ")"
+      WHITESPACE@971..972 " "
+      STRING@972..975 "\"a\""
+      WHITESPACE@975..976 " "
+      STRING@976..978 "\"\""
+      WHITESPACE@978..979 " "
+      STRING@979..984 "\"bcd\""
+      R_PAREN@984..985 ")"
+    WHITESPACE@985..988 "\n  "
+    MODULE_FIELD_DATA@988..1034
+      L_PAREN@988..989 "("
+      KEYWORD@989..993 "data"
+      WHITESPACE@993..994 " "
+      IDENT@994..998 "$d11"
+      WHITESPACE@998..999 " "
+      MEM_USE@999..1010
+        L_PAREN@999..1000 "("
+        KEYWORD@1000..1006 "memory"
+        WHITESPACE@1006..1007 " "
+        INDEX@1007..1009
+          IDENT@1007..1009 "$m"
+        R_PAREN@1009..1010 ")"
+      WHITESPACE@1010..1011 " "
+      OFFSET@1011..1033
+        L_PAREN@1011..1012 "("
+        KEYWORD@1012..1018 "offset"
+        WHITESPACE@1018..1019 " "
+        PLAIN_INSTR@1019..1032
+          L_PAREN@1019..1020 "("
+          INSTR_NAME@1020..1029 "i32.const"
+          WHITESPACE@1029..1030 " "
+          OPERAND@1030..1031
+            INT@1030..1031 "0"
+          R_PAREN@1031..1032 ")"
+        R_PAREN@1032..1033 ")"
+      R_PAREN@1033..1034 ")"
+    WHITESPACE@1034..1037 "\n  "
+    MODULE_FIELD_DATA@1037..1098
+      L_PAREN@1037..1038 "("
+      KEYWORD@1038..1042 "data"
+      WHITESPACE@1042..1043 " "
+      IDENT@1043..1047 "$d12"
+      WHITESPACE@1047..1048 " "
+      MEM_USE@1048..1059
+        L_PAREN@1048..1049 "("
+        KEYWORD@1049..1055 "memory"
+        WHITESPACE@1055..1056 " "
+        INDEX@1056..1058
+          IDENT@1056..1058 "$m"
+        R_PAREN@1058..1059 ")"
+      WHITESPACE@1059..1060 " "
+      OFFSET@1060..1082
+        L_PAREN@1060..1061 "("
+        KEYWORD@1061..1067 "offset"
+        WHITESPACE@1067..1068 " "
+        PLAIN_INSTR@1068..1081
+          L_PAREN@1068..1069 "("
+          INSTR_NAME@1069..1078 "i32.const"
+          WHITESPACE@1078..1079 " "
+          OPERAND@1079..1080
+            INT@1079..1080 "0"
+          R_PAREN@1080..1081 ")"
+        R_PAREN@1081..1082 ")"
+      WHITESPACE@1082..1083 " "
+      STRING@1083..1085 "\"\""
+      WHITESPACE@1085..1086 " "
+      STRING@1086..1089 "\"a\""
+      WHITESPACE@1089..1090 " "
+      STRING@1090..1094 "\"bc\""
+      WHITESPACE@1094..1095 " "
+      STRING@1095..1097 "\"\""
+      R_PAREN@1097..1098 ")"
+    WHITESPACE@1098..1099 "\n"
+    R_PAREN@1099..1100 ")"
+  WHITESPACE@1100..1101 "\n"

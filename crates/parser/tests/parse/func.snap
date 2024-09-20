@@ -1,0 +1,1020 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..1830
+  MODULE@0..1829
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_FUNC@10..16
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "func"
+      R_PAREN@15..16 ")"
+    WHITESPACE@16..19 "\n  "
+    MODULE_FIELD_FUNC@19..38
+      L_PAREN@19..20 "("
+      KEYWORD@20..24 "func"
+      WHITESPACE@24..25 " "
+      EXPORT@25..37
+        L_PAREN@25..26 "("
+        KEYWORD@26..32 "export"
+        WHITESPACE@32..33 " "
+        NAME@33..36
+          STRING@33..36 "\"f\""
+        R_PAREN@36..37 ")"
+      R_PAREN@37..38 ")"
+    WHITESPACE@38..41 "\n  "
+    MODULE_FIELD_FUNC@41..50
+      L_PAREN@41..42 "("
+      KEYWORD@42..46 "func"
+      WHITESPACE@46..47 " "
+      IDENT@47..49 "$f"
+      R_PAREN@49..50 ")"
+    WHITESPACE@50..53 "\n  "
+    MODULE_FIELD_FUNC@53..75
+      L_PAREN@53..54 "("
+      KEYWORD@54..58 "func"
+      WHITESPACE@58..59 " "
+      IDENT@59..61 "$h"
+      WHITESPACE@61..62 " "
+      EXPORT@62..74
+        L_PAREN@62..63 "("
+        KEYWORD@63..69 "export"
+        WHITESPACE@69..70 " "
+        NAME@70..73
+          STRING@70..73 "\"g\""
+        R_PAREN@73..74 ")"
+      R_PAREN@74..75 ")"
+    WHITESPACE@75..79 "\n\n  "
+    MODULE_FIELD_FUNC@79..93
+      L_PAREN@79..80 "("
+      KEYWORD@80..84 "func"
+      WHITESPACE@84..85 " "
+      LOCAL@85..92
+        L_PAREN@85..86 "("
+        KEYWORD@86..91 "local"
+        R_PAREN@91..92 ")"
+      R_PAREN@92..93 ")"
+    WHITESPACE@93..96 "\n  "
+    MODULE_FIELD_FUNC@96..118
+      L_PAREN@96..97 "("
+      KEYWORD@97..101 "func"
+      WHITESPACE@101..102 " "
+      LOCAL@102..109
+        L_PAREN@102..103 "("
+        KEYWORD@103..108 "local"
+        R_PAREN@108..109 ")"
+      WHITESPACE@109..110 " "
+      LOCAL@110..117
+        L_PAREN@110..111 "("
+        KEYWORD@111..116 "local"
+        R_PAREN@116..117 ")"
+      R_PAREN@117..118 ")"
+    WHITESPACE@118..121 "\n  "
+    MODULE_FIELD_FUNC@121..139
+      L_PAREN@121..122 "("
+      KEYWORD@122..126 "func"
+      WHITESPACE@126..127 " "
+      LOCAL@127..138
+        L_PAREN@127..128 "("
+        KEYWORD@128..133 "local"
+        WHITESPACE@133..134 " "
+        VAL_TYPE@134..137
+          NUM_TYPE@134..137 "i32"
+        R_PAREN@137..138 ")"
+      R_PAREN@138..139 ")"
+    WHITESPACE@139..142 "\n  "
+    MODULE_FIELD_FUNC@142..163
+      L_PAREN@142..143 "("
+      KEYWORD@143..147 "func"
+      WHITESPACE@147..148 " "
+      LOCAL@148..162
+        L_PAREN@148..149 "("
+        KEYWORD@149..154 "local"
+        WHITESPACE@154..155 " "
+        IDENT@155..157 "$x"
+        WHITESPACE@157..158 " "
+        VAL_TYPE@158..161
+          NUM_TYPE@158..161 "i32"
+        R_PAREN@161..162 ")"
+      R_PAREN@162..163 ")"
+    WHITESPACE@163..166 "\n  "
+    MODULE_FIELD_FUNC@166..192
+      L_PAREN@166..167 "("
+      KEYWORD@167..171 "func"
+      WHITESPACE@171..172 " "
+      LOCAL@172..191
+        L_PAREN@172..173 "("
+        KEYWORD@173..178 "local"
+        WHITESPACE@178..179 " "
+        VAL_TYPE@179..182
+          NUM_TYPE@179..182 "i32"
+        WHITESPACE@182..183 " "
+        VAL_TYPE@183..186
+          NUM_TYPE@183..186 "f64"
+        WHITESPACE@186..187 " "
+        VAL_TYPE@187..190
+          NUM_TYPE@187..190 "i64"
+        R_PAREN@190..191 ")"
+      R_PAREN@191..192 ")"
+    WHITESPACE@192..195 "\n  "
+    MODULE_FIELD_FUNC@195..225
+      L_PAREN@195..196 "("
+      KEYWORD@196..200 "func"
+      WHITESPACE@200..201 " "
+      LOCAL@201..212
+        L_PAREN@201..202 "("
+        KEYWORD@202..207 "local"
+        WHITESPACE@207..208 " "
+        VAL_TYPE@208..211
+          NUM_TYPE@208..211 "i32"
+        R_PAREN@211..212 ")"
+      WHITESPACE@212..213 " "
+      LOCAL@213..224
+        L_PAREN@213..214 "("
+        KEYWORD@214..219 "local"
+        WHITESPACE@219..220 " "
+        VAL_TYPE@220..223
+          NUM_TYPE@220..223 "f64"
+        R_PAREN@223..224 ")"
+      R_PAREN@224..225 ")"
+    WHITESPACE@225..228 "\n  "
+    MODULE_FIELD_FUNC@228..289
+      L_PAREN@228..229 "("
+      KEYWORD@229..233 "func"
+      WHITESPACE@233..234 " "
+      LOCAL@234..249
+        L_PAREN@234..235 "("
+        KEYWORD@235..240 "local"
+        WHITESPACE@240..241 " "
+        VAL_TYPE@241..244
+          NUM_TYPE@241..244 "i32"
+        WHITESPACE@244..245 " "
+        VAL_TYPE@245..248
+          NUM_TYPE@245..248 "f32"
+        R_PAREN@248..249 ")"
+      WHITESPACE@249..250 " "
+      LOCAL@250..264
+        L_PAREN@250..251 "("
+        KEYWORD@251..256 "local"
+        WHITESPACE@256..257 " "
+        IDENT@257..259 "$x"
+        WHITESPACE@259..260 " "
+        VAL_TYPE@260..263
+          NUM_TYPE@260..263 "i64"
+        R_PAREN@263..264 ")"
+      WHITESPACE@264..265 " "
+      LOCAL@265..272
+        L_PAREN@265..266 "("
+        KEYWORD@266..271 "local"
+        R_PAREN@271..272 ")"
+      WHITESPACE@272..273 " "
+      LOCAL@273..288
+        L_PAREN@273..274 "("
+        KEYWORD@274..279 "local"
+        WHITESPACE@279..280 " "
+        VAL_TYPE@280..283
+          NUM_TYPE@280..283 "i32"
+        WHITESPACE@283..284 " "
+        VAL_TYPE@284..287
+          NUM_TYPE@284..287 "f64"
+        R_PAREN@287..288 ")"
+      R_PAREN@288..289 ")"
+    WHITESPACE@289..293 "\n\n  "
+    MODULE_FIELD_FUNC@293..307
+      L_PAREN@293..294 "("
+      KEYWORD@294..298 "func"
+      WHITESPACE@298..299 " "
+      TYPE_USE@299..306
+        PARAM@299..306
+          L_PAREN@299..300 "("
+          KEYWORD@300..305 "param"
+          R_PAREN@305..306 ")"
+      R_PAREN@306..307 ")"
+    WHITESPACE@307..310 "\n  "
+    MODULE_FIELD_FUNC@310..332
+      L_PAREN@310..311 "("
+      KEYWORD@311..315 "func"
+      WHITESPACE@315..316 " "
+      TYPE_USE@316..331
+        PARAM@316..323
+          L_PAREN@316..317 "("
+          KEYWORD@317..322 "param"
+          R_PAREN@322..323 ")"
+        WHITESPACE@323..324 " "
+        PARAM@324..331
+          L_PAREN@324..325 "("
+          KEYWORD@325..330 "param"
+          R_PAREN@330..331 ")"
+      R_PAREN@331..332 ")"
+    WHITESPACE@332..335 "\n  "
+    MODULE_FIELD_FUNC@335..353
+      L_PAREN@335..336 "("
+      KEYWORD@336..340 "func"
+      WHITESPACE@340..341 " "
+      TYPE_USE@341..352
+        PARAM@341..352
+          L_PAREN@341..342 "("
+          KEYWORD@342..347 "param"
+          WHITESPACE@347..348 " "
+          VAL_TYPE@348..351
+            NUM_TYPE@348..351 "i32"
+          R_PAREN@351..352 ")"
+      R_PAREN@352..353 ")"
+    WHITESPACE@353..356 "\n  "
+    MODULE_FIELD_FUNC@356..377
+      L_PAREN@356..357 "("
+      KEYWORD@357..361 "func"
+      WHITESPACE@361..362 " "
+      TYPE_USE@362..376
+        PARAM@362..376
+          L_PAREN@362..363 "("
+          KEYWORD@363..368 "param"
+          WHITESPACE@368..369 " "
+          IDENT@369..371 "$x"
+          WHITESPACE@371..372 " "
+          VAL_TYPE@372..375
+            NUM_TYPE@372..375 "i32"
+          R_PAREN@375..376 ")"
+      R_PAREN@376..377 ")"
+    WHITESPACE@377..380 "\n  "
+    MODULE_FIELD_FUNC@380..406
+      L_PAREN@380..381 "("
+      KEYWORD@381..385 "func"
+      WHITESPACE@385..386 " "
+      TYPE_USE@386..405
+        PARAM@386..405
+          L_PAREN@386..387 "("
+          KEYWORD@387..392 "param"
+          WHITESPACE@392..393 " "
+          VAL_TYPE@393..396
+            NUM_TYPE@393..396 "i32"
+          WHITESPACE@396..397 " "
+          VAL_TYPE@397..400
+            NUM_TYPE@397..400 "f64"
+          WHITESPACE@400..401 " "
+          VAL_TYPE@401..404
+            NUM_TYPE@401..404 "i64"
+          R_PAREN@404..405 ")"
+      R_PAREN@405..406 ")"
+    WHITESPACE@406..409 "\n  "
+    MODULE_FIELD_FUNC@409..439
+      L_PAREN@409..410 "("
+      KEYWORD@410..414 "func"
+      WHITESPACE@414..415 " "
+      TYPE_USE@415..438
+        PARAM@415..426
+          L_PAREN@415..416 "("
+          KEYWORD@416..421 "param"
+          WHITESPACE@421..422 " "
+          VAL_TYPE@422..425
+            NUM_TYPE@422..425 "i32"
+          R_PAREN@425..426 ")"
+        WHITESPACE@426..427 " "
+        PARAM@427..438
+          L_PAREN@427..428 "("
+          KEYWORD@428..433 "param"
+          WHITESPACE@433..434 " "
+          VAL_TYPE@434..437
+            NUM_TYPE@434..437 "f64"
+          R_PAREN@437..438 ")"
+      R_PAREN@438..439 ")"
+    WHITESPACE@439..442 "\n  "
+    MODULE_FIELD_FUNC@442..503
+      L_PAREN@442..443 "("
+      KEYWORD@443..447 "func"
+      WHITESPACE@447..448 " "
+      TYPE_USE@448..502
+        PARAM@448..463
+          L_PAREN@448..449 "("
+          KEYWORD@449..454 "param"
+          WHITESPACE@454..455 " "
+          VAL_TYPE@455..458
+            NUM_TYPE@455..458 "i32"
+          WHITESPACE@458..459 " "
+          VAL_TYPE@459..462
+            NUM_TYPE@459..462 "f32"
+          R_PAREN@462..463 ")"
+        WHITESPACE@463..464 " "
+        PARAM@464..478
+          L_PAREN@464..465 "("
+          KEYWORD@465..470 "param"
+          WHITESPACE@470..471 " "
+          IDENT@471..473 "$x"
+          WHITESPACE@473..474 " "
+          VAL_TYPE@474..477
+            NUM_TYPE@474..477 "i64"
+          R_PAREN@477..478 ")"
+        WHITESPACE@478..479 " "
+        PARAM@479..486
+          L_PAREN@479..480 "("
+          KEYWORD@480..485 "param"
+          R_PAREN@485..486 ")"
+        WHITESPACE@486..487 " "
+        PARAM@487..502
+          L_PAREN@487..488 "("
+          KEYWORD@488..493 "param"
+          WHITESPACE@493..494 " "
+          VAL_TYPE@494..497
+            NUM_TYPE@494..497 "i32"
+          WHITESPACE@497..498 " "
+          VAL_TYPE@498..501
+            NUM_TYPE@498..501 "f64"
+          R_PAREN@501..502 ")"
+      R_PAREN@502..503 ")"
+    WHITESPACE@503..507 "\n\n  "
+    MODULE_FIELD_FUNC@507..522
+      L_PAREN@507..508 "("
+      KEYWORD@508..512 "func"
+      WHITESPACE@512..513 " "
+      TYPE_USE@513..521
+        RESULT@513..521
+          L_PAREN@513..514 "("
+          KEYWORD@514..520 "result"
+          R_PAREN@520..521 ")"
+      R_PAREN@521..522 ")"
+    WHITESPACE@522..525 "\n  "
+    MODULE_FIELD_FUNC@525..549
+      L_PAREN@525..526 "("
+      KEYWORD@526..530 "func"
+      WHITESPACE@530..531 " "
+      TYPE_USE@531..548
+        RESULT@531..539
+          L_PAREN@531..532 "("
+          KEYWORD@532..538 "result"
+          R_PAREN@538..539 ")"
+        WHITESPACE@539..540 " "
+        RESULT@540..548
+          L_PAREN@540..541 "("
+          KEYWORD@541..547 "result"
+          R_PAREN@547..548 ")"
+      R_PAREN@548..549 ")"
+    WHITESPACE@549..552 "\n  "
+    MODULE_FIELD_FUNC@552..585
+      L_PAREN@552..553 "("
+      KEYWORD@553..557 "func"
+      WHITESPACE@557..558 " "
+      TYPE_USE@558..570
+        RESULT@558..570
+          L_PAREN@558..559 "("
+          KEYWORD@559..565 "result"
+          WHITESPACE@565..566 " "
+          VAL_TYPE@566..569
+            NUM_TYPE@566..569 "i32"
+          R_PAREN@569..570 ")"
+      WHITESPACE@570..571 " "
+      PLAIN_INSTR@571..584
+        L_PAREN@571..572 "("
+        INSTR_NAME@572..583 "unreachable"
+        R_PAREN@583..584 ")"
+      R_PAREN@584..585 ")"
+    WHITESPACE@585..588 "\n  "
+    MODULE_FIELD_FUNC@588..629
+      L_PAREN@588..589 "("
+      KEYWORD@589..593 "func"
+      WHITESPACE@593..594 " "
+      TYPE_USE@594..614
+        RESULT@594..614
+          L_PAREN@594..595 "("
+          KEYWORD@595..601 "result"
+          WHITESPACE@601..602 " "
+          VAL_TYPE@602..605
+            NUM_TYPE@602..605 "i32"
+          WHITESPACE@605..606 " "
+          VAL_TYPE@606..609
+            NUM_TYPE@606..609 "f64"
+          WHITESPACE@609..610 " "
+          VAL_TYPE@610..613
+            NUM_TYPE@610..613 "f32"
+          R_PAREN@613..614 ")"
+      WHITESPACE@614..615 " "
+      PLAIN_INSTR@615..628
+        L_PAREN@615..616 "("
+        INSTR_NAME@616..627 "unreachable"
+        R_PAREN@627..628 ")"
+      R_PAREN@628..629 ")"
+    WHITESPACE@629..632 "\n  "
+    MODULE_FIELD_FUNC@632..678
+      L_PAREN@632..633 "("
+      KEYWORD@633..637 "func"
+      WHITESPACE@637..638 " "
+      TYPE_USE@638..663
+        RESULT@638..650
+          L_PAREN@638..639 "("
+          KEYWORD@639..645 "result"
+          WHITESPACE@645..646 " "
+          VAL_TYPE@646..649
+            NUM_TYPE@646..649 "i32"
+          R_PAREN@649..650 ")"
+        WHITESPACE@650..651 " "
+        RESULT@651..663
+          L_PAREN@651..652 "("
+          KEYWORD@652..658 "result"
+          WHITESPACE@658..659 " "
+          VAL_TYPE@659..662
+            NUM_TYPE@659..662 "f64"
+          R_PAREN@662..663 ")"
+      WHITESPACE@663..664 " "
+      PLAIN_INSTR@664..677
+        L_PAREN@664..665 "("
+        INSTR_NAME@665..676 "unreachable"
+        R_PAREN@676..677 ")"
+      R_PAREN@677..678 ")"
+    WHITESPACE@678..681 "\n  "
+    MODULE_FIELD_FUNC@681..757
+      L_PAREN@681..682 "("
+      KEYWORD@682..686 "func"
+      WHITESPACE@686..687 " "
+      TYPE_USE@687..742
+        RESULT@687..703
+          L_PAREN@687..688 "("
+          KEYWORD@688..694 "result"
+          WHITESPACE@694..695 " "
+          VAL_TYPE@695..698
+            NUM_TYPE@695..698 "i32"
+          WHITESPACE@698..699 " "
+          VAL_TYPE@699..702
+            NUM_TYPE@699..702 "f32"
+          R_PAREN@702..703 ")"
+        WHITESPACE@703..704 " "
+        RESULT@704..716
+          L_PAREN@704..705 "("
+          KEYWORD@705..711 "result"
+          WHITESPACE@711..712 " "
+          VAL_TYPE@712..715
+            NUM_TYPE@712..715 "i64"
+          R_PAREN@715..716 ")"
+        WHITESPACE@716..717 " "
+        RESULT@717..725
+          L_PAREN@717..718 "("
+          KEYWORD@718..724 "result"
+          R_PAREN@724..725 ")"
+        WHITESPACE@725..726 " "
+        RESULT@726..742
+          L_PAREN@726..727 "("
+          KEYWORD@727..733 "result"
+          WHITESPACE@733..734 " "
+          VAL_TYPE@734..737
+            NUM_TYPE@734..737 "i32"
+          WHITESPACE@737..738 " "
+          VAL_TYPE@738..741
+            NUM_TYPE@738..741 "f64"
+          R_PAREN@741..742 ")"
+      WHITESPACE@742..743 " "
+      PLAIN_INSTR@743..756
+        L_PAREN@743..744 "("
+        INSTR_NAME@744..755 "unreachable"
+        R_PAREN@755..756 ")"
+      R_PAREN@756..757 ")"
+    WHITESPACE@757..761 "\n\n  "
+    MODULE_FIELD_TYPE@761..781
+      L_PAREN@761..762 "("
+      KEYWORD@762..766 "type"
+      WHITESPACE@766..767 " "
+      IDENT@767..773 "$sig-1"
+      WHITESPACE@773..774 " "
+      FUNC_TYPE@774..780
+        L_PAREN@774..775 "("
+        KEYWORD@775..779 "func"
+        R_PAREN@779..780 ")"
+      R_PAREN@780..781 ")"
+    WHITESPACE@781..784 "\n  "
+    MODULE_FIELD_TYPE@784..817
+      L_PAREN@784..785 "("
+      KEYWORD@785..789 "type"
+      WHITESPACE@789..790 " "
+      IDENT@790..796 "$sig-2"
+      WHITESPACE@796..797 " "
+      FUNC_TYPE@797..816
+        L_PAREN@797..798 "("
+        KEYWORD@798..802 "func"
+        WHITESPACE@802..803 " "
+        RESULT@803..815
+          L_PAREN@803..804 "("
+          KEYWORD@804..810 "result"
+          WHITESPACE@810..811 " "
+          VAL_TYPE@811..814
+            NUM_TYPE@811..814 "i32"
+          R_PAREN@814..815 ")"
+        R_PAREN@815..816 ")"
+      R_PAREN@816..817 ")"
+    WHITESPACE@817..820 "\n  "
+    MODULE_FIELD_TYPE@820..855
+      L_PAREN@820..821 "("
+      KEYWORD@821..825 "type"
+      WHITESPACE@825..826 " "
+      IDENT@826..832 "$sig-3"
+      WHITESPACE@832..833 " "
+      FUNC_TYPE@833..854
+        L_PAREN@833..834 "("
+        KEYWORD@834..838 "func"
+        WHITESPACE@838..839 " "
+        PARAM@839..853
+          L_PAREN@839..840 "("
+          KEYWORD@840..845 "param"
+          WHITESPACE@845..846 " "
+          IDENT@846..848 "$x"
+          WHITESPACE@848..849 " "
+          VAL_TYPE@849..852
+            NUM_TYPE@849..852 "i32"
+          R_PAREN@852..853 ")"
+        R_PAREN@853..854 ")"
+      R_PAREN@854..855 ")"
+    WHITESPACE@855..858 "\n  "
+    MODULE_FIELD_TYPE@858..911
+      L_PAREN@858..859 "("
+      KEYWORD@859..863 "type"
+      WHITESPACE@863..864 " "
+      IDENT@864..870 "$sig-4"
+      WHITESPACE@870..871 " "
+      FUNC_TYPE@871..910
+        L_PAREN@871..872 "("
+        KEYWORD@872..876 "func"
+        WHITESPACE@876..877 " "
+        PARAM@877..896
+          L_PAREN@877..878 "("
+          KEYWORD@878..883 "param"
+          WHITESPACE@883..884 " "
+          VAL_TYPE@884..887
+            NUM_TYPE@884..887 "i32"
+          WHITESPACE@887..888 " "
+          VAL_TYPE@888..891
+            NUM_TYPE@888..891 "f64"
+          WHITESPACE@891..892 " "
+          VAL_TYPE@892..895
+            NUM_TYPE@892..895 "i32"
+          R_PAREN@895..896 ")"
+        WHITESPACE@896..897 " "
+        RESULT@897..909
+          L_PAREN@897..898 "("
+          KEYWORD@898..904 "result"
+          WHITESPACE@904..905 " "
+          VAL_TYPE@905..908
+            NUM_TYPE@905..908 "i32"
+          R_PAREN@908..909 ")"
+        R_PAREN@909..910 ")"
+      R_PAREN@910..911 ")"
+    WHITESPACE@911..915 "\n\n  "
+    MODULE_FIELD_FUNC@915..957
+      L_PAREN@915..916 "("
+      KEYWORD@916..920 "func"
+      WHITESPACE@920..921 " "
+      EXPORT@921..942
+        L_PAREN@921..922 "("
+        KEYWORD@922..928 "export"
+        WHITESPACE@928..929 " "
+        NAME@929..941
+          STRING@929..941 "\"type-use-1\""
+        R_PAREN@941..942 ")"
+      WHITESPACE@942..943 " "
+      TYPE_USE@943..956
+        L_PAREN@943..944 "("
+        KEYWORD@944..948 "type"
+        WHITESPACE@948..949 " "
+        INDEX@949..955
+          IDENT@949..955 "$sig-1"
+        R_PAREN@955..956 ")"
+      R_PAREN@956..957 ")"
+    WHITESPACE@957..960 "\n  "
+    MODULE_FIELD_FUNC@960..1016
+      L_PAREN@960..961 "("
+      KEYWORD@961..965 "func"
+      WHITESPACE@965..966 " "
+      EXPORT@966..987
+        L_PAREN@966..967 "("
+        KEYWORD@967..973 "export"
+        WHITESPACE@973..974 " "
+        NAME@974..986
+          STRING@974..986 "\"type-use-2\""
+        R_PAREN@986..987 ")"
+      WHITESPACE@987..988 " "
+      TYPE_USE@988..1001
+        L_PAREN@988..989 "("
+        KEYWORD@989..993 "type"
+        WHITESPACE@993..994 " "
+        INDEX@994..1000
+          IDENT@994..1000 "$sig-2"
+        R_PAREN@1000..1001 ")"
+      WHITESPACE@1001..1002 " "
+      PLAIN_INSTR@1002..1015
+        L_PAREN@1002..1003 "("
+        INSTR_NAME@1003..1012 "i32.const"
+        WHITESPACE@1012..1013 " "
+        OPERAND@1013..1014
+          INT@1013..1014 "0"
+        R_PAREN@1014..1015 ")"
+      R_PAREN@1015..1016 ")"
+    WHITESPACE@1016..1019 "\n  "
+    MODULE_FIELD_FUNC@1019..1061
+      L_PAREN@1019..1020 "("
+      KEYWORD@1020..1024 "func"
+      WHITESPACE@1024..1025 " "
+      EXPORT@1025..1046
+        L_PAREN@1025..1026 "("
+        KEYWORD@1026..1032 "export"
+        WHITESPACE@1032..1033 " "
+        NAME@1033..1045
+          STRING@1033..1045 "\"type-use-3\""
+        R_PAREN@1045..1046 ")"
+      WHITESPACE@1046..1047 " "
+      TYPE_USE@1047..1060
+        L_PAREN@1047..1048 "("
+        KEYWORD@1048..1052 "type"
+        WHITESPACE@1052..1053 " "
+        INDEX@1053..1059
+          IDENT@1053..1059 "$sig-3"
+        R_PAREN@1059..1060 ")"
+      R_PAREN@1060..1061 ")"
+    WHITESPACE@1061..1064 "\n  "
+    MODULE_FIELD_FUNC@1064..1120
+      L_PAREN@1064..1065 "("
+      KEYWORD@1065..1069 "func"
+      WHITESPACE@1069..1070 " "
+      EXPORT@1070..1091
+        L_PAREN@1070..1071 "("
+        KEYWORD@1071..1077 "export"
+        WHITESPACE@1077..1078 " "
+        NAME@1078..1090
+          STRING@1078..1090 "\"type-use-4\""
+        R_PAREN@1090..1091 ")"
+      WHITESPACE@1091..1092 " "
+      TYPE_USE@1092..1105
+        L_PAREN@1092..1093 "("
+        KEYWORD@1093..1097 "type"
+        WHITESPACE@1097..1098 " "
+        INDEX@1098..1104
+          IDENT@1098..1104 "$sig-4"
+        R_PAREN@1104..1105 ")"
+      WHITESPACE@1105..1106 " "
+      PLAIN_INSTR@1106..1119
+        L_PAREN@1106..1107 "("
+        INSTR_NAME@1107..1116 "i32.const"
+        WHITESPACE@1116..1117 " "
+        OPERAND@1117..1118
+          INT@1117..1118 "0"
+        R_PAREN@1118..1119 ")"
+      R_PAREN@1119..1120 ")"
+    WHITESPACE@1120..1123 "\n  "
+    MODULE_FIELD_FUNC@1123..1192
+      L_PAREN@1123..1124 "("
+      KEYWORD@1124..1128 "func"
+      WHITESPACE@1128..1129 " "
+      EXPORT@1129..1150
+        L_PAREN@1129..1130 "("
+        KEYWORD@1130..1136 "export"
+        WHITESPACE@1136..1137 " "
+        NAME@1137..1149
+          STRING@1137..1149 "\"type-use-5\""
+        R_PAREN@1149..1150 ")"
+      WHITESPACE@1150..1151 " "
+      TYPE_USE@1151..1177
+        L_PAREN@1151..1152 "("
+        KEYWORD@1152..1156 "type"
+        WHITESPACE@1156..1157 " "
+        INDEX@1157..1163
+          IDENT@1157..1163 "$sig-2"
+        R_PAREN@1163..1164 ")"
+        WHITESPACE@1164..1165 " "
+        RESULT@1165..1177
+          L_PAREN@1165..1166 "("
+          KEYWORD@1166..1172 "result"
+          WHITESPACE@1172..1173 " "
+          VAL_TYPE@1173..1176
+            NUM_TYPE@1173..1176 "i32"
+          R_PAREN@1176..1177 ")"
+      WHITESPACE@1177..1178 " "
+      PLAIN_INSTR@1178..1191
+        L_PAREN@1178..1179 "("
+        INSTR_NAME@1179..1188 "i32.const"
+        WHITESPACE@1188..1189 " "
+        OPERAND@1189..1190
+          INT@1189..1190 "0"
+        R_PAREN@1190..1191 ")"
+      R_PAREN@1191..1192 ")"
+    WHITESPACE@1192..1195 "\n  "
+    MODULE_FIELD_FUNC@1195..1249
+      L_PAREN@1195..1196 "("
+      KEYWORD@1196..1200 "func"
+      WHITESPACE@1200..1201 " "
+      EXPORT@1201..1222
+        L_PAREN@1201..1202 "("
+        KEYWORD@1202..1208 "export"
+        WHITESPACE@1208..1209 " "
+        NAME@1209..1221
+          STRING@1209..1221 "\"type-use-6\""
+        R_PAREN@1221..1222 ")"
+      WHITESPACE@1222..1223 " "
+      TYPE_USE@1223..1248
+        L_PAREN@1223..1224 "("
+        KEYWORD@1224..1228 "type"
+        WHITESPACE@1228..1229 " "
+        INDEX@1229..1235
+          IDENT@1229..1235 "$sig-3"
+        R_PAREN@1235..1236 ")"
+        WHITESPACE@1236..1237 " "
+        PARAM@1237..1248
+          L_PAREN@1237..1238 "("
+          KEYWORD@1238..1243 "param"
+          WHITESPACE@1243..1244 " "
+          VAL_TYPE@1244..1247
+            NUM_TYPE@1244..1247 "i32"
+          R_PAREN@1247..1248 ")"
+      R_PAREN@1248..1249 ")"
+    WHITESPACE@1249..1252 "\n  "
+    MODULE_FIELD_FUNC@1252..1356
+      L_PAREN@1252..1253 "("
+      KEYWORD@1253..1257 "func"
+      WHITESPACE@1257..1258 " "
+      EXPORT@1258..1279
+        L_PAREN@1258..1259 "("
+        KEYWORD@1259..1265 "export"
+        WHITESPACE@1265..1266 " "
+        NAME@1266..1278
+          STRING@1266..1278 "\"type-use-7\""
+        R_PAREN@1278..1279 ")"
+      WHITESPACE@1279..1284 "\n    "
+      TYPE_USE@1284..1338
+        L_PAREN@1284..1285 "("
+        KEYWORD@1285..1289 "type"
+        WHITESPACE@1289..1290 " "
+        INDEX@1290..1296
+          IDENT@1290..1296 "$sig-4"
+        R_PAREN@1296..1297 ")"
+        WHITESPACE@1297..1298 " "
+        PARAM@1298..1309
+          L_PAREN@1298..1299 "("
+          KEYWORD@1299..1304 "param"
+          WHITESPACE@1304..1305 " "
+          VAL_TYPE@1305..1308
+            NUM_TYPE@1305..1308 "i32"
+          R_PAREN@1308..1309 ")"
+        WHITESPACE@1309..1310 " "
+        PARAM@1310..1325
+          L_PAREN@1310..1311 "("
+          KEYWORD@1311..1316 "param"
+          WHITESPACE@1316..1317 " "
+          VAL_TYPE@1317..1320
+            NUM_TYPE@1317..1320 "f64"
+          WHITESPACE@1320..1321 " "
+          VAL_TYPE@1321..1324
+            NUM_TYPE@1321..1324 "i32"
+          R_PAREN@1324..1325 ")"
+        WHITESPACE@1325..1326 " "
+        RESULT@1326..1338
+          L_PAREN@1326..1327 "("
+          KEYWORD@1327..1333 "result"
+          WHITESPACE@1333..1334 " "
+          VAL_TYPE@1334..1337
+            NUM_TYPE@1334..1337 "i32"
+          R_PAREN@1337..1338 ")"
+      WHITESPACE@1338..1339 " "
+      PLAIN_INSTR@1339..1352
+        L_PAREN@1339..1340 "("
+        INSTR_NAME@1340..1349 "i32.const"
+        WHITESPACE@1349..1350 " "
+        OPERAND@1350..1351
+          INT@1350..1351 "0"
+        R_PAREN@1351..1352 ")"
+      WHITESPACE@1352..1355 "\n  "
+      R_PAREN@1355..1356 ")"
+    WHITESPACE@1356..1360 "\n\n  "
+    MODULE_FIELD_FUNC@1360..1378
+      L_PAREN@1360..1361 "("
+      KEYWORD@1361..1365 "func"
+      WHITESPACE@1365..1366 " "
+      TYPE_USE@1366..1377
+        L_PAREN@1366..1367 "("
+        KEYWORD@1367..1371 "type"
+        WHITESPACE@1371..1372 " "
+        INDEX@1372..1376
+          IDENT@1372..1376 "$sig"
+        R_PAREN@1376..1377 ")"
+      R_PAREN@1377..1378 ")"
+    WHITESPACE@1378..1381 "\n  "
+    MODULE_FIELD_FUNC@1381..1403
+      L_PAREN@1381..1382 "("
+      KEYWORD@1382..1386 "func"
+      WHITESPACE@1386..1387 " "
+      TYPE_USE@1387..1402
+        L_PAREN@1387..1388 "("
+        KEYWORD@1388..1392 "type"
+        WHITESPACE@1392..1393 " "
+        INDEX@1393..1401
+          IDENT@1393..1401 "$forward"
+        R_PAREN@1401..1402 ")"
+      R_PAREN@1402..1403 ")"
+    WHITESPACE@1403..1405 "  "
+    LINE_COMMENT@1405..1425 ";; forward reference"
+    WHITESPACE@1425..1429 "\n\n  "
+    MODULE_FIELD_FUNC@1429..1657
+      L_PAREN@1429..1430 "("
+      KEYWORD@1430..1434 "func"
+      WHITESPACE@1434..1435 " "
+      IDENT@1435..1443 "$complex"
+      WHITESPACE@1443..1448 "\n    "
+      TYPE_USE@1448..1550
+        PARAM@1448..1463
+          L_PAREN@1448..1449 "("
+          KEYWORD@1449..1454 "param"
+          WHITESPACE@1454..1455 " "
+          VAL_TYPE@1455..1458
+            NUM_TYPE@1455..1458 "i32"
+          WHITESPACE@1458..1459 " "
+          VAL_TYPE@1459..1462
+            NUM_TYPE@1459..1462 "f32"
+          R_PAREN@1462..1463 ")"
+        WHITESPACE@1463..1464 " "
+        PARAM@1464..1478
+          L_PAREN@1464..1465 "("
+          KEYWORD@1465..1470 "param"
+          WHITESPACE@1470..1471 " "
+          IDENT@1471..1473 "$x"
+          WHITESPACE@1473..1474 " "
+          VAL_TYPE@1474..1477
+            NUM_TYPE@1474..1477 "i64"
+          R_PAREN@1477..1478 ")"
+        WHITESPACE@1478..1479 " "
+        PARAM@1479..1486
+          L_PAREN@1479..1480 "("
+          KEYWORD@1480..1485 "param"
+          R_PAREN@1485..1486 ")"
+        WHITESPACE@1486..1487 " "
+        PARAM@1487..1498
+          L_PAREN@1487..1488 "("
+          KEYWORD@1488..1493 "param"
+          WHITESPACE@1493..1494 " "
+          VAL_TYPE@1494..1497
+            NUM_TYPE@1494..1497 "i32"
+          R_PAREN@1497..1498 ")"
+        WHITESPACE@1498..1503 "\n    "
+        RESULT@1503..1511
+          L_PAREN@1503..1504 "("
+          KEYWORD@1504..1510 "result"
+          R_PAREN@1510..1511 ")"
+        WHITESPACE@1511..1512 " "
+        RESULT@1512..1524
+          L_PAREN@1512..1513 "("
+          KEYWORD@1513..1519 "result"
+          WHITESPACE@1519..1520 " "
+          VAL_TYPE@1520..1523
+            NUM_TYPE@1520..1523 "i32"
+          R_PAREN@1523..1524 ")"
+        WHITESPACE@1524..1525 " "
+        RESULT@1525..1533
+          L_PAREN@1525..1526 "("
+          KEYWORD@1526..1532 "result"
+          R_PAREN@1532..1533 ")"
+        WHITESPACE@1533..1534 " "
+        RESULT@1534..1550
+          L_PAREN@1534..1535 "("
+          KEYWORD@1535..1541 "result"
+          WHITESPACE@1541..1542 " "
+          VAL_TYPE@1542..1545
+            NUM_TYPE@1542..1545 "i64"
+          WHITESPACE@1545..1546 " "
+          VAL_TYPE@1546..1549
+            NUM_TYPE@1546..1549 "i32"
+          R_PAREN@1549..1550 ")"
+      WHITESPACE@1550..1555 "\n    "
+      LOCAL@1555..1566
+        L_PAREN@1555..1556 "("
+        KEYWORD@1556..1561 "local"
+        WHITESPACE@1561..1562 " "
+        VAL_TYPE@1562..1565
+          NUM_TYPE@1562..1565 "f32"
+        R_PAREN@1565..1566 ")"
+      WHITESPACE@1566..1567 " "
+      LOCAL@1567..1581
+        L_PAREN@1567..1568 "("
+        KEYWORD@1568..1573 "local"
+        WHITESPACE@1573..1574 " "
+        IDENT@1574..1576 "$y"
+        WHITESPACE@1576..1577 " "
+        VAL_TYPE@1577..1580
+          NUM_TYPE@1577..1580 "i32"
+        R_PAREN@1580..1581 ")"
+      WHITESPACE@1581..1582 " "
+      LOCAL@1582..1597
+        L_PAREN@1582..1583 "("
+        KEYWORD@1583..1588 "local"
+        WHITESPACE@1588..1589 " "
+        VAL_TYPE@1589..1592
+          NUM_TYPE@1589..1592 "i64"
+        WHITESPACE@1592..1593 " "
+        VAL_TYPE@1593..1596
+          NUM_TYPE@1593..1596 "i32"
+        R_PAREN@1596..1597 ")"
+      WHITESPACE@1597..1598 " "
+      LOCAL@1598..1605
+        L_PAREN@1598..1599 "("
+        KEYWORD@1599..1604 "local"
+        R_PAREN@1604..1605 ")"
+      WHITESPACE@1605..1606 " "
+      LOCAL@1606..1621
+        L_PAREN@1606..1607 "("
+        KEYWORD@1607..1612 "local"
+        WHITESPACE@1612..1613 " "
+        VAL_TYPE@1613..1616
+          NUM_TYPE@1613..1616 "f64"
+        WHITESPACE@1616..1617 " "
+        VAL_TYPE@1617..1620
+          NUM_TYPE@1617..1620 "i32"
+        R_PAREN@1620..1621 ")"
+      WHITESPACE@1621..1626 "\n    "
+      PLAIN_INSTR@1626..1639
+        L_PAREN@1626..1627 "("
+        INSTR_NAME@1627..1638 "unreachable"
+        R_PAREN@1638..1639 ")"
+      WHITESPACE@1639..1640 " "
+      PLAIN_INSTR@1640..1653
+        L_PAREN@1640..1641 "("
+        INSTR_NAME@1641..1652 "unreachable"
+        R_PAREN@1652..1653 ")"
+      WHITESPACE@1653..1656 "\n  "
+      R_PAREN@1656..1657 ")"
+    WHITESPACE@1657..1660 "\n  "
+    MODULE_FIELD_FUNC@1660..1801
+      L_PAREN@1660..1661 "("
+      KEYWORD@1661..1665 "func"
+      WHITESPACE@1665..1666 " "
+      IDENT@1666..1678 "$complex-sig"
+      WHITESPACE@1678..1683 "\n    "
+      TYPE_USE@1683..1694
+        L_PAREN@1683..1684 "("
+        KEYWORD@1684..1688 "type"
+        WHITESPACE@1688..1689 " "
+        INDEX@1689..1693
+          IDENT@1689..1693 "$sig"
+        R_PAREN@1693..1694 ")"
+      WHITESPACE@1694..1699 "\n    "
+      LOCAL@1699..1710
+        L_PAREN@1699..1700 "("
+        KEYWORD@1700..1705 "local"
+        WHITESPACE@1705..1706 " "
+        VAL_TYPE@1706..1709
+          NUM_TYPE@1706..1709 "f32"
+        R_PAREN@1709..1710 ")"
+      WHITESPACE@1710..1711 " "
+      LOCAL@1711..1725
+        L_PAREN@1711..1712 "("
+        KEYWORD@1712..1717 "local"
+        WHITESPACE@1717..1718 " "
+        IDENT@1718..1720 "$y"
+        WHITESPACE@1720..1721 " "
+        VAL_TYPE@1721..1724
+          NUM_TYPE@1721..1724 "i32"
+        R_PAREN@1724..1725 ")"
+      WHITESPACE@1725..1726 " "
+      LOCAL@1726..1741
+        L_PAREN@1726..1727 "("
+        KEYWORD@1727..1732 "local"
+        WHITESPACE@1732..1733 " "
+        VAL_TYPE@1733..1736
+          NUM_TYPE@1733..1736 "i64"
+        WHITESPACE@1736..1737 " "
+        VAL_TYPE@1737..1740
+          NUM_TYPE@1737..1740 "i32"
+        R_PAREN@1740..1741 ")"
+      WHITESPACE@1741..1742 " "
+      LOCAL@1742..1749
+        L_PAREN@1742..1743 "("
+        KEYWORD@1743..1748 "local"
+        R_PAREN@1748..1749 ")"
+      WHITESPACE@1749..1750 " "
+      LOCAL@1750..1765
+        L_PAREN@1750..1751 "("
+        KEYWORD@1751..1756 "local"
+        WHITESPACE@1756..1757 " "
+        VAL_TYPE@1757..1760
+          NUM_TYPE@1757..1760 "f64"
+        WHITESPACE@1760..1761 " "
+        VAL_TYPE@1761..1764
+          NUM_TYPE@1761..1764 "i32"
+        R_PAREN@1764..1765 ")"
+      WHITESPACE@1765..1770 "\n    "
+      PLAIN_INSTR@1770..1783
+        L_PAREN@1770..1771 "("
+        INSTR_NAME@1771..1782 "unreachable"
+        R_PAREN@1782..1783 ")"
+      WHITESPACE@1783..1784 " "
+      PLAIN_INSTR@1784..1797
+        L_PAREN@1784..1785 "("
+        INSTR_NAME@1785..1796 "unreachable"
+        R_PAREN@1796..1797 ")"
+      WHITESPACE@1797..1800 "\n  "
+      R_PAREN@1800..1801 ")"
+    WHITESPACE@1801..1805 "\n\n  "
+    MODULE_FIELD_TYPE@1805..1827
+      L_PAREN@1805..1806 "("
+      KEYWORD@1806..1810 "type"
+      WHITESPACE@1810..1811 " "
+      IDENT@1811..1819 "$forward"
+      WHITESPACE@1819..1820 " "
+      FUNC_TYPE@1820..1826
+        L_PAREN@1820..1821 "("
+        KEYWORD@1821..1825 "func"
+        R_PAREN@1825..1826 ")"
+      R_PAREN@1826..1827 ")"
+    WHITESPACE@1827..1828 "\n"
+    R_PAREN@1828..1829 ")"
+  WHITESPACE@1829..1830 "\n"

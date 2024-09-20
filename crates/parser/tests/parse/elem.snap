@@ -1,0 +1,1809 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..3044
+  MODULE@0..2935
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_TABLE@10..31
+      L_PAREN@10..11 "("
+      KEYWORD@11..16 "table"
+      WHITESPACE@16..17 " "
+      IDENT@17..19 "$t"
+      WHITESPACE@19..20 " "
+      TABLE_TYPE@20..30
+        LIMITS@20..22
+          UNSIGNED_INT@20..22 "10"
+        WHITESPACE@22..23 " "
+        REF_TYPE@23..30 "funcref"
+      R_PAREN@30..31 ")"
+    WHITESPACE@31..34 "\n  "
+    MODULE_FIELD_FUNC@34..43
+      L_PAREN@34..35 "("
+      KEYWORD@35..39 "func"
+      WHITESPACE@39..40 " "
+      IDENT@40..42 "$f"
+      R_PAREN@42..43 ")"
+    WHITESPACE@43..46 "\n  "
+    MODULE_FIELD_FUNC@46..55
+      L_PAREN@46..47 "("
+      KEYWORD@47..51 "func"
+      WHITESPACE@51..52 " "
+      IDENT@52..54 "$g"
+      R_PAREN@54..55 ")"
+    WHITESPACE@55..59 "\n\n  "
+    LINE_COMMENT@59..69 ";; Passive"
+    WHITESPACE@69..72 "\n  "
+    MODULE_FIELD_ELEM@72..86
+      L_PAREN@72..73 "("
+      KEYWORD@73..77 "elem"
+      WHITESPACE@77..78 " "
+      ELEM_LIST@78..85
+        REF_TYPE@78..85 "funcref"
+      R_PAREN@85..86 ")"
+    WHITESPACE@86..89 "\n  "
+    MODULE_FIELD_ELEM@89..173
+      L_PAREN@89..90 "("
+      KEYWORD@90..94 "elem"
+      WHITESPACE@94..95 " "
+      ELEM_LIST@95..172
+        REF_TYPE@95..102 "funcref"
+        WHITESPACE@102..103 " "
+        ELEM_EXPR@103..116
+          PLAIN_INSTR@103..116
+            L_PAREN@103..104 "("
+            INSTR_NAME@104..112 "ref.func"
+            WHITESPACE@112..113 " "
+            OPERAND@113..115
+              IDENT@113..115 "$f"
+            R_PAREN@115..116 ")"
+        WHITESPACE@116..117 " "
+        ELEM_EXPR@117..135
+          L_PAREN@117..118 "("
+          KEYWORD@118..122 "item"
+          WHITESPACE@122..123 " "
+          PLAIN_INSTR@123..134
+            INSTR_NAME@123..131 "ref.func"
+            WHITESPACE@131..132 " "
+            OPERAND@132..134
+              IDENT@132..134 "$f"
+          R_PAREN@134..135 ")"
+        WHITESPACE@135..136 " "
+        ELEM_EXPR@136..158
+          L_PAREN@136..137 "("
+          KEYWORD@137..141 "item"
+          WHITESPACE@141..142 " "
+          PLAIN_INSTR@142..157
+            L_PAREN@142..143 "("
+            INSTR_NAME@143..151 "ref.null"
+            WHITESPACE@151..152 " "
+            OPERAND@152..156
+              HEAP_TYPE@152..156 "func"
+            R_PAREN@156..157 ")"
+          R_PAREN@157..158 ")"
+        WHITESPACE@158..159 " "
+        ELEM_EXPR@159..172
+          PLAIN_INSTR@159..172
+            L_PAREN@159..160 "("
+            INSTR_NAME@160..168 "ref.func"
+            WHITESPACE@168..169 " "
+            OPERAND@169..171
+              IDENT@169..171 "$g"
+            R_PAREN@171..172 ")"
+      R_PAREN@172..173 ")"
+    WHITESPACE@173..176 "\n  "
+    MODULE_FIELD_ELEM@176..187
+      L_PAREN@176..177 "("
+      KEYWORD@177..181 "elem"
+      WHITESPACE@181..182 " "
+      ELEM_LIST@182..186
+        KEYWORD@182..186 "func"
+      R_PAREN@186..187 ")"
+    WHITESPACE@187..190 "\n  "
+    MODULE_FIELD_ELEM@190..213
+      L_PAREN@190..191 "("
+      KEYWORD@191..195 "elem"
+      WHITESPACE@195..196 " "
+      ELEM_LIST@196..212
+        KEYWORD@196..200 "func"
+        WHITESPACE@200..201 " "
+        INDEX@201..203
+          IDENT@201..203 "$f"
+        WHITESPACE@203..204 " "
+        INDEX@204..206
+          IDENT@204..206 "$f"
+        WHITESPACE@206..207 " "
+        INDEX@207..209
+          IDENT@207..209 "$g"
+        WHITESPACE@209..210 " "
+        INDEX@210..212
+          IDENT@210..212 "$g"
+      R_PAREN@212..213 ")"
+    WHITESPACE@213..217 "\n\n  "
+    MODULE_FIELD_ELEM@217..235
+      L_PAREN@217..218 "("
+      KEYWORD@218..222 "elem"
+      WHITESPACE@222..223 " "
+      IDENT@223..226 "$p1"
+      WHITESPACE@226..227 " "
+      ELEM_LIST@227..234
+        REF_TYPE@227..234 "funcref"
+      R_PAREN@234..235 ")"
+    WHITESPACE@235..238 "\n  "
+    MODULE_FIELD_ELEM@238..314
+      L_PAREN@238..239 "("
+      KEYWORD@239..243 "elem"
+      WHITESPACE@243..244 " "
+      IDENT@244..247 "$p2"
+      WHITESPACE@247..248 " "
+      ELEM_LIST@248..313
+        REF_TYPE@248..255 "funcref"
+        WHITESPACE@255..256 " "
+        ELEM_EXPR@256..269
+          PLAIN_INSTR@256..269
+            L_PAREN@256..257 "("
+            INSTR_NAME@257..265 "ref.func"
+            WHITESPACE@265..266 " "
+            OPERAND@266..268
+              IDENT@266..268 "$f"
+            R_PAREN@268..269 ")"
+        WHITESPACE@269..270 " "
+        ELEM_EXPR@270..283
+          PLAIN_INSTR@270..283
+            L_PAREN@270..271 "("
+            INSTR_NAME@271..279 "ref.func"
+            WHITESPACE@279..280 " "
+            OPERAND@280..282
+              IDENT@280..282 "$f"
+            R_PAREN@282..283 ")"
+        WHITESPACE@283..284 " "
+        ELEM_EXPR@284..299
+          PLAIN_INSTR@284..299
+            L_PAREN@284..285 "("
+            INSTR_NAME@285..293 "ref.null"
+            WHITESPACE@293..294 " "
+            OPERAND@294..298
+              HEAP_TYPE@294..298 "func"
+            R_PAREN@298..299 ")"
+        WHITESPACE@299..300 " "
+        ELEM_EXPR@300..313
+          PLAIN_INSTR@300..313
+            L_PAREN@300..301 "("
+            INSTR_NAME@301..309 "ref.func"
+            WHITESPACE@309..310 " "
+            OPERAND@310..312
+              IDENT@310..312 "$g"
+            R_PAREN@312..313 ")"
+      R_PAREN@313..314 ")"
+    WHITESPACE@314..317 "\n  "
+    MODULE_FIELD_ELEM@317..332
+      L_PAREN@317..318 "("
+      KEYWORD@318..322 "elem"
+      WHITESPACE@322..323 " "
+      IDENT@323..326 "$p3"
+      WHITESPACE@326..327 " "
+      ELEM_LIST@327..331
+        KEYWORD@327..331 "func"
+      R_PAREN@331..332 ")"
+    WHITESPACE@332..335 "\n  "
+    MODULE_FIELD_ELEM@335..362
+      L_PAREN@335..336 "("
+      KEYWORD@336..340 "elem"
+      WHITESPACE@340..341 " "
+      IDENT@341..344 "$p4"
+      WHITESPACE@344..345 " "
+      ELEM_LIST@345..361
+        KEYWORD@345..349 "func"
+        WHITESPACE@349..350 " "
+        INDEX@350..352
+          IDENT@350..352 "$f"
+        WHITESPACE@352..353 " "
+        INDEX@353..355
+          IDENT@353..355 "$f"
+        WHITESPACE@355..356 " "
+        INDEX@356..358
+          IDENT@356..358 "$g"
+        WHITESPACE@358..359 " "
+        INDEX@359..361
+          IDENT@359..361 "$g"
+      R_PAREN@361..362 ")"
+    WHITESPACE@362..366 "\n\n  "
+    LINE_COMMENT@366..375 ";; Active"
+    WHITESPACE@375..378 "\n  "
+    MODULE_FIELD_ELEM@378..417
+      L_PAREN@378..379 "("
+      KEYWORD@379..383 "elem"
+      WHITESPACE@383..384 " "
+      TABLE_USE@384..394
+        L_PAREN@384..385 "("
+        KEYWORD@385..390 "table"
+        WHITESPACE@390..391 " "
+        INDEX@391..393
+          IDENT@391..393 "$t"
+        R_PAREN@393..394 ")"
+      WHITESPACE@394..395 " "
+      OFFSET@395..408
+        PLAIN_INSTR@395..408
+          L_PAREN@395..396 "("
+          INSTR_NAME@396..405 "i32.const"
+          WHITESPACE@405..406 " "
+          OPERAND@406..407
+            INT@406..407 "0"
+          R_PAREN@407..408 ")"
+      WHITESPACE@408..409 " "
+      ELEM_LIST@409..416
+        REF_TYPE@409..416 "funcref"
+      R_PAREN@416..417 ")"
+    WHITESPACE@417..420 "\n  "
+    MODULE_FIELD_ELEM@420..489
+      L_PAREN@420..421 "("
+      KEYWORD@421..425 "elem"
+      WHITESPACE@425..426 " "
+      TABLE_USE@426..436
+        L_PAREN@426..427 "("
+        KEYWORD@427..432 "table"
+        WHITESPACE@432..433 " "
+        INDEX@433..435
+          IDENT@433..435 "$t"
+        R_PAREN@435..436 ")"
+      WHITESPACE@436..437 " "
+      OFFSET@437..450
+        PLAIN_INSTR@437..450
+          L_PAREN@437..438 "("
+          INSTR_NAME@438..447 "i32.const"
+          WHITESPACE@447..448 " "
+          OPERAND@448..449
+            INT@448..449 "0"
+          R_PAREN@449..450 ")"
+      WHITESPACE@450..451 " "
+      ELEM_LIST@451..488
+        REF_TYPE@451..458 "funcref"
+        WHITESPACE@458..459 " "
+        ELEM_EXPR@459..472
+          PLAIN_INSTR@459..472
+            L_PAREN@459..460 "("
+            INSTR_NAME@460..468 "ref.func"
+            WHITESPACE@468..469 " "
+            OPERAND@469..471
+              IDENT@469..471 "$f"
+            R_PAREN@471..472 ")"
+        WHITESPACE@472..473 " "
+        ELEM_EXPR@473..488
+          PLAIN_INSTR@473..488
+            L_PAREN@473..474 "("
+            INSTR_NAME@474..482 "ref.null"
+            WHITESPACE@482..483 " "
+            OPERAND@483..487
+              HEAP_TYPE@483..487 "func"
+            R_PAREN@487..488 ")"
+      R_PAREN@488..489 ")"
+    WHITESPACE@489..492 "\n  "
+    MODULE_FIELD_ELEM@492..528
+      L_PAREN@492..493 "("
+      KEYWORD@493..497 "elem"
+      WHITESPACE@497..498 " "
+      TABLE_USE@498..508
+        L_PAREN@498..499 "("
+        KEYWORD@499..504 "table"
+        WHITESPACE@504..505 " "
+        INDEX@505..507
+          IDENT@505..507 "$t"
+        R_PAREN@507..508 ")"
+      WHITESPACE@508..509 " "
+      OFFSET@509..522
+        PLAIN_INSTR@509..522
+          L_PAREN@509..510 "("
+          INSTR_NAME@510..519 "i32.const"
+          WHITESPACE@519..520 " "
+          OPERAND@520..521
+            INT@520..521 "0"
+          R_PAREN@521..522 ")"
+      WHITESPACE@522..523 " "
+      ELEM_LIST@523..527
+        KEYWORD@523..527 "func"
+      R_PAREN@527..528 ")"
+    WHITESPACE@528..531 "\n  "
+    MODULE_FIELD_ELEM@531..573
+      L_PAREN@531..532 "("
+      KEYWORD@532..536 "elem"
+      WHITESPACE@536..537 " "
+      TABLE_USE@537..547
+        L_PAREN@537..538 "("
+        KEYWORD@538..543 "table"
+        WHITESPACE@543..544 " "
+        INDEX@544..546
+          IDENT@544..546 "$t"
+        R_PAREN@546..547 ")"
+      WHITESPACE@547..548 " "
+      OFFSET@548..561
+        PLAIN_INSTR@548..561
+          L_PAREN@548..549 "("
+          INSTR_NAME@549..558 "i32.const"
+          WHITESPACE@558..559 " "
+          OPERAND@559..560
+            INT@559..560 "0"
+          R_PAREN@560..561 ")"
+      WHITESPACE@561..562 " "
+      ELEM_LIST@562..572
+        KEYWORD@562..566 "func"
+        WHITESPACE@566..567 " "
+        INDEX@567..569
+          IDENT@567..569 "$f"
+        WHITESPACE@569..570 " "
+        INDEX@570..572
+          IDENT@570..572 "$g"
+      R_PAREN@572..573 ")"
+    WHITESPACE@573..576 "\n  "
+    MODULE_FIELD_ELEM@576..624
+      L_PAREN@576..577 "("
+      KEYWORD@577..581 "elem"
+      WHITESPACE@581..582 " "
+      TABLE_USE@582..592
+        L_PAREN@582..583 "("
+        KEYWORD@583..588 "table"
+        WHITESPACE@588..589 " "
+        INDEX@589..591
+          IDENT@589..591 "$t"
+        R_PAREN@591..592 ")"
+      WHITESPACE@592..593 " "
+      OFFSET@593..615
+        L_PAREN@593..594 "("
+        KEYWORD@594..600 "offset"
+        WHITESPACE@600..601 " "
+        PLAIN_INSTR@601..614
+          L_PAREN@601..602 "("
+          INSTR_NAME@602..611 "i32.const"
+          WHITESPACE@611..612 " "
+          OPERAND@612..613
+            INT@612..613 "0"
+          R_PAREN@613..614 ")"
+        R_PAREN@614..615 ")"
+      WHITESPACE@615..616 " "
+      ELEM_LIST@616..623
+        REF_TYPE@616..623 "funcref"
+      R_PAREN@623..624 ")"
+    WHITESPACE@624..627 "\n  "
+    MODULE_FIELD_ELEM@627..678
+      L_PAREN@627..628 "("
+      KEYWORD@628..632 "elem"
+      WHITESPACE@632..633 " "
+      TABLE_USE@633..643
+        L_PAREN@633..634 "("
+        KEYWORD@634..639 "table"
+        WHITESPACE@639..640 " "
+        INDEX@640..642
+          IDENT@640..642 "$t"
+        R_PAREN@642..643 ")"
+      WHITESPACE@643..644 " "
+      OFFSET@644..666
+        L_PAREN@644..645 "("
+        KEYWORD@645..651 "offset"
+        WHITESPACE@651..652 " "
+        PLAIN_INSTR@652..665
+          L_PAREN@652..653 "("
+          INSTR_NAME@653..662 "i32.const"
+          WHITESPACE@662..663 " "
+          OPERAND@663..664
+            INT@663..664 "0"
+          R_PAREN@664..665 ")"
+        R_PAREN@665..666 ")"
+      WHITESPACE@666..667 " "
+      ELEM_LIST@667..677
+        KEYWORD@667..671 "func"
+        WHITESPACE@671..672 " "
+        INDEX@672..674
+          IDENT@672..674 "$f"
+        WHITESPACE@674..675 " "
+        INDEX@675..677
+          IDENT@675..677 "$g"
+      R_PAREN@677..678 ")"
+    WHITESPACE@678..681 "\n  "
+    MODULE_FIELD_ELEM@681..716
+      L_PAREN@681..682 "("
+      KEYWORD@682..686 "elem"
+      WHITESPACE@686..687 " "
+      TABLE_USE@687..696
+        L_PAREN@687..688 "("
+        KEYWORD@688..693 "table"
+        WHITESPACE@693..694 " "
+        INDEX@694..695
+          UNSIGNED_INT@694..695 "0"
+        R_PAREN@695..696 ")"
+      WHITESPACE@696..697 " "
+      OFFSET@697..710
+        PLAIN_INSTR@697..710
+          L_PAREN@697..698 "("
+          INSTR_NAME@698..707 "i32.const"
+          WHITESPACE@707..708 " "
+          OPERAND@708..709
+            INT@708..709 "0"
+          R_PAREN@709..710 ")"
+      WHITESPACE@710..711 " "
+      ELEM_LIST@711..715
+        KEYWORD@711..715 "func"
+      R_PAREN@715..716 ")"
+    WHITESPACE@716..719 "\n  "
+    MODULE_FIELD_ELEM@719..762
+      L_PAREN@719..720 "("
+      KEYWORD@720..724 "elem"
+      WHITESPACE@724..725 " "
+      TABLE_USE@725..736
+        L_PAREN@725..726 "("
+        KEYWORD@726..731 "table"
+        WHITESPACE@731..732 " "
+        INDEX@732..735
+          UNSIGNED_INT@732..735 "0x0"
+        R_PAREN@735..736 ")"
+      WHITESPACE@736..737 " "
+      OFFSET@737..750
+        PLAIN_INSTR@737..750
+          L_PAREN@737..738 "("
+          INSTR_NAME@738..747 "i32.const"
+          WHITESPACE@747..748 " "
+          OPERAND@748..749
+            INT@748..749 "0"
+          R_PAREN@749..750 ")"
+      WHITESPACE@750..751 " "
+      ELEM_LIST@751..761
+        KEYWORD@751..755 "func"
+        WHITESPACE@755..756 " "
+        INDEX@756..758
+          IDENT@756..758 "$f"
+        WHITESPACE@758..759 " "
+        INDEX@759..761
+          IDENT@759..761 "$f"
+      R_PAREN@761..762 ")"
+    WHITESPACE@762..765 "\n  "
+    MODULE_FIELD_ELEM@765..813
+      L_PAREN@765..766 "("
+      KEYWORD@766..770 "elem"
+      WHITESPACE@770..771 " "
+      TABLE_USE@771..784
+        L_PAREN@771..772 "("
+        KEYWORD@772..777 "table"
+        WHITESPACE@777..778 " "
+        INDEX@778..783
+          UNSIGNED_INT@778..783 "0x000"
+        R_PAREN@783..784 ")"
+      WHITESPACE@784..785 " "
+      OFFSET@785..807
+        L_PAREN@785..786 "("
+        KEYWORD@786..792 "offset"
+        WHITESPACE@792..793 " "
+        PLAIN_INSTR@793..806
+          L_PAREN@793..794 "("
+          INSTR_NAME@794..803 "i32.const"
+          WHITESPACE@803..804 " "
+          OPERAND@804..805
+            INT@804..805 "0"
+          R_PAREN@805..806 ")"
+        R_PAREN@806..807 ")"
+      WHITESPACE@807..808 " "
+      ELEM_LIST@808..812
+        KEYWORD@808..812 "func"
+      R_PAREN@812..813 ")"
+    WHITESPACE@813..816 "\n  "
+    MODULE_FIELD_ELEM@816..866
+      L_PAREN@816..817 "("
+      KEYWORD@817..821 "elem"
+      WHITESPACE@821..822 " "
+      TABLE_USE@822..831
+        L_PAREN@822..823 "("
+        KEYWORD@823..828 "table"
+        WHITESPACE@828..829 " "
+        INDEX@829..830
+          UNSIGNED_INT@829..830 "0"
+        R_PAREN@830..831 ")"
+      WHITESPACE@831..832 " "
+      OFFSET@832..854
+        L_PAREN@832..833 "("
+        KEYWORD@833..839 "offset"
+        WHITESPACE@839..840 " "
+        PLAIN_INSTR@840..853
+          L_PAREN@840..841 "("
+          INSTR_NAME@841..850 "i32.const"
+          WHITESPACE@850..851 " "
+          OPERAND@851..852
+            INT@851..852 "0"
+          R_PAREN@852..853 ")"
+        R_PAREN@853..854 ")"
+      WHITESPACE@854..855 " "
+      ELEM_LIST@855..865
+        KEYWORD@855..859 "func"
+        WHITESPACE@859..860 " "
+        INDEX@860..862
+          IDENT@860..862 "$f"
+        WHITESPACE@862..863 " "
+        INDEX@863..865
+          IDENT@863..865 "$f"
+      R_PAREN@865..866 ")"
+    WHITESPACE@866..869 "\n  "
+    MODULE_FIELD_ELEM@869..905
+      L_PAREN@869..870 "("
+      KEYWORD@870..874 "elem"
+      WHITESPACE@874..875 " "
+      TABLE_USE@875..885
+        L_PAREN@875..876 "("
+        KEYWORD@876..881 "table"
+        WHITESPACE@881..882 " "
+        INDEX@882..884
+          IDENT@882..884 "$t"
+        R_PAREN@884..885 ")"
+      WHITESPACE@885..886 " "
+      OFFSET@886..899
+        PLAIN_INSTR@886..899
+          L_PAREN@886..887 "("
+          INSTR_NAME@887..896 "i32.const"
+          WHITESPACE@896..897 " "
+          OPERAND@897..898
+            INT@897..898 "0"
+          R_PAREN@898..899 ")"
+      WHITESPACE@899..900 " "
+      ELEM_LIST@900..904
+        KEYWORD@900..904 "func"
+      R_PAREN@904..905 ")"
+    WHITESPACE@905..908 "\n  "
+    MODULE_FIELD_ELEM@908..950
+      L_PAREN@908..909 "("
+      KEYWORD@909..913 "elem"
+      WHITESPACE@913..914 " "
+      TABLE_USE@914..924
+        L_PAREN@914..915 "("
+        KEYWORD@915..920 "table"
+        WHITESPACE@920..921 " "
+        INDEX@921..923
+          IDENT@921..923 "$t"
+        R_PAREN@923..924 ")"
+      WHITESPACE@924..925 " "
+      OFFSET@925..938
+        PLAIN_INSTR@925..938
+          L_PAREN@925..926 "("
+          INSTR_NAME@926..935 "i32.const"
+          WHITESPACE@935..936 " "
+          OPERAND@936..937
+            INT@936..937 "0"
+          R_PAREN@937..938 ")"
+      WHITESPACE@938..939 " "
+      ELEM_LIST@939..949
+        KEYWORD@939..943 "func"
+        WHITESPACE@943..944 " "
+        INDEX@944..946
+          IDENT@944..946 "$f"
+        WHITESPACE@946..947 " "
+        INDEX@947..949
+          IDENT@947..949 "$f"
+      R_PAREN@949..950 ")"
+    WHITESPACE@950..953 "\n  "
+    MODULE_FIELD_ELEM@953..998
+      L_PAREN@953..954 "("
+      KEYWORD@954..958 "elem"
+      WHITESPACE@958..959 " "
+      TABLE_USE@959..969
+        L_PAREN@959..960 "("
+        KEYWORD@960..965 "table"
+        WHITESPACE@965..966 " "
+        INDEX@966..968
+          IDENT@966..968 "$t"
+        R_PAREN@968..969 ")"
+      WHITESPACE@969..970 " "
+      OFFSET@970..992
+        L_PAREN@970..971 "("
+        KEYWORD@971..977 "offset"
+        WHITESPACE@977..978 " "
+        PLAIN_INSTR@978..991
+          L_PAREN@978..979 "("
+          INSTR_NAME@979..988 "i32.const"
+          WHITESPACE@988..989 " "
+          OPERAND@989..990
+            INT@989..990 "0"
+          R_PAREN@990..991 ")"
+        R_PAREN@991..992 ")"
+      WHITESPACE@992..993 " "
+      ELEM_LIST@993..997
+        KEYWORD@993..997 "func"
+      R_PAREN@997..998 ")"
+    WHITESPACE@998..1001 "\n  "
+    MODULE_FIELD_ELEM@1001..1052
+      L_PAREN@1001..1002 "("
+      KEYWORD@1002..1006 "elem"
+      WHITESPACE@1006..1007 " "
+      TABLE_USE@1007..1017
+        L_PAREN@1007..1008 "("
+        KEYWORD@1008..1013 "table"
+        WHITESPACE@1013..1014 " "
+        INDEX@1014..1016
+          IDENT@1014..1016 "$t"
+        R_PAREN@1016..1017 ")"
+      WHITESPACE@1017..1018 " "
+      OFFSET@1018..1040
+        L_PAREN@1018..1019 "("
+        KEYWORD@1019..1025 "offset"
+        WHITESPACE@1025..1026 " "
+        PLAIN_INSTR@1026..1039
+          L_PAREN@1026..1027 "("
+          INSTR_NAME@1027..1036 "i32.const"
+          WHITESPACE@1036..1037 " "
+          OPERAND@1037..1038
+            INT@1037..1038 "0"
+          R_PAREN@1038..1039 ")"
+        R_PAREN@1039..1040 ")"
+      WHITESPACE@1040..1041 " "
+      ELEM_LIST@1041..1051
+        KEYWORD@1041..1045 "func"
+        WHITESPACE@1045..1046 " "
+        INDEX@1046..1048
+          IDENT@1046..1048 "$f"
+        WHITESPACE@1048..1049 " "
+        INDEX@1049..1051
+          IDENT@1049..1051 "$f"
+      R_PAREN@1051..1052 ")"
+    WHITESPACE@1052..1055 "\n  "
+    MODULE_FIELD_ELEM@1055..1084
+      L_PAREN@1055..1056 "("
+      KEYWORD@1056..1060 "elem"
+      WHITESPACE@1060..1061 " "
+      OFFSET@1061..1083
+        L_PAREN@1061..1062 "("
+        KEYWORD@1062..1068 "offset"
+        WHITESPACE@1068..1069 " "
+        PLAIN_INSTR@1069..1082
+          L_PAREN@1069..1070 "("
+          INSTR_NAME@1070..1079 "i32.const"
+          WHITESPACE@1079..1080 " "
+          OPERAND@1080..1081
+            INT@1080..1081 "0"
+          R_PAREN@1081..1082 ")"
+        R_PAREN@1082..1083 ")"
+      R_PAREN@1083..1084 ")"
+    WHITESPACE@1084..1087 "\n  "
+    MODULE_FIELD_ELEM@1087..1154
+      L_PAREN@1087..1088 "("
+      KEYWORD@1088..1092 "elem"
+      WHITESPACE@1092..1093 " "
+      OFFSET@1093..1115
+        L_PAREN@1093..1094 "("
+        KEYWORD@1094..1100 "offset"
+        WHITESPACE@1100..1101 " "
+        PLAIN_INSTR@1101..1114
+          L_PAREN@1101..1102 "("
+          INSTR_NAME@1102..1111 "i32.const"
+          WHITESPACE@1111..1112 " "
+          OPERAND@1112..1113
+            INT@1112..1113 "0"
+          R_PAREN@1113..1114 ")"
+        R_PAREN@1114..1115 ")"
+      WHITESPACE@1115..1116 " "
+      ELEM_LIST@1116..1153
+        REF_TYPE@1116..1123 "funcref"
+        WHITESPACE@1123..1124 " "
+        ELEM_EXPR@1124..1137
+          PLAIN_INSTR@1124..1137
+            L_PAREN@1124..1125 "("
+            INSTR_NAME@1125..1133 "ref.func"
+            WHITESPACE@1133..1134 " "
+            OPERAND@1134..1136
+              IDENT@1134..1136 "$f"
+            R_PAREN@1136..1137 ")"
+        WHITESPACE@1137..1138 " "
+        ELEM_EXPR@1138..1153
+          PLAIN_INSTR@1138..1153
+            L_PAREN@1138..1139 "("
+            INSTR_NAME@1139..1147 "ref.null"
+            WHITESPACE@1147..1148 " "
+            OPERAND@1148..1152
+              HEAP_TYPE@1148..1152 "func"
+            R_PAREN@1152..1153 ")"
+      R_PAREN@1153..1154 ")"
+    WHITESPACE@1154..1157 "\n  "
+    MODULE_FIELD_ELEM@1157..1197
+      L_PAREN@1157..1158 "("
+      KEYWORD@1158..1162 "elem"
+      WHITESPACE@1162..1163 " "
+      OFFSET@1163..1185
+        L_PAREN@1163..1164 "("
+        KEYWORD@1164..1170 "offset"
+        WHITESPACE@1170..1171 " "
+        PLAIN_INSTR@1171..1184
+          L_PAREN@1171..1172 "("
+          INSTR_NAME@1172..1181 "i32.const"
+          WHITESPACE@1181..1182 " "
+          OPERAND@1182..1183
+            INT@1182..1183 "0"
+          R_PAREN@1183..1184 ")"
+        R_PAREN@1184..1185 ")"
+      WHITESPACE@1185..1186 " "
+      ELEM_LIST@1186..1196
+        KEYWORD@1186..1190 "func"
+        WHITESPACE@1190..1191 " "
+        INDEX@1191..1193
+          IDENT@1191..1193 "$f"
+        WHITESPACE@1193..1194 " "
+        INDEX@1194..1196
+          IDENT@1194..1196 "$f"
+      R_PAREN@1196..1197 ")"
+    WHITESPACE@1197..1200 "\n  "
+    MODULE_FIELD_ELEM@1200..1235
+      L_PAREN@1200..1201 "("
+      KEYWORD@1201..1205 "elem"
+      WHITESPACE@1205..1206 " "
+      OFFSET@1206..1228
+        L_PAREN@1206..1207 "("
+        KEYWORD@1207..1213 "offset"
+        WHITESPACE@1213..1214 " "
+        PLAIN_INSTR@1214..1227
+          L_PAREN@1214..1215 "("
+          INSTR_NAME@1215..1224 "i32.const"
+          WHITESPACE@1224..1225 " "
+          OPERAND@1225..1226
+            INT@1225..1226 "0"
+          R_PAREN@1226..1227 ")"
+        R_PAREN@1227..1228 ")"
+      WHITESPACE@1228..1229 " "
+      ELEM_LIST@1229..1234
+        INDEX@1229..1231
+          IDENT@1229..1231 "$f"
+        WHITESPACE@1231..1232 " "
+        INDEX@1232..1234
+          IDENT@1232..1234 "$f"
+      R_PAREN@1234..1235 ")"
+    WHITESPACE@1235..1238 "\n  "
+    MODULE_FIELD_ELEM@1238..1258
+      L_PAREN@1238..1239 "("
+      KEYWORD@1239..1243 "elem"
+      WHITESPACE@1243..1244 " "
+      OFFSET@1244..1257
+        PLAIN_INSTR@1244..1257
+          L_PAREN@1244..1245 "("
+          INSTR_NAME@1245..1254 "i32.const"
+          WHITESPACE@1254..1255 " "
+          OPERAND@1255..1256
+            INT@1255..1256 "0"
+          R_PAREN@1256..1257 ")"
+      R_PAREN@1257..1258 ")"
+    WHITESPACE@1258..1261 "\n  "
+    MODULE_FIELD_ELEM@1261..1319
+      L_PAREN@1261..1262 "("
+      KEYWORD@1262..1266 "elem"
+      WHITESPACE@1266..1267 " "
+      OFFSET@1267..1280
+        PLAIN_INSTR@1267..1280
+          L_PAREN@1267..1268 "("
+          INSTR_NAME@1268..1277 "i32.const"
+          WHITESPACE@1277..1278 " "
+          OPERAND@1278..1279
+            INT@1278..1279 "0"
+          R_PAREN@1279..1280 ")"
+      WHITESPACE@1280..1281 " "
+      ELEM_LIST@1281..1318
+        REF_TYPE@1281..1288 "funcref"
+        WHITESPACE@1288..1289 " "
+        ELEM_EXPR@1289..1302
+          PLAIN_INSTR@1289..1302
+            L_PAREN@1289..1290 "("
+            INSTR_NAME@1290..1298 "ref.func"
+            WHITESPACE@1298..1299 " "
+            OPERAND@1299..1301
+              IDENT@1299..1301 "$f"
+            R_PAREN@1301..1302 ")"
+        WHITESPACE@1302..1303 " "
+        ELEM_EXPR@1303..1318
+          PLAIN_INSTR@1303..1318
+            L_PAREN@1303..1304 "("
+            INSTR_NAME@1304..1312 "ref.null"
+            WHITESPACE@1312..1313 " "
+            OPERAND@1313..1317
+              HEAP_TYPE@1313..1317 "func"
+            R_PAREN@1317..1318 ")"
+      R_PAREN@1318..1319 ")"
+    WHITESPACE@1319..1322 "\n  "
+    MODULE_FIELD_ELEM@1322..1353
+      L_PAREN@1322..1323 "("
+      KEYWORD@1323..1327 "elem"
+      WHITESPACE@1327..1328 " "
+      OFFSET@1328..1341
+        PLAIN_INSTR@1328..1341
+          L_PAREN@1328..1329 "("
+          INSTR_NAME@1329..1338 "i32.const"
+          WHITESPACE@1338..1339 " "
+          OPERAND@1339..1340
+            INT@1339..1340 "0"
+          R_PAREN@1340..1341 ")"
+      WHITESPACE@1341..1342 " "
+      ELEM_LIST@1342..1352
+        KEYWORD@1342..1346 "func"
+        WHITESPACE@1346..1347 " "
+        INDEX@1347..1349
+          IDENT@1347..1349 "$f"
+        WHITESPACE@1349..1350 " "
+        INDEX@1350..1352
+          IDENT@1350..1352 "$f"
+      R_PAREN@1352..1353 ")"
+    WHITESPACE@1353..1356 "\n  "
+    MODULE_FIELD_ELEM@1356..1382
+      L_PAREN@1356..1357 "("
+      KEYWORD@1357..1361 "elem"
+      WHITESPACE@1361..1362 " "
+      OFFSET@1362..1375
+        PLAIN_INSTR@1362..1375
+          L_PAREN@1362..1363 "("
+          INSTR_NAME@1363..1372 "i32.const"
+          WHITESPACE@1372..1373 " "
+          OPERAND@1373..1374
+            INT@1373..1374 "0"
+          R_PAREN@1374..1375 ")"
+      WHITESPACE@1375..1376 " "
+      ELEM_LIST@1376..1381
+        INDEX@1376..1378
+          IDENT@1376..1378 "$f"
+        WHITESPACE@1378..1379 " "
+        INDEX@1379..1381
+          IDENT@1379..1381 "$f"
+      R_PAREN@1381..1382 ")"
+    WHITESPACE@1382..1385 "\n  "
+    MODULE_FIELD_ELEM@1385..1457
+      L_PAREN@1385..1386 "("
+      KEYWORD@1386..1390 "elem"
+      WHITESPACE@1390..1391 " "
+      OFFSET@1391..1404
+        PLAIN_INSTR@1391..1404
+          L_PAREN@1391..1392 "("
+          INSTR_NAME@1392..1401 "i32.const"
+          WHITESPACE@1401..1402 " "
+          OPERAND@1402..1403
+            INT@1402..1403 "0"
+          R_PAREN@1403..1404 ")"
+      WHITESPACE@1404..1405 " "
+      ELEM_LIST@1405..1456
+        REF_TYPE@1405..1412 "funcref"
+        WHITESPACE@1412..1413 " "
+        ELEM_EXPR@1413..1433
+          L_PAREN@1413..1414 "("
+          KEYWORD@1414..1418 "item"
+          WHITESPACE@1418..1419 " "
+          PLAIN_INSTR@1419..1432
+            L_PAREN@1419..1420 "("
+            INSTR_NAME@1420..1428 "ref.func"
+            WHITESPACE@1428..1429 " "
+            OPERAND@1429..1431
+              IDENT@1429..1431 "$f"
+            R_PAREN@1431..1432 ")"
+          R_PAREN@1432..1433 ")"
+        WHITESPACE@1433..1434 " "
+        ELEM_EXPR@1434..1456
+          L_PAREN@1434..1435 "("
+          KEYWORD@1435..1439 "item"
+          WHITESPACE@1439..1440 " "
+          PLAIN_INSTR@1440..1455
+            L_PAREN@1440..1441 "("
+            INSTR_NAME@1441..1449 "ref.null"
+            WHITESPACE@1449..1450 " "
+            OPERAND@1450..1454
+              HEAP_TYPE@1450..1454 "func"
+            R_PAREN@1454..1455 ")"
+          R_PAREN@1455..1456 ")"
+      R_PAREN@1456..1457 ")"
+    WHITESPACE@1457..1461 "\n\n  "
+    MODULE_FIELD_ELEM@1461..1504
+      L_PAREN@1461..1462 "("
+      KEYWORD@1462..1466 "elem"
+      WHITESPACE@1466..1467 " "
+      IDENT@1467..1470 "$a1"
+      WHITESPACE@1470..1471 " "
+      TABLE_USE@1471..1481
+        L_PAREN@1471..1472 "("
+        KEYWORD@1472..1477 "table"
+        WHITESPACE@1477..1478 " "
+        INDEX@1478..1480
+          IDENT@1478..1480 "$t"
+        R_PAREN@1480..1481 ")"
+      WHITESPACE@1481..1482 " "
+      OFFSET@1482..1495
+        PLAIN_INSTR@1482..1495
+          L_PAREN@1482..1483 "("
+          INSTR_NAME@1483..1492 "i32.const"
+          WHITESPACE@1492..1493 " "
+          OPERAND@1493..1494
+            INT@1493..1494 "0"
+          R_PAREN@1494..1495 ")"
+      WHITESPACE@1495..1496 " "
+      ELEM_LIST@1496..1503
+        REF_TYPE@1496..1503 "funcref"
+      R_PAREN@1503..1504 ")"
+    WHITESPACE@1504..1507 "\n  "
+    MODULE_FIELD_ELEM@1507..1580
+      L_PAREN@1507..1508 "("
+      KEYWORD@1508..1512 "elem"
+      WHITESPACE@1512..1513 " "
+      IDENT@1513..1516 "$a2"
+      WHITESPACE@1516..1517 " "
+      TABLE_USE@1517..1527
+        L_PAREN@1517..1518 "("
+        KEYWORD@1518..1523 "table"
+        WHITESPACE@1523..1524 " "
+        INDEX@1524..1526
+          IDENT@1524..1526 "$t"
+        R_PAREN@1526..1527 ")"
+      WHITESPACE@1527..1528 " "
+      OFFSET@1528..1541
+        PLAIN_INSTR@1528..1541
+          L_PAREN@1528..1529 "("
+          INSTR_NAME@1529..1538 "i32.const"
+          WHITESPACE@1538..1539 " "
+          OPERAND@1539..1540
+            INT@1539..1540 "0"
+          R_PAREN@1540..1541 ")"
+      WHITESPACE@1541..1542 " "
+      ELEM_LIST@1542..1579
+        REF_TYPE@1542..1549 "funcref"
+        WHITESPACE@1549..1550 " "
+        ELEM_EXPR@1550..1563
+          PLAIN_INSTR@1550..1563
+            L_PAREN@1550..1551 "("
+            INSTR_NAME@1551..1559 "ref.func"
+            WHITESPACE@1559..1560 " "
+            OPERAND@1560..1562
+              IDENT@1560..1562 "$f"
+            R_PAREN@1562..1563 ")"
+        WHITESPACE@1563..1564 " "
+        ELEM_EXPR@1564..1579
+          PLAIN_INSTR@1564..1579
+            L_PAREN@1564..1565 "("
+            INSTR_NAME@1565..1573 "ref.null"
+            WHITESPACE@1573..1574 " "
+            OPERAND@1574..1578
+              HEAP_TYPE@1574..1578 "func"
+            R_PAREN@1578..1579 ")"
+      R_PAREN@1579..1580 ")"
+    WHITESPACE@1580..1583 "\n  "
+    MODULE_FIELD_ELEM@1583..1623
+      L_PAREN@1583..1584 "("
+      KEYWORD@1584..1588 "elem"
+      WHITESPACE@1588..1589 " "
+      IDENT@1589..1592 "$a3"
+      WHITESPACE@1592..1593 " "
+      TABLE_USE@1593..1603
+        L_PAREN@1593..1594 "("
+        KEYWORD@1594..1599 "table"
+        WHITESPACE@1599..1600 " "
+        INDEX@1600..1602
+          IDENT@1600..1602 "$t"
+        R_PAREN@1602..1603 ")"
+      WHITESPACE@1603..1604 " "
+      OFFSET@1604..1617
+        PLAIN_INSTR@1604..1617
+          L_PAREN@1604..1605 "("
+          INSTR_NAME@1605..1614 "i32.const"
+          WHITESPACE@1614..1615 " "
+          OPERAND@1615..1616
+            INT@1615..1616 "0"
+          R_PAREN@1616..1617 ")"
+      WHITESPACE@1617..1618 " "
+      ELEM_LIST@1618..1622
+        KEYWORD@1618..1622 "func"
+      R_PAREN@1622..1623 ")"
+    WHITESPACE@1623..1626 "\n  "
+    MODULE_FIELD_ELEM@1626..1672
+      L_PAREN@1626..1627 "("
+      KEYWORD@1627..1631 "elem"
+      WHITESPACE@1631..1632 " "
+      IDENT@1632..1635 "$a4"
+      WHITESPACE@1635..1636 " "
+      TABLE_USE@1636..1646
+        L_PAREN@1636..1637 "("
+        KEYWORD@1637..1642 "table"
+        WHITESPACE@1642..1643 " "
+        INDEX@1643..1645
+          IDENT@1643..1645 "$t"
+        R_PAREN@1645..1646 ")"
+      WHITESPACE@1646..1647 " "
+      OFFSET@1647..1660
+        PLAIN_INSTR@1647..1660
+          L_PAREN@1647..1648 "("
+          INSTR_NAME@1648..1657 "i32.const"
+          WHITESPACE@1657..1658 " "
+          OPERAND@1658..1659
+            INT@1658..1659 "0"
+          R_PAREN@1659..1660 ")"
+      WHITESPACE@1660..1661 " "
+      ELEM_LIST@1661..1671
+        KEYWORD@1661..1665 "func"
+        WHITESPACE@1665..1666 " "
+        INDEX@1666..1668
+          IDENT@1666..1668 "$f"
+        WHITESPACE@1668..1669 " "
+        INDEX@1669..1671
+          IDENT@1669..1671 "$g"
+      R_PAREN@1671..1672 ")"
+    WHITESPACE@1672..1675 "\n  "
+    MODULE_FIELD_ELEM@1675..1727
+      L_PAREN@1675..1676 "("
+      KEYWORD@1676..1680 "elem"
+      WHITESPACE@1680..1681 " "
+      IDENT@1681..1684 "$a9"
+      WHITESPACE@1684..1685 " "
+      TABLE_USE@1685..1695
+        L_PAREN@1685..1686 "("
+        KEYWORD@1686..1691 "table"
+        WHITESPACE@1691..1692 " "
+        INDEX@1692..1694
+          IDENT@1692..1694 "$t"
+        R_PAREN@1694..1695 ")"
+      WHITESPACE@1695..1696 " "
+      OFFSET@1696..1718
+        L_PAREN@1696..1697 "("
+        KEYWORD@1697..1703 "offset"
+        WHITESPACE@1703..1704 " "
+        PLAIN_INSTR@1704..1717
+          L_PAREN@1704..1705 "("
+          INSTR_NAME@1705..1714 "i32.const"
+          WHITESPACE@1714..1715 " "
+          OPERAND@1715..1716
+            INT@1715..1716 "0"
+          R_PAREN@1716..1717 ")"
+        R_PAREN@1717..1718 ")"
+      WHITESPACE@1718..1719 " "
+      ELEM_LIST@1719..1726
+        REF_TYPE@1719..1726 "funcref"
+      R_PAREN@1726..1727 ")"
+    WHITESPACE@1727..1730 "\n  "
+    MODULE_FIELD_ELEM@1730..1786
+      L_PAREN@1730..1731 "("
+      KEYWORD@1731..1735 "elem"
+      WHITESPACE@1735..1736 " "
+      IDENT@1736..1740 "$a10"
+      WHITESPACE@1740..1741 " "
+      TABLE_USE@1741..1751
+        L_PAREN@1741..1742 "("
+        KEYWORD@1742..1747 "table"
+        WHITESPACE@1747..1748 " "
+        INDEX@1748..1750
+          IDENT@1748..1750 "$t"
+        R_PAREN@1750..1751 ")"
+      WHITESPACE@1751..1752 " "
+      OFFSET@1752..1774
+        L_PAREN@1752..1753 "("
+        KEYWORD@1753..1759 "offset"
+        WHITESPACE@1759..1760 " "
+        PLAIN_INSTR@1760..1773
+          L_PAREN@1760..1761 "("
+          INSTR_NAME@1761..1770 "i32.const"
+          WHITESPACE@1770..1771 " "
+          OPERAND@1771..1772
+            INT@1771..1772 "0"
+          R_PAREN@1772..1773 ")"
+        R_PAREN@1773..1774 ")"
+      WHITESPACE@1774..1775 " "
+      ELEM_LIST@1775..1785
+        KEYWORD@1775..1779 "func"
+        WHITESPACE@1779..1780 " "
+        INDEX@1780..1782
+          IDENT@1780..1782 "$f"
+        WHITESPACE@1782..1783 " "
+        INDEX@1783..1785
+          IDENT@1783..1785 "$g"
+      R_PAREN@1785..1786 ")"
+    WHITESPACE@1786..1789 "\n  "
+    MODULE_FIELD_ELEM@1789..1829
+      L_PAREN@1789..1790 "("
+      KEYWORD@1790..1794 "elem"
+      WHITESPACE@1794..1795 " "
+      IDENT@1795..1799 "$a11"
+      WHITESPACE@1799..1800 " "
+      TABLE_USE@1800..1809
+        L_PAREN@1800..1801 "("
+        KEYWORD@1801..1806 "table"
+        WHITESPACE@1806..1807 " "
+        INDEX@1807..1808
+          UNSIGNED_INT@1807..1808 "0"
+        R_PAREN@1808..1809 ")"
+      WHITESPACE@1809..1810 " "
+      OFFSET@1810..1823
+        PLAIN_INSTR@1810..1823
+          L_PAREN@1810..1811 "("
+          INSTR_NAME@1811..1820 "i32.const"
+          WHITESPACE@1820..1821 " "
+          OPERAND@1821..1822
+            INT@1821..1822 "0"
+          R_PAREN@1822..1823 ")"
+      WHITESPACE@1823..1824 " "
+      ELEM_LIST@1824..1828
+        KEYWORD@1824..1828 "func"
+      R_PAREN@1828..1829 ")"
+    WHITESPACE@1829..1832 "\n  "
+    MODULE_FIELD_ELEM@1832..1880
+      L_PAREN@1832..1833 "("
+      KEYWORD@1833..1837 "elem"
+      WHITESPACE@1837..1838 " "
+      IDENT@1838..1842 "$a12"
+      WHITESPACE@1842..1843 " "
+      TABLE_USE@1843..1854
+        L_PAREN@1843..1844 "("
+        KEYWORD@1844..1849 "table"
+        WHITESPACE@1849..1850 " "
+        INDEX@1850..1853
+          UNSIGNED_INT@1850..1853 "0x0"
+        R_PAREN@1853..1854 ")"
+      WHITESPACE@1854..1855 " "
+      OFFSET@1855..1868
+        PLAIN_INSTR@1855..1868
+          L_PAREN@1855..1856 "("
+          INSTR_NAME@1856..1865 "i32.const"
+          WHITESPACE@1865..1866 " "
+          OPERAND@1866..1867
+            INT@1866..1867 "0"
+          R_PAREN@1867..1868 ")"
+      WHITESPACE@1868..1869 " "
+      ELEM_LIST@1869..1879
+        KEYWORD@1869..1873 "func"
+        WHITESPACE@1873..1874 " "
+        INDEX@1874..1876
+          IDENT@1874..1876 "$f"
+        WHITESPACE@1876..1877 " "
+        INDEX@1877..1879
+          IDENT@1877..1879 "$f"
+      R_PAREN@1879..1880 ")"
+    WHITESPACE@1880..1883 "\n  "
+    MODULE_FIELD_ELEM@1883..1936
+      L_PAREN@1883..1884 "("
+      KEYWORD@1884..1888 "elem"
+      WHITESPACE@1888..1889 " "
+      IDENT@1889..1893 "$a13"
+      WHITESPACE@1893..1894 " "
+      TABLE_USE@1894..1907
+        L_PAREN@1894..1895 "("
+        KEYWORD@1895..1900 "table"
+        WHITESPACE@1900..1901 " "
+        INDEX@1901..1906
+          UNSIGNED_INT@1901..1906 "0x000"
+        R_PAREN@1906..1907 ")"
+      WHITESPACE@1907..1908 " "
+      OFFSET@1908..1930
+        L_PAREN@1908..1909 "("
+        KEYWORD@1909..1915 "offset"
+        WHITESPACE@1915..1916 " "
+        PLAIN_INSTR@1916..1929
+          L_PAREN@1916..1917 "("
+          INSTR_NAME@1917..1926 "i32.const"
+          WHITESPACE@1926..1927 " "
+          OPERAND@1927..1928
+            INT@1927..1928 "0"
+          R_PAREN@1928..1929 ")"
+        R_PAREN@1929..1930 ")"
+      WHITESPACE@1930..1931 " "
+      ELEM_LIST@1931..1935
+        KEYWORD@1931..1935 "func"
+      R_PAREN@1935..1936 ")"
+    WHITESPACE@1936..1939 "\n  "
+    MODULE_FIELD_ELEM@1939..1994
+      L_PAREN@1939..1940 "("
+      KEYWORD@1940..1944 "elem"
+      WHITESPACE@1944..1945 " "
+      IDENT@1945..1949 "$a14"
+      WHITESPACE@1949..1950 " "
+      TABLE_USE@1950..1959
+        L_PAREN@1950..1951 "("
+        KEYWORD@1951..1956 "table"
+        WHITESPACE@1956..1957 " "
+        INDEX@1957..1958
+          UNSIGNED_INT@1957..1958 "0"
+        R_PAREN@1958..1959 ")"
+      WHITESPACE@1959..1960 " "
+      OFFSET@1960..1982
+        L_PAREN@1960..1961 "("
+        KEYWORD@1961..1967 "offset"
+        WHITESPACE@1967..1968 " "
+        PLAIN_INSTR@1968..1981
+          L_PAREN@1968..1969 "("
+          INSTR_NAME@1969..1978 "i32.const"
+          WHITESPACE@1978..1979 " "
+          OPERAND@1979..1980
+            INT@1979..1980 "0"
+          R_PAREN@1980..1981 ")"
+        R_PAREN@1981..1982 ")"
+      WHITESPACE@1982..1983 " "
+      ELEM_LIST@1983..1993
+        KEYWORD@1983..1987 "func"
+        WHITESPACE@1987..1988 " "
+        INDEX@1988..1990
+          IDENT@1988..1990 "$f"
+        WHITESPACE@1990..1991 " "
+        INDEX@1991..1993
+          IDENT@1991..1993 "$f"
+      R_PAREN@1993..1994 ")"
+    WHITESPACE@1994..1997 "\n  "
+    MODULE_FIELD_ELEM@1997..2038
+      L_PAREN@1997..1998 "("
+      KEYWORD@1998..2002 "elem"
+      WHITESPACE@2002..2003 " "
+      IDENT@2003..2007 "$a15"
+      WHITESPACE@2007..2008 " "
+      TABLE_USE@2008..2018
+        L_PAREN@2008..2009 "("
+        KEYWORD@2009..2014 "table"
+        WHITESPACE@2014..2015 " "
+        INDEX@2015..2017
+          IDENT@2015..2017 "$t"
+        R_PAREN@2017..2018 ")"
+      WHITESPACE@2018..2019 " "
+      OFFSET@2019..2032
+        PLAIN_INSTR@2019..2032
+          L_PAREN@2019..2020 "("
+          INSTR_NAME@2020..2029 "i32.const"
+          WHITESPACE@2029..2030 " "
+          OPERAND@2030..2031
+            INT@2030..2031 "0"
+          R_PAREN@2031..2032 ")"
+      WHITESPACE@2032..2033 " "
+      ELEM_LIST@2033..2037
+        KEYWORD@2033..2037 "func"
+      R_PAREN@2037..2038 ")"
+    WHITESPACE@2038..2041 "\n  "
+    MODULE_FIELD_ELEM@2041..2088
+      L_PAREN@2041..2042 "("
+      KEYWORD@2042..2046 "elem"
+      WHITESPACE@2046..2047 " "
+      IDENT@2047..2051 "$a16"
+      WHITESPACE@2051..2052 " "
+      TABLE_USE@2052..2062
+        L_PAREN@2052..2053 "("
+        KEYWORD@2053..2058 "table"
+        WHITESPACE@2058..2059 " "
+        INDEX@2059..2061
+          IDENT@2059..2061 "$t"
+        R_PAREN@2061..2062 ")"
+      WHITESPACE@2062..2063 " "
+      OFFSET@2063..2076
+        PLAIN_INSTR@2063..2076
+          L_PAREN@2063..2064 "("
+          INSTR_NAME@2064..2073 "i32.const"
+          WHITESPACE@2073..2074 " "
+          OPERAND@2074..2075
+            INT@2074..2075 "0"
+          R_PAREN@2075..2076 ")"
+      WHITESPACE@2076..2077 " "
+      ELEM_LIST@2077..2087
+        KEYWORD@2077..2081 "func"
+        WHITESPACE@2081..2082 " "
+        INDEX@2082..2084
+          IDENT@2082..2084 "$f"
+        WHITESPACE@2084..2085 " "
+        INDEX@2085..2087
+          IDENT@2085..2087 "$f"
+      R_PAREN@2087..2088 ")"
+    WHITESPACE@2088..2091 "\n  "
+    MODULE_FIELD_ELEM@2091..2141
+      L_PAREN@2091..2092 "("
+      KEYWORD@2092..2096 "elem"
+      WHITESPACE@2096..2097 " "
+      IDENT@2097..2101 "$a17"
+      WHITESPACE@2101..2102 " "
+      TABLE_USE@2102..2112
+        L_PAREN@2102..2103 "("
+        KEYWORD@2103..2108 "table"
+        WHITESPACE@2108..2109 " "
+        INDEX@2109..2111
+          IDENT@2109..2111 "$t"
+        R_PAREN@2111..2112 ")"
+      WHITESPACE@2112..2113 " "
+      OFFSET@2113..2135
+        L_PAREN@2113..2114 "("
+        KEYWORD@2114..2120 "offset"
+        WHITESPACE@2120..2121 " "
+        PLAIN_INSTR@2121..2134
+          L_PAREN@2121..2122 "("
+          INSTR_NAME@2122..2131 "i32.const"
+          WHITESPACE@2131..2132 " "
+          OPERAND@2132..2133
+            INT@2132..2133 "0"
+          R_PAREN@2133..2134 ")"
+        R_PAREN@2134..2135 ")"
+      WHITESPACE@2135..2136 " "
+      ELEM_LIST@2136..2140
+        KEYWORD@2136..2140 "func"
+      R_PAREN@2140..2141 ")"
+    WHITESPACE@2141..2144 "\n  "
+    MODULE_FIELD_ELEM@2144..2200
+      L_PAREN@2144..2145 "("
+      KEYWORD@2145..2149 "elem"
+      WHITESPACE@2149..2150 " "
+      IDENT@2150..2154 "$a18"
+      WHITESPACE@2154..2155 " "
+      TABLE_USE@2155..2165
+        L_PAREN@2155..2156 "("
+        KEYWORD@2156..2161 "table"
+        WHITESPACE@2161..2162 " "
+        INDEX@2162..2164
+          IDENT@2162..2164 "$t"
+        R_PAREN@2164..2165 ")"
+      WHITESPACE@2165..2166 " "
+      OFFSET@2166..2188
+        L_PAREN@2166..2167 "("
+        KEYWORD@2167..2173 "offset"
+        WHITESPACE@2173..2174 " "
+        PLAIN_INSTR@2174..2187
+          L_PAREN@2174..2175 "("
+          INSTR_NAME@2175..2184 "i32.const"
+          WHITESPACE@2184..2185 " "
+          OPERAND@2185..2186
+            INT@2185..2186 "0"
+          R_PAREN@2186..2187 ")"
+        R_PAREN@2187..2188 ")"
+      WHITESPACE@2188..2189 " "
+      ELEM_LIST@2189..2199
+        KEYWORD@2189..2193 "func"
+        WHITESPACE@2193..2194 " "
+        INDEX@2194..2196
+          IDENT@2194..2196 "$f"
+        WHITESPACE@2196..2197 " "
+        INDEX@2197..2199
+          IDENT@2197..2199 "$f"
+      R_PAREN@2199..2200 ")"
+    WHITESPACE@2200..2203 "\n  "
+    MODULE_FIELD_ELEM@2203..2237
+      L_PAREN@2203..2204 "("
+      KEYWORD@2204..2208 "elem"
+      WHITESPACE@2208..2209 " "
+      IDENT@2209..2213 "$a19"
+      WHITESPACE@2213..2214 " "
+      OFFSET@2214..2236
+        L_PAREN@2214..2215 "("
+        KEYWORD@2215..2221 "offset"
+        WHITESPACE@2221..2222 " "
+        PLAIN_INSTR@2222..2235
+          L_PAREN@2222..2223 "("
+          INSTR_NAME@2223..2232 "i32.const"
+          WHITESPACE@2232..2233 " "
+          OPERAND@2233..2234
+            INT@2233..2234 "0"
+          R_PAREN@2234..2235 ")"
+        R_PAREN@2235..2236 ")"
+      R_PAREN@2236..2237 ")"
+    WHITESPACE@2237..2240 "\n  "
+    MODULE_FIELD_ELEM@2240..2312
+      L_PAREN@2240..2241 "("
+      KEYWORD@2241..2245 "elem"
+      WHITESPACE@2245..2246 " "
+      IDENT@2246..2250 "$a20"
+      WHITESPACE@2250..2251 " "
+      OFFSET@2251..2273
+        L_PAREN@2251..2252 "("
+        KEYWORD@2252..2258 "offset"
+        WHITESPACE@2258..2259 " "
+        PLAIN_INSTR@2259..2272
+          L_PAREN@2259..2260 "("
+          INSTR_NAME@2260..2269 "i32.const"
+          WHITESPACE@2269..2270 " "
+          OPERAND@2270..2271
+            INT@2270..2271 "0"
+          R_PAREN@2271..2272 ")"
+        R_PAREN@2272..2273 ")"
+      WHITESPACE@2273..2274 " "
+      ELEM_LIST@2274..2311
+        REF_TYPE@2274..2281 "funcref"
+        WHITESPACE@2281..2282 " "
+        ELEM_EXPR@2282..2295
+          PLAIN_INSTR@2282..2295
+            L_PAREN@2282..2283 "("
+            INSTR_NAME@2283..2291 "ref.func"
+            WHITESPACE@2291..2292 " "
+            OPERAND@2292..2294
+              IDENT@2292..2294 "$f"
+            R_PAREN@2294..2295 ")"
+        WHITESPACE@2295..2296 " "
+        ELEM_EXPR@2296..2311
+          PLAIN_INSTR@2296..2311
+            L_PAREN@2296..2297 "("
+            INSTR_NAME@2297..2305 "ref.null"
+            WHITESPACE@2305..2306 " "
+            OPERAND@2306..2310
+              HEAP_TYPE@2306..2310 "func"
+            R_PAREN@2310..2311 ")"
+      R_PAREN@2311..2312 ")"
+    WHITESPACE@2312..2315 "\n  "
+    MODULE_FIELD_ELEM@2315..2360
+      L_PAREN@2315..2316 "("
+      KEYWORD@2316..2320 "elem"
+      WHITESPACE@2320..2321 " "
+      IDENT@2321..2325 "$a21"
+      WHITESPACE@2325..2326 " "
+      OFFSET@2326..2348
+        L_PAREN@2326..2327 "("
+        KEYWORD@2327..2333 "offset"
+        WHITESPACE@2333..2334 " "
+        PLAIN_INSTR@2334..2347
+          L_PAREN@2334..2335 "("
+          INSTR_NAME@2335..2344 "i32.const"
+          WHITESPACE@2344..2345 " "
+          OPERAND@2345..2346
+            INT@2345..2346 "0"
+          R_PAREN@2346..2347 ")"
+        R_PAREN@2347..2348 ")"
+      WHITESPACE@2348..2349 " "
+      ELEM_LIST@2349..2359
+        KEYWORD@2349..2353 "func"
+        WHITESPACE@2353..2354 " "
+        INDEX@2354..2356
+          IDENT@2354..2356 "$f"
+        WHITESPACE@2356..2357 " "
+        INDEX@2357..2359
+          IDENT@2357..2359 "$f"
+      R_PAREN@2359..2360 ")"
+    WHITESPACE@2360..2363 "\n  "
+    MODULE_FIELD_ELEM@2363..2403
+      L_PAREN@2363..2364 "("
+      KEYWORD@2364..2368 "elem"
+      WHITESPACE@2368..2369 " "
+      IDENT@2369..2373 "$a22"
+      WHITESPACE@2373..2374 " "
+      OFFSET@2374..2396
+        L_PAREN@2374..2375 "("
+        KEYWORD@2375..2381 "offset"
+        WHITESPACE@2381..2382 " "
+        PLAIN_INSTR@2382..2395
+          L_PAREN@2382..2383 "("
+          INSTR_NAME@2383..2392 "i32.const"
+          WHITESPACE@2392..2393 " "
+          OPERAND@2393..2394
+            INT@2393..2394 "0"
+          R_PAREN@2394..2395 ")"
+        R_PAREN@2395..2396 ")"
+      WHITESPACE@2396..2397 " "
+      ELEM_LIST@2397..2402
+        INDEX@2397..2399
+          IDENT@2397..2399 "$f"
+        WHITESPACE@2399..2400 " "
+        INDEX@2400..2402
+          IDENT@2400..2402 "$f"
+      R_PAREN@2402..2403 ")"
+    WHITESPACE@2403..2406 "\n  "
+    MODULE_FIELD_ELEM@2406..2431
+      L_PAREN@2406..2407 "("
+      KEYWORD@2407..2411 "elem"
+      WHITESPACE@2411..2412 " "
+      IDENT@2412..2416 "$a23"
+      WHITESPACE@2416..2417 " "
+      OFFSET@2417..2430
+        PLAIN_INSTR@2417..2430
+          L_PAREN@2417..2418 "("
+          INSTR_NAME@2418..2427 "i32.const"
+          WHITESPACE@2427..2428 " "
+          OPERAND@2428..2429
+            INT@2428..2429 "0"
+          R_PAREN@2429..2430 ")"
+      R_PAREN@2430..2431 ")"
+    WHITESPACE@2431..2434 "\n  "
+    MODULE_FIELD_ELEM@2434..2497
+      L_PAREN@2434..2435 "("
+      KEYWORD@2435..2439 "elem"
+      WHITESPACE@2439..2440 " "
+      IDENT@2440..2444 "$a24"
+      WHITESPACE@2444..2445 " "
+      OFFSET@2445..2458
+        PLAIN_INSTR@2445..2458
+          L_PAREN@2445..2446 "("
+          INSTR_NAME@2446..2455 "i32.const"
+          WHITESPACE@2455..2456 " "
+          OPERAND@2456..2457
+            INT@2456..2457 "0"
+          R_PAREN@2457..2458 ")"
+      WHITESPACE@2458..2459 " "
+      ELEM_LIST@2459..2496
+        REF_TYPE@2459..2466 "funcref"
+        WHITESPACE@2466..2467 " "
+        ELEM_EXPR@2467..2480
+          PLAIN_INSTR@2467..2480
+            L_PAREN@2467..2468 "("
+            INSTR_NAME@2468..2476 "ref.func"
+            WHITESPACE@2476..2477 " "
+            OPERAND@2477..2479
+              IDENT@2477..2479 "$f"
+            R_PAREN@2479..2480 ")"
+        WHITESPACE@2480..2481 " "
+        ELEM_EXPR@2481..2496
+          PLAIN_INSTR@2481..2496
+            L_PAREN@2481..2482 "("
+            INSTR_NAME@2482..2490 "ref.null"
+            WHITESPACE@2490..2491 " "
+            OPERAND@2491..2495
+              HEAP_TYPE@2491..2495 "func"
+            R_PAREN@2495..2496 ")"
+      R_PAREN@2496..2497 ")"
+    WHITESPACE@2497..2500 "\n  "
+    MODULE_FIELD_ELEM@2500..2536
+      L_PAREN@2500..2501 "("
+      KEYWORD@2501..2505 "elem"
+      WHITESPACE@2505..2506 " "
+      IDENT@2506..2510 "$a25"
+      WHITESPACE@2510..2511 " "
+      OFFSET@2511..2524
+        PLAIN_INSTR@2511..2524
+          L_PAREN@2511..2512 "("
+          INSTR_NAME@2512..2521 "i32.const"
+          WHITESPACE@2521..2522 " "
+          OPERAND@2522..2523
+            INT@2522..2523 "0"
+          R_PAREN@2523..2524 ")"
+      WHITESPACE@2524..2525 " "
+      ELEM_LIST@2525..2535
+        KEYWORD@2525..2529 "func"
+        WHITESPACE@2529..2530 " "
+        INDEX@2530..2532
+          IDENT@2530..2532 "$f"
+        WHITESPACE@2532..2533 " "
+        INDEX@2533..2535
+          IDENT@2533..2535 "$f"
+      R_PAREN@2535..2536 ")"
+    WHITESPACE@2536..2539 "\n  "
+    MODULE_FIELD_ELEM@2539..2570
+      L_PAREN@2539..2540 "("
+      KEYWORD@2540..2544 "elem"
+      WHITESPACE@2544..2545 " "
+      IDENT@2545..2549 "$a26"
+      WHITESPACE@2549..2550 " "
+      OFFSET@2550..2563
+        PLAIN_INSTR@2550..2563
+          L_PAREN@2550..2551 "("
+          INSTR_NAME@2551..2560 "i32.const"
+          WHITESPACE@2560..2561 " "
+          OPERAND@2561..2562
+            INT@2561..2562 "0"
+          R_PAREN@2562..2563 ")"
+      WHITESPACE@2563..2564 " "
+      ELEM_LIST@2564..2569
+        INDEX@2564..2566
+          IDENT@2564..2566 "$f"
+        WHITESPACE@2566..2567 " "
+        INDEX@2567..2569
+          IDENT@2567..2569 "$f"
+      R_PAREN@2569..2570 ")"
+    WHITESPACE@2570..2574 "\n\n  "
+    LINE_COMMENT@2574..2588 ";; Declarative"
+    WHITESPACE@2588..2591 "\n  "
+    MODULE_FIELD_ELEM@2591..2613
+      L_PAREN@2591..2592 "("
+      KEYWORD@2592..2596 "elem"
+      WHITESPACE@2596..2597 " "
+      KEYWORD@2597..2604 "declare"
+      WHITESPACE@2604..2605 " "
+      ELEM_LIST@2605..2612
+        REF_TYPE@2605..2612 "funcref"
+      R_PAREN@2612..2613 ")"
+    WHITESPACE@2613..2616 "\n  "
+    MODULE_FIELD_ELEM@2616..2696
+      L_PAREN@2616..2617 "("
+      KEYWORD@2617..2621 "elem"
+      WHITESPACE@2621..2622 " "
+      KEYWORD@2622..2629 "declare"
+      WHITESPACE@2629..2630 " "
+      ELEM_LIST@2630..2695
+        REF_TYPE@2630..2637 "funcref"
+        WHITESPACE@2637..2638 " "
+        ELEM_EXPR@2638..2651
+          PLAIN_INSTR@2638..2651
+            L_PAREN@2638..2639 "("
+            INSTR_NAME@2639..2647 "ref.func"
+            WHITESPACE@2647..2648 " "
+            OPERAND@2648..2650
+              IDENT@2648..2650 "$f"
+            R_PAREN@2650..2651 ")"
+        WHITESPACE@2651..2652 " "
+        ELEM_EXPR@2652..2665
+          PLAIN_INSTR@2652..2665
+            L_PAREN@2652..2653 "("
+            INSTR_NAME@2653..2661 "ref.func"
+            WHITESPACE@2661..2662 " "
+            OPERAND@2662..2664
+              IDENT@2662..2664 "$f"
+            R_PAREN@2664..2665 ")"
+        WHITESPACE@2665..2666 " "
+        ELEM_EXPR@2666..2681
+          PLAIN_INSTR@2666..2681
+            L_PAREN@2666..2667 "("
+            INSTR_NAME@2667..2675 "ref.null"
+            WHITESPACE@2675..2676 " "
+            OPERAND@2676..2680
+              HEAP_TYPE@2676..2680 "func"
+            R_PAREN@2680..2681 ")"
+        WHITESPACE@2681..2682 " "
+        ELEM_EXPR@2682..2695
+          PLAIN_INSTR@2682..2695
+            L_PAREN@2682..2683 "("
+            INSTR_NAME@2683..2691 "ref.func"
+            WHITESPACE@2691..2692 " "
+            OPERAND@2692..2694
+              IDENT@2692..2694 "$g"
+            R_PAREN@2694..2695 ")"
+      R_PAREN@2695..2696 ")"
+    WHITESPACE@2696..2699 "\n  "
+    MODULE_FIELD_ELEM@2699..2718
+      L_PAREN@2699..2700 "("
+      KEYWORD@2700..2704 "elem"
+      WHITESPACE@2704..2705 " "
+      KEYWORD@2705..2712 "declare"
+      WHITESPACE@2712..2713 " "
+      ELEM_LIST@2713..2717
+        KEYWORD@2713..2717 "func"
+      R_PAREN@2717..2718 ")"
+    WHITESPACE@2718..2721 "\n  "
+    MODULE_FIELD_ELEM@2721..2752
+      L_PAREN@2721..2722 "("
+      KEYWORD@2722..2726 "elem"
+      WHITESPACE@2726..2727 " "
+      KEYWORD@2727..2734 "declare"
+      WHITESPACE@2734..2735 " "
+      ELEM_LIST@2735..2751
+        KEYWORD@2735..2739 "func"
+        WHITESPACE@2739..2740 " "
+        INDEX@2740..2742
+          IDENT@2740..2742 "$f"
+        WHITESPACE@2742..2743 " "
+        INDEX@2743..2745
+          IDENT@2743..2745 "$f"
+        WHITESPACE@2745..2746 " "
+        INDEX@2746..2748
+          IDENT@2746..2748 "$g"
+        WHITESPACE@2748..2749 " "
+        INDEX@2749..2751
+          IDENT@2749..2751 "$g"
+      R_PAREN@2751..2752 ")"
+    WHITESPACE@2752..2756 "\n\n  "
+    MODULE_FIELD_ELEM@2756..2782
+      L_PAREN@2756..2757 "("
+      KEYWORD@2757..2761 "elem"
+      WHITESPACE@2761..2762 " "
+      IDENT@2762..2765 "$d1"
+      WHITESPACE@2765..2766 " "
+      KEYWORD@2766..2773 "declare"
+      WHITESPACE@2773..2774 " "
+      ELEM_LIST@2774..2781
+        REF_TYPE@2774..2781 "funcref"
+      R_PAREN@2781..2782 ")"
+    WHITESPACE@2782..2785 "\n  "
+    MODULE_FIELD_ELEM@2785..2869
+      L_PAREN@2785..2786 "("
+      KEYWORD@2786..2790 "elem"
+      WHITESPACE@2790..2791 " "
+      IDENT@2791..2794 "$d2"
+      WHITESPACE@2794..2795 " "
+      KEYWORD@2795..2802 "declare"
+      WHITESPACE@2802..2803 " "
+      ELEM_LIST@2803..2868
+        REF_TYPE@2803..2810 "funcref"
+        WHITESPACE@2810..2811 " "
+        ELEM_EXPR@2811..2824
+          PLAIN_INSTR@2811..2824
+            L_PAREN@2811..2812 "("
+            INSTR_NAME@2812..2820 "ref.func"
+            WHITESPACE@2820..2821 " "
+            OPERAND@2821..2823
+              IDENT@2821..2823 "$f"
+            R_PAREN@2823..2824 ")"
+        WHITESPACE@2824..2825 " "
+        ELEM_EXPR@2825..2838
+          PLAIN_INSTR@2825..2838
+            L_PAREN@2825..2826 "("
+            INSTR_NAME@2826..2834 "ref.func"
+            WHITESPACE@2834..2835 " "
+            OPERAND@2835..2837
+              IDENT@2835..2837 "$f"
+            R_PAREN@2837..2838 ")"
+        WHITESPACE@2838..2839 " "
+        ELEM_EXPR@2839..2854
+          PLAIN_INSTR@2839..2854
+            L_PAREN@2839..2840 "("
+            INSTR_NAME@2840..2848 "ref.null"
+            WHITESPACE@2848..2849 " "
+            OPERAND@2849..2853
+              HEAP_TYPE@2849..2853 "func"
+            R_PAREN@2853..2854 ")"
+        WHITESPACE@2854..2855 " "
+        ELEM_EXPR@2855..2868
+          PLAIN_INSTR@2855..2868
+            L_PAREN@2855..2856 "("
+            INSTR_NAME@2856..2864 "ref.func"
+            WHITESPACE@2864..2865 " "
+            OPERAND@2865..2867
+              IDENT@2865..2867 "$g"
+            R_PAREN@2867..2868 ")"
+      R_PAREN@2868..2869 ")"
+    WHITESPACE@2869..2872 "\n  "
+    MODULE_FIELD_ELEM@2872..2895
+      L_PAREN@2872..2873 "("
+      KEYWORD@2873..2877 "elem"
+      WHITESPACE@2877..2878 " "
+      IDENT@2878..2881 "$d3"
+      WHITESPACE@2881..2882 " "
+      KEYWORD@2882..2889 "declare"
+      WHITESPACE@2889..2890 " "
+      ELEM_LIST@2890..2894
+        KEYWORD@2890..2894 "func"
+      R_PAREN@2894..2895 ")"
+    WHITESPACE@2895..2898 "\n  "
+    MODULE_FIELD_ELEM@2898..2933
+      L_PAREN@2898..2899 "("
+      KEYWORD@2899..2903 "elem"
+      WHITESPACE@2903..2904 " "
+      IDENT@2904..2907 "$d4"
+      WHITESPACE@2907..2908 " "
+      KEYWORD@2908..2915 "declare"
+      WHITESPACE@2915..2916 " "
+      ELEM_LIST@2916..2932
+        KEYWORD@2916..2920 "func"
+        WHITESPACE@2920..2921 " "
+        INDEX@2921..2923
+          IDENT@2921..2923 "$f"
+        WHITESPACE@2923..2924 " "
+        INDEX@2924..2926
+          IDENT@2924..2926 "$f"
+        WHITESPACE@2926..2927 " "
+        INDEX@2927..2929
+          IDENT@2927..2929 "$g"
+        WHITESPACE@2929..2930 " "
+        INDEX@2930..2932
+          IDENT@2930..2932 "$g"
+      R_PAREN@2932..2933 ")"
+    WHITESPACE@2933..2934 "\n"
+    R_PAREN@2934..2935 ")"
+  WHITESPACE@2935..2937 "\n\n"
+  MODULE@2937..3043
+    L_PAREN@2937..2938 "("
+    KEYWORD@2938..2944 "module"
+    WHITESPACE@2944..2947 "\n  "
+    MODULE_FIELD_FUNC@2947..2956
+      L_PAREN@2947..2948 "("
+      KEYWORD@2948..2952 "func"
+      WHITESPACE@2952..2953 " "
+      IDENT@2953..2955 "$f"
+      R_PAREN@2955..2956 ")"
+    WHITESPACE@2956..2959 "\n  "
+    MODULE_FIELD_FUNC@2959..2968
+      L_PAREN@2959..2960 "("
+      KEYWORD@2960..2964 "func"
+      WHITESPACE@2964..2965 " "
+      IDENT@2965..2967 "$g"
+      R_PAREN@2967..2968 ")"
+    WHITESPACE@2968..2972 "\n\n  "
+    MODULE_FIELD_TABLE@2972..3041
+      L_PAREN@2972..2973 "("
+      KEYWORD@2973..2978 "table"
+      WHITESPACE@2978..2979 " "
+      IDENT@2979..2981 "$t"
+      WHITESPACE@2981..2982 " "
+      REF_TYPE@2982..2989 "funcref"
+      WHITESPACE@2989..2990 " "
+      ELEM@2990..3040
+        L_PAREN@2990..2991 "("
+        KEYWORD@2991..2995 "elem"
+        WHITESPACE@2995..2996 " "
+        ELEM_EXPR@2996..3009
+          PLAIN_INSTR@2996..3009
+            L_PAREN@2996..2997 "("
+            INSTR_NAME@2997..3005 "ref.func"
+            WHITESPACE@3005..3006 " "
+            OPERAND@3006..3008
+              IDENT@3006..3008 "$f"
+            R_PAREN@3008..3009 ")"
+        WHITESPACE@3009..3010 " "
+        ELEM_EXPR@3010..3025
+          PLAIN_INSTR@3010..3025
+            L_PAREN@3010..3011 "("
+            INSTR_NAME@3011..3019 "ref.null"
+            WHITESPACE@3019..3020 " "
+            OPERAND@3020..3024
+              HEAP_TYPE@3020..3024 "func"
+            R_PAREN@3024..3025 ")"
+        WHITESPACE@3025..3026 " "
+        ELEM_EXPR@3026..3039
+          PLAIN_INSTR@3026..3039
+            L_PAREN@3026..3027 "("
+            INSTR_NAME@3027..3035 "ref.func"
+            WHITESPACE@3035..3036 " "
+            OPERAND@3036..3038
+              IDENT@3036..3038 "$g"
+            R_PAREN@3038..3039 ")"
+        R_PAREN@3039..3040 ")"
+      R_PAREN@3040..3041 ")"
+    WHITESPACE@3041..3042 "\n"
+    R_PAREN@3042..3043 ")"
+  WHITESPACE@3043..3044 "\n"

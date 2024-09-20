@@ -1,0 +1,58 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..80
+  MODULE@0..37
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..8 " "
+    MODULE_FIELD_EXPORT@8..29
+      L_PAREN@8..9 "("
+      KEYWORD@9..15 "export"
+      WHITESPACE@15..16 " "
+      NAME@16..19
+        STRING@16..19 "\"a\""
+      WHITESPACE@19..20 " "
+      EXPORT_DESC_FUNC@20..28
+        L_PAREN@20..21 "("
+        KEYWORD@21..25 "func"
+        WHITESPACE@25..26 " "
+        INDEX@26..27
+          UNSIGNED_INT@26..27 "0"
+        R_PAREN@27..28 ")"
+      R_PAREN@28..29 ")"
+    WHITESPACE@29..30 " "
+    MODULE_FIELD_FUNC@30..36
+      L_PAREN@30..31 "("
+      KEYWORD@31..35 "func"
+      R_PAREN@35..36 ")"
+    R_PAREN@36..37 ")"
+  WHITESPACE@37..38 "\n"
+  MODULE@38..79
+    L_PAREN@38..39 "("
+    KEYWORD@39..45 "module"
+    WHITESPACE@45..46 " "
+    MODULE_FIELD_EXPORT@46..68
+      L_PAREN@46..47 "("
+      KEYWORD@47..53 "export"
+      WHITESPACE@53..54 " "
+      NAME@54..57
+        STRING@54..57 "\"a\""
+      WHITESPACE@57..58 " "
+      EXPORT_DESC_FUNC@58..67
+        L_PAREN@58..59 "("
+        KEYWORD@59..63 "func"
+        WHITESPACE@63..64 " "
+        INDEX@64..66
+          IDENT@64..66 "$a"
+        R_PAREN@66..67 ")"
+      R_PAREN@67..68 ")"
+    WHITESPACE@68..69 " "
+    MODULE_FIELD_FUNC@69..78
+      L_PAREN@69..70 "("
+      KEYWORD@70..74 "func"
+      WHITESPACE@74..75 " "
+      IDENT@75..77 "$a"
+      R_PAREN@77..78 ")"
+    R_PAREN@78..79 ")"
+  WHITESPACE@79..80 "\n"

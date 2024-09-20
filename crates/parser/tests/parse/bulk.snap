@@ -1,0 +1,222 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..422
+  LINE_COMMENT@0..17 ";; segment syntax"
+  WHITESPACE@17..18 "\n"
+  MODULE@18..54
+    L_PAREN@18..19 "("
+    KEYWORD@19..25 "module"
+    WHITESPACE@25..28 "\n  "
+    MODULE_FIELD_MEMORY@28..38
+      L_PAREN@28..29 "("
+      KEYWORD@29..35 "memory"
+      WHITESPACE@35..36 " "
+      MEMORY_TYPE@36..37
+        LIMITS@36..37
+          UNSIGNED_INT@36..37 "1"
+      R_PAREN@37..38 ")"
+    WHITESPACE@38..41 "\n  "
+    MODULE_FIELD_DATA@41..53
+      L_PAREN@41..42 "("
+      KEYWORD@42..46 "data"
+      WHITESPACE@46..47 " "
+      STRING@47..52 "\"foo\""
+      R_PAREN@52..53 ")"
+    R_PAREN@53..54 ")"
+  WHITESPACE@54..56 "\n\n"
+  MODULE@56..152
+    L_PAREN@56..57 "("
+    KEYWORD@57..63 "module"
+    WHITESPACE@63..66 "\n  "
+    MODULE_FIELD_TABLE@66..83
+      L_PAREN@66..67 "("
+      KEYWORD@67..72 "table"
+      WHITESPACE@72..73 " "
+      TABLE_TYPE@73..82
+        LIMITS@73..74
+          UNSIGNED_INT@73..74 "3"
+        WHITESPACE@74..75 " "
+        REF_TYPE@75..82 "funcref"
+      R_PAREN@82..83 ")"
+    WHITESPACE@83..86 "\n  "
+    MODULE_FIELD_ELEM@86..142
+      L_PAREN@86..87 "("
+      KEYWORD@87..91 "elem"
+      WHITESPACE@91..92 " "
+      ELEM_LIST@92..141
+        REF_TYPE@92..99 "funcref"
+        WHITESPACE@99..100 " "
+        ELEM_EXPR@100..112
+          PLAIN_INSTR@100..112
+            L_PAREN@100..101 "("
+            INSTR_NAME@101..109 "ref.func"
+            WHITESPACE@109..110 " "
+            OPERAND@110..111
+              INT@110..111 "0"
+            R_PAREN@111..112 ")"
+        WHITESPACE@112..113 " "
+        ELEM_EXPR@113..128
+          PLAIN_INSTR@113..128
+            L_PAREN@113..114 "("
+            INSTR_NAME@114..122 "ref.null"
+            WHITESPACE@122..123 " "
+            OPERAND@123..127
+              HEAP_TYPE@123..127 "func"
+            R_PAREN@127..128 ")"
+        WHITESPACE@128..129 " "
+        ELEM_EXPR@129..141
+          PLAIN_INSTR@129..141
+            L_PAREN@129..130 "("
+            INSTR_NAME@130..138 "ref.func"
+            WHITESPACE@138..139 " "
+            OPERAND@139..140
+              INT@139..140 "1"
+            R_PAREN@140..141 ")"
+      R_PAREN@141..142 ")"
+    WHITESPACE@142..145 "\n  "
+    MODULE_FIELD_FUNC@145..151
+      L_PAREN@145..146 "("
+      KEYWORD@146..150 "func"
+      R_PAREN@150..151 ")"
+    R_PAREN@151..152 ")"
+  WHITESPACE@152..154 "\n\n"
+  LINE_COMMENT@154..168 ";; memory.fill"
+  WHITESPACE@168..169 "\n"
+  MODULE@169..301
+    L_PAREN@169..170 "("
+    KEYWORD@170..176 "module"
+    WHITESPACE@176..179 "\n  "
+    MODULE_FIELD_FUNC@179..299
+      L_PAREN@179..180 "("
+      KEYWORD@180..184 "func"
+      WHITESPACE@184..185 " "
+      EXPORT@185..200
+        L_PAREN@185..186 "("
+        KEYWORD@186..192 "export"
+        WHITESPACE@192..193 " "
+        NAME@193..199
+          STRING@193..199 "\"fill\""
+        R_PAREN@199..200 ")"
+      WHITESPACE@200..201 " "
+      TYPE_USE@201..220
+        PARAM@201..220
+          L_PAREN@201..202 "("
+          KEYWORD@202..207 "param"
+          WHITESPACE@207..208 " "
+          VAL_TYPE@208..211
+            NUM_TYPE@208..211 "i32"
+          WHITESPACE@211..212 " "
+          VAL_TYPE@212..215
+            NUM_TYPE@212..215 "i32"
+          WHITESPACE@215..216 " "
+          VAL_TYPE@216..219
+            NUM_TYPE@216..219 "i32"
+          R_PAREN@219..220 ")"
+      WHITESPACE@220..225 "\n    "
+      PLAIN_INSTR@225..298
+        L_PAREN@225..226 "("
+        INSTR_NAME@226..237 "memory.fill"
+        WHITESPACE@237..244 "\n      "
+        OPERAND@244..257
+          PLAIN_INSTR@244..257
+            L_PAREN@244..245 "("
+            INSTR_NAME@245..254 "local.get"
+            WHITESPACE@254..255 " "
+            OPERAND@255..256
+              INT@255..256 "0"
+            R_PAREN@256..257 ")"
+        WHITESPACE@257..264 "\n      "
+        OPERAND@264..277
+          PLAIN_INSTR@264..277
+            L_PAREN@264..265 "("
+            INSTR_NAME@265..274 "local.get"
+            WHITESPACE@274..275 " "
+            OPERAND@275..276
+              INT@275..276 "1"
+            R_PAREN@276..277 ")"
+        WHITESPACE@277..284 "\n      "
+        OPERAND@284..297
+          PLAIN_INSTR@284..297
+            L_PAREN@284..285 "("
+            INSTR_NAME@285..294 "local.get"
+            WHITESPACE@294..295 " "
+            OPERAND@295..296
+              INT@295..296 "2"
+            R_PAREN@296..297 ")"
+        R_PAREN@297..298 ")"
+      R_PAREN@298..299 ")"
+    WHITESPACE@299..300 "\n"
+    R_PAREN@300..301 ")"
+  WHITESPACE@301..304 "\n\n\n"
+  MODULE@304..370
+    L_PAREN@304..305 "("
+    KEYWORD@305..311 "module"
+    WHITESPACE@311..314 "\n  "
+    MODULE_FIELD_DATA@314..327
+      L_PAREN@314..315 "("
+      KEYWORD@315..319 "data"
+      WHITESPACE@319..320 " "
+      IDENT@320..322 "$p"
+      WHITESPACE@322..323 " "
+      STRING@323..326 "\"x\""
+      R_PAREN@326..327 ")"
+    WHITESPACE@327..330 "\n  "
+    MODULE_FIELD_DATA@330..368
+      L_PAREN@330..331 "("
+      KEYWORD@331..335 "data"
+      WHITESPACE@335..336 " "
+      IDENT@336..338 "$a"
+      WHITESPACE@338..339 " "
+      MEM_USE@339..349
+        L_PAREN@339..340 "("
+        KEYWORD@340..346 "memory"
+        WHITESPACE@346..347 " "
+        INDEX@347..348
+          UNSIGNED_INT@347..348 "0"
+        R_PAREN@348..349 ")"
+      WHITESPACE@349..350 " "
+      OFFSET@350..363
+        PLAIN_INSTR@350..363
+          L_PAREN@350..351 "("
+          INSTR_NAME@351..360 "i32.const"
+          WHITESPACE@360..361 " "
+          OPERAND@361..362
+            INT@361..362 "0"
+          R_PAREN@362..363 ")"
+      WHITESPACE@363..364 " "
+      STRING@364..367 "\"x\""
+      R_PAREN@367..368 ")"
+    WHITESPACE@368..369 "\n"
+    R_PAREN@369..370 ")"
+  WHITESPACE@370..373 "\n\n\n"
+  MODULE@373..421
+    L_PAREN@373..374 "("
+    KEYWORD@374..380 "module"
+    WHITESPACE@380..383 "\n  "
+    MODULE_FIELD_ELEM@383..419
+      L_PAREN@383..384 "("
+      KEYWORD@384..388 "elem"
+      WHITESPACE@388..389 " "
+      OFFSET@389..402
+        PLAIN_INSTR@389..402
+          L_PAREN@389..390 "("
+          INSTR_NAME@390..399 "i32.const"
+          WHITESPACE@399..400 " "
+          OPERAND@400..401
+            INT@400..401 "0"
+          R_PAREN@401..402 ")"
+      WHITESPACE@402..403 " "
+      ELEM_LIST@403..418
+        INDEX@403..408
+          IDENT@403..408 "$zero"
+        WHITESPACE@408..409 " "
+        INDEX@409..413
+          IDENT@409..413 "$one"
+        WHITESPACE@413..414 " "
+        INDEX@414..418
+          IDENT@414..418 "$two"
+      R_PAREN@418..419 ")"
+    WHITESPACE@419..420 "\n"
+    R_PAREN@420..421 ")"
+  WHITESPACE@421..422 "\n"

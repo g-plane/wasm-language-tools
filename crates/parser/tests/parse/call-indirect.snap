@@ -1,0 +1,140 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..652
+  MODULE@0..651
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_TABLE@10..649
+      L_PAREN@10..11 "("
+      KEYWORD@11..16 "table"
+      WHITESPACE@16..17 " "
+      REF_TYPE@17..24 "funcref"
+      WHITESPACE@24..29 "\n    "
+      ELEM@29..645
+        L_PAREN@29..30 "("
+        KEYWORD@30..34 "elem"
+        WHITESPACE@34..41 "\n      "
+        INDEX@41..51
+          IDENT@41..51 "$const-i32"
+        WHITESPACE@51..52 " "
+        INDEX@52..62
+          IDENT@52..62 "$const-i64"
+        WHITESPACE@62..63 " "
+        INDEX@63..73
+          IDENT@63..73 "$const-f32"
+        WHITESPACE@73..74 " "
+        INDEX@74..84
+          IDENT@74..84 "$const-f64"
+        WHITESPACE@84..86 "  "
+        LINE_COMMENT@86..93 ";; 0..3"
+        WHITESPACE@93..100 "\n      "
+        INDEX@100..107
+          IDENT@100..107 "$id-i32"
+        WHITESPACE@107..108 " "
+        INDEX@108..115
+          IDENT@108..115 "$id-i64"
+        WHITESPACE@115..116 " "
+        INDEX@116..123
+          IDENT@116..123 "$id-f32"
+        WHITESPACE@123..124 " "
+        INDEX@124..131
+          IDENT@124..131 "$id-f64"
+        WHITESPACE@131..145 "              "
+        LINE_COMMENT@145..152 ";; 4..7"
+        WHITESPACE@152..159 "\n      "
+        INDEX@159..167
+          IDENT@159..167 "$f32-i32"
+        WHITESPACE@167..168 " "
+        INDEX@168..176
+          IDENT@168..176 "$i32-i64"
+        WHITESPACE@176..177 " "
+        INDEX@177..185
+          IDENT@177..185 "$f64-f32"
+        WHITESPACE@185..186 " "
+        INDEX@186..194
+          IDENT@186..194 "$i64-f64"
+        WHITESPACE@194..204 "          "
+        LINE_COMMENT@204..212 ";; 9..11"
+        WHITESPACE@212..219 "\n      "
+        INDEX@219..227
+          IDENT@219..227 "$fac-i64"
+        WHITESPACE@227..228 " "
+        INDEX@228..236
+          IDENT@228..236 "$fib-i64"
+        WHITESPACE@236..237 " "
+        INDEX@237..242
+          IDENT@237..242 "$even"
+        WHITESPACE@242..243 " "
+        INDEX@243..247
+          IDENT@243..247 "$odd"
+        WHITESPACE@247..264 "                 "
+        LINE_COMMENT@264..273 ";; 12..15"
+        WHITESPACE@273..280 "\n      "
+        INDEX@280..288
+          IDENT@280..288 "$runaway"
+        WHITESPACE@288..289 " "
+        INDEX@289..305
+          IDENT@289..305 "$mutual-runaway1"
+        WHITESPACE@305..306 " "
+        INDEX@306..322
+          IDENT@306..322 "$mutual-runaway2"
+        WHITESPACE@322..325 "   "
+        LINE_COMMENT@325..334 ";; 16..18"
+        WHITESPACE@334..341 "\n      "
+        INDEX@341..360
+          IDENT@341..360 "$over-i32-duplicate"
+        WHITESPACE@360..361 " "
+        INDEX@361..380
+          IDENT@361..380 "$over-i64-duplicate"
+        WHITESPACE@380..386 "      "
+        LINE_COMMENT@386..395 ";; 19..20"
+        WHITESPACE@395..402 "\n      "
+        INDEX@402..421
+          IDENT@402..421 "$over-f32-duplicate"
+        WHITESPACE@421..422 " "
+        INDEX@422..441
+          IDENT@422..441 "$over-f64-duplicate"
+        WHITESPACE@441..447 "      "
+        LINE_COMMENT@447..456 ";; 21..22"
+        WHITESPACE@456..463 "\n      "
+        INDEX@463..471
+          IDENT@463..471 "$fac-i32"
+        WHITESPACE@471..472 " "
+        INDEX@472..480
+          IDENT@472..480 "$fac-f32"
+        WHITESPACE@480..481 " "
+        INDEX@481..489
+          IDENT@481..489 "$fac-f64"
+        WHITESPACE@489..508 "                   "
+        LINE_COMMENT@508..517 ";; 23..25"
+        WHITESPACE@517..524 "\n      "
+        INDEX@524..532
+          IDENT@524..532 "$fib-i32"
+        WHITESPACE@532..533 " "
+        INDEX@533..541
+          IDENT@533..541 "$fib-f32"
+        WHITESPACE@541..542 " "
+        INDEX@542..550
+          IDENT@542..550 "$fib-f64"
+        WHITESPACE@550..569 "                   "
+        LINE_COMMENT@569..578 ";; 26..28"
+        WHITESPACE@578..585 "\n      "
+        INDEX@585..599
+          IDENT@585..599 "$const-f64-i32"
+        WHITESPACE@599..600 " "
+        INDEX@600..611
+          IDENT@600..611 "$id-i32-f64"
+        WHITESPACE@611..612 " "
+        INDEX@612..625
+          IDENT@612..625 "$swap-i32-i64"
+        WHITESPACE@625..630 "     "
+        LINE_COMMENT@630..639 ";; 29..31"
+        WHITESPACE@639..644 "\n    "
+        R_PAREN@644..645 ")"
+      WHITESPACE@645..648 "\n  "
+      R_PAREN@648..649 ")"
+    WHITESPACE@649..650 "\n"
+    R_PAREN@650..651 ")"
+  WHITESPACE@651..652 "\n"
