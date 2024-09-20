@@ -103,7 +103,7 @@ fn module_field_elem(input: &mut Input) -> GreenResult {
         opt(trivias_prefixed(keyword("declare"))), // postpone syntax error for using this with table use
         opt(trivias_prefixed(table_use)),
         opt(trivias_prefixed(offset)),
-        resume(elem_list),
+        opt(trivias_prefixed(elem_list)),
         resume(r_paren),
     )
         .parse_next(input)
