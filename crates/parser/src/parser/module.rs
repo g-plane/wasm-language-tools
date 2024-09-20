@@ -792,7 +792,7 @@ fn mem_use(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("memory")),
-        resume(unsigned_int),
+        resume(index),
         resume(r_paren),
     )
         .parse_next(input)
@@ -814,7 +814,7 @@ fn table_use(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("table")),
-        resume(unsigned_int),
+        resume(index),
         resume(r_paren),
     )
         .parse_next(input)

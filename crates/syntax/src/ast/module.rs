@@ -914,8 +914,8 @@ impl MemUse {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn unsigned_int_token(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::UNSIGNED_INT)
+    pub fn index(&self) -> Option<Index> {
+        child(&self.syntax)
     }
     #[inline]
     pub fn r_paren_token(&self) -> Option<SyntaxToken> {
@@ -1508,8 +1508,8 @@ impl TableUse {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn unsigned_int_token(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::UNSIGNED_INT)
+    pub fn index(&self) -> Option<Index> {
+        child(&self.syntax)
     }
     #[inline]
     pub fn r_paren_token(&self) -> Option<SyntaxToken> {
