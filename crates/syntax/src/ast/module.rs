@@ -78,15 +78,6 @@ impl Elem {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn unsigned_int_tokens(&self) -> impl Iterator<Item = SyntaxToken> {
-        self.syntax
-            .children_with_tokens()
-            .filter_map(|it| match it {
-                NodeOrToken::Token(it) if it.kind() == SyntaxKind::UNSIGNED_INT => Some(it),
-                _ => None,
-            })
-    }
-    #[inline]
     pub fn elem_exprs(&self) -> AstChildren<ElemExpr> {
         children(&self.syntax)
     }
@@ -179,13 +170,8 @@ impl ElemList {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn unsigned_int_tokens(&self) -> impl Iterator<Item = SyntaxToken> {
-        self.syntax
-            .children_with_tokens()
-            .filter_map(|it| match it {
-                NodeOrToken::Token(it) if it.kind() == SyntaxKind::UNSIGNED_INT => Some(it),
-                _ => None,
-            })
+    pub fn indexes(&self) -> AstChildren<Index> {
+        children(&self.syntax)
     }
     #[inline]
     pub fn ref_type(&self) -> Option<SyntaxToken> {

@@ -130,7 +130,7 @@ fn module_field_elem(input: &mut Input) -> GreenResult {
                 if let Some(mut r_paren) = r_paren {
                     children.append(&mut r_paren);
                 }
-                node(MODULE_FIELD_TYPE, children)
+                node(MODULE_FIELD_ELEM, children)
             },
         )
 }
@@ -727,8 +727,8 @@ fn elem(input: &mut Input) -> GreenResult {
 fn elem_list(input: &mut Input) -> GreenResult {
     alt((
         (
-            alt((keyword("func"), unsigned_int)),
-            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(unsigned_int)),
+            alt((keyword("func"), index)),
+            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(index)),
         )
             .map(|(keyword_or_first_idx, indexes)| {
                 let mut children = Vec::with_capacity(2);
