@@ -1,6 +1,6 @@
 use super::{
     instr::instr,
-    node, resume, retry,
+    node, resume, retry, retry_once,
     token::{
         ident, keyword, l_paren, r_paren, string, trivias, trivias_prefixed, unsigned_int, word,
     },
@@ -416,16 +416,12 @@ pub(super) fn local(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("local")),
         alt((
-            repeat::<_, _, Vec<_>, _, _>(1.., trivias_prefixed(val_type))
-                .map(|types| types.into_iter().flatten().collect()),
-            (opt(trivias_prefixed(ident)), retry(val_type, [])).map(|(id, mut ty)| {
-                if let Some(mut id) = id {
-                    id.append(&mut ty);
-                    id
-                } else {
-                    ty
-                }
+            (trivias_prefixed(ident), retry(val_type, [])).map(|(mut children, mut ty)| {
+                children.append(&mut ty);
+                children
             }),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry_once(val_type, []))
+                .map(|types| types.into_iter().flatten().collect()),
         )),
         resume(r_paren),
     )

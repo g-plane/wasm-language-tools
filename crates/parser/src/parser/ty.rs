@@ -77,7 +77,7 @@ pub(super) fn param(input: &mut Input) -> GreenResult {
                 }
                 children
             }),
-            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(val_type))
+            repeat::<_, _, Vec<_>, _, _>(0.., retry_once(val_type, []))
                 .map(|types| types.into_iter().flatten().collect()),
         )),
         resume(r_paren),
