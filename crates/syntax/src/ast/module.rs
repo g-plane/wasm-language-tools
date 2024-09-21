@@ -1,6 +1,6 @@
 use super::{
     instr::Instr,
-    ty::{GlobalType, MemoryType, Param, Result, TableType, ValType},
+    ty::{FuncType, GlobalType, MemoryType, Param, Result, TableType, ValType},
     SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage,
 };
 use rowan::{
@@ -1078,6 +1078,41 @@ impl AstNode for ModuleField {
 pub struct ModuleFieldData {
     syntax: SyntaxNode,
 }
+impl ModuleFieldData {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+    #[inline]
+    pub fn mem_use(&self) -> Option<MemUse> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn offset(&self) -> Option<Offset> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn string_tokens(&self) -> impl Iterator<Item = SyntaxToken> {
+        self.syntax
+            .children_with_tokens()
+            .filter_map(|it| match it {
+                NodeOrToken::Token(it) if it.kind() == SyntaxKind::STRING => Some(it),
+                _ => None,
+            })
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
 impl AstNode for ModuleFieldData {
     type Language = WatLanguage;
     #[inline]
@@ -1107,6 +1142,43 @@ impl AstNode for ModuleFieldData {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ModuleFieldElem {
     syntax: SyntaxNode,
+}
+impl ModuleFieldElem {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+    #[inline]
+    pub fn declare_keyword(&self) -> Option<SyntaxToken> {
+        self.syntax
+            .children_with_tokens()
+            .filter_map(|it| it.into_token())
+            .find(|it| it.kind() == SyntaxKind::KEYWORD && it.text() == "declare")
+    }
+    #[inline]
+    pub fn table_use(&self) -> Option<TableUse> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn offset(&self) -> Option<Offset> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn elem_list(&self) -> Option<ElemList> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
 }
 impl AstNode for ModuleFieldElem {
     type Language = WatLanguage;
@@ -1138,6 +1210,24 @@ impl AstNode for ModuleFieldElem {
 pub struct ModuleFieldExport {
     syntax: SyntaxNode,
 }
+impl ModuleFieldExport {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn export_desc(&self) -> Option<ExportDesc> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
 impl AstNode for ModuleFieldExport {
     type Language = WatLanguage;
     #[inline]
@@ -1167,6 +1257,44 @@ impl AstNode for ModuleFieldExport {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ModuleFieldFunc {
     syntax: SyntaxNode,
+}
+impl ModuleFieldFunc {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+    #[inline]
+    pub fn import(&self) -> Option<Import> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn exports(&self) -> AstChildren<Export> {
+        children(&self.syntax)
+    }
+    #[inline]
+    pub fn type_use(&self) -> Option<TypeUse> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn locals(&self) -> AstChildren<Local> {
+        children(&self.syntax)
+    }
+    #[inline]
+    pub fn instrs(&self) -> AstChildren<Instr> {
+        children(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
 }
 impl AstNode for ModuleFieldFunc {
     type Language = WatLanguage;
@@ -1198,6 +1326,40 @@ impl AstNode for ModuleFieldFunc {
 pub struct ModuleFieldGlobal {
     syntax: SyntaxNode,
 }
+impl ModuleFieldGlobal {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+    #[inline]
+    pub fn import(&self) -> Option<Import> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn export(&self) -> Option<Export> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn global_type(&self) -> Option<GlobalType> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn instrs(&self) -> AstChildren<Instr> {
+        children(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
 impl AstNode for ModuleFieldGlobal {
     type Language = WatLanguage;
     #[inline]
@@ -1227,6 +1389,32 @@ impl AstNode for ModuleFieldGlobal {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ModuleFieldImport {
     syntax: SyntaxNode,
+}
+impl ModuleFieldImport {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn module_name(&self) -> Option<ModuleName> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn name(&self) -> Option<Name> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn import_desc(&self) -> Option<ImportDesc> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
 }
 impl AstNode for ModuleFieldImport {
     type Language = WatLanguage;
@@ -1258,6 +1446,40 @@ impl AstNode for ModuleFieldImport {
 pub struct ModuleFieldMemory {
     syntax: SyntaxNode,
 }
+impl ModuleFieldMemory {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+    #[inline]
+    pub fn import(&self) -> Option<Import> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn export(&self) -> Option<Export> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn memory_type(&self) -> Option<MemoryType> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn data(&self) -> Option<Data> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
 impl AstNode for ModuleFieldMemory {
     type Language = WatLanguage;
     #[inline]
@@ -1287,6 +1509,24 @@ impl AstNode for ModuleFieldMemory {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ModuleFieldStart {
     syntax: SyntaxNode,
+}
+impl ModuleFieldStart {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn index(&self) -> Option<Index> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
 }
 impl AstNode for ModuleFieldStart {
     type Language = WatLanguage;
@@ -1318,6 +1558,44 @@ impl AstNode for ModuleFieldStart {
 pub struct ModuleFieldTable {
     syntax: SyntaxNode,
 }
+impl ModuleFieldTable {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+    #[inline]
+    pub fn import(&self) -> Option<Import> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn export(&self) -> Option<Export> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn table_type(&self) -> Option<TableType> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn ref_type(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::REF_TYPE)
+    }
+    #[inline]
+    pub fn elem(&self) -> Option<Elem> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
 impl AstNode for ModuleFieldTable {
     type Language = WatLanguage;
     #[inline]
@@ -1347,6 +1625,28 @@ impl AstNode for ModuleFieldTable {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ModuleFieldType {
     syntax: SyntaxNode,
+}
+impl ModuleFieldType {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+    #[inline]
+    pub fn func_type(&self) -> Option<FuncType> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
 }
 impl AstNode for ModuleFieldType {
     type Language = WatLanguage;
