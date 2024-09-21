@@ -140,11 +140,7 @@ fn module_field_export(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("export")),
         resume(name),
-        resume(
-            export_desc.context(StrContext::Expected(StrContextValue::Description(
-                "export desc",
-            ))),
-        ),
+        resume(export_desc),
         resume(r_paren),
     )
         .parse_next(input)
@@ -609,6 +605,9 @@ fn export_desc(input: &mut Input) -> GreenResult {
         "global" => export_desc_variant("global", EXPORT_DESC_GLOBAL),
         _ => fail,
     }
+    .context(StrContext::Expected(StrContextValue::Description(
+        "export desc",
+    )))
     .parse_next(input)
 }
 
