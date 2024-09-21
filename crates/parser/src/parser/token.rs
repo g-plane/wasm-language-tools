@@ -191,20 +191,20 @@ fn float_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
         opt(one_of(['+', '-'])),
         alt((
             (
-                alt((
-                    (unsigned_dec, opt(('.', opt(unsigned_dec)))).void(),
-                    ('.', unsigned_dec).void(),
-                )),
-                opt((one_of(['e', 'E']), opt(one_of(['+', '-'])), unsigned_dec)),
-            )
-                .void(),
-            (
                 "0x",
                 alt((
                     (unsigned_hex, opt(('.', opt(unsigned_hex)))).void(),
                     ('.', unsigned_hex).void(),
                 )),
                 opt((one_of(['p', 'P']), opt(one_of(['+', '-'])), unsigned_dec)),
+            )
+                .void(),
+            (
+                alt((
+                    (unsigned_dec, opt(('.', opt(unsigned_dec)))).void(),
+                    ('.', unsigned_dec).void(),
+                )),
+                opt((one_of(['e', 'E']), opt(one_of(['+', '-'])), unsigned_dec)),
             )
                 .void(),
             "inf".void(),
