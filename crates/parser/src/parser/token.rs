@@ -223,7 +223,8 @@ pub(super) fn error_token<'s>(
         '0'..='9' => alt((float_impl, int_impl, unsigned_int_impl)),
         '(' | ')' if allow_parens => alt(("(", ")")),
         '(' | ')' => fail,
-        c if is_id_char(c) => word,
+        c if is_id_char(c) => take_while(1.., is_id_char),
+        '"' => string_impl,
         _ => take_till(1.., |c: char| c == '(' || c == ')' || c.is_ascii_whitespace()),
     }
     .map(|text| tok(ERROR, text))
