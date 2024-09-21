@@ -1,0 +1,8 @@
+(module
+  (func (i32.const 0) (block (type $sig) (result i32) (param i32)))
+  (func (i32.const 0) (block (param i32) (type $sig) (result i32)))
+  (func (i32.const 0) (block (param i32) (result i32) (type $sig)))
+  (func (i32.const 0) (block (result i32) (type $sig) (param i32)))
+  (func (i32.const 0) (block (result i32) (param i32) (type $sig)))
+  (func (i32.const 0) (block (result i32) (param i32)))
+)

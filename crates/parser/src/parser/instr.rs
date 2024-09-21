@@ -1,9 +1,9 @@
 use super::{
     module::type_use,
-    node, resume, retry, tok,
+    node, resume, retry, retry_once, tok,
     token::{
-        error_token, float, ident, int, keyword, l_paren, r_paren, string, trivias,
-        trivias_prefixed, unsigned_int_impl, word,
+        float, ident, int, keyword, l_paren, r_paren, string, trivias, trivias_prefixed,
+        unsigned_int_impl, word,
     },
     ty::{heap_type, result},
     GreenElement, GreenResult, Input,
@@ -12,6 +12,7 @@ use crate::error::SyntaxError;
 use wat_syntax::SyntaxKind::*;
 use winnow::{
     combinator::{alt, dispatch, fail, opt, peek, preceded, repeat, repeat_till},
+    error::{StrContext, StrContextValue},
     token::any,
     Parser,
 };
@@ -314,10 +315,7 @@ fn plain_instr(input: &mut Input) -> GreenResult {
         (
             l_paren,
             trivias_prefixed(instr_name),
-            repeat::<_, _, Vec<_>, _, _>(
-                0..,
-                trivias_prefixed(alt((operand(true), error_token(false)))),
-            ),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry_once(operand(true), [])),
             resume(r_paren),
         )
             .map(|(l_paren, mut instr_name, operands, r_paren)| {
@@ -334,10 +332,7 @@ fn plain_instr(input: &mut Input) -> GreenResult {
             }),
         (
             instr_name,
-            repeat::<_, _, Vec<_>, _, _>(
-                0..,
-                trivias_prefixed(alt((operand(false), error_token(false)))),
-            ),
+            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(operand(false))),
         )
             .map(|(instr_name, operands)| {
                 let mut children = Vec::with_capacity(2);
@@ -371,6 +366,9 @@ fn operand<'s>(allow_instr: bool) -> impl Parser<Input<'s>, GreenElement, Syntax
         _ => fail,
     }
     .map(|child| node(OPERAND, [child]))
+    .context(StrContext::Expected(StrContextValue::Description(
+        "operand",
+    )))
 }
 
 fn mem_arg(input: &mut Input) -> GreenResult {
