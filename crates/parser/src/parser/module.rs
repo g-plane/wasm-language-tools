@@ -66,7 +66,7 @@ fn module_field_data(input: &mut Input) -> GreenResult {
         opt(trivias_prefixed(ident)),
         opt(trivias_prefixed(mem_use)),
         opt(trivias_prefixed(offset)),
-        repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(string)),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry_once(string, [])),
         resume(r_paren),
     )
         .parse_next(input)
