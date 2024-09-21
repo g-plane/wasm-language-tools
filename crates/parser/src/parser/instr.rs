@@ -44,11 +44,14 @@ fn block_block(input: &mut Input) -> GreenResult {
             keyword("block"),
             opt(trivias_prefixed(ident)),
             opt(trivias_prefixed(block_type)),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
-            resume(keyword("end")),
+            repeat_till::<_, _, Vec<_>, _, _, _, _>(
+                0..,
+                retry(instr, []),
+                trivias_prefixed(keyword("end")),
+            ),
             opt(trivias_prefixed(ident)),
         )
-            .map(|(keyword, label, block_type, instrs, end, id)| {
+            .map(|(keyword, label, block_type, (instrs, mut end), id)| {
                 let mut children = Vec::with_capacity(6);
                 children.push(keyword);
                 if let Some(mut label) = label {
@@ -60,9 +63,7 @@ fn block_block(input: &mut Input) -> GreenResult {
                 instrs
                     .into_iter()
                     .for_each(|mut instr| children.append(&mut instr));
-                if let Some(mut end) = end {
-                    children.append(&mut end);
-                }
+                children.append(&mut end);
                 if let Some(mut id) = id {
                     children.append(&mut id);
                 }
