@@ -1,0 +1,315 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..608
+  MODULE@0..607
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_GLOBAL@10..55
+      L_PAREN@10..11 "("
+      KEYWORD@11..17 "global"
+      WHITESPACE@17..18 " "
+      IMPORT@18..50
+        L_PAREN@18..19 "("
+        KEYWORD@19..25 "import"
+        WHITESPACE@25..26 " "
+        MODULE_NAME@26..36
+          STRING@26..36 "\"spectest\""
+        WHITESPACE@36..37 " "
+        NAME@37..49
+          STRING@37..49 "\"global_i32\""
+        R_PAREN@49..50 ")"
+      WHITESPACE@50..51 " "
+      GLOBAL_TYPE@51..54
+        VAL_TYPE@51..54
+          NUM_TYPE@51..54 "i32"
+      R_PAREN@54..55 ")"
+    WHITESPACE@55..58 "\n  "
+    MODULE_FIELD_GLOBAL@58..103
+      L_PAREN@58..59 "("
+      KEYWORD@59..65 "global"
+      WHITESPACE@65..66 " "
+      IMPORT@66..98
+        L_PAREN@66..67 "("
+        KEYWORD@67..73 "import"
+        WHITESPACE@73..74 " "
+        MODULE_NAME@74..84
+          STRING@74..84 "\"spectest\""
+        WHITESPACE@84..85 " "
+        NAME@85..97
+          STRING@85..97 "\"global_i64\""
+        R_PAREN@97..98 ")"
+      WHITESPACE@98..99 " "
+      GLOBAL_TYPE@99..102
+        VAL_TYPE@99..102
+          NUM_TYPE@99..102 "i64"
+      R_PAREN@102..103 ")"
+    WHITESPACE@103..107 "\n\n  "
+    MODULE_FIELD_GLOBAL@107..137
+      L_PAREN@107..108 "("
+      KEYWORD@108..114 "global"
+      WHITESPACE@114..115 " "
+      IDENT@115..117 "$a"
+      WHITESPACE@117..118 " "
+      GLOBAL_TYPE@118..121
+        VAL_TYPE@118..121
+          NUM_TYPE@118..121 "i32"
+      WHITESPACE@121..122 " "
+      PLAIN_INSTR@122..136
+        L_PAREN@122..123 "("
+        INSTR_NAME@123..132 "i32.const"
+        WHITESPACE@132..133 " "
+        OPERAND@133..135
+          INT@133..135 "-2"
+        R_PAREN@135..136 ")"
+      R_PAREN@136..137 ")"
+    WHITESPACE@137..140 "\n  "
+    MODULE_FIELD_GLOBAL@140..173
+      L_PAREN@140..141 "("
+      KEYWORD@141..147 "global"
+      WHITESPACE@147..148 " "
+      BLOCK_COMMENT@148..153 "(;3;)"
+      WHITESPACE@153..154 " "
+      GLOBAL_TYPE@154..157
+        VAL_TYPE@154..157
+          NUM_TYPE@154..157 "f32"
+      WHITESPACE@157..158 " "
+      PLAIN_INSTR@158..172
+        L_PAREN@158..159 "("
+        INSTR_NAME@159..168 "f32.const"
+        WHITESPACE@168..169 " "
+        OPERAND@169..171
+          INT@169..171 "-3"
+        R_PAREN@171..172 ")"
+      R_PAREN@172..173 ")"
+    WHITESPACE@173..176 "\n  "
+    MODULE_FIELD_GLOBAL@176..209
+      L_PAREN@176..177 "("
+      KEYWORD@177..183 "global"
+      WHITESPACE@183..184 " "
+      BLOCK_COMMENT@184..189 "(;4;)"
+      WHITESPACE@189..190 " "
+      GLOBAL_TYPE@190..193
+        VAL_TYPE@190..193
+          NUM_TYPE@190..193 "f64"
+      WHITESPACE@193..194 " "
+      PLAIN_INSTR@194..208
+        L_PAREN@194..195 "("
+        INSTR_NAME@195..204 "f64.const"
+        WHITESPACE@204..205 " "
+        OPERAND@205..207
+          INT@205..207 "-4"
+        R_PAREN@207..208 ")"
+      R_PAREN@208..209 ")"
+    WHITESPACE@209..212 "\n  "
+    MODULE_FIELD_GLOBAL@212..242
+      L_PAREN@212..213 "("
+      KEYWORD@213..219 "global"
+      WHITESPACE@219..220 " "
+      IDENT@220..222 "$b"
+      WHITESPACE@222..223 " "
+      GLOBAL_TYPE@223..226
+        VAL_TYPE@223..226
+          NUM_TYPE@223..226 "i64"
+      WHITESPACE@226..227 " "
+      PLAIN_INSTR@227..241
+        L_PAREN@227..228 "("
+        INSTR_NAME@228..237 "i64.const"
+        WHITESPACE@237..238 " "
+        OPERAND@238..240
+          INT@238..240 "-5"
+        R_PAREN@240..241 ")"
+      R_PAREN@241..242 ")"
+    WHITESPACE@242..246 "\n\n  "
+    MODULE_FIELD_GLOBAL@246..283
+      L_PAREN@246..247 "("
+      KEYWORD@247..253 "global"
+      WHITESPACE@253..254 " "
+      IDENT@254..256 "$x"
+      WHITESPACE@256..257 " "
+      GLOBAL_TYPE@257..266
+        L_PAREN@257..258 "("
+        KEYWORD@258..261 "mut"
+        WHITESPACE@261..262 " "
+        VAL_TYPE@262..265
+          NUM_TYPE@262..265 "i32"
+        R_PAREN@265..266 ")"
+      WHITESPACE@266..267 " "
+      PLAIN_INSTR@267..282
+        L_PAREN@267..268 "("
+        INSTR_NAME@268..277 "i32.const"
+        WHITESPACE@277..278 " "
+        OPERAND@278..281
+          INT@278..281 "-12"
+        R_PAREN@281..282 ")"
+      R_PAREN@282..283 ")"
+    WHITESPACE@283..286 "\n  "
+    MODULE_FIELD_GLOBAL@286..326
+      L_PAREN@286..287 "("
+      KEYWORD@287..293 "global"
+      WHITESPACE@293..294 " "
+      BLOCK_COMMENT@294..299 "(;7;)"
+      WHITESPACE@299..300 " "
+      GLOBAL_TYPE@300..309
+        L_PAREN@300..301 "("
+        KEYWORD@301..304 "mut"
+        WHITESPACE@304..305 " "
+        VAL_TYPE@305..308
+          NUM_TYPE@305..308 "f32"
+        R_PAREN@308..309 ")"
+      WHITESPACE@309..310 " "
+      PLAIN_INSTR@310..325
+        L_PAREN@310..311 "("
+        INSTR_NAME@311..320 "f32.const"
+        WHITESPACE@320..321 " "
+        OPERAND@321..324
+          INT@321..324 "-13"
+        R_PAREN@324..325 ")"
+      R_PAREN@325..326 ")"
+    WHITESPACE@326..329 "\n  "
+    MODULE_FIELD_GLOBAL@329..369
+      L_PAREN@329..330 "("
+      KEYWORD@330..336 "global"
+      WHITESPACE@336..337 " "
+      BLOCK_COMMENT@337..342 "(;8;)"
+      WHITESPACE@342..343 " "
+      GLOBAL_TYPE@343..352
+        L_PAREN@343..344 "("
+        KEYWORD@344..347 "mut"
+        WHITESPACE@347..348 " "
+        VAL_TYPE@348..351
+          NUM_TYPE@348..351 "f64"
+        R_PAREN@351..352 ")"
+      WHITESPACE@352..353 " "
+      PLAIN_INSTR@353..368
+        L_PAREN@353..354 "("
+        INSTR_NAME@354..363 "f64.const"
+        WHITESPACE@363..364 " "
+        OPERAND@364..367
+          INT@364..367 "-14"
+        R_PAREN@367..368 ")"
+      R_PAREN@368..369 ")"
+    WHITESPACE@369..372 "\n  "
+    MODULE_FIELD_GLOBAL@372..409
+      L_PAREN@372..373 "("
+      KEYWORD@373..379 "global"
+      WHITESPACE@379..380 " "
+      IDENT@380..382 "$y"
+      WHITESPACE@382..383 " "
+      GLOBAL_TYPE@383..392
+        L_PAREN@383..384 "("
+        KEYWORD@384..387 "mut"
+        WHITESPACE@387..388 " "
+        VAL_TYPE@388..391
+          NUM_TYPE@388..391 "i64"
+        R_PAREN@391..392 ")"
+      WHITESPACE@392..393 " "
+      PLAIN_INSTR@393..408
+        L_PAREN@393..394 "("
+        INSTR_NAME@394..403 "i64.const"
+        WHITESPACE@403..404 " "
+        OPERAND@404..407
+          INT@404..407 "-15"
+        R_PAREN@407..408 ")"
+      R_PAREN@408..409 ")"
+    WHITESPACE@409..413 "\n\n  "
+    MODULE_FIELD_GLOBAL@413..444
+      L_PAREN@413..414 "("
+      KEYWORD@414..420 "global"
+      WHITESPACE@420..421 " "
+      IDENT@421..424 "$z1"
+      WHITESPACE@424..425 " "
+      GLOBAL_TYPE@425..428
+        VAL_TYPE@425..428
+          NUM_TYPE@425..428 "i32"
+      WHITESPACE@428..429 " "
+      PLAIN_INSTR@429..443
+        L_PAREN@429..430 "("
+        INSTR_NAME@430..440 "global.get"
+        WHITESPACE@440..441 " "
+        OPERAND@441..442
+          INT@441..442 "0"
+        R_PAREN@442..443 ")"
+      R_PAREN@443..444 ")"
+    WHITESPACE@444..447 "\n  "
+    MODULE_FIELD_GLOBAL@447..478
+      L_PAREN@447..448 "("
+      KEYWORD@448..454 "global"
+      WHITESPACE@454..455 " "
+      IDENT@455..458 "$z2"
+      WHITESPACE@458..459 " "
+      GLOBAL_TYPE@459..462
+        VAL_TYPE@459..462
+          NUM_TYPE@459..462 "i64"
+      WHITESPACE@462..463 " "
+      PLAIN_INSTR@463..477
+        L_PAREN@463..464 "("
+        INSTR_NAME@464..474 "global.get"
+        WHITESPACE@474..475 " "
+        OPERAND@475..476
+          INT@475..476 "1"
+        R_PAREN@476..477 ")"
+      R_PAREN@477..478 ")"
+    WHITESPACE@478..482 "\n\n  "
+    MODULE_FIELD_GLOBAL@482..521
+      L_PAREN@482..483 "("
+      KEYWORD@483..489 "global"
+      WHITESPACE@489..490 " "
+      IDENT@490..492 "$r"
+      WHITESPACE@492..493 " "
+      GLOBAL_TYPE@493..502
+        VAL_TYPE@493..502
+          REF_TYPE@493..502 "externref"
+      WHITESPACE@502..503 " "
+      PLAIN_INSTR@503..520
+        L_PAREN@503..504 "("
+        INSTR_NAME@504..512 "ref.null"
+        WHITESPACE@512..513 " "
+        OPERAND@513..519
+          HEAP_TYPE@513..519 "extern"
+        R_PAREN@519..520 ")"
+      R_PAREN@520..521 ")"
+    WHITESPACE@521..524 "\n  "
+    MODULE_FIELD_GLOBAL@524..570
+      L_PAREN@524..525 "("
+      KEYWORD@525..531 "global"
+      WHITESPACE@531..532 " "
+      IDENT@532..535 "$mr"
+      WHITESPACE@535..536 " "
+      GLOBAL_TYPE@536..551
+        L_PAREN@536..537 "("
+        KEYWORD@537..540 "mut"
+        WHITESPACE@540..541 " "
+        VAL_TYPE@541..550
+          REF_TYPE@541..550 "externref"
+        R_PAREN@550..551 ")"
+      WHITESPACE@551..552 " "
+      PLAIN_INSTR@552..569
+        L_PAREN@552..553 "("
+        INSTR_NAME@553..561 "ref.null"
+        WHITESPACE@561..562 " "
+        OPERAND@562..568
+          HEAP_TYPE@562..568 "extern"
+        R_PAREN@568..569 ")"
+      R_PAREN@569..570 ")"
+    WHITESPACE@570..573 "\n  "
+    MODULE_FIELD_GLOBAL@573..605
+      L_PAREN@573..574 "("
+      KEYWORD@574..580 "global"
+      WHITESPACE@580..581 " "
+      GLOBAL_TYPE@581..588
+        VAL_TYPE@581..588
+          REF_TYPE@581..588 "funcref"
+      WHITESPACE@588..589 " "
+      PLAIN_INSTR@589..604
+        L_PAREN@589..590 "("
+        INSTR_NAME@590..598 "ref.null"
+        WHITESPACE@598..599 " "
+        OPERAND@599..603
+          HEAP_TYPE@599..603 "func"
+        R_PAREN@603..604 ")"
+      R_PAREN@604..605 ")"
+    WHITESPACE@605..606 "\n"
+    R_PAREN@606..607 ")"
+  WHITESPACE@607..608 "\n"

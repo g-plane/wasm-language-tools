@@ -1,0 +1,418 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..570
+  MODULE@0..569
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_FUNC@10..67
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "func"
+      WHITESPACE@15..16 " "
+      TYPE_USE@16..40
+        L_PAREN@16..17 "("
+        KEYWORD@17..21 "type"
+        WHITESPACE@21..22 " "
+        INDEX@22..26
+          IDENT@22..26 "$sig"
+        R_PAREN@26..27 ")"
+        WHITESPACE@27..28 " "
+        RESULT@28..40
+          L_PAREN@28..29 "("
+          KEYWORD@29..35 "result"
+          WHITESPACE@35..36 " "
+          VAL_TYPE@36..39
+            NUM_TYPE@36..39 "i32"
+          R_PAREN@39..40 ")"
+      WHITESPACE@40..41 " "
+      PLAIN_INSTR@41..52
+        L_PAREN@41..42 "("
+        INSTR_NAME@42..47 "param"
+        WHITESPACE@47..48 " "
+        ERROR@48..51 "i32"
+        R_PAREN@51..52 ")"
+      WHITESPACE@52..53 " "
+      PLAIN_INSTR@53..66
+        L_PAREN@53..54 "("
+        INSTR_NAME@54..63 "i32.const"
+        WHITESPACE@63..64 " "
+        OPERAND@64..65
+          INT@64..65 "0"
+        R_PAREN@65..66 ")"
+      R_PAREN@66..67 ")"
+    WHITESPACE@67..70 "\n  "
+    MODULE_FIELD_FUNC@70..127
+      L_PAREN@70..71 "("
+      KEYWORD@71..75 "func"
+      WHITESPACE@75..76 " "
+      TYPE_USE@76..87
+        PARAM@76..87
+          L_PAREN@76..77 "("
+          KEYWORD@77..82 "param"
+          WHITESPACE@82..83 " "
+          VAL_TYPE@83..86
+            NUM_TYPE@83..86 "i32"
+          R_PAREN@86..87 ")"
+      WHITESPACE@87..88 " "
+      PLAIN_INSTR@88..99
+        L_PAREN@88..89 "("
+        INSTR_NAME@89..93 "type"
+        WHITESPACE@93..94 " "
+        OPERAND@94..98
+          IDENT@94..98 "$sig"
+        R_PAREN@98..99 ")"
+      WHITESPACE@99..100 " "
+      PLAIN_INSTR@100..112
+        L_PAREN@100..101 "("
+        INSTR_NAME@101..107 "result"
+        WHITESPACE@107..108 " "
+        ERROR@108..111 "i32"
+        R_PAREN@111..112 ")"
+      WHITESPACE@112..113 " "
+      PLAIN_INSTR@113..126
+        L_PAREN@113..114 "("
+        INSTR_NAME@114..123 "i32.const"
+        WHITESPACE@123..124 " "
+        OPERAND@124..125
+          INT@124..125 "0"
+        R_PAREN@125..126 ")"
+      R_PAREN@126..127 ")"
+    WHITESPACE@127..130 "\n  "
+    MODULE_FIELD_FUNC@130..187
+      L_PAREN@130..131 "("
+      KEYWORD@131..135 "func"
+      WHITESPACE@135..136 " "
+      TYPE_USE@136..160
+        PARAM@136..147
+          L_PAREN@136..137 "("
+          KEYWORD@137..142 "param"
+          WHITESPACE@142..143 " "
+          VAL_TYPE@143..146
+            NUM_TYPE@143..146 "i32"
+          R_PAREN@146..147 ")"
+        WHITESPACE@147..148 " "
+        RESULT@148..160
+          L_PAREN@148..149 "("
+          KEYWORD@149..155 "result"
+          WHITESPACE@155..156 " "
+          VAL_TYPE@156..159
+            NUM_TYPE@156..159 "i32"
+          R_PAREN@159..160 ")"
+      WHITESPACE@160..161 " "
+      PLAIN_INSTR@161..172
+        L_PAREN@161..162 "("
+        INSTR_NAME@162..166 "type"
+        WHITESPACE@166..167 " "
+        OPERAND@167..171
+          IDENT@167..171 "$sig"
+        R_PAREN@171..172 ")"
+      WHITESPACE@172..173 " "
+      PLAIN_INSTR@173..186
+        L_PAREN@173..174 "("
+        INSTR_NAME@174..183 "i32.const"
+        WHITESPACE@183..184 " "
+        OPERAND@184..185
+          INT@184..185 "0"
+        R_PAREN@185..186 ")"
+      R_PAREN@186..187 ")"
+    WHITESPACE@187..190 "\n  "
+    MODULE_FIELD_FUNC@190..247
+      L_PAREN@190..191 "("
+      KEYWORD@191..195 "func"
+      WHITESPACE@195..196 " "
+      TYPE_USE@196..208
+        RESULT@196..208
+          L_PAREN@196..197 "("
+          KEYWORD@197..203 "result"
+          WHITESPACE@203..204 " "
+          VAL_TYPE@204..207
+            NUM_TYPE@204..207 "i32"
+          R_PAREN@207..208 ")"
+      WHITESPACE@208..209 " "
+      PLAIN_INSTR@209..220
+        L_PAREN@209..210 "("
+        INSTR_NAME@210..214 "type"
+        WHITESPACE@214..215 " "
+        OPERAND@215..219
+          IDENT@215..219 "$sig"
+        R_PAREN@219..220 ")"
+      WHITESPACE@220..221 " "
+      PLAIN_INSTR@221..232
+        L_PAREN@221..222 "("
+        INSTR_NAME@222..227 "param"
+        WHITESPACE@227..228 " "
+        ERROR@228..231 "i32"
+        R_PAREN@231..232 ")"
+      WHITESPACE@232..233 " "
+      PLAIN_INSTR@233..246
+        L_PAREN@233..234 "("
+        INSTR_NAME@234..243 "i32.const"
+        WHITESPACE@243..244 " "
+        OPERAND@244..245
+          INT@244..245 "0"
+        R_PAREN@245..246 ")"
+      R_PAREN@246..247 ")"
+    WHITESPACE@247..250 "\n  "
+    MODULE_FIELD_FUNC@250..307
+      L_PAREN@250..251 "("
+      KEYWORD@251..255 "func"
+      WHITESPACE@255..256 " "
+      TYPE_USE@256..268
+        RESULT@256..268
+          L_PAREN@256..257 "("
+          KEYWORD@257..263 "result"
+          WHITESPACE@263..264 " "
+          VAL_TYPE@264..267
+            NUM_TYPE@264..267 "i32"
+          R_PAREN@267..268 ")"
+      WHITESPACE@268..269 " "
+      PLAIN_INSTR@269..280
+        L_PAREN@269..270 "("
+        INSTR_NAME@270..275 "param"
+        WHITESPACE@275..276 " "
+        ERROR@276..279 "i32"
+        R_PAREN@279..280 ")"
+      WHITESPACE@280..281 " "
+      PLAIN_INSTR@281..292
+        L_PAREN@281..282 "("
+        INSTR_NAME@282..286 "type"
+        WHITESPACE@286..287 " "
+        OPERAND@287..291
+          IDENT@287..291 "$sig"
+        R_PAREN@291..292 ")"
+      WHITESPACE@292..293 " "
+      PLAIN_INSTR@293..306
+        L_PAREN@293..294 "("
+        INSTR_NAME@294..303 "i32.const"
+        WHITESPACE@303..304 " "
+        OPERAND@304..305
+          INT@304..305 "0"
+        R_PAREN@305..306 ")"
+      R_PAREN@306..307 ")"
+    WHITESPACE@307..310 "\n  "
+    MODULE_FIELD_FUNC@310..355
+      L_PAREN@310..311 "("
+      KEYWORD@311..315 "func"
+      WHITESPACE@315..316 " "
+      TYPE_USE@316..328
+        RESULT@316..328
+          L_PAREN@316..317 "("
+          KEYWORD@317..323 "result"
+          WHITESPACE@323..324 " "
+          VAL_TYPE@324..327
+            NUM_TYPE@324..327 "i32"
+          R_PAREN@327..328 ")"
+      WHITESPACE@328..329 " "
+      PLAIN_INSTR@329..340
+        L_PAREN@329..330 "("
+        INSTR_NAME@330..335 "param"
+        WHITESPACE@335..336 " "
+        ERROR@336..339 "i32"
+        R_PAREN@339..340 ")"
+      WHITESPACE@340..341 " "
+      PLAIN_INSTR@341..354
+        L_PAREN@341..342 "("
+        INSTR_NAME@342..351 "i32.const"
+        WHITESPACE@351..352 " "
+        OPERAND@352..353
+          INT@352..353 "0"
+        R_PAREN@353..354 ")"
+      R_PAREN@354..355 ")"
+    WHITESPACE@355..359 "\n\n  "
+    MODULE_FIELD_FUNC@359..383
+      L_PAREN@359..360 "("
+      KEYWORD@360..364 "func"
+      WHITESPACE@364..365 " "
+      PLAIN_INSTR@365..370
+        L_PAREN@365..366 "("
+        INSTR_NAME@366..369 "nop"
+        R_PAREN@369..370 ")"
+      WHITESPACE@370..371 " "
+      PLAIN_INSTR@371..382
+        L_PAREN@371..372 "("
+        INSTR_NAME@372..377 "local"
+        WHITESPACE@377..378 " "
+        ERROR@378..381 "i32"
+        R_PAREN@381..382 ")"
+      R_PAREN@382..383 ")"
+    WHITESPACE@383..386 "\n  "
+    MODULE_FIELD_FUNC@386..410
+      L_PAREN@386..387 "("
+      KEYWORD@387..391 "func"
+      WHITESPACE@391..392 " "
+      PLAIN_INSTR@392..397
+        L_PAREN@392..393 "("
+        INSTR_NAME@393..396 "nop"
+        R_PAREN@396..397 ")"
+      WHITESPACE@397..398 " "
+      PLAIN_INSTR@398..409
+        L_PAREN@398..399 "("
+        INSTR_NAME@399..404 "param"
+        WHITESPACE@404..405 " "
+        ERROR@405..408 "i32"
+        R_PAREN@408..409 ")"
+      R_PAREN@409..410 ")"
+    WHITESPACE@410..413 "\n  "
+    MODULE_FIELD_FUNC@413..438
+      L_PAREN@413..414 "("
+      KEYWORD@414..418 "func"
+      WHITESPACE@418..419 " "
+      PLAIN_INSTR@419..424
+        L_PAREN@419..420 "("
+        INSTR_NAME@420..423 "nop"
+        R_PAREN@423..424 ")"
+      WHITESPACE@424..425 " "
+      PLAIN_INSTR@425..437
+        L_PAREN@425..426 "("
+        INSTR_NAME@426..432 "result"
+        WHITESPACE@432..433 " "
+        ERROR@433..436 "i32"
+        R_PAREN@436..437 ")"
+      R_PAREN@437..438 ")"
+    WHITESPACE@438..441 "\n  "
+    MODULE_FIELD_FUNC@441..471
+      L_PAREN@441..442 "("
+      KEYWORD@442..446 "func"
+      WHITESPACE@446..447 " "
+      LOCAL@447..458
+        L_PAREN@447..448 "("
+        KEYWORD@448..453 "local"
+        WHITESPACE@453..454 " "
+        VAL_TYPE@454..457
+          NUM_TYPE@454..457 "i32"
+        R_PAREN@457..458 ")"
+      WHITESPACE@458..459 " "
+      PLAIN_INSTR@459..470
+        L_PAREN@459..460 "("
+        INSTR_NAME@460..465 "param"
+        WHITESPACE@465..466 " "
+        ERROR@466..469 "i32"
+        R_PAREN@469..470 ")"
+      R_PAREN@470..471 ")"
+    WHITESPACE@471..474 "\n  "
+    MODULE_FIELD_FUNC@474..519
+      L_PAREN@474..475 "("
+      KEYWORD@475..479 "func"
+      WHITESPACE@479..480 " "
+      LOCAL@480..491
+        L_PAREN@480..481 "("
+        KEYWORD@481..486 "local"
+        WHITESPACE@486..487 " "
+        VAL_TYPE@487..490
+          NUM_TYPE@487..490 "i32"
+        R_PAREN@490..491 ")"
+      WHITESPACE@491..492 " "
+      PLAIN_INSTR@492..504
+        L_PAREN@492..493 "("
+        INSTR_NAME@493..499 "result"
+        WHITESPACE@499..500 " "
+        ERROR@500..503 "i32"
+        R_PAREN@503..504 ")"
+      WHITESPACE@504..505 " "
+      PLAIN_INSTR@505..518
+        L_PAREN@505..506 "("
+        INSTR_NAME@506..515 "local.get"
+        WHITESPACE@515..516 " "
+        OPERAND@516..517
+          INT@516..517 "0"
+        R_PAREN@517..518 ")"
+      R_PAREN@518..519 ")"
+    WHITESPACE@519..522 "\n  "
+    MODULE_FIELD_FUNC@522..567
+      L_PAREN@522..523 "("
+      KEYWORD@523..527 "func"
+      WHITESPACE@527..528 " "
+      TYPE_USE@528..540
+        RESULT@528..540
+          L_PAREN@528..529 "("
+          KEYWORD@529..535 "result"
+          WHITESPACE@535..536 " "
+          VAL_TYPE@536..539
+            NUM_TYPE@536..539 "i32"
+          R_PAREN@539..540 ")"
+      WHITESPACE@540..541 " "
+      PLAIN_INSTR@541..552
+        L_PAREN@541..542 "("
+        INSTR_NAME@542..547 "param"
+        WHITESPACE@547..548 " "
+        ERROR@548..551 "i32"
+        R_PAREN@551..552 ")"
+      WHITESPACE@552..553 " "
+      PLAIN_INSTR@553..566
+        L_PAREN@553..554 "("
+        INSTR_NAME@554..563 "local.get"
+        WHITESPACE@563..564 " "
+        OPERAND@564..565
+          INT@564..565 "0"
+        R_PAREN@565..566 ")"
+      R_PAREN@566..567 ")"
+    WHITESPACE@567..568 "\n"
+    R_PAREN@568..569 ")"
+  WHITESPACE@569..570 "\n"
+
+error: expected operand
+  ┌─ func-malformed.wat:2:41
+  │
+2 │   (func (type $sig) (result i32) (param i32) (i32.const 0))
+  │                                         ^^^
+
+error: expected operand
+  ┌─ func-malformed.wat:3:41
+  │
+3 │   (func (param i32) (type $sig) (result i32) (i32.const 0))
+  │                                         ^^^
+
+error: expected operand
+  ┌─ func-malformed.wat:5:41
+  │
+5 │   (func (result i32) (type $sig) (param i32) (i32.const 0))
+  │                                         ^^^
+
+error: expected operand
+  ┌─ func-malformed.wat:6:29
+  │
+6 │   (func (result i32) (param i32) (type $sig) (i32.const 0))
+  │                             ^^^
+
+error: expected operand
+  ┌─ func-malformed.wat:7:29
+  │
+7 │   (func (result i32) (param i32) (i32.const 0))
+  │                             ^^^
+
+error: expected operand
+  ┌─ func-malformed.wat:9:22
+  │
+9 │   (func (nop) (local i32))
+  │                      ^^^
+
+error: expected operand
+   ┌─ func-malformed.wat:10:22
+   │
+10 │   (func (nop) (param i32))
+   │                      ^^^
+
+error: expected operand
+   ┌─ func-malformed.wat:11:23
+   │
+11 │   (func (nop) (result i32))
+   │                       ^^^
+
+error: expected operand
+   ┌─ func-malformed.wat:12:28
+   │
+12 │   (func (local i32) (param i32))
+   │                            ^^^
+
+error: expected operand
+   ┌─ func-malformed.wat:13:29
+   │
+13 │   (func (local i32) (result i32) (local.get 0))
+   │                             ^^^
+
+error: expected operand
+   ┌─ func-malformed.wat:14:29
+   │
+14 │   (func (result i32) (param i32) (local.get 0))
+   │                             ^^^

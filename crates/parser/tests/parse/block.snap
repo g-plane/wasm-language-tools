@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..11073
-  MODULE@0..11072
+ROOT@0..11133
+  MODULE@0..11132
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -5433,6 +5433,45 @@ ROOT@0..11073
         R_PAREN@11065..11066 ")"
       WHITESPACE@11066..11069 "\n  "
       R_PAREN@11069..11070 ")"
-    WHITESPACE@11070..11071 "\n"
-    R_PAREN@11071..11072 ")"
-  WHITESPACE@11072..11073 "\n"
+    WHITESPACE@11070..11074 "\n\n  "
+    MODULE_FIELD_FUNC@11074..11130
+      L_PAREN@11074..11075 "("
+      KEYWORD@11075..11079 "func"
+      WHITESPACE@11079..11080 " "
+      TYPE_USE@11080..11104
+        PARAM@11080..11091
+          L_PAREN@11080..11081 "("
+          KEYWORD@11081..11086 "param"
+          WHITESPACE@11086..11087 " "
+          VAL_TYPE@11087..11090
+            NUM_TYPE@11087..11090 "i32"
+          R_PAREN@11090..11091 ")"
+        WHITESPACE@11091..11092 " "
+        RESULT@11092..11104
+          L_PAREN@11092..11093 "("
+          KEYWORD@11093..11099 "result"
+          WHITESPACE@11099..11100 " "
+          VAL_TYPE@11100..11103
+            NUM_TYPE@11100..11103 "i32"
+          R_PAREN@11103..11104 ")"
+      WHITESPACE@11104..11105 " "
+      BLOCK_BLOCK@11105..11129
+        KEYWORD@11105..11110 "block"
+        WHITESPACE@11110..11111 " "
+        BLOCK_TYPE@11111..11125
+          TYPE_USE@11111..11125
+            PARAM@11111..11125
+              L_PAREN@11111..11112 "("
+              KEYWORD@11112..11117 "param"
+              WHITESPACE@11117..11118 " "
+              IDENT@11118..11120 "$x"
+              WHITESPACE@11120..11121 " "
+              VAL_TYPE@11121..11124
+                NUM_TYPE@11121..11124 "i32"
+              R_PAREN@11124..11125 ")"
+        WHITESPACE@11125..11126 " "
+        KEYWORD@11126..11129 "end"
+      R_PAREN@11129..11130 ")"
+    WHITESPACE@11130..11131 "\n"
+    R_PAREN@11131..11132 ")"
+  WHITESPACE@11132..11133 "\n"

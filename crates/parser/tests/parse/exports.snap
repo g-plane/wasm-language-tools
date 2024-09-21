@@ -1,58 +1,1670 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..80
-  MODULE@0..37
-    L_PAREN@0..1 "("
-    KEYWORD@1..7 "module"
-    WHITESPACE@7..8 " "
-    MODULE_FIELD_EXPORT@8..29
-      L_PAREN@8..9 "("
-      KEYWORD@9..15 "export"
-      WHITESPACE@15..16 " "
-      NAME@16..19
-        STRING@16..19 "\"a\""
-      WHITESPACE@19..20 " "
-      EXPORT_DESC_FUNC@20..28
-        L_PAREN@20..21 "("
-        KEYWORD@21..25 "func"
-        WHITESPACE@25..26 " "
-        INDEX@26..27
-          UNSIGNED_INT@26..27 "0"
-        R_PAREN@27..28 ")"
-      R_PAREN@28..29 ")"
-    WHITESPACE@29..30 " "
-    MODULE_FIELD_FUNC@30..36
-      L_PAREN@30..31 "("
-      KEYWORD@31..35 "func"
-      R_PAREN@35..36 ")"
-    R_PAREN@36..37 ")"
-  WHITESPACE@37..38 "\n"
-  MODULE@38..79
-    L_PAREN@38..39 "("
-    KEYWORD@39..45 "module"
-    WHITESPACE@45..46 " "
-    MODULE_FIELD_EXPORT@46..68
-      L_PAREN@46..47 "("
-      KEYWORD@47..53 "export"
-      WHITESPACE@53..54 " "
-      NAME@54..57
-        STRING@54..57 "\"a\""
-      WHITESPACE@57..58 " "
-      EXPORT_DESC_FUNC@58..67
-        L_PAREN@58..59 "("
-        KEYWORD@59..63 "func"
-        WHITESPACE@63..64 " "
-        INDEX@64..66
-          IDENT@64..66 "$a"
-        R_PAREN@66..67 ")"
-      R_PAREN@67..68 ")"
-    WHITESPACE@68..69 " "
-    MODULE_FIELD_FUNC@69..78
-      L_PAREN@69..70 "("
-      KEYWORD@70..74 "func"
+ROOT@0..2705
+  LINE_COMMENT@0..12 ";; Functions"
+  WHITESPACE@12..14 "\n\n"
+  MODULE@14..51
+    L_PAREN@14..15 "("
+    KEYWORD@15..21 "module"
+    WHITESPACE@21..22 " "
+    MODULE_FIELD_FUNC@22..28
+      L_PAREN@22..23 "("
+      KEYWORD@23..27 "func"
+      R_PAREN@27..28 ")"
+    WHITESPACE@28..29 " "
+    MODULE_FIELD_EXPORT@29..50
+      L_PAREN@29..30 "("
+      KEYWORD@30..36 "export"
+      WHITESPACE@36..37 " "
+      NAME@37..40
+        STRING@37..40 "\"a\""
+      WHITESPACE@40..41 " "
+      EXPORT_DESC_FUNC@41..49
+        L_PAREN@41..42 "("
+        KEYWORD@42..46 "func"
+        WHITESPACE@46..47 " "
+        INDEX@47..48
+          UNSIGNED_INT@47..48 "0"
+        R_PAREN@48..49 ")"
+      R_PAREN@49..50 ")"
+    R_PAREN@50..51 ")"
+  WHITESPACE@51..52 "\n"
+  MODULE@52..111
+    L_PAREN@52..53 "("
+    KEYWORD@53..59 "module"
+    WHITESPACE@59..60 " "
+    MODULE_FIELD_FUNC@60..66
+      L_PAREN@60..61 "("
+      KEYWORD@61..65 "func"
+      R_PAREN@65..66 ")"
+    WHITESPACE@66..67 " "
+    MODULE_FIELD_EXPORT@67..88
+      L_PAREN@67..68 "("
+      KEYWORD@68..74 "export"
       WHITESPACE@74..75 " "
-      IDENT@75..77 "$a"
-      R_PAREN@77..78 ")"
-    R_PAREN@78..79 ")"
-  WHITESPACE@79..80 "\n"
+      NAME@75..78
+        STRING@75..78 "\"a\""
+      WHITESPACE@78..79 " "
+      EXPORT_DESC_FUNC@79..87
+        L_PAREN@79..80 "("
+        KEYWORD@80..84 "func"
+        WHITESPACE@84..85 " "
+        INDEX@85..86
+          UNSIGNED_INT@85..86 "0"
+        R_PAREN@86..87 ")"
+      R_PAREN@87..88 ")"
+    WHITESPACE@88..89 " "
+    MODULE_FIELD_EXPORT@89..110
+      L_PAREN@89..90 "("
+      KEYWORD@90..96 "export"
+      WHITESPACE@96..97 " "
+      NAME@97..100
+        STRING@97..100 "\"b\""
+      WHITESPACE@100..101 " "
+      EXPORT_DESC_FUNC@101..109
+        L_PAREN@101..102 "("
+        KEYWORD@102..106 "func"
+        WHITESPACE@106..107 " "
+        INDEX@107..108
+          UNSIGNED_INT@107..108 "0"
+        R_PAREN@108..109 ")"
+      R_PAREN@109..110 ")"
+    R_PAREN@110..111 ")"
+  WHITESPACE@111..112 "\n"
+  MODULE@112..178
+    L_PAREN@112..113 "("
+    KEYWORD@113..119 "module"
+    WHITESPACE@119..120 " "
+    MODULE_FIELD_FUNC@120..126
+      L_PAREN@120..121 "("
+      KEYWORD@121..125 "func"
+      R_PAREN@125..126 ")"
+    WHITESPACE@126..127 " "
+    MODULE_FIELD_FUNC@127..133
+      L_PAREN@127..128 "("
+      KEYWORD@128..132 "func"
+      R_PAREN@132..133 ")"
+    WHITESPACE@133..134 " "
+    MODULE_FIELD_EXPORT@134..155
+      L_PAREN@134..135 "("
+      KEYWORD@135..141 "export"
+      WHITESPACE@141..142 " "
+      NAME@142..145
+        STRING@142..145 "\"a\""
+      WHITESPACE@145..146 " "
+      EXPORT_DESC_FUNC@146..154
+        L_PAREN@146..147 "("
+        KEYWORD@147..151 "func"
+        WHITESPACE@151..152 " "
+        INDEX@152..153
+          UNSIGNED_INT@152..153 "0"
+        R_PAREN@153..154 ")"
+      R_PAREN@154..155 ")"
+    WHITESPACE@155..156 " "
+    MODULE_FIELD_EXPORT@156..177
+      L_PAREN@156..157 "("
+      KEYWORD@157..163 "export"
+      WHITESPACE@163..164 " "
+      NAME@164..167
+        STRING@164..167 "\"b\""
+      WHITESPACE@167..168 " "
+      EXPORT_DESC_FUNC@168..176
+        L_PAREN@168..169 "("
+        KEYWORD@169..173 "func"
+        WHITESPACE@173..174 " "
+        INDEX@174..175
+          UNSIGNED_INT@174..175 "1"
+        R_PAREN@175..176 ")"
+      R_PAREN@176..177 ")"
+    R_PAREN@177..178 ")"
+  WHITESPACE@178..180 "\n\n"
+  MODULE@180..208
+    L_PAREN@180..181 "("
+    KEYWORD@181..187 "module"
+    WHITESPACE@187..188 " "
+    MODULE_FIELD_FUNC@188..207
+      L_PAREN@188..189 "("
+      KEYWORD@189..193 "func"
+      WHITESPACE@193..194 " "
+      EXPORT@194..206
+        L_PAREN@194..195 "("
+        KEYWORD@195..201 "export"
+        WHITESPACE@201..202 " "
+        NAME@202..205
+          STRING@202..205 "\"a\""
+        R_PAREN@205..206 ")"
+      R_PAREN@206..207 ")"
+    R_PAREN@207..208 ")"
+  WHITESPACE@208..209 "\n"
+  MODULE@209..263
+    L_PAREN@209..210 "("
+    KEYWORD@210..216 "module"
+    WHITESPACE@216..217 " "
+    MODULE_FIELD_FUNC@217..262
+      L_PAREN@217..218 "("
+      KEYWORD@218..222 "func"
+      WHITESPACE@222..223 " "
+      EXPORT@223..235
+        L_PAREN@223..224 "("
+        KEYWORD@224..230 "export"
+        WHITESPACE@230..231 " "
+        NAME@231..234
+          STRING@231..234 "\"a\""
+        R_PAREN@234..235 ")"
+      WHITESPACE@235..236 " "
+      EXPORT@236..248
+        L_PAREN@236..237 "("
+        KEYWORD@237..243 "export"
+        WHITESPACE@243..244 " "
+        NAME@244..247
+          STRING@244..247 "\"b\""
+        R_PAREN@247..248 ")"
+      WHITESPACE@248..249 " "
+      EXPORT@249..261
+        L_PAREN@249..250 "("
+        KEYWORD@250..256 "export"
+        WHITESPACE@256..257 " "
+        NAME@257..260
+          STRING@257..260 "\"c\""
+        R_PAREN@260..261 ")"
+      R_PAREN@261..262 ")"
+    R_PAREN@262..263 ")"
+  WHITESPACE@263..264 "\n"
+  MODULE@264..317
+    L_PAREN@264..265 "("
+    KEYWORD@265..271 "module"
+    WHITESPACE@271..272 " "
+    MODULE_FIELD_FUNC@272..316
+      L_PAREN@272..273 "("
+      KEYWORD@273..277 "func"
+      WHITESPACE@277..278 " "
+      EXPORT@278..290
+        L_PAREN@278..279 "("
+        KEYWORD@279..285 "export"
+        WHITESPACE@285..286 " "
+        NAME@286..289
+          STRING@286..289 "\"a\""
+        R_PAREN@289..290 ")"
+      WHITESPACE@290..291 " "
+      EXPORT@291..303
+        L_PAREN@291..292 "("
+        KEYWORD@292..298 "export"
+        WHITESPACE@298..299 " "
+        NAME@299..302
+          STRING@299..302 "\"b\""
+        R_PAREN@302..303 ")"
+      WHITESPACE@303..304 " "
+      TYPE_USE@304..315
+        PARAM@304..315
+          L_PAREN@304..305 "("
+          KEYWORD@305..310 "param"
+          WHITESPACE@310..311 " "
+          VAL_TYPE@311..314
+            NUM_TYPE@311..314 "i32"
+          R_PAREN@314..315 ")"
+      R_PAREN@315..316 ")"
+    R_PAREN@316..317 ")"
+  WHITESPACE@317..318 "\n"
+  MODULE@318..355
+    L_PAREN@318..319 "("
+    KEYWORD@319..325 "module"
+    WHITESPACE@325..326 " "
+    MODULE_FIELD_FUNC@326..332
+      L_PAREN@326..327 "("
+      KEYWORD@327..331 "func"
+      R_PAREN@331..332 ")"
+    WHITESPACE@332..333 " "
+    MODULE_FIELD_EXPORT@333..354
+      L_PAREN@333..334 "("
+      KEYWORD@334..340 "export"
+      WHITESPACE@340..341 " "
+      NAME@341..344
+        STRING@341..344 "\"a\""
+      WHITESPACE@344..345 " "
+      EXPORT_DESC_FUNC@345..353
+        L_PAREN@345..346 "("
+        KEYWORD@346..350 "func"
+        WHITESPACE@350..351 " "
+        INDEX@351..352
+          UNSIGNED_INT@351..352 "0"
+        R_PAREN@352..353 ")"
+      R_PAREN@353..354 ")"
+    R_PAREN@354..355 ")"
+  WHITESPACE@355..356 "\n"
+  MODULE@356..387
+    L_PAREN@356..357 "("
+    KEYWORD@357..363 "module"
+    WHITESPACE@363..364 " "
+    MODULE_FIELD_FUNC@364..386
+      L_PAREN@364..365 "("
+      KEYWORD@365..369 "func"
+      WHITESPACE@369..370 " "
+      IDENT@370..372 "$a"
+      WHITESPACE@372..373 " "
+      EXPORT@373..385
+        L_PAREN@373..374 "("
+        KEYWORD@374..380 "export"
+        WHITESPACE@380..381 " "
+        NAME@381..384
+          STRING@381..384 "\"a\""
+        R_PAREN@384..385 ")"
+      R_PAREN@385..386 ")"
+    R_PAREN@386..387 ")"
+  WHITESPACE@387..388 "\n"
+  MODULE@388..429
+    L_PAREN@388..389 "("
+    KEYWORD@389..395 "module"
+    WHITESPACE@395..396 " "
+    MODULE_FIELD_FUNC@396..405
+      L_PAREN@396..397 "("
+      KEYWORD@397..401 "func"
+      WHITESPACE@401..402 " "
+      IDENT@402..404 "$a"
+      R_PAREN@404..405 ")"
+    WHITESPACE@405..406 " "
+    MODULE_FIELD_EXPORT@406..428
+      L_PAREN@406..407 "("
+      KEYWORD@407..413 "export"
+      WHITESPACE@413..414 " "
+      NAME@414..417
+        STRING@414..417 "\"a\""
+      WHITESPACE@417..418 " "
+      EXPORT_DESC_FUNC@418..427
+        L_PAREN@418..419 "("
+        KEYWORD@419..423 "func"
+        WHITESPACE@423..424 " "
+        INDEX@424..426
+          IDENT@424..426 "$a"
+        R_PAREN@426..427 ")"
+      R_PAREN@427..428 ")"
+    R_PAREN@428..429 ")"
+  WHITESPACE@429..430 "\n"
+  MODULE@430..467
+    L_PAREN@430..431 "("
+    KEYWORD@431..437 "module"
+    WHITESPACE@437..438 " "
+    MODULE_FIELD_EXPORT@438..459
+      L_PAREN@438..439 "("
+      KEYWORD@439..445 "export"
+      WHITESPACE@445..446 " "
+      NAME@446..449
+        STRING@446..449 "\"a\""
+      WHITESPACE@449..450 " "
+      EXPORT_DESC_FUNC@450..458
+        L_PAREN@450..451 "("
+        KEYWORD@451..455 "func"
+        WHITESPACE@455..456 " "
+        INDEX@456..457
+          UNSIGNED_INT@456..457 "0"
+        R_PAREN@457..458 ")"
+      R_PAREN@458..459 ")"
+    WHITESPACE@459..460 " "
+    MODULE_FIELD_FUNC@460..466
+      L_PAREN@460..461 "("
+      KEYWORD@461..465 "func"
+      R_PAREN@465..466 ")"
+    R_PAREN@466..467 ")"
+  WHITESPACE@467..468 "\n"
+  MODULE@468..509
+    L_PAREN@468..469 "("
+    KEYWORD@469..475 "module"
+    WHITESPACE@475..476 " "
+    MODULE_FIELD_EXPORT@476..498
+      L_PAREN@476..477 "("
+      KEYWORD@477..483 "export"
+      WHITESPACE@483..484 " "
+      NAME@484..487
+        STRING@484..487 "\"a\""
+      WHITESPACE@487..488 " "
+      EXPORT_DESC_FUNC@488..497
+        L_PAREN@488..489 "("
+        KEYWORD@489..493 "func"
+        WHITESPACE@493..494 " "
+        INDEX@494..496
+          IDENT@494..496 "$a"
+        R_PAREN@496..497 ")"
+      R_PAREN@497..498 ")"
+    WHITESPACE@498..499 " "
+    MODULE_FIELD_FUNC@499..508
+      L_PAREN@499..500 "("
+      KEYWORD@500..504 "func"
+      WHITESPACE@504..505 " "
+      IDENT@505..507 "$a"
+      R_PAREN@507..508 ")"
+    R_PAREN@508..509 ")"
+  WHITESPACE@509..511 "\n\n"
+  LINE_COMMENT@511..521 ";; Globals"
+  WHITESPACE@521..523 "\n\n"
+  MODULE@523..582
+    L_PAREN@523..524 "("
+    KEYWORD@524..530 "module"
+    WHITESPACE@530..531 " "
+    MODULE_FIELD_GLOBAL@531..557
+      L_PAREN@531..532 "("
+      KEYWORD@532..538 "global"
+      WHITESPACE@538..539 " "
+      GLOBAL_TYPE@539..542
+        VAL_TYPE@539..542
+          NUM_TYPE@539..542 "i32"
+      WHITESPACE@542..543 " "
+      PLAIN_INSTR@543..556
+        L_PAREN@543..544 "("
+        INSTR_NAME@544..553 "i32.const"
+        WHITESPACE@553..554 " "
+        OPERAND@554..555
+          INT@554..555 "0"
+        R_PAREN@555..556 ")"
+      R_PAREN@556..557 ")"
+    WHITESPACE@557..558 " "
+    MODULE_FIELD_EXPORT@558..581
+      L_PAREN@558..559 "("
+      KEYWORD@559..565 "export"
+      WHITESPACE@565..566 " "
+      NAME@566..569
+        STRING@566..569 "\"a\""
+      WHITESPACE@569..570 " "
+      EXPORT_DESC_GLOBAL@570..580
+        L_PAREN@570..571 "("
+        KEYWORD@571..577 "global"
+        WHITESPACE@577..578 " "
+        INDEX@578..579
+          UNSIGNED_INT@578..579 "0"
+        R_PAREN@579..580 ")"
+      R_PAREN@580..581 ")"
+    R_PAREN@581..582 ")"
+  WHITESPACE@582..583 "\n"
+  MODULE@583..666
+    L_PAREN@583..584 "("
+    KEYWORD@584..590 "module"
+    WHITESPACE@590..591 " "
+    MODULE_FIELD_GLOBAL@591..617
+      L_PAREN@591..592 "("
+      KEYWORD@592..598 "global"
+      WHITESPACE@598..599 " "
+      GLOBAL_TYPE@599..602
+        VAL_TYPE@599..602
+          NUM_TYPE@599..602 "i32"
+      WHITESPACE@602..603 " "
+      PLAIN_INSTR@603..616
+        L_PAREN@603..604 "("
+        INSTR_NAME@604..613 "i32.const"
+        WHITESPACE@613..614 " "
+        OPERAND@614..615
+          INT@614..615 "0"
+        R_PAREN@615..616 ")"
+      R_PAREN@616..617 ")"
+    WHITESPACE@617..618 " "
+    MODULE_FIELD_EXPORT@618..641
+      L_PAREN@618..619 "("
+      KEYWORD@619..625 "export"
+      WHITESPACE@625..626 " "
+      NAME@626..629
+        STRING@626..629 "\"a\""
+      WHITESPACE@629..630 " "
+      EXPORT_DESC_GLOBAL@630..640
+        L_PAREN@630..631 "("
+        KEYWORD@631..637 "global"
+        WHITESPACE@637..638 " "
+        INDEX@638..639
+          UNSIGNED_INT@638..639 "0"
+        R_PAREN@639..640 ")"
+      R_PAREN@640..641 ")"
+    WHITESPACE@641..642 " "
+    MODULE_FIELD_EXPORT@642..665
+      L_PAREN@642..643 "("
+      KEYWORD@643..649 "export"
+      WHITESPACE@649..650 " "
+      NAME@650..653
+        STRING@650..653 "\"b\""
+      WHITESPACE@653..654 " "
+      EXPORT_DESC_GLOBAL@654..664
+        L_PAREN@654..655 "("
+        KEYWORD@655..661 "global"
+        WHITESPACE@661..662 " "
+        INDEX@662..663
+          UNSIGNED_INT@662..663 "0"
+        R_PAREN@663..664 ")"
+      R_PAREN@664..665 ")"
+    R_PAREN@665..666 ")"
+  WHITESPACE@666..667 "\n"
+  MODULE@667..777
+    L_PAREN@667..668 "("
+    KEYWORD@668..674 "module"
+    WHITESPACE@674..675 " "
+    MODULE_FIELD_GLOBAL@675..701
+      L_PAREN@675..676 "("
+      KEYWORD@676..682 "global"
+      WHITESPACE@682..683 " "
+      GLOBAL_TYPE@683..686
+        VAL_TYPE@683..686
+          NUM_TYPE@683..686 "i32"
+      WHITESPACE@686..687 " "
+      PLAIN_INSTR@687..700
+        L_PAREN@687..688 "("
+        INSTR_NAME@688..697 "i32.const"
+        WHITESPACE@697..698 " "
+        OPERAND@698..699
+          INT@698..699 "0"
+        R_PAREN@699..700 ")"
+      R_PAREN@700..701 ")"
+    WHITESPACE@701..702 " "
+    MODULE_FIELD_GLOBAL@702..728
+      L_PAREN@702..703 "("
+      KEYWORD@703..709 "global"
+      WHITESPACE@709..710 " "
+      GLOBAL_TYPE@710..713
+        VAL_TYPE@710..713
+          NUM_TYPE@710..713 "i32"
+      WHITESPACE@713..714 " "
+      PLAIN_INSTR@714..727
+        L_PAREN@714..715 "("
+        INSTR_NAME@715..724 "i32.const"
+        WHITESPACE@724..725 " "
+        OPERAND@725..726
+          INT@725..726 "0"
+        R_PAREN@726..727 ")"
+      R_PAREN@727..728 ")"
+    WHITESPACE@728..729 " "
+    MODULE_FIELD_EXPORT@729..752
+      L_PAREN@729..730 "("
+      KEYWORD@730..736 "export"
+      WHITESPACE@736..737 " "
+      NAME@737..740
+        STRING@737..740 "\"a\""
+      WHITESPACE@740..741 " "
+      EXPORT_DESC_GLOBAL@741..751
+        L_PAREN@741..742 "("
+        KEYWORD@742..748 "global"
+        WHITESPACE@748..749 " "
+        INDEX@749..750
+          UNSIGNED_INT@749..750 "0"
+        R_PAREN@750..751 ")"
+      R_PAREN@751..752 ")"
+    WHITESPACE@752..753 " "
+    MODULE_FIELD_EXPORT@753..776
+      L_PAREN@753..754 "("
+      KEYWORD@754..760 "export"
+      WHITESPACE@760..761 " "
+      NAME@761..764
+        STRING@761..764 "\"b\""
+      WHITESPACE@764..765 " "
+      EXPORT_DESC_GLOBAL@765..775
+        L_PAREN@765..766 "("
+        KEYWORD@766..772 "global"
+        WHITESPACE@772..773 " "
+        INDEX@773..774
+          UNSIGNED_INT@773..774 "1"
+        R_PAREN@774..775 ")"
+      R_PAREN@775..776 ")"
+    R_PAREN@776..777 ")"
+  WHITESPACE@777..779 "\n\n"
+  MODULE@779..827
+    L_PAREN@779..780 "("
+    KEYWORD@780..786 "module"
+    WHITESPACE@786..787 " "
+    MODULE_FIELD_GLOBAL@787..826
+      L_PAREN@787..788 "("
+      KEYWORD@788..794 "global"
+      WHITESPACE@794..795 " "
+      EXPORT@795..807
+        L_PAREN@795..796 "("
+        KEYWORD@796..802 "export"
+        WHITESPACE@802..803 " "
+        NAME@803..806
+          STRING@803..806 "\"a\""
+        R_PAREN@806..807 ")"
+      WHITESPACE@807..808 " "
+      GLOBAL_TYPE@808..811
+        VAL_TYPE@808..811
+          NUM_TYPE@808..811 "i32"
+      WHITESPACE@811..812 " "
+      PLAIN_INSTR@812..825
+        L_PAREN@812..813 "("
+        INSTR_NAME@813..822 "i32.const"
+        WHITESPACE@822..823 " "
+        OPERAND@823..824
+          INT@823..824 "0"
+        R_PAREN@824..825 ")"
+      R_PAREN@825..826 ")"
+    R_PAREN@826..827 ")"
+  WHITESPACE@827..828 "\n"
+  MODULE@828..887
+    L_PAREN@828..829 "("
+    KEYWORD@829..835 "module"
+    WHITESPACE@835..836 " "
+    MODULE_FIELD_GLOBAL@836..862
+      L_PAREN@836..837 "("
+      KEYWORD@837..843 "global"
+      WHITESPACE@843..844 " "
+      GLOBAL_TYPE@844..847
+        VAL_TYPE@844..847
+          NUM_TYPE@844..847 "i32"
+      WHITESPACE@847..848 " "
+      PLAIN_INSTR@848..861
+        L_PAREN@848..849 "("
+        INSTR_NAME@849..858 "i32.const"
+        WHITESPACE@858..859 " "
+        OPERAND@859..860
+          INT@859..860 "0"
+        R_PAREN@860..861 ")"
+      R_PAREN@861..862 ")"
+    WHITESPACE@862..863 " "
+    MODULE_FIELD_EXPORT@863..886
+      L_PAREN@863..864 "("
+      KEYWORD@864..870 "export"
+      WHITESPACE@870..871 " "
+      NAME@871..874
+        STRING@871..874 "\"a\""
+      WHITESPACE@874..875 " "
+      EXPORT_DESC_GLOBAL@875..885
+        L_PAREN@875..876 "("
+        KEYWORD@876..882 "global"
+        WHITESPACE@882..883 " "
+        INDEX@883..884
+          UNSIGNED_INT@883..884 "0"
+        R_PAREN@884..885 ")"
+      R_PAREN@885..886 ")"
+    R_PAREN@886..887 ")"
+  WHITESPACE@887..888 "\n"
+  MODULE@888..939
+    L_PAREN@888..889 "("
+    KEYWORD@889..895 "module"
+    WHITESPACE@895..896 " "
+    MODULE_FIELD_GLOBAL@896..938
+      L_PAREN@896..897 "("
+      KEYWORD@897..903 "global"
+      WHITESPACE@903..904 " "
+      IDENT@904..906 "$a"
+      WHITESPACE@906..907 " "
+      EXPORT@907..919
+        L_PAREN@907..908 "("
+        KEYWORD@908..914 "export"
+        WHITESPACE@914..915 " "
+        NAME@915..918
+          STRING@915..918 "\"a\""
+        R_PAREN@918..919 ")"
+      WHITESPACE@919..920 " "
+      GLOBAL_TYPE@920..923
+        VAL_TYPE@920..923
+          NUM_TYPE@920..923 "i32"
+      WHITESPACE@923..924 " "
+      PLAIN_INSTR@924..937
+        L_PAREN@924..925 "("
+        INSTR_NAME@925..934 "i32.const"
+        WHITESPACE@934..935 " "
+        OPERAND@935..936
+          INT@935..936 "0"
+        R_PAREN@936..937 ")"
+      R_PAREN@937..938 ")"
+    R_PAREN@938..939 ")"
+  WHITESPACE@939..940 "\n"
+  MODULE@940..1003
+    L_PAREN@940..941 "("
+    KEYWORD@941..947 "module"
+    WHITESPACE@947..948 " "
+    MODULE_FIELD_GLOBAL@948..977
+      L_PAREN@948..949 "("
+      KEYWORD@949..955 "global"
+      WHITESPACE@955..956 " "
+      IDENT@956..958 "$a"
+      WHITESPACE@958..959 " "
+      GLOBAL_TYPE@959..962
+        VAL_TYPE@959..962
+          NUM_TYPE@959..962 "i32"
+      WHITESPACE@962..963 " "
+      PLAIN_INSTR@963..976
+        L_PAREN@963..964 "("
+        INSTR_NAME@964..973 "i32.const"
+        WHITESPACE@973..974 " "
+        OPERAND@974..975
+          INT@974..975 "0"
+        R_PAREN@975..976 ")"
+      R_PAREN@976..977 ")"
+    WHITESPACE@977..978 " "
+    MODULE_FIELD_EXPORT@978..1002
+      L_PAREN@978..979 "("
+      KEYWORD@979..985 "export"
+      WHITESPACE@985..986 " "
+      NAME@986..989
+        STRING@986..989 "\"a\""
+      WHITESPACE@989..990 " "
+      EXPORT_DESC_GLOBAL@990..1001
+        L_PAREN@990..991 "("
+        KEYWORD@991..997 "global"
+        WHITESPACE@997..998 " "
+        INDEX@998..1000
+          IDENT@998..1000 "$a"
+        R_PAREN@1000..1001 ")"
+      R_PAREN@1001..1002 ")"
+    R_PAREN@1002..1003 ")"
+  WHITESPACE@1003..1004 "\n"
+  MODULE@1004..1063
+    L_PAREN@1004..1005 "("
+    KEYWORD@1005..1011 "module"
+    WHITESPACE@1011..1012 " "
+    MODULE_FIELD_EXPORT@1012..1035
+      L_PAREN@1012..1013 "("
+      KEYWORD@1013..1019 "export"
+      WHITESPACE@1019..1020 " "
+      NAME@1020..1023
+        STRING@1020..1023 "\"a\""
+      WHITESPACE@1023..1024 " "
+      EXPORT_DESC_GLOBAL@1024..1034
+        L_PAREN@1024..1025 "("
+        KEYWORD@1025..1031 "global"
+        WHITESPACE@1031..1032 " "
+        INDEX@1032..1033
+          UNSIGNED_INT@1032..1033 "0"
+        R_PAREN@1033..1034 ")"
+      R_PAREN@1034..1035 ")"
+    WHITESPACE@1035..1036 " "
+    MODULE_FIELD_GLOBAL@1036..1062
+      L_PAREN@1036..1037 "("
+      KEYWORD@1037..1043 "global"
+      WHITESPACE@1043..1044 " "
+      GLOBAL_TYPE@1044..1047
+        VAL_TYPE@1044..1047
+          NUM_TYPE@1044..1047 "i32"
+      WHITESPACE@1047..1048 " "
+      PLAIN_INSTR@1048..1061
+        L_PAREN@1048..1049 "("
+        INSTR_NAME@1049..1058 "i32.const"
+        WHITESPACE@1058..1059 " "
+        OPERAND@1059..1060
+          INT@1059..1060 "0"
+        R_PAREN@1060..1061 ")"
+      R_PAREN@1061..1062 ")"
+    R_PAREN@1062..1063 ")"
+  WHITESPACE@1063..1064 "\n"
+  MODULE@1064..1127
+    L_PAREN@1064..1065 "("
+    KEYWORD@1065..1071 "module"
+    WHITESPACE@1071..1072 " "
+    MODULE_FIELD_EXPORT@1072..1096
+      L_PAREN@1072..1073 "("
+      KEYWORD@1073..1079 "export"
+      WHITESPACE@1079..1080 " "
+      NAME@1080..1083
+        STRING@1080..1083 "\"a\""
+      WHITESPACE@1083..1084 " "
+      EXPORT_DESC_GLOBAL@1084..1095
+        L_PAREN@1084..1085 "("
+        KEYWORD@1085..1091 "global"
+        WHITESPACE@1091..1092 " "
+        INDEX@1092..1094
+          IDENT@1092..1094 "$a"
+        R_PAREN@1094..1095 ")"
+      R_PAREN@1095..1096 ")"
+    WHITESPACE@1096..1097 " "
+    MODULE_FIELD_GLOBAL@1097..1126
+      L_PAREN@1097..1098 "("
+      KEYWORD@1098..1104 "global"
+      WHITESPACE@1104..1105 " "
+      IDENT@1105..1107 "$a"
+      WHITESPACE@1107..1108 " "
+      GLOBAL_TYPE@1108..1111
+        VAL_TYPE@1108..1111
+          NUM_TYPE@1108..1111 "i32"
+      WHITESPACE@1111..1112 " "
+      PLAIN_INSTR@1112..1125
+        L_PAREN@1112..1113 "("
+        INSTR_NAME@1113..1122 "i32.const"
+        WHITESPACE@1122..1123 " "
+        OPERAND@1123..1124
+          INT@1123..1124 "0"
+        R_PAREN@1124..1125 ")"
+      R_PAREN@1125..1126 ")"
+    R_PAREN@1126..1127 ")"
+  WHITESPACE@1127..1129 "\n\n"
+  LINE_COMMENT@1129..1138 ";; Tables"
+  WHITESPACE@1138..1140 "\n\n"
+  MODULE@1140..1189
+    L_PAREN@1140..1141 "("
+    KEYWORD@1141..1147 "module"
+    WHITESPACE@1147..1148 " "
+    MODULE_FIELD_TABLE@1148..1165
+      L_PAREN@1148..1149 "("
+      KEYWORD@1149..1154 "table"
+      WHITESPACE@1154..1155 " "
+      TABLE_TYPE@1155..1164
+        LIMITS@1155..1156
+          UNSIGNED_INT@1155..1156 "0"
+        WHITESPACE@1156..1157 " "
+        REF_TYPE@1157..1164 "funcref"
+      R_PAREN@1164..1165 ")"
+    WHITESPACE@1165..1166 " "
+    MODULE_FIELD_EXPORT@1166..1188
+      L_PAREN@1166..1167 "("
+      KEYWORD@1167..1173 "export"
+      WHITESPACE@1173..1174 " "
+      NAME@1174..1177
+        STRING@1174..1177 "\"a\""
+      WHITESPACE@1177..1178 " "
+      EXPORT_DESC_TABLE@1178..1187
+        L_PAREN@1178..1179 "("
+        KEYWORD@1179..1184 "table"
+        WHITESPACE@1184..1185 " "
+        INDEX@1185..1186
+          UNSIGNED_INT@1185..1186 "0"
+        R_PAREN@1186..1187 ")"
+      R_PAREN@1187..1188 ")"
+    R_PAREN@1188..1189 ")"
+  WHITESPACE@1189..1190 "\n"
+  MODULE@1190..1262
+    L_PAREN@1190..1191 "("
+    KEYWORD@1191..1197 "module"
+    WHITESPACE@1197..1198 " "
+    MODULE_FIELD_TABLE@1198..1215
+      L_PAREN@1198..1199 "("
+      KEYWORD@1199..1204 "table"
+      WHITESPACE@1204..1205 " "
+      TABLE_TYPE@1205..1214
+        LIMITS@1205..1206
+          UNSIGNED_INT@1205..1206 "0"
+        WHITESPACE@1206..1207 " "
+        REF_TYPE@1207..1214 "funcref"
+      R_PAREN@1214..1215 ")"
+    WHITESPACE@1215..1216 " "
+    MODULE_FIELD_EXPORT@1216..1238
+      L_PAREN@1216..1217 "("
+      KEYWORD@1217..1223 "export"
+      WHITESPACE@1223..1224 " "
+      NAME@1224..1227
+        STRING@1224..1227 "\"a\""
+      WHITESPACE@1227..1228 " "
+      EXPORT_DESC_TABLE@1228..1237
+        L_PAREN@1228..1229 "("
+        KEYWORD@1229..1234 "table"
+        WHITESPACE@1234..1235 " "
+        INDEX@1235..1236
+          UNSIGNED_INT@1235..1236 "0"
+        R_PAREN@1236..1237 ")"
+      R_PAREN@1237..1238 ")"
+    WHITESPACE@1238..1239 " "
+    MODULE_FIELD_EXPORT@1239..1261
+      L_PAREN@1239..1240 "("
+      KEYWORD@1240..1246 "export"
+      WHITESPACE@1246..1247 " "
+      NAME@1247..1250
+        STRING@1247..1250 "\"b\""
+      WHITESPACE@1250..1251 " "
+      EXPORT_DESC_TABLE@1251..1260
+        L_PAREN@1251..1252 "("
+        KEYWORD@1252..1257 "table"
+        WHITESPACE@1257..1258 " "
+        INDEX@1258..1259
+          UNSIGNED_INT@1258..1259 "0"
+        R_PAREN@1259..1260 ")"
+      R_PAREN@1260..1261 ")"
+    R_PAREN@1261..1262 ")"
+  WHITESPACE@1262..1263 "\n"
+  MODULE@1263..1353
+    L_PAREN@1263..1264 "("
+    KEYWORD@1264..1270 "module"
+    WHITESPACE@1270..1271 " "
+    MODULE_FIELD_TABLE@1271..1288
+      L_PAREN@1271..1272 "("
+      KEYWORD@1272..1277 "table"
+      WHITESPACE@1277..1278 " "
+      TABLE_TYPE@1278..1287
+        LIMITS@1278..1279
+          UNSIGNED_INT@1278..1279 "0"
+        WHITESPACE@1279..1280 " "
+        REF_TYPE@1280..1287 "funcref"
+      R_PAREN@1287..1288 ")"
+    WHITESPACE@1288..1289 " "
+    MODULE_FIELD_TABLE@1289..1306
+      L_PAREN@1289..1290 "("
+      KEYWORD@1290..1295 "table"
+      WHITESPACE@1295..1296 " "
+      TABLE_TYPE@1296..1305
+        LIMITS@1296..1297
+          UNSIGNED_INT@1296..1297 "0"
+        WHITESPACE@1297..1298 " "
+        REF_TYPE@1298..1305 "funcref"
+      R_PAREN@1305..1306 ")"
+    WHITESPACE@1306..1307 " "
+    MODULE_FIELD_EXPORT@1307..1329
+      L_PAREN@1307..1308 "("
+      KEYWORD@1308..1314 "export"
+      WHITESPACE@1314..1315 " "
+      NAME@1315..1318
+        STRING@1315..1318 "\"a\""
+      WHITESPACE@1318..1319 " "
+      EXPORT_DESC_TABLE@1319..1328
+        L_PAREN@1319..1320 "("
+        KEYWORD@1320..1325 "table"
+        WHITESPACE@1325..1326 " "
+        INDEX@1326..1327
+          UNSIGNED_INT@1326..1327 "0"
+        R_PAREN@1327..1328 ")"
+      R_PAREN@1328..1329 ")"
+    WHITESPACE@1329..1330 " "
+    MODULE_FIELD_EXPORT@1330..1352
+      L_PAREN@1330..1331 "("
+      KEYWORD@1331..1337 "export"
+      WHITESPACE@1337..1338 " "
+      NAME@1338..1341
+        STRING@1338..1341 "\"b\""
+      WHITESPACE@1341..1342 " "
+      EXPORT_DESC_TABLE@1342..1351
+        L_PAREN@1342..1343 "("
+        KEYWORD@1343..1348 "table"
+        WHITESPACE@1348..1349 " "
+        INDEX@1349..1350
+          UNSIGNED_INT@1349..1350 "1"
+        R_PAREN@1350..1351 ")"
+      R_PAREN@1351..1352 ")"
+    R_PAREN@1352..1353 ")"
+  WHITESPACE@1353..1355 "\n\n"
+  MODULE@1355..1394
+    L_PAREN@1355..1356 "("
+    KEYWORD@1356..1362 "module"
+    WHITESPACE@1362..1363 " "
+    MODULE_FIELD_TABLE@1363..1393
+      L_PAREN@1363..1364 "("
+      KEYWORD@1364..1369 "table"
+      WHITESPACE@1369..1370 " "
+      EXPORT@1370..1382
+        L_PAREN@1370..1371 "("
+        KEYWORD@1371..1377 "export"
+        WHITESPACE@1377..1378 " "
+        NAME@1378..1381
+          STRING@1378..1381 "\"a\""
+        R_PAREN@1381..1382 ")"
+      WHITESPACE@1382..1383 " "
+      TABLE_TYPE@1383..1392
+        LIMITS@1383..1384
+          UNSIGNED_INT@1383..1384 "0"
+        WHITESPACE@1384..1385 " "
+        REF_TYPE@1385..1392 "funcref"
+      R_PAREN@1392..1393 ")"
+    R_PAREN@1393..1394 ")"
+  WHITESPACE@1394..1395 "\n"
+  MODULE@1395..1436
+    L_PAREN@1395..1396 "("
+    KEYWORD@1396..1402 "module"
+    WHITESPACE@1402..1403 " "
+    MODULE_FIELD_TABLE@1403..1435
+      L_PAREN@1403..1404 "("
+      KEYWORD@1404..1409 "table"
+      WHITESPACE@1409..1410 " "
+      EXPORT@1410..1422
+        L_PAREN@1410..1411 "("
+        KEYWORD@1411..1417 "export"
+        WHITESPACE@1417..1418 " "
+        NAME@1418..1421
+          STRING@1418..1421 "\"a\""
+        R_PAREN@1421..1422 ")"
+      WHITESPACE@1422..1423 " "
+      TABLE_TYPE@1423..1434
+        LIMITS@1423..1426
+          UNSIGNED_INT@1423..1424 "0"
+          WHITESPACE@1424..1425 " "
+          UNSIGNED_INT@1425..1426 "1"
+        WHITESPACE@1426..1427 " "
+        REF_TYPE@1427..1434 "funcref"
+      R_PAREN@1434..1435 ")"
+    R_PAREN@1435..1436 ")"
+  WHITESPACE@1436..1437 "\n"
+  MODULE@1437..1486
+    L_PAREN@1437..1438 "("
+    KEYWORD@1438..1444 "module"
+    WHITESPACE@1444..1445 " "
+    MODULE_FIELD_TABLE@1445..1462
+      L_PAREN@1445..1446 "("
+      KEYWORD@1446..1451 "table"
+      WHITESPACE@1451..1452 " "
+      TABLE_TYPE@1452..1461
+        LIMITS@1452..1453
+          UNSIGNED_INT@1452..1453 "0"
+        WHITESPACE@1453..1454 " "
+        REF_TYPE@1454..1461 "funcref"
+      R_PAREN@1461..1462 ")"
+    WHITESPACE@1462..1463 " "
+    MODULE_FIELD_EXPORT@1463..1485
+      L_PAREN@1463..1464 "("
+      KEYWORD@1464..1470 "export"
+      WHITESPACE@1470..1471 " "
+      NAME@1471..1474
+        STRING@1471..1474 "\"a\""
+      WHITESPACE@1474..1475 " "
+      EXPORT_DESC_TABLE@1475..1484
+        L_PAREN@1475..1476 "("
+        KEYWORD@1476..1481 "table"
+        WHITESPACE@1481..1482 " "
+        INDEX@1482..1483
+          UNSIGNED_INT@1482..1483 "0"
+        R_PAREN@1483..1484 ")"
+      R_PAREN@1484..1485 ")"
+    R_PAREN@1485..1486 ")"
+  WHITESPACE@1486..1487 "\n"
+  MODULE@1487..1538
+    L_PAREN@1487..1488 "("
+    KEYWORD@1488..1494 "module"
+    WHITESPACE@1494..1495 " "
+    MODULE_FIELD_TABLE@1495..1514
+      L_PAREN@1495..1496 "("
+      KEYWORD@1496..1501 "table"
+      WHITESPACE@1501..1502 " "
+      TABLE_TYPE@1502..1513
+        LIMITS@1502..1505
+          UNSIGNED_INT@1502..1503 "0"
+          WHITESPACE@1503..1504 " "
+          UNSIGNED_INT@1504..1505 "1"
+        WHITESPACE@1505..1506 " "
+        REF_TYPE@1506..1513 "funcref"
+      R_PAREN@1513..1514 ")"
+    WHITESPACE@1514..1515 " "
+    MODULE_FIELD_EXPORT@1515..1537
+      L_PAREN@1515..1516 "("
+      KEYWORD@1516..1522 "export"
+      WHITESPACE@1522..1523 " "
+      NAME@1523..1526
+        STRING@1523..1526 "\"a\""
+      WHITESPACE@1526..1527 " "
+      EXPORT_DESC_TABLE@1527..1536
+        L_PAREN@1527..1528 "("
+        KEYWORD@1528..1533 "table"
+        WHITESPACE@1533..1534 " "
+        INDEX@1534..1535
+          UNSIGNED_INT@1534..1535 "0"
+        R_PAREN@1535..1536 ")"
+      R_PAREN@1536..1537 ")"
+    R_PAREN@1537..1538 ")"
+  WHITESPACE@1538..1539 "\n"
+  MODULE@1539..1581
+    L_PAREN@1539..1540 "("
+    KEYWORD@1540..1546 "module"
+    WHITESPACE@1546..1547 " "
+    MODULE_FIELD_TABLE@1547..1580
+      L_PAREN@1547..1548 "("
+      KEYWORD@1548..1553 "table"
+      WHITESPACE@1553..1554 " "
+      IDENT@1554..1556 "$a"
+      WHITESPACE@1556..1557 " "
+      EXPORT@1557..1569
+        L_PAREN@1557..1558 "("
+        KEYWORD@1558..1564 "export"
+        WHITESPACE@1564..1565 " "
+        NAME@1565..1568
+          STRING@1565..1568 "\"a\""
+        R_PAREN@1568..1569 ")"
+      WHITESPACE@1569..1570 " "
+      TABLE_TYPE@1570..1579
+        LIMITS@1570..1571
+          UNSIGNED_INT@1570..1571 "0"
+        WHITESPACE@1571..1572 " "
+        REF_TYPE@1572..1579 "funcref"
+      R_PAREN@1579..1580 ")"
+    R_PAREN@1580..1581 ")"
+  WHITESPACE@1581..1582 "\n"
+  MODULE@1582..1626
+    L_PAREN@1582..1583 "("
+    KEYWORD@1583..1589 "module"
+    WHITESPACE@1589..1590 " "
+    MODULE_FIELD_TABLE@1590..1625
+      L_PAREN@1590..1591 "("
+      KEYWORD@1591..1596 "table"
+      WHITESPACE@1596..1597 " "
+      IDENT@1597..1599 "$a"
+      WHITESPACE@1599..1600 " "
+      EXPORT@1600..1612
+        L_PAREN@1600..1601 "("
+        KEYWORD@1601..1607 "export"
+        WHITESPACE@1607..1608 " "
+        NAME@1608..1611
+          STRING@1608..1611 "\"a\""
+        R_PAREN@1611..1612 ")"
+      WHITESPACE@1612..1613 " "
+      TABLE_TYPE@1613..1624
+        LIMITS@1613..1616
+          UNSIGNED_INT@1613..1614 "0"
+          WHITESPACE@1614..1615 " "
+          UNSIGNED_INT@1615..1616 "1"
+        WHITESPACE@1616..1617 " "
+        REF_TYPE@1617..1624 "funcref"
+      R_PAREN@1624..1625 ")"
+    R_PAREN@1625..1626 ")"
+  WHITESPACE@1626..1627 "\n"
+  MODULE@1627..1680
+    L_PAREN@1627..1628 "("
+    KEYWORD@1628..1634 "module"
+    WHITESPACE@1634..1635 " "
+    MODULE_FIELD_TABLE@1635..1655
+      L_PAREN@1635..1636 "("
+      KEYWORD@1636..1641 "table"
+      WHITESPACE@1641..1642 " "
+      IDENT@1642..1644 "$a"
+      WHITESPACE@1644..1645 " "
+      TABLE_TYPE@1645..1654
+        LIMITS@1645..1646
+          UNSIGNED_INT@1645..1646 "0"
+        WHITESPACE@1646..1647 " "
+        REF_TYPE@1647..1654 "funcref"
+      R_PAREN@1654..1655 ")"
+    WHITESPACE@1655..1656 " "
+    MODULE_FIELD_EXPORT@1656..1679
+      L_PAREN@1656..1657 "("
+      KEYWORD@1657..1663 "export"
+      WHITESPACE@1663..1664 " "
+      NAME@1664..1667
+        STRING@1664..1667 "\"a\""
+      WHITESPACE@1667..1668 " "
+      EXPORT_DESC_TABLE@1668..1678
+        L_PAREN@1668..1669 "("
+        KEYWORD@1669..1674 "table"
+        WHITESPACE@1674..1675 " "
+        INDEX@1675..1677
+          IDENT@1675..1677 "$a"
+        R_PAREN@1677..1678 ")"
+      R_PAREN@1678..1679 ")"
+    R_PAREN@1679..1680 ")"
+  WHITESPACE@1680..1681 "\n"
+  MODULE@1681..1736
+    L_PAREN@1681..1682 "("
+    KEYWORD@1682..1688 "module"
+    WHITESPACE@1688..1689 " "
+    MODULE_FIELD_TABLE@1689..1711
+      L_PAREN@1689..1690 "("
+      KEYWORD@1690..1695 "table"
+      WHITESPACE@1695..1696 " "
+      IDENT@1696..1698 "$a"
+      WHITESPACE@1698..1699 " "
+      TABLE_TYPE@1699..1710
+        LIMITS@1699..1702
+          UNSIGNED_INT@1699..1700 "0"
+          WHITESPACE@1700..1701 " "
+          UNSIGNED_INT@1701..1702 "1"
+        WHITESPACE@1702..1703 " "
+        REF_TYPE@1703..1710 "funcref"
+      R_PAREN@1710..1711 ")"
+    WHITESPACE@1711..1712 " "
+    MODULE_FIELD_EXPORT@1712..1735
+      L_PAREN@1712..1713 "("
+      KEYWORD@1713..1719 "export"
+      WHITESPACE@1719..1720 " "
+      NAME@1720..1723
+        STRING@1720..1723 "\"a\""
+      WHITESPACE@1723..1724 " "
+      EXPORT_DESC_TABLE@1724..1734
+        L_PAREN@1724..1725 "("
+        KEYWORD@1725..1730 "table"
+        WHITESPACE@1730..1731 " "
+        INDEX@1731..1733
+          IDENT@1731..1733 "$a"
+        R_PAREN@1733..1734 ")"
+      R_PAREN@1734..1735 ")"
+    R_PAREN@1735..1736 ")"
+  WHITESPACE@1736..1737 "\n"
+  MODULE@1737..1786
+    L_PAREN@1737..1738 "("
+    KEYWORD@1738..1744 "module"
+    WHITESPACE@1744..1745 " "
+    MODULE_FIELD_EXPORT@1745..1767
+      L_PAREN@1745..1746 "("
+      KEYWORD@1746..1752 "export"
+      WHITESPACE@1752..1753 " "
+      NAME@1753..1756
+        STRING@1753..1756 "\"a\""
+      WHITESPACE@1756..1757 " "
+      EXPORT_DESC_TABLE@1757..1766
+        L_PAREN@1757..1758 "("
+        KEYWORD@1758..1763 "table"
+        WHITESPACE@1763..1764 " "
+        INDEX@1764..1765
+          UNSIGNED_INT@1764..1765 "0"
+        R_PAREN@1765..1766 ")"
+      R_PAREN@1766..1767 ")"
+    WHITESPACE@1767..1768 " "
+    MODULE_FIELD_TABLE@1768..1785
+      L_PAREN@1768..1769 "("
+      KEYWORD@1769..1774 "table"
+      WHITESPACE@1774..1775 " "
+      TABLE_TYPE@1775..1784
+        LIMITS@1775..1776
+          UNSIGNED_INT@1775..1776 "0"
+        WHITESPACE@1776..1777 " "
+        REF_TYPE@1777..1784 "funcref"
+      R_PAREN@1784..1785 ")"
+    R_PAREN@1785..1786 ")"
+  WHITESPACE@1786..1787 "\n"
+  MODULE@1787..1838
+    L_PAREN@1787..1788 "("
+    KEYWORD@1788..1794 "module"
+    WHITESPACE@1794..1795 " "
+    MODULE_FIELD_EXPORT@1795..1817
+      L_PAREN@1795..1796 "("
+      KEYWORD@1796..1802 "export"
+      WHITESPACE@1802..1803 " "
+      NAME@1803..1806
+        STRING@1803..1806 "\"a\""
+      WHITESPACE@1806..1807 " "
+      EXPORT_DESC_TABLE@1807..1816
+        L_PAREN@1807..1808 "("
+        KEYWORD@1808..1813 "table"
+        WHITESPACE@1813..1814 " "
+        INDEX@1814..1815
+          UNSIGNED_INT@1814..1815 "0"
+        R_PAREN@1815..1816 ")"
+      R_PAREN@1816..1817 ")"
+    WHITESPACE@1817..1818 " "
+    MODULE_FIELD_TABLE@1818..1837
+      L_PAREN@1818..1819 "("
+      KEYWORD@1819..1824 "table"
+      WHITESPACE@1824..1825 " "
+      TABLE_TYPE@1825..1836
+        LIMITS@1825..1828
+          UNSIGNED_INT@1825..1826 "0"
+          WHITESPACE@1826..1827 " "
+          UNSIGNED_INT@1827..1828 "1"
+        WHITESPACE@1828..1829 " "
+        REF_TYPE@1829..1836 "funcref"
+      R_PAREN@1836..1837 ")"
+    R_PAREN@1837..1838 ")"
+  WHITESPACE@1838..1839 "\n"
+  MODULE@1839..1892
+    L_PAREN@1839..1840 "("
+    KEYWORD@1840..1846 "module"
+    WHITESPACE@1846..1847 " "
+    MODULE_FIELD_EXPORT@1847..1870
+      L_PAREN@1847..1848 "("
+      KEYWORD@1848..1854 "export"
+      WHITESPACE@1854..1855 " "
+      NAME@1855..1858
+        STRING@1855..1858 "\"a\""
+      WHITESPACE@1858..1859 " "
+      EXPORT_DESC_TABLE@1859..1869
+        L_PAREN@1859..1860 "("
+        KEYWORD@1860..1865 "table"
+        WHITESPACE@1865..1866 " "
+        INDEX@1866..1868
+          IDENT@1866..1868 "$a"
+        R_PAREN@1868..1869 ")"
+      R_PAREN@1869..1870 ")"
+    WHITESPACE@1870..1871 " "
+    MODULE_FIELD_TABLE@1871..1891
+      L_PAREN@1871..1872 "("
+      KEYWORD@1872..1877 "table"
+      WHITESPACE@1877..1878 " "
+      IDENT@1878..1880 "$a"
+      WHITESPACE@1880..1881 " "
+      TABLE_TYPE@1881..1890
+        LIMITS@1881..1882
+          UNSIGNED_INT@1881..1882 "0"
+        WHITESPACE@1882..1883 " "
+        REF_TYPE@1883..1890 "funcref"
+      R_PAREN@1890..1891 ")"
+    R_PAREN@1891..1892 ")"
+  WHITESPACE@1892..1893 "\n"
+  MODULE@1893..1948
+    L_PAREN@1893..1894 "("
+    KEYWORD@1894..1900 "module"
+    WHITESPACE@1900..1901 " "
+    MODULE_FIELD_EXPORT@1901..1924
+      L_PAREN@1901..1902 "("
+      KEYWORD@1902..1908 "export"
+      WHITESPACE@1908..1909 " "
+      NAME@1909..1912
+        STRING@1909..1912 "\"a\""
+      WHITESPACE@1912..1913 " "
+      EXPORT_DESC_TABLE@1913..1923
+        L_PAREN@1913..1914 "("
+        KEYWORD@1914..1919 "table"
+        WHITESPACE@1919..1920 " "
+        INDEX@1920..1922
+          IDENT@1920..1922 "$a"
+        R_PAREN@1922..1923 ")"
+      R_PAREN@1923..1924 ")"
+    WHITESPACE@1924..1925 " "
+    MODULE_FIELD_TABLE@1925..1947
+      L_PAREN@1925..1926 "("
+      KEYWORD@1926..1931 "table"
+      WHITESPACE@1931..1932 " "
+      IDENT@1932..1934 "$a"
+      WHITESPACE@1934..1935 " "
+      TABLE_TYPE@1935..1946
+        LIMITS@1935..1938
+          UNSIGNED_INT@1935..1936 "0"
+          WHITESPACE@1936..1937 " "
+          UNSIGNED_INT@1937..1938 "1"
+        WHITESPACE@1938..1939 " "
+        REF_TYPE@1939..1946 "funcref"
+      R_PAREN@1946..1947 ")"
+    R_PAREN@1947..1948 ")"
+  WHITESPACE@1948..1950 "\n\n"
+  LINE_COMMENT@1950..1961 ";; Memories"
+  WHITESPACE@1961..1963 "\n\n"
+  MODULE@1963..2006
+    L_PAREN@1963..1964 "("
+    KEYWORD@1964..1970 "module"
+    WHITESPACE@1970..1971 " "
+    MODULE_FIELD_MEMORY@1971..1981
+      L_PAREN@1971..1972 "("
+      KEYWORD@1972..1978 "memory"
+      WHITESPACE@1978..1979 " "
+      MEMORY_TYPE@1979..1980
+        LIMITS@1979..1980
+          UNSIGNED_INT@1979..1980 "0"
+      R_PAREN@1980..1981 ")"
+    WHITESPACE@1981..1982 " "
+    MODULE_FIELD_EXPORT@1982..2005
+      L_PAREN@1982..1983 "("
+      KEYWORD@1983..1989 "export"
+      WHITESPACE@1989..1990 " "
+      NAME@1990..1993
+        STRING@1990..1993 "\"a\""
+      WHITESPACE@1993..1994 " "
+      EXPORT_DESC_MEMORY@1994..2004
+        L_PAREN@1994..1995 "("
+        KEYWORD@1995..2001 "memory"
+        WHITESPACE@2001..2002 " "
+        INDEX@2002..2003
+          UNSIGNED_INT@2002..2003 "0"
+        R_PAREN@2003..2004 ")"
+      R_PAREN@2004..2005 ")"
+    R_PAREN@2005..2006 ")"
+  WHITESPACE@2006..2007 "\n"
+  MODULE@2007..2074
+    L_PAREN@2007..2008 "("
+    KEYWORD@2008..2014 "module"
+    WHITESPACE@2014..2015 " "
+    MODULE_FIELD_MEMORY@2015..2025
+      L_PAREN@2015..2016 "("
+      KEYWORD@2016..2022 "memory"
+      WHITESPACE@2022..2023 " "
+      MEMORY_TYPE@2023..2024
+        LIMITS@2023..2024
+          UNSIGNED_INT@2023..2024 "0"
+      R_PAREN@2024..2025 ")"
+    WHITESPACE@2025..2026 " "
+    MODULE_FIELD_EXPORT@2026..2049
+      L_PAREN@2026..2027 "("
+      KEYWORD@2027..2033 "export"
+      WHITESPACE@2033..2034 " "
+      NAME@2034..2037
+        STRING@2034..2037 "\"a\""
+      WHITESPACE@2037..2038 " "
+      EXPORT_DESC_MEMORY@2038..2048
+        L_PAREN@2038..2039 "("
+        KEYWORD@2039..2045 "memory"
+        WHITESPACE@2045..2046 " "
+        INDEX@2046..2047
+          UNSIGNED_INT@2046..2047 "0"
+        R_PAREN@2047..2048 ")"
+      R_PAREN@2048..2049 ")"
+    WHITESPACE@2049..2050 " "
+    MODULE_FIELD_EXPORT@2050..2073
+      L_PAREN@2050..2051 "("
+      KEYWORD@2051..2057 "export"
+      WHITESPACE@2057..2058 " "
+      NAME@2058..2061
+        STRING@2058..2061 "\"b\""
+      WHITESPACE@2061..2062 " "
+      EXPORT_DESC_MEMORY@2062..2072
+        L_PAREN@2062..2063 "("
+        KEYWORD@2063..2069 "memory"
+        WHITESPACE@2069..2070 " "
+        INDEX@2070..2071
+          UNSIGNED_INT@2070..2071 "0"
+        R_PAREN@2071..2072 ")"
+      R_PAREN@2072..2073 ")"
+    R_PAREN@2073..2074 ")"
+  WHITESPACE@2074..2075 "\n"
+  LINE_COMMENT@2075..2103 ";; No multiple memori ..."
+  WHITESPACE@2103..2104 "\n"
+  LINE_COMMENT@2104..2185 ";; (module (memory 0) ..."
+  WHITESPACE@2185..2187 "\n\n"
+  MODULE@2187..2219
+    L_PAREN@2187..2188 "("
+    KEYWORD@2188..2194 "module"
+    WHITESPACE@2194..2195 " "
+    MODULE_FIELD_MEMORY@2195..2218
+      L_PAREN@2195..2196 "("
+      KEYWORD@2196..2202 "memory"
+      WHITESPACE@2202..2203 " "
+      EXPORT@2203..2215
+        L_PAREN@2203..2204 "("
+        KEYWORD@2204..2210 "export"
+        WHITESPACE@2210..2211 " "
+        NAME@2211..2214
+          STRING@2211..2214 "\"a\""
+        R_PAREN@2214..2215 ")"
+      WHITESPACE@2215..2216 " "
+      MEMORY_TYPE@2216..2217
+        LIMITS@2216..2217
+          UNSIGNED_INT@2216..2217 "0"
+      R_PAREN@2217..2218 ")"
+    R_PAREN@2218..2219 ")"
+  WHITESPACE@2219..2220 "\n"
+  MODULE@2220..2254
+    L_PAREN@2220..2221 "("
+    KEYWORD@2221..2227 "module"
+    WHITESPACE@2227..2228 " "
+    MODULE_FIELD_MEMORY@2228..2253
+      L_PAREN@2228..2229 "("
+      KEYWORD@2229..2235 "memory"
+      WHITESPACE@2235..2236 " "
+      EXPORT@2236..2248
+        L_PAREN@2236..2237 "("
+        KEYWORD@2237..2243 "export"
+        WHITESPACE@2243..2244 " "
+        NAME@2244..2247
+          STRING@2244..2247 "\"a\""
+        R_PAREN@2247..2248 ")"
+      WHITESPACE@2248..2249 " "
+      MEMORY_TYPE@2249..2252
+        LIMITS@2249..2252
+          UNSIGNED_INT@2249..2250 "0"
+          WHITESPACE@2250..2251 " "
+          UNSIGNED_INT@2251..2252 "1"
+      R_PAREN@2252..2253 ")"
+    R_PAREN@2253..2254 ")"
+  WHITESPACE@2254..2255 "\n"
+  MODULE@2255..2298
+    L_PAREN@2255..2256 "("
+    KEYWORD@2256..2262 "module"
+    WHITESPACE@2262..2263 " "
+    MODULE_FIELD_MEMORY@2263..2273
+      L_PAREN@2263..2264 "("
+      KEYWORD@2264..2270 "memory"
+      WHITESPACE@2270..2271 " "
+      MEMORY_TYPE@2271..2272
+        LIMITS@2271..2272
+          UNSIGNED_INT@2271..2272 "0"
+      R_PAREN@2272..2273 ")"
+    WHITESPACE@2273..2274 " "
+    MODULE_FIELD_EXPORT@2274..2297
+      L_PAREN@2274..2275 "("
+      KEYWORD@2275..2281 "export"
+      WHITESPACE@2281..2282 " "
+      NAME@2282..2285
+        STRING@2282..2285 "\"a\""
+      WHITESPACE@2285..2286 " "
+      EXPORT_DESC_MEMORY@2286..2296
+        L_PAREN@2286..2287 "("
+        KEYWORD@2287..2293 "memory"
+        WHITESPACE@2293..2294 " "
+        INDEX@2294..2295
+          UNSIGNED_INT@2294..2295 "0"
+        R_PAREN@2295..2296 ")"
+      R_PAREN@2296..2297 ")"
+    R_PAREN@2297..2298 ")"
+  WHITESPACE@2298..2299 "\n"
+  MODULE@2299..2344
+    L_PAREN@2299..2300 "("
+    KEYWORD@2300..2306 "module"
+    WHITESPACE@2306..2307 " "
+    MODULE_FIELD_MEMORY@2307..2319
+      L_PAREN@2307..2308 "("
+      KEYWORD@2308..2314 "memory"
+      WHITESPACE@2314..2315 " "
+      MEMORY_TYPE@2315..2318
+        LIMITS@2315..2318
+          UNSIGNED_INT@2315..2316 "0"
+          WHITESPACE@2316..2317 " "
+          UNSIGNED_INT@2317..2318 "1"
+      R_PAREN@2318..2319 ")"
+    WHITESPACE@2319..2320 " "
+    MODULE_FIELD_EXPORT@2320..2343
+      L_PAREN@2320..2321 "("
+      KEYWORD@2321..2327 "export"
+      WHITESPACE@2327..2328 " "
+      NAME@2328..2331
+        STRING@2328..2331 "\"a\""
+      WHITESPACE@2331..2332 " "
+      EXPORT_DESC_MEMORY@2332..2342
+        L_PAREN@2332..2333 "("
+        KEYWORD@2333..2339 "memory"
+        WHITESPACE@2339..2340 " "
+        INDEX@2340..2341
+          UNSIGNED_INT@2340..2341 "0"
+        R_PAREN@2341..2342 ")"
+      R_PAREN@2342..2343 ")"
+    R_PAREN@2343..2344 ")"
+  WHITESPACE@2344..2345 "\n"
+  MODULE@2345..2380
+    L_PAREN@2345..2346 "("
+    KEYWORD@2346..2352 "module"
+    WHITESPACE@2352..2353 " "
+    MODULE_FIELD_MEMORY@2353..2379
+      L_PAREN@2353..2354 "("
+      KEYWORD@2354..2360 "memory"
+      WHITESPACE@2360..2361 " "
+      IDENT@2361..2363 "$a"
+      WHITESPACE@2363..2364 " "
+      EXPORT@2364..2376
+        L_PAREN@2364..2365 "("
+        KEYWORD@2365..2371 "export"
+        WHITESPACE@2371..2372 " "
+        NAME@2372..2375
+          STRING@2372..2375 "\"a\""
+        R_PAREN@2375..2376 ")"
+      WHITESPACE@2376..2377 " "
+      MEMORY_TYPE@2377..2378
+        LIMITS@2377..2378
+          UNSIGNED_INT@2377..2378 "0"
+      R_PAREN@2378..2379 ")"
+    R_PAREN@2379..2380 ")"
+  WHITESPACE@2380..2381 "\n"
+  MODULE@2381..2418
+    L_PAREN@2381..2382 "("
+    KEYWORD@2382..2388 "module"
+    WHITESPACE@2388..2389 " "
+    MODULE_FIELD_MEMORY@2389..2417
+      L_PAREN@2389..2390 "("
+      KEYWORD@2390..2396 "memory"
+      WHITESPACE@2396..2397 " "
+      IDENT@2397..2399 "$a"
+      WHITESPACE@2399..2400 " "
+      EXPORT@2400..2412
+        L_PAREN@2400..2401 "("
+        KEYWORD@2401..2407 "export"
+        WHITESPACE@2407..2408 " "
+        NAME@2408..2411
+          STRING@2408..2411 "\"a\""
+        R_PAREN@2411..2412 ")"
+      WHITESPACE@2412..2413 " "
+      MEMORY_TYPE@2413..2416
+        LIMITS@2413..2416
+          UNSIGNED_INT@2413..2414 "0"
+          WHITESPACE@2414..2415 " "
+          UNSIGNED_INT@2415..2416 "1"
+      R_PAREN@2416..2417 ")"
+    R_PAREN@2417..2418 ")"
+  WHITESPACE@2418..2419 "\n"
+  MODULE@2419..2466
+    L_PAREN@2419..2420 "("
+    KEYWORD@2420..2426 "module"
+    WHITESPACE@2426..2427 " "
+    MODULE_FIELD_MEMORY@2427..2440
+      L_PAREN@2427..2428 "("
+      KEYWORD@2428..2434 "memory"
+      WHITESPACE@2434..2435 " "
+      IDENT@2435..2437 "$a"
+      WHITESPACE@2437..2438 " "
+      MEMORY_TYPE@2438..2439
+        LIMITS@2438..2439
+          UNSIGNED_INT@2438..2439 "0"
+      R_PAREN@2439..2440 ")"
+    WHITESPACE@2440..2441 " "
+    MODULE_FIELD_EXPORT@2441..2465
+      L_PAREN@2441..2442 "("
+      KEYWORD@2442..2448 "export"
+      WHITESPACE@2448..2449 " "
+      NAME@2449..2452
+        STRING@2449..2452 "\"a\""
+      WHITESPACE@2452..2453 " "
+      EXPORT_DESC_MEMORY@2453..2464
+        L_PAREN@2453..2454 "("
+        KEYWORD@2454..2460 "memory"
+        WHITESPACE@2460..2461 " "
+        INDEX@2461..2463
+          IDENT@2461..2463 "$a"
+        R_PAREN@2463..2464 ")"
+      R_PAREN@2464..2465 ")"
+    R_PAREN@2465..2466 ")"
+  WHITESPACE@2466..2467 "\n"
+  MODULE@2467..2516
+    L_PAREN@2467..2468 "("
+    KEYWORD@2468..2474 "module"
+    WHITESPACE@2474..2475 " "
+    MODULE_FIELD_MEMORY@2475..2490
+      L_PAREN@2475..2476 "("
+      KEYWORD@2476..2482 "memory"
+      WHITESPACE@2482..2483 " "
+      IDENT@2483..2485 "$a"
+      WHITESPACE@2485..2486 " "
+      MEMORY_TYPE@2486..2489
+        LIMITS@2486..2489
+          UNSIGNED_INT@2486..2487 "0"
+          WHITESPACE@2487..2488 " "
+          UNSIGNED_INT@2488..2489 "1"
+      R_PAREN@2489..2490 ")"
+    WHITESPACE@2490..2491 " "
+    MODULE_FIELD_EXPORT@2491..2515
+      L_PAREN@2491..2492 "("
+      KEYWORD@2492..2498 "export"
+      WHITESPACE@2498..2499 " "
+      NAME@2499..2502
+        STRING@2499..2502 "\"a\""
+      WHITESPACE@2502..2503 " "
+      EXPORT_DESC_MEMORY@2503..2514
+        L_PAREN@2503..2504 "("
+        KEYWORD@2504..2510 "memory"
+        WHITESPACE@2510..2511 " "
+        INDEX@2511..2513
+          IDENT@2511..2513 "$a"
+        R_PAREN@2513..2514 ")"
+      R_PAREN@2514..2515 ")"
+    R_PAREN@2515..2516 ")"
+  WHITESPACE@2516..2517 "\n"
+  MODULE@2517..2560
+    L_PAREN@2517..2518 "("
+    KEYWORD@2518..2524 "module"
+    WHITESPACE@2524..2525 " "
+    MODULE_FIELD_EXPORT@2525..2548
+      L_PAREN@2525..2526 "("
+      KEYWORD@2526..2532 "export"
+      WHITESPACE@2532..2533 " "
+      NAME@2533..2536
+        STRING@2533..2536 "\"a\""
+      WHITESPACE@2536..2537 " "
+      EXPORT_DESC_MEMORY@2537..2547
+        L_PAREN@2537..2538 "("
+        KEYWORD@2538..2544 "memory"
+        WHITESPACE@2544..2545 " "
+        INDEX@2545..2546
+          UNSIGNED_INT@2545..2546 "0"
+        R_PAREN@2546..2547 ")"
+      R_PAREN@2547..2548 ")"
+    WHITESPACE@2548..2549 " "
+    MODULE_FIELD_MEMORY@2549..2559
+      L_PAREN@2549..2550 "("
+      KEYWORD@2550..2556 "memory"
+      WHITESPACE@2556..2557 " "
+      MEMORY_TYPE@2557..2558
+        LIMITS@2557..2558
+          UNSIGNED_INT@2557..2558 "0"
+      R_PAREN@2558..2559 ")"
+    R_PAREN@2559..2560 ")"
+  WHITESPACE@2560..2561 "\n"
+  MODULE@2561..2606
+    L_PAREN@2561..2562 "("
+    KEYWORD@2562..2568 "module"
+    WHITESPACE@2568..2569 " "
+    MODULE_FIELD_EXPORT@2569..2592
+      L_PAREN@2569..2570 "("
+      KEYWORD@2570..2576 "export"
+      WHITESPACE@2576..2577 " "
+      NAME@2577..2580
+        STRING@2577..2580 "\"a\""
+      WHITESPACE@2580..2581 " "
+      EXPORT_DESC_MEMORY@2581..2591
+        L_PAREN@2581..2582 "("
+        KEYWORD@2582..2588 "memory"
+        WHITESPACE@2588..2589 " "
+        INDEX@2589..2590
+          UNSIGNED_INT@2589..2590 "0"
+        R_PAREN@2590..2591 ")"
+      R_PAREN@2591..2592 ")"
+    WHITESPACE@2592..2593 " "
+    MODULE_FIELD_MEMORY@2593..2605
+      L_PAREN@2593..2594 "("
+      KEYWORD@2594..2600 "memory"
+      WHITESPACE@2600..2601 " "
+      MEMORY_TYPE@2601..2604
+        LIMITS@2601..2604
+          UNSIGNED_INT@2601..2602 "0"
+          WHITESPACE@2602..2603 " "
+          UNSIGNED_INT@2603..2604 "1"
+      R_PAREN@2604..2605 ")"
+    R_PAREN@2605..2606 ")"
+  WHITESPACE@2606..2607 "\n"
+  MODULE@2607..2654
+    L_PAREN@2607..2608 "("
+    KEYWORD@2608..2614 "module"
+    WHITESPACE@2614..2615 " "
+    MODULE_FIELD_EXPORT@2615..2639
+      L_PAREN@2615..2616 "("
+      KEYWORD@2616..2622 "export"
+      WHITESPACE@2622..2623 " "
+      NAME@2623..2626
+        STRING@2623..2626 "\"a\""
+      WHITESPACE@2626..2627 " "
+      EXPORT_DESC_MEMORY@2627..2638
+        L_PAREN@2627..2628 "("
+        KEYWORD@2628..2634 "memory"
+        WHITESPACE@2634..2635 " "
+        INDEX@2635..2637
+          IDENT@2635..2637 "$a"
+        R_PAREN@2637..2638 ")"
+      R_PAREN@2638..2639 ")"
+    WHITESPACE@2639..2640 " "
+    MODULE_FIELD_MEMORY@2640..2653
+      L_PAREN@2640..2641 "("
+      KEYWORD@2641..2647 "memory"
+      WHITESPACE@2647..2648 " "
+      IDENT@2648..2650 "$a"
+      WHITESPACE@2650..2651 " "
+      MEMORY_TYPE@2651..2652
+        LIMITS@2651..2652
+          UNSIGNED_INT@2651..2652 "0"
+      R_PAREN@2652..2653 ")"
+    R_PAREN@2653..2654 ")"
+  WHITESPACE@2654..2655 "\n"
+  MODULE@2655..2704
+    L_PAREN@2655..2656 "("
+    KEYWORD@2656..2662 "module"
+    WHITESPACE@2662..2663 " "
+    MODULE_FIELD_EXPORT@2663..2687
+      L_PAREN@2663..2664 "("
+      KEYWORD@2664..2670 "export"
+      WHITESPACE@2670..2671 " "
+      NAME@2671..2674
+        STRING@2671..2674 "\"a\""
+      WHITESPACE@2674..2675 " "
+      EXPORT_DESC_MEMORY@2675..2686
+        L_PAREN@2675..2676 "("
+        KEYWORD@2676..2682 "memory"
+        WHITESPACE@2682..2683 " "
+        INDEX@2683..2685
+          IDENT@2683..2685 "$a"
+        R_PAREN@2685..2686 ")"
+      R_PAREN@2686..2687 ")"
+    WHITESPACE@2687..2688 " "
+    MODULE_FIELD_MEMORY@2688..2703
+      L_PAREN@2688..2689 "("
+      KEYWORD@2689..2695 "memory"
+      WHITESPACE@2695..2696 " "
+      IDENT@2696..2698 "$a"
+      WHITESPACE@2698..2699 " "
+      MEMORY_TYPE@2699..2702
+        LIMITS@2699..2702
+          UNSIGNED_INT@2699..2700 "0"
+          WHITESPACE@2700..2701 " "
+          UNSIGNED_INT@2701..2702 "1"
+      R_PAREN@2702..2703 ")"
+    R_PAREN@2703..2704 ")"
+  WHITESPACE@2704..2705 "\n"

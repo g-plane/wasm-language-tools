@@ -1,0 +1,410 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..570
+  MODULE@0..569
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_FUNC@10..36
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "func"
+      WHITESPACE@15..16 " "
+      PLAIN_INSTR@16..30
+        L_PAREN@16..17 "("
+        INSTR_NAME@17..26 "i32.const"
+        WHITESPACE@26..27 " "
+        OPERAND@27..28
+          FLOAT@27..28 "0"
+        ERROR@28..29 "x"
+        R_PAREN@29..30 ")"
+      WHITESPACE@30..31 " "
+      PLAIN_INSTR@31..35
+        INSTR_NAME@31..35 "drop"
+      R_PAREN@35..36 ")"
+    WHITESPACE@36..39 "\n  "
+    MODULE_FIELD_FUNC@39..65
+      L_PAREN@39..40 "("
+      KEYWORD@40..44 "func"
+      WHITESPACE@44..45 " "
+      PLAIN_INSTR@45..59
+        L_PAREN@45..46 "("
+        INSTR_NAME@46..55 "i32.const"
+        WHITESPACE@55..56 " "
+        OPERAND@56..57
+          INT@56..57 "1"
+        ERROR@57..58 "x"
+        R_PAREN@58..59 ")"
+      WHITESPACE@59..60 " "
+      PLAIN_INSTR@60..64
+        INSTR_NAME@60..64 "drop"
+      R_PAREN@64..65 ")"
+    WHITESPACE@65..68 "\n  "
+    MODULE_FIELD_FUNC@68..95
+      L_PAREN@68..69 "("
+      KEYWORD@69..73 "func"
+      WHITESPACE@73..74 " "
+      PLAIN_INSTR@74..89
+        L_PAREN@74..75 "("
+        INSTR_NAME@75..84 "i32.const"
+        WHITESPACE@84..85 " "
+        OPERAND@85..86
+          FLOAT@85..86 "0"
+        ERROR@86..88 "xg"
+        R_PAREN@88..89 ")"
+      WHITESPACE@89..90 " "
+      PLAIN_INSTR@90..94
+        INSTR_NAME@90..94 "drop"
+      R_PAREN@94..95 ")"
+    WHITESPACE@95..98 "\n  "
+    MODULE_FIELD_FUNC@98..124
+      L_PAREN@98..99 "("
+      KEYWORD@99..103 "func"
+      WHITESPACE@103..104 " "
+      PLAIN_INSTR@104..118
+        L_PAREN@104..105 "("
+        INSTR_NAME@105..114 "f32.const"
+        WHITESPACE@114..115 " "
+        OPERAND@115..117
+          FLOAT@115..117 ".0"
+        R_PAREN@117..118 ")"
+      WHITESPACE@118..119 " "
+      PLAIN_INSTR@119..123
+        INSTR_NAME@119..123 "drop"
+      R_PAREN@123..124 ")"
+    WHITESPACE@124..127 "\n  "
+    MODULE_FIELD_FUNC@127..155
+      L_PAREN@127..128 "("
+      KEYWORD@128..132 "func"
+      WHITESPACE@132..133 " "
+      PLAIN_INSTR@133..149
+        L_PAREN@133..134 "("
+        INSTR_NAME@134..143 "f32.const"
+        WHITESPACE@143..144 " "
+        OPERAND@144..148
+          FLOAT@144..148 ".0e0"
+        R_PAREN@148..149 ")"
+      WHITESPACE@149..150 " "
+      PLAIN_INSTR@150..154
+        INSTR_NAME@150..154 "drop"
+      R_PAREN@154..155 ")"
+    WHITESPACE@155..158 "\n  "
+    MODULE_FIELD_FUNC@158..184
+      L_PAREN@158..159 "("
+      KEYWORD@159..163 "func"
+      WHITESPACE@163..164 " "
+      PLAIN_INSTR@164..178
+        L_PAREN@164..165 "("
+        INSTR_NAME@165..174 "f32.const"
+        WHITESPACE@174..175 " "
+        OPERAND@175..176
+          FLOAT@175..176 "0"
+        ERROR@176..177 "e"
+        R_PAREN@177..178 ")"
+      WHITESPACE@178..179 " "
+      PLAIN_INSTR@179..183
+        INSTR_NAME@179..183 "drop"
+      R_PAREN@183..184 ")"
+    WHITESPACE@184..187 "\n  "
+    MODULE_FIELD_FUNC@187..214
+      L_PAREN@187..188 "("
+      KEYWORD@188..192 "func"
+      WHITESPACE@192..193 " "
+      PLAIN_INSTR@193..208
+        L_PAREN@193..194 "("
+        INSTR_NAME@194..203 "f32.const"
+        WHITESPACE@203..204 " "
+        OPERAND@204..205
+          FLOAT@204..205 "0"
+        ERROR@205..207 "e+"
+        R_PAREN@207..208 ")"
+      WHITESPACE@208..209 " "
+      PLAIN_INSTR@209..213
+        INSTR_NAME@209..213 "drop"
+      R_PAREN@213..214 ")"
+    WHITESPACE@214..217 "\n  "
+    MODULE_FIELD_FUNC@217..245
+      L_PAREN@217..218 "("
+      KEYWORD@218..222 "func"
+      WHITESPACE@222..223 " "
+      PLAIN_INSTR@223..239
+        L_PAREN@223..224 "("
+        INSTR_NAME@224..233 "f32.const"
+        WHITESPACE@233..234 " "
+        OPERAND@234..237
+          FLOAT@234..237 "0.0"
+        ERROR@237..238 "e"
+        R_PAREN@238..239 ")"
+      WHITESPACE@239..240 " "
+      PLAIN_INSTR@240..244
+        INSTR_NAME@240..244 "drop"
+      R_PAREN@244..245 ")"
+    WHITESPACE@245..248 "\n  "
+    MODULE_FIELD_FUNC@248..277
+      L_PAREN@248..249 "("
+      KEYWORD@249..253 "func"
+      WHITESPACE@253..254 " "
+      PLAIN_INSTR@254..271
+        L_PAREN@254..255 "("
+        INSTR_NAME@255..264 "f32.const"
+        WHITESPACE@264..265 " "
+        OPERAND@265..268
+          FLOAT@265..268 "0.0"
+        ERROR@268..270 "e-"
+        R_PAREN@270..271 ")"
+      WHITESPACE@271..272 " "
+      PLAIN_INSTR@272..276
+        INSTR_NAME@272..276 "drop"
+      R_PAREN@276..277 ")"
+    WHITESPACE@277..280 "\n  "
+    MODULE_FIELD_FUNC@280..307
+      L_PAREN@280..281 "("
+      KEYWORD@281..285 "func"
+      WHITESPACE@285..286 " "
+      PLAIN_INSTR@286..301
+        L_PAREN@286..287 "("
+        INSTR_NAME@287..296 "f32.const"
+        WHITESPACE@296..297 " "
+        OPERAND@297..298
+          FLOAT@297..298 "0"
+        ERROR@298..300 "x."
+        R_PAREN@300..301 ")"
+      WHITESPACE@301..302 " "
+      PLAIN_INSTR@302..306
+        INSTR_NAME@302..306 "drop"
+      R_PAREN@306..307 ")"
+    WHITESPACE@307..310 "\n  "
+    MODULE_FIELD_FUNC@310..339
+      L_PAREN@310..311 "("
+      KEYWORD@311..315 "func"
+      WHITESPACE@315..316 " "
+      PLAIN_INSTR@316..333
+        L_PAREN@316..317 "("
+        INSTR_NAME@317..326 "f32.const"
+        WHITESPACE@326..327 " "
+        OPERAND@327..331
+          FLOAT@327..331 "0x0."
+        ERROR@331..332 "g"
+        R_PAREN@332..333 ")"
+      WHITESPACE@333..334 " "
+      PLAIN_INSTR@334..338
+        INSTR_NAME@334..338 "drop"
+      R_PAREN@338..339 ")"
+    WHITESPACE@339..342 "\n  "
+    MODULE_FIELD_FUNC@342..370
+      L_PAREN@342..343 "("
+      KEYWORD@343..347 "func"
+      WHITESPACE@347..348 " "
+      PLAIN_INSTR@348..364
+        L_PAREN@348..349 "("
+        INSTR_NAME@349..358 "f32.const"
+        WHITESPACE@358..359 " "
+        OPERAND@359..362
+          FLOAT@359..362 "0x0"
+        ERROR@362..363 "p"
+        R_PAREN@363..364 ")"
+      WHITESPACE@364..365 " "
+      PLAIN_INSTR@365..369
+        INSTR_NAME@365..369 "drop"
+      R_PAREN@369..370 ")"
+    WHITESPACE@370..373 "\n  "
+    MODULE_FIELD_FUNC@373..402
+      L_PAREN@373..374 "("
+      KEYWORD@374..378 "func"
+      WHITESPACE@378..379 " "
+      PLAIN_INSTR@379..396
+        L_PAREN@379..380 "("
+        INSTR_NAME@380..389 "f32.const"
+        WHITESPACE@389..390 " "
+        OPERAND@390..393
+          FLOAT@390..393 "0x0"
+        ERROR@393..395 "p+"
+        R_PAREN@395..396 ")"
+      WHITESPACE@396..397 " "
+      PLAIN_INSTR@397..401
+        INSTR_NAME@397..401 "drop"
+      R_PAREN@401..402 ")"
+    WHITESPACE@402..405 "\n  "
+    MODULE_FIELD_FUNC@405..434
+      L_PAREN@405..406 "("
+      KEYWORD@406..410 "func"
+      WHITESPACE@410..411 " "
+      PLAIN_INSTR@411..428
+        L_PAREN@411..412 "("
+        INSTR_NAME@412..421 "f32.const"
+        WHITESPACE@421..422 " "
+        OPERAND@422..425
+          FLOAT@422..425 "0x0"
+        ERROR@425..427 "p-"
+        R_PAREN@427..428 ")"
+      WHITESPACE@428..429 " "
+      PLAIN_INSTR@429..433
+        INSTR_NAME@429..433 "drop"
+      R_PAREN@433..434 ")"
+    WHITESPACE@434..437 "\n  "
+    MODULE_FIELD_FUNC@437..467
+      L_PAREN@437..438 "("
+      KEYWORD@438..442 "func"
+      WHITESPACE@442..443 " "
+      PLAIN_INSTR@443..461
+        L_PAREN@443..444 "("
+        INSTR_NAME@444..453 "f32.const"
+        WHITESPACE@453..454 " "
+        OPERAND@454..459
+          FLOAT@454..459 "0x0.0"
+        ERROR@459..460 "p"
+        R_PAREN@460..461 ")"
+      WHITESPACE@461..462 " "
+      PLAIN_INSTR@462..466
+        INSTR_NAME@462..466 "drop"
+      R_PAREN@466..467 ")"
+    WHITESPACE@467..470 "\n  "
+    MODULE_FIELD_FUNC@470..501
+      L_PAREN@470..471 "("
+      KEYWORD@471..475 "func"
+      WHITESPACE@475..476 " "
+      PLAIN_INSTR@476..495
+        L_PAREN@476..477 "("
+        INSTR_NAME@477..486 "f32.const"
+        WHITESPACE@486..487 " "
+        OPERAND@487..492
+          FLOAT@487..492 "0x0.0"
+        ERROR@492..494 "p+"
+        R_PAREN@494..495 ")"
+      WHITESPACE@495..496 " "
+      PLAIN_INSTR@496..500
+        INSTR_NAME@496..500 "drop"
+      R_PAREN@500..501 ")"
+    WHITESPACE@501..504 "\n  "
+    MODULE_FIELD_FUNC@504..535
+      L_PAREN@504..505 "("
+      KEYWORD@505..509 "func"
+      WHITESPACE@509..510 " "
+      PLAIN_INSTR@510..529
+        L_PAREN@510..511 "("
+        INSTR_NAME@511..520 "f32.const"
+        WHITESPACE@520..521 " "
+        OPERAND@521..526
+          FLOAT@521..526 "0x0.0"
+        ERROR@526..528 "p-"
+        R_PAREN@528..529 ")"
+      WHITESPACE@529..530 " "
+      PLAIN_INSTR@530..534
+        INSTR_NAME@530..534 "drop"
+      R_PAREN@534..535 ")"
+    WHITESPACE@535..538 "\n  "
+    MODULE_FIELD_FUNC@538..567
+      L_PAREN@538..539 "("
+      KEYWORD@539..543 "func"
+      WHITESPACE@543..544 " "
+      PLAIN_INSTR@544..561
+        L_PAREN@544..545 "("
+        INSTR_NAME@545..554 "f32.const"
+        WHITESPACE@554..555 " "
+        OPERAND@555..558
+          FLOAT@555..558 "0x0"
+        ERROR@558..560 "pA"
+        R_PAREN@560..561 ")"
+      WHITESPACE@561..562 " "
+      PLAIN_INSTR@562..566
+        INSTR_NAME@562..566 "drop"
+      R_PAREN@566..567 ")"
+    WHITESPACE@567..568 "\n"
+    R_PAREN@568..569 ")"
+  WHITESPACE@569..570 "\n"
+
+error: expected operand
+  ┌─ const-malformed.wat:2:21
+  │
+2 │   (func (i32.const 0x) drop)
+  │                     ^
+
+error: expected operand
+  ┌─ const-malformed.wat:3:21
+  │
+3 │   (func (i32.const 1x) drop)
+  │                     ^
+
+error: expected operand
+  ┌─ const-malformed.wat:4:21
+  │
+4 │   (func (i32.const 0xg) drop)
+  │                     ^^
+
+error: expected operand
+  ┌─ const-malformed.wat:7:21
+  │
+7 │   (func (f32.const 0e) drop)
+  │                     ^
+
+error: expected operand
+  ┌─ const-malformed.wat:8:21
+  │
+8 │   (func (f32.const 0e+) drop)
+  │                     ^^
+
+error: expected operand
+  ┌─ const-malformed.wat:9:23
+  │
+9 │   (func (f32.const 0.0e) drop)
+  │                       ^
+
+error: expected operand
+   ┌─ const-malformed.wat:10:23
+   │
+10 │   (func (f32.const 0.0e-) drop)
+   │                       ^^
+
+error: expected operand
+   ┌─ const-malformed.wat:11:21
+   │
+11 │   (func (f32.const 0x.) drop)
+   │                     ^^
+
+error: expected operand
+   ┌─ const-malformed.wat:12:24
+   │
+12 │   (func (f32.const 0x0.g) drop)
+   │                        ^
+
+error: expected operand
+   ┌─ const-malformed.wat:13:23
+   │
+13 │   (func (f32.const 0x0p) drop)
+   │                       ^
+
+error: expected operand
+   ┌─ const-malformed.wat:14:23
+   │
+14 │   (func (f32.const 0x0p+) drop)
+   │                       ^^
+
+error: expected operand
+   ┌─ const-malformed.wat:15:23
+   │
+15 │   (func (f32.const 0x0p-) drop)
+   │                       ^^
+
+error: expected operand
+   ┌─ const-malformed.wat:16:25
+   │
+16 │   (func (f32.const 0x0.0p) drop)
+   │                         ^
+
+error: expected operand
+   ┌─ const-malformed.wat:17:25
+   │
+17 │   (func (f32.const 0x0.0p+) drop)
+   │                         ^^
+
+error: expected operand
+   ┌─ const-malformed.wat:18:25
+   │
+18 │   (func (f32.const 0x0.0p-) drop)
+   │                         ^^
+
+error: expected operand
+   ┌─ const-malformed.wat:19:23
+   │
+19 │   (func (f32.const 0x0pA) drop)
+   │                       ^^
