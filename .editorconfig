@@ -8,5 +8,5 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-[*.{yml,md,snap,json}]
+[*.{yml,md,snap,json,wat}]
 indent_size = 2
