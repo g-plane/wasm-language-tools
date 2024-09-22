@@ -170,7 +170,7 @@ fn module_field_func(input: &mut Input) -> GreenResult {
         repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(export)),
         opt(trivias_prefixed(type_use)),
         repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(local)),
-        repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(instr)),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry_once(instr, [])),
         resume(r_paren),
     )
         .parse_next(input)

@@ -347,7 +347,9 @@ fn plain_instr(input: &mut Input) -> GreenResult {
 }
 
 fn instr_name(input: &mut Input) -> GreenResult {
-    word.parse_next(input).map(|text| tok(INSTR_NAME, text))
+    word.context(StrContext::Label("instruction name"))
+        .parse_next(input)
+        .map(|text| tok(INSTR_NAME, text))
 }
 
 fn operand<'s>(allow_instr: bool) -> impl Parser<Input<'s>, GreenElement, SyntaxError> {
