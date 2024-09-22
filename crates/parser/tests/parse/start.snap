@@ -1,0 +1,30 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..42
+  MODULE@0..18
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..8 " "
+    MODULE_FIELD_START@8..17
+      L_PAREN@8..9 "("
+      KEYWORD@9..14 "start"
+      WHITESPACE@14..15 " "
+      INDEX@15..16
+        UNSIGNED_INT@15..16 "1"
+      R_PAREN@16..17 ")"
+    R_PAREN@17..18 ")"
+  WHITESPACE@18..19 "\n"
+  MODULE@19..41
+    L_PAREN@19..20 "("
+    KEYWORD@20..26 "module"
+    WHITESPACE@26..27 " "
+    MODULE_FIELD_START@27..40
+      L_PAREN@27..28 "("
+      KEYWORD@28..33 "start"
+      WHITESPACE@33..34 " "
+      INDEX@34..39
+        IDENT@34..39 "$main"
+      R_PAREN@39..40 ")"
+    R_PAREN@40..41 ")"
+  WHITESPACE@41..42 "\n"

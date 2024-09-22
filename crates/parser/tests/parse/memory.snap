@@ -1,0 +1,66 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..96
+  MODULE@0..19
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..8 " "
+    MODULE_FIELD_MEMORY@8..18
+      L_PAREN@8..9 "("
+      KEYWORD@9..15 "memory"
+      WHITESPACE@15..16 " "
+      MEMORY_TYPE@16..17
+        LIMITS@16..17
+          UNSIGNED_INT@16..17 "0"
+      R_PAREN@17..18 ")"
+    R_PAREN@18..19 ")"
+  WHITESPACE@19..20 "\n"
+  MODULE@20..41
+    L_PAREN@20..21 "("
+    KEYWORD@21..27 "module"
+    WHITESPACE@27..28 " "
+    MODULE_FIELD_MEMORY@28..40
+      L_PAREN@28..29 "("
+      KEYWORD@29..35 "memory"
+      WHITESPACE@35..36 " "
+      MEMORY_TYPE@36..39
+        LIMITS@36..39
+          UNSIGNED_INT@36..37 "0"
+          WHITESPACE@37..38 " "
+          UNSIGNED_INT@38..39 "0"
+      R_PAREN@39..40 ")"
+    R_PAREN@40..41 ")"
+  WHITESPACE@41..42 "\n"
+  MODULE@42..66
+    L_PAREN@42..43 "("
+    KEYWORD@43..49 "module"
+    WHITESPACE@49..50 " "
+    MODULE_FIELD_MEMORY@50..65
+      L_PAREN@50..51 "("
+      KEYWORD@51..57 "memory"
+      WHITESPACE@57..58 " "
+      DATA@58..64
+        L_PAREN@58..59 "("
+        KEYWORD@59..63 "data"
+        R_PAREN@63..64 ")"
+      R_PAREN@64..65 ")"
+    R_PAREN@65..66 ")"
+  WHITESPACE@66..67 "\n"
+  MODULE@67..95
+    L_PAREN@67..68 "("
+    KEYWORD@68..74 "module"
+    WHITESPACE@74..75 " "
+    MODULE_FIELD_MEMORY@75..94
+      L_PAREN@75..76 "("
+      KEYWORD@76..82 "memory"
+      WHITESPACE@82..83 " "
+      DATA@83..93
+        L_PAREN@83..84 "("
+        KEYWORD@84..88 "data"
+        WHITESPACE@88..89 " "
+        STRING@89..92 "\"x\""
+        R_PAREN@92..93 ")"
+      R_PAREN@93..94 ")"
+    R_PAREN@94..95 ")"
+  WHITESPACE@95..96 "\n"
