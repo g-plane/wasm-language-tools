@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..1264
-  MODULE@0..1263
+ROOT@0..1361
+  MODULE@0..1360
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -642,9 +642,55 @@ ROOT@0..1264
         ERROR@1255..1259 "p_+1"
         R_PAREN@1259..1260 ")"
       R_PAREN@1260..1261 ")"
-    WHITESPACE@1261..1262 "\n"
-    R_PAREN@1262..1263 ")"
-  WHITESPACE@1263..1264 "\n"
+    WHITESPACE@1261..1264 "\n  "
+    MODULE_FIELD_FUNC@1264..1310
+      L_PAREN@1264..1265 "("
+      KEYWORD@1265..1269 "func"
+      WHITESPACE@1269..1270 " "
+      TYPE_USE@1270..1282
+        RESULT@1270..1282
+          L_PAREN@1270..1271 "("
+          KEYWORD@1271..1277 "result"
+          WHITESPACE@1277..1278 " "
+          VAL_TYPE@1278..1281
+            NUM_TYPE@1278..1281 "i32"
+          R_PAREN@1281..1282 ")"
+      WHITESPACE@1282..1283 " "
+      PLAIN_INSTR@1283..1309
+        L_PAREN@1283..1284 "("
+        INSTR_NAME@1284..1293 "i32.const"
+        WHITESPACE@1293..1294 " "
+        OPERAND@1294..1297
+          FLOAT@1294..1297 "nan"
+        ERROR@1297..1308 ":arithmetic"
+        R_PAREN@1308..1309 ")"
+      R_PAREN@1309..1310 ")"
+    WHITESPACE@1310..1313 "\n  "
+    MODULE_FIELD_FUNC@1313..1358
+      L_PAREN@1313..1314 "("
+      KEYWORD@1314..1318 "func"
+      WHITESPACE@1318..1319 " "
+      TYPE_USE@1319..1331
+        RESULT@1319..1331
+          L_PAREN@1319..1320 "("
+          KEYWORD@1320..1326 "result"
+          WHITESPACE@1326..1327 " "
+          VAL_TYPE@1327..1330
+            NUM_TYPE@1327..1330 "i32"
+          R_PAREN@1330..1331 ")"
+      WHITESPACE@1331..1332 " "
+      PLAIN_INSTR@1332..1357
+        L_PAREN@1332..1333 "("
+        INSTR_NAME@1333..1342 "i32.const"
+        WHITESPACE@1342..1343 " "
+        OPERAND@1343..1346
+          FLOAT@1343..1346 "nan"
+        ERROR@1346..1356 ":canonical"
+        R_PAREN@1356..1357 ")"
+      R_PAREN@1357..1358 ")"
+    WHITESPACE@1358..1359 "\n"
+    R_PAREN@1359..1360 ")"
+  WHITESPACE@1360..1361 "\n"
 
 error: expected operand
   ┌─ float-literals-malformed.wat:2:26
@@ -777,3 +823,15 @@ error: expected operand
    │
 38 │   (global f32 (f32.const 0x1.0p_+1))
    │                               ^^^^
+
+error: expected operand
+   ┌─ float-literals-malformed.wat:39:36
+   │
+39 │   (func (result i32) (i32.const nan:arithmetic))
+   │                                    ^^^^^^^^^^^
+
+error: expected operand
+   ┌─ float-literals-malformed.wat:40:36
+   │
+40 │   (func (result i32) (i32.const nan:canonical))
+   │                                    ^^^^^^^^^^

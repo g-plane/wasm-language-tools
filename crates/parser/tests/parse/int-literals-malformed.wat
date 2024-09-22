@@ -1,0 +1,12 @@
+(module
+  (global i32 (i32.const _100))
+  (global i32 (i32.const +_100))
+  (global i32 (i32.const -_100))
+  (global i32 (i32.const 99_))
+  (global i32 (i32.const 1__000))
+  (global i32 (i32.const _0x100))
+  (global i32 (i32.const 0_x100))
+  (global i32 (i32.const 0x_100))
+  (global i32 (i32.const 0x00_))
+  (global i32 (i32.const 0xff__ffff))
+)

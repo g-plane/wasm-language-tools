@@ -36,4 +36,6 @@
   (global f32 (f32.const 0x1.0p_1))
   (global f32 (f32.const 0x1.0p+_1))
   (global f32 (f32.const 0x1.0p_+1))
+  (func (result i32) (i32.const nan:arithmetic))
+  (func (result i32) (i32.const nan:canonical))
 )

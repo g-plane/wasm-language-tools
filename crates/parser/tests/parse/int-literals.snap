@@ -1,0 +1,1072 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..2353
+  MODULE@0..2352
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_FUNC@10..81
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "func"
+      WHITESPACE@15..16 " "
+      EXPORT@16..35
+        L_PAREN@16..17 "("
+        KEYWORD@17..23 "export"
+        WHITESPACE@23..24 " "
+        NAME@24..34
+          STRING@24..34 "\"i32.test\""
+        R_PAREN@34..35 ")"
+      WHITESPACE@35..36 " "
+      TYPE_USE@36..48
+        RESULT@36..48
+          L_PAREN@36..37 "("
+          KEYWORD@37..43 "result"
+          WHITESPACE@43..44 " "
+          VAL_TYPE@44..47
+            NUM_TYPE@44..47 "i32"
+          R_PAREN@47..48 ")"
+      WHITESPACE@48..49 " "
+      PLAIN_INSTR@49..80
+        L_PAREN@49..50 "("
+        INSTR_NAME@50..56 "return"
+        WHITESPACE@56..57 " "
+        OPERAND@57..79
+          PLAIN_INSTR@57..79
+            L_PAREN@57..58 "("
+            INSTR_NAME@58..67 "i32.const"
+            WHITESPACE@67..68 " "
+            OPERAND@68..78
+              INT@68..78 "0x0bAdD00D"
+            R_PAREN@78..79 ")"
+        R_PAREN@79..80 ")"
+      R_PAREN@80..81 ")"
+    WHITESPACE@81..84 "\n  "
+    MODULE_FIELD_FUNC@84..155
+      L_PAREN@84..85 "("
+      KEYWORD@85..89 "func"
+      WHITESPACE@89..90 " "
+      EXPORT@90..109
+        L_PAREN@90..91 "("
+        KEYWORD@91..97 "export"
+        WHITESPACE@97..98 " "
+        NAME@98..108
+          STRING@98..108 "\"i32.umax\""
+        R_PAREN@108..109 ")"
+      WHITESPACE@109..110 " "
+      TYPE_USE@110..122
+        RESULT@110..122
+          L_PAREN@110..111 "("
+          KEYWORD@111..117 "result"
+          WHITESPACE@117..118 " "
+          VAL_TYPE@118..121
+            NUM_TYPE@118..121 "i32"
+          R_PAREN@121..122 ")"
+      WHITESPACE@122..123 " "
+      PLAIN_INSTR@123..154
+        L_PAREN@123..124 "("
+        INSTR_NAME@124..130 "return"
+        WHITESPACE@130..131 " "
+        OPERAND@131..153
+          PLAIN_INSTR@131..153
+            L_PAREN@131..132 "("
+            INSTR_NAME@132..141 "i32.const"
+            WHITESPACE@141..142 " "
+            OPERAND@142..152
+              INT@142..152 "0xffffffff"
+            R_PAREN@152..153 ")"
+        R_PAREN@153..154 ")"
+      R_PAREN@154..155 ")"
+    WHITESPACE@155..158 "\n  "
+    MODULE_FIELD_FUNC@158..229
+      L_PAREN@158..159 "("
+      KEYWORD@159..163 "func"
+      WHITESPACE@163..164 " "
+      EXPORT@164..183
+        L_PAREN@164..165 "("
+        KEYWORD@165..171 "export"
+        WHITESPACE@171..172 " "
+        NAME@172..182
+          STRING@172..182 "\"i32.smax\""
+        R_PAREN@182..183 ")"
+      WHITESPACE@183..184 " "
+      TYPE_USE@184..196
+        RESULT@184..196
+          L_PAREN@184..185 "("
+          KEYWORD@185..191 "result"
+          WHITESPACE@191..192 " "
+          VAL_TYPE@192..195
+            NUM_TYPE@192..195 "i32"
+          R_PAREN@195..196 ")"
+      WHITESPACE@196..197 " "
+      PLAIN_INSTR@197..228
+        L_PAREN@197..198 "("
+        INSTR_NAME@198..204 "return"
+        WHITESPACE@204..205 " "
+        OPERAND@205..227
+          PLAIN_INSTR@205..227
+            L_PAREN@205..206 "("
+            INSTR_NAME@206..215 "i32.const"
+            WHITESPACE@215..216 " "
+            OPERAND@216..226
+              INT@216..226 "0x7fffffff"
+            R_PAREN@226..227 ")"
+        R_PAREN@227..228 ")"
+      R_PAREN@228..229 ")"
+    WHITESPACE@229..232 "\n  "
+    MODULE_FIELD_FUNC@232..308
+      L_PAREN@232..233 "("
+      KEYWORD@233..237 "func"
+      WHITESPACE@237..238 " "
+      EXPORT@238..261
+        L_PAREN@238..239 "("
+        KEYWORD@239..245 "export"
+        WHITESPACE@245..246 " "
+        NAME@246..260
+          STRING@246..260 "\"i32.neg_smax\""
+        R_PAREN@260..261 ")"
+      WHITESPACE@261..262 " "
+      TYPE_USE@262..274
+        RESULT@262..274
+          L_PAREN@262..263 "("
+          KEYWORD@263..269 "result"
+          WHITESPACE@269..270 " "
+          VAL_TYPE@270..273
+            NUM_TYPE@270..273 "i32"
+          R_PAREN@273..274 ")"
+      WHITESPACE@274..275 " "
+      PLAIN_INSTR@275..307
+        L_PAREN@275..276 "("
+        INSTR_NAME@276..282 "return"
+        WHITESPACE@282..283 " "
+        OPERAND@283..306
+          PLAIN_INSTR@283..306
+            L_PAREN@283..284 "("
+            INSTR_NAME@284..293 "i32.const"
+            WHITESPACE@293..294 " "
+            OPERAND@294..305
+              INT@294..305 "-0x7fffffff"
+            R_PAREN@305..306 ")"
+        R_PAREN@306..307 ")"
+      R_PAREN@307..308 ")"
+    WHITESPACE@308..311 "\n  "
+    MODULE_FIELD_FUNC@311..383
+      L_PAREN@311..312 "("
+      KEYWORD@312..316 "func"
+      WHITESPACE@316..317 " "
+      EXPORT@317..336
+        L_PAREN@317..318 "("
+        KEYWORD@318..324 "export"
+        WHITESPACE@324..325 " "
+        NAME@325..335
+          STRING@325..335 "\"i32.smin\""
+        R_PAREN@335..336 ")"
+      WHITESPACE@336..337 " "
+      TYPE_USE@337..349
+        RESULT@337..349
+          L_PAREN@337..338 "("
+          KEYWORD@338..344 "result"
+          WHITESPACE@344..345 " "
+          VAL_TYPE@345..348
+            NUM_TYPE@345..348 "i32"
+          R_PAREN@348..349 ")"
+      WHITESPACE@349..350 " "
+      PLAIN_INSTR@350..382
+        L_PAREN@350..351 "("
+        INSTR_NAME@351..357 "return"
+        WHITESPACE@357..358 " "
+        OPERAND@358..381
+          PLAIN_INSTR@358..381
+            L_PAREN@358..359 "("
+            INSTR_NAME@359..368 "i32.const"
+            WHITESPACE@368..369 " "
+            OPERAND@369..380
+              INT@369..380 "-0x80000000"
+            R_PAREN@380..381 ")"
+        R_PAREN@381..382 ")"
+      R_PAREN@382..383 ")"
+    WHITESPACE@383..386 "\n  "
+    MODULE_FIELD_FUNC@386..461
+      L_PAREN@386..387 "("
+      KEYWORD@387..391 "func"
+      WHITESPACE@391..392 " "
+      EXPORT@392..415
+        L_PAREN@392..393 "("
+        KEYWORD@393..399 "export"
+        WHITESPACE@399..400 " "
+        NAME@400..414
+          STRING@400..414 "\"i32.alt_smin\""
+        R_PAREN@414..415 ")"
+      WHITESPACE@415..416 " "
+      TYPE_USE@416..428
+        RESULT@416..428
+          L_PAREN@416..417 "("
+          KEYWORD@417..423 "result"
+          WHITESPACE@423..424 " "
+          VAL_TYPE@424..427
+            NUM_TYPE@424..427 "i32"
+          R_PAREN@427..428 ")"
+      WHITESPACE@428..429 " "
+      PLAIN_INSTR@429..460
+        L_PAREN@429..430 "("
+        INSTR_NAME@430..436 "return"
+        WHITESPACE@436..437 " "
+        OPERAND@437..459
+          PLAIN_INSTR@437..459
+            L_PAREN@437..438 "("
+            INSTR_NAME@438..447 "i32.const"
+            WHITESPACE@447..448 " "
+            OPERAND@448..458
+              INT@448..458 "0x80000000"
+            R_PAREN@458..459 ")"
+        R_PAREN@459..460 ")"
+      R_PAREN@460..461 ")"
+    WHITESPACE@461..464 "\n  "
+    MODULE_FIELD_FUNC@464..564
+      L_PAREN@464..465 "("
+      KEYWORD@465..469 "func"
+      WHITESPACE@469..470 " "
+      EXPORT@470..493
+        L_PAREN@470..471 "("
+        KEYWORD@471..477 "export"
+        WHITESPACE@477..478 " "
+        NAME@478..492
+          STRING@478..492 "\"i32.inc_smin\""
+        R_PAREN@492..493 ")"
+      WHITESPACE@493..494 " "
+      TYPE_USE@494..506
+        RESULT@494..506
+          L_PAREN@494..495 "("
+          KEYWORD@495..501 "result"
+          WHITESPACE@501..502 " "
+          VAL_TYPE@502..505
+            NUM_TYPE@502..505 "i32"
+          R_PAREN@505..506 ")"
+      WHITESPACE@506..507 " "
+      PLAIN_INSTR@507..563
+        L_PAREN@507..508 "("
+        INSTR_NAME@508..514 "return"
+        WHITESPACE@514..515 " "
+        OPERAND@515..562
+          PLAIN_INSTR@515..562
+            L_PAREN@515..516 "("
+            INSTR_NAME@516..523 "i32.add"
+            WHITESPACE@523..524 " "
+            OPERAND@524..547
+              PLAIN_INSTR@524..547
+                L_PAREN@524..525 "("
+                INSTR_NAME@525..534 "i32.const"
+                WHITESPACE@534..535 " "
+                OPERAND@535..546
+                  INT@535..546 "-0x80000000"
+                R_PAREN@546..547 ")"
+            WHITESPACE@547..548 " "
+            OPERAND@548..561
+              PLAIN_INSTR@548..561
+                L_PAREN@548..549 "("
+                INSTR_NAME@549..558 "i32.const"
+                WHITESPACE@558..559 " "
+                OPERAND@559..560
+                  INT@559..560 "1"
+                R_PAREN@560..561 ")"
+            R_PAREN@561..562 ")"
+        R_PAREN@562..563 ")"
+      R_PAREN@563..564 ")"
+    WHITESPACE@564..567 "\n  "
+    MODULE_FIELD_FUNC@567..636
+      L_PAREN@567..568 "("
+      KEYWORD@568..572 "func"
+      WHITESPACE@572..573 " "
+      EXPORT@573..596
+        L_PAREN@573..574 "("
+        KEYWORD@574..580 "export"
+        WHITESPACE@580..581 " "
+        NAME@581..595
+          STRING@581..595 "\"i32.neg_zero\""
+        R_PAREN@595..596 ")"
+      WHITESPACE@596..597 " "
+      TYPE_USE@597..609
+        RESULT@597..609
+          L_PAREN@597..598 "("
+          KEYWORD@598..604 "result"
+          WHITESPACE@604..605 " "
+          VAL_TYPE@605..608
+            NUM_TYPE@605..608 "i32"
+          R_PAREN@608..609 ")"
+      WHITESPACE@609..610 " "
+      PLAIN_INSTR@610..635
+        L_PAREN@610..611 "("
+        INSTR_NAME@611..617 "return"
+        WHITESPACE@617..618 " "
+        OPERAND@618..634
+          PLAIN_INSTR@618..634
+            L_PAREN@618..619 "("
+            INSTR_NAME@619..628 "i32.const"
+            WHITESPACE@628..629 " "
+            OPERAND@629..633
+              INT@629..633 "-0x0"
+            R_PAREN@633..634 ")"
+        R_PAREN@634..635 ")"
+      R_PAREN@635..636 ")"
+    WHITESPACE@636..639 "\n  "
+    MODULE_FIELD_FUNC@639..708
+      L_PAREN@639..640 "("
+      KEYWORD@640..644 "func"
+      WHITESPACE@644..645 " "
+      EXPORT@645..669
+        L_PAREN@645..646 "("
+        KEYWORD@646..652 "export"
+        WHITESPACE@652..653 " "
+        NAME@653..668
+          STRING@653..668 "\"i32.not_octal\""
+        R_PAREN@668..669 ")"
+      WHITESPACE@669..670 " "
+      TYPE_USE@670..682
+        RESULT@670..682
+          L_PAREN@670..671 "("
+          KEYWORD@671..677 "result"
+          WHITESPACE@677..678 " "
+          VAL_TYPE@678..681
+            NUM_TYPE@678..681 "i32"
+          R_PAREN@681..682 ")"
+      WHITESPACE@682..683 " "
+      PLAIN_INSTR@683..707
+        L_PAREN@683..684 "("
+        INSTR_NAME@684..690 "return"
+        WHITESPACE@690..691 " "
+        OPERAND@691..706
+          PLAIN_INSTR@691..706
+            L_PAREN@691..692 "("
+            INSTR_NAME@692..701 "i32.const"
+            WHITESPACE@701..702 " "
+            OPERAND@702..705
+              INT@702..705 "010"
+            R_PAREN@705..706 ")"
+        R_PAREN@706..707 ")"
+      R_PAREN@707..708 ")"
+    WHITESPACE@708..711 "\n  "
+    MODULE_FIELD_FUNC@711..794
+      L_PAREN@711..712 "("
+      KEYWORD@712..716 "func"
+      WHITESPACE@716..717 " "
+      EXPORT@717..748
+        L_PAREN@717..718 "("
+        KEYWORD@718..724 "export"
+        WHITESPACE@724..725 " "
+        NAME@725..747
+          STRING@725..747 "\"i32.unsigned_decimal\""
+        R_PAREN@747..748 ")"
+      WHITESPACE@748..749 " "
+      TYPE_USE@749..761
+        RESULT@749..761
+          L_PAREN@749..750 "("
+          KEYWORD@750..756 "result"
+          WHITESPACE@756..757 " "
+          VAL_TYPE@757..760
+            NUM_TYPE@757..760 "i32"
+          R_PAREN@760..761 ")"
+      WHITESPACE@761..762 " "
+      PLAIN_INSTR@762..793
+        L_PAREN@762..763 "("
+        INSTR_NAME@763..769 "return"
+        WHITESPACE@769..770 " "
+        OPERAND@770..792
+          PLAIN_INSTR@770..792
+            L_PAREN@770..771 "("
+            INSTR_NAME@771..780 "i32.const"
+            WHITESPACE@780..781 " "
+            OPERAND@781..791
+              INT@781..791 "4294967295"
+            R_PAREN@791..792 ")"
+        R_PAREN@792..793 ")"
+      R_PAREN@793..794 ")"
+    WHITESPACE@794..797 "\n  "
+    MODULE_FIELD_FUNC@797..866
+      L_PAREN@797..798 "("
+      KEYWORD@798..802 "func"
+      WHITESPACE@802..803 " "
+      EXPORT@803..827
+        L_PAREN@803..804 "("
+        KEYWORD@804..810 "export"
+        WHITESPACE@810..811 " "
+        NAME@811..826
+          STRING@811..826 "\"i32.plus_sign\""
+        R_PAREN@826..827 ")"
+      WHITESPACE@827..828 " "
+      TYPE_USE@828..840
+        RESULT@828..840
+          L_PAREN@828..829 "("
+          KEYWORD@829..835 "result"
+          WHITESPACE@835..836 " "
+          VAL_TYPE@836..839
+            NUM_TYPE@836..839 "i32"
+          R_PAREN@839..840 ")"
+      WHITESPACE@840..841 " "
+      PLAIN_INSTR@841..865
+        L_PAREN@841..842 "("
+        INSTR_NAME@842..848 "return"
+        WHITESPACE@848..849 " "
+        OPERAND@849..864
+          PLAIN_INSTR@849..864
+            L_PAREN@849..850 "("
+            INSTR_NAME@850..859 "i32.const"
+            WHITESPACE@859..860 " "
+            OPERAND@860..863
+              INT@860..863 "+42"
+            R_PAREN@863..864 ")"
+        R_PAREN@864..865 ")"
+      R_PAREN@865..866 ")"
+    WHITESPACE@866..870 "\n\n  "
+    MODULE_FIELD_FUNC@870..949
+      L_PAREN@870..871 "("
+      KEYWORD@871..875 "func"
+      WHITESPACE@875..876 " "
+      EXPORT@876..895
+        L_PAREN@876..877 "("
+        KEYWORD@877..883 "export"
+        WHITESPACE@883..884 " "
+        NAME@884..894
+          STRING@884..894 "\"i64.test\""
+        R_PAREN@894..895 ")"
+      WHITESPACE@895..896 " "
+      TYPE_USE@896..908
+        RESULT@896..908
+          L_PAREN@896..897 "("
+          KEYWORD@897..903 "result"
+          WHITESPACE@903..904 " "
+          VAL_TYPE@904..907
+            NUM_TYPE@904..907 "i64"
+          R_PAREN@907..908 ")"
+      WHITESPACE@908..909 " "
+      PLAIN_INSTR@909..948
+        L_PAREN@909..910 "("
+        INSTR_NAME@910..916 "return"
+        WHITESPACE@916..917 " "
+        OPERAND@917..947
+          PLAIN_INSTR@917..947
+            L_PAREN@917..918 "("
+            INSTR_NAME@918..927 "i64.const"
+            WHITESPACE@927..928 " "
+            OPERAND@928..946
+              INT@928..946 "0x0CABBA6E0ba66a6e"
+            R_PAREN@946..947 ")"
+        R_PAREN@947..948 ")"
+      R_PAREN@948..949 ")"
+    WHITESPACE@949..952 "\n  "
+    MODULE_FIELD_FUNC@952..1031
+      L_PAREN@952..953 "("
+      KEYWORD@953..957 "func"
+      WHITESPACE@957..958 " "
+      EXPORT@958..977
+        L_PAREN@958..959 "("
+        KEYWORD@959..965 "export"
+        WHITESPACE@965..966 " "
+        NAME@966..976
+          STRING@966..976 "\"i64.umax\""
+        R_PAREN@976..977 ")"
+      WHITESPACE@977..978 " "
+      TYPE_USE@978..990
+        RESULT@978..990
+          L_PAREN@978..979 "("
+          KEYWORD@979..985 "result"
+          WHITESPACE@985..986 " "
+          VAL_TYPE@986..989
+            NUM_TYPE@986..989 "i64"
+          R_PAREN@989..990 ")"
+      WHITESPACE@990..991 " "
+      PLAIN_INSTR@991..1030
+        L_PAREN@991..992 "("
+        INSTR_NAME@992..998 "return"
+        WHITESPACE@998..999 " "
+        OPERAND@999..1029
+          PLAIN_INSTR@999..1029
+            L_PAREN@999..1000 "("
+            INSTR_NAME@1000..1009 "i64.const"
+            WHITESPACE@1009..1010 " "
+            OPERAND@1010..1028
+              INT@1010..1028 "0xffffffffffffffff"
+            R_PAREN@1028..1029 ")"
+        R_PAREN@1029..1030 ")"
+      R_PAREN@1030..1031 ")"
+    WHITESPACE@1031..1034 "\n  "
+    MODULE_FIELD_FUNC@1034..1113
+      L_PAREN@1034..1035 "("
+      KEYWORD@1035..1039 "func"
+      WHITESPACE@1039..1040 " "
+      EXPORT@1040..1059
+        L_PAREN@1040..1041 "("
+        KEYWORD@1041..1047 "export"
+        WHITESPACE@1047..1048 " "
+        NAME@1048..1058
+          STRING@1048..1058 "\"i64.smax\""
+        R_PAREN@1058..1059 ")"
+      WHITESPACE@1059..1060 " "
+      TYPE_USE@1060..1072
+        RESULT@1060..1072
+          L_PAREN@1060..1061 "("
+          KEYWORD@1061..1067 "result"
+          WHITESPACE@1067..1068 " "
+          VAL_TYPE@1068..1071
+            NUM_TYPE@1068..1071 "i64"
+          R_PAREN@1071..1072 ")"
+      WHITESPACE@1072..1073 " "
+      PLAIN_INSTR@1073..1112
+        L_PAREN@1073..1074 "("
+        INSTR_NAME@1074..1080 "return"
+        WHITESPACE@1080..1081 " "
+        OPERAND@1081..1111
+          PLAIN_INSTR@1081..1111
+            L_PAREN@1081..1082 "("
+            INSTR_NAME@1082..1091 "i64.const"
+            WHITESPACE@1091..1092 " "
+            OPERAND@1092..1110
+              INT@1092..1110 "0x7fffffffffffffff"
+            R_PAREN@1110..1111 ")"
+        R_PAREN@1111..1112 ")"
+      R_PAREN@1112..1113 ")"
+    WHITESPACE@1113..1116 "\n  "
+    MODULE_FIELD_FUNC@1116..1200
+      L_PAREN@1116..1117 "("
+      KEYWORD@1117..1121 "func"
+      WHITESPACE@1121..1122 " "
+      EXPORT@1122..1145
+        L_PAREN@1122..1123 "("
+        KEYWORD@1123..1129 "export"
+        WHITESPACE@1129..1130 " "
+        NAME@1130..1144
+          STRING@1130..1144 "\"i64.neg_smax\""
+        R_PAREN@1144..1145 ")"
+      WHITESPACE@1145..1146 " "
+      TYPE_USE@1146..1158
+        RESULT@1146..1158
+          L_PAREN@1146..1147 "("
+          KEYWORD@1147..1153 "result"
+          WHITESPACE@1153..1154 " "
+          VAL_TYPE@1154..1157
+            NUM_TYPE@1154..1157 "i64"
+          R_PAREN@1157..1158 ")"
+      WHITESPACE@1158..1159 " "
+      PLAIN_INSTR@1159..1199
+        L_PAREN@1159..1160 "("
+        INSTR_NAME@1160..1166 "return"
+        WHITESPACE@1166..1167 " "
+        OPERAND@1167..1198
+          PLAIN_INSTR@1167..1198
+            L_PAREN@1167..1168 "("
+            INSTR_NAME@1168..1177 "i64.const"
+            WHITESPACE@1177..1178 " "
+            OPERAND@1178..1197
+              INT@1178..1197 "-0x7fffffffffffffff"
+            R_PAREN@1197..1198 ")"
+        R_PAREN@1198..1199 ")"
+      R_PAREN@1199..1200 ")"
+    WHITESPACE@1200..1203 "\n  "
+    MODULE_FIELD_FUNC@1203..1283
+      L_PAREN@1203..1204 "("
+      KEYWORD@1204..1208 "func"
+      WHITESPACE@1208..1209 " "
+      EXPORT@1209..1228
+        L_PAREN@1209..1210 "("
+        KEYWORD@1210..1216 "export"
+        WHITESPACE@1216..1217 " "
+        NAME@1217..1227
+          STRING@1217..1227 "\"i64.smin\""
+        R_PAREN@1227..1228 ")"
+      WHITESPACE@1228..1229 " "
+      TYPE_USE@1229..1241
+        RESULT@1229..1241
+          L_PAREN@1229..1230 "("
+          KEYWORD@1230..1236 "result"
+          WHITESPACE@1236..1237 " "
+          VAL_TYPE@1237..1240
+            NUM_TYPE@1237..1240 "i64"
+          R_PAREN@1240..1241 ")"
+      WHITESPACE@1241..1242 " "
+      PLAIN_INSTR@1242..1282
+        L_PAREN@1242..1243 "("
+        INSTR_NAME@1243..1249 "return"
+        WHITESPACE@1249..1250 " "
+        OPERAND@1250..1281
+          PLAIN_INSTR@1250..1281
+            L_PAREN@1250..1251 "("
+            INSTR_NAME@1251..1260 "i64.const"
+            WHITESPACE@1260..1261 " "
+            OPERAND@1261..1280
+              INT@1261..1280 "-0x8000000000000000"
+            R_PAREN@1280..1281 ")"
+        R_PAREN@1281..1282 ")"
+      R_PAREN@1282..1283 ")"
+    WHITESPACE@1283..1286 "\n  "
+    MODULE_FIELD_FUNC@1286..1369
+      L_PAREN@1286..1287 "("
+      KEYWORD@1287..1291 "func"
+      WHITESPACE@1291..1292 " "
+      EXPORT@1292..1315
+        L_PAREN@1292..1293 "("
+        KEYWORD@1293..1299 "export"
+        WHITESPACE@1299..1300 " "
+        NAME@1300..1314
+          STRING@1300..1314 "\"i64.alt_smin\""
+        R_PAREN@1314..1315 ")"
+      WHITESPACE@1315..1316 " "
+      TYPE_USE@1316..1328
+        RESULT@1316..1328
+          L_PAREN@1316..1317 "("
+          KEYWORD@1317..1323 "result"
+          WHITESPACE@1323..1324 " "
+          VAL_TYPE@1324..1327
+            NUM_TYPE@1324..1327 "i64"
+          R_PAREN@1327..1328 ")"
+      WHITESPACE@1328..1329 " "
+      PLAIN_INSTR@1329..1368
+        L_PAREN@1329..1330 "("
+        INSTR_NAME@1330..1336 "return"
+        WHITESPACE@1336..1337 " "
+        OPERAND@1337..1367
+          PLAIN_INSTR@1337..1367
+            L_PAREN@1337..1338 "("
+            INSTR_NAME@1338..1347 "i64.const"
+            WHITESPACE@1347..1348 " "
+            OPERAND@1348..1366
+              INT@1348..1366 "0x8000000000000000"
+            R_PAREN@1366..1367 ")"
+        R_PAREN@1367..1368 ")"
+      R_PAREN@1368..1369 ")"
+    WHITESPACE@1369..1372 "\n  "
+    MODULE_FIELD_FUNC@1372..1480
+      L_PAREN@1372..1373 "("
+      KEYWORD@1373..1377 "func"
+      WHITESPACE@1377..1378 " "
+      EXPORT@1378..1401
+        L_PAREN@1378..1379 "("
+        KEYWORD@1379..1385 "export"
+        WHITESPACE@1385..1386 " "
+        NAME@1386..1400
+          STRING@1386..1400 "\"i64.inc_smin\""
+        R_PAREN@1400..1401 ")"
+      WHITESPACE@1401..1402 " "
+      TYPE_USE@1402..1414
+        RESULT@1402..1414
+          L_PAREN@1402..1403 "("
+          KEYWORD@1403..1409 "result"
+          WHITESPACE@1409..1410 " "
+          VAL_TYPE@1410..1413
+            NUM_TYPE@1410..1413 "i64"
+          R_PAREN@1413..1414 ")"
+      WHITESPACE@1414..1415 " "
+      PLAIN_INSTR@1415..1479
+        L_PAREN@1415..1416 "("
+        INSTR_NAME@1416..1422 "return"
+        WHITESPACE@1422..1423 " "
+        OPERAND@1423..1478
+          PLAIN_INSTR@1423..1478
+            L_PAREN@1423..1424 "("
+            INSTR_NAME@1424..1431 "i64.add"
+            WHITESPACE@1431..1432 " "
+            OPERAND@1432..1463
+              PLAIN_INSTR@1432..1463
+                L_PAREN@1432..1433 "("
+                INSTR_NAME@1433..1442 "i64.const"
+                WHITESPACE@1442..1443 " "
+                OPERAND@1443..1462
+                  INT@1443..1462 "-0x8000000000000000"
+                R_PAREN@1462..1463 ")"
+            WHITESPACE@1463..1464 " "
+            OPERAND@1464..1477
+              PLAIN_INSTR@1464..1477
+                L_PAREN@1464..1465 "("
+                INSTR_NAME@1465..1474 "i64.const"
+                WHITESPACE@1474..1475 " "
+                OPERAND@1475..1476
+                  INT@1475..1476 "1"
+                R_PAREN@1476..1477 ")"
+            R_PAREN@1477..1478 ")"
+        R_PAREN@1478..1479 ")"
+      R_PAREN@1479..1480 ")"
+    WHITESPACE@1480..1483 "\n  "
+    MODULE_FIELD_FUNC@1483..1552
+      L_PAREN@1483..1484 "("
+      KEYWORD@1484..1488 "func"
+      WHITESPACE@1488..1489 " "
+      EXPORT@1489..1512
+        L_PAREN@1489..1490 "("
+        KEYWORD@1490..1496 "export"
+        WHITESPACE@1496..1497 " "
+        NAME@1497..1511
+          STRING@1497..1511 "\"i64.neg_zero\""
+        R_PAREN@1511..1512 ")"
+      WHITESPACE@1512..1513 " "
+      TYPE_USE@1513..1525
+        RESULT@1513..1525
+          L_PAREN@1513..1514 "("
+          KEYWORD@1514..1520 "result"
+          WHITESPACE@1520..1521 " "
+          VAL_TYPE@1521..1524
+            NUM_TYPE@1521..1524 "i64"
+          R_PAREN@1524..1525 ")"
+      WHITESPACE@1525..1526 " "
+      PLAIN_INSTR@1526..1551
+        L_PAREN@1526..1527 "("
+        INSTR_NAME@1527..1533 "return"
+        WHITESPACE@1533..1534 " "
+        OPERAND@1534..1550
+          PLAIN_INSTR@1534..1550
+            L_PAREN@1534..1535 "("
+            INSTR_NAME@1535..1544 "i64.const"
+            WHITESPACE@1544..1545 " "
+            OPERAND@1545..1549
+              INT@1545..1549 "-0x0"
+            R_PAREN@1549..1550 ")"
+        R_PAREN@1550..1551 ")"
+      R_PAREN@1551..1552 ")"
+    WHITESPACE@1552..1555 "\n  "
+    MODULE_FIELD_FUNC@1555..1624
+      L_PAREN@1555..1556 "("
+      KEYWORD@1556..1560 "func"
+      WHITESPACE@1560..1561 " "
+      EXPORT@1561..1585
+        L_PAREN@1561..1562 "("
+        KEYWORD@1562..1568 "export"
+        WHITESPACE@1568..1569 " "
+        NAME@1569..1584
+          STRING@1569..1584 "\"i64.not_octal\""
+        R_PAREN@1584..1585 ")"
+      WHITESPACE@1585..1586 " "
+      TYPE_USE@1586..1598
+        RESULT@1586..1598
+          L_PAREN@1586..1587 "("
+          KEYWORD@1587..1593 "result"
+          WHITESPACE@1593..1594 " "
+          VAL_TYPE@1594..1597
+            NUM_TYPE@1594..1597 "i64"
+          R_PAREN@1597..1598 ")"
+      WHITESPACE@1598..1599 " "
+      PLAIN_INSTR@1599..1623
+        L_PAREN@1599..1600 "("
+        INSTR_NAME@1600..1606 "return"
+        WHITESPACE@1606..1607 " "
+        OPERAND@1607..1622
+          PLAIN_INSTR@1607..1622
+            L_PAREN@1607..1608 "("
+            INSTR_NAME@1608..1617 "i64.const"
+            WHITESPACE@1617..1618 " "
+            OPERAND@1618..1621
+              INT@1618..1621 "010"
+            R_PAREN@1621..1622 ")"
+        R_PAREN@1622..1623 ")"
+      R_PAREN@1623..1624 ")"
+    WHITESPACE@1624..1627 "\n  "
+    MODULE_FIELD_FUNC@1627..1720
+      L_PAREN@1627..1628 "("
+      KEYWORD@1628..1632 "func"
+      WHITESPACE@1632..1633 " "
+      EXPORT@1633..1664
+        L_PAREN@1633..1634 "("
+        KEYWORD@1634..1640 "export"
+        WHITESPACE@1640..1641 " "
+        NAME@1641..1663
+          STRING@1641..1663 "\"i64.unsigned_decimal\""
+        R_PAREN@1663..1664 ")"
+      WHITESPACE@1664..1665 " "
+      TYPE_USE@1665..1677
+        RESULT@1665..1677
+          L_PAREN@1665..1666 "("
+          KEYWORD@1666..1672 "result"
+          WHITESPACE@1672..1673 " "
+          VAL_TYPE@1673..1676
+            NUM_TYPE@1673..1676 "i64"
+          R_PAREN@1676..1677 ")"
+      WHITESPACE@1677..1678 " "
+      PLAIN_INSTR@1678..1719
+        L_PAREN@1678..1679 "("
+        INSTR_NAME@1679..1685 "return"
+        WHITESPACE@1685..1686 " "
+        OPERAND@1686..1718
+          PLAIN_INSTR@1686..1718
+            L_PAREN@1686..1687 "("
+            INSTR_NAME@1687..1696 "i64.const"
+            WHITESPACE@1696..1697 " "
+            OPERAND@1697..1717
+              INT@1697..1717 "18446744073709551615"
+            R_PAREN@1717..1718 ")"
+        R_PAREN@1718..1719 ")"
+      R_PAREN@1719..1720 ")"
+    WHITESPACE@1720..1723 "\n  "
+    MODULE_FIELD_FUNC@1723..1792
+      L_PAREN@1723..1724 "("
+      KEYWORD@1724..1728 "func"
+      WHITESPACE@1728..1729 " "
+      EXPORT@1729..1753
+        L_PAREN@1729..1730 "("
+        KEYWORD@1730..1736 "export"
+        WHITESPACE@1736..1737 " "
+        NAME@1737..1752
+          STRING@1737..1752 "\"i64.plus_sign\""
+        R_PAREN@1752..1753 ")"
+      WHITESPACE@1753..1754 " "
+      TYPE_USE@1754..1766
+        RESULT@1754..1766
+          L_PAREN@1754..1755 "("
+          KEYWORD@1755..1761 "result"
+          WHITESPACE@1761..1762 " "
+          VAL_TYPE@1762..1765
+            NUM_TYPE@1762..1765 "i64"
+          R_PAREN@1765..1766 ")"
+      WHITESPACE@1766..1767 " "
+      PLAIN_INSTR@1767..1791
+        L_PAREN@1767..1768 "("
+        INSTR_NAME@1768..1774 "return"
+        WHITESPACE@1774..1775 " "
+        OPERAND@1775..1790
+          PLAIN_INSTR@1775..1790
+            L_PAREN@1775..1776 "("
+            INSTR_NAME@1776..1785 "i64.const"
+            WHITESPACE@1785..1786 " "
+            OPERAND@1786..1789
+              INT@1786..1789 "+42"
+            R_PAREN@1789..1790 ")"
+        R_PAREN@1790..1791 ")"
+      R_PAREN@1791..1792 ")"
+    WHITESPACE@1792..1796 "\n\n  "
+    MODULE_FIELD_FUNC@1796..1861
+      L_PAREN@1796..1797 "("
+      KEYWORD@1797..1801 "func"
+      WHITESPACE@1801..1802 " "
+      EXPORT@1802..1825
+        L_PAREN@1802..1803 "("
+        KEYWORD@1803..1809 "export"
+        WHITESPACE@1809..1810 " "
+        NAME@1810..1824
+          STRING@1810..1824 "\"i32-dec-sep1\""
+        R_PAREN@1824..1825 ")"
+      WHITESPACE@1825..1826 " "
+      TYPE_USE@1826..1838
+        RESULT@1826..1838
+          L_PAREN@1826..1827 "("
+          KEYWORD@1827..1833 "result"
+          WHITESPACE@1833..1834 " "
+          VAL_TYPE@1834..1837
+            NUM_TYPE@1834..1837 "i32"
+          R_PAREN@1837..1838 ")"
+      WHITESPACE@1838..1839 " "
+      PLAIN_INSTR@1839..1860
+        L_PAREN@1839..1840 "("
+        INSTR_NAME@1840..1849 "i32.const"
+        WHITESPACE@1849..1850 " "
+        OPERAND@1850..1859
+          INT@1850..1859 "1_000_000"
+        R_PAREN@1859..1860 ")"
+      R_PAREN@1860..1861 ")"
+    WHITESPACE@1861..1864 "\n  "
+    MODULE_FIELD_FUNC@1864..1927
+      L_PAREN@1864..1865 "("
+      KEYWORD@1865..1869 "func"
+      WHITESPACE@1869..1870 " "
+      EXPORT@1870..1893
+        L_PAREN@1870..1871 "("
+        KEYWORD@1871..1877 "export"
+        WHITESPACE@1877..1878 " "
+        NAME@1878..1892
+          STRING@1878..1892 "\"i32-dec-sep2\""
+        R_PAREN@1892..1893 ")"
+      WHITESPACE@1893..1894 " "
+      TYPE_USE@1894..1906
+        RESULT@1894..1906
+          L_PAREN@1894..1895 "("
+          KEYWORD@1895..1901 "result"
+          WHITESPACE@1901..1902 " "
+          VAL_TYPE@1902..1905
+            NUM_TYPE@1902..1905 "i32"
+          R_PAREN@1905..1906 ")"
+      WHITESPACE@1906..1907 " "
+      PLAIN_INSTR@1907..1926
+        L_PAREN@1907..1908 "("
+        INSTR_NAME@1908..1917 "i32.const"
+        WHITESPACE@1917..1918 " "
+        OPERAND@1918..1925
+          INT@1918..1925 "1_0_0_0"
+        R_PAREN@1925..1926 ")"
+      R_PAREN@1926..1927 ")"
+    WHITESPACE@1927..1930 "\n  "
+    MODULE_FIELD_FUNC@1930..1998
+      L_PAREN@1930..1931 "("
+      KEYWORD@1931..1935 "func"
+      WHITESPACE@1935..1936 " "
+      EXPORT@1936..1959
+        L_PAREN@1936..1937 "("
+        KEYWORD@1937..1943 "export"
+        WHITESPACE@1943..1944 " "
+        NAME@1944..1958
+          STRING@1944..1958 "\"i32-hex-sep1\""
+        R_PAREN@1958..1959 ")"
+      WHITESPACE@1959..1960 " "
+      TYPE_USE@1960..1972
+        RESULT@1960..1972
+          L_PAREN@1960..1961 "("
+          KEYWORD@1961..1967 "result"
+          WHITESPACE@1967..1968 " "
+          VAL_TYPE@1968..1971
+            NUM_TYPE@1968..1971 "i32"
+          R_PAREN@1971..1972 ")"
+      WHITESPACE@1972..1973 " "
+      PLAIN_INSTR@1973..1997
+        L_PAREN@1973..1974 "("
+        INSTR_NAME@1974..1983 "i32.const"
+        WHITESPACE@1983..1984 " "
+        OPERAND@1984..1996
+          INT@1984..1996 "0xa_0f_00_99"
+        R_PAREN@1996..1997 ")"
+      R_PAREN@1997..1998 ")"
+    WHITESPACE@1998..2001 "\n  "
+    MODULE_FIELD_FUNC@2001..2068
+      L_PAREN@2001..2002 "("
+      KEYWORD@2002..2006 "func"
+      WHITESPACE@2006..2007 " "
+      EXPORT@2007..2030
+        L_PAREN@2007..2008 "("
+        KEYWORD@2008..2014 "export"
+        WHITESPACE@2014..2015 " "
+        NAME@2015..2029
+          STRING@2015..2029 "\"i32-hex-sep2\""
+        R_PAREN@2029..2030 ")"
+      WHITESPACE@2030..2031 " "
+      TYPE_USE@2031..2043
+        RESULT@2031..2043
+          L_PAREN@2031..2032 "("
+          KEYWORD@2032..2038 "result"
+          WHITESPACE@2038..2039 " "
+          VAL_TYPE@2039..2042
+            NUM_TYPE@2039..2042 "i32"
+          R_PAREN@2042..2043 ")"
+      WHITESPACE@2043..2044 " "
+      PLAIN_INSTR@2044..2067
+        L_PAREN@2044..2045 "("
+        INSTR_NAME@2045..2054 "i32.const"
+        WHITESPACE@2054..2055 " "
+        OPERAND@2055..2066
+          INT@2055..2066 "0x1_a_A_0_f"
+        R_PAREN@2066..2067 ")"
+      R_PAREN@2067..2068 ")"
+    WHITESPACE@2068..2072 "\n\n  "
+    MODULE_FIELD_FUNC@2072..2137
+      L_PAREN@2072..2073 "("
+      KEYWORD@2073..2077 "func"
+      WHITESPACE@2077..2078 " "
+      EXPORT@2078..2101
+        L_PAREN@2078..2079 "("
+        KEYWORD@2079..2085 "export"
+        WHITESPACE@2085..2086 " "
+        NAME@2086..2100
+          STRING@2086..2100 "\"i64-dec-sep1\""
+        R_PAREN@2100..2101 ")"
+      WHITESPACE@2101..2102 " "
+      TYPE_USE@2102..2114
+        RESULT@2102..2114
+          L_PAREN@2102..2103 "("
+          KEYWORD@2103..2109 "result"
+          WHITESPACE@2109..2110 " "
+          VAL_TYPE@2110..2113
+            NUM_TYPE@2110..2113 "i64"
+          R_PAREN@2113..2114 ")"
+      WHITESPACE@2114..2115 " "
+      PLAIN_INSTR@2115..2136
+        L_PAREN@2115..2116 "("
+        INSTR_NAME@2116..2125 "i64.const"
+        WHITESPACE@2125..2126 " "
+        OPERAND@2126..2135
+          INT@2126..2135 "1_000_000"
+        R_PAREN@2135..2136 ")"
+      R_PAREN@2136..2137 ")"
+    WHITESPACE@2137..2140 "\n  "
+    MODULE_FIELD_FUNC@2140..2203
+      L_PAREN@2140..2141 "("
+      KEYWORD@2141..2145 "func"
+      WHITESPACE@2145..2146 " "
+      EXPORT@2146..2169
+        L_PAREN@2146..2147 "("
+        KEYWORD@2147..2153 "export"
+        WHITESPACE@2153..2154 " "
+        NAME@2154..2168
+          STRING@2154..2168 "\"i64-dec-sep2\""
+        R_PAREN@2168..2169 ")"
+      WHITESPACE@2169..2170 " "
+      TYPE_USE@2170..2182
+        RESULT@2170..2182
+          L_PAREN@2170..2171 "("
+          KEYWORD@2171..2177 "result"
+          WHITESPACE@2177..2178 " "
+          VAL_TYPE@2178..2181
+            NUM_TYPE@2178..2181 "i64"
+          R_PAREN@2181..2182 ")"
+      WHITESPACE@2182..2183 " "
+      PLAIN_INSTR@2183..2202
+        L_PAREN@2183..2184 "("
+        INSTR_NAME@2184..2193 "i64.const"
+        WHITESPACE@2193..2194 " "
+        OPERAND@2194..2201
+          INT@2194..2201 "1_0_0_0"
+        R_PAREN@2201..2202 ")"
+      R_PAREN@2202..2203 ")"
+    WHITESPACE@2203..2206 "\n  "
+    MODULE_FIELD_FUNC@2206..2280
+      L_PAREN@2206..2207 "("
+      KEYWORD@2207..2211 "func"
+      WHITESPACE@2211..2212 " "
+      EXPORT@2212..2235
+        L_PAREN@2212..2213 "("
+        KEYWORD@2213..2219 "export"
+        WHITESPACE@2219..2220 " "
+        NAME@2220..2234
+          STRING@2220..2234 "\"i64-hex-sep1\""
+        R_PAREN@2234..2235 ")"
+      WHITESPACE@2235..2236 " "
+      TYPE_USE@2236..2248
+        RESULT@2236..2248
+          L_PAREN@2236..2237 "("
+          KEYWORD@2237..2243 "result"
+          WHITESPACE@2243..2244 " "
+          VAL_TYPE@2244..2247
+            NUM_TYPE@2244..2247 "i64"
+          R_PAREN@2247..2248 ")"
+      WHITESPACE@2248..2249 " "
+      PLAIN_INSTR@2249..2279
+        L_PAREN@2249..2250 "("
+        INSTR_NAME@2250..2259 "i64.const"
+        WHITESPACE@2259..2260 " "
+        OPERAND@2260..2278
+          INT@2260..2278 "0xa_f00f_0000_9999"
+        R_PAREN@2278..2279 ")"
+      R_PAREN@2279..2280 ")"
+    WHITESPACE@2280..2283 "\n  "
+    MODULE_FIELD_FUNC@2283..2350
+      L_PAREN@2283..2284 "("
+      KEYWORD@2284..2288 "func"
+      WHITESPACE@2288..2289 " "
+      EXPORT@2289..2312
+        L_PAREN@2289..2290 "("
+        KEYWORD@2290..2296 "export"
+        WHITESPACE@2296..2297 " "
+        NAME@2297..2311
+          STRING@2297..2311 "\"i64-hex-sep2\""
+        R_PAREN@2311..2312 ")"
+      WHITESPACE@2312..2313 " "
+      TYPE_USE@2313..2325
+        RESULT@2313..2325
+          L_PAREN@2313..2314 "("
+          KEYWORD@2314..2320 "result"
+          WHITESPACE@2320..2321 " "
+          VAL_TYPE@2321..2324
+            NUM_TYPE@2321..2324 "i64"
+          R_PAREN@2324..2325 ")"
+      WHITESPACE@2325..2326 " "
+      PLAIN_INSTR@2326..2349
+        L_PAREN@2326..2327 "("
+        INSTR_NAME@2327..2336 "i64.const"
+        WHITESPACE@2336..2337 " "
+        OPERAND@2337..2348
+          INT@2337..2348 "0x1_a_A_0_f"
+        R_PAREN@2348..2349 ")"
+      R_PAREN@2349..2350 ")"
+    WHITESPACE@2350..2351 "\n"
+    R_PAREN@2351..2352 ")"
+  WHITESPACE@2352..2353 "\n"

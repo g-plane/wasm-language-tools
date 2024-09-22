@@ -1,0 +1,214 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..346
+  MODULE@0..345
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_GLOBAL@10..39
+      L_PAREN@10..11 "("
+      KEYWORD@11..17 "global"
+      WHITESPACE@17..18 " "
+      GLOBAL_TYPE@18..21
+        VAL_TYPE@18..21
+          NUM_TYPE@18..21 "i32"
+      WHITESPACE@21..22 " "
+      PLAIN_INSTR@22..38
+        L_PAREN@22..23 "("
+        INSTR_NAME@23..32 "i32.const"
+        WHITESPACE@32..33 " "
+        ERROR@33..37 "_100"
+        R_PAREN@37..38 ")"
+      R_PAREN@38..39 ")"
+    WHITESPACE@39..42 "\n  "
+    MODULE_FIELD_GLOBAL@42..72
+      L_PAREN@42..43 "("
+      KEYWORD@43..49 "global"
+      WHITESPACE@49..50 " "
+      GLOBAL_TYPE@50..53
+        VAL_TYPE@50..53
+          NUM_TYPE@50..53 "i32"
+      WHITESPACE@53..54 " "
+      PLAIN_INSTR@54..71
+        L_PAREN@54..55 "("
+        INSTR_NAME@55..64 "i32.const"
+        WHITESPACE@64..65 " "
+        ERROR@65..70 "+_100"
+        R_PAREN@70..71 ")"
+      R_PAREN@71..72 ")"
+    WHITESPACE@72..75 "\n  "
+    MODULE_FIELD_GLOBAL@75..105
+      L_PAREN@75..76 "("
+      KEYWORD@76..82 "global"
+      WHITESPACE@82..83 " "
+      GLOBAL_TYPE@83..86
+        VAL_TYPE@83..86
+          NUM_TYPE@83..86 "i32"
+      WHITESPACE@86..87 " "
+      PLAIN_INSTR@87..104
+        L_PAREN@87..88 "("
+        INSTR_NAME@88..97 "i32.const"
+        WHITESPACE@97..98 " "
+        ERROR@98..103 "-_100"
+        R_PAREN@103..104 ")"
+      R_PAREN@104..105 ")"
+    WHITESPACE@105..108 "\n  "
+    MODULE_FIELD_GLOBAL@108..136
+      L_PAREN@108..109 "("
+      KEYWORD@109..115 "global"
+      WHITESPACE@115..116 " "
+      GLOBAL_TYPE@116..119
+        VAL_TYPE@116..119
+          NUM_TYPE@116..119 "i32"
+      WHITESPACE@119..120 " "
+      PLAIN_INSTR@120..135
+        L_PAREN@120..121 "("
+        INSTR_NAME@121..130 "i32.const"
+        WHITESPACE@130..131 " "
+        OPERAND@131..134
+          INT@131..134 "99_"
+        R_PAREN@134..135 ")"
+      R_PAREN@135..136 ")"
+    WHITESPACE@136..139 "\n  "
+    MODULE_FIELD_GLOBAL@139..170
+      L_PAREN@139..140 "("
+      KEYWORD@140..146 "global"
+      WHITESPACE@146..147 " "
+      GLOBAL_TYPE@147..150
+        VAL_TYPE@147..150
+          NUM_TYPE@147..150 "i32"
+      WHITESPACE@150..151 " "
+      PLAIN_INSTR@151..169
+        L_PAREN@151..152 "("
+        INSTR_NAME@152..161 "i32.const"
+        WHITESPACE@161..162 " "
+        OPERAND@162..168
+          INT@162..168 "1__000"
+        R_PAREN@168..169 ")"
+      R_PAREN@169..170 ")"
+    WHITESPACE@170..173 "\n  "
+    MODULE_FIELD_GLOBAL@173..204
+      L_PAREN@173..174 "("
+      KEYWORD@174..180 "global"
+      WHITESPACE@180..181 " "
+      GLOBAL_TYPE@181..184
+        VAL_TYPE@181..184
+          NUM_TYPE@181..184 "i32"
+      WHITESPACE@184..185 " "
+      PLAIN_INSTR@185..203
+        L_PAREN@185..186 "("
+        INSTR_NAME@186..195 "i32.const"
+        WHITESPACE@195..196 " "
+        ERROR@196..202 "_0x100"
+        R_PAREN@202..203 ")"
+      R_PAREN@203..204 ")"
+    WHITESPACE@204..207 "\n  "
+    MODULE_FIELD_GLOBAL@207..238
+      L_PAREN@207..208 "("
+      KEYWORD@208..214 "global"
+      WHITESPACE@214..215 " "
+      GLOBAL_TYPE@215..218
+        VAL_TYPE@215..218
+          NUM_TYPE@215..218 "i32"
+      WHITESPACE@218..219 " "
+      PLAIN_INSTR@219..237
+        L_PAREN@219..220 "("
+        INSTR_NAME@220..229 "i32.const"
+        WHITESPACE@229..230 " "
+        OPERAND@230..232
+          INT@230..232 "0_"
+        ERROR@232..236 "x100"
+        R_PAREN@236..237 ")"
+      R_PAREN@237..238 ")"
+    WHITESPACE@238..241 "\n  "
+    MODULE_FIELD_GLOBAL@241..272
+      L_PAREN@241..242 "("
+      KEYWORD@242..248 "global"
+      WHITESPACE@248..249 " "
+      GLOBAL_TYPE@249..252
+        VAL_TYPE@249..252
+          NUM_TYPE@249..252 "i32"
+      WHITESPACE@252..253 " "
+      PLAIN_INSTR@253..271
+        L_PAREN@253..254 "("
+        INSTR_NAME@254..263 "i32.const"
+        WHITESPACE@263..264 " "
+        OPERAND@264..265
+          FLOAT@264..265 "0"
+        ERROR@265..270 "x_100"
+        R_PAREN@270..271 ")"
+      R_PAREN@271..272 ")"
+    WHITESPACE@272..275 "\n  "
+    MODULE_FIELD_GLOBAL@275..305
+      L_PAREN@275..276 "("
+      KEYWORD@276..282 "global"
+      WHITESPACE@282..283 " "
+      GLOBAL_TYPE@283..286
+        VAL_TYPE@283..286
+          NUM_TYPE@283..286 "i32"
+      WHITESPACE@286..287 " "
+      PLAIN_INSTR@287..304
+        L_PAREN@287..288 "("
+        INSTR_NAME@288..297 "i32.const"
+        WHITESPACE@297..298 " "
+        OPERAND@298..303
+          INT@298..303 "0x00_"
+        R_PAREN@303..304 ")"
+      R_PAREN@304..305 ")"
+    WHITESPACE@305..308 "\n  "
+    MODULE_FIELD_GLOBAL@308..343
+      L_PAREN@308..309 "("
+      KEYWORD@309..315 "global"
+      WHITESPACE@315..316 " "
+      GLOBAL_TYPE@316..319
+        VAL_TYPE@316..319
+          NUM_TYPE@316..319 "i32"
+      WHITESPACE@319..320 " "
+      PLAIN_INSTR@320..342
+        L_PAREN@320..321 "("
+        INSTR_NAME@321..330 "i32.const"
+        WHITESPACE@330..331 " "
+        OPERAND@331..341
+          INT@331..341 "0xff__ffff"
+        R_PAREN@341..342 ")"
+      R_PAREN@342..343 ")"
+    WHITESPACE@343..344 "\n"
+    R_PAREN@344..345 ")"
+  WHITESPACE@345..346 "\n"
+
+error: expected operand
+  ┌─ int-literals-malformed.wat:2:26
+  │
+2 │   (global i32 (i32.const _100))
+  │                          ^^^^
+
+error: expected operand
+  ┌─ int-literals-malformed.wat:3:27
+  │
+3 │   (global i32 (i32.const +_100))
+  │                           ^^^^
+
+error: expected operand
+  ┌─ int-literals-malformed.wat:4:27
+  │
+4 │   (global i32 (i32.const -_100))
+  │                           ^^^^
+
+error: expected operand
+  ┌─ int-literals-malformed.wat:7:26
+  │
+7 │   (global i32 (i32.const _0x100))
+  │                          ^^^^^^
+
+error: expected operand
+  ┌─ int-literals-malformed.wat:8:28
+  │
+8 │   (global i32 (i32.const 0_x100))
+  │                            ^^^^
+
+error: expected operand
+  ┌─ int-literals-malformed.wat:9:27
+  │
+9 │   (global i32 (i32.const 0x_100))
+  │                           ^^^^^
