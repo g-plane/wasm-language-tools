@@ -66,8 +66,7 @@ ROOT@0..1361
         L_PAREN@120..121 "("
         INSTR_NAME@121..130 "f32.const"
         WHITESPACE@130..131 " "
-        OPERAND@131..134
-          INT@131..134 "99_"
+        ERROR@131..134 "99_"
         R_PAREN@134..135 ")"
       R_PAREN@135..136 ")"
     WHITESPACE@136..139 "\n  "
@@ -99,8 +98,7 @@ ROOT@0..1361
         L_PAREN@183..184 "("
         INSTR_NAME@184..193 "f32.const"
         WHITESPACE@193..194 " "
-        OPERAND@194..198
-          FLOAT@194..198 "1.0_"
+        ERROR@194..198 "1.0_"
         R_PAREN@198..199 ")"
       R_PAREN@199..200 ")"
     WHITESPACE@200..203 "\n  "
@@ -116,8 +114,7 @@ ROOT@0..1361
         L_PAREN@215..216 "("
         INSTR_NAME@216..225 "f32.const"
         WHITESPACE@225..226 " "
-        OPERAND@226..230
-          FLOAT@226..230 "1_.0"
+        ERROR@226..230 "1_.0"
         R_PAREN@230..231 ")"
       R_PAREN@231..232 ")"
     WHITESPACE@232..235 "\n  "
@@ -133,9 +130,7 @@ ROOT@0..1361
         L_PAREN@247..248 "("
         INSTR_NAME@248..257 "f32.const"
         WHITESPACE@257..258 " "
-        OPERAND@258..260
-          FLOAT@258..260 "1."
-        ERROR@260..262 "_0"
+        ERROR@258..262 "1._0"
         R_PAREN@262..263 ")"
       R_PAREN@263..264 ")"
     WHITESPACE@264..267 "\n  "
@@ -167,8 +162,7 @@ ROOT@0..1361
         L_PAREN@311..312 "("
         INSTR_NAME@312..321 "f32.const"
         WHITESPACE@321..322 " "
-        OPERAND@322..326
-          FLOAT@322..326 "1e1_"
+        ERROR@322..326 "1e1_"
         R_PAREN@326..327 ")"
       R_PAREN@327..328 ")"
     WHITESPACE@328..331 "\n  "
@@ -184,8 +178,7 @@ ROOT@0..1361
         L_PAREN@343..344 "("
         INSTR_NAME@344..353 "f32.const"
         WHITESPACE@353..354 " "
-        OPERAND@354..358
-          FLOAT@354..358 "1_e1"
+        ERROR@354..358 "1_e1"
         R_PAREN@358..359 ")"
       R_PAREN@359..360 ")"
     WHITESPACE@360..363 "\n  "
@@ -201,9 +194,7 @@ ROOT@0..1361
         L_PAREN@375..376 "("
         INSTR_NAME@376..385 "f32.const"
         WHITESPACE@385..386 " "
-        OPERAND@386..387
-          FLOAT@386..387 "1"
-        ERROR@387..390 "e_1"
+        ERROR@386..390 "1e_1"
         R_PAREN@390..391 ")"
       R_PAREN@391..392 ")"
     WHITESPACE@392..395 "\n  "
@@ -235,8 +226,7 @@ ROOT@0..1361
         L_PAREN@441..442 "("
         INSTR_NAME@442..451 "f32.const"
         WHITESPACE@451..452 " "
-        OPERAND@452..458
-          FLOAT@452..458 "1.0e1_"
+        ERROR@452..458 "1.0e1_"
         R_PAREN@458..459 ")"
       R_PAREN@459..460 ")"
     WHITESPACE@460..463 "\n  "
@@ -252,8 +242,7 @@ ROOT@0..1361
         L_PAREN@475..476 "("
         INSTR_NAME@476..485 "f32.const"
         WHITESPACE@485..486 " "
-        OPERAND@486..492
-          FLOAT@486..492 "1.0_e1"
+        ERROR@486..492 "1.0_e1"
         R_PAREN@492..493 ")"
       R_PAREN@493..494 ")"
     WHITESPACE@494..497 "\n  "
@@ -269,9 +258,7 @@ ROOT@0..1361
         L_PAREN@509..510 "("
         INSTR_NAME@510..519 "f32.const"
         WHITESPACE@519..520 " "
-        OPERAND@520..523
-          FLOAT@520..523 "1.0"
-        ERROR@523..526 "e_1"
+        ERROR@520..526 "1.0e_1"
         R_PAREN@526..527 ")"
       R_PAREN@527..528 ")"
     WHITESPACE@528..531 "\n  "
@@ -287,9 +274,7 @@ ROOT@0..1361
         L_PAREN@543..544 "("
         INSTR_NAME@544..553 "f32.const"
         WHITESPACE@553..554 " "
-        OPERAND@554..557
-          FLOAT@554..557 "1.0"
-        ERROR@557..561 "e+_1"
+        ERROR@554..561 "1.0e+_1"
         R_PAREN@561..562 ")"
       R_PAREN@562..563 ")"
     WHITESPACE@563..566 "\n  "
@@ -305,9 +290,7 @@ ROOT@0..1361
         L_PAREN@578..579 "("
         INSTR_NAME@579..588 "f32.const"
         WHITESPACE@588..589 " "
-        OPERAND@589..592
-          FLOAT@589..592 "1.0"
-        ERROR@592..596 "e_+1"
+        ERROR@589..596 "1.0e_+1"
         R_PAREN@596..597 ")"
       R_PAREN@597..598 ")"
     WHITESPACE@598..601 "\n  "
@@ -339,9 +322,7 @@ ROOT@0..1361
         L_PAREN@647..648 "("
         INSTR_NAME@648..657 "f32.const"
         WHITESPACE@657..658 " "
-        OPERAND@658..660
-          INT@658..660 "0_"
-        ERROR@660..664 "x100"
+        ERROR@658..664 "0_x100"
         R_PAREN@664..665 ")"
       R_PAREN@665..666 ")"
     WHITESPACE@666..669 "\n  "
@@ -357,9 +338,7 @@ ROOT@0..1361
         L_PAREN@681..682 "("
         INSTR_NAME@682..691 "f32.const"
         WHITESPACE@691..692 " "
-        OPERAND@692..693
-          FLOAT@692..693 "0"
-        ERROR@693..698 "x_100"
+        ERROR@692..698 "0x_100"
         R_PAREN@698..699 ")"
       R_PAREN@699..700 ")"
     WHITESPACE@700..703 "\n  "
@@ -375,8 +354,7 @@ ROOT@0..1361
         L_PAREN@715..716 "("
         INSTR_NAME@716..725 "f32.const"
         WHITESPACE@725..726 " "
-        OPERAND@726..731
-          INT@726..731 "0x00_"
+        ERROR@726..731 "0x00_"
         R_PAREN@731..732 ")"
       R_PAREN@732..733 ")"
     WHITESPACE@733..736 "\n  "
@@ -409,9 +387,7 @@ ROOT@0..1361
         L_PAREN@786..787 "("
         INSTR_NAME@787..796 "f32.const"
         WHITESPACE@796..797 " "
-        OPERAND@797..798
-          FLOAT@797..798 "0"
-        ERROR@798..803 "x_1.0"
+        ERROR@797..803 "0x_1.0"
         R_PAREN@803..804 ")"
       R_PAREN@804..805 ")"
     WHITESPACE@805..808 "\n  "
@@ -427,8 +403,7 @@ ROOT@0..1361
         L_PAREN@820..821 "("
         INSTR_NAME@821..830 "f32.const"
         WHITESPACE@830..831 " "
-        OPERAND@831..837
-          FLOAT@831..837 "0x1.0_"
+        ERROR@831..837 "0x1.0_"
         R_PAREN@837..838 ")"
       R_PAREN@838..839 ")"
     WHITESPACE@839..842 "\n  "
@@ -444,8 +419,7 @@ ROOT@0..1361
         L_PAREN@854..855 "("
         INSTR_NAME@855..864 "f32.const"
         WHITESPACE@864..865 " "
-        OPERAND@865..871
-          FLOAT@865..871 "0x1_.0"
+        ERROR@865..871 "0x1_.0"
         R_PAREN@871..872 ")"
       R_PAREN@872..873 ")"
     WHITESPACE@873..876 "\n  "
@@ -461,9 +435,7 @@ ROOT@0..1361
         L_PAREN@888..889 "("
         INSTR_NAME@889..898 "f32.const"
         WHITESPACE@898..899 " "
-        OPERAND@899..903
-          FLOAT@899..903 "0x1."
-        ERROR@903..905 "_0"
+        ERROR@899..905 "0x1._0"
         R_PAREN@905..906 ")"
       R_PAREN@906..907 ")"
     WHITESPACE@907..910 "\n  "
@@ -479,9 +451,7 @@ ROOT@0..1361
         L_PAREN@922..923 "("
         INSTR_NAME@923..932 "f32.const"
         WHITESPACE@932..933 " "
-        OPERAND@933..934
-          FLOAT@933..934 "0"
-        ERROR@934..939 "x_1p1"
+        ERROR@933..939 "0x_1p1"
         R_PAREN@939..940 ")"
       R_PAREN@940..941 ")"
     WHITESPACE@941..944 "\n  "
@@ -497,8 +467,7 @@ ROOT@0..1361
         L_PAREN@956..957 "("
         INSTR_NAME@957..966 "f32.const"
         WHITESPACE@966..967 " "
-        OPERAND@967..973
-          FLOAT@967..973 "0x1p1_"
+        ERROR@967..973 "0x1p1_"
         R_PAREN@973..974 ")"
       R_PAREN@974..975 ")"
     WHITESPACE@975..978 "\n  "
@@ -514,8 +483,7 @@ ROOT@0..1361
         L_PAREN@990..991 "("
         INSTR_NAME@991..1000 "f32.const"
         WHITESPACE@1000..1001 " "
-        OPERAND@1001..1007
-          FLOAT@1001..1007 "0x1_p1"
+        ERROR@1001..1007 "0x1_p1"
         R_PAREN@1007..1008 ")"
       R_PAREN@1008..1009 ")"
     WHITESPACE@1009..1012 "\n  "
@@ -531,9 +499,7 @@ ROOT@0..1361
         L_PAREN@1024..1025 "("
         INSTR_NAME@1025..1034 "f32.const"
         WHITESPACE@1034..1035 " "
-        OPERAND@1035..1038
-          FLOAT@1035..1038 "0x1"
-        ERROR@1038..1041 "p_1"
+        ERROR@1035..1041 "0x1p_1"
         R_PAREN@1041..1042 ")"
       R_PAREN@1042..1043 ")"
     WHITESPACE@1043..1046 "\n  "
@@ -549,9 +515,7 @@ ROOT@0..1361
         L_PAREN@1058..1059 "("
         INSTR_NAME@1059..1068 "f32.const"
         WHITESPACE@1068..1069 " "
-        OPERAND@1069..1070
-          FLOAT@1069..1070 "0"
-        ERROR@1070..1077 "x_1.0p1"
+        ERROR@1069..1077 "0x_1.0p1"
         R_PAREN@1077..1078 ")"
       R_PAREN@1078..1079 ")"
     WHITESPACE@1079..1082 "\n  "
@@ -567,8 +531,7 @@ ROOT@0..1361
         L_PAREN@1094..1095 "("
         INSTR_NAME@1095..1104 "f32.const"
         WHITESPACE@1104..1105 " "
-        OPERAND@1105..1113
-          FLOAT@1105..1113 "0x1.0p1_"
+        ERROR@1105..1113 "0x1.0p1_"
         R_PAREN@1113..1114 ")"
       R_PAREN@1114..1115 ")"
     WHITESPACE@1115..1118 "\n  "
@@ -584,8 +547,7 @@ ROOT@0..1361
         L_PAREN@1130..1131 "("
         INSTR_NAME@1131..1140 "f32.const"
         WHITESPACE@1140..1141 " "
-        OPERAND@1141..1149
-          FLOAT@1141..1149 "0x1.0_p1"
+        ERROR@1141..1149 "0x1.0_p1"
         R_PAREN@1149..1150 ")"
       R_PAREN@1150..1151 ")"
     WHITESPACE@1151..1154 "\n  "
@@ -601,9 +563,7 @@ ROOT@0..1361
         L_PAREN@1166..1167 "("
         INSTR_NAME@1167..1176 "f32.const"
         WHITESPACE@1176..1177 " "
-        OPERAND@1177..1182
-          FLOAT@1177..1182 "0x1.0"
-        ERROR@1182..1185 "p_1"
+        ERROR@1177..1185 "0x1.0p_1"
         R_PAREN@1185..1186 ")"
       R_PAREN@1186..1187 ")"
     WHITESPACE@1187..1190 "\n  "
@@ -619,9 +579,7 @@ ROOT@0..1361
         L_PAREN@1202..1203 "("
         INSTR_NAME@1203..1212 "f32.const"
         WHITESPACE@1212..1213 " "
-        OPERAND@1213..1218
-          FLOAT@1213..1218 "0x1.0"
-        ERROR@1218..1222 "p+_1"
+        ERROR@1213..1222 "0x1.0p+_1"
         R_PAREN@1222..1223 ")"
       R_PAREN@1223..1224 ")"
     WHITESPACE@1224..1227 "\n  "
@@ -637,9 +595,7 @@ ROOT@0..1361
         L_PAREN@1239..1240 "("
         INSTR_NAME@1240..1249 "f32.const"
         WHITESPACE@1249..1250 " "
-        OPERAND@1250..1255
-          FLOAT@1250..1255 "0x1.0"
-        ERROR@1255..1259 "p_+1"
+        ERROR@1250..1259 "0x1.0p_+1"
         R_PAREN@1259..1260 ")"
       R_PAREN@1260..1261 ")"
     WHITESPACE@1261..1264 "\n  "
@@ -660,9 +616,7 @@ ROOT@0..1361
         L_PAREN@1283..1284 "("
         INSTR_NAME@1284..1293 "i32.const"
         WHITESPACE@1293..1294 " "
-        OPERAND@1294..1297
-          FLOAT@1294..1297 "nan"
-        ERROR@1297..1308 ":arithmetic"
+        ERROR@1294..1308 "nan:arithmetic"
         R_PAREN@1308..1309 ")"
       R_PAREN@1309..1310 ")"
     WHITESPACE@1310..1313 "\n  "
@@ -683,9 +637,7 @@ ROOT@0..1361
         L_PAREN@1332..1333 "("
         INSTR_NAME@1333..1342 "i32.const"
         WHITESPACE@1342..1343 " "
-        OPERAND@1343..1346
-          FLOAT@1343..1346 "nan"
-        ERROR@1346..1356 ":canonical"
+        ERROR@1343..1356 "nan:canonical"
         R_PAREN@1356..1357 ")"
       R_PAREN@1357..1358 ")"
     WHITESPACE@1358..1359 "\n"
@@ -711,9 +663,27 @@ error: expected operand
   │                           ^^^^
 
 error: expected operand
+  ┌─ float-literals-malformed.wat:5:26
+  │
+5 │   (global f32 (f32.const 99_))
+  │                          ^^^
+
+error: expected operand
   ┌─ float-literals-malformed.wat:6:26
   │
 6 │   (global f32 (f32.const _1.0))
+  │                          ^^^^
+
+error: expected operand
+  ┌─ float-literals-malformed.wat:7:26
+  │
+7 │   (global f32 (f32.const 1.0_))
+  │                          ^^^^
+
+error: expected operand
+  ┌─ float-literals-malformed.wat:8:26
+  │
+8 │   (global f32 (f32.const 1_.0))
   │                          ^^^^
 
 error: expected operand
@@ -729,6 +699,18 @@ error: expected operand
    │                          ^^^^
 
 error: expected operand
+   ┌─ float-literals-malformed.wat:11:26
+   │
+11 │   (global f32 (f32.const 1e1_))
+   │                          ^^^^
+
+error: expected operand
+   ┌─ float-literals-malformed.wat:12:26
+   │
+12 │   (global f32 (f32.const 1_e1))
+   │                          ^^^^
+
+error: expected operand
    ┌─ float-literals-malformed.wat:13:27
    │
 13 │   (global f32 (f32.const 1e_1))
@@ -738,6 +720,18 @@ error: expected operand
    ┌─ float-literals-malformed.wat:14:26
    │
 14 │   (global f32 (f32.const _1.0e1))
+   │                          ^^^^^^
+
+error: expected operand
+   ┌─ float-literals-malformed.wat:15:26
+   │
+15 │   (global f32 (f32.const 1.0e1_))
+   │                          ^^^^^^
+
+error: expected operand
+   ┌─ float-literals-malformed.wat:16:26
+   │
+16 │   (global f32 (f32.const 1.0_e1))
    │                          ^^^^^^
 
 error: expected operand
@@ -777,10 +771,28 @@ error: expected operand
    │                           ^^^^^
 
 error: expected operand
+   ┌─ float-literals-malformed.wat:23:26
+   │
+23 │   (global f32 (f32.const 0x00_))
+   │                          ^^^^^
+
+error: expected operand
    ┌─ float-literals-malformed.wat:25:27
    │
 25 │   (global f32 (f32.const 0x_1.0))
    │                           ^^^^^
+
+error: expected operand
+   ┌─ float-literals-malformed.wat:26:26
+   │
+26 │   (global f32 (f32.const 0x1.0_))
+   │                          ^^^^^^
+
+error: expected operand
+   ┌─ float-literals-malformed.wat:27:26
+   │
+27 │   (global f32 (f32.const 0x1_.0))
+   │                          ^^^^^^
 
 error: expected operand
    ┌─ float-literals-malformed.wat:28:30
@@ -795,6 +807,18 @@ error: expected operand
    │                           ^^^^^
 
 error: expected operand
+   ┌─ float-literals-malformed.wat:30:26
+   │
+30 │   (global f32 (f32.const 0x1p1_))
+   │                          ^^^^^^
+
+error: expected operand
+   ┌─ float-literals-malformed.wat:31:26
+   │
+31 │   (global f32 (f32.const 0x1_p1))
+   │                          ^^^^^^
+
+error: expected operand
    ┌─ float-literals-malformed.wat:32:29
    │
 32 │   (global f32 (f32.const 0x1p_1))
@@ -805,6 +829,18 @@ error: expected operand
    │
 33 │   (global f32 (f32.const 0x_1.0p1))
    │                           ^^^^^^^
+
+error: expected operand
+   ┌─ float-literals-malformed.wat:34:26
+   │
+34 │   (global f32 (f32.const 0x1.0p1_))
+   │                          ^^^^^^^^
+
+error: expected operand
+   ┌─ float-literals-malformed.wat:35:26
+   │
+35 │   (global f32 (f32.const 0x1.0_p1))
+   │                          ^^^^^^^^
 
 error: expected operand
    ┌─ float-literals-malformed.wat:36:31

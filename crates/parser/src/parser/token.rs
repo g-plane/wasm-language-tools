@@ -147,7 +147,7 @@ fn int_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
     (
         opt(one_of(['+', '-'])),
         unsigned_int_impl,
-        peek(none_of(['.', 'e', 'E', 'p', 'P'])),
+        peek(none_of(is_id_char)),
     )
         .take()
         .parse_next(input)
@@ -164,6 +164,7 @@ pub(super) fn unsigned_int_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, S
         None => unsigned_dec,
     }
     .take()
+    .verify(|text: &str| !text.ends_with('_'))
     .parse_next(input)
 }
 fn unsigned_hex<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
@@ -192,26 +193,39 @@ fn float_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
         alt((
             (
                 "0x",
-                alt((
-                    (unsigned_hex, opt(('.', opt(unsigned_hex)))).void(),
-                    ('.', unsigned_hex).void(),
-                )),
+                (unsigned_hex, opt(('.', opt(unsigned_hex)))),
                 opt((one_of(['p', 'P']), opt(one_of(['+', '-'])), unsigned_dec)),
             )
                 .void(),
             (
-                alt((
-                    (unsigned_dec, opt(('.', opt(unsigned_dec)))).void(),
-                    ('.', unsigned_dec).void(),
-                )),
+                (unsigned_dec, opt(('.', opt(unsigned_dec)))),
                 opt((one_of(['e', 'E']), opt(one_of(['+', '-'])), unsigned_dec)),
             )
                 .void(),
             "inf".void(),
             ("nan", opt((":0x", unsigned_hex))).void(),
         )),
+        peek(none_of(is_id_char)),
     )
         .take()
+        .verify(|text: &str| {
+            let is_hex = text.starts_with("0x");
+            let mut chars = text.chars();
+            while let Some(c) = chars.next() {
+                if c == '_'
+                    && !chars.next().is_some_and(|c| {
+                        if is_hex {
+                            c.is_ascii_hexdigit()
+                        } else {
+                            c.is_ascii_digit()
+                        }
+                    })
+                {
+                    return false;
+                }
+            }
+            true
+        })
         .parse_next(input)
 }
 
@@ -220,11 +234,10 @@ pub(super) fn error_token<'s>(
 ) -> impl Parser<Input<'s>, GreenElement, SyntaxError> {
     dispatch! {peek(any);
         '$' => ident_impl,
-        '0'..='9' => alt((float_impl, int_impl, unsigned_int_impl)),
         '(' | ')' if allow_parens => alt(("(", ")")),
         '(' | ')' => fail,
-        c if is_id_char(c) => take_while(1.., is_id_char),
         '"' => string_impl,
+        c if is_id_char(c) => take_while(1.., is_id_char),
         _ => take_till(1.., |c: char| c == '(' || c == ')' || c.is_ascii_whitespace()),
     }
     .map(|text| tok(ERROR, text))

@@ -66,8 +66,7 @@ ROOT@0..346
         L_PAREN@120..121 "("
         INSTR_NAME@121..130 "i32.const"
         WHITESPACE@130..131 " "
-        OPERAND@131..134
-          INT@131..134 "99_"
+        ERROR@131..134 "99_"
         R_PAREN@134..135 ")"
       R_PAREN@135..136 ")"
     WHITESPACE@136..139 "\n  "
@@ -116,9 +115,7 @@ ROOT@0..346
         L_PAREN@219..220 "("
         INSTR_NAME@220..229 "i32.const"
         WHITESPACE@229..230 " "
-        OPERAND@230..232
-          INT@230..232 "0_"
-        ERROR@232..236 "x100"
+        ERROR@230..236 "0_x100"
         R_PAREN@236..237 ")"
       R_PAREN@237..238 ")"
     WHITESPACE@238..241 "\n  "
@@ -134,9 +131,7 @@ ROOT@0..346
         L_PAREN@253..254 "("
         INSTR_NAME@254..263 "i32.const"
         WHITESPACE@263..264 " "
-        OPERAND@264..265
-          FLOAT@264..265 "0"
-        ERROR@265..270 "x_100"
+        ERROR@264..270 "0x_100"
         R_PAREN@270..271 ")"
       R_PAREN@271..272 ")"
     WHITESPACE@272..275 "\n  "
@@ -152,8 +147,7 @@ ROOT@0..346
         L_PAREN@287..288 "("
         INSTR_NAME@288..297 "i32.const"
         WHITESPACE@297..298 " "
-        OPERAND@298..303
-          INT@298..303 "0x00_"
+        ERROR@298..303 "0x00_"
         R_PAREN@303..304 ")"
       R_PAREN@304..305 ")"
     WHITESPACE@305..308 "\n  "
@@ -196,6 +190,12 @@ error: expected operand
   │                           ^^^^
 
 error: expected operand
+  ┌─ int-literals-malformed.wat:5:26
+  │
+5 │   (global i32 (i32.const 99_))
+  │                          ^^^
+
+error: expected operand
   ┌─ int-literals-malformed.wat:7:26
   │
 7 │   (global i32 (i32.const _0x100))
@@ -212,3 +212,9 @@ error: expected operand
   │
 9 │   (global i32 (i32.const 0x_100))
   │                           ^^^^^
+
+error: expected operand
+   ┌─ int-literals-malformed.wat:10:26
+   │
+10 │   (global i32 (i32.const 0x00_))
+   │                          ^^^^^
