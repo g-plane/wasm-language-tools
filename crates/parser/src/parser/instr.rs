@@ -47,12 +47,13 @@ fn block_block(input: &mut Input) -> GreenResult {
             opt(trivias_prefixed(block_type)),
             repeat_till::<_, _, Vec<_>, _, _, _, _>(
                 0..,
-                retry(instr, []),
-                trivias_prefixed(keyword("end")),
+                retry_once(instr, []),
+                peek((trivias, alt((word.verify(|word: &str| word == "end"), ")")))),
             ),
+            resume(keyword("end")),
             opt(trivias_prefixed(ident)),
         )
-            .map(|(keyword, label, block_type, (instrs, mut end), id)| {
+            .map(|(keyword, label, block_type, (instrs, _), end, id)| {
                 let mut children = Vec::with_capacity(6);
                 children.push(keyword);
                 if let Some(mut label) = label {
@@ -64,7 +65,9 @@ fn block_block(input: &mut Input) -> GreenResult {
                 instrs
                     .into_iter()
                     .for_each(|mut instr| children.append(&mut instr));
-                children.append(&mut end);
+                if let Some(mut end) = end {
+                    children.append(&mut end);
+                }
                 if let Some(mut id) = id {
                     children.append(&mut id);
                 }
@@ -112,11 +115,15 @@ fn block_loop(input: &mut Input) -> GreenResult {
             keyword("loop"),
             opt(trivias_prefixed(ident)),
             opt(trivias_prefixed(block_type)),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
+            repeat_till::<_, _, Vec<_>, _, _, _, _>(
+                0..,
+                retry_once(instr, []),
+                peek((trivias, alt((word.verify(|word: &str| word == "end"), ")")))),
+            ),
             resume(keyword("end")),
             opt(trivias_prefixed(ident)),
         )
-            .map(|(keyword, label, block_type, instrs, end, id)| {
+            .map(|(keyword, label, block_type, (instrs, _), end, id)| {
                 let mut children = Vec::with_capacity(6);
                 children.push(keyword);
                 if let Some(mut label) = label {
@@ -178,18 +185,29 @@ fn block_if(input: &mut Input) -> GreenResult {
             keyword("if"),
             opt(trivias_prefixed(ident)),
             opt(trivias_prefixed(block_type)),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
+            repeat_till::<_, _, Vec<_>, _, _, _, _>(
+                0..,
+                retry_once(instr, []),
+                peek((
+                    trivias,
+                    alt((word.verify(|word| matches!(word, "end" | "else")), ")")),
+                )),
+            ),
             opt((
                 trivias,
                 keyword("else"),
                 opt(trivias_prefixed(ident)),
-                repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
+                repeat_till::<_, _, Vec<_>, _, _, _, _>(
+                    0..,
+                    retry_once(instr, []),
+                    peek((trivias, alt((word.verify(|word: &str| word == "end"), ")")))),
+                ),
             )),
             resume(keyword("end")),
             opt(trivias_prefixed(ident)),
         )
             .map(
-                |(keyword, label, block_type, instrs, else_branch, end, id)| {
+                |(keyword, label, block_type, (instrs, _), else_branch, end, id)| {
                     let mut children = Vec::with_capacity(6);
                     children.push(keyword);
                     if let Some(mut label) = label {
@@ -205,7 +223,7 @@ fn block_if(input: &mut Input) -> GreenResult {
                             .flat_map(|instr| instr.into_iter())
                             .collect::<Vec<_>>(),
                     ));
-                    if let Some((mut trivias, keyword, id, instrs)) = else_branch {
+                    if let Some((mut trivias, keyword, id, (instrs, _))) = else_branch {
                         children.append(&mut trivias);
                         let mut else_children = Vec::with_capacity(3);
                         else_children.push(keyword);
