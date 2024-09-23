@@ -166,8 +166,7 @@ fn module_field_func(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("func")),
         opt(trivias_prefixed(ident)),
-        opt(trivias_prefixed(import)), // postpone syntax error for using import with export or instr
-        repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(export)),
+        repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(alt((import, export)))), // postpone syntax error for using import with export or instr
         opt(trivias_prefixed(type_use)),
         repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(local)),
         repeat::<_, _, Vec<_>, _, _>(0.., retry_once(instr, [])),
@@ -175,19 +174,16 @@ fn module_field_func(input: &mut Input) -> GreenResult {
     )
         .parse_next(input)
         .map(
-            |(l_paren, mut keyword, id, import, exports, type_use, locals, instrs, r_paren)| {
+            |(l_paren, mut keyword, id, imports_or_exports, type_use, locals, instrs, r_paren)| {
                 let mut children = Vec::with_capacity(7);
                 children.push(l_paren);
                 children.append(&mut keyword);
                 if let Some(mut id) = id {
                     children.append(&mut id);
                 }
-                if let Some(mut import) = import {
-                    children.append(&mut import);
-                }
-                exports
+                imports_or_exports
                     .into_iter()
-                    .for_each(|mut export| children.append(&mut export));
+                    .for_each(|mut import_or_export| children.append(&mut import_or_export));
                 if let Some(mut type_use) = type_use {
                     children.append(&mut type_use);
                 }
