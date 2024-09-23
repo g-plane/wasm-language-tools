@@ -3,7 +3,7 @@ use crate::error::SyntaxError;
 use wat_syntax::SyntaxKind::*;
 use winnow::{
     ascii::{hex_digit0, line_ending, multispace1, take_escaped, till_line_ending},
-    combinator::{alt, dispatch, empty, eof, fail, opt, peek, repeat, repeat_till},
+    combinator::{alt, dispatch, empty, eof, fail, not, opt, peek, repeat, repeat_till},
     error::{StrContext, StrContextValue},
     stream::AsChar,
     token::{any, none_of, one_of, take_till, take_until, take_while},
@@ -246,21 +246,52 @@ pub(super) fn error_token<'s>(
 pub(super) fn error_term<'s, const N: usize>(
     allowed_names: [&'static str; N],
 ) -> impl Parser<Input<'s>, Vec<GreenElement>, SyntaxError> {
-    repeat_till::<_, _, Vec<_>, _, _, _, _>(
-        1..,
-        alt((
-            ws,
-            line_comment,
-            block_comment,
-            error_token(false),
-            '('.map(|_| tok(ERROR, "(")),
-        )),
-        peek((
+    (
+        peek(not((
             trivias,
             '(',
             trivias,
             word.verify(move |word| allowed_names.contains(word)),
-        )),
+        ))),
+        error_term_inner,
     )
-    .map(|(tokens, _)| tokens)
+        .map(|(_, tokens)| tokens)
+}
+fn error_term_inner(input: &mut Input) -> PResult<Vec<GreenElement>, SyntaxError> {
+    (
+        '('.map(|_| tok(ERROR, "(")),
+        repeat(
+            0..,
+            (
+                trivias,
+                dispatch! {peek(opt('('));
+                    Some(..) => error_term_inner.map(TermItem::Multi),
+                    None => error_token(false).map(TermItem::Single),
+                },
+            ),
+        )
+        .fold(Vec::<GreenElement>::new, |mut acc, (mut trivias, item)| {
+            acc.append(&mut trivias);
+            match item {
+                TermItem::Single(token) => acc.push(token),
+                TermItem::Multi(mut tokens) => acc.append(&mut tokens),
+            }
+            acc
+        }),
+        opt(')'.map(|_| tok(ERROR, ")"))),
+    )
+        .parse_next(input)
+        .map(|(l_paren, mut tokens, r_paren)| {
+            let mut children = Vec::with_capacity(3);
+            children.push(l_paren);
+            children.append(&mut tokens);
+            if let Some(r_paren) = r_paren {
+                children.push(r_paren);
+            }
+            children
+        })
+}
+enum TermItem {
+    Single(GreenElement),
+    Multi(Vec<GreenElement>),
 }
