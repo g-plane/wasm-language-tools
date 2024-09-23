@@ -1,0 +1,479 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..1081
+  MODULE@0..1080
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    LINE_COMMENT@10..22 ";; Functions"
+    WHITESPACE@22..25 "\n  "
+    MODULE_FIELD_IMPORT@25..75
+      L_PAREN@25..26 "("
+      KEYWORD@26..32 "import"
+      WHITESPACE@32..33 " "
+      MODULE_NAME@33..43
+        STRING@33..43 "\"spectest\""
+      WHITESPACE@43..44 " "
+      NAME@44..55
+        STRING@44..55 "\"print_i32\""
+      WHITESPACE@55..56 " "
+      IMPORT_DESC_TYPE_USE@56..74
+        L_PAREN@56..57 "("
+        KEYWORD@57..61 "func"
+        WHITESPACE@61..62 " "
+        TYPE_USE@62..73
+          PARAM@62..73
+            L_PAREN@62..63 "("
+            KEYWORD@63..68 "param"
+            WHITESPACE@68..69 " "
+            VAL_TYPE@69..72
+              NUM_TYPE@69..72 "i32"
+            R_PAREN@72..73 ")"
+        R_PAREN@73..74 ")"
+      R_PAREN@74..75 ")"
+    WHITESPACE@75..78 "\n  "
+    MODULE_FIELD_FUNC@78..128
+      L_PAREN@78..79 "("
+      KEYWORD@79..83 "func"
+      WHITESPACE@83..84 " "
+      IMPORT@84..115
+        L_PAREN@84..85 "("
+        KEYWORD@85..91 "import"
+        WHITESPACE@91..92 " "
+        MODULE_NAME@92..102
+          STRING@92..102 "\"spectest\""
+        WHITESPACE@102..103 " "
+        NAME@103..114
+          STRING@103..114 "\"print_i64\""
+        R_PAREN@114..115 ")"
+      WHITESPACE@115..116 " "
+      TYPE_USE@116..127
+        PARAM@116..127
+          L_PAREN@116..117 "("
+          KEYWORD@117..122 "param"
+          WHITESPACE@122..123 " "
+          VAL_TYPE@123..126
+            NUM_TYPE@123..126 "i64"
+          R_PAREN@126..127 ")"
+      R_PAREN@127..128 ")"
+    WHITESPACE@128..131 "\n  "
+    MODULE_FIELD_IMPORT@131..192
+      L_PAREN@131..132 "("
+      KEYWORD@132..138 "import"
+      WHITESPACE@138..139 " "
+      MODULE_NAME@139..149
+        STRING@139..149 "\"spectest\""
+      WHITESPACE@149..150 " "
+      NAME@150..161
+        STRING@150..161 "\"print_i32\""
+      WHITESPACE@161..162 " "
+      IMPORT_DESC_TYPE_USE@162..191
+        L_PAREN@162..163 "("
+        KEYWORD@163..167 "func"
+        WHITESPACE@167..168 " "
+        IDENT@168..178 "$print_i32"
+        WHITESPACE@178..179 " "
+        TYPE_USE@179..190
+          PARAM@179..190
+            L_PAREN@179..180 "("
+            KEYWORD@180..185 "param"
+            WHITESPACE@185..186 " "
+            VAL_TYPE@186..189
+              NUM_TYPE@186..189 "i32"
+            R_PAREN@189..190 ")"
+        R_PAREN@190..191 ")"
+      R_PAREN@191..192 ")"
+    WHITESPACE@192..195 "\n  "
+    MODULE_FIELD_FUNC@195..258
+      L_PAREN@195..196 "("
+      KEYWORD@196..200 "func"
+      WHITESPACE@200..201 " "
+      IDENT@201..213 "$print_i32-2"
+      WHITESPACE@213..214 " "
+      IMPORT@214..245
+        L_PAREN@214..215 "("
+        KEYWORD@215..221 "import"
+        WHITESPACE@221..222 " "
+        MODULE_NAME@222..232
+          STRING@222..232 "\"spectest\""
+        WHITESPACE@232..233 " "
+        NAME@233..244
+          STRING@233..244 "\"print_i32\""
+        R_PAREN@244..245 ")"
+      WHITESPACE@245..246 " "
+      TYPE_USE@246..257
+        PARAM@246..257
+          L_PAREN@246..247 "("
+          KEYWORD@247..252 "param"
+          WHITESPACE@252..253 " "
+          VAL_TYPE@253..256
+            NUM_TYPE@253..256 "i32"
+          R_PAREN@256..257 ")"
+      R_PAREN@257..258 ")"
+    WHITESPACE@258..262 "\n\n  "
+    MODULE_FIELD_FUNC@262..326
+      L_PAREN@262..263 "("
+      KEYWORD@263..267 "func"
+      WHITESPACE@267..268 " "
+      EXPORT@268..281
+        L_PAREN@268..269 "("
+        KEYWORD@269..275 "export"
+        WHITESPACE@275..276 " "
+        NAME@276..280
+          STRING@276..280 "\"p1\""
+        R_PAREN@280..281 ")"
+      WHITESPACE@281..282 " "
+      IMPORT@282..313
+        L_PAREN@282..283 "("
+        KEYWORD@283..289 "import"
+        WHITESPACE@289..290 " "
+        MODULE_NAME@290..300
+          STRING@290..300 "\"spectest\""
+        WHITESPACE@300..301 " "
+        NAME@301..312
+          STRING@301..312 "\"print_i32\""
+        R_PAREN@312..313 ")"
+      WHITESPACE@313..314 " "
+      TYPE_USE@314..325
+        PARAM@314..325
+          L_PAREN@314..315 "("
+          KEYWORD@315..320 "param"
+          WHITESPACE@320..321 " "
+          VAL_TYPE@321..324
+            NUM_TYPE@321..324 "i32"
+          R_PAREN@324..325 ")"
+      R_PAREN@325..326 ")"
+    WHITESPACE@326..329 "\n  "
+    MODULE_FIELD_FUNC@329..396
+      L_PAREN@329..330 "("
+      KEYWORD@330..334 "func"
+      WHITESPACE@334..335 " "
+      IDENT@335..337 "$p"
+      WHITESPACE@337..338 " "
+      EXPORT@338..351
+        L_PAREN@338..339 "("
+        KEYWORD@339..345 "export"
+        WHITESPACE@345..346 " "
+        NAME@346..350
+          STRING@346..350 "\"p2\""
+        R_PAREN@350..351 ")"
+      WHITESPACE@351..352 " "
+      IMPORT@352..383
+        L_PAREN@352..353 "("
+        KEYWORD@353..359 "import"
+        WHITESPACE@359..360 " "
+        MODULE_NAME@360..370
+          STRING@360..370 "\"spectest\""
+        WHITESPACE@370..371 " "
+        NAME@371..382
+          STRING@371..382 "\"print_i32\""
+        R_PAREN@382..383 ")"
+      WHITESPACE@383..384 " "
+      TYPE_USE@384..395
+        PARAM@384..395
+          L_PAREN@384..385 "("
+          KEYWORD@385..390 "param"
+          WHITESPACE@390..391 " "
+          VAL_TYPE@391..394
+            NUM_TYPE@391..394 "i32"
+          R_PAREN@394..395 ")"
+      R_PAREN@395..396 ")"
+    WHITESPACE@396..399 "\n  "
+    MODULE_FIELD_FUNC@399..477
+      L_PAREN@399..400 "("
+      KEYWORD@400..404 "func"
+      WHITESPACE@404..405 " "
+      EXPORT@405..418
+        L_PAREN@405..406 "("
+        KEYWORD@406..412 "export"
+        WHITESPACE@412..413 " "
+        NAME@413..417
+          STRING@413..417 "\"p3\""
+        R_PAREN@417..418 ")"
+      WHITESPACE@418..419 " "
+      EXPORT@419..432
+        L_PAREN@419..420 "("
+        KEYWORD@420..426 "export"
+        WHITESPACE@426..427 " "
+        NAME@427..431
+          STRING@427..431 "\"p4\""
+        R_PAREN@431..432 ")"
+      WHITESPACE@432..433 " "
+      IMPORT@433..464
+        L_PAREN@433..434 "("
+        KEYWORD@434..440 "import"
+        WHITESPACE@440..441 " "
+        MODULE_NAME@441..451
+          STRING@441..451 "\"spectest\""
+        WHITESPACE@451..452 " "
+        NAME@452..463
+          STRING@452..463 "\"print_i32\""
+        R_PAREN@463..464 ")"
+      WHITESPACE@464..465 " "
+      TYPE_USE@465..476
+        PARAM@465..476
+          L_PAREN@465..466 "("
+          KEYWORD@466..471 "param"
+          WHITESPACE@471..472 " "
+          VAL_TYPE@472..475
+            NUM_TYPE@472..475 "i32"
+          R_PAREN@475..476 ")"
+      R_PAREN@476..477 ")"
+    WHITESPACE@477..481 "\n\n  "
+    MODULE_FIELD_IMPORT@481..535
+      L_PAREN@481..482 "("
+      KEYWORD@482..488 "import"
+      WHITESPACE@488..489 " "
+      MODULE_NAME@489..499
+        STRING@489..499 "\"spectest\""
+      WHITESPACE@499..500 " "
+      NAME@500..511
+        STRING@500..511 "\"print_i32\""
+      WHITESPACE@511..512 " "
+      IMPORT_DESC_TYPE_USE@512..534
+        L_PAREN@512..513 "("
+        KEYWORD@513..517 "func"
+        WHITESPACE@517..518 " "
+        TYPE_USE@518..533
+          L_PAREN@518..519 "("
+          KEYWORD@519..523 "type"
+          WHITESPACE@523..524 " "
+          INDEX@524..532
+            IDENT@524..532 "$forward"
+          R_PAREN@532..533 ")"
+        R_PAREN@533..534 ")"
+      R_PAREN@534..535 ")"
+    WHITESPACE@535..539 "\n\n  "
+    LINE_COMMENT@539..549 ";; Globals"
+    WHITESPACE@549..552 "\n  "
+    MODULE_FIELD_IMPORT@552..597
+      L_PAREN@552..553 "("
+      KEYWORD@553..559 "import"
+      WHITESPACE@559..560 " "
+      MODULE_NAME@560..570
+        STRING@560..570 "\"spectest\""
+      WHITESPACE@570..571 " "
+      NAME@571..583
+        STRING@571..583 "\"global_i32\""
+      WHITESPACE@583..584 " "
+      IMPORT_DESC_GLOBAL_TYPE@584..596
+        L_PAREN@584..585 "("
+        KEYWORD@585..591 "global"
+        WHITESPACE@591..592 " "
+        GLOBAL_TYPE@592..595
+          VAL_TYPE@592..595
+            NUM_TYPE@592..595 "i32"
+        R_PAREN@595..596 ")"
+      R_PAREN@596..597 ")"
+    WHITESPACE@597..600 "\n  "
+    MODULE_FIELD_GLOBAL@600..645
+      L_PAREN@600..601 "("
+      KEYWORD@601..607 "global"
+      WHITESPACE@607..608 " "
+      IMPORT@608..640
+        L_PAREN@608..609 "("
+        KEYWORD@609..615 "import"
+        WHITESPACE@615..616 " "
+        MODULE_NAME@616..626
+          STRING@616..626 "\"spectest\""
+        WHITESPACE@626..627 " "
+        NAME@627..639
+          STRING@627..639 "\"global_i32\""
+        R_PAREN@639..640 ")"
+      WHITESPACE@640..641 " "
+      GLOBAL_TYPE@641..644
+        VAL_TYPE@641..644
+          NUM_TYPE@641..644 "i32"
+      R_PAREN@644..645 ")"
+    WHITESPACE@645..649 "\n\n  "
+    MODULE_FIELD_IMPORT@649..697
+      L_PAREN@649..650 "("
+      KEYWORD@650..656 "import"
+      WHITESPACE@656..657 " "
+      MODULE_NAME@657..667
+        STRING@657..667 "\"spectest\""
+      WHITESPACE@667..668 " "
+      NAME@668..680
+        STRING@668..680 "\"global_i32\""
+      WHITESPACE@680..681 " "
+      IMPORT_DESC_GLOBAL_TYPE@681..696
+        L_PAREN@681..682 "("
+        KEYWORD@682..688 "global"
+        WHITESPACE@688..689 " "
+        IDENT@689..691 "$x"
+        WHITESPACE@691..692 " "
+        GLOBAL_TYPE@692..695
+          VAL_TYPE@692..695
+            NUM_TYPE@692..695 "i32"
+        R_PAREN@695..696 ")"
+      R_PAREN@696..697 ")"
+    WHITESPACE@697..700 "\n  "
+    MODULE_FIELD_GLOBAL@700..748
+      L_PAREN@700..701 "("
+      KEYWORD@701..707 "global"
+      WHITESPACE@707..708 " "
+      IDENT@708..710 "$y"
+      WHITESPACE@710..711 " "
+      IMPORT@711..743
+        L_PAREN@711..712 "("
+        KEYWORD@712..718 "import"
+        WHITESPACE@718..719 " "
+        MODULE_NAME@719..729
+          STRING@719..729 "\"spectest\""
+        WHITESPACE@729..730 " "
+        NAME@730..742
+          STRING@730..742 "\"global_i32\""
+        R_PAREN@742..743 ")"
+      WHITESPACE@743..744 " "
+      GLOBAL_TYPE@744..747
+        VAL_TYPE@744..747
+          NUM_TYPE@744..747 "i32"
+      R_PAREN@747..748 ")"
+    WHITESPACE@748..752 "\n\n  "
+    LINE_COMMENT@752..761 ";; Tables"
+    WHITESPACE@761..764 "\n  "
+    MODULE_FIELD_IMPORT@764..818
+      L_PAREN@764..765 "("
+      KEYWORD@765..771 "import"
+      WHITESPACE@771..772 " "
+      MODULE_NAME@772..782
+        STRING@772..782 "\"spectest\""
+      WHITESPACE@782..783 " "
+      NAME@783..790
+        STRING@783..790 "\"table\""
+      WHITESPACE@790..791 " "
+      IMPORT_DESC_TABLE_TYPE@791..817
+        L_PAREN@791..792 "("
+        KEYWORD@792..797 "table"
+        WHITESPACE@797..798 " "
+        IDENT@798..802 "$tab"
+        WHITESPACE@802..803 " "
+        TABLE_TYPE@803..816
+          LIMITS@803..808
+            UNSIGNED_INT@803..805 "10"
+            WHITESPACE@805..806 " "
+            UNSIGNED_INT@806..808 "20"
+          WHITESPACE@808..809 " "
+          REF_TYPE@809..816 "funcref"
+        R_PAREN@816..817 ")"
+      R_PAREN@817..818 ")"
+    WHITESPACE@818..821 "\n  "
+    MODULE_FIELD_TABLE@821..875
+      L_PAREN@821..822 "("
+      KEYWORD@822..827 "table"
+      WHITESPACE@827..828 " "
+      IDENT@828..832 "$tab"
+      WHITESPACE@832..833 " "
+      IMPORT@833..860
+        L_PAREN@833..834 "("
+        KEYWORD@834..840 "import"
+        WHITESPACE@840..841 " "
+        MODULE_NAME@841..851
+          STRING@841..851 "\"spectest\""
+        WHITESPACE@851..852 " "
+        NAME@852..859
+          STRING@852..859 "\"table\""
+        R_PAREN@859..860 ")"
+      WHITESPACE@860..861 " "
+      TABLE_TYPE@861..874
+        LIMITS@861..866
+          UNSIGNED_INT@861..863 "10"
+          WHITESPACE@863..864 " "
+          UNSIGNED_INT@864..866 "20"
+        WHITESPACE@866..867 " "
+        REF_TYPE@867..874 "funcref"
+      R_PAREN@874..875 ")"
+    WHITESPACE@875..878 "\n  "
+    MODULE_FIELD_IMPORT@878..927
+      L_PAREN@878..879 "("
+      KEYWORD@879..885 "import"
+      WHITESPACE@885..886 " "
+      MODULE_NAME@886..892
+        STRING@886..892 "\"test\""
+      WHITESPACE@892..893 " "
+      NAME@893..907
+        STRING@893..907 "\"table-10-inf\""
+      WHITESPACE@907..908 " "
+      IMPORT_DESC_TABLE_TYPE@908..926
+        L_PAREN@908..909 "("
+        KEYWORD@909..914 "table"
+        WHITESPACE@914..915 " "
+        TABLE_TYPE@915..925
+          LIMITS@915..917
+            UNSIGNED_INT@915..917 "10"
+          WHITESPACE@917..918 " "
+          REF_TYPE@918..925 "funcref"
+        R_PAREN@925..926 ")"
+      R_PAREN@926..927 ")"
+    WHITESPACE@927..930 "\n  "
+    MODULE_FIELD_IMPORT@930..975
+      L_PAREN@930..931 "("
+      KEYWORD@931..937 "import"
+      WHITESPACE@937..938 " "
+      MODULE_NAME@938..948
+        STRING@938..948 "\"spectest\""
+      WHITESPACE@948..949 " "
+      NAME@949..956
+        STRING@949..956 "\"table\""
+      WHITESPACE@956..957 " "
+      IMPORT_DESC_TABLE_TYPE@957..974
+        L_PAREN@957..958 "("
+        KEYWORD@958..963 "table"
+        WHITESPACE@963..964 " "
+        TABLE_TYPE@964..973
+          LIMITS@964..965
+            UNSIGNED_INT@964..965 "0"
+          WHITESPACE@965..966 " "
+          REF_TYPE@966..973 "funcref"
+        R_PAREN@973..974 ")"
+      R_PAREN@974..975 ")"
+    WHITESPACE@975..979 "\n\n  "
+    LINE_COMMENT@979..990 ";; Memories"
+    WHITESPACE@990..993 "\n  "
+    MODULE_FIELD_IMPORT@993..1034
+      L_PAREN@993..994 "("
+      KEYWORD@994..1000 "import"
+      WHITESPACE@1000..1001 " "
+      MODULE_NAME@1001..1011
+        STRING@1001..1011 "\"spectest\""
+      WHITESPACE@1011..1012 " "
+      NAME@1012..1020
+        STRING@1012..1020 "\"memory\""
+      WHITESPACE@1020..1021 " "
+      IMPORT_DESC_MEMORY_TYPE@1021..1033
+        L_PAREN@1021..1022 "("
+        KEYWORD@1022..1028 "memory"
+        WHITESPACE@1028..1029 " "
+        MEMORY_TYPE@1029..1032
+          LIMITS@1029..1032
+            UNSIGNED_INT@1029..1030 "1"
+            WHITESPACE@1030..1031 " "
+            UNSIGNED_INT@1031..1032 "2"
+        R_PAREN@1032..1033 ")"
+      R_PAREN@1033..1034 ")"
+    WHITESPACE@1034..1037 "\n  "
+    MODULE_FIELD_MEMORY@1037..1078
+      L_PAREN@1037..1038 "("
+      KEYWORD@1038..1044 "memory"
+      WHITESPACE@1044..1045 " "
+      IMPORT@1045..1073
+        L_PAREN@1045..1046 "("
+        KEYWORD@1046..1052 "import"
+        WHITESPACE@1052..1053 " "
+        MODULE_NAME@1053..1063
+          STRING@1053..1063 "\"spectest\""
+        WHITESPACE@1063..1064 " "
+        NAME@1064..1072
+          STRING@1064..1072 "\"memory\""
+        R_PAREN@1072..1073 ")"
+      WHITESPACE@1073..1074 " "
+      MEMORY_TYPE@1074..1077
+        LIMITS@1074..1077
+          UNSIGNED_INT@1074..1075 "1"
+          WHITESPACE@1075..1076 " "
+          UNSIGNED_INT@1076..1077 "2"
+      R_PAREN@1077..1078 ")"
+    WHITESPACE@1078..1079 "\n"
+    R_PAREN@1079..1080 ")"
+  WHITESPACE@1080..1081 "\n"
