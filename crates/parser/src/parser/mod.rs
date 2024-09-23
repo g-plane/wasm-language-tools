@@ -59,7 +59,7 @@ where
 
 fn root(input: &mut Input) -> PResult<SyntaxNode, SyntaxError> {
     (
-        repeat::<_, _, Vec<_>, _, _>(0.., retry(module, [])),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry_once(module, [])),
         repeat(
             0..,
             alt((ws, line_comment, block_comment, error_token(true))),

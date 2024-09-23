@@ -1,5 +1,5 @@
 use super::{
-    node, resume, retry, retry_once, tok,
+    node, resume, retry_once, tok,
     token::{ident, keyword, l_paren, r_paren, trivias_prefixed, unsigned_int, word},
     GreenResult, Input,
 };
@@ -44,8 +44,8 @@ pub(super) fn func_type(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("func")),
-        repeat::<_, _, Vec<_>, _, _>(0.., retry(param, ["result"])),
-        repeat::<_, _, Vec<_>, _, _>(0.., retry(result, [])),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry_once(param, ["result"])),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry_once(result, [])),
         resume(r_paren),
     )
         .parse_next(input)

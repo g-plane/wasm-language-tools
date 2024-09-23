@@ -856,7 +856,7 @@ fn data(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("data")),
-        repeat::<_, _, Vec<_>, _, _>(0.., retry(string, [])),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry_once(string, [])),
         resume(r_paren),
     )
         .parse_next(input)
