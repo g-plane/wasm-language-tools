@@ -1,0 +1,2246 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..4343
+  MODULE@0..4342
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_FUNC@10..188
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "func"
+      WHITESPACE@15..16 " "
+      EXPORT@16..32
+        L_PAREN@16..17 "("
+        KEYWORD@17..23 "export"
+        WHITESPACE@23..24 " "
+        NAME@24..31
+          STRING@24..31 "\"empty\""
+        R_PAREN@31..32 ")"
+      WHITESPACE@32..33 " "
+      TYPE_USE@33..44
+        PARAM@33..44
+          L_PAREN@33..34 "("
+          KEYWORD@34..39 "param"
+          WHITESPACE@39..40 " "
+          VAL_TYPE@40..43
+            NUM_TYPE@40..43 "i32"
+          R_PAREN@43..44 ")"
+      WHITESPACE@44..49 "\n    "
+      BLOCK_IF@49..74
+        L_PAREN@49..50 "("
+        KEYWORD@50..52 "if"
+        WHITESPACE@52..53 " "
+        PLAIN_INSTR@53..66
+          L_PAREN@53..54 "("
+          INSTR_NAME@54..63 "local.get"
+          WHITESPACE@63..64 " "
+          OPERAND@64..65
+            INT@64..65 "0"
+          R_PAREN@65..66 ")"
+        WHITESPACE@66..67 " "
+        BLOCK_IF_THEN@67..73
+          L_PAREN@67..68 "("
+          KEYWORD@68..72 "then"
+          R_PAREN@72..73 ")"
+        R_PAREN@73..74 ")"
+      WHITESPACE@74..79 "\n    "
+      BLOCK_IF@79..111
+        L_PAREN@79..80 "("
+        KEYWORD@80..82 "if"
+        WHITESPACE@82..83 " "
+        PLAIN_INSTR@83..96
+          L_PAREN@83..84 "("
+          INSTR_NAME@84..93 "local.get"
+          WHITESPACE@93..94 " "
+          OPERAND@94..95
+            INT@94..95 "0"
+          R_PAREN@95..96 ")"
+        WHITESPACE@96..97 " "
+        BLOCK_IF_THEN@97..103
+          L_PAREN@97..98 "("
+          KEYWORD@98..102 "then"
+          R_PAREN@102..103 ")"
+        WHITESPACE@103..104 " "
+        BLOCK_IF_ELSE@104..110
+          L_PAREN@104..105 "("
+          KEYWORD@105..109 "else"
+          R_PAREN@109..110 ")"
+        R_PAREN@110..111 ")"
+      WHITESPACE@111..116 "\n    "
+      BLOCK_IF@116..144
+        L_PAREN@116..117 "("
+        KEYWORD@117..119 "if"
+        WHITESPACE@119..120 " "
+        IDENT@120..122 "$l"
+        WHITESPACE@122..123 " "
+        PLAIN_INSTR@123..136
+          L_PAREN@123..124 "("
+          INSTR_NAME@124..133 "local.get"
+          WHITESPACE@133..134 " "
+          OPERAND@134..135
+            INT@134..135 "0"
+          R_PAREN@135..136 ")"
+        WHITESPACE@136..137 " "
+        BLOCK_IF_THEN@137..143
+          L_PAREN@137..138 "("
+          KEYWORD@138..142 "then"
+          R_PAREN@142..143 ")"
+        R_PAREN@143..144 ")"
+      WHITESPACE@144..149 "\n    "
+      BLOCK_IF@149..184
+        L_PAREN@149..150 "("
+        KEYWORD@150..152 "if"
+        WHITESPACE@152..153 " "
+        IDENT@153..155 "$l"
+        WHITESPACE@155..156 " "
+        PLAIN_INSTR@156..169
+          L_PAREN@156..157 "("
+          INSTR_NAME@157..166 "local.get"
+          WHITESPACE@166..167 " "
+          OPERAND@167..168
+            INT@167..168 "0"
+          R_PAREN@168..169 ")"
+        WHITESPACE@169..170 " "
+        BLOCK_IF_THEN@170..176
+          L_PAREN@170..171 "("
+          KEYWORD@171..175 "then"
+          R_PAREN@175..176 ")"
+        WHITESPACE@176..177 " "
+        BLOCK_IF_ELSE@177..183
+          L_PAREN@177..178 "("
+          KEYWORD@178..182 "else"
+          R_PAREN@182..183 ")"
+        R_PAREN@183..184 ")"
+      WHITESPACE@184..187 "\n  "
+      R_PAREN@187..188 ")"
+    WHITESPACE@188..192 "\n\n  "
+    MODULE_FIELD_FUNC@192..409
+      L_PAREN@192..193 "("
+      KEYWORD@193..197 "func"
+      WHITESPACE@197..198 " "
+      EXPORT@198..217
+        L_PAREN@198..199 "("
+        KEYWORD@199..205 "export"
+        WHITESPACE@205..206 " "
+        NAME@206..216
+          STRING@206..216 "\"singular\""
+        R_PAREN@216..217 ")"
+      WHITESPACE@217..218 " "
+      TYPE_USE@218..242
+        PARAM@218..229
+          L_PAREN@218..219 "("
+          KEYWORD@219..224 "param"
+          WHITESPACE@224..225 " "
+          VAL_TYPE@225..228
+            NUM_TYPE@225..228 "i32"
+          R_PAREN@228..229 ")"
+        WHITESPACE@229..230 " "
+        RESULT@230..242
+          L_PAREN@230..231 "("
+          KEYWORD@231..237 "result"
+          WHITESPACE@237..238 " "
+          VAL_TYPE@238..241
+            NUM_TYPE@238..241 "i32"
+          R_PAREN@241..242 ")"
+      WHITESPACE@242..247 "\n    "
+      BLOCK_IF@247..278
+        L_PAREN@247..248 "("
+        KEYWORD@248..250 "if"
+        WHITESPACE@250..251 " "
+        PLAIN_INSTR@251..264
+          L_PAREN@251..252 "("
+          INSTR_NAME@252..261 "local.get"
+          WHITESPACE@261..262 " "
+          OPERAND@262..263
+            INT@262..263 "0"
+          R_PAREN@263..264 ")"
+        WHITESPACE@264..265 " "
+        BLOCK_IF_THEN@265..277
+          L_PAREN@265..266 "("
+          KEYWORD@266..270 "then"
+          WHITESPACE@270..271 " "
+          PLAIN_INSTR@271..276
+            L_PAREN@271..272 "("
+            INSTR_NAME@272..275 "nop"
+            R_PAREN@275..276 ")"
+          R_PAREN@276..277 ")"
+        R_PAREN@277..278 ")"
+      WHITESPACE@278..283 "\n    "
+      BLOCK_IF@283..327
+        L_PAREN@283..284 "("
+        KEYWORD@284..286 "if"
+        WHITESPACE@286..287 " "
+        PLAIN_INSTR@287..300
+          L_PAREN@287..288 "("
+          INSTR_NAME@288..297 "local.get"
+          WHITESPACE@297..298 " "
+          OPERAND@298..299
+            INT@298..299 "0"
+          R_PAREN@299..300 ")"
+        WHITESPACE@300..301 " "
+        BLOCK_IF_THEN@301..313
+          L_PAREN@301..302 "("
+          KEYWORD@302..306 "then"
+          WHITESPACE@306..307 " "
+          PLAIN_INSTR@307..312
+            L_PAREN@307..308 "("
+            INSTR_NAME@308..311 "nop"
+            R_PAREN@311..312 ")"
+          R_PAREN@312..313 ")"
+        WHITESPACE@313..314 " "
+        BLOCK_IF_ELSE@314..326
+          L_PAREN@314..315 "("
+          KEYWORD@315..319 "else"
+          WHITESPACE@319..320 " "
+          PLAIN_INSTR@320..325
+            L_PAREN@320..321 "("
+            INSTR_NAME@321..324 "nop"
+            R_PAREN@324..325 ")"
+          R_PAREN@325..326 ")"
+        R_PAREN@326..327 ")"
+      WHITESPACE@327..332 "\n    "
+      BLOCK_IF@332..405
+        L_PAREN@332..333 "("
+        KEYWORD@333..335 "if"
+        WHITESPACE@335..336 " "
+        BLOCK_TYPE@336..348
+          RESULT@336..348
+            L_PAREN@336..337 "("
+            KEYWORD@337..343 "result"
+            WHITESPACE@343..344 " "
+            VAL_TYPE@344..347
+              NUM_TYPE@344..347 "i32"
+            R_PAREN@347..348 ")"
+        WHITESPACE@348..349 " "
+        PLAIN_INSTR@349..362
+          L_PAREN@349..350 "("
+          INSTR_NAME@350..359 "local.get"
+          WHITESPACE@359..360 " "
+          OPERAND@360..361
+            INT@360..361 "0"
+          R_PAREN@361..362 ")"
+        WHITESPACE@362..363 " "
+        BLOCK_IF_THEN@363..383
+          L_PAREN@363..364 "("
+          KEYWORD@364..368 "then"
+          WHITESPACE@368..369 " "
+          PLAIN_INSTR@369..382
+            L_PAREN@369..370 "("
+            INSTR_NAME@370..379 "i32.const"
+            WHITESPACE@379..380 " "
+            OPERAND@380..381
+              INT@380..381 "7"
+            R_PAREN@381..382 ")"
+          R_PAREN@382..383 ")"
+        WHITESPACE@383..384 " "
+        BLOCK_IF_ELSE@384..404
+          L_PAREN@384..385 "("
+          KEYWORD@385..389 "else"
+          WHITESPACE@389..390 " "
+          PLAIN_INSTR@390..403
+            L_PAREN@390..391 "("
+            INSTR_NAME@391..400 "i32.const"
+            WHITESPACE@400..401 " "
+            OPERAND@401..402
+              INT@401..402 "8"
+            R_PAREN@402..403 ")"
+          R_PAREN@403..404 ")"
+        R_PAREN@404..405 ")"
+      WHITESPACE@405..408 "\n  "
+      R_PAREN@408..409 ")"
+    WHITESPACE@409..413 "\n\n  "
+    MODULE_FIELD_FUNC@413..1022
+      L_PAREN@413..414 "("
+      KEYWORD@414..418 "func"
+      WHITESPACE@418..419 " "
+      EXPORT@419..435
+        L_PAREN@419..420 "("
+        KEYWORD@420..426 "export"
+        WHITESPACE@426..427 " "
+        NAME@427..434
+          STRING@427..434 "\"multi\""
+        R_PAREN@434..435 ")"
+      WHITESPACE@435..436 " "
+      TYPE_USE@436..464
+        PARAM@436..447
+          L_PAREN@436..437 "("
+          KEYWORD@437..442 "param"
+          WHITESPACE@442..443 " "
+          VAL_TYPE@443..446
+            NUM_TYPE@443..446 "i32"
+          R_PAREN@446..447 ")"
+        WHITESPACE@447..448 " "
+        RESULT@448..464
+          L_PAREN@448..449 "("
+          KEYWORD@449..455 "result"
+          WHITESPACE@455..456 " "
+          VAL_TYPE@456..459
+            NUM_TYPE@456..459 "i32"
+          WHITESPACE@459..460 " "
+          VAL_TYPE@460..463
+            NUM_TYPE@460..463 "i32"
+          R_PAREN@463..464 ")"
+      WHITESPACE@464..469 "\n    "
+      BLOCK_IF@469..522
+        L_PAREN@469..470 "("
+        KEYWORD@470..472 "if"
+        WHITESPACE@472..473 " "
+        PLAIN_INSTR@473..486
+          L_PAREN@473..474 "("
+          INSTR_NAME@474..483 "local.get"
+          WHITESPACE@483..484 " "
+          OPERAND@484..485
+            INT@484..485 "0"
+          R_PAREN@485..486 ")"
+        WHITESPACE@486..487 " "
+        BLOCK_IF_THEN@487..521
+          L_PAREN@487..488 "("
+          KEYWORD@488..492 "then"
+          WHITESPACE@492..493 " "
+          PLAIN_INSTR@493..506
+            L_PAREN@493..494 "("
+            INSTR_NAME@494..498 "call"
+            WHITESPACE@498..499 " "
+            OPERAND@499..505
+              IDENT@499..505 "$dummy"
+            R_PAREN@505..506 ")"
+          WHITESPACE@506..507 " "
+          PLAIN_INSTR@507..520
+            L_PAREN@507..508 "("
+            INSTR_NAME@508..512 "call"
+            WHITESPACE@512..513 " "
+            OPERAND@513..519
+              IDENT@513..519 "$dummy"
+            R_PAREN@519..520 ")"
+          R_PAREN@520..521 ")"
+        R_PAREN@521..522 ")"
+      WHITESPACE@522..527 "\n    "
+      BLOCK_IF@527..587
+        L_PAREN@527..528 "("
+        KEYWORD@528..530 "if"
+        WHITESPACE@530..531 " "
+        PLAIN_INSTR@531..544
+          L_PAREN@531..532 "("
+          INSTR_NAME@532..541 "local.get"
+          WHITESPACE@541..542 " "
+          OPERAND@542..543
+            INT@542..543 "0"
+          R_PAREN@543..544 ")"
+        WHITESPACE@544..545 " "
+        BLOCK_IF_THEN@545..551
+          L_PAREN@545..546 "("
+          KEYWORD@546..550 "then"
+          R_PAREN@550..551 ")"
+        WHITESPACE@551..552 " "
+        BLOCK_IF_ELSE@552..586
+          L_PAREN@552..553 "("
+          KEYWORD@553..557 "else"
+          WHITESPACE@557..558 " "
+          PLAIN_INSTR@558..571
+            L_PAREN@558..559 "("
+            INSTR_NAME@559..563 "call"
+            WHITESPACE@563..564 " "
+            OPERAND@564..570
+              IDENT@564..570 "$dummy"
+            R_PAREN@570..571 ")"
+          WHITESPACE@571..572 " "
+          PLAIN_INSTR@572..585
+            L_PAREN@572..573 "("
+            INSTR_NAME@573..577 "call"
+            WHITESPACE@577..578 " "
+            OPERAND@578..584
+              IDENT@578..584 "$dummy"
+            R_PAREN@584..585 ")"
+          R_PAREN@585..586 ")"
+        R_PAREN@586..587 ")"
+      WHITESPACE@587..592 "\n    "
+      BLOCK_IF@592..710
+        L_PAREN@592..593 "("
+        KEYWORD@593..595 "if"
+        WHITESPACE@595..596 " "
+        BLOCK_TYPE@596..608
+          RESULT@596..608
+            L_PAREN@596..597 "("
+            KEYWORD@597..603 "result"
+            WHITESPACE@603..604 " "
+            VAL_TYPE@604..607
+              NUM_TYPE@604..607 "i32"
+            R_PAREN@607..608 ")"
+        WHITESPACE@608..609 " "
+        PLAIN_INSTR@609..622
+          L_PAREN@609..610 "("
+          INSTR_NAME@610..619 "local.get"
+          WHITESPACE@619..620 " "
+          OPERAND@620..621
+            INT@620..621 "0"
+          R_PAREN@621..622 ")"
+        WHITESPACE@622..629 "\n      "
+        BLOCK_IF_THEN@629..663
+          L_PAREN@629..630 "("
+          KEYWORD@630..634 "then"
+          WHITESPACE@634..635 " "
+          PLAIN_INSTR@635..648
+            L_PAREN@635..636 "("
+            INSTR_NAME@636..640 "call"
+            WHITESPACE@640..641 " "
+            OPERAND@641..647
+              IDENT@641..647 "$dummy"
+            R_PAREN@647..648 ")"
+          WHITESPACE@648..649 " "
+          PLAIN_INSTR@649..662
+            L_PAREN@649..650 "("
+            INSTR_NAME@650..659 "i32.const"
+            WHITESPACE@659..660 " "
+            OPERAND@660..661
+              INT@660..661 "8"
+            R_PAREN@661..662 ")"
+          R_PAREN@662..663 ")"
+        WHITESPACE@663..670 "\n      "
+        BLOCK_IF_ELSE@670..704
+          L_PAREN@670..671 "("
+          KEYWORD@671..675 "else"
+          WHITESPACE@675..676 " "
+          PLAIN_INSTR@676..689
+            L_PAREN@676..677 "("
+            INSTR_NAME@677..681 "call"
+            WHITESPACE@681..682 " "
+            OPERAND@682..688
+              IDENT@682..688 "$dummy"
+            R_PAREN@688..689 ")"
+          WHITESPACE@689..690 " "
+          PLAIN_INSTR@690..703
+            L_PAREN@690..691 "("
+            INSTR_NAME@691..700 "i32.const"
+            WHITESPACE@700..701 " "
+            OPERAND@701..702
+              INT@701..702 "9"
+            R_PAREN@702..703 ")"
+          R_PAREN@703..704 ")"
+        WHITESPACE@704..709 "\n    "
+        R_PAREN@709..710 ")"
+      WHITESPACE@710..715 "\n    "
+      BLOCK_IF@715..1018
+        L_PAREN@715..716 "("
+        KEYWORD@716..718 "if"
+        WHITESPACE@718..719 " "
+        BLOCK_TYPE@719..739
+          RESULT@719..739
+            L_PAREN@719..720 "("
+            KEYWORD@720..726 "result"
+            WHITESPACE@726..727 " "
+            VAL_TYPE@727..730
+              NUM_TYPE@727..730 "i32"
+            WHITESPACE@730..731 " "
+            VAL_TYPE@731..734
+              NUM_TYPE@731..734 "i64"
+            WHITESPACE@734..735 " "
+            VAL_TYPE@735..738
+              NUM_TYPE@735..738 "i32"
+            R_PAREN@738..739 ")"
+        WHITESPACE@739..740 " "
+        PLAIN_INSTR@740..753
+          L_PAREN@740..741 "("
+          INSTR_NAME@741..750 "local.get"
+          WHITESPACE@750..751 " "
+          OPERAND@751..752
+            INT@751..752 "0"
+          R_PAREN@752..753 ")"
+        WHITESPACE@753..760 "\n      "
+        BLOCK_IF_THEN@760..881
+          L_PAREN@760..761 "("
+          KEYWORD@761..765 "then"
+          WHITESPACE@765..774 "\n        "
+          PLAIN_INSTR@774..787
+            L_PAREN@774..775 "("
+            INSTR_NAME@775..779 "call"
+            WHITESPACE@779..780 " "
+            OPERAND@780..786
+              IDENT@780..786 "$dummy"
+            R_PAREN@786..787 ")"
+          WHITESPACE@787..788 " "
+          PLAIN_INSTR@788..801
+            L_PAREN@788..789 "("
+            INSTR_NAME@789..798 "i32.const"
+            WHITESPACE@798..799 " "
+            OPERAND@799..800
+              INT@799..800 "1"
+            R_PAREN@800..801 ")"
+          WHITESPACE@801..810 "\n        "
+          PLAIN_INSTR@810..823
+            L_PAREN@810..811 "("
+            INSTR_NAME@811..815 "call"
+            WHITESPACE@815..816 " "
+            OPERAND@816..822
+              IDENT@816..822 "$dummy"
+            R_PAREN@822..823 ")"
+          WHITESPACE@823..824 " "
+          PLAIN_INSTR@824..837
+            L_PAREN@824..825 "("
+            INSTR_NAME@825..834 "i64.const"
+            WHITESPACE@834..835 " "
+            OPERAND@835..836
+              INT@835..836 "2"
+            R_PAREN@836..837 ")"
+          WHITESPACE@837..846 "\n        "
+          PLAIN_INSTR@846..859
+            L_PAREN@846..847 "("
+            INSTR_NAME@847..851 "call"
+            WHITESPACE@851..852 " "
+            OPERAND@852..858
+              IDENT@852..858 "$dummy"
+            R_PAREN@858..859 ")"
+          WHITESPACE@859..860 " "
+          PLAIN_INSTR@860..873
+            L_PAREN@860..861 "("
+            INSTR_NAME@861..870 "i32.const"
+            WHITESPACE@870..871 " "
+            OPERAND@871..872
+              INT@871..872 "3"
+            R_PAREN@872..873 ")"
+          WHITESPACE@873..880 "\n      "
+          R_PAREN@880..881 ")"
+        WHITESPACE@881..888 "\n      "
+        BLOCK_IF_ELSE@888..1012
+          L_PAREN@888..889 "("
+          KEYWORD@889..893 "else"
+          WHITESPACE@893..902 "\n        "
+          PLAIN_INSTR@902..915
+            L_PAREN@902..903 "("
+            INSTR_NAME@903..907 "call"
+            WHITESPACE@907..908 " "
+            OPERAND@908..914
+              IDENT@908..914 "$dummy"
+            R_PAREN@914..915 ")"
+          WHITESPACE@915..916 " "
+          PLAIN_INSTR@916..930
+            L_PAREN@916..917 "("
+            INSTR_NAME@917..926 "i32.const"
+            WHITESPACE@926..927 " "
+            OPERAND@927..929
+              INT@927..929 "-1"
+            R_PAREN@929..930 ")"
+          WHITESPACE@930..939 "\n        "
+          PLAIN_INSTR@939..952
+            L_PAREN@939..940 "("
+            INSTR_NAME@940..944 "call"
+            WHITESPACE@944..945 " "
+            OPERAND@945..951
+              IDENT@945..951 "$dummy"
+            R_PAREN@951..952 ")"
+          WHITESPACE@952..953 " "
+          PLAIN_INSTR@953..967
+            L_PAREN@953..954 "("
+            INSTR_NAME@954..963 "i64.const"
+            WHITESPACE@963..964 " "
+            OPERAND@964..966
+              INT@964..966 "-2"
+            R_PAREN@966..967 ")"
+          WHITESPACE@967..976 "\n        "
+          PLAIN_INSTR@976..989
+            L_PAREN@976..977 "("
+            INSTR_NAME@977..981 "call"
+            WHITESPACE@981..982 " "
+            OPERAND@982..988
+              IDENT@982..988 "$dummy"
+            R_PAREN@988..989 ")"
+          WHITESPACE@989..990 " "
+          PLAIN_INSTR@990..1004
+            L_PAREN@990..991 "("
+            INSTR_NAME@991..1000 "i32.const"
+            WHITESPACE@1000..1001 " "
+            OPERAND@1001..1003
+              INT@1001..1003 "-3"
+            R_PAREN@1003..1004 ")"
+          WHITESPACE@1004..1011 "\n      "
+          R_PAREN@1011..1012 ")"
+        WHITESPACE@1012..1017 "\n    "
+        R_PAREN@1017..1018 ")"
+      WHITESPACE@1018..1021 "\n  "
+      R_PAREN@1021..1022 ")"
+    WHITESPACE@1022..1026 "\n\n  "
+    MODULE_FIELD_FUNC@1026..1706
+      L_PAREN@1026..1027 "("
+      KEYWORD@1027..1031 "func"
+      WHITESPACE@1031..1032 " "
+      EXPORT@1032..1049
+        L_PAREN@1032..1033 "("
+        KEYWORD@1033..1039 "export"
+        WHITESPACE@1039..1040 " "
+        NAME@1040..1048
+          STRING@1040..1048 "\"nested\""
+        R_PAREN@1048..1049 ")"
+      WHITESPACE@1049..1050 " "
+      TYPE_USE@1050..1078
+        PARAM@1050..1065
+          L_PAREN@1050..1051 "("
+          KEYWORD@1051..1056 "param"
+          WHITESPACE@1056..1057 " "
+          VAL_TYPE@1057..1060
+            NUM_TYPE@1057..1060 "i32"
+          WHITESPACE@1060..1061 " "
+          VAL_TYPE@1061..1064
+            NUM_TYPE@1061..1064 "i32"
+          R_PAREN@1064..1065 ")"
+        WHITESPACE@1065..1066 " "
+        RESULT@1066..1078
+          L_PAREN@1066..1067 "("
+          KEYWORD@1067..1073 "result"
+          WHITESPACE@1073..1074 " "
+          VAL_TYPE@1074..1077
+            NUM_TYPE@1074..1077 "i32"
+          R_PAREN@1077..1078 ")"
+      WHITESPACE@1078..1083 "\n    "
+      BLOCK_IF@1083..1702
+        L_PAREN@1083..1084 "("
+        KEYWORD@1084..1086 "if"
+        WHITESPACE@1086..1087 " "
+        BLOCK_TYPE@1087..1099
+          RESULT@1087..1099
+            L_PAREN@1087..1088 "("
+            KEYWORD@1088..1094 "result"
+            WHITESPACE@1094..1095 " "
+            VAL_TYPE@1095..1098
+              NUM_TYPE@1095..1098 "i32"
+            R_PAREN@1098..1099 ")"
+        WHITESPACE@1099..1100 " "
+        PLAIN_INSTR@1100..1113
+          L_PAREN@1100..1101 "("
+          INSTR_NAME@1101..1110 "local.get"
+          WHITESPACE@1110..1111 " "
+          OPERAND@1111..1112
+            INT@1111..1112 "0"
+          R_PAREN@1112..1113 ")"
+        WHITESPACE@1113..1120 "\n      "
+        BLOCK_IF_THEN@1120..1404
+          L_PAREN@1120..1121 "("
+          KEYWORD@1121..1125 "then"
+          WHITESPACE@1125..1134 "\n        "
+          BLOCK_IF@1134..1187
+            L_PAREN@1134..1135 "("
+            KEYWORD@1135..1137 "if"
+            WHITESPACE@1137..1138 " "
+            PLAIN_INSTR@1138..1151
+              L_PAREN@1138..1139 "("
+              INSTR_NAME@1139..1148 "local.get"
+              WHITESPACE@1148..1149 " "
+              OPERAND@1149..1150
+                INT@1149..1150 "1"
+              R_PAREN@1150..1151 ")"
+            WHITESPACE@1151..1152 " "
+            BLOCK_IF_THEN@1152..1186
+              L_PAREN@1152..1153 "("
+              KEYWORD@1153..1157 "then"
+              WHITESPACE@1157..1158 " "
+              PLAIN_INSTR@1158..1171
+                L_PAREN@1158..1159 "("
+                INSTR_NAME@1159..1163 "call"
+                WHITESPACE@1163..1164 " "
+                OPERAND@1164..1170
+                  IDENT@1164..1170 "$dummy"
+                R_PAREN@1170..1171 ")"
+              WHITESPACE@1171..1172 " "
+              BLOCK_BLOCK@1172..1179
+                L_PAREN@1172..1173 "("
+                KEYWORD@1173..1178 "block"
+                R_PAREN@1178..1179 ")"
+              WHITESPACE@1179..1180 " "
+              PLAIN_INSTR@1180..1185
+                L_PAREN@1180..1181 "("
+                INSTR_NAME@1181..1184 "nop"
+                R_PAREN@1184..1185 ")"
+              R_PAREN@1185..1186 ")"
+            R_PAREN@1186..1187 ")"
+          WHITESPACE@1187..1196 "\n        "
+          BLOCK_IF@1196..1256
+            L_PAREN@1196..1197 "("
+            KEYWORD@1197..1199 "if"
+            WHITESPACE@1199..1200 " "
+            PLAIN_INSTR@1200..1213
+              L_PAREN@1200..1201 "("
+              INSTR_NAME@1201..1210 "local.get"
+              WHITESPACE@1210..1211 " "
+              OPERAND@1211..1212
+                INT@1211..1212 "1"
+              R_PAREN@1212..1213 ")"
+            WHITESPACE@1213..1214 " "
+            BLOCK_IF_THEN@1214..1220
+              L_PAREN@1214..1215 "("
+              KEYWORD@1215..1219 "then"
+              R_PAREN@1219..1220 ")"
+            WHITESPACE@1220..1221 " "
+            BLOCK_IF_ELSE@1221..1255
+              L_PAREN@1221..1222 "("
+              KEYWORD@1222..1226 "else"
+              WHITESPACE@1226..1227 " "
+              PLAIN_INSTR@1227..1240
+                L_PAREN@1227..1228 "("
+                INSTR_NAME@1228..1232 "call"
+                WHITESPACE@1232..1233 " "
+                OPERAND@1233..1239
+                  IDENT@1233..1239 "$dummy"
+                R_PAREN@1239..1240 ")"
+              WHITESPACE@1240..1241 " "
+              BLOCK_BLOCK@1241..1248
+                L_PAREN@1241..1242 "("
+                KEYWORD@1242..1247 "block"
+                R_PAREN@1247..1248 ")"
+              WHITESPACE@1248..1249 " "
+              PLAIN_INSTR@1249..1254
+                L_PAREN@1249..1250 "("
+                INSTR_NAME@1250..1253 "nop"
+                R_PAREN@1253..1254 ")"
+              R_PAREN@1254..1255 ")"
+            R_PAREN@1255..1256 ")"
+          WHITESPACE@1256..1265 "\n        "
+          BLOCK_IF@1265..1396
+            L_PAREN@1265..1266 "("
+            KEYWORD@1266..1268 "if"
+            WHITESPACE@1268..1269 " "
+            BLOCK_TYPE@1269..1281
+              RESULT@1269..1281
+                L_PAREN@1269..1270 "("
+                KEYWORD@1270..1276 "result"
+                WHITESPACE@1276..1277 " "
+                VAL_TYPE@1277..1280
+                  NUM_TYPE@1277..1280 "i32"
+                R_PAREN@1280..1281 ")"
+            WHITESPACE@1281..1282 " "
+            PLAIN_INSTR@1282..1295
+              L_PAREN@1282..1283 "("
+              INSTR_NAME@1283..1292 "local.get"
+              WHITESPACE@1292..1293 " "
+              OPERAND@1293..1294
+                INT@1293..1294 "1"
+              R_PAREN@1294..1295 ")"
+            WHITESPACE@1295..1306 "\n          "
+            BLOCK_IF_THEN@1306..1340
+              L_PAREN@1306..1307 "("
+              KEYWORD@1307..1311 "then"
+              WHITESPACE@1311..1312 " "
+              PLAIN_INSTR@1312..1325
+                L_PAREN@1312..1313 "("
+                INSTR_NAME@1313..1317 "call"
+                WHITESPACE@1317..1318 " "
+                OPERAND@1318..1324
+                  IDENT@1318..1324 "$dummy"
+                R_PAREN@1324..1325 ")"
+              WHITESPACE@1325..1326 " "
+              PLAIN_INSTR@1326..1339
+                L_PAREN@1326..1327 "("
+                INSTR_NAME@1327..1336 "i32.const"
+                WHITESPACE@1336..1337 " "
+                OPERAND@1337..1338
+                  INT@1337..1338 "9"
+                R_PAREN@1338..1339 ")"
+              R_PAREN@1339..1340 ")"
+            WHITESPACE@1340..1351 "\n          "
+            BLOCK_IF_ELSE@1351..1386
+              L_PAREN@1351..1352 "("
+              KEYWORD@1352..1356 "else"
+              WHITESPACE@1356..1357 " "
+              PLAIN_INSTR@1357..1370
+                L_PAREN@1357..1358 "("
+                INSTR_NAME@1358..1362 "call"
+                WHITESPACE@1362..1363 " "
+                OPERAND@1363..1369
+                  IDENT@1363..1369 "$dummy"
+                R_PAREN@1369..1370 ")"
+              WHITESPACE@1370..1371 " "
+              PLAIN_INSTR@1371..1385
+                L_PAREN@1371..1372 "("
+                INSTR_NAME@1372..1381 "i32.const"
+                WHITESPACE@1381..1382 " "
+                OPERAND@1382..1384
+                  INT@1382..1384 "10"
+                R_PAREN@1384..1385 ")"
+              R_PAREN@1385..1386 ")"
+            WHITESPACE@1386..1395 "\n        "
+            R_PAREN@1395..1396 ")"
+          WHITESPACE@1396..1403 "\n      "
+          R_PAREN@1403..1404 ")"
+        WHITESPACE@1404..1411 "\n      "
+        BLOCK_IF_ELSE@1411..1696
+          L_PAREN@1411..1412 "("
+          KEYWORD@1412..1416 "else"
+          WHITESPACE@1416..1425 "\n        "
+          BLOCK_IF@1425..1478
+            L_PAREN@1425..1426 "("
+            KEYWORD@1426..1428 "if"
+            WHITESPACE@1428..1429 " "
+            PLAIN_INSTR@1429..1442
+              L_PAREN@1429..1430 "("
+              INSTR_NAME@1430..1439 "local.get"
+              WHITESPACE@1439..1440 " "
+              OPERAND@1440..1441
+                INT@1440..1441 "1"
+              R_PAREN@1441..1442 ")"
+            WHITESPACE@1442..1443 " "
+            BLOCK_IF_THEN@1443..1477
+              L_PAREN@1443..1444 "("
+              KEYWORD@1444..1448 "then"
+              WHITESPACE@1448..1449 " "
+              PLAIN_INSTR@1449..1462
+                L_PAREN@1449..1450 "("
+                INSTR_NAME@1450..1454 "call"
+                WHITESPACE@1454..1455 " "
+                OPERAND@1455..1461
+                  IDENT@1455..1461 "$dummy"
+                R_PAREN@1461..1462 ")"
+              WHITESPACE@1462..1463 " "
+              BLOCK_BLOCK@1463..1470
+                L_PAREN@1463..1464 "("
+                KEYWORD@1464..1469 "block"
+                R_PAREN@1469..1470 ")"
+              WHITESPACE@1470..1471 " "
+              PLAIN_INSTR@1471..1476
+                L_PAREN@1471..1472 "("
+                INSTR_NAME@1472..1475 "nop"
+                R_PAREN@1475..1476 ")"
+              R_PAREN@1476..1477 ")"
+            R_PAREN@1477..1478 ")"
+          WHITESPACE@1478..1487 "\n        "
+          BLOCK_IF@1487..1547
+            L_PAREN@1487..1488 "("
+            KEYWORD@1488..1490 "if"
+            WHITESPACE@1490..1491 " "
+            PLAIN_INSTR@1491..1504
+              L_PAREN@1491..1492 "("
+              INSTR_NAME@1492..1501 "local.get"
+              WHITESPACE@1501..1502 " "
+              OPERAND@1502..1503
+                INT@1502..1503 "1"
+              R_PAREN@1503..1504 ")"
+            WHITESPACE@1504..1505 " "
+            BLOCK_IF_THEN@1505..1511
+              L_PAREN@1505..1506 "("
+              KEYWORD@1506..1510 "then"
+              R_PAREN@1510..1511 ")"
+            WHITESPACE@1511..1512 " "
+            BLOCK_IF_ELSE@1512..1546
+              L_PAREN@1512..1513 "("
+              KEYWORD@1513..1517 "else"
+              WHITESPACE@1517..1518 " "
+              PLAIN_INSTR@1518..1531
+                L_PAREN@1518..1519 "("
+                INSTR_NAME@1519..1523 "call"
+                WHITESPACE@1523..1524 " "
+                OPERAND@1524..1530
+                  IDENT@1524..1530 "$dummy"
+                R_PAREN@1530..1531 ")"
+              WHITESPACE@1531..1532 " "
+              BLOCK_BLOCK@1532..1539
+                L_PAREN@1532..1533 "("
+                KEYWORD@1533..1538 "block"
+                R_PAREN@1538..1539 ")"
+              WHITESPACE@1539..1540 " "
+              PLAIN_INSTR@1540..1545
+                L_PAREN@1540..1541 "("
+                INSTR_NAME@1541..1544 "nop"
+                R_PAREN@1544..1545 ")"
+              R_PAREN@1545..1546 ")"
+            R_PAREN@1546..1547 ")"
+          WHITESPACE@1547..1556 "\n        "
+          BLOCK_IF@1556..1688
+            L_PAREN@1556..1557 "("
+            KEYWORD@1557..1559 "if"
+            WHITESPACE@1559..1560 " "
+            BLOCK_TYPE@1560..1572
+              RESULT@1560..1572
+                L_PAREN@1560..1561 "("
+                KEYWORD@1561..1567 "result"
+                WHITESPACE@1567..1568 " "
+                VAL_TYPE@1568..1571
+                  NUM_TYPE@1568..1571 "i32"
+                R_PAREN@1571..1572 ")"
+            WHITESPACE@1572..1573 " "
+            PLAIN_INSTR@1573..1586
+              L_PAREN@1573..1574 "("
+              INSTR_NAME@1574..1583 "local.get"
+              WHITESPACE@1583..1584 " "
+              OPERAND@1584..1585
+                INT@1584..1585 "1"
+              R_PAREN@1585..1586 ")"
+            WHITESPACE@1586..1597 "\n          "
+            BLOCK_IF_THEN@1597..1632
+              L_PAREN@1597..1598 "("
+              KEYWORD@1598..1602 "then"
+              WHITESPACE@1602..1603 " "
+              PLAIN_INSTR@1603..1616
+                L_PAREN@1603..1604 "("
+                INSTR_NAME@1604..1608 "call"
+                WHITESPACE@1608..1609 " "
+                OPERAND@1609..1615
+                  IDENT@1609..1615 "$dummy"
+                R_PAREN@1615..1616 ")"
+              WHITESPACE@1616..1617 " "
+              PLAIN_INSTR@1617..1631
+                L_PAREN@1617..1618 "("
+                INSTR_NAME@1618..1627 "i32.const"
+                WHITESPACE@1627..1628 " "
+                OPERAND@1628..1630
+                  INT@1628..1630 "10"
+                R_PAREN@1630..1631 ")"
+              R_PAREN@1631..1632 ")"
+            WHITESPACE@1632..1643 "\n          "
+            BLOCK_IF_ELSE@1643..1678
+              L_PAREN@1643..1644 "("
+              KEYWORD@1644..1648 "else"
+              WHITESPACE@1648..1649 " "
+              PLAIN_INSTR@1649..1662
+                L_PAREN@1649..1650 "("
+                INSTR_NAME@1650..1654 "call"
+                WHITESPACE@1654..1655 " "
+                OPERAND@1655..1661
+                  IDENT@1655..1661 "$dummy"
+                R_PAREN@1661..1662 ")"
+              WHITESPACE@1662..1663 " "
+              PLAIN_INSTR@1663..1677
+                L_PAREN@1663..1664 "("
+                INSTR_NAME@1664..1673 "i32.const"
+                WHITESPACE@1673..1674 " "
+                OPERAND@1674..1676
+                  INT@1674..1676 "11"
+                R_PAREN@1676..1677 ")"
+              R_PAREN@1677..1678 ")"
+            WHITESPACE@1678..1687 "\n        "
+            R_PAREN@1687..1688 ")"
+          WHITESPACE@1688..1695 "\n      "
+          R_PAREN@1695..1696 ")"
+        WHITESPACE@1696..1701 "\n    "
+        R_PAREN@1701..1702 ")"
+      WHITESPACE@1702..1705 "\n  "
+      R_PAREN@1705..1706 ")"
+    WHITESPACE@1706..1710 "\n\n  "
+    MODULE_FIELD_FUNC@1710..1954
+      L_PAREN@1710..1711 "("
+      KEYWORD@1711..1715 "func"
+      WHITESPACE@1715..1716 " "
+      EXPORT@1716..1742
+        L_PAREN@1716..1717 "("
+        KEYWORD@1717..1723 "export"
+        WHITESPACE@1723..1724 " "
+        NAME@1724..1741
+          STRING@1724..1741 "\"as-select-first\""
+        R_PAREN@1741..1742 ")"
+      WHITESPACE@1742..1743 " "
+      TYPE_USE@1743..1767
+        PARAM@1743..1754
+          L_PAREN@1743..1744 "("
+          KEYWORD@1744..1749 "param"
+          WHITESPACE@1749..1750 " "
+          VAL_TYPE@1750..1753
+            NUM_TYPE@1750..1753 "i32"
+          R_PAREN@1753..1754 ")"
+        WHITESPACE@1754..1755 " "
+        RESULT@1755..1767
+          L_PAREN@1755..1756 "("
+          KEYWORD@1756..1762 "result"
+          WHITESPACE@1762..1763 " "
+          VAL_TYPE@1763..1766
+            NUM_TYPE@1763..1766 "i32"
+          R_PAREN@1766..1767 ")"
+      WHITESPACE@1767..1772 "\n    "
+      PLAIN_INSTR@1772..1950
+        L_PAREN@1772..1773 "("
+        INSTR_NAME@1773..1779 "select"
+        WHITESPACE@1779..1786 "\n      "
+        OPERAND@1786..1910
+          BLOCK_IF@1786..1910
+            L_PAREN@1786..1787 "("
+            KEYWORD@1787..1789 "if"
+            WHITESPACE@1789..1790 " "
+            BLOCK_TYPE@1790..1802
+              RESULT@1790..1802
+                L_PAREN@1790..1791 "("
+                KEYWORD@1791..1797 "result"
+                WHITESPACE@1797..1798 " "
+                VAL_TYPE@1798..1801
+                  NUM_TYPE@1798..1801 "i32"
+                R_PAREN@1801..1802 ")"
+            WHITESPACE@1802..1803 " "
+            PLAIN_INSTR@1803..1816
+              L_PAREN@1803..1804 "("
+              INSTR_NAME@1804..1813 "local.get"
+              WHITESPACE@1813..1814 " "
+              OPERAND@1814..1815
+                INT@1814..1815 "0"
+              R_PAREN@1815..1816 ")"
+            WHITESPACE@1816..1825 "\n        "
+            BLOCK_IF_THEN@1825..1859
+              L_PAREN@1825..1826 "("
+              KEYWORD@1826..1830 "then"
+              WHITESPACE@1830..1831 " "
+              PLAIN_INSTR@1831..1844
+                L_PAREN@1831..1832 "("
+                INSTR_NAME@1832..1836 "call"
+                WHITESPACE@1836..1837 " "
+                OPERAND@1837..1843
+                  IDENT@1837..1843 "$dummy"
+                R_PAREN@1843..1844 ")"
+              WHITESPACE@1844..1845 " "
+              PLAIN_INSTR@1845..1858
+                L_PAREN@1845..1846 "("
+                INSTR_NAME@1846..1855 "i32.const"
+                WHITESPACE@1855..1856 " "
+                OPERAND@1856..1857
+                  INT@1856..1857 "1"
+                R_PAREN@1857..1858 ")"
+              R_PAREN@1858..1859 ")"
+            WHITESPACE@1859..1868 "\n        "
+            BLOCK_IF_ELSE@1868..1902
+              L_PAREN@1868..1869 "("
+              KEYWORD@1869..1873 "else"
+              WHITESPACE@1873..1874 " "
+              PLAIN_INSTR@1874..1887
+                L_PAREN@1874..1875 "("
+                INSTR_NAME@1875..1879 "call"
+                WHITESPACE@1879..1880 " "
+                OPERAND@1880..1886
+                  IDENT@1880..1886 "$dummy"
+                R_PAREN@1886..1887 ")"
+              WHITESPACE@1887..1888 " "
+              PLAIN_INSTR@1888..1901
+                L_PAREN@1888..1889 "("
+                INSTR_NAME@1889..1898 "i32.const"
+                WHITESPACE@1898..1899 " "
+                OPERAND@1899..1900
+                  INT@1899..1900 "0"
+                R_PAREN@1900..1901 ")"
+              R_PAREN@1901..1902 ")"
+            WHITESPACE@1902..1909 "\n      "
+            R_PAREN@1909..1910 ")"
+        WHITESPACE@1910..1917 "\n      "
+        OPERAND@1917..1930
+          PLAIN_INSTR@1917..1930
+            L_PAREN@1917..1918 "("
+            INSTR_NAME@1918..1927 "i32.const"
+            WHITESPACE@1927..1928 " "
+            OPERAND@1928..1929
+              INT@1928..1929 "2"
+            R_PAREN@1929..1930 ")"
+        WHITESPACE@1930..1931 " "
+        OPERAND@1931..1944
+          PLAIN_INSTR@1931..1944
+            L_PAREN@1931..1932 "("
+            INSTR_NAME@1932..1941 "i32.const"
+            WHITESPACE@1941..1942 " "
+            OPERAND@1942..1943
+              INT@1942..1943 "3"
+            R_PAREN@1943..1944 ")"
+        WHITESPACE@1944..1949 "\n    "
+        R_PAREN@1949..1950 ")"
+      WHITESPACE@1950..1953 "\n  "
+      R_PAREN@1953..1954 ")"
+    WHITESPACE@1954..1957 "\n  "
+    MODULE_FIELD_FUNC@1957..2205
+      L_PAREN@1957..1958 "("
+      KEYWORD@1958..1962 "func"
+      WHITESPACE@1962..1963 " "
+      EXPORT@1963..1987
+        L_PAREN@1963..1964 "("
+        KEYWORD@1964..1970 "export"
+        WHITESPACE@1970..1971 " "
+        NAME@1971..1986
+          STRING@1971..1986 "\"as-select-mid\""
+        R_PAREN@1986..1987 ")"
+      WHITESPACE@1987..1988 " "
+      TYPE_USE@1988..2012
+        PARAM@1988..1999
+          L_PAREN@1988..1989 "("
+          KEYWORD@1989..1994 "param"
+          WHITESPACE@1994..1995 " "
+          VAL_TYPE@1995..1998
+            NUM_TYPE@1995..1998 "i32"
+          R_PAREN@1998..1999 ")"
+        WHITESPACE@1999..2000 " "
+        RESULT@2000..2012
+          L_PAREN@2000..2001 "("
+          KEYWORD@2001..2007 "result"
+          WHITESPACE@2007..2008 " "
+          VAL_TYPE@2008..2011
+            NUM_TYPE@2008..2011 "i32"
+          R_PAREN@2011..2012 ")"
+      WHITESPACE@2012..2017 "\n    "
+      PLAIN_INSTR@2017..2201
+        L_PAREN@2017..2018 "("
+        INSTR_NAME@2018..2024 "select"
+        WHITESPACE@2024..2031 "\n      "
+        OPERAND@2031..2044
+          PLAIN_INSTR@2031..2044
+            L_PAREN@2031..2032 "("
+            INSTR_NAME@2032..2041 "i32.const"
+            WHITESPACE@2041..2042 " "
+            OPERAND@2042..2043
+              INT@2042..2043 "2"
+            R_PAREN@2043..2044 ")"
+        WHITESPACE@2044..2051 "\n      "
+        OPERAND@2051..2175
+          BLOCK_IF@2051..2175
+            L_PAREN@2051..2052 "("
+            KEYWORD@2052..2054 "if"
+            WHITESPACE@2054..2055 " "
+            BLOCK_TYPE@2055..2067
+              RESULT@2055..2067
+                L_PAREN@2055..2056 "("
+                KEYWORD@2056..2062 "result"
+                WHITESPACE@2062..2063 " "
+                VAL_TYPE@2063..2066
+                  NUM_TYPE@2063..2066 "i32"
+                R_PAREN@2066..2067 ")"
+            WHITESPACE@2067..2068 " "
+            PLAIN_INSTR@2068..2081
+              L_PAREN@2068..2069 "("
+              INSTR_NAME@2069..2078 "local.get"
+              WHITESPACE@2078..2079 " "
+              OPERAND@2079..2080
+                INT@2079..2080 "0"
+              R_PAREN@2080..2081 ")"
+            WHITESPACE@2081..2090 "\n        "
+            BLOCK_IF_THEN@2090..2124
+              L_PAREN@2090..2091 "("
+              KEYWORD@2091..2095 "then"
+              WHITESPACE@2095..2096 " "
+              PLAIN_INSTR@2096..2109
+                L_PAREN@2096..2097 "("
+                INSTR_NAME@2097..2101 "call"
+                WHITESPACE@2101..2102 " "
+                OPERAND@2102..2108
+                  IDENT@2102..2108 "$dummy"
+                R_PAREN@2108..2109 ")"
+              WHITESPACE@2109..2110 " "
+              PLAIN_INSTR@2110..2123
+                L_PAREN@2110..2111 "("
+                INSTR_NAME@2111..2120 "i32.const"
+                WHITESPACE@2120..2121 " "
+                OPERAND@2121..2122
+                  INT@2121..2122 "1"
+                R_PAREN@2122..2123 ")"
+              R_PAREN@2123..2124 ")"
+            WHITESPACE@2124..2133 "\n        "
+            BLOCK_IF_ELSE@2133..2167
+              L_PAREN@2133..2134 "("
+              KEYWORD@2134..2138 "else"
+              WHITESPACE@2138..2139 " "
+              PLAIN_INSTR@2139..2152
+                L_PAREN@2139..2140 "("
+                INSTR_NAME@2140..2144 "call"
+                WHITESPACE@2144..2145 " "
+                OPERAND@2145..2151
+                  IDENT@2145..2151 "$dummy"
+                R_PAREN@2151..2152 ")"
+              WHITESPACE@2152..2153 " "
+              PLAIN_INSTR@2153..2166
+                L_PAREN@2153..2154 "("
+                INSTR_NAME@2154..2163 "i32.const"
+                WHITESPACE@2163..2164 " "
+                OPERAND@2164..2165
+                  INT@2164..2165 "0"
+                R_PAREN@2165..2166 ")"
+              R_PAREN@2166..2167 ")"
+            WHITESPACE@2167..2174 "\n      "
+            R_PAREN@2174..2175 ")"
+        WHITESPACE@2175..2182 "\n      "
+        OPERAND@2182..2195
+          PLAIN_INSTR@2182..2195
+            L_PAREN@2182..2183 "("
+            INSTR_NAME@2183..2192 "i32.const"
+            WHITESPACE@2192..2193 " "
+            OPERAND@2193..2194
+              INT@2193..2194 "3"
+            R_PAREN@2194..2195 ")"
+        WHITESPACE@2195..2200 "\n    "
+        R_PAREN@2200..2201 ")"
+      WHITESPACE@2201..2204 "\n  "
+      R_PAREN@2204..2205 ")"
+    WHITESPACE@2205..2208 "\n  "
+    MODULE_FIELD_FUNC@2208..2451
+      L_PAREN@2208..2209 "("
+      KEYWORD@2209..2213 "func"
+      WHITESPACE@2213..2214 " "
+      EXPORT@2214..2239
+        L_PAREN@2214..2215 "("
+        KEYWORD@2215..2221 "export"
+        WHITESPACE@2221..2222 " "
+        NAME@2222..2238
+          STRING@2222..2238 "\"as-select-last\""
+        R_PAREN@2238..2239 ")"
+      WHITESPACE@2239..2240 " "
+      TYPE_USE@2240..2264
+        PARAM@2240..2251
+          L_PAREN@2240..2241 "("
+          KEYWORD@2241..2246 "param"
+          WHITESPACE@2246..2247 " "
+          VAL_TYPE@2247..2250
+            NUM_TYPE@2247..2250 "i32"
+          R_PAREN@2250..2251 ")"
+        WHITESPACE@2251..2252 " "
+        RESULT@2252..2264
+          L_PAREN@2252..2253 "("
+          KEYWORD@2253..2259 "result"
+          WHITESPACE@2259..2260 " "
+          VAL_TYPE@2260..2263
+            NUM_TYPE@2260..2263 "i32"
+          R_PAREN@2263..2264 ")"
+      WHITESPACE@2264..2269 "\n    "
+      PLAIN_INSTR@2269..2447
+        L_PAREN@2269..2270 "("
+        INSTR_NAME@2270..2276 "select"
+        WHITESPACE@2276..2283 "\n      "
+        OPERAND@2283..2296
+          PLAIN_INSTR@2283..2296
+            L_PAREN@2283..2284 "("
+            INSTR_NAME@2284..2293 "i32.const"
+            WHITESPACE@2293..2294 " "
+            OPERAND@2294..2295
+              INT@2294..2295 "2"
+            R_PAREN@2295..2296 ")"
+        WHITESPACE@2296..2297 " "
+        OPERAND@2297..2310
+          PLAIN_INSTR@2297..2310
+            L_PAREN@2297..2298 "("
+            INSTR_NAME@2298..2307 "i32.const"
+            WHITESPACE@2307..2308 " "
+            OPERAND@2308..2309
+              INT@2308..2309 "3"
+            R_PAREN@2309..2310 ")"
+        WHITESPACE@2310..2317 "\n      "
+        OPERAND@2317..2441
+          BLOCK_IF@2317..2441
+            L_PAREN@2317..2318 "("
+            KEYWORD@2318..2320 "if"
+            WHITESPACE@2320..2321 " "
+            BLOCK_TYPE@2321..2333
+              RESULT@2321..2333
+                L_PAREN@2321..2322 "("
+                KEYWORD@2322..2328 "result"
+                WHITESPACE@2328..2329 " "
+                VAL_TYPE@2329..2332
+                  NUM_TYPE@2329..2332 "i32"
+                R_PAREN@2332..2333 ")"
+            WHITESPACE@2333..2334 " "
+            PLAIN_INSTR@2334..2347
+              L_PAREN@2334..2335 "("
+              INSTR_NAME@2335..2344 "local.get"
+              WHITESPACE@2344..2345 " "
+              OPERAND@2345..2346
+                INT@2345..2346 "0"
+              R_PAREN@2346..2347 ")"
+            WHITESPACE@2347..2356 "\n        "
+            BLOCK_IF_THEN@2356..2390
+              L_PAREN@2356..2357 "("
+              KEYWORD@2357..2361 "then"
+              WHITESPACE@2361..2362 " "
+              PLAIN_INSTR@2362..2375
+                L_PAREN@2362..2363 "("
+                INSTR_NAME@2363..2367 "call"
+                WHITESPACE@2367..2368 " "
+                OPERAND@2368..2374
+                  IDENT@2368..2374 "$dummy"
+                R_PAREN@2374..2375 ")"
+              WHITESPACE@2375..2376 " "
+              PLAIN_INSTR@2376..2389
+                L_PAREN@2376..2377 "("
+                INSTR_NAME@2377..2386 "i32.const"
+                WHITESPACE@2386..2387 " "
+                OPERAND@2387..2388
+                  INT@2387..2388 "1"
+                R_PAREN@2388..2389 ")"
+              R_PAREN@2389..2390 ")"
+            WHITESPACE@2390..2399 "\n        "
+            BLOCK_IF_ELSE@2399..2433
+              L_PAREN@2399..2400 "("
+              KEYWORD@2400..2404 "else"
+              WHITESPACE@2404..2405 " "
+              PLAIN_INSTR@2405..2418
+                L_PAREN@2405..2406 "("
+                INSTR_NAME@2406..2410 "call"
+                WHITESPACE@2410..2411 " "
+                OPERAND@2411..2417
+                  IDENT@2411..2417 "$dummy"
+                R_PAREN@2417..2418 ")"
+              WHITESPACE@2418..2419 " "
+              PLAIN_INSTR@2419..2432
+                L_PAREN@2419..2420 "("
+                INSTR_NAME@2420..2429 "i32.const"
+                WHITESPACE@2429..2430 " "
+                OPERAND@2430..2431
+                  INT@2430..2431 "0"
+                R_PAREN@2431..2432 ")"
+              R_PAREN@2432..2433 ")"
+            WHITESPACE@2433..2440 "\n      "
+            R_PAREN@2440..2441 ")"
+        WHITESPACE@2441..2446 "\n    "
+        R_PAREN@2446..2447 ")"
+      WHITESPACE@2447..2450 "\n  "
+      R_PAREN@2450..2451 ")"
+    WHITESPACE@2451..2455 "\n\n  "
+    MODULE_FIELD_FUNC@2455..2708
+      L_PAREN@2455..2456 "("
+      KEYWORD@2456..2460 "func"
+      WHITESPACE@2460..2461 " "
+      EXPORT@2461..2485
+        L_PAREN@2461..2462 "("
+        KEYWORD@2462..2468 "export"
+        WHITESPACE@2468..2469 " "
+        NAME@2469..2484
+          STRING@2469..2484 "\"as-loop-first\""
+        R_PAREN@2484..2485 ")"
+      WHITESPACE@2485..2486 " "
+      TYPE_USE@2486..2510
+        PARAM@2486..2497
+          L_PAREN@2486..2487 "("
+          KEYWORD@2487..2492 "param"
+          WHITESPACE@2492..2493 " "
+          VAL_TYPE@2493..2496
+            NUM_TYPE@2493..2496 "i32"
+          R_PAREN@2496..2497 ")"
+        WHITESPACE@2497..2498 " "
+        RESULT@2498..2510
+          L_PAREN@2498..2499 "("
+          KEYWORD@2499..2505 "result"
+          WHITESPACE@2505..2506 " "
+          VAL_TYPE@2506..2509
+            NUM_TYPE@2506..2509 "i32"
+          R_PAREN@2509..2510 ")"
+      WHITESPACE@2510..2515 "\n    "
+      BLOCK_LOOP@2515..2704
+        L_PAREN@2515..2516 "("
+        KEYWORD@2516..2520 "loop"
+        WHITESPACE@2520..2521 " "
+        BLOCK_TYPE@2521..2533
+          RESULT@2521..2533
+            L_PAREN@2521..2522 "("
+            KEYWORD@2522..2528 "result"
+            WHITESPACE@2528..2529 " "
+            VAL_TYPE@2529..2532
+              NUM_TYPE@2529..2532 "i32"
+            R_PAREN@2532..2533 ")"
+        WHITESPACE@2533..2540 "\n      "
+        BLOCK_IF@2540..2664
+          L_PAREN@2540..2541 "("
+          KEYWORD@2541..2543 "if"
+          WHITESPACE@2543..2544 " "
+          BLOCK_TYPE@2544..2556
+            RESULT@2544..2556
+              L_PAREN@2544..2545 "("
+              KEYWORD@2545..2551 "result"
+              WHITESPACE@2551..2552 " "
+              VAL_TYPE@2552..2555
+                NUM_TYPE@2552..2555 "i32"
+              R_PAREN@2555..2556 ")"
+          WHITESPACE@2556..2557 " "
+          PLAIN_INSTR@2557..2570
+            L_PAREN@2557..2558 "("
+            INSTR_NAME@2558..2567 "local.get"
+            WHITESPACE@2567..2568 " "
+            OPERAND@2568..2569
+              INT@2568..2569 "0"
+            R_PAREN@2569..2570 ")"
+          WHITESPACE@2570..2579 "\n        "
+          BLOCK_IF_THEN@2579..2613
+            L_PAREN@2579..2580 "("
+            KEYWORD@2580..2584 "then"
+            WHITESPACE@2584..2585 " "
+            PLAIN_INSTR@2585..2598
+              L_PAREN@2585..2586 "("
+              INSTR_NAME@2586..2590 "call"
+              WHITESPACE@2590..2591 " "
+              OPERAND@2591..2597
+                IDENT@2591..2597 "$dummy"
+              R_PAREN@2597..2598 ")"
+            WHITESPACE@2598..2599 " "
+            PLAIN_INSTR@2599..2612
+              L_PAREN@2599..2600 "("
+              INSTR_NAME@2600..2609 "i32.const"
+              WHITESPACE@2609..2610 " "
+              OPERAND@2610..2611
+                INT@2610..2611 "1"
+              R_PAREN@2611..2612 ")"
+            R_PAREN@2612..2613 ")"
+          WHITESPACE@2613..2622 "\n        "
+          BLOCK_IF_ELSE@2622..2656
+            L_PAREN@2622..2623 "("
+            KEYWORD@2623..2627 "else"
+            WHITESPACE@2627..2628 " "
+            PLAIN_INSTR@2628..2641
+              L_PAREN@2628..2629 "("
+              INSTR_NAME@2629..2633 "call"
+              WHITESPACE@2633..2634 " "
+              OPERAND@2634..2640
+                IDENT@2634..2640 "$dummy"
+              R_PAREN@2640..2641 ")"
+            WHITESPACE@2641..2642 " "
+            PLAIN_INSTR@2642..2655
+              L_PAREN@2642..2643 "("
+              INSTR_NAME@2643..2652 "i32.const"
+              WHITESPACE@2652..2653 " "
+              OPERAND@2653..2654
+                INT@2653..2654 "0"
+              R_PAREN@2654..2655 ")"
+            R_PAREN@2655..2656 ")"
+          WHITESPACE@2656..2663 "\n      "
+          R_PAREN@2663..2664 ")"
+        WHITESPACE@2664..2671 "\n      "
+        PLAIN_INSTR@2671..2684
+          L_PAREN@2671..2672 "("
+          INSTR_NAME@2672..2676 "call"
+          WHITESPACE@2676..2677 " "
+          OPERAND@2677..2683
+            IDENT@2677..2683 "$dummy"
+          R_PAREN@2683..2684 ")"
+        WHITESPACE@2684..2685 " "
+        PLAIN_INSTR@2685..2698
+          L_PAREN@2685..2686 "("
+          INSTR_NAME@2686..2690 "call"
+          WHITESPACE@2690..2691 " "
+          OPERAND@2691..2697
+            IDENT@2691..2697 "$dummy"
+          R_PAREN@2697..2698 ")"
+        WHITESPACE@2698..2703 "\n    "
+        R_PAREN@2703..2704 ")"
+      WHITESPACE@2704..2707 "\n  "
+      R_PAREN@2707..2708 ")"
+    WHITESPACE@2708..2711 "\n  "
+    MODULE_FIELD_FUNC@2711..2968
+      L_PAREN@2711..2712 "("
+      KEYWORD@2712..2716 "func"
+      WHITESPACE@2716..2717 " "
+      EXPORT@2717..2739
+        L_PAREN@2717..2718 "("
+        KEYWORD@2718..2724 "export"
+        WHITESPACE@2724..2725 " "
+        NAME@2725..2738
+          STRING@2725..2738 "\"as-loop-mid\""
+        R_PAREN@2738..2739 ")"
+      WHITESPACE@2739..2740 " "
+      TYPE_USE@2740..2764
+        PARAM@2740..2751
+          L_PAREN@2740..2741 "("
+          KEYWORD@2741..2746 "param"
+          WHITESPACE@2746..2747 " "
+          VAL_TYPE@2747..2750
+            NUM_TYPE@2747..2750 "i32"
+          R_PAREN@2750..2751 ")"
+        WHITESPACE@2751..2752 " "
+        RESULT@2752..2764
+          L_PAREN@2752..2753 "("
+          KEYWORD@2753..2759 "result"
+          WHITESPACE@2759..2760 " "
+          VAL_TYPE@2760..2763
+            NUM_TYPE@2760..2763 "i32"
+          R_PAREN@2763..2764 ")"
+      WHITESPACE@2764..2769 "\n    "
+      BLOCK_LOOP@2769..2964
+        L_PAREN@2769..2770 "("
+        KEYWORD@2770..2774 "loop"
+        WHITESPACE@2774..2775 " "
+        BLOCK_TYPE@2775..2787
+          RESULT@2775..2787
+            L_PAREN@2775..2776 "("
+            KEYWORD@2776..2782 "result"
+            WHITESPACE@2782..2783 " "
+            VAL_TYPE@2783..2786
+              NUM_TYPE@2783..2786 "i32"
+            R_PAREN@2786..2787 ")"
+        WHITESPACE@2787..2794 "\n      "
+        PLAIN_INSTR@2794..2807
+          L_PAREN@2794..2795 "("
+          INSTR_NAME@2795..2799 "call"
+          WHITESPACE@2799..2800 " "
+          OPERAND@2800..2806
+            IDENT@2800..2806 "$dummy"
+          R_PAREN@2806..2807 ")"
+        WHITESPACE@2807..2814 "\n      "
+        BLOCK_IF@2814..2938
+          L_PAREN@2814..2815 "("
+          KEYWORD@2815..2817 "if"
+          WHITESPACE@2817..2818 " "
+          BLOCK_TYPE@2818..2830
+            RESULT@2818..2830
+              L_PAREN@2818..2819 "("
+              KEYWORD@2819..2825 "result"
+              WHITESPACE@2825..2826 " "
+              VAL_TYPE@2826..2829
+                NUM_TYPE@2826..2829 "i32"
+              R_PAREN@2829..2830 ")"
+          WHITESPACE@2830..2831 " "
+          PLAIN_INSTR@2831..2844
+            L_PAREN@2831..2832 "("
+            INSTR_NAME@2832..2841 "local.get"
+            WHITESPACE@2841..2842 " "
+            OPERAND@2842..2843
+              INT@2842..2843 "0"
+            R_PAREN@2843..2844 ")"
+          WHITESPACE@2844..2853 "\n        "
+          BLOCK_IF_THEN@2853..2887
+            L_PAREN@2853..2854 "("
+            KEYWORD@2854..2858 "then"
+            WHITESPACE@2858..2859 " "
+            PLAIN_INSTR@2859..2872
+              L_PAREN@2859..2860 "("
+              INSTR_NAME@2860..2864 "call"
+              WHITESPACE@2864..2865 " "
+              OPERAND@2865..2871
+                IDENT@2865..2871 "$dummy"
+              R_PAREN@2871..2872 ")"
+            WHITESPACE@2872..2873 " "
+            PLAIN_INSTR@2873..2886
+              L_PAREN@2873..2874 "("
+              INSTR_NAME@2874..2883 "i32.const"
+              WHITESPACE@2883..2884 " "
+              OPERAND@2884..2885
+                INT@2884..2885 "1"
+              R_PAREN@2885..2886 ")"
+            R_PAREN@2886..2887 ")"
+          WHITESPACE@2887..2896 "\n        "
+          BLOCK_IF_ELSE@2896..2930
+            L_PAREN@2896..2897 "("
+            KEYWORD@2897..2901 "else"
+            WHITESPACE@2901..2902 " "
+            PLAIN_INSTR@2902..2915
+              L_PAREN@2902..2903 "("
+              INSTR_NAME@2903..2907 "call"
+              WHITESPACE@2907..2908 " "
+              OPERAND@2908..2914
+                IDENT@2908..2914 "$dummy"
+              R_PAREN@2914..2915 ")"
+            WHITESPACE@2915..2916 " "
+            PLAIN_INSTR@2916..2929
+              L_PAREN@2916..2917 "("
+              INSTR_NAME@2917..2926 "i32.const"
+              WHITESPACE@2926..2927 " "
+              OPERAND@2927..2928
+                INT@2927..2928 "0"
+              R_PAREN@2928..2929 ")"
+            R_PAREN@2929..2930 ")"
+          WHITESPACE@2930..2937 "\n      "
+          R_PAREN@2937..2938 ")"
+        WHITESPACE@2938..2945 "\n      "
+        PLAIN_INSTR@2945..2958
+          L_PAREN@2945..2946 "("
+          INSTR_NAME@2946..2950 "call"
+          WHITESPACE@2950..2951 " "
+          OPERAND@2951..2957
+            IDENT@2951..2957 "$dummy"
+          R_PAREN@2957..2958 ")"
+        WHITESPACE@2958..2963 "\n    "
+        R_PAREN@2963..2964 ")"
+      WHITESPACE@2964..2967 "\n  "
+      R_PAREN@2967..2968 ")"
+    WHITESPACE@2968..2971 "\n  "
+    MODULE_FIELD_FUNC@2971..3223
+      L_PAREN@2971..2972 "("
+      KEYWORD@2972..2976 "func"
+      WHITESPACE@2976..2977 " "
+      EXPORT@2977..3000
+        L_PAREN@2977..2978 "("
+        KEYWORD@2978..2984 "export"
+        WHITESPACE@2984..2985 " "
+        NAME@2985..2999
+          STRING@2985..2999 "\"as-loop-last\""
+        R_PAREN@2999..3000 ")"
+      WHITESPACE@3000..3001 " "
+      TYPE_USE@3001..3025
+        PARAM@3001..3012
+          L_PAREN@3001..3002 "("
+          KEYWORD@3002..3007 "param"
+          WHITESPACE@3007..3008 " "
+          VAL_TYPE@3008..3011
+            NUM_TYPE@3008..3011 "i32"
+          R_PAREN@3011..3012 ")"
+        WHITESPACE@3012..3013 " "
+        RESULT@3013..3025
+          L_PAREN@3013..3014 "("
+          KEYWORD@3014..3020 "result"
+          WHITESPACE@3020..3021 " "
+          VAL_TYPE@3021..3024
+            NUM_TYPE@3021..3024 "i32"
+          R_PAREN@3024..3025 ")"
+      WHITESPACE@3025..3030 "\n    "
+      BLOCK_LOOP@3030..3219
+        L_PAREN@3030..3031 "("
+        KEYWORD@3031..3035 "loop"
+        WHITESPACE@3035..3036 " "
+        BLOCK_TYPE@3036..3048
+          RESULT@3036..3048
+            L_PAREN@3036..3037 "("
+            KEYWORD@3037..3043 "result"
+            WHITESPACE@3043..3044 " "
+            VAL_TYPE@3044..3047
+              NUM_TYPE@3044..3047 "i32"
+            R_PAREN@3047..3048 ")"
+        WHITESPACE@3048..3055 "\n      "
+        PLAIN_INSTR@3055..3068
+          L_PAREN@3055..3056 "("
+          INSTR_NAME@3056..3060 "call"
+          WHITESPACE@3060..3061 " "
+          OPERAND@3061..3067
+            IDENT@3061..3067 "$dummy"
+          R_PAREN@3067..3068 ")"
+        WHITESPACE@3068..3069 " "
+        PLAIN_INSTR@3069..3082
+          L_PAREN@3069..3070 "("
+          INSTR_NAME@3070..3074 "call"
+          WHITESPACE@3074..3075 " "
+          OPERAND@3075..3081
+            IDENT@3075..3081 "$dummy"
+          R_PAREN@3081..3082 ")"
+        WHITESPACE@3082..3089 "\n      "
+        BLOCK_IF@3089..3213
+          L_PAREN@3089..3090 "("
+          KEYWORD@3090..3092 "if"
+          WHITESPACE@3092..3093 " "
+          BLOCK_TYPE@3093..3105
+            RESULT@3093..3105
+              L_PAREN@3093..3094 "("
+              KEYWORD@3094..3100 "result"
+              WHITESPACE@3100..3101 " "
+              VAL_TYPE@3101..3104
+                NUM_TYPE@3101..3104 "i32"
+              R_PAREN@3104..3105 ")"
+          WHITESPACE@3105..3106 " "
+          PLAIN_INSTR@3106..3119
+            L_PAREN@3106..3107 "("
+            INSTR_NAME@3107..3116 "local.get"
+            WHITESPACE@3116..3117 " "
+            OPERAND@3117..3118
+              INT@3117..3118 "0"
+            R_PAREN@3118..3119 ")"
+          WHITESPACE@3119..3128 "\n        "
+          BLOCK_IF_THEN@3128..3162
+            L_PAREN@3128..3129 "("
+            KEYWORD@3129..3133 "then"
+            WHITESPACE@3133..3134 " "
+            PLAIN_INSTR@3134..3147
+              L_PAREN@3134..3135 "("
+              INSTR_NAME@3135..3139 "call"
+              WHITESPACE@3139..3140 " "
+              OPERAND@3140..3146
+                IDENT@3140..3146 "$dummy"
+              R_PAREN@3146..3147 ")"
+            WHITESPACE@3147..3148 " "
+            PLAIN_INSTR@3148..3161
+              L_PAREN@3148..3149 "("
+              INSTR_NAME@3149..3158 "i32.const"
+              WHITESPACE@3158..3159 " "
+              OPERAND@3159..3160
+                INT@3159..3160 "1"
+              R_PAREN@3160..3161 ")"
+            R_PAREN@3161..3162 ")"
+          WHITESPACE@3162..3171 "\n        "
+          BLOCK_IF_ELSE@3171..3205
+            L_PAREN@3171..3172 "("
+            KEYWORD@3172..3176 "else"
+            WHITESPACE@3176..3177 " "
+            PLAIN_INSTR@3177..3190
+              L_PAREN@3177..3178 "("
+              INSTR_NAME@3178..3182 "call"
+              WHITESPACE@3182..3183 " "
+              OPERAND@3183..3189
+                IDENT@3183..3189 "$dummy"
+              R_PAREN@3189..3190 ")"
+            WHITESPACE@3190..3191 " "
+            PLAIN_INSTR@3191..3204
+              L_PAREN@3191..3192 "("
+              INSTR_NAME@3192..3201 "i32.const"
+              WHITESPACE@3201..3202 " "
+              OPERAND@3202..3203
+                INT@3202..3203 "0"
+              R_PAREN@3203..3204 ")"
+            R_PAREN@3204..3205 ")"
+          WHITESPACE@3205..3212 "\n      "
+          R_PAREN@3212..3213 ")"
+        WHITESPACE@3213..3218 "\n    "
+        R_PAREN@3218..3219 ")"
+      WHITESPACE@3219..3222 "\n  "
+      R_PAREN@3222..3223 ")"
+    WHITESPACE@3223..3227 "\n\n  "
+    MODULE_FIELD_FUNC@3227..3492
+      L_PAREN@3227..3228 "("
+      KEYWORD@3228..3232 "func"
+      WHITESPACE@3232..3233 " "
+      EXPORT@3233..3259
+        L_PAREN@3233..3234 "("
+        KEYWORD@3234..3240 "export"
+        WHITESPACE@3240..3241 " "
+        NAME@3241..3258
+          STRING@3241..3258 "\"as-if-condition\""
+        R_PAREN@3258..3259 ")"
+      WHITESPACE@3259..3260 " "
+      TYPE_USE@3260..3284
+        PARAM@3260..3271
+          L_PAREN@3260..3261 "("
+          KEYWORD@3261..3266 "param"
+          WHITESPACE@3266..3267 " "
+          VAL_TYPE@3267..3270
+            NUM_TYPE@3267..3270 "i32"
+          R_PAREN@3270..3271 ")"
+        WHITESPACE@3271..3272 " "
+        RESULT@3272..3284
+          L_PAREN@3272..3273 "("
+          KEYWORD@3273..3279 "result"
+          WHITESPACE@3279..3280 " "
+          VAL_TYPE@3280..3283
+            NUM_TYPE@3280..3283 "i32"
+          R_PAREN@3283..3284 ")"
+      WHITESPACE@3284..3289 "\n    "
+      BLOCK_IF@3289..3488
+        L_PAREN@3289..3290 "("
+        KEYWORD@3290..3292 "if"
+        WHITESPACE@3292..3293 " "
+        BLOCK_TYPE@3293..3305
+          RESULT@3293..3305
+            L_PAREN@3293..3294 "("
+            KEYWORD@3294..3300 "result"
+            WHITESPACE@3300..3301 " "
+            VAL_TYPE@3301..3304
+              NUM_TYPE@3301..3304 "i32"
+            R_PAREN@3304..3305 ")"
+        WHITESPACE@3305..3312 "\n      "
+        BLOCK_IF@3312..3400
+          L_PAREN@3312..3313 "("
+          KEYWORD@3313..3315 "if"
+          WHITESPACE@3315..3316 " "
+          BLOCK_TYPE@3316..3328
+            RESULT@3316..3328
+              L_PAREN@3316..3317 "("
+              KEYWORD@3317..3323 "result"
+              WHITESPACE@3323..3324 " "
+              VAL_TYPE@3324..3327
+                NUM_TYPE@3324..3327 "i32"
+              R_PAREN@3327..3328 ")"
+          WHITESPACE@3328..3329 " "
+          PLAIN_INSTR@3329..3342
+            L_PAREN@3329..3330 "("
+            INSTR_NAME@3330..3339 "local.get"
+            WHITESPACE@3339..3340 " "
+            OPERAND@3340..3341
+              INT@3340..3341 "0"
+            R_PAREN@3341..3342 ")"
+          WHITESPACE@3342..3351 "\n        "
+          BLOCK_IF_THEN@3351..3371
+            L_PAREN@3351..3352 "("
+            KEYWORD@3352..3356 "then"
+            WHITESPACE@3356..3357 " "
+            PLAIN_INSTR@3357..3370
+              L_PAREN@3357..3358 "("
+              INSTR_NAME@3358..3367 "i32.const"
+              WHITESPACE@3367..3368 " "
+              OPERAND@3368..3369
+                INT@3368..3369 "1"
+              R_PAREN@3369..3370 ")"
+            R_PAREN@3370..3371 ")"
+          WHITESPACE@3371..3372 " "
+          BLOCK_IF_ELSE@3372..3392
+            L_PAREN@3372..3373 "("
+            KEYWORD@3373..3377 "else"
+            WHITESPACE@3377..3378 " "
+            PLAIN_INSTR@3378..3391
+              L_PAREN@3378..3379 "("
+              INSTR_NAME@3379..3388 "i32.const"
+              WHITESPACE@3388..3389 " "
+              OPERAND@3389..3390
+                INT@3389..3390 "0"
+              R_PAREN@3390..3391 ")"
+            R_PAREN@3391..3392 ")"
+          WHITESPACE@3392..3399 "\n      "
+          R_PAREN@3399..3400 ")"
+        WHITESPACE@3400..3407 "\n      "
+        BLOCK_IF_THEN@3407..3441
+          L_PAREN@3407..3408 "("
+          KEYWORD@3408..3412 "then"
+          WHITESPACE@3412..3413 " "
+          PLAIN_INSTR@3413..3426
+            L_PAREN@3413..3414 "("
+            INSTR_NAME@3414..3418 "call"
+            WHITESPACE@3418..3419 " "
+            OPERAND@3419..3425
+              IDENT@3419..3425 "$dummy"
+            R_PAREN@3425..3426 ")"
+          WHITESPACE@3426..3427 " "
+          PLAIN_INSTR@3427..3440
+            L_PAREN@3427..3428 "("
+            INSTR_NAME@3428..3437 "i32.const"
+            WHITESPACE@3437..3438 " "
+            OPERAND@3438..3439
+              INT@3438..3439 "2"
+            R_PAREN@3439..3440 ")"
+          R_PAREN@3440..3441 ")"
+        WHITESPACE@3441..3448 "\n      "
+        BLOCK_IF_ELSE@3448..3482
+          L_PAREN@3448..3449 "("
+          KEYWORD@3449..3453 "else"
+          WHITESPACE@3453..3454 " "
+          PLAIN_INSTR@3454..3467
+            L_PAREN@3454..3455 "("
+            INSTR_NAME@3455..3459 "call"
+            WHITESPACE@3459..3460 " "
+            OPERAND@3460..3466
+              IDENT@3460..3466 "$dummy"
+            R_PAREN@3466..3467 ")"
+          WHITESPACE@3467..3468 " "
+          PLAIN_INSTR@3468..3481
+            L_PAREN@3468..3469 "("
+            INSTR_NAME@3469..3478 "i32.const"
+            WHITESPACE@3478..3479 " "
+            OPERAND@3479..3480
+              INT@3479..3480 "3"
+            R_PAREN@3480..3481 ")"
+          R_PAREN@3481..3482 ")"
+        WHITESPACE@3482..3487 "\n    "
+        R_PAREN@3487..3488 ")"
+      WHITESPACE@3488..3491 "\n  "
+      R_PAREN@3491..3492 ")"
+    WHITESPACE@3492..3496 "\n\n  "
+    MODULE_FIELD_FUNC@3496..3675
+      L_PAREN@3496..3497 "("
+      KEYWORD@3497..3501 "func"
+      WHITESPACE@3501..3502 " "
+      EXPORT@3502..3518
+        L_PAREN@3502..3503 "("
+        KEYWORD@3503..3509 "export"
+        WHITESPACE@3509..3510 " "
+        NAME@3510..3517
+          STRING@3510..3517 "\"param\""
+        R_PAREN@3517..3518 ")"
+      WHITESPACE@3518..3519 " "
+      TYPE_USE@3519..3543
+        PARAM@3519..3530
+          L_PAREN@3519..3520 "("
+          KEYWORD@3520..3525 "param"
+          WHITESPACE@3525..3526 " "
+          VAL_TYPE@3526..3529
+            NUM_TYPE@3526..3529 "i32"
+          R_PAREN@3529..3530 ")"
+        WHITESPACE@3530..3531 " "
+        RESULT@3531..3543
+          L_PAREN@3531..3532 "("
+          KEYWORD@3532..3538 "result"
+          WHITESPACE@3538..3539 " "
+          VAL_TYPE@3539..3542
+            NUM_TYPE@3539..3542 "i32"
+          R_PAREN@3542..3543 ")"
+      WHITESPACE@3543..3548 "\n    "
+      BLOCK_IF@3548..3671
+        L_PAREN@3548..3549 "("
+        KEYWORD@3549..3551 "if"
+        WHITESPACE@3551..3552 " "
+        BLOCK_TYPE@3552..3576
+          TYPE_USE@3552..3576
+            PARAM@3552..3563
+              L_PAREN@3552..3553 "("
+              KEYWORD@3553..3558 "param"
+              WHITESPACE@3558..3559 " "
+              VAL_TYPE@3559..3562
+                NUM_TYPE@3559..3562 "i32"
+              R_PAREN@3562..3563 ")"
+            WHITESPACE@3563..3564 " "
+            RESULT@3564..3576
+              L_PAREN@3564..3565 "("
+              KEYWORD@3565..3571 "result"
+              WHITESPACE@3571..3572 " "
+              VAL_TYPE@3572..3575
+                NUM_TYPE@3572..3575 "i32"
+              R_PAREN@3575..3576 ")"
+        WHITESPACE@3576..3577 " "
+        PLAIN_INSTR@3577..3590
+          L_PAREN@3577..3578 "("
+          INSTR_NAME@3578..3587 "local.get"
+          WHITESPACE@3587..3588 " "
+          OPERAND@3588..3589
+            INT@3588..3589 "0"
+          R_PAREN@3589..3590 ")"
+        WHITESPACE@3590..3597 "\n      "
+        BLOCK_IF_THEN@3597..3627
+          L_PAREN@3597..3598 "("
+          KEYWORD@3598..3602 "then"
+          WHITESPACE@3602..3603 " "
+          PLAIN_INSTR@3603..3616
+            L_PAREN@3603..3604 "("
+            INSTR_NAME@3604..3613 "i32.const"
+            WHITESPACE@3613..3614 " "
+            OPERAND@3614..3615
+              INT@3614..3615 "2"
+            R_PAREN@3615..3616 ")"
+          WHITESPACE@3616..3617 " "
+          PLAIN_INSTR@3617..3626
+            L_PAREN@3617..3618 "("
+            INSTR_NAME@3618..3625 "i32.add"
+            R_PAREN@3625..3626 ")"
+          R_PAREN@3626..3627 ")"
+        WHITESPACE@3627..3634 "\n      "
+        BLOCK_IF_ELSE@3634..3665
+          L_PAREN@3634..3635 "("
+          KEYWORD@3635..3639 "else"
+          WHITESPACE@3639..3640 " "
+          PLAIN_INSTR@3640..3654
+            L_PAREN@3640..3641 "("
+            INSTR_NAME@3641..3650 "i32.const"
+            WHITESPACE@3650..3651 " "
+            OPERAND@3651..3653
+              INT@3651..3653 "-2"
+            R_PAREN@3653..3654 ")"
+          WHITESPACE@3654..3655 " "
+          PLAIN_INSTR@3655..3664
+            L_PAREN@3655..3656 "("
+            INSTR_NAME@3656..3663 "i32.add"
+            R_PAREN@3663..3664 ")"
+          R_PAREN@3664..3665 ")"
+        WHITESPACE@3665..3670 "\n    "
+        R_PAREN@3670..3671 ")"
+      WHITESPACE@3671..3674 "\n  "
+      R_PAREN@3674..3675 ")"
+    WHITESPACE@3675..3678 "\n  "
+    MODULE_FIELD_FUNC@3678..3833
+      L_PAREN@3678..3679 "("
+      KEYWORD@3679..3683 "func"
+      WHITESPACE@3683..3684 " "
+      EXPORT@3684..3701
+        L_PAREN@3684..3685 "("
+        KEYWORD@3685..3691 "export"
+        WHITESPACE@3691..3692 " "
+        NAME@3692..3700
+          STRING@3692..3700 "\"params\""
+        R_PAREN@3700..3701 ")"
+      WHITESPACE@3701..3702 " "
+      TYPE_USE@3702..3726
+        PARAM@3702..3713
+          L_PAREN@3702..3703 "("
+          KEYWORD@3703..3708 "param"
+          WHITESPACE@3708..3709 " "
+          VAL_TYPE@3709..3712
+            NUM_TYPE@3709..3712 "i32"
+          R_PAREN@3712..3713 ")"
+        WHITESPACE@3713..3714 " "
+        RESULT@3714..3726
+          L_PAREN@3714..3715 "("
+          KEYWORD@3715..3721 "result"
+          WHITESPACE@3721..3722 " "
+          VAL_TYPE@3722..3725
+            NUM_TYPE@3722..3725 "i32"
+          R_PAREN@3725..3726 ")"
+      WHITESPACE@3726..3731 "\n    "
+      BLOCK_IF@3731..3829
+        L_PAREN@3731..3732 "("
+        KEYWORD@3732..3734 "if"
+        WHITESPACE@3734..3735 " "
+        BLOCK_TYPE@3735..3763
+          TYPE_USE@3735..3763
+            PARAM@3735..3750
+              L_PAREN@3735..3736 "("
+              KEYWORD@3736..3741 "param"
+              WHITESPACE@3741..3742 " "
+              VAL_TYPE@3742..3745
+                NUM_TYPE@3742..3745 "i32"
+              WHITESPACE@3745..3746 " "
+              VAL_TYPE@3746..3749
+                NUM_TYPE@3746..3749 "i32"
+              R_PAREN@3749..3750 ")"
+            WHITESPACE@3750..3751 " "
+            RESULT@3751..3763
+              L_PAREN@3751..3752 "("
+              KEYWORD@3752..3758 "result"
+              WHITESPACE@3758..3759 " "
+              VAL_TYPE@3759..3762
+                NUM_TYPE@3759..3762 "i32"
+              R_PAREN@3762..3763 ")"
+        WHITESPACE@3763..3764 " "
+        PLAIN_INSTR@3764..3777
+          L_PAREN@3764..3765 "("
+          INSTR_NAME@3765..3774 "local.get"
+          WHITESPACE@3774..3775 " "
+          OPERAND@3775..3776
+            INT@3775..3776 "0"
+          R_PAREN@3776..3777 ")"
+        WHITESPACE@3777..3784 "\n      "
+        BLOCK_IF_THEN@3784..3800
+          L_PAREN@3784..3785 "("
+          KEYWORD@3785..3789 "then"
+          WHITESPACE@3789..3790 " "
+          PLAIN_INSTR@3790..3799
+            L_PAREN@3790..3791 "("
+            INSTR_NAME@3791..3798 "i32.add"
+            R_PAREN@3798..3799 ")"
+          R_PAREN@3799..3800 ")"
+        WHITESPACE@3800..3807 "\n      "
+        BLOCK_IF_ELSE@3807..3823
+          L_PAREN@3807..3808 "("
+          KEYWORD@3808..3812 "else"
+          WHITESPACE@3812..3813 " "
+          PLAIN_INSTR@3813..3822
+            L_PAREN@3813..3814 "("
+            INSTR_NAME@3814..3821 "i32.sub"
+            R_PAREN@3821..3822 ")"
+          R_PAREN@3822..3823 ")"
+        WHITESPACE@3823..3828 "\n    "
+        R_PAREN@3828..3829 ")"
+      WHITESPACE@3829..3832 "\n  "
+      R_PAREN@3832..3833 ")"
+    WHITESPACE@3833..3837 "\n\n  "
+    MODULE_FIELD_FUNC@3837..4340
+      L_PAREN@3837..3838 "("
+      KEYWORD@3838..3842 "func"
+      WHITESPACE@3842..3843 " "
+      EXPORT@3843..3862
+        L_PAREN@3843..3844 "("
+        KEYWORD@3844..3850 "export"
+        WHITESPACE@3850..3851 " "
+        NAME@3851..3861
+          STRING@3851..3861 "\"type-use\""
+        R_PAREN@3861..3862 ")"
+      WHITESPACE@3862..3867 "\n    "
+      BLOCK_IF@3867..3912
+        L_PAREN@3867..3868 "("
+        KEYWORD@3868..3870 "if"
+        WHITESPACE@3870..3871 " "
+        BLOCK_TYPE@3871..3890
+          TYPE_USE@3871..3890
+            L_PAREN@3871..3872 "("
+            KEYWORD@3872..3876 "type"
+            WHITESPACE@3876..3877 " "
+            INDEX@3877..3889
+              IDENT@3877..3889 "$block-sig-1"
+            R_PAREN@3889..3890 ")"
+        WHITESPACE@3890..3891 " "
+        PLAIN_INSTR@3891..3904
+          L_PAREN@3891..3892 "("
+          INSTR_NAME@3892..3901 "i32.const"
+          WHITESPACE@3901..3902 " "
+          OPERAND@3902..3903
+            INT@3902..3903 "1"
+          R_PAREN@3903..3904 ")"
+        WHITESPACE@3904..3905 " "
+        BLOCK_IF_THEN@3905..3911
+          L_PAREN@3905..3906 "("
+          KEYWORD@3906..3910 "then"
+          R_PAREN@3910..3911 ")"
+        R_PAREN@3911..3912 ")"
+      WHITESPACE@3912..3917 "\n    "
+      BLOCK_IF@3917..4008
+        L_PAREN@3917..3918 "("
+        KEYWORD@3918..3920 "if"
+        WHITESPACE@3920..3921 " "
+        BLOCK_TYPE@3921..3940
+          TYPE_USE@3921..3940
+            L_PAREN@3921..3922 "("
+            KEYWORD@3922..3926 "type"
+            WHITESPACE@3926..3927 " "
+            INDEX@3927..3939
+              IDENT@3927..3939 "$block-sig-2"
+            R_PAREN@3939..3940 ")"
+        WHITESPACE@3940..3941 " "
+        PLAIN_INSTR@3941..3954
+          L_PAREN@3941..3942 "("
+          INSTR_NAME@3942..3951 "i32.const"
+          WHITESPACE@3951..3952 " "
+          OPERAND@3952..3953
+            INT@3952..3953 "1"
+          R_PAREN@3953..3954 ")"
+        WHITESPACE@3954..3961 "\n      "
+        BLOCK_IF_THEN@3961..3981
+          L_PAREN@3961..3962 "("
+          KEYWORD@3962..3966 "then"
+          WHITESPACE@3966..3967 " "
+          PLAIN_INSTR@3967..3980
+            L_PAREN@3967..3968 "("
+            INSTR_NAME@3968..3977 "i32.const"
+            WHITESPACE@3977..3978 " "
+            OPERAND@3978..3979
+              INT@3978..3979 "0"
+            R_PAREN@3979..3980 ")"
+          R_PAREN@3980..3981 ")"
+        WHITESPACE@3981..3982 " "
+        BLOCK_IF_ELSE@3982..4002
+          L_PAREN@3982..3983 "("
+          KEYWORD@3983..3987 "else"
+          WHITESPACE@3987..3988 " "
+          PLAIN_INSTR@3988..4001
+            L_PAREN@3988..3989 "("
+            INSTR_NAME@3989..3998 "i32.const"
+            WHITESPACE@3998..3999 " "
+            OPERAND@3999..4000
+              INT@3999..4000 "2"
+            R_PAREN@4000..4001 ")"
+          R_PAREN@4001..4002 ")"
+        WHITESPACE@4002..4007 "\n    "
+        R_PAREN@4007..4008 ")"
+      WHITESPACE@4008..4013 "\n    "
+      BLOCK_IF@4013..4117
+        L_PAREN@4013..4014 "("
+        KEYWORD@4014..4016 "if"
+        WHITESPACE@4016..4017 " "
+        BLOCK_TYPE@4017..4049
+          TYPE_USE@4017..4049
+            L_PAREN@4017..4018 "("
+            KEYWORD@4018..4022 "type"
+            WHITESPACE@4022..4023 " "
+            INDEX@4023..4035
+              IDENT@4023..4035 "$block-sig-2"
+            R_PAREN@4035..4036 ")"
+            WHITESPACE@4036..4037 " "
+            RESULT@4037..4049
+              L_PAREN@4037..4038 "("
+              KEYWORD@4038..4044 "result"
+              WHITESPACE@4044..4045 " "
+              VAL_TYPE@4045..4048
+                NUM_TYPE@4045..4048 "i32"
+              R_PAREN@4048..4049 ")"
+        WHITESPACE@4049..4050 " "
+        PLAIN_INSTR@4050..4063
+          L_PAREN@4050..4051 "("
+          INSTR_NAME@4051..4060 "i32.const"
+          WHITESPACE@4060..4061 " "
+          OPERAND@4061..4062
+            INT@4061..4062 "1"
+          R_PAREN@4062..4063 ")"
+        WHITESPACE@4063..4070 "\n      "
+        BLOCK_IF_THEN@4070..4090
+          L_PAREN@4070..4071 "("
+          KEYWORD@4071..4075 "then"
+          WHITESPACE@4075..4076 " "
+          PLAIN_INSTR@4076..4089
+            L_PAREN@4076..4077 "("
+            INSTR_NAME@4077..4086 "i32.const"
+            WHITESPACE@4086..4087 " "
+            OPERAND@4087..4088
+              INT@4087..4088 "0"
+            R_PAREN@4088..4089 ")"
+          R_PAREN@4089..4090 ")"
+        WHITESPACE@4090..4091 " "
+        BLOCK_IF_ELSE@4091..4111
+          L_PAREN@4091..4092 "("
+          KEYWORD@4092..4096 "else"
+          WHITESPACE@4096..4097 " "
+          PLAIN_INSTR@4097..4110
+            L_PAREN@4097..4098 "("
+            INSTR_NAME@4098..4107 "i32.const"
+            WHITESPACE@4107..4108 " "
+            OPERAND@4108..4109
+              INT@4108..4109 "2"
+            R_PAREN@4109..4110 ")"
+          R_PAREN@4110..4111 ")"
+        WHITESPACE@4111..4116 "\n    "
+        R_PAREN@4116..4117 ")"
+      WHITESPACE@4117..4122 "\n    "
+      BLOCK_IF@4122..4211
+        L_PAREN@4122..4123 "("
+        KEYWORD@4123..4125 "if"
+        WHITESPACE@4125..4126 " "
+        BLOCK_TYPE@4126..4157
+          TYPE_USE@4126..4157
+            L_PAREN@4126..4127 "("
+            KEYWORD@4127..4131 "type"
+            WHITESPACE@4131..4132 " "
+            INDEX@4132..4144
+              IDENT@4132..4144 "$block-sig-3"
+            R_PAREN@4144..4145 ")"
+            WHITESPACE@4145..4146 " "
+            PARAM@4146..4157
+              L_PAREN@4146..4147 "("
+              KEYWORD@4147..4152 "param"
+              WHITESPACE@4152..4153 " "
+              VAL_TYPE@4153..4156
+                NUM_TYPE@4153..4156 "i32"
+              R_PAREN@4156..4157 ")"
+        WHITESPACE@4157..4158 " "
+        PLAIN_INSTR@4158..4171
+          L_PAREN@4158..4159 "("
+          INSTR_NAME@4159..4168 "i32.const"
+          WHITESPACE@4168..4169 " "
+          OPERAND@4169..4170
+            INT@4169..4170 "1"
+          R_PAREN@4170..4171 ")"
+        WHITESPACE@4171..4178 "\n      "
+        BLOCK_IF_THEN@4178..4191
+          L_PAREN@4178..4179 "("
+          KEYWORD@4179..4183 "then"
+          WHITESPACE@4183..4184 " "
+          PLAIN_INSTR@4184..4190
+            L_PAREN@4184..4185 "("
+            INSTR_NAME@4185..4189 "drop"
+            R_PAREN@4189..4190 ")"
+          R_PAREN@4190..4191 ")"
+        WHITESPACE@4191..4192 " "
+        BLOCK_IF_ELSE@4192..4205
+          L_PAREN@4192..4193 "("
+          KEYWORD@4193..4197 "else"
+          WHITESPACE@4197..4198 " "
+          PLAIN_INSTR@4198..4204
+            L_PAREN@4198..4199 "("
+            INSTR_NAME@4199..4203 "drop"
+            R_PAREN@4203..4204 ")"
+          R_PAREN@4204..4205 ")"
+        WHITESPACE@4205..4210 "\n    "
+        R_PAREN@4210..4211 ")"
+      WHITESPACE@4211..4216 "\n    "
+      BLOCK_IF@4216..4336
+        L_PAREN@4216..4217 "("
+        KEYWORD@4217..4219 "if"
+        WHITESPACE@4219..4220 " "
+        BLOCK_TYPE@4220..4303
+          TYPE_USE@4220..4303
+            L_PAREN@4220..4221 "("
+            KEYWORD@4221..4225 "type"
+            WHITESPACE@4225..4226 " "
+            INDEX@4226..4238
+              IDENT@4226..4238 "$block-sig-4"
+            R_PAREN@4238..4239 ")"
+            WHITESPACE@4239..4246 "\n      "
+            PARAM@4246..4257
+              L_PAREN@4246..4247 "("
+              KEYWORD@4247..4252 "param"
+              WHITESPACE@4252..4253 " "
+              VAL_TYPE@4253..4256
+                NUM_TYPE@4253..4256 "i32"
+              R_PAREN@4256..4257 ")"
+            WHITESPACE@4257..4258 " "
+            PARAM@4258..4273
+              L_PAREN@4258..4259 "("
+              KEYWORD@4259..4264 "param"
+              WHITESPACE@4264..4265 " "
+              VAL_TYPE@4265..4268
+                NUM_TYPE@4265..4268 "f64"
+              WHITESPACE@4268..4269 " "
+              VAL_TYPE@4269..4272
+                NUM_TYPE@4269..4272 "i32"
+              R_PAREN@4272..4273 ")"
+            WHITESPACE@4273..4274 " "
+            RESULT@4274..4290
+              L_PAREN@4274..4275 "("
+              KEYWORD@4275..4281 "result"
+              WHITESPACE@4281..4282 " "
+              VAL_TYPE@4282..4285
+                NUM_TYPE@4282..4285 "i32"
+              WHITESPACE@4285..4286 " "
+              VAL_TYPE@4286..4289
+                NUM_TYPE@4286..4289 "f64"
+              R_PAREN@4289..4290 ")"
+            WHITESPACE@4290..4291 " "
+            RESULT@4291..4303
+              L_PAREN@4291..4292 "("
+              KEYWORD@4292..4298 "result"
+              WHITESPACE@4298..4299 " "
+              VAL_TYPE@4299..4302
+                NUM_TYPE@4299..4302 "i32"
+              R_PAREN@4302..4303 ")"
+        WHITESPACE@4303..4310 "\n      "
+        PLAIN_INSTR@4310..4323
+          L_PAREN@4310..4311 "("
+          INSTR_NAME@4311..4320 "i32.const"
+          WHITESPACE@4320..4321 " "
+          OPERAND@4321..4322
+            INT@4321..4322 "1"
+          R_PAREN@4322..4323 ")"
+        WHITESPACE@4323..4324 " "
+        BLOCK_IF_THEN@4324..4330
+          L_PAREN@4324..4325 "("
+          KEYWORD@4325..4329 "then"
+          R_PAREN@4329..4330 ")"
+        WHITESPACE@4330..4335 "\n    "
+        R_PAREN@4335..4336 ")"
+      WHITESPACE@4336..4339 "\n  "
+      R_PAREN@4339..4340 ")"
+    WHITESPACE@4340..4341 "\n"
+    R_PAREN@4341..4342 ")"
+  WHITESPACE@4342..4343 "\n"

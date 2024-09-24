@@ -1,0 +1,11 @@
+(module
+  (func (i32.const 0)
+    (if (type $sig) (result i32) (param i32) (i32.const 1) (then))
+    (if (param i32) (type $sig) (result i32) (i32.const 1) (then))
+    (if (param i32) (result i32) (type $sig) (i32.const 1) (then))
+    (if (result i32) (type $sig) (param i32) (i32.const 1) (then))
+    (if (result i32) (param i32) (type $sig) (i32.const 1) (then))
+    (if (result i32) (param i32) (i32.const 1) (then))
+    (if (param $x i32) (then (drop)) (else (drop)))
+  )
+)

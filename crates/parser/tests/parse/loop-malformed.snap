@@ -1,0 +1,322 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..452
+  MODULE@0..451
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_FUNC@10..74
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "func"
+      WHITESPACE@15..16 " "
+      PLAIN_INSTR@16..29
+        L_PAREN@16..17 "("
+        INSTR_NAME@17..26 "i32.const"
+        WHITESPACE@26..27 " "
+        OPERAND@27..28
+          INT@27..28 "0"
+        R_PAREN@28..29 ")"
+      WHITESPACE@29..30 " "
+      BLOCK_LOOP@30..73
+        L_PAREN@30..31 "("
+        KEYWORD@31..35 "loop"
+        WHITESPACE@35..36 " "
+        BLOCK_TYPE@36..60
+          TYPE_USE@36..60
+            L_PAREN@36..37 "("
+            KEYWORD@37..41 "type"
+            WHITESPACE@41..42 " "
+            INDEX@42..46
+              IDENT@42..46 "$sig"
+            R_PAREN@46..47 ")"
+            WHITESPACE@47..48 " "
+            RESULT@48..60
+              L_PAREN@48..49 "("
+              KEYWORD@49..55 "result"
+              WHITESPACE@55..56 " "
+              VAL_TYPE@56..59
+                NUM_TYPE@56..59 "i32"
+              R_PAREN@59..60 ")"
+        WHITESPACE@60..61 " "
+        PLAIN_INSTR@61..72
+          L_PAREN@61..62 "("
+          INSTR_NAME@62..67 "param"
+          WHITESPACE@67..68 " "
+          ERROR@68..71 "i32"
+          R_PAREN@71..72 ")"
+        R_PAREN@72..73 ")"
+      R_PAREN@73..74 ")"
+    WHITESPACE@74..77 "\n  "
+    MODULE_FIELD_FUNC@77..141
+      L_PAREN@77..78 "("
+      KEYWORD@78..82 "func"
+      WHITESPACE@82..83 " "
+      PLAIN_INSTR@83..96
+        L_PAREN@83..84 "("
+        INSTR_NAME@84..93 "i32.const"
+        WHITESPACE@93..94 " "
+        OPERAND@94..95
+          INT@94..95 "0"
+        R_PAREN@95..96 ")"
+      WHITESPACE@96..97 " "
+      BLOCK_LOOP@97..140
+        L_PAREN@97..98 "("
+        KEYWORD@98..102 "loop"
+        WHITESPACE@102..103 " "
+        BLOCK_TYPE@103..114
+          TYPE_USE@103..114
+            PARAM@103..114
+              L_PAREN@103..104 "("
+              KEYWORD@104..109 "param"
+              WHITESPACE@109..110 " "
+              VAL_TYPE@110..113
+                NUM_TYPE@110..113 "i32"
+              R_PAREN@113..114 ")"
+        WHITESPACE@114..115 " "
+        PLAIN_INSTR@115..126
+          L_PAREN@115..116 "("
+          INSTR_NAME@116..120 "type"
+          WHITESPACE@120..121 " "
+          OPERAND@121..125
+            IDENT@121..125 "$sig"
+          R_PAREN@125..126 ")"
+        WHITESPACE@126..127 " "
+        PLAIN_INSTR@127..139
+          L_PAREN@127..128 "("
+          INSTR_NAME@128..134 "result"
+          WHITESPACE@134..135 " "
+          ERROR@135..138 "i32"
+          R_PAREN@138..139 ")"
+        R_PAREN@139..140 ")"
+      R_PAREN@140..141 ")"
+    WHITESPACE@141..144 "\n  "
+    MODULE_FIELD_FUNC@144..208
+      L_PAREN@144..145 "("
+      KEYWORD@145..149 "func"
+      WHITESPACE@149..150 " "
+      PLAIN_INSTR@150..163
+        L_PAREN@150..151 "("
+        INSTR_NAME@151..160 "i32.const"
+        WHITESPACE@160..161 " "
+        OPERAND@161..162
+          INT@161..162 "0"
+        R_PAREN@162..163 ")"
+      WHITESPACE@163..164 " "
+      BLOCK_LOOP@164..207
+        L_PAREN@164..165 "("
+        KEYWORD@165..169 "loop"
+        WHITESPACE@169..170 " "
+        BLOCK_TYPE@170..194
+          TYPE_USE@170..194
+            PARAM@170..181
+              L_PAREN@170..171 "("
+              KEYWORD@171..176 "param"
+              WHITESPACE@176..177 " "
+              VAL_TYPE@177..180
+                NUM_TYPE@177..180 "i32"
+              R_PAREN@180..181 ")"
+            WHITESPACE@181..182 " "
+            RESULT@182..194
+              L_PAREN@182..183 "("
+              KEYWORD@183..189 "result"
+              WHITESPACE@189..190 " "
+              VAL_TYPE@190..193
+                NUM_TYPE@190..193 "i32"
+              R_PAREN@193..194 ")"
+        WHITESPACE@194..195 " "
+        PLAIN_INSTR@195..206
+          L_PAREN@195..196 "("
+          INSTR_NAME@196..200 "type"
+          WHITESPACE@200..201 " "
+          OPERAND@201..205
+            IDENT@201..205 "$sig"
+          R_PAREN@205..206 ")"
+        R_PAREN@206..207 ")"
+      R_PAREN@207..208 ")"
+    WHITESPACE@208..211 "\n  "
+    MODULE_FIELD_FUNC@211..275
+      L_PAREN@211..212 "("
+      KEYWORD@212..216 "func"
+      WHITESPACE@216..217 " "
+      PLAIN_INSTR@217..230
+        L_PAREN@217..218 "("
+        INSTR_NAME@218..227 "i32.const"
+        WHITESPACE@227..228 " "
+        OPERAND@228..229
+          INT@228..229 "0"
+        R_PAREN@229..230 ")"
+      WHITESPACE@230..231 " "
+      BLOCK_LOOP@231..274
+        L_PAREN@231..232 "("
+        KEYWORD@232..236 "loop"
+        WHITESPACE@236..237 " "
+        BLOCK_TYPE@237..249
+          RESULT@237..249
+            L_PAREN@237..238 "("
+            KEYWORD@238..244 "result"
+            WHITESPACE@244..245 " "
+            VAL_TYPE@245..248
+              NUM_TYPE@245..248 "i32"
+            R_PAREN@248..249 ")"
+        WHITESPACE@249..250 " "
+        PLAIN_INSTR@250..261
+          L_PAREN@250..251 "("
+          INSTR_NAME@251..255 "type"
+          WHITESPACE@255..256 " "
+          OPERAND@256..260
+            IDENT@256..260 "$sig"
+          R_PAREN@260..261 ")"
+        WHITESPACE@261..262 " "
+        PLAIN_INSTR@262..273
+          L_PAREN@262..263 "("
+          INSTR_NAME@263..268 "param"
+          WHITESPACE@268..269 " "
+          ERROR@269..272 "i32"
+          R_PAREN@272..273 ")"
+        R_PAREN@273..274 ")"
+      R_PAREN@274..275 ")"
+    WHITESPACE@275..278 "\n  "
+    MODULE_FIELD_FUNC@278..342
+      L_PAREN@278..279 "("
+      KEYWORD@279..283 "func"
+      WHITESPACE@283..284 " "
+      PLAIN_INSTR@284..297
+        L_PAREN@284..285 "("
+        INSTR_NAME@285..294 "i32.const"
+        WHITESPACE@294..295 " "
+        OPERAND@295..296
+          INT@295..296 "0"
+        R_PAREN@296..297 ")"
+      WHITESPACE@297..298 " "
+      BLOCK_LOOP@298..341
+        L_PAREN@298..299 "("
+        KEYWORD@299..303 "loop"
+        WHITESPACE@303..304 " "
+        BLOCK_TYPE@304..316
+          RESULT@304..316
+            L_PAREN@304..305 "("
+            KEYWORD@305..311 "result"
+            WHITESPACE@311..312 " "
+            VAL_TYPE@312..315
+              NUM_TYPE@312..315 "i32"
+            R_PAREN@315..316 ")"
+        WHITESPACE@316..317 " "
+        PLAIN_INSTR@317..328
+          L_PAREN@317..318 "("
+          INSTR_NAME@318..323 "param"
+          WHITESPACE@323..324 " "
+          ERROR@324..327 "i32"
+          R_PAREN@327..328 ")"
+        WHITESPACE@328..329 " "
+        PLAIN_INSTR@329..340
+          L_PAREN@329..330 "("
+          INSTR_NAME@330..334 "type"
+          WHITESPACE@334..335 " "
+          OPERAND@335..339
+            IDENT@335..339 "$sig"
+          R_PAREN@339..340 ")"
+        R_PAREN@340..341 ")"
+      R_PAREN@341..342 ")"
+    WHITESPACE@342..345 "\n  "
+    MODULE_FIELD_FUNC@345..397
+      L_PAREN@345..346 "("
+      KEYWORD@346..350 "func"
+      WHITESPACE@350..351 " "
+      PLAIN_INSTR@351..364
+        L_PAREN@351..352 "("
+        INSTR_NAME@352..361 "i32.const"
+        WHITESPACE@361..362 " "
+        OPERAND@362..363
+          INT@362..363 "0"
+        R_PAREN@363..364 ")"
+      WHITESPACE@364..365 " "
+      BLOCK_LOOP@365..396
+        L_PAREN@365..366 "("
+        KEYWORD@366..370 "loop"
+        WHITESPACE@370..371 " "
+        BLOCK_TYPE@371..383
+          RESULT@371..383
+            L_PAREN@371..372 "("
+            KEYWORD@372..378 "result"
+            WHITESPACE@378..379 " "
+            VAL_TYPE@379..382
+              NUM_TYPE@379..382 "i32"
+            R_PAREN@382..383 ")"
+        WHITESPACE@383..384 " "
+        PLAIN_INSTR@384..395
+          L_PAREN@384..385 "("
+          INSTR_NAME@385..390 "param"
+          WHITESPACE@390..391 " "
+          ERROR@391..394 "i32"
+          R_PAREN@394..395 ")"
+        R_PAREN@395..396 ")"
+      R_PAREN@396..397 ")"
+    WHITESPACE@397..400 "\n  "
+    MODULE_FIELD_FUNC@400..449
+      L_PAREN@400..401 "("
+      KEYWORD@401..405 "func"
+      WHITESPACE@405..406 " "
+      PLAIN_INSTR@406..419
+        L_PAREN@406..407 "("
+        INSTR_NAME@407..416 "i32.const"
+        WHITESPACE@416..417 " "
+        OPERAND@417..418
+          INT@417..418 "0"
+        R_PAREN@418..419 ")"
+      WHITESPACE@419..420 " "
+      BLOCK_LOOP@420..448
+        L_PAREN@420..421 "("
+        KEYWORD@421..425 "loop"
+        WHITESPACE@425..426 " "
+        BLOCK_TYPE@426..440
+          TYPE_USE@426..440
+            PARAM@426..440
+              L_PAREN@426..427 "("
+              KEYWORD@427..432 "param"
+              WHITESPACE@432..433 " "
+              IDENT@433..435 "$x"
+              WHITESPACE@435..436 " "
+              VAL_TYPE@436..439
+                NUM_TYPE@436..439 "i32"
+              R_PAREN@439..440 ")"
+        WHITESPACE@440..441 " "
+        PLAIN_INSTR@441..447
+          L_PAREN@441..442 "("
+          INSTR_NAME@442..446 "drop"
+          R_PAREN@446..447 ")"
+        R_PAREN@447..448 ")"
+      R_PAREN@448..449 ")"
+    WHITESPACE@449..450 "\n"
+    R_PAREN@450..451 ")"
+  WHITESPACE@451..452 "\n"
+
+error: expected operand
+  ┌─ loop-malformed.wat:2:61
+  │
+2 │   (func (i32.const 0) (loop (type $sig) (result i32) (param i32)))
+  │                                                             ^^^
+
+error: expected operand
+  ┌─ loop-malformed.wat:3:61
+  │
+3 │   (func (i32.const 0) (loop (param i32) (type $sig) (result i32)))
+  │                                                             ^^^
+
+error: expected operand
+  ┌─ loop-malformed.wat:5:61
+  │
+5 │   (func (i32.const 0) (loop (result i32) (type $sig) (param i32)))
+  │                                                             ^^^
+
+error: expected operand
+  ┌─ loop-malformed.wat:6:49
+  │
+6 │   (func (i32.const 0) (loop (result i32) (param i32) (type $sig)))
+  │                                                 ^^^
+
+error: expected operand
+  ┌─ loop-malformed.wat:7:49
+  │
+7 │   (func (i32.const 0) (loop (result i32) (param i32)))
+  │                                                 ^^^
