@@ -1,9 +1,14 @@
-use crate::files::Files;
+use crate::{files::Files, parser::parse};
+use comemo::Track;
 use lsp_server::{Connection, ExtractError, Message, Notification, Request, RequestId};
 use lsp_types::{
-    notification::{DidCloseTextDocument, DidOpenTextDocument},
-    DidCloseTextDocumentParams, DidOpenTextDocumentParams, ServerCapabilities,
-    TextDocumentSyncCapability, TextDocumentSyncKind,
+    notification::{
+        DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument, Notification as _,
+        PublishDiagnostics,
+    },
+    Diagnostic, DiagnosticSeverity, DidChangeTextDocumentParams, DidCloseTextDocumentParams,
+    DidOpenTextDocumentParams, PublishDiagnosticsParams, ServerCapabilities,
+    TextDocumentSyncCapability, TextDocumentSyncKind, Uri,
 };
 
 #[derive(Default)]
@@ -34,22 +39,26 @@ impl Server {
         Ok(())
     }
 
-    fn server_loop(
-        &mut self,
-        connection: Connection,
-        _params: serde_json::Value,
-    ) -> anyhow::Result<()> {
-        for msg in &connection.receiver {
+    fn server_loop(&mut self, conn: Connection, _params: serde_json::Value) -> anyhow::Result<()> {
+        for msg in &conn.receiver {
             match msg {
                 Message::Request(mut req) => {
-                    if connection.handle_shutdown(&req)? {
+                    if conn.handle_shutdown(&req)? {
                         return Ok(());
                     }
                 }
                 Message::Notification(mut notification) => {
                     match cast_notification::<DidOpenTextDocument>(notification) {
                         Ok(params) => {
-                            self.handle_did_open_text_document(params);
+                            self.handle_did_open_text_document(params, &conn)?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(n)) => notification = n,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    };
+                    match cast_notification::<DidChangeTextDocument>(notification) {
+                        Ok(params) => {
+                            self.handle_did_change_text_document(params, &conn)?;
                             continue;
                         }
                         Err(ExtractError::MethodMismatch(n)) => notification = n,
@@ -70,13 +79,66 @@ impl Server {
         Ok(())
     }
 
-    fn handle_did_open_text_document(&mut self, params: DidOpenTextDocumentParams) {
+    fn handle_did_open_text_document(
+        &mut self,
+        params: DidOpenTextDocumentParams,
+        conn: &Connection,
+    ) -> anyhow::Result<()> {
         self.files
-            .write(params.text_document.uri, params.text_document.text);
+            .write(params.text_document.uri.clone(), params.text_document.text);
+
+        let diagnostics = self.collect_syntax_errors(&params.text_document.uri);
+        conn.sender.send(Message::Notification(Notification {
+            method: PublishDiagnostics::METHOD.to_string(),
+            params: serde_json::to_value(PublishDiagnosticsParams {
+                uri: params.text_document.uri,
+                diagnostics,
+                version: None,
+            })?,
+        }))?;
+
+        Ok(())
+    }
+
+    fn handle_did_change_text_document(
+        &mut self,
+        params: DidChangeTextDocumentParams,
+        conn: &Connection,
+    ) -> anyhow::Result<()> {
+        if let Some(change) = params.content_changes.first() {
+            self.files
+                .write(params.text_document.uri.clone(), change.text.clone());
+        }
+
+        let diagnostics = self.collect_syntax_errors(&params.text_document.uri);
+        conn.sender.send(Message::Notification(Notification {
+            method: PublishDiagnostics::METHOD.to_string(),
+            params: serde_json::to_value(PublishDiagnosticsParams {
+                uri: params.text_document.uri,
+                diagnostics,
+                version: None,
+            })?,
+        }))?;
+
+        Ok(())
     }
 
     fn handle_did_close_text_document(&mut self, params: DidCloseTextDocumentParams) {
         self.files.remove(&params.text_document.uri);
+    }
+
+    fn collect_syntax_errors(&self, uri: &Uri) -> Vec<Diagnostic> {
+        let diagnostics = parse(uri, self.files.track());
+        diagnostics
+            .into_iter()
+            .map(|diag| Diagnostic {
+                range: diag.range,
+                severity: Some(DiagnosticSeverity::ERROR),
+                source: Some("wat".into()),
+                message: diag.message,
+                ..Default::default()
+            })
+            .collect()
     }
 }
 
