@@ -1,3 +1,4 @@
+mod binder;
 mod diag;
 mod files;
 mod parser;
