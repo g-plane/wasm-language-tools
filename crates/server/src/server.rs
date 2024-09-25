@@ -66,7 +66,7 @@ impl Server {
                     };
                     match cast_notification::<DidCloseTextDocument>(notification) {
                         Ok(params) => {
-                            self.handle_did_close_text_document(params);
+                            self.handle_did_close_text_document(params, &conn)?;
                             continue;
                         }
                         Err(ExtractError::MethodMismatch(..)) => continue,
@@ -123,8 +123,21 @@ impl Server {
         Ok(())
     }
 
-    fn handle_did_close_text_document(&mut self, params: DidCloseTextDocumentParams) {
+    fn handle_did_close_text_document(
+        &mut self,
+        params: DidCloseTextDocumentParams,
+        conn: &Connection,
+    ) -> anyhow::Result<()> {
         self.files.remove(&params.text_document.uri);
+        conn.sender.send(Message::Notification(Notification {
+            method: PublishDiagnostics::METHOD.to_string(),
+            params: serde_json::to_value(PublishDiagnosticsParams {
+                uri: params.text_document.uri,
+                diagnostics: vec![],
+                version: None,
+            })?,
+        }))?;
+        Ok(())
     }
 
     fn collect_syntax_errors(&self, uri: &Uri) -> Vec<Diagnostic> {
