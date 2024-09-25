@@ -1,24 +1,29 @@
 use crate::{
     binder::{SymbolTable, SymbolTables},
+    features,
     files::{get_line_index, Files},
     parser::parse,
 };
+use ahash::AHashMap;
 use comemo::Track;
-use lsp_server::{Connection, ExtractError, Message, Notification, Request, RequestId};
+use lsp_server::{Connection, ExtractError, Message, Notification, Request, RequestId, Response};
 use lsp_types::{
     notification::{
         DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument, Notification as _,
         PublishDiagnostics,
     },
+    request::GotoDefinition,
     Diagnostic, DiagnosticSeverity, DidChangeTextDocumentParams, DidCloseTextDocumentParams,
-    DidOpenTextDocumentParams, Position, PublishDiagnosticsParams, Range, ServerCapabilities,
-    TextDocumentSyncCapability, TextDocumentSyncKind, Uri,
+    DidOpenTextDocumentParams, GotoDefinitionParams, OneOf, Position, PublishDiagnosticsParams,
+    Range, ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind, Uri,
 };
 use rowan::ast::AstNode;
+use wat_syntax::SyntaxNode;
 
 #[derive(Default)]
 pub struct Server {
     files: Files,
+    trees: AHashMap<Uri, SyntaxNode>,
     symbol_tables: SymbolTables,
 }
 
@@ -27,6 +32,7 @@ impl Server {
         let (connection, io_threads) = Connection::stdio();
 
         let server_capabilities = serde_json::to_value(&ServerCapabilities {
+            definition_provider: Some(OneOf::Left(true)),
             text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
             ..Default::default()
         })
@@ -51,6 +57,14 @@ impl Server {
                 Message::Request(mut req) => {
                     if conn.handle_shutdown(&req)? {
                         return Ok(());
+                    }
+                    match cast_req::<GotoDefinition>(req) {
+                        Ok((id, params)) => {
+                            self.handle_goto_definition(id, params, &conn)?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
                     }
                 }
                 Message::Notification(mut notification) => {
@@ -82,6 +96,41 @@ impl Server {
                 Message::Response(_) => {}
             }
         }
+        Ok(())
+    }
+
+    fn handle_goto_definition(
+        &self,
+        id: RequestId,
+        params: GotoDefinitionParams,
+        conn: &Connection,
+    ) -> anyhow::Result<()> {
+        let uri = params.text_document_position_params.text_document.uri;
+
+        let line_index = get_line_index(&uri, self.files.track());
+        let tree = self.trees.get(&uri);
+        let symbol_table = self.symbol_tables.read(&uri);
+        let resp = features::goto_definition(
+            uri,
+            params.text_document_position_params.position,
+            line_index,
+            tree,
+            symbol_table,
+        );
+        if let Some(resp) = resp {
+            conn.sender.send(Message::Response(Response {
+                id,
+                result: Some(serde_json::to_value(resp)?),
+                error: None,
+            }))?;
+        } else {
+            conn.sender.send(Message::Response(Response {
+                id,
+                result: Some(serde_json::Value::Null),
+                error: None,
+            }))?;
+        }
+
         Ok(())
     }
 
@@ -148,6 +197,8 @@ impl Server {
 
     fn accept_file(&mut self, uri: &Uri) -> Vec<Diagnostic> {
         let (root, diagnostics) = parse(uri, self.files.track());
+        self.trees.insert(uri.clone(), root.syntax().clone());
+
         let mut diagnostics = diagnostics
             .into_iter()
             .map(|diag| Diagnostic {
