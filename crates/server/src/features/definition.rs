@@ -52,24 +52,25 @@ pub fn goto_definition(
         })
     {
         let name = token.text();
-        if let Some(func) = symbol_table
-            .functions
-            .iter()
-            .find(|func| func.idx.name.as_deref().is_some_and(|n| n == name))
-        {
-            let range = func.node.syntax_node_ptr().text_range();
-            let start = line_index.line_col(range.start());
-            let end = line_index.line_col(range.end());
-            Some(GotoDefinitionResponse::Scalar(Location {
-                uri,
-                range: Range::new(
-                    Position::new(start.line, start.col),
-                    Position::new(end.line, end.col),
-                ),
-            }))
-        } else {
-            None
-        }
+        Some(GotoDefinitionResponse::Array(
+            symbol_table
+                .functions
+                .iter()
+                .filter(|func| func.idx.name.as_deref().is_some_and(|n| n == name))
+                .map(|func| {
+                    let range = func.node.syntax_node_ptr().text_range();
+                    let start = line_index.line_col(range.start());
+                    let end = line_index.line_col(range.end());
+                    Location {
+                        uri: uri.clone(),
+                        range: Range::new(
+                            Position::new(start.line, start.col),
+                            Position::new(end.line, end.col),
+                        ),
+                    }
+                })
+                .collect(),
+        ))
     } else {
         None
     }
