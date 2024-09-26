@@ -1,11 +1,6 @@
-use crate::{
-    binder::{SymbolTable, SymbolTables},
-    features,
-    files::{get_line_index, Files},
-    parser::parse,
-};
+use crate::{binder::SymbolTable, features, files::File};
 use ahash::AHashMap;
-use comemo::Track;
+use leptos_reactive::{create_memo, create_rw_signal, Memo, RwSignal, SignalGet, SignalSet};
 use lsp_server::{Connection, ExtractError, Message, Notification, Request, RequestId, Response};
 use lsp_types::{
     notification::{
@@ -18,13 +13,11 @@ use lsp_types::{
     Range, ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind, Uri,
 };
 use rowan::ast::AstNode;
-use wat_syntax::SyntaxNode;
 
 #[derive(Default)]
 pub struct Server {
-    files: Files,
-    trees: AHashMap<Uri, SyntaxNode>,
-    symbol_tables: SymbolTables,
+    files: AHashMap<Uri, RwSignal<File>>,
+    symbol_tables: AHashMap<Uri, Memo<SymbolTable>>,
 }
 
 impl Server {
@@ -106,16 +99,11 @@ impl Server {
         conn: &Connection,
     ) -> anyhow::Result<()> {
         let uri = params.text_document_position_params.text_document.uri;
-
-        let line_index = get_line_index(&uri, self.files.track());
-        let tree = self.trees.get(&uri);
-        let symbol_table = self.symbol_tables.read(&uri);
         let resp = features::goto_definition(
-            uri,
             params.text_document_position_params.position,
-            line_index,
-            tree,
-            symbol_table,
+            self.files.get(&uri),
+            self.symbol_tables.get(&uri).map(SignalGet::get),
+            uri,
         );
         conn.sender.send(Message::Response(Response {
             id,
@@ -131,10 +119,7 @@ impl Server {
         params: DidOpenTextDocumentParams,
         conn: &Connection,
     ) -> anyhow::Result<()> {
-        self.files
-            .write(params.text_document.uri.clone(), params.text_document.text);
-
-        let diagnostics = self.accept_file(&params.text_document.uri);
+        let diagnostics = self.accept_file(&params.text_document.uri, params.text_document.text);
         conn.sender.send(Message::Notification(Notification {
             method: PublishDiagnostics::METHOD.to_string(),
             params: serde_json::to_value(PublishDiagnosticsParams {
@@ -153,19 +138,16 @@ impl Server {
         conn: &Connection,
     ) -> anyhow::Result<()> {
         if let Some(change) = params.content_changes.first() {
-            self.files
-                .write(params.text_document.uri.clone(), change.text.clone());
+            let diagnostics = self.accept_file(&params.text_document.uri, change.text.clone());
+            conn.sender.send(Message::Notification(Notification {
+                method: PublishDiagnostics::METHOD.to_string(),
+                params: serde_json::to_value(PublishDiagnosticsParams {
+                    uri: params.text_document.uri,
+                    diagnostics,
+                    version: None,
+                })?,
+            }))?;
         }
-
-        let diagnostics = self.accept_file(&params.text_document.uri);
-        conn.sender.send(Message::Notification(Notification {
-            method: PublishDiagnostics::METHOD.to_string(),
-            params: serde_json::to_value(PublishDiagnosticsParams {
-                uri: params.text_document.uri,
-                diagnostics,
-                version: None,
-            })?,
-        }))?;
 
         Ok(())
     }
@@ -187,11 +169,16 @@ impl Server {
         Ok(())
     }
 
-    fn accept_file(&mut self, uri: &Uri) -> Vec<Diagnostic> {
-        let (root, diagnostics) = parse(uri, self.files.track());
-        self.trees.insert(uri.clone(), root.syntax().clone());
+    fn accept_file(&mut self, uri: &Uri, source: String) -> Vec<Diagnostic> {
+        let file = self
+            .files
+            .entry(uri.clone())
+            .and_modify(|file| file.set(File::new(&source)))
+            .or_insert_with(|| create_rw_signal(File::new(&source)))
+            .get();
 
-        let mut diagnostics = diagnostics
+        let mut diagnostics = file
+            .syntax_errors
             .into_iter()
             .map(|diag| Diagnostic {
                 range: diag.range,
@@ -202,16 +189,17 @@ impl Server {
             })
             .collect::<Vec<_>>();
 
-        let mut modules = root.modules();
+        let mut modules = file.tree.modules();
         if let Some(module) = modules.next() {
-            self.symbol_tables
-                .write(uri.clone(), SymbolTable::new(&module));
+            if !self.symbol_tables.contains_key(uri) {
+                self.symbol_tables
+                    .insert(uri.clone(), create_memo(move |_| SymbolTable::new(&module)));
+            }
         }
-        let line_index = get_line_index(uri, self.files.track());
         diagnostics.extend(modules.map(|module| {
             let range = module.syntax().text_range();
-            let start = line_index.line_col(range.start());
-            let end = line_index.line_col(range.end());
+            let start = file.line_index.line_col(range.start());
+            let end = file.line_index.line_col(range.end());
             Diagnostic {
                 range: Range::new(
                     Position::new(start.line, start.col),

@@ -1,11 +1,13 @@
 use ahash::AHashMap;
 use lsp_types::Uri;
-use rowan::ast::AstPtr;
+use rowan::{
+    ast::{AstNode, AstPtr},
+    GreenNode,
+};
 use wat_syntax::ast::{Module, ModuleField, ModuleFieldFunc};
 
 #[derive(Clone, Debug, Default)]
 pub struct SymbolTables(AHashMap<Uri, SymbolTable>);
-#[comemo::track]
 impl SymbolTables {
     pub fn read(&self, uri: &Uri) -> SymbolTable {
         self.0.get(uri).cloned().unwrap_or_default()
@@ -20,12 +22,11 @@ impl SymbolTables {
     }
 }
 
-#[derive(Clone, Debug, Default, Hash)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct SymbolTable {
     pub functions: Vec<Function>,
 }
 impl SymbolTable {
-    #[comemo::memoize]
     pub fn new(module: &Module) -> SymbolTable {
         Self {
             functions: module
@@ -44,15 +45,16 @@ impl SymbolTable {
     }
 }
 
-#[derive(Clone, Debug, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Idx {
     pub num: usize,
     pub name: Option<String>,
 }
 
-#[derive(Clone, Debug, Hash)]
+#[derive(Clone, Debug)]
 pub struct Function {
-    pub node: AstPtr<ModuleFieldFunc>,
+    pub key: GreenNode,
+    pub ptr: AstPtr<ModuleFieldFunc>,
     pub idx: Idx,
     pub params: Vec<Param>,
     pub results: Vec<Result>,
@@ -60,6 +62,7 @@ pub struct Function {
 impl Function {
     pub fn new(id: usize, func: ModuleFieldFunc) -> Self {
         let idx = if let Some(token) = func.ident_token() {
+            tracing::event!(tracing::Level::DEBUG, "function name: {}", token.text());
             Idx {
                 num: id,
                 name: Some(token.text().to_string()),
@@ -89,27 +92,34 @@ impl Function {
             );
         }
         Self {
-            node: AstPtr::new(&func),
+            key: func.syntax().green().into(),
+            ptr: AstPtr::new(&func),
             idx,
             params,
             results,
         }
     }
 }
+impl PartialEq for Function {
+    fn eq(&self, other: &Self) -> bool {
+        self.key == other.key
+    }
+}
+impl Eq for Function {}
 
-#[derive(Clone, Debug, Hash)]
+#[derive(Clone, Debug)]
 pub struct Param {
     pub ty: ValType,
     pub idx: Idx,
 }
 
-#[derive(Clone, Debug, Hash)]
+#[derive(Clone, Debug)]
 pub struct Result {
     pub ty: ValType,
     pub idx: Idx,
 }
 
-#[derive(Clone, Debug, Hash)]
+#[derive(Clone, Debug)]
 pub enum ValType {
     I32,
     I64,

@@ -12,7 +12,7 @@ exclude = ["/tests"]
 [dependencies]
 ahash = "0.8"
 anyhow = "1.0"
-comemo = "0.4"
+leptos_reactive = "0.6"
 line-index = "0.1"
 lsp-server = "0.7"
 lsp-types = "0.97"
