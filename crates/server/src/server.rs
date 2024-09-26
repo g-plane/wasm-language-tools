@@ -117,19 +117,11 @@ impl Server {
             tree,
             symbol_table,
         );
-        if let Some(resp) = resp {
-            conn.sender.send(Message::Response(Response {
-                id,
-                result: Some(serde_json::to_value(resp)?),
-                error: None,
-            }))?;
-        } else {
-            conn.sender.send(Message::Response(Response {
-                id,
-                result: Some(serde_json::Value::Null),
-                error: None,
-            }))?;
-        }
+        conn.sender.send(Message::Response(Response {
+            id,
+            result: Some(serde_json::to_value(resp)?),
+            error: None,
+        }))?;
 
         Ok(())
     }
