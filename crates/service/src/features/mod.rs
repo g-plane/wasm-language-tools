@@ -1,7 +1,8 @@
 mod definition;
+mod document_symbol;
 
+pub use self::{definition::goto_definition, document_symbol::document_symbol};
 use crate::{files::FileInputCtx, LanguageServiceCtx};
-pub use definition::goto_definition;
 use line_index::LineCol;
 use lsp_types::{Position, Uri};
 use rowan::{ast::AstNode, TokenAtOffset};

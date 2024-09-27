@@ -4,7 +4,7 @@ use lsp_types::{
         DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument, Notification as _,
         PublishDiagnostics,
     },
-    request::GotoDefinition,
+    request::{DocumentSymbolRequest, GotoDefinition},
     Diagnostic, DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
     OneOf, PublishDiagnosticsParams, ServerCapabilities, TextDocumentSyncCapability,
     TextDocumentSyncKind, Uri,
@@ -22,6 +22,7 @@ impl Server {
 
         let server_capabilities = serde_json::to_value(&ServerCapabilities {
             definition_provider: Some(OneOf::Left(true)),
+            document_symbol_provider: Some(OneOf::Left(true)),
             text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
             ..Default::default()
         })
@@ -59,6 +60,20 @@ impl Server {
                             continue;
                         }
                         Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<DocumentSymbolRequest>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.document_symbol(params),
+                                )?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(..)) => continue,
                         Err(ExtractError::JsonError { .. }) => continue,
                     }
                 }

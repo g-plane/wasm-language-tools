@@ -1,6 +1,6 @@
 use super::find_meaningful_token;
-use crate::{binder::SymbolTablesCtx, files::FileInputCtx, LanguageServiceCtx};
-use lsp_types::{GotoDefinitionParams, GotoDefinitionResponse, Location, Position, Range};
+use crate::{binder::SymbolTablesCtx, files::FileInputCtx, helpers, LanguageServiceCtx};
+use lsp_types::{GotoDefinitionParams, GotoDefinitionResponse, Location};
 use wat_syntax::{SyntaxElement, SyntaxKind};
 
 pub fn goto_definition(
@@ -39,17 +39,12 @@ pub fn goto_definition(
                 .functions
                 .iter()
                 .filter(|func| func.idx.name.as_deref().is_some_and(|n| n == name))
-                .map(|func| {
-                    let range = func.ptr.syntax_node_ptr().text_range();
-                    let start = line_index.line_col(range.start());
-                    let end = line_index.line_col(range.end());
-                    Location {
-                        uri: uri.clone(),
-                        range: Range::new(
-                            Position::new(start.line, start.col),
-                            Position::new(end.line, end.col),
-                        ),
-                    }
+                .map(|func| Location {
+                    uri: uri.clone(),
+                    range: helpers::rowan_range_to_lsp_range(
+                        &line_index,
+                        func.ptr.syntax_node_ptr().text_range(),
+                    ),
                 })
                 .collect(),
         ))

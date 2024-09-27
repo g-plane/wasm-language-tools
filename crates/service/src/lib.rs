@@ -2,14 +2,15 @@ mod binder;
 mod diag;
 mod features;
 mod files;
+mod helpers;
 
 use crate::{
     binder::SymbolTables,
     files::{FileInput, FileInputCtx},
 };
 use lsp_types::{
-    Diagnostic, DiagnosticSeverity, GotoDefinitionParams, GotoDefinitionResponse, Position, Range,
-    Uri,
+    Diagnostic, DiagnosticSeverity, DocumentSymbolParams, DocumentSymbolResponse,
+    GotoDefinitionParams, GotoDefinitionResponse, Position, Range, Uri,
 };
 use rowan::ast::AstNode;
 
@@ -63,6 +64,10 @@ impl LanguageService {
         }));
 
         diagnostics
+    }
+
+    pub fn document_symbol(&self, params: DocumentSymbolParams) -> Option<DocumentSymbolResponse> {
+        crate::features::document_symbol(&self.ctx, params)
     }
 
     pub fn goto_definition(&self, params: GotoDefinitionParams) -> Option<GotoDefinitionResponse> {
