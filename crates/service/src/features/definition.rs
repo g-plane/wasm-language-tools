@@ -28,26 +28,46 @@ pub fn goto_definition(
             })
         })
     {
-        if token.kind() != SyntaxKind::IDENT {
-            return None;
-        }
-        let name = token.text();
         let line_index = service.line_index(uri.clone());
-        Some(GotoDefinitionResponse::Array(
-            service
-                .symbol_table(uri.clone())
-                .functions
-                .iter()
-                .filter(|func| func.idx.name.as_deref().is_some_and(|n| n == name))
-                .map(|func| Location {
-                    uri: uri.clone(),
-                    range: helpers::rowan_range_to_lsp_range(
-                        &line_index,
-                        func.ptr.syntax_node_ptr().text_range(),
-                    ),
-                })
-                .collect(),
-        ))
+        match token.kind() {
+            SyntaxKind::IDENT => {
+                let name = token.text();
+                Some(GotoDefinitionResponse::Array(
+                    service
+                        .symbol_table(uri.clone())
+                        .functions
+                        .iter()
+                        .filter(|func| func.idx.name.as_deref().is_some_and(|n| n == name))
+                        .map(|func| Location {
+                            uri: uri.clone(),
+                            range: helpers::rowan_range_to_lsp_range(
+                                &line_index,
+                                func.ptr.syntax_node_ptr().text_range(),
+                            ),
+                        })
+                        .collect(),
+                ))
+            }
+            SyntaxKind::INT => {
+                let num: usize = token.text().parse().ok()?;
+                Some(GotoDefinitionResponse::Array(
+                    service
+                        .symbol_table(uri.clone())
+                        .functions
+                        .iter()
+                        .filter(|func| func.idx.num == num)
+                        .map(|func| Location {
+                            uri: uri.clone(),
+                            range: helpers::rowan_range_to_lsp_range(
+                                &line_index,
+                                func.ptr.syntax_node_ptr().text_range(),
+                            ),
+                        })
+                        .collect(),
+                ))
+            }
+            _ => None,
+        }
     } else {
         None
     }
