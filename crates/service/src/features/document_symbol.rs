@@ -32,10 +32,10 @@ pub fn document_symbol(
                     kind: SymbolKind::FUNCTION,
                     tags: None,
                     deprecated: None,
-                    range: range.clone(),
+                    range,
                     selection_range: func
                         .ptr
-                        .to_node(&root)
+                        .to_node(root)
                         .ident_token()
                         .map(|token| {
                             helpers::rowan_range_to_lsp_range(&line_index, token.text_range())
@@ -55,7 +55,7 @@ pub fn document_symbol(
                 kind: SymbolKind::MODULE,
                 tags: None,
                 deprecated: None,
-                range: module_range.clone(),
+                range: module_range,
                 selection_range: module_range,
                 children: Some(functions.collect()),
             }

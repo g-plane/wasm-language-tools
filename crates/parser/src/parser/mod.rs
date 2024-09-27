@@ -204,7 +204,7 @@ where
         input.reset(&trivia_start);
         err = err
             .map(|err| SyntaxError::from_recoverable_error(&token_start, &err_start, input, err));
-        return Err(err);
+        Err(err)
     }
 }
 
