@@ -1,6 +1,7 @@
+mod server;
+
 use tracing::{event, Level};
 use tracing_subscriber::prelude::*;
-use wat_server::Server;
 
 fn main() -> anyhow::Result<()> {
     if let Ok(layer) = tracing_journald::layer() {
@@ -11,7 +12,7 @@ fn main() -> anyhow::Result<()> {
     let _enter = span.enter();
 
     event!(Level::INFO, "wat_server starting");
-    let mut server = Server::default();
+    let mut server = crate::server::Server::default();
     server.run()?;
     Ok(())
 }

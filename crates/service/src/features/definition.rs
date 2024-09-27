@@ -1,19 +1,19 @@
-use crate::{binder::SymbolTablesCtx, files::FileInputCtx, server::LanguageServiceCtx};
+use crate::{binder::SymbolTablesCtx, files::FileInputCtx, LanguageServiceCtx};
 use line_index::LineCol;
-use lsp_types::{GotoDefinitionResponse, Location, Position, Range, Uri};
+use lsp_types::{GotoDefinitionParams, GotoDefinitionResponse, Location, Position, Range};
 use rowan::{ast::AstNode, TokenAtOffset};
 use wat_syntax::{is_punc, is_trivia, SyntaxElement, SyntaxKind};
 
 pub fn goto_definition(
     service: &LanguageServiceCtx,
-    uri: Uri,
-    position: Position,
+    params: GotoDefinitionParams,
 ) -> Option<GotoDefinitionResponse> {
+    let uri = params.text_document_position_params.text_document.uri;
     let offset = service
         .line_index(uri.clone())
         .offset(LineCol {
-            line: position.line,
-            col: position.character,
+            line: params.text_document_position_params.position.line,
+            col: params.text_document_position_params.position.character,
         })
         .map(|text_size| rowan::TextSize::new(text_size.into()))?;
 

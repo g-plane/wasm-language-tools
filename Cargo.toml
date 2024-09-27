@@ -4,5 +4,7 @@ resolver = "2"
 
 [workspace.dependencies]
 insta = { version = "1.39", features = ["glob"] }
+lsp-types = "0.97"
 rowan = "0.15"
 similar-asserts = "1.6"
+tracing = "0.1"

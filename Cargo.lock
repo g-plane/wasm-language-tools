@@ -686,16 +686,25 @@ name = "wat_server"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "line-index",
  "lsp-server",
  "lsp-types",
- "ra_ap_salsa",
- "rowan",
  "serde",
  "serde_json",
  "tracing",
  "tracing-journald",
  "tracing-subscriber",
+ "wat_service",
+]
+
+[[package]]
+name = "wat_service"
+version = "0.0.0"
+dependencies = [
+ "line-index",
+ "lsp-types",
+ "ra_ap_salsa",
+ "rowan",
+ "tracing",
  "wat_parser",
  "wat_syntax",
 ]

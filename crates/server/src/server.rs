@@ -1,8 +1,3 @@
-use crate::{
-    binder::SymbolTables,
-    features,
-    files::{FileInput, FileInputCtx},
-};
 use lsp_server::{Connection, ExtractError, Message, Notification, Request, RequestId, Response};
 use lsp_types::{
     notification::{
@@ -10,22 +5,15 @@ use lsp_types::{
         PublishDiagnostics,
     },
     request::GotoDefinition,
-    Diagnostic, DiagnosticSeverity, DidChangeTextDocumentParams, DidCloseTextDocumentParams,
-    DidOpenTextDocumentParams, GotoDefinitionParams, OneOf, Position, PublishDiagnosticsParams,
-    Range, ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind, Uri,
+    Diagnostic, DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
+    OneOf, PublishDiagnosticsParams, ServerCapabilities, TextDocumentSyncCapability,
+    TextDocumentSyncKind, Uri,
 };
-use rowan::ast::AstNode;
-
-#[salsa::database(FileInput, SymbolTables)]
-#[derive(Default)]
-pub struct LanguageServiceCtx {
-    storage: salsa::Storage<Self>,
-}
-impl salsa::Database for LanguageServiceCtx {}
+use wat_service::LanguageService;
 
 #[derive(Default)]
 pub struct Server {
-    service: LanguageServiceCtx,
+    service: LanguageService,
 }
 
 impl Server {
@@ -61,7 +49,13 @@ impl Server {
                     }
                     match cast_req::<GotoDefinition>(req) {
                         Ok((id, params)) => {
-                            self.handle_goto_definition(id, params, &conn)?;
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.goto_definition(params),
+                                )?),
+                                error: None,
+                            }))?;
                             continue;
                         }
                         Err(ExtractError::MethodMismatch(r)) => req = r,
@@ -100,27 +94,6 @@ impl Server {
         Ok(())
     }
 
-    fn handle_goto_definition(
-        &self,
-        id: RequestId,
-        params: GotoDefinitionParams,
-        conn: &Connection,
-    ) -> anyhow::Result<()> {
-        let uri = params.text_document_position_params.text_document.uri;
-        let resp = features::goto_definition(
-            &self.service,
-            uri,
-            params.text_document_position_params.position,
-        );
-        conn.sender.send(Message::Response(Response {
-            id,
-            result: Some(serde_json::to_value(resp)?),
-            error: None,
-        }))?;
-
-        Ok(())
-    }
-
     fn handle_did_open_text_document(
         &mut self,
         params: DidOpenTextDocumentParams,
@@ -135,7 +108,6 @@ impl Server {
                 version: None,
             })?,
         }))?;
-
         Ok(())
     }
 
@@ -155,7 +127,6 @@ impl Server {
                 })?,
             }))?;
         }
-
         Ok(())
     }
 
@@ -176,46 +147,8 @@ impl Server {
     }
 
     fn accept_file(&mut self, uri: &Uri, source: String) -> Vec<Diagnostic> {
-        self.service.set_source(uri.clone(), source);
-
-        let mut diagnostics = self
-            .service
-            .parser_result(uri.clone())
-            .1
-            .into_iter()
-            .map(|diag| Diagnostic {
-                range: diag.range,
-                severity: Some(DiagnosticSeverity::ERROR),
-                source: Some("wat".into()),
-                message: diag.message,
-                ..Default::default()
-            })
-            .collect::<Vec<_>>();
-
-        let line_index = self.service.line_index(uri.clone());
-        diagnostics.extend(
-            self.service
-                .root(uri.clone())
-                .modules()
-                .skip(1)
-                .map(|module| {
-                    let range = module.syntax().text_range();
-                    let start = line_index.line_col(range.start());
-                    let end = line_index.line_col(range.end());
-                    Diagnostic {
-                        range: Range::new(
-                            Position::new(start.line, start.col),
-                            Position::new(end.line, end.col),
-                        ),
-                        severity: Some(DiagnosticSeverity::ERROR),
-                        source: Some("wat".into()),
-                        message: "only one module is allowed in one file".into(),
-                        ..Default::default()
-                    }
-                }),
-        );
-
-        diagnostics
+        self.service.set_file(uri.clone(), source);
+        self.service.fetch_syntax_errors(uri.clone())
     }
 }
 

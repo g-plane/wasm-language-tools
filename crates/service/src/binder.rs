@@ -61,7 +61,6 @@ pub struct Function {
 impl Function {
     pub fn new(id: usize, func: ModuleFieldFunc) -> Self {
         let idx = if let Some(token) = func.ident_token() {
-            tracing::event!(tracing::Level::DEBUG, "function name: {}", token.text());
             Idx {
                 num: id,
                 name: Some(token.text().to_string()),
