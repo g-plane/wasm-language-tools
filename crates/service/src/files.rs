@@ -1,4 +1,4 @@
-use crate::diag::Diagnostic;
+use crate::{diag::Diagnostic, InternUri};
 use line_index::{LineIndex, TextSize};
 use lsp_types::{Position, Range, Uri};
 use rowan::ast::AstNode;
@@ -7,27 +7,30 @@ use wat_syntax::ast::Root;
 
 #[salsa::query_group(Files)]
 pub trait FilesCtx: salsa::Database {
+    #[salsa::interned]
+    fn uri(&self, uri: Uri) -> InternUri;
+
     #[salsa::input]
-    fn source(&self, uri: Uri) -> String;
+    fn source(&self, uri: InternUri) -> String;
 
     #[salsa::memoized]
     #[salsa::invoke(get_line_index)]
-    fn line_index(&self, uri: Uri) -> LineIndex;
+    fn line_index(&self, uri: InternUri) -> LineIndex;
 
     #[salsa::dependencies]
     #[salsa::invoke(parse)]
-    fn parser_result(&self, uri: Uri) -> (Root, Vec<Diagnostic>);
+    fn parser_result(&self, uri: InternUri) -> (Root, Vec<Diagnostic>);
 
     #[salsa::dependencies]
-    fn root(&self, uri: Uri) -> Root;
+    fn root(&self, uri: InternUri) -> Root;
 }
 
-fn get_line_index(db: &dyn FilesCtx, uri: Uri) -> LineIndex {
+fn get_line_index(db: &dyn FilesCtx, uri: InternUri) -> LineIndex {
     LineIndex::new(&db.source(uri))
 }
 
-fn parse(db: &dyn FilesCtx, uri: Uri) -> (Root, Vec<Diagnostic>) {
-    let source = db.source(uri.clone());
+fn parse(db: &dyn FilesCtx, uri: InternUri) -> (Root, Vec<Diagnostic>) {
+    let source = db.source(uri);
     let line_index = db.line_index(uri);
     let mut parser = Parser::new(&source);
     let tree = Root::cast(parser.parse()).expect("expected AST root");
@@ -49,6 +52,6 @@ fn parse(db: &dyn FilesCtx, uri: Uri) -> (Root, Vec<Diagnostic>) {
     (tree, syntax_errors)
 }
 
-fn root(db: &dyn FilesCtx, uri: Uri) -> Root {
+fn root(db: &dyn FilesCtx, uri: InternUri) -> Root {
     db.parser_result(uri).0
 }

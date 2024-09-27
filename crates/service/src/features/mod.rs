@@ -4,10 +4,10 @@ mod document_symbol;
 use crate::{
     binder::{Module, SymbolTable},
     files::FilesCtx,
-    LanguageServiceCtx,
+    InternUri, LanguageServiceCtx,
 };
 use line_index::LineCol;
-use lsp_types::{Position, Uri};
+use lsp_types::Position;
 use rowan::{
     ast::{AstNode, SyntaxNodePtr},
     TokenAtOffset,
@@ -16,18 +16,18 @@ use wat_syntax::{is_punc, is_trivia, SyntaxKind, SyntaxNode, SyntaxToken};
 
 fn find_meaningful_token(
     service: &LanguageServiceCtx,
-    uri: Uri,
+    uri: InternUri,
     position: Position,
 ) -> Option<SyntaxToken> {
     let offset = service
-        .line_index(uri.clone())
+        .line_index(uri)
         .offset(LineCol {
             line: position.line,
             col: position.character,
         })
         .map(|text_size| rowan::TextSize::new(text_size.into()))?;
 
-    match service.root(uri.clone()).syntax().token_at_offset(offset) {
+    match service.root(uri).syntax().token_at_offset(offset) {
         TokenAtOffset::None => None,
         TokenAtOffset::Single(token) => Some(token),
         TokenAtOffset::Between(left, right) => {

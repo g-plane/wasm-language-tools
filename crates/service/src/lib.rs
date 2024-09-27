@@ -10,6 +10,7 @@ use crate::{
 };
 use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range, Uri};
 use rowan::ast::AstNode;
+use salsa::{InternId, InternKey};
 
 #[salsa::database(Files, SymbolTables)]
 #[derive(Default)]
@@ -24,14 +25,13 @@ pub struct LanguageService {
 }
 
 impl LanguageService {
-    pub fn set_file(&mut self, uri: Uri, source: String) {
+    pub fn commit_file(&mut self, uri: Uri, source: String) -> Vec<Diagnostic> {
+        let uri = self.ctx.uri(uri);
         self.ctx.set_source(uri, source);
-    }
 
-    pub fn fetch_syntax_errors(&self, uri: Uri) -> Vec<Diagnostic> {
         let mut diagnostics = self
             .ctx
-            .parser_result(uri.clone())
+            .parser_result(uri)
             .1
             .into_iter()
             .map(|diag| Diagnostic {
@@ -43,8 +43,8 @@ impl LanguageService {
             })
             .collect::<Vec<_>>();
 
-        let line_index = self.ctx.line_index(uri.clone());
-        diagnostics.extend(self.ctx.root(uri.clone()).modules().skip(1).map(|module| {
+        let line_index = self.ctx.line_index(uri);
+        diagnostics.extend(self.ctx.root(uri).modules().skip(1).map(|module| {
             let range = module.syntax().text_range();
             let start = line_index.line_col(range.start());
             let end = line_index.line_col(range.end());
@@ -61,5 +61,16 @@ impl LanguageService {
         }));
 
         diagnostics
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct InternUri(InternId);
+impl InternKey for InternUri {
+    fn from_intern_id(v: salsa::InternId) -> Self {
+        InternUri(v)
+    }
+    fn as_intern_id(&self) -> InternId {
+        self.0
     }
 }

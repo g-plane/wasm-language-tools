@@ -12,8 +12,8 @@ exclude = ["/tests"]
 [dependencies]
 line-index = "0.1"
 lsp-types.workspace = true
-ra_ap_salsa = "0.0.236"
 rowan.workspace = true
+salsa = "0.16"
 tracing.workspace = true
 wat_parser = { path = "../parser", version = "0.0" }
 wat_syntax = { path = "../syntax", version = "0.0" }

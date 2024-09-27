@@ -5,9 +5,8 @@ use lsp_types::{
         PublishDiagnostics,
     },
     request::{DocumentSymbolRequest, GotoDefinition},
-    Diagnostic, DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
-    OneOf, PublishDiagnosticsParams, ServerCapabilities, TextDocumentSyncCapability,
-    TextDocumentSyncKind, Uri,
+    DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams, OneOf,
+    PublishDiagnosticsParams, ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind,
 };
 use wat_service::LanguageService;
 
@@ -114,7 +113,9 @@ impl Server {
         params: DidOpenTextDocumentParams,
         conn: &Connection,
     ) -> anyhow::Result<()> {
-        let diagnostics = self.accept_file(&params.text_document.uri, params.text_document.text);
+        let diagnostics = self
+            .service
+            .commit_file(params.text_document.uri.clone(), params.text_document.text);
         conn.sender.send(Message::Notification(Notification {
             method: PublishDiagnostics::METHOD.to_string(),
             params: serde_json::to_value(PublishDiagnosticsParams {
@@ -132,7 +133,9 @@ impl Server {
         conn: &Connection,
     ) -> anyhow::Result<()> {
         if let Some(change) = params.content_changes.first() {
-            let diagnostics = self.accept_file(&params.text_document.uri, change.text.clone());
+            let diagnostics = self
+                .service
+                .commit_file(params.text_document.uri.clone(), change.text.clone());
             conn.sender.send(Message::Notification(Notification {
                 method: PublishDiagnostics::METHOD.to_string(),
                 params: serde_json::to_value(PublishDiagnosticsParams {
@@ -159,11 +162,6 @@ impl Server {
             })?,
         }))?;
         Ok(())
-    }
-
-    fn accept_file(&mut self, uri: &Uri, source: String) -> Vec<Diagnostic> {
-        self.service.set_file(uri.clone(), source);
-        self.service.fetch_syntax_errors(uri.clone())
     }
 }
 

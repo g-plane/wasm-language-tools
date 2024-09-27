@@ -5,10 +5,16 @@ use wat_syntax::{SyntaxElement, SyntaxKind};
 
 impl LanguageService {
     pub fn goto_definition(&self, params: GotoDefinitionParams) -> Option<GotoDefinitionResponse> {
-        let uri = params.text_document_position_params.text_document.uri;
+        let uri = self.ctx.uri(
+            params
+                .text_document_position_params
+                .text_document
+                .uri
+                .clone(),
+        );
         let token = find_meaningful_token(
             &self.ctx,
-            uri.clone(),
+            uri,
             params.text_document_position_params.position,
         )?;
 
@@ -26,13 +32,14 @@ impl LanguageService {
                 })
             })
         {
-            let line_index = self.ctx.line_index(uri.clone());
-            let symbol_table = self.ctx.symbol_table(uri.clone());
+            let line_index = self.ctx.line_index(uri);
+            let symbol_table = self.ctx.symbol_table(uri);
             let module = locate_module(&symbol_table, token.parent_ancestors())?;
 
             match token.kind() {
                 SyntaxKind::IDENT => {
                     let name = token.text();
+                    let uri = params.text_document_position_params.text_document.uri;
                     Some(GotoDefinitionResponse::Array(
                         module
                             .functions
@@ -50,6 +57,7 @@ impl LanguageService {
                 }
                 SyntaxKind::INT => {
                     let num: usize = token.text().parse().ok()?;
+                    let uri = params.text_document_position_params.text_document.uri;
                     Some(GotoDefinitionResponse::Array(
                         module
                             .functions

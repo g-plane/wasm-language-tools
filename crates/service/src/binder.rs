@@ -1,5 +1,4 @@
-use crate::files::FilesCtx;
-use lsp_types::Uri;
+use crate::{files::FilesCtx, InternUri};
 use rowan::{
     ast::{AstNode, AstPtr},
     GreenNode,
@@ -10,9 +9,9 @@ use wat_syntax::ast::{ModuleField, ModuleFieldFunc};
 pub trait SymbolTablesCtx: FilesCtx {
     #[salsa::memoized]
     #[salsa::invoke(create_symbol_table)]
-    fn symbol_table(&self, uri: Uri) -> SymbolTable;
+    fn symbol_table(&self, uri: InternUri) -> SymbolTable;
 }
-fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: Uri) -> SymbolTable {
+fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable {
     SymbolTable::new(db.root(uri))
 }
 

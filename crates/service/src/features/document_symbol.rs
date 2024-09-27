@@ -4,9 +4,9 @@ use rowan::ast::AstNode;
 
 impl LanguageService {
     pub fn document_symbol(&self, params: DocumentSymbolParams) -> Option<DocumentSymbolResponse> {
-        let uri = params.text_document.uri;
-        let line_index = self.ctx.line_index(uri.clone());
-        let root = self.ctx.root(uri.clone());
+        let uri = self.ctx.uri(params.text_document.uri);
+        let line_index = self.ctx.line_index(uri);
+        let root = self.ctx.root(uri);
         let root = root.syntax();
         let symbol_table = self.ctx.symbol_table(uri);
 
