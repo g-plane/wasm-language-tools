@@ -1,4 +1,4 @@
-use ahash::AHashMap;
+use crate::files::FileInputCtx;
 use lsp_types::Uri;
 use rowan::{
     ast::{AstNode, AstPtr},
@@ -6,20 +6,19 @@ use rowan::{
 };
 use wat_syntax::ast::{Module, ModuleField, ModuleFieldFunc};
 
-#[derive(Clone, Debug, Default)]
-pub struct SymbolTables(AHashMap<Uri, SymbolTable>);
-impl SymbolTables {
-    pub fn read(&self, uri: &Uri) -> SymbolTable {
-        self.0.get(uri).cloned().unwrap_or_default()
-    }
+#[salsa::query_group(SymbolTables)]
+pub trait SymbolTablesCtx: FileInputCtx {
+    #[salsa::memoized]
+    #[salsa::invoke(create_symbol_table)]
+    fn symbol_table(&self, uri: Uri) -> SymbolTable;
 }
-impl SymbolTables {
-    pub fn write(&mut self, uri: Uri, symbol_table: SymbolTable) {
-        self.0.insert(uri, symbol_table);
-    }
-    pub fn remove(&mut self, uri: &Uri) {
-        self.0.remove(uri);
-    }
+fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: Uri) -> SymbolTable {
+    db.root(uri)
+        .modules()
+        .next()
+        .as_ref()
+        .map(SymbolTable::new)
+        .unwrap_or_default()
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -53,7 +52,7 @@ pub struct Idx {
 
 #[derive(Clone, Debug)]
 pub struct Function {
-    pub key: GreenNode,
+    pub green: GreenNode,
     pub ptr: AstPtr<ModuleFieldFunc>,
     pub idx: Idx,
     pub params: Vec<Param>,
@@ -92,7 +91,7 @@ impl Function {
             );
         }
         Self {
-            key: func.syntax().green().into(),
+            green: func.syntax().green().into(),
             ptr: AstPtr::new(&func),
             idx,
             params,
@@ -102,7 +101,7 @@ impl Function {
 }
 impl PartialEq for Function {
     fn eq(&self, other: &Self) -> bool {
-        self.key == other.key
+        self.green == other.green
     }
 }
 impl Eq for Function {}

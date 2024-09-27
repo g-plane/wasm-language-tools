@@ -1,42 +1,54 @@
 use crate::diag::Diagnostic;
 use line_index::{LineIndex, TextSize};
-use lsp_types::{Position, Range};
+use lsp_types::{Position, Range, Uri};
 use rowan::ast::AstNode;
 use wat_parser::Parser;
 use wat_syntax::ast::Root;
 
-#[derive(Clone, Debug)]
-pub struct File {
-    pub line_index: LineIndex,
-    pub tree: Root,
-    pub syntax_errors: Vec<Diagnostic>,
+#[salsa::query_group(FileInput)]
+pub trait FileInputCtx: salsa::Database {
+    #[salsa::input]
+    fn source(&self, uri: Uri) -> String;
+
+    #[salsa::memoized]
+    #[salsa::invoke(get_line_index)]
+    fn line_index(&self, uri: Uri) -> LineIndex;
+
+    #[salsa::dependencies]
+    #[salsa::invoke(parse)]
+    fn parser_result(&self, uri: Uri) -> (Root, Vec<Diagnostic>);
+
+    #[salsa::dependencies]
+    fn root(&self, uri: Uri) -> Root;
 }
-impl File {
-    pub fn new(source: &str) -> Self {
-        let line_index = LineIndex::new(source);
 
-        let mut parser = Parser::new(&source);
-        let tree = Root::cast(parser.parse()).expect("expected AST root");
-        let syntax_errors = parser
-            .errors()
-            .iter()
-            .map(|error| {
-                let start = line_index.line_col(TextSize::new(error.start as u32));
-                let end = line_index.line_col(TextSize::new(error.end as u32));
-                Diagnostic {
-                    range: Range::new(
-                        Position::new(start.line, start.col),
-                        Position::new(end.line, end.col),
-                    ),
-                    message: format!("syntax error: {}", error.message),
-                }
-            })
-            .collect();
+fn get_line_index(db: &dyn FileInputCtx, uri: Uri) -> LineIndex {
+    LineIndex::new(&db.source(uri))
+}
 
-        Self {
-            line_index,
-            tree,
-            syntax_errors,
-        }
-    }
+fn parse(db: &dyn FileInputCtx, uri: Uri) -> (Root, Vec<Diagnostic>) {
+    let source = db.source(uri.clone());
+    let line_index = db.line_index(uri);
+    let mut parser = Parser::new(&source);
+    let tree = Root::cast(parser.parse()).expect("expected AST root");
+    let syntax_errors = parser
+        .errors()
+        .iter()
+        .map(|error| {
+            let start = line_index.line_col(TextSize::new(error.start as u32));
+            let end = line_index.line_col(TextSize::new(error.end as u32));
+            Diagnostic {
+                range: Range::new(
+                    Position::new(start.line, start.col),
+                    Position::new(end.line, end.col),
+                ),
+                message: format!("syntax error: {}", error.message),
+            }
+        })
+        .collect();
+    (tree, syntax_errors)
+}
+
+fn root(db: &dyn FileInputCtx, uri: Uri) -> Root {
+    db.parser_result(uri).0
 }

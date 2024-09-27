@@ -1,6 +1,8 @@
-use crate::{binder::SymbolTable, features, files::File};
-use ahash::AHashMap;
-use leptos_reactive::{create_memo, create_rw_signal, Memo, RwSignal, SignalGet, SignalSet};
+use crate::{
+    binder::SymbolTables,
+    features,
+    files::{FileInput, FileInputCtx},
+};
 use lsp_server::{Connection, ExtractError, Message, Notification, Request, RequestId, Response};
 use lsp_types::{
     notification::{
@@ -14,10 +16,16 @@ use lsp_types::{
 };
 use rowan::ast::AstNode;
 
+#[salsa::database(FileInput, SymbolTables)]
+#[derive(Default)]
+pub struct LanguageServiceCtx {
+    storage: salsa::Storage<Self>,
+}
+impl salsa::Database for LanguageServiceCtx {}
+
 #[derive(Default)]
 pub struct Server {
-    files: AHashMap<Uri, RwSignal<File>>,
-    symbol_tables: AHashMap<Uri, Memo<SymbolTable>>,
+    service: LanguageServiceCtx,
 }
 
 impl Server {
@@ -100,10 +108,9 @@ impl Server {
     ) -> anyhow::Result<()> {
         let uri = params.text_document_position_params.text_document.uri;
         let resp = features::goto_definition(
-            params.text_document_position_params.position,
-            self.files.get(&uri),
-            self.symbol_tables.get(&uri).map(SignalGet::get),
+            &self.service,
             uri,
+            params.text_document_position_params.position,
         );
         conn.sender.send(Message::Response(Response {
             id,
@@ -157,7 +164,6 @@ impl Server {
         params: DidCloseTextDocumentParams,
         conn: &Connection,
     ) -> anyhow::Result<()> {
-        self.files.remove(&params.text_document.uri);
         conn.sender.send(Message::Notification(Notification {
             method: PublishDiagnostics::METHOD.to_string(),
             params: serde_json::to_value(PublishDiagnosticsParams {
@@ -170,15 +176,12 @@ impl Server {
     }
 
     fn accept_file(&mut self, uri: &Uri, source: String) -> Vec<Diagnostic> {
-        let file = self
-            .files
-            .entry(uri.clone())
-            .and_modify(|file| file.set(File::new(&source)))
-            .or_insert_with(|| create_rw_signal(File::new(&source)))
-            .get();
+        self.service.set_source(uri.clone(), source);
 
-        let mut diagnostics = file
-            .syntax_errors
+        let mut diagnostics = self
+            .service
+            .parser_result(uri.clone())
+            .1
             .into_iter()
             .map(|diag| Diagnostic {
                 range: diag.range,
@@ -189,28 +192,28 @@ impl Server {
             })
             .collect::<Vec<_>>();
 
-        let mut modules = file.tree.modules();
-        if let Some(module) = modules.next() {
-            if !self.symbol_tables.contains_key(uri) {
-                self.symbol_tables
-                    .insert(uri.clone(), create_memo(move |_| SymbolTable::new(&module)));
-            }
-        }
-        diagnostics.extend(modules.map(|module| {
-            let range = module.syntax().text_range();
-            let start = file.line_index.line_col(range.start());
-            let end = file.line_index.line_col(range.end());
-            Diagnostic {
-                range: Range::new(
-                    Position::new(start.line, start.col),
-                    Position::new(end.line, end.col),
-                ),
-                severity: Some(DiagnosticSeverity::ERROR),
-                source: Some("wat".into()),
-                message: "only one module is allowed in one file".into(),
-                ..Default::default()
-            }
-        }));
+        let line_index = self.service.line_index(uri.clone());
+        diagnostics.extend(
+            self.service
+                .root(uri.clone())
+                .modules()
+                .skip(1)
+                .map(|module| {
+                    let range = module.syntax().text_range();
+                    let start = line_index.line_col(range.start());
+                    let end = line_index.line_col(range.end());
+                    Diagnostic {
+                        range: Range::new(
+                            Position::new(start.line, start.col),
+                            Position::new(end.line, end.col),
+                        ),
+                        severity: Some(DiagnosticSeverity::ERROR),
+                        source: Some("wat".into()),
+                        message: "only one module is allowed in one file".into(),
+                        ..Default::default()
+                    }
+                }),
+        );
 
         diagnostics
     }

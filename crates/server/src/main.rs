@@ -11,7 +11,6 @@ fn main() -> anyhow::Result<()> {
     let _enter = span.enter();
 
     event!(Level::INFO, "wat_server starting");
-    let _rt = leptos_reactive::create_runtime();
     let mut server = Server::default();
     server.run()?;
     Ok(())
