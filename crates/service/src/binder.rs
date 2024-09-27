@@ -4,7 +4,7 @@ use rowan::{
     ast::{AstNode, AstPtr},
     GreenNode,
 };
-use wat_syntax::ast::{Module, ModuleField, ModuleFieldFunc};
+use wat_syntax::ast::{ModuleField, ModuleFieldFunc};
 
 #[salsa::query_group(SymbolTables)]
 pub trait SymbolTablesCtx: FileInputCtx {
@@ -13,21 +13,32 @@ pub trait SymbolTablesCtx: FileInputCtx {
     fn symbol_table(&self, uri: Uri) -> SymbolTable;
 }
 fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: Uri) -> SymbolTable {
-    db.root(uri)
-        .modules()
-        .next()
-        .as_ref()
-        .map(SymbolTable::new)
-        .unwrap_or_default()
+    SymbolTable::new(db.root(uri))
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct SymbolTable {
-    pub functions: Vec<Function>,
+    pub modules: Vec<Module>,
 }
 impl SymbolTable {
-    pub fn new(module: &Module) -> SymbolTable {
+    pub fn new(root: wat_syntax::ast::Root) -> SymbolTable {
         Self {
+            modules: root.modules().map(Module::new).collect(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Module {
+    pub green: GreenNode,
+    pub ptr: AstPtr<wat_syntax::ast::Module>,
+    pub functions: Vec<Function>,
+}
+impl Module {
+    pub fn new(module: wat_syntax::ast::Module) -> Self {
+        Self {
+            green: module.syntax().green().into(),
+            ptr: AstPtr::new(&module),
             functions: module
                 .module_fields()
                 .filter_map(|field| {
@@ -100,7 +111,7 @@ impl Function {
 }
 impl PartialEq for Function {
     fn eq(&self, other: &Self) -> bool {
-        self.green == other.green
+        self.green == other.green && self.ptr == other.ptr
     }
 }
 impl Eq for Function {}

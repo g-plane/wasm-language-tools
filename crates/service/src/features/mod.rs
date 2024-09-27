@@ -2,11 +2,18 @@ mod definition;
 mod document_symbol;
 
 pub use self::{definition::goto_definition, document_symbol::document_symbol};
-use crate::{files::FileInputCtx, LanguageServiceCtx};
+use crate::{
+    binder::{Module, SymbolTable},
+    files::FileInputCtx,
+    LanguageServiceCtx,
+};
 use line_index::LineCol;
 use lsp_types::{Position, Uri};
-use rowan::{ast::AstNode, TokenAtOffset};
-use wat_syntax::{is_punc, is_trivia, SyntaxToken};
+use rowan::{
+    ast::{AstNode, SyntaxNodePtr},
+    TokenAtOffset,
+};
+use wat_syntax::{is_punc, is_trivia, SyntaxKind, SyntaxNode, SyntaxToken};
 
 fn find_meaningful_token(
     service: &LanguageServiceCtx,
@@ -36,4 +43,17 @@ fn find_meaningful_token(
             }
         }
     }
+}
+
+fn locate_module(
+    symbol_table: &SymbolTable,
+    mut ancestors: impl Iterator<Item = SyntaxNode>,
+) -> Option<&Module> {
+    let module_node = ancestors.find(|node| node.kind() == SyntaxKind::MODULE)?;
+    let green = module_node.green().into();
+    let ptr = SyntaxNodePtr::new(&module_node);
+    symbol_table
+        .modules
+        .iter()
+        .find(|module| module.green == green && module.ptr.syntax_node_ptr() == ptr)
 }

@@ -1,4 +1,4 @@
-use super::find_meaningful_token;
+use super::{find_meaningful_token, locate_module};
 use crate::{binder::SymbolTablesCtx, files::FileInputCtx, helpers, LanguageServiceCtx};
 use lsp_types::{GotoDefinitionParams, GotoDefinitionResponse, Location};
 use wat_syntax::{SyntaxElement, SyntaxKind};
@@ -29,12 +29,14 @@ pub fn goto_definition(
         })
     {
         let line_index = service.line_index(uri.clone());
+        let symbol_table = service.symbol_table(uri.clone());
+        let module = locate_module(&symbol_table, token.parent_ancestors())?;
+
         match token.kind() {
             SyntaxKind::IDENT => {
                 let name = token.text();
                 Some(GotoDefinitionResponse::Array(
-                    service
-                        .symbol_table(uri.clone())
+                    module
                         .functions
                         .iter()
                         .filter(|func| func.idx.name.as_deref().is_some_and(|n| n == name))
@@ -51,8 +53,7 @@ pub fn goto_definition(
             SyntaxKind::INT => {
                 let num: usize = token.text().parse().ok()?;
                 Some(GotoDefinitionResponse::Array(
-                    service
-                        .symbol_table(uri.clone())
+                    module
                         .functions
                         .iter()
                         .filter(|func| func.idx.num == num)
