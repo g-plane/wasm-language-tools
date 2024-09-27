@@ -6,12 +6,12 @@ mod helpers;
 
 use crate::{
     binder::SymbolTables,
-    files::{FileInput, FileInputCtx},
+    files::{Files, FilesCtx},
 };
 use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range, Uri};
 use rowan::ast::AstNode;
 
-#[salsa::database(FileInput, SymbolTables)]
+#[salsa::database(Files, SymbolTables)]
 #[derive(Default)]
 struct LanguageServiceCtx {
     storage: salsa::Storage<Self>,

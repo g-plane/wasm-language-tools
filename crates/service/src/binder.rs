@@ -1,4 +1,4 @@
-use crate::files::FileInputCtx;
+use crate::files::FilesCtx;
 use lsp_types::Uri;
 use rowan::{
     ast::{AstNode, AstPtr},
@@ -7,7 +7,7 @@ use rowan::{
 use wat_syntax::ast::{ModuleField, ModuleFieldFunc};
 
 #[salsa::query_group(SymbolTables)]
-pub trait SymbolTablesCtx: FileInputCtx {
+pub trait SymbolTablesCtx: FilesCtx {
     #[salsa::memoized]
     #[salsa::invoke(create_symbol_table)]
     fn symbol_table(&self, uri: Uri) -> SymbolTable;

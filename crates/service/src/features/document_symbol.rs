@@ -1,4 +1,4 @@
-use crate::{binder::SymbolTablesCtx, files::FileInputCtx, helpers, LanguageService};
+use crate::{binder::SymbolTablesCtx, files::FilesCtx, helpers, LanguageService};
 use lsp_types::{DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind};
 use rowan::ast::AstNode;
 

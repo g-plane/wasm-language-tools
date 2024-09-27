@@ -5,8 +5,8 @@ use rowan::ast::AstNode;
 use wat_parser::Parser;
 use wat_syntax::ast::Root;
 
-#[salsa::query_group(FileInput)]
-pub trait FileInputCtx: salsa::Database {
+#[salsa::query_group(Files)]
+pub trait FilesCtx: salsa::Database {
     #[salsa::input]
     fn source(&self, uri: Uri) -> String;
 
@@ -22,11 +22,11 @@ pub trait FileInputCtx: salsa::Database {
     fn root(&self, uri: Uri) -> Root;
 }
 
-fn get_line_index(db: &dyn FileInputCtx, uri: Uri) -> LineIndex {
+fn get_line_index(db: &dyn FilesCtx, uri: Uri) -> LineIndex {
     LineIndex::new(&db.source(uri))
 }
 
-fn parse(db: &dyn FileInputCtx, uri: Uri) -> (Root, Vec<Diagnostic>) {
+fn parse(db: &dyn FilesCtx, uri: Uri) -> (Root, Vec<Diagnostic>) {
     let source = db.source(uri.clone());
     let line_index = db.line_index(uri);
     let mut parser = Parser::new(&source);
@@ -49,6 +49,6 @@ fn parse(db: &dyn FileInputCtx, uri: Uri) -> (Root, Vec<Diagnostic>) {
     (tree, syntax_errors)
 }
 
-fn root(db: &dyn FileInputCtx, uri: Uri) -> Root {
+fn root(db: &dyn FilesCtx, uri: Uri) -> Root {
     db.parser_result(uri).0
 }

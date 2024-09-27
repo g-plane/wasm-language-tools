@@ -1,5 +1,5 @@
 use super::{find_meaningful_token, locate_module};
-use crate::{binder::SymbolTablesCtx, files::FileInputCtx, helpers, LanguageService};
+use crate::{binder::SymbolTablesCtx, files::FilesCtx, helpers, LanguageService};
 use lsp_types::{GotoDefinitionParams, GotoDefinitionResponse, Location};
 use wat_syntax::{SyntaxElement, SyntaxKind};
 

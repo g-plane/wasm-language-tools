@@ -3,7 +3,7 @@ mod document_symbol;
 
 use crate::{
     binder::{Module, SymbolTable},
-    files::FileInputCtx,
+    files::FilesCtx,
     LanguageServiceCtx,
 };
 use line_index::LineCol;
