@@ -1,40 +1,19 @@
+use super::find_meaningful_token;
 use crate::{binder::SymbolTablesCtx, files::FileInputCtx, LanguageServiceCtx};
-use line_index::LineCol;
 use lsp_types::{GotoDefinitionParams, GotoDefinitionResponse, Location, Position, Range};
-use rowan::{ast::AstNode, TokenAtOffset};
-use wat_syntax::{is_punc, is_trivia, SyntaxElement, SyntaxKind};
+use wat_syntax::{SyntaxElement, SyntaxKind};
 
 pub fn goto_definition(
     service: &LanguageServiceCtx,
     params: GotoDefinitionParams,
 ) -> Option<GotoDefinitionResponse> {
     let uri = params.text_document_position_params.text_document.uri;
-    let offset = service
-        .line_index(uri.clone())
-        .offset(LineCol {
-            line: params.text_document_position_params.position.line,
-            col: params.text_document_position_params.position.character,
-        })
-        .map(|text_size| rowan::TextSize::new(text_size.into()))?;
+    let token = find_meaningful_token(
+        service,
+        uri.clone(),
+        params.text_document_position_params.position,
+    )?;
 
-    let token = (match service.root(uri.clone()).syntax().token_at_offset(offset) {
-        TokenAtOffset::None => None,
-        TokenAtOffset::Single(token) => Some(token),
-        TokenAtOffset::Between(left, right) => {
-            let left_check = is_trivia(&left) || is_punc(&left);
-            let right_check = is_trivia(&right) || is_punc(&right);
-            if left_check && right_check || !left_check && !right_check {
-                None
-            } else if left_check {
-                Some(right)
-            } else {
-                Some(left)
-            }
-        }
-    })?;
-    if token.kind() != SyntaxKind::IDENT {
-        return None;
-    }
     if token
         .parent()
         .and_then(|parent| parent.parent())
@@ -49,6 +28,9 @@ pub fn goto_definition(
             })
         })
     {
+        if token.kind() != SyntaxKind::IDENT {
+            return None;
+        }
         let name = token.text();
         let line_index = service.line_index(uri.clone());
         Some(GotoDefinitionResponse::Array(
