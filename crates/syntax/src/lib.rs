@@ -23,6 +23,7 @@ pub type SyntaxNode = rowan::SyntaxNode<WatLanguage>;
 pub type SyntaxToken = rowan::SyntaxToken<WatLanguage>;
 pub type SyntaxElement = rowan::SyntaxElement<WatLanguage>;
 
+#[inline]
 pub fn is_trivia(token: &SyntaxToken) -> bool {
     matches!(
         token.kind(),
@@ -30,6 +31,7 @@ pub fn is_trivia(token: &SyntaxToken) -> bool {
     )
 }
 
+#[inline]
 pub fn is_punc(token: &SyntaxToken) -> bool {
     matches!(token.kind(), SyntaxKind::L_PAREN | SyntaxKind::R_PAREN)
 }
