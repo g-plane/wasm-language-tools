@@ -8,10 +8,7 @@ use crate::{
     binder::SymbolTables,
     files::{FileInput, FileInputCtx},
 };
-use lsp_types::{
-    Diagnostic, DiagnosticSeverity, DocumentSymbolParams, DocumentSymbolResponse,
-    GotoDefinitionParams, GotoDefinitionResponse, Position, Range, Uri,
-};
+use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range, Uri};
 use rowan::ast::AstNode;
 
 #[salsa::database(FileInput, SymbolTables)]
@@ -64,13 +61,5 @@ impl LanguageService {
         }));
 
         diagnostics
-    }
-
-    pub fn document_symbol(&self, params: DocumentSymbolParams) -> Option<DocumentSymbolResponse> {
-        crate::features::document_symbol(&self.ctx, params)
-    }
-
-    pub fn goto_definition(&self, params: GotoDefinitionParams) -> Option<GotoDefinitionResponse> {
-        crate::features::goto_definition(&self.ctx, params)
     }
 }

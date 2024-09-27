@@ -1,7 +1,6 @@
 mod definition;
 mod document_symbol;
 
-pub use self::{definition::goto_definition, document_symbol::document_symbol};
 use crate::{
     binder::{Module, SymbolTable},
     files::FileInputCtx,
