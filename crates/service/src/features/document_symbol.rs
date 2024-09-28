@@ -62,6 +62,30 @@ impl LanguageService {
                         },
                     )
                 }
+                SymbolItemKind::Type(ty) => {
+                    let range =
+                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.ptr.text_range());
+                    (
+                        symbol.key.clone(),
+                        DocumentSymbol {
+                            name: ty.name.clone().unwrap_or_else(|| ty.num.to_string()),
+                            detail: None,
+                            kind: SymbolKind::VARIABLE,
+                            tags: None,
+                            deprecated: None,
+                            range,
+                            selection_range: token(
+                                &symbol.key.ptr.to_node(root),
+                                SyntaxKind::IDENT,
+                            )
+                            .map(|token| {
+                                helpers::rowan_range_to_lsp_range(&line_index, token.text_range())
+                            })
+                            .unwrap_or(range),
+                            children: None,
+                        },
+                    )
+                }
             })
             .collect::<FxHashMap<_, _>>();
         symbol_table.symbols.iter().for_each(|symbol| {

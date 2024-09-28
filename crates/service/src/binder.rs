@@ -56,6 +56,24 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable 
                 }),
             })
         }
+        SyntaxKind::MODULE_FIELD_TYPE => {
+            let current_id = module_field_id;
+            module_field_id += 1;
+            Some(SymbolItem {
+                key: SymbolItemKey {
+                    ptr: SyntaxNodePtr::new(&node),
+                    green: node.green().into(),
+                },
+                parent: node.parent().map(|parent| SymbolItemKey {
+                    ptr: SyntaxNodePtr::new(&parent),
+                    green: parent.green().into(),
+                }),
+                kind: SymbolItemKind::Type(Idx {
+                    num: current_id,
+                    name: token(&node, SyntaxKind::IDENT).map(|token| token.text().to_string()),
+                }),
+            })
+        }
         _ => None,
     });
     SymbolTable {
@@ -86,6 +104,7 @@ impl Eq for SymbolItem {}
 pub enum SymbolItemKind {
     Module,
     Func(Idx),
+    Type(Idx),
 }
 
 #[derive(Clone, Debug)]
