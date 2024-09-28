@@ -65,8 +65,6 @@ pub struct Function {
     pub green: GreenNode,
     pub ptr: AstPtr<ModuleFieldFunc>,
     pub idx: Idx,
-    pub params: Vec<Param>,
-    pub results: Vec<Result>,
 }
 impl Function {
     pub fn new(id: usize, func: ModuleFieldFunc) -> Self {
@@ -81,30 +79,10 @@ impl Function {
                 name: None,
             }
         };
-
-        let params = vec![];
-        let mut results = vec![];
-        if let Some(type_use) = func.type_use() {
-            results.extend(
-                type_use
-                    .results()
-                    .flat_map(|result| result.val_types())
-                    .enumerate()
-                    .map(|(id, ty)| Result {
-                        ty: ty.into(),
-                        idx: Idx {
-                            num: id,
-                            name: None,
-                        },
-                    }),
-            );
-        }
         Self {
             green: func.syntax().green().into(),
             ptr: AstPtr::new(&func),
             idx,
-            params,
-            results,
         }
     }
 }
@@ -114,18 +92,6 @@ impl PartialEq for Function {
     }
 }
 impl Eq for Function {}
-
-#[derive(Clone, Debug)]
-pub struct Param {
-    pub ty: ValType,
-    pub idx: Idx,
-}
-
-#[derive(Clone, Debug)]
-pub struct Result {
-    pub ty: ValType,
-    pub idx: Idx,
-}
 
 #[derive(Clone, Debug)]
 pub enum ValType {
