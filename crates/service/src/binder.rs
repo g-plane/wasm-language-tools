@@ -1,57 +1,15 @@
 use crate::{files::FilesCtx, InternUri};
 use rowan::{
-    ast::{AstNode, AstPtr},
+    ast::{support::token, AstNode, SyntaxNodePtr},
     GreenNode,
 };
-use wat_syntax::ast::{ModuleField, ModuleFieldFunc};
+use wat_syntax::{SyntaxKind, WatLanguage};
 
 #[salsa::query_group(SymbolTables)]
 pub trait SymbolTablesCtx: FilesCtx {
     #[salsa::memoized]
     #[salsa::invoke(create_symbol_table)]
     fn symbol_table(&self, uri: InternUri) -> SymbolTable;
-}
-fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable {
-    SymbolTable::new(db.root(uri))
-}
-
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct SymbolTable {
-    pub modules: Vec<Module>,
-}
-impl SymbolTable {
-    pub fn new(root: wat_syntax::ast::Root) -> SymbolTable {
-        Self {
-            modules: root.modules().map(Module::new).collect(),
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Module {
-    pub green: GreenNode,
-    pub ptr: AstPtr<wat_syntax::ast::Module>,
-    pub functions: Vec<Function>,
-}
-impl Module {
-    pub fn new(module: wat_syntax::ast::Module) -> Self {
-        Self {
-            green: module.syntax().green().into(),
-            ptr: AstPtr::new(&module),
-            functions: module
-                .module_fields()
-                .filter_map(|field| {
-                    if let ModuleField::Func(func) = field {
-                        Some(func)
-                    } else {
-                        None
-                    }
-                })
-                .enumerate()
-                .map(|(id, func)| Function::new(id, func))
-                .collect(),
-        }
-    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -60,38 +18,75 @@ pub struct Idx {
     pub name: Option<String>,
 }
 
-#[derive(Clone, Debug)]
-pub struct Function {
-    pub green: GreenNode,
-    pub ptr: AstPtr<ModuleFieldFunc>,
-    pub idx: Idx,
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SymbolTable {
+    pub symbols: Vec<SymbolItem>,
 }
-impl Function {
-    pub fn new(id: usize, func: ModuleFieldFunc) -> Self {
-        let idx = if let Some(token) = func.ident_token() {
-            Idx {
-                num: id,
-                name: Some(token.text().to_string()),
-            }
-        } else {
-            Idx {
-                num: id,
-                name: None,
-            }
-        };
-        Self {
-            green: func.syntax().green().into(),
-            ptr: AstPtr::new(&func),
-            idx,
+fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable {
+    let root = db.root(uri);
+    let root = root.syntax();
+    let mut module_field_id = 0;
+    let symbols = root.descendants().filter_map(|node| match node.kind() {
+        SyntaxKind::MODULE => {
+            module_field_id = 0;
+            Some(SymbolItem {
+                key: SymbolItemKey {
+                    ptr: SyntaxNodePtr::new(&node),
+                    green: node.green().into(),
+                },
+                parent: None,
+                kind: SymbolItemKind::Module,
+            })
         }
+        SyntaxKind::MODULE_FIELD_FUNC => {
+            let current_id = module_field_id;
+            module_field_id += 1;
+            Some(SymbolItem {
+                key: SymbolItemKey {
+                    ptr: SyntaxNodePtr::new(&node),
+                    green: node.green().into(),
+                },
+                parent: node.parent().map(|parent| SymbolItemKey {
+                    ptr: SyntaxNodePtr::new(&parent),
+                    green: parent.green().into(),
+                }),
+                kind: SymbolItemKind::Func(Idx {
+                    num: current_id,
+                    name: token(&node, SyntaxKind::IDENT).map(|token| token.text().to_string()),
+                }),
+            })
+        }
+        _ => None,
+    });
+    SymbolTable {
+        symbols: symbols.collect(),
     }
 }
-impl PartialEq for Function {
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct SymbolItemKey {
+    pub ptr: SyntaxNodePtr<WatLanguage>,
+    pub green: GreenNode,
+}
+
+#[derive(Clone, Debug)]
+pub struct SymbolItem {
+    pub key: SymbolItemKey,
+    pub parent: Option<SymbolItemKey>,
+    pub kind: SymbolItemKind,
+}
+impl PartialEq for SymbolItem {
     fn eq(&self, other: &Self) -> bool {
-        self.green == other.green && self.ptr == other.ptr
+        self.key == other.key
     }
 }
-impl Eq for Function {}
+impl Eq for SymbolItem {}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum SymbolItemKind {
+    Module,
+    Func(Idx),
+}
 
 #[derive(Clone, Debug)]
 pub enum ValType {

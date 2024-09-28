@@ -1,5 +1,9 @@
 use super::{find_meaningful_token, locate_module};
-use crate::{binder::SymbolTablesCtx, files::FilesCtx, helpers, LanguageService};
+use crate::{
+    binder::{SymbolItemKind, SymbolTablesCtx},
+    files::FilesCtx,
+    helpers, LanguageService,
+};
 use lsp_types::{GotoDefinitionParams, GotoDefinitionResponse, Location};
 use wat_syntax::{SyntaxElement, SyntaxKind};
 
@@ -41,15 +45,25 @@ impl LanguageService {
                     let name = token.text();
                     let uri = params.text_document_position_params.text_document.uri;
                     Some(GotoDefinitionResponse::Array(
-                        module
-                            .functions
+                        symbol_table
+                            .symbols
                             .iter()
-                            .filter(|func| func.idx.name.as_deref().is_some_and(|n| n == name))
-                            .map(|func| Location {
+                            .filter(|symbol| {
+                                if let SymbolItemKind::Func(func) = &symbol.kind {
+                                    symbol
+                                        .parent
+                                        .as_ref()
+                                        .is_some_and(|parent| parent == &module.key)
+                                        && func.name.as_deref().is_some_and(|n| n == name)
+                                } else {
+                                    false
+                                }
+                            })
+                            .map(|symbol| Location {
                                 uri: uri.clone(),
                                 range: helpers::rowan_range_to_lsp_range(
                                     &line_index,
-                                    func.ptr.syntax_node_ptr().text_range(),
+                                    symbol.key.ptr.text_range(),
                                 ),
                             })
                             .collect(),
@@ -59,15 +73,25 @@ impl LanguageService {
                     let num: usize = token.text().parse().ok()?;
                     let uri = params.text_document_position_params.text_document.uri;
                     Some(GotoDefinitionResponse::Array(
-                        module
-                            .functions
+                        symbol_table
+                            .symbols
                             .iter()
-                            .filter(|func| func.idx.num == num)
-                            .map(|func| Location {
+                            .filter(|symbol| {
+                                if let SymbolItemKind::Func(func) = &symbol.kind {
+                                    symbol
+                                        .parent
+                                        .as_ref()
+                                        .is_some_and(|parent| parent == &module.key)
+                                        && func.num == num
+                                } else {
+                                    false
+                                }
+                            })
+                            .map(|symbol| Location {
                                 uri: uri.clone(),
                                 range: helpers::rowan_range_to_lsp_range(
                                     &line_index,
-                                    func.ptr.syntax_node_ptr().text_range(),
+                                    symbol.key.ptr.text_range(),
                                 ),
                             })
                             .collect(),

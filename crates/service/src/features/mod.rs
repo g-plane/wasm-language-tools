@@ -2,7 +2,7 @@ mod definition;
 mod document_symbol;
 
 use crate::{
-    binder::{Module, SymbolTable},
+    binder::{SymbolItem, SymbolItemKind, SymbolTable},
     files::FilesCtx,
     InternUri, LanguageServiceCtx,
 };
@@ -47,12 +47,13 @@ fn find_meaningful_token(
 fn locate_module(
     symbol_table: &SymbolTable,
     mut ancestors: impl Iterator<Item = SyntaxNode>,
-) -> Option<&Module> {
+) -> Option<&SymbolItem> {
     let module_node = ancestors.find(|node| node.kind() == SyntaxKind::MODULE)?;
     let green = module_node.green().into();
     let ptr = SyntaxNodePtr::new(&module_node);
-    symbol_table
-        .modules
-        .iter()
-        .find(|module| module.green == green && module.ptr.syntax_node_ptr() == ptr)
+    symbol_table.symbols.iter().find(|symbol| {
+        matches!(symbol.kind, SymbolItemKind::Module)
+            && symbol.key.green == green
+            && symbol.key.ptr == ptr
+    })
 }

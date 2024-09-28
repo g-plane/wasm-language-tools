@@ -13,6 +13,7 @@ exclude = ["/tests"]
 line-index = "0.1"
 lsp-types.workspace = true
 rowan.workspace = true
+rustc-hash = "2.0"
 salsa = "0.16"
 tracing.workspace = true
 wat_parser = { path = "../parser", version = "0.0" }
