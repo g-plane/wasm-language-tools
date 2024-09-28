@@ -17,11 +17,11 @@ pub trait FilesCtx: salsa::Database {
     #[salsa::invoke(get_line_index)]
     fn line_index(&self, uri: InternUri) -> LineIndex;
 
-    #[salsa::dependencies]
+    #[salsa::memoized]
     #[salsa::invoke(parse)]
     fn parser_result(&self, uri: InternUri) -> (Root, Vec<Diagnostic>);
 
-    #[salsa::dependencies]
+    #[salsa::memoized]
     fn root(&self, uri: InternUri) -> Root;
 }
 
