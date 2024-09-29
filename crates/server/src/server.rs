@@ -20,7 +20,7 @@ impl Server {
         let (connection, io_threads) = Connection::stdio();
 
         let server_capabilities = serde_json::to_value(wat_service::server_capabilities())?;
-        let initialization_params = match connection.initialize(server_capabilities) {
+        match connection.initialize(server_capabilities) {
             Ok(it) => it,
             Err(e) => {
                 if e.channel_is_disconnected() {
@@ -29,12 +29,12 @@ impl Server {
                 return Err(e.into());
             }
         };
-        self.server_loop(connection, initialization_params)?;
+        self.server_loop(connection)?;
         io_threads.join()?;
         Ok(())
     }
 
-    fn server_loop(&mut self, conn: Connection, _params: serde_json::Value) -> anyhow::Result<()> {
+    fn server_loop(&mut self, conn: Connection) -> anyhow::Result<()> {
         for msg in &conn.receiver {
             match msg {
                 Message::Request(mut req) => {
