@@ -4,9 +4,10 @@ use lsp_types::{
         DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument, Notification as _,
         PublishDiagnostics,
     },
-    request::{DocumentSymbolRequest, GotoDefinition},
+    request::{DocumentSymbolRequest, GotoDefinition, GotoTypeDefinition},
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams, OneOf,
     PublishDiagnosticsParams, ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind,
+    TypeDefinitionProviderCapability,
 };
 use wat_service::LanguageService;
 
@@ -21,6 +22,7 @@ impl Server {
 
         let server_capabilities = serde_json::to_value(&ServerCapabilities {
             definition_provider: Some(OneOf::Left(true)),
+            type_definition_provider: Some(TypeDefinitionProviderCapability::Simple(true)),
             document_symbol_provider: Some(OneOf::Left(true)),
             text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
             ..Default::default()
@@ -53,6 +55,20 @@ impl Server {
                                 id,
                                 result: Some(serde_json::to_value(
                                     self.service.goto_definition(params),
+                                )?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<GotoTypeDefinition>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.goto_type_definition(params),
                                 )?),
                                 error: None,
                             }))?;

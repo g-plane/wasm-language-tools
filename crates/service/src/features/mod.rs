@@ -12,7 +12,7 @@ use rowan::{
     ast::{AstNode, SyntaxNodePtr},
     TokenAtOffset,
 };
-use wat_syntax::{is_punc, is_trivia, SyntaxKind, SyntaxNode, SyntaxToken};
+use wat_syntax::{is_punc, is_trivia, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 fn find_meaningful_token(
     service: &LanguageServiceCtx,
@@ -55,5 +55,15 @@ fn locate_module(
         matches!(symbol.kind, SymbolItemKind::Module)
             && symbol.key.green == green
             && symbol.key.ptr == ptr
+    })
+}
+
+fn is_call(node: &SyntaxNode) -> bool {
+    node.children_with_tokens().any(|element| {
+        if let SyntaxElement::Token(token) = element {
+            token.kind() == SyntaxKind::INSTR_NAME && token.text() == "call"
+        } else {
+            false
+        }
     })
 }
