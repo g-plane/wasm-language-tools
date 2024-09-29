@@ -21,17 +21,37 @@ impl LanguageService {
                 if token.kind() == SyntaxKind::WHITESPACE {
                     let lines = token.text().chars().filter(|c| *c == '\n').count() as u32;
                     if lines > 0 {
-                        delta_line = lines;
+                        delta_line += lines;
                         prev_start = 0;
                     }
                     return None;
                 }
                 let token_type = self.token_type(&token)?;
+                let block_comment_lines = if token.kind() == SyntaxKind::BLOCK_COMMENT {
+                    Some(token.text().chars().filter(|c| *c == '\n').count() as u32)
+                } else {
+                    None
+                };
                 let range = token.text_range();
                 let col = line_index.line_col(range.start()).col;
                 Some(SemanticToken {
-                    delta_line: mem::replace(&mut delta_line, 0),
-                    delta_start: col - mem::replace(&mut prev_start, col),
+                    delta_line: mem::replace(
+                        &mut delta_line,
+                        if let Some(lines) = block_comment_lines {
+                            lines
+                        } else {
+                            0
+                        },
+                    ),
+                    delta_start: col
+                        - mem::replace(
+                            &mut prev_start,
+                            if block_comment_lines.is_some_and(|lines| lines > 0) {
+                                0
+                            } else {
+                                col
+                            },
+                        ),
                     length: range.len().into(),
                     token_type,
                     token_modifiers_bitset: 0,
