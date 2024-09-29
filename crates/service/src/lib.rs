@@ -8,7 +8,10 @@ use crate::{
     binder::SymbolTables,
     files::{Files, FilesCtx},
 };
-use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range, Uri};
+use lsp_types::{
+    Diagnostic, DiagnosticSeverity, OneOf, Position, Range, ServerCapabilities,
+    TextDocumentSyncCapability, TextDocumentSyncKind, TypeDefinitionProviderCapability, Uri,
+};
 use rowan::ast::AstNode;
 use salsa::{InternId, InternKey};
 
@@ -72,5 +75,15 @@ impl InternKey for InternUri {
     }
     fn as_intern_id(&self) -> InternId {
         self.0
+    }
+}
+
+pub fn server_capabilities() -> ServerCapabilities {
+    ServerCapabilities {
+        definition_provider: Some(OneOf::Left(true)),
+        type_definition_provider: Some(TypeDefinitionProviderCapability::Simple(true)),
+        document_symbol_provider: Some(OneOf::Left(true)),
+        text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
+        ..Default::default()
     }
 }

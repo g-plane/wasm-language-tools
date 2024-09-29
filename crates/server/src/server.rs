@@ -5,9 +5,8 @@ use lsp_types::{
         PublishDiagnostics,
     },
     request::{DocumentSymbolRequest, GotoDefinition, GotoTypeDefinition},
-    DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams, OneOf,
-    PublishDiagnosticsParams, ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind,
-    TypeDefinitionProviderCapability,
+    DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
+    PublishDiagnosticsParams,
 };
 use wat_service::LanguageService;
 
@@ -20,14 +19,7 @@ impl Server {
     pub fn run(&mut self) -> anyhow::Result<()> {
         let (connection, io_threads) = Connection::stdio();
 
-        let server_capabilities = serde_json::to_value(&ServerCapabilities {
-            definition_provider: Some(OneOf::Left(true)),
-            type_definition_provider: Some(TypeDefinitionProviderCapability::Simple(true)),
-            document_symbol_provider: Some(OneOf::Left(true)),
-            text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
-            ..Default::default()
-        })
-        .unwrap();
+        let server_capabilities = serde_json::to_value(wat_service::server_capabilities())?;
         let initialization_params = match connection.initialize(server_capabilities) {
             Ok(it) => it,
             Err(e) => {
