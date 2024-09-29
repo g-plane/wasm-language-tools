@@ -25,59 +25,60 @@ pub struct SymbolTable {
 fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable {
     let root = db.root(uri);
     let mut module_field_id = 0;
-    let symbols = root.descendants().filter_map(|node| match node.kind() {
-        SyntaxKind::MODULE => {
-            module_field_id = 0;
-            Some(SymbolItem {
-                key: SymbolItemKey {
-                    ptr: SyntaxNodePtr::new(&node),
-                    green: node.green().into(),
-                },
-                parent: None,
-                kind: SymbolItemKind::Module,
-            })
+    let mut symbols = Vec::with_capacity(2);
+    for node in root.descendants() {
+        match node.kind() {
+            SyntaxKind::MODULE => {
+                module_field_id = 0;
+                symbols.push(SymbolItem {
+                    key: SymbolItemKey {
+                        ptr: SyntaxNodePtr::new(&node),
+                        green: node.green().into(),
+                    },
+                    parent: None,
+                    kind: SymbolItemKind::Module,
+                });
+            }
+            SyntaxKind::MODULE_FIELD_FUNC => {
+                let current_id = module_field_id;
+                module_field_id += 1;
+                symbols.push(SymbolItem {
+                    key: SymbolItemKey {
+                        ptr: SyntaxNodePtr::new(&node),
+                        green: node.green().into(),
+                    },
+                    parent: node.parent().map(|parent| SymbolItemKey {
+                        ptr: SyntaxNodePtr::new(&parent),
+                        green: parent.green().into(),
+                    }),
+                    kind: SymbolItemKind::Func(Idx {
+                        num: current_id,
+                        name: token(&node, SyntaxKind::IDENT).map(|token| token.text().to_string()),
+                    }),
+                });
+            }
+            SyntaxKind::MODULE_FIELD_TYPE => {
+                let current_id = module_field_id;
+                module_field_id += 1;
+                symbols.push(SymbolItem {
+                    key: SymbolItemKey {
+                        ptr: SyntaxNodePtr::new(&node),
+                        green: node.green().into(),
+                    },
+                    parent: node.parent().map(|parent| SymbolItemKey {
+                        ptr: SyntaxNodePtr::new(&parent),
+                        green: parent.green().into(),
+                    }),
+                    kind: SymbolItemKind::Type(Idx {
+                        num: current_id,
+                        name: token(&node, SyntaxKind::IDENT).map(|token| token.text().to_string()),
+                    }),
+                });
+            }
+            _ => {}
         }
-        SyntaxKind::MODULE_FIELD_FUNC => {
-            let current_id = module_field_id;
-            module_field_id += 1;
-            Some(SymbolItem {
-                key: SymbolItemKey {
-                    ptr: SyntaxNodePtr::new(&node),
-                    green: node.green().into(),
-                },
-                parent: node.parent().map(|parent| SymbolItemKey {
-                    ptr: SyntaxNodePtr::new(&parent),
-                    green: parent.green().into(),
-                }),
-                kind: SymbolItemKind::Func(Idx {
-                    num: current_id,
-                    name: token(&node, SyntaxKind::IDENT).map(|token| token.text().to_string()),
-                }),
-            })
-        }
-        SyntaxKind::MODULE_FIELD_TYPE => {
-            let current_id = module_field_id;
-            module_field_id += 1;
-            Some(SymbolItem {
-                key: SymbolItemKey {
-                    ptr: SyntaxNodePtr::new(&node),
-                    green: node.green().into(),
-                },
-                parent: node.parent().map(|parent| SymbolItemKey {
-                    ptr: SyntaxNodePtr::new(&parent),
-                    green: parent.green().into(),
-                }),
-                kind: SymbolItemKind::Type(Idx {
-                    num: current_id,
-                    name: token(&node, SyntaxKind::IDENT).map(|token| token.text().to_string()),
-                }),
-            })
-        }
-        _ => None,
-    });
-    SymbolTable {
-        symbols: symbols.collect(),
     }
+    SymbolTable { symbols }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
