@@ -1,6 +1,8 @@
 mod definition;
 mod document_symbol;
+mod semantic_tokens;
 
+pub(crate) use self::semantic_tokens::SemanticTokenKind;
 use crate::{
     binder::{SymbolItem, SymbolItemKind, SymbolTable},
     files::FilesCtx,

@@ -11,6 +11,7 @@ exclude = ["/tests"]
 
 [dependencies]
 either = "1.13"
+indexmap = "2.5"
 line-index = "0.1"
 lsp-types.workspace = true
 rowan.workspace = true

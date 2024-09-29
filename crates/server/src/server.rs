@@ -4,7 +4,10 @@ use lsp_types::{
         DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument, Notification as _,
         PublishDiagnostics,
     },
-    request::{DocumentSymbolRequest, GotoDeclaration, GotoDefinition, GotoTypeDefinition},
+    request::{
+        DocumentSymbolRequest, GotoDeclaration, GotoDefinition, GotoTypeDefinition,
+        SemanticTokensFullRequest,
+    },
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
     PublishDiagnosticsParams,
 };
@@ -18,17 +21,11 @@ pub struct Server {
 impl Server {
     pub fn run(&mut self) -> anyhow::Result<()> {
         let (connection, io_threads) = Connection::stdio();
-
-        let server_capabilities = serde_json::to_value(wat_service::server_capabilities())?;
-        match connection.initialize(server_capabilities) {
-            Ok(it) => it,
-            Err(e) => {
-                if e.channel_is_disconnected() {
-                    io_threads.join()?;
-                }
-                return Err(e.into());
-            }
-        };
+        let (id, params) = connection.initialize_start()?;
+        connection.initialize_finish(
+            id,
+            serde_json::to_value(self.service.initialize(serde_json::from_value(params)?))?,
+        )?;
         self.server_loop(connection)?;
         io_threads.join()?;
         Ok(())
@@ -75,6 +72,20 @@ impl Server {
                                 id,
                                 result: Some(serde_json::to_value(
                                     self.service.goto_declaration(params),
+                                )?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<SemanticTokensFullRequest>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.semantic_tokens_full(params),
                                 )?),
                                 error: None,
                             }))?;
