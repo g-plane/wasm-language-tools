@@ -6,7 +6,7 @@ use rowan::{
 use wat_syntax::{SyntaxKind, WatLanguage};
 
 #[salsa::query_group(SymbolTables)]
-pub trait SymbolTablesCtx: FilesCtx {
+pub(crate) trait SymbolTablesCtx: FilesCtx {
     #[salsa::memoized]
     #[salsa::invoke(create_symbol_table)]
     fn symbol_table(&self, uri: InternUri) -> SymbolTable;

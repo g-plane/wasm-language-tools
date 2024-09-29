@@ -68,7 +68,7 @@ impl LanguageService {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-pub struct InternUri(InternId);
+struct InternUri(InternId);
 impl InternKey for InternUri {
     fn from_intern_id(v: salsa::InternId) -> Self {
         InternUri(v)

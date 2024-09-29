@@ -6,7 +6,7 @@ use wat_parser::Parser;
 use wat_syntax::ast::Root;
 
 #[salsa::query_group(Files)]
-pub trait FilesCtx: salsa::Database {
+pub(crate) trait FilesCtx: salsa::Database {
     #[salsa::interned]
     fn uri(&self, uri: Uri) -> InternUri;
 
