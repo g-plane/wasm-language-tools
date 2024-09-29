@@ -9,8 +9,9 @@ use crate::{
     files::{Files, FilesCtx},
 };
 use lsp_types::{
-    Diagnostic, DiagnosticSeverity, OneOf, Position, Range, ServerCapabilities,
-    TextDocumentSyncCapability, TextDocumentSyncKind, TypeDefinitionProviderCapability, Uri,
+    DeclarationCapability, Diagnostic, DiagnosticSeverity, OneOf, Position, Range,
+    ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind,
+    TypeDefinitionProviderCapability, Uri,
 };
 use rowan::ast::AstNode;
 use salsa::{InternId, InternKey};
@@ -82,6 +83,7 @@ pub fn server_capabilities() -> ServerCapabilities {
     ServerCapabilities {
         definition_provider: Some(OneOf::Left(true)),
         type_definition_provider: Some(TypeDefinitionProviderCapability::Simple(true)),
+        declaration_provider: Some(DeclarationCapability::Simple(true)),
         document_symbol_provider: Some(OneOf::Left(true)),
         text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
         ..Default::default()

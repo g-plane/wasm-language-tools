@@ -88,6 +88,36 @@ impl LanguageService {
             _ => None,
         }
     }
+
+    /// Only available for function calls currently. This behaves same as "Goto Definition".
+    pub fn goto_declaration(&self, params: GotoDefinitionParams) -> Option<GotoDefinitionResponse> {
+        let uri = self.ctx.uri(
+            params
+                .text_document_position_params
+                .text_document
+                .uri
+                .clone(),
+        );
+        let line_index = self.ctx.line_index(uri);
+        let symbol_table = self.ctx.symbol_table(uri);
+        let token = find_meaningful_token(
+            &self.ctx,
+            uri,
+            params.text_document_position_params.position,
+        )?;
+
+        let grand = token.parent()?.parent()?;
+        match grand.kind() {
+            SyntaxKind::PLAIN_INSTR => find_func_def(&symbol_table, token).map(|symbols| {
+                GotoDefinitionResponse::Array(
+                    symbols
+                        .map(|symbol| create_location_by_symbol(&params, &line_index, symbol))
+                        .collect(),
+                )
+            }),
+            _ => None,
+        }
+    }
 }
 
 fn find_func_def(

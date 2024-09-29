@@ -4,7 +4,7 @@ use lsp_types::{
         DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument, Notification as _,
         PublishDiagnostics,
     },
-    request::{DocumentSymbolRequest, GotoDefinition, GotoTypeDefinition},
+    request::{DocumentSymbolRequest, GotoDeclaration, GotoDefinition, GotoTypeDefinition},
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
     PublishDiagnosticsParams,
 };
@@ -61,6 +61,20 @@ impl Server {
                                 id,
                                 result: Some(serde_json::to_value(
                                     self.service.goto_type_definition(params),
+                                )?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<GotoDeclaration>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.goto_declaration(params),
                                 )?),
                                 error: None,
                             }))?;
