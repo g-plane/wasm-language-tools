@@ -13,8 +13,9 @@ use lsp_types::{
     ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind,
     TypeDefinitionProviderCapability, Uri,
 };
-use rowan::ast::AstNode;
+use rowan::ast::{support::children, AstNode};
 use salsa::{InternId, InternKey};
+use wat_syntax::ast::Module;
 
 #[salsa::database(Files, SymbolTables)]
 #[derive(Default)]
@@ -48,21 +49,25 @@ impl LanguageService {
             .collect::<Vec<_>>();
 
         let line_index = self.ctx.line_index(uri);
-        diagnostics.extend(self.ctx.root(uri).modules().skip(1).map(|module| {
-            let range = module.syntax().text_range();
-            let start = line_index.line_col(range.start());
-            let end = line_index.line_col(range.end());
-            Diagnostic {
-                range: Range::new(
-                    Position::new(start.line, start.col),
-                    Position::new(end.line, end.col),
-                ),
-                severity: Some(DiagnosticSeverity::ERROR),
-                source: Some("wat".into()),
-                message: "only one module is allowed in one file".into(),
-                ..Default::default()
-            }
-        }));
+        diagnostics.extend(
+            children::<Module>(&self.ctx.root(uri))
+                .skip(1)
+                .map(|module| {
+                    let range = module.syntax().text_range();
+                    let start = line_index.line_col(range.start());
+                    let end = line_index.line_col(range.end());
+                    Diagnostic {
+                        range: Range::new(
+                            Position::new(start.line, start.col),
+                            Position::new(end.line, end.col),
+                        ),
+                        severity: Some(DiagnosticSeverity::ERROR),
+                        source: Some("wat".into()),
+                        message: "only one module is allowed in one file".into(),
+                        ..Default::default()
+                    }
+                }),
+        );
 
         diagnostics
     }

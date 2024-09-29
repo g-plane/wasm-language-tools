@@ -1,6 +1,6 @@
 use crate::{files::FilesCtx, InternUri};
 use rowan::{
-    ast::{support::token, AstNode, SyntaxNodePtr},
+    ast::{support::token, SyntaxNodePtr},
     GreenNode,
 };
 use wat_syntax::{SyntaxKind, WatLanguage};
@@ -24,7 +24,6 @@ pub struct SymbolTable {
 }
 fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable {
     let root = db.root(uri);
-    let root = root.syntax();
     let mut module_field_id = 0;
     let symbols = root.descendants().filter_map(|node| match node.kind() {
         SyntaxKind::MODULE => {

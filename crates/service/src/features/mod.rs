@@ -8,10 +8,7 @@ use crate::{
 };
 use line_index::LineCol;
 use lsp_types::Position;
-use rowan::{
-    ast::{AstNode, SyntaxNodePtr},
-    TokenAtOffset,
-};
+use rowan::{ast::SyntaxNodePtr, TokenAtOffset};
 use wat_syntax::{is_punc, is_trivia, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 fn find_meaningful_token(
@@ -27,7 +24,7 @@ fn find_meaningful_token(
         })
         .map(|text_size| rowan::TextSize::new(text_size.into()))?;
 
-    match service.root(uri).syntax().token_at_offset(offset) {
+    match service.root(uri).token_at_offset(offset) {
         TokenAtOffset::None => None,
         TokenAtOffset::Single(token) => Some(token),
         TokenAtOffset::Between(left, right) => {

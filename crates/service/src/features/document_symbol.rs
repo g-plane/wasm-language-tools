@@ -4,7 +4,7 @@ use crate::{
     helpers, LanguageService,
 };
 use lsp_types::{DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind};
-use rowan::ast::{support::token, AstNode};
+use rowan::ast::support::token;
 use rustc_hash::FxHashMap;
 use wat_syntax::SyntaxKind;
 
@@ -13,7 +13,6 @@ impl LanguageService {
         let uri = self.ctx.uri(params.text_document.uri);
         let line_index = self.ctx.line_index(uri);
         let root = self.ctx.root(uri);
-        let root = root.syntax();
         let symbol_table = self.ctx.symbol_table(uri);
 
         #[allow(deprecated)]
@@ -51,7 +50,7 @@ impl LanguageService {
                             deprecated: None,
                             range,
                             selection_range: token(
-                                &symbol.key.ptr.to_node(root),
+                                &symbol.key.ptr.to_node(&root),
                                 SyntaxKind::IDENT,
                             )
                             .map(|token| {
@@ -75,7 +74,7 @@ impl LanguageService {
                             deprecated: None,
                             range,
                             selection_range: token(
-                                &symbol.key.ptr.to_node(root),
+                                &symbol.key.ptr.to_node(&root),
                                 SyntaxKind::IDENT,
                             )
                             .map(|token| {

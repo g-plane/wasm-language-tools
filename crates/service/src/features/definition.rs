@@ -60,7 +60,6 @@ impl LanguageService {
         );
         let line_index = self.ctx.line_index(uri);
         let root = self.ctx.root(uri);
-        let root = root.syntax();
         let symbol_table = self.ctx.symbol_table(uri);
         let token = find_meaningful_token(
             &self.ctx,
@@ -74,7 +73,7 @@ impl LanguageService {
                 GotoDefinitionResponse::Array(
                     symbols
                         .filter_map(|symbol| {
-                            let token = child::<TypeUse>(&symbol.key.ptr.to_node(root))?
+                            let token = child::<TypeUse>(&symbol.key.ptr.to_node(&root))?
                                 .index()?
                                 .syntax()
                                 .first_token()?;
