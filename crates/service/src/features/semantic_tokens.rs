@@ -1,5 +1,9 @@
-use crate::{files::FilesCtx, LanguageService};
-use lsp_types::{SemanticToken, SemanticTokens, SemanticTokensParams, SemanticTokensResult};
+use crate::{files::FilesCtx, InternUri, LanguageService};
+use line_index::LineCol;
+use lsp_types::{
+    SemanticToken, SemanticTokens, SemanticTokensParams, SemanticTokensRangeParams,
+    SemanticTokensRangeResult, SemanticTokensResult,
+};
 use std::mem;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxToken};
 
@@ -9,20 +13,76 @@ impl LanguageService {
         params: SemanticTokensParams,
     ) -> Option<SemanticTokensResult> {
         let uri = self.ctx.uri(params.text_document.uri);
-        let line_index = self.ctx.line_index(uri);
         let mut delta_line = 0;
         let mut prev_start = 0;
-        let tokens = self
+        let tokens = self.build_tokens(
+            uri,
+            self.ctx
+                .root(uri)
+                .descendants_with_tokens()
+                .filter_map(SyntaxElement::into_token),
+            &mut delta_line,
+            &mut prev_start,
+        );
+        Some(SemanticTokensResult::Tokens(SemanticTokens {
+            result_id: None,
+            data: tokens,
+        }))
+    }
+
+    pub fn semantic_tokens_range(
+        &self,
+        params: SemanticTokensRangeParams,
+    ) -> Option<SemanticTokensRangeResult> {
+        let uri = self.ctx.uri(params.text_document.uri);
+        let line_index = self.ctx.line_index(uri);
+        let start = line_index.offset(LineCol {
+            line: params.range.start.line,
+            col: params.range.start.character,
+        })?;
+        let end = line_index.offset(LineCol {
+            line: params.range.end.line,
+            col: params.range.end.character,
+        })?;
+
+        let mut delta_line = 0;
+        let mut prev_start = 0;
+        let mut tokens = self
             .ctx
             .root(uri)
             .descendants_with_tokens()
             .filter_map(SyntaxElement::into_token)
+            .skip_while(|token| token.text_range().end() <= start)
+            .take_while(|token| token.text_range().start() < end)
+            .peekable();
+        if let Some(token) = tokens.peek() {
+            LineCol {
+                line: delta_line,
+                col: prev_start,
+            } = line_index.line_col(token.text_range().start());
+        }
+        let tokens = self.build_tokens(uri, tokens, &mut delta_line, &mut prev_start);
+        Some(SemanticTokensRangeResult::Tokens(SemanticTokens {
+            result_id: None,
+            data: tokens,
+        }))
+    }
+
+    fn build_tokens(
+        &self,
+        uri: InternUri,
+        tokens: impl Iterator<Item = SyntaxToken>,
+        delta_line: &mut u32,
+        prev_start: &mut u32,
+    ) -> Vec<SemanticToken> {
+        let line_index = self.ctx.line_index(uri);
+        tokens
             .filter_map(|token| {
                 if token.kind() == SyntaxKind::WHITESPACE {
                     let lines = token.text().chars().filter(|c| *c == '\n').count() as u32;
                     if lines > 0 {
-                        delta_line += lines;
-                        prev_start = 0;
+                        *delta_line += lines;
+                        *prev_start = 0;
                     }
                     return None;
                 }
@@ -35,17 +95,10 @@ impl LanguageService {
                 let range = token.text_range();
                 let col = line_index.line_col(range.start()).col;
                 Some(SemanticToken {
-                    delta_line: mem::replace(
-                        &mut delta_line,
-                        if let Some(lines) = block_comment_lines {
-                            lines
-                        } else {
-                            0
-                        },
-                    ),
+                    delta_line: mem::replace(delta_line, block_comment_lines.unwrap_or_default()),
                     delta_start: col
                         - mem::replace(
-                            &mut prev_start,
+                            prev_start,
                             if block_comment_lines.is_some_and(|lines| lines > 0) {
                                 0
                             } else {
@@ -57,11 +110,7 @@ impl LanguageService {
                     token_modifiers_bitset: 0,
                 })
             })
-            .collect();
-        Some(SemanticTokensResult::Tokens(SemanticTokens {
-            result_id: None,
-            data: tokens,
-        }))
+            .collect()
     }
 
     fn token_type(&self, token: &SyntaxToken) -> Option<u32> {

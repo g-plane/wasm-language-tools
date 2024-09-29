@@ -82,7 +82,7 @@ impl LanguageService {
                                     .collect(),
                                 token_modifiers: vec![],
                             },
-                            range: None,
+                            range: Some(true),
                             full: Some(SemanticTokensFullOptions::Bool(true)),
                             ..Default::default()
                         },

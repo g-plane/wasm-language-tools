@@ -6,7 +6,7 @@ use lsp_types::{
     },
     request::{
         DocumentSymbolRequest, GotoDeclaration, GotoDefinition, GotoTypeDefinition,
-        SemanticTokensFullRequest,
+        SemanticTokensFullRequest, SemanticTokensRangeRequest,
     },
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
     PublishDiagnosticsParams,
@@ -86,6 +86,20 @@ impl Server {
                                 id,
                                 result: Some(serde_json::to_value(
                                     self.service.semantic_tokens_full(params),
+                                )?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<SemanticTokensRangeRequest>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.semantic_tokens_range(params),
                                 )?),
                                 error: None,
                             }))?;
