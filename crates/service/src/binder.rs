@@ -14,7 +14,7 @@ pub(crate) trait SymbolTablesCtx: FilesCtx {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Idx {
-    pub num: usize,
+    pub num: u32,
     pub name: Option<String>,
 }
 

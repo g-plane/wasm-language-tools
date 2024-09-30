@@ -147,7 +147,7 @@ fn find_func_def(
                 },
             ))),
             SyntaxKind::INT => {
-                let num: usize = token.text().parse().ok()?;
+                let num: u32 = token.text().parse().ok()?;
                 Some(Either::Right(symbol_table.symbols.iter().filter(
                     move |symbol| {
                         if let SymbolItemKind::Func(func) = &symbol.kind {
@@ -189,7 +189,7 @@ fn find_type_use_def(
             },
         ))),
         SyntaxKind::INT => {
-            let num: usize = token.text().parse().ok()?;
+            let num: u32 = token.text().parse().ok()?;
             Some(Either::Right(symbol_table.symbols.iter().filter(
                 move |symbol| {
                     if let SymbolItemKind::Type(ty) = &symbol.kind {
