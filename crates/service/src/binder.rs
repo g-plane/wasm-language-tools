@@ -1,9 +1,9 @@
 use crate::{files::FilesCtx, InternUri};
 use rowan::{
-    ast::{support::token, SyntaxNodePtr},
+    ast::{support::token, AstNode, SyntaxNodePtr},
     GreenNode,
 };
-use wat_syntax::{SyntaxKind, WatLanguage};
+use wat_syntax::{ast::ModuleFieldFunc, SyntaxKind, WatLanguage};
 
 #[salsa::query_group(SymbolTables)]
 pub(crate) trait SymbolTablesCtx: FilesCtx {
@@ -56,6 +56,46 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable 
                         name: token(&node, SyntaxKind::IDENT).map(|token| token.text().to_string()),
                     }),
                 });
+                let Some(func) = ModuleFieldFunc::cast(node.clone()) else {
+                    continue;
+                };
+                let local_index = func
+                    .type_use()
+                    .iter()
+                    .flat_map(|type_use| type_use.params())
+                    .fold(0, |i, param| {
+                        let param_node = param.syntax();
+                        symbols.push(SymbolItem {
+                            key: SymbolItemKey {
+                                ptr: SyntaxNodePtr::new(param_node),
+                                green: param_node.green().into(),
+                            },
+                            parent: Some(SymbolItemKey {
+                                ptr: SyntaxNodePtr::new(&node),
+                                green: node.green().into(),
+                            }),
+                            kind: SymbolItemKind::Param(i),
+                        });
+                        i + 1
+                    });
+                func.locals().fold(local_index, |i, local| {
+                    let local_node = local.syntax();
+                    symbols.push(SymbolItem {
+                        key: SymbolItemKey {
+                            ptr: SyntaxNodePtr::new(local_node),
+                            green: local_node.green().into(),
+                        },
+                        parent: Some(SymbolItemKey {
+                            ptr: SyntaxNodePtr::new(&node),
+                            green: node.green().into(),
+                        }),
+                        kind: SymbolItemKind::Local(Idx {
+                            num: i,
+                            name: local.ident_token().map(|token| token.text().to_string()),
+                        }),
+                    });
+                    i + 1
+                });
             }
             SyntaxKind::MODULE_FIELD_TYPE => {
                 let current_id = module_field_id;
@@ -104,6 +144,8 @@ impl Eq for SymbolItem {}
 pub enum SymbolItemKind {
     Module,
     Func(Idx),
+    Param(u32),
+    Local(Idx),
     Type(Idx),
 }
 

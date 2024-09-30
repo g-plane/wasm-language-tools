@@ -19,11 +19,11 @@ impl LanguageService {
         let mut symbols_map = symbol_table
             .symbols
             .iter()
-            .map(|symbol| match &symbol.kind {
+            .filter_map(|symbol| match &symbol.kind {
                 SymbolItemKind::Module => {
                     let module_range =
                         helpers::rowan_range_to_lsp_range(&line_index, symbol.key.ptr.text_range());
-                    (
+                    Some((
                         symbol.key.clone(),
                         DocumentSymbol {
                             name: "module".into(),
@@ -35,12 +35,12 @@ impl LanguageService {
                             selection_range: module_range,
                             children: None,
                         },
-                    )
+                    ))
                 }
                 SymbolItemKind::Func(func) => {
                     let range =
                         helpers::rowan_range_to_lsp_range(&line_index, symbol.key.ptr.text_range());
-                    (
+                    Some((
                         symbol.key.clone(),
                         DocumentSymbol {
                             name: func.name.clone().unwrap_or_else(|| func.num.to_string()),
@@ -59,12 +59,37 @@ impl LanguageService {
                             .unwrap_or(range),
                             children: None,
                         },
-                    )
+                    ))
+                }
+                SymbolItemKind::Param(..) => None,
+                SymbolItemKind::Local(local) => {
+                    let range =
+                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.ptr.text_range());
+                    Some((
+                        symbol.key.clone(),
+                        DocumentSymbol {
+                            name: local.name.clone().unwrap_or_else(|| local.num.to_string()),
+                            detail: None,
+                            kind: SymbolKind::VARIABLE,
+                            tags: None,
+                            deprecated: None,
+                            range,
+                            selection_range: token(
+                                &symbol.key.ptr.to_node(&root),
+                                SyntaxKind::IDENT,
+                            )
+                            .map(|token| {
+                                helpers::rowan_range_to_lsp_range(&line_index, token.text_range())
+                            })
+                            .unwrap_or(range),
+                            children: None,
+                        },
+                    ))
                 }
                 SymbolItemKind::Type(ty) => {
                     let range =
                         helpers::rowan_range_to_lsp_range(&line_index, symbol.key.ptr.text_range());
-                    (
+                    Some((
                         symbol.key.clone(),
                         DocumentSymbol {
                             name: ty.name.clone().unwrap_or_else(|| ty.num.to_string()),
@@ -83,11 +108,11 @@ impl LanguageService {
                             .unwrap_or(range),
                             children: None,
                         },
-                    )
+                    ))
                 }
             })
             .collect::<FxHashMap<_, _>>();
-        symbol_table.symbols.iter().for_each(|symbol| {
+        symbol_table.symbols.iter().rev().for_each(|symbol| {
             if let Some((lsp_symbol, parent)) = symbol.parent.as_ref().and_then(|parent| {
                 symbols_map
                     .remove(&symbol.key)

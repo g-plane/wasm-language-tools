@@ -1,9 +1,14 @@
-use crate::{files::FilesCtx, InternUri, LanguageService};
+use crate::{
+    binder::{SymbolItem, SymbolItemKey, SymbolItemKind, SymbolTablesCtx},
+    files::FilesCtx,
+    InternUri, LanguageService,
+};
 use line_index::LineCol;
 use lsp_types::{
     SemanticToken, SemanticTokens, SemanticTokensParams, SemanticTokensRangeParams,
     SemanticTokensRangeResult, SemanticTokensResult,
 };
+use rowan::ast::{support, SyntaxNodePtr};
 use std::mem;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxToken};
 
@@ -86,7 +91,7 @@ impl LanguageService {
                     }
                     return None;
                 }
-                let token_type = self.token_type(&token)?;
+                let token_type = self.token_type(uri, &token)?;
                 let block_comment_lines = if token.kind() == SyntaxKind::BLOCK_COMMENT {
                     Some(token.text().chars().filter(|c| *c == '\n').count() as u32)
                 } else {
@@ -113,7 +118,8 @@ impl LanguageService {
             .collect()
     }
 
-    fn token_type(&self, token: &SyntaxToken) -> Option<u32> {
+    fn token_type(&self, uri: InternUri, token: &SyntaxToken) -> Option<u32> {
+        let symbol_table = self.ctx.symbol_table(uri);
         match token.kind() {
             SyntaxKind::NUM_TYPE | SyntaxKind::VEC_TYPE | SyntaxKind::REF_TYPE => self
                 .semantic_token_kinds
@@ -122,14 +128,39 @@ impl LanguageService {
                 .semantic_token_kinds
                 .get_index_of(&SemanticTokenKind::Keyword),
             SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
-                // TODO: detect `local.get` and `local.set`
-                if token
-                    .parent()
-                    .and_then(|parent| parent.parent())
-                    .is_some_and(|node| super::is_call(&node))
-                {
+                let parent = token.parent();
+                let grand = parent.as_ref().and_then(|parent| parent.parent());
+                if grand.as_ref().is_some_and(super::is_call) {
                     self.semantic_token_kinds
                         .get_index_of(&SemanticTokenKind::Func)
+                } else if let Some(func) = grand
+                    .filter(|grand| {
+                        support::token(grand, SyntaxKind::INSTR_NAME)
+                            .is_some_and(|name| name.text().starts_with("local."))
+                    })
+                    .into_iter()
+                    .flat_map(|grand| grand.ancestors())
+                    .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
+                {
+                    let value: u32 = token.text().parse().ok()?;
+                    let key = SymbolItemKey {
+                        ptr: SyntaxNodePtr::new(&func),
+                        green: func.green().into(),
+                    };
+                    if symbol_table.symbols.iter().any(|symbol| match symbol {
+                        SymbolItem {
+                            parent: Some(parent),
+                            kind: SymbolItemKind::Param(idx),
+                            ..
+                        } => parent == &key && *idx == value,
+                        _ => false,
+                    }) {
+                        self.semantic_token_kinds
+                            .get_index_of(&SemanticTokenKind::Param)
+                    } else {
+                        self.semantic_token_kinds
+                            .get_index_of(&SemanticTokenKind::Var)
+                    }
                 } else {
                     self.semantic_token_kinds
                         .get_index_of(&SemanticTokenKind::Number)
@@ -139,7 +170,6 @@ impl LanguageService {
                 .semantic_token_kinds
                 .get_index_of(&SemanticTokenKind::Number),
             SyntaxKind::IDENT => {
-                // TODO: detect `local.get` and `local.set`
                 let parent = token.parent();
                 if parent
                     .as_ref()
