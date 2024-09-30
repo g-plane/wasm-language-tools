@@ -126,7 +126,9 @@ impl LanguageService {
             SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
                 let parent = token.parent();
                 let grand = parent.as_ref().and_then(|parent| parent.parent());
-                if grand.as_ref().is_some_and(super::is_call) {
+                if grand.as_ref().is_some_and(|grand| {
+                    super::is_call(grand) || grand.kind() == SyntaxKind::MODULE_FIELD_START
+                }) {
                     self.semantic_token_kinds
                         .get_index_of(&SemanticTokenKind::Func)
                 } else if let Some(operand) = grand
@@ -156,7 +158,9 @@ impl LanguageService {
                 if parent
                     .as_ref()
                     .and_then(|parent| parent.parent())
-                    .is_some_and(|node| super::is_call(&node))
+                    .is_some_and(|grand| {
+                        super::is_call(&grand) || grand.kind() == SyntaxKind::MODULE_FIELD_START
+                    })
                     || parent
                         .as_ref()
                         .is_some_and(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)

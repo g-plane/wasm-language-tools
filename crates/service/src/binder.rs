@@ -1,10 +1,13 @@
 use crate::{files::FilesCtx, InternUri};
 use rowan::{
-    ast::{support::token, AstNode, SyntaxNodePtr},
+    ast::{
+        support::{child, token},
+        AstNode, SyntaxNodePtr,
+    },
     GreenNode,
 };
 use wat_syntax::{
-    ast::{ModuleFieldFunc, PlainInstr},
+    ast::{Index, ModuleFieldFunc, PlainInstr},
     SyntaxKind, SyntaxNode, WatLanguage,
 };
 
@@ -187,6 +190,29 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable 
                     _ => {}
                 }
             }
+            SyntaxKind::MODULE_FIELD_START => {
+                let Some(parent) = node.parent().map(SymbolItemKey::from) else {
+                    continue;
+                };
+                if let Some(index) = child::<Index>(&node) {
+                    if let Some(ident) = index.ident_token() {
+                        symbols.push(SymbolItem {
+                            key: index.syntax().clone().into(),
+                            parent: Some(parent),
+                            kind: SymbolItemKind::Call(RefIdx::Name(ident.text().to_string())),
+                        });
+                    } else if let Some(unsigned_int) = index
+                        .unsigned_int_token()
+                        .and_then(|token| token.text().parse().ok())
+                    {
+                        symbols.push(SymbolItem {
+                            key: index.syntax().clone().into(),
+                            parent: Some(parent),
+                            kind: SymbolItemKind::Call(RefIdx::Num(unsigned_int)),
+                        });
+                    }
+                }
+            }
             _ => {}
         }
     }
@@ -196,7 +222,7 @@ impl SymbolTable {
     pub fn find_func_defs(
         &self,
         call: &SymbolItemKey,
-    ) -> Option<impl Iterator<Item = &SymbolItem> + Clone> {
+    ) -> Option<impl Iterator<Item = &SymbolItem>> {
         self.symbols
             .iter()
             .find_map(|symbol| match symbol {

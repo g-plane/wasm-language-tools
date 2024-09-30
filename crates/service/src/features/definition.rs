@@ -28,7 +28,7 @@ impl LanguageService {
         )?;
 
         let parent = token.parent()?;
-        if parent.kind() == SyntaxKind::OPERAND {
+        if matches!(parent.kind(), SyntaxKind::OPERAND | SyntaxKind::INDEX) {
             let key = parent.clone().into();
             if let Some(symbols) = symbol_table.find_func_defs(&key) {
                 return Some(GotoDefinitionResponse::Array(
