@@ -92,7 +92,10 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable 
                         symbols.push(SymbolItem {
                             key: param.syntax().to_owned().into(),
                             parent: Some(node.clone().into()),
-                            kind: SymbolItemKind::Param(i),
+                            kind: SymbolItemKind::Param(DefIdx {
+                                num: i,
+                                name: param.ident_token().map(|token| token.text().to_string()),
+                            }),
                         });
                         i + 1
                     });
@@ -225,7 +228,7 @@ impl SymbolTable {
                         .parent
                         .as_ref()
                         .is_some_and(|parent| parent == func_key)
-                        && matches!(symbol.kind, SymbolItemKind::Param(param_idx) if idx == &param_idx)
+                        && matches!(&symbol.kind, SymbolItemKind::Param(param_idx) if idx == param_idx)
                 })
             })
     }
@@ -287,7 +290,7 @@ impl Eq for SymbolItem {}
 pub enum SymbolItemKind {
     Module,
     Func(DefIdx),
-    Param(u32),
+    Param(DefIdx),
     Local(DefIdx),
     Call(RefIdx),
     LocalRef(RefIdx),

@@ -71,6 +71,9 @@ impl LanguageService {
                         SymbolItemKind::Func(idx) => {
                             idx.name.as_deref().is_some_and(|name| name == old_name)
                         }
+                        SymbolItemKind::Param(idx) => {
+                            idx.name.as_deref().is_some_and(|name| name == old_name)
+                        }
                         SymbolItemKind::Local(idx) => {
                             idx.name.as_deref().is_some_and(|name| name == old_name)
                         }
@@ -88,9 +91,7 @@ impl LanguageService {
                                 false
                             }
                         }
-                        SymbolItemKind::Module
-                        | SymbolItemKind::Param(..)
-                        | SymbolItemKind::Type(..) => false,
+                        SymbolItemKind::Module | SymbolItemKind::Type(..) => false,
                     }
             })
             .filter_map(|sym| support::token(&sym.key.ptr.to_node(&root), SyntaxKind::IDENT))
