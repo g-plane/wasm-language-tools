@@ -1,4 +1,4 @@
-use super::{find_meaningful_token, is_call, locate_module};
+use super::{find_meaningful_token, locate_module};
 use crate::{
     binder::{SymbolItem, SymbolItemKind, SymbolTable, SymbolTablesCtx},
     files::FilesCtx,
@@ -27,15 +27,29 @@ impl LanguageService {
             params.text_document_position_params.position,
         )?;
 
-        let grand = token.parent()?.parent()?;
-        match grand.kind() {
-            SyntaxKind::PLAIN_INSTR => find_func_def(&symbol_table, token).map(|symbols| {
-                GotoDefinitionResponse::Array(
+        let parent = token.parent()?;
+        if parent.kind() == SyntaxKind::OPERAND {
+            let key = parent.clone().into();
+            if let Some(symbols) = symbol_table.find_func_defs(&key) {
+                return Some(GotoDefinitionResponse::Array(
                     symbols
                         .map(|symbol| create_location_by_symbol(&params, &line_index, symbol))
                         .collect(),
-                )
-            }),
+                ));
+            } else if let Some(symbol) = symbol_table
+                .find_param_def(&key)
+                .or_else(|| symbol_table.find_local_def(&key))
+            {
+                return Some(GotoDefinitionResponse::Scalar(create_location_by_symbol(
+                    &params,
+                    &line_index,
+                    symbol,
+                )));
+            }
+        }
+
+        let grand = parent.parent()?;
+        match grand.kind() {
             SyntaxKind::TYPE_USE => find_type_use_def(&symbol_table, token).map(|symbols| {
                 GotoDefinitionResponse::Array(
                     symbols
@@ -67,9 +81,10 @@ impl LanguageService {
             params.text_document_position_params.position,
         )?;
 
-        let grand = token.parent()?.parent()?;
+        let parent = token.parent()?;
+        let grand = parent.parent()?;
         match grand.kind() {
-            SyntaxKind::PLAIN_INSTR => find_func_def(&symbol_table, token).map(|symbols| {
+            SyntaxKind::PLAIN_INSTR => symbol_table.find_func_defs(&parent.into()).map(|symbols| {
                 GotoDefinitionResponse::Array(
                     symbols
                         .filter_map(|symbol| {
@@ -104,68 +119,20 @@ impl LanguageService {
             uri,
             params.text_document_position_params.position,
         )?;
-
-        let grand = token.parent()?.parent()?;
-        match grand.kind() {
-            SyntaxKind::PLAIN_INSTR => find_func_def(&symbol_table, token).map(|symbols| {
-                GotoDefinitionResponse::Array(
-                    symbols
-                        .map(|symbol| create_location_by_symbol(&params, &line_index, symbol))
-                        .collect(),
-                )
-            }),
-            _ => None,
+        let parent = token.parent()?;
+        if parent.kind() == SyntaxKind::OPERAND {
+            symbol_table
+                .find_func_defs(&parent.clone().into())
+                .map(|symbols| {
+                    GotoDefinitionResponse::Array(
+                        symbols
+                            .map(|symbol| create_location_by_symbol(&params, &line_index, symbol))
+                            .collect(),
+                    )
+                })
+        } else {
+            None
         }
-    }
-}
-
-fn find_func_def(
-    symbol_table: &SymbolTable,
-    token: SyntaxToken,
-) -> Option<Either<impl Iterator<Item = &SymbolItem>, impl Iterator<Item = &SymbolItem>>> {
-    let grand = token.parent()?.parent()?;
-    if grand.kind() == SyntaxKind::PLAIN_INSTR {
-        if !is_call(&grand) {
-            return None;
-        }
-        let module = locate_module(symbol_table, token.parent_ancestors())?;
-        match token.kind() {
-            SyntaxKind::IDENT => Some(Either::Left(symbol_table.symbols.iter().filter(
-                move |symbol| {
-                    if let SymbolItemKind::Func(func) = &symbol.kind {
-                        symbol
-                            .parent
-                            .as_ref()
-                            .is_some_and(|parent| parent == &module.key)
-                            && func
-                                .name
-                                .as_deref()
-                                .is_some_and(|name| name == token.text())
-                    } else {
-                        false
-                    }
-                },
-            ))),
-            SyntaxKind::INT => {
-                let num: u32 = token.text().parse().ok()?;
-                Some(Either::Right(symbol_table.symbols.iter().filter(
-                    move |symbol| {
-                        if let SymbolItemKind::Func(func) = &symbol.kind {
-                            symbol
-                                .parent
-                                .as_ref()
-                                .is_some_and(|parent| parent == &module.key)
-                                && func.num == num
-                        } else {
-                            false
-                        }
-                    },
-                )))
-            }
-            _ => None,
-        }
-    } else {
-        None
     }
 }
 

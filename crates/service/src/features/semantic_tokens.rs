@@ -1,14 +1,10 @@
-use crate::{
-    binder::{SymbolItem, SymbolItemKey, SymbolItemKind, SymbolTablesCtx},
-    files::FilesCtx,
-    InternUri, LanguageService,
-};
+use crate::{binder::SymbolTablesCtx, files::FilesCtx, InternUri, LanguageService};
 use line_index::LineCol;
 use lsp_types::{
     SemanticToken, SemanticTokens, SemanticTokensParams, SemanticTokensRangeParams,
     SemanticTokensRangeResult, SemanticTokensResult,
 };
-use rowan::ast::{support, SyntaxNodePtr};
+use rowan::ast::support;
 use std::mem;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxToken};
 
@@ -133,28 +129,14 @@ impl LanguageService {
                 if grand.as_ref().is_some_and(super::is_call) {
                     self.semantic_token_kinds
                         .get_index_of(&SemanticTokenKind::Func)
-                } else if let Some(func) = grand
+                } else if let Some(operand) = grand
                     .filter(|grand| {
                         support::token(grand, SyntaxKind::INSTR_NAME)
                             .is_some_and(|name| name.text().starts_with("local."))
                     })
-                    .into_iter()
-                    .flat_map(|grand| grand.ancestors())
-                    .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
+                    .and(parent)
                 {
-                    let value: u32 = token.text().parse().ok()?;
-                    let key = SymbolItemKey {
-                        ptr: SyntaxNodePtr::new(&func),
-                        green: func.green().into(),
-                    };
-                    if symbol_table.symbols.iter().any(|symbol| match symbol {
-                        SymbolItem {
-                            parent: Some(parent),
-                            kind: SymbolItemKind::Param(idx),
-                            ..
-                        } => parent == &key && *idx == value,
-                        _ => false,
-                    }) {
+                    if symbol_table.find_param_def(&operand.into()).is_some() {
                         self.semantic_token_kinds
                             .get_index_of(&SemanticTokenKind::Param)
                     } else {

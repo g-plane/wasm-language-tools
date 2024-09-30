@@ -61,7 +61,6 @@ impl LanguageService {
                         },
                     ))
                 }
-                SymbolItemKind::Param(..) => None,
                 SymbolItemKind::Local(local) => {
                     let range =
                         helpers::rowan_range_to_lsp_range(&line_index, symbol.key.ptr.text_range());
@@ -110,6 +109,9 @@ impl LanguageService {
                         },
                     ))
                 }
+                SymbolItemKind::Param(..)
+                | SymbolItemKind::Call(..)
+                | SymbolItemKind::LocalRef(..) => None,
             })
             .collect::<FxHashMap<_, _>>();
         symbol_table.symbols.iter().rev().for_each(|symbol| {
