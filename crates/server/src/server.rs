@@ -1,4 +1,6 @@
-use lsp_server::{Connection, ExtractError, Message, Notification, Request, RequestId, Response};
+use lsp_server::{
+    Connection, ExtractError, Message, Notification, Request, RequestId, Response, ResponseError,
+};
 use lsp_types::{
     notification::{
         DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument, Notification as _,
@@ -6,7 +8,7 @@ use lsp_types::{
     },
     request::{
         DocumentSymbolRequest, GotoDeclaration, GotoDefinition, GotoTypeDefinition,
-        SemanticTokensFullRequest, SemanticTokensRangeRequest,
+        PrepareRenameRequest, Rename, SemanticTokensFullRequest, SemanticTokensRangeRequest,
     },
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
     PublishDiagnosticsParams,
@@ -75,6 +77,43 @@ impl Server {
                                 )?),
                                 error: None,
                             }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<PrepareRenameRequest>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.prepare_rename(params),
+                                )?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<Rename>(req) {
+                        Ok((id, params)) => {
+                            match self.service.rename(params) {
+                                Ok(result) => conn.sender.send(Message::Response(Response {
+                                    id,
+                                    result: Some(serde_json::to_value(result)?),
+                                    error: None,
+                                }))?,
+                                Err(message) => conn.sender.send(Message::Response(Response {
+                                    id,
+                                    result: None,
+                                    error: Some(ResponseError {
+                                        code: -1,
+                                        message,
+                                        data: None,
+                                    }),
+                                }))?,
+                            }
                             continue;
                         }
                         Err(ExtractError::MethodMismatch(r)) => req = r,

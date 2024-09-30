@@ -1,5 +1,6 @@
 mod definition;
 mod document_symbol;
+mod rename;
 mod semantic_tokens;
 
 pub(crate) use self::semantic_tokens::SemanticTokenKind;

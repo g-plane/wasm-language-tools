@@ -1,3 +1,4 @@
+pub use self::token::is_id_char;
 use self::{
     module::module,
     token::{block_comment, error_term, error_token, line_comment, trivias, ws},

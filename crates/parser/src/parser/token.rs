@@ -106,7 +106,9 @@ fn ident_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
         .parse_next(input)
 }
 
-fn is_id_char(c: char) -> bool {
+#[inline]
+/// Checks if a character is a valid identifier character.
+pub fn is_id_char(c: char) -> bool {
     c.is_ascii_alphanumeric()
         || c.is_ascii_punctuation()
             && !matches!(
