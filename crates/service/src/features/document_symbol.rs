@@ -111,7 +111,8 @@ impl LanguageService {
                 }
                 SymbolItemKind::Param(..)
                 | SymbolItemKind::Call(..)
-                | SymbolItemKind::LocalRef(..) => None,
+                | SymbolItemKind::LocalRef(..)
+                | SymbolItemKind::TypeUse(..) => None,
             })
             .collect::<FxHashMap<_, _>>();
         symbol_table.symbols.iter().rev().for_each(|symbol| {

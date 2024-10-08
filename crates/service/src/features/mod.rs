@@ -4,14 +4,10 @@ mod rename;
 mod semantic_tokens;
 
 pub(crate) use self::semantic_tokens::SemanticTokenKind;
-use crate::{
-    binder::{SymbolItem, SymbolItemKind, SymbolTable},
-    files::FilesCtx,
-    InternUri, LanguageServiceCtx,
-};
+use crate::{files::FilesCtx, InternUri, LanguageServiceCtx};
 use line_index::LineCol;
 use lsp_types::Position;
-use rowan::{ast::SyntaxNodePtr, TokenAtOffset};
+use rowan::TokenAtOffset;
 use wat_syntax::{is_punc, is_trivia, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 fn find_meaningful_token(
@@ -42,20 +38,6 @@ fn find_meaningful_token(
             }
         }
     }
-}
-
-fn locate_module(
-    symbol_table: &SymbolTable,
-    mut ancestors: impl Iterator<Item = SyntaxNode>,
-) -> Option<&SymbolItem> {
-    let module_node = ancestors.find(|node| node.kind() == SyntaxKind::MODULE)?;
-    let green = module_node.green().into();
-    let ptr = SyntaxNodePtr::new(&module_node);
-    symbol_table.symbols.iter().find(|symbol| {
-        matches!(symbol.kind, SymbolItemKind::Module)
-            && symbol.key.green == green
-            && symbol.key.ptr == ptr
-    })
 }
 
 fn is_call(node: &SyntaxNode) -> bool {

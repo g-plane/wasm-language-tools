@@ -91,7 +91,17 @@ impl LanguageService {
                                 false
                             }
                         }
-                        SymbolItemKind::Module | SymbolItemKind::Type(..) => false,
+                        SymbolItemKind::Type(idx) => {
+                            idx.name.as_deref().is_some_and(|name| name == old_name)
+                        }
+                        SymbolItemKind::TypeUse(idx) => {
+                            if let RefIdx::Name(name) = idx {
+                                name == old_name
+                            } else {
+                                false
+                            }
+                        }
+                        SymbolItemKind::Module => false,
                     }
             })
             .filter_map(|sym| support::token(&sym.key.ptr.to_node(&root), SyntaxKind::IDENT))

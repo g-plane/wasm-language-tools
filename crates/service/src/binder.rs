@@ -213,6 +213,33 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable 
                     }
                 }
             }
+            SyntaxKind::TYPE_USE => {
+                let Some(parent) = node
+                    .ancestors()
+                    .find(|node| node.kind() == SyntaxKind::MODULE)
+                    .map(SymbolItemKey::from)
+                else {
+                    continue;
+                };
+                if let Some(index) = child::<Index>(&node) {
+                    if let Some(ident) = index.ident_token() {
+                        symbols.push(SymbolItem {
+                            key: index.syntax().clone().into(),
+                            parent: Some(parent),
+                            kind: SymbolItemKind::TypeUse(RefIdx::Name(ident.text().to_string())),
+                        });
+                    } else if let Some(unsigned_int) = index
+                        .unsigned_int_token()
+                        .and_then(|token| token.text().parse().ok())
+                    {
+                        symbols.push(SymbolItem {
+                            key: index.syntax().clone().into(),
+                            parent: Some(parent),
+                            kind: SymbolItemKind::TypeUse(RefIdx::Num(unsigned_int)),
+                        });
+                    }
+                }
+            }
             _ => {}
         }
     }
@@ -283,6 +310,32 @@ impl SymbolTable {
             _ => None,
         })
     }
+
+    pub fn find_type_use_defs(
+        &self,
+        type_use: &SymbolItemKey,
+    ) -> Option<impl Iterator<Item = &SymbolItem>> {
+        self.symbols
+            .iter()
+            .find_map(|symbol| match symbol {
+                SymbolItem {
+                    kind: SymbolItemKind::TypeUse(idx),
+                    key,
+                    ..
+                } if key == type_use => Some((symbol, idx)),
+                _ => None,
+            })
+            .and_then(|(symbol, idx)| symbol.parent.as_ref().map(|parent| (parent, idx)))
+            .map(|(module_key, idx)| {
+                self.symbols.iter().filter(move |symbol| {
+                    symbol
+                        .parent
+                        .as_ref()
+                        .is_some_and(|parent| parent == module_key)
+                        && matches!(&symbol.kind, SymbolItemKind::Type(type_idx) if idx == type_idx)
+                })
+            })
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -321,6 +374,7 @@ pub enum SymbolItemKind {
     Call(RefIdx),
     LocalRef(RefIdx),
     Type(DefIdx),
+    TypeUse(RefIdx),
 }
 
 #[derive(Clone, Debug)]
