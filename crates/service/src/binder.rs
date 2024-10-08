@@ -301,13 +301,13 @@ impl SymbolTable {
                 _ => None,
             })
             .and_then(|(symbol, idx)| symbol.parent.as_ref().map(|parent| (parent, idx)))
-            .map(|(module_key, idx)| {
+            .map(|(module_key, ref_idx)| {
                 self.symbols.iter().filter(move |symbol| {
                     symbol
                         .parent
                         .as_ref()
                         .is_some_and(|parent| parent == module_key)
-                        && matches!(&symbol.kind, SymbolItemKind::Func(func_idx) if idx == func_idx)
+                        && matches!(&symbol.kind, SymbolItemKind::Func(def_idx) if ref_idx == def_idx)
                 })
             })
     }
@@ -315,13 +315,13 @@ impl SymbolTable {
     pub fn find_param_def(&self, local_ref: &SymbolItemKey) -> Option<&SymbolItem> {
         self.find_local_ref(local_ref)
             .and_then(|(symbol, idx)| symbol.parent.as_ref().map(|parent| (parent, idx)))
-            .and_then(|(func_key, idx)| {
+            .and_then(|(func_key, ref_idx)| {
                 self.symbols.iter().find(|symbol| {
                     symbol
                         .parent
                         .as_ref()
                         .is_some_and(|parent| parent == func_key)
-                        && matches!(&symbol.kind, SymbolItemKind::Param(param_idx) if idx == param_idx)
+                        && matches!(&symbol.kind, SymbolItemKind::Param(def_idx) if ref_idx == def_idx)
                 })
             })
     }
@@ -329,13 +329,13 @@ impl SymbolTable {
     pub fn find_local_def(&self, local_ref: &SymbolItemKey) -> Option<&SymbolItem> {
         self.find_local_ref(local_ref)
             .and_then(|(symbol, idx)| symbol.parent.as_ref().map(|parent| (parent, idx)))
-            .and_then(|(func_key, idx)| {
+            .and_then(|(func_key, ref_idx)| {
                 self.symbols.iter().find(|symbol| {
                     symbol
                         .parent
                         .as_ref()
                         .is_some_and(|parent| parent == func_key)
-                        && matches!(&symbol.kind, SymbolItemKind::Local(local_idx) if idx == local_idx)
+                        && matches!(&symbol.kind, SymbolItemKind::Local(def_idx) if ref_idx == def_idx)
                 })
             })
     }
@@ -366,13 +366,13 @@ impl SymbolTable {
                 _ => None,
             })
             .and_then(|(symbol, idx)| symbol.parent.as_ref().map(|parent| (parent, idx)))
-            .map(|(module_key, idx)| {
+            .map(|(module_key, ref_idx)| {
                 self.symbols.iter().filter(move |symbol| {
                     symbol
                         .parent
                         .as_ref()
                         .is_some_and(|parent| parent == module_key)
-                        && matches!(&symbol.kind, SymbolItemKind::Type(type_idx) if idx == type_idx)
+                        && matches!(&symbol.kind, SymbolItemKind::Type(def_idx) if ref_idx == def_idx)
                 })
             })
     }
