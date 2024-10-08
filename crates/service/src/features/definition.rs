@@ -6,8 +6,11 @@ use crate::{
 };
 use line_index::LineIndex;
 use lsp_types::{GotoDefinitionParams, GotoDefinitionResponse, Location};
-use rowan::ast::{support::child, AstNode};
-use wat_syntax::{ast::TypeUse, SyntaxKind};
+use rowan::ast::{
+    support::{child, token},
+    AstNode,
+};
+use wat_syntax::{ast::TypeUse, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     pub fn goto_definition(&self, params: GotoDefinitionParams) -> Option<GotoDefinitionResponse> {
@@ -29,6 +32,7 @@ impl LanguageService {
             return None;
         }
 
+        let root = self.ctx.root(uri);
         let symbol_table = self.ctx.symbol_table(uri);
         let line_index = self.ctx.line_index(uri);
         let key = parent.clone().into();
@@ -37,7 +41,9 @@ impl LanguageService {
             .map(|symbols| {
                 GotoDefinitionResponse::Array(
                     symbols
-                        .map(|symbol| create_location_by_symbol(&params, &line_index, symbol))
+                        .map(|symbol| {
+                            create_location_by_symbol(&params, &line_index, symbol, &root)
+                        })
                         .collect(),
                 )
             })
@@ -50,6 +56,7 @@ impl LanguageService {
                             &params,
                             &line_index,
                             symbol,
+                            &root,
                         ))
                     })
             })
@@ -57,7 +64,9 @@ impl LanguageService {
                 symbol_table.find_type_use_defs(&key).map(|symbols| {
                     GotoDefinitionResponse::Array(
                         symbols
-                            .map(|symbol| create_location_by_symbol(&params, &line_index, symbol))
+                            .map(|symbol| {
+                                create_location_by_symbol(&params, &line_index, symbol, &root)
+                            })
                             .collect(),
                     )
                 })
@@ -66,7 +75,9 @@ impl LanguageService {
                 symbol_table.find_global_defs(&key).map(|symbols| {
                     GotoDefinitionResponse::Array(
                         symbols
-                            .map(|symbol| create_location_by_symbol(&params, &line_index, symbol))
+                            .map(|symbol| {
+                                create_location_by_symbol(&params, &line_index, symbol, &root)
+                            })
                             .collect(),
                     )
                 })
@@ -85,6 +96,7 @@ impl LanguageService {
                 .clone(),
         );
         let line_index = self.ctx.line_index(uri);
+        let root = self.ctx.root(uri);
         let symbol_table = self.ctx.symbol_table(uri);
         let token = find_meaningful_token(
             &self.ctx,
@@ -96,7 +108,6 @@ impl LanguageService {
         let grand = parent.parent()?;
         match grand.kind() {
             SyntaxKind::PLAIN_INSTR => symbol_table.find_func_defs(&parent.into()).map(|symbols| {
-                let root = self.ctx.root(uri);
                 GotoDefinitionResponse::Array(
                     symbols
                         .filter_map(|symbol| {
@@ -109,7 +120,9 @@ impl LanguageService {
                             )
                         })
                         .flatten()
-                        .map(|symbol| create_location_by_symbol(&params, &line_index, symbol))
+                        .map(|symbol| {
+                            create_location_by_symbol(&params, &line_index, symbol, &root)
+                        })
                         .collect(),
                 )
             }),
@@ -127,6 +140,7 @@ impl LanguageService {
                 .clone(),
         );
         let line_index = self.ctx.line_index(uri);
+        let root = self.ctx.root(uri);
         let symbol_table = self.ctx.symbol_table(uri);
         let token = find_meaningful_token(
             &self.ctx,
@@ -140,7 +154,9 @@ impl LanguageService {
                 .map(|symbols| {
                     GotoDefinitionResponse::Array(
                         symbols
-                            .map(|symbol| create_location_by_symbol(&params, &line_index, symbol))
+                            .map(|symbol| {
+                                create_location_by_symbol(&params, &line_index, symbol, &root)
+                            })
                             .collect(),
                     )
                 })
@@ -154,13 +170,19 @@ fn create_location_by_symbol(
     params: &GotoDefinitionParams,
     line_index: &LineIndex,
     symbol: &SymbolItem,
+    root: &SyntaxNode,
 ) -> Location {
+    let node = symbol.key.ptr.to_node(root);
+    let range = token(&node, SyntaxKind::IDENT)
+        .or_else(|| token(&node, SyntaxKind::KEYWORD))
+        .map(|token| token.text_range())
+        .unwrap_or_else(|| node.text_range());
     Location {
         uri: params
             .text_document_position_params
             .text_document
             .uri
             .clone(),
-        range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.ptr.text_range()),
+        range: helpers::rowan_range_to_lsp_range(line_index, range),
     }
 }
