@@ -85,13 +85,13 @@ impl LanguageService {
                         },
                     ))
                 }
-                SymbolItemKind::Type(ty) => {
+                SymbolItemKind::Type(idx) | SymbolItemKind::GlobalDef(idx) => {
                     let range =
                         helpers::rowan_range_to_lsp_range(&line_index, symbol.key.ptr.text_range());
                     Some((
                         symbol.key.clone(),
                         DocumentSymbol {
-                            name: ty.name.clone().unwrap_or_else(|| ty.num.to_string()),
+                            name: idx.name.clone().unwrap_or_else(|| idx.num.to_string()),
                             detail: None,
                             kind: SymbolKind::VARIABLE,
                             tags: None,
@@ -112,7 +112,8 @@ impl LanguageService {
                 SymbolItemKind::Param(..)
                 | SymbolItemKind::Call(..)
                 | SymbolItemKind::LocalRef(..)
-                | SymbolItemKind::TypeUse(..) => None,
+                | SymbolItemKind::TypeUse(..)
+                | SymbolItemKind::GlobalRef(..) => None,
             })
             .collect::<FxHashMap<_, _>>();
         symbol_table.symbols.iter().rev().for_each(|symbol| {

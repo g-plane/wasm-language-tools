@@ -126,6 +126,18 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable 
                     }),
                 });
             }
+            SyntaxKind::MODULE_FIELD_GLOBAL => {
+                let current_id = module_field_id;
+                module_field_id += 1;
+                symbols.push(SymbolItem {
+                    key: node.clone().into(),
+                    parent: node.parent().map(SymbolItemKey::from),
+                    kind: SymbolItemKind::GlobalDef(DefIdx {
+                        num: current_id,
+                        name: token(&node, SyntaxKind::IDENT).map(|token| token.text().to_string()),
+                    }),
+                });
+            }
             SyntaxKind::PLAIN_INSTR => {
                 let Some(instr) = PlainInstr::cast(node.clone()) else {
                     continue;
@@ -181,6 +193,34 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable 
                                         key: operand.syntax().clone().into(),
                                         parent: Some(parent.clone()),
                                         kind: SymbolItemKind::LocalRef(RefIdx::Name(
+                                            idx.text().to_string(),
+                                        )),
+                                    })
+                                })
+                        }));
+                    }
+                    Some("global.get" | "global.set") => {
+                        let Some(parent) = node
+                            .ancestors()
+                            .find(|node| node.kind() == SyntaxKind::MODULE)
+                            .map(SymbolItemKey::from)
+                        else {
+                            continue;
+                        };
+                        symbols.extend(instr.operands().filter_map(|operand| {
+                            operand
+                                .int()
+                                .and_then(|token| token.text().parse().ok())
+                                .map(|idx| SymbolItem {
+                                    key: operand.syntax().clone().into(),
+                                    parent: Some(parent.clone()),
+                                    kind: SymbolItemKind::GlobalRef(RefIdx::Num(idx)),
+                                })
+                                .or_else(|| {
+                                    operand.ident().map(|idx| SymbolItem {
+                                        key: operand.syntax().clone().into(),
+                                        parent: Some(parent.clone()),
+                                        kind: SymbolItemKind::GlobalRef(RefIdx::Name(
                                             idx.text().to_string(),
                                         )),
                                     })
@@ -336,6 +376,32 @@ impl SymbolTable {
                 })
             })
     }
+
+    pub fn find_global_defs(
+        &self,
+        global_ref: &SymbolItemKey,
+    ) -> Option<impl Iterator<Item = &SymbolItem>> {
+        self.symbols
+            .iter()
+            .find_map(|symbol| match symbol {
+                SymbolItem {
+                    kind: SymbolItemKind::GlobalRef(idx),
+                    key,
+                    ..
+                } if key == global_ref => Some((symbol, idx)),
+                _ => None,
+            })
+            .and_then(|(symbol, idx)| symbol.parent.as_ref().map(|parent| (parent, idx)))
+            .map(|(module_key, ref_idx)| {
+                self.symbols.iter().filter(move |symbol| {
+                    symbol
+                        .parent
+                        .as_ref()
+                        .is_some_and(|parent| parent == module_key)
+                        && matches!(&symbol.kind, SymbolItemKind::GlobalDef(def_idx) if ref_idx == def_idx)
+                })
+            })
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -375,6 +441,8 @@ pub enum SymbolItemKind {
     LocalRef(RefIdx),
     Type(DefIdx),
     TypeUse(RefIdx),
+    GlobalDef(DefIdx),
+    GlobalRef(RefIdx),
 }
 
 #[derive(Clone, Debug)]

@@ -62,6 +62,15 @@ impl LanguageService {
                     )
                 })
             })
+            .or_else(|| {
+                symbol_table.find_global_defs(&key).map(|symbols| {
+                    GotoDefinitionResponse::Array(
+                        symbols
+                            .map(|symbol| create_location_by_symbol(&params, &line_index, symbol))
+                            .collect(),
+                    )
+                })
+            })
     }
 
     pub fn goto_type_definition(

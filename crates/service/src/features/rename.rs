@@ -101,6 +101,16 @@ impl LanguageService {
                                 false
                             }
                         }
+                        SymbolItemKind::GlobalDef(idx) => {
+                            idx.name.as_deref().is_some_and(|name| name == old_name)
+                        }
+                        SymbolItemKind::GlobalRef(idx) => {
+                            if let RefIdx::Name(name) = idx {
+                                name == old_name
+                            } else {
+                                false
+                            }
+                        }
                         SymbolItemKind::Module => false,
                     }
             })
