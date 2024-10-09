@@ -170,6 +170,10 @@ impl LanguageService {
                 } else if parent
                     .as_ref()
                     .is_some_and(|node| node.kind() == SyntaxKind::PARAM)
+                    || parent
+                        .as_ref()
+                        .and_then(|parent| symbol_table.find_param_def(&parent.clone().into()))
+                        .is_some()
                 {
                     self.semantic_token_kinds
                         .get_index_of(&SemanticTokenKind::Param)
