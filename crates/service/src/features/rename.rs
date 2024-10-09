@@ -66,7 +66,7 @@ impl LanguageService {
             .symbols
             .iter()
             .filter(|sym| {
-                symbol.parent == sym.parent
+                symbol.region == sym.region
                     && match &sym.kind {
                         SymbolItemKind::Func(idx) => {
                             idx.name.as_deref().is_some_and(|name| name == old_name)

@@ -116,18 +116,22 @@ impl LanguageService {
                 | SymbolItemKind::GlobalRef(..) => None,
             })
             .collect::<FxHashMap<_, _>>();
-        symbol_table.symbols.iter().rev().for_each(|symbol| {
-            if let Some((lsp_symbol, parent)) = symbol.parent.as_ref().and_then(|parent| {
-                symbols_map
+        symbol_table
+            .symbols
+            .iter()
+            .filter(|symbol| symbol.region.ptr.kind() != SyntaxKind::ROOT)
+            .rev()
+            .for_each(|symbol| {
+                if let Some((lsp_symbol, parent)) = symbols_map
                     .remove(&symbol.key)
-                    .zip(symbols_map.get_mut(parent))
-            }) {
-                parent
-                    .children
-                    .get_or_insert_with(|| Vec::with_capacity(1))
-                    .push(lsp_symbol);
-            }
-        });
+                    .zip(symbols_map.get_mut(&symbol.region))
+                {
+                    parent
+                        .children
+                        .get_or_insert_with(|| Vec::with_capacity(1))
+                        .push(lsp_symbol);
+                }
+            });
         Some(DocumentSymbolResponse::Nested(
             symbols_map
                 .into_iter()
