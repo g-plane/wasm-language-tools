@@ -101,15 +101,27 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable 
                     .iter()
                     .flat_map(|type_use| type_use.params())
                     .fold(0, |i, param| {
-                        symbols.push(SymbolItem {
-                            key: param.syntax().to_owned().into(),
-                            region: node.clone().into(),
-                            kind: SymbolItemKind::Param(DefIdx {
-                                num: i,
-                                name: param.ident_token().map(|token| token.text().to_string()),
-                            }),
-                        });
-                        i + 1
+                        let key = param.syntax().to_owned().into();
+                        if let Some(ident) = param.ident_token() {
+                            symbols.push(SymbolItem {
+                                key,
+                                region: node.clone().into(),
+                                kind: SymbolItemKind::Param(DefIdx {
+                                    num: i,
+                                    name: Some(ident.text().to_string()),
+                                }),
+                            });
+                            i + 1
+                        } else {
+                            param.val_types().fold(i, |i, _| {
+                                symbols.push(SymbolItem {
+                                    key: key.clone(),
+                                    region: node.clone().into(),
+                                    kind: SymbolItemKind::Param(DefIdx { num: i, name: None }),
+                                });
+                                i + 1
+                            })
+                        }
                     });
                 func.locals().fold(local_index, |i, local| {
                     symbols.push(SymbolItem {
