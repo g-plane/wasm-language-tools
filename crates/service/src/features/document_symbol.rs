@@ -134,8 +134,8 @@ impl LanguageService {
             });
         Some(DocumentSymbolResponse::Nested(
             symbols_map
-                .into_iter()
-                .filter_map(|(_, v)| v.children.is_some().then_some(v))
+                .into_values()
+                .filter_map(|v| v.children.is_some().then_some(v))
                 .collect(),
         ))
     }

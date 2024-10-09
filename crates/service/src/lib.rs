@@ -81,10 +81,7 @@ impl LanguageService {
                     SemanticTokensServerCapabilities::SemanticTokensOptions(
                         SemanticTokensOptions {
                             legend: SemanticTokensLegend {
-                                token_types: kinds_map
-                                    .into_iter()
-                                    .map(|(_, token_type)| token_type)
-                                    .collect(),
+                                token_types: kinds_map.into_values().collect(),
                                 token_modifiers: vec![],
                             },
                             range: Some(true),
