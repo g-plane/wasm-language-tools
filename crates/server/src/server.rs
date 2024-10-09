@@ -8,7 +8,8 @@ use lsp_types::{
     },
     request::{
         DocumentSymbolRequest, GotoDeclaration, GotoDefinition, GotoTypeDefinition,
-        PrepareRenameRequest, Rename, SemanticTokensFullRequest, SemanticTokensRangeRequest,
+        PrepareRenameRequest, References, Rename, SemanticTokensFullRequest,
+        SemanticTokensRangeRequest,
     },
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
     PublishDiagnosticsParams,
@@ -74,6 +75,20 @@ impl Server {
                                 id,
                                 result: Some(serde_json::to_value(
                                     self.service.goto_declaration(params),
+                                )?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<References>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.find_references(params),
                                 )?),
                                 error: None,
                             }))?;

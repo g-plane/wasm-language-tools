@@ -32,10 +32,10 @@ impl LanguageService {
             return None;
         }
 
+        let line_index = self.ctx.line_index(uri);
         let root = self.ctx.root(uri);
         let symbol_table = self.ctx.symbol_table(uri);
-        let line_index = self.ctx.line_index(uri);
-        let key = parent.clone().into();
+        let key = parent.into();
         symbol_table
             .find_func_defs(&key)
             .map(|symbols| {
