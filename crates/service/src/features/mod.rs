@@ -1,5 +1,6 @@
 mod definition;
 mod document_symbol;
+mod hover;
 mod references;
 mod rename;
 mod semantic_tokens;

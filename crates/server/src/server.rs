@@ -7,7 +7,7 @@ use lsp_types::{
         PublishDiagnostics,
     },
     request::{
-        DocumentSymbolRequest, GotoDeclaration, GotoDefinition, GotoTypeDefinition,
+        DocumentSymbolRequest, GotoDeclaration, GotoDefinition, GotoTypeDefinition, HoverRequest,
         PrepareRenameRequest, References, Rename, SemanticTokensFullRequest,
         SemanticTokensRangeRequest,
     },
@@ -76,6 +76,18 @@ impl Server {
                                 result: Some(serde_json::to_value(
                                     self.service.goto_declaration(params),
                                 )?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<HoverRequest>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(self.service.hover(params))?),
                                 error: None,
                             }))?;
                             continue;

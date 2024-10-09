@@ -13,10 +13,10 @@ use crate::{
 };
 use indexmap::{IndexMap, IndexSet};
 use lsp_types::{
-    DeclarationCapability, Diagnostic, DiagnosticSeverity, InitializeParams, InitializeResult,
-    OneOf, Position, Range, RenameOptions, SemanticTokenType, SemanticTokensClientCapabilities,
-    SemanticTokensFullOptions, SemanticTokensLegend, SemanticTokensOptions,
-    SemanticTokensServerCapabilities, ServerCapabilities, ServerInfo,
+    DeclarationCapability, Diagnostic, DiagnosticSeverity, HoverProviderCapability,
+    InitializeParams, InitializeResult, OneOf, Position, Range, RenameOptions, SemanticTokenType,
+    SemanticTokensClientCapabilities, SemanticTokensFullOptions, SemanticTokensLegend,
+    SemanticTokensOptions, SemanticTokensServerCapabilities, ServerCapabilities, ServerInfo,
     TextDocumentClientCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind,
     TextDocumentSyncOptions, TextDocumentSyncSaveOptions, TypeDefinitionProviderCapability, Uri,
 };
@@ -74,6 +74,7 @@ impl LanguageService {
                 type_definition_provider: Some(TypeDefinitionProviderCapability::Simple(true)),
                 declaration_provider: Some(DeclarationCapability::Simple(true)),
                 document_symbol_provider: Some(OneOf::Left(true)),
+                hover_provider: Some(HoverProviderCapability::Simple(true)),
                 references_provider: Some(OneOf::Left(true)),
                 rename_provider: Some(OneOf::Right(RenameOptions {
                     prepare_provider: Some(true),
