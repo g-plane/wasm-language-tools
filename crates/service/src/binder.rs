@@ -314,97 +314,109 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable 
     SymbolTable { symbols }
 }
 impl SymbolTable {
-    pub fn find_func_defs(
-        &self,
-        call: &SymbolItemKey,
-    ) -> Option<impl Iterator<Item = &SymbolItem>> {
+    pub fn find_func_defs(&self, key: &SymbolItemKey) -> Option<impl Iterator<Item = &SymbolItem>> {
         self.symbols
             .iter()
             .find_map(|symbol| match symbol {
                 SymbolItem {
                     kind: SymbolItemKind::Call(idx),
-                    key,
+                    key: call_key,
                     ..
-                } if key == call => Some((symbol, idx)),
+                } if call_key == key => Some((symbol, idx)),
                 _ => None,
             })
             .map(|(call, ref_idx)| {
                 self.symbols.iter().filter(move |symbol| {
                     symbol.region == call.region
-                        && matches!(&symbol.kind, SymbolItemKind::Func(def_idx) if ref_idx == def_idx)
+                        && match &symbol.kind {
+                            SymbolItemKind::Func(def_idx) => ref_idx == def_idx,
+                            _ => false,
+                        }
                 })
             })
     }
 
-    pub fn find_param_def(&self, local_ref: &SymbolItemKey) -> Option<&SymbolItem> {
-        self.find_local_ref(local_ref).and_then(|(local, ref_idx)| {
+    pub fn find_param_def(&self, key: &SymbolItemKey) -> Option<&SymbolItem> {
+        self.find_local_ref(key).and_then(|(local, ref_idx)| {
             self.symbols.iter().find(|symbol| {
                 symbol.region == local.region
-                    && matches!(&symbol.kind, SymbolItemKind::Param(def_idx) if ref_idx == def_idx)
+                    && match &symbol.kind {
+                        SymbolItemKind::Param(def_idx) => ref_idx == def_idx,
+                        _ => false,
+                    }
             })
         })
     }
 
-    pub fn find_local_def(&self, local_ref: &SymbolItemKey) -> Option<&SymbolItem> {
-        self.find_local_ref(local_ref).and_then(|(local, ref_idx)| {
+    pub fn find_local_def(&self, key: &SymbolItemKey) -> Option<&SymbolItem> {
+        self.find_local_ref(key).and_then(|(local, ref_idx)| {
             self.symbols.iter().find(|symbol| {
                 symbol.region == local.region
-                    && matches!(&symbol.kind, SymbolItemKind::Local(def_idx) if ref_idx == def_idx)
+                    && match &symbol.kind {
+                        SymbolItemKind::Local(def_idx) => ref_idx == def_idx,
+                        _ => false,
+                    }
             })
         })
     }
 
-    fn find_local_ref(&self, local_ref: &SymbolItemKey) -> Option<(&SymbolItem, &RefIdx)> {
+    fn find_local_ref(&self, key: &SymbolItemKey) -> Option<(&SymbolItem, &RefIdx)> {
         self.symbols.iter().find_map(|symbol| match symbol {
             SymbolItem {
                 kind: SymbolItemKind::LocalRef(idx),
-                key,
+                key: local_ref_key,
                 ..
-            } if key == local_ref => Some((symbol, idx)),
+            } if local_ref_key == key => Some((symbol, idx)),
             _ => None,
         })
     }
 
     pub fn find_type_use_defs(
         &self,
-        type_use: &SymbolItemKey,
+        key: &SymbolItemKey,
     ) -> Option<impl Iterator<Item = &SymbolItem>> {
         self.symbols
             .iter()
             .find_map(|symbol| match symbol {
                 SymbolItem {
                     kind: SymbolItemKind::TypeUse(idx),
-                    key,
+                    key: type_use_key,
                     ..
-                } if key == type_use => Some((symbol, idx)),
+                } if type_use_key == key => Some((symbol, idx)),
                 _ => None,
             })
             .map(|(type_use, ref_idx)| {
                 self.symbols.iter().filter(move |symbol| {
                     symbol.region == type_use.region
-                        && matches!(&symbol.kind, SymbolItemKind::Type(def_idx) if ref_idx == def_idx)
+                        && match &symbol.kind {
+                            SymbolItemKind::Type(def_idx) => ref_idx == def_idx,
+                            _ => false,
+                        }
                 })
             })
     }
 
     pub fn find_global_defs(
         &self,
-        global_ref: &SymbolItemKey,
+        key: &SymbolItemKey,
     ) -> Option<impl Iterator<Item = &SymbolItem>> {
         self.symbols
             .iter()
             .find_map(|symbol| match symbol {
                 SymbolItem {
                     kind: SymbolItemKind::GlobalRef(idx),
-                    key,
+                    key: global_ref_key,
                     ..
-                } if key == global_ref => Some((symbol, idx)),
+                } if global_ref_key == key => Some((symbol, idx)),
                 _ => None,
             })
             .map(|(global, ref_idx)| {
                 self.symbols.iter().filter(move |symbol| {
                     symbol.region == global.region
-                        && matches!(&symbol.kind, SymbolItemKind::GlobalDef(def_idx) if ref_idx == def_idx)
+                        && match &symbol.kind {
+                            SymbolItemKind::GlobalDef(def_idx) => ref_idx == def_idx,
+                            _ => false,
+                        }
                 })
             })
     }
