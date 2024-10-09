@@ -101,10 +101,9 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable 
                     .iter()
                     .flat_map(|type_use| type_use.params())
                     .fold(0, |i, param| {
-                        let key = param.syntax().to_owned().into();
                         if let Some(ident) = param.ident_token() {
                             symbols.push(SymbolItem {
-                                key,
+                                key: param.syntax().to_owned().into(),
                                 region: node.clone().into(),
                                 kind: SymbolItemKind::Param(DefIdx {
                                     num: i,
@@ -113,9 +112,9 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable 
                             });
                             i + 1
                         } else {
-                            param.val_types().fold(i, |i, _| {
+                            param.val_types().fold(i, |i, val_type| {
                                 symbols.push(SymbolItem {
-                                    key: key.clone(),
+                                    key: val_type.syntax().to_owned().into(),
                                     region: node.clone().into(),
                                     kind: SymbolItemKind::Param(DefIdx { num: i, name: None }),
                                 });
