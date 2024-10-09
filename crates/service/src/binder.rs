@@ -450,37 +450,3 @@ pub enum SymbolItemKind {
     GlobalDef(DefIdx),
     GlobalRef(RefIdx),
 }
-
-#[derive(Clone, Debug)]
-pub enum ValType {
-    I32,
-    I64,
-    F32,
-    F64,
-    V128,
-    FuncRef,
-    ExternRef,
-}
-impl From<wat_syntax::ast::ValType> for ValType {
-    fn from(value: wat_syntax::ast::ValType) -> Self {
-        if let Some(num_type) = value.num_type() {
-            match num_type.text() {
-                "i32" => ValType::I32,
-                "i64" => ValType::I64,
-                "f32" => ValType::F32,
-                "f64" => ValType::F64,
-                _ => unreachable!("unsupported numtype"),
-            }
-        } else if value.vec_type().is_some() {
-            ValType::V128
-        } else if let Some(ref_type) = value.ref_type() {
-            match ref_type.text() {
-                "funcref" => ValType::FuncRef,
-                "externref" => ValType::ExternRef,
-                _ => unreachable!("unsupported reftype"),
-            }
-        } else {
-            unreachable!("unsupported valtype");
-        }
-    }
-}

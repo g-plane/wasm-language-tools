@@ -3,11 +3,13 @@ mod diag;
 mod features;
 mod files;
 mod helpers;
+mod types_analyzer;
 
 use self::features::SemanticTokenKind;
 use crate::{
     binder::SymbolTables,
     files::{Files, FilesCtx},
+    types_analyzer::TypesAnalyzer,
 };
 use indexmap::{IndexMap, IndexSet};
 use lsp_types::{
@@ -23,7 +25,7 @@ use rustc_hash::FxBuildHasher;
 use salsa::{InternId, InternKey};
 use wat_syntax::ast::Module;
 
-#[salsa::database(Files, SymbolTables)]
+#[salsa::database(Files, SymbolTables, TypesAnalyzer)]
 #[derive(Default)]
 struct LanguageServiceCtx {
     storage: salsa::Storage<Self>,
