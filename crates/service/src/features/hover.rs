@@ -43,49 +43,14 @@ impl LanguageService {
                 symbol_table
                     .find_param_def(&key)
                     .or_else(|| symbol_table.find_local_def(&key))
-                    .or_else(|| {
-                        symbol_table.symbols.iter().find(|symbol| {
-                            symbol.key == key
-                                && matches!(
-                                    symbol.kind,
-                                    SymbolItemKind::Param(..) | SymbolItemKind::Local(..)
-                                )
-                        })
-                    })
-                    .map(|symbol| {
-                        let mut content_value = '('.to_string();
-                        match &symbol.kind {
-                            SymbolItemKind::Param(idx) => {
-                                content_value.push_str("param");
-                                if let Some(name) = &idx.name {
-                                    content_value.push(' ');
-                                    content_value.push_str(name);
-                                }
-                            }
-                            SymbolItemKind::Local(idx) => {
-                                content_value.push_str("local");
-                                if let Some(name) = &idx.name {
-                                    content_value.push(' ');
-                                    content_value.push_str(name);
-                                }
-                            }
-                            _ => {}
-                        }
-                        self.ctx
-                            .extract_types(symbol.key.green.clone())
-                            .into_iter()
-                            .for_each(|ty| {
-                                content_value.push(' ');
-                                content_value.push_str(&ty.to_string());
-                            });
-                        content_value.push(')');
-                        Hover {
-                            contents: HoverContents::Scalar(create_marked_string(content_value)),
-                            range: Some(helpers::rowan_range_to_lsp_range(
-                                &line_index,
-                                token.text_range(),
-                            )),
-                        }
+                    .map(|symbol| Hover {
+                        contents: HoverContents::Scalar(create_param_or_local_hover(
+                            &self.ctx, symbol,
+                        )),
+                        range: Some(helpers::rowan_range_to_lsp_range(
+                            &line_index,
+                            token.text_range(),
+                        )),
                     })
                     .or_else(|| {
                         symbol_table.find_global_defs(&key).map(|symbols| {
@@ -102,27 +67,6 @@ impl LanguageService {
                                 )),
                             }
                         })
-                    })
-                    .or_else(|| {
-                        symbol_table
-                            .symbols
-                            .iter()
-                            .find(|symbol| {
-                                symbol.key == key
-                                    && matches!(symbol.kind, SymbolItemKind::GlobalDef(..))
-                            })
-                            .map(|symbol| {
-                                let root = self.ctx.root(uri);
-                                Hover {
-                                    contents: HoverContents::Scalar(create_global_def_hover(
-                                        symbol, &root,
-                                    )),
-                                    range: Some(helpers::rowan_range_to_lsp_range(
-                                        &line_index,
-                                        token.text_range(),
-                                    )),
-                                }
-                            })
                     })
                     .or_else(|| {
                         symbol_table.find_func_defs(&key).map(|symbols| {
@@ -148,29 +92,6 @@ impl LanguageService {
                         })
                     })
                     .or_else(|| {
-                        symbol_table
-                            .symbols
-                            .iter()
-                            .find(|symbol| {
-                                symbol.key == key && matches!(symbol.kind, SymbolItemKind::Func(..))
-                            })
-                            .map(|symbol| {
-                                let root = self.ctx.root(uri);
-                                Hover {
-                                    contents: HoverContents::Scalar(create_func_hover(
-                                        &self.ctx,
-                                        symbol,
-                                        &symbol_table,
-                                        &root,
-                                    )),
-                                    range: Some(helpers::rowan_range_to_lsp_range(
-                                        &line_index,
-                                        token.text_range(),
-                                    )),
-                                }
-                            })
-                    })
-                    .or_else(|| {
                         symbol_table.find_type_use_defs(&key).map(|symbols| Hover {
                             contents: HoverContents::Array(
                                 symbols
@@ -187,17 +108,33 @@ impl LanguageService {
                         symbol_table
                             .symbols
                             .iter()
-                            .find(|symbol| {
-                                symbol.key == key && matches!(symbol.kind, SymbolItemKind::Type(..))
-                            })
-                            .map(|symbol| Hover {
-                                contents: HoverContents::Scalar(create_type_def_hover(
-                                    &self.ctx, symbol,
-                                )),
-                                range: Some(helpers::rowan_range_to_lsp_range(
-                                    &line_index,
-                                    token.text_range(),
-                                )),
+                            .find(|symbol| symbol.key == key)
+                            .and_then(|symbol| {
+                                let content = match symbol.kind {
+                                    SymbolItemKind::Param(..) | SymbolItemKind::Local(..) => {
+                                        create_param_or_local_hover(&self.ctx, symbol)
+                                    }
+                                    SymbolItemKind::Func(..) => create_func_hover(
+                                        &self.ctx,
+                                        symbol,
+                                        &symbol_table,
+                                        &self.ctx.root(uri),
+                                    ),
+                                    SymbolItemKind::Type(..) => {
+                                        create_type_def_hover(&self.ctx, symbol)
+                                    }
+                                    SymbolItemKind::GlobalDef(..) => {
+                                        create_global_def_hover(symbol, &self.ctx.root(uri))
+                                    }
+                                    _ => return None,
+                                };
+                                Some(Hover {
+                                    contents: HoverContents::Scalar(content),
+                                    range: Some(helpers::rowan_range_to_lsp_range(
+                                        &line_index,
+                                        token.text_range(),
+                                    )),
+                                })
                             })
                     })
             }
@@ -280,6 +217,35 @@ impl LanguageService {
             _ => None,
         }
     }
+}
+
+fn create_param_or_local_hover(ctx: &LanguageServiceCtx, symbol: &SymbolItem) -> MarkedString {
+    let mut content_value = '('.to_string();
+    match &symbol.kind {
+        SymbolItemKind::Param(idx) => {
+            content_value.push_str("param");
+            if let Some(name) = &idx.name {
+                content_value.push(' ');
+                content_value.push_str(name);
+            }
+        }
+        SymbolItemKind::Local(idx) => {
+            content_value.push_str("local");
+            if let Some(name) = &idx.name {
+                content_value.push(' ');
+                content_value.push_str(name);
+            }
+        }
+        _ => {}
+    }
+    ctx.extract_types(symbol.key.green.clone())
+        .into_iter()
+        .for_each(|ty| {
+            content_value.push(' ');
+            content_value.push_str(&ty.to_string());
+        });
+    content_value.push(')');
+    create_marked_string(content_value)
 }
 
 fn create_global_def_hover(symbol: &SymbolItem, root: &SyntaxNode) -> MarkedString {
