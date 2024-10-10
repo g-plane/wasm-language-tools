@@ -3,12 +3,14 @@ use rowan::{
     GreenNode, SyntaxNode,
 };
 use std::fmt;
-use wat_syntax::ast::ValType as AstValType;
+use wat_syntax::ast::{Param, Result, ValType as AstValType};
 
 #[salsa::query_group(TypesAnalyzer)]
 pub(crate) trait TypesAnalyzerCtx {
     #[salsa::memoized]
     fn extract_types(&self, node: GreenNode) -> Vec<ValType>;
+    #[salsa::memoized]
+    fn extract_func_sig(&self, node: GreenNode) -> FuncSig;
 }
 fn extract_types(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Vec<ValType> {
     let root = SyntaxNode::new_root(node);
@@ -17,6 +19,27 @@ fn extract_types(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Vec<ValType> {
     } else {
         children::<AstValType>(&root).map(ValType::from).collect()
     }
+}
+
+fn extract_func_sig(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
+    let root = SyntaxNode::new_root(node);
+    let params = children::<Param>(&root).fold(vec![], |mut acc, param| {
+        if let Some((ident, ty)) = param.ident_token().zip(param.val_types().next()) {
+            acc.push((ValType::from(ty), Some(ident.text().to_string())));
+        } else {
+            acc.extend(
+                param
+                    .val_types()
+                    .map(|val_type| (ValType::from(val_type), None)),
+            );
+        }
+        acc
+    });
+    let results = children::<Result>(&root)
+        .flat_map(|result| result.val_types())
+        .map(ValType::from)
+        .collect();
+    FuncSig { params, results }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -65,5 +88,37 @@ impl From<AstValType> for ValType {
         } else {
             unreachable!("unsupported valtype");
         }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct FuncSig {
+    pub(crate) params: Vec<(ValType, Option<String>)>,
+    pub(crate) results: Vec<ValType>,
+}
+impl fmt::Display for FuncSig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut written = false;
+        self.params.iter().try_for_each(|param| {
+            if written {
+                write!(f, " ")?;
+            }
+            write!(f, "(param")?;
+            if let Some(name) = &param.1 {
+                write!(f, " {}", name)?;
+            }
+            write!(f, " {})", param.0)?;
+            written = true;
+            Ok(())
+        })?;
+        self.results.iter().try_for_each(|result| {
+            if written {
+                write!(f, " ")?;
+            }
+            write!(f, "(result {})", result)?;
+            written = true;
+            Ok(())
+        })?;
+        Ok(())
     }
 }

@@ -1,16 +1,22 @@
 use super::find_meaningful_token;
 use crate::{
-    binder::{SymbolItem, SymbolItemKind, SymbolTablesCtx},
+    binder::{DefIdx, SymbolItem, SymbolItemKind, SymbolTable, SymbolTablesCtx},
     files::FilesCtx,
     helpers,
     types_analyzer::TypesAnalyzerCtx,
-    LanguageService,
+    LanguageService, LanguageServiceCtx,
 };
 use lsp_types::{
     Hover, HoverContents, HoverParams, LanguageString, MarkedString, MarkupContent, MarkupKind,
 };
-use rowan::ast::{support::child, AstNode};
-use wat_syntax::{ast::GlobalType, SyntaxKind, SyntaxNode};
+use rowan::{
+    ast::{support::child, AstNode},
+    GreenNode, NodeOrToken,
+};
+use wat_syntax::{
+    ast::{GlobalType, TypeUse},
+    SyntaxKind, SyntaxNode,
+};
 
 impl LanguageService {
     pub fn hover(&self, params: HoverParams) -> Option<Hover> {
@@ -74,12 +80,7 @@ impl LanguageService {
                             });
                         content_value.push(')');
                         Hover {
-                            contents: HoverContents::Scalar(MarkedString::LanguageString(
-                                LanguageString {
-                                    language: "wat".into(),
-                                    value: content_value,
-                                },
-                            )),
+                            contents: HoverContents::Scalar(create_marked_string(content_value)),
                             range: Some(helpers::rowan_range_to_lsp_range(
                                 &line_index,
                                 token.text_range(),
@@ -121,6 +122,82 @@ impl LanguageService {
                                         token.text_range(),
                                     )),
                                 }
+                            })
+                    })
+                    .or_else(|| {
+                        symbol_table.find_func_defs(&key).map(|symbols| {
+                            let root = self.ctx.root(uri);
+                            Hover {
+                                contents: HoverContents::Array(
+                                    symbols
+                                        .map(|symbol| {
+                                            create_func_hover(
+                                                &self.ctx,
+                                                symbol,
+                                                &symbol_table,
+                                                &root,
+                                            )
+                                        })
+                                        .collect(),
+                                ),
+                                range: Some(helpers::rowan_range_to_lsp_range(
+                                    &line_index,
+                                    token.text_range(),
+                                )),
+                            }
+                        })
+                    })
+                    .or_else(|| {
+                        symbol_table
+                            .symbols
+                            .iter()
+                            .find(|symbol| {
+                                symbol.key == key && matches!(symbol.kind, SymbolItemKind::Func(..))
+                            })
+                            .map(|symbol| {
+                                let root = self.ctx.root(uri);
+                                Hover {
+                                    contents: HoverContents::Scalar(create_func_hover(
+                                        &self.ctx,
+                                        symbol,
+                                        &symbol_table,
+                                        &root,
+                                    )),
+                                    range: Some(helpers::rowan_range_to_lsp_range(
+                                        &line_index,
+                                        token.text_range(),
+                                    )),
+                                }
+                            })
+                    })
+                    .or_else(|| {
+                        symbol_table.find_type_use_defs(&key).map(|symbols| Hover {
+                            contents: HoverContents::Array(
+                                symbols
+                                    .map(|symbol| create_type_def_hover(&self.ctx, symbol))
+                                    .collect(),
+                            ),
+                            range: Some(helpers::rowan_range_to_lsp_range(
+                                &line_index,
+                                token.text_range(),
+                            )),
+                        })
+                    })
+                    .or_else(|| {
+                        symbol_table
+                            .symbols
+                            .iter()
+                            .find(|symbol| {
+                                symbol.key == key && matches!(symbol.kind, SymbolItemKind::Type(..))
+                            })
+                            .map(|symbol| Hover {
+                                contents: HoverContents::Scalar(create_type_def_hover(
+                                    &self.ctx, symbol,
+                                )),
+                                range: Some(helpers::rowan_range_to_lsp_range(
+                                    &line_index,
+                                    token.text_range(),
+                                )),
                             })
                     })
             }
@@ -229,9 +306,88 @@ fn create_global_def_hover(symbol: &SymbolItem, root: &SyntaxNode) -> MarkedStri
         }
     }
     content_value.push(')');
+    create_marked_string(content_value)
+}
+
+fn create_func_hover(
+    ctx: &LanguageServiceCtx,
+    symbol: &SymbolItem,
+    symbol_table: &SymbolTable,
+    root: &SyntaxNode,
+) -> MarkedString {
+    let mut content_value = "(func".to_string();
+    if let SymbolItemKind::Func(DefIdx {
+        name: Some(name), ..
+    }) = &symbol.kind
+    {
+        content_value.push(' ');
+        content_value.push_str(name);
+    }
+    if let Some(type_use) = symbol.key.green.children().find_map(|child| match child {
+        NodeOrToken::Node(node) if node.kind() == SyntaxKind::TYPE_USE.into() => Some(node),
+        _ => None,
+    }) {
+        content_value.push(' ');
+        if type_use
+            .children()
+            .filter(|child| {
+                let kind = child.kind();
+                kind == SyntaxKind::PARAM.into() || kind == SyntaxKind::RESULT.into()
+            })
+            .next()
+            .is_none()
+        {
+            let node = symbol.key.ptr.to_node(root);
+            if let Some(func_type) = child::<TypeUse>(&node)
+                .and_then(|type_use| type_use.index())
+                .and_then(|idx| symbol_table.find_type_use_defs(&idx.syntax().clone().into()))
+                .and_then(|mut symbols| symbols.next())
+                .and_then(|symbol| find_func_type_of_type_def(&symbol.key.green))
+            {
+                let sig = ctx.extract_func_sig(func_type);
+                content_value.push_str(&sig.to_string());
+            }
+        } else {
+            let sig = ctx.extract_func_sig(type_use.to_owned());
+            content_value.push_str(&sig.to_string());
+        }
+    }
+    content_value.push(')');
+    create_marked_string(content_value)
+}
+
+fn create_type_def_hover(ctx: &LanguageServiceCtx, symbol: &SymbolItem) -> MarkedString {
+    let mut content_value = "(type".to_string();
+    if let SymbolItemKind::Type(DefIdx {
+        name: Some(name), ..
+    }) = &symbol.kind
+    {
+        content_value.push(' ');
+        content_value.push_str(name);
+    }
+    if let Some(func_type) = find_func_type_of_type_def(&symbol.key.green) {
+        let sig = ctx.extract_func_sig(func_type.to_owned());
+        content_value.push_str(" (func ");
+        content_value.push_str(&sig.to_string());
+        content_value.push(')');
+    }
+    content_value.push(')');
+    create_marked_string(content_value)
+}
+
+fn find_func_type_of_type_def(green: &GreenNode) -> Option<GreenNode> {
+    green.children().find_map(|child| match child {
+        NodeOrToken::Node(node) if node.kind() == SyntaxKind::FUNC_TYPE.into() => {
+            Some(node.to_owned())
+        }
+        _ => None,
+    })
+}
+
+fn create_marked_string(value: String) -> MarkedString {
     MarkedString::LanguageString(LanguageString {
         language: "wat".into(),
-        value: content_value,
+        value,
     })
 }
 
