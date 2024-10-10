@@ -361,25 +361,25 @@ const I32_DOC: &str = "```wat
 i32
 ```
 
-The type `i32` classify 32 bit integers.";
+The type `i32` classifies 32 bit integers.";
 
 const I64_DOC: &str = "```wat
 i64
 ```
 
-The type `i64` classify 64 bit integers.";
+The type `i64` classifies 64 bit integers.";
 
 const F32_DOC: &str = "```wat
 f32
 ```
 
-The type `f32` classify 32 bit floating-point data.";
+The type `f32` classifies 32 bit floating-point data.";
 
 const F64_DOC: &str = "```wat
 f64
 ```
 
-The type `f64` classify 64 bit floating-point data.";
+The type `f64` classifies 64 bit floating-point data.";
 
 const V128_DOC: &str = "```wat
 v128
