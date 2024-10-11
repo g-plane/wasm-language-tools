@@ -1,4 +1,5 @@
 mod binder;
+mod dataset;
 mod diag;
 mod features;
 mod files;
@@ -13,12 +14,13 @@ use crate::{
 };
 use indexmap::{IndexMap, IndexSet};
 use lsp_types::{
-    DeclarationCapability, Diagnostic, DiagnosticSeverity, HoverProviderCapability,
-    InitializeParams, InitializeResult, OneOf, Position, Range, RenameOptions, SemanticTokenType,
-    SemanticTokensClientCapabilities, SemanticTokensFullOptions, SemanticTokensLegend,
-    SemanticTokensOptions, SemanticTokensServerCapabilities, ServerCapabilities, ServerInfo,
-    TextDocumentClientCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind,
-    TextDocumentSyncOptions, TextDocumentSyncSaveOptions, TypeDefinitionProviderCapability, Uri,
+    CompletionOptions, DeclarationCapability, Diagnostic, DiagnosticSeverity,
+    HoverProviderCapability, InitializeParams, InitializeResult, OneOf, Position, Range,
+    RenameOptions, SemanticTokenType, SemanticTokensClientCapabilities, SemanticTokensFullOptions,
+    SemanticTokensLegend, SemanticTokensOptions, SemanticTokensServerCapabilities,
+    ServerCapabilities, ServerInfo, TextDocumentClientCapabilities, TextDocumentSyncCapability,
+    TextDocumentSyncKind, TextDocumentSyncOptions, TextDocumentSyncSaveOptions,
+    TypeDefinitionProviderCapability, Uri,
 };
 use rowan::ast::{support::children, AstNode};
 use rustc_hash::FxBuildHasher;
@@ -72,6 +74,20 @@ impl LanguageService {
 
         InitializeResult {
             capabilities: ServerCapabilities {
+                completion_provider: Some(CompletionOptions {
+                    trigger_characters: Some(
+                        [
+                            ' ', '(', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
+                            'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                            '$', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                        ]
+                        .iter()
+                        .map(char::to_string)
+                        .collect(),
+                    ),
+                    all_commit_characters: Some(vec![")".into()]),
+                    ..Default::default()
+                }),
                 definition_provider: Some(OneOf::Left(true)),
                 type_definition_provider: Some(TypeDefinitionProviderCapability::Simple(true)),
                 declaration_provider: Some(DeclarationCapability::Simple(true)),

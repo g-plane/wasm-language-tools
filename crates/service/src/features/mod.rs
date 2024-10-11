@@ -1,3 +1,4 @@
+mod completion;
 mod definition;
 mod document_symbol;
 mod hover;

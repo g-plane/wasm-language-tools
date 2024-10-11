@@ -431,6 +431,21 @@ impl SymbolTable {
                 })
             })
     }
+
+    pub fn get_declared_params_and_locals(
+        &self,
+        node: SyntaxNode,
+    ) -> impl Iterator<Item = (&SymbolItem, &DefIdx)> {
+        let key = node.into();
+        self.symbols
+            .iter()
+            .filter_map(move |symbol| match &symbol.kind {
+                SymbolItemKind::Param(idx) | SymbolItemKind::Local(idx) if symbol.region == key => {
+                    Some((symbol, idx))
+                }
+                _ => None,
+            })
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
