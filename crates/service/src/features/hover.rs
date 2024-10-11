@@ -294,15 +294,13 @@ fn create_func_hover(
         _ => None,
     }) {
         content_value.push(' ');
-        if type_use
-            .children()
-            .filter(|child| {
-                let kind = child.kind();
-                kind == SyntaxKind::PARAM.into() || kind == SyntaxKind::RESULT.into()
-            })
-            .next()
-            .is_none()
-        {
+        if type_use.children().any(|child| {
+            let kind = child.kind();
+            kind == SyntaxKind::PARAM.into() || kind == SyntaxKind::RESULT.into()
+        }) {
+            let sig = ctx.extract_func_sig(type_use.to_owned());
+            content_value.push_str(&sig.to_string());
+        } else {
             let node = symbol.key.ptr.to_node(root);
             if let Some(func_type) = child::<TypeUse>(&node)
                 .and_then(|type_use| type_use.index())
@@ -313,9 +311,6 @@ fn create_func_hover(
                 let sig = ctx.extract_func_sig(func_type);
                 content_value.push_str(&sig.to_string());
             }
-        } else {
-            let sig = ctx.extract_func_sig(type_use.to_owned());
-            content_value.push_str(&sig.to_string());
         }
     }
     content_value.push(')');
