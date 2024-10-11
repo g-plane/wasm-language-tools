@@ -235,7 +235,7 @@ pub(super) fn error_token<'s>(
     allow_parens: bool,
 ) -> impl Parser<Input<'s>, GreenElement, SyntaxError> {
     dispatch! {peek(any);
-        '$' => ident_impl,
+        '$' => ('$', take_while(0.., is_id_char)).take(),
         '(' | ')' if allow_parens => alt(("(", ")")),
         '(' | ')' => fail,
         '"' => string_impl,

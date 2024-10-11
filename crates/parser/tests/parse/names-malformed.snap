@@ -1,0 +1,31 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..44
+  MODULE@0..43
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_FUNC@10..41
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "func"
+      WHITESPACE@15..16 " "
+      IDENT@16..19 "$f1"
+      WHITESPACE@19..24 "\n    "
+      PLAIN_INSTR@24..37
+        L_PAREN@24..25 "("
+        INSTR_NAME@25..34 "local.get"
+        WHITESPACE@34..35 " "
+        ERROR@35..36 "$"
+        R_PAREN@36..37 ")"
+      WHITESPACE@37..40 "\n  "
+      R_PAREN@40..41 ")"
+    WHITESPACE@41..42 "\n"
+    R_PAREN@42..43 ")"
+  WHITESPACE@43..44 "\n"
+
+error: expected operand
+  ┌─ names-malformed.wat:3:17
+  │
+3 │     (local.get $)
+  │                 ^
