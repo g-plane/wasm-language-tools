@@ -120,7 +120,7 @@ impl LanguageService {
             SyntaxKind::NUM_TYPE | SyntaxKind::VEC_TYPE | SyntaxKind::REF_TYPE => self
                 .semantic_token_kinds
                 .get_index_of(&SemanticTokenKind::Type),
-            SyntaxKind::KEYWORD | SyntaxKind::INSTR_NAME => self
+            SyntaxKind::KEYWORD => self
                 .semantic_token_kinds
                 .get_index_of(&SemanticTokenKind::Keyword),
             SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
@@ -188,6 +188,9 @@ impl LanguageService {
             SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT => self
                 .semantic_token_kinds
                 .get_index_of(&SemanticTokenKind::Comment),
+            SyntaxKind::INSTR_NAME => self
+                .semantic_token_kinds
+                .get_index_of(&SemanticTokenKind::Op),
             _ => None,
         }
         .map(|v| v as u32)
@@ -204,4 +207,5 @@ pub(crate) enum SemanticTokenKind {
     Comment,
     String,
     Number,
+    Op,
 }

@@ -63,6 +63,8 @@ impl LanguageService {
                     kinds_map.insert(SemanticTokenKind::String, SemanticTokenType::STRING);
                 } else if *token_type == SemanticTokenType::NUMBER {
                     kinds_map.insert(SemanticTokenKind::Number, SemanticTokenType::NUMBER);
+                } else if *token_type == SemanticTokenType::OPERATOR {
+                    kinds_map.insert(SemanticTokenKind::Op, SemanticTokenType::OPERATOR);
                 }
             });
             self.semantic_token_kinds = kinds_map.keys().cloned().collect();
