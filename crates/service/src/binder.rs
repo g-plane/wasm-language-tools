@@ -123,15 +123,26 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable 
                         }
                     });
                 func.locals().fold(local_index, |i, local| {
-                    symbols.push(SymbolItem {
-                        key: local.syntax().to_owned().into(),
-                        region: node.clone().into(),
-                        kind: SymbolItemKind::Local(DefIdx {
-                            num: i,
-                            name: local.ident_token().map(|token| token.text().to_string()),
-                        }),
-                    });
-                    i + 1
+                    if let Some(ident) = local.ident_token() {
+                        symbols.push(SymbolItem {
+                            key: local.syntax().to_owned().into(),
+                            region: node.clone().into(),
+                            kind: SymbolItemKind::Local(DefIdx {
+                                num: i,
+                                name: Some(ident.text().to_string()),
+                            }),
+                        });
+                        i + 1
+                    } else {
+                        local.val_types().fold(i, |i, val_type| {
+                            symbols.push(SymbolItem {
+                                key: val_type.syntax().to_owned().into(),
+                                region: node.clone().into(),
+                                kind: SymbolItemKind::Local(DefIdx { num: i, name: None }),
+                            });
+                            i + 1
+                        })
+                    }
                 });
             }
             SyntaxKind::MODULE_FIELD_TYPE => {
