@@ -182,7 +182,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable 
                     continue;
                 };
                 match instr.instr_name().as_ref().map(|token| token.text()) {
-                    Some("call") => {
+                    Some("call" | "ref.func") => {
                         let Some(region) = node
                             .ancestors()
                             .find(|node| node.kind() == SyntaxKind::MODULE)
