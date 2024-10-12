@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..570
-  MODULE@0..569
+ROOT@0..593
+  MODULE@0..592
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -347,9 +347,24 @@ ROOT@0..570
           INT@564..565 "0"
         R_PAREN@565..566 ")"
       R_PAREN@566..567 ")"
-    WHITESPACE@567..568 "\n"
-    R_PAREN@568..569 ")"
-  WHITESPACE@569..570 "\n"
+    WHITESPACE@567..571 "\n\n  "
+    MODULE_FIELD_FUNC@571..590
+      L_PAREN@571..572 "("
+      KEYWORD@572..576 "func"
+      WHITESPACE@576..577 " "
+      TYPE_USE@577..589
+        PARAM@577..589
+          L_PAREN@577..578 "("
+          KEYWORD@578..583 "param"
+          WHITESPACE@583..584 " "
+          IDENT@584..586 "$p"
+          WHITESPACE@586..587 " "
+          ERROR@587..588 "i"
+          R_PAREN@588..589 ")"
+      R_PAREN@589..590 ")"
+    WHITESPACE@590..591 "\n"
+    R_PAREN@591..592 ")"
+  WHITESPACE@592..593 "\n"
 
 error: expected operand
   ┌─ func-malformed.wat:2:41
@@ -416,3 +431,9 @@ error: expected operand
    │
 14 │   (func (result i32) (param i32) (local.get 0))
    │                             ^^^
+
+error: expected value type
+   ┌─ func-malformed.wat:16:19
+   │
+16 │   (func (param $p i))
+   │                   ^

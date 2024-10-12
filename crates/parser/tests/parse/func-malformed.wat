@@ -12,4 +12,6 @@
   (func (local i32) (param i32))
   (func (local i32) (result i32) (local.get 0))
   (func (result i32) (param i32) (local.get 0))
+
+  (func (param $p i))
 )
