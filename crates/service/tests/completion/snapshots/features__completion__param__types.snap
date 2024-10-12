@@ -1,0 +1,34 @@
+---
+source: crates/service/tests/completion/param.rs
+expression: response
+---
+[
+  {
+    "label": "i32",
+    "kind": 7
+  },
+  {
+    "label": "i64",
+    "kind": 7
+  },
+  {
+    "label": "f32",
+    "kind": 7
+  },
+  {
+    "label": "f64",
+    "kind": 7
+  },
+  {
+    "label": "v128",
+    "kind": 7
+  },
+  {
+    "label": "funcref",
+    "kind": 7
+  },
+  {
+    "label": "externref",
+    "kind": 7
+  }
+]
