@@ -1,6 +1,7 @@
 use super::find_meaningful_token;
 use crate::{
     binder::{DefIdx, SymbolItem, SymbolItemKind, SymbolTable, SymbolTablesCtx},
+    dataset,
     files::FilesCtx,
     helpers,
     types_analyzer::TypesAnalyzerCtx,
@@ -138,82 +139,19 @@ impl LanguageService {
                             })
                     })
             }
-            SyntaxKind::NUM_TYPE => match token.text() {
-                "i32" => Some(Hover {
+            SyntaxKind::NUM_TYPE | SyntaxKind::VEC_TYPE | SyntaxKind::REF_TYPE => {
+                let ty = token.text();
+                dataset::get_value_type_description(token.text()).map(|doc| Hover {
                     contents: HoverContents::Markup(MarkupContent {
                         kind: MarkupKind::Markdown,
-                        value: I32_DOC.into(),
+                        value: format!("```wat\n{ty}\n```\n\n{doc}"),
                     }),
                     range: Some(helpers::rowan_range_to_lsp_range(
                         &line_index,
                         token.text_range(),
                     )),
-                }),
-                "i64" => Some(Hover {
-                    contents: HoverContents::Markup(MarkupContent {
-                        kind: MarkupKind::Markdown,
-                        value: I64_DOC.into(),
-                    }),
-                    range: Some(helpers::rowan_range_to_lsp_range(
-                        &line_index,
-                        token.text_range(),
-                    )),
-                }),
-                "f32" => Some(Hover {
-                    contents: HoverContents::Markup(MarkupContent {
-                        kind: MarkupKind::Markdown,
-                        value: F32_DOC.into(),
-                    }),
-                    range: Some(helpers::rowan_range_to_lsp_range(
-                        &line_index,
-                        token.text_range(),
-                    )),
-                }),
-                "f64" => Some(Hover {
-                    contents: HoverContents::Markup(MarkupContent {
-                        kind: MarkupKind::Markdown,
-                        value: F64_DOC.into(),
-                    }),
-                    range: Some(helpers::rowan_range_to_lsp_range(
-                        &line_index,
-                        token.text_range(),
-                    )),
-                }),
-                _ => None,
-            },
-            SyntaxKind::VEC_TYPE => Some(Hover {
-                contents: HoverContents::Markup(MarkupContent {
-                    kind: MarkupKind::Markdown,
-                    value: V128_DOC.into(),
-                }),
-                range: Some(helpers::rowan_range_to_lsp_range(
-                    &line_index,
-                    token.text_range(),
-                )),
-            }),
-            SyntaxKind::REF_TYPE => match token.text() {
-                "funcref" => Some(Hover {
-                    contents: HoverContents::Markup(MarkupContent {
-                        kind: MarkupKind::Markdown,
-                        value: FUNC_REF_DOC.into(),
-                    }),
-                    range: Some(helpers::rowan_range_to_lsp_range(
-                        &line_index,
-                        token.text_range(),
-                    )),
-                }),
-                "externref" => Some(Hover {
-                    contents: HoverContents::Markup(MarkupContent {
-                        kind: MarkupKind::Markdown,
-                        value: EXTERN_REF_DOC.into(),
-                    }),
-                    range: Some(helpers::rowan_range_to_lsp_range(
-                        &line_index,
-                        token.text_range(),
-                    )),
-                }),
-                _ => None,
-            },
+                })
+            }
             _ => None,
         }
     }
@@ -351,49 +289,3 @@ fn create_marked_string(value: String) -> MarkedString {
         value,
     })
 }
-
-const I32_DOC: &str = "```wat
-i32
-```
-
-The type `i32` classifies 32 bit integers.";
-
-const I64_DOC: &str = "```wat
-i64
-```
-
-The type `i64` classifies 64 bit integers.";
-
-const F32_DOC: &str = "```wat
-f32
-```
-
-The type `f32` classifies 32 bit floating-point data.";
-
-const F64_DOC: &str = "```wat
-f64
-```
-
-The type `f64` classifies 64 bit floating-point data.";
-
-const V128_DOC: &str = "```wat
-v128
-```
-
-The type `v128` corresponds to a 128 bit vector of packed integer or floating-point data.";
-
-const FUNC_REF_DOC: &str =  "```wat
-funcref
-```
-
-The type [`funcref`](https://webassembly.github.io/spec/core/syntax/types.html#syntax-reftype)
-denotes the infinite union of all references to [functions](https://webassembly.github.io/spec/core/syntax/modules.html#syntax-func),
-regardless of their [function types](https://webassembly.github.io/spec/core/syntax/types.html#syntax-functype).";
-
-const EXTERN_REF_DOC: &str =  "```wat
-externref
-```
-
-The type [`externref`](https://webassembly.github.io/spec/core/syntax/types.html#syntax-reftype)
-denotes the infinite union of all references to objects owned by the [embedder](https://webassembly.github.io/spec/core/intro/overview.html#embedder)
-and that can be passed into WebAssembly under this type.";

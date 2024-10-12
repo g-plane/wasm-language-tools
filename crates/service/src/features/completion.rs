@@ -5,7 +5,9 @@ use crate::{
     InternUri, LanguageService, LanguageServiceCtx,
 };
 use line_index::LineCol;
-use lsp_types::{CompletionItem, CompletionParams, CompletionResponse, Position};
+use lsp_types::{
+    CompletionItem, CompletionParams, CompletionResponse, Documentation, MarkupKind, Position,
+};
 use rowan::{ast::support, Direction, TokenAtOffset};
 use smallvec::SmallVec;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxToken};
@@ -191,6 +193,12 @@ fn get_cmp_list(
                     items.extend(dataset::VALUE_TYPES.iter().map(|ty| CompletionItem {
                         label: ty.to_string(),
                         kind: Some(lsp_types::CompletionItemKind::CLASS),
+                        documentation: dataset::get_value_type_description(ty).map(|desc| {
+                            Documentation::MarkupContent(lsp_types::MarkupContent {
+                                kind: MarkupKind::Markdown,
+                                value: desc.into(),
+                            })
+                        }),
                         ..Default::default()
                     }));
                 }

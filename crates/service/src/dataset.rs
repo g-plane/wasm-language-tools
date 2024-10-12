@@ -259,3 +259,16 @@ pub(crate) static INSTR_NAMES: [&str; 252] = [
 pub(crate) static MODULE_FIELDS: [&str; 10] = [
     "func", "type", "import", "table", "memory", "global", "export", "start", "elem", "data",
 ];
+
+pub(crate) fn get_value_type_description(value_type: &str) -> Option<&'static str> {
+    match value_type {
+        "i32" => Some("The type `i32` classifies 32 bit integers."),
+        "i64" => Some("The type `i64` classifies 64 bit integers."),
+        "f32" => Some("The type `f32` classifies 32 bit floating-point data."),
+        "f64" => Some("The type `f64` classifies 64 bit floating-point data."),
+        "v128" => Some("The type `v128` corresponds to a 128 bit vector of packed integer or floating-point data."),
+        "funcref" => Some("The type [`funcref`](https://webassembly.github.io/spec/core/syntax/types.html#syntax-reftype) denotes the infinite union of all references to [functions](https://webassembly.github.io/spec/core/syntax/modules.html#syntax-func), regardless of their [function types](https://webassembly.github.io/spec/core/syntax/types.html#syntax-functype)."),
+        "externref" => Some("The type [`externref`](https://webassembly.github.io/spec/core/syntax/types.html#syntax-reftype) denotes the infinite union of all references to objects owned by the [embedder](https://webassembly.github.io/spec/core/intro/overview.html#embedder) and that can be passed into WebAssembly under this type."),
+        _ => None,
+    }
+}
