@@ -49,11 +49,31 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
     let parent = token.parent()?;
     match parent.kind() {
         SyntaxKind::MODULE_FIELD_FUNC => {
+            let prev_node = token
+                .siblings_with_tokens(Direction::Prev)
+                .skip(1)
+                .find(|element| matches!(element, SyntaxElement::Node(..)))
+                .map(|element| element.kind());
             let next_node = token
                 .siblings_with_tokens(Direction::Next)
                 .skip(1)
                 .find(|element| matches!(element, SyntaxElement::Node(..)))
                 .map(|element| element.kind());
+            if !matches!(
+                prev_node,
+                Some(
+                    SyntaxKind::PLAIN_INSTR
+                        | SyntaxKind::BLOCK_BLOCK
+                        | SyntaxKind::BLOCK_IF
+                        | SyntaxKind::BLOCK_LOOP
+                )
+            ) && find_leading_l_paren(token).is_some()
+            {
+                ctx.reserve(3);
+                ctx.push(CmpCtx::KeywordImExport);
+                ctx.push(CmpCtx::KeywordTypeUse);
+                ctx.push(CmpCtx::KeywordLocal);
+            }
             if matches!(
                 next_node,
                 Some(
@@ -69,6 +89,36 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         SyntaxKind::PLAIN_INSTR => {
             if token.kind() == SyntaxKind::INSTR_NAME {
                 ctx.push(CmpCtx::Instr);
+                if parent
+                    .parent()
+                    .is_some_and(|grand| grand.kind() == SyntaxKind::MODULE_FIELD_FUNC)
+                {
+                    // Given the code below:
+                    // (func (export "foo") (par))
+                    //                          ^ cursor
+                    // User is probably going to type "param",
+                    // but parser treat it as a plain instruction,
+                    // so we catch this case here, though these keywords aren't instruction names.
+                    let prev_node = parent
+                        .siblings_with_tokens(Direction::Prev)
+                        .skip(1)
+                        .find(|element| matches!(element, SyntaxElement::Node(..)))
+                        .map(|element| element.kind());
+                    if !matches!(
+                        prev_node,
+                        Some(
+                            SyntaxKind::PLAIN_INSTR
+                                | SyntaxKind::BLOCK_BLOCK
+                                | SyntaxKind::BLOCK_IF
+                                | SyntaxKind::BLOCK_LOOP
+                        )
+                    ) {
+                        ctx.reserve(3);
+                        ctx.push(CmpCtx::KeywordImExport);
+                        ctx.push(CmpCtx::KeywordTypeUse);
+                        ctx.push(CmpCtx::KeywordLocal);
+                    }
+                }
             } else {
                 let instr_name = support::token(&parent, SyntaxKind::INSTR_NAME)?;
                 let instr_name = instr_name.text();
@@ -117,6 +167,9 @@ enum CmpCtx {
     Local,
     KeywordModule,
     KeywordModuleField,
+    KeywordImExport,
+    KeywordTypeUse,
+    KeywordLocal,
 }
 
 fn get_cmp_list(
@@ -132,14 +185,14 @@ fn get_cmp_list(
                         label: ty.to_string(),
                         kind: Some(lsp_types::CompletionItemKind::OPERATOR),
                         ..Default::default()
-                    }))
+                    }));
                 }
                 CmpCtx::ValType => {
                     items.extend(dataset::VALUE_TYPES.iter().map(|ty| CompletionItem {
                         label: ty.to_string(),
                         kind: Some(lsp_types::CompletionItemKind::CLASS),
                         ..Default::default()
-                    }))
+                    }));
                 }
                 CmpCtx::Local => {
                     let Some(func) = token
@@ -187,6 +240,27 @@ fn get_cmp_list(
                         ..Default::default()
                     }))
                 }
+                CmpCtx::KeywordImExport => {
+                    items.extend(["import", "export"].iter().map(|keyword| CompletionItem {
+                        label: keyword.to_string(),
+                        kind: Some(lsp_types::CompletionItemKind::KEYWORD),
+                        ..Default::default()
+                    }));
+                }
+                CmpCtx::KeywordTypeUse => {
+                    items.extend(["type", "param", "result"].iter().map(|keyword| {
+                        CompletionItem {
+                            label: keyword.to_string(),
+                            kind: Some(lsp_types::CompletionItemKind::KEYWORD),
+                            ..Default::default()
+                        }
+                    }));
+                }
+                CmpCtx::KeywordLocal => items.push(CompletionItem {
+                    label: "local".to_string(),
+                    kind: Some(lsp_types::CompletionItemKind::KEYWORD),
+                    ..Default::default()
+                }),
             }
             items
         })
