@@ -255,3 +255,7 @@ pub(crate) static INSTR_NAMES: [&str; 252] = [
     "f32x4.convert_i32x4_s",
     "f32x4.convert_i32x4_u",
 ];
+
+pub(crate) static MODULE_FIELDS: [&str; 10] = [
+    "func", "type", "import", "table", "memory", "global", "export", "start", "elem", "data",
+];

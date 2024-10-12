@@ -96,6 +96,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<CmpCtx> {
                 Some(CmpCtx::ValType)
             }
         }
+        SyntaxKind::MODULE => find_leading_l_paren(token).map(|_| CmpCtx::KeywordModuleField),
+        SyntaxKind::ROOT => find_leading_l_paren(token).map(|_| CmpCtx::KeywordModule),
         _ => None,
     }
 }
@@ -104,6 +106,8 @@ enum CmpCtx {
     Instr,
     ValType,
     Local,
+    KeywordModule,
+    KeywordModuleField,
 }
 
 fn get_cmp_list(
@@ -161,5 +165,40 @@ fn get_cmp_list(
                 })
                 .collect()
         }
+        CmpCtx::KeywordModule => vec![CompletionItem {
+            label: "module".to_string(),
+            kind: Some(lsp_types::CompletionItemKind::KEYWORD),
+            ..Default::default()
+        }],
+        CmpCtx::KeywordModuleField => dataset::MODULE_FIELDS
+            .iter()
+            .map(|ty| CompletionItem {
+                label: ty.to_string(),
+                kind: Some(lsp_types::CompletionItemKind::KEYWORD),
+                ..Default::default()
+            })
+            .collect(),
     }
+}
+
+fn find_leading_l_paren(token: &SyntaxToken) -> Option<SyntaxToken> {
+    if is_l_paren(token) {
+        Some(token.clone())
+    } else {
+        token
+            .siblings_with_tokens(Direction::Prev)
+            .skip(1)
+            .skip_while(|element| {
+                matches!(
+                    element.kind(),
+                    SyntaxKind::WHITESPACE | SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT
+                )
+            })
+            .find_map(SyntaxElement::into_token)
+            .filter(is_l_paren)
+    }
+}
+fn is_l_paren(token: &SyntaxToken) -> bool {
+    let kind = token.kind();
+    kind == SyntaxKind::L_PAREN || kind == SyntaxKind::ERROR && token.text() == "("
 }

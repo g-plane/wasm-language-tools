@@ -1,0 +1,46 @@
+---
+source: crates/service/tests/completion.rs
+expression: response
+---
+[
+  {
+    "label": "func",
+    "kind": 14
+  },
+  {
+    "label": "type",
+    "kind": 14
+  },
+  {
+    "label": "import",
+    "kind": 14
+  },
+  {
+    "label": "table",
+    "kind": 14
+  },
+  {
+    "label": "memory",
+    "kind": 14
+  },
+  {
+    "label": "global",
+    "kind": 14
+  },
+  {
+    "label": "export",
+    "kind": 14
+  },
+  {
+    "label": "start",
+    "kind": 14
+  },
+  {
+    "label": "elem",
+    "kind": 14
+  },
+  {
+    "label": "data",
+    "kind": 14
+  }
+]

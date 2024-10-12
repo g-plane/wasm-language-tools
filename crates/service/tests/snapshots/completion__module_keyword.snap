@@ -1,0 +1,10 @@
+---
+source: crates/service/tests/completion.rs
+expression: response
+---
+[
+  {
+    "label": "module",
+    "kind": 14
+  }
+]
