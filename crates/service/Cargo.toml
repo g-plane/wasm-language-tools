@@ -19,3 +19,6 @@ salsa = "0.16"
 tracing.workspace = true
 wat_parser = { path = "../parser", version = "0.0" }
 wat_syntax = { path = "../syntax", version = "0.0" }
+
+[dev-dependencies]
+insta.workspace = true

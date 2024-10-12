@@ -1,0 +1,30 @@
+---
+source: crates/service/tests/completion.rs
+expression: response
+---
+[
+  {
+    "label": "$p",
+    "kind": 6
+  },
+  {
+    "label": "1",
+    "kind": 6
+  },
+  {
+    "label": "2",
+    "kind": 6
+  },
+  {
+    "label": "$l",
+    "kind": 6
+  },
+  {
+    "label": "4",
+    "kind": 6
+  },
+  {
+    "label": "5",
+    "kind": 6
+  }
+]
