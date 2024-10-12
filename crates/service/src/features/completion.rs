@@ -7,6 +7,7 @@ use crate::{
 use line_index::LineCol;
 use lsp_types::{CompletionItem, CompletionParams, CompletionResponse, Position};
 use rowan::{ast::support, Direction, TokenAtOffset};
+use smallvec::SmallVec;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxToken};
 
 impl LanguageService {
@@ -15,9 +16,10 @@ impl LanguageService {
             .ctx
             .uri(params.text_document_position.text_document.uri);
         let token = find_token(&self.ctx, uri, params.text_document_position.position)?;
-        let symbol_table = self.ctx.symbol_table(uri);
 
         let cmp_ctx = get_cmp_ctx(&token)?;
+
+        let symbol_table = self.ctx.symbol_table(uri);
         let items = get_cmp_list(cmp_ctx, &token, &symbol_table);
         Some(CompletionResponse::Array(items))
     }
@@ -42,7 +44,8 @@ fn find_token(
     }
 }
 
-fn get_cmp_ctx(token: &SyntaxToken) -> Option<CmpCtx> {
+fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
+    let mut ctx = SmallVec::with_capacity(2);
     let parent = token.parent()?;
     match parent.kind() {
         SyntaxKind::MODULE_FIELD_FUNC => {
@@ -60,21 +63,18 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<CmpCtx> {
                         | SyntaxKind::BLOCK_LOOP
                 ) | None
             ) {
-                Some(CmpCtx::Instr)
-            } else {
-                None
+                ctx.push(CmpCtx::Instr);
             }
         }
         SyntaxKind::PLAIN_INSTR => {
             if token.kind() == SyntaxKind::INSTR_NAME {
-                return Some(CmpCtx::Instr);
-            }
-            let instr_name = support::token(&parent, SyntaxKind::INSTR_NAME)?;
-            let instr_name = instr_name.text();
-            if instr_name.starts_with("local.") {
-                Some(CmpCtx::Local)
+                ctx.push(CmpCtx::Instr);
             } else {
-                None
+                let instr_name = support::token(&parent, SyntaxKind::INSTR_NAME)?;
+                let instr_name = instr_name.text();
+                if instr_name.starts_with("local.") {
+                    ctx.push(CmpCtx::Local);
+                }
             }
         }
         SyntaxKind::OPERAND => {
@@ -84,21 +84,30 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<CmpCtx> {
             let instr_name = support::token(&instr, SyntaxKind::INSTR_NAME)?;
             let instr_name = instr_name.text();
             if instr_name.starts_with("local.") {
-                Some(CmpCtx::Local)
-            } else {
-                None
+                ctx.push(CmpCtx::Local);
             }
         }
         SyntaxKind::PARAM | SyntaxKind::RESULT | SyntaxKind::LOCAL | SyntaxKind::GLOBAL_TYPE => {
-            if token.text().starts_with('$') {
-                None
-            } else {
-                Some(CmpCtx::ValType)
+            if !token.text().starts_with('$') {
+                ctx.push(CmpCtx::ValType);
             }
         }
-        SyntaxKind::MODULE => find_leading_l_paren(token).map(|_| CmpCtx::KeywordModuleField),
-        SyntaxKind::ROOT => find_leading_l_paren(token).map(|_| CmpCtx::KeywordModule),
-        _ => None,
+        SyntaxKind::MODULE => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordModuleField);
+            }
+        }
+        SyntaxKind::ROOT => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordModule);
+            }
+        }
+        _ => {}
+    }
+    if ctx.is_empty() {
+        None
+    } else {
+        Some(ctx)
     }
 }
 
@@ -111,74 +120,76 @@ enum CmpCtx {
 }
 
 fn get_cmp_list(
-    ctx: CmpCtx,
+    ctx: SmallVec<[CmpCtx; 4]>,
     token: &SyntaxToken,
     symbol_table: &SymbolTable,
 ) -> Vec<CompletionItem> {
-    match ctx {
-        CmpCtx::Instr => dataset::INSTR_NAMES
-            .iter()
-            .map(|ty| CompletionItem {
-                label: ty.to_string(),
-                kind: Some(lsp_types::CompletionItemKind::OPERATOR),
-                ..Default::default()
-            })
-            .collect(),
-        CmpCtx::ValType => dataset::VALUE_TYPES
-            .iter()
-            .map(|ty| CompletionItem {
-                label: ty.to_string(),
-                kind: Some(lsp_types::CompletionItemKind::CLASS),
-                ..Default::default()
-            })
-            .collect(),
-        CmpCtx::Local => {
-            let Some(func) = token
-                .parent_ancestors()
-                .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
-            else {
-                return vec![];
-            };
-            let has_dollar = token.text().starts_with('$');
-            symbol_table
-                .get_declared_params_and_locals(func)
-                .filter_map(|(_, idx)| {
-                    if has_dollar {
-                        let name = idx.name.as_ref()?;
-                        Some(CompletionItem {
-                            label: name.to_owned(),
-                            insert_text: Some(name.strip_prefix('$')?.to_string()),
-                            kind: Some(lsp_types::CompletionItemKind::VARIABLE),
-                            ..Default::default()
-                        })
-                    } else {
-                        Some(CompletionItem {
-                            label: idx
-                                .name
-                                .as_ref()
-                                .map(|name| name.to_string())
-                                .unwrap_or_else(|| idx.num.to_string()),
-                            kind: Some(lsp_types::CompletionItemKind::VARIABLE),
-                            ..Default::default()
-                        })
-                    }
-                })
-                .collect()
-        }
-        CmpCtx::KeywordModule => vec![CompletionItem {
-            label: "module".to_string(),
-            kind: Some(lsp_types::CompletionItemKind::KEYWORD),
-            ..Default::default()
-        }],
-        CmpCtx::KeywordModuleField => dataset::MODULE_FIELDS
-            .iter()
-            .map(|ty| CompletionItem {
-                label: ty.to_string(),
-                kind: Some(lsp_types::CompletionItemKind::KEYWORD),
-                ..Default::default()
-            })
-            .collect(),
-    }
+    ctx.into_iter()
+        .fold(Vec::with_capacity(2), |mut items, ctx| {
+            match ctx {
+                CmpCtx::Instr => {
+                    items.extend(dataset::INSTR_NAMES.iter().map(|ty| CompletionItem {
+                        label: ty.to_string(),
+                        kind: Some(lsp_types::CompletionItemKind::OPERATOR),
+                        ..Default::default()
+                    }))
+                }
+                CmpCtx::ValType => {
+                    items.extend(dataset::VALUE_TYPES.iter().map(|ty| CompletionItem {
+                        label: ty.to_string(),
+                        kind: Some(lsp_types::CompletionItemKind::CLASS),
+                        ..Default::default()
+                    }))
+                }
+                CmpCtx::Local => {
+                    let Some(func) = token
+                        .parent_ancestors()
+                        .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
+                    else {
+                        return items;
+                    };
+                    let has_dollar = token.text().starts_with('$');
+                    items.extend(
+                        symbol_table
+                            .get_declared_params_and_locals(func)
+                            .filter_map(|(_, idx)| {
+                                if has_dollar {
+                                    let name = idx.name.as_ref()?;
+                                    Some(CompletionItem {
+                                        label: name.to_owned(),
+                                        insert_text: Some(name.strip_prefix('$')?.to_string()),
+                                        kind: Some(lsp_types::CompletionItemKind::VARIABLE),
+                                        ..Default::default()
+                                    })
+                                } else {
+                                    Some(CompletionItem {
+                                        label: idx
+                                            .name
+                                            .as_ref()
+                                            .map(|name| name.to_string())
+                                            .unwrap_or_else(|| idx.num.to_string()),
+                                        kind: Some(lsp_types::CompletionItemKind::VARIABLE),
+                                        ..Default::default()
+                                    })
+                                }
+                            }),
+                    );
+                }
+                CmpCtx::KeywordModule => items.push(CompletionItem {
+                    label: "module".to_string(),
+                    kind: Some(lsp_types::CompletionItemKind::KEYWORD),
+                    ..Default::default()
+                }),
+                CmpCtx::KeywordModuleField => {
+                    items.extend(dataset::MODULE_FIELDS.iter().map(|ty| CompletionItem {
+                        label: ty.to_string(),
+                        kind: Some(lsp_types::CompletionItemKind::KEYWORD),
+                        ..Default::default()
+                    }))
+                }
+            }
+            items
+        })
 }
 
 fn find_leading_l_paren(token: &SyntaxToken) -> Option<SyntaxToken> {
