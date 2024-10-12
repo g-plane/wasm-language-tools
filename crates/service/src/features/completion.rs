@@ -89,6 +89,13 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<CmpCtx> {
                 None
             }
         }
+        SyntaxKind::PARAM | SyntaxKind::RESULT | SyntaxKind::LOCAL | SyntaxKind::GLOBAL_TYPE => {
+            if token.text().starts_with('$') {
+                None
+            } else {
+                Some(CmpCtx::ValType)
+            }
+        }
         _ => None,
     }
 }
