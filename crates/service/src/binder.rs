@@ -461,6 +461,20 @@ impl SymbolTable {
             })
     }
 
+    pub fn get_declared_func_types(
+        &self,
+        node: SyntaxNode,
+    ) -> impl Iterator<Item = (&SymbolItem, &DefIdx)> {
+        debug_assert_eq!(node.kind(), SyntaxKind::MODULE);
+        let key = node.into();
+        self.symbols
+            .iter()
+            .filter_map(move |symbol| match &symbol.kind {
+                SymbolItemKind::Type(idx) if symbol.region == key => Some((symbol, idx)),
+                _ => None,
+            })
+    }
+
     pub fn get_declared_globals(
         &self,
         node: SyntaxNode,

@@ -153,10 +153,13 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::ValType);
             }
         }
+        SyntaxKind::TYPE_USE => ctx.push(CmpCtx::FuncType),
         SyntaxKind::INDEX => {
             let grand = parent.parent()?;
-            if grand.kind() == SyntaxKind::MODULE_FIELD_START {
-                ctx.push(CmpCtx::Func);
+            match grand.kind() {
+                SyntaxKind::MODULE_FIELD_START => ctx.push(CmpCtx::Func),
+                SyntaxKind::TYPE_USE => ctx.push(CmpCtx::FuncType),
+                _ => {}
             }
         }
         SyntaxKind::MODULE_FIELD_START => ctx.push(CmpCtx::Func),
@@ -184,6 +187,7 @@ enum CmpCtx {
     ValType,
     Local,
     Func,
+    FuncType,
     Global,
     KeywordModule,
     KeywordModuleField,
@@ -257,6 +261,26 @@ fn get_cmp_list(
                                 label,
                                 insert_text,
                                 kind: Some(CompletionItemKind::FUNCTION),
+                                ..Default::default()
+                            })
+                        },
+                    ));
+                }
+                CmpCtx::FuncType => {
+                    let Some(module) = token
+                        .parent_ancestors()
+                        .find(|node| node.kind() == SyntaxKind::MODULE)
+                    else {
+                        return items;
+                    };
+                    let has_dollar = token.text().starts_with('$');
+                    items.extend(symbol_table.get_declared_func_types(module).filter_map(
+                        |(_, idx)| {
+                            let (label, insert_text) = get_def_idx_cmp_text(idx, has_dollar)?;
+                            Some(CompletionItem {
+                                label,
+                                insert_text,
+                                kind: Some(CompletionItemKind::INTERFACE),
                                 ..Default::default()
                             })
                         },

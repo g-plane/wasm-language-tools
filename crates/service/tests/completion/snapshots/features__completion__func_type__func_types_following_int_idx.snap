@@ -1,0 +1,14 @@
+---
+source: crates/service/tests/completion/func_type.rs
+expression: response
+---
+[
+  {
+    "label": "1",
+    "kind": 8
+  },
+  {
+    "label": "$type",
+    "kind": 8
+  }
+]
