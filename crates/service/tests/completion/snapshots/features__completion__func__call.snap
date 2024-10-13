@@ -1,0 +1,14 @@
+---
+source: crates/service/tests/completion/func.rs
+expression: response
+---
+[
+  {
+    "label": "0",
+    "kind": 3
+  },
+  {
+    "label": "$func",
+    "kind": 3
+  }
+]

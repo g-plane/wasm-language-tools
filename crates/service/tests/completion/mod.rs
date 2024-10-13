@@ -1,4 +1,6 @@
 #[cfg(test)]
+mod func;
+#[cfg(test)]
 mod global;
 #[cfg(test)]
 mod instr;

@@ -446,6 +446,20 @@ impl SymbolTable {
                 _ => None,
             })
     }
+
+    pub fn get_declared_functions(
+        &self,
+        node: SyntaxNode,
+    ) -> impl Iterator<Item = (&SymbolItem, &DefIdx)> {
+        debug_assert_eq!(node.kind(), SyntaxKind::MODULE);
+        let key = node.into();
+        self.symbols
+            .iter()
+            .filter_map(move |symbol| match &symbol.kind {
+                SymbolItemKind::Func(idx) if symbol.region == key => Some((symbol, idx)),
+                _ => None,
+            })
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]

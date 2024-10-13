@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolTable, SymbolTablesCtx},
+    binder::{DefIdx, SymbolTable, SymbolTablesCtx},
     dataset,
     files::FilesCtx,
     InternUri, LanguageService, LanguageServiceCtx,
@@ -126,6 +126,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 let instr_name = instr_name.text();
                 if instr_name.starts_with("local.") {
                     ctx.push(CmpCtx::Local);
+                } else if matches!(instr_name, "call" | "ref.func") {
+                    ctx.push(CmpCtx::Func);
                 }
             }
         }
@@ -137,6 +139,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             let instr_name = instr_name.text();
             if instr_name.starts_with("local.") {
                 ctx.push(CmpCtx::Local);
+            } else if matches!(instr_name, "call" | "ref.func") {
+                ctx.push(CmpCtx::Func);
             }
         }
         SyntaxKind::PARAM | SyntaxKind::RESULT | SyntaxKind::LOCAL | SyntaxKind::GLOBAL_TYPE => {
@@ -144,6 +148,13 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::ValType);
             }
         }
+        SyntaxKind::INDEX => {
+            let grand = parent.parent()?;
+            if grand.kind() == SyntaxKind::MODULE_FIELD_START {
+                ctx.push(CmpCtx::Func);
+            }
+        }
+        SyntaxKind::MODULE_FIELD_START => ctx.push(CmpCtx::Func),
         SyntaxKind::MODULE => {
             if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::KeywordModuleField);
@@ -167,6 +178,7 @@ enum CmpCtx {
     Instr,
     ValType,
     Local,
+    Func,
     KeywordModule,
     KeywordModuleField,
     KeywordImExport,
@@ -214,27 +226,35 @@ fn get_cmp_list(
                         symbol_table
                             .get_declared_params_and_locals(func)
                             .filter_map(|(_, idx)| {
-                                if has_dollar {
-                                    let name = idx.name.as_ref()?;
-                                    Some(CompletionItem {
-                                        label: name.to_owned(),
-                                        insert_text: Some(name.strip_prefix('$')?.to_string()),
-                                        kind: Some(lsp_types::CompletionItemKind::VARIABLE),
-                                        ..Default::default()
-                                    })
-                                } else {
-                                    Some(CompletionItem {
-                                        label: idx
-                                            .name
-                                            .as_ref()
-                                            .map(|name| name.to_string())
-                                            .unwrap_or_else(|| idx.num.to_string()),
-                                        kind: Some(lsp_types::CompletionItemKind::VARIABLE),
-                                        ..Default::default()
-                                    })
-                                }
+                                let (label, insert_text) = get_def_idx_cmp_text(idx, has_dollar)?;
+                                Some(CompletionItem {
+                                    label,
+                                    insert_text,
+                                    kind: Some(lsp_types::CompletionItemKind::VARIABLE),
+                                    ..Default::default()
+                                })
                             }),
                     );
+                }
+                CmpCtx::Func => {
+                    let Some(module) = token
+                        .parent_ancestors()
+                        .find(|node| node.kind() == SyntaxKind::MODULE)
+                    else {
+                        return items;
+                    };
+                    let has_dollar = token.text().starts_with('$');
+                    items.extend(symbol_table.get_declared_functions(module).filter_map(
+                        |(_, idx)| {
+                            let (label, insert_text) = get_def_idx_cmp_text(idx, has_dollar)?;
+                            Some(CompletionItem {
+                                label,
+                                insert_text,
+                                kind: Some(lsp_types::CompletionItemKind::FUNCTION),
+                                ..Default::default()
+                            })
+                        },
+                    ));
                 }
                 CmpCtx::KeywordModule => items.push(CompletionItem {
                     label: "module".to_string(),
@@ -246,7 +266,7 @@ fn get_cmp_list(
                         label: ty.to_string(),
                         kind: Some(lsp_types::CompletionItemKind::KEYWORD),
                         ..Default::default()
-                    }))
+                    }));
                 }
                 CmpCtx::KeywordImExport => {
                     items.extend(["import", "export"].iter().map(|keyword| CompletionItem {
@@ -272,6 +292,21 @@ fn get_cmp_list(
             }
             items
         })
+}
+
+fn get_def_idx_cmp_text(idx: &DefIdx, has_dollar: bool) -> Option<(String, Option<String>)> {
+    if has_dollar {
+        let name = idx.name.as_ref()?;
+        Some((name.to_owned(), Some(name.strip_prefix('$')?.to_string())))
+    } else {
+        Some((
+            idx.name
+                .as_ref()
+                .map(|name| name.to_string())
+                .unwrap_or_else(|| idx.num.to_string()),
+            None,
+        ))
+    }
 }
 
 fn find_leading_l_paren(token: &SyntaxToken) -> Option<SyntaxToken> {
