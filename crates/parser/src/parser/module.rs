@@ -315,7 +315,7 @@ fn module_field_start(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("start")),
-        resume(index),
+        opt(retry_once(index, [])),
         resume(r_paren),
     )
         .parse_next(input)

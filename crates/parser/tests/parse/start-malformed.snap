@@ -1,0 +1,34 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..43
+  MODULE@0..42
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_START@10..17
+      L_PAREN@10..11 "("
+      KEYWORD@11..16 "start"
+      R_PAREN@16..17 ")"
+    WHITESPACE@17..20 "\n  "
+    MODULE_FIELD_START@20..28
+      L_PAREN@20..21 "("
+      KEYWORD@21..26 "start"
+      WHITESPACE@26..27 " "
+      R_PAREN@27..28 ")"
+    WHITESPACE@28..31 "\n  "
+    MODULE_FIELD_START@31..40
+      L_PAREN@31..32 "("
+      KEYWORD@32..37 "start"
+      WHITESPACE@37..38 " "
+      ERROR@38..39 "$"
+      R_PAREN@39..40 ")"
+    WHITESPACE@40..41 "\n"
+    R_PAREN@41..42 ")"
+  WHITESPACE@42..43 "\n"
+
+error: expected index (identifier or unsigned integer)
+  ┌─ start-malformed.wat:4:10
+  │
+4 │   (start $)
+  │          ^
