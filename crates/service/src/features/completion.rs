@@ -6,7 +6,8 @@ use crate::{
 };
 use line_index::LineCol;
 use lsp_types::{
-    CompletionItem, CompletionParams, CompletionResponse, Documentation, MarkupKind, Position,
+    CompletionItem, CompletionItemKind, CompletionParams, CompletionResponse, Documentation,
+    MarkupKind, Position,
 };
 use rowan::{ast::support, Direction, TokenAtOffset};
 use smallvec::SmallVec;
@@ -128,6 +129,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                     ctx.push(CmpCtx::Local);
                 } else if matches!(instr_name, "call" | "ref.func") {
                     ctx.push(CmpCtx::Func);
+                } else if instr_name.starts_with("global.") {
+                    ctx.push(CmpCtx::Global);
                 }
             }
         }
@@ -141,6 +144,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::Local);
             } else if matches!(instr_name, "call" | "ref.func") {
                 ctx.push(CmpCtx::Func);
+            } else if instr_name.starts_with("global.") {
+                ctx.push(CmpCtx::Global);
             }
         }
         SyntaxKind::PARAM | SyntaxKind::RESULT | SyntaxKind::LOCAL | SyntaxKind::GLOBAL_TYPE => {
@@ -179,6 +184,7 @@ enum CmpCtx {
     ValType,
     Local,
     Func,
+    Global,
     KeywordModule,
     KeywordModuleField,
     KeywordImExport,
@@ -197,14 +203,14 @@ fn get_cmp_list(
                 CmpCtx::Instr => {
                     items.extend(dataset::INSTR_NAMES.iter().map(|ty| CompletionItem {
                         label: ty.to_string(),
-                        kind: Some(lsp_types::CompletionItemKind::OPERATOR),
+                        kind: Some(CompletionItemKind::OPERATOR),
                         ..Default::default()
                     }));
                 }
                 CmpCtx::ValType => {
                     items.extend(dataset::VALUE_TYPES.iter().map(|ty| CompletionItem {
                         label: ty.to_string(),
-                        kind: Some(lsp_types::CompletionItemKind::CLASS),
+                        kind: Some(CompletionItemKind::CLASS),
                         documentation: dataset::get_value_type_description(ty).map(|desc| {
                             Documentation::MarkupContent(lsp_types::MarkupContent {
                                 kind: MarkupKind::Markdown,
@@ -230,7 +236,7 @@ fn get_cmp_list(
                                 Some(CompletionItem {
                                     label,
                                     insert_text,
-                                    kind: Some(lsp_types::CompletionItemKind::VARIABLE),
+                                    kind: Some(CompletionItemKind::VARIABLE),
                                     ..Default::default()
                                 })
                             }),
@@ -250,7 +256,27 @@ fn get_cmp_list(
                             Some(CompletionItem {
                                 label,
                                 insert_text,
-                                kind: Some(lsp_types::CompletionItemKind::FUNCTION),
+                                kind: Some(CompletionItemKind::FUNCTION),
+                                ..Default::default()
+                            })
+                        },
+                    ));
+                }
+                CmpCtx::Global => {
+                    let Some(module) = token
+                        .parent_ancestors()
+                        .find(|node| node.kind() == SyntaxKind::MODULE)
+                    else {
+                        return items;
+                    };
+                    let has_dollar = token.text().starts_with('$');
+                    items.extend(symbol_table.get_declared_globals(module).filter_map(
+                        |(_, idx)| {
+                            let (label, insert_text) = get_def_idx_cmp_text(idx, has_dollar)?;
+                            Some(CompletionItem {
+                                label,
+                                insert_text,
+                                kind: Some(CompletionItemKind::VARIABLE),
                                 ..Default::default()
                             })
                         },
@@ -258,20 +284,20 @@ fn get_cmp_list(
                 }
                 CmpCtx::KeywordModule => items.push(CompletionItem {
                     label: "module".to_string(),
-                    kind: Some(lsp_types::CompletionItemKind::KEYWORD),
+                    kind: Some(CompletionItemKind::KEYWORD),
                     ..Default::default()
                 }),
                 CmpCtx::KeywordModuleField => {
                     items.extend(dataset::MODULE_FIELDS.iter().map(|ty| CompletionItem {
                         label: ty.to_string(),
-                        kind: Some(lsp_types::CompletionItemKind::KEYWORD),
+                        kind: Some(CompletionItemKind::KEYWORD),
                         ..Default::default()
                     }));
                 }
                 CmpCtx::KeywordImExport => {
                     items.extend(["import", "export"].iter().map(|keyword| CompletionItem {
                         label: keyword.to_string(),
-                        kind: Some(lsp_types::CompletionItemKind::KEYWORD),
+                        kind: Some(CompletionItemKind::KEYWORD),
                         ..Default::default()
                     }));
                 }
@@ -279,14 +305,14 @@ fn get_cmp_list(
                     items.extend(["type", "param", "result"].iter().map(|keyword| {
                         CompletionItem {
                             label: keyword.to_string(),
-                            kind: Some(lsp_types::CompletionItemKind::KEYWORD),
+                            kind: Some(CompletionItemKind::KEYWORD),
                             ..Default::default()
                         }
                     }));
                 }
                 CmpCtx::KeywordLocal => items.push(CompletionItem {
                     label: "local".to_string(),
-                    kind: Some(lsp_types::CompletionItemKind::KEYWORD),
+                    kind: Some(CompletionItemKind::KEYWORD),
                     ..Default::default()
                 }),
             }
