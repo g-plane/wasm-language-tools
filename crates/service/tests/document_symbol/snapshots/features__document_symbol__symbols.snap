@@ -1,0 +1,300 @@
+---
+source: crates/service/tests/document_symbol/mod.rs
+expression: response
+---
+[
+  {
+    "name": "module",
+    "kind": 2,
+    "range": {
+      "start": {
+        "line": 1,
+        "character": 0
+      },
+      "end": {
+        "line": 8,
+        "character": 1
+      }
+    },
+    "selectionRange": {
+      "start": {
+        "line": 1,
+        "character": 0
+      },
+      "end": {
+        "line": 8,
+        "character": 1
+      }
+    },
+    "children": [
+      {
+        "name": "$func",
+        "kind": 12,
+        "range": {
+          "start": {
+            "line": 2,
+            "character": 4
+          },
+          "end": {
+            "line": 2,
+            "character": 75
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 2,
+            "character": 10
+          },
+          "end": {
+            "line": 2,
+            "character": 15
+          }
+        },
+        "children": [
+          {
+            "name": "$l1",
+            "kind": 13,
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 31
+              },
+              "end": {
+                "line": 2,
+                "character": 46
+              }
+            },
+            "selectionRange": {
+              "start": {
+                "line": 2,
+                "character": 38
+              },
+              "end": {
+                "line": 2,
+                "character": 41
+              }
+            }
+          },
+          {
+            "name": "$l2",
+            "kind": 13,
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 47
+              },
+              "end": {
+                "line": 2,
+                "character": 62
+              }
+            },
+            "selectionRange": {
+              "start": {
+                "line": 2,
+                "character": 54
+              },
+              "end": {
+                "line": 2,
+                "character": 57
+              }
+            }
+          },
+          {
+            "name": "3",
+            "kind": 13,
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 70
+              },
+              "end": {
+                "line": 2,
+                "character": 73
+              }
+            },
+            "selectionRange": {
+              "start": {
+                "line": 2,
+                "character": 70
+              },
+              "end": {
+                "line": 2,
+                "character": 73
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "1",
+        "kind": 12,
+        "range": {
+          "start": {
+            "line": 3,
+            "character": 4
+          },
+          "end": {
+            "line": 3,
+            "character": 19
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 3,
+            "character": 4
+          },
+          "end": {
+            "line": 3,
+            "character": 19
+          }
+        }
+      },
+      {
+        "name": "2",
+        "kind": 13,
+        "range": {
+          "start": {
+            "line": 4,
+            "character": 4
+          },
+          "end": {
+            "line": 4,
+            "character": 17
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 4,
+            "character": 4
+          },
+          "end": {
+            "line": 4,
+            "character": 17
+          }
+        }
+      },
+      {
+        "name": "$ty",
+        "kind": 13,
+        "range": {
+          "start": {
+            "line": 5,
+            "character": 4
+          },
+          "end": {
+            "line": 5,
+            "character": 21
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 5,
+            "character": 10
+          },
+          "end": {
+            "line": 5,
+            "character": 13
+          }
+        }
+      },
+      {
+        "name": "$global",
+        "kind": 13,
+        "range": {
+          "start": {
+            "line": 6,
+            "character": 4
+          },
+          "end": {
+            "line": 6,
+            "character": 24
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 6,
+            "character": 12
+          },
+          "end": {
+            "line": 6,
+            "character": 19
+          }
+        }
+      },
+      {
+        "name": "5",
+        "kind": 13,
+        "range": {
+          "start": {
+            "line": 7,
+            "character": 4
+          },
+          "end": {
+            "line": 7,
+            "character": 16
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 7,
+            "character": 4
+          },
+          "end": {
+            "line": 7,
+            "character": 16
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "module",
+    "kind": 2,
+    "range": {
+      "start": {
+        "line": 10,
+        "character": 0
+      },
+      "end": {
+        "line": 12,
+        "character": 1
+      }
+    },
+    "selectionRange": {
+      "start": {
+        "line": 10,
+        "character": 0
+      },
+      "end": {
+        "line": 12,
+        "character": 1
+      }
+    },
+    "children": [
+      {
+        "name": "0",
+        "kind": 12,
+        "range": {
+          "start": {
+            "line": 11,
+            "character": 4
+          },
+          "end": {
+            "line": 11,
+            "character": 10
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 11,
+            "character": 4
+          },
+          "end": {
+            "line": 11,
+            "character": 10
+          }
+        }
+      }
+    ]
+  }
+]

@@ -122,21 +122,31 @@ impl LanguageService {
             .filter(|symbol| symbol.region.ptr.kind() != SyntaxKind::ROOT)
             .rev()
             .for_each(|symbol| {
-                if let Some((lsp_symbol, parent)) = symbols_map
+                if let Some((mut lsp_symbol, parent)) = symbols_map
                     .remove(&symbol.key)
                     .zip(symbols_map.get_mut(&symbol.region))
                 {
+                    if let Some(children) = &mut lsp_symbol.children {
+                        children.reverse();
+                    }
                     parent
                         .children
                         .get_or_insert_with(|| Vec::with_capacity(1))
                         .push(lsp_symbol);
                 }
             });
-        Some(DocumentSymbolResponse::Nested(
-            symbols_map
-                .into_values()
-                .filter_map(|v| v.children.is_some().then_some(v))
-                .collect(),
-        ))
+        let mut lsp_symbols = symbols_map
+            .into_values()
+            .filter_map(|mut lsp_symbol| {
+                if let Some(children) = &mut lsp_symbol.children {
+                    children.reverse();
+                    Some(lsp_symbol)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+        lsp_symbols.reverse();
+        Some(DocumentSymbolResponse::Nested(lsp_symbols))
     }
 }
