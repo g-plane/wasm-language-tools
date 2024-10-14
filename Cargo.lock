@@ -718,7 +718,6 @@ dependencies = [
  "rustc-hash 2.0.0",
  "salsa",
  "smallvec",
- "tracing",
  "wat_parser",
  "wat_syntax",
 ]
