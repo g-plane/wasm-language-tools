@@ -7,9 +7,9 @@ use lsp_types::{
         PublishDiagnostics,
     },
     request::{
-        Completion, DocumentSymbolRequest, GotoDeclaration, GotoDefinition, GotoTypeDefinition,
-        HoverRequest, PrepareRenameRequest, References, Rename, SemanticTokensFullRequest,
-        SemanticTokensRangeRequest,
+        CodeActionRequest, Completion, DocumentSymbolRequest, GotoDeclaration, GotoDefinition,
+        GotoTypeDefinition, HoverRequest, PrepareRenameRequest, References, Rename,
+        SemanticTokensFullRequest, SemanticTokensRangeRequest,
     },
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
     PublishDiagnosticsParams,
@@ -40,6 +40,20 @@ impl Server {
                 Message::Request(mut req) => {
                     if conn.handle_shutdown(&req)? {
                         return Ok(());
+                    }
+                    match cast_req::<CodeActionRequest>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.code_action(params),
+                                )?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
                     }
                     match cast_req::<Completion>(req) {
                         Ok((id, params)) => {

@@ -1,0 +1,30 @@
+---
+source: crates/service/tests/code_action/fix_invalid_mem_arg.rs
+expression: response
+---
+[
+  {
+    "title": "Fix invalid memory argument",
+    "kind": "quickfix",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 25
+              },
+              "end": {
+                "line": 2,
+                "character": 26
+              }
+            },
+            "newText": ""
+          }
+        ]
+      }
+    },
+    "isPreferred": true
+  }
+]
