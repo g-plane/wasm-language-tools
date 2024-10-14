@@ -150,3 +150,20 @@ fn locals_and_params_following_ident() {
     let response = service.completion(create_params(uri, Position::new(3, 21)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn locals_and_params_in_different_funcs() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (param $param i32) (local $local i32))
+    (func (param $p i32) (local $l i32)
+        (local.get )
+    )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(4, 19)));
+    assert_json_snapshot!(response);
+}
