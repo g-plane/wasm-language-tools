@@ -124,14 +124,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 }
             } else {
                 let instr_name = support::token(&parent, SyntaxKind::INSTR_NAME)?;
-                let instr_name = instr_name.text();
-                if instr_name.starts_with("local.") {
-                    ctx.push(CmpCtx::Local);
-                } else if matches!(instr_name, "call" | "ref.func") {
-                    ctx.push(CmpCtx::Func);
-                } else if instr_name.starts_with("global.") {
-                    ctx.push(CmpCtx::Global);
-                }
+                add_cmp_ctx_for_operands(instr_name.text(), &mut ctx);
             }
         }
         SyntaxKind::OPERAND => {
@@ -139,14 +132,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 .ancestors()
                 .find(|node| node.kind() == SyntaxKind::PLAIN_INSTR)?;
             let instr_name = support::token(&instr, SyntaxKind::INSTR_NAME)?;
-            let instr_name = instr_name.text();
-            if instr_name.starts_with("local.") {
-                ctx.push(CmpCtx::Local);
-            } else if matches!(instr_name, "call" | "ref.func") {
-                ctx.push(CmpCtx::Func);
-            } else if instr_name.starts_with("global.") {
-                ctx.push(CmpCtx::Global);
-            }
+            add_cmp_ctx_for_operands(instr_name.text(), &mut ctx);
         }
         SyntaxKind::PARAM | SyntaxKind::RESULT | SyntaxKind::LOCAL | SyntaxKind::GLOBAL_TYPE => {
             if !token.text().starts_with('$') {
@@ -181,6 +167,22 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         Some(ctx)
     }
 }
+fn add_cmp_ctx_for_operands(instr_name: &str, ctx: &mut SmallVec<[CmpCtx; 4]>) {
+    match instr_name.split_once('.') {
+        Some(("local", _)) => ctx.push(CmpCtx::Local),
+        Some(("global", _)) => ctx.push(CmpCtx::Global),
+        Some(("ref", "func")) => ctx.push(CmpCtx::Func),
+        Some((_, snd)) if snd.starts_with("load") || snd.starts_with("store") => {
+            ctx.push(CmpCtx::MemArg);
+        }
+        None => {
+            if instr_name == "call" {
+                ctx.push(CmpCtx::Func);
+            }
+        }
+        _ => {}
+    }
+}
 
 enum CmpCtx {
     Instr,
@@ -189,6 +191,7 @@ enum CmpCtx {
     Func,
     FuncType,
     Global,
+    MemArg,
     KeywordModule,
     KeywordModuleField,
     KeywordImExport,
@@ -305,6 +308,13 @@ fn get_cmp_list(
                             })
                         },
                     ));
+                }
+                CmpCtx::MemArg => {
+                    items.extend(["offset=", "align="].iter().map(|label| CompletionItem {
+                        label: label.to_string(),
+                        kind: Some(CompletionItemKind::SNIPPET),
+                        ..Default::default()
+                    }));
                 }
                 CmpCtx::KeywordModule => items.push(CompletionItem {
                     label: "module".to_string(),

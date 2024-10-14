@@ -11,6 +11,8 @@ mod keyword;
 #[cfg(test)]
 mod local;
 #[cfg(test)]
+mod mem_arg;
+#[cfg(test)]
 mod param;
 #[cfg(test)]
 mod result;
