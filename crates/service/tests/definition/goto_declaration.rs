@@ -4,6 +4,39 @@ use lsp_types::{GotoDefinitionResponse, Position, Uri};
 use wat_service::LanguageService;
 
 #[test]
+fn ignored_tokens() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func $func (export \"func\")
+        (unreachable $func)
+        (cal 0) ;; typo
+    )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    assert!(service
+        .goto_declaration(create_params(uri.clone(), Position::new(1, 4)))
+        .is_none());
+    assert!(service
+        .goto_declaration(create_params(uri.clone(), Position::new(2, 29)))
+        .is_none());
+    assert!(service
+        .goto_declaration(create_params(uri.clone(), Position::new(3, 7)))
+        .is_none());
+    assert!(service
+        .goto_declaration(create_params(uri.clone(), Position::new(3, 25)))
+        .is_none());
+    assert!(service
+        .goto_declaration(create_params(uri.clone(), Position::new(4, 14)))
+        .is_none());
+    assert!(service
+        .goto_declaration(create_params(uri.clone(), Position::new(4, 23)))
+        .is_none());
+}
+
+#[test]
 fn func_not_defined() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "

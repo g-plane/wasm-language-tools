@@ -105,6 +105,10 @@ impl LanguageService {
         )?;
 
         let parent = token.parent()?;
+        if !matches!(parent.kind(), SyntaxKind::OPERAND | SyntaxKind::INDEX) {
+            return None;
+        }
+
         let grand = parent.parent()?;
         match grand.kind() {
             SyntaxKind::PLAIN_INSTR => symbol_table.find_func_defs(&parent.into()).map(|symbols| {
