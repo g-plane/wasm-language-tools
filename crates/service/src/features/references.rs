@@ -7,6 +7,7 @@ use crate::{
 use line_index::LineIndex;
 use lsp_types::{Location, ReferenceParams};
 use rowan::ast::support::token;
+use smallvec::SmallVec;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 impl LanguageService {
@@ -80,7 +81,7 @@ impl LanguageService {
                             None
                         }
                     })
-                    .collect::<Vec<_>>();
+                    .collect::<SmallVec<[_; 1]>>();
                 symbol_table
                     .symbols
                     .iter()
@@ -146,7 +147,7 @@ impl LanguageService {
                             None
                         }
                     })
-                    .collect::<Vec<_>>();
+                    .collect::<SmallVec<[_; 1]>>();
                 symbol_table
                     .symbols
                     .iter()
@@ -187,7 +188,7 @@ impl LanguageService {
                             None
                         }
                     })
-                    .collect::<Vec<_>>();
+                    .collect::<SmallVec<[_; 1]>>();
                 symbol_table
                     .symbols
                     .iter()
