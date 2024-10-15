@@ -1,0 +1,22 @@
+---
+source: crates/service/tests/hover/mod.rs
+expression: response
+---
+{
+  "contents": [
+    {
+      "language": "wat",
+      "value": "(func $func (param $p f64) (result i32))"
+    }
+  ],
+  "range": {
+    "start": {
+      "line": 4,
+      "character": 14
+    },
+    "end": {
+      "line": 4,
+      "character": 19
+    }
+  }
+}

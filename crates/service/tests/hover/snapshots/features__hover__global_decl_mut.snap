@@ -1,0 +1,20 @@
+---
+source: crates/service/tests/hover/mod.rs
+expression: response
+---
+{
+  "contents": {
+    "language": "wat",
+    "value": "(global $global (mut i64))"
+  },
+  "range": {
+    "start": {
+      "line": 2,
+      "character": 12
+    },
+    "end": {
+      "line": 2,
+      "character": 19
+    }
+  }
+}

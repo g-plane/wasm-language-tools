@@ -1,0 +1,20 @@
+---
+source: crates/service/tests/hover/mod.rs
+expression: response
+---
+{
+  "contents": {
+    "language": "wat",
+    "value": "(local i32)"
+  },
+  "range": {
+    "start": {
+      "line": 3,
+      "character": 19
+    },
+    "end": {
+      "line": 3,
+      "character": 20
+    }
+  }
+}
