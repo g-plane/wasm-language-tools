@@ -1,0 +1,19 @@
+---
+source: crates/service/tests/definition/goto_type_definition.rs
+expression: response
+---
+[
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 2,
+        "character": 5
+      },
+      "end": {
+        "line": 2,
+        "character": 9
+      }
+    }
+  }
+]

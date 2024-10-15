@@ -1,0 +1,17 @@
+---
+source: crates/service/tests/definition/goto_definition.rs
+expression: response
+---
+{
+  "uri": "untitled:test",
+  "range": {
+    "start": {
+      "line": 2,
+      "character": 17
+    },
+    "end": {
+      "line": 2,
+      "character": 21
+    }
+  }
+}
