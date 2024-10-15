@@ -371,6 +371,20 @@ impl SymbolTable {
         })
     }
 
+    pub fn find_param_or_local_def(&self, key: &SymbolItemKey) -> Option<&SymbolItem> {
+        self.find_local_ref(key).and_then(|(local, ref_idx)| {
+            self.symbols.iter().find(|symbol| {
+                symbol.region == local.region
+                    && match &symbol.kind {
+                        SymbolItemKind::Param(def_idx) | SymbolItemKind::Local(def_idx) => {
+                            ref_idx == def_idx
+                        }
+                        _ => false,
+                    }
+            })
+        })
+    }
+
     fn find_local_ref(&self, key: &SymbolItemKey) -> Option<(&SymbolItem, &RefIdx)> {
         self.symbols.iter().find_map(|symbol| match symbol {
             SymbolItem {
