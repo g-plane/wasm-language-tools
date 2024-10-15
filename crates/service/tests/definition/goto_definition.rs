@@ -62,18 +62,22 @@ fn param_or_local_not_defined() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
 (module
+    (func (param $param i64) (local $local i64))
     (func
-        (local.get 0) (local.get $param)
+        (local.get 0) (local.get $param) (local.get $local)
     )
 )
 ";
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
     assert!(service
-        .goto_definition(create_params(uri.clone(), Position::new(3, 20)))
+        .goto_definition(create_params(uri.clone(), Position::new(4, 20)))
         .is_none());
     assert!(service
-        .goto_definition(create_params(uri, Position::new(3, 37)))
+        .goto_definition(create_params(uri.clone(), Position::new(4, 37)))
+        .is_none());
+    assert!(service
+        .goto_definition(create_params(uri, Position::new(4, 57)))
         .is_none());
 }
 
