@@ -9,4 +9,6 @@ mod document_symbol;
 #[cfg(test)]
 mod hover;
 #[cfg(test)]
+mod references;
+#[cfg(test)]
 mod semantic_tokens;

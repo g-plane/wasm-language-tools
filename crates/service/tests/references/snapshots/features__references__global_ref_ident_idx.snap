@@ -1,0 +1,45 @@
+---
+source: crates/service/tests/references/mod.rs
+expression: include_decl
+---
+[
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 2,
+        "character": 12
+      },
+      "end": {
+        "line": 2,
+        "character": 19
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 22
+      },
+      "end": {
+        "line": 3,
+        "character": 23
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 37
+      },
+      "end": {
+        "line": 3,
+        "character": 44
+      }
+    }
+  }
+]
