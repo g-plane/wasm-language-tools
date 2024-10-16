@@ -184,3 +184,31 @@ fn in_func_with_paren_without_any_instrs() {
     let response = service.completion(create_params(uri, Position::new(2, 11)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn in_global() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (global i32 )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 16)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn in_global_with_paren() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (global i32 ()
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 17)));
+    assert_json_snapshot!(response);
+}

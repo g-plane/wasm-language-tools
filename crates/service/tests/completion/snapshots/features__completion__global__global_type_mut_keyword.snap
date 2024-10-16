@@ -1,0 +1,10 @@
+---
+source: crates/service/tests/completion/global.rs
+expression: response
+---
+[
+  {
+    "label": "mut",
+    "kind": 14
+  }
+]
