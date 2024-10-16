@@ -119,3 +119,48 @@ fn ref_func() {
     let response = service.completion(create_params(uri, Position::new(2, 20)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn export_desc_func() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (export (func ))
+    (func $func)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 18)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn export_desc_func_following_dollar() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (export (func $))
+    (func $func)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 19)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn export_desc_func_incomplete() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (export (func $f))
+    (func $func)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 20)));
+    assert_json_snapshot!(response);
+}

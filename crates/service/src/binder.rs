@@ -269,8 +269,12 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable 
                     _ => {}
                 }
             }
-            SyntaxKind::MODULE_FIELD_START => {
-                let Some(region) = node.parent().map(SymbolItemKey::from) else {
+            SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC => {
+                let Some(region) = node
+                    .ancestors()
+                    .find(|node| node.kind() == SyntaxKind::MODULE)
+                    .map(SymbolItemKey::from)
+                else {
                     continue;
                 };
                 if let Some(index) = child::<Index>(&node) {

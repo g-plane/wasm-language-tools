@@ -180,6 +180,7 @@ fn call_int_idx() {
     (func
         (call 0)
     )
+    (export \"\" (func 0))
 )
 (module (func))
 ";
@@ -200,6 +201,7 @@ fn call_ident_idx() {
     (func $func
         (call 0) (call $func)
     )
+    (export \"\" (func $func))
 )
 (module (func $func))
 ";
