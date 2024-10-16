@@ -61,6 +61,7 @@ fn func_int_idx() {
         (call 0)
     )
 )
+(module (func))
 ";
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
@@ -80,6 +81,7 @@ fn func_ident_idx() {
         (call 0) (call $func)
     )
 )
+(module (func $func))
 ";
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
@@ -98,6 +100,7 @@ fn param_int_idx() {
     (func (param i64)
         (local.get 0)
     )
+    (func (param i64))
 )
 ";
     let mut service = LanguageService::default();
@@ -117,6 +120,7 @@ fn param_ident_idx() {
     (func (param $param i64)
         (local.get 0) (local.get $param)
     )
+    (func (param $param i64))
 )
 ";
     let mut service = LanguageService::default();
@@ -136,6 +140,7 @@ fn local_int_idx() {
     (func (local i64)
         (local.get 0)
     )
+    (func (local i64))
 )
 ";
     let mut service = LanguageService::default();
@@ -155,6 +160,7 @@ fn local_ident_idx() {
     (func (local $local i64)
         (local.get 0) (local.get $local)
     )
+    (func (local $local i64))
 )
 ";
     let mut service = LanguageService::default();
@@ -175,6 +181,7 @@ fn call_int_idx() {
         (call 0)
     )
 )
+(module (func))
 ";
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
@@ -194,6 +201,7 @@ fn call_ident_idx() {
         (call 0) (call $func)
     )
 )
+(module (func $func))
 ";
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
@@ -212,6 +220,7 @@ fn param_access_int_idx() {
     (func (param i64)
         (local.get 0)
     )
+    (func (param i64))
 )
 ";
     let mut service = LanguageService::default();
@@ -231,6 +240,7 @@ fn param_access_ident_idx() {
     (func (param $param i64) (local $local i64)
         (local.get 0) (local.get $param)
     )
+    (func (param $param i64) (local $local i64))
 )
 ";
     let mut service = LanguageService::default();
@@ -250,6 +260,7 @@ fn local_access_int_idx() {
     (func (local i64)
         (local.get 0)
     )
+    (func (local i64))
 )
 ";
     let mut service = LanguageService::default();
@@ -269,6 +280,7 @@ fn local_access_ident_idx() {
     (func (param $param i64) (local $local i64)
         (local.get 1) (local.get $local)
     )
+    (func (param $param i64) (local $local i64))
 )
 ";
     let mut service = LanguageService::default();
@@ -288,6 +300,7 @@ fn local_ref_int_idx() {
     (func (param i64) (local i64)
         (local.get 1)
     )
+    (func (param i64) (local i64))
 )
 ";
     let mut service = LanguageService::default();
@@ -307,6 +320,7 @@ fn local_ref_ident_idx() {
     (func (param $name i32) (local $name i64)
         (local.get $name)
     )
+    (func (param $name i32) (local $name i64))
 )
 ";
     let mut service = LanguageService::default();
@@ -326,6 +340,7 @@ fn func_type_int_idx() {
     (type (func))
     (func (type 0))
 )
+(module (type (func)))
 ";
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
@@ -345,6 +360,7 @@ fn func_type_ident_idx() {
     (func (type 0))
     (func (type $type))
 )
+(module (type $type))
 ";
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
@@ -363,6 +379,7 @@ fn type_use_int_idx() {
     (type (func))
     (func (type 0))
 )
+(module (type (func)))
 ";
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
@@ -382,6 +399,7 @@ fn type_use_ident_idx() {
     (func (type 0))
     (func (type $type))
 )
+(module (type $type))
 ";
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
@@ -400,6 +418,7 @@ fn global_def_int_idx() {
     (global i32)
     (func (global.get 0))
 )
+(module (global i32))
 ";
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
@@ -418,6 +437,7 @@ fn global_def_ident_idx() {
     (global $global i32)
     (func (global.get 0) (global.get $global))
 )
+(module (global $global i32))
 ";
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
@@ -436,6 +456,7 @@ fn global_ref_int_idx() {
     (global i32)
     (func (global.get 0))
 )
+(module (global i32))
 ";
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
@@ -454,6 +475,7 @@ fn global_ref_ident_idx() {
     (global $global i32)
     (func (global.get 0) (global.get $global))
 )
+(module (global $global i32))
 ";
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());

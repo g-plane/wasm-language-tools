@@ -67,6 +67,7 @@ fn func_int_idx() {
         (call 0)
     )
 )
+(module (func))
 ";
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
@@ -83,6 +84,7 @@ fn func_ident_idx() {
         (call $func)
     )
 )
+(module (func $func))
 ";
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
