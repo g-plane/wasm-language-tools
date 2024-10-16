@@ -11,4 +11,6 @@ mod hover;
 #[cfg(test)]
 mod references;
 #[cfg(test)]
+mod rename;
+#[cfg(test)]
 mod semantic_tokens;

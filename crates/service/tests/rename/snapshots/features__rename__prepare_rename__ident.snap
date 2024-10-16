@@ -1,0 +1,14 @@
+---
+source: crates/service/tests/rename/prepare_rename.rs
+expression: response
+---
+{
+  "start": {
+    "line": 2,
+    "character": 10
+  },
+  "end": {
+    "line": 2,
+    "character": 15
+  }
+}

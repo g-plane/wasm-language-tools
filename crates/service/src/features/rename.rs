@@ -29,7 +29,11 @@ impl LanguageService {
     }
 
     pub fn rename(&self, params: RenameParams) -> Result<Option<WorkspaceEdit>, String> {
-        if !params.new_name.starts_with('$') || !params.new_name.chars().all(is_id_char) {
+        if !params
+            .new_name
+            .strip_prefix('$')
+            .is_some_and(|rest| !rest.is_empty() && rest.chars().all(is_id_char))
+        {
             return Err(format!(
                 "Invalid name `{}`: {ERR_INVALID_IDENTIFIER}.",
                 params.new_name
