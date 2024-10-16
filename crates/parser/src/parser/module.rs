@@ -614,7 +614,7 @@ fn export_desc_variant<'s>(
     (
         l_paren,
         trivias_prefixed(keyword(keyword_literal)),
-        resume(index),
+        opt(retry_once(index, [])),
         resume(r_paren),
     )
         .map(move |(l_paren, mut keyword, index, r_paren)| {

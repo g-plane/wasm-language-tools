@@ -1,0 +1,31 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..33
+  MODULE@0..32
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_EXPORT@10..30
+      L_PAREN@10..11 "("
+      KEYWORD@11..17 "export"
+      WHITESPACE@17..18 " "
+      NAME@18..20
+        STRING@18..20 "\"\""
+      WHITESPACE@20..21 " "
+      EXPORT_DESC_FUNC@21..29
+        L_PAREN@21..22 "("
+        KEYWORD@22..26 "func"
+        WHITESPACE@26..27 " "
+        ERROR@27..28 "$"
+        R_PAREN@28..29 ")"
+      R_PAREN@29..30 ")"
+    WHITESPACE@30..31 "\n"
+    R_PAREN@31..32 ")"
+  WHITESPACE@32..33 "\n"
+
+error: expected index (identifier or unsigned integer)
+  ┌─ exports-malformed.wat:2:20
+  │
+2 │   (export "" (func $))
+  │                    ^
