@@ -48,17 +48,14 @@ impl LanguageService {
                 )
             })
             .or_else(|| {
-                symbol_table
-                    .find_param_def(&key)
-                    .or_else(|| symbol_table.find_local_def(&key))
-                    .map(|symbol| {
-                        GotoDefinitionResponse::Scalar(create_location_by_symbol(
-                            &params,
-                            &line_index,
-                            symbol,
-                            &root,
-                        ))
-                    })
+                symbol_table.find_param_or_local_def(&key).map(|symbol| {
+                    GotoDefinitionResponse::Scalar(create_location_by_symbol(
+                        &params,
+                        &line_index,
+                        symbol,
+                        &root,
+                    ))
+                })
             })
             .or_else(|| {
                 symbol_table.find_type_use_defs(&key).map(|symbols| {

@@ -42,8 +42,7 @@ impl LanguageService {
                 let parent = token.parent()?;
                 let key = parent.into();
                 symbol_table
-                    .find_param_def(&key)
-                    .or_else(|| symbol_table.find_local_def(&key))
+                    .find_param_or_local_def(&key)
                     .map(|symbol| Hover {
                         contents: HoverContents::Scalar(create_param_or_local_hover(
                             &self.ctx, symbol,
