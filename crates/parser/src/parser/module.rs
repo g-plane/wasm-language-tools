@@ -208,8 +208,8 @@ fn module_field_global(input: &mut Input) -> GreenResult {
         opt(trivias_prefixed(ident)),
         opt(trivias_prefixed(import)), // postpone syntax error for using import with export or instr
         opt(trivias_prefixed(export)),
-        resume(global_type),
-        repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(instr)),
+        opt(retry_once(global_type, [])),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry_once(instr, [])),
         resume(r_paren),
     )
         .parse_next(input)

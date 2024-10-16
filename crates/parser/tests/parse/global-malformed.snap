@@ -1,0 +1,64 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..66
+  MODULE@0..65
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_GLOBAL@10..21
+      L_PAREN@10..11 "("
+      KEYWORD@11..17 "global"
+      WHITESPACE@17..18 " "
+      ERROR@18..19 "("
+      ERROR@19..20 ")"
+      R_PAREN@20..21 ")"
+    WHITESPACE@21..24 "\n  "
+    MODULE_FIELD_GLOBAL@24..39
+      L_PAREN@24..25 "("
+      KEYWORD@25..31 "global"
+      WHITESPACE@31..32 " "
+      GLOBAL_TYPE@32..35
+        VAL_TYPE@32..35
+          NUM_TYPE@32..35 "i32"
+      WHITESPACE@35..36 " "
+      ERROR@36..37 "("
+      ERROR@37..38 ")"
+      R_PAREN@38..39 ")"
+    WHITESPACE@39..42 "\n  "
+    MODULE_FIELD_GLOBAL@42..63
+      L_PAREN@42..43 "("
+      KEYWORD@43..49 "global"
+      WHITESPACE@49..50 " "
+      GLOBAL_TYPE@50..59
+        L_PAREN@50..51 "("
+        KEYWORD@51..54 "mut"
+        WHITESPACE@54..55 " "
+        VAL_TYPE@55..58
+          NUM_TYPE@55..58 "i32"
+        R_PAREN@58..59 ")"
+      WHITESPACE@59..60 " "
+      ERROR@60..61 "("
+      ERROR@61..62 ")"
+      R_PAREN@62..63 ")"
+    WHITESPACE@63..64 "\n"
+    R_PAREN@64..65 ")"
+  WHITESPACE@65..66 "\n"
+
+error: expected `mut`
+  ┌─ global-malformed.wat:2:12
+  │
+2 │   (global ())
+  │            ^
+
+error: invalid instruction name
+  ┌─ global-malformed.wat:3:15
+  │
+3 │   (global i32 ())
+  │               ^^
+
+error: invalid instruction name
+  ┌─ global-malformed.wat:4:21
+  │
+4 │   (global (mut i32) ())
+  │                     ^^
