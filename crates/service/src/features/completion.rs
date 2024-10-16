@@ -115,7 +115,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                                 | SyntaxKind::BLOCK_IF
                                 | SyntaxKind::BLOCK_LOOP
                         )
-                    ) {
+                    ) && find_leading_l_paren(token).is_some()
+                    {
                         ctx.reserve(3);
                         ctx.push(CmpCtx::KeywordImExport);
                         ctx.push(CmpCtx::KeywordTypeUse);

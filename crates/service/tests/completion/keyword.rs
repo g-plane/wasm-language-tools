@@ -102,3 +102,13 @@ fn module_field_func_keyword_in_middle() {
     let response = service.completion(create_params(uri, Position::new(0, 23)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn no_module_field_func_keyword_without_paren() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "(module (func p))"; // shouldn't provide "param"
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(0, 15)));
+    assert_json_snapshot!(response);
+}
