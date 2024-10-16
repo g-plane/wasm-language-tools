@@ -24,13 +24,12 @@ impl LanguageService {
         let line_index = self.ctx.line_index(uri);
         let token = find_meaningful_token(&self.ctx, uri, params.position)
             .filter(|token| token.kind() == SyntaxKind::IDENT)?;
-        let mut range = helpers::rowan_range_to_lsp_range(&line_index, token.text_range());
-        range.start.character += 1; // exclude `$`
+        let range = helpers::rowan_range_to_lsp_range(&line_index, token.text_range());
         Some(PrepareRenameResponse::Range(range))
     }
 
     pub fn rename(&self, params: RenameParams) -> Result<Option<WorkspaceEdit>, String> {
-        if !params.new_name.chars().all(is_id_char) {
+        if !params.new_name.starts_with('$') || !params.new_name.chars().all(is_id_char) {
             return Err(format!(
                 "Invalid name `{}`: {ERR_INVALID_IDENTIFIER}.",
                 params.new_name
@@ -117,7 +116,7 @@ impl LanguageService {
             .filter_map(|sym| support::token(&sym.key.ptr.to_node(&root), SyntaxKind::IDENT))
             .map(|token| TextEdit {
                 range: helpers::rowan_range_to_lsp_range(&line_index, token.text_range()),
-                new_text: format!("${}", params.new_name),
+                new_text: params.new_name.clone(),
             })
             .collect();
 
