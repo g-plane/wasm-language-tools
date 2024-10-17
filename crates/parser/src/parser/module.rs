@@ -140,7 +140,7 @@ fn module_field_export(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("export")),
         resume(name),
-        resume(export_desc),
+        opt(retry_once(export_desc, [])),
         resume(r_paren),
     )
         .parse_next(input)
