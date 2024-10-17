@@ -163,6 +163,11 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::ValType);
             }
         }
+        SyntaxKind::MODULE_FIELD_EXPORT => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordExportDesc);
+            }
+        }
         SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC => ctx.push(CmpCtx::Func),
         SyntaxKind::MODULE => {
             if find_leading_l_paren(token).is_some() {
@@ -213,6 +218,7 @@ enum CmpCtx {
     KeywordTypeUse,
     KeywordLocal,
     KeywordMut,
+    KeywordExportDesc,
 }
 
 fn get_cmp_list(
@@ -370,6 +376,13 @@ fn get_cmp_list(
                     kind: Some(CompletionItemKind::KEYWORD),
                     ..Default::default()
                 }),
+                CmpCtx::KeywordExportDesc => {
+                    items.extend(dataset::EXPORT_DESC.iter().map(|desc| CompletionItem {
+                        label: desc.to_string(),
+                        kind: Some(CompletionItemKind::KEYWORD),
+                        ..Default::default()
+                    }));
+                }
             }
             items
         })

@@ -1,0 +1,22 @@
+---
+source: crates/service/tests/completion/keyword.rs
+expression: response
+---
+[
+  {
+    "label": "func",
+    "kind": 14
+  },
+  {
+    "label": "table",
+    "kind": 14
+  },
+  {
+    "label": "memory",
+    "kind": 14
+  },
+  {
+    "label": "global",
+    "kind": 14
+  }
+]

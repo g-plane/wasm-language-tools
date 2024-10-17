@@ -272,3 +272,5 @@ pub(crate) fn get_value_type_description(value_type: &str) -> Option<&'static st
         _ => None,
     }
 }
+
+pub(crate) static EXPORT_DESC: [&str; 4] = ["func", "table", "memory", "global"];

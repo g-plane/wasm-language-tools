@@ -112,3 +112,33 @@ fn no_module_field_func_keyword_without_paren() {
     let response = service.completion(create_params(uri, Position::new(0, 15)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn export_desc_keyword() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "(module (export \"\" ())";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(0, 20)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn export_desc_keyword_incomplete() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "(module (export \"\" (f))";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(0, 21)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn export_desc_keyword_without_paren() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "(module (export \"\" ))";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(0, 19)));
+    assert!(response.is_none());
+}
