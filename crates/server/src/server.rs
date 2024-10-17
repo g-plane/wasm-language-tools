@@ -8,8 +8,8 @@ use lsp_types::{
     },
     request::{
         CodeActionRequest, Completion, DocumentSymbolRequest, GotoDeclaration, GotoDefinition,
-        GotoTypeDefinition, HoverRequest, PrepareRenameRequest, References, Rename,
-        SemanticTokensFullRequest, SemanticTokensRangeRequest,
+        GotoTypeDefinition, HoverRequest, InlayHintRequest, PrepareRenameRequest, References,
+        Rename, SemanticTokensFullRequest, SemanticTokensRangeRequest,
     },
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
     PublishDiagnosticsParams, Uri,
@@ -116,6 +116,20 @@ impl Server {
                             conn.sender.send(Message::Response(Response {
                                 id,
                                 result: Some(serde_json::to_value(self.service.hover(params))?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<InlayHintRequest>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.inlay_hint(params),
+                                )?),
                                 error: None,
                             }))?;
                             continue;

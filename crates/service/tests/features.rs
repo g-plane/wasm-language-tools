@@ -9,6 +9,8 @@ mod document_symbol;
 #[cfg(test)]
 mod hover;
 #[cfg(test)]
+mod inlay_hint;
+#[cfg(test)]
 mod references;
 #[cfg(test)]
 mod rename;

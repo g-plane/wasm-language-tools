@@ -3,6 +3,7 @@ mod completion;
 mod definition;
 mod document_symbol;
 mod hover;
+mod inlay_hint;
 mod references;
 mod rename;
 mod semantic_tokens;

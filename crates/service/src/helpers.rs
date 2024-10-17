@@ -2,12 +2,15 @@ use line_index::{LineCol, LineIndex};
 use lsp_types::{Position, Range};
 use rowan::{TextRange, TextSize};
 
+pub fn rowan_pos_to_lsp_pos(line_index: &LineIndex, pos: TextSize) -> Position {
+    let line_col = line_index.line_col(pos);
+    Position::new(line_col.line, line_col.col)
+}
+
 pub fn rowan_range_to_lsp_range(line_index: &LineIndex, range: TextRange) -> Range {
-    let start = line_index.line_col(range.start());
-    let end = line_index.line_col(range.end());
     Range::new(
-        Position::new(start.line, start.col),
-        Position::new(end.line, end.col),
+        rowan_pos_to_lsp_pos(line_index, range.start()),
+        rowan_pos_to_lsp_pos(line_index, range.end()),
     )
 }
 
