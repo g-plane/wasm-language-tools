@@ -12,7 +12,7 @@ use lsp_types::{
         SemanticTokensFullRequest, SemanticTokensRangeRequest,
     },
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
-    PublishDiagnosticsParams,
+    PublishDiagnosticsParams, Uri,
 };
 use wat_service::LanguageService;
 
@@ -254,17 +254,9 @@ impl Server {
         params: DidOpenTextDocumentParams,
         conn: &Connection,
     ) -> anyhow::Result<()> {
-        let diagnostics = self
-            .service
+        self.service
             .commit_file(params.text_document.uri.clone(), params.text_document.text);
-        conn.sender.send(Message::Notification(Notification {
-            method: PublishDiagnostics::METHOD.to_string(),
-            params: serde_json::to_value(PublishDiagnosticsParams {
-                uri: params.text_document.uri,
-                diagnostics,
-                version: None,
-            })?,
-        }))?;
+        self.publish_diagnostics(conn, params.text_document.uri)?;
         Ok(())
     }
 
@@ -274,17 +266,9 @@ impl Server {
         conn: &Connection,
     ) -> anyhow::Result<()> {
         if let Some(change) = params.content_changes.first() {
-            let diagnostics = self
-                .service
+            self.service
                 .commit_file(params.text_document.uri.clone(), change.text.clone());
-            conn.sender.send(Message::Notification(Notification {
-                method: PublishDiagnostics::METHOD.to_string(),
-                params: serde_json::to_value(PublishDiagnosticsParams {
-                    uri: params.text_document.uri,
-                    diagnostics,
-                    version: None,
-                })?,
-            }))?;
+            self.publish_diagnostics(conn, params.text_document.uri)?;
         }
         Ok(())
     }
@@ -299,6 +283,19 @@ impl Server {
             params: serde_json::to_value(PublishDiagnosticsParams {
                 uri: params.text_document.uri,
                 diagnostics: vec![],
+                version: None,
+            })?,
+        }))?;
+        Ok(())
+    }
+
+    fn publish_diagnostics(&self, conn: &Connection, uri: Uri) -> anyhow::Result<()> {
+        let diagnostics = self.service.get_diagnostics(uri.clone());
+        conn.sender.send(Message::Notification(Notification {
+            method: PublishDiagnostics::METHOD.to_string(),
+            params: serde_json::to_value(PublishDiagnosticsParams {
+                uri,
+                diagnostics,
                 version: None,
             })?,
         }))?;

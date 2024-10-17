@@ -136,10 +136,15 @@ impl LanguageService {
         }
     }
 
-    pub fn commit_file(&mut self, uri: Uri, source: String) -> Vec<Diagnostic> {
+    /// Commit a file to the service, usually called when handling `textDocument/didOpen` or
+    /// `textDocument/didChange` notifications.
+    pub fn commit_file(&mut self, uri: Uri, source: String) {
         let uri = self.ctx.uri(uri);
         self.ctx.set_source(uri, source);
+    }
 
+    pub fn get_diagnostics(&self, uri: Uri) -> Vec<Diagnostic> {
+        let uri = self.ctx.uri(uri);
         let mut diagnostics = self
             .ctx
             .parser_result(uri)
