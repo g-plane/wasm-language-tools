@@ -1,0 +1,5 @@
+(module
+  (memory)
+  (memory "")
+  (memory ())
+)

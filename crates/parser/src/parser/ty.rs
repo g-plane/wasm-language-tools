@@ -131,6 +131,9 @@ pub(super) fn table_type(input: &mut Input) -> GreenResult {
 
 pub(super) fn memory_type(input: &mut Input) -> GreenResult {
     limits
+        .context(StrContext::Expected(StrContextValue::Description(
+            "memory type",
+        )))
         .parse_next(input)
         .map(|limits| node(MEMORY_TYPE, [limits]))
 }

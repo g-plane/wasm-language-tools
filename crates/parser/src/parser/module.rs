@@ -278,13 +278,16 @@ fn module_field_memory(input: &mut Input) -> GreenResult {
         opt(trivias_prefixed(ident)),
         opt(trivias_prefixed(import)), // postpone syntax error for using import with export or instr
         opt(trivias_prefixed(export)),
-        opt(trivias_prefixed(memory_type)),
-        opt(trivias_prefixed(data)), // postpone syntax error for using data with mem type
+        dispatch! {peek(preceded(trivias, any));
+            '(' => opt(retry_once(data, [])),
+            ')' => resume(memory_type),
+            _ => opt(retry_once(memory_type, [])),
+        },
         resume(r_paren),
     )
         .parse_next(input)
         .map(
-            |(l_paren, mut keyword, id, import, export, mem_type, data, r_paren)| {
+            |(l_paren, mut keyword, id, import, export, mem_type_or_data, r_paren)| {
                 let mut children = Vec::with_capacity(8);
                 children.push(l_paren);
                 children.append(&mut keyword);
@@ -297,11 +300,8 @@ fn module_field_memory(input: &mut Input) -> GreenResult {
                 if let Some(mut export) = export {
                     children.append(&mut export);
                 }
-                if let Some(mut mem_type) = mem_type {
-                    children.append(&mut mem_type);
-                }
-                if let Some(mut data) = data {
-                    children.append(&mut data);
+                if let Some(mut mem_type_or_data) = mem_type_or_data {
+                    children.append(&mut mem_type_or_data);
                 }
                 if let Some(mut r_paren) = r_paren {
                     children.append(&mut r_paren);
