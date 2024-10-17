@@ -56,3 +56,19 @@ fn global() {
     let response = service.inlay_hint(create_params(uri, Position::new(5, 0)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn func_end() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func $name
+        (i32.const 0)
+    )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.inlay_hint(create_params(uri, Position::new(6, 0)));
+    assert_json_snapshot!(response);
+}

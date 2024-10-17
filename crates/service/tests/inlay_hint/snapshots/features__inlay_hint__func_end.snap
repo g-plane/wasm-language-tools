@@ -1,0 +1,14 @@
+---
+source: crates/service/tests/inlay_hint/mod.rs
+expression: response
+---
+[
+  {
+    "position": {
+      "line": 4,
+      "character": 5
+    },
+    "label": "(func $name)",
+    "paddingLeft": true
+  }
+]
