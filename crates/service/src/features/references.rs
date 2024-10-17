@@ -46,8 +46,10 @@ impl LanguageService {
                     .symbols
                     .iter()
                     .filter(|symbol| match &symbol.kind {
-                        SymbolItemKind::Func(idx) if params.context.include_declaration => {
-                            def_idx == idx && symbol.region == current_symbol.region
+                        SymbolItemKind::Func(idx) => {
+                            params.context.include_declaration
+                                && def_idx == idx
+                                && symbol.region == current_symbol.region
                         }
                         SymbolItemKind::Call(idx) => {
                             def_idx == idx && symbol.region == current_symbol.region
@@ -62,8 +64,10 @@ impl LanguageService {
                     .symbols
                     .iter()
                     .filter(|symbol| match &symbol.kind {
-                        SymbolItemKind::Param(idx) if params.context.include_declaration => {
-                            def_idx == idx && symbol.region == current_symbol.region
+                        SymbolItemKind::Param(idx) => {
+                            params.context.include_declaration
+                                && def_idx == idx
+                                && symbol.region == current_symbol.region
                         }
                         SymbolItemKind::LocalRef(idx) => {
                             def_idx == idx && symbol.region == current_symbol.region
@@ -78,8 +82,10 @@ impl LanguageService {
                     .symbols
                     .iter()
                     .filter(|symbol| match &symbol.kind {
-                        SymbolItemKind::Local(idx) if params.context.include_declaration => {
-                            def_idx == idx && symbol.region == current_symbol.region
+                        SymbolItemKind::Local(idx) => {
+                            params.context.include_declaration
+                                && def_idx == idx
+                                && symbol.region == current_symbol.region
                         }
                         SymbolItemKind::LocalRef(idx) => {
                             def_idx == idx && symbol.region == current_symbol.region
@@ -105,8 +111,10 @@ impl LanguageService {
                         .symbols
                         .iter()
                         .filter(|symbol| match &symbol.kind {
-                            SymbolItemKind::Func(idx) if params.context.include_declaration => {
-                                ref_idx == idx && symbol.region == current_symbol.region
+                            SymbolItemKind::Func(idx) => {
+                                params.context.include_declaration
+                                    && ref_idx == idx
+                                    && symbol.region == current_symbol.region
                             }
                             SymbolItemKind::Call(idx) => {
                                 funcs.iter().any(|def_idx| *def_idx == idx)
@@ -133,10 +141,10 @@ impl LanguageService {
                         .symbols
                         .iter()
                         .filter(|symbol| match &symbol.kind {
-                            SymbolItemKind::Param(idx) | SymbolItemKind::Local(idx)
-                                if params.context.include_declaration =>
-                            {
-                                ref_idx == idx && symbol.region == current_symbol.region
+                            SymbolItemKind::Param(idx) | SymbolItemKind::Local(idx) => {
+                                params.context.include_declaration
+                                    && ref_idx == idx
+                                    && symbol.region == current_symbol.region
                             }
                             SymbolItemKind::LocalRef(idx) => {
                                 def_idx == idx && symbol.region == current_symbol.region
@@ -154,8 +162,10 @@ impl LanguageService {
                     .symbols
                     .iter()
                     .filter(|symbol| match &symbol.kind {
-                        SymbolItemKind::Type(idx) if params.context.include_declaration => {
-                            def_idx == idx && symbol.region == current_symbol.region
+                        SymbolItemKind::Type(idx) => {
+                            params.context.include_declaration
+                                && def_idx == idx
+                                && symbol.region == current_symbol.region
                         }
                         SymbolItemKind::TypeUse(idx) => {
                             def_idx == idx && symbol.region == current_symbol.region
@@ -181,8 +191,10 @@ impl LanguageService {
                         .symbols
                         .iter()
                         .filter(|symbol| match &symbol.kind {
-                            SymbolItemKind::Type(idx) if params.context.include_declaration => {
-                                ref_idx == idx && symbol.region == current_symbol.region
+                            SymbolItemKind::Type(idx) => {
+                                params.context.include_declaration
+                                    && ref_idx == idx
+                                    && symbol.region == current_symbol.region
                             }
                             SymbolItemKind::TypeUse(idx) => {
                                 func_types.iter().any(|def_idx| *def_idx == idx)
@@ -201,8 +213,10 @@ impl LanguageService {
                     .symbols
                     .iter()
                     .filter(|symbol| match &symbol.kind {
-                        SymbolItemKind::GlobalDef(idx) if params.context.include_declaration => {
-                            def_idx == idx && symbol.region == current_symbol.region
+                        SymbolItemKind::GlobalDef(idx) => {
+                            params.context.include_declaration
+                                && def_idx == idx
+                                && symbol.region == current_symbol.region
                         }
                         SymbolItemKind::GlobalRef(idx) => {
                             def_idx == idx && symbol.region == current_symbol.region
@@ -228,10 +242,10 @@ impl LanguageService {
                         .symbols
                         .iter()
                         .filter(|symbol| match &symbol.kind {
-                            SymbolItemKind::GlobalDef(idx)
-                                if params.context.include_declaration =>
-                            {
-                                ref_idx == idx && symbol.region == current_symbol.region
+                            SymbolItemKind::GlobalDef(idx) => {
+                                params.context.include_declaration
+                                    && ref_idx == idx
+                                    && symbol.region == current_symbol.region
                             }
                             SymbolItemKind::GlobalRef(idx) => {
                                 globals.iter().any(|def_idx| *def_idx == idx)
@@ -250,8 +264,10 @@ impl LanguageService {
                     .symbols
                     .iter()
                     .filter(|symbol| match &symbol.kind {
-                        SymbolItemKind::MemoryDef(idx) if params.context.include_declaration => {
-                            def_idx == idx && symbol.region == current_symbol.region
+                        SymbolItemKind::MemoryDef(idx) => {
+                            params.context.include_declaration
+                                && def_idx == idx
+                                && symbol.region == current_symbol.region
                         }
                         SymbolItemKind::MemoryRef(idx) => {
                             def_idx == idx && symbol.region == current_symbol.region
@@ -277,10 +293,10 @@ impl LanguageService {
                         .symbols
                         .iter()
                         .filter(|symbol| match &symbol.kind {
-                            SymbolItemKind::MemoryDef(idx)
-                                if params.context.include_declaration =>
-                            {
-                                ref_idx == idx && symbol.region == current_symbol.region
+                            SymbolItemKind::MemoryDef(idx) => {
+                                params.context.include_declaration
+                                    && ref_idx == idx
+                                    && symbol.region == current_symbol.region
                             }
                             SymbolItemKind::MemoryRef(idx) => {
                                 memories.iter().any(|def_idx| *def_idx == idx)
