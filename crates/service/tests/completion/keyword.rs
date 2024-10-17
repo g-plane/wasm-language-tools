@@ -142,3 +142,23 @@ fn export_desc_keyword_without_paren() {
     let response = service.completion(create_params(uri, Position::new(0, 19)));
     assert!(response.is_none());
 }
+
+#[test]
+fn module_field_memory_keyword() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "(module (memory ( ))";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(0, 17)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn module_field_memory_keyword_without_paren() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "(module (memory ))";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(0, 16)));
+    assert!(response.is_none());
+}

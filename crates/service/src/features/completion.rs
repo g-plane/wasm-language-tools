@@ -171,6 +171,12 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC => ctx.push(CmpCtx::Func),
         SyntaxKind::EXPORT_DESC_GLOBAL => ctx.push(CmpCtx::Global),
+        SyntaxKind::MODULE_FIELD_MEMORY => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordImExport);
+                ctx.push(CmpCtx::KeywordData);
+            }
+        }
         SyntaxKind::MODULE => {
             if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::KeywordModuleField);
@@ -221,6 +227,7 @@ enum CmpCtx {
     KeywordLocal,
     KeywordMut,
     KeywordExportDesc,
+    KeywordData,
 }
 
 fn get_cmp_list(
@@ -385,6 +392,11 @@ fn get_cmp_list(
                         ..Default::default()
                     }));
                 }
+                CmpCtx::KeywordData => items.push(CompletionItem {
+                    label: "data".to_string(),
+                    kind: Some(CompletionItemKind::KEYWORD),
+                    ..Default::default()
+                }),
             }
             items
         })
