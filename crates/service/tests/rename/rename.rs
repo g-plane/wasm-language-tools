@@ -298,3 +298,37 @@ fn global_ref() {
         .unwrap();
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn memory_def() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (memory $memory (data))
+    (export \"\" (memory $memory))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service
+        .rename(create_params(uri, Position::new(2, 17), "$m"))
+        .unwrap();
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn memory_ref() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (memory $memory (data))
+    (export \"\" (memory $memory))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service
+        .rename(create_params(uri, Position::new(3, 28), "$m"))
+        .unwrap();
+    assert_json_snapshot!(response);
+}

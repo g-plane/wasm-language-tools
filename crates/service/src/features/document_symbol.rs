@@ -85,7 +85,9 @@ impl LanguageService {
                         },
                     ))
                 }
-                SymbolItemKind::Type(idx) | SymbolItemKind::GlobalDef(idx) => {
+                SymbolItemKind::Type(idx)
+                | SymbolItemKind::GlobalDef(idx)
+                | SymbolItemKind::MemoryDef(idx) => {
                     let range =
                         helpers::rowan_range_to_lsp_range(&line_index, symbol.key.ptr.text_range());
                     Some((
@@ -113,7 +115,8 @@ impl LanguageService {
                 | SymbolItemKind::Call(..)
                 | SymbolItemKind::LocalRef(..)
                 | SymbolItemKind::TypeUse(..)
-                | SymbolItemKind::GlobalRef(..) => None,
+                | SymbolItemKind::GlobalRef(..)
+                | SymbolItemKind::MemoryRef(..) => None,
             })
             .collect::<FxHashMap<_, _>>();
         symbol_table

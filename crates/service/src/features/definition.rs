@@ -79,6 +79,17 @@ impl LanguageService {
                     )
                 })
             })
+            .or_else(|| {
+                symbol_table.find_memory_defs(&key).map(|symbols| {
+                    GotoDefinitionResponse::Array(
+                        symbols
+                            .map(|symbol| {
+                                create_location_by_symbol(&params, &line_index, symbol, &root)
+                            })
+                            .collect(),
+                    )
+                })
+            })
     }
 
     pub fn goto_type_definition(

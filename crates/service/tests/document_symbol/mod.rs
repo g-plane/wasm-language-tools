@@ -13,6 +13,8 @@ fn symbols() {
     (type $ty (func))
     (global $global i32)
     (global i32)
+    (memory $memory 1)
+    (memory 1)
 )
 
 (module

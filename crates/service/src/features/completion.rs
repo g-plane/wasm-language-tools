@@ -149,6 +149,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 }
                 SyntaxKind::TYPE_USE => ctx.push(CmpCtx::FuncType),
                 SyntaxKind::EXPORT_DESC_GLOBAL => ctx.push(CmpCtx::Global),
+                SyntaxKind::EXPORT_DESC_MEMORY => ctx.push(CmpCtx::Memory),
                 _ => {}
             }
         }
@@ -177,6 +178,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::KeywordData);
             }
         }
+        SyntaxKind::EXPORT_DESC_MEMORY => ctx.push(CmpCtx::Memory),
         SyntaxKind::MODULE => {
             if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::KeywordModuleField);
@@ -220,6 +222,7 @@ enum CmpCtx {
     FuncType,
     Global,
     MemArg,
+    Memory,
     KeywordModule,
     KeywordModuleField,
     KeywordImExport,
@@ -346,6 +349,26 @@ fn get_cmp_list(
                         kind: Some(CompletionItemKind::SNIPPET),
                         ..Default::default()
                     }));
+                }
+                CmpCtx::Memory => {
+                    let Some(module) = token
+                        .parent_ancestors()
+                        .find(|node| node.kind() == SyntaxKind::MODULE)
+                    else {
+                        return items;
+                    };
+                    let has_dollar = token.text().starts_with('$');
+                    items.extend(symbol_table.get_declared_memories(module).filter_map(
+                        |(_, idx)| {
+                            let (label, insert_text) = get_def_idx_cmp_text(idx, has_dollar)?;
+                            Some(CompletionItem {
+                                label,
+                                insert_text,
+                                kind: Some(CompletionItemKind::VARIABLE),
+                                ..Default::default()
+                            })
+                        },
+                    ));
                 }
                 CmpCtx::KeywordModule => items.push(CompletionItem {
                     label: "module".to_string(),

@@ -487,3 +487,79 @@ fn global_ref_ident_idx() {
     let exclude_decl = service.find_references(create_params(uri, Position::new(3, 44), false));
     assert_json_snapshot!(exclude_decl);
 }
+
+#[test]
+fn memory_def_int_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (memory (data))
+    (export \"\" (memory 0))
+)
+(module (memory))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let include_decl =
+        service.find_references(create_params(uri.clone(), Position::new(2, 11), true));
+    assert_json_snapshot!(include_decl);
+    let exclude_decl = service.find_references(create_params(uri, Position::new(2, 11), false));
+    assert_json_snapshot!(exclude_decl);
+}
+
+#[test]
+fn memory_def_ident_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (memory $memory (data))
+    (export \"\" (memory $memory))
+)
+(module (memory $memory))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let include_decl =
+        service.find_references(create_params(uri.clone(), Position::new(2, 19), true));
+    assert_json_snapshot!(include_decl);
+    let exclude_decl = service.find_references(create_params(uri, Position::new(2, 19), false));
+    assert_json_snapshot!(exclude_decl);
+}
+
+#[test]
+fn memory_ref_int_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (memory (data))
+    (export \"\" (memory 0))
+)
+(module (memory))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let include_decl =
+        service.find_references(create_params(uri.clone(), Position::new(3, 24), true));
+    assert_json_snapshot!(include_decl);
+    let exclude_decl = service.find_references(create_params(uri, Position::new(3, 24), false));
+    assert_json_snapshot!(exclude_decl);
+}
+
+#[test]
+fn memory_ref_ident_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (memory $memory (data))
+    (export \"\" (memory $memory))
+)
+(module (memory $memory))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let include_decl =
+        service.find_references(create_params(uri.clone(), Position::new(3, 30), true));
+    assert_json_snapshot!(include_decl);
+    let exclude_decl = service.find_references(create_params(uri, Position::new(3, 30), false));
+    assert_json_snapshot!(exclude_decl);
+}

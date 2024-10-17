@@ -12,7 +12,7 @@ expression: response
         "character": 0
       },
       "end": {
-        "line": 8,
+        "line": 10,
         "character": 1
       }
     },
@@ -22,7 +22,7 @@ expression: response
         "character": 0
       },
       "end": {
-        "line": 8,
+        "line": 10,
         "character": 1
       }
     },
@@ -244,6 +244,54 @@ expression: response
             "character": 16
           }
         }
+      },
+      {
+        "name": "$memory",
+        "kind": 13,
+        "range": {
+          "start": {
+            "line": 8,
+            "character": 4
+          },
+          "end": {
+            "line": 8,
+            "character": 22
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 8,
+            "character": 12
+          },
+          "end": {
+            "line": 8,
+            "character": 19
+          }
+        }
+      },
+      {
+        "name": "7",
+        "kind": 13,
+        "range": {
+          "start": {
+            "line": 9,
+            "character": 4
+          },
+          "end": {
+            "line": 9,
+            "character": 14
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 9,
+            "character": 4
+          },
+          "end": {
+            "line": 9,
+            "character": 14
+          }
+        }
       }
     ]
   },
@@ -252,21 +300,21 @@ expression: response
     "kind": 2,
     "range": {
       "start": {
-        "line": 10,
+        "line": 12,
         "character": 0
       },
       "end": {
-        "line": 12,
+        "line": 14,
         "character": 1
       }
     },
     "selectionRange": {
       "start": {
-        "line": 10,
+        "line": 12,
         "character": 0
       },
       "end": {
-        "line": 12,
+        "line": 14,
         "character": 1
       }
     },
@@ -276,21 +324,21 @@ expression: response
         "kind": 12,
         "range": {
           "start": {
-            "line": 11,
+            "line": 13,
             "character": 4
           },
           "end": {
-            "line": 11,
+            "line": 13,
             "character": 10
           }
         },
         "selectionRange": {
           "start": {
-            "line": 11,
+            "line": 13,
             "character": 4
           },
           "end": {
-            "line": 11,
+            "line": 13,
             "character": 10
           }
         }

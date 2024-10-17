@@ -245,6 +245,55 @@ impl LanguageService {
                         .collect(),
                 )
             }
+            SymbolItemKind::MemoryDef(def_idx) => Some(
+                symbol_table
+                    .symbols
+                    .iter()
+                    .filter(|symbol| match &symbol.kind {
+                        SymbolItemKind::MemoryDef(idx) if params.context.include_declaration => {
+                            def_idx == idx && symbol.region == current_symbol.region
+                        }
+                        SymbolItemKind::MemoryRef(idx) => {
+                            def_idx == idx && symbol.region == current_symbol.region
+                        }
+                        _ => false,
+                    })
+                    .map(|symbol| create_location_by_symbol(&params, &line_index, symbol, &root))
+                    .collect(),
+            ),
+            SymbolItemKind::MemoryRef(ref_idx) => {
+                let memories = symbol_table
+                    .find_memory_defs(&current_symbol.key)?
+                    .filter_map(|symbol| {
+                        if let SymbolItemKind::MemoryDef(idx) = &symbol.kind {
+                            Some(idx)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<SmallVec<[_; 1]>>();
+                Some(
+                    symbol_table
+                        .symbols
+                        .iter()
+                        .filter(|symbol| match &symbol.kind {
+                            SymbolItemKind::MemoryDef(idx)
+                                if params.context.include_declaration =>
+                            {
+                                ref_idx == idx && symbol.region == current_symbol.region
+                            }
+                            SymbolItemKind::MemoryRef(idx) => {
+                                memories.iter().any(|def_idx| *def_idx == idx)
+                                    && symbol.region == current_symbol.region
+                            }
+                            _ => false,
+                        })
+                        .map(|symbol| {
+                            create_location_by_symbol(&params, &line_index, symbol, &root)
+                        })
+                        .collect(),
+                )
+            }
         }
     }
 }

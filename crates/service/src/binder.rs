@@ -266,6 +266,32 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable 
                     symbols.push(symbol);
                 }
             }
+            SyntaxKind::MODULE_FIELD_MEMORY => {
+                if let Some(symbol) = create_module_field_symbol(
+                    node.clone(),
+                    module_field_id,
+                    SymbolItemKind::MemoryDef,
+                ) {
+                    symbols.push(symbol);
+                }
+                module_field_id += 1;
+            }
+            SyntaxKind::EXPORT_DESC_MEMORY => {
+                if let Some(symbol) = node
+                    .ancestors()
+                    .find(|node| node.kind() == SyntaxKind::MODULE)
+                    .map(SymbolItemKey::from)
+                    .zip(
+                        node.children()
+                            .find(|child| child.kind() == SyntaxKind::INDEX),
+                    )
+                    .and_then(|(region, index)| {
+                        create_ref_symbol(index, region, SymbolItemKind::MemoryRef)
+                    })
+                {
+                    symbols.push(symbol);
+                }
+            }
             _ => {}
         }
     }
@@ -382,6 +408,31 @@ impl SymbolTable {
             })
     }
 
+    pub fn find_memory_defs(
+        &self,
+        key: &SymbolItemKey,
+    ) -> Option<impl Iterator<Item = &SymbolItem>> {
+        self.symbols
+            .iter()
+            .find_map(|symbol| match symbol {
+                SymbolItem {
+                    kind: SymbolItemKind::MemoryRef(idx),
+                    key: memory_ref_key,
+                    ..
+                } if memory_ref_key == key => Some((symbol, idx)),
+                _ => None,
+            })
+            .map(|(memory, ref_idx)| {
+                self.symbols.iter().filter(move |symbol| {
+                    symbol.region == memory.region
+                        && match &symbol.kind {
+                            SymbolItemKind::MemoryDef(def_idx) => ref_idx == def_idx,
+                            _ => false,
+                        }
+                })
+            })
+    }
+
     pub fn get_declared_params_and_locals(
         &self,
         node: SyntaxNode,
@@ -438,6 +489,20 @@ impl SymbolTable {
                 _ => None,
             })
     }
+
+    pub fn get_declared_memories(
+        &self,
+        node: SyntaxNode,
+    ) -> impl Iterator<Item = (&SymbolItem, &DefIdx)> {
+        debug_assert_eq!(node.kind(), SyntaxKind::MODULE);
+        let key = node.into();
+        self.symbols
+            .iter()
+            .filter_map(move |symbol| match &symbol.kind {
+                SymbolItemKind::MemoryDef(idx) if symbol.region == key => Some((symbol, idx)),
+                _ => None,
+            })
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -479,4 +544,6 @@ pub enum SymbolItemKind {
     TypeUse(RefIdx),
     GlobalDef(DefIdx),
     GlobalRef(RefIdx),
+    MemoryDef(DefIdx),
+    MemoryRef(RefIdx),
 }

@@ -71,43 +71,19 @@ impl LanguageService {
             .filter(|sym| {
                 symbol.region == sym.region
                     && match &sym.kind {
-                        SymbolItemKind::Func(idx) => {
+                        SymbolItemKind::Func(idx)
+                        | SymbolItemKind::Param(idx)
+                        | SymbolItemKind::Local(idx)
+                        | SymbolItemKind::Type(idx)
+                        | SymbolItemKind::GlobalDef(idx)
+                        | SymbolItemKind::MemoryDef(idx) => {
                             idx.name.as_deref().is_some_and(|name| name == old_name)
                         }
-                        SymbolItemKind::Param(idx) => {
-                            idx.name.as_deref().is_some_and(|name| name == old_name)
-                        }
-                        SymbolItemKind::Local(idx) => {
-                            idx.name.as_deref().is_some_and(|name| name == old_name)
-                        }
-                        SymbolItemKind::Call(idx) => {
-                            if let RefIdx::Name(name) = idx {
-                                name == old_name
-                            } else {
-                                false
-                            }
-                        }
-                        SymbolItemKind::LocalRef(idx) => {
-                            if let RefIdx::Name(name) = idx {
-                                name == old_name
-                            } else {
-                                false
-                            }
-                        }
-                        SymbolItemKind::Type(idx) => {
-                            idx.name.as_deref().is_some_and(|name| name == old_name)
-                        }
-                        SymbolItemKind::TypeUse(idx) => {
-                            if let RefIdx::Name(name) = idx {
-                                name == old_name
-                            } else {
-                                false
-                            }
-                        }
-                        SymbolItemKind::GlobalDef(idx) => {
-                            idx.name.as_deref().is_some_and(|name| name == old_name)
-                        }
-                        SymbolItemKind::GlobalRef(idx) => {
+                        SymbolItemKind::Call(idx)
+                        | SymbolItemKind::LocalRef(idx)
+                        | SymbolItemKind::TypeUse(idx)
+                        | SymbolItemKind::GlobalRef(idx)
+                        | SymbolItemKind::MemoryRef(idx) => {
                             if let RefIdx::Name(name) = idx {
                                 name == old_name
                             } else {

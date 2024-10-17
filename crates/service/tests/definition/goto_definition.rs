@@ -294,3 +294,51 @@ fn global_ident_idx() {
     let response = service.goto_definition(create_params(uri, Position::new(4, 26)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn memory_not_defined() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (export \"\" (memory $memory))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    assert!(matches!(
+        service.goto_definition(create_params(uri.clone(), Position::new(2, 27))),
+        Some(GotoDefinitionResponse::Array(locations)) if locations.is_empty()
+    ));
+}
+
+#[test]
+fn memory_int_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (memory (data))
+    (export \"\" (memory 0))
+)
+(module (memory))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(3, 24)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn memory_ident_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (memory $memory (data))
+    (export \"\" (memory $memory))
+)
+(module (memory $memory))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(3, 30)));
+    assert_json_snapshot!(response);
+}
