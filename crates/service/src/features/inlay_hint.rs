@@ -23,13 +23,13 @@ impl LanguageService {
             .filter_map(|symbol| match &symbol.kind {
                 SymbolItemKind::LocalRef(..) => {
                     let param_or_local = symbol_table.find_param_or_local_def(&symbol.key)?;
-                    let types = self.ctx.extract_types(param_or_local.key.green.clone());
+                    let ty = self.ctx.extract_types(param_or_local.key.green.clone())?;
                     Some(InlayHint {
                         position: helpers::rowan_pos_to_lsp_pos(
                             &line_index,
                             symbol.key.ptr.text_range().end(),
                         ),
-                        label: InlayHintLabel::String(types.first()?.to_string()),
+                        label: InlayHintLabel::String(ty.to_string()),
                         kind: Some(InlayHintKind::TYPE),
                         text_edits: None,
                         tooltip: None,
@@ -40,7 +40,7 @@ impl LanguageService {
                 }
                 SymbolItemKind::GlobalRef(..) => {
                     let global = symbol_table.find_global_defs(&symbol.key)?.next()?;
-                    let types = self.ctx.extract_types(
+                    let ty = self.ctx.extract_types(
                         global
                             .key
                             .green
@@ -54,13 +54,13 @@ impl LanguageService {
                                 _ => None,
                             })?
                             .to_owned(),
-                    );
+                    )?;
                     Some(InlayHint {
                         position: helpers::rowan_pos_to_lsp_pos(
                             &line_index,
                             symbol.key.ptr.text_range().end(),
                         ),
-                        label: InlayHintLabel::String(types.first()?.to_string()),
+                        label: InlayHintLabel::String(ty.to_string()),
                         kind: Some(InlayHintKind::TYPE),
                         text_edits: None,
                         tooltip: None,

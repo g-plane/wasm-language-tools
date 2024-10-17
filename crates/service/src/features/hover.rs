@@ -175,12 +175,10 @@ fn create_param_or_local_hover(ctx: &LanguageServiceCtx, symbol: &SymbolItem) ->
         }
         _ => {}
     }
-    ctx.extract_types(symbol.key.green.clone())
-        .into_iter()
-        .for_each(|ty| {
-            content_value.push(' ');
-            content_value.push_str(&ty.to_string());
-        });
+    if let Some(ty) = ctx.extract_types(symbol.key.green.clone()) {
+        content_value.push(' ');
+        content_value.push_str(&ty.to_string());
+    }
     content_value.push(')');
     create_marked_string(content_value)
 }

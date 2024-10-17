@@ -1,5 +1,8 @@
 use rowan::{
-    ast::{support::children, AstNode},
+    ast::{
+        support::{child, children},
+        AstNode,
+    },
     GreenNode, SyntaxNode,
 };
 use std::fmt;
@@ -8,17 +11,15 @@ use wat_syntax::ast::{Param, Result, ValType as AstValType};
 #[salsa::query_group(TypesAnalyzer)]
 pub(crate) trait TypesAnalyzerCtx {
     #[salsa::memoized]
-    fn extract_types(&self, node: GreenNode) -> Vec<ValType>;
+    fn extract_types(&self, node: GreenNode) -> Option<ValType>;
     #[salsa::memoized]
     fn extract_func_sig(&self, node: GreenNode) -> FuncSig;
 }
-fn extract_types(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Vec<ValType> {
+fn extract_types(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<ValType> {
     let root = SyntaxNode::new_root(node);
-    if let Some(ty) = AstValType::cast(root.clone()) {
-        vec![ValType::from(ty)]
-    } else {
-        children::<AstValType>(&root).map(ValType::from).collect()
-    }
+    AstValType::cast(root.clone())
+        .map(ValType::from)
+        .or_else(|| child::<AstValType>(&root).map(ValType::from))
 }
 
 fn extract_func_sig(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
