@@ -145,9 +145,10 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             let grand = parent.parent()?;
             match grand.kind() {
                 SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC => {
-                    ctx.push(CmpCtx::Func)
+                    ctx.push(CmpCtx::Func);
                 }
                 SyntaxKind::TYPE_USE => ctx.push(CmpCtx::FuncType),
+                SyntaxKind::EXPORT_DESC_GLOBAL => ctx.push(CmpCtx::Global),
                 _ => {}
             }
         }
@@ -169,6 +170,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             }
         }
         SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC => ctx.push(CmpCtx::Func),
+        SyntaxKind::EXPORT_DESC_GLOBAL => ctx.push(CmpCtx::Global),
         SyntaxKind::MODULE => {
             if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::KeywordModuleField);

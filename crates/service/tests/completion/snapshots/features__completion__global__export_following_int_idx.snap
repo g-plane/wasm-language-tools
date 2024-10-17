@@ -1,0 +1,14 @@
+---
+source: crates/service/tests/completion/global.rs
+expression: response
+---
+[
+  {
+    "label": "0",
+    "kind": 6
+  },
+  {
+    "label": "$global",
+    "kind": 6
+  }
+]

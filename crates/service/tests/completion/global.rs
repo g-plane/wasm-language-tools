@@ -108,3 +108,67 @@ fn globals_following_ident() {
     let response = service.completion(create_params(uri, Position::new(2, 24)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn export() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (global i32)
+    (global $global i32)
+    (export \"\" (global ))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(4, 23)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn export_following_int_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (global i32)
+    (global $global i32)
+    (export \"\" (global 0))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(4, 24)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn export_following_dollar() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (global i32)
+    (global $global i32)
+    (export \"\" (global $))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(4, 24)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn export_following_ident() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (global i32)
+    (global $global i32)
+    (export \"\" (global $g))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(4, 25)));
+    assert_json_snapshot!(response);
+}
