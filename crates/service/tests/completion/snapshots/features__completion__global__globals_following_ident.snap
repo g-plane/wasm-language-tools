@@ -5,6 +5,9 @@ expression: response
 [
   {
     "label": "$global",
+    "labelDetails": {
+      "description": "i32"
+    },
     "kind": 6,
     "insertText": "global"
   }

@@ -2,11 +2,13 @@ use crate::{
     binder::{DefIdx, SymbolTable, SymbolTablesCtx},
     dataset,
     files::FilesCtx,
-    helpers, InternUri, LanguageService, LanguageServiceCtx,
+    helpers,
+    types_analyzer::TypesAnalyzerCtx,
+    InternUri, LanguageService, LanguageServiceCtx,
 };
 use lsp_types::{
-    CompletionItem, CompletionItemKind, CompletionParams, CompletionResponse, Documentation,
-    MarkupKind, Position,
+    CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionParams,
+    CompletionResponse, Documentation, MarkupKind, Position,
 };
 use rowan::{ast::support, Direction, TokenAtOffset};
 use smallvec::SmallVec;
@@ -22,7 +24,7 @@ impl LanguageService {
         let cmp_ctx = get_cmp_ctx(&token)?;
 
         let symbol_table = self.ctx.symbol_table(uri);
-        let items = get_cmp_list(cmp_ctx, &token, &symbol_table);
+        let items = get_cmp_list(&self.ctx, cmp_ctx, &token, &symbol_table);
         Some(CompletionResponse::Array(items))
     }
 }
@@ -227,6 +229,7 @@ enum CmpCtx {
 }
 
 fn get_cmp_list(
+    service: &LanguageServiceCtx,
     ctx: SmallVec<[CmpCtx; 4]>,
     token: &SyntaxToken,
     symbol_table: &SymbolTable,
@@ -265,12 +268,18 @@ fn get_cmp_list(
                     items.extend(
                         symbol_table
                             .get_declared_params_and_locals(func)
-                            .filter_map(|(_, idx)| {
+                            .filter_map(|(symbol, idx)| {
                                 let (label, insert_text) = get_def_idx_cmp_text(idx, has_dollar)?;
                                 Some(CompletionItem {
                                     label,
                                     insert_text,
                                     kind: Some(CompletionItemKind::VARIABLE),
+                                    label_details: service
+                                        .extract_type(symbol.key.green.clone())
+                                        .map(|ty| CompletionItemLabelDetails {
+                                            description: Some(ty.to_string()),
+                                            ..Default::default()
+                                        }),
                                     ..Default::default()
                                 })
                             }),
@@ -325,12 +334,18 @@ fn get_cmp_list(
                     };
                     let has_dollar = token.text().starts_with('$');
                     items.extend(symbol_table.get_declared_globals(module).filter_map(
-                        |(_, idx)| {
+                        |(symbol, idx)| {
                             let (label, insert_text) = get_def_idx_cmp_text(idx, has_dollar)?;
                             Some(CompletionItem {
                                 label,
                                 insert_text,
                                 kind: Some(CompletionItemKind::VARIABLE),
+                                label_details: service
+                                    .extract_global_type(symbol.key.green.clone())
+                                    .map(|ty| CompletionItemLabelDetails {
+                                        description: Some(ty.to_string()),
+                                        ..Default::default()
+                                    }),
                                 ..Default::default()
                             })
                         },

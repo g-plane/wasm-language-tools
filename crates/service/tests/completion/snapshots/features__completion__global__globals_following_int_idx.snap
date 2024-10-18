@@ -5,10 +5,16 @@ expression: response
 [
   {
     "label": "1",
+    "labelDetails": {
+      "description": "i32"
+    },
     "kind": 6
   },
   {
     "label": "$global",
+    "labelDetails": {
+      "description": "i32"
+    },
     "kind": 6
   }
 ]

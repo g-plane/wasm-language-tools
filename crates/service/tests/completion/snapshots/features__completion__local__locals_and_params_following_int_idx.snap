@@ -5,26 +5,44 @@ expression: response
 [
   {
     "label": "$p",
+    "labelDetails": {
+      "description": "i32"
+    },
     "kind": 6
   },
   {
     "label": "1",
+    "labelDetails": {
+      "description": "f32"
+    },
     "kind": 6
   },
   {
     "label": "2",
+    "labelDetails": {
+      "description": "f64"
+    },
     "kind": 6
   },
   {
     "label": "$l",
+    "labelDetails": {
+      "description": "i32"
+    },
     "kind": 6
   },
   {
     "label": "4",
+    "labelDetails": {
+      "description": "f32"
+    },
     "kind": 6
   },
   {
     "label": "5",
+    "labelDetails": {
+      "description": "f64"
+    },
     "kind": 6
   }
 ]
