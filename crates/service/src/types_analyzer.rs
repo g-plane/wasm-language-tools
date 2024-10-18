@@ -1,18 +1,32 @@
-use rowan::{ast::support::children, GreenNode, Language, NodeOrToken, SyntaxNode};
+use crate::{
+    binder::{DefIdx, SymbolItem, SymbolItemKind, SymbolTablesCtx},
+    files::FilesCtx,
+    helpers, InternUri,
+};
+use rowan::{
+    ast::{
+        support::{child, children},
+        AstNode,
+    },
+    GreenNode, Language, NodeOrToken, SyntaxNode,
+};
 use std::fmt;
 use wat_syntax::{
-    ast::{Param, Result, ValType as AstValType},
+    ast::{Param, Result, TypeUse, ValType as AstValType},
     SyntaxKind, WatLanguage,
 };
 
 #[salsa::query_group(TypesAnalyzer)]
-pub(crate) trait TypesAnalyzerCtx {
+pub(crate) trait TypesAnalyzerCtx: FilesCtx + SymbolTablesCtx {
     #[salsa::memoized]
     fn extract_type(&self, node: GreenNode) -> Option<ValType>;
     #[salsa::memoized]
     fn extract_global_type(&self, node: GreenNode) -> Option<ValType>;
     #[salsa::memoized]
     fn extract_func_sig(&self, node: GreenNode) -> FuncSig;
+
+    #[salsa::memoized]
+    fn render_func_header(&self, uri: InternUri, symbol: SymbolItem) -> String;
 }
 fn extract_type(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<ValType> {
     node.clone().try_into().ok().or_else(|| {
@@ -53,6 +67,44 @@ fn extract_func_sig(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
         .map(ValType::from)
         .collect();
     FuncSig { params, results }
+}
+
+fn render_func_header(db: &dyn TypesAnalyzerCtx, uri: InternUri, symbol: SymbolItem) -> String {
+    let mut content = "(func".to_string();
+    if let SymbolItemKind::Func(DefIdx {
+        name: Some(name), ..
+    }) = &symbol.kind
+    {
+        content.push(' ');
+        content.push_str(name);
+    }
+    if let Some(type_use) = symbol.key.green.children().find_map(|child| match child {
+        NodeOrToken::Node(node) if node.kind() == SyntaxKind::TYPE_USE.into() => Some(node),
+        _ => None,
+    }) {
+        content.push(' ');
+        if type_use.children().any(|child| {
+            let kind = child.kind();
+            kind == SyntaxKind::PARAM.into() || kind == SyntaxKind::RESULT.into()
+        }) {
+            let sig = db.extract_func_sig(type_use.to_owned());
+            content.push_str(&sig.to_string());
+        } else {
+            let node = symbol.key.ptr.to_node(&db.root(uri));
+            let symbol_table = db.symbol_table(uri);
+            if let Some(func_type) = child::<TypeUse>(&node)
+                .and_then(|type_use| type_use.index())
+                .and_then(|idx| symbol_table.find_type_use_defs(&idx.syntax().clone().into()))
+                .and_then(|mut symbols| symbols.next())
+                .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.key.green))
+            {
+                let sig = db.extract_func_sig(func_type);
+                content.push_str(&sig.to_string());
+            }
+        }
+    }
+    content.push(')');
+    content
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

@@ -3,6 +3,7 @@ use rowan::{
     ast::{support::token, AstNode, SyntaxNodePtr},
     GreenNode,
 };
+use std::hash::Hash;
 use wat_syntax::{
     ast::{ModuleFieldFunc, PlainInstr},
     SyntaxKind, SyntaxNode, WatLanguage,
@@ -15,13 +16,13 @@ pub(crate) trait SymbolTablesCtx: FilesCtx {
     fn symbol_table(&self, uri: InternUri) -> SymbolTable;
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct DefIdx {
     pub num: u32,
     pub name: Option<String>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum RefIdx {
     Num(u32),
     Name(String),
@@ -531,8 +532,13 @@ impl PartialEq for SymbolItem {
     }
 }
 impl Eq for SymbolItem {}
+impl Hash for SymbolItem {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.key.hash(state)
+    }
+}
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum SymbolItemKind {
     Module,
     Func(DefIdx),

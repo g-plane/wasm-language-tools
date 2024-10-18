@@ -33,3 +33,17 @@ pub fn lsp_range_to_rowan_range(line_index: &LineIndex, range: Range) -> Option<
         }))
         .map(|(start, end)| TextRange::new(TextSize::new(start.into()), TextSize::new(end.into())))
 }
+
+pub(crate) mod ast {
+    use rowan::{GreenNode, NodeOrToken};
+    use wat_syntax::SyntaxKind;
+
+    pub fn find_func_type_of_type_def(green: &GreenNode) -> Option<GreenNode> {
+        green.children().find_map(|child| match child {
+            NodeOrToken::Node(node) if node.kind() == SyntaxKind::FUNC_TYPE.into() => {
+                Some(node.to_owned())
+            }
+            _ => None,
+        })
+    }
+}
