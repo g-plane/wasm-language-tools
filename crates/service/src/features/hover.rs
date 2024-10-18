@@ -5,7 +5,7 @@ use crate::{
     files::FilesCtx,
     helpers,
     types_analyzer::TypesAnalyzerCtx,
-    LanguageService, LanguageServiceCtx,
+    InternUri, LanguageService, LanguageServiceCtx,
 };
 use lsp_types::{
     Hover, HoverContents, HoverParams, LanguageString, MarkedString, MarkupContent, MarkupKind,
@@ -110,31 +110,14 @@ impl LanguageService {
                             .iter()
                             .find(|symbol| symbol.key == key)
                             .and_then(|symbol| {
-                                let content = match symbol.kind {
-                                    SymbolItemKind::Param(..) | SymbolItemKind::Local(..) => {
-                                        create_param_or_local_hover(&self.ctx, symbol)
-                                    }
-                                    SymbolItemKind::Func(..) => create_func_hover(
-                                        &self.ctx,
-                                        symbol,
-                                        &symbol_table,
-                                        &self.ctx.root(uri),
-                                    ),
-                                    SymbolItemKind::Type(..) => {
-                                        create_type_def_hover(&self.ctx, symbol)
-                                    }
-                                    SymbolItemKind::GlobalDef(..) => {
-                                        create_global_def_hover(symbol, &self.ctx.root(uri))
-                                    }
-                                    _ => return None,
-                                };
-                                Some(Hover {
-                                    contents: HoverContents::Scalar(content),
-                                    range: Some(helpers::rowan_range_to_lsp_range(
-                                        &line_index,
-                                        token.text_range(),
-                                    )),
-                                })
+                                create_def_hover(&self.ctx, uri, &symbol_table, symbol)
+                            })
+                            .map(|contents| Hover {
+                                contents,
+                                range: Some(helpers::rowan_range_to_lsp_range(
+                                    &line_index,
+                                    token.text_range(),
+                                )),
                             })
                     })
             }
@@ -151,9 +134,45 @@ impl LanguageService {
                     )),
                 })
             }
+            SyntaxKind::KEYWORD => {
+                let parent = token.parent()?;
+                let key = parent.into();
+
+                let symbol_table = self.ctx.symbol_table(uri);
+                symbol_table
+                    .symbols
+                    .iter()
+                    .find(|symbol| symbol.key == key)
+                    .and_then(|symbol| create_def_hover(&self.ctx, uri, &symbol_table, symbol))
+                    .map(|contents| Hover {
+                        contents,
+                        range: Some(helpers::rowan_range_to_lsp_range(
+                            &line_index,
+                            token.text_range(),
+                        )),
+                    })
+            }
             _ => None,
         }
     }
+}
+
+fn create_def_hover(
+    ctx: &LanguageServiceCtx,
+    uri: InternUri,
+    symbol_table: &SymbolTable,
+    symbol: &SymbolItem,
+) -> Option<HoverContents> {
+    let content = match symbol.kind {
+        SymbolItemKind::Param(..) | SymbolItemKind::Local(..) => {
+            create_param_or_local_hover(ctx, symbol)
+        }
+        SymbolItemKind::Func(..) => create_func_hover(ctx, symbol, symbol_table, &ctx.root(uri)),
+        SymbolItemKind::Type(..) => create_type_def_hover(ctx, symbol),
+        SymbolItemKind::GlobalDef(..) => create_global_def_hover(symbol, &ctx.root(uri)),
+        _ => return None,
+    };
+    Some(HoverContents::Scalar(content))
 }
 
 fn create_param_or_local_hover(ctx: &LanguageServiceCtx, symbol: &SymbolItem) -> MarkedString {

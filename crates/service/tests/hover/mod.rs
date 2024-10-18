@@ -217,6 +217,20 @@ fn param_decl() {
 }
 
 #[test]
+fn param_keyword() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (param $param i64))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(2, 15)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn local_decl() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
@@ -227,6 +241,20 @@ fn local_decl() {
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
     let response = service.hover(create_params(uri, Position::new(2, 21)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn local_keyword() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (local $local i64))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(2, 15)));
     assert_json_snapshot!(response);
 }
 
@@ -245,6 +273,20 @@ fn func_decl() {
 }
 
 #[test]
+fn func_keyword() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func $func (param $param i32) (param f32 f64) (result i32 i64))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(2, 8)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn type_decl() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
@@ -255,6 +297,20 @@ fn type_decl() {
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
     let response = service.hover(create_params(uri, Position::new(2, 14)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn type_keyword() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (type $type (func (param $param i32) (param f32 f64) (result i32 i64)))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(2, 8)));
     assert_json_snapshot!(response);
 }
 
@@ -283,6 +339,20 @@ fn global_decl_mut() {
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
     let response = service.hover(create_params(uri, Position::new(2, 17)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn global_keyword() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (global $global i64)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(2, 9)));
     assert_json_snapshot!(response);
 }
 
