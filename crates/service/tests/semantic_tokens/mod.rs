@@ -57,6 +57,8 @@ const SOURCE: &str = r#"
     )
     (start $func)
     (start 0)
+    (export "" (func $func))
+    (export "" (func 0))
 )
 (; block ;)
 ;; line

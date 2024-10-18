@@ -121,7 +121,11 @@ impl LanguageService {
                 let parent = token.parent();
                 let grand = parent.as_ref().and_then(|parent| parent.parent());
                 if grand.as_ref().is_some_and(|grand| {
-                    super::is_call(grand) || grand.kind() == SyntaxKind::MODULE_FIELD_START
+                    super::is_call(grand)
+                        || matches!(
+                            grand.kind(),
+                            SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC
+                        )
                 }) {
                     self.semantic_token_kinds
                         .get_index_of(&SemanticTokenKind::Func)
@@ -153,7 +157,11 @@ impl LanguageService {
                     .as_ref()
                     .and_then(|parent| parent.parent())
                     .is_some_and(|grand| {
-                        super::is_call(&grand) || grand.kind() == SyntaxKind::MODULE_FIELD_START
+                        super::is_call(&grand)
+                            || matches!(
+                                grand.kind(),
+                                SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC
+                            )
                     })
                     || parent
                         .as_ref()
