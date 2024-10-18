@@ -34,6 +34,19 @@ expression: response
       {
         "range": {
           "start": {
+            "line": 3,
+            "character": 34
+          },
+          "end": {
+            "line": 3,
+            "character": 39
+          }
+        },
+        "newText": "$f"
+      },
+      {
+        "range": {
+          "start": {
             "line": 5,
             "character": 11
           },

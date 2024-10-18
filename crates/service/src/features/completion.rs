@@ -201,7 +201,7 @@ fn add_cmp_ctx_for_operands(instr_name: &str, ctx: &mut SmallVec<[CmpCtx; 4]>) {
             ctx.push(CmpCtx::MemArg);
         }
         None => {
-            if instr_name == "call" {
+            if matches!(instr_name, "call" | "return_call") {
                 ctx.push(CmpCtx::Func);
             }
         }

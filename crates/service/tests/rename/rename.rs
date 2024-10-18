@@ -82,7 +82,7 @@ fn func() {
     let source = "
 (module
     (func $func
-        (call $func)
+        (call $func) (return_call $func)
     )
     (start $func)
 )
@@ -175,7 +175,7 @@ fn call() {
     let source = "
 (module
     (func $func
-        (call $func)
+        (call $func) (return_call $func)
     )
     (start $func)
 )

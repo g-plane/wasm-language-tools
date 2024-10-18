@@ -41,7 +41,8 @@ fn find_meaningful_token(
 fn is_call(node: &SyntaxNode) -> bool {
     node.children_with_tokens().any(|element| {
         if let SyntaxElement::Token(token) = element {
-            token.kind() == SyntaxKind::INSTR_NAME && matches!(token.text(), "call" | "ref.func")
+            token.kind() == SyntaxKind::INSTR_NAME
+                && matches!(token.text(), "call" | "ref.func" | "return_call")
         } else {
             false
         }

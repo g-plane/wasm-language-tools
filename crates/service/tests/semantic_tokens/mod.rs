@@ -53,6 +53,7 @@ const SOURCE: &str = r#"
         (local.get $param) (local.get 0) (i32.const 0)
         (local.get $local) (local.get 1) (i32.const 1)
         (call $func) (ref.func $func) (call 0) (ref.func 0)
+        (return_call $func) (return_call 0)
         (f32.const 0.1) (f32.const -1.2e+2)
     )
     (start $func)
