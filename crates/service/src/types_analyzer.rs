@@ -1,25 +1,37 @@
-use rowan::{
-    ast::{
-        support::{child, children},
-        AstNode,
-    },
-    GreenNode, SyntaxNode,
-};
+use rowan::{ast::support::children, GreenNode, Language, NodeOrToken, SyntaxNode};
 use std::fmt;
-use wat_syntax::ast::{Param, Result, ValType as AstValType};
+use wat_syntax::{
+    ast::{Param, Result, ValType as AstValType},
+    SyntaxKind, WatLanguage,
+};
 
 #[salsa::query_group(TypesAnalyzer)]
 pub(crate) trait TypesAnalyzerCtx {
     #[salsa::memoized]
-    fn extract_types(&self, node: GreenNode) -> Option<ValType>;
+    fn extract_type(&self, node: GreenNode) -> Option<ValType>;
+    #[salsa::memoized]
+    fn extract_global_type(&self, node: GreenNode) -> Option<ValType>;
     #[salsa::memoized]
     fn extract_func_sig(&self, node: GreenNode) -> FuncSig;
 }
-fn extract_types(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<ValType> {
-    let root = SyntaxNode::new_root(node);
-    AstValType::cast(root.clone())
-        .map(ValType::from)
-        .or_else(|| child::<AstValType>(&root).map(ValType::from))
+fn extract_type(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<ValType> {
+    node.clone().try_into().ok().or_else(|| {
+        node.children().find_map(|child| match child {
+            NodeOrToken::Node(node) if node.kind() == SyntaxKind::VAL_TYPE.into() => {
+                node.to_owned().try_into().ok()
+            }
+            _ => None,
+        })
+    })
+}
+
+fn extract_global_type(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<ValType> {
+    node.children()
+        .find_map(|child| match child {
+            NodeOrToken::Node(node) if node.kind() == SyntaxKind::GLOBAL_TYPE.into() => Some(node),
+            _ => None,
+        })
+        .and_then(|global_type| db.extract_type(global_type.to_owned()))
 }
 
 fn extract_func_sig(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
@@ -89,6 +101,36 @@ impl From<AstValType> for ValType {
         } else {
             unreachable!("unsupported valtype");
         }
+    }
+}
+
+impl TryFrom<GreenNode> for ValType {
+    type Error = ();
+    fn try_from(node: GreenNode) -> std::result::Result<Self, Self::Error> {
+        node.children()
+            .find_map(|child| {
+                if let NodeOrToken::Token(token) = child {
+                    match WatLanguage::kind_from_raw(token.kind()) {
+                        SyntaxKind::NUM_TYPE => match token.text() {
+                            "i32" => Some(ValType::I32),
+                            "i64" => Some(ValType::I64),
+                            "f32" => Some(ValType::F32),
+                            "f64" => Some(ValType::F64),
+                            _ => None,
+                        },
+                        SyntaxKind::VEC_TYPE => Some(ValType::V128),
+                        SyntaxKind::REF_TYPE => match token.text() {
+                            "funcref" => Some(ValType::FuncRef),
+                            "externref" => Some(ValType::ExternRef),
+                            _ => None,
+                        },
+                        _ => None,
+                    }
+                } else {
+                    None
+                }
+            })
+            .ok_or(())
     }
 }
 

@@ -175,7 +175,7 @@ fn create_param_or_local_hover(ctx: &LanguageServiceCtx, symbol: &SymbolItem) ->
         }
         _ => {}
     }
-    if let Some(ty) = ctx.extract_types(symbol.key.green.clone()) {
+    if let Some(ty) = ctx.extract_type(symbol.key.green.clone()) {
         content_value.push(' ');
         content_value.push_str(&ty.to_string());
     }

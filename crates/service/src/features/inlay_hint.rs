@@ -6,8 +6,6 @@ use crate::{
     LanguageService,
 };
 use lsp_types::{InlayHint, InlayHintKind, InlayHintLabel, InlayHintParams};
-use rowan::NodeOrToken;
-use wat_syntax::SyntaxKind;
 
 impl LanguageService {
     pub fn inlay_hint(&self, params: InlayHintParams) -> Option<Vec<InlayHint>> {
@@ -26,7 +24,7 @@ impl LanguageService {
                         return None;
                     }
                     let param_or_local = symbol_table.find_param_or_local_def(&symbol.key)?;
-                    let ty = self.ctx.extract_types(param_or_local.key.green.clone())?;
+                    let ty = self.ctx.extract_type(param_or_local.key.green.clone())?;
                     Some(InlayHint {
                         position: helpers::rowan_pos_to_lsp_pos(
                             &line_index,
@@ -46,21 +44,7 @@ impl LanguageService {
                         return None;
                     }
                     let global = symbol_table.find_global_defs(&symbol.key)?.next()?;
-                    let ty = self.ctx.extract_types(
-                        global
-                            .key
-                            .green
-                            .children()
-                            .find_map(|child| match child {
-                                NodeOrToken::Node(node)
-                                    if node.kind() == SyntaxKind::GLOBAL_TYPE.into() =>
-                                {
-                                    Some(node)
-                                }
-                                _ => None,
-                            })?
-                            .to_owned(),
-                    )?;
+                    let ty = self.ctx.extract_global_type(global.key.green.clone())?;
                     Some(InlayHint {
                         position: helpers::rowan_pos_to_lsp_pos(
                             &line_index,
