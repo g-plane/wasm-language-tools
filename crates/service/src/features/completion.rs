@@ -8,7 +8,7 @@ use crate::{
 };
 use lsp_types::{
     CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionParams,
-    CompletionResponse, Documentation, MarkupKind, Position,
+    CompletionResponse, Documentation, MarkupContent, MarkupKind, Position,
 };
 use rowan::{ast::support, Direction, TokenAtOffset};
 use smallvec::SmallVec;
@@ -24,7 +24,7 @@ impl LanguageService {
         let cmp_ctx = get_cmp_ctx(&token)?;
 
         let symbol_table = self.ctx.symbol_table(uri);
-        let items = get_cmp_list(&self.ctx, cmp_ctx, &token, &symbol_table);
+        let items = get_cmp_list(&self.ctx, cmp_ctx, &token, uri, &symbol_table);
         Some(CompletionResponse::Array(items))
     }
 }
@@ -232,6 +232,7 @@ fn get_cmp_list(
     service: &LanguageServiceCtx,
     ctx: SmallVec<[CmpCtx; 4]>,
     token: &SyntaxToken,
+    uri: InternUri,
     symbol_table: &SymbolTable,
 ) -> Vec<CompletionItem> {
     ctx.into_iter()
@@ -294,12 +295,19 @@ fn get_cmp_list(
                     };
                     let has_dollar = token.text().starts_with('$');
                     items.extend(symbol_table.get_declared_functions(module).filter_map(
-                        |(_, idx)| {
+                        |(symbol, idx)| {
                             let (label, insert_text) = get_def_idx_cmp_text(idx, has_dollar)?;
                             Some(CompletionItem {
                                 label,
                                 insert_text,
                                 kind: Some(CompletionItemKind::FUNCTION),
+                                documentation: Some(Documentation::MarkupContent(MarkupContent {
+                                    kind: MarkupKind::Markdown,
+                                    value: format!(
+                                        "```wat\n{}\n```",
+                                        service.render_func_header(uri, symbol.clone())
+                                    ),
+                                })),
                                 ..Default::default()
                             })
                         },

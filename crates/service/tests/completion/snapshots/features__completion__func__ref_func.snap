@@ -5,10 +5,18 @@ expression: response
 [
   {
     "label": "0",
-    "kind": 3
+    "kind": 3,
+    "documentation": {
+      "kind": "markdown",
+      "value": "```wat\n(func)\n```"
+    }
   },
   {
     "label": "$func",
-    "kind": 3
+    "kind": 3,
+    "documentation": {
+      "kind": "markdown",
+      "value": "```wat\n(func $func)\n```"
+    }
   }
 ]

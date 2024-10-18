@@ -70,6 +70,7 @@ fn extract_func_sig(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
 }
 
 fn render_func_header(db: &dyn TypesAnalyzerCtx, uri: InternUri, symbol: SymbolItem) -> String {
+    debug_assert!(matches!(symbol.kind, SymbolItemKind::Func(..)));
     let mut content = "(func".to_string();
     if let SymbolItemKind::Func(DefIdx {
         name: Some(name), ..
