@@ -9,8 +9,7 @@ mod rename;
 mod semantic_tokens;
 
 pub(crate) use self::semantic_tokens::SemanticTokenKind;
-use crate::{files::FilesCtx, InternUri, LanguageServiceCtx};
-use line_index::LineCol;
+use crate::{files::FilesCtx, helpers, InternUri, LanguageServiceCtx};
 use lsp_types::Position;
 use rowan::TokenAtOffset;
 use wat_syntax::{is_punc, is_trivia, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
@@ -20,13 +19,7 @@ fn find_meaningful_token(
     uri: InternUri,
     position: Position,
 ) -> Option<SyntaxToken> {
-    let offset = service
-        .line_index(uri)
-        .offset(LineCol {
-            line: position.line,
-            col: position.character,
-        })
-        .map(|text_size| rowan::TextSize::new(text_size.into()))?;
+    let offset = helpers::lsp_pos_to_rowan_pos(&service.line_index(uri), position)?;
 
     match service.root(uri).token_at_offset(offset) {
         TokenAtOffset::None => None,

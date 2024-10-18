@@ -14,17 +14,22 @@ pub fn rowan_range_to_lsp_range(line_index: &LineIndex, range: TextRange) -> Ran
     )
 }
 
+pub fn lsp_pos_to_rowan_pos(line_index: &LineIndex, pos: Position) -> Option<TextSize> {
+    line_index.offset(LineCol {
+        line: pos.line,
+        col: pos.character,
+    })
+}
+
 pub fn lsp_range_to_rowan_range(line_index: &LineIndex, range: Range) -> Option<TextRange> {
-    let start = line_index.offset(LineCol {
-        line: range.start.line,
-        col: range.start.character,
-    })?;
-    let end = line_index.offset(LineCol {
-        line: range.end.line,
-        col: range.end.character,
-    })?;
-    Some(TextRange::new(
-        TextSize::new(start.into()),
-        TextSize::new(end.into()),
-    ))
+    line_index
+        .offset(LineCol {
+            line: range.start.line,
+            col: range.start.character,
+        })
+        .zip(line_index.offset(LineCol {
+            line: range.end.line,
+            col: range.end.character,
+        }))
+        .map(|(start, end)| TextRange::new(TextSize::new(start.into()), TextSize::new(end.into())))
 }

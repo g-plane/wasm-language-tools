@@ -2,9 +2,8 @@ use crate::{
     binder::{DefIdx, SymbolTable, SymbolTablesCtx},
     dataset,
     files::FilesCtx,
-    InternUri, LanguageService, LanguageServiceCtx,
+    helpers, InternUri, LanguageService, LanguageServiceCtx,
 };
-use line_index::LineCol;
 use lsp_types::{
     CompletionItem, CompletionItemKind, CompletionParams, CompletionResponse, Documentation,
     MarkupKind, Position,
@@ -33,13 +32,7 @@ fn find_token(
     uri: InternUri,
     position: Position,
 ) -> Option<SyntaxToken> {
-    let offset = service
-        .line_index(uri)
-        .offset(LineCol {
-            line: position.line,
-            col: position.character,
-        })
-        .map(|text_size| rowan::TextSize::new(text_size.into()))?;
+    let offset = helpers::lsp_pos_to_rowan_pos(&service.line_index(uri), position)?;
     match service.root(uri).token_at_offset(offset) {
         TokenAtOffset::None => None,
         TokenAtOffset::Single(token) => Some(token),

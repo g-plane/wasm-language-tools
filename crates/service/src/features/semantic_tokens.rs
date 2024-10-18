@@ -1,4 +1,4 @@
-use crate::{binder::SymbolTablesCtx, files::FilesCtx, InternUri, LanguageService};
+use crate::{binder::SymbolTablesCtx, files::FilesCtx, helpers, InternUri, LanguageService};
 use line_index::LineCol;
 use lsp_types::{
     SemanticToken, SemanticTokens, SemanticTokensParams, SemanticTokensRangeParams,
@@ -37,14 +37,8 @@ impl LanguageService {
     ) -> Option<SemanticTokensRangeResult> {
         let uri = self.ctx.uri(params.text_document.uri);
         let line_index = self.ctx.line_index(uri);
-        let start = line_index.offset(LineCol {
-            line: params.range.start.line,
-            col: params.range.start.character,
-        })?;
-        let end = line_index.offset(LineCol {
-            line: params.range.end.line,
-            col: params.range.end.character,
-        })?;
+        let start = helpers::lsp_pos_to_rowan_pos(&line_index, params.range.start)?;
+        let end = helpers::lsp_pos_to_rowan_pos(&line_index, params.range.end)?;
 
         let mut delta_line = 0;
         let mut prev_start = 0;
