@@ -287,6 +287,20 @@ fn func_keyword() {
 }
 
 #[test]
+fn type_use_only_func() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func $func (type $t))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(2, 14)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn type_decl() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
@@ -311,6 +325,20 @@ fn type_keyword() {
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
     let response = service.hover(create_params(uri, Position::new(2, 8)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn type_decl_empty() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (type $type (func))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(2, 14)));
     assert_json_snapshot!(response);
 }
 

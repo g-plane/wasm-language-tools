@@ -83,13 +83,15 @@ fn render_func_header(db: &dyn TypesAnalyzerCtx, uri: InternUri, symbol: SymbolI
         NodeOrToken::Node(node) if node.kind() == SyntaxKind::TYPE_USE.into() => Some(node),
         _ => None,
     }) {
-        content.push(' ');
         if type_use.children().any(|child| {
             let kind = child.kind();
             kind == SyntaxKind::PARAM.into() || kind == SyntaxKind::RESULT.into()
         }) {
             let sig = db.extract_func_sig(type_use.to_owned());
-            content.push_str(&sig.to_string());
+            if !sig.params.is_empty() || !sig.results.is_empty() {
+                content.push(' ');
+                content.push_str(&sig.to_string());
+            }
         } else {
             let node = symbol.key.ptr.to_node(&db.root(uri));
             let symbol_table = db.symbol_table(uri);
@@ -100,7 +102,10 @@ fn render_func_header(db: &dyn TypesAnalyzerCtx, uri: InternUri, symbol: SymbolI
                 .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.key.green))
             {
                 let sig = db.extract_func_sig(func_type);
-                content.push_str(&sig.to_string());
+                if !sig.params.is_empty() || !sig.results.is_empty() {
+                    content.push(' ');
+                    content.push_str(&sig.to_string());
+                }
             }
         }
     }
