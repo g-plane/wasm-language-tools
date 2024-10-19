@@ -3,6 +3,7 @@ members = ["crates/*"]
 resolver = "2"
 
 [workspace.dependencies]
+criterion = "0.5"
 insta = { version = "1.39", features = ["glob", "json"] }
 lsp-types = "0.97"
 rowan = "0.15"
