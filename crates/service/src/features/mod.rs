@@ -1,3 +1,4 @@
+mod call_hierarchy;
 mod code_action;
 mod completion;
 mod definition;

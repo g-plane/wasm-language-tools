@@ -1,4 +1,6 @@
 #[cfg(test)]
+mod call_hierarchy;
+#[cfg(test)]
 mod code_action;
 #[cfg(test)]
 mod completion;

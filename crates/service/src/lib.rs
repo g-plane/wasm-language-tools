@@ -14,13 +14,14 @@ use crate::{
 };
 use indexmap::{IndexMap, IndexSet};
 use lsp_types::{
-    CodeActionKind, CodeActionOptions, CodeActionProviderCapability, CompletionOptions,
-    DeclarationCapability, Diagnostic, DiagnosticSeverity, HoverProviderCapability,
-    InitializeParams, InitializeResult, OneOf, Position, Range, RenameOptions, SemanticTokenType,
-    SemanticTokensClientCapabilities, SemanticTokensFullOptions, SemanticTokensLegend,
-    SemanticTokensOptions, SemanticTokensServerCapabilities, ServerCapabilities, ServerInfo,
-    TextDocumentClientCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind,
-    TextDocumentSyncOptions, TextDocumentSyncSaveOptions, TypeDefinitionProviderCapability, Uri,
+    CallHierarchyServerCapability, CodeActionKind, CodeActionOptions, CodeActionProviderCapability,
+    CompletionOptions, DeclarationCapability, Diagnostic, DiagnosticSeverity,
+    HoverProviderCapability, InitializeParams, InitializeResult, OneOf, Position, Range,
+    RenameOptions, SemanticTokenType, SemanticTokensClientCapabilities, SemanticTokensFullOptions,
+    SemanticTokensLegend, SemanticTokensOptions, SemanticTokensServerCapabilities,
+    ServerCapabilities, ServerInfo, TextDocumentClientCapabilities, TextDocumentSyncCapability,
+    TextDocumentSyncKind, TextDocumentSyncOptions, TextDocumentSyncSaveOptions,
+    TypeDefinitionProviderCapability, Uri,
 };
 use rowan::ast::{support::children, AstNode};
 use rustc_hash::FxBuildHasher;
@@ -74,6 +75,7 @@ impl LanguageService {
 
         InitializeResult {
             capabilities: ServerCapabilities {
+                call_hierarchy_provider: Some(CallHierarchyServerCapability::Simple(true)),
                 code_action_provider: Some(CodeActionProviderCapability::Options(
                     CodeActionOptions {
                         code_action_kinds: Some(vec![CodeActionKind::QUICKFIX]),

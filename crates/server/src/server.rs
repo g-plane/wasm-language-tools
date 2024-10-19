@@ -7,6 +7,7 @@ use lsp_types::{
         PublishDiagnostics,
     },
     request::{
+        CallHierarchyIncomingCalls, CallHierarchyOutgoingCalls, CallHierarchyPrepare,
         CodeActionRequest, Completion, DocumentSymbolRequest, GotoDeclaration, GotoDefinition,
         GotoTypeDefinition, HoverRequest, InlayHintRequest, PrepareRenameRequest, References,
         Rename, SemanticTokensFullRequest, SemanticTokensRangeRequest,
@@ -40,6 +41,48 @@ impl Server {
                 Message::Request(mut req) => {
                     if conn.handle_shutdown(&req)? {
                         return Ok(());
+                    }
+                    match cast_req::<CallHierarchyPrepare>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.prepare_call_hierarchy(params),
+                                )?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<CallHierarchyIncomingCalls>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.call_hierarchy_incoming_calls(params),
+                                )?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<CallHierarchyOutgoingCalls>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.call_hierarchy_outgoing_calls(params),
+                                )?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
                     }
                     match cast_req::<CodeActionRequest>(req) {
                         Ok((id, params)) => {

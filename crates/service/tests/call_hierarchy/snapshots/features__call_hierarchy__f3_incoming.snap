@@ -1,0 +1,32 @@
+---
+source: crates/service/tests/call_hierarchy/mod.rs
+expression: prepare
+---
+[
+  {
+    "name": "$f3",
+    "kind": 12,
+    "detail": "(func $f3)",
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 4,
+        "character": 4
+      },
+      "end": {
+        "line": 4,
+        "character": 47
+      }
+    },
+    "selectionRange": {
+      "start": {
+        "line": 4,
+        "character": 10
+      },
+      "end": {
+        "line": 4,
+        "character": 13
+      }
+    }
+  }
+]

@@ -1,0 +1,86 @@
+---
+source: crates/service/tests/call_hierarchy/mod.rs
+expression: incoming_calls
+---
+[
+  {
+    "from": {
+      "name": "$f2",
+      "kind": 12,
+      "detail": "(func $f2)",
+      "uri": "untitled:test",
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 4
+        },
+        "end": {
+          "line": 3,
+          "character": 36
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 3,
+          "character": 10
+        },
+        "end": {
+          "line": 3,
+          "character": 13
+        }
+      }
+    },
+    "fromRanges": [
+      {
+        "start": {
+          "line": 3,
+          "character": 14
+        },
+        "end": {
+          "line": 3,
+          "character": 24
+        }
+      }
+    ]
+  },
+  {
+    "from": {
+      "name": "$f3",
+      "kind": 12,
+      "detail": "(func $f3)",
+      "uri": "untitled:test",
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 4
+        },
+        "end": {
+          "line": 4,
+          "character": 47
+        }
+      },
+      "selectionRange": {
+        "start": {
+          "line": 4,
+          "character": 10
+        },
+        "end": {
+          "line": 4,
+          "character": 13
+        }
+      }
+    },
+    "fromRanges": [
+      {
+        "start": {
+          "line": 4,
+          "character": 14
+        },
+        "end": {
+          "line": 4,
+          "character": 24
+        }
+      }
+    ]
+  }
+]
