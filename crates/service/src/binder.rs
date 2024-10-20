@@ -3,6 +3,7 @@ use rowan::{
     ast::{support::token, AstNode, SyntaxNodePtr},
     GreenNode,
 };
+use salsa::{InternId, InternKey};
 use std::{hash::Hash, rc::Rc};
 use wat_syntax::{
     ast::{ModuleFieldFunc, PlainInstr},
@@ -14,18 +15,21 @@ pub(crate) trait SymbolTablesCtx: FilesCtx {
     #[salsa::memoized]
     #[salsa::invoke(create_symbol_table)]
     fn symbol_table(&self, uri: InternUri) -> Rc<SymbolTable>;
+
+    #[salsa::interned]
+    fn ident(&self, ident: String) -> InternIdent;
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct DefIdx {
     pub num: u32,
-    pub name: Option<String>,
+    pub name: Option<InternIdent>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum RefIdx {
     Num(u32),
-    Name(String),
+    Name(InternIdent),
 }
 
 impl PartialEq<u32> for RefIdx {
@@ -59,6 +63,7 @@ pub(crate) struct SymbolTable {
 }
 fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTable> {
     fn create_module_field_symbol(
+        db: &dyn SymbolTablesCtx,
         node: SyntaxNode,
         id: u32,
         kind: fn(DefIdx) -> SymbolItemKind,
@@ -68,11 +73,13 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
             region: parent.into(),
             kind: kind(DefIdx {
                 num: id,
-                name: token(&node, SyntaxKind::IDENT).map(|token| token.text().to_string()),
+                name: token(&node, SyntaxKind::IDENT)
+                    .map(|token| db.ident(token.text().to_string())),
             }),
         })
     }
     fn create_ref_symbol(
+        db: &dyn SymbolTablesCtx,
         node: SyntaxNode,
         region: SymbolItemKey,
         kind: fn(RefIdx) -> SymbolItemKind,
@@ -81,7 +88,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
             .map(|ident| SymbolItem {
                 key: node.clone().into(),
                 region: region.clone(),
-                kind: kind(RefIdx::Name(ident.text().to_string())),
+                kind: kind(RefIdx::Name(db.ident(ident.text().to_string()))),
             })
             .or_else(|| {
                 node.children_with_tokens()
@@ -115,9 +122,12 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                 });
             }
             SyntaxKind::MODULE_FIELD_FUNC => {
-                if let Some(symbol) =
-                    create_module_field_symbol(node.clone(), module_field_id, SymbolItemKind::Func)
-                {
+                if let Some(symbol) = create_module_field_symbol(
+                    db,
+                    node.clone(),
+                    module_field_id,
+                    SymbolItemKind::Func,
+                ) {
                     symbols.push(symbol);
                 }
                 module_field_id += 1;
@@ -135,7 +145,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                                 region: node.clone().into(),
                                 kind: SymbolItemKind::Param(DefIdx {
                                     num: i,
-                                    name: Some(ident.text().to_string()),
+                                    name: Some(db.ident(ident.text().to_string())),
                                 }),
                             });
                             i + 1
@@ -157,7 +167,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             region: node.clone().into(),
                             kind: SymbolItemKind::Local(DefIdx {
                                 num: i,
-                                name: Some(ident.text().to_string()),
+                                name: Some(db.ident(ident.text().to_string())),
                             }),
                         });
                         i + 1
@@ -174,15 +184,19 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                 });
             }
             SyntaxKind::MODULE_FIELD_TYPE => {
-                if let Some(symbol) =
-                    create_module_field_symbol(node.clone(), module_field_id, SymbolItemKind::Type)
-                {
+                if let Some(symbol) = create_module_field_symbol(
+                    db,
+                    node.clone(),
+                    module_field_id,
+                    SymbolItemKind::Type,
+                ) {
                     symbols.push(symbol);
                 }
                 module_field_id += 1;
             }
             SyntaxKind::MODULE_FIELD_GLOBAL => {
                 if let Some(symbol) = create_module_field_symbol(
+                    db,
                     node.clone(),
                     module_field_id,
                     SymbolItemKind::GlobalDef,
@@ -205,7 +219,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             continue;
                         };
                         symbols.extend(node.children().filter_map(|node| {
-                            create_ref_symbol(node, region.clone(), SymbolItemKind::Call)
+                            create_ref_symbol(db, node, region.clone(), SymbolItemKind::Call)
                         }));
                     }
                     Some("local.get" | "local.set" | "local.tee") => {
@@ -217,7 +231,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             continue;
                         };
                         symbols.extend(node.children().filter_map(|node| {
-                            create_ref_symbol(node, region.clone(), SymbolItemKind::LocalRef)
+                            create_ref_symbol(db, node, region.clone(), SymbolItemKind::LocalRef)
                         }));
                     }
                     Some("global.get" | "global.set") => {
@@ -229,7 +243,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             continue;
                         };
                         symbols.extend(node.children().filter_map(|node| {
-                            create_ref_symbol(node, region.clone(), SymbolItemKind::GlobalRef)
+                            create_ref_symbol(db, node, region.clone(), SymbolItemKind::GlobalRef)
                         }));
                     }
                     _ => {}
@@ -245,7 +259,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             .find(|child| child.kind() == SyntaxKind::INDEX),
                     )
                     .and_then(|(region, index)| {
-                        create_ref_symbol(index, region, SymbolItemKind::Call)
+                        create_ref_symbol(db, index, region, SymbolItemKind::Call)
                     })
                 {
                     symbols.push(symbol);
@@ -261,7 +275,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             .find(|child| child.kind() == SyntaxKind::INDEX),
                     )
                     .and_then(|(region, index)| {
-                        create_ref_symbol(index, region, SymbolItemKind::TypeUse)
+                        create_ref_symbol(db, index, region, SymbolItemKind::TypeUse)
                     })
                 {
                     symbols.push(symbol);
@@ -269,6 +283,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
             }
             SyntaxKind::MODULE_FIELD_MEMORY => {
                 if let Some(symbol) = create_module_field_symbol(
+                    db,
                     node.clone(),
                     module_field_id,
                     SymbolItemKind::MemoryDef,
@@ -287,7 +302,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             .find(|child| child.kind() == SyntaxKind::INDEX),
                     )
                     .and_then(|(region, index)| {
-                        create_ref_symbol(index, region, SymbolItemKind::MemoryRef)
+                        create_ref_symbol(db, index, region, SymbolItemKind::MemoryRef)
                     })
                 {
                     symbols.push(symbol);
@@ -552,4 +567,15 @@ pub enum SymbolItemKind {
     GlobalRef(RefIdx),
     MemoryDef(DefIdx),
     MemoryRef(RefIdx),
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub(crate) struct InternIdent(InternId);
+impl InternKey for InternIdent {
+    fn from_intern_id(v: salsa::InternId) -> Self {
+        InternIdent(v)
+    }
+    fn as_intern_id(&self) -> InternId {
+        self.0
+    }
 }

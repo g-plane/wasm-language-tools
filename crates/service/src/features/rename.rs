@@ -59,7 +59,7 @@ impl LanguageService {
         let root = self.ctx.root(uri);
         let symbol_table = self.ctx.symbol_table(uri);
 
-        let old_name = ident_token.text();
+        let old_name = self.ctx.ident(ident_token.text().to_string());
         let symbol_key = ident_token.parent()?.into();
         let symbol = symbol_table
             .symbols
@@ -77,7 +77,7 @@ impl LanguageService {
                         | SymbolItemKind::Type(idx)
                         | SymbolItemKind::GlobalDef(idx)
                         | SymbolItemKind::MemoryDef(idx) => {
-                            idx.name.as_deref().is_some_and(|name| name == old_name)
+                            idx.name.is_some_and(|name| name == old_name)
                         }
                         SymbolItemKind::Call(idx)
                         | SymbolItemKind::LocalRef(idx)
@@ -85,7 +85,7 @@ impl LanguageService {
                         | SymbolItemKind::GlobalRef(idx)
                         | SymbolItemKind::MemoryRef(idx) => {
                             if let RefIdx::Name(name) = idx {
-                                name == old_name
+                                *name == old_name
                             } else {
                                 false
                             }

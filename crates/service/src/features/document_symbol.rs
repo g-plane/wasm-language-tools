@@ -43,7 +43,10 @@ impl LanguageService {
                     Some((
                         symbol.key.clone(),
                         DocumentSymbol {
-                            name: func.name.clone().unwrap_or_else(|| func.num.to_string()),
+                            name: func
+                                .name
+                                .map(|name| self.ctx.lookup_ident(name))
+                                .unwrap_or_else(|| func.num.to_string()),
                             detail: None,
                             kind: SymbolKind::FUNCTION,
                             tags: None,
@@ -67,7 +70,10 @@ impl LanguageService {
                     Some((
                         symbol.key.clone(),
                         DocumentSymbol {
-                            name: local.name.clone().unwrap_or_else(|| local.num.to_string()),
+                            name: local
+                                .name
+                                .map(|name| self.ctx.lookup_ident(name))
+                                .unwrap_or_else(|| local.num.to_string()),
                             detail: None,
                             kind: SymbolKind::VARIABLE,
                             tags: None,
@@ -93,7 +99,10 @@ impl LanguageService {
                     Some((
                         symbol.key.clone(),
                         DocumentSymbol {
-                            name: idx.name.clone().unwrap_or_else(|| idx.num.to_string()),
+                            name: idx
+                                .name
+                                .map(|name| self.ctx.lookup_ident(name))
+                                .unwrap_or_else(|| idx.num.to_string()),
                             detail: None,
                             kind: SymbolKind::VARIABLE,
                             tags: None,

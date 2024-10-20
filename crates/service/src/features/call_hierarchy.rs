@@ -44,7 +44,10 @@ impl LanguageService {
             .find_map(|symbol| match &symbol.kind {
                 SymbolItemKind::Func(idx) if symbol.key.ptr.text_range() == parent_range => {
                     Some(vec![CallHierarchyItem {
-                        name: idx.name.clone().unwrap_or_else(|| idx.num.to_string()),
+                        name: idx
+                            .name
+                            .map(|name| self.ctx.lookup_ident(name))
+                            .unwrap_or_else(|| idx.num.to_string()),
                         kind: SymbolKind::FUNCTION,
                         tags: None,
                         detail: Some(self.ctx.render_func_header(uri, symbol.clone())),
@@ -72,7 +75,10 @@ impl LanguageService {
                                 }
                             })
                             .map(|(symbol, idx)| CallHierarchyItem {
-                                name: idx.name.clone().unwrap_or_else(|| idx.num.to_string()),
+                                name: idx
+                                    .name
+                                    .map(|name| self.ctx.lookup_ident(name))
+                                    .unwrap_or_else(|| idx.num.to_string()),
                                 kind: SymbolKind::FUNCTION,
                                 tags: None,
                                 detail: Some(self.ctx.render_func_header(uri, symbol.clone())),
@@ -154,7 +160,10 @@ impl LanguageService {
                     });
                 CallHierarchyIncomingCall {
                     from: CallHierarchyItem {
-                        name: idx.name.clone().unwrap_or_else(|| idx.num.to_string()),
+                        name: idx
+                            .name
+                            .map(|name| self.ctx.lookup_ident(name))
+                            .unwrap_or_else(|| idx.num.to_string()),
                         kind: SymbolKind::FUNCTION,
                         tags: None,
                         detail: Some(self.ctx.render_func_header(uri, func_symbol.clone())),
@@ -212,7 +221,10 @@ impl LanguageService {
                         let line_index = self.ctx.line_index(uri);
                         CallHierarchyOutgoingCall {
                             to: CallHierarchyItem {
-                                name: idx.name.clone().unwrap_or_else(|| idx.num.to_string()),
+                                name: idx
+                                    .name
+                                    .map(|name| self.ctx.lookup_ident(name))
+                                    .unwrap_or_else(|| idx.num.to_string()),
                                 kind: SymbolKind::FUNCTION,
                                 tags: None,
                                 detail: Some(self.ctx.render_func_header(uri, func_symbol.clone())),

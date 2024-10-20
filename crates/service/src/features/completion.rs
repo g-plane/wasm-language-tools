@@ -270,7 +270,8 @@ fn get_cmp_list(
                         symbol_table
                             .get_declared_params_and_locals(func)
                             .filter_map(|(symbol, idx)| {
-                                let (label, insert_text) = get_def_idx_cmp_text(idx, has_dollar)?;
+                                let (label, insert_text) =
+                                    get_def_idx_cmp_text(service, idx, has_dollar)?;
                                 Some(CompletionItem {
                                     label,
                                     insert_text,
@@ -296,7 +297,8 @@ fn get_cmp_list(
                     let has_dollar = token.text().starts_with('$');
                     items.extend(symbol_table.get_declared_functions(module).filter_map(
                         |(symbol, idx)| {
-                            let (label, insert_text) = get_def_idx_cmp_text(idx, has_dollar)?;
+                            let (label, insert_text) =
+                                get_def_idx_cmp_text(service, idx, has_dollar)?;
                             Some(CompletionItem {
                                 label,
                                 insert_text,
@@ -323,7 +325,8 @@ fn get_cmp_list(
                     let has_dollar = token.text().starts_with('$');
                     items.extend(symbol_table.get_declared_func_types(module).filter_map(
                         |(_, idx)| {
-                            let (label, insert_text) = get_def_idx_cmp_text(idx, has_dollar)?;
+                            let (label, insert_text) =
+                                get_def_idx_cmp_text(service, idx, has_dollar)?;
                             Some(CompletionItem {
                                 label,
                                 insert_text,
@@ -343,7 +346,8 @@ fn get_cmp_list(
                     let has_dollar = token.text().starts_with('$');
                     items.extend(symbol_table.get_declared_globals(module).filter_map(
                         |(symbol, idx)| {
-                            let (label, insert_text) = get_def_idx_cmp_text(idx, has_dollar)?;
+                            let (label, insert_text) =
+                                get_def_idx_cmp_text(service, idx, has_dollar)?;
                             Some(CompletionItem {
                                 label,
                                 insert_text,
@@ -376,7 +380,8 @@ fn get_cmp_list(
                     let has_dollar = token.text().starts_with('$');
                     items.extend(symbol_table.get_declared_memories(module).filter_map(
                         |(_, idx)| {
-                            let (label, insert_text) = get_def_idx_cmp_text(idx, has_dollar)?;
+                            let (label, insert_text) =
+                                get_def_idx_cmp_text(service, idx, has_dollar)?;
                             Some(CompletionItem {
                                 label,
                                 insert_text,
@@ -441,15 +446,18 @@ fn get_cmp_list(
         })
 }
 
-fn get_def_idx_cmp_text(idx: &DefIdx, has_dollar: bool) -> Option<(String, Option<String>)> {
+fn get_def_idx_cmp_text(
+    service: &LanguageServiceCtx,
+    idx: &DefIdx,
+    has_dollar: bool,
+) -> Option<(String, Option<String>)> {
     if has_dollar {
-        let name = idx.name.as_ref()?;
+        let name = service.lookup_ident(idx.name?);
         Some((name.to_owned(), Some(name.strip_prefix('$')?.to_string())))
     } else {
         Some((
             idx.name
-                .as_ref()
-                .map(|name| name.to_string())
+                .map(|name| service.lookup_ident(name))
                 .unwrap_or_else(|| idx.num.to_string()),
             None,
         ))

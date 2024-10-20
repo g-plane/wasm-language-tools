@@ -74,10 +74,10 @@ fn render_func_header(db: &dyn TypesAnalyzerCtx, uri: InternUri, symbol: SymbolI
     let mut content = "(func".to_string();
     if let SymbolItemKind::Func(DefIdx {
         name: Some(name), ..
-    }) = &symbol.kind
+    }) = symbol.kind
     {
         content.push(' ');
-        content.push_str(name);
+        content.push_str(&db.lookup_ident(name));
     }
     if let Some(type_use) = symbol.key.green.children().find_map(|child| match child {
         NodeOrToken::Node(node) if node.kind() == SyntaxKind::TYPE_USE.into() => Some(node),

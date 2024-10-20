@@ -18,7 +18,7 @@ impl LanguageService {
         let inlay_hints = symbol_table
             .symbols
             .iter()
-            .filter_map(|symbol| match &symbol.kind {
+            .filter_map(|symbol| match symbol.kind {
                 SymbolItemKind::LocalRef(..) => {
                     if !range.contains_range(symbol.key.ptr.text_range()) {
                         return None;
@@ -68,7 +68,10 @@ impl LanguageService {
                         .filter(|last| range.contains_range(*last))
                         .map(|last| InlayHint {
                             position: helpers::rowan_pos_to_lsp_pos(&line_index, last.end()),
-                            label: InlayHintLabel::String(format!("(func {name})")),
+                            label: InlayHintLabel::String(format!(
+                                "(func {})",
+                                self.ctx.lookup_ident(name)
+                            )),
                             kind: None,
                             text_edits: None,
                             tooltip: None,
