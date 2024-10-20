@@ -3,7 +3,7 @@ use rowan::{
     ast::{support::token, AstNode, SyntaxNodePtr},
     GreenNode,
 };
-use std::hash::Hash;
+use std::{hash::Hash, rc::Rc};
 use wat_syntax::{
     ast::{ModuleFieldFunc, PlainInstr},
     SyntaxKind, SyntaxNode, WatLanguage,
@@ -13,7 +13,7 @@ use wat_syntax::{
 pub(crate) trait SymbolTablesCtx: FilesCtx {
     #[salsa::memoized]
     #[salsa::invoke(create_symbol_table)]
-    fn symbol_table(&self, uri: InternUri) -> SymbolTable;
+    fn symbol_table(&self, uri: InternUri) -> Rc<SymbolTable>;
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -57,7 +57,7 @@ impl PartialEq<RefIdx> for DefIdx {
 pub(crate) struct SymbolTable {
     pub symbols: Vec<SymbolItem>,
 }
-fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable {
+fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTable> {
     fn create_module_field_symbol(
         node: SyntaxNode,
         id: u32,
@@ -296,7 +296,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> SymbolTable 
             _ => {}
         }
     }
-    SymbolTable { symbols }
+    Rc::new(SymbolTable { symbols })
 }
 
 impl SymbolTable {

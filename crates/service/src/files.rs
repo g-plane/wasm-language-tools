@@ -1,6 +1,7 @@
 use crate::{diag::Diagnostic, InternUri};
 use line_index::{LineIndex, TextSize};
 use lsp_types::{Position, Range, Uri};
+use std::rc::Rc;
 use wat_parser::Parser;
 use wat_syntax::SyntaxNode;
 
@@ -14,7 +15,7 @@ pub(crate) trait FilesCtx: salsa::Database {
 
     #[salsa::memoized]
     #[salsa::invoke(get_line_index)]
-    fn line_index(&self, uri: InternUri) -> LineIndex;
+    fn line_index(&self, uri: InternUri) -> Rc<LineIndex>;
 
     #[salsa::memoized]
     #[salsa::invoke(parse)]
@@ -24,8 +25,8 @@ pub(crate) trait FilesCtx: salsa::Database {
     fn root(&self, uri: InternUri) -> SyntaxNode;
 }
 
-fn get_line_index(db: &dyn FilesCtx, uri: InternUri) -> LineIndex {
-    LineIndex::new(&db.source(uri))
+fn get_line_index(db: &dyn FilesCtx, uri: InternUri) -> Rc<LineIndex> {
+    Rc::new(LineIndex::new(&db.source(uri)))
 }
 
 fn parse(db: &dyn FilesCtx, uri: InternUri) -> (SyntaxNode, Vec<Diagnostic>) {
