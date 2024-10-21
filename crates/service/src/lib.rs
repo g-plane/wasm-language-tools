@@ -1,6 +1,5 @@
 mod binder;
 mod dataset;
-mod diag;
 mod features;
 mod files;
 mod helpers;
@@ -148,19 +147,7 @@ impl LanguageService {
 
     pub fn get_diagnostics(&self, uri: Uri) -> Vec<Diagnostic> {
         let uri = self.ctx.uri(uri);
-        let mut diagnostics = self
-            .ctx
-            .parser_result(uri)
-            .1
-            .into_iter()
-            .map(|diag| Diagnostic {
-                range: diag.range,
-                severity: Some(DiagnosticSeverity::ERROR),
-                source: Some("wat".into()),
-                message: diag.message,
-                ..Default::default()
-            })
-            .collect::<Vec<_>>();
+        let mut diagnostics = self.ctx.parser_result(uri).1;
 
         let line_index = self.ctx.line_index(uri);
         diagnostics.extend(

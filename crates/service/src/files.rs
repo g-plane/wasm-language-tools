@@ -1,6 +1,6 @@
-use crate::{diag::Diagnostic, InternUri};
+use crate::InternUri;
 use line_index::{LineIndex, TextSize};
-use lsp_types::{Position, Range, Uri};
+use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range, Uri};
 use std::rc::Rc;
 use wat_parser::Parser;
 use wat_syntax::SyntaxNode;
@@ -45,7 +45,10 @@ fn parse(db: &dyn FilesCtx, uri: InternUri) -> (SyntaxNode, Vec<Diagnostic>) {
                     Position::new(start.line, start.col),
                     Position::new(end.line, end.col),
                 ),
+                severity: Some(DiagnosticSeverity::ERROR),
+                source: Some("wat".into()),
                 message: format!("syntax error: {}", error.message),
+                ..Default::default()
             }
         })
         .collect();
