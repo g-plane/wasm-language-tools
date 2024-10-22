@@ -2,6 +2,8 @@ use insta::assert_json_snapshot;
 use lsp_types::{HoverParams, Position, TextDocumentIdentifier, TextDocumentPositionParams, Uri};
 use wat_service::LanguageService;
 
+mod memo;
+
 fn create_params(uri: Uri, position: Position) -> HoverParams {
     HoverParams {
         text_document_position_params: TextDocumentPositionParams {
