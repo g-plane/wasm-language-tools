@@ -44,17 +44,17 @@ ROOT@0..162
   ERROR@160..161 ")"
   WHITESPACE@161..162 "\n"
 
-error: invalid <unknown syntax error>
-  ┌─ binary.wat:1:1
+error: expected module field
+  ┌─ binary.wat:1:9
   │
 1 │ (module binary "\00asm\01\00\00\00")
-  │ ^^^^^^^^^^^^^^
+  │         ^^^^^^
 
-error: invalid <unknown syntax error>
-  ┌─ binary.wat:1:1
+error: expected module field
+  ┌─ binary.wat:1:16
   │
 1 │ (module binary "\00asm\01\00\00\00")
-  │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  │                ^^^^^^^^^^^^^^^^^^^^
 
 error: expected `)`
   ┌─ binary.wat:1:9

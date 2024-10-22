@@ -56,6 +56,9 @@ fn module_field(input: &mut Input) -> GreenResult {
         "elem" => module_field_elem,
         _ => fail,
     }
+    .context(StrContext::Expected(StrContextValue::Description(
+        "module field",
+    )))
     .parse_next(input)
 }
 
