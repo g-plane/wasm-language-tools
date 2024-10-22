@@ -276,12 +276,12 @@ fn get_cmp_list(
                                     label,
                                     insert_text,
                                     kind: Some(CompletionItemKind::VARIABLE),
-                                    label_details: service
-                                        .extract_type(symbol.key.green.clone())
-                                        .map(|ty| CompletionItemLabelDetails {
+                                    label_details: service.extract_type(symbol.green.clone()).map(
+                                        |ty| CompletionItemLabelDetails {
                                             description: Some(ty.to_string()),
                                             ..Default::default()
-                                        }),
+                                        },
+                                    ),
                                     ..Default::default()
                                 })
                             }),
@@ -353,7 +353,7 @@ fn get_cmp_list(
                                 insert_text,
                                 kind: Some(CompletionItemKind::VARIABLE),
                                 label_details: service
-                                    .extract_global_type(symbol.key.green.clone())
+                                    .extract_global_type(symbol.green.clone())
                                     .map(|ty| CompletionItemLabelDetails {
                                         description: Some(ty.to_string()),
                                         ..Default::default()

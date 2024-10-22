@@ -70,6 +70,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
     ) -> Option<SymbolItem> {
         node.parent().map(|parent| SymbolItem {
             key: node.clone().into(),
+            green: node.green().into(),
             region: parent.into(),
             kind: kind(DefIdx {
                 num: id,
@@ -87,6 +88,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
         token(&node, SyntaxKind::IDENT)
             .map(|ident| SymbolItem {
                 key: node.clone().into(),
+                green: node.green().into(),
                 region: region.clone(),
                 kind: kind(RefIdx::Name(db.ident(ident.text().to_string()))),
             })
@@ -96,6 +98,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                     .find(|it| matches!(it.kind(), SyntaxKind::UNSIGNED_INT | SyntaxKind::INT))
                     .and_then(|token| token.text().parse().ok())
                     .map(|num| SymbolItem {
+                        green: node.green().into(),
                         key: node.into(),
                         region,
                         kind: kind(RefIdx::Num(num)),
@@ -116,6 +119,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                     continue;
                 };
                 symbols.push(SymbolItem {
+                    green: node.green().into(),
                     key: node.into(),
                     region,
                     kind: SymbolItemKind::Module,
@@ -140,8 +144,10 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                     .flat_map(|type_use| type_use.params())
                     .fold(0, |i, param| {
                         if let Some(ident) = param.ident_token() {
+                            let param = param.syntax();
                             symbols.push(SymbolItem {
-                                key: param.syntax().to_owned().into(),
+                                key: param.to_owned().into(),
+                                green: param.green().into(),
                                 region: node.clone().into(),
                                 kind: SymbolItemKind::Param(DefIdx {
                                     num: i,
@@ -151,8 +157,10 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             i + 1
                         } else {
                             param.val_types().fold(i, |i, val_type| {
+                                let val_type = val_type.syntax();
                                 symbols.push(SymbolItem {
-                                    key: val_type.syntax().to_owned().into(),
+                                    key: val_type.to_owned().into(),
+                                    green: val_type.green().into(),
                                     region: node.clone().into(),
                                     kind: SymbolItemKind::Param(DefIdx { num: i, name: None }),
                                 });
@@ -162,8 +170,10 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                     });
                 func.locals().fold(local_index, |i, local| {
                     if let Some(ident) = local.ident_token() {
+                        let local = local.syntax();
                         symbols.push(SymbolItem {
-                            key: local.syntax().to_owned().into(),
+                            key: local.to_owned().into(),
+                            green: local.green().into(),
                             region: node.clone().into(),
                             kind: SymbolItemKind::Local(DefIdx {
                                 num: i,
@@ -173,8 +183,10 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                         i + 1
                     } else {
                         local.val_types().fold(i, |i, val_type| {
+                            let val_type = val_type.syntax();
                             symbols.push(SymbolItem {
-                                key: val_type.syntax().to_owned().into(),
+                                key: val_type.to_owned().into(),
+                                green: val_type.green().into(),
                                 region: node.clone().into(),
                                 kind: SymbolItemKind::Local(DefIdx { num: i, name: None }),
                             });
@@ -524,13 +536,11 @@ impl SymbolTable {
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct SymbolItemKey {
     pub ptr: SyntaxNodePtr<WatLanguage>,
-    pub green: GreenNode,
 }
 impl From<SyntaxNode> for SymbolItemKey {
     fn from(node: SyntaxNode) -> Self {
         SymbolItemKey {
             ptr: SyntaxNodePtr::new(&node),
-            green: node.green().into(),
         }
     }
 }
@@ -538,12 +548,13 @@ impl From<SyntaxNode> for SymbolItemKey {
 #[derive(Clone, Debug)]
 pub struct SymbolItem {
     pub key: SymbolItemKey,
+    pub green: GreenNode,
     pub region: SymbolItemKey,
     pub kind: SymbolItemKind,
 }
 impl PartialEq for SymbolItem {
     fn eq(&self, other: &Self) -> bool {
-        self.key == other.key
+        self.key == other.key && self.kind == other.kind
     }
 }
 impl Eq for SymbolItem {}

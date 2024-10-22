@@ -183,7 +183,7 @@ fn create_param_or_local_hover(ctx: &LanguageServiceCtx, symbol: &SymbolItem) ->
         }
         _ => {}
     }
-    if let Some(ty) = ctx.extract_type(symbol.key.green.clone()) {
+    if let Some(ty) = ctx.extract_type(symbol.green.clone()) {
         content_value.push(' ');
         content_value.push_str(&ty.to_string());
     }
@@ -231,7 +231,7 @@ fn create_type_def_hover(ctx: &LanguageServiceCtx, symbol: &SymbolItem) -> Marke
         content_value.push(' ');
         content_value.push_str(&ctx.lookup_ident(name));
     }
-    if let Some(func_type) = helpers::ast::find_func_type_of_type_def(&symbol.key.green) {
+    if let Some(func_type) = helpers::ast::find_func_type_of_type_def(&symbol.green) {
         let sig = ctx.extract_func_sig(func_type.to_owned());
         content_value.push_str(" (func");
         if !sig.params.is_empty() || !sig.results.is_empty() {
