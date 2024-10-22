@@ -93,7 +93,7 @@ fn render_func_header(db: &dyn TypesAnalyzerCtx, uri: InternUri, symbol: SymbolI
                 content.push_str(&sig.to_string());
             }
         } else {
-            let node = symbol.key.ptr.to_node(&db.root(uri));
+            let node = symbol.key.ptr.to_node(&SyntaxNode::new_root(db.root(uri)));
             let symbol_table = db.symbol_table(uri);
             if let Some(func_type) = child::<TypeUse>(&node)
                 .and_then(|type_use| type_use.index())

@@ -15,7 +15,13 @@ impl LanguageService {
         let uri = self
             .ctx
             .uri(params.text_document_position.text_document.uri.clone());
-        let token = find_meaningful_token(&self.ctx, uri, params.text_document_position.position)?;
+        let root = self.build_root(uri);
+        let token = find_meaningful_token(
+            &self.ctx,
+            uri,
+            &root,
+            params.text_document_position.position,
+        )?;
         if !matches!(
             token.kind(),
             SyntaxKind::IDENT
@@ -31,7 +37,6 @@ impl LanguageService {
         let parent = token.parent()?;
 
         let line_index = self.ctx.line_index(uri);
-        let root = self.ctx.root(uri);
         let symbol_table = self.ctx.symbol_table(uri);
 
         let key = parent.into();

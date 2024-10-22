@@ -32,6 +32,10 @@ impl<'s> Parser<'s> {
     }
 
     pub fn parse(&mut self) -> SyntaxNode {
+        SyntaxNode::new_root(self.parse_to_green())
+    }
+
+    pub fn parse_to_green(&mut self) -> GreenNode {
         let (_, tree, errors) = root.recoverable_parse(*self.input);
         self.errors = errors;
         tree.expect("parser should always succeed even if there are syntax errors")
@@ -58,7 +62,7 @@ where
     NodeOrToken::Node(GreenNode::new(kind.into(), children))
 }
 
-fn root(input: &mut Input) -> PResult<SyntaxNode, SyntaxError> {
+fn root(input: &mut Input) -> PResult<GreenNode, SyntaxError> {
     (
         repeat::<_, _, Vec<_>, _, _>(0.., retry_once(module, [])),
         repeat(
@@ -73,7 +77,7 @@ fn root(input: &mut Input) -> PResult<SyntaxNode, SyntaxError> {
                 .into_iter()
                 .for_each(|mut module| children.append(&mut module));
             children.append(&mut trivias);
-            SyntaxNode::new_root(GreenNode::new(SyntaxKind::ROOT.into(), children))
+            GreenNode::new(SyntaxKind::ROOT.into(), children)
         })
 }
 

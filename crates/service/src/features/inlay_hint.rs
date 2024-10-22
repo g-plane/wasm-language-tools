@@ -11,7 +11,7 @@ impl LanguageService {
     pub fn inlay_hint(&self, params: InlayHintParams) -> Option<Vec<InlayHint>> {
         let uri = self.ctx.uri(params.text_document.uri);
         let line_index = self.ctx.line_index(uri);
-        let root = self.ctx.root(uri);
+        let root = self.build_root(uri);
         let symbol_table = self.ctx.symbol_table(uri);
 
         let range = helpers::lsp_range_to_rowan_range(&line_index, params.range)?;

@@ -12,7 +12,7 @@ use lsp_types::{
 };
 use rowan::{ast::support, Direction, TokenAtOffset};
 use smallvec::SmallVec;
-use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxToken};
+use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 impl LanguageService {
     pub fn completion(&self, params: CompletionParams) -> Option<CompletionResponse> {
@@ -35,7 +35,7 @@ fn find_token(
     position: Position,
 ) -> Option<SyntaxToken> {
     let offset = helpers::lsp_pos_to_rowan_pos(&service.line_index(uri), position)?;
-    match service.root(uri).token_at_offset(offset) {
+    match SyntaxNode::new_root(service.root(uri)).token_at_offset(offset) {
         TokenAtOffset::None => None,
         TokenAtOffset::Single(token) => Some(token),
         TokenAtOffset::Between(left, _) => Some(left),

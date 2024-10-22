@@ -106,7 +106,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
             })
     }
 
-    let root = db.root(uri);
+    let root = SyntaxNode::new_root(db.root(uri));
     let mut module_field_id = 0;
     let mut symbols = Vec::with_capacity(2);
     for node in root.descendants() {

@@ -28,12 +28,13 @@ impl LanguageService {
                 .clone(),
         );
         let line_index = self.ctx.line_index(uri);
-        let root = self.ctx.root(uri);
+        let root = self.build_root(uri);
         let symbol_table = self.ctx.symbol_table(uri);
 
         let token = find_meaningful_token(
             &self.ctx,
             uri,
+            &root,
             params.text_document_position_params.position,
         )?;
         let parent_range = token.parent()?.text_range();
@@ -106,7 +107,7 @@ impl LanguageService {
         params: CallHierarchyIncomingCallsParams,
     ) -> Option<Vec<CallHierarchyIncomingCall>> {
         let uri = self.ctx.uri(params.item.uri.clone());
-        let root = self.ctx.root(uri);
+        let root = self.build_root(uri);
         let symbol_table = self.ctx.symbol_table(uri);
 
         let line_index = self.ctx.line_index(uri);
@@ -187,7 +188,7 @@ impl LanguageService {
         params: CallHierarchyOutgoingCallsParams,
     ) -> Option<Vec<CallHierarchyOutgoingCall>> {
         let uri = self.ctx.uri(params.item.uri.clone());
-        let root = self.ctx.root(uri);
+        let root = self.build_root(uri);
         let symbol_table = self.ctx.symbol_table(uri);
 
         let line_index = self.ctx.line_index(uri);
@@ -235,7 +236,7 @@ impl LanguageService {
                                 ),
                                 selection_range: create_selection_range(
                                     func_symbol,
-                                    &self.ctx.root(uri),
+                                    &self.build_root(uri),
                                     &line_index,
                                 ),
                                 data: None,

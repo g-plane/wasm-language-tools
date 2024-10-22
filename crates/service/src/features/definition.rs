@@ -21,9 +21,11 @@ impl LanguageService {
                 .uri
                 .clone(),
         );
+        let root = self.build_root(uri);
         let token = find_meaningful_token(
             &self.ctx,
             uri,
+            &root,
             params.text_document_position_params.position,
         )?;
 
@@ -33,7 +35,6 @@ impl LanguageService {
         }
 
         let line_index = self.ctx.line_index(uri);
-        let root = self.ctx.root(uri);
         let symbol_table = self.ctx.symbol_table(uri);
         let key = parent.into();
         symbol_table
@@ -104,11 +105,12 @@ impl LanguageService {
                 .clone(),
         );
         let line_index = self.ctx.line_index(uri);
-        let root = self.ctx.root(uri);
+        let root = self.build_root(uri);
         let symbol_table = self.ctx.symbol_table(uri);
         let token = find_meaningful_token(
             &self.ctx,
             uri,
+            &root,
             params.text_document_position_params.position,
         )?;
 
@@ -152,11 +154,12 @@ impl LanguageService {
                 .clone(),
         );
         let line_index = self.ctx.line_index(uri);
-        let root = self.ctx.root(uri);
+        let root = self.build_root(uri);
         let symbol_table = self.ctx.symbol_table(uri);
         let token = find_meaningful_token(
             &self.ctx,
             uri,
+            &root,
             params.text_document_position_params.position,
         )?;
         let parent = token.parent()?;

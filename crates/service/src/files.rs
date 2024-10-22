@@ -1,9 +1,9 @@
 use crate::InternUri;
 use line_index::{LineIndex, TextSize};
 use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range, Uri};
+use rowan::GreenNode;
 use std::rc::Rc;
 use wat_parser::Parser;
-use wat_syntax::SyntaxNode;
 
 #[salsa::query_group(Files)]
 pub(crate) trait FilesCtx: salsa::Database {
@@ -19,21 +19,21 @@ pub(crate) trait FilesCtx: salsa::Database {
 
     #[salsa::memoized]
     #[salsa::invoke(parse)]
-    fn parser_result(&self, uri: InternUri) -> (SyntaxNode, Vec<Diagnostic>);
+    fn parser_result(&self, uri: InternUri) -> (GreenNode, Vec<Diagnostic>);
 
     #[salsa::memoized]
-    fn root(&self, uri: InternUri) -> SyntaxNode;
+    fn root(&self, uri: InternUri) -> GreenNode;
 }
 
 fn get_line_index(db: &dyn FilesCtx, uri: InternUri) -> Rc<LineIndex> {
     Rc::new(LineIndex::new(&db.source(uri)))
 }
 
-fn parse(db: &dyn FilesCtx, uri: InternUri) -> (SyntaxNode, Vec<Diagnostic>) {
+fn parse(db: &dyn FilesCtx, uri: InternUri) -> (GreenNode, Vec<Diagnostic>) {
     let source = db.source(uri);
     let line_index = db.line_index(uri);
     let mut parser = Parser::new(&source);
-    let tree = parser.parse();
+    let green = parser.parse_to_green();
     let syntax_errors = parser
         .errors()
         .iter()
@@ -52,9 +52,9 @@ fn parse(db: &dyn FilesCtx, uri: InternUri) -> (SyntaxNode, Vec<Diagnostic>) {
             }
         })
         .collect();
-    (tree, syntax_errors)
+    (green, syntax_errors)
 }
 
-fn root(db: &dyn FilesCtx, uri: InternUri) -> SyntaxNode {
+fn root(db: &dyn FilesCtx, uri: InternUri) -> GreenNode {
     db.parser_result(uri).0
 }

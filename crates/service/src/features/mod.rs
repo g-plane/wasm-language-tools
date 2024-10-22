@@ -18,11 +18,12 @@ use wat_syntax::{is_punc, is_trivia, SyntaxElement, SyntaxKind, SyntaxNode, Synt
 fn find_meaningful_token(
     service: &LanguageServiceCtx,
     uri: InternUri,
+    root: &SyntaxNode,
     position: Position,
 ) -> Option<SyntaxToken> {
     let offset = helpers::lsp_pos_to_rowan_pos(&service.line_index(uri), position)?;
 
-    match service.root(uri).token_at_offset(offset) {
+    match root.token_at_offset(offset) {
         TokenAtOffset::None => None,
         TokenAtOffset::Single(token) => Some(token),
         TokenAtOffset::Between(left, right) => {

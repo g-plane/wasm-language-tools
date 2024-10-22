@@ -22,9 +22,11 @@ impl LanguageService {
                 .uri
                 .clone(),
         );
+        let root = self.build_root(uri);
         let token = find_meaningful_token(
             &self.ctx,
             uri,
+            &root,
             params.text_document_position_params.position,
         )?;
         let line_index = self.ctx.line_index(uri);
@@ -47,21 +49,16 @@ impl LanguageService {
                         )),
                     })
                     .or_else(|| {
-                        symbol_table.find_global_defs(&key).map(|symbols| {
-                            let root = self.ctx.root(uri);
-                            Hover {
-                                contents: HoverContents::Array(
-                                    symbols
-                                        .map(|symbol| {
-                                            create_global_def_hover(&self.ctx, symbol, &root)
-                                        })
-                                        .collect(),
-                                ),
-                                range: Some(helpers::rowan_range_to_lsp_range(
-                                    &line_index,
-                                    token.text_range(),
-                                )),
-                            }
+                        symbol_table.find_global_defs(&key).map(|symbols| Hover {
+                            contents: HoverContents::Array(
+                                symbols
+                                    .map(|symbol| create_global_def_hover(&self.ctx, symbol, &root))
+                                    .collect(),
+                            ),
+                            range: Some(helpers::rowan_range_to_lsp_range(
+                                &line_index,
+                                token.text_range(),
+                            )),
                         })
                     })
                     .or_else(|| {
@@ -99,7 +96,7 @@ impl LanguageService {
                             .symbols
                             .iter()
                             .find(|symbol| symbol.key == key)
-                            .and_then(|symbol| create_def_hover(&self.ctx, uri, symbol))
+                            .and_then(|symbol| create_def_hover(&self.ctx, uri, &root, symbol))
                             .map(|contents| Hover {
                                 contents,
                                 range: Some(helpers::rowan_range_to_lsp_range(
@@ -131,7 +128,7 @@ impl LanguageService {
                     .symbols
                     .iter()
                     .find(|symbol| symbol.key == key)
-                    .and_then(|symbol| create_def_hover(&self.ctx, uri, symbol))
+                    .and_then(|symbol| create_def_hover(&self.ctx, uri, &root, symbol))
                     .map(|contents| Hover {
                         contents,
                         range: Some(helpers::rowan_range_to_lsp_range(
@@ -148,6 +145,7 @@ impl LanguageService {
 fn create_def_hover(
     ctx: &LanguageServiceCtx,
     uri: InternUri,
+    root: &SyntaxNode,
     symbol: &SymbolItem,
 ) -> Option<HoverContents> {
     let content = match symbol.kind {
@@ -158,7 +156,7 @@ fn create_def_hover(
             create_marked_string(ctx.render_func_header(uri, symbol.clone()))
         }
         SymbolItemKind::Type(..) => create_type_def_hover(ctx, symbol),
-        SymbolItemKind::GlobalDef(..) => create_global_def_hover(ctx, symbol, &ctx.root(uri)),
+        SymbolItemKind::GlobalDef(..) => create_global_def_hover(ctx, symbol, root),
         _ => return None,
     };
     Some(HoverContents::Scalar(content))

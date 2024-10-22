@@ -18,8 +18,7 @@ impl LanguageService {
         let mut prev_start = 0;
         let tokens = self.build_tokens(
             uri,
-            self.ctx
-                .root(uri)
+            self.build_root(uri)
                 .descendants_with_tokens()
                 .filter_map(SyntaxElement::into_token),
             &mut delta_line,
@@ -43,8 +42,7 @@ impl LanguageService {
         let mut delta_line = 0;
         let mut prev_start = 0;
         let mut tokens = self
-            .ctx
-            .root(uri)
+            .build_root(uri)
             .descendants_with_tokens()
             .filter_map(SyntaxElement::into_token)
             .skip_while(|token| token.text_range().end() <= start)

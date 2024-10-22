@@ -25,7 +25,7 @@ use lsp_types::{
 use rowan::ast::{support::children, AstNode};
 use rustc_hash::FxBuildHasher;
 use salsa::{InternId, InternKey};
-use wat_syntax::ast::Module;
+use wat_syntax::{ast::Module, SyntaxNode};
 
 #[salsa::database(Files, SymbolTables, TypesAnalyzer)]
 #[derive(Default)]
@@ -151,7 +151,7 @@ impl LanguageService {
 
         let line_index = self.ctx.line_index(uri);
         diagnostics.extend(
-            children::<Module>(&self.ctx.root(uri))
+            children::<Module>(&self.build_root(uri))
                 .skip(1)
                 .map(|module| {
                     let range = module.syntax().text_range();
@@ -171,6 +171,10 @@ impl LanguageService {
         );
 
         diagnostics
+    }
+
+    fn build_root(&self, uri: InternUri) -> SyntaxNode {
+        SyntaxNode::new_root(self.ctx.root(uri))
     }
 }
 

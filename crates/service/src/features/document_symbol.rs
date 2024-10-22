@@ -12,7 +12,7 @@ impl LanguageService {
     pub fn document_symbol(&self, params: DocumentSymbolParams) -> Option<DocumentSymbolResponse> {
         let uri = self.ctx.uri(params.text_document.uri);
         let line_index = self.ctx.line_index(uri);
-        let root = self.ctx.root(uri);
+        let root = self.build_root(uri);
         let symbol_table = self.ctx.symbol_table(uri);
 
         #[allow(deprecated)]
