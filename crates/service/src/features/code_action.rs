@@ -11,7 +11,7 @@ impl LanguageService {
     pub fn code_action(&self, params: CodeActionParams) -> Option<Vec<CodeActionOrCommand>> {
         let uri = self.ctx.uri(params.text_document.uri.clone());
         let line_index = self.ctx.line_index(uri);
-        let root = self.build_root(uri);
+        let root = SyntaxNode::new_root(self.ctx.root(uri));
         let node = root
             .child_or_token_at_range(helpers::lsp_range_to_rowan_range(
                 &line_index,

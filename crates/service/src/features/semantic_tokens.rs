@@ -6,7 +6,7 @@ use lsp_types::{
 };
 use rowan::ast::support;
 use std::mem;
-use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxToken};
+use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 impl LanguageService {
     pub fn semantic_tokens_full(
@@ -18,7 +18,7 @@ impl LanguageService {
         let mut prev_start = 0;
         let tokens = self.build_tokens(
             uri,
-            self.build_root(uri)
+            SyntaxNode::new_root(self.ctx.root(uri))
                 .descendants_with_tokens()
                 .filter_map(SyntaxElement::into_token),
             &mut delta_line,
@@ -41,8 +41,7 @@ impl LanguageService {
 
         let mut delta_line = 0;
         let mut prev_start = 0;
-        let mut tokens = self
-            .build_root(uri)
+        let mut tokens = SyntaxNode::new_root(self.ctx.root(uri))
             .descendants_with_tokens()
             .filter_map(SyntaxElement::into_token)
             .skip_while(|token| token.text_range().end() <= start)

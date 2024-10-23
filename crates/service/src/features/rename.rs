@@ -10,7 +10,7 @@ use lsp_types::{
 use rowan::ast::support;
 use std::collections::HashMap;
 use wat_parser::is_id_char;
-use wat_syntax::{SyntaxKind, SyntaxToken};
+use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
 const ERR_INVALID_IDENTIFIER: &str = "not a valid identifier";
 const ERR_CANT_BE_RENAMED: &str = "This can't be renamed.";
@@ -22,7 +22,8 @@ impl LanguageService {
     ) -> Option<PrepareRenameResponse> {
         let uri = self.ctx.uri(params.text_document.uri);
         let line_index = self.ctx.line_index(uri);
-        let token = find_meaningful_token(&self.ctx, uri, &self.build_root(uri), params.position)
+        let root = SyntaxNode::new_root(self.ctx.root(uri));
+        let token = find_meaningful_token(&self.ctx, uri, &root, params.position)
             .filter(|token| token.kind() == SyntaxKind::IDENT)?;
         let range = helpers::rowan_range_to_lsp_range(&line_index, token.text_range());
         Some(PrepareRenameResponse::Range(range))
@@ -47,7 +48,7 @@ impl LanguageService {
         let token = find_meaningful_token(
             &self.ctx,
             uri,
-            &self.build_root(uri),
+            &SyntaxNode::new_root(self.ctx.root(uri)),
             params.text_document_position.position,
         )
         .filter(|token| token.kind() == SyntaxKind::IDENT)
@@ -61,7 +62,7 @@ impl LanguageService {
             .ctx
             .uri(params.text_document_position.text_document.uri.clone());
         let line_index = self.ctx.line_index(uri);
-        let root = self.build_root(uri);
+        let root = SyntaxNode::new_root(self.ctx.root(uri));
         let symbol_table = self.ctx.symbol_table(uri);
 
         let old_name = self.ctx.ident(ident_token.text().to_string());

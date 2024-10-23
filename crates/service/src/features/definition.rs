@@ -21,7 +21,7 @@ impl LanguageService {
                 .uri
                 .clone(),
         );
-        let root = self.build_root(uri);
+        let root = SyntaxNode::new_root(self.ctx.root(uri));
         let token = find_meaningful_token(
             &self.ctx,
             uri,
@@ -105,7 +105,7 @@ impl LanguageService {
                 .clone(),
         );
         let line_index = self.ctx.line_index(uri);
-        let root = self.build_root(uri);
+        let root = SyntaxNode::new_root(self.ctx.root(uri));
         let symbol_table = self.ctx.symbol_table(uri);
         let token = find_meaningful_token(
             &self.ctx,
@@ -154,7 +154,7 @@ impl LanguageService {
                 .clone(),
         );
         let line_index = self.ctx.line_index(uri);
-        let root = self.build_root(uri);
+        let root = SyntaxNode::new_root(self.ctx.root(uri));
         let symbol_table = self.ctx.symbol_table(uri);
         let token = find_meaningful_token(
             &self.ctx,

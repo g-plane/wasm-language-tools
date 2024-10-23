@@ -6,13 +6,13 @@ use crate::{
 use lsp_types::{DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind};
 use rowan::ast::support::token;
 use rustc_hash::FxHashMap;
-use wat_syntax::SyntaxKind;
+use wat_syntax::{SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     pub fn document_symbol(&self, params: DocumentSymbolParams) -> Option<DocumentSymbolResponse> {
         let uri = self.ctx.uri(params.text_document.uri);
         let line_index = self.ctx.line_index(uri);
-        let root = self.build_root(uri);
+        let root = SyntaxNode::new_root(self.ctx.root(uri));
         let symbol_table = self.ctx.symbol_table(uri);
 
         #[allow(deprecated)]

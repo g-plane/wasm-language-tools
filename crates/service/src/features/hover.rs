@@ -22,7 +22,7 @@ impl LanguageService {
                 .uri
                 .clone(),
         );
-        let root = self.build_root(uri);
+        let root = SyntaxNode::new_root(self.ctx.root(uri));
         let token = find_meaningful_token(
             &self.ctx,
             uri,

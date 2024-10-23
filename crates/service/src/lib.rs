@@ -151,7 +151,7 @@ impl LanguageService {
 
         let line_index = self.ctx.line_index(uri);
         diagnostics.extend(
-            children::<Module>(&self.build_root(uri))
+            children::<Module>(&SyntaxNode::new_root(self.ctx.root(uri)))
                 .skip(1)
                 .map(|module| {
                     let range = module.syntax().text_range();
@@ -171,10 +171,6 @@ impl LanguageService {
         );
 
         diagnostics
-    }
-
-    fn build_root(&self, uri: InternUri) -> SyntaxNode {
-        SyntaxNode::new_root(self.ctx.root(uri))
     }
 }
 
