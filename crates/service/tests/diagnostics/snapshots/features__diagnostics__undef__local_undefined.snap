@@ -1,0 +1,24 @@
+---
+source: crates/service/tests/diagnostics/undef.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 25
+        },
+        "end": {
+          "line": 0,
+          "character": 26
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "cannot find `0` in this scope"
+    }
+  ]
+}

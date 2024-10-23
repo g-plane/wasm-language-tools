@@ -4,6 +4,7 @@ use lsp_types::{
 };
 
 mod multi_modules;
+mod undef;
 
 fn create_params(uri: Uri) -> DocumentDiagnosticParams {
     DocumentDiagnosticParams {
