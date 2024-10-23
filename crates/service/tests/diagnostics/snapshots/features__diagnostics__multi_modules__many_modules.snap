@@ -1,0 +1,39 @@
+---
+source: crates/service/tests/diagnostics/multi_modules.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 9
+        },
+        "end": {
+          "line": 0,
+          "character": 17
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "only one module is allowed in one file"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 18
+        },
+        "end": {
+          "line": 0,
+          "character": 26
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "only one module is allowed in one file"
+    }
+  ]
+}

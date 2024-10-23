@@ -7,6 +7,8 @@ mod completion;
 #[cfg(test)]
 mod definition;
 #[cfg(test)]
+mod diagnostics;
+#[cfg(test)]
 mod document_symbol;
 #[cfg(test)]
 mod hover;
