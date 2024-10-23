@@ -2,6 +2,7 @@ mod call_hierarchy;
 mod code_action;
 mod completion;
 mod definition;
+mod diagnostics;
 mod document_symbol;
 mod hover;
 mod inlay_hint;

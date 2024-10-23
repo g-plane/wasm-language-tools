@@ -8,28 +8,34 @@ use lsp_types::{
     },
     request::{
         CallHierarchyIncomingCalls, CallHierarchyOutgoingCalls, CallHierarchyPrepare,
-        CodeActionRequest, Completion, DocumentSymbolRequest, GotoDeclaration, GotoDefinition,
-        GotoTypeDefinition, HoverRequest, InlayHintRequest, PrepareRenameRequest, References,
-        Rename, SemanticTokensFullRequest, SemanticTokensRangeRequest,
+        CodeActionRequest, Completion, DocumentDiagnosticRequest, DocumentSymbolRequest,
+        GotoDeclaration, GotoDefinition, GotoTypeDefinition, HoverRequest, InlayHintRequest,
+        PrepareRenameRequest, References, Rename, SemanticTokensFullRequest,
+        SemanticTokensRangeRequest,
     },
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
-    PublishDiagnosticsParams, Uri,
+    InitializeParams, PublishDiagnosticsParams, Uri,
 };
 use wat_service::LanguageService;
 
 #[derive(Default)]
 pub struct Server {
     service: LanguageService,
+    support_pull_diagnostics: bool,
 }
 
 impl Server {
     pub fn run(&mut self) -> anyhow::Result<()> {
         let (connection, io_threads) = Connection::stdio();
         let (id, params) = connection.initialize_start()?;
-        connection.initialize_finish(
-            id,
-            serde_json::to_value(self.service.initialize(serde_json::from_value(params)?))?,
-        )?;
+        let params = serde_json::from_value::<InitializeParams>(params)?;
+        self.support_pull_diagnostics = params
+            .capabilities
+            .text_document
+            .as_ref()
+            .and_then(|it| it.diagnostic.as_ref())
+            .is_some();
+        connection.initialize_finish(id, serde_json::to_value(self.service.initialize(params))?)?;
         self.server_loop(connection)?;
         io_threads.join()?;
         Ok(())
@@ -104,6 +110,20 @@ impl Server {
                                 id,
                                 result: Some(serde_json::to_value(
                                     self.service.completion(params),
+                                )?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<DocumentDiagnosticRequest>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.pull_diagnostics(params),
                                 )?),
                                 error: None,
                             }))?;
@@ -313,7 +333,9 @@ impl Server {
     ) -> anyhow::Result<()> {
         self.service
             .commit_file(params.text_document.uri.clone(), params.text_document.text);
-        self.publish_diagnostics(conn, params.text_document.uri)?;
+        if !self.support_pull_diagnostics {
+            self.publish_diagnostics(conn, params.text_document.uri)?;
+        }
         Ok(())
     }
 
@@ -325,7 +347,9 @@ impl Server {
         if let Some(change) = params.content_changes.first() {
             self.service
                 .commit_file(params.text_document.uri.clone(), change.text.clone());
-            self.publish_diagnostics(conn, params.text_document.uri)?;
+            if !self.support_pull_diagnostics {
+                self.publish_diagnostics(conn, params.text_document.uri)?;
+            }
         }
         Ok(())
     }
@@ -347,14 +371,9 @@ impl Server {
     }
 
     fn publish_diagnostics(&self, conn: &Connection, uri: Uri) -> anyhow::Result<()> {
-        let diagnostics = self.service.get_diagnostics(uri.clone());
         conn.sender.send(Message::Notification(Notification {
             method: PublishDiagnostics::METHOD.to_string(),
-            params: serde_json::to_value(PublishDiagnosticsParams {
-                uri,
-                diagnostics,
-                version: None,
-            })?,
+            params: serde_json::to_value(self.service.publish_diagnostics(uri))?,
         }))?;
         Ok(())
     }

@@ -15,12 +15,13 @@ use crate::{
 use indexmap::{IndexMap, IndexSet};
 use lsp_types::{
     CallHierarchyServerCapability, CodeActionKind, CodeActionOptions, CodeActionProviderCapability,
-    CompletionOptions, DeclarationCapability, Diagnostic, HoverProviderCapability,
-    InitializeParams, InitializeResult, OneOf, RenameOptions, SemanticTokenType,
-    SemanticTokensClientCapabilities, SemanticTokensFullOptions, SemanticTokensLegend,
-    SemanticTokensOptions, SemanticTokensServerCapabilities, ServerCapabilities, ServerInfo,
-    TextDocumentClientCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind,
-    TextDocumentSyncOptions, TextDocumentSyncSaveOptions, TypeDefinitionProviderCapability, Uri,
+    CompletionOptions, DeclarationCapability, DiagnosticOptions, DiagnosticServerCapabilities,
+    HoverProviderCapability, InitializeParams, InitializeResult, OneOf, RenameOptions,
+    SemanticTokenType, SemanticTokensClientCapabilities, SemanticTokensFullOptions,
+    SemanticTokensLegend, SemanticTokensOptions, SemanticTokensServerCapabilities,
+    ServerCapabilities, ServerInfo, TextDocumentClientCapabilities, TextDocumentSyncCapability,
+    TextDocumentSyncKind, TextDocumentSyncOptions, TextDocumentSyncSaveOptions,
+    TypeDefinitionProviderCapability, Uri,
 };
 use rustc_hash::FxBuildHasher;
 use salsa::{InternId, InternKey};
@@ -95,6 +96,14 @@ impl LanguageService {
                     ..Default::default()
                 }),
                 definition_provider: Some(OneOf::Left(true)),
+                diagnostic_provider: Some(DiagnosticServerCapabilities::Options(
+                    DiagnosticOptions {
+                        identifier: Some("wat".into()),
+                        inter_file_dependencies: false,
+                        workspace_diagnostics: false,
+                        ..Default::default()
+                    },
+                )),
                 type_definition_provider: Some(TypeDefinitionProviderCapability::Simple(true)),
                 declaration_provider: Some(DeclarationCapability::Simple(true)),
                 document_symbol_provider: Some(OneOf::Left(true)),
@@ -141,10 +150,6 @@ impl LanguageService {
     pub fn commit_file(&mut self, uri: Uri, source: String) {
         let uri = self.ctx.uri(uri);
         self.ctx.set_source(uri, source);
-    }
-
-    pub fn get_diagnostics(&self, uri: Uri) -> Vec<Diagnostic> {
-        checker::check_file(&self.ctx, self.ctx.uri(uri))
     }
 }
 
