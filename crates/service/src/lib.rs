@@ -1,4 +1,5 @@
 mod binder;
+mod checker;
 mod dataset;
 mod features;
 mod files;
@@ -14,18 +15,15 @@ use crate::{
 use indexmap::{IndexMap, IndexSet};
 use lsp_types::{
     CallHierarchyServerCapability, CodeActionKind, CodeActionOptions, CodeActionProviderCapability,
-    CompletionOptions, DeclarationCapability, Diagnostic, DiagnosticSeverity,
-    HoverProviderCapability, InitializeParams, InitializeResult, OneOf, Position, Range,
-    RenameOptions, SemanticTokenType, SemanticTokensClientCapabilities, SemanticTokensFullOptions,
-    SemanticTokensLegend, SemanticTokensOptions, SemanticTokensServerCapabilities,
-    ServerCapabilities, ServerInfo, TextDocumentClientCapabilities, TextDocumentSyncCapability,
-    TextDocumentSyncKind, TextDocumentSyncOptions, TextDocumentSyncSaveOptions,
-    TypeDefinitionProviderCapability, Uri,
+    CompletionOptions, DeclarationCapability, Diagnostic, HoverProviderCapability,
+    InitializeParams, InitializeResult, OneOf, RenameOptions, SemanticTokenType,
+    SemanticTokensClientCapabilities, SemanticTokensFullOptions, SemanticTokensLegend,
+    SemanticTokensOptions, SemanticTokensServerCapabilities, ServerCapabilities, ServerInfo,
+    TextDocumentClientCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind,
+    TextDocumentSyncOptions, TextDocumentSyncSaveOptions, TypeDefinitionProviderCapability, Uri,
 };
-use rowan::ast::{support::children, AstNode};
 use rustc_hash::FxBuildHasher;
 use salsa::{InternId, InternKey};
-use wat_syntax::{ast::Module, SyntaxNode};
 
 #[salsa::database(Files, SymbolTables, TypesAnalyzer)]
 #[derive(Default)]
@@ -146,31 +144,7 @@ impl LanguageService {
     }
 
     pub fn get_diagnostics(&self, uri: Uri) -> Vec<Diagnostic> {
-        let uri = self.ctx.uri(uri);
-        let mut diagnostics = self.ctx.parser_result(uri).1;
-
-        let line_index = self.ctx.line_index(uri);
-        diagnostics.extend(
-            children::<Module>(&SyntaxNode::new_root(self.ctx.root(uri)))
-                .skip(1)
-                .map(|module| {
-                    let range = module.syntax().text_range();
-                    let start = line_index.line_col(range.start());
-                    let end = line_index.line_col(range.end());
-                    Diagnostic {
-                        range: Range::new(
-                            Position::new(start.line, start.col),
-                            Position::new(end.line, end.col),
-                        ),
-                        severity: Some(DiagnosticSeverity::ERROR),
-                        source: Some("wat".into()),
-                        message: "only one module is allowed in one file".into(),
-                        ..Default::default()
-                    }
-                }),
-        );
-
-        diagnostics
+        checker::check_file(&self.ctx, self.ctx.uri(uri))
     }
 }
 
