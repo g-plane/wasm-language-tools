@@ -4,7 +4,7 @@ use crate::{
     files::FilesCtx,
     helpers,
     types_analyzer::TypesAnalyzerCtx,
-    InternUri, LanguageService, LanguageServiceCtx,
+    InternUri, LanguageService,
 };
 use lsp_types::{
     CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionParams,
@@ -16,21 +16,19 @@ use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 impl LanguageService {
     pub fn completion(&self, params: CompletionParams) -> Option<CompletionResponse> {
-        let uri = self
-            .ctx
-            .uri(params.text_document_position.text_document.uri);
-        let token = find_token(&self.ctx, uri, params.text_document_position.position)?;
+        let uri = self.uri(params.text_document_position.text_document.uri);
+        let token = find_token(self, uri, params.text_document_position.position)?;
 
         let cmp_ctx = get_cmp_ctx(&token)?;
 
-        let symbol_table = self.ctx.symbol_table(uri);
-        let items = get_cmp_list(&self.ctx, cmp_ctx, &token, uri, &symbol_table);
+        let symbol_table = self.symbol_table(uri);
+        let items = get_cmp_list(self, cmp_ctx, &token, uri, &symbol_table);
         Some(CompletionResponse::Array(items))
     }
 }
 
 fn find_token(
-    service: &LanguageServiceCtx,
+    service: &LanguageService,
     uri: InternUri,
     position: Position,
 ) -> Option<SyntaxToken> {
@@ -229,7 +227,7 @@ enum CmpCtx {
 }
 
 fn get_cmp_list(
-    service: &LanguageServiceCtx,
+    service: &LanguageService,
     ctx: SmallVec<[CmpCtx; 4]>,
     token: &SyntaxToken,
     uri: InternUri,
@@ -447,7 +445,7 @@ fn get_cmp_list(
 }
 
 fn get_def_idx_cmp_text(
-    service: &LanguageServiceCtx,
+    service: &LanguageService,
     idx: &DefIdx,
     has_dollar: bool,
 ) -> Option<(String, Option<String>)> {

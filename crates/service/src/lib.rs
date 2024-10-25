@@ -28,16 +28,11 @@ use salsa::{InternId, InternKey};
 
 #[salsa::database(Files, SymbolTables, TypesAnalyzer)]
 #[derive(Default)]
-struct LanguageServiceCtx {
-    storage: salsa::Storage<Self>,
-}
-impl salsa::Database for LanguageServiceCtx {}
-
-#[derive(Default)]
 pub struct LanguageService {
-    ctx: LanguageServiceCtx,
+    storage: salsa::Storage<Self>,
     semantic_token_kinds: IndexSet<SemanticTokenKind, FxBuildHasher>,
 }
+impl salsa::Database for LanguageService {}
 
 impl LanguageService {
     pub fn initialize(&mut self, params: InitializeParams) -> InitializeResult {
@@ -148,8 +143,8 @@ impl LanguageService {
     /// Commit a file to the service, usually called when handling `textDocument/didOpen` or
     /// `textDocument/didChange` notifications.
     pub fn commit_file(&mut self, uri: Uri, source: String) {
-        let uri = self.ctx.uri(uri);
-        self.ctx.set_source(uri, source);
+        let uri = self.uri(uri);
+        self.set_source(uri, source);
     }
 }
 

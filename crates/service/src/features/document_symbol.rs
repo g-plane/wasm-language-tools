@@ -10,10 +10,10 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     pub fn document_symbol(&self, params: DocumentSymbolParams) -> Option<DocumentSymbolResponse> {
-        let uri = self.ctx.uri(params.text_document.uri);
-        let line_index = self.ctx.line_index(uri);
-        let root = SyntaxNode::new_root(self.ctx.root(uri));
-        let symbol_table = self.ctx.symbol_table(uri);
+        let uri = self.uri(params.text_document.uri);
+        let line_index = self.line_index(uri);
+        let root = SyntaxNode::new_root(self.root(uri));
+        let symbol_table = self.symbol_table(uri);
 
         #[allow(deprecated)]
         let mut symbols_map = symbol_table
@@ -45,7 +45,7 @@ impl LanguageService {
                         DocumentSymbol {
                             name: func
                                 .name
-                                .map(|name| self.ctx.lookup_ident(name))
+                                .map(|name| self.lookup_ident(name))
                                 .unwrap_or_else(|| func.num.to_string()),
                             detail: None,
                             kind: SymbolKind::FUNCTION,
@@ -72,7 +72,7 @@ impl LanguageService {
                         DocumentSymbol {
                             name: local
                                 .name
-                                .map(|name| self.ctx.lookup_ident(name))
+                                .map(|name| self.lookup_ident(name))
                                 .unwrap_or_else(|| local.num.to_string()),
                             detail: None,
                             kind: SymbolKind::VARIABLE,
@@ -101,7 +101,7 @@ impl LanguageService {
                         DocumentSymbol {
                             name: idx
                                 .name
-                                .map(|name| self.ctx.lookup_ident(name))
+                                .map(|name| self.lookup_ident(name))
                                 .unwrap_or_else(|| idx.num.to_string()),
                             detail: None,
                             kind: SymbolKind::VARIABLE,

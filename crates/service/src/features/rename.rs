@@ -20,10 +20,10 @@ impl LanguageService {
         &self,
         params: TextDocumentPositionParams,
     ) -> Option<PrepareRenameResponse> {
-        let uri = self.ctx.uri(params.text_document.uri);
-        let line_index = self.ctx.line_index(uri);
-        let root = SyntaxNode::new_root(self.ctx.root(uri));
-        let token = find_meaningful_token(&self.ctx, uri, &root, params.position)
+        let uri = self.uri(params.text_document.uri);
+        let line_index = self.line_index(uri);
+        let root = SyntaxNode::new_root(self.root(uri));
+        let token = find_meaningful_token(self, uri, &root, params.position)
             .filter(|token| token.kind() == SyntaxKind::IDENT)?;
         let range = helpers::rowan_range_to_lsp_range(&line_index, token.text_range());
         Some(PrepareRenameResponse::Range(range))
@@ -41,14 +41,12 @@ impl LanguageService {
             ));
         }
 
-        let uri = self
-            .ctx
-            .uri(params.text_document_position.text_document.uri.clone());
+        let uri = self.uri(params.text_document_position.text_document.uri.clone());
         // We can't assume client supports "prepareRename" so we need to check the token again.
         let token = find_meaningful_token(
-            &self.ctx,
+            self,
             uri,
-            &SyntaxNode::new_root(self.ctx.root(uri)),
+            &SyntaxNode::new_root(self.root(uri)),
             params.text_document_position.position,
         )
         .filter(|token| token.kind() == SyntaxKind::IDENT)
@@ -58,14 +56,12 @@ impl LanguageService {
 
     #[allow(clippy::mutable_key_type)]
     fn rename_impl(&self, params: RenameParams, ident_token: SyntaxToken) -> Option<WorkspaceEdit> {
-        let uri = self
-            .ctx
-            .uri(params.text_document_position.text_document.uri.clone());
-        let line_index = self.ctx.line_index(uri);
-        let root = SyntaxNode::new_root(self.ctx.root(uri));
-        let symbol_table = self.ctx.symbol_table(uri);
+        let uri = self.uri(params.text_document_position.text_document.uri.clone());
+        let line_index = self.line_index(uri);
+        let root = SyntaxNode::new_root(self.root(uri));
+        let symbol_table = self.symbol_table(uri);
 
-        let old_name = self.ctx.ident(ident_token.text().to_string());
+        let old_name = self.ident(ident_token.text().to_string());
         let symbol_key = ident_token.parent()?.into();
         let symbol = symbol_table
             .symbols

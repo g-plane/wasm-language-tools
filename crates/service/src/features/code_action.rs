@@ -1,4 +1,4 @@
-use crate::{files::FilesCtx, helpers, InternUri, LanguageService, LanguageServiceCtx};
+use crate::{files::FilesCtx, helpers, InternUri, LanguageService};
 use line_index::LineIndex;
 use lsp_types::{
     CodeAction, CodeActionKind, CodeActionOrCommand, CodeActionParams, TextEdit, WorkspaceEdit,
@@ -9,9 +9,9 @@ use wat_syntax::{ast::Operand, SyntaxElement, SyntaxKind, SyntaxNode, WatLanguag
 
 impl LanguageService {
     pub fn code_action(&self, params: CodeActionParams) -> Option<Vec<CodeActionOrCommand>> {
-        let uri = self.ctx.uri(params.text_document.uri.clone());
-        let line_index = self.ctx.line_index(uri);
-        let root = SyntaxNode::new_root(self.ctx.root(uri));
+        let uri = self.uri(params.text_document.uri.clone());
+        let line_index = self.line_index(uri);
+        let root = SyntaxNode::new_root(self.root(uri));
         let node = root
             .child_or_token_at_range(helpers::lsp_range_to_rowan_range(
                 &line_index,
@@ -27,7 +27,7 @@ impl LanguageService {
                     .only
                     .as_ref()
                     .filter(|only| only.contains(&CodeActionKind::QUICKFIX))
-                    .and_then(|_| fix_invalid_mem_arg(&self.ctx, uri, &line_index, &node))
+                    .and_then(|_| fix_invalid_mem_arg(self, uri, &line_index, &node))
                 {
                     actions.push(CodeActionOrCommand::CodeAction(action));
                 }
@@ -42,7 +42,7 @@ impl LanguageService {
 }
 
 fn fix_invalid_mem_arg(
-    ctx: &LanguageServiceCtx,
+    service: &LanguageService,
     uri: InternUri,
     line_index: &LineIndex,
     node: &SyntaxNode,
@@ -128,7 +128,7 @@ fn fix_invalid_mem_arg(
         None
     } else {
         let mut changes = HashMap::with_capacity(1);
-        changes.insert(ctx.lookup_uri(uri), text_edits);
+        changes.insert(service.lookup_uri(uri), text_edits);
         Some(CodeAction {
             title: "Fix invalid memory argument".into(),
             kind: Some(CodeActionKind::QUICKFIX),

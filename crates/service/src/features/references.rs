@@ -12,16 +12,10 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     pub fn find_references(&self, params: ReferenceParams) -> Option<Vec<Location>> {
-        let uri = self
-            .ctx
-            .uri(params.text_document_position.text_document.uri.clone());
-        let root = SyntaxNode::new_root(self.ctx.root(uri));
-        let token = find_meaningful_token(
-            &self.ctx,
-            uri,
-            &root,
-            params.text_document_position.position,
-        )?;
+        let uri = self.uri(params.text_document_position.text_document.uri.clone());
+        let root = SyntaxNode::new_root(self.root(uri));
+        let token =
+            find_meaningful_token(self, uri, &root, params.text_document_position.position)?;
         if !matches!(
             token.kind(),
             SyntaxKind::IDENT
@@ -36,8 +30,8 @@ impl LanguageService {
         }
         let parent = token.parent()?;
 
-        let line_index = self.ctx.line_index(uri);
-        let symbol_table = self.ctx.symbol_table(uri);
+        let line_index = self.line_index(uri);
+        let symbol_table = self.symbol_table(uri);
 
         let key = parent.into();
         let current_symbol = symbol_table

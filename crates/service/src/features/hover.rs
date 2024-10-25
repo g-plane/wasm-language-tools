@@ -5,7 +5,7 @@ use crate::{
     files::FilesCtx,
     helpers,
     types_analyzer::TypesAnalyzerCtx,
-    InternUri, LanguageService, LanguageServiceCtx,
+    InternUri, LanguageService,
 };
 use lsp_types::{
     Hover, HoverContents, HoverParams, LanguageString, MarkedString, MarkupContent, MarkupKind,
@@ -15,34 +15,32 @@ use wat_syntax::{ast::GlobalType, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     pub fn hover(&self, params: HoverParams) -> Option<Hover> {
-        let uri = self.ctx.uri(
+        let uri = self.uri(
             params
                 .text_document_position_params
                 .text_document
                 .uri
                 .clone(),
         );
-        let root = SyntaxNode::new_root(self.ctx.root(uri));
+        let root = SyntaxNode::new_root(self.root(uri));
         let token = find_meaningful_token(
-            &self.ctx,
+            self,
             uri,
             &root,
             params.text_document_position_params.position,
         )?;
-        let line_index = self.ctx.line_index(uri);
+        let line_index = self.line_index(uri);
 
         match token.kind() {
             SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
-                let symbol_table = self.ctx.symbol_table(uri);
+                let symbol_table = self.symbol_table(uri);
 
                 let parent = token.parent()?;
                 let key = parent.into();
                 symbol_table
                     .find_param_or_local_def(&key)
                     .map(|symbol| Hover {
-                        contents: HoverContents::Scalar(create_param_or_local_hover(
-                            &self.ctx, symbol,
-                        )),
+                        contents: HoverContents::Scalar(create_param_or_local_hover(self, symbol)),
                         range: Some(helpers::rowan_range_to_lsp_range(
                             &line_index,
                             token.text_range(),
@@ -52,7 +50,7 @@ impl LanguageService {
                         symbol_table.find_global_defs(&key).map(|symbols| Hover {
                             contents: HoverContents::Array(
                                 symbols
-                                    .map(|symbol| create_global_def_hover(&self.ctx, symbol, &root))
+                                    .map(|symbol| create_global_def_hover(self, symbol, &root))
                                     .collect(),
                             ),
                             range: Some(helpers::rowan_range_to_lsp_range(
@@ -67,7 +65,7 @@ impl LanguageService {
                                 symbols
                                     .map(|symbol| {
                                         create_marked_string(
-                                            self.ctx.render_func_header(uri, symbol.clone()),
+                                            self.render_func_header(uri, symbol.clone()),
                                         )
                                     })
                                     .collect(),
@@ -82,7 +80,7 @@ impl LanguageService {
                         symbol_table.find_type_use_defs(&key).map(|symbols| Hover {
                             contents: HoverContents::Array(
                                 symbols
-                                    .map(|symbol| create_type_def_hover(&self.ctx, symbol))
+                                    .map(|symbol| create_type_def_hover(self, symbol))
                                     .collect(),
                             ),
                             range: Some(helpers::rowan_range_to_lsp_range(
@@ -96,7 +94,7 @@ impl LanguageService {
                             .symbols
                             .iter()
                             .find(|symbol| symbol.key == key)
-                            .and_then(|symbol| create_def_hover(&self.ctx, uri, &root, symbol))
+                            .and_then(|symbol| create_def_hover(self, uri, &root, symbol))
                             .map(|contents| Hover {
                                 contents,
                                 range: Some(helpers::rowan_range_to_lsp_range(
@@ -123,12 +121,12 @@ impl LanguageService {
                 let parent = token.parent()?;
                 let key = parent.into();
 
-                let symbol_table = self.ctx.symbol_table(uri);
+                let symbol_table = self.symbol_table(uri);
                 symbol_table
                     .symbols
                     .iter()
                     .find(|symbol| symbol.key == key)
-                    .and_then(|symbol| create_def_hover(&self.ctx, uri, &root, symbol))
+                    .and_then(|symbol| create_def_hover(self, uri, &root, symbol))
                     .map(|contents| Hover {
                         contents,
                         range: Some(helpers::rowan_range_to_lsp_range(
@@ -143,45 +141,45 @@ impl LanguageService {
 }
 
 fn create_def_hover(
-    ctx: &LanguageServiceCtx,
+    service: &LanguageService,
     uri: InternUri,
     root: &SyntaxNode,
     symbol: &SymbolItem,
 ) -> Option<HoverContents> {
     let content = match symbol.kind {
         SymbolItemKind::Param(..) | SymbolItemKind::Local(..) => {
-            create_param_or_local_hover(ctx, symbol)
+            create_param_or_local_hover(service, symbol)
         }
         SymbolItemKind::Func(..) => {
-            create_marked_string(ctx.render_func_header(uri, symbol.clone()))
+            create_marked_string(service.render_func_header(uri, symbol.clone()))
         }
-        SymbolItemKind::Type(..) => create_type_def_hover(ctx, symbol),
-        SymbolItemKind::GlobalDef(..) => create_global_def_hover(ctx, symbol, root),
+        SymbolItemKind::Type(..) => create_type_def_hover(service, symbol),
+        SymbolItemKind::GlobalDef(..) => create_global_def_hover(service, symbol, root),
         _ => return None,
     };
     Some(HoverContents::Scalar(content))
 }
 
-fn create_param_or_local_hover(ctx: &LanguageServiceCtx, symbol: &SymbolItem) -> MarkedString {
+fn create_param_or_local_hover(service: &LanguageService, symbol: &SymbolItem) -> MarkedString {
     let mut content_value = '('.to_string();
     match &symbol.kind {
         SymbolItemKind::Param(idx) => {
             content_value.push_str("param");
             if let Some(name) = idx.name {
                 content_value.push(' ');
-                content_value.push_str(&ctx.lookup_ident(name));
+                content_value.push_str(&service.lookup_ident(name));
             }
         }
         SymbolItemKind::Local(idx) => {
             content_value.push_str("local");
             if let Some(name) = idx.name {
                 content_value.push(' ');
-                content_value.push_str(&ctx.lookup_ident(name));
+                content_value.push_str(&service.lookup_ident(name));
             }
         }
         _ => {}
     }
-    if let Some(ty) = ctx.extract_type(symbol.green.clone()) {
+    if let Some(ty) = service.extract_type(symbol.green.clone()) {
         content_value.push(' ');
         content_value.push_str(&ty.to_string());
     }
@@ -190,7 +188,7 @@ fn create_param_or_local_hover(ctx: &LanguageServiceCtx, symbol: &SymbolItem) ->
 }
 
 fn create_global_def_hover(
-    ctx: &LanguageServiceCtx,
+    service: &LanguageService,
     symbol: &SymbolItem,
     root: &SyntaxNode,
 ) -> MarkedString {
@@ -199,7 +197,7 @@ fn create_global_def_hover(
         content_value.push_str("global");
         if let Some(name) = idx.name {
             content_value.push(' ');
-            content_value.push_str(&ctx.lookup_ident(name));
+            content_value.push_str(&service.lookup_ident(name));
         }
     }
     let node = symbol.key.ptr.to_node(root);
@@ -220,17 +218,17 @@ fn create_global_def_hover(
     create_marked_string(content_value)
 }
 
-fn create_type_def_hover(ctx: &LanguageServiceCtx, symbol: &SymbolItem) -> MarkedString {
+fn create_type_def_hover(service: &LanguageService, symbol: &SymbolItem) -> MarkedString {
     let mut content_value = "(type".to_string();
     if let SymbolItemKind::Type(DefIdx {
         name: Some(name), ..
     }) = symbol.kind
     {
         content_value.push(' ');
-        content_value.push_str(&ctx.lookup_ident(name));
+        content_value.push_str(&service.lookup_ident(name));
     }
     if let Some(func_type) = helpers::ast::find_func_type_of_type_def(&symbol.green) {
-        let sig = ctx.extract_func_sig(func_type.to_owned());
+        let sig = service.extract_func_sig(func_type.to_owned());
         content_value.push_str(" (func");
         if !sig.params.is_empty() || !sig.results.is_empty() {
             content_value.push(' ');

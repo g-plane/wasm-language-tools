@@ -13,12 +13,12 @@ impl LanguageService {
         &self,
         params: SemanticTokensParams,
     ) -> Option<SemanticTokensResult> {
-        let uri = self.ctx.uri(params.text_document.uri);
+        let uri = self.uri(params.text_document.uri);
         let mut delta_line = 0;
         let mut prev_start = 0;
         let tokens = self.build_tokens(
             uri,
-            SyntaxNode::new_root(self.ctx.root(uri))
+            SyntaxNode::new_root(self.root(uri))
                 .descendants_with_tokens()
                 .filter_map(SyntaxElement::into_token),
             &mut delta_line,
@@ -34,14 +34,14 @@ impl LanguageService {
         &self,
         params: SemanticTokensRangeParams,
     ) -> Option<SemanticTokensRangeResult> {
-        let uri = self.ctx.uri(params.text_document.uri);
-        let line_index = self.ctx.line_index(uri);
+        let uri = self.uri(params.text_document.uri);
+        let line_index = self.line_index(uri);
         let start = helpers::lsp_pos_to_rowan_pos(&line_index, params.range.start)?;
         let end = helpers::lsp_pos_to_rowan_pos(&line_index, params.range.end)?;
 
         let mut delta_line = 0;
         let mut prev_start = 0;
-        let mut tokens = SyntaxNode::new_root(self.ctx.root(uri))
+        let mut tokens = SyntaxNode::new_root(self.root(uri))
             .descendants_with_tokens()
             .filter_map(SyntaxElement::into_token)
             .skip_while(|token| token.text_range().end() <= start)
@@ -67,7 +67,7 @@ impl LanguageService {
         delta_line: &mut u32,
         prev_start: &mut u32,
     ) -> Vec<SemanticToken> {
-        let line_index = self.ctx.line_index(uri);
+        let line_index = self.line_index(uri);
         tokens
             .filter_map(|token| {
                 if token.kind() == SyntaxKind::WHITESPACE {
@@ -106,14 +106,13 @@ impl LanguageService {
     }
 
     fn token_type(&self, uri: InternUri, token: &SyntaxToken) -> Option<u32> {
-        let symbol_table = self.ctx.symbol_table(uri);
+        let symbol_table = self.symbol_table(uri);
+        let token_kinds = &self.semantic_token_kinds;
         match token.kind() {
-            SyntaxKind::NUM_TYPE | SyntaxKind::VEC_TYPE | SyntaxKind::REF_TYPE => self
-                .semantic_token_kinds
-                .get_index_of(&SemanticTokenKind::Type),
-            SyntaxKind::KEYWORD => self
-                .semantic_token_kinds
-                .get_index_of(&SemanticTokenKind::Keyword),
+            SyntaxKind::NUM_TYPE | SyntaxKind::VEC_TYPE | SyntaxKind::REF_TYPE => {
+                token_kinds.get_index_of(&SemanticTokenKind::Type)
+            }
+            SyntaxKind::KEYWORD => token_kinds.get_index_of(&SemanticTokenKind::Keyword),
             SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
                 let parent = token.parent();
                 let grand = parent.as_ref().and_then(|parent| parent.parent());
@@ -124,8 +123,7 @@ impl LanguageService {
                             SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC
                         )
                 }) {
-                    self.semantic_token_kinds
-                        .get_index_of(&SemanticTokenKind::Func)
+                    token_kinds.get_index_of(&SemanticTokenKind::Func)
                 } else if let Some(operand) = grand
                     .filter(|grand| {
                         support::token(grand, SyntaxKind::INSTR_NAME)
@@ -134,20 +132,15 @@ impl LanguageService {
                     .and(parent)
                 {
                     if symbol_table.find_param_def(&operand.into()).is_some() {
-                        self.semantic_token_kinds
-                            .get_index_of(&SemanticTokenKind::Param)
+                        token_kinds.get_index_of(&SemanticTokenKind::Param)
                     } else {
-                        self.semantic_token_kinds
-                            .get_index_of(&SemanticTokenKind::Var)
+                        token_kinds.get_index_of(&SemanticTokenKind::Var)
                     }
                 } else {
-                    self.semantic_token_kinds
-                        .get_index_of(&SemanticTokenKind::Number)
+                    token_kinds.get_index_of(&SemanticTokenKind::Number)
                 }
             }
-            SyntaxKind::FLOAT => self
-                .semantic_token_kinds
-                .get_index_of(&SemanticTokenKind::Number),
+            SyntaxKind::FLOAT => token_kinds.get_index_of(&SemanticTokenKind::Number),
             SyntaxKind::IDENT => {
                 let parent = token.parent();
                 if parent
@@ -164,8 +157,7 @@ impl LanguageService {
                         .as_ref()
                         .is_some_and(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
                 {
-                    self.semantic_token_kinds
-                        .get_index_of(&SemanticTokenKind::Func)
+                    token_kinds.get_index_of(&SemanticTokenKind::Func)
                 } else if parent
                     .as_ref()
                     .is_some_and(|node| node.kind() == SyntaxKind::PARAM)
@@ -174,22 +166,16 @@ impl LanguageService {
                         .and_then(|parent| symbol_table.find_param_def(&parent.clone().into()))
                         .is_some()
                 {
-                    self.semantic_token_kinds
-                        .get_index_of(&SemanticTokenKind::Param)
+                    token_kinds.get_index_of(&SemanticTokenKind::Param)
                 } else {
-                    self.semantic_token_kinds
-                        .get_index_of(&SemanticTokenKind::Var)
+                    token_kinds.get_index_of(&SemanticTokenKind::Var)
                 }
             }
-            SyntaxKind::STRING => self
-                .semantic_token_kinds
-                .get_index_of(&SemanticTokenKind::String),
-            SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT => self
-                .semantic_token_kinds
-                .get_index_of(&SemanticTokenKind::Comment),
-            SyntaxKind::INSTR_NAME => self
-                .semantic_token_kinds
-                .get_index_of(&SemanticTokenKind::Op),
+            SyntaxKind::STRING => token_kinds.get_index_of(&SemanticTokenKind::String),
+            SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT => {
+                token_kinds.get_index_of(&SemanticTokenKind::Comment)
+            }
+            SyntaxKind::INSTR_NAME => token_kinds.get_index_of(&SemanticTokenKind::Op),
             _ => None,
         }
         .map(|v| v as u32)

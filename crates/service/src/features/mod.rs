@@ -11,13 +11,13 @@ mod rename;
 mod semantic_tokens;
 
 pub(crate) use self::semantic_tokens::SemanticTokenKind;
-use crate::{files::FilesCtx, helpers, InternUri, LanguageServiceCtx};
+use crate::{files::FilesCtx, helpers, InternUri, LanguageService};
 use lsp_types::Position;
 use rowan::TokenAtOffset;
 use wat_syntax::{is_punc, is_trivia, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 fn find_meaningful_token(
-    service: &LanguageServiceCtx,
+    service: &LanguageService,
     uri: InternUri,
     root: &SyntaxNode,
     position: Position,

@@ -1,13 +1,13 @@
 use crate::{
     binder::{RefIdx, SymbolItemKind, SymbolTable, SymbolTablesCtx},
-    helpers, LanguageServiceCtx,
+    helpers, LanguageService,
 };
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity};
 
 pub fn check(
+    service: &LanguageService,
     diags: &mut Vec<Diagnostic>,
-    ctx: &LanguageServiceCtx,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
 ) {
@@ -98,7 +98,7 @@ pub fn check(
                 "cannot find `{}` in this scope",
                 match idx {
                     RefIdx::Num(num) => num.to_string(),
-                    RefIdx::Name(name) => ctx.lookup_ident(*name),
+                    RefIdx::Name(name) => service.lookup_ident(*name),
                 }
             ),
             ..Default::default()

@@ -20,19 +20,19 @@ impl LanguageService {
         &self,
         params: CallHierarchyPrepareParams,
     ) -> Option<Vec<CallHierarchyItem>> {
-        let uri = self.ctx.uri(
+        let uri = self.uri(
             params
                 .text_document_position_params
                 .text_document
                 .uri
                 .clone(),
         );
-        let line_index = self.ctx.line_index(uri);
-        let root = SyntaxNode::new_root(self.ctx.root(uri));
-        let symbol_table = self.ctx.symbol_table(uri);
+        let line_index = self.line_index(uri);
+        let root = SyntaxNode::new_root(self.root(uri));
+        let symbol_table = self.symbol_table(uri);
 
         let token = find_meaningful_token(
-            &self.ctx,
+            self,
             uri,
             &root,
             params.text_document_position_params.position,
@@ -47,11 +47,11 @@ impl LanguageService {
                     Some(vec![CallHierarchyItem {
                         name: idx
                             .name
-                            .map(|name| self.ctx.lookup_ident(name))
+                            .map(|name| self.lookup_ident(name))
                             .unwrap_or_else(|| idx.num.to_string()),
                         kind: SymbolKind::FUNCTION,
                         tags: None,
-                        detail: Some(self.ctx.render_func_header(uri, symbol.clone())),
+                        detail: Some(self.render_func_header(uri, symbol.clone())),
                         uri: params
                             .text_document_position_params
                             .text_document
@@ -78,11 +78,11 @@ impl LanguageService {
                             .map(|(symbol, idx)| CallHierarchyItem {
                                 name: idx
                                     .name
-                                    .map(|name| self.ctx.lookup_ident(name))
+                                    .map(|name| self.lookup_ident(name))
                                     .unwrap_or_else(|| idx.num.to_string()),
                                 kind: SymbolKind::FUNCTION,
                                 tags: None,
-                                detail: Some(self.ctx.render_func_header(uri, symbol.clone())),
+                                detail: Some(self.render_func_header(uri, symbol.clone())),
                                 uri: params
                                     .text_document_position_params
                                     .text_document
@@ -106,11 +106,11 @@ impl LanguageService {
         &self,
         params: CallHierarchyIncomingCallsParams,
     ) -> Option<Vec<CallHierarchyIncomingCall>> {
-        let uri = self.ctx.uri(params.item.uri.clone());
-        let root = SyntaxNode::new_root(self.ctx.root(uri));
-        let symbol_table = self.ctx.symbol_table(uri);
+        let uri = self.uri(params.item.uri.clone());
+        let root = SyntaxNode::new_root(self.root(uri));
+        let symbol_table = self.symbol_table(uri);
 
-        let line_index = self.ctx.line_index(uri);
+        let line_index = self.line_index(uri);
         let callee_def_range = helpers::lsp_range_to_rowan_range(&line_index, params.item.range)?;
         let (callee_def_symbol, callee_def_idx) =
             symbol_table.symbols.iter().find_map(|symbol| {
@@ -163,11 +163,11 @@ impl LanguageService {
                     from: CallHierarchyItem {
                         name: idx
                             .name
-                            .map(|name| self.ctx.lookup_ident(name))
+                            .map(|name| self.lookup_ident(name))
                             .unwrap_or_else(|| idx.num.to_string()),
                         kind: SymbolKind::FUNCTION,
                         tags: None,
-                        detail: Some(self.ctx.render_func_header(uri, func_symbol.clone())),
+                        detail: Some(self.render_func_header(uri, func_symbol.clone())),
                         uri: params.item.uri.clone(),
                         range: helpers::rowan_range_to_lsp_range(
                             &line_index,
@@ -187,11 +187,11 @@ impl LanguageService {
         &self,
         params: CallHierarchyOutgoingCallsParams,
     ) -> Option<Vec<CallHierarchyOutgoingCall>> {
-        let uri = self.ctx.uri(params.item.uri.clone());
-        let root = SyntaxNode::new_root(self.ctx.root(uri));
-        let symbol_table = self.ctx.symbol_table(uri);
+        let uri = self.uri(params.item.uri.clone());
+        let root = SyntaxNode::new_root(self.root(uri));
+        let symbol_table = self.symbol_table(uri);
 
-        let line_index = self.ctx.line_index(uri);
+        let line_index = self.line_index(uri);
         let call_def_range = helpers::lsp_range_to_rowan_range(&line_index, params.item.range)?;
         let call_def_symbol = symbol_table.symbols.iter().find(|symbol| {
             if let SymbolItemKind::Func(..) = &symbol.kind {
@@ -219,24 +219,24 @@ impl LanguageService {
                         }
                     })
                     .map(move |(func_symbol, idx)| {
-                        let line_index = self.ctx.line_index(uri);
+                        let line_index = self.line_index(uri);
                         CallHierarchyOutgoingCall {
                             to: CallHierarchyItem {
                                 name: idx
                                     .name
-                                    .map(|name| self.ctx.lookup_ident(name))
+                                    .map(|name| self.lookup_ident(name))
                                     .unwrap_or_else(|| idx.num.to_string()),
                                 kind: SymbolKind::FUNCTION,
                                 tags: None,
-                                detail: Some(self.ctx.render_func_header(uri, func_symbol.clone())),
-                                uri: self.ctx.lookup_uri(uri),
+                                detail: Some(self.render_func_header(uri, func_symbol.clone())),
+                                uri: self.lookup_uri(uri),
                                 range: helpers::rowan_range_to_lsp_range(
                                     &line_index,
                                     func_symbol.key.ptr.text_range(),
                                 ),
                                 selection_range: create_selection_range(
                                     func_symbol,
-                                    &SyntaxNode::new_root(self.ctx.root(uri)),
+                                    &SyntaxNode::new_root(self.root(uri)),
                                     &line_index,
                                 ),
                                 data: None,

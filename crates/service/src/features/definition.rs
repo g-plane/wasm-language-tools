@@ -14,16 +14,16 @@ use wat_syntax::{ast::TypeUse, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     pub fn goto_definition(&self, params: GotoDefinitionParams) -> Option<GotoDefinitionResponse> {
-        let uri = self.ctx.uri(
+        let uri = self.uri(
             params
                 .text_document_position_params
                 .text_document
                 .uri
                 .clone(),
         );
-        let root = SyntaxNode::new_root(self.ctx.root(uri));
+        let root = SyntaxNode::new_root(self.root(uri));
         let token = find_meaningful_token(
-            &self.ctx,
+            self,
             uri,
             &root,
             params.text_document_position_params.position,
@@ -34,8 +34,8 @@ impl LanguageService {
             return None;
         }
 
-        let line_index = self.ctx.line_index(uri);
-        let symbol_table = self.ctx.symbol_table(uri);
+        let line_index = self.line_index(uri);
+        let symbol_table = self.symbol_table(uri);
         let key = parent.into();
         symbol_table
             .find_func_defs(&key)
@@ -97,18 +97,18 @@ impl LanguageService {
         &self,
         params: GotoDefinitionParams,
     ) -> Option<GotoDefinitionResponse> {
-        let uri = self.ctx.uri(
+        let uri = self.uri(
             params
                 .text_document_position_params
                 .text_document
                 .uri
                 .clone(),
         );
-        let line_index = self.ctx.line_index(uri);
-        let root = SyntaxNode::new_root(self.ctx.root(uri));
-        let symbol_table = self.ctx.symbol_table(uri);
+        let line_index = self.line_index(uri);
+        let root = SyntaxNode::new_root(self.root(uri));
+        let symbol_table = self.symbol_table(uri);
         let token = find_meaningful_token(
-            &self.ctx,
+            self,
             uri,
             &root,
             params.text_document_position_params.position,
@@ -146,18 +146,18 @@ impl LanguageService {
 
     /// Only available for function calls currently. This behaves same as "Goto Definition".
     pub fn goto_declaration(&self, params: GotoDefinitionParams) -> Option<GotoDefinitionResponse> {
-        let uri = self.ctx.uri(
+        let uri = self.uri(
             params
                 .text_document_position_params
                 .text_document
                 .uri
                 .clone(),
         );
-        let line_index = self.ctx.line_index(uri);
-        let root = SyntaxNode::new_root(self.ctx.root(uri));
-        let symbol_table = self.ctx.symbol_table(uri);
+        let line_index = self.line_index(uri);
+        let root = SyntaxNode::new_root(self.root(uri));
+        let symbol_table = self.symbol_table(uri);
         let token = find_meaningful_token(
-            &self.ctx,
+            self,
             uri,
             &root,
             params.text_document_position_params.position,
