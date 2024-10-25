@@ -72,7 +72,10 @@ impl LanguageService {
                 call_hierarchy_provider: Some(CallHierarchyServerCapability::Simple(true)),
                 code_action_provider: Some(CodeActionProviderCapability::Options(
                     CodeActionOptions {
-                        code_action_kinds: Some(vec![CodeActionKind::QUICKFIX]),
+                        code_action_kinds: Some(vec![
+                            CodeActionKind::QUICKFIX,
+                            CodeActionKind::REFACTOR_REWRITE,
+                        ]),
                         resolve_provider: Some(false),
                         ..Default::default()
                     },

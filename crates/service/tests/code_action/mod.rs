@@ -1,9 +1,9 @@
-use lsp_types::{
-    CodeActionContext, CodeActionKind, CodeActionParams, Range, TextDocumentIdentifier, Uri,
-};
+use lsp_types::{CodeActionContext, CodeActionParams, Range, TextDocumentIdentifier, Uri};
 
 #[cfg(test)]
 mod fix_invalid_mem_arg;
+#[cfg(test)]
+mod params_split;
 
 fn create_params(uri: Uri, range: Range) -> CodeActionParams {
     CodeActionParams {
@@ -11,7 +11,7 @@ fn create_params(uri: Uri, range: Range) -> CodeActionParams {
         range,
         context: CodeActionContext {
             diagnostics: vec![],
-            only: Some(vec![CodeActionKind::QUICKFIX]),
+            only: None,
             trigger_kind: None,
         },
         work_done_progress_params: Default::default(),
