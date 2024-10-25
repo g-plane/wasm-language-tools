@@ -4,6 +4,7 @@ mod dataset;
 mod features;
 mod files;
 mod helpers;
+mod refactorings;
 mod types_analyzer;
 
 use self::features::SemanticTokenKind;
