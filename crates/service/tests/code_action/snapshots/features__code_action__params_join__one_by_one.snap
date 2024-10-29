@@ -1,0 +1,29 @@
+---
+source: crates/service/tests/code_action/params_join.rs
+expression: response
+---
+[
+  {
+    "title": "Join parameters",
+    "kind": "refactor.rewrite",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 10
+              },
+              "end": {
+                "line": 2,
+                "character": 33
+              }
+            },
+            "newText": "(param i32 f64)"
+          }
+        ]
+      }
+    }
+  }
+]

@@ -11,7 +11,7 @@ pub fn act(
     node: &SyntaxNode,
 ) -> Option<CodeAction> {
     let types = node
-        .children_with_tokens()
+        .children()
         .filter(|child| child.kind() == SyntaxKind::VAL_TYPE)
         .collect::<Vec<_>>();
     let [first, rest @ ..] = &types[..] else {
@@ -30,6 +30,7 @@ pub fn act(
             new_text
         });
 
+    #[allow(clippy::mutable_key_type)]
     let mut changes = HashMap::with_capacity(1);
     changes.insert(
         service.lookup_uri(uri),

@@ -37,6 +37,13 @@ impl LanguageService {
                         }
                     }
                 }
+                SyntaxKind::TYPE_USE | SyntaxKind::FUNC_TYPE => {
+                    if rewrite {
+                        if let Some(action) = params_join::act(self, uri, &line_index, &it, range) {
+                            actions.push(CodeActionOrCommand::CodeAction(action));
+                        }
+                    }
+                }
                 _ => {}
             }
             node = it;

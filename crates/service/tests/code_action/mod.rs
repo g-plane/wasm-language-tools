@@ -3,6 +3,8 @@ use lsp_types::{CodeActionContext, CodeActionParams, Range, TextDocumentIdentifi
 #[cfg(test)]
 mod fix_invalid_mem_arg;
 #[cfg(test)]
+mod params_join;
+#[cfg(test)]
 mod params_split;
 
 fn create_params(uri: Uri, range: Range) -> CodeActionParams {
