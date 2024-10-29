@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..52
-  MODULE@0..51
+ROOT@0..87
+  MODULE@0..86
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -32,9 +32,30 @@ ROOT@0..52
         ERROR@46..47 "$"
         R_PAREN@47..48 ")"
       R_PAREN@48..49 ")"
-    WHITESPACE@49..50 "\n"
-    R_PAREN@50..51 ")"
-  WHITESPACE@51..52 "\n"
+    WHITESPACE@49..52 "\n  "
+    MODULE_FIELD_EXPORT@52..63
+      L_PAREN@52..53 "("
+      KEYWORD@53..59 "export"
+      WHITESPACE@59..60 " "
+      NAME@60..62
+        STRING@60..62 "\"\""
+      R_PAREN@62..63 ")"
+    WHITESPACE@63..66 "\n  "
+    MODULE_FIELD_EXPORT@66..84
+      L_PAREN@66..67 "("
+      KEYWORD@67..73 "export"
+      WHITESPACE@73..74 " "
+      NAME@74..76
+        STRING@74..76 "\"\""
+      WHITESPACE@76..77 " "
+      EXPORT_DESC_FUNC@77..83
+        L_PAREN@77..78 "("
+        KEYWORD@78..82 "func"
+        R_PAREN@82..83 ")"
+      R_PAREN@83..84 ")"
+    WHITESPACE@84..85 "\n"
+    R_PAREN@85..86 ")"
+  WHITESPACE@86..87 "\n"
 
 error: expected export desc
   ┌─ exports-malformed.wat:2:14
@@ -47,3 +68,15 @@ error: expected index (identifier or unsigned integer)
   │
 3 │   (export "" (func $))
   │                    ^
+
+error: expected export desc
+  ┌─ exports-malformed.wat:4:13
+  │
+4 │   (export "")
+  │             ^
+
+error: expected index (identifier or unsigned integer)
+  ┌─ exports-malformed.wat:5:19
+  │
+5 │   (export "" (func))
+  │                   ^

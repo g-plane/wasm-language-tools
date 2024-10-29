@@ -1,6 +1,6 @@
 use super::{
     instr::instr,
-    node, resume, retry, retry_once,
+    must, node, resume, retry, retry_once,
     token::{
         ident, keyword, l_paren, r_paren, string, trivias, trivias_prefixed, unsigned_int, word,
     },
@@ -143,7 +143,7 @@ fn module_field_export(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("export")),
         resume(name),
-        opt(retry_once(export_desc, [])),
+        must(retry_once(export_desc, [])),
         resume(r_paren),
     )
         .parse_next(input)
@@ -211,7 +211,7 @@ fn module_field_global(input: &mut Input) -> GreenResult {
         opt(trivias_prefixed(ident)),
         opt(trivias_prefixed(import)), // postpone syntax error for using import with export or instr
         opt(trivias_prefixed(export)),
-        opt(retry_once(global_type, [])),
+        must(retry_once(global_type, [])),
         repeat::<_, _, Vec<_>, _, _>(0.., retry_once(instr, [])),
         resume(r_paren),
     )
@@ -282,9 +282,8 @@ fn module_field_memory(input: &mut Input) -> GreenResult {
         opt(trivias_prefixed(import)), // postpone syntax error for using import with export or instr
         opt(trivias_prefixed(export)),
         dispatch! {peek(preceded(trivias, any));
-            '(' => opt(retry_once(data, [])),
-            ')' => resume(memory_type),
-            _ => opt(retry_once(memory_type, [])),
+            '(' => must(retry_once(data, [])),
+            _ => must(retry_once(memory_type, [])),
         },
         resume(r_paren),
     )
@@ -318,7 +317,7 @@ fn module_field_start(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("start")),
-        opt(retry_once(index, [])),
+        must(retry_once(index, [])),
         resume(r_paren),
     )
         .parse_next(input)
@@ -617,7 +616,7 @@ fn export_desc_variant<'s>(
     (
         l_paren,
         trivias_prefixed(keyword(keyword_literal)),
-        opt(retry_once(index, [])),
+        must(retry_once(index, [])),
         resume(r_paren),
     )
         .map(move |(l_paren, mut keyword, index, r_paren)| {

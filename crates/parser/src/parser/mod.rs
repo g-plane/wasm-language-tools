@@ -252,3 +252,30 @@ where
         Err(err)
     }
 }
+
+/// This is similar to [`opt`](winnow::combinator::opt),
+/// but it will record recoverable error if the parser fails.
+/// This can be used to avoid switch to another branch of [`alt`](winnow::combinator::alt).
+fn must<'s, P, O>(mut parser: P) -> impl WinnowParser<Input<'s>, Option<O>, SyntaxError>
+where
+    P: WinnowParser<Input<'s>, O, SyntaxError>,
+{
+    move |input: &mut Input<'s>| {
+        let start = input.checkpoint();
+        let mut err = match parser.parse_next(input) {
+            Ok(o) => return Ok(Some(o)),
+            Err(ErrMode::Incomplete(e)) => return Err(ErrMode::Incomplete(e)),
+            Err(err) => err,
+        };
+        let err_start = input.checkpoint();
+        if let Err(err_) = input.record_err(&start, &err_start, err) {
+            err = err_;
+        } else {
+            input.reset(&start);
+            return Ok(None);
+        }
+        input.reset(&start);
+        err = err.map(|err| SyntaxError::from_recoverable_error(&start, &err_start, input, err));
+        Err(err)
+    }
+}

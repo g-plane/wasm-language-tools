@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..66
-  MODULE@0..65
+ROOT@0..77
+  MODULE@0..76
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -41,9 +41,14 @@ ROOT@0..66
       ERROR@60..61 "("
       ERROR@61..62 ")"
       R_PAREN@62..63 ")"
-    WHITESPACE@63..64 "\n"
-    R_PAREN@64..65 ")"
-  WHITESPACE@65..66 "\n"
+    WHITESPACE@63..66 "\n  "
+    MODULE_FIELD_GLOBAL@66..74
+      L_PAREN@66..67 "("
+      KEYWORD@67..73 "global"
+      R_PAREN@73..74 ")"
+    WHITESPACE@74..75 "\n"
+    R_PAREN@75..76 ")"
+  WHITESPACE@76..77 "\n"
 
 error: expected `mut`
   ┌─ global-malformed.wat:2:12
@@ -62,3 +67,9 @@ error: invalid instruction name
   │
 4 │   (global (mut i32) ())
   │                     ^^
+
+error: expected `(`
+  ┌─ global-malformed.wat:5:10
+  │
+5 │   (global)
+  │          ^

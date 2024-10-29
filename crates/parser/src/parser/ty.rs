@@ -1,5 +1,5 @@
 use super::{
-    node, resume, retry_once, tok,
+    must, node, resume, retry_once, tok,
     token::{ident, keyword, l_paren, r_paren, trivias_prefixed, unsigned_int, word},
     GreenResult, Input,
 };
@@ -71,8 +71,10 @@ pub(super) fn param(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("param")),
         alt((
-            (trivias_prefixed(ident), retry_once(val_type, [])).map(|(mut children, mut ty)| {
-                children.append(&mut ty);
+            (trivias_prefixed(ident), must(retry_once(val_type, []))).map(|(mut children, ty)| {
+                if let Some(mut ty) = ty {
+                    children.append(&mut ty);
+                }
                 children
             }),
             repeat::<_, _, Vec<_>, _, _>(0.., retry_once(val_type, []))

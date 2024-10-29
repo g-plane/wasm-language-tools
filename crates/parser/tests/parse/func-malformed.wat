@@ -15,4 +15,5 @@
 
   (func (param $p i))
   (func (type $))
+  (func (param $p))
 )

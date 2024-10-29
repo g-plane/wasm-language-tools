@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..611
-  MODULE@0..610
+ROOT@0..631
+  MODULE@0..630
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -374,9 +374,22 @@ ROOT@0..611
         ERROR@605..606 "$"
         R_PAREN@606..607 ")"
       R_PAREN@607..608 ")"
-    WHITESPACE@608..609 "\n"
-    R_PAREN@609..610 ")"
-  WHITESPACE@610..611 "\n"
+    WHITESPACE@608..611 "\n  "
+    MODULE_FIELD_FUNC@611..628
+      L_PAREN@611..612 "("
+      KEYWORD@612..616 "func"
+      WHITESPACE@616..617 " "
+      TYPE_USE@617..627
+        PARAM@617..627
+          L_PAREN@617..618 "("
+          KEYWORD@618..623 "param"
+          WHITESPACE@623..624 " "
+          IDENT@624..626 "$p"
+          R_PAREN@626..627 ")"
+      R_PAREN@627..628 ")"
+    WHITESPACE@628..629 "\n"
+    R_PAREN@629..630 ")"
+  WHITESPACE@630..631 "\n"
 
 error: expected operand
   ┌─ func-malformed.wat:2:41
@@ -455,3 +468,9 @@ error: expected index (identifier or unsigned integer)
    │
 17 │   (func (type $))
    │               ^
+
+error: expected value type
+   ┌─ func-malformed.wat:18:18
+   │
+18 │   (func (param $p))
+   │                  ^
