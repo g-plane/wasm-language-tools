@@ -9,6 +9,7 @@ pub fn act(
     uri: InternUri,
     line_index: &LineIndex,
     node: &SyntaxNode,
+    kind: SyntaxKind,
 ) -> Option<CodeAction> {
     let types = node
         .children()
@@ -21,10 +22,18 @@ pub fn act(
         return None;
     }
 
+    let keyword = match kind {
+        SyntaxKind::PARAM => "param",
+        SyntaxKind::RESULT => "result",
+        SyntaxKind::LOCAL => "local",
+        _ => return None,
+    };
     let new_text = rest
         .iter()
-        .fold(format!("(param {first})"), |mut new_text, ty| {
-            new_text.push_str(" (param ");
+        .fold(format!("({keyword} {first})"), |mut new_text, ty| {
+            new_text.push_str(" (");
+            new_text.push_str(keyword);
+            new_text.push(' ');
             new_text.push_str(&ty.to_string());
             new_text.push(')');
             new_text
@@ -39,8 +48,14 @@ pub fn act(
             new_text,
         }],
     );
+    let title = match kind {
+        SyntaxKind::PARAM => "Split parameters".into(),
+        SyntaxKind::RESULT => "Split results".into(),
+        SyntaxKind::LOCAL => "Split locals".into(),
+        _ => return None,
+    };
     Some(CodeAction {
-        title: "Split parameters".into(),
+        title,
         kind: Some(CodeActionKind::REFACTOR_REWRITE),
         edit: Some(WorkspaceEdit {
             changes: Some(changes),

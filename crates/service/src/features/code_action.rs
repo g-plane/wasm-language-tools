@@ -32,7 +32,27 @@ impl LanguageService {
                 }
                 SyntaxKind::PARAM => {
                     if rewrite {
-                        if let Some(action) = params_split::act(self, uri, &line_index, &it) {
+                        if let Some(action) =
+                            func_header_split::act(self, uri, &line_index, &it, SyntaxKind::PARAM)
+                        {
+                            actions.push(CodeActionOrCommand::CodeAction(action));
+                        }
+                    }
+                }
+                SyntaxKind::RESULT => {
+                    if rewrite {
+                        if let Some(action) =
+                            func_header_split::act(self, uri, &line_index, &it, SyntaxKind::RESULT)
+                        {
+                            actions.push(CodeActionOrCommand::CodeAction(action));
+                        }
+                    }
+                }
+                SyntaxKind::LOCAL => {
+                    if rewrite {
+                        if let Some(action) =
+                            func_header_split::act(self, uri, &line_index, &it, SyntaxKind::LOCAL)
+                        {
                             actions.push(CodeActionOrCommand::CodeAction(action));
                         }
                     }

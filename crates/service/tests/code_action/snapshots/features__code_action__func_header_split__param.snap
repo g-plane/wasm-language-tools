@@ -1,0 +1,29 @@
+---
+source: crates/service/tests/code_action/func_header_split.rs
+expression: response
+---
+[
+  {
+    "title": "Split parameters",
+    "kind": "refactor.rewrite",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 10
+              },
+              "end": {
+                "line": 2,
+                "character": 25
+              }
+            },
+            "newText": "(param i32) (param f64)"
+          }
+        ]
+      }
+    }
+  }
+]
