@@ -1,7 +1,7 @@
 use super::find_meaningful_token;
 use crate::{
     binder::{DefIdx, SymbolItem, SymbolItemKind, SymbolTablesCtx},
-    dataset,
+    data_set,
     files::FilesCtx,
     helpers,
     types_analyzer::TypesAnalyzerCtx,
@@ -106,7 +106,7 @@ impl LanguageService {
             }
             SyntaxKind::NUM_TYPE | SyntaxKind::VEC_TYPE | SyntaxKind::REF_TYPE => {
                 let ty = token.text();
-                dataset::get_value_type_description(token.text()).map(|doc| Hover {
+                data_set::get_value_type_description(token.text()).map(|doc| Hover {
                     contents: HoverContents::Markup(MarkupContent {
                         kind: MarkupKind::Markdown,
                         value: format!("```wat\n{ty}\n```\n\n{doc}"),
@@ -134,6 +134,19 @@ impl LanguageService {
                             token.text_range(),
                         )),
                     })
+            }
+            SyntaxKind::INSTR_NAME => {
+                let name = token.text();
+                data_set::INSTR_METAS.get(name).map(|instr| Hover {
+                    contents: HoverContents::Markup(MarkupContent {
+                        kind: MarkupKind::Markdown,
+                        value: format!("```wat\n{name}\n```\nBinary Opcode: {}", instr.bin_op),
+                    }),
+                    range: Some(helpers::rowan_range_to_lsp_range(
+                        &line_index,
+                        token.text_range(),
+                    )),
+                })
             }
             _ => None,
         }

@@ -1,6 +1,6 @@
 mod binder;
 mod checker;
-mod dataset;
+mod data_set;
 mod features;
 mod files;
 mod helpers;

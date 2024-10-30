@@ -427,3 +427,17 @@ fn ref_type() {
     let response = service.hover(create_params(uri, Position::new(2, 19)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn instr_name() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (i32.const 0))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(2, 19)));
+    assert_json_snapshot!(response);
+}

@@ -1,6 +1,6 @@
 use crate::{
     binder::{DefIdx, SymbolTable, SymbolTablesCtx},
-    dataset,
+    data_set,
     files::FilesCtx,
     helpers,
     types_analyzer::TypesAnalyzerCtx,
@@ -237,17 +237,17 @@ fn get_cmp_list(
         .fold(Vec::with_capacity(2), |mut items, ctx| {
             match ctx {
                 CmpCtx::Instr => {
-                    items.extend(dataset::INSTR_NAMES.iter().map(|ty| CompletionItem {
+                    items.extend(data_set::INSTR_NAMES.iter().map(|ty| CompletionItem {
                         label: ty.to_string(),
                         kind: Some(CompletionItemKind::OPERATOR),
                         ..Default::default()
                     }));
                 }
                 CmpCtx::ValType => {
-                    items.extend(dataset::VALUE_TYPES.iter().map(|ty| CompletionItem {
+                    items.extend(data_set::VALUE_TYPES.iter().map(|ty| CompletionItem {
                         label: ty.to_string(),
                         kind: Some(CompletionItemKind::CLASS),
-                        documentation: dataset::get_value_type_description(ty).map(|desc| {
+                        documentation: data_set::get_value_type_description(ty).map(|desc| {
                             Documentation::MarkupContent(lsp_types::MarkupContent {
                                 kind: MarkupKind::Markdown,
                                 value: desc.into(),
@@ -395,7 +395,7 @@ fn get_cmp_list(
                     ..Default::default()
                 }),
                 CmpCtx::KeywordModuleField => {
-                    items.extend(dataset::MODULE_FIELDS.iter().map(|ty| CompletionItem {
+                    items.extend(data_set::MODULE_FIELDS.iter().map(|ty| CompletionItem {
                         label: ty.to_string(),
                         kind: Some(CompletionItemKind::KEYWORD),
                         ..Default::default()
@@ -428,7 +428,7 @@ fn get_cmp_list(
                     ..Default::default()
                 }),
                 CmpCtx::KeywordExportDesc => {
-                    items.extend(dataset::EXPORT_DESC.iter().map(|desc| CompletionItem {
+                    items.extend(data_set::EXPORT_DESC.iter().map(|desc| CompletionItem {
                         label: desc.to_string(),
                         kind: Some(CompletionItemKind::KEYWORD),
                         ..Default::default()
