@@ -3,6 +3,7 @@ use lsp_types::Diagnostic;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 mod multi_modules;
+mod operand_amount;
 mod undef;
 
 pub fn check_file(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
@@ -14,6 +15,9 @@ pub fn check_file(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> 
     root.descendants().for_each(|node| match node.kind() {
         SyntaxKind::ROOT => {
             multi_modules::check(&mut diagnostics, &line_index, &node);
+        }
+        SyntaxKind::PLAIN_INSTR => {
+            operand_amount::check(&mut diagnostics, &line_index, &node);
         }
         _ => {}
     });
