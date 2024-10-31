@@ -73,32 +73,30 @@ fn extract_sig(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
 
 fn get_func_sig(db: &dyn TypesAnalyzerCtx, uri: InternUri, symbol: SymbolItem) -> Option<FuncSig> {
     debug_assert!(matches!(symbol.kind, SymbolItemKind::Func(..)));
-    if let Some(type_use) = symbol.green.children().find_map(|child| match child {
-        NodeOrToken::Node(node) if node.kind() == SyntaxKind::TYPE_USE.into() => Some(node),
-        _ => None,
-    }) {
-        if type_use.children().any(|child| {
-            let kind = child.kind();
-            kind == SyntaxKind::PARAM.into() || kind == SyntaxKind::RESULT.into()
-        }) {
-            Some(db.extract_sig(type_use.to_owned()))
-        } else {
-            let node = symbol.key.ptr.to_node(&SyntaxNode::new_root(db.root(uri)));
-            let symbol_table = db.symbol_table(uri);
-            if let Some(func_type) = child::<TypeUse>(&node)
-                .and_then(|type_use| type_use.index())
-                .and_then(|idx| symbol_table.find_type_use_defs(&idx.syntax().clone().into()))
-                .and_then(|mut symbols| symbols.next())
-                .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.green))
-            {
-                Some(db.extract_sig(func_type))
+    symbol
+        .green
+        .children()
+        .find_map(|child| match child {
+            NodeOrToken::Node(node) if node.kind() == SyntaxKind::TYPE_USE.into() => Some(node),
+            _ => None,
+        })
+        .and_then(|type_use| {
+            if type_use.children().any(|child| {
+                let kind = child.kind();
+                kind == SyntaxKind::PARAM.into() || kind == SyntaxKind::RESULT.into()
+            }) {
+                Some(db.extract_sig(type_use.to_owned()))
             } else {
-                None
+                let node = symbol.key.ptr.to_node(&SyntaxNode::new_root(db.root(uri)));
+                let symbol_table = db.symbol_table(uri);
+                child::<TypeUse>(&node)
+                    .and_then(|type_use| type_use.index())
+                    .and_then(|idx| symbol_table.find_type_use_defs(&idx.syntax().clone().into()))
+                    .and_then(|mut symbols| symbols.next())
+                    .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.green))
+                    .map(|func_type| db.extract_sig(func_type))
             }
-        }
-    } else {
-        None
-    }
+        })
 }
 
 fn render_func_header(db: &dyn TypesAnalyzerCtx, uri: InternUri, symbol: SymbolItem) -> String {
