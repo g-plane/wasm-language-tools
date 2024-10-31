@@ -241,7 +241,7 @@ fn create_type_def_hover(service: &LanguageService, symbol: &SymbolItem) -> Mark
         content_value.push_str(&service.lookup_ident(name));
     }
     if let Some(func_type) = helpers::ast::find_func_type_of_type_def(&symbol.green) {
-        let sig = service.extract_func_sig(func_type.to_owned());
+        let sig = service.extract_sig(func_type.to_owned());
         content_value.push_str(" (func");
         if !sig.params.is_empty() || !sig.results.is_empty() {
             content_value.push(' ');

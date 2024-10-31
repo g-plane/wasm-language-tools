@@ -23,8 +23,10 @@ pub(crate) trait TypesAnalyzerCtx: FilesCtx + SymbolTablesCtx {
     #[salsa::memoized]
     fn extract_global_type(&self, node: GreenNode) -> Option<ValType>;
     #[salsa::memoized]
-    fn extract_func_sig(&self, node: GreenNode) -> FuncSig;
+    fn extract_sig(&self, node: GreenNode) -> FuncSig;
 
+    #[salsa::memoized]
+    fn get_func_sig(&self, uri: InternUri, symbol: SymbolItem) -> Option<FuncSig>;
     #[salsa::memoized]
     fn render_func_header(&self, uri: InternUri, symbol: SymbolItem) -> String;
 }
@@ -48,7 +50,7 @@ fn extract_global_type(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<Val
         .and_then(|global_type| db.extract_type(global_type.to_owned()))
 }
 
-fn extract_func_sig(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
+fn extract_sig(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
     let root = SyntaxNode::new_root(node);
     let params = children::<Param>(&root).fold(vec![], |mut acc, param| {
         if let Some((ident, ty)) = param.ident_token().zip(param.val_types().next()) {
@@ -69,16 +71,8 @@ fn extract_func_sig(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
     FuncSig { params, results }
 }
 
-fn render_func_header(db: &dyn TypesAnalyzerCtx, uri: InternUri, symbol: SymbolItem) -> String {
+fn get_func_sig(db: &dyn TypesAnalyzerCtx, uri: InternUri, symbol: SymbolItem) -> Option<FuncSig> {
     debug_assert!(matches!(symbol.kind, SymbolItemKind::Func(..)));
-    let mut content = "(func".to_string();
-    if let SymbolItemKind::Func(DefIdx {
-        name: Some(name), ..
-    }) = symbol.kind
-    {
-        content.push(' ');
-        content.push_str(&db.lookup_ident(name));
-    }
     if let Some(type_use) = symbol.green.children().find_map(|child| match child {
         NodeOrToken::Node(node) if node.kind() == SyntaxKind::TYPE_USE.into() => Some(node),
         _ => None,
@@ -87,11 +81,7 @@ fn render_func_header(db: &dyn TypesAnalyzerCtx, uri: InternUri, symbol: SymbolI
             let kind = child.kind();
             kind == SyntaxKind::PARAM.into() || kind == SyntaxKind::RESULT.into()
         }) {
-            let sig = db.extract_func_sig(type_use.to_owned());
-            if !sig.params.is_empty() || !sig.results.is_empty() {
-                content.push(' ');
-                content.push_str(&sig.to_string());
-            }
+            Some(db.extract_sig(type_use.to_owned()))
         } else {
             let node = symbol.key.ptr.to_node(&SyntaxNode::new_root(db.root(uri)));
             let symbol_table = db.symbol_table(uri);
@@ -101,12 +91,29 @@ fn render_func_header(db: &dyn TypesAnalyzerCtx, uri: InternUri, symbol: SymbolI
                 .and_then(|mut symbols| symbols.next())
                 .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.green))
             {
-                let sig = db.extract_func_sig(func_type);
-                if !sig.params.is_empty() || !sig.results.is_empty() {
-                    content.push(' ');
-                    content.push_str(&sig.to_string());
-                }
+                Some(db.extract_sig(func_type))
+            } else {
+                None
             }
+        }
+    } else {
+        None
+    }
+}
+
+fn render_func_header(db: &dyn TypesAnalyzerCtx, uri: InternUri, symbol: SymbolItem) -> String {
+    let mut content = "(func".to_string();
+    if let SymbolItemKind::Func(DefIdx {
+        name: Some(name), ..
+    }) = symbol.kind
+    {
+        content.push(' ');
+        content.push_str(&db.lookup_ident(name));
+    }
+    if let Some(sig) = db.get_func_sig(uri, symbol.clone()) {
+        if !sig.params.is_empty() || !sig.results.is_empty() {
+            content.push(' ');
+            content.push_str(&sig.to_string());
         }
     }
     content.push(')');
