@@ -305,7 +305,7 @@ fn get_cmp_list(
                                     kind: MarkupKind::Markdown,
                                     value: format!(
                                         "```wat\n{}\n```",
-                                        service.render_func_header(uri, symbol.clone())
+                                        service.render_func_header(uri, symbol.clone().into())
                                     ),
                                 })),
                                 ..Default::default()

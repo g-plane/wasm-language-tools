@@ -65,7 +65,7 @@ impl LanguageService {
                                 symbols
                                     .map(|symbol| {
                                         create_marked_string(
-                                            self.render_func_header(uri, symbol.clone()),
+                                            self.render_func_header(uri, symbol.clone().into()),
                                         )
                                     })
                                     .collect(),
@@ -164,7 +164,7 @@ fn create_def_hover(
             create_param_or_local_hover(service, symbol)
         }
         SymbolItemKind::Func(..) => {
-            create_marked_string(service.render_func_header(uri, symbol.clone()))
+            create_marked_string(service.render_func_header(uri, symbol.clone().into()))
         }
         SymbolItemKind::Type(..) => create_type_def_hover(service, symbol),
         SymbolItemKind::GlobalDef(..) => create_global_def_hover(service, symbol, root),

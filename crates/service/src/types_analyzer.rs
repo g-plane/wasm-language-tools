@@ -10,7 +10,11 @@ use rowan::{
     },
     GreenNode, Language, NodeOrToken, SyntaxNode,
 };
-use std::fmt;
+use std::{
+    fmt::{self, Debug},
+    hash::Hash,
+    ops::Deref,
+};
 use wat_syntax::{
     ast::{Param, Result, TypeUse, ValType as AstValType},
     SyntaxKind, WatLanguage,
@@ -26,9 +30,9 @@ pub(crate) trait TypesAnalyzerCtx: FilesCtx + SymbolTablesCtx {
     fn extract_sig(&self, node: GreenNode) -> FuncSig;
 
     #[salsa::memoized]
-    fn get_func_sig(&self, uri: InternUri, symbol: SymbolItem) -> Option<FuncSig>;
+    fn get_func_sig(&self, uri: InternUri, symbol: SymbolItemWithGreenEq) -> Option<FuncSig>;
     #[salsa::memoized]
-    fn render_func_header(&self, uri: InternUri, symbol: SymbolItem) -> String;
+    fn render_func_header(&self, uri: InternUri, symbol: SymbolItemWithGreenEq) -> String;
 }
 fn extract_type(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<ValType> {
     node.clone().try_into().ok().or_else(|| {
@@ -71,7 +75,11 @@ fn extract_sig(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
     FuncSig { params, results }
 }
 
-fn get_func_sig(db: &dyn TypesAnalyzerCtx, uri: InternUri, symbol: SymbolItem) -> Option<FuncSig> {
+fn get_func_sig(
+    db: &dyn TypesAnalyzerCtx,
+    uri: InternUri,
+    symbol: SymbolItemWithGreenEq,
+) -> Option<FuncSig> {
     debug_assert!(matches!(symbol.kind, SymbolItemKind::Func(..)));
     symbol
         .green
@@ -99,7 +107,11 @@ fn get_func_sig(db: &dyn TypesAnalyzerCtx, uri: InternUri, symbol: SymbolItem) -
         })
 }
 
-fn render_func_header(db: &dyn TypesAnalyzerCtx, uri: InternUri, symbol: SymbolItem) -> String {
+fn render_func_header(
+    db: &dyn TypesAnalyzerCtx,
+    uri: InternUri,
+    symbol: SymbolItemWithGreenEq,
+) -> String {
     let mut content = "(func".to_string();
     if let SymbolItemKind::Func(DefIdx {
         name: Some(name), ..
@@ -226,5 +238,36 @@ impl fmt::Display for FuncSig {
             Ok(())
         })?;
         Ok(())
+    }
+}
+
+#[derive(Clone)]
+pub(crate) struct SymbolItemWithGreenEq(SymbolItem);
+impl PartialEq for SymbolItemWithGreenEq {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0 && self.0.green == other.0.green
+    }
+}
+impl Eq for SymbolItemWithGreenEq {}
+impl Hash for SymbolItemWithGreenEq {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.0.hash(state);
+        self.0.green.hash(state);
+    }
+}
+impl From<SymbolItem> for SymbolItemWithGreenEq {
+    fn from(symbol: SymbolItem) -> Self {
+        SymbolItemWithGreenEq(symbol)
+    }
+}
+impl Deref for SymbolItemWithGreenEq {
+    type Target = SymbolItem;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl Debug for SymbolItemWithGreenEq {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self.0)
     }
 }

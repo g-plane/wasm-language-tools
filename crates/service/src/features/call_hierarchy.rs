@@ -51,7 +51,7 @@ impl LanguageService {
                             .unwrap_or_else(|| idx.num.to_string()),
                         kind: SymbolKind::FUNCTION,
                         tags: None,
-                        detail: Some(self.render_func_header(uri, symbol.clone())),
+                        detail: Some(self.render_func_header(uri, symbol.clone().into())),
                         uri: params
                             .text_document_position_params
                             .text_document
@@ -82,7 +82,7 @@ impl LanguageService {
                                     .unwrap_or_else(|| idx.num.to_string()),
                                 kind: SymbolKind::FUNCTION,
                                 tags: None,
-                                detail: Some(self.render_func_header(uri, symbol.clone())),
+                                detail: Some(self.render_func_header(uri, symbol.clone().into())),
                                 uri: params
                                     .text_document_position_params
                                     .text_document
@@ -167,7 +167,7 @@ impl LanguageService {
                             .unwrap_or_else(|| idx.num.to_string()),
                         kind: SymbolKind::FUNCTION,
                         tags: None,
-                        detail: Some(self.render_func_header(uri, func_symbol.clone())),
+                        detail: Some(self.render_func_header(uri, func_symbol.clone().into())),
                         uri: params.item.uri.clone(),
                         range: helpers::rowan_range_to_lsp_range(
                             &line_index,
@@ -228,7 +228,9 @@ impl LanguageService {
                                     .unwrap_or_else(|| idx.num.to_string()),
                                 kind: SymbolKind::FUNCTION,
                                 tags: None,
-                                detail: Some(self.render_func_header(uri, func_symbol.clone())),
+                                detail: Some(
+                                    self.render_func_header(uri, func_symbol.clone().into()),
+                                ),
                                 uri: self.lookup_uri(uri),
                                 range: helpers::rowan_range_to_lsp_range(
                                     &line_index,
