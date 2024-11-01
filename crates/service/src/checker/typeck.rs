@@ -61,27 +61,7 @@ pub fn check(
                 }
                 received
             });
-    let params = if is_call {
-        let Some(idx) = instr.operands().next() else {
-            return;
-        };
-        if let Some(sig) = symbol_table
-            .find_func_defs(&idx.syntax().clone().into())
-            .into_iter()
-            .flatten()
-            .next()
-            .and_then(|func| service.get_func_sig(uri, func.clone().into()))
-        {
-            sig.params
-                .iter()
-                .map(|ty| OperandType::Val(ty.0.clone()))
-                .collect()
-        } else {
-            return;
-        }
-    } else if let Some(meta) = meta {
-        meta.params.clone()
-    } else {
+    let Some(params) = resolve_expected_types(service, uri, symbol_table, &instr, meta) else {
         return;
     };
 
@@ -179,5 +159,31 @@ fn resolve_type(
                     .map(|meta| meta.results.clone()),
             }
         }
+    }
+}
+
+fn resolve_expected_types(
+    service: &LanguageService,
+    uri: InternUri,
+    symbol_table: &SymbolTable,
+    instr: &PlainInstr,
+    meta: Option<&data_set::InstrMeta>,
+) -> Option<Vec<OperandType>> {
+    if instr.instr_name()?.text() == "call" {
+        let idx = instr.operands().next()?;
+        symbol_table
+            .find_func_defs(&idx.syntax().clone().into())
+            .into_iter()
+            .flatten()
+            .next()
+            .and_then(|func| service.get_func_sig(uri, func.clone().into()))
+            .map(|sig| {
+                sig.params
+                    .iter()
+                    .map(|ty| OperandType::Val(ty.0.clone()))
+                    .collect()
+            })
+    } else {
+        meta.map(|meta| meta.params.clone())
     }
 }
