@@ -9,7 +9,7 @@ use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity};
 use rowan::ast::AstNode;
 use wat_syntax::{
-    ast::{Instr, Operand, PlainInstr},
+    ast::{Instr, PlainInstr},
     SyntaxNode,
 };
 
@@ -43,23 +43,21 @@ pub fn check(
             .operands()
             .skip(skipped_count)
             .fold(vec![], |mut received, operand| {
-                match resolve_type(service, uri, symbol_table, &operand) {
-                    ResolvedType::Type(types) => {
-                        received.extend(types.into_iter().map(|ty| (ty, operand.clone())))
+                if let Some(instr) = operand.instr() {
+                    if let Some(types) = resolve_type(service, uri, symbol_table, &instr) {
+                        received.extend(types.into_iter().map(|ty| (ty, operand.clone())));
                     }
-                    ResolvedType::Ignore => {}
-                    ResolvedType::NotInstr => {
-                        diags.push(Diagnostic {
-                            range: helpers::rowan_range_to_lsp_range(
-                                line_index,
-                                operand.syntax().text_range(),
-                            ),
-                            severity: Some(DiagnosticSeverity::ERROR),
-                            source: Some("wat".into()),
-                            message: "expected instr".into(),
-                            ..Default::default()
-                        });
-                    }
+                } else {
+                    diags.push(Diagnostic {
+                        range: helpers::rowan_range_to_lsp_range(
+                            line_index,
+                            operand.syntax().text_range(),
+                        ),
+                        severity: Some(DiagnosticSeverity::ERROR),
+                        source: Some("wat".into()),
+                        message: "expected instr".into(),
+                        ..Default::default()
+                    });
                 }
                 received
             });
@@ -137,75 +135,49 @@ fn resolve_type(
     service: &LanguageService,
     uri: InternUri,
     symbol_table: &SymbolTable,
-    operand: &Operand,
-) -> ResolvedType {
-    let Some(instr) = operand.instr() else {
-        return ResolvedType::NotInstr;
-    };
+    instr: &Instr,
+) -> Option<Vec<OperandType>> {
     match instr {
-        Instr::Block(..) => ResolvedType::Ignore,
+        Instr::Block(..) => None,
         Instr::Plain(plain_instr) => {
-            let Some(instr_name) = plain_instr.instr_name() else {
-                return ResolvedType::Ignore;
-            };
+            let instr_name = plain_instr.instr_name()?;
             match instr_name.text() {
                 "call" => {
-                    let Some(idx) = plain_instr.operands().next() else {
-                        return ResolvedType::Ignore;
-                    };
-                    if let Some(sig) = symbol_table
+                    let idx = plain_instr.operands().next()?;
+                    symbol_table
                         .find_func_defs(&idx.syntax().clone().into())
                         .into_iter()
                         .flatten()
                         .next()
                         .and_then(|func| service.get_func_sig(uri, func.clone().into()))
-                    {
-                        ResolvedType::Type(
+                        .map(|sig| {
                             sig.results
                                 .iter()
                                 .map(|ty| OperandType::Val(ty.clone()))
-                                .collect(),
-                        )
-                    } else {
-                        ResolvedType::Ignore
-                    }
+                                .collect()
+                        })
                 }
                 "local.get" => {
-                    let Some(idx) = plain_instr.operands().next() else {
-                        return ResolvedType::Ignore;
-                    };
+                    let idx = plain_instr.operands().next()?;
                     symbol_table
                         .find_param_or_local_def(&idx.syntax().clone().into())
                         .and_then(|symbol| service.extract_type(symbol.green.clone()))
-                        .map_or(ResolvedType::Ignore, |ty| {
-                            ResolvedType::Type(vec![OperandType::Val(ty)])
-                        })
+                        .map(|ty| vec![OperandType::Val(ty)])
                 }
                 "global.get" => {
-                    let Some(idx) = plain_instr.operands().next() else {
-                        return ResolvedType::Ignore;
-                    };
+                    let idx = plain_instr.operands().next()?;
                     symbol_table
                         .find_global_defs(&idx.syntax().clone().into())
                         .into_iter()
                         .flatten()
                         .next()
                         .and_then(|symbol| service.extract_global_type(symbol.green.clone()))
-                        .map_or(ResolvedType::Ignore, |ty| {
-                            ResolvedType::Type(vec![OperandType::Val(ty)])
-                        })
+                        .map(|ty| vec![OperandType::Val(ty)])
                 }
                 _ => data_set::INSTR_METAS
                     .get(instr_name.text())
-                    .map_or(ResolvedType::Ignore, |meta| {
-                        ResolvedType::Type(meta.results.clone())
-                    }),
+                    .map(|meta| meta.results.clone()),
             }
         }
     }
-}
-enum ResolvedType {
-    Type(Vec<OperandType>),
-    Ignore,
-    NotInstr,
 }
