@@ -135,3 +135,82 @@ fn call_type_mismatch() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn less_operands_on_stack() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (param i32 i32) (result i32)
+        local.get 0
+        i32.sub))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn stacked_type_mismatch_from_func_params() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func $swap (param i32 i32) (result i32 i32)
+        local.get 1
+        local.get 0)
+    (func (param f32 i32) (result i32)
+        local.get 0
+        local.get 1
+        call $swap
+        i32.sub))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn stacked_type_mismatch_from_func_results() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func $swap (param i32 i32) (result i32 f32)
+        local.get 1
+        local.get 0)
+    (func (param i32 i32) (result i32)
+        local.get 0
+        local.get 1
+        call $swap
+        i32.sub))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn stacked_type_mismatch_from_instr_meta() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func $swap (param i32 i32) (result i32 i32)
+        local.get 1
+        local.get 0)
+    (func (param i32 i32) (result i32)
+        local.get 0
+        local.get 1
+        call $swap
+        f32.sub)
+    (func (param i32 i32) (result i32)
+        local.get 0
+        local.get 1
+        f32.sub))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

@@ -16,8 +16,18 @@ pub fn check_file(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> 
         SyntaxKind::ROOT => {
             multi_modules::check(&mut diagnostics, &line_index, &node);
         }
+        SyntaxKind::MODULE_FIELD_FUNC | SyntaxKind::MODULE_FIELD_GLOBAL => {
+            typeck::check_stacked(
+                &mut diagnostics,
+                service,
+                uri,
+                &line_index,
+                &node,
+                &symbol_table,
+            );
+        }
         SyntaxKind::PLAIN_INSTR => {
-            typeck::check(
+            typeck::check_parenthesized(
                 &mut diagnostics,
                 service,
                 uri,

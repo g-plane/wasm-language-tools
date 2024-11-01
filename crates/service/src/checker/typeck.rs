@@ -7,13 +7,16 @@ use crate::{
 };
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity};
-use rowan::ast::AstNode;
+use rowan::ast::{
+    support::{children, token},
+    AstNode,
+};
 use wat_syntax::{
     ast::{Instr, PlainInstr},
-    SyntaxNode,
+    SyntaxKind, SyntaxNode,
 };
 
-pub fn check(
+pub fn check_parenthesized(
     diags: &mut Vec<Diagnostic>,
     service: &LanguageService,
     uri: InternUri,
@@ -76,14 +79,7 @@ pub fn check(
             range: helpers::rowan_range_to_lsp_range(line_index, instr.syntax().text_range()),
             severity: Some(DiagnosticSeverity::ERROR),
             source: Some("wat".into()),
-            message: format!(
-                "expected {expected_count} {}, found {received_count}",
-                if expected_count == 1 {
-                    "operand"
-                } else {
-                    "operands"
-                },
-            ),
+            message: build_incorrect_operands_count_msg(expected_count, received_count),
             ..Default::default()
         });
     }
@@ -109,6 +105,94 @@ pub fn check(
         }
     });
     diags.extend(type_mismatches);
+}
+
+pub fn check_stacked(
+    diags: &mut Vec<Diagnostic>,
+    service: &LanguageService,
+    uri: InternUri,
+    line_index: &LineIndex,
+    node: &SyntaxNode,
+    symbol_table: &SymbolTable,
+) {
+    if node
+        .children()
+        .filter(|child| {
+            matches!(
+                child.kind(),
+                SyntaxKind::PLAIN_INSTR
+                    | SyntaxKind::BLOCK_BLOCK
+                    | SyntaxKind::BLOCK_IF
+                    | SyntaxKind::BLOCK_LOOP
+            )
+        })
+        .any(|child| token(&child, SyntaxKind::L_PAREN).is_some())
+    {
+        return;
+    }
+
+    let mut types_stack = Vec::<(_, Instr)>::with_capacity(2);
+    children::<Instr>(node).for_each(|instr| {
+        if let Instr::Plain(plain_instr) = &instr {
+            let Some(instr_name) = plain_instr.instr_name() else {
+                return;
+            };
+            let meta = data_set::INSTR_METAS.get(instr_name.text());
+            let Some(params) =
+                resolve_expected_types(service, uri, symbol_table, plain_instr, meta)
+            else {
+                return;
+            };
+            let expected_count = params.len();
+            let pop_count = if let Some(count) = types_stack.len().checked_sub(expected_count) {
+                count
+            } else {
+                diags.push(Diagnostic {
+                    range: helpers::rowan_range_to_lsp_range(
+                        line_index,
+                        instr.syntax().text_range(),
+                    ),
+                    severity: Some(DiagnosticSeverity::ERROR),
+                    source: Some("wat".into()),
+                    message: build_incorrect_operands_count_msg(expected_count, types_stack.len()),
+                    ..Default::default()
+                });
+                0
+            };
+            let type_mismatches = params
+                .iter()
+                .zip(types_stack.drain(pop_count..))
+                .filter_map(|pair| {
+                    if let (
+                        OperandType::Val(expected),
+                        (OperandType::Val(received), related_instr),
+                    ) = pair
+                    {
+                        if expected == &received {
+                            None
+                        } else {
+                            Some(Diagnostic {
+                                range: helpers::rowan_range_to_lsp_range(
+                                    line_index,
+                                    related_instr.syntax().text_range(),
+                                ),
+                                severity: Some(DiagnosticSeverity::ERROR),
+                                source: Some("wat".into()),
+                                message: format!("expected type `{expected}`, found `{received}`"),
+                                ..Default::default()
+                            })
+                        }
+                    } else {
+                        None
+                    }
+                });
+            diags.extend(type_mismatches);
+
+            if let Some(types) = resolve_type(service, uri, symbol_table, &instr) {
+                types_stack.extend(types.into_iter().map(|ty| (ty, instr.clone())));
+            }
+        }
+    });
 }
 
 fn resolve_type(
@@ -186,4 +270,11 @@ fn resolve_expected_types(
     } else {
         meta.map(|meta| meta.params.clone())
     }
+}
+
+fn build_incorrect_operands_count_msg(expected: usize, received: usize) -> String {
+    format!(
+        "expected {expected} {}, found {received}",
+        if expected == 1 { "operand" } else { "operands" },
+    )
 }
