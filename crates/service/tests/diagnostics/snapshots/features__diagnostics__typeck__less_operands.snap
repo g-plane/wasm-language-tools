@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/operand_amount.rs
+source: crates/service/tests/diagnostics/typeck.rs
 expression: response
 ---
 {
@@ -13,12 +13,12 @@ expression: response
         },
         "end": {
           "line": 0,
-          "character": 65
+          "character": 37
         }
       },
       "severity": 1,
       "source": "wat",
-      "message": "expected 2 operands, found 3"
+      "message": "expected 2 operands, found 1"
     }
   ]
 }

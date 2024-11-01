@@ -8,6 +8,7 @@ pub(crate) struct InstrMeta {
     pub params: Vec<OperandType>,
     pub results: Vec<OperandType>,
 }
+#[derive(Clone, Debug)]
 pub(crate) enum OperandType {
     Val(ValType),
     Generic,

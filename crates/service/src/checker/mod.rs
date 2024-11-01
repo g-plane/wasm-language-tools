@@ -3,7 +3,7 @@ use lsp_types::Diagnostic;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 mod multi_modules;
-mod operand_amount;
+mod typeck;
 mod undef;
 
 pub fn check_file(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
@@ -17,7 +17,14 @@ pub fn check_file(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> 
             multi_modules::check(&mut diagnostics, &line_index, &node);
         }
         SyntaxKind::PLAIN_INSTR => {
-            operand_amount::check(&mut diagnostics, &line_index, &node);
+            typeck::check(
+                &mut diagnostics,
+                service,
+                uri,
+                &line_index,
+                node,
+                &symbol_table,
+            );
         }
         _ => {}
     });

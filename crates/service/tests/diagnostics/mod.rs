@@ -3,8 +3,11 @@ use lsp_types::{
     FullDocumentDiagnosticReport, RelatedFullDocumentDiagnosticReport, TextDocumentIdentifier, Uri,
 };
 
+#[cfg(test)]
 mod multi_modules;
-mod operand_amount;
+#[cfg(test)]
+mod typeck;
+#[cfg(test)]
 mod undef;
 
 fn create_params(uri: Uri) -> DocumentDiagnosticParams {
