@@ -214,3 +214,19 @@ fn stacked_type_mismatch_from_instr_meta() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn mixed_type_mismatch_from_instr_meta() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (result i32)
+        (i32.const 1) (f32.const 2) i32.add
+    )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

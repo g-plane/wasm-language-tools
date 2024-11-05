@@ -27,7 +27,7 @@ pub fn check_file(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> 
             );
         }
         SyntaxKind::PLAIN_INSTR => {
-            typeck::check_parenthesized(
+            typeck::check_folded(
                 &mut diagnostics,
                 service,
                 uri,

@@ -1,0 +1,24 @@
+---
+source: crates/service/tests/diagnostics/typeck.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 22
+        },
+        "end": {
+          "line": 3,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "expected type `i32`, found `f32`"
+    }
+  ]
+}

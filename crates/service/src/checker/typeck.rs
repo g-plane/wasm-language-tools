@@ -16,7 +16,7 @@ use wat_syntax::{
     SyntaxKind, SyntaxNode,
 };
 
-pub fn check_parenthesized(
+pub fn check_folded(
     diags: &mut Vec<Diagnostic>,
     service: &LanguageService,
     uri: InternUri,
@@ -126,7 +126,7 @@ pub fn check_stacked(
                     | SyntaxKind::BLOCK_LOOP
             )
         })
-        .any(|child| token(&child, SyntaxKind::L_PAREN).is_some())
+        .all(|child| token(&child, SyntaxKind::L_PAREN).is_some())
     {
         return;
     }
