@@ -1,0 +1,54 @@
+---
+source: crates/service/tests/diagnostics/literal_operands.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 20
+        },
+        "end": {
+          "line": 3,
+          "character": 23
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "expected identifier or unsigned integer"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 24
+        },
+        "end": {
+          "line": 3,
+          "character": 27
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "expected identifier or unsigned integer"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 23
+        },
+        "end": {
+          "line": 4,
+          "character": 25
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "expected identifier or unsigned integer"
+    }
+  ]
+}

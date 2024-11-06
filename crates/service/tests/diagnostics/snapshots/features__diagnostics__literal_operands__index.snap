@@ -1,0 +1,84 @@
+---
+source: crates/service/tests/diagnostics/literal_operands.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 14
+        },
+        "end": {
+          "line": 3,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "expected identifier or unsigned integer"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 19
+        },
+        "end": {
+          "line": 4,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "expected identifier or unsigned integer"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 19
+        },
+        "end": {
+          "line": 5,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "expected identifier or unsigned integer"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 20
+        },
+        "end": {
+          "line": 6,
+          "character": 23
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "expected identifier or unsigned integer"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 20
+        },
+        "end": {
+          "line": 7,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "expected identifier or unsigned integer"
+    }
+  ]
+}

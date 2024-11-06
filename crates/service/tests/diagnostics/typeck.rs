@@ -221,7 +221,7 @@ fn mixed_type_mismatch_from_instr_meta() {
     let source = "
 (module
     (func (result i32)
-        (i32.const 1) (f32.const 2) i32.add
+        (i32.const 1) (f32.const 2.0) i32.add
     )
 )
 ";

@@ -2,6 +2,7 @@ use crate::{binder::SymbolTablesCtx, files::FilesCtx, InternUri, LanguageService
 use lsp_types::Diagnostic;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
+mod literal_operands;
 mod multi_modules;
 mod typeck;
 mod undef;
@@ -27,6 +28,7 @@ pub fn check_file(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> 
             );
         }
         SyntaxKind::PLAIN_INSTR => {
+            literal_operands::check(&mut diagnostics, &line_index, &node);
             typeck::check_folded(
                 &mut diagnostics,
                 service,
