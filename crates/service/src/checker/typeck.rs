@@ -1,15 +1,19 @@
 use crate::{
-    binder::SymbolTable,
+    binder::{SymbolItemKind, SymbolTable},
     data_set::{self, OperandType},
+    files::FilesCtx,
     helpers,
     types_analyzer::TypesAnalyzerCtx,
     InternUri, LanguageService,
 };
 use line_index::LineIndex;
-use lsp_types::{Diagnostic, DiagnosticSeverity};
-use rowan::ast::{
-    support::{children, token},
-    AstNode,
+use lsp_types::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location};
+use rowan::{
+    ast::{
+        support::{children, token},
+        AstNode,
+    },
+    TextRange,
 };
 use wat_syntax::{
     ast::{Instr, PlainInstr},
@@ -85,7 +89,8 @@ pub fn check_folded(
     }
 
     let type_mismatches = params.iter().zip(received_types.iter()).filter_map(|pair| {
-        if let (OperandType::Val(expected), (OperandType::Val(received), operand)) = pair {
+        if let ((OperandType::Val(expected), related), (OperandType::Val(received), operand)) = pair
+        {
             if expected == received {
                 None
             } else {
@@ -97,6 +102,15 @@ pub fn check_folded(
                     severity: Some(DiagnosticSeverity::ERROR),
                     source: Some("wat".into()),
                     message: format!("expected type `{expected}`, found `{received}`"),
+                    related_information: related.as_ref().map(|(range, message)| {
+                        vec![DiagnosticRelatedInformation {
+                            location: Location {
+                                uri: service.lookup_uri(uri),
+                                range: helpers::rowan_range_to_lsp_range(line_index, *range),
+                            },
+                            message: message.clone(),
+                        }]
+                    }),
                     ..Default::default()
                 })
             }
@@ -164,7 +178,7 @@ pub fn check_stacked(
                 .zip(types_stack.drain(pop_count..))
                 .filter_map(|pair| {
                     if let (
-                        OperandType::Val(expected),
+                        (OperandType::Val(expected), related),
                         (OperandType::Val(received), related_instr),
                     ) = pair
                     {
@@ -179,6 +193,17 @@ pub fn check_stacked(
                                 severity: Some(DiagnosticSeverity::ERROR),
                                 source: Some("wat".into()),
                                 message: format!("expected type `{expected}`, found `{received}`"),
+                                related_information: related.as_ref().map(|(range, message)| {
+                                    vec![DiagnosticRelatedInformation {
+                                        location: Location {
+                                            uri: service.lookup_uri(uri),
+                                            range: helpers::rowan_range_to_lsp_range(
+                                                line_index, *range,
+                                            ),
+                                        },
+                                        message: message.clone(),
+                                    }]
+                                }),
                                 ..Default::default()
                             })
                         }
@@ -246,29 +271,45 @@ fn resolve_type(
     }
 }
 
+type ExpectedType = (OperandType, Option<(TextRange, String)>);
 fn resolve_expected_types(
     service: &LanguageService,
     uri: InternUri,
     symbol_table: &SymbolTable,
     instr: &PlainInstr,
     meta: Option<&data_set::InstrMeta>,
-) -> Option<Vec<OperandType>> {
+) -> Option<Vec<ExpectedType>> {
     if instr.instr_name()?.text() == "call" {
         let idx = instr.operands().next()?;
-        symbol_table
+        let func = symbol_table
             .find_func_defs(&idx.syntax().clone().into())
             .into_iter()
             .flatten()
-            .next()
-            .and_then(|func| service.get_func_sig(uri, func.clone().into()))
-            .map(|sig| {
-                sig.params
-                    .iter()
-                    .map(|ty| OperandType::Val(ty.0.clone()))
-                    .collect()
-            })
+            .next()?;
+        let root = SyntaxNode::new_root(service.root(uri));
+        let related = symbol_table
+            .get_declared_params_and_locals(func.key.ptr.to_node(&root))
+            .filter(|(symbol, _)| matches!(symbol.kind, SymbolItemKind::Param(..)))
+            .map(|(symbol, _)| {
+                Some((
+                    symbol.key.ptr.text_range(),
+                    "parameter originally defined here".into(),
+                ))
+            });
+        service.get_func_sig(uri, func.clone().into()).map(|sig| {
+            sig.params
+                .iter()
+                .map(|ty| OperandType::Val(ty.0.clone()))
+                .zip(related)
+                .collect()
+        })
     } else {
-        meta.map(|meta| meta.params.clone())
+        meta.map(|meta| {
+            meta.params
+                .iter()
+                .map(|param| (param.clone(), None))
+                .collect()
+        })
     }
 }
 

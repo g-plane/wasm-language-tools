@@ -18,7 +18,25 @@ expression: response
       },
       "severity": 1,
       "source": "wat",
-      "message": "expected type `i32`, found `f32`"
+      "message": "expected type `i32`, found `f32`",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 23
+              },
+              "end": {
+                "line": 2,
+                "character": 26
+              }
+            }
+          },
+          "message": "parameter originally defined here"
+        }
+      ]
     }
   ]
 }
