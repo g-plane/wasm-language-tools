@@ -962,6 +962,10 @@ impl Module {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+    #[inline]
     pub fn module_fields(&self) -> AstChildren<ModuleField> {
         children(&self.syntax)
     }
