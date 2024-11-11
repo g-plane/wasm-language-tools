@@ -126,7 +126,7 @@ impl ElemExpr {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn instructions(&self) -> AstChildren<Instr> {
+    pub fn instrs(&self) -> AstChildren<Instr> {
         children(&self.syntax)
     }
     #[inline]
@@ -1764,7 +1764,7 @@ impl Offset {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn instructions(&self) -> AstChildren<Instr> {
+    pub fn instrs(&self) -> AstChildren<Instr> {
         children(&self.syntax)
     }
     #[inline]
