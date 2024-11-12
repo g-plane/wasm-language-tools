@@ -14,6 +14,10 @@ impl BlockBlock {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
     pub fn ident_token(&self) -> Option<SyntaxToken> {
         token(&self.syntax, SyntaxKind::IDENT)
     }
@@ -264,6 +268,10 @@ impl BlockLoop {
     #[inline]
     pub fn l_paren_token(&self) -> Option<SyntaxToken> {
         token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
     pub fn ident_token(&self) -> Option<SyntaxToken> {
