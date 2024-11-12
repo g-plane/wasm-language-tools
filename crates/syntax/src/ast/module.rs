@@ -1228,6 +1228,10 @@ impl ModuleFieldExport {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
+    pub fn name(&self) -> Option<Name> {
+        child(&self.syntax)
+    }
+    #[inline]
     pub fn export_desc(&self) -> Option<ExportDesc> {
         child(&self.syntax)
     }
