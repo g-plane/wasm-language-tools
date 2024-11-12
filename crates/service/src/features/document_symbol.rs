@@ -15,7 +15,7 @@ impl LanguageService {
         let root = SyntaxNode::new_root(self.root(uri));
         let symbol_table = self.symbol_table(uri);
 
-        #[allow(deprecated)]
+        #[expect(deprecated)]
         let mut symbols_map = symbol_table
             .symbols
             .iter()

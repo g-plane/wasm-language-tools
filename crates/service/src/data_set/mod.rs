@@ -1,6 +1,5 @@
 pub(crate) use instr_meta::*;
 
-#[allow(dead_code)]
 mod instr_meta;
 
 pub(crate) static VALUE_TYPES: [&str; 7] =

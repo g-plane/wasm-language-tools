@@ -39,7 +39,7 @@ pub fn act(
             new_text
         });
 
-    #[allow(clippy::mutable_key_type)]
+    #[expect(clippy::mutable_key_type)]
     let mut changes = HashMap::with_capacity(1);
     changes.insert(
         service.lookup_uri(uri),

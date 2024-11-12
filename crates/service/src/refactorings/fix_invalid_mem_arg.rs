@@ -72,7 +72,7 @@ pub fn act(
         }
     }
 
-    #[allow(clippy::mutable_key_type)]
+    #[expect(clippy::mutable_key_type)]
     if text_edits.is_empty() {
         None
     } else {
