@@ -82,6 +82,10 @@ impl Elem {
         children(&self.syntax)
     }
     #[inline]
+    pub fn indexes(&self) -> AstChildren<Index> {
+        children(&self.syntax)
+    }
+    #[inline]
     pub fn r_paren_token(&self) -> Option<SyntaxToken> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
