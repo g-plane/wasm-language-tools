@@ -835,6 +835,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "tiny_pretty"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4b3f46f0549180b9c6f7f76270903f1a06867c43a03998b99dce81aa1760c3b2"
+
+[[package]]
 name = "tinytemplate"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1000,6 +1006,20 @@ name = "wasm-bindgen-shared"
 version = "0.2.95"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "65fc09f10666a9f147042251e0dda9c18f166ff7de300607007e96bdebc1068d"
+
+[[package]]
+name = "wat_formatter"
+version = "0.0.0"
+dependencies = [
+ "insta",
+ "rowan",
+ "serde",
+ "serde_json",
+ "similar-asserts",
+ "tiny_pretty",
+ "wat_parser",
+ "wat_syntax",
+]
 
 [[package]]
 name = "wat_parser"
