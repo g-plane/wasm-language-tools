@@ -17,6 +17,7 @@ rowan.workspace = true
 rustc-hash = "2.0"
 salsa = "0.16"
 smallvec = "1.13"
+wat_formatter = { path = "../formatter", version = "0.0" }
 wat_parser = { path = "../parser", version = "0.0" }
 wat_syntax = { path = "../syntax", version = "0.0" }
 

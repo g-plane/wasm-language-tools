@@ -105,6 +105,7 @@ impl LanguageService {
                 )),
                 type_definition_provider: Some(TypeDefinitionProviderCapability::Simple(true)),
                 declaration_provider: Some(DeclarationCapability::Simple(true)),
+                document_formatting_provider: Some(OneOf::Left(true)),
                 document_symbol_provider: Some(OneOf::Left(true)),
                 hover_provider: Some(HoverProviderCapability::Simple(true)),
                 inlay_hint_provider: Some(OneOf::Left(true)),

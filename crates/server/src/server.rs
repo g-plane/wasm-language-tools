@@ -9,8 +9,8 @@ use lsp_types::{
     request::{
         CallHierarchyIncomingCalls, CallHierarchyOutgoingCalls, CallHierarchyPrepare,
         CodeActionRequest, Completion, DocumentDiagnosticRequest, DocumentSymbolRequest,
-        GotoDeclaration, GotoDefinition, GotoTypeDefinition, HoverRequest, InlayHintRequest,
-        PrepareRenameRequest, References, Rename, SemanticTokensFullRequest,
+        Formatting, GotoDeclaration, GotoDefinition, GotoTypeDefinition, HoverRequest,
+        InlayHintRequest, PrepareRenameRequest, References, Rename, SemanticTokensFullRequest,
         SemanticTokensRangeRequest,
     },
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
@@ -124,6 +124,20 @@ impl Server {
                                 id,
                                 result: Some(serde_json::to_value(
                                     self.service.pull_diagnostics(params),
+                                )?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<Formatting>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.formatting(params),
                                 )?),
                                 error: None,
                             }))?;
