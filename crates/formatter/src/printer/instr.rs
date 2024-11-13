@@ -47,9 +47,11 @@ impl DocGen for BlockBlock {
             docs.push(Doc::text(")"));
             trivias = format_trivias_after_token(r_paren, ctx);
         }
+
+        let mut docs = vec![Doc::list(docs).nest(ctx.indent_width)];
         if let Some(keyword) = self.end_keyword() {
             if trivias.is_empty() {
-                docs.push(Doc::space());
+                docs.push(Doc::hard_line());
             } else {
                 docs.append(&mut trivias);
             }
@@ -64,7 +66,7 @@ impl DocGen for BlockBlock {
             }
             docs.push(Doc::text(ident.to_string()));
         }
-        Doc::list(docs).nest(ctx.indent_width)
+        Doc::list(docs)
     }
 }
 
@@ -131,9 +133,15 @@ impl DocGen for BlockIf {
             docs.push(Doc::text(")"));
             trivias = format_trivias_after_token(r_paren, ctx);
         }
+
+        let mut docs = if self.l_paren_token().is_some() {
+            vec![Doc::list(docs).nest(ctx.indent_width)]
+        } else {
+            docs
+        };
         if let Some(keyword) = self.end_keyword() {
             if trivias.is_empty() {
-                docs.push(Doc::space());
+                docs.push(Doc::hard_line());
             } else {
                 docs.append(&mut trivias);
             }
@@ -149,11 +157,7 @@ impl DocGen for BlockIf {
             docs.push(Doc::text(ident.to_string()));
         }
 
-        if self.l_paren_token().is_some() {
-            Doc::list(docs).nest(ctx.indent_width)
-        } else {
-            Doc::list(docs)
-        }
+        Doc::list(docs)
     }
 }
 
@@ -290,9 +294,11 @@ impl DocGen for BlockLoop {
             docs.push(Doc::text(")"));
             trivias = format_trivias_after_token(r_paren, ctx);
         }
+
+        let mut docs = vec![Doc::list(docs).nest(ctx.indent_width)];
         if let Some(keyword) = self.end_keyword() {
             if trivias.is_empty() {
-                docs.push(Doc::space());
+                docs.push(Doc::hard_line());
             } else {
                 docs.append(&mut trivias);
             }
@@ -307,7 +313,7 @@ impl DocGen for BlockLoop {
             }
             docs.push(Doc::text(ident.to_string()));
         }
-        Doc::list(docs).nest(ctx.indent_width)
+        Doc::list(docs)
     }
 }
 
