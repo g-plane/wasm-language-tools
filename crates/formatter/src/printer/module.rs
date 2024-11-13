@@ -53,12 +53,17 @@ impl DocGen for Elem {
             trivias = format_trivias_after_node(index, ctx);
         });
         self.elem_exprs().for_each(|elem_expr| {
-            if trivias.is_empty() && elem_expr.keyword().is_some() {
-                docs.push(Doc::space());
+            let has_keyword = elem_expr.keyword().is_some();
+            if trivias.is_empty() && has_keyword {
+                docs.push(Doc::hard_line().nest(ctx.indent_width));
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(elem_expr.doc(ctx));
+            if has_keyword {
+                docs.push(elem_expr.doc(ctx).nest(ctx.indent_width));
+            } else {
+                docs.push(elem_expr.doc(ctx));
+            }
             trivias = format_trivias_after_node(elem_expr, ctx);
         });
         docs.append(&mut trivias);
@@ -125,12 +130,17 @@ impl DocGen for ElemList {
             trivias = format_trivias_after_token(ref_type, ctx);
         }
         self.elem_exprs().for_each(|elem_expr| {
-            if trivias.is_empty() && elem_expr.keyword().is_some() {
-                docs.push(Doc::space());
+            let has_keyword = elem_expr.keyword().is_some();
+            if trivias.is_empty() && has_keyword {
+                docs.push(Doc::hard_line().nest(ctx.indent_width));
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(elem_expr.doc(ctx));
+            if has_keyword {
+                docs.push(elem_expr.doc(ctx).nest(ctx.indent_width));
+            } else {
+                docs.push(elem_expr.doc(ctx));
+            }
             trivias = format_trivias_after_node(elem_expr, ctx);
         });
         docs.append(&mut trivias);
@@ -563,12 +573,17 @@ impl DocGen for ModuleFieldData {
             trivias = format_trivias_after_node(mem_use, ctx);
         }
         if let Some(offset) = self.offset() {
-            if trivias.is_empty() && offset.keyword().is_some() {
-                docs.push(Doc::space());
+            let has_keyword = offset.keyword().is_some();
+            if trivias.is_empty() && has_keyword {
+                docs.push(Doc::hard_line().nest(ctx.indent_width));
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(offset.doc(ctx));
+            if has_keyword {
+                docs.push(offset.doc(ctx).nest(ctx.indent_width));
+            } else {
+                docs.push(offset.doc(ctx));
+            }
             trivias = format_trivias_after_node(offset, ctx);
         }
         self.string_tokens().for_each(|string| {
@@ -627,12 +642,17 @@ impl DocGen for ModuleFieldElem {
             trivias = format_trivias_after_node(table_use, ctx);
         }
         if let Some(offset) = self.offset() {
-            if trivias.is_empty() && offset.keyword().is_some() {
-                docs.push(Doc::space());
+            let has_keyword = offset.keyword().is_some();
+            if trivias.is_empty() && has_keyword {
+                docs.push(Doc::hard_line().nest(ctx.indent_width));
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(offset.doc(ctx));
+            if has_keyword {
+                docs.push(offset.doc(ctx).nest(ctx.indent_width));
+            } else {
+                docs.push(offset.doc(ctx));
+            }
             trivias = format_trivias_after_node(offset, ctx);
         }
         if let Some(elem_list) = self.elem_list() {
