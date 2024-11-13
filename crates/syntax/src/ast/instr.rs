@@ -175,6 +175,10 @@ impl BlockIfElse {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+    #[inline]
     pub fn instrs(&self) -> AstChildren<Instr> {
         children(&self.syntax)
     }
@@ -221,6 +225,10 @@ impl BlockIfThen {
     #[inline]
     pub fn keyword(&self) -> Option<SyntaxToken> {
         token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
     pub fn instrs(&self) -> AstChildren<Instr> {

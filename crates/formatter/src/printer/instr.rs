@@ -170,6 +170,15 @@ impl DocGen for BlockIfElse {
             docs.push(Doc::text("else"));
             trivias = format_trivias_after_token(keyword, ctx);
         }
+        if let Some(ident) = self.ident_token() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text(ident.to_string()));
+            trivias = format_trivias_after_token(ident, ctx);
+        }
         self.instrs().for_each(|instr| {
             if trivias.is_empty() {
                 docs.push(Doc::hard_line());
@@ -199,6 +208,15 @@ impl DocGen for BlockIfThen {
             docs.append(&mut trivias);
             docs.push(Doc::text("then"));
             trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(ident) = self.ident_token() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text(ident.to_string()));
+            trivias = format_trivias_after_token(ident, ctx);
         }
         self.instrs().for_each(|instr| {
             if trivias.is_empty() {
