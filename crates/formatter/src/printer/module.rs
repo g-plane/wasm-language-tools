@@ -561,7 +561,7 @@ impl DocGen for ModuleFieldData {
             trivias = format_trivias_after_node(mem_use, ctx);
         }
         if let Some(offset) = self.offset() {
-            if trivias.is_empty() {
+            if trivias.is_empty() && offset.keyword().is_some() {
                 docs.push(Doc::space());
             } else {
                 docs.append(&mut trivias);
@@ -1116,8 +1116,10 @@ impl DocGen for Offset {
             }))
             .nest(ctx.indent_width),
         );
-        docs.append(&mut trivias);
-        docs.push(Doc::text(")"));
+        if self.r_paren_token().is_some() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text(")"));
+        }
         Doc::list(docs)
     }
 }
