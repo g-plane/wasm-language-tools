@@ -495,7 +495,12 @@ impl DocGen for Module {
                 } else {
                     docs.append(&mut trivias);
                 }
-                docs.push(module_field.doc(ctx));
+                let node = module_field.syntax();
+                if should_ignore(&node, ctx) {
+                    reflow(&node.to_string(), &mut docs);
+                } else {
+                    docs.push(module_field.doc(ctx));
+                }
                 trivias = format_trivias_after_node(module_field, ctx);
                 docs
             }))
