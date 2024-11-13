@@ -1184,10 +1184,10 @@ impl DocGen for TypeUse {
 
         let mut params = self.params();
         if let Some(param) = params.next() {
-            if !trivias.is_empty() {
-                docs.append(&mut trivias);
-            } else if self.l_paren_token().is_some() {
+            if trivias.is_empty() && !docs.is_empty() {
                 docs.push(Doc::space());
+            } else if self.l_paren_token().is_some() {
+                docs.append(&mut trivias);
             }
             docs.push(param.doc(ctx));
             trivias = format_trivias_after_node(param, ctx);
@@ -1201,7 +1201,17 @@ impl DocGen for TypeUse {
             docs.push(param.doc(ctx));
             trivias = format_trivias_after_node(param, ctx);
         });
-        self.results().for_each(|result| {
+        let mut results = self.results();
+        if let Some(result) = results.next() {
+            if trivias.is_empty() && !docs.is_empty() {
+                docs.push(Doc::space());
+            } else if self.l_paren_token().is_some() {
+                docs.append(&mut trivias);
+            }
+            docs.push(result.doc(ctx));
+            trivias = format_trivias_after_node(result, ctx);
+        }
+        results.for_each(|result| {
             if trivias.is_empty() {
                 docs.push(Doc::space());
             } else {
