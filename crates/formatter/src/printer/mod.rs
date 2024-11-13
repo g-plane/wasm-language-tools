@@ -45,6 +45,8 @@ impl DocGen for Root {
                                 0 => {
                                     if prev_kind == SyntaxKind::LINE_COMMENT {
                                         docs.push(Doc::hard_line());
+                                    } else {
+                                        docs.push(Doc::space());
                                     }
                                 }
                                 1 => {
