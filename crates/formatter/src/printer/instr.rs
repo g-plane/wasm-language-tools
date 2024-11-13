@@ -42,9 +42,27 @@ impl DocGen for BlockBlock {
             docs.push(instr.doc(ctx));
             trivias = format_trivias_after_node(instr, ctx);
         });
-        if self.r_paren_token().is_some() {
+        if let Some(r_paren) = self.r_paren_token() {
             docs.append(&mut trivias);
             docs.push(Doc::text(")"));
+            trivias = format_trivias_after_token(r_paren, ctx);
+        }
+        if let Some(keyword) = self.end_keyword() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text("end"));
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(ident) = self.end_ident_token() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text(ident.to_string()));
         }
         Doc::list(docs).nest(ctx.indent_width)
     }
@@ -108,9 +126,27 @@ impl DocGen for BlockIf {
             docs.push(else_block.doc(ctx));
             trivias = format_trivias_after_node(else_block, ctx);
         }
-        if self.r_paren_token().is_some() {
+        if let Some(r_paren) = self.r_paren_token() {
             docs.append(&mut trivias);
             docs.push(Doc::text(")"));
+            trivias = format_trivias_after_token(r_paren, ctx);
+        }
+        if let Some(keyword) = self.end_keyword() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text("end"));
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(ident) = self.end_ident_token() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text(ident.to_string()));
         }
 
         if self.l_paren_token().is_some() {
@@ -231,9 +267,27 @@ impl DocGen for BlockLoop {
             docs.push(instr.doc(ctx));
             trivias = format_trivias_after_node(instr, ctx);
         });
-        if self.r_paren_token().is_some() {
+        if let Some(r_paren) = self.r_paren_token() {
             docs.append(&mut trivias);
             docs.push(Doc::text(")"));
+            trivias = format_trivias_after_token(r_paren, ctx);
+        }
+        if let Some(keyword) = self.end_keyword() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text("end"));
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(ident) = self.end_ident_token() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text(ident.to_string()));
         }
         Doc::list(docs).nest(ctx.indent_width)
     }
