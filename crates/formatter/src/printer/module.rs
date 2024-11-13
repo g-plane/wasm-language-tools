@@ -508,7 +508,7 @@ impl DocGen for Module {
                     docs.append(&mut trivias);
                 }
                 let node = module_field.syntax();
-                if should_ignore(&node, ctx) {
+                if should_ignore(node, ctx) {
                     reflow(&node.to_string(), &mut docs);
                 } else {
                     docs.push(module_field.doc(ctx));

@@ -1,6 +1,5 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[expect(non_camel_case_types)]
-#[expect(clippy::upper_case_acronyms)]
 #[repr(u16)]
 /// Syntax kind enum for nodes and tokens.
 pub enum SyntaxKind {
