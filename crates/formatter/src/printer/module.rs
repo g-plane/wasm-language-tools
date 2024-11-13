@@ -53,7 +53,7 @@ impl DocGen for Elem {
             trivias = format_trivias_after_node(index, ctx);
         });
         self.elem_exprs().for_each(|elem_expr| {
-            if trivias.is_empty() {
+            if trivias.is_empty() && elem_expr.keyword().is_some() {
                 docs.push(Doc::space());
             } else {
                 docs.append(&mut trivias);
@@ -93,8 +93,10 @@ impl DocGen for ElemExpr {
             }))
             .nest(ctx.indent_width),
         );
-        docs.append(&mut trivias);
-        docs.push(Doc::text(")"));
+        if self.r_paren_token().is_some() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text(")"));
+        }
         Doc::list(docs)
     }
 }
@@ -123,7 +125,7 @@ impl DocGen for ElemList {
             trivias = format_trivias_after_token(ref_type, ctx);
         }
         self.elem_exprs().for_each(|elem_expr| {
-            if trivias.is_empty() {
+            if trivias.is_empty() && elem_expr.keyword().is_some() {
                 docs.push(Doc::space());
             } else {
                 docs.append(&mut trivias);
@@ -625,7 +627,7 @@ impl DocGen for ModuleFieldElem {
             trivias = format_trivias_after_node(table_use, ctx);
         }
         if let Some(offset) = self.offset() {
-            if trivias.is_empty() {
+            if trivias.is_empty() && offset.keyword().is_some() {
                 docs.push(Doc::space());
             } else {
                 docs.append(&mut trivias);
