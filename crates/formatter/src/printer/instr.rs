@@ -33,22 +33,24 @@ impl DocGen for BlockBlock {
             docs.push(block_type.doc(ctx));
             trivias = format_trivias_after_node(block_type, ctx);
         }
-        self.instrs().for_each(|instr| {
-            if trivias.is_empty() {
-                docs.push(Doc::hard_line());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(instr.doc(ctx));
-            trivias = format_trivias_after_node(instr, ctx);
-        });
+        docs.push(
+            Doc::list(self.instrs().fold(vec![], |mut docs, instr| {
+                if trivias.is_empty() {
+                    docs.push(Doc::hard_line());
+                } else {
+                    docs.append(&mut trivias);
+                }
+                docs.push(instr.doc(ctx));
+                trivias = format_trivias_after_node(instr, ctx);
+                docs
+            }))
+            .nest(ctx.indent_width),
+        );
         if let Some(r_paren) = self.r_paren_token() {
             docs.append(&mut trivias);
             docs.push(Doc::text(")"));
             trivias = format_trivias_after_token(r_paren, ctx);
         }
-
-        let mut docs = vec![Doc::list(docs).nest(ctx.indent_width)];
         if let Some(keyword) = self.end_keyword() {
             if trivias.is_empty() {
                 docs.push(Doc::hard_line());
@@ -74,7 +76,9 @@ impl DocGen for BlockIf {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         let mut docs = Vec::with_capacity(2);
         let mut trivias = vec![];
+        let mut is_folded = false;
         if let Some(l_paren) = self.l_paren_token() {
+            is_folded = true;
             docs.push(Doc::text("("));
             trivias = format_trivias_after_token(l_paren, ctx);
         }
@@ -101,44 +105,44 @@ impl DocGen for BlockIf {
             docs.push(block_type.doc(ctx));
             trivias = format_trivias_after_node(block_type, ctx);
         }
+        let mut block_docs = Vec::with_capacity(3);
         self.instrs().for_each(|instr| {
             if trivias.is_empty() {
-                docs.push(Doc::hard_line());
+                block_docs.push(Doc::hard_line());
             } else {
-                docs.append(&mut trivias);
+                block_docs.append(&mut trivias);
             }
-            docs.push(instr.doc(ctx));
+            block_docs.push(instr.doc(ctx));
             trivias = format_trivias_after_node(instr, ctx);
         });
         if let Some(then_block) = self.then_block() {
             if trivias.is_empty() && then_block.l_paren_token().is_some() {
-                docs.push(Doc::hard_line());
+                block_docs.push(Doc::hard_line());
             } else {
-                docs.append(&mut trivias);
+                block_docs.append(&mut trivias);
             }
-            docs.push(then_block.doc(ctx));
+            block_docs.push(then_block.doc(ctx));
             trivias = format_trivias_after_node(then_block, ctx);
         }
         if let Some(else_block) = self.else_block() {
             if trivias.is_empty() {
-                docs.push(Doc::hard_line());
+                block_docs.push(Doc::hard_line());
             } else {
-                docs.append(&mut trivias);
+                block_docs.append(&mut trivias);
             }
-            docs.push(else_block.doc(ctx));
+            block_docs.push(else_block.doc(ctx));
             trivias = format_trivias_after_node(else_block, ctx);
+        }
+        if is_folded {
+            docs.push(Doc::list(block_docs).nest(ctx.indent_width));
+        } else {
+            docs.append(&mut block_docs);
         }
         if let Some(r_paren) = self.r_paren_token() {
             docs.append(&mut trivias);
             docs.push(Doc::text(")"));
             trivias = format_trivias_after_token(r_paren, ctx);
         }
-
-        let mut docs = if self.l_paren_token().is_some() {
-            vec![Doc::list(docs).nest(ctx.indent_width)]
-        } else {
-            docs
-        };
         if let Some(keyword) = self.end_keyword() {
             if trivias.is_empty() {
                 docs.push(Doc::hard_line());
@@ -280,22 +284,24 @@ impl DocGen for BlockLoop {
             docs.push(block_type.doc(ctx));
             trivias = format_trivias_after_node(block_type, ctx);
         }
-        self.instrs().for_each(|instr| {
-            if trivias.is_empty() {
-                docs.push(Doc::hard_line());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(instr.doc(ctx));
-            trivias = format_trivias_after_node(instr, ctx);
-        });
+        docs.push(
+            Doc::list(self.instrs().fold(vec![], |mut docs, instr| {
+                if trivias.is_empty() {
+                    docs.push(Doc::hard_line());
+                } else {
+                    docs.append(&mut trivias);
+                }
+                docs.push(instr.doc(ctx));
+                trivias = format_trivias_after_node(instr, ctx);
+                docs
+            }))
+            .nest(ctx.indent_width),
+        );
         if let Some(r_paren) = self.r_paren_token() {
             docs.append(&mut trivias);
             docs.push(Doc::text(")"));
             trivias = format_trivias_after_token(r_paren, ctx);
         }
-
-        let mut docs = vec![Doc::list(docs).nest(ctx.indent_width)];
         if let Some(keyword) = self.end_keyword() {
             if trivias.is_empty() {
                 docs.push(Doc::hard_line());

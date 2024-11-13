@@ -749,14 +749,28 @@ impl DocGen for ModuleFieldFunc {
         });
         if let Some(type_use) = self.type_use() {
             if trivias.is_empty() {
-                docs.push(Doc::space());
+                if type_use.keyword().is_some() {
+                    docs.push(Doc::space());
+                } else {
+                    docs.push(Doc::soft_line().nest(ctx.indent_width));
+                }
             } else {
                 docs.append(&mut trivias);
             }
             docs.push(type_use.doc(ctx));
             trivias = format_trivias_after_node(type_use, ctx);
         }
-        self.locals().for_each(|local| {
+        let mut locals = self.locals();
+        if let Some(local) = locals.next() {
+            if trivias.is_empty() {
+                docs.push(Doc::soft_line().nest(ctx.indent_width));
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(local.doc(ctx));
+            trivias = format_trivias_after_node(local, ctx);
+        }
+        locals.for_each(|local| {
             if trivias.is_empty() {
                 docs.push(Doc::space());
             } else {
@@ -1205,7 +1219,7 @@ impl DocGen for TypeUse {
         let mut params = self.params();
         if let Some(param) = params.next() {
             if trivias.is_empty() && !docs.is_empty() {
-                docs.push(Doc::space());
+                docs.push(Doc::soft_line().nest(ctx.indent_width));
             } else if self.l_paren_token().is_some() {
                 docs.append(&mut trivias);
             }

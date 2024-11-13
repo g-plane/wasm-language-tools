@@ -48,16 +48,20 @@ source: crates/formatter/tests/parser.rs
   (func (export "type-use-5") (type $sig-2) (result i32)
     (i32.const 0))
   (func (export "type-use-6") (type $sig-3) (param i32))
-  (func (export "type-use-7") (type $sig-4) (param i32) (param f64 i32) (result i32)
+  (func (export "type-use-7") (type $sig-4)
+    (param i32) (param f64 i32) (result i32)
     (i32.const 0))
 
   (func (type $sig))
   (func (type $forward)) ;; forward reference
 
-  (func $complex (param i32 f32) (param $x i64) (param) (param i32) (result) (result i32) (result) (result i64 i32) (local f32) (local $y i32) (local i64 i32) (local) (local f64 i32)
+  (func $complex
+    (param i32 f32) (param $x i64) (param) (param i32) (result) (result i32) (result) (result i64 i32)
+    (local f32) (local $y i32) (local i64 i32) (local) (local f64 i32)
     (unreachable)
     (unreachable))
-  (func $complex-sig (type $sig) (local f32) (local $y i32) (local i64 i32) (local) (local f64 i32)
+  (func $complex-sig (type $sig)
+    (local f32) (local $y i32) (local i64 i32) (local) (local f64 i32)
     (unreachable)
     (unreachable))
 
