@@ -1,0 +1,7 @@
+---
+source: crates/formatter/tests/parser.rs
+---
+(module
+  (func)
+  (f)
+  (func))

@@ -1,0 +1,8 @@
+---
+source: crates/formatter/tests/fmt.rs
+---
+;; fmt-ignore
+( module )
+
+(module ;; fmt-ignore
+  ( func ))

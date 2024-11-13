@@ -1,0 +1,8 @@
+{
+  "enabled": {
+    "format_comments": true
+  },
+  "disabled": {
+    "format_comments": false
+  }
+}

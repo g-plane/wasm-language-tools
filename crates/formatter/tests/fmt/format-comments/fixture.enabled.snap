@@ -1,0 +1,10 @@
+---
+source: crates/formatter/tests/fmt.rs
+---
+(; comment ;)
+(; comment ;)
+(; comment ;)
+;; comment
+
+(; comment ;)
+;; comment

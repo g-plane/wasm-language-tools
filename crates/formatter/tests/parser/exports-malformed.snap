@@ -1,0 +1,8 @@
+---
+source: crates/formatter/tests/parser.rs
+---
+(module
+  (export "" (fu))
+  (export "" (func $))
+  (export "")
+  (export "" (func)))
