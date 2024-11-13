@@ -1,0 +1,19 @@
+---
+source: crates/service/tests/formatting/mod.rs
+expression: response
+---
+[
+  {
+    "range": {
+      "start": {
+        "line": 0,
+        "character": 0
+      },
+      "end": {
+        "line": 6,
+        "character": 0
+      }
+    },
+    "newText": "(module\n    (func (param i32)\n        (local.get 0)))\n"
+  }
+]
