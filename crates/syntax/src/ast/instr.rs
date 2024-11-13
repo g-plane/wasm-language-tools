@@ -1,7 +1,10 @@
 use super::{module::TypeUse, ty::Result, SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage};
-use rowan::ast::{
-    support::{child, children, token},
-    AstChildren, AstNode,
+use rowan::{
+    ast::{
+        support::{child, children, token},
+        AstChildren, AstNode,
+    },
+    NodeOrToken,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -32,6 +35,23 @@ impl BlockBlock {
     #[inline]
     pub fn r_paren_token(&self) -> Option<SyntaxToken> {
         token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+    #[inline]
+    pub fn end_keyword(&self) -> Option<SyntaxToken> {
+        self.syntax
+            .children_with_tokens()
+            .filter_map(|it| it.into_token())
+            .find(|it| it.kind() == SyntaxKind::KEYWORD && it.text() == "end")
+    }
+    #[inline]
+    pub fn end_ident_token(&self) -> Option<SyntaxToken> {
+        self.syntax
+            .children_with_tokens()
+            .filter_map(|it| match it {
+                NodeOrToken::Token(token) if token.kind() == SyntaxKind::IDENT => Some(token),
+                _ => None,
+            })
+            .nth(1)
     }
 }
 impl AstNode for BlockBlock {
@@ -96,6 +116,23 @@ impl BlockIf {
     #[inline]
     pub fn r_paren_token(&self) -> Option<SyntaxToken> {
         token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+    #[inline]
+    pub fn end_keyword(&self) -> Option<SyntaxToken> {
+        self.syntax
+            .children_with_tokens()
+            .filter_map(|it| it.into_token())
+            .find(|it| it.kind() == SyntaxKind::KEYWORD && it.text() == "end")
+    }
+    #[inline]
+    pub fn end_ident_token(&self) -> Option<SyntaxToken> {
+        self.syntax
+            .children_with_tokens()
+            .filter_map(|it| match it {
+                NodeOrToken::Token(token) if token.kind() == SyntaxKind::IDENT => Some(token),
+                _ => None,
+            })
+            .nth(1)
     }
 }
 impl AstNode for BlockIf {
@@ -288,6 +325,23 @@ impl BlockLoop {
     #[inline]
     pub fn r_paren_token(&self) -> Option<SyntaxToken> {
         token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+    #[inline]
+    pub fn end_keyword(&self) -> Option<SyntaxToken> {
+        self.syntax
+            .children_with_tokens()
+            .filter_map(|it| it.into_token())
+            .find(|it| it.kind() == SyntaxKind::KEYWORD && it.text() == "end")
+    }
+    #[inline]
+    pub fn end_ident_token(&self) -> Option<SyntaxToken> {
+        self.syntax
+            .children_with_tokens()
+            .filter_map(|it| match it {
+                NodeOrToken::Token(token) if token.kind() == SyntaxKind::IDENT => Some(token),
+                _ => None,
+            })
+            .nth(1)
     }
 }
 impl AstNode for BlockLoop {
