@@ -14,6 +14,16 @@ fn expected_instr() {
 }
 
 #[test]
+fn ignored_expecting_instr() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "(module (func (br_table 0 1)))";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
+
+#[test]
 fn less_operands() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "(module (func (i32.add (i32.const 0))))";

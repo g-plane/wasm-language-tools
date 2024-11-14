@@ -54,7 +54,7 @@ pub fn check_folded(
                     if let Some(types) = resolve_type(service, uri, symbol_table, &instr) {
                         received.extend(types.into_iter().map(|ty| (ty, operand.clone())));
                     }
-                } else {
+                } else if meta.is_some() {
                     diags.push(Diagnostic {
                         range: helpers::rowan_range_to_lsp_range(
                             line_index,
