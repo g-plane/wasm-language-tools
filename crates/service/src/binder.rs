@@ -523,7 +523,8 @@ impl PartialEq for SymbolItem {
 impl Eq for SymbolItem {}
 impl Hash for SymbolItem {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.key.hash(state)
+        self.key.hash(state);
+        self.kind.hash(state);
     }
 }
 
