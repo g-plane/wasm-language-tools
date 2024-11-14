@@ -240,3 +240,25 @@ fn mixed_type_mismatch_from_instr_meta() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn mixed_matches_from_call() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func $fib$naive (param i32) (result i32)
+    (call $fib$naive
+      (i32.sub
+        (local.get 0)
+        (i32.const 1)))
+    (call $fib$naive
+      (i32.sub
+        (local.get 0)
+        (i32.const 2)))
+    i32.add))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}

@@ -157,7 +157,11 @@ pub fn check_stacked(
             else {
                 return;
             };
-            let expected_count = params.len();
+            let expected_count = if plain_instr.l_paren_token().is_some() {
+                0
+            } else {
+                params.len()
+            };
             let pop_count = if let Some(count) = types_stack.len().checked_sub(expected_count) {
                 count
             } else {
