@@ -4,6 +4,7 @@ mod data_set;
 mod features;
 mod files;
 mod helpers;
+mod idx;
 mod refactorings;
 mod types_analyzer;
 
@@ -11,6 +12,7 @@ use self::features::SemanticTokenKind;
 use crate::{
     binder::SymbolTables,
     files::{Files, FilesCtx},
+    idx::Idents,
     types_analyzer::TypesAnalyzer,
 };
 use indexmap::{IndexMap, IndexSet};
@@ -27,7 +29,7 @@ use lsp_types::{
 use rustc_hash::FxBuildHasher;
 use salsa::{InternId, InternKey};
 
-#[salsa::database(Files, SymbolTables, TypesAnalyzer)]
+#[salsa::database(Files, Idents, SymbolTables, TypesAnalyzer)]
 #[derive(Default)]
 pub struct LanguageService {
     storage: salsa::Storage<Self>,

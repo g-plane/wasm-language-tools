@@ -1,7 +1,8 @@
 use crate::{
-    binder::{DefIdx, SymbolItemKind, SymbolTablesCtx},
+    binder::{SymbolItemKind, SymbolTablesCtx},
     files::FilesCtx,
     helpers,
+    idx::{DefIdx, IdentsCtx},
     types_analyzer::TypesAnalyzerCtx,
     LanguageService,
 };

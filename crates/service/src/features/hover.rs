@@ -1,9 +1,10 @@
 use super::find_meaningful_token;
 use crate::{
-    binder::{DefIdx, SymbolItem, SymbolItemKind, SymbolTablesCtx},
+    binder::{SymbolItem, SymbolItemKind, SymbolTablesCtx},
     data_set,
     files::FilesCtx,
     helpers,
+    idx::{DefIdx, IdentsCtx},
     types_analyzer::TypesAnalyzerCtx,
     InternUri, LanguageService,
 };

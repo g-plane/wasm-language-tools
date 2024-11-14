@@ -1,6 +1,8 @@
 use crate::{
-    binder::{RefIdx, SymbolItemKind, SymbolTable, SymbolTablesCtx},
-    helpers, LanguageService,
+    binder::{SymbolItemKind, SymbolTable},
+    helpers,
+    idx::{IdentsCtx, RefIdx},
+    LanguageService,
 };
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity};

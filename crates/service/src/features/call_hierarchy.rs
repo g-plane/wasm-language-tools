@@ -3,6 +3,7 @@ use crate::{
     binder::{SymbolItem, SymbolItemKind, SymbolTablesCtx},
     files::FilesCtx,
     helpers,
+    idx::IdentsCtx,
     types_analyzer::TypesAnalyzerCtx,
     LanguageService,
 };

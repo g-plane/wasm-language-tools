@@ -1,9 +1,12 @@
-use crate::{files::FilesCtx, InternUri};
+use crate::{
+    files::FilesCtx,
+    idx::{DefIdx, IdentsCtx, RefIdx},
+    InternUri,
+};
 use rowan::{
     ast::{support::token, AstNode, SyntaxNodePtr},
     GreenNode,
 };
-use salsa::{InternId, InternKey};
 use std::{hash::Hash, rc::Rc};
 use wat_syntax::{
     ast::{ModuleFieldFunc, PlainInstr},
@@ -11,50 +14,10 @@ use wat_syntax::{
 };
 
 #[salsa::query_group(SymbolTables)]
-pub(crate) trait SymbolTablesCtx: FilesCtx {
+pub(crate) trait SymbolTablesCtx: FilesCtx + IdentsCtx {
     #[salsa::memoized]
     #[salsa::invoke(create_symbol_table)]
     fn symbol_table(&self, uri: InternUri) -> Rc<SymbolTable>;
-
-    #[salsa::interned]
-    fn ident(&self, ident: String) -> InternIdent;
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct DefIdx {
-    pub num: u32,
-    pub name: Option<InternIdent>,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub enum RefIdx {
-    Num(u32),
-    Name(InternIdent),
-}
-
-impl PartialEq<u32> for RefIdx {
-    fn eq(&self, other: &u32) -> bool {
-        match self {
-            RefIdx::Num(num) => num == other,
-            RefIdx::Name(..) => false,
-        }
-    }
-}
-impl PartialEq<DefIdx> for RefIdx {
-    fn eq(&self, other: &DefIdx) -> bool {
-        match self {
-            RefIdx::Num(num) => *num == other.num,
-            RefIdx::Name(name) => other.name.as_ref().is_some_and(|s| name == s),
-        }
-    }
-}
-impl PartialEq<RefIdx> for DefIdx {
-    fn eq(&self, other: &RefIdx) -> bool {
-        match other {
-            RefIdx::Num(num) => self.num == *num,
-            RefIdx::Name(name) => self.name.as_ref().is_some_and(|s| name == s),
-        }
-    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -578,15 +541,4 @@ pub enum SymbolItemKind {
     GlobalRef(RefIdx),
     MemoryDef(DefIdx),
     MemoryRef(RefIdx),
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-pub(crate) struct InternIdent(InternId);
-impl InternKey for InternIdent {
-    fn from_intern_id(v: salsa::InternId) -> Self {
-        InternIdent(v)
-    }
-    fn as_intern_id(&self) -> InternId {
-        self.0
-    }
 }

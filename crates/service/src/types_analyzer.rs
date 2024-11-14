@@ -1,7 +1,9 @@
 use crate::{
-    binder::{DefIdx, SymbolItem, SymbolItemKind, SymbolTablesCtx},
+    binder::{SymbolItem, SymbolItemKind, SymbolTablesCtx},
     files::FilesCtx,
-    helpers, InternUri,
+    helpers,
+    idx::DefIdx,
+    InternUri,
 };
 use rowan::{
     ast::{

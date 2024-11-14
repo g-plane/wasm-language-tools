@@ -1,8 +1,10 @@
 use super::find_meaningful_token;
 use crate::{
-    binder::{RefIdx, SymbolItemKind, SymbolTablesCtx},
+    binder::{SymbolItemKind, SymbolTablesCtx},
     files::FilesCtx,
-    helpers, LanguageService,
+    helpers,
+    idx::{IdentsCtx, RefIdx},
+    LanguageService,
 };
 use lsp_types::{
     PrepareRenameResponse, RenameParams, TextDocumentPositionParams, TextEdit, WorkspaceEdit,

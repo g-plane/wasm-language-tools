@@ -1,7 +1,9 @@
 use crate::{
     binder::{SymbolItemKind, SymbolTablesCtx},
     files::FilesCtx,
-    helpers, LanguageService,
+    helpers,
+    idx::IdentsCtx,
+    LanguageService,
 };
 use lsp_types::{DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind};
 use rowan::ast::support::token;
