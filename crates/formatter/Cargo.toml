@@ -24,6 +24,9 @@ wat_parser = { version = "0.0", path = "../parser" }
 [features]
 config_serde = ["serde"]
 
+[lints.clippy]
+dbg_macro = "warn"
+
 [[example]]
 name = "fmt"
 required-features = ["config_serde"]

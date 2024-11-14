@@ -25,6 +25,9 @@ wat_syntax = { path = "../syntax", version = "0.0" }
 criterion.workspace = true
 insta.workspace = true
 
+[lints.clippy]
+dbg_macro = "warn"
+
 [[bench]]
 name = "unchanged"
 harness = false

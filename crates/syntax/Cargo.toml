@@ -10,3 +10,6 @@ keywords = ["wasm"]
 
 [dependencies]
 rowan.workspace = true
+
+[lints.clippy]
+dbg_macro = "warn"

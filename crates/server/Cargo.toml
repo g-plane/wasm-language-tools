@@ -19,3 +19,6 @@ tracing = "0.1"
 tracing-subscriber = "0.3"
 tracing-journald = "0.3"
 wat_service = { path = "../service", version = "0.0" }
+
+[lints.clippy]
+dbg_macro = "warn"
