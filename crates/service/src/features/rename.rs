@@ -94,22 +94,20 @@ impl LanguageService {
                 }
                 SymbolItemKind::BlockDef(..) => {
                     symbol == *sym
-                        || symbol_table
-                            .blocks
-                            .get(&symbol_key)
-                            .is_some_and(|defs| defs.iter().any(|(key, _)| key == &sym.key))
+                        || symbol_table.blocks.iter().any(|(ref_key, def_key, _)| {
+                            &symbol_key == ref_key && def_key == &sym.key
+                        })
                 }
                 SymbolItemKind::BlockRef(..) => {
                     symbol == *sym
-                        || symbol_table
-                            .blocks
-                            .get(&sym.key)
-                            .is_some_and(|defs| defs.iter().any(|(key, _)| key == &symbol.key))
+                        || symbol_table.blocks.iter().any(|(ref_key, def_key, _)| {
+                            &sym.key == ref_key && def_key == &symbol.key
+                        })
                         || symbol_table
                             .find_block_def(&symbol_key)
                             .is_some_and(|def_symbol| {
-                                symbol_table.blocks.get(&sym.key).is_some_and(|defs| {
-                                    defs.iter().any(|(key, _)| key == &def_symbol.key)
+                                symbol_table.blocks.iter().any(|(ref_key, def_key, _)| {
+                                    &sym.key == ref_key && def_key == &def_symbol.key
                                 })
                             })
                 }

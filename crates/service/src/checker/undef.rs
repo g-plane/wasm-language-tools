@@ -95,8 +95,8 @@ pub fn check(
             SymbolItemKind::BlockRef(ref_idx) => {
                 if symbol_table
                     .blocks
-                    .get(&symbol.key)
-                    .is_some_and(|defs| defs.iter().any(|(_, def_idx)| def_idx == ref_idx))
+                    .iter()
+                    .any(|(ref_key, _, def_idx)| ref_key == &symbol.key && def_idx == ref_idx)
                 {
                     None
                 } else {

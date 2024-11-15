@@ -7,8 +7,7 @@ use rowan::{
     ast::{support::token, AstNode, SyntaxNodePtr},
     GreenNode,
 };
-use rustc_hash::FxBuildHasher;
-use std::{collections::HashMap, hash::Hash, rc::Rc};
+use std::{hash::Hash, rc::Rc};
 use wat_syntax::{
     ast::{ModuleFieldFunc, PlainInstr},
     SyntaxKind, SyntaxNode, WatLanguage,
@@ -24,7 +23,7 @@ pub(crate) trait SymbolTablesCtx: FilesCtx + IdentsCtx {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct SymbolTable {
     pub symbols: Vec<SymbolItem>,
-    pub blocks: HashMap<SymbolItemKey, Vec<(SymbolItemKey, DefIdx)>, FxBuildHasher>,
+    pub blocks: Vec<(SymbolItemKey, SymbolItemKey, DefIdx)>,
 }
 fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTable> {
     fn create_parent_based_symbol(
@@ -74,7 +73,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
     let root = SyntaxNode::new_root(db.root(uri));
     let mut module_field_id = 0;
     let mut symbols = Vec::with_capacity(2);
-    let mut blocks = HashMap::with_hasher(FxBuildHasher);
+    let mut blocks = vec![];
     for node in root.descendants() {
         match node.kind() {
             SyntaxKind::MODULE => {
@@ -250,7 +249,6 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             })
                             .for_each(|symbol| {
                                 symbols.push(symbol.clone());
-                                let mut ancestors = Vec::with_capacity(1);
                                 let mut current = &symbol;
                                 let mut levels = 0;
                                 while let Some(
@@ -265,11 +263,10 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                                 }) {
                                     let mut def_idx = def_idx.clone();
                                     def_idx.num = levels;
-                                    ancestors.push((key.clone(), def_idx));
+                                    blocks.push((symbol.key.clone(), key.clone(), def_idx));
                                     current = parent;
                                     levels += 1;
                                 }
-                                blocks.insert(symbol.key, ancestors);
                             });
                     }
                     _ => {}
@@ -486,16 +483,11 @@ impl SymbolTable {
     }
 
     pub fn find_block_def(&self, key: &SymbolItemKey) -> Option<&SymbolItem> {
-        self.find_block_ref(key).and_then(|(symbol, ref_idx)| {
-            self.blocks.iter().find_map(|(key, defs)| {
-                if &symbol.key == key {
-                    defs.iter()
-                        .find(|(_, def_idx)| def_idx == ref_idx)
-                        .and_then(|(key, _)| self.symbols.iter().find(|sym| &sym.key == key))
-                } else {
-                    None
-                }
-            })
+        self.find_block_ref(key).and_then(|(_, ref_idx)| {
+            self.blocks
+                .iter()
+                .find(|(ref_key, _, def_idx)| key == ref_key && def_idx == ref_idx)
+                .and_then(|(_, def_key, _)| self.symbols.iter().find(|sym| &sym.key == def_key))
         })
     }
 

@@ -347,12 +347,12 @@ fn get_block_refs(
         symbol_table
             .blocks
             .iter()
-            .filter(|(_, defs)| defs.iter().any(|(def_key, _)| def_key == &def_symbol.key))
-            .filter_map(|(key, _)| {
+            .filter(|(_, def_key, _)| def_key == &def_symbol.key)
+            .filter_map(|(ref_key, _, _)| {
                 symbol_table
                     .symbols
                     .iter()
-                    .find(|symbol| &symbol.key == key)
+                    .find(|symbol| &symbol.key == ref_key)
             })
             .map(|symbol| create_location_by_symbol(params, line_index, symbol, root)),
     );
