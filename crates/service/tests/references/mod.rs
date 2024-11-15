@@ -563,3 +563,91 @@ fn memory_ref_ident_idx() {
     let exclude_decl = service.find_references(create_params(uri, Position::new(3, 30), false));
     assert_json_snapshot!(exclude_decl);
 }
+
+#[test]
+fn block_def_int_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (block
+      (block
+        (br_table 1))
+      (br_table 0))
+    (block
+      (br_table 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let include_decl =
+        service.find_references(create_params(uri.clone(), Position::new(3, 10), true));
+    assert_json_snapshot!(include_decl);
+    let exclude_decl = service.find_references(create_params(uri, Position::new(3, 10), false));
+    assert_json_snapshot!(exclude_decl);
+}
+
+#[test]
+fn block_def_ident_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (block $block
+      (block
+        (br_table $block))
+      (br_table $block))
+    (block $block
+      (br_table $block))))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let include_decl =
+        service.find_references(create_params(uri.clone(), Position::new(3, 14), true));
+    assert_json_snapshot!(include_decl);
+    let exclude_decl = service.find_references(create_params(uri, Position::new(3, 14), false));
+    assert_json_snapshot!(exclude_decl);
+}
+
+#[test]
+fn block_ref_int_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (block
+      (block
+        (br_table 1))
+      (br_table 0))
+    (block
+      (br_table 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let include_decl =
+        service.find_references(create_params(uri.clone(), Position::new(5, 19), true));
+    assert_json_snapshot!(include_decl);
+    let exclude_decl = service.find_references(create_params(uri, Position::new(5, 19), false));
+    assert_json_snapshot!(exclude_decl);
+}
+
+#[test]
+fn block_ref_ident_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (block $block
+      (block
+        (br_table $block))
+      (br_table $block))
+    (block $block
+      (br_table $block))))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let include_decl =
+        service.find_references(create_params(uri.clone(), Position::new(5, 21), true));
+    assert_json_snapshot!(include_decl);
+    let exclude_decl = service.find_references(create_params(uri, Position::new(5, 21), false));
+    assert_json_snapshot!(exclude_decl);
+}

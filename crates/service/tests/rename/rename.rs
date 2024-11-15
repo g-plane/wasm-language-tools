@@ -332,3 +332,45 @@ fn memory_ref() {
         .unwrap();
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn block_def() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (block $block
+      (block
+        (br_table $block))
+      (br_table $block))
+    (block $block
+      (br_table $block))))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service
+        .rename(create_params(uri, Position::new(3, 16), "$b"))
+        .unwrap();
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn block_ref() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (block $block
+      (block
+        (br_table $block))
+      (br_table $block))
+    (block $block
+      (br_table $block))))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service
+        .rename(create_params(uri, Position::new(6, 21), "$b"))
+        .unwrap();
+    assert_json_snapshot!(response);
+}

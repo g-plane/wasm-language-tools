@@ -91,6 +91,16 @@ impl LanguageService {
                     )
                 })
             })
+            .or_else(|| {
+                symbol_table.find_block_def(&key).map(|symbol| {
+                    GotoDefinitionResponse::Scalar(create_location_by_symbol(
+                        &params,
+                        &line_index,
+                        symbol,
+                        &root,
+                    ))
+                })
+            })
     }
 
     pub fn goto_type_definition(

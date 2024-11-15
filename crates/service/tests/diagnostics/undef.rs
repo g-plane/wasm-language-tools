@@ -102,3 +102,25 @@ fn memory_undefined() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn block() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (block $a
+      (block $b
+        (block $c
+          (br_table $a $b $c $d)
+          (br_table 0 1 2 3))
+        (i32.const 1)
+        (return))
+      (i32.const 1)
+      (return))))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

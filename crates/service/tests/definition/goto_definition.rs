@@ -342,3 +342,51 @@ fn memory_ident_idx() {
     let response = service.goto_definition(create_params(uri, Position::new(3, 30)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn block_not_defined() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (br_table 0 $block))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    assert!(service
+        .goto_definition(create_params(uri.clone(), Position::new(2, 20)))
+        .is_none());
+    assert!(service
+        .goto_definition(create_params(uri.clone(), Position::new(2, 27)))
+        .is_none());
+}
+
+#[test]
+fn block_int_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (block
+      (br_table 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(4, 16)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn block_ident_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (block $block
+      (br_table $block))))
+";
+    let mut service = LanguageService::default();
+    service.commit_file(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(4, 21)));
+    assert_json_snapshot!(response);
+}

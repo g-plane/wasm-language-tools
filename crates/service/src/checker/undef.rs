@@ -23,7 +23,8 @@ pub fn check(
             | SymbolItemKind::Local(..)
             | SymbolItemKind::Type(..)
             | SymbolItemKind::GlobalDef(..)
-            | SymbolItemKind::MemoryDef(..) => None,
+            | SymbolItemKind::MemoryDef(..)
+            | SymbolItemKind::BlockDef(..) => None,
             SymbolItemKind::Call(ref_idx) => {
                 if symbol_table.symbols.iter().any(|sym| {
                     if let SymbolItemKind::Func(def_idx) = &sym.kind {
@@ -86,6 +87,17 @@ pub fn check(
                         false
                     }
                 }) {
+                    None
+                } else {
+                    Some((symbol, ref_idx))
+                }
+            }
+            SymbolItemKind::BlockRef(ref_idx) => {
+                if symbol_table
+                    .blocks
+                    .get(&symbol.key)
+                    .is_some_and(|defs| defs.iter().any(|(_, def_idx)| def_idx == ref_idx))
+                {
                     None
                 } else {
                     Some((symbol, ref_idx))

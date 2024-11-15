@@ -72,30 +72,48 @@ impl LanguageService {
         let text_edits = symbol_table
             .symbols
             .iter()
-            .filter(|sym| {
-                symbol.region == sym.region
-                    && match &sym.kind {
-                        SymbolItemKind::Func(idx)
-                        | SymbolItemKind::Param(idx)
-                        | SymbolItemKind::Local(idx)
-                        | SymbolItemKind::Type(idx)
-                        | SymbolItemKind::GlobalDef(idx)
-                        | SymbolItemKind::MemoryDef(idx) => {
-                            idx.name.is_some_and(|name| name == old_name)
-                        }
-                        SymbolItemKind::Call(idx)
-                        | SymbolItemKind::LocalRef(idx)
-                        | SymbolItemKind::TypeUse(idx)
-                        | SymbolItemKind::GlobalRef(idx)
-                        | SymbolItemKind::MemoryRef(idx) => {
-                            if let RefIdx::Name(name) = idx {
-                                *name == old_name
-                            } else {
-                                false
-                            }
-                        }
-                        SymbolItemKind::Module => false,
+            .filter(|sym| match &sym.kind {
+                SymbolItemKind::Func(idx)
+                | SymbolItemKind::Param(idx)
+                | SymbolItemKind::Local(idx)
+                | SymbolItemKind::Type(idx)
+                | SymbolItemKind::GlobalDef(idx)
+                | SymbolItemKind::MemoryDef(idx) => {
+                    symbol.region == sym.region && idx.name.is_some_and(|name| name == old_name)
+                }
+                SymbolItemKind::Call(idx)
+                | SymbolItemKind::LocalRef(idx)
+                | SymbolItemKind::TypeUse(idx)
+                | SymbolItemKind::GlobalRef(idx)
+                | SymbolItemKind::MemoryRef(idx) => {
+                    if let RefIdx::Name(name) = idx {
+                        symbol.region == sym.region && *name == old_name
+                    } else {
+                        false
                     }
+                }
+                SymbolItemKind::BlockDef(..) => {
+                    symbol == *sym
+                        || symbol_table
+                            .blocks
+                            .get(&symbol_key)
+                            .is_some_and(|defs| defs.iter().any(|(key, _)| key == &sym.key))
+                }
+                SymbolItemKind::BlockRef(..) => {
+                    symbol == *sym
+                        || symbol_table
+                            .blocks
+                            .get(&sym.key)
+                            .is_some_and(|defs| defs.iter().any(|(key, _)| key == &symbol.key))
+                        || symbol_table
+                            .find_block_def(&symbol_key)
+                            .is_some_and(|def_symbol| {
+                                symbol_table.blocks.get(&sym.key).is_some_and(|defs| {
+                                    defs.iter().any(|(key, _)| key == &def_symbol.key)
+                                })
+                            })
+                }
+                SymbolItemKind::Module => false,
             })
             .filter_map(|sym| support::token(&sym.key.ptr.to_node(&root), SyntaxKind::IDENT))
             .map(|token| TextEdit {

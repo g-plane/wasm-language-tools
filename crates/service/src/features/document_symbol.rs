@@ -127,7 +127,9 @@ impl LanguageService {
                 | SymbolItemKind::LocalRef(..)
                 | SymbolItemKind::TypeUse(..)
                 | SymbolItemKind::GlobalRef(..)
-                | SymbolItemKind::MemoryRef(..) => None,
+                | SymbolItemKind::MemoryRef(..)
+                | SymbolItemKind::BlockDef(..)
+                | SymbolItemKind::BlockRef(..) => None,
             })
             .collect::<FxHashMap<_, _>>();
         symbol_table

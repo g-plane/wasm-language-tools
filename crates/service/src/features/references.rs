@@ -1,6 +1,6 @@
 use super::find_meaningful_token;
 use crate::{
-    binder::{SymbolItem, SymbolItemKind, SymbolTablesCtx},
+    binder::{SymbolItem, SymbolItemKind, SymbolTable, SymbolTablesCtx},
     files::FilesCtx,
     helpers, LanguageService,
 };
@@ -309,8 +309,54 @@ impl LanguageService {
                         .collect(),
                 )
             }
+            SymbolItemKind::BlockDef(..) => Some(get_block_refs(
+                current_symbol,
+                &params,
+                &symbol_table,
+                &line_index,
+                &root,
+            )),
+            SymbolItemKind::BlockRef(..) => {
+                let def_symbol = symbol_table.find_block_def(&key)?;
+                Some(get_block_refs(
+                    def_symbol,
+                    &params,
+                    &symbol_table,
+                    &line_index,
+                    &root,
+                ))
+            }
         }
     }
+}
+
+fn get_block_refs(
+    def_symbol: &SymbolItem,
+    params: &ReferenceParams,
+    symbol_table: &SymbolTable,
+    line_index: &LineIndex,
+    root: &SyntaxNode,
+) -> Vec<Location> {
+    let mut locations = Vec::with_capacity(1);
+    if params.context.include_declaration {
+        locations.push(create_location_by_symbol(
+            params, line_index, def_symbol, root,
+        ));
+    }
+    locations.extend(
+        symbol_table
+            .blocks
+            .iter()
+            .filter(|(_, defs)| defs.iter().any(|(def_key, _)| def_key == &def_symbol.key))
+            .filter_map(|(key, _)| {
+                symbol_table
+                    .symbols
+                    .iter()
+                    .find(|symbol| &symbol.key == key)
+            })
+            .map(|symbol| create_location_by_symbol(params, line_index, symbol, root)),
+    );
+    locations
 }
 
 fn create_location_by_symbol(

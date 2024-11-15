@@ -7,7 +7,8 @@ use rowan::{
     ast::{support::token, AstNode, SyntaxNodePtr},
     GreenNode,
 };
-use std::{hash::Hash, rc::Rc};
+use rustc_hash::FxBuildHasher;
+use std::{collections::HashMap, hash::Hash, rc::Rc};
 use wat_syntax::{
     ast::{ModuleFieldFunc, PlainInstr},
     SyntaxKind, SyntaxNode, WatLanguage,
@@ -23,9 +24,10 @@ pub(crate) trait SymbolTablesCtx: FilesCtx + IdentsCtx {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct SymbolTable {
     pub symbols: Vec<SymbolItem>,
+    pub blocks: HashMap<SymbolItemKey, Vec<(SymbolItemKey, DefIdx)>, FxBuildHasher>,
 }
 fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTable> {
-    fn create_module_field_symbol(
+    fn create_parent_based_symbol(
         db: &dyn SymbolTablesCtx,
         node: SyntaxNode,
         id: u32,
@@ -72,6 +74,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
     let root = SyntaxNode::new_root(db.root(uri));
     let mut module_field_id = 0;
     let mut symbols = Vec::with_capacity(2);
+    let mut blocks = HashMap::with_hasher(FxBuildHasher);
     for node in root.descendants() {
         match node.kind() {
             SyntaxKind::MODULE => {
@@ -89,7 +92,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                 });
             }
             SyntaxKind::MODULE_FIELD_FUNC => {
-                if let Some(symbol) = create_module_field_symbol(
+                if let Some(symbol) = create_parent_based_symbol(
                     db,
                     node.clone(),
                     module_field_id,
@@ -159,7 +162,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                 });
             }
             SyntaxKind::MODULE_FIELD_TYPE => {
-                if let Some(symbol) = create_module_field_symbol(
+                if let Some(symbol) = create_parent_based_symbol(
                     db,
                     node.clone(),
                     module_field_id,
@@ -170,7 +173,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                 module_field_id += 1;
             }
             SyntaxKind::MODULE_FIELD_GLOBAL => {
-                if let Some(symbol) = create_module_field_symbol(
+                if let Some(symbol) = create_parent_based_symbol(
                     db,
                     node.clone(),
                     module_field_id,
@@ -221,7 +224,65 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             create_ref_symbol(db, node, region.clone(), SymbolItemKind::GlobalRef)
                         }));
                     }
+                    Some("br_table") => {
+                        let Some(region) = node
+                            .ancestors()
+                            .find(|node| {
+                                matches!(
+                                    node.kind(),
+                                    SyntaxKind::BLOCK_BLOCK
+                                        | SyntaxKind::BLOCK_LOOP
+                                        | SyntaxKind::BLOCK_IF
+                                )
+                            })
+                            .map(SymbolItemKey::from)
+                        else {
+                            continue;
+                        };
+                        node.children()
+                            .filter_map(|node| {
+                                create_ref_symbol(
+                                    db,
+                                    node,
+                                    region.clone(),
+                                    SymbolItemKind::BlockRef,
+                                )
+                            })
+                            .for_each(|symbol| {
+                                symbols.push(symbol.clone());
+                                let mut ancestors = Vec::with_capacity(1);
+                                let mut current = &symbol;
+                                let mut levels = 0;
+                                while let Some(
+                                    parent @ SymbolItem {
+                                        key,
+                                        kind: SymbolItemKind::BlockDef(def_idx),
+                                        ..
+                                    },
+                                ) = symbols.iter().find(|sym| {
+                                    matches!(sym.kind, SymbolItemKind::BlockDef(..))
+                                        && sym.key == current.region
+                                }) {
+                                    let mut def_idx = def_idx.clone();
+                                    def_idx.num = levels;
+                                    ancestors.push((key.clone(), def_idx));
+                                    current = parent;
+                                    levels += 1;
+                                }
+                                blocks.insert(symbol.key, ancestors);
+                            });
+                    }
                     _ => {}
+                }
+            }
+            SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_IF | SyntaxKind::BLOCK_LOOP => {
+                if let Some(symbol) = create_parent_based_symbol(
+                    db,
+                    node.clone(),
+                    0, // fake ID
+                    SymbolItemKind::BlockDef,
+                ) {
+                    symbols.push(symbol);
                 }
             }
             SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC => {
@@ -257,7 +318,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                 }
             }
             SyntaxKind::MODULE_FIELD_MEMORY => {
-                if let Some(symbol) = create_module_field_symbol(
+                if let Some(symbol) = create_parent_based_symbol(
                     db,
                     node.clone(),
                     module_field_id,
@@ -286,7 +347,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
             _ => {}
         }
     }
-    Rc::new(SymbolTable { symbols })
+    Rc::new(SymbolTable { symbols, blocks })
 }
 
 impl SymbolTable {
@@ -424,6 +485,31 @@ impl SymbolTable {
             })
     }
 
+    pub fn find_block_def(&self, key: &SymbolItemKey) -> Option<&SymbolItem> {
+        self.find_block_ref(key).and_then(|(symbol, ref_idx)| {
+            self.blocks.iter().find_map(|(key, defs)| {
+                if &symbol.key == key {
+                    defs.iter()
+                        .find(|(_, def_idx)| def_idx == ref_idx)
+                        .and_then(|(key, _)| self.symbols.iter().find(|sym| &sym.key == key))
+                } else {
+                    None
+                }
+            })
+        })
+    }
+
+    pub fn find_block_ref(&self, key: &SymbolItemKey) -> Option<(&SymbolItem, &RefIdx)> {
+        self.symbols.iter().find_map(|symbol| match symbol {
+            SymbolItem {
+                kind: SymbolItemKind::BlockRef(idx),
+                key: block_ref_key,
+                ..
+            } if block_ref_key == key => Some((symbol, idx)),
+            _ => None,
+        })
+    }
+
     pub fn get_declared_params_and_locals(
         &self,
         node: SyntaxNode,
@@ -542,4 +628,6 @@ pub enum SymbolItemKind {
     GlobalRef(RefIdx),
     MemoryDef(DefIdx),
     MemoryRef(RefIdx),
+    BlockDef(DefIdx),
+    BlockRef(RefIdx),
 }
