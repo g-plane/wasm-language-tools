@@ -293,8 +293,8 @@ fn resolve_expected_types(
         let root = SyntaxNode::new_root(service.root(uri));
         let related = symbol_table
             .get_declared_params_and_locals(func.key.ptr.to_node(&root))
-            .filter(|(symbol, _)| matches!(symbol.kind, SymbolItemKind::Param(..)))
-            .map(|(symbol, _)| {
+            .filter(|symbol| symbol.kind == SymbolItemKind::Param)
+            .map(|symbol| {
                 Some((
                     symbol.key.ptr.text_range(),
                     "parameter originally defined here".into(),

@@ -2,7 +2,7 @@ use crate::{
     binder::{SymbolItem, SymbolItemKind, SymbolTablesCtx},
     files::FilesCtx,
     helpers,
-    idx::DefIdx,
+    idx::Idx,
     InternUri,
 };
 use rowan::{
@@ -82,7 +82,7 @@ fn get_func_sig(
     uri: InternUri,
     symbol: SymbolItemWithGreenEq,
 ) -> Option<FuncSig> {
-    debug_assert!(matches!(symbol.kind, SymbolItemKind::Func(..)));
+    debug_assert!(matches!(symbol.kind, SymbolItemKind::Func));
     symbol
         .green
         .children()
@@ -115,9 +115,13 @@ fn render_func_header(
     symbol: SymbolItemWithGreenEq,
 ) -> String {
     let mut content = "(func".to_string();
-    if let SymbolItemKind::Func(DefIdx {
-        name: Some(name), ..
-    }) = symbol.kind
+    if let SymbolItem {
+        kind: SymbolItemKind::Func,
+        idx: Idx {
+            name: Some(name), ..
+        },
+        ..
+    } = symbol.0
     {
         content.push(' ');
         content.push_str(&db.lookup_ident(name));

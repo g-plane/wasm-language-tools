@@ -39,16 +39,18 @@ impl LanguageService {
                         },
                     ))
                 }
-                SymbolItemKind::Func(func) => {
+                SymbolItemKind::Func => {
                     let range =
                         helpers::rowan_range_to_lsp_range(&line_index, symbol.key.ptr.text_range());
                     Some((
                         symbol.key.clone(),
                         DocumentSymbol {
-                            name: func
+                            name: symbol
+                                .idx
                                 .name
                                 .map(|name| self.lookup_ident(name))
-                                .unwrap_or_else(|| func.num.to_string()),
+                                .or_else(|| symbol.idx.num.map(|num| num.to_string()))
+                                .unwrap_or_default(),
                             detail: None,
                             kind: SymbolKind::FUNCTION,
                             tags: None,
@@ -66,16 +68,18 @@ impl LanguageService {
                         },
                     ))
                 }
-                SymbolItemKind::Local(local) => {
+                SymbolItemKind::Local => {
                     let range =
                         helpers::rowan_range_to_lsp_range(&line_index, symbol.key.ptr.text_range());
                     Some((
                         symbol.key.clone(),
                         DocumentSymbol {
-                            name: local
+                            name: symbol
+                                .idx
                                 .name
                                 .map(|name| self.lookup_ident(name))
-                                .unwrap_or_else(|| local.num.to_string()),
+                                .or_else(|| symbol.idx.num.map(|num| num.to_string()))
+                                .unwrap_or_default(),
                             detail: None,
                             kind: SymbolKind::VARIABLE,
                             tags: None,
@@ -93,18 +97,18 @@ impl LanguageService {
                         },
                     ))
                 }
-                SymbolItemKind::Type(idx)
-                | SymbolItemKind::GlobalDef(idx)
-                | SymbolItemKind::MemoryDef(idx) => {
+                SymbolItemKind::Type | SymbolItemKind::GlobalDef | SymbolItemKind::MemoryDef => {
                     let range =
                         helpers::rowan_range_to_lsp_range(&line_index, symbol.key.ptr.text_range());
                     Some((
                         symbol.key.clone(),
                         DocumentSymbol {
-                            name: idx
+                            name: symbol
+                                .idx
                                 .name
                                 .map(|name| self.lookup_ident(name))
-                                .unwrap_or_else(|| idx.num.to_string()),
+                                .or_else(|| symbol.idx.num.map(|num| num.to_string()))
+                                .unwrap_or_default(),
                             detail: None,
                             kind: SymbolKind::VARIABLE,
                             tags: None,
@@ -122,14 +126,14 @@ impl LanguageService {
                         },
                     ))
                 }
-                SymbolItemKind::Param(..)
-                | SymbolItemKind::Call(..)
-                | SymbolItemKind::LocalRef(..)
-                | SymbolItemKind::TypeUse(..)
-                | SymbolItemKind::GlobalRef(..)
-                | SymbolItemKind::MemoryRef(..)
-                | SymbolItemKind::BlockDef(..)
-                | SymbolItemKind::BlockRef(..) => None,
+                SymbolItemKind::Param
+                | SymbolItemKind::Call
+                | SymbolItemKind::LocalRef
+                | SymbolItemKind::TypeUse
+                | SymbolItemKind::GlobalRef
+                | SymbolItemKind::MemoryRef
+                | SymbolItemKind::BlockDef
+                | SymbolItemKind::BlockRef => None,
             })
             .collect::<FxHashMap<_, _>>();
         symbol_table

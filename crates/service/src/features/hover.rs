@@ -4,7 +4,7 @@ use crate::{
     data_set,
     files::FilesCtx,
     helpers,
-    idx::{DefIdx, IdentsCtx},
+    idx::{IdentsCtx, Idx},
     types_analyzer::TypesAnalyzerCtx,
     InternUri, LanguageService,
 };
@@ -161,14 +161,14 @@ fn create_def_hover(
     symbol: &SymbolItem,
 ) -> Option<HoverContents> {
     let content = match symbol.kind {
-        SymbolItemKind::Param(..) | SymbolItemKind::Local(..) => {
+        SymbolItemKind::Param | SymbolItemKind::Local => {
             create_param_or_local_hover(service, symbol)
         }
-        SymbolItemKind::Func(..) => {
+        SymbolItemKind::Func => {
             create_marked_string(service.render_func_header(uri, symbol.clone().into()))
         }
-        SymbolItemKind::Type(..) => create_type_def_hover(service, symbol),
-        SymbolItemKind::GlobalDef(..) => create_global_def_hover(service, symbol, root),
+        SymbolItemKind::Type => create_type_def_hover(service, symbol),
+        SymbolItemKind::GlobalDef => create_global_def_hover(service, symbol, root),
         _ => return None,
     };
     Some(HoverContents::Scalar(content))
@@ -176,17 +176,17 @@ fn create_def_hover(
 
 fn create_param_or_local_hover(service: &LanguageService, symbol: &SymbolItem) -> MarkedString {
     let mut content_value = '('.to_string();
-    match &symbol.kind {
-        SymbolItemKind::Param(idx) => {
+    match symbol.kind {
+        SymbolItemKind::Param => {
             content_value.push_str("param");
-            if let Some(name) = idx.name {
+            if let Some(name) = symbol.idx.name {
                 content_value.push(' ');
                 content_value.push_str(&service.lookup_ident(name));
             }
         }
-        SymbolItemKind::Local(idx) => {
+        SymbolItemKind::Local => {
             content_value.push_str("local");
-            if let Some(name) = idx.name {
+            if let Some(name) = symbol.idx.name {
                 content_value.push(' ');
                 content_value.push_str(&service.lookup_ident(name));
             }
@@ -207,9 +207,9 @@ fn create_global_def_hover(
     root: &SyntaxNode,
 ) -> MarkedString {
     let mut content_value = '('.to_string();
-    if let SymbolItemKind::GlobalDef(idx) = &symbol.kind {
+    if symbol.kind == SymbolItemKind::GlobalDef {
         content_value.push_str("global");
-        if let Some(name) = idx.name {
+        if let Some(name) = symbol.idx.name {
             content_value.push(' ');
             content_value.push_str(&service.lookup_ident(name));
         }
@@ -234,12 +234,16 @@ fn create_global_def_hover(
 
 fn create_type_def_hover(service: &LanguageService, symbol: &SymbolItem) -> MarkedString {
     let mut content_value = "(type".to_string();
-    if let SymbolItemKind::Type(DefIdx {
-        name: Some(name), ..
-    }) = symbol.kind
+    if let SymbolItem {
+        kind: SymbolItemKind::Type,
+        idx: Idx {
+            name: Some(name), ..
+        },
+        ..
+    } = symbol
     {
         content_value.push(' ');
-        content_value.push_str(&service.lookup_ident(name));
+        content_value.push_str(&service.lookup_ident(*name));
     }
     if let Some(func_type) = helpers::ast::find_func_type_of_type_def(&symbol.green) {
         let sig = service.extract_sig(func_type.to_owned());

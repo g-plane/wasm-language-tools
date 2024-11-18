@@ -1,38 +1,45 @@
 use salsa::{InternId, InternKey};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct DefIdx {
-    pub num: u32,
+pub struct Idx {
+    pub num: Option<u32>,
     pub name: Option<InternIdent>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub enum RefIdx {
-    Num(u32),
-    Name(InternIdent),
-}
+impl Idx {
+    pub fn is_def(&self) -> bool {
+        matches!(self, Idx { num: Some(..), .. })
+    }
 
-impl PartialEq<u32> for RefIdx {
-    fn eq(&self, other: &u32) -> bool {
-        match self {
-            RefIdx::Num(num) => num == other,
-            RefIdx::Name(..) => false,
+    pub fn is_ref(&self) -> bool {
+        if self.name.is_some() {
+            self.num.is_none()
+        } else {
+            self.num.is_some()
         }
     }
-}
-impl PartialEq<DefIdx> for RefIdx {
-    fn eq(&self, other: &DefIdx) -> bool {
-        match self {
-            RefIdx::Num(num) => *num == other.num,
-            RefIdx::Name(name) => other.name.as_ref().is_some_and(|s| name == s),
-        }
-    }
-}
-impl PartialEq<RefIdx> for DefIdx {
-    fn eq(&self, other: &RefIdx) -> bool {
-        match other {
-            RefIdx::Num(num) => self.num == *num,
-            RefIdx::Name(name) => self.name.as_ref().is_some_and(|s| name == s),
+
+    pub fn is_defined_by(&self, other: &Self) -> bool {
+        debug_assert!(self.is_ref());
+        debug_assert!(other.is_def());
+        match (self, other) {
+            (
+                Idx { num: Some(num), .. },
+                Idx {
+                    num: Some(other_num),
+                    ..
+                },
+            ) => num == other_num,
+            (
+                Idx {
+                    name: Some(name), ..
+                },
+                Idx {
+                    name: Some(other_name),
+                    ..
+                },
+            ) => name == other_name,
+            _ => false,
         }
     }
 }

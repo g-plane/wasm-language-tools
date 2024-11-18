@@ -3,7 +3,7 @@ use crate::{
     data_set,
     files::FilesCtx,
     helpers,
-    idx::{DefIdx, IdentsCtx},
+    idx::{IdentsCtx, Idx},
     types_analyzer::TypesAnalyzerCtx,
     InternUri, LanguageService,
 };
@@ -268,9 +268,9 @@ fn get_cmp_list(
                     items.extend(
                         symbol_table
                             .get_declared_params_and_locals(func)
-                            .filter_map(|(symbol, idx)| {
+                            .filter_map(|symbol| {
                                 let (label, insert_text) =
-                                    get_def_idx_cmp_text(service, idx, has_dollar)?;
+                                    get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
                                 Some(CompletionItem {
                                     label,
                                     insert_text,
@@ -295,9 +295,9 @@ fn get_cmp_list(
                     };
                     let has_dollar = token.text().starts_with('$');
                     items.extend(symbol_table.get_declared_functions(module).filter_map(
-                        |(symbol, idx)| {
+                        |symbol| {
                             let (label, insert_text) =
-                                get_def_idx_cmp_text(service, idx, has_dollar)?;
+                                get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
                             Some(CompletionItem {
                                 label,
                                 insert_text,
@@ -323,9 +323,9 @@ fn get_cmp_list(
                     };
                     let has_dollar = token.text().starts_with('$');
                     items.extend(symbol_table.get_declared_func_types(module).filter_map(
-                        |(_, idx)| {
+                        |symbol| {
                             let (label, insert_text) =
-                                get_def_idx_cmp_text(service, idx, has_dollar)?;
+                                get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
                             Some(CompletionItem {
                                 label,
                                 insert_text,
@@ -343,24 +343,26 @@ fn get_cmp_list(
                         return items;
                     };
                     let has_dollar = token.text().starts_with('$');
-                    items.extend(symbol_table.get_declared_globals(module).filter_map(
-                        |(symbol, idx)| {
-                            let (label, insert_text) =
-                                get_def_idx_cmp_text(service, idx, has_dollar)?;
-                            Some(CompletionItem {
-                                label,
-                                insert_text,
-                                kind: Some(CompletionItemKind::VARIABLE),
-                                label_details: service
-                                    .extract_global_type(symbol.green.clone())
-                                    .map(|ty| CompletionItemLabelDetails {
-                                        description: Some(ty.to_string()),
-                                        ..Default::default()
-                                    }),
-                                ..Default::default()
-                            })
-                        },
-                    ));
+                    items.extend(
+                        symbol_table
+                            .get_declared_globals(module)
+                            .filter_map(|symbol| {
+                                let (label, insert_text) =
+                                    get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
+                                Some(CompletionItem {
+                                    label,
+                                    insert_text,
+                                    kind: Some(CompletionItemKind::VARIABLE),
+                                    label_details: service
+                                        .extract_global_type(symbol.green.clone())
+                                        .map(|ty| CompletionItemLabelDetails {
+                                            description: Some(ty.to_string()),
+                                            ..Default::default()
+                                        }),
+                                    ..Default::default()
+                                })
+                            }),
+                    );
                 }
                 CmpCtx::MemArg => {
                     items.extend(["offset=", "align="].iter().map(|label| CompletionItem {
@@ -377,18 +379,20 @@ fn get_cmp_list(
                         return items;
                     };
                     let has_dollar = token.text().starts_with('$');
-                    items.extend(symbol_table.get_declared_memories(module).filter_map(
-                        |(_, idx)| {
-                            let (label, insert_text) =
-                                get_def_idx_cmp_text(service, idx, has_dollar)?;
-                            Some(CompletionItem {
-                                label,
-                                insert_text,
-                                kind: Some(CompletionItemKind::VARIABLE),
-                                ..Default::default()
-                            })
-                        },
-                    ));
+                    items.extend(
+                        symbol_table
+                            .get_declared_memories(module)
+                            .filter_map(|symbol| {
+                                let (label, insert_text) =
+                                    get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
+                                Some(CompletionItem {
+                                    label,
+                                    insert_text,
+                                    kind: Some(CompletionItemKind::VARIABLE),
+                                    ..Default::default()
+                                })
+                            }),
+                    );
                 }
                 CmpCtx::KeywordModule => items.push(CompletionItem {
                     label: "module".to_string(),
@@ -445,9 +449,9 @@ fn get_cmp_list(
         })
 }
 
-fn get_def_idx_cmp_text(
+fn get_idx_cmp_text(
     service: &LanguageService,
-    idx: &DefIdx,
+    idx: &Idx,
     has_dollar: bool,
 ) -> Option<(String, Option<String>)> {
     if has_dollar {
@@ -457,7 +461,8 @@ fn get_def_idx_cmp_text(
         Some((
             idx.name
                 .map(|name| service.lookup_ident(name))
-                .unwrap_or_else(|| idx.num.to_string()),
+                .or_else(|| idx.num.map(|num| num.to_string()))
+                .unwrap_or_default(),
             None,
         ))
     }

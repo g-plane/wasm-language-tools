@@ -1,6 +1,6 @@
 use crate::{
     files::FilesCtx,
-    idx::{DefIdx, IdentsCtx, RefIdx},
+    idx::{IdentsCtx, Idx},
     InternUri,
 };
 use rowan::{
@@ -23,38 +23,43 @@ pub(crate) trait SymbolTablesCtx: FilesCtx + IdentsCtx {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct SymbolTable {
     pub symbols: Vec<SymbolItem>,
-    pub blocks: Vec<(SymbolItemKey, SymbolItemKey, DefIdx)>,
+    pub blocks: Vec<(SymbolItemKey, SymbolItemKey, Idx)>,
 }
 fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTable> {
     fn create_parent_based_symbol(
         db: &dyn SymbolTablesCtx,
         node: SyntaxNode,
         id: u32,
-        kind: fn(DefIdx) -> SymbolItemKind,
+        kind: SymbolItemKind,
     ) -> Option<SymbolItem> {
         node.parent().map(|parent| SymbolItem {
             key: node.clone().into(),
             green: node.green().into(),
             region: parent.into(),
-            kind: kind(DefIdx {
-                num: id,
+            kind,
+            idx: Idx {
+                num: Some(id),
                 name: token(&node, SyntaxKind::IDENT)
                     .map(|token| db.ident(token.text().to_string())),
-            }),
+            },
         })
     }
     fn create_ref_symbol(
         db: &dyn SymbolTablesCtx,
         node: SyntaxNode,
         region: SymbolItemKey,
-        kind: fn(RefIdx) -> SymbolItemKind,
+        kind: SymbolItemKind,
     ) -> Option<SymbolItem> {
         token(&node, SyntaxKind::IDENT)
             .map(|ident| SymbolItem {
                 key: node.clone().into(),
                 green: node.green().into(),
                 region: region.clone(),
-                kind: kind(RefIdx::Name(db.ident(ident.text().to_string()))),
+                kind: kind.clone(),
+                idx: Idx {
+                    num: None,
+                    name: Some(db.ident(ident.text().to_string())),
+                },
             })
             .or_else(|| {
                 node.children_with_tokens()
@@ -65,7 +70,11 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                         green: node.green().into(),
                         key: node.into(),
                         region,
-                        kind: kind(RefIdx::Num(num)),
+                        kind,
+                        idx: Idx {
+                            num: Some(num),
+                            name: None,
+                        },
                     })
             })
     }
@@ -88,6 +97,10 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                     key: node.into(),
                     region,
                     kind: SymbolItemKind::Module,
+                    idx: Idx {
+                        num: None,
+                        name: None,
+                    },
                 });
             }
             SyntaxKind::MODULE_FIELD_FUNC => {
@@ -114,10 +127,11 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                                 key: param.to_owned().into(),
                                 green: param.green().into(),
                                 region: node.clone().into(),
-                                kind: SymbolItemKind::Param(DefIdx {
-                                    num: i,
+                                kind: SymbolItemKind::Param,
+                                idx: Idx {
+                                    num: Some(i),
                                     name: Some(db.ident(ident.text().to_string())),
-                                }),
+                                },
                             });
                             i + 1
                         } else {
@@ -127,7 +141,11 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                                     key: val_type.to_owned().into(),
                                     green: val_type.green().into(),
                                     region: node.clone().into(),
-                                    kind: SymbolItemKind::Param(DefIdx { num: i, name: None }),
+                                    kind: SymbolItemKind::Param,
+                                    idx: Idx {
+                                        num: Some(i),
+                                        name: None,
+                                    },
                                 });
                                 i + 1
                             })
@@ -140,10 +158,11 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             key: local.to_owned().into(),
                             green: local.green().into(),
                             region: node.clone().into(),
-                            kind: SymbolItemKind::Local(DefIdx {
-                                num: i,
+                            kind: SymbolItemKind::Local,
+                            idx: Idx {
+                                num: Some(i),
                                 name: Some(db.ident(ident.text().to_string())),
-                            }),
+                            },
                         });
                         i + 1
                     } else {
@@ -153,7 +172,11 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                                 key: val_type.to_owned().into(),
                                 green: val_type.green().into(),
                                 region: node.clone().into(),
-                                kind: SymbolItemKind::Local(DefIdx { num: i, name: None }),
+                                kind: SymbolItemKind::Local,
+                                idx: Idx {
+                                    num: Some(i),
+                                    name: None,
+                                },
                             });
                             i + 1
                         })
@@ -254,16 +277,16 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                                 while let Some(
                                     parent @ SymbolItem {
                                         key,
-                                        kind: SymbolItemKind::BlockDef(def_idx),
+                                        kind: SymbolItemKind::BlockDef,
                                         ..
                                     },
                                 ) = symbols.iter().find(|sym| {
-                                    matches!(sym.kind, SymbolItemKind::BlockDef(..))
+                                    sym.kind == SymbolItemKind::BlockDef
                                         && sym.key == current.region
                                 }) {
-                                    let mut def_idx = def_idx.clone();
-                                    def_idx.num = levels;
-                                    blocks.push((symbol.key.clone(), key.clone(), def_idx));
+                                    let mut idx = parent.idx.clone();
+                                    idx.num = Some(levels);
+                                    blocks.push((symbol.key.clone(), key.clone(), idx));
                                     current = parent;
                                     levels += 1;
                                 }
@@ -351,60 +374,40 @@ impl SymbolTable {
     pub fn find_func_defs(&self, key: &SymbolItemKey) -> Option<impl Iterator<Item = &SymbolItem>> {
         self.symbols
             .iter()
-            .find_map(|symbol| match symbol {
-                SymbolItem {
-                    kind: SymbolItemKind::Call(idx),
-                    key: call_key,
-                    ..
-                } if call_key == key => Some((symbol, idx)),
-                _ => None,
-            })
-            .map(|(call, ref_idx)| {
-                self.symbols.iter().filter(move |symbol| {
+            .find(|symbol| symbol.kind == SymbolItemKind::Call && &symbol.key == key)
+            .map(|call| {
+                self.symbols.iter().filter(|symbol| {
                     symbol.region == call.region
-                        && match &symbol.kind {
-                            SymbolItemKind::Func(def_idx) => ref_idx == def_idx,
-                            _ => false,
-                        }
+                        && symbol.kind == SymbolItemKind::Func
+                        && call.idx.is_defined_by(&symbol.idx)
                 })
             })
     }
 
     pub fn find_param_def(&self, key: &SymbolItemKey) -> Option<&SymbolItem> {
-        self.find_local_ref(key).and_then(|(local, ref_idx)| {
+        self.find_local_ref(key).and_then(|local| {
             self.symbols.iter().find(|symbol| {
                 symbol.region == local.region
-                    && match &symbol.kind {
-                        SymbolItemKind::Param(def_idx) => ref_idx == def_idx,
-                        _ => false,
-                    }
+                    && symbol.kind == SymbolItemKind::Param
+                    && local.idx.is_defined_by(&symbol.idx)
             })
         })
     }
 
     pub fn find_param_or_local_def(&self, key: &SymbolItemKey) -> Option<&SymbolItem> {
-        self.find_local_ref(key).and_then(|(local, ref_idx)| {
+        self.find_local_ref(key).and_then(|local| {
             self.symbols.iter().find(|symbol| {
                 symbol.region == local.region
-                    && match &symbol.kind {
-                        SymbolItemKind::Param(def_idx) | SymbolItemKind::Local(def_idx) => {
-                            ref_idx == def_idx
-                        }
-                        _ => false,
-                    }
+                    && matches!(symbol.kind, SymbolItemKind::Param | SymbolItemKind::Local)
+                    && local.idx.is_defined_by(&symbol.idx)
             })
         })
     }
 
-    fn find_local_ref(&self, key: &SymbolItemKey) -> Option<(&SymbolItem, &RefIdx)> {
-        self.symbols.iter().find_map(|symbol| match symbol {
-            SymbolItem {
-                kind: SymbolItemKind::LocalRef(idx),
-                key: local_ref_key,
-                ..
-            } if local_ref_key == key => Some((symbol, idx)),
-            _ => None,
-        })
+    fn find_local_ref(&self, key: &SymbolItemKey) -> Option<&SymbolItem> {
+        self.symbols
+            .iter()
+            .find(|symbol| symbol.kind == SymbolItemKind::LocalRef && &symbol.key == key)
     }
 
     pub fn find_type_use_defs(
@@ -413,21 +416,12 @@ impl SymbolTable {
     ) -> Option<impl Iterator<Item = &SymbolItem>> {
         self.symbols
             .iter()
-            .find_map(|symbol| match symbol {
-                SymbolItem {
-                    kind: SymbolItemKind::TypeUse(idx),
-                    key: type_use_key,
-                    ..
-                } if type_use_key == key => Some((symbol, idx)),
-                _ => None,
-            })
-            .map(|(type_use, ref_idx)| {
-                self.symbols.iter().filter(move |symbol| {
+            .find(|symbol| symbol.kind == SymbolItemKind::TypeUse && &symbol.key == key)
+            .map(|type_use| {
+                self.symbols.iter().filter(|symbol| {
                     symbol.region == type_use.region
-                        && match &symbol.kind {
-                            SymbolItemKind::Type(def_idx) => ref_idx == def_idx,
-                            _ => false,
-                        }
+                        && symbol.kind == SymbolItemKind::Type
+                        && type_use.idx.is_defined_by(&symbol.idx)
                 })
             })
     }
@@ -438,21 +432,12 @@ impl SymbolTable {
     ) -> Option<impl Iterator<Item = &SymbolItem>> {
         self.symbols
             .iter()
-            .find_map(|symbol| match symbol {
-                SymbolItem {
-                    kind: SymbolItemKind::GlobalRef(idx),
-                    key: global_ref_key,
-                    ..
-                } if global_ref_key == key => Some((symbol, idx)),
-                _ => None,
-            })
-            .map(|(global, ref_idx)| {
-                self.symbols.iter().filter(move |symbol| {
+            .find(|symbol| symbol.kind == SymbolItemKind::GlobalRef && &symbol.key == key)
+            .map(|global| {
+                self.symbols.iter().filter(|symbol| {
                     symbol.region == global.region
-                        && match &symbol.kind {
-                            SymbolItemKind::GlobalDef(def_idx) => ref_idx == def_idx,
-                            _ => false,
-                        }
+                        && symbol.kind == SymbolItemKind::GlobalDef
+                        && global.idx.is_defined_by(&symbol.idx)
                 })
             })
     }
@@ -463,114 +448,72 @@ impl SymbolTable {
     ) -> Option<impl Iterator<Item = &SymbolItem>> {
         self.symbols
             .iter()
-            .find_map(|symbol| match symbol {
-                SymbolItem {
-                    kind: SymbolItemKind::MemoryRef(idx),
-                    key: memory_ref_key,
-                    ..
-                } if memory_ref_key == key => Some((symbol, idx)),
-                _ => None,
-            })
-            .map(|(memory, ref_idx)| {
-                self.symbols.iter().filter(move |symbol| {
+            .find(|symbol| symbol.kind == SymbolItemKind::MemoryRef && &symbol.key == key)
+            .map(|memory| {
+                self.symbols.iter().filter(|symbol| {
                     symbol.region == memory.region
-                        && match &symbol.kind {
-                            SymbolItemKind::MemoryDef(def_idx) => ref_idx == def_idx,
-                            _ => false,
-                        }
+                        && symbol.kind == SymbolItemKind::MemoryDef
+                        && memory.idx.is_defined_by(&symbol.idx)
                 })
             })
     }
 
     pub fn find_block_def(&self, key: &SymbolItemKey) -> Option<&SymbolItem> {
-        self.find_block_ref(key).and_then(|(_, ref_idx)| {
+        self.find_block_ref(key).and_then(|block_ref| {
             self.blocks
                 .iter()
-                .find(|(ref_key, _, def_idx)| key == ref_key && def_idx == ref_idx)
+                .find(|(ref_key, _, idx)| key == ref_key && block_ref.idx.is_defined_by(idx))
                 .and_then(|(_, def_key, _)| self.symbols.iter().find(|sym| &sym.key == def_key))
         })
     }
 
-    pub fn find_block_ref(&self, key: &SymbolItemKey) -> Option<(&SymbolItem, &RefIdx)> {
-        self.symbols.iter().find_map(|symbol| match symbol {
-            SymbolItem {
-                kind: SymbolItemKind::BlockRef(idx),
-                key: block_ref_key,
-                ..
-            } if block_ref_key == key => Some((symbol, idx)),
-            _ => None,
-        })
+    pub fn find_block_ref(&self, key: &SymbolItemKey) -> Option<&SymbolItem> {
+        self.symbols
+            .iter()
+            .find(|symbol| symbol.kind == SymbolItemKind::BlockRef && &symbol.key == key)
     }
 
     pub fn get_declared_params_and_locals(
         &self,
         node: SyntaxNode,
-    ) -> impl Iterator<Item = (&SymbolItem, &DefIdx)> {
+    ) -> impl Iterator<Item = &SymbolItem> {
         let key = node.into();
-        self.symbols
-            .iter()
-            .filter_map(move |symbol| match &symbol.kind {
-                SymbolItemKind::Param(idx) | SymbolItemKind::Local(idx) if symbol.region == key => {
-                    Some((symbol, idx))
-                }
-                _ => None,
-            })
+        self.symbols.iter().filter(move |symbol| {
+            matches!(symbol.kind, SymbolItemKind::Param | SymbolItemKind::Local)
+                && symbol.region == key
+        })
     }
 
-    pub fn get_declared_functions(
-        &self,
-        node: SyntaxNode,
-    ) -> impl Iterator<Item = (&SymbolItem, &DefIdx)> {
+    pub fn get_declared_functions(&self, node: SyntaxNode) -> impl Iterator<Item = &SymbolItem> {
         debug_assert_eq!(node.kind(), SyntaxKind::MODULE);
         let key = node.into();
         self.symbols
             .iter()
-            .filter_map(move |symbol| match &symbol.kind {
-                SymbolItemKind::Func(idx) if symbol.region == key => Some((symbol, idx)),
-                _ => None,
-            })
+            .filter(move |symbol| symbol.kind == SymbolItemKind::Func && symbol.region == key)
     }
 
-    pub fn get_declared_func_types(
-        &self,
-        node: SyntaxNode,
-    ) -> impl Iterator<Item = (&SymbolItem, &DefIdx)> {
+    pub fn get_declared_func_types(&self, node: SyntaxNode) -> impl Iterator<Item = &SymbolItem> {
         debug_assert_eq!(node.kind(), SyntaxKind::MODULE);
         let key = node.into();
         self.symbols
             .iter()
-            .filter_map(move |symbol| match &symbol.kind {
-                SymbolItemKind::Type(idx) if symbol.region == key => Some((symbol, idx)),
-                _ => None,
-            })
+            .filter(move |symbol| symbol.kind == SymbolItemKind::Type && symbol.region == key)
     }
 
-    pub fn get_declared_globals(
-        &self,
-        node: SyntaxNode,
-    ) -> impl Iterator<Item = (&SymbolItem, &DefIdx)> {
+    pub fn get_declared_globals(&self, node: SyntaxNode) -> impl Iterator<Item = &SymbolItem> {
         debug_assert_eq!(node.kind(), SyntaxKind::MODULE);
         let key = node.into();
         self.symbols
             .iter()
-            .filter_map(move |symbol| match &symbol.kind {
-                SymbolItemKind::GlobalDef(idx) if symbol.region == key => Some((symbol, idx)),
-                _ => None,
-            })
+            .filter(move |symbol| symbol.kind == SymbolItemKind::GlobalDef && symbol.region == key)
     }
 
-    pub fn get_declared_memories(
-        &self,
-        node: SyntaxNode,
-    ) -> impl Iterator<Item = (&SymbolItem, &DefIdx)> {
+    pub fn get_declared_memories(&self, node: SyntaxNode) -> impl Iterator<Item = &SymbolItem> {
         debug_assert_eq!(node.kind(), SyntaxKind::MODULE);
         let key = node.into();
         self.symbols
             .iter()
-            .filter_map(move |symbol| match &symbol.kind {
-                SymbolItemKind::MemoryDef(idx) if symbol.region == key => Some((symbol, idx)),
-                _ => None,
-            })
+            .filter(move |symbol| symbol.kind == SymbolItemKind::MemoryDef && symbol.region == key)
     }
 }
 
@@ -592,6 +535,7 @@ pub struct SymbolItem {
     pub green: GreenNode,
     pub region: SymbolItemKey,
     pub kind: SymbolItemKind,
+    pub idx: Idx,
 }
 impl PartialEq for SymbolItem {
     fn eq(&self, other: &Self) -> bool {
@@ -609,17 +553,17 @@ impl Hash for SymbolItem {
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum SymbolItemKind {
     Module,
-    Func(DefIdx),
-    Param(DefIdx),
-    Local(DefIdx),
-    Call(RefIdx),
-    LocalRef(RefIdx),
-    Type(DefIdx),
-    TypeUse(RefIdx),
-    GlobalDef(DefIdx),
-    GlobalRef(RefIdx),
-    MemoryDef(DefIdx),
-    MemoryRef(RefIdx),
-    BlockDef(DefIdx),
-    BlockRef(RefIdx),
+    Func,
+    Param,
+    Local,
+    Call,
+    LocalRef,
+    Type,
+    TypeUse,
+    GlobalDef,
+    GlobalRef,
+    MemoryDef,
+    MemoryRef,
+    BlockDef,
+    BlockRef,
 }

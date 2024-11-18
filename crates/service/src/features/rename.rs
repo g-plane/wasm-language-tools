@@ -3,7 +3,7 @@ use crate::{
     binder::{SymbolItemKind, SymbolTablesCtx},
     files::FilesCtx,
     helpers,
-    idx::{IdentsCtx, RefIdx},
+    idx::IdentsCtx,
     LanguageService,
 };
 use lsp_types::{
@@ -73,32 +73,27 @@ impl LanguageService {
             .symbols
             .iter()
             .filter(|sym| match &sym.kind {
-                SymbolItemKind::Func(idx)
-                | SymbolItemKind::Param(idx)
-                | SymbolItemKind::Local(idx)
-                | SymbolItemKind::Type(idx)
-                | SymbolItemKind::GlobalDef(idx)
-                | SymbolItemKind::MemoryDef(idx) => {
-                    symbol.region == sym.region && idx.name.is_some_and(|name| name == old_name)
+                SymbolItemKind::Func
+                | SymbolItemKind::Param
+                | SymbolItemKind::Local
+                | SymbolItemKind::Type
+                | SymbolItemKind::GlobalDef
+                | SymbolItemKind::MemoryDef
+                | SymbolItemKind::Call
+                | SymbolItemKind::LocalRef
+                | SymbolItemKind::TypeUse
+                | SymbolItemKind::GlobalRef
+                | SymbolItemKind::MemoryRef => {
+                    symbol.region == sym.region
+                        && symbol.idx.name.is_some_and(|name| name == old_name)
                 }
-                SymbolItemKind::Call(idx)
-                | SymbolItemKind::LocalRef(idx)
-                | SymbolItemKind::TypeUse(idx)
-                | SymbolItemKind::GlobalRef(idx)
-                | SymbolItemKind::MemoryRef(idx) => {
-                    if let RefIdx::Name(name) = idx {
-                        symbol.region == sym.region && *name == old_name
-                    } else {
-                        false
-                    }
-                }
-                SymbolItemKind::BlockDef(..) => {
+                SymbolItemKind::BlockDef => {
                     symbol == *sym
                         || symbol_table.blocks.iter().any(|(ref_key, def_key, _)| {
                             &symbol_key == ref_key && def_key == &sym.key
                         })
                 }
-                SymbolItemKind::BlockRef(..) => {
+                SymbolItemKind::BlockRef => {
                     symbol == *sym
                         || symbol_table.blocks.iter().any(|(ref_key, def_key, _)| {
                             &sym.key == ref_key && def_key == &symbol.key

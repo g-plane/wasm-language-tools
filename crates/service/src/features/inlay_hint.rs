@@ -2,7 +2,7 @@ use crate::{
     binder::{SymbolItemKind, SymbolTablesCtx},
     files::FilesCtx,
     helpers,
-    idx::{DefIdx, IdentsCtx},
+    idx::IdentsCtx,
     types_analyzer::TypesAnalyzerCtx,
     LanguageService,
 };
@@ -21,7 +21,7 @@ impl LanguageService {
             .symbols
             .iter()
             .filter_map(|symbol| match symbol.kind {
-                SymbolItemKind::LocalRef(..) => {
+                SymbolItemKind::LocalRef => {
                     if !range.contains_range(symbol.key.ptr.text_range()) {
                         return None;
                     }
@@ -41,7 +41,7 @@ impl LanguageService {
                         data: None,
                     })
                 }
-                SymbolItemKind::GlobalRef(..) => {
+                SymbolItemKind::GlobalRef => {
                     if !range.contains_range(symbol.key.ptr.text_range()) {
                         return None;
                     }
@@ -61,14 +61,13 @@ impl LanguageService {
                         data: None,
                     })
                 }
-                SymbolItemKind::Func(DefIdx {
-                    name: Some(name), ..
-                }) => {
+                SymbolItemKind::Func => {
                     let func = symbol.key.ptr.to_node(&root);
                     func.last_child_or_token()
                         .map(|last| last.text_range())
                         .filter(|last| range.contains_range(*last))
-                        .map(|last| InlayHint {
+                        .zip(symbol.idx.name)
+                        .map(|(last, name)| InlayHint {
                             position: helpers::rowan_pos_to_lsp_pos(&line_index, last.end()),
                             label: InlayHintLabel::String(format!(
                                 "(func {})",
