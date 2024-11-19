@@ -48,7 +48,7 @@ fn float() {
 (module
     (func (result f32 f64)
         (f32.const 1)
-        (f64.const 1)
+        (f64.const $a)
     )
 )
 ";

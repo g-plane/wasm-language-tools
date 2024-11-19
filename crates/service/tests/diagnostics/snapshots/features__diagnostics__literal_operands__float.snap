@@ -8,27 +8,12 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 3,
-          "character": 19
-        },
-        "end": {
-          "line": 3,
-          "character": 20
-        }
-      },
-      "severity": 1,
-      "source": "wat",
-      "message": "expected floating-point number"
-    },
-    {
-      "range": {
-        "start": {
           "line": 4,
           "character": 19
         },
         "end": {
           "line": 4,
-          "character": 20
+          "character": 21
         }
       },
       "severity": 1,

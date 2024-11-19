@@ -45,7 +45,10 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
             check_operand!(SyntaxKind::INT, "expected integer");
         }
         "f32.const" | "f64.const" => {
-            check_operand!(SyntaxKind::FLOAT, "expected floating-point number");
+            check_operand!(
+                SyntaxKind::FLOAT | SyntaxKind::INT,
+                "expected floating-point number"
+            );
         }
         "table.init" | "table.copy" => {
             check_operand!(
