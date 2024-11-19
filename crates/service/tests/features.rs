@@ -11,6 +11,8 @@ mod diagnostics;
 #[cfg(test)]
 mod document_symbol;
 #[cfg(test)]
+mod folding_range;
+#[cfg(test)]
 mod formatting;
 #[cfg(test)]
 mod hover;

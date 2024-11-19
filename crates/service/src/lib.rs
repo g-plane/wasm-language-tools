@@ -19,12 +19,12 @@ use indexmap::{IndexMap, IndexSet};
 use lsp_types::{
     CallHierarchyServerCapability, CodeActionKind, CodeActionOptions, CodeActionProviderCapability,
     CompletionOptions, DeclarationCapability, DiagnosticOptions, DiagnosticServerCapabilities,
-    HoverProviderCapability, InitializeParams, InitializeResult, OneOf, RenameOptions,
-    SemanticTokenType, SemanticTokensClientCapabilities, SemanticTokensFullOptions,
-    SemanticTokensLegend, SemanticTokensOptions, SemanticTokensServerCapabilities,
-    ServerCapabilities, ServerInfo, TextDocumentClientCapabilities, TextDocumentSyncCapability,
-    TextDocumentSyncKind, TextDocumentSyncOptions, TextDocumentSyncSaveOptions,
-    TypeDefinitionProviderCapability, Uri,
+    FoldingRangeProviderCapability, HoverProviderCapability, InitializeParams, InitializeResult,
+    OneOf, RenameOptions, SemanticTokenType, SemanticTokensClientCapabilities,
+    SemanticTokensFullOptions, SemanticTokensLegend, SemanticTokensOptions,
+    SemanticTokensServerCapabilities, ServerCapabilities, ServerInfo,
+    TextDocumentClientCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind,
+    TextDocumentSyncOptions, TextDocumentSyncSaveOptions, TypeDefinitionProviderCapability, Uri,
 };
 use rustc_hash::FxBuildHasher;
 use salsa::{InternId, InternKey};
@@ -109,6 +109,7 @@ impl LanguageService {
                 declaration_provider: Some(DeclarationCapability::Simple(true)),
                 document_formatting_provider: Some(OneOf::Left(true)),
                 document_symbol_provider: Some(OneOf::Left(true)),
+                folding_range_provider: Some(FoldingRangeProviderCapability::Simple(true)),
                 hover_provider: Some(HoverProviderCapability::Simple(true)),
                 inlay_hint_provider: Some(OneOf::Left(true)),
                 references_provider: Some(OneOf::Left(true)),

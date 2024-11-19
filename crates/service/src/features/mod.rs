@@ -4,6 +4,7 @@ mod completion;
 mod definition;
 mod diagnostics;
 mod document_symbol;
+mod folding_range;
 mod formatting;
 mod hover;
 mod inlay_hint;

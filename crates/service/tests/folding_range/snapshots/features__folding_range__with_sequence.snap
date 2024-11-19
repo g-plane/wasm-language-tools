@@ -1,0 +1,34 @@
+---
+source: crates/service/tests/folding_range/mod.rs
+expression: response
+---
+[
+  {
+    "startLine": 1,
+    "startCharacter": 0,
+    "endLine": 8,
+    "endCharacter": 9,
+    "kind": "region"
+  },
+  {
+    "startLine": 2,
+    "startCharacter": 2,
+    "endLine": 8,
+    "endCharacter": 8,
+    "kind": "region"
+  },
+  {
+    "startLine": 4,
+    "startCharacter": 4,
+    "endLine": 8,
+    "endCharacter": 7,
+    "kind": "region"
+  },
+  {
+    "startLine": 6,
+    "startCharacter": 4,
+    "endLine": 7,
+    "endCharacter": 17,
+    "kind": "region"
+  }
+]
