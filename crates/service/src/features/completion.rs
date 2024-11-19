@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolTable, SymbolTablesCtx},
+    binder::{SymbolItemKind, SymbolTable, SymbolTablesCtx},
     data_set,
     files::FilesCtx,
     helpers,
@@ -199,11 +199,11 @@ fn add_cmp_ctx_for_operands(instr_name: &str, ctx: &mut SmallVec<[CmpCtx; 4]>) {
         Some((_, snd)) if snd.starts_with("load") || snd.starts_with("store") => {
             ctx.push(CmpCtx::MemArg);
         }
-        None => {
-            if matches!(instr_name, "call" | "return_call") {
-                ctx.push(CmpCtx::Func);
-            }
-        }
+        None => match instr_name {
+            "call" | "return_call" => ctx.push(CmpCtx::Func),
+            "br_table" => ctx.push(CmpCtx::Block),
+            _ => {}
+        },
         _ => {}
     }
 }
@@ -217,6 +217,7 @@ enum CmpCtx {
     Global,
     MemArg,
     Memory,
+    Block,
     KeywordModule,
     KeywordModuleField,
     KeywordImExport,
@@ -385,6 +386,38 @@ fn get_cmp_list(
                             .filter_map(|symbol| {
                                 let (label, insert_text) =
                                     get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
+                                Some(CompletionItem {
+                                    label,
+                                    insert_text,
+                                    kind: Some(CompletionItemKind::VARIABLE),
+                                    ..Default::default()
+                                })
+                            }),
+                    );
+                }
+                CmpCtx::Block => {
+                    let has_dollar = token.text().starts_with('$');
+                    items.extend(
+                        symbol_table
+                            .symbols
+                            .iter()
+                            .filter(|symbol| {
+                                symbol.kind == SymbolItemKind::BlockDef
+                                    && symbol
+                                        .key
+                                        .ptr
+                                        .text_range()
+                                        .contains_range(token.text_range())
+                            })
+                            .rev()
+                            .enumerate()
+                            .filter_map(|(num, symbol)| {
+                                let idx = Idx {
+                                    num: Some(num as u32),
+                                    name: symbol.idx.name,
+                                };
+                                let (label, insert_text) =
+                                    get_idx_cmp_text(service, &idx, has_dollar)?;
                                 Some(CompletionItem {
                                     label,
                                     insert_text,

@@ -1,4 +1,6 @@
 #[cfg(test)]
+mod block;
+#[cfg(test)]
 mod func;
 #[cfg(test)]
 mod func_type;
