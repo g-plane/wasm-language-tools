@@ -35,7 +35,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
     match instr_name.text() {
         "call" | "local.get" | "local.set" | "local.tee" | "global.get" | "global.set"
         | "table.get" | "table.set" | "ref.func" | "memory.init" | "data.drop" | "elem.drop"
-        | "table.grow" | "table.size" | "table.fill" => {
+        | "table.grow" | "table.size" | "table.fill" | "br" | "br_if" => {
             check_operand!(
                 SyntaxKind::IDENT | SyntaxKind::INT,
                 "expected identifier or unsigned integer"

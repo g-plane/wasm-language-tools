@@ -246,7 +246,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             create_ref_symbol(db, node, region.clone(), SymbolItemKind::GlobalRef)
                         }));
                     }
-                    Some("br_table") => {
+                    Some("br" | "br_if" | "br_table") => {
                         let Some(region) = node
                             .ancestors()
                             .find(|node| {
