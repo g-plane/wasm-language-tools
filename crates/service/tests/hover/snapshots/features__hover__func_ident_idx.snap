@@ -3,19 +3,17 @@ source: crates/service/tests/hover/mod.rs
 expression: response
 ---
 {
-  "contents": [
-    {
-      "language": "wat",
-      "value": "(func $func (param $param i32) (param f32) (param f64) (result i32) (result i64))"
-    }
-  ],
+  "contents": {
+    "kind": "markdown",
+    "value": "```wat\n(func $func (param $param i32) (param f32) (param f64) (result i32) (result i64))\n```\n---\n## Canendo in adest purpureas\n\nAonius nec adstitit, meo suo *inplevere* ignisque inmeriti **Rex talaria si** tendite?\nDeum tres essent; dabat, [liquidis per](http://pictis.com/poculamutua) tacta,\nSamos deum veros aestuat acta necis, sed gestumque."
+  },
   "range": {
     "start": {
-      "line": 3,
+      "line": 10,
       "character": 14
     },
     "end": {
-      "line": 3,
+      "line": 10,
       "character": 19
     }
   }

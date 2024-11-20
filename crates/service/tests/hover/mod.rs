@@ -129,6 +129,13 @@ fn func_ident_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
 (module
+    ;; This is a comment
+    ;;; ## Canendo in adest purpureas
+    ;;;
+    ;;; Aonius nec adstitit, meo suo *inplevere* ignisque inmeriti **Rex talaria si** tendite?
+    ;;; Deum tres essent; dabat, [liquidis per](http://pictis.com/poculamutua) tacta,
+    ;;; Samos deum veros aestuat acta necis, sed gestumque.
+    ;; This is another comment
     (func $func (param $param i32) (param f32 f64) (result i32 i64)
         (call $func)
     )
@@ -136,7 +143,7 @@ fn func_ident_idx() {
 ";
     let mut service = LanguageService::default();
     service.commit_file(uri.clone(), source.into());
-    let response = service.hover(create_params(uri, Position::new(3, 19)));
+    let response = service.hover(create_params(uri, Position::new(10, 19)));
     assert_json_snapshot!(response);
 }
 

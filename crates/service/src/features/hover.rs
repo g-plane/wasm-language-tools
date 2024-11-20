@@ -11,8 +11,11 @@ use crate::{
 use lsp_types::{
     Hover, HoverContents, HoverParams, LanguageString, MarkedString, MarkupContent, MarkupKind,
 };
-use rowan::ast::{support::child, AstNode};
-use wat_syntax::{ast::GlobalType, SyntaxKind, SyntaxNode};
+use rowan::{
+    ast::{support::child, AstNode},
+    Direction,
+};
+use wat_syntax::{ast::GlobalType, SyntaxElement, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     pub fn hover(&self, params: HoverParams) -> Option<Hover> {
@@ -61,20 +64,29 @@ impl LanguageService {
                         })
                     })
                     .or_else(|| {
-                        symbol_table.find_func_defs(&key).map(|symbols| Hover {
-                            contents: HoverContents::Array(
-                                symbols
-                                    .map(|symbol| {
-                                        create_marked_string(
-                                            self.render_func_header(uri, symbol.clone().into()),
-                                        )
-                                    })
-                                    .collect(),
-                            ),
-                            range: Some(helpers::rowan_range_to_lsp_range(
-                                &line_index,
-                                token.text_range(),
-                            )),
+                        symbol_table.find_func_defs(&key).map(|symbols| {
+                            let contents = symbols.fold(String::new(), |mut contents, symbol| {
+                                if !contents.is_empty() {
+                                    contents.push_str("\n---\n");
+                                }
+                                contents.push_str(&create_func_hover(
+                                    self,
+                                    uri,
+                                    symbol.clone(),
+                                    &root,
+                                ));
+                                contents
+                            });
+                            Hover {
+                                contents: HoverContents::Markup(MarkupContent {
+                                    kind: MarkupKind::Markdown,
+                                    value: contents,
+                                }),
+                                range: Some(helpers::rowan_range_to_lsp_range(
+                                    &line_index,
+                                    token.text_range(),
+                                )),
+                            }
                         })
                     })
                     .or_else(|| {
@@ -160,18 +172,65 @@ fn create_def_hover(
     root: &SyntaxNode,
     symbol: &SymbolItem,
 ) -> Option<HoverContents> {
-    let content = match symbol.kind {
-        SymbolItemKind::Param | SymbolItemKind::Local => {
-            create_param_or_local_hover(service, symbol)
-        }
-        SymbolItemKind::Func => {
-            create_marked_string(service.render_func_header(uri, symbol.clone().into()))
-        }
-        SymbolItemKind::Type => create_type_def_hover(service, symbol),
-        SymbolItemKind::GlobalDef => create_global_def_hover(service, symbol, root),
-        _ => return None,
-    };
-    Some(HoverContents::Scalar(content))
+    match symbol.kind {
+        SymbolItemKind::Param | SymbolItemKind::Local => Some(HoverContents::Scalar(
+            create_param_or_local_hover(service, symbol),
+        )),
+        SymbolItemKind::Func => Some(HoverContents::Markup(MarkupContent {
+            kind: MarkupKind::Markdown,
+            value: create_func_hover(service, uri, symbol.clone(), root),
+        })),
+        SymbolItemKind::Type => Some(HoverContents::Scalar(create_type_def_hover(
+            service, symbol,
+        ))),
+        SymbolItemKind::GlobalDef => Some(HoverContents::Scalar(create_global_def_hover(
+            service, symbol, root,
+        ))),
+        _ => None,
+    }
+}
+
+fn create_func_hover(
+    service: &LanguageService,
+    uri: InternUri,
+    symbol: SymbolItem,
+    root: &SyntaxNode,
+) -> String {
+    let node = symbol.key.ptr.to_node(root);
+    let doc = node
+        .siblings_with_tokens(Direction::Prev)
+        .skip(1)
+        .take_while(|element| {
+            matches!(
+                element.kind(),
+                SyntaxKind::LINE_COMMENT | SyntaxKind::WHITESPACE
+            )
+        })
+        .filter_map(|element| match element {
+            SyntaxElement::Token(token) if token.kind() == SyntaxKind::LINE_COMMENT => Some(token),
+            _ => None,
+        })
+        .skip_while(|token| !token.text().starts_with(";;;"))
+        .take_while(|token| token.text().starts_with(";;;"))
+        .fold(String::new(), |mut doc, comment| {
+            if !doc.is_empty() {
+                doc.insert(0, '\n');
+            }
+            if let Some(text) = comment.text().strip_prefix(";;;") {
+                doc.insert_str(0, text.strip_prefix([' ', '\t']).unwrap_or(text));
+            }
+            doc
+        });
+
+    let mut content = format!(
+        "```wat\n{}\n```",
+        service.render_func_header(uri, symbol.into())
+    );
+    if !doc.is_empty() {
+        content.push_str("\n---\n");
+        content.push_str(&doc);
+    }
+    content
 }
 
 fn create_param_or_local_hover(service: &LanguageService, symbol: &SymbolItem) -> MarkedString {
