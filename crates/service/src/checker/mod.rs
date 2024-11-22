@@ -2,6 +2,7 @@ use crate::{binder::SymbolTablesCtx, files::FilesCtx, InternUri, LanguageService
 use lsp_types::Diagnostic;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
+mod dup_names;
 mod literal_operands;
 mod multi_modules;
 mod typeck;
@@ -41,6 +42,14 @@ pub fn check_file(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> 
         _ => {}
     });
     undef::check(service, &mut diagnostics, &line_index, &symbol_table);
+    dup_names::check(
+        service,
+        &mut diagnostics,
+        uri,
+        &line_index,
+        &root,
+        &symbol_table,
+    );
 
     diagnostics
 }

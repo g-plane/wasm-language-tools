@@ -4,6 +4,8 @@ use lsp_types::{
 };
 
 #[cfg(test)]
+mod dup_names;
+#[cfg(test)]
 mod literal_operands;
 #[cfg(test)]
 mod multi_modules;

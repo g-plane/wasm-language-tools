@@ -1,0 +1,75 @@
+---
+source: crates/service/tests/diagnostics/dup_names.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 15
+        },
+        "end": {
+          "line": 2,
+          "character": 17
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "duplicated name `$a` in this scope",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 30
+              },
+              "end": {
+                "line": 2,
+                "character": 32
+              }
+            }
+          },
+          "message": "already defined here as `$a`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 30
+        },
+        "end": {
+          "line": 2,
+          "character": 32
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "duplicated name `$a` in this scope",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 15
+              },
+              "end": {
+                "line": 2,
+                "character": 17
+              }
+            }
+          },
+          "message": "already defined here as `$a`"
+        }
+      ]
+    }
+  ]
+}
