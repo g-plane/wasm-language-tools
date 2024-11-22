@@ -13,6 +13,7 @@ use rowan::ast::{
 use wat_syntax::{ast::TypeUse, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
+    /// Handler for `textDocument/definition` request.
     pub fn goto_definition(&self, params: GotoDefinitionParams) -> Option<GotoDefinitionResponse> {
         let uri = self.uri(
             params
@@ -103,6 +104,7 @@ impl LanguageService {
             })
     }
 
+    /// Handler for `textDocument/typeDefinition` request.
     pub fn goto_type_definition(
         &self,
         params: GotoDefinitionParams,
@@ -154,6 +156,8 @@ impl LanguageService {
         }
     }
 
+    /// Handler for `textDocument/declaration` request.
+    ///
     /// Only available for function calls currently. This behaves same as "Goto Definition".
     pub fn goto_declaration(&self, params: GotoDefinitionParams) -> Option<GotoDefinitionResponse> {
         let uri = self.uri(

@@ -18,6 +18,7 @@ const ERR_INVALID_IDENTIFIER: &str = "not a valid identifier";
 const ERR_CANT_BE_RENAMED: &str = "This can't be renamed.";
 
 impl LanguageService {
+    /// Handler for `textDocument/prepareRename` request.
     pub fn prepare_rename(
         &self,
         params: TextDocumentPositionParams,
@@ -31,6 +32,7 @@ impl LanguageService {
         Some(PrepareRenameResponse::Range(range))
     }
 
+    /// Handler for `textDocument/rename` request.
     pub fn rename(&self, params: RenameParams) -> Result<Option<WorkspaceEdit>, String> {
         if !params
             .new_name

@@ -18,6 +18,7 @@ use rowan::{
 use wat_syntax::{ast::GlobalType, SyntaxElement, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
+    /// Handler for `textDocument/hover` request.
     pub fn hover(&self, params: HoverParams) -> Option<Hover> {
         let uri = self.uri(
             params

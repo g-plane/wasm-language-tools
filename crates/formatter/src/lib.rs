@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+
 use self::printer::DocGen;
 use tiny_pretty::{IndentKind, PrintOptions};
 use wat_syntax::ast::Root;

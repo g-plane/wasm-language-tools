@@ -19,11 +19,14 @@ mod token;
 mod ty;
 
 #[derive(Debug)]
+/// Create a parser with some source code, then parse it.
 pub struct Parser<'s> {
     input: Input<'s>,
     errors: Vec<SyntaxError>,
 }
 impl<'s> Parser<'s> {
+    /// Create a parser instance with specific source code.
+    /// Once created, source code can't be changed.
     pub fn new(source: &'s str) -> Self {
         Self {
             input: Recoverable::new(Located::new(source)),
@@ -31,16 +34,19 @@ impl<'s> Parser<'s> {
         }
     }
 
+    /// Parse the code into a rowan syntax node.
     pub fn parse(&mut self) -> SyntaxNode {
         SyntaxNode::new_root(self.parse_to_green())
     }
 
+    /// Parse the code into a rowan green node.
     pub fn parse_to_green(&mut self) -> GreenNode {
         let (_, tree, errors) = root.recoverable_parse(*self.input);
         self.errors = errors;
         tree.expect("parser should always succeed even if there are syntax errors")
     }
 
+    /// Retrieve syntax errors.
     pub fn errors(&self) -> &[SyntaxError] {
         &self.errors
     }

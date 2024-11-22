@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+
 pub mod ast;
 mod kind;
 
@@ -24,6 +26,7 @@ pub type SyntaxToken = rowan::SyntaxToken<WatLanguage>;
 pub type SyntaxElement = rowan::SyntaxElement<WatLanguage>;
 
 #[inline]
+/// Checks if a token is whitespace or comment.
 pub fn is_trivia(token: &SyntaxToken) -> bool {
     matches!(
         token.kind(),
@@ -32,6 +35,7 @@ pub fn is_trivia(token: &SyntaxToken) -> bool {
 }
 
 #[inline]
+/// Checks if a token is punctuation.
 pub fn is_punc(token: &SyntaxToken) -> bool {
     matches!(token.kind(), SyntaxKind::L_PAREN | SyntaxKind::R_PAREN)
 }

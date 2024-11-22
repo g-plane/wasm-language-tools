@@ -5,6 +5,7 @@ use winnow::{
 };
 
 #[derive(Clone, Debug)]
+/// The syntax error comes with location and message.
 pub struct SyntaxError {
     pub start: usize,
     pub end: usize,

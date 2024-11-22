@@ -10,6 +10,7 @@ use lsp_types::{InlayHint, InlayHintKind, InlayHintLabel, InlayHintParams};
 use wat_syntax::SyntaxNode;
 
 impl LanguageService {
+    /// Handler for `textDocument/inlayHint` request.
     pub fn inlay_hint(&self, params: InlayHintParams) -> Option<Vec<InlayHint>> {
         let uri = self.uri(params.text_document.uri);
         let line_index = self.line_index(uri);

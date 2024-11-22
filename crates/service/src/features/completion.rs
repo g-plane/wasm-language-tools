@@ -16,6 +16,7 @@ use smallvec::SmallVec;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 impl LanguageService {
+    /// Handler for `textDocument/completion` request.
     pub fn completion(&self, params: CompletionParams) -> Option<CompletionResponse> {
         let uri = self.uri(params.text_document_position.text_document.uri);
         let token = find_token(self, uri, params.text_document_position.position)?;

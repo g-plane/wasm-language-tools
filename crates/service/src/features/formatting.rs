@@ -6,6 +6,7 @@ use wat_formatter::config::{FormatOptions, LayoutOptions};
 use wat_syntax::{ast::Root, SyntaxNode};
 
 impl LanguageService {
+    /// Handler for `textDocument/formatting` request.
     pub fn formatting(&self, params: DocumentFormattingParams) -> Option<Vec<TextEdit>> {
         let uri = self.uri(params.text_document.uri);
         let line_index = self.line_index(uri);

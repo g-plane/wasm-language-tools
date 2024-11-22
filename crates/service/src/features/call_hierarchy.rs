@@ -17,6 +17,7 @@ use rowan::ast::support::token;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 impl LanguageService {
+    /// Handler for `textDocument/prepareCallHierarchy` request.
     pub fn prepare_call_hierarchy(
         &self,
         params: CallHierarchyPrepareParams,
@@ -100,6 +101,7 @@ impl LanguageService {
             })
     }
 
+    /// Handler for `callHierarchy/incomingCalls` request.
     pub fn call_hierarchy_incoming_calls(
         &self,
         params: CallHierarchyIncomingCallsParams,
@@ -167,6 +169,7 @@ impl LanguageService {
         Some(items)
     }
 
+    /// Handler for `callHierarchy/outgoingCalls` request.
     pub fn call_hierarchy_outgoing_calls(
         &self,
         params: CallHierarchyOutgoingCallsParams,

@@ -3,6 +3,7 @@ use lsp_types::{CodeActionKind, CodeActionOrCommand, CodeActionParams};
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
+    /// Handler for `textDocument/codeAction` request.
     pub fn code_action(&self, params: CodeActionParams) -> Option<Vec<CodeActionOrCommand>> {
         let uri = self.uri(params.text_document.uri.clone());
         let line_index = self.line_index(uri);

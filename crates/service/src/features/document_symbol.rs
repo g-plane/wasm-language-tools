@@ -11,6 +11,7 @@ use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 impl LanguageService {
+    /// Handler for `textDocument/documentSymbol` request.
     pub fn document_symbol(&self, params: DocumentSymbolParams) -> Option<DocumentSymbolResponse> {
         let uri = self.uri(params.text_document.uri);
         let line_index = self.line_index(uri);

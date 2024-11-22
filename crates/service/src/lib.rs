@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+
 mod binder;
 mod checker;
 mod data_set;
@@ -31,6 +33,18 @@ use salsa::{InternId, InternKey};
 
 #[salsa::database(Files, Idents, SymbolTables, TypesAnalyzer)]
 #[derive(Default)]
+/// The language service comes with handlers for LSP requests.
+///
+/// The language service only does computation.
+/// It doesn't require IO to read source file,
+/// instead, you need to call [`commit`](LanguageService::commit) to add or update file.
+/// Also, it doesn't process language server protocol.
+/// You should call the corresponding method for each request.
+///
+/// To create a language service instance, you should call `LanguageService::default()`,
+/// not the `initialize` method.
+///
+/// ​
 pub struct LanguageService {
     storage: salsa::Storage<Self>,
     semantic_token_kinds: IndexSet<SemanticTokenKind, FxBuildHasher>,
@@ -38,6 +52,9 @@ pub struct LanguageService {
 impl salsa::Database for LanguageService {}
 
 impl LanguageService {
+    /// This method isn't used to create language service instance.
+    /// Instead, you can call `LanguageService::default()` to create instance,
+    /// then call this method when the language server is initializing.
     pub fn initialize(&mut self, params: InitializeParams) -> InitializeResult {
         let mut kinds_map = IndexMap::<_, _, FxBuildHasher>::default();
         if let Some(TextDocumentClientCapabilities {

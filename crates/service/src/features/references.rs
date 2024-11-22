@@ -11,6 +11,7 @@ use smallvec::SmallVec;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 impl LanguageService {
+    /// Handler for `textDocument/references` request.
     pub fn find_references(&self, params: ReferenceParams) -> Option<Vec<Location>> {
         let uri = self.uri(params.text_document_position.text_document.uri.clone());
         let root = SyntaxNode::new_root(self.root(uri));

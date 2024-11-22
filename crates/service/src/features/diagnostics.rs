@@ -6,6 +6,7 @@ use lsp_types::{
 };
 
 impl LanguageService {
+    /// Handler for `textDocument/diagnostic` request.
     pub fn pull_diagnostics(
         &self,
         params: DocumentDiagnosticParams,
@@ -22,6 +23,7 @@ impl LanguageService {
         ))
     }
 
+    /// Handler for `textDocument/publishDiagnostics` notification.
     pub fn publish_diagnostics(&self, uri: Uri) -> PublishDiagnosticsParams {
         PublishDiagnosticsParams {
             uri: uri.clone(),

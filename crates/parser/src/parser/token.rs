@@ -108,6 +108,19 @@ fn ident_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
 
 #[inline]
 /// Checks if a character is a valid identifier character.
+///
+/// ## Examples
+///
+/// ```
+/// # use wat_parser::is_id_char;
+/// assert!(is_id_char('a'));
+/// assert!(is_id_char('Z'));
+/// assert!(is_id_char('0'));
+/// assert!(is_id_char('$'));
+/// assert!(is_id_char('.'));
+/// assert!(!is_id_char('('));
+/// assert!(!is_id_char(')'));
+/// ```
 pub fn is_id_char(c: char) -> bool {
     c.is_ascii_alphanumeric()
         || c.is_ascii_punctuation()

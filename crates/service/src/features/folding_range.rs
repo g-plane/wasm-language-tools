@@ -5,6 +5,7 @@ use rowan::ast::support::token;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 impl LanguageService {
+    /// Handler for `textDocument/foldingRange` request.
     pub fn folding_range(&self, params: FoldingRangeParams) -> Option<Vec<FoldingRange>> {
         let uri = self.uri(params.text_document.uri);
         let line_index = self.line_index(uri);

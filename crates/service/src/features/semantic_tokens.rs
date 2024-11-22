@@ -9,6 +9,7 @@ use std::mem;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 impl LanguageService {
+    /// Handler for `textDocument/semanticTokens/full` request.
     pub fn semantic_tokens_full(
         &self,
         params: SemanticTokensParams,
@@ -30,6 +31,7 @@ impl LanguageService {
         }))
     }
 
+    /// Handler for `textDocument/semanticTokens/range` request.
     pub fn semantic_tokens_range(
         &self,
         params: SemanticTokensRangeParams,
