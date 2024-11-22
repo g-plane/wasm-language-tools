@@ -17,7 +17,7 @@ const SOURCE: &str = "
 fn f1_incoming() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), SOURCE.into());
+    service.commit(uri.clone(), SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document_position_params: TextDocumentPositionParams {
             text_document: TextDocumentIdentifier { uri },
@@ -38,7 +38,7 @@ fn f1_incoming() {
 fn f2_incoming() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), SOURCE.into());
+    service.commit(uri.clone(), SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document_position_params: TextDocumentPositionParams {
             text_document: TextDocumentIdentifier { uri },
@@ -59,7 +59,7 @@ fn f2_incoming() {
 fn f3_incoming() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), SOURCE.into());
+    service.commit(uri.clone(), SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document_position_params: TextDocumentPositionParams {
             text_document: TextDocumentIdentifier { uri },
@@ -80,7 +80,7 @@ fn f3_incoming() {
 fn f1_outgoing() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), SOURCE.into());
+    service.commit(uri.clone(), SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document_position_params: TextDocumentPositionParams {
             text_document: TextDocumentIdentifier { uri },
@@ -101,7 +101,7 @@ fn f1_outgoing() {
 fn f2_outgoing() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), SOURCE.into());
+    service.commit(uri.clone(), SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document_position_params: TextDocumentPositionParams {
             text_document: TextDocumentIdentifier { uri },
@@ -122,7 +122,7 @@ fn f2_outgoing() {
 fn f3_outgoing() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), SOURCE.into());
+    service.commit(uri.clone(), SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document_position_params: TextDocumentPositionParams {
             text_document: TextDocumentIdentifier { uri },

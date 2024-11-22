@@ -148,9 +148,9 @@ impl LanguageService {
         }
     }
 
-    /// Commit a file to the service, usually called when handling `textDocument/didOpen` or
+    /// Commit a document to the service, usually called when handling `textDocument/didOpen` or
     /// `textDocument/didChange` notifications.
-    pub fn commit_file(&mut self, uri: Uri, source: String) {
+    pub fn commit(&mut self, uri: Uri, source: String) {
         let uri = self.uri(uri);
         self.set_source(uri, source);
     }

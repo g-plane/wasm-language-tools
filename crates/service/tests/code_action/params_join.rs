@@ -12,7 +12,7 @@ fn not_covered() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range::new(Position::new(2, 19), Position::new(2, 19)),
@@ -29,7 +29,7 @@ fn too_wide() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range::new(Position::new(2, 9), Position::new(2, 33)),
@@ -46,7 +46,7 @@ fn single() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range::new(Position::new(2, 10), Position::new(2, 21)),
@@ -63,7 +63,7 @@ fn one_by_one() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range::new(Position::new(2, 10), Position::new(2, 33)),
@@ -80,7 +80,7 @@ fn many() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range::new(Position::new(2, 10), Position::new(2, 37)),

@@ -360,7 +360,7 @@ impl Server {
         conn: &Connection,
     ) -> anyhow::Result<()> {
         self.service
-            .commit_file(params.text_document.uri.clone(), params.text_document.text);
+            .commit(params.text_document.uri.clone(), params.text_document.text);
         if !self.support_pull_diagnostics {
             self.publish_diagnostics(conn, params.text_document.uri)?;
         }
@@ -374,7 +374,7 @@ impl Server {
     ) -> anyhow::Result<()> {
         if let Some(change) = params.content_changes.first() {
             self.service
-                .commit_file(params.text_document.uri.clone(), change.text.clone());
+                .commit(params.text_document.uri.clone(), change.text.clone());
             if !self.support_pull_diagnostics {
                 self.publish_diagnostics(conn, params.text_document.uri)?;
             }

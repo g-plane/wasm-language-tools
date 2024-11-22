@@ -21,7 +21,7 @@ fn space2() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.formatting(create_params(
         uri,
         FormattingOptions {
@@ -44,7 +44,7 @@ fn space4() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.formatting(create_params(
         uri,
         FormattingOptions {
@@ -67,7 +67,7 @@ fn tab() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.formatting(create_params(
         uri,
         FormattingOptions {

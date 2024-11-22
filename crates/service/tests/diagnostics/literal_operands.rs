@@ -18,7 +18,7 @@ fn index() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -36,7 +36,7 @@ fn int() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -53,7 +53,7 @@ fn float() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -70,7 +70,7 @@ fn indexes() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -87,7 +87,7 @@ fn mem_arg() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -103,7 +103,7 @@ fn mem_arg_and_index() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }

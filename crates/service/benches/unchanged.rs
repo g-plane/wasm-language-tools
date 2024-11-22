@@ -61,7 +61,7 @@ pub fn unchanged_text_bench(c: &mut Criterion) {
         },
         ..Default::default()
     });
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
 
     c.bench_function("unchanged text", |b| {
         b.iter(|| {

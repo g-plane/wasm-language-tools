@@ -12,7 +12,7 @@ fn leading_whitespace() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range::new(Position::new(2, 25), Position::new(2, 25)),
@@ -29,7 +29,7 @@ fn trailing_whitespace() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range::new(Position::new(2, 26), Position::new(2, 26)),
@@ -46,7 +46,7 @@ fn around_whitespaces() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range::new(Position::new(2, 25), Position::new(2, 25)),

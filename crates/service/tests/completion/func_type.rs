@@ -14,7 +14,7 @@ fn func_types() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 16)));
     assert_json_snapshot!(response);
 }
@@ -30,7 +30,7 @@ fn func_types_following_int_idx() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 17)));
     assert_json_snapshot!(response);
 }
@@ -46,7 +46,7 @@ fn func_types_following_dollar() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 17)));
     assert_json_snapshot!(response);
 }
@@ -62,7 +62,7 @@ fn func_types_following_ident() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 18)));
     assert_json_snapshot!(response);
 }

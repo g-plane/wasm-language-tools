@@ -8,7 +8,7 @@ fn no_modules() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
@@ -18,7 +18,7 @@ fn one_module() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "(module)";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
@@ -28,7 +28,7 @@ fn many_modules() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "(module) (module) (module)";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }

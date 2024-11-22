@@ -12,7 +12,7 @@ fn single() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range::new(Position::new(2, 19), Position::new(2, 19)),
@@ -29,7 +29,7 @@ fn param() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range::new(Position::new(2, 19), Position::new(2, 19)),
@@ -46,7 +46,7 @@ fn result() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range::new(Position::new(2, 20), Position::new(2, 20)),
@@ -63,7 +63,7 @@ fn local() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range::new(Position::new(2, 19), Position::new(2, 19)),

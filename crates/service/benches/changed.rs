@@ -64,12 +64,12 @@ pub fn changed_text_bench(c: &mut Criterion) {
                 },
                 ..Default::default()
             });
-            service.commit_file(uri.clone(), source.clone());
+            service.commit(uri.clone(), source.clone());
             requests_on_changed(&mut service, &uri);
 
             let mut insert_char = |offset, char, line, col| {
                 source.insert(offset, char);
-                service.commit_file(uri.clone(), source.clone());
+                service.commit(uri.clone(), source.clone());
                 let completions = service.completion(black_box(CompletionParams {
                     context: Some(CompletionContext {
                         trigger_character: Some(char.to_string()),

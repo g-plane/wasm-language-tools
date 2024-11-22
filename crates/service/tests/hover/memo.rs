@@ -6,7 +6,7 @@ use wat_service::LanguageService;
 fn param_type_changing() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let mut service = LanguageService::default();
-    service.commit_file(
+    service.commit(
         uri.clone(),
         "
 (module
@@ -19,7 +19,7 @@ fn param_type_changing() {
     );
     let response1 = service.hover(create_params(uri.clone(), Position::new(2, 20)));
 
-    service.commit_file(
+    service.commit(
         uri.clone(),
         "
 (module
@@ -39,7 +39,7 @@ fn param_type_changing() {
 fn param_name_changing() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let mut service = LanguageService::default();
-    service.commit_file(
+    service.commit(
         uri.clone(),
         "
 (module
@@ -52,7 +52,7 @@ fn param_name_changing() {
     );
     let response1 = service.hover(create_params(uri.clone(), Position::new(2, 20)));
 
-    service.commit_file(
+    service.commit(
         uri.clone(),
         "
 (module
@@ -72,7 +72,7 @@ fn param_name_changing() {
 fn func_name_changing() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let mut service = LanguageService::default();
-    service.commit_file(
+    service.commit(
         uri.clone(),
         "
 (module
@@ -83,7 +83,7 @@ fn func_name_changing() {
     );
     let response1 = service.hover(create_params(uri.clone(), Position::new(2, 12)));
 
-    service.commit_file(
+    service.commit(
         uri.clone(),
         "
 (module
@@ -101,7 +101,7 @@ fn func_name_changing() {
 fn func_name_and_param_changing() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let mut service = LanguageService::default();
-    service.commit_file(
+    service.commit(
         uri.clone(),
         "
 (module
@@ -112,7 +112,7 @@ fn func_name_and_param_changing() {
     );
     let response1 = service.hover(create_params(uri.clone(), Position::new(2, 12)));
 
-    service.commit_file(
+    service.commit(
         uri.clone(),
         "
 (module

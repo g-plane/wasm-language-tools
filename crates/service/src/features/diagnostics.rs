@@ -10,7 +10,7 @@ impl LanguageService {
         &self,
         params: DocumentDiagnosticParams,
     ) -> DocumentDiagnosticReportResult {
-        let diagnostics = checker::check_file(self, self.uri(params.text_document.uri));
+        let diagnostics = checker::check(self, self.uri(params.text_document.uri));
         DocumentDiagnosticReportResult::Report(DocumentDiagnosticReport::Full(
             RelatedFullDocumentDiagnosticReport {
                 related_documents: None,
@@ -25,7 +25,7 @@ impl LanguageService {
     pub fn publish_diagnostics(&self, uri: Uri) -> PublishDiagnosticsParams {
         PublishDiagnosticsParams {
             uri: uri.clone(),
-            diagnostics: checker::check_file(self, self.uri(uri)),
+            diagnostics: checker::check(self, self.uri(uri)),
             version: None,
         }
     }

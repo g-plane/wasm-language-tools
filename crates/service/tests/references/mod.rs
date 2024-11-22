@@ -31,7 +31,7 @@ fn ignored_tokens() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     assert!(service
         .find_references(create_params(uri.clone(), Position::new(1, 4), true))
         .is_none());
@@ -64,7 +64,7 @@ fn func_int_idx() {
 (module (func))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(2, 9), true));
     assert_json_snapshot!(include_decl);
@@ -84,7 +84,7 @@ fn func_ident_idx() {
 (module (func $func))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(2, 15), true));
     assert_json_snapshot!(include_decl);
@@ -104,7 +104,7 @@ fn param_int_idx() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(2, 20), true));
     assert_json_snapshot!(include_decl);
@@ -124,7 +124,7 @@ fn param_ident_idx() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(2, 23), true));
     assert_json_snapshot!(include_decl);
@@ -144,7 +144,7 @@ fn local_int_idx() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(2, 20), true));
     assert_json_snapshot!(include_decl);
@@ -164,7 +164,7 @@ fn local_ident_idx() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(2, 23), true));
     assert_json_snapshot!(include_decl);
@@ -185,7 +185,7 @@ fn call_int_idx() {
 (module (func))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(3, 15), true));
     assert_json_snapshot!(include_decl);
@@ -206,7 +206,7 @@ fn call_ident_idx() {
 (module (func $func))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(3, 28), true));
     assert_json_snapshot!(include_decl);
@@ -226,7 +226,7 @@ fn param_access_int_idx() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(3, 20), true));
     assert_json_snapshot!(include_decl);
@@ -246,7 +246,7 @@ fn param_access_ident_idx() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(3, 38), true));
     assert_json_snapshot!(include_decl);
@@ -266,7 +266,7 @@ fn local_access_int_idx() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(3, 20), true));
     assert_json_snapshot!(include_decl);
@@ -286,7 +286,7 @@ fn local_access_ident_idx() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(3, 38), true));
     assert_json_snapshot!(include_decl);
@@ -306,7 +306,7 @@ fn local_ref_int_idx() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(3, 20), true));
     assert_json_snapshot!(include_decl);
@@ -326,7 +326,7 @@ fn local_ref_ident_idx() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(3, 24), true));
     assert_json_snapshot!(include_decl);
@@ -345,7 +345,7 @@ fn func_type_int_idx() {
 (module (type (func)))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(2, 9), true));
     assert_json_snapshot!(include_decl);
@@ -365,7 +365,7 @@ fn func_type_ident_idx() {
 (module (type $type))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(2, 15), true));
     assert_json_snapshot!(include_decl);
@@ -384,7 +384,7 @@ fn type_use_int_idx() {
 (module (type (func)))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(3, 17), true));
     assert_json_snapshot!(include_decl);
@@ -404,7 +404,7 @@ fn type_use_ident_idx() {
 (module (type $type))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(4, 21), true));
     assert_json_snapshot!(include_decl);
@@ -423,7 +423,7 @@ fn global_def_int_idx() {
 (module (global i32))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(2, 11), true));
     assert_json_snapshot!(include_decl);
@@ -442,7 +442,7 @@ fn global_def_ident_idx() {
 (module (global $global i32))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(2, 19), true));
     assert_json_snapshot!(include_decl);
@@ -461,7 +461,7 @@ fn global_ref_int_idx() {
 (module (global i32))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(3, 23), true));
     assert_json_snapshot!(include_decl);
@@ -480,7 +480,7 @@ fn global_ref_ident_idx() {
 (module (global $global i32))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(3, 44), true));
     assert_json_snapshot!(include_decl);
@@ -499,7 +499,7 @@ fn memory_def_int_idx() {
 (module (memory))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(2, 11), true));
     assert_json_snapshot!(include_decl);
@@ -518,7 +518,7 @@ fn memory_def_ident_idx() {
 (module (memory $memory))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(2, 19), true));
     assert_json_snapshot!(include_decl);
@@ -537,7 +537,7 @@ fn memory_ref_int_idx() {
 (module (memory))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(3, 24), true));
     assert_json_snapshot!(include_decl);
@@ -556,7 +556,7 @@ fn memory_ref_ident_idx() {
 (module (memory $memory))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(3, 30), true));
     assert_json_snapshot!(include_decl);
@@ -578,7 +578,7 @@ fn block_def_int_idx() {
       (br_table 0))))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(3, 10), true));
     assert_json_snapshot!(include_decl);
@@ -600,7 +600,7 @@ fn block_def_ident_idx() {
       (br_table $block))))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(3, 14), true));
     assert_json_snapshot!(include_decl);
@@ -622,7 +622,7 @@ fn block_ref_int_idx() {
       (br_table 0))))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(5, 19), true));
     assert_json_snapshot!(include_decl);
@@ -644,7 +644,7 @@ fn block_ref_ident_idx() {
       (br_table $block))))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let include_decl =
         service.find_references(create_params(uri.clone(), Position::new(5, 21), true));
     assert_json_snapshot!(include_decl);

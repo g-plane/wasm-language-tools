@@ -15,7 +15,7 @@ fn ignored_tokens() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     assert!(service
         .goto_declaration(create_params(uri.clone(), Position::new(1, 4)))
         .is_none());
@@ -47,7 +47,7 @@ fn func_not_defined() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     assert!(matches!(
         service.goto_declaration(create_params(uri.clone(), Position::new(3, 15))),
         Some(GotoDefinitionResponse::Array(locations)) if locations.is_empty()
@@ -70,7 +70,7 @@ fn func_int_idx() {
 (module (func))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.goto_declaration(create_params(uri, Position::new(3, 15)));
     assert_json_snapshot!(response);
 }
@@ -87,7 +87,7 @@ fn func_ident_idx() {
 (module (func $func))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.goto_declaration(create_params(uri, Position::new(3, 18)));
     assert_json_snapshot!(response);
 }

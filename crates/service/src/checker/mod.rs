@@ -8,7 +8,7 @@ mod multi_modules;
 mod typeck;
 mod undef;
 
-pub fn check_file(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
+pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
     let line_index = service.line_index(uri);
     let root = SyntaxNode::new_root(service.root(uri));
     let symbol_table = service.symbol_table(uri);

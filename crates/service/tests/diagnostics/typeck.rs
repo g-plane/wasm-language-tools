@@ -8,7 +8,7 @@ fn expected_instr() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "(module (func (i32.add 1 (i32.const 0))))";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -18,7 +18,7 @@ fn ignored_expecting_instr() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "(module (func (br_table 0 1)))";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
@@ -28,7 +28,7 @@ fn less_operands() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "(module (func (i32.add (i32.const 0))))";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -38,7 +38,7 @@ fn more_operands() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "(module (func (i32.add (i32.const 0) (i32.const 0) (i32.const 0))))";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -48,7 +48,7 @@ fn operand_count_pluralization() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "(module (func (i32.const)))";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -58,7 +58,7 @@ fn builtin_instr_type_mismatch() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "(module (func (i32.add (i64.const 1) (i32.const 0))))";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -77,7 +77,7 @@ fn type_mismatch_from_func_results() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -93,7 +93,7 @@ fn param_type_mismatch() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -109,7 +109,7 @@ fn local_type_mismatch() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -126,7 +126,7 @@ fn global_type_mismatch() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -141,7 +141,7 @@ fn call_type_mismatch() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -156,7 +156,7 @@ fn less_operands_on_stack() {
         i32.sub))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -176,7 +176,7 @@ fn stacked_type_mismatch_from_func_params() {
         i32.sub))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -196,7 +196,7 @@ fn stacked_type_mismatch_from_func_results() {
         i32.sub))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -220,7 +220,7 @@ fn stacked_type_mismatch_from_instr_meta() {
         f32.sub))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -236,7 +236,7 @@ fn mixed_type_mismatch_from_instr_meta() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -258,7 +258,7 @@ fn mixed_matches_from_call() {
     i32.add))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }

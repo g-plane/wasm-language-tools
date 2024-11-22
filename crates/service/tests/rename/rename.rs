@@ -18,7 +18,7 @@ fn invalid_new_name() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     assert_eq!(
         service.rename(create_params(uri.clone(), Position::new(0, 0), "0")),
         Err("Invalid name `0`: not a valid identifier.".into())
@@ -49,7 +49,7 @@ fn ignored_tokens() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     assert_eq!(
         service.rename(create_params(uri.clone(), Position::new(1, 4), "$f")),
         Err("This can't be renamed.".into())
@@ -89,7 +89,7 @@ fn func() {
 (module (func $func))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service
         .rename(create_params(uri, Position::new(2, 14), "$f"))
         .unwrap();
@@ -106,7 +106,7 @@ fn func_conflicts() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service
         .rename(create_params(uri, Position::new(3, 14), "$f"))
         .unwrap();
@@ -125,7 +125,7 @@ fn param() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service
         .rename(create_params(uri, Position::new(2, 21), "$p"))
         .unwrap();
@@ -144,7 +144,7 @@ fn local() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service
         .rename(create_params(uri, Position::new(2, 21), "$l"))
         .unwrap();
@@ -162,7 +162,7 @@ fn local_conflicts() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service
         .rename(create_params(uri, Position::new(2, 39), "$l"))
         .unwrap();
@@ -182,7 +182,7 @@ fn call() {
 (module (func $func))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service
         .rename(create_params(uri, Position::new(5, 14), "$f"))
         .unwrap();
@@ -201,7 +201,7 @@ fn param_access() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service
         .rename(create_params(uri, Position::new(3, 21), "$p"))
         .unwrap();
@@ -220,7 +220,7 @@ fn local_access() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service
         .rename(create_params(uri, Position::new(3, 21), "$l"))
         .unwrap();
@@ -238,7 +238,7 @@ fn func_type() {
 (module (type $type))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service
         .rename(create_params(uri, Position::new(2, 14), "$ty"))
         .unwrap();
@@ -256,7 +256,7 @@ fn type_use() {
 (module (type $type))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service
         .rename(create_params(uri, Position::new(3, 20), "$ty"))
         .unwrap();
@@ -274,7 +274,7 @@ fn global_def() {
 (module (global $global))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service
         .rename(create_params(uri, Position::new(2, 17), "$g"))
         .unwrap();
@@ -292,7 +292,7 @@ fn global_ref() {
 (module (global $global))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service
         .rename(create_params(uri, Position::new(3, 28), "$g"))
         .unwrap();
@@ -309,7 +309,7 @@ fn memory_def() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service
         .rename(create_params(uri, Position::new(2, 17), "$m"))
         .unwrap();
@@ -326,7 +326,7 @@ fn memory_ref() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service
         .rename(create_params(uri, Position::new(3, 28), "$m"))
         .unwrap();
@@ -347,7 +347,7 @@ fn block_def() {
       (br_table $block))))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service
         .rename(create_params(uri, Position::new(3, 16), "$b"))
         .unwrap();
@@ -368,7 +368,7 @@ fn block_ref() {
       (br_table $block))))
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service
         .rename(create_params(uri, Position::new(6, 21), "$b"))
         .unwrap();

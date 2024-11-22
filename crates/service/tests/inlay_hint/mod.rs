@@ -21,7 +21,7 @@ fn param() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.inlay_hint(create_params(uri, Position::new(6, 0)));
     assert_json_snapshot!(response);
 }
@@ -37,7 +37,7 @@ fn local() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.inlay_hint(create_params(uri, Position::new(6, 0)));
     assert_json_snapshot!(response);
 }
@@ -52,7 +52,7 @@ fn global() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.inlay_hint(create_params(uri, Position::new(5, 0)));
     assert_json_snapshot!(response);
 }
@@ -68,7 +68,7 @@ fn func_end() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.inlay_hint(create_params(uri, Position::new(6, 0)));
     assert_json_snapshot!(response);
 }

@@ -13,7 +13,7 @@ fn export_desc_memory() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 23)));
     assert_json_snapshot!(response);
 }
@@ -28,7 +28,7 @@ fn export_desc_memory_following_dollar() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 24)));
     assert_json_snapshot!(response);
 }
@@ -43,7 +43,7 @@ fn export_desc_memory_incomplete() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 25)));
     assert_json_snapshot!(response);
 }

@@ -12,7 +12,7 @@ fn types() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 18)));
     assert_json_snapshot!(response);
 }
@@ -26,7 +26,7 @@ fn types_multiple_types() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 22)));
     assert_json_snapshot!(response);
 }
@@ -40,7 +40,7 @@ fn types_incomplete_type() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 19)));
     assert_json_snapshot!(response);
 }

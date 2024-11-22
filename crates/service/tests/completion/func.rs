@@ -13,7 +13,7 @@ fn module_field_start() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 11)));
     assert_json_snapshot!(response);
 }
@@ -28,7 +28,7 @@ fn module_field_start_following_dollar() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 11)));
     assert_json_snapshot!(response);
 }
@@ -43,7 +43,7 @@ fn module_field_start_incomplete() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 12)));
     assert_json_snapshot!(response);
 }
@@ -58,7 +58,7 @@ fn call() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 16)));
     assert_json_snapshot!(response);
 }
@@ -72,7 +72,7 @@ fn call_named() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 22)));
     assert_json_snapshot!(response);
 }
@@ -86,7 +86,7 @@ fn call_named_following_dollar() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 23)));
     assert_json_snapshot!(response);
 }
@@ -100,7 +100,7 @@ fn call_named_incomplete() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 24)));
     assert_json_snapshot!(response);
 }
@@ -115,7 +115,7 @@ fn ref_func() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 20)));
     assert_json_snapshot!(response);
 }
@@ -130,7 +130,7 @@ fn export_desc_func() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 18)));
     assert_json_snapshot!(response);
 }
@@ -145,7 +145,7 @@ fn export_desc_func_following_dollar() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 19)));
     assert_json_snapshot!(response);
 }
@@ -160,7 +160,7 @@ fn export_desc_func_incomplete() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, Position::new(2, 20)));
     assert_json_snapshot!(response);
 }

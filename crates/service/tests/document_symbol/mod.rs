@@ -22,7 +22,7 @@ fn symbols() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit_file(uri.clone(), source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.document_symbol(DocumentSymbolParams {
         text_document: TextDocumentIdentifier { uri },
         work_done_progress_params: Default::default(),
