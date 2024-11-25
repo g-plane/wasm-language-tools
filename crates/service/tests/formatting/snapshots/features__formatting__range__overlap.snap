@@ -1,0 +1,19 @@
+---
+source: crates/service/tests/formatting/range.rs
+expression: response
+---
+[
+  {
+    "range": {
+      "start": {
+        "line": 4,
+        "character": 4
+      },
+      "end": {
+        "line": 12,
+        "character": 7
+      }
+    },
+    "newText": "(block $a\n      (block $b\n        (block $c\n          (block $b)\n\n        )\n\n      ))"
+  }
+]

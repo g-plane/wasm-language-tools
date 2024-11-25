@@ -1,4 +1,4 @@
-use crate::config::LanguageOptions;
+use crate::config::{FormatOptions, LanguageOptions};
 use rowan::{ast::AstNode, Direction};
 use tiny_pretty::Doc;
 use wat_syntax::{ast::*, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage};
@@ -10,6 +10,76 @@ mod ty;
 pub(super) struct Ctx<'a> {
     pub indent_width: usize,
     pub options: &'a LanguageOptions,
+}
+impl<'a> Ctx<'a> {
+    pub(crate) fn new(options: &'a FormatOptions) -> Self {
+        Self {
+            indent_width: options.layout.indent_width,
+            options: &options.language,
+        }
+    }
+}
+
+pub(crate) fn format_node(node: SyntaxNode, ctx: &Ctx) -> Option<Doc<'static>> {
+    match node.kind() {
+        SyntaxKind::MODULE_NAME => ModuleName::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::NAME => Name::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::VAL_TYPE => ValType::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::FUNC_TYPE => FuncType::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::PARAM => Param::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::RESULT => Result::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::TABLE_TYPE => TableType::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::MEMORY_TYPE => MemoryType::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::GLOBAL_TYPE => GlobalType::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::BLOCK_TYPE => BlockType::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::PLAIN_INSTR => PlainInstr::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::BLOCK_BLOCK => BlockBlock::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::BLOCK_LOOP => BlockLoop::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::BLOCK_IF => BlockIf::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::BLOCK_IF_THEN => BlockIfThen::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::BLOCK_IF_ELSE => BlockIfElse::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::OPERAND => Operand::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::TYPE_USE => TypeUse::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::LIMITS => Limits::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::IMPORT => Import::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::EXPORT => Export::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::IMPORT_DESC_TYPE_USE => ImportDescTypeUse::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::IMPORT_DESC_TABLE_TYPE => {
+            ImportDescTableType::cast(node).map(|node| node.doc(ctx))
+        }
+        SyntaxKind::IMPORT_DESC_MEMORY_TYPE => {
+            ImportDescMemoryType::cast(node).map(|node| node.doc(ctx))
+        }
+        SyntaxKind::IMPORT_DESC_GLOBAL_TYPE => {
+            ImportDescGlobalType::cast(node).map(|node| node.doc(ctx))
+        }
+        SyntaxKind::EXPORT_DESC_FUNC => ExportDescFunc::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::EXPORT_DESC_TABLE => ExportDescTable::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::EXPORT_DESC_MEMORY => ExportDescMemory::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::EXPORT_DESC_GLOBAL => ExportDescGlobal::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::INDEX => Index::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::LOCAL => Local::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::MEM_USE => MemUse::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::OFFSET => Offset::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::ELEM => Elem::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::ELEM_LIST => ElemList::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::ELEM_EXPR => ElemExpr::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::TABLE_USE => TableUse::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::DATA => Data::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::MODULE => Module::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::MODULE_FIELD_DATA => ModuleFieldData::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::MODULE_FIELD_ELEM => ModuleFieldElem::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::MODULE_FIELD_EXPORT => ModuleFieldExport::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::MODULE_FIELD_FUNC => ModuleFieldFunc::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::MODULE_FIELD_GLOBAL => ModuleFieldGlobal::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::MODULE_FIELD_IMPORT => ModuleFieldImport::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::MODULE_FIELD_MEMORY => ModuleFieldMemory::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::MODULE_FIELD_START => ModuleFieldStart::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::MODULE_FIELD_TABLE => ModuleFieldTable::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::MODULE_FIELD_TYPE => ModuleFieldType::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::ROOT => Root::cast(node).map(|node| node.doc(ctx)),
+        _ => None,
+    }
 }
 
 pub(super) trait DocGen {

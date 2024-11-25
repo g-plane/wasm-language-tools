@@ -10,6 +10,7 @@ keywords = ["wasm", "formatter"]
 exclude = ["/tests"]
 
 [dependencies]
+line-index.workspace = true
 rowan.workspace = true
 serde = { version = "1.0", features = ["derive"], optional = true }
 tiny_pretty = "0.2"

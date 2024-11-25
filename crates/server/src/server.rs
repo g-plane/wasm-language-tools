@@ -10,7 +10,7 @@ use lsp_types::{
         CallHierarchyIncomingCalls, CallHierarchyOutgoingCalls, CallHierarchyPrepare,
         CodeActionRequest, Completion, DocumentDiagnosticRequest, DocumentSymbolRequest,
         FoldingRangeRequest, Formatting, GotoDeclaration, GotoDefinition, GotoTypeDefinition,
-        HoverRequest, InlayHintRequest, PrepareRenameRequest, References, Rename,
+        HoverRequest, InlayHintRequest, PrepareRenameRequest, RangeFormatting, References, Rename,
         SemanticTokensFullRequest, SemanticTokensRangeRequest,
     },
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
@@ -152,6 +152,20 @@ impl Server {
                                 id,
                                 result: Some(serde_json::to_value(
                                     self.service.formatting(params),
+                                )?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<RangeFormatting>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.range_formatting(params),
                                 )?),
                                 error: None,
                             }))?;

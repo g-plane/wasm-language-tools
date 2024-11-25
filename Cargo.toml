@@ -5,6 +5,7 @@ resolver = "2"
 [workspace.dependencies]
 criterion = "0.5"
 insta = { version = "1.39", features = ["glob", "json"] }
+line-index = "0.1"
 lsp-types = "0.97"
 rowan = "0.15"
 similar-asserts = "1.6"
