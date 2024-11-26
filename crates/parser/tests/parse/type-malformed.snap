@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..83
-  MODULE@0..82
+ROOT@0..104
+  MODULE@0..103
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -49,9 +49,22 @@ ROOT@0..83
           R_PAREN@77..78 ")"
         R_PAREN@78..79 ")"
       R_PAREN@79..80 ")"
-    WHITESPACE@80..81 "\n"
-    R_PAREN@81..82 ")"
-  WHITESPACE@82..83 "\n"
+    WHITESPACE@80..83 "\n  "
+    MODULE_FIELD_TYPE@83..89
+      L_PAREN@83..84 "("
+      KEYWORD@84..88 "type"
+      R_PAREN@88..89 ")"
+    WHITESPACE@89..92 "\n  "
+    MODULE_FIELD_TYPE@92..101
+      L_PAREN@92..93 "("
+      KEYWORD@93..97 "type"
+      WHITESPACE@97..98 " "
+      ERROR@98..99 "("
+      ERROR@99..100 ")"
+      R_PAREN@100..101 ")"
+    WHITESPACE@101..102 "\n"
+    R_PAREN@102..103 ")"
+  WHITESPACE@103..104 "\n"
 
 error: expected `result`
   ┌─ type-malformed.wat:2:29
@@ -64,3 +77,15 @@ error: expected value type
   │
 3 │   (type (func (result $x i32)))
   │                       ^^
+
+error: expected `(`
+  ┌─ type-malformed.wat:4:8
+  │
+4 │   (type)
+  │        ^
+
+error: expected `func`
+  ┌─ type-malformed.wat:5:10
+  │
+5 │   (type ())
+  │          ^

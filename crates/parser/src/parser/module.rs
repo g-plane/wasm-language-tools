@@ -384,7 +384,7 @@ fn module_field_type(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("type")),
         opt(trivias_prefixed(ident)),
-        resume(func_type),
+        must(retry_once(func_type, [])),
         resume(r_paren),
     )
         .parse_next(input)
