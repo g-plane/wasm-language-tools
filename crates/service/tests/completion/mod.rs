@@ -1,3 +1,7 @@
+use lsp_types::{
+    CompletionParams, Position, TextDocumentIdentifier, TextDocumentPositionParams, Uri,
+};
+
 #[cfg(test)]
 mod block;
 #[cfg(test)]
@@ -20,10 +24,8 @@ mod memory;
 mod param;
 #[cfg(test)]
 mod result;
-
-use lsp_types::{
-    CompletionParams, Position, TextDocumentIdentifier, TextDocumentPositionParams, Uri,
-};
+#[cfg(test)]
+mod ty_decl;
 
 fn create_params(uri: Uri, position: Position) -> CompletionParams {
     CompletionParams {

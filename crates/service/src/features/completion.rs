@@ -22,9 +22,7 @@ impl LanguageService {
         let token = find_token(self, uri, params.text_document_position.position)?;
 
         let cmp_ctx = get_cmp_ctx(&token)?;
-
-        let symbol_table = self.symbol_table(uri);
-        let items = get_cmp_list(self, cmp_ctx, &token, uri, &symbol_table);
+        let items = get_cmp_list(self, cmp_ctx, &token, uri, &self.symbol_table(uri));
         Some(CompletionResponse::Array(items))
     }
 }
@@ -69,7 +67,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             {
                 ctx.reserve(3);
                 ctx.push(CmpCtx::KeywordImExport);
-                ctx.push(CmpCtx::KeywordTypeUse);
+                ctx.push(CmpCtx::KeywordType);
+                ctx.push(CmpCtx::KeywordParamResult);
                 ctx.push(CmpCtx::KeywordLocal);
             }
             if matches!(
@@ -82,6 +81,11 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ) | None
             ) {
                 ctx.push(CmpCtx::Instr);
+            }
+        }
+        SyntaxKind::MODULE_FIELD_TYPE => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordFunc);
             }
         }
         SyntaxKind::PLAIN_INSTR => {
@@ -114,7 +118,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                     {
                         ctx.reserve(3);
                         ctx.push(CmpCtx::KeywordImExport);
-                        ctx.push(CmpCtx::KeywordTypeUse);
+                        ctx.push(CmpCtx::KeywordType);
+                        ctx.push(CmpCtx::KeywordParamResult);
                         ctx.push(CmpCtx::KeywordLocal);
                     }
                 }
@@ -136,6 +141,11 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             }
         }
         SyntaxKind::TYPE_USE => ctx.push(CmpCtx::FuncType),
+        SyntaxKind::FUNC_TYPE => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordParamResult);
+            }
+        }
         SyntaxKind::INDEX => {
             let grand = parent.parent()?;
             match grand.kind() {
@@ -222,11 +232,13 @@ enum CmpCtx {
     KeywordModule,
     KeywordModuleField,
     KeywordImExport,
-    KeywordTypeUse,
+    KeywordType,
+    KeywordParamResult,
     KeywordLocal,
     KeywordMut,
     KeywordExportDesc,
     KeywordData,
+    KeywordFunc,
 }
 
 fn get_cmp_list(
@@ -447,13 +459,16 @@ fn get_cmp_list(
                         ..Default::default()
                     }));
                 }
-                CmpCtx::KeywordTypeUse => {
-                    items.extend(["type", "param", "result"].iter().map(|keyword| {
-                        CompletionItem {
-                            label: keyword.to_string(),
-                            kind: Some(CompletionItemKind::KEYWORD),
-                            ..Default::default()
-                        }
+                CmpCtx::KeywordType => items.push(CompletionItem {
+                    label: "type".to_string(),
+                    kind: Some(CompletionItemKind::KEYWORD),
+                    ..Default::default()
+                }),
+                CmpCtx::KeywordParamResult => {
+                    items.extend(["param", "result"].iter().map(|keyword| CompletionItem {
+                        label: keyword.to_string(),
+                        kind: Some(CompletionItemKind::KEYWORD),
+                        ..Default::default()
                     }));
                 }
                 CmpCtx::KeywordLocal => items.push(CompletionItem {
@@ -475,6 +490,11 @@ fn get_cmp_list(
                 }
                 CmpCtx::KeywordData => items.push(CompletionItem {
                     label: "data".to_string(),
+                    kind: Some(CompletionItemKind::KEYWORD),
+                    ..Default::default()
+                }),
+                CmpCtx::KeywordFunc => items.push(CompletionItem {
+                    label: "func".to_string(),
                     kind: Some(CompletionItemKind::KEYWORD),
                     ..Default::default()
                 }),
