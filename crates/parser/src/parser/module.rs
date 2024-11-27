@@ -21,8 +21,8 @@ pub(super) fn module(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("module")),
         opt(trivias_prefixed(ident)),
-        repeat::<_, _, Vec<_>, _, _>(0.., retry(module_field, [])),
-        resume(r_paren),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry_once(module_field, [])),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, id, fields, r_paren)| {
@@ -70,7 +70,7 @@ fn module_field_data(input: &mut Input) -> GreenResult {
         opt(trivias_prefixed(mem_use)),
         opt(trivias_prefixed(offset)),
         repeat::<_, _, Vec<_>, _, _>(0.., retry_once(string, [])),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(
@@ -107,7 +107,7 @@ fn module_field_elem(input: &mut Input) -> GreenResult {
         opt(trivias_prefixed(table_use)),
         opt(trivias_prefixed(offset)),
         opt(trivias_prefixed(elem_list)),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(
@@ -144,7 +144,7 @@ fn module_field_export(input: &mut Input) -> GreenResult {
         trivias_prefixed(keyword("export")),
         resume(name),
         must(retry_once(export_desc, [])),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, name, export_desc, r_paren)| {
@@ -173,7 +173,7 @@ fn module_field_func(input: &mut Input) -> GreenResult {
         opt(trivias_prefixed(type_use)),
         repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(local)),
         repeat::<_, _, Vec<_>, _, _>(0.., retry_once(instr, [])),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(
@@ -213,7 +213,7 @@ fn module_field_global(input: &mut Input) -> GreenResult {
         opt(trivias_prefixed(export)),
         must(retry_once(global_type, [])),
         repeat::<_, _, Vec<_>, _, _>(0.., retry_once(instr, [])),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(
@@ -251,7 +251,7 @@ fn module_field_import(input: &mut Input) -> GreenResult {
         resume(module_name),
         resume(name),
         resume(import_desc),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, module_name, name, desc, r_paren)| {
@@ -285,7 +285,7 @@ fn module_field_memory(input: &mut Input) -> GreenResult {
             '(' => must(retry_once(data, [])),
             _ => must(retry_once(memory_type, [])),
         },
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(
@@ -318,7 +318,7 @@ fn module_field_start(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("start")),
         must(retry_once(index, [])),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, index, r_paren)| {
@@ -345,7 +345,7 @@ fn module_field_table(input: &mut Input) -> GreenResult {
         opt(trivias_prefixed(table_type)),
         opt(trivias_prefixed(ref_type)),
         opt(trivias_prefixed(elem)),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(
@@ -385,7 +385,7 @@ fn module_field_type(input: &mut Input) -> GreenResult {
         trivias_prefixed(keyword("type")),
         opt(trivias_prefixed(ident)),
         must(retry_once(func_type, [])),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, id, ty, r_paren)| {
@@ -417,7 +417,7 @@ pub(super) fn local(input: &mut Input) -> GreenResult {
             repeat::<_, _, Vec<_>, _, _>(0.., retry_once(val_type, []))
                 .map(|types| types.into_iter().flatten().collect()),
         )),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, mut types, r_paren)| {
@@ -438,7 +438,7 @@ fn import(input: &mut Input) -> GreenResult {
         trivias_prefixed(keyword("import")),
         resume(module_name),
         resume(name),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, module_name, name, r_paren)| {
@@ -463,7 +463,7 @@ fn export(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("export")),
         resume(name),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, name, r_paren)| {
@@ -497,7 +497,7 @@ fn import_desc_global_type(input: &mut Input) -> GreenResult {
         trivias_prefixed(keyword("global")),
         opt(trivias_prefixed(ident)),
         resume(global_type),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, id, global_type, r_paren)| {
@@ -523,7 +523,7 @@ fn import_desc_memory_type(input: &mut Input) -> GreenResult {
         trivias_prefixed(keyword("memory")),
         opt(trivias_prefixed(ident)),
         resume(memory_type),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, id, memory_type, r_paren)| {
@@ -549,7 +549,7 @@ fn import_desc_table_type(input: &mut Input) -> GreenResult {
         trivias_prefixed(keyword("table")),
         opt(trivias_prefixed(ident)),
         resume(table_type),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, id, table_type, r_paren)| {
@@ -575,7 +575,7 @@ fn import_desc_type_use(input: &mut Input) -> GreenResult {
         trivias_prefixed(keyword("func")),
         opt(trivias_prefixed(ident)),
         opt(trivias_prefixed(type_use)),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, id, type_use, r_paren)| {
@@ -617,7 +617,7 @@ fn export_desc_variant<'s>(
         l_paren,
         trivias_prefixed(keyword(keyword_literal)),
         must(retry_once(index, [])),
-        resume(r_paren),
+        r_paren,
     )
         .map(move |(l_paren, mut keyword, index, r_paren)| {
             let mut children = Vec::with_capacity(4);
@@ -649,7 +649,7 @@ pub(super) fn type_use(input: &mut Input) -> GreenResult {
             l_paren,
             trivias_prefixed(keyword("type")),
             opt(retry_once(index, [])),
-            resume(r_paren),
+            r_paren,
             repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(param)),
             repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(result)),
         )
@@ -700,7 +700,7 @@ fn elem(input: &mut Input) -> GreenResult {
             ')' => empty.value(vec![]),
             _ => repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(index)),
         },
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, items, r_paren)| {
@@ -753,7 +753,7 @@ fn elem_expr(input: &mut Input) -> GreenResult {
             l_paren,
             trivias_prefixed(keyword("item")),
             repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
-            resume(r_paren),
+            r_paren,
         )
             .map(|(l_paren, mut keyword, instrs, r_paren)| {
                 let mut children = Vec::with_capacity(4);
@@ -786,7 +786,7 @@ fn mem_use(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("memory")),
         resume(index),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, idx, r_paren)| {
@@ -808,7 +808,7 @@ fn table_use(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("table")),
         resume(index),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, idx, r_paren)| {
@@ -831,7 +831,7 @@ fn offset(input: &mut Input) -> GreenResult {
             l_paren,
             trivias_prefixed(keyword("offset")),
             repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
-            resume(r_paren),
+            r_paren,
         )
             .map(|(l_paren, mut keyword, instrs, r_paren)| {
                 let mut children = Vec::with_capacity(4);
@@ -855,7 +855,7 @@ fn data(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("data")),
         repeat::<_, _, Vec<_>, _, _>(0.., retry_once(string, [])),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, strings, r_paren)| {

@@ -2,46 +2,49 @@
 source: crates/parser/tests/parse.rs
 ---
 ROOT@0..162
-  MODULE@0..7
+  MODULE@0..36
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
-  WHITESPACE@7..8 " "
-  ERROR@8..14 "binary"
-  WHITESPACE@14..15 " "
-  ERROR@15..35 "\"\\00asm\\01\\00\\00\\00\""
-  ERROR@35..36 ")"
+    WHITESPACE@7..8 " "
+    ERROR@8..14 "binary"
+    WHITESPACE@14..15 " "
+    ERROR@15..35 "\"\\00asm\\01\\00\\00\\00\""
+    R_PAREN@35..36 ")"
   WHITESPACE@36..37 "\n"
-  ERROR@37..38 "("
-  ERROR@38..44 "module"
-  WHITESPACE@44..45 " "
-  ERROR@45..51 "binary"
-  WHITESPACE@51..52 " "
-  ERROR@52..60 "\"\\00asm\""
-  WHITESPACE@60..61 " "
-  ERROR@61..75 "\"\\01\\00\\00\\00\""
-  ERROR@75..76 ")"
+  MODULE@37..76
+    L_PAREN@37..38 "("
+    KEYWORD@38..44 "module"
+    WHITESPACE@44..45 " "
+    ERROR@45..51 "binary"
+    WHITESPACE@51..52 " "
+    ERROR@52..60 "\"\\00asm\""
+    WHITESPACE@60..61 " "
+    ERROR@61..75 "\"\\01\\00\\00\\00\""
+    R_PAREN@75..76 ")"
   WHITESPACE@76..77 "\n"
-  ERROR@77..78 "("
-  ERROR@78..84 "module"
-  WHITESPACE@84..85 " "
-  ERROR@85..88 "$M1"
-  WHITESPACE@88..89 " "
-  ERROR@89..95 "binary"
-  WHITESPACE@95..96 " "
-  ERROR@96..116 "\"\\00asm\\01\\00\\00\\00\""
-  ERROR@116..117 ")"
+  MODULE@77..117
+    L_PAREN@77..78 "("
+    KEYWORD@78..84 "module"
+    WHITESPACE@84..85 " "
+    IDENT@85..88 "$M1"
+    WHITESPACE@88..89 " "
+    ERROR@89..95 "binary"
+    WHITESPACE@95..96 " "
+    ERROR@96..116 "\"\\00asm\\01\\00\\00\\00\""
+    R_PAREN@116..117 ")"
   WHITESPACE@117..118 "\n"
-  ERROR@118..119 "("
-  ERROR@119..125 "module"
-  WHITESPACE@125..126 " "
-  ERROR@126..129 "$M2"
-  WHITESPACE@129..130 " "
-  ERROR@130..136 "binary"
-  WHITESPACE@136..137 " "
-  ERROR@137..145 "\"\\00asm\""
-  WHITESPACE@145..146 " "
-  ERROR@146..160 "\"\\01\\00\\00\\00\""
-  ERROR@160..161 ")"
+  MODULE@118..161
+    L_PAREN@118..119 "("
+    KEYWORD@119..125 "module"
+    WHITESPACE@125..126 " "
+    IDENT@126..129 "$M2"
+    WHITESPACE@129..130 " "
+    ERROR@130..136 "binary"
+    WHITESPACE@136..137 " "
+    ERROR@137..145 "\"\\00asm\""
+    WHITESPACE@145..146 " "
+    ERROR@146..160 "\"\\01\\00\\00\\00\""
+    R_PAREN@160..161 ")"
   WHITESPACE@161..162 "\n"
 
 error: expected module field
@@ -56,20 +59,50 @@ error: expected module field
 1 │ (module binary "\00asm\01\00\00\00")
   │                ^^^^^^^^^^^^^^^^^^^^
 
-error: expected `)`
-  ┌─ binary.wat:1:9
+error: expected module field
+  ┌─ binary.wat:2:9
   │
-1 │ (module binary "\00asm\01\00\00\00")
+2 │ (module binary "\00asm" "\01\00\00\00")
   │         ^^^^^^
 
-error: expected `(`
-  ┌─ binary.wat:1:9
+error: expected module field
+  ┌─ binary.wat:2:16
   │
-1 │ (module binary "\00asm\01\00\00\00")
-  │         ^^^^^^
+2 │ (module binary "\00asm" "\01\00\00\00")
+  │                ^^^^^^^^
 
-error: expected `(`
-  ┌─ binary.wat:1:16
+error: expected module field
+  ┌─ binary.wat:2:25
   │
-1 │ (module binary "\00asm\01\00\00\00")
-  │                ^^^^^^^^^^^^^^^^^^^^
+2 │ (module binary "\00asm" "\01\00\00\00")
+  │                         ^^^^^^^^^^^^^^
+
+error: expected module field
+  ┌─ binary.wat:3:13
+  │
+3 │ (module $M1 binary "\00asm\01\00\00\00")
+  │             ^^^^^^
+
+error: expected module field
+  ┌─ binary.wat:3:20
+  │
+3 │ (module $M1 binary "\00asm\01\00\00\00")
+  │                    ^^^^^^^^^^^^^^^^^^^^
+
+error: expected module field
+  ┌─ binary.wat:4:13
+  │
+4 │ (module $M2 binary "\00asm" "\01\00\00\00")
+  │             ^^^^^^
+
+error: expected module field
+  ┌─ binary.wat:4:20
+  │
+4 │ (module $M2 binary "\00asm" "\01\00\00\00")
+  │                    ^^^^^^^^
+
+error: expected module field
+  ┌─ binary.wat:4:29
+  │
+4 │ (module $M2 binary "\00asm" "\01\00\00\00")
+  │                             ^^^^^^^^^^^^^^

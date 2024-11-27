@@ -79,7 +79,7 @@ fn block_block(input: &mut Input) -> GreenResult {
             opt(trivias_prefixed(ident)),
             opt(trivias_prefixed(block_type)),
             repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
-            resume(r_paren),
+            r_paren,
             opt(trivias_prefixed(ident)),
         )
             .map(
@@ -149,7 +149,7 @@ fn block_loop(input: &mut Input) -> GreenResult {
             opt(trivias_prefixed(ident)),
             opt(trivias_prefixed(block_type)),
             repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
-            resume(r_paren),
+            r_paren,
             opt(trivias_prefixed(ident)),
         )
             .map(
@@ -255,15 +255,15 @@ fn block_if(input: &mut Input) -> GreenResult {
                 (trivias, l_paren, trivias_prefixed(keyword("then"))),
             ),
             repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
-            resume(r_paren),
+            r_paren,
             opt((
                 trivias,
                 l_paren,
                 trivias_prefixed(keyword("else")),
                 repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
-                resume(r_paren),
+                r_paren,
             )),
-            resume(r_paren),
+            r_paren,
         )
             .map(
                 |(
@@ -334,7 +334,7 @@ fn plain_instr(input: &mut Input) -> GreenResult {
             l_paren,
             trivias_prefixed(instr_name),
             repeat::<_, _, Vec<_>, _, _>(0.., retry_once(operand(true), [])),
-            resume(r_paren),
+            r_paren,
         )
             .map(|(l_paren, mut instr_name, operands, r_paren)| {
                 let mut children = Vec::with_capacity(4);

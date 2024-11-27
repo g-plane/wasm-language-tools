@@ -3,9 +3,9 @@ use crate::error::SyntaxError;
 use wat_syntax::SyntaxKind::*;
 use winnow::{
     ascii::{hex_digit0, line_ending, multispace1, take_escaped, till_line_ending},
-    combinator::{alt, dispatch, empty, eof, fail, not, opt, peek, repeat, repeat_till},
-    error::{StrContext, StrContextValue},
-    stream::AsChar,
+    combinator::{alt, dispatch, empty, eof, fail, not, opt, peek, preceded, repeat, repeat_till},
+    error::{ErrMode, FromRecoverableError, StrContext, StrContextValue},
+    stream::{AsChar, Recover, Stream},
     token::{any, none_of, one_of, take_till, take_until, take_while},
     PResult, Parser,
 };
@@ -16,10 +16,52 @@ pub(super) fn l_paren(input: &mut Input) -> GreenResult {
         .parse_next(input)
 }
 
-pub(super) fn r_paren(input: &mut Input) -> GreenResult {
-    ')'.map(|_| tok(R_PAREN, ")"))
-        .context(StrContext::Expected(StrContextValue::CharLiteral(')')))
-        .parse_next(input)
+pub(super) fn r_paren(input: &mut Input) -> PResult<Option<Vec<GreenElement>>, SyntaxError> {
+    let mut parser = ')'.context(StrContext::Expected(StrContextValue::CharLiteral(')')));
+    let mut error_token_parser = error_token(false).context(StrContext::Label("unexpected token"));
+    let mut tokens = Vec::with_capacity(1);
+    let start = input.checkpoint();
+    loop {
+        let mut trivia_tokens = match trivias.parse_next(input) {
+            Ok(trivias) => trivias,
+            Err(err) => return Err(err),
+        };
+        let token_start = input.checkpoint();
+        let mut err = match parser.parse_next(input) {
+            Ok(..) => {
+                tokens.append(&mut trivia_tokens);
+                tokens.push(tok(R_PAREN, ")"));
+                return Ok(Some(tokens));
+            }
+            Err(ErrMode::Incomplete(e)) => return Err(ErrMode::Incomplete(e)),
+            Err(err) => err,
+        };
+        input.reset(&token_start);
+        let err_start = input.checkpoint();
+        let err_start_eof_offset = input.eof_offset();
+        if let Ok(error_token) = error_token_parser.parse_next(input) {
+            let i_eof_offset = input.eof_offset();
+            if err_start_eof_offset == i_eof_offset {
+                // didn't advance so bubble the error up
+            } else if let Err(err_) = input.record_err(&token_start, &err_start, err) {
+                err = err_;
+            } else {
+                tokens.append(&mut trivia_tokens);
+                tokens.push(error_token);
+                continue;
+            }
+        } else if let Err(err_) = input.record_err(&token_start, &err_start, err) {
+            err = err_;
+        } else {
+            input.reset(&start);
+            return Ok(None);
+        }
+
+        input.reset(&start);
+        err = err
+            .map(|err| SyntaxError::from_recoverable_error(&token_start, &err_start, input, err));
+        return Err(err);
+    }
 }
 
 pub(super) fn word<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
@@ -261,7 +303,7 @@ pub(super) fn error_token<'s>(
 pub(super) fn error_term<'s, const N: usize>(
     allowed_names: [&'static str; N],
 ) -> impl Parser<Input<'s>, Vec<GreenElement>, SyntaxError> {
-    (
+    preceded(
         peek(not((
             trivias,
             '(',
@@ -270,7 +312,6 @@ pub(super) fn error_term<'s, const N: usize>(
         ))),
         error_term_inner,
     )
-        .map(|(_, tokens)| tokens)
 }
 fn error_term_inner(input: &mut Input) -> PResult<Vec<GreenElement>, SyntaxError> {
     (

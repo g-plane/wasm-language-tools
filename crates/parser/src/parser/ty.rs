@@ -46,7 +46,7 @@ pub(super) fn func_type(input: &mut Input) -> GreenResult {
         trivias_prefixed(keyword("func")),
         repeat::<_, _, Vec<_>, _, _>(0.., retry_once(param, ["result"])),
         repeat::<_, _, Vec<_>, _, _>(0.., retry_once(result, [])),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, params, results, r_paren)| {
@@ -80,7 +80,7 @@ pub(super) fn param(input: &mut Input) -> GreenResult {
             repeat::<_, _, Vec<_>, _, _>(0.., retry_once(val_type, []))
                 .map(|types| types.into_iter().flatten().collect()),
         )),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, mut types, r_paren)| {
@@ -100,7 +100,7 @@ pub(super) fn result(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("result")),
         repeat::<_, _, Vec<_>, _, _>(0.., retry_once(val_type, [])),
-        resume(r_paren),
+        r_paren,
     )
         .parse_next(input)
         .map(|(l_paren, mut keyword, types, r_paren)| {
@@ -147,7 +147,7 @@ pub(super) fn global_type(input: &mut Input) -> GreenResult {
             l_paren,
             trivias_prefixed(keyword("mut")),
             resume(val_type),
-            resume(r_paren),
+            r_paren,
         )
             .map(|(l_paren, mut keyword, val_type, r_paren)| {
                 let mut children = Vec::with_capacity(4);
