@@ -342,14 +342,15 @@ fn module_field_table(input: &mut Input) -> GreenResult {
         opt(trivias_prefixed(ident)),
         opt(trivias_prefixed(import)), // postpone syntax error for using import with export or instr
         opt(trivias_prefixed(export)),
-        opt(trivias_prefixed(table_type)),
-        opt(trivias_prefixed(ref_type)),
-        opt(trivias_prefixed(elem)),
+        must(alt((
+            (trivias_prefixed(ref_type), must(retry_once(elem, []))),
+            (retry(table_type, []), empty.value(None)),
+        ))),
         r_paren,
     )
         .parse_next(input)
         .map(
-            |(l_paren, mut keyword, id, import, export, table_type, ref_type, elem, r_paren)| {
+            |(l_paren, mut keyword, id, import, export, ty_and_elem, r_paren)| {
                 let mut children = Vec::with_capacity(7);
                 children.push(l_paren);
                 children.append(&mut keyword);
@@ -362,14 +363,11 @@ fn module_field_table(input: &mut Input) -> GreenResult {
                 if let Some(mut export) = export {
                     children.append(&mut export);
                 }
-                if let Some(mut table_type) = table_type {
-                    children.append(&mut table_type);
-                }
-                if let Some(mut ref_type) = ref_type {
-                    children.append(&mut ref_type);
-                }
-                if let Some(mut elem) = elem {
-                    children.append(&mut elem);
+                if let Some((mut ty, elem)) = ty_and_elem {
+                    children.append(&mut ty);
+                    if let Some(mut elem) = elem {
+                        children.append(&mut elem);
+                    }
                 }
                 if let Some(mut r_paren) = r_paren {
                     children.append(&mut r_paren);
@@ -696,9 +694,9 @@ fn elem(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("elem")),
         dispatch! {peek(preceded(trivias, any));
-            '(' => repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(elem_expr)),
+            '(' => repeat::<_, _, Vec<_>, _, _>(0.., retry_once(elem_expr, [])),
             ')' => empty.value(vec![]),
-            _ => repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(index)),
+            _ => repeat::<_, _, Vec<_>, _, _>(0.., retry_once(index, [])),
         },
         r_paren,
     )

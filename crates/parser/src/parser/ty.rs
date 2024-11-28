@@ -118,7 +118,10 @@ pub(super) fn result(input: &mut Input) -> GreenResult {
 }
 
 pub(super) fn table_type(input: &mut Input) -> GreenResult {
-    (limits, resume(ref_type))
+    (limits, must(retry_once(ref_type, [])))
+        .context(StrContext::Expected(StrContextValue::Description(
+            "table type",
+        )))
         .parse_next(input)
         .map(|(limits, ref_type)| {
             if let Some(mut ref_type) = ref_type {
