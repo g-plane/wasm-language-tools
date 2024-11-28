@@ -125,7 +125,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 }
             } else {
                 let instr_name = support::token(&parent, SyntaxKind::INSTR_NAME)?;
-                add_cmp_ctx_for_operands(instr_name.text(), &mut ctx);
+                add_cmp_ctx_for_operands(instr_name.text(), &parent, &mut ctx);
             }
         }
         SyntaxKind::OPERAND => {
@@ -133,7 +133,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 .ancestors()
                 .find(|node| node.kind() == SyntaxKind::PLAIN_INSTR)?;
             let instr_name = support::token(&instr, SyntaxKind::INSTR_NAME)?;
-            add_cmp_ctx_for_operands(instr_name.text(), &mut ctx);
+            add_cmp_ctx_for_operands(instr_name.text(), &parent, &mut ctx);
         }
         SyntaxKind::PARAM | SyntaxKind::RESULT | SyntaxKind::LOCAL | SyntaxKind::GLOBAL_TYPE => {
             if !token.text().starts_with('$') {
@@ -155,6 +155,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 SyntaxKind::TYPE_USE => ctx.push(CmpCtx::FuncType),
                 SyntaxKind::EXPORT_DESC_GLOBAL => ctx.push(CmpCtx::Global),
                 SyntaxKind::EXPORT_DESC_MEMORY => ctx.push(CmpCtx::Memory),
+                SyntaxKind::EXPORT_DESC_TABLE => ctx.push(CmpCtx::Table),
                 _ => {}
             }
         }
@@ -193,6 +194,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             }
         }
         SyntaxKind::EXPORT_DESC_MEMORY => ctx.push(CmpCtx::Memory),
+        SyntaxKind::EXPORT_DESC_TABLE => ctx.push(CmpCtx::Table),
         SyntaxKind::TABLE_TYPE => ctx.push(CmpCtx::RefType),
         SyntaxKind::ELEM => {
             if find_leading_l_paren(token).is_some() {
@@ -221,11 +223,23 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         Some(ctx)
     }
 }
-fn add_cmp_ctx_for_operands(instr_name: &str, ctx: &mut SmallVec<[CmpCtx; 4]>) {
+fn add_cmp_ctx_for_operands(instr_name: &str, node: &SyntaxNode, ctx: &mut SmallVec<[CmpCtx; 4]>) {
     match instr_name.split_once('.') {
         Some(("local", _)) => ctx.push(CmpCtx::Local),
         Some(("global", _)) => ctx.push(CmpCtx::Global),
         Some(("ref", "func")) => ctx.push(CmpCtx::Func),
+        Some(("table", snd)) => {
+            if snd == "init"
+                && node.kind() == SyntaxKind::OPERAND
+                && node
+                    .prev_sibling()
+                    .is_some_and(|prev| prev.kind() == SyntaxKind::OPERAND)
+            {
+                // elem id
+            } else {
+                ctx.push(CmpCtx::Table);
+            }
+        }
         Some((_, snd)) if snd.starts_with("load") || snd.starts_with("store") => {
             ctx.push(CmpCtx::MemArg);
         }
@@ -248,6 +262,7 @@ enum CmpCtx {
     Global,
     MemArg,
     Memory,
+    Table,
     Block,
     KeywordModule,
     KeywordModuleField,
@@ -431,6 +446,34 @@ fn get_cmp_list(
                     items.extend(
                         symbol_table
                             .get_declared_memories(module)
+                            .filter_map(|symbol| {
+                                let (label, insert_text) =
+                                    get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
+                                Some(CompletionItem {
+                                    label,
+                                    insert_text,
+                                    kind: Some(CompletionItemKind::VARIABLE),
+                                    ..Default::default()
+                                })
+                            }),
+                    );
+                }
+                CmpCtx::Table => {
+                    let Some(module) = token
+                        .parent_ancestors()
+                        .find(|node| node.kind() == SyntaxKind::MODULE)
+                        .map(|module| module.into())
+                    else {
+                        return items;
+                    };
+                    let has_dollar = token.text().starts_with('$');
+                    items.extend(
+                        symbol_table
+                            .symbols
+                            .iter()
+                            .filter(|symbol| {
+                                symbol.kind == SymbolItemKind::TableDef && symbol.region == module
+                            })
                             .filter_map(|symbol| {
                                 let (label, insert_text) =
                                     get_idx_cmp_text(service, &symbol.idx, has_dollar)?;

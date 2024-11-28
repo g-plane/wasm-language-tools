@@ -15,6 +15,7 @@ fn symbols() {
     (global i32)
     (memory $memory 1)
     (memory 1)
+    (table $table 1 funcref)
 )
 
 (module

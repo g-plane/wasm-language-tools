@@ -24,6 +24,7 @@ pub fn check(
             | SymbolItemKind::Type
             | SymbolItemKind::GlobalDef
             | SymbolItemKind::MemoryDef
+            | SymbolItemKind::TableDef
             | SymbolItemKind::BlockDef => false,
             SymbolItemKind::Call => !symbol_table
                 .find_func_defs(&symbol.key)
@@ -38,6 +39,9 @@ pub fn check(
             SymbolItemKind::MemoryRef => !symbol_table
                 .find_memory_defs(&symbol.key)
                 .is_some_and(|memories| memories.count() > 0),
+            SymbolItemKind::TableRef => !symbol_table
+                .find_table_defs(&symbol.key)
+                .is_some_and(|tables| tables.count() > 0),
             SymbolItemKind::BlockRef => !symbol_table
                 .blocks
                 .iter()

@@ -76,16 +76,18 @@ impl LanguageService {
             .iter()
             .filter(|sym| match &sym.kind {
                 SymbolItemKind::Func
+                | SymbolItemKind::Call
                 | SymbolItemKind::Param
                 | SymbolItemKind::Local
-                | SymbolItemKind::Type
-                | SymbolItemKind::GlobalDef
-                | SymbolItemKind::MemoryDef
-                | SymbolItemKind::Call
                 | SymbolItemKind::LocalRef
+                | SymbolItemKind::Type
                 | SymbolItemKind::TypeUse
+                | SymbolItemKind::GlobalDef
                 | SymbolItemKind::GlobalRef
-                | SymbolItemKind::MemoryRef => {
+                | SymbolItemKind::MemoryDef
+                | SymbolItemKind::MemoryRef
+                | SymbolItemKind::TableDef
+                | SymbolItemKind::TableRef => {
                     symbol.region == sym.region
                         && symbol.idx.name.is_some_and(|name| name == old_name)
                 }

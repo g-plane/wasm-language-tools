@@ -287,6 +287,53 @@ impl LanguageService {
                         .collect(),
                 )
             }
+            SymbolItemKind::TableDef => Some(
+                symbol_table
+                    .symbols
+                    .iter()
+                    .filter(|symbol| match &symbol.kind {
+                        SymbolItemKind::TableDef => {
+                            params.context.include_declaration
+                                && current_symbol.idx == symbol.idx
+                                && symbol.region == current_symbol.region
+                        }
+                        SymbolItemKind::TableRef => {
+                            symbol.idx.is_defined_by(&current_symbol.idx)
+                                && symbol.region == current_symbol.region
+                        }
+                        _ => false,
+                    })
+                    .map(|symbol| create_location_by_symbol(&params, &line_index, symbol, &root))
+                    .collect(),
+            ),
+            SymbolItemKind::TableRef => {
+                let tables = symbol_table
+                    .find_table_defs(&current_symbol.key)?
+                    .collect::<SmallVec<[_; 1]>>();
+                Some(
+                    symbol_table
+                        .symbols
+                        .iter()
+                        .filter(|symbol| match &symbol.kind {
+                            SymbolItemKind::TableDef => {
+                                params.context.include_declaration
+                                    && current_symbol.idx.is_defined_by(&symbol.idx)
+                                    && symbol.region == current_symbol.region
+                            }
+                            SymbolItemKind::TableRef => {
+                                tables
+                                    .iter()
+                                    .any(|memory| symbol.idx.is_defined_by(&memory.idx))
+                                    && symbol.region == current_symbol.region
+                            }
+                            _ => false,
+                        })
+                        .map(|symbol| {
+                            create_location_by_symbol(&params, &line_index, symbol, &root)
+                        })
+                        .collect(),
+                )
+            }
             SymbolItemKind::BlockDef => Some(get_block_refs(
                 current_symbol,
                 &params,

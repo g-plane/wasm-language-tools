@@ -93,6 +93,17 @@ impl LanguageService {
                 })
             })
             .or_else(|| {
+                symbol_table.find_table_defs(&key).map(|symbols| {
+                    GotoDefinitionResponse::Array(
+                        symbols
+                            .map(|symbol| {
+                                create_location_by_symbol(&params, &line_index, symbol, &root)
+                            })
+                            .collect(),
+                    )
+                })
+            })
+            .or_else(|| {
                 symbol_table.find_block_def(&key).map(|symbol| {
                     GotoDefinitionResponse::Scalar(create_location_by_symbol(
                         &params,

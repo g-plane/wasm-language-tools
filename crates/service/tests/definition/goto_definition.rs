@@ -344,6 +344,56 @@ fn memory_ident_idx() {
 }
 
 #[test]
+fn table_not_defined() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (table.size $table)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    assert!(matches!(
+        service.goto_definition(create_params(uri.clone(), Position::new(3, 21))),
+        Some(GotoDefinitionResponse::Array(locations)) if locations.is_empty()
+    ));
+}
+
+#[test]
+fn table_int_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (table 0 funcref)
+  (func
+    (table.size 0)))
+(module
+  (table))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(4, 17)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn table_ident_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (table $table 0 funcref)
+  (func
+    (table.size $table)))
+(module
+  (table $table))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(4, 22)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn block_not_defined() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "

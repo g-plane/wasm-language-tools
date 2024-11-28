@@ -1,0 +1,24 @@
+---
+source: crates/service/tests/diagnostics/undef.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 16
+        },
+        "end": {
+          "line": 3,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "cannot find `$table` in this scope"
+    }
+  ]
+}

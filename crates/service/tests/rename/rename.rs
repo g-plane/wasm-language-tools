@@ -334,6 +334,40 @@ fn memory_ref() {
 }
 
 #[test]
+fn table_def() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (table $table 0 funcref)
+  (func
+    (table.size $table)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service
+        .rename(create_params(uri, Position::new(2, 13), "$t"))
+        .unwrap();
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn table_ref() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (table $table 0 funcref)
+  (func
+    (table.size $table)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service
+        .rename(create_params(uri, Position::new(4, 21), "$t"))
+        .unwrap();
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn block_def() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "

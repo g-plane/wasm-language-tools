@@ -98,7 +98,10 @@ impl LanguageService {
                         },
                     ))
                 }
-                SymbolItemKind::Type | SymbolItemKind::GlobalDef | SymbolItemKind::MemoryDef => {
+                SymbolItemKind::Type
+                | SymbolItemKind::GlobalDef
+                | SymbolItemKind::MemoryDef
+                | SymbolItemKind::TableDef => {
                     let range =
                         helpers::rowan_range_to_lsp_range(&line_index, symbol.key.ptr.text_range());
                     Some((
@@ -133,6 +136,7 @@ impl LanguageService {
                 | SymbolItemKind::TypeUse
                 | SymbolItemKind::GlobalRef
                 | SymbolItemKind::MemoryRef
+                | SymbolItemKind::TableRef
                 | SymbolItemKind::BlockDef
                 | SymbolItemKind::BlockRef => None,
             })

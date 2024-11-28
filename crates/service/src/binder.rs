@@ -292,6 +292,36 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                                 }
                             });
                     }
+                    Some(
+                        "table.get" | "table.set" | "table.size" | "table.grow" | "table.fill"
+                        | "table.copy",
+                    ) => {
+                        let Some(region) = node
+                            .ancestors()
+                            .find(|node| node.kind() == SyntaxKind::MODULE)
+                            .map(SymbolItemKey::from)
+                        else {
+                            continue;
+                        };
+                        symbols.extend(node.children().filter_map(|node| {
+                            create_ref_symbol(db, node, region.clone(), SymbolItemKind::TableRef)
+                        }));
+                    }
+                    Some("table.init") => {
+                        let Some(region) = node
+                            .ancestors()
+                            .find(|node| node.kind() == SyntaxKind::MODULE)
+                            .map(SymbolItemKey::from)
+                        else {
+                            continue;
+                        };
+                        let mut children = node.children();
+                        if let Some(symbol) = children.next().and_then(|node| {
+                            create_ref_symbol(db, node, region.clone(), SymbolItemKind::TableRef)
+                        }) {
+                            symbols.push(symbol);
+                        }
+                    }
                     _ => {}
                 }
             }
@@ -348,6 +378,17 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                 }
                 module_field_id += 1;
             }
+            SyntaxKind::MODULE_FIELD_TABLE => {
+                if let Some(symbol) = create_parent_based_symbol(
+                    db,
+                    node.clone(),
+                    module_field_id,
+                    SymbolItemKind::TableDef,
+                ) {
+                    symbols.push(symbol);
+                }
+                module_field_id += 1;
+            }
             SyntaxKind::EXPORT_DESC_MEMORY => {
                 if let Some(symbol) = node
                     .ancestors()
@@ -359,6 +400,22 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                     )
                     .and_then(|(region, index)| {
                         create_ref_symbol(db, index, region, SymbolItemKind::MemoryRef)
+                    })
+                {
+                    symbols.push(symbol);
+                }
+            }
+            SyntaxKind::EXPORT_DESC_TABLE => {
+                if let Some(symbol) = node
+                    .ancestors()
+                    .find(|node| node.kind() == SyntaxKind::MODULE)
+                    .map(SymbolItemKey::from)
+                    .zip(
+                        node.children()
+                            .find(|child| child.kind() == SyntaxKind::INDEX),
+                    )
+                    .and_then(|(region, index)| {
+                        create_ref_symbol(db, index, region, SymbolItemKind::TableRef)
                     })
                 {
                     symbols.push(symbol);
@@ -454,6 +511,22 @@ impl SymbolTable {
                     symbol.region == memory.region
                         && symbol.kind == SymbolItemKind::MemoryDef
                         && memory.idx.is_defined_by(&symbol.idx)
+                })
+            })
+    }
+
+    pub fn find_table_defs(
+        &self,
+        key: &SymbolItemKey,
+    ) -> Option<impl Iterator<Item = &SymbolItem>> {
+        self.symbols
+            .iter()
+            .find(|symbol| symbol.kind == SymbolItemKind::TableRef && &symbol.key == key)
+            .map(|table| {
+                self.symbols.iter().filter(|symbol| {
+                    symbol.region == table.region
+                        && symbol.kind == SymbolItemKind::TableDef
+                        && table.idx.is_defined_by(&symbol.idx)
                 })
             })
     }
@@ -564,6 +637,8 @@ pub enum SymbolItemKind {
     GlobalRef,
     MemoryDef,
     MemoryRef,
+    TableDef,
+    TableRef,
     BlockDef,
     BlockRef,
 }
