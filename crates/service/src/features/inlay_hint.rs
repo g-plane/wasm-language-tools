@@ -46,7 +46,9 @@ impl LanguageService {
                     if !range.contains_range(symbol.key.ptr.text_range()) {
                         return None;
                     }
-                    let global = symbol_table.find_global_defs(&symbol.key)?.next()?;
+                    let global = symbol_table
+                        .find_defs(&symbol.key, SymbolItemKind::GlobalDef)?
+                        .next()?;
                     let ty = self.extract_global_type(global.green.clone())?;
                     Some(InlayHint {
                         position: helpers::rowan_pos_to_lsp_pos(

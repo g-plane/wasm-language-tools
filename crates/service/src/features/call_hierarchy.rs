@@ -69,8 +69,9 @@ impl LanguageService {
                         data: None,
                     }])
                 }
-                SymbolItemKind::Call if symbol.key.ptr.text_range() == parent_range => {
-                    symbol_table.find_func_defs(&symbol.key).map(|symbols| {
+                SymbolItemKind::Call if symbol.key.ptr.text_range() == parent_range => symbol_table
+                    .find_defs(&symbol.key, SymbolItemKind::Func)
+                    .map(|symbols| {
                         symbols
                             .map(|symbol| CallHierarchyItem {
                                 name: symbol
@@ -95,8 +96,7 @@ impl LanguageService {
                                 data: None,
                             })
                             .collect()
-                    })
-                }
+                    }),
                 _ => None,
             })
     }
@@ -192,7 +192,9 @@ impl LanguageService {
                     helpers::rowan_range_to_lsp_range(&line_index, node.text_range());
                 node.children()
                     .filter(|child| child.kind() == SyntaxKind::OPERAND)
-                    .filter_map(|operand| symbol_table.find_func_defs(&operand.into()))
+                    .filter_map(|operand| {
+                        symbol_table.find_defs(&operand.into(), SymbolItemKind::Func)
+                    })
                     .flatten()
                     .filter(|symbol| symbol.kind == SymbolItemKind::Func)
                     .map(move |func_symbol| {

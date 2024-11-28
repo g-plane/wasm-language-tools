@@ -52,56 +52,68 @@ impl LanguageService {
                         )),
                     })
                     .or_else(|| {
-                        symbol_table.find_global_defs(&key).map(|symbols| Hover {
-                            contents: HoverContents::Array(
-                                symbols
-                                    .map(|symbol| create_global_def_hover(self, symbol, &root))
-                                    .collect(),
-                            ),
-                            range: Some(helpers::rowan_range_to_lsp_range(
-                                &line_index,
-                                token.text_range(),
-                            )),
-                        })
-                    })
-                    .or_else(|| {
-                        symbol_table.find_func_defs(&key).map(|symbols| {
-                            let contents = symbols.fold(String::new(), |mut contents, symbol| {
-                                if !contents.is_empty() {
-                                    contents.push_str("\n---\n");
-                                }
-                                contents.push_str(&create_func_hover(
-                                    self,
-                                    uri,
-                                    symbol.clone(),
-                                    &root,
-                                ));
-                                contents
-                            });
-                            Hover {
-                                contents: HoverContents::Markup(MarkupContent {
-                                    kind: MarkupKind::Markdown,
-                                    value: contents,
-                                }),
-                                range: Some(helpers::rowan_range_to_lsp_range(
-                                    &line_index,
-                                    token.text_range(),
-                                )),
-                            }
-                        })
-                    })
-                    .or_else(|| {
-                        symbol_table.find_type_use_defs(&key).map(|symbols| Hover {
-                            contents: HoverContents::Array(
-                                symbols
-                                    .map(|symbol| create_type_def_hover(self, symbol))
-                                    .collect(),
-                            ),
-                            range: Some(helpers::rowan_range_to_lsp_range(
-                                &line_index,
-                                token.text_range(),
-                            )),
-                        })
+                        symbol_table
+                            .symbols
+                            .iter()
+                            .find(|symbol| symbol.key == key)
+                            .and_then(|symbol| match symbol.kind {
+                                SymbolItemKind::Call => symbol_table
+                                    .find_defs(&key, SymbolItemKind::Func)
+                                    .map(|symbols| {
+                                        let contents =
+                                            symbols.fold(String::new(), |mut contents, symbol| {
+                                                if !contents.is_empty() {
+                                                    contents.push_str("\n---\n");
+                                                }
+                                                contents.push_str(&create_func_hover(
+                                                    self,
+                                                    uri,
+                                                    symbol.clone(),
+                                                    &root,
+                                                ));
+                                                contents
+                                            });
+                                        Hover {
+                                            contents: HoverContents::Markup(MarkupContent {
+                                                kind: MarkupKind::Markdown,
+                                                value: contents,
+                                            }),
+                                            range: Some(helpers::rowan_range_to_lsp_range(
+                                                &line_index,
+                                                token.text_range(),
+                                            )),
+                                        }
+                                    }),
+                                SymbolItemKind::TypeUse => symbol_table
+                                    .find_defs(&key, SymbolItemKind::Type)
+                                    .map(|symbols| Hover {
+                                        contents: HoverContents::Array(
+                                            symbols
+                                                .map(|symbol| create_type_def_hover(self, symbol))
+                                                .collect(),
+                                        ),
+                                        range: Some(helpers::rowan_range_to_lsp_range(
+                                            &line_index,
+                                            token.text_range(),
+                                        )),
+                                    }),
+                                SymbolItemKind::GlobalRef => symbol_table
+                                    .find_defs(&key, SymbolItemKind::GlobalDef)
+                                    .map(|symbols| Hover {
+                                        contents: HoverContents::Array(
+                                            symbols
+                                                .map(|symbol| {
+                                                    create_global_def_hover(self, symbol, &root)
+                                                })
+                                                .collect(),
+                                        ),
+                                        range: Some(helpers::rowan_range_to_lsp_range(
+                                            &line_index,
+                                            token.text_range(),
+                                        )),
+                                    }),
+                                _ => None,
+                            })
                     })
                     .or_else(|| {
                         symbol_table

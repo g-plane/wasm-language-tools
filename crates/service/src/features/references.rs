@@ -100,7 +100,7 @@ impl LanguageService {
             ),
             SymbolItemKind::Call => {
                 let funcs = symbol_table
-                    .find_func_defs(&current_symbol.key)?
+                    .find_defs(&current_symbol.key, SymbolItemKind::Func)?
                     .collect::<SmallVec<[_; 1]>>();
                 Some(
                     symbol_table
@@ -169,7 +169,7 @@ impl LanguageService {
             ),
             SymbolItemKind::TypeUse => {
                 let types = symbol_table
-                    .find_type_use_defs(&current_symbol.key)?
+                    .find_defs(&current_symbol.key, SymbolItemKind::Type)?
                     .collect::<SmallVec<[_; 1]>>();
                 Some(
                     symbol_table
@@ -214,7 +214,7 @@ impl LanguageService {
             ),
             SymbolItemKind::GlobalRef => {
                 let globals = symbol_table
-                    .find_global_defs(&current_symbol.key)?
+                    .find_defs(&current_symbol.key, SymbolItemKind::GlobalDef)?
                     .collect::<SmallVec<[_; 1]>>();
                 Some(
                     symbol_table
@@ -261,7 +261,7 @@ impl LanguageService {
             ),
             SymbolItemKind::MemoryRef => {
                 let memories = symbol_table
-                    .find_memory_defs(&current_symbol.key)?
+                    .find_defs(&current_symbol.key, SymbolItemKind::MemoryDef)?
                     .collect::<SmallVec<[_; 1]>>();
                 Some(
                     symbol_table
@@ -308,7 +308,7 @@ impl LanguageService {
             ),
             SymbolItemKind::TableRef => {
                 let tables = symbol_table
-                    .find_table_defs(&current_symbol.key)?
+                    .find_defs(&current_symbol.key, SymbolItemKind::TableDef)?
                     .collect::<SmallVec<[_; 1]>>();
                 Some(
                     symbol_table

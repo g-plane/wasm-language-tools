@@ -238,7 +238,7 @@ fn resolve_type(
                 "call" => {
                     let idx = plain_instr.operands().next()?;
                     symbol_table
-                        .find_func_defs(&idx.syntax().clone().into())
+                        .find_defs(&idx.syntax().clone().into(), SymbolItemKind::Func)
                         .into_iter()
                         .flatten()
                         .next()
@@ -260,7 +260,7 @@ fn resolve_type(
                 "global.get" => {
                     let idx = plain_instr.operands().next()?;
                     symbol_table
-                        .find_global_defs(&idx.syntax().clone().into())
+                        .find_defs(&idx.syntax().clone().into(), SymbolItemKind::GlobalDef)
                         .into_iter()
                         .flatten()
                         .next()
@@ -286,7 +286,7 @@ fn resolve_expected_types(
     if instr.instr_name()?.text() == "call" {
         let idx = instr.operands().next()?;
         let func = symbol_table
-            .find_func_defs(&idx.syntax().clone().into())
+            .find_defs(&idx.syntax().clone().into(), SymbolItemKind::Func)
             .into_iter()
             .flatten()
             .next()?;

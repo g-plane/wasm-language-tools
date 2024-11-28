@@ -1,6 +1,6 @@
 use super::find_meaningful_token;
 use crate::{
-    binder::{SymbolItem, SymbolTablesCtx},
+    binder::{SymbolItem, SymbolItemKind, SymbolTablesCtx},
     files::FilesCtx,
     helpers, LanguageService,
 };
@@ -39,69 +39,103 @@ impl LanguageService {
         let symbol_table = self.symbol_table(uri);
         let key = parent.into();
         symbol_table
-            .find_func_defs(&key)
-            .map(|symbols| {
-                GotoDefinitionResponse::Array(
-                    symbols
-                        .map(|symbol| {
-                            create_location_by_symbol(&params, &line_index, symbol, &root)
-                        })
-                        .collect(),
-                )
+            .find_param_or_local_def(&key)
+            .map(|symbol| {
+                GotoDefinitionResponse::Scalar(create_location_by_symbol(
+                    &params,
+                    &line_index,
+                    symbol,
+                    &root,
+                ))
             })
             .or_else(|| {
-                symbol_table.find_param_or_local_def(&key).map(|symbol| {
-                    GotoDefinitionResponse::Scalar(create_location_by_symbol(
-                        &params,
-                        &line_index,
-                        symbol,
-                        &root,
-                    ))
-                })
-            })
-            .or_else(|| {
-                symbol_table.find_type_use_defs(&key).map(|symbols| {
-                    GotoDefinitionResponse::Array(
-                        symbols
-                            .map(|symbol| {
-                                create_location_by_symbol(&params, &line_index, symbol, &root)
-                            })
-                            .collect(),
-                    )
-                })
-            })
-            .or_else(|| {
-                symbol_table.find_global_defs(&key).map(|symbols| {
-                    GotoDefinitionResponse::Array(
-                        symbols
-                            .map(|symbol| {
-                                create_location_by_symbol(&params, &line_index, symbol, &root)
-                            })
-                            .collect(),
-                    )
-                })
-            })
-            .or_else(|| {
-                symbol_table.find_memory_defs(&key).map(|symbols| {
-                    GotoDefinitionResponse::Array(
-                        symbols
-                            .map(|symbol| {
-                                create_location_by_symbol(&params, &line_index, symbol, &root)
-                            })
-                            .collect(),
-                    )
-                })
-            })
-            .or_else(|| {
-                symbol_table.find_table_defs(&key).map(|symbols| {
-                    GotoDefinitionResponse::Array(
-                        symbols
-                            .map(|symbol| {
-                                create_location_by_symbol(&params, &line_index, symbol, &root)
-                            })
-                            .collect(),
-                    )
-                })
+                symbol_table
+                    .symbols
+                    .iter()
+                    .find(|symbol| symbol.key == key)
+                    .and_then(|symbol| match symbol.kind {
+                        SymbolItemKind::Call => symbol_table
+                            .find_defs(&key, SymbolItemKind::Func)
+                            .map(|symbols| {
+                                GotoDefinitionResponse::Array(
+                                    symbols
+                                        .map(|symbol| {
+                                            create_location_by_symbol(
+                                                &params,
+                                                &line_index,
+                                                symbol,
+                                                &root,
+                                            )
+                                        })
+                                        .collect(),
+                                )
+                            }),
+                        SymbolItemKind::TypeUse => symbol_table
+                            .find_defs(&key, SymbolItemKind::Type)
+                            .map(|symbols| {
+                                GotoDefinitionResponse::Array(
+                                    symbols
+                                        .map(|symbol| {
+                                            create_location_by_symbol(
+                                                &params,
+                                                &line_index,
+                                                symbol,
+                                                &root,
+                                            )
+                                        })
+                                        .collect(),
+                                )
+                            }),
+                        SymbolItemKind::GlobalRef => symbol_table
+                            .find_defs(&key, SymbolItemKind::GlobalDef)
+                            .map(|symbols| {
+                                GotoDefinitionResponse::Array(
+                                    symbols
+                                        .map(|symbol| {
+                                            create_location_by_symbol(
+                                                &params,
+                                                &line_index,
+                                                symbol,
+                                                &root,
+                                            )
+                                        })
+                                        .collect(),
+                                )
+                            }),
+                        SymbolItemKind::MemoryRef => symbol_table
+                            .find_defs(&key, SymbolItemKind::MemoryDef)
+                            .map(|symbols| {
+                                GotoDefinitionResponse::Array(
+                                    symbols
+                                        .map(|symbol| {
+                                            create_location_by_symbol(
+                                                &params,
+                                                &line_index,
+                                                symbol,
+                                                &root,
+                                            )
+                                        })
+                                        .collect(),
+                                )
+                            }),
+                        SymbolItemKind::TableRef => symbol_table
+                            .find_defs(&key, SymbolItemKind::TableDef)
+                            .map(|symbols| {
+                                GotoDefinitionResponse::Array(
+                                    symbols
+                                        .map(|symbol| {
+                                            create_location_by_symbol(
+                                                &params,
+                                                &line_index,
+                                                symbol,
+                                                &root,
+                                            )
+                                        })
+                                        .collect(),
+                                )
+                            }),
+                        _ => None,
+                    })
             })
             .or_else(|| {
                 symbol_table.find_block_def(&key).map(|symbol| {
@@ -144,25 +178,28 @@ impl LanguageService {
 
         let grand = parent.parent()?;
         match grand.kind() {
-            SyntaxKind::PLAIN_INSTR => symbol_table.find_func_defs(&parent.into()).map(|symbols| {
-                GotoDefinitionResponse::Array(
-                    symbols
-                        .filter_map(|symbol| {
-                            symbol_table.find_type_use_defs(
-                                &child::<TypeUse>(&symbol.key.ptr.to_node(&root))?
-                                    .index()?
-                                    .syntax()
-                                    .clone()
-                                    .into(),
-                            )
-                        })
-                        .flatten()
-                        .map(|symbol| {
-                            create_location_by_symbol(&params, &line_index, symbol, &root)
-                        })
-                        .collect(),
-                )
-            }),
+            SyntaxKind::PLAIN_INSTR => symbol_table
+                .find_defs(&parent.into(), SymbolItemKind::Func)
+                .map(|symbols| {
+                    GotoDefinitionResponse::Array(
+                        symbols
+                            .filter_map(|symbol| {
+                                symbol_table.find_defs(
+                                    &child::<TypeUse>(&symbol.key.ptr.to_node(&root))?
+                                        .index()?
+                                        .syntax()
+                                        .clone()
+                                        .into(),
+                                    SymbolItemKind::Type,
+                                )
+                            })
+                            .flatten()
+                            .map(|symbol| {
+                                create_location_by_symbol(&params, &line_index, symbol, &root)
+                            })
+                            .collect(),
+                    )
+                }),
             _ => None,
         }
     }
@@ -190,7 +227,7 @@ impl LanguageService {
         let parent = token.parent()?;
         if parent.kind() == SyntaxKind::OPERAND {
             symbol_table
-                .find_func_defs(&parent.clone().into())
+                .find_defs(&parent.clone().into(), SymbolItemKind::Func)
                 .map(|symbols| {
                     GotoDefinitionResponse::Array(
                         symbols

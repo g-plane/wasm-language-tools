@@ -27,20 +27,20 @@ pub fn check(
             | SymbolItemKind::TableDef
             | SymbolItemKind::BlockDef => false,
             SymbolItemKind::Call => !symbol_table
-                .find_func_defs(&symbol.key)
+                .find_defs(&symbol.key, SymbolItemKind::Func)
                 .is_some_and(|funcs| funcs.count() > 0),
             SymbolItemKind::LocalRef => symbol_table.find_param_or_local_def(&symbol.key).is_none(),
             SymbolItemKind::TypeUse => !symbol_table
-                .find_type_use_defs(&symbol.key)
+                .find_defs(&symbol.key, SymbolItemKind::Type)
                 .is_some_and(|types| types.count() > 0),
             SymbolItemKind::GlobalRef => !symbol_table
-                .find_global_defs(&symbol.key)
+                .find_defs(&symbol.key, SymbolItemKind::GlobalDef)
                 .is_some_and(|globals| globals.count() > 0),
             SymbolItemKind::MemoryRef => !symbol_table
-                .find_memory_defs(&symbol.key)
+                .find_defs(&symbol.key, SymbolItemKind::MemoryDef)
                 .is_some_and(|memories| memories.count() > 0),
             SymbolItemKind::TableRef => !symbol_table
-                .find_table_defs(&symbol.key)
+                .find_defs(&symbol.key, SymbolItemKind::TableDef)
                 .is_some_and(|tables| tables.count() > 0),
             SymbolItemKind::BlockRef => !symbol_table
                 .blocks

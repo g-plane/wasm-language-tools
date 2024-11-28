@@ -428,15 +428,27 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
 }
 
 impl SymbolTable {
-    pub fn find_func_defs(&self, key: &SymbolItemKey) -> Option<impl Iterator<Item = &SymbolItem>> {
+    pub fn find_defs(
+        &self,
+        key: &SymbolItemKey,
+        kind: SymbolItemKind,
+    ) -> Option<impl Iterator<Item = &SymbolItem>> {
+        debug_assert!(matches!(
+            kind,
+            SymbolItemKind::Func
+                | SymbolItemKind::Type
+                | SymbolItemKind::GlobalDef
+                | SymbolItemKind::MemoryDef
+                | SymbolItemKind::TableDef
+        ));
         self.symbols
             .iter()
-            .find(|symbol| symbol.kind == SymbolItemKind::Call && &symbol.key == key)
-            .map(|call| {
-                self.symbols.iter().filter(|symbol| {
-                    symbol.region == call.region
-                        && symbol.kind == SymbolItemKind::Func
-                        && call.idx.is_defined_by(&symbol.idx)
+            .find(|symbol| &symbol.key == key)
+            .map(move |ref_symbol| {
+                self.symbols.iter().filter(move |symbol| {
+                    symbol.region == ref_symbol.region
+                        && symbol.kind == kind
+                        && ref_symbol.idx.is_defined_by(&symbol.idx)
                 })
             })
     }
@@ -467,70 +479,6 @@ impl SymbolTable {
             .find(|symbol| symbol.kind == SymbolItemKind::LocalRef && &symbol.key == key)
     }
 
-    pub fn find_type_use_defs(
-        &self,
-        key: &SymbolItemKey,
-    ) -> Option<impl Iterator<Item = &SymbolItem>> {
-        self.symbols
-            .iter()
-            .find(|symbol| symbol.kind == SymbolItemKind::TypeUse && &symbol.key == key)
-            .map(|type_use| {
-                self.symbols.iter().filter(|symbol| {
-                    symbol.region == type_use.region
-                        && symbol.kind == SymbolItemKind::Type
-                        && type_use.idx.is_defined_by(&symbol.idx)
-                })
-            })
-    }
-
-    pub fn find_global_defs(
-        &self,
-        key: &SymbolItemKey,
-    ) -> Option<impl Iterator<Item = &SymbolItem>> {
-        self.symbols
-            .iter()
-            .find(|symbol| symbol.kind == SymbolItemKind::GlobalRef && &symbol.key == key)
-            .map(|global| {
-                self.symbols.iter().filter(|symbol| {
-                    symbol.region == global.region
-                        && symbol.kind == SymbolItemKind::GlobalDef
-                        && global.idx.is_defined_by(&symbol.idx)
-                })
-            })
-    }
-
-    pub fn find_memory_defs(
-        &self,
-        key: &SymbolItemKey,
-    ) -> Option<impl Iterator<Item = &SymbolItem>> {
-        self.symbols
-            .iter()
-            .find(|symbol| symbol.kind == SymbolItemKind::MemoryRef && &symbol.key == key)
-            .map(|memory| {
-                self.symbols.iter().filter(|symbol| {
-                    symbol.region == memory.region
-                        && symbol.kind == SymbolItemKind::MemoryDef
-                        && memory.idx.is_defined_by(&symbol.idx)
-                })
-            })
-    }
-
-    pub fn find_table_defs(
-        &self,
-        key: &SymbolItemKey,
-    ) -> Option<impl Iterator<Item = &SymbolItem>> {
-        self.symbols
-            .iter()
-            .find(|symbol| symbol.kind == SymbolItemKind::TableRef && &symbol.key == key)
-            .map(|table| {
-                self.symbols.iter().filter(|symbol| {
-                    symbol.region == table.region
-                        && symbol.kind == SymbolItemKind::TableDef
-                        && table.idx.is_defined_by(&symbol.idx)
-                })
-            })
-    }
-
     pub fn find_block_def(&self, key: &SymbolItemKey) -> Option<&SymbolItem> {
         self.find_block_ref(key).and_then(|block_ref| {
             self.blocks
@@ -546,6 +494,18 @@ impl SymbolTable {
             .find(|symbol| symbol.kind == SymbolItemKind::BlockRef && &symbol.key == key)
     }
 
+    pub fn get_declared_fields(
+        &self,
+        node: SyntaxNode,
+        kind: SymbolItemKind,
+    ) -> impl Iterator<Item = &SymbolItem> {
+        debug_assert_eq!(node.kind(), SyntaxKind::MODULE);
+        let key = node.into();
+        self.symbols
+            .iter()
+            .filter(move |symbol| symbol.kind == kind && symbol.region == key)
+    }
+
     pub fn get_declared_params_and_locals(
         &self,
         node: SyntaxNode,
@@ -555,38 +515,6 @@ impl SymbolTable {
             matches!(symbol.kind, SymbolItemKind::Param | SymbolItemKind::Local)
                 && symbol.region == key
         })
-    }
-
-    pub fn get_declared_functions(&self, node: SyntaxNode) -> impl Iterator<Item = &SymbolItem> {
-        debug_assert_eq!(node.kind(), SyntaxKind::MODULE);
-        let key = node.into();
-        self.symbols
-            .iter()
-            .filter(move |symbol| symbol.kind == SymbolItemKind::Func && symbol.region == key)
-    }
-
-    pub fn get_declared_func_types(&self, node: SyntaxNode) -> impl Iterator<Item = &SymbolItem> {
-        debug_assert_eq!(node.kind(), SyntaxKind::MODULE);
-        let key = node.into();
-        self.symbols
-            .iter()
-            .filter(move |symbol| symbol.kind == SymbolItemKind::Type && symbol.region == key)
-    }
-
-    pub fn get_declared_globals(&self, node: SyntaxNode) -> impl Iterator<Item = &SymbolItem> {
-        debug_assert_eq!(node.kind(), SyntaxKind::MODULE);
-        let key = node.into();
-        self.symbols
-            .iter()
-            .filter(move |symbol| symbol.kind == SymbolItemKind::GlobalDef && symbol.region == key)
-    }
-
-    pub fn get_declared_memories(&self, node: SyntaxNode) -> impl Iterator<Item = &SymbolItem> {
-        debug_assert_eq!(node.kind(), SyntaxKind::MODULE);
-        let key = node.into();
-        self.symbols
-            .iter()
-            .filter(move |symbol| symbol.kind == SymbolItemKind::MemoryDef && symbol.region == key)
     }
 }
 
