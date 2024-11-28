@@ -1,0 +1,22 @@
+---
+source: crates/service/tests/completion/table.rs
+expression: response
+---
+[
+  {
+    "label": "funcref",
+    "kind": 7,
+    "documentation": {
+      "kind": "markdown",
+      "value": "The type [`funcref`](https://webassembly.github.io/spec/core/syntax/types.html#syntax-reftype) denotes the infinite union of all references to [functions](https://webassembly.github.io/spec/core/syntax/modules.html#syntax-func), regardless of their [function types](https://webassembly.github.io/spec/core/syntax/types.html#syntax-functype)."
+    }
+  },
+  {
+    "label": "externref",
+    "kind": 7,
+    "documentation": {
+      "kind": "markdown",
+      "value": "The type [`externref`](https://webassembly.github.io/spec/core/syntax/types.html#syntax-reftype) denotes the infinite union of all references to objects owned by the [embedder](https://webassembly.github.io/spec/core/intro/overview.html#embedder) and that can be passed into WebAssembly under this type."
+    }
+  }
+]

@@ -25,6 +25,8 @@ mod param;
 #[cfg(test)]
 mod result;
 #[cfg(test)]
+mod table;
+#[cfg(test)]
 mod ty_decl;
 
 fn create_params(uri: Uri, position: Position) -> CompletionParams {

@@ -175,6 +175,14 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::KeywordExportDesc);
             }
         }
+        SyntaxKind::MODULE_FIELD_TABLE => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordImExport);
+                ctx.push(CmpCtx::KeywordElem);
+            } else {
+                ctx.push(CmpCtx::RefType);
+            }
+        }
         SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC => ctx.push(CmpCtx::Func),
         SyntaxKind::EXPORT_DESC_GLOBAL => ctx.push(CmpCtx::Global),
         SyntaxKind::MODULE_FIELD_MEMORY => {
@@ -184,6 +192,16 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             }
         }
         SyntaxKind::EXPORT_DESC_MEMORY => ctx.push(CmpCtx::Memory),
+        SyntaxKind::TABLE_TYPE => ctx.push(CmpCtx::RefType),
+        SyntaxKind::ELEM => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::Instr);
+                ctx.push(CmpCtx::KeywordItem);
+            } else {
+                ctx.push(CmpCtx::Func);
+            }
+        }
+        SyntaxKind::ELEM_EXPR => ctx.push(CmpCtx::Instr),
         SyntaxKind::MODULE => {
             if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::KeywordModuleField);
@@ -222,6 +240,7 @@ fn add_cmp_ctx_for_operands(instr_name: &str, ctx: &mut SmallVec<[CmpCtx; 4]>) {
 enum CmpCtx {
     Instr,
     ValType,
+    RefType,
     Local,
     Func,
     FuncType,
@@ -239,6 +258,8 @@ enum CmpCtx {
     KeywordExportDesc,
     KeywordData,
     KeywordFunc,
+    KeywordElem,
+    KeywordItem,
 }
 
 fn get_cmp_list(
@@ -260,6 +281,19 @@ fn get_cmp_list(
                 }
                 CmpCtx::ValType => {
                     items.extend(data_set::VALUE_TYPES.iter().map(|ty| CompletionItem {
+                        label: ty.to_string(),
+                        kind: Some(CompletionItemKind::CLASS),
+                        documentation: data_set::get_value_type_description(ty).map(|desc| {
+                            Documentation::MarkupContent(lsp_types::MarkupContent {
+                                kind: MarkupKind::Markdown,
+                                value: desc.into(),
+                            })
+                        }),
+                        ..Default::default()
+                    }));
+                }
+                CmpCtx::RefType => {
+                    items.extend(["funcref", "externref"].iter().map(|ty| CompletionItem {
                         label: ty.to_string(),
                         kind: Some(CompletionItemKind::CLASS),
                         documentation: data_set::get_value_type_description(ty).map(|desc| {
@@ -495,6 +529,16 @@ fn get_cmp_list(
                 }),
                 CmpCtx::KeywordFunc => items.push(CompletionItem {
                     label: "func".to_string(),
+                    kind: Some(CompletionItemKind::KEYWORD),
+                    ..Default::default()
+                }),
+                CmpCtx::KeywordElem => items.push(CompletionItem {
+                    label: "elem".to_string(),
+                    kind: Some(CompletionItemKind::KEYWORD),
+                    ..Default::default()
+                }),
+                CmpCtx::KeywordItem => items.push(CompletionItem {
+                    label: "item".to_string(),
                     kind: Some(CompletionItemKind::KEYWORD),
                     ..Default::default()
                 }),

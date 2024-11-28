@@ -1,0 +1,14 @@
+---
+source: crates/service/tests/completion/table.rs
+expression: response
+---
+[
+  {
+    "label": "$f",
+    "kind": 3,
+    "documentation": {
+      "kind": "markdown",
+      "value": "```wat\n(func $f)\n```"
+    }
+  }
+]

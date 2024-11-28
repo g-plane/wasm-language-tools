@@ -1,0 +1,18 @@
+---
+source: crates/service/tests/completion/table.rs
+expression: response
+---
+[
+  {
+    "label": "import",
+    "kind": 14
+  },
+  {
+    "label": "export",
+    "kind": 14
+  },
+  {
+    "label": "elem",
+    "kind": 14
+  }
+]
