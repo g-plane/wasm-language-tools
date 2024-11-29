@@ -183,12 +183,6 @@ error: expected import descriptor
 6 │   (import "" "" ())
   │                 ^^
 
-error: expected `(`
-  ┌─ imports-malformed.wat:7:23
-  │
-7 │   (import "" "" (func ))
-  │                       ^
-
 error: expected table type
   ┌─ imports-malformed.wat:8:24
   │

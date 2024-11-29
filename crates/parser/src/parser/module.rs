@@ -575,7 +575,7 @@ fn import_desc_type_use(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("func")),
         opt(trivias_prefixed(ident)),
-        must(retry_once(type_use, [])),
+        opt(retry_once(type_use, [])),
         r_paren,
     )
         .parse_next(input)
