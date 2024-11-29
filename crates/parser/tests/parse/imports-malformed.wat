@@ -4,4 +4,8 @@
   (import "" "")
   (import "" ())
   (import "" "" ())
+  (import "" "" (func ))
+  (import "" "" (table ))
+  (import "" "" (memory ))
+  (import "" "" (global ))
 )

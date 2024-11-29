@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..92
-  MODULE@0..91
+ROOT@0..197
+  MODULE@0..196
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -57,9 +57,77 @@ ROOT@0..92
       ERROR@86..87 "("
       ERROR@87..88 ")"
       R_PAREN@88..89 ")"
-    WHITESPACE@89..90 "\n"
-    R_PAREN@90..91 ")"
-  WHITESPACE@91..92 "\n"
+    WHITESPACE@89..92 "\n  "
+    MODULE_FIELD_IMPORT@92..114
+      L_PAREN@92..93 "("
+      KEYWORD@93..99 "import"
+      WHITESPACE@99..100 " "
+      MODULE_NAME@100..102
+        STRING@100..102 "\"\""
+      WHITESPACE@102..103 " "
+      NAME@103..105
+        STRING@103..105 "\"\""
+      WHITESPACE@105..106 " "
+      IMPORT_DESC_TYPE_USE@106..113
+        L_PAREN@106..107 "("
+        KEYWORD@107..111 "func"
+        WHITESPACE@111..112 " "
+        R_PAREN@112..113 ")"
+      R_PAREN@113..114 ")"
+    WHITESPACE@114..117 "\n  "
+    MODULE_FIELD_IMPORT@117..140
+      L_PAREN@117..118 "("
+      KEYWORD@118..124 "import"
+      WHITESPACE@124..125 " "
+      MODULE_NAME@125..127
+        STRING@125..127 "\"\""
+      WHITESPACE@127..128 " "
+      NAME@128..130
+        STRING@128..130 "\"\""
+      WHITESPACE@130..131 " "
+      IMPORT_DESC_TABLE_TYPE@131..139
+        L_PAREN@131..132 "("
+        KEYWORD@132..137 "table"
+        WHITESPACE@137..138 " "
+        R_PAREN@138..139 ")"
+      R_PAREN@139..140 ")"
+    WHITESPACE@140..143 "\n  "
+    MODULE_FIELD_IMPORT@143..167
+      L_PAREN@143..144 "("
+      KEYWORD@144..150 "import"
+      WHITESPACE@150..151 " "
+      MODULE_NAME@151..153
+        STRING@151..153 "\"\""
+      WHITESPACE@153..154 " "
+      NAME@154..156
+        STRING@154..156 "\"\""
+      WHITESPACE@156..157 " "
+      IMPORT_DESC_MEMORY_TYPE@157..166
+        L_PAREN@157..158 "("
+        KEYWORD@158..164 "memory"
+        WHITESPACE@164..165 " "
+        R_PAREN@165..166 ")"
+      R_PAREN@166..167 ")"
+    WHITESPACE@167..170 "\n  "
+    MODULE_FIELD_IMPORT@170..194
+      L_PAREN@170..171 "("
+      KEYWORD@171..177 "import"
+      WHITESPACE@177..178 " "
+      MODULE_NAME@178..180
+        STRING@178..180 "\"\""
+      WHITESPACE@180..181 " "
+      NAME@181..183
+        STRING@181..183 "\"\""
+      WHITESPACE@183..184 " "
+      IMPORT_DESC_GLOBAL_TYPE@184..193
+        L_PAREN@184..185 "("
+        KEYWORD@185..191 "global"
+        WHITESPACE@191..192 " "
+        R_PAREN@192..193 ")"
+      R_PAREN@193..194 ")"
+    WHITESPACE@194..195 "\n"
+    R_PAREN@195..196 ")"
+  WHITESPACE@196..197 "\n"
 
 error: expected string literal
   ┌─ imports-malformed.wat:2:11
@@ -114,3 +182,27 @@ error: expected import descriptor
   │
 6 │   (import "" "" ())
   │                 ^^
+
+error: expected `(`
+  ┌─ imports-malformed.wat:7:23
+  │
+7 │   (import "" "" (func ))
+  │                       ^
+
+error: expected table type
+  ┌─ imports-malformed.wat:8:24
+  │
+8 │   (import "" "" (table ))
+  │                        ^
+
+error: expected memory type
+  ┌─ imports-malformed.wat:9:25
+  │
+9 │   (import "" "" (memory ))
+  │                         ^
+
+error: expected `(`
+   ┌─ imports-malformed.wat:10:25
+   │
+10 │   (import "" "" (global ))
+   │                         ^

@@ -497,7 +497,7 @@ fn import_desc_global_type(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("global")),
         opt(trivias_prefixed(ident)),
-        resume(global_type),
+        must(retry_once(global_type, [])),
         r_paren,
     )
         .parse_next(input)
@@ -523,7 +523,7 @@ fn import_desc_memory_type(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("memory")),
         opt(trivias_prefixed(ident)),
-        resume(memory_type),
+        must(retry(memory_type, [])),
         r_paren,
     )
         .parse_next(input)
@@ -549,7 +549,7 @@ fn import_desc_table_type(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("table")),
         opt(trivias_prefixed(ident)),
-        resume(table_type),
+        must(retry(table_type, [])),
         r_paren,
     )
         .parse_next(input)
@@ -575,7 +575,7 @@ fn import_desc_type_use(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("func")),
         opt(trivias_prefixed(ident)),
-        opt(trivias_prefixed(type_use)),
+        must(retry_once(type_use, [])),
         r_paren,
     )
         .parse_next(input)
