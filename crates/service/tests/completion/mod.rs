@@ -11,6 +11,8 @@ mod func_type;
 #[cfg(test)]
 mod global;
 #[cfg(test)]
+mod import;
+#[cfg(test)]
 mod instr;
 #[cfg(test)]
 mod keyword;

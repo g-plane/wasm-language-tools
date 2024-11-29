@@ -172,9 +172,9 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::ValType);
             }
         }
-        SyntaxKind::MODULE_FIELD_EXPORT => {
+        SyntaxKind::MODULE_FIELD_EXPORT | SyntaxKind::MODULE_FIELD_IMPORT => {
             if find_leading_l_paren(token).is_some() {
-                ctx.push(CmpCtx::KeywordExportDesc);
+                ctx.push(CmpCtx::KeywordPortDesc);
             }
         }
         SyntaxKind::MODULE_FIELD_TABLE => {
@@ -195,7 +195,20 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         SyntaxKind::EXPORT_DESC_MEMORY => ctx.push(CmpCtx::Memory),
         SyntaxKind::EXPORT_DESC_TABLE => ctx.push(CmpCtx::Table),
-        SyntaxKind::TABLE_TYPE => ctx.push(CmpCtx::RefType),
+        SyntaxKind::TABLE_TYPE | SyntaxKind::IMPORT_DESC_TABLE_TYPE => ctx.push(CmpCtx::RefType),
+        SyntaxKind::IMPORT_DESC_TYPE_USE => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordParamResult);
+                ctx.push(CmpCtx::KeywordType);
+            }
+        }
+        SyntaxKind::IMPORT_DESC_GLOBAL_TYPE => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordMut);
+            } else {
+                ctx.push(CmpCtx::ValType);
+            }
+        }
         SyntaxKind::ELEM => {
             if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::Instr);
@@ -271,7 +284,7 @@ enum CmpCtx {
     KeywordParamResult,
     KeywordLocal,
     KeywordMut,
-    KeywordExportDesc,
+    KeywordPortDesc,
     KeywordData,
     KeywordFunc,
     KeywordElem,
@@ -566,8 +579,8 @@ fn get_cmp_list(
                     kind: Some(CompletionItemKind::KEYWORD),
                     ..Default::default()
                 }),
-                CmpCtx::KeywordExportDesc => {
-                    items.extend(data_set::EXPORT_DESC.iter().map(|desc| CompletionItem {
+                CmpCtx::KeywordPortDesc => {
+                    items.extend(data_set::PORT_DESC.iter().map(|desc| CompletionItem {
                         label: desc.to_string(),
                         kind: Some(CompletionItemKind::KEYWORD),
                         ..Default::default()

@@ -649,7 +649,7 @@ pub(super) fn type_use(input: &mut Input) -> GreenResult {
         (
             l_paren,
             trivias_prefixed(keyword("type")),
-            opt(retry_once(index, [])),
+            must(retry_once(index, [])),
             r_paren,
             repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(param)),
             repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(result)),
