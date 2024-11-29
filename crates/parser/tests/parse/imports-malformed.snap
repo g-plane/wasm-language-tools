@@ -1,0 +1,116 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..92
+  MODULE@0..91
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_IMPORT@10..21
+      L_PAREN@10..11 "("
+      KEYWORD@11..17 "import"
+      WHITESPACE@17..18 " "
+      ERROR@18..19 "("
+      ERROR@19..20 ")"
+      R_PAREN@20..21 ")"
+    WHITESPACE@21..24 "\n  "
+    MODULE_FIELD_IMPORT@24..35
+      L_PAREN@24..25 "("
+      KEYWORD@25..31 "import"
+      WHITESPACE@31..32 " "
+      MODULE_NAME@32..34
+        STRING@32..34 "\"\""
+      R_PAREN@34..35 ")"
+    WHITESPACE@35..38 "\n  "
+    MODULE_FIELD_IMPORT@38..52
+      L_PAREN@38..39 "("
+      KEYWORD@39..45 "import"
+      WHITESPACE@45..46 " "
+      MODULE_NAME@46..48
+        STRING@46..48 "\"\""
+      WHITESPACE@48..49 " "
+      NAME@49..51
+        STRING@49..51 "\"\""
+      R_PAREN@51..52 ")"
+    WHITESPACE@52..55 "\n  "
+    MODULE_FIELD_IMPORT@55..69
+      L_PAREN@55..56 "("
+      KEYWORD@56..62 "import"
+      WHITESPACE@62..63 " "
+      MODULE_NAME@63..65
+        STRING@63..65 "\"\""
+      WHITESPACE@65..66 " "
+      ERROR@66..67 "("
+      ERROR@67..68 ")"
+      R_PAREN@68..69 ")"
+    WHITESPACE@69..72 "\n  "
+    MODULE_FIELD_IMPORT@72..89
+      L_PAREN@72..73 "("
+      KEYWORD@73..79 "import"
+      WHITESPACE@79..80 " "
+      MODULE_NAME@80..82
+        STRING@80..82 "\"\""
+      WHITESPACE@82..83 " "
+      NAME@83..85
+        STRING@83..85 "\"\""
+      WHITESPACE@85..86 " "
+      ERROR@86..87 "("
+      ERROR@87..88 ")"
+      R_PAREN@88..89 ")"
+    WHITESPACE@89..90 "\n"
+    R_PAREN@90..91 ")"
+  WHITESPACE@91..92 "\n"
+
+error: expected string literal
+  ┌─ imports-malformed.wat:2:11
+  │
+2 │   (import ())
+  │           ^^
+
+error: expected string literal
+  ┌─ imports-malformed.wat:2:13
+  │
+2 │   (import ())
+  │             ^
+
+error: expected import descriptor
+  ┌─ imports-malformed.wat:2:13
+  │
+2 │   (import ())
+  │             ^
+
+error: expected string literal
+  ┌─ imports-malformed.wat:3:13
+  │
+3 │   (import "")
+  │             ^
+
+error: expected import descriptor
+  ┌─ imports-malformed.wat:3:13
+  │
+3 │   (import "")
+  │             ^
+
+error: expected import descriptor
+  ┌─ imports-malformed.wat:4:16
+  │
+4 │   (import "" "")
+  │                ^
+
+error: expected string literal
+  ┌─ imports-malformed.wat:5:14
+  │
+5 │   (import "" ())
+  │              ^^
+
+error: expected import descriptor
+  ┌─ imports-malformed.wat:5:16
+  │
+5 │   (import "" ())
+  │                ^
+
+error: expected import descriptor
+  ┌─ imports-malformed.wat:6:17
+  │
+6 │   (import "" "" ())
+  │                 ^^

@@ -1,0 +1,9 @@
+---
+source: crates/formatter/tests/parser.rs
+---
+(module
+  (import ())
+  (import "")
+  (import "" "")
+  (import "" ())
+  (import "" "" ()))

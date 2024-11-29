@@ -248,9 +248,9 @@ fn module_field_import(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("import")),
-        resume(module_name),
-        resume(name),
-        resume(import_desc),
+        must(retry(module_name, [])),
+        must(retry(name, [])),
+        must(retry_once(import_desc, [])),
         r_paren,
     )
         .parse_next(input)
@@ -486,6 +486,9 @@ fn import_desc(input: &mut Input) -> GreenResult {
         "table" => import_desc_table_type,
         _ => fail,
     }
+    .context(StrContext::Expected(StrContextValue::Description(
+        "import descriptor",
+    )))
     .parse_next(input)
 }
 
