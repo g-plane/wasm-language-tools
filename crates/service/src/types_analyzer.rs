@@ -101,9 +101,7 @@ fn get_func_sig(
                 let symbol_table = db.symbol_table(uri);
                 child::<TypeUse>(&node)
                     .and_then(|type_use| type_use.index())
-                    .and_then(|idx| {
-                        symbol_table.find_defs(&idx.syntax().clone().into(), SymbolItemKind::Type)
-                    })
+                    .and_then(|idx| symbol_table.find_defs(&idx.syntax().clone().into()))
                     .and_then(|mut symbols| symbols.next())
                     .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.green))
                     .map(|func_type| db.extract_sig(func_type))

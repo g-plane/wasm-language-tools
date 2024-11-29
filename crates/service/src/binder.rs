@@ -428,28 +428,24 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
 }
 
 impl SymbolTable {
-    pub fn find_defs(
-        &self,
-        key: &SymbolItemKey,
-        kind: SymbolItemKind,
-    ) -> Option<impl Iterator<Item = &SymbolItem>> {
-        debug_assert!(matches!(
-            kind,
-            SymbolItemKind::Func
-                | SymbolItemKind::Type
-                | SymbolItemKind::GlobalDef
-                | SymbolItemKind::MemoryDef
-                | SymbolItemKind::TableDef
-        ));
+    pub fn find_defs(&self, key: &SymbolItemKey) -> Option<impl Iterator<Item = &SymbolItem>> {
         self.symbols
             .iter()
             .find(|symbol| &symbol.key == key)
-            .map(move |ref_symbol| {
-                self.symbols.iter().filter(move |symbol| {
+            .and_then(|ref_symbol| {
+                let kind = match ref_symbol.kind {
+                    SymbolItemKind::Call => SymbolItemKind::Func,
+                    SymbolItemKind::TypeUse => SymbolItemKind::Type,
+                    SymbolItemKind::GlobalRef => SymbolItemKind::GlobalDef,
+                    SymbolItemKind::MemoryRef => SymbolItemKind::MemoryDef,
+                    SymbolItemKind::TableRef => SymbolItemKind::TableDef,
+                    _ => return None,
+                };
+                Some(self.symbols.iter().filter(move |symbol| {
                     symbol.region == ref_symbol.region
                         && symbol.kind == kind
                         && ref_symbol.idx.is_defined_by(&symbol.idx)
-                })
+                }))
             })
     }
 

@@ -57,9 +57,8 @@ impl LanguageService {
                             .iter()
                             .find(|symbol| symbol.key == key)
                             .and_then(|symbol| match symbol.kind {
-                                SymbolItemKind::Call => symbol_table
-                                    .find_defs(&key, SymbolItemKind::Func)
-                                    .map(|symbols| {
+                                SymbolItemKind::Call => {
+                                    symbol_table.find_defs(&key).map(|symbols| {
                                         let contents =
                                             symbols.fold(String::new(), |mut contents, symbol| {
                                                 if !contents.is_empty() {
@@ -83,10 +82,10 @@ impl LanguageService {
                                                 token.text_range(),
                                             )),
                                         }
-                                    }),
-                                SymbolItemKind::TypeUse => symbol_table
-                                    .find_defs(&key, SymbolItemKind::Type)
-                                    .map(|symbols| Hover {
+                                    })
+                                }
+                                SymbolItemKind::TypeUse => {
+                                    symbol_table.find_defs(&key).map(|symbols| Hover {
                                         contents: HoverContents::Array(
                                             symbols
                                                 .map(|symbol| create_type_def_hover(self, symbol))
@@ -96,10 +95,10 @@ impl LanguageService {
                                             &line_index,
                                             token.text_range(),
                                         )),
-                                    }),
-                                SymbolItemKind::GlobalRef => symbol_table
-                                    .find_defs(&key, SymbolItemKind::GlobalDef)
-                                    .map(|symbols| Hover {
+                                    })
+                                }
+                                SymbolItemKind::GlobalRef => {
+                                    symbol_table.find_defs(&key).map(|symbols| Hover {
                                         contents: HoverContents::Array(
                                             symbols
                                                 .map(|symbol| {
@@ -111,7 +110,8 @@ impl LanguageService {
                                             &line_index,
                                             token.text_range(),
                                         )),
-                                    }),
+                                    })
+                                }
                                 _ => None,
                             })
                     })

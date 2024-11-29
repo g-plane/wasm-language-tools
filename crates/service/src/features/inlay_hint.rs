@@ -47,8 +47,8 @@ impl LanguageService {
                         return None;
                     }
                     let global = symbol_table
-                        .find_defs(&symbol.key, SymbolItemKind::GlobalDef)?
-                        .next()?;
+                        .find_defs(&symbol.key)
+                        .and_then(|mut defs| defs.next())?;
                     let ty = self.extract_global_type(global.green.clone())?;
                     Some(InlayHint {
                         position: helpers::rowan_pos_to_lsp_pos(
