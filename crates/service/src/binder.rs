@@ -78,6 +78,26 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                     })
             })
     }
+    fn create_import_desc_symbol(
+        db: &dyn SymbolTablesCtx,
+        node: &SyntaxNode,
+        id: u32,
+        kind: SymbolItemKind,
+    ) -> Option<SymbolItem> {
+        node.parent()
+            .and_then(|parent| parent.parent())
+            .map(|module| SymbolItem {
+                key: node.clone().into(),
+                green: node.green().into(),
+                region: module.into(),
+                kind,
+                idx: Idx {
+                    num: Some(id),
+                    name: token(&node, SyntaxKind::IDENT)
+                        .map(|token| db.ident(token.text().to_string())),
+                },
+            })
+    }
 
     let root = SyntaxNode::new_root(db.root(uri));
     let mut module_field_id = 0;
@@ -420,6 +440,38 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                 {
                     symbols.push(symbol);
                 }
+            }
+            SyntaxKind::IMPORT_DESC_TYPE_USE => {
+                if let Some(symbol) =
+                    create_import_desc_symbol(db, &node, module_field_id, SymbolItemKind::Func)
+                {
+                    symbols.push(symbol);
+                }
+                module_field_id += 1;
+            }
+            SyntaxKind::IMPORT_DESC_TABLE_TYPE => {
+                if let Some(symbol) =
+                    create_import_desc_symbol(db, &node, module_field_id, SymbolItemKind::TableDef)
+                {
+                    symbols.push(symbol);
+                }
+                module_field_id += 1;
+            }
+            SyntaxKind::IMPORT_DESC_MEMORY_TYPE => {
+                if let Some(symbol) =
+                    create_import_desc_symbol(db, &node, module_field_id, SymbolItemKind::MemoryDef)
+                {
+                    symbols.push(symbol);
+                }
+                module_field_id += 1;
+            }
+            SyntaxKind::IMPORT_DESC_GLOBAL_TYPE => {
+                if let Some(symbol) =
+                    create_import_desc_symbol(db, &node, module_field_id, SymbolItemKind::GlobalDef)
+                {
+                    symbols.push(symbol);
+                }
+                module_field_id += 1;
             }
             _ => {}
         }

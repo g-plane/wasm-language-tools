@@ -10,5 +10,13 @@ expression: response
       "kind": "markdown",
       "value": "```wat\n(func $func)\n```"
     }
+  },
+  {
+    "label": "1",
+    "kind": 3,
+    "documentation": {
+      "kind": "markdown",
+      "value": "```wat\n(func)\n```"
+    }
   }
 ]

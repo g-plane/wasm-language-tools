@@ -10,6 +10,7 @@ fn module_field_start() {
 (module
     (start )
     (func $func)
+    (import \"\" \"\" (func))
 )
 ";
     let mut service = LanguageService::default();

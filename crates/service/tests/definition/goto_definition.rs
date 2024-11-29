@@ -93,6 +93,42 @@ fn func_ident_idx() {
 }
 
 #[test]
+fn imported_func_int_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (import \"\" \"\" (func))
+    (func
+        (call 0)
+    )
+)
+(module (import \"\" \"\" (func)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(4, 15)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn imported_func_ident_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (import \"\" \"\" (func $func))
+    (func
+        (call $func)
+    )
+)
+(module (import \"\" \"\" (func $func)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(4, 18)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn param_or_local_not_defined() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
@@ -296,6 +332,42 @@ fn global_ident_idx() {
 }
 
 #[test]
+fn imported_global_int_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (import \"\" \"\" (global i32))
+    (func
+        (global.get 0)
+    )
+)
+(module (import \"\" \"\" (global i32)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(4, 21)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn imported_global_ident_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (import \"\" \"\" (global $global i32))
+    (func
+        (global.get $global)
+    )
+)
+(module (import \"\" \"\" (global $global i32)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(4, 26)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn memory_not_defined() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
@@ -336,6 +408,38 @@ fn memory_ident_idx() {
     (export \"\" (memory $memory))
 )
 (module (memory $memory))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(3, 30)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn imported_memory_int_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (import \"\" \"\" (memory))
+    (export \"\" (memory 0))
+)
+(module (import \"\" \"\" (memory)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(3, 24)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn imported_memory_ident_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (import \"\" \"\" (memory $memory))
+    (export \"\" (memory $memory))
+)
+(module (import \"\" \"\" (memory $memory)))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -386,6 +490,40 @@ fn table_ident_idx() {
     (table.size $table)))
 (module
   (table $table))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(4, 22)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn imported_table_int_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (import \"\" \"\" (table 0 funcref))
+  (func
+    (table.size 0)))
+(module
+  (import \"\" \"\" (table 0 funcref)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(4, 17)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn imported_table_ident_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (import \"\" \"\" (table $table 0 funcref))
+  (func
+    (table.size $table)))
+(module
+  (import \"\" \"\" (table $table 0 funcref)))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

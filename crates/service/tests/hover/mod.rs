@@ -182,6 +182,36 @@ fn func_type_use_with_inlined() {
 }
 
 #[test]
+fn func_import_int_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (import \"\" \"\" (func (param $param i32) (param f32 f64) (result i32 i64)))
+    (func (call 0))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(3, 17)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn func_import_ident_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (import \"\" \"\" (func $func (param $param i32) (param f32 f64) (result i32 i64)))
+    (func (call $func))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(3, 19)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn type_use_int_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
