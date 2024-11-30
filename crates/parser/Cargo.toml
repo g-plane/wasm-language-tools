@@ -1,6 +1,6 @@
 [package]
 name = "wat_parser"
-version = "0.0.0"
+version = "0.1.0"
 description = "WebAssembly Text Format concrete syntax tree parser."
 authors = ["Pig Fang <g-plane@hotmail.com>"]
 repository = "https://github.com/g-plane/wasm-language-tools"
@@ -12,7 +12,7 @@ exclude = ["/tests"]
 
 [dependencies]
 rowan.workspace = true
-wat_syntax = { path = "../syntax", version = "0.0" }
+wat_syntax = { path = "../syntax", version = "0.1" }
 winnow = { version = "0.6", features = ["unstable-recover"] }
 
 [dev-dependencies]
