@@ -18,13 +18,13 @@ jobs:
           fetch-depth: 2
       - name: Publish crates
         run: |
-          if ! git show --exit-code -G^version wat_syntax/Cargo.toml; then
+          if ! git show --exit-code -G^version crates/syntax/Cargo.toml; then
             cargo publish -p wat_syntax
           fi
-          if ! git show --exit-code -G^version wat_parser/Cargo.toml; then
+          if ! git show --exit-code -G^version crates/parser/Cargo.toml; then
             cargo publish -p wat_parser
           fi
-          if ! git show --exit-code -G^version wat_formatter/Cargo.toml; then
+          if ! git show --exit-code -G^version crates/formatter/Cargo.toml; then
             cargo publish -p wat_formatter
           fi
           cargo publish -p wat_service
