@@ -1,0 +1,32 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Publish crates
+        run: |
+          if ! git show --exit-code -G^version wat_syntax/Cargo.toml; then
+            cargo publish -p wat_syntax
+          fi
+          if ! git show --exit-code -G^version wat_parser/Cargo.toml; then
+            cargo publish -p wat_parser
+          fi
+          if ! git show --exit-code -G^version wat_formatter/Cargo.toml; then
+            cargo publish -p wat_formatter
+          fi
+          cargo publish -p wat_service
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
