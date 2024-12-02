@@ -1,0 +1,1022 @@
+---
+source: crates/service/tests/completion/data.rs
+expression: response
+---
+[
+  {
+    "label": "unreachable",
+    "kind": 24
+  },
+  {
+    "label": "nop",
+    "kind": 24
+  },
+  {
+    "label": "block",
+    "kind": 24
+  },
+  {
+    "label": "loop",
+    "kind": 24
+  },
+  {
+    "label": "if",
+    "kind": 24
+  },
+  {
+    "label": "else",
+    "kind": 24
+  },
+  {
+    "label": "end",
+    "kind": 24
+  },
+  {
+    "label": "br",
+    "kind": 24
+  },
+  {
+    "label": "br_if",
+    "kind": 24
+  },
+  {
+    "label": "br_table",
+    "kind": 24
+  },
+  {
+    "label": "return",
+    "kind": 24
+  },
+  {
+    "label": "call",
+    "kind": 24
+  },
+  {
+    "label": "call_indirect",
+    "kind": 24
+  },
+  {
+    "label": "drop",
+    "kind": 24
+  },
+  {
+    "label": "select",
+    "kind": 24
+  },
+  {
+    "label": "local.get",
+    "kind": 24
+  },
+  {
+    "label": "local.set",
+    "kind": 24
+  },
+  {
+    "label": "local.tee",
+    "kind": 24
+  },
+  {
+    "label": "global.get",
+    "kind": 24
+  },
+  {
+    "label": "global.set",
+    "kind": 24
+  },
+  {
+    "label": "i32.load",
+    "kind": 24
+  },
+  {
+    "label": "i64.load",
+    "kind": 24
+  },
+  {
+    "label": "f32.load",
+    "kind": 24
+  },
+  {
+    "label": "f64.load",
+    "kind": 24
+  },
+  {
+    "label": "i32.load8_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.load8_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.load16_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.load16_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.load8_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.load8_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.load16_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.load16_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.load32_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.load32_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.store",
+    "kind": 24
+  },
+  {
+    "label": "i64.store",
+    "kind": 24
+  },
+  {
+    "label": "f32.store",
+    "kind": 24
+  },
+  {
+    "label": "f64.store",
+    "kind": 24
+  },
+  {
+    "label": "i32.store8",
+    "kind": 24
+  },
+  {
+    "label": "i32.store16",
+    "kind": 24
+  },
+  {
+    "label": "i64.store8",
+    "kind": 24
+  },
+  {
+    "label": "i64.store16",
+    "kind": 24
+  },
+  {
+    "label": "i64.store32",
+    "kind": 24
+  },
+  {
+    "label": "memory.size",
+    "kind": 24
+  },
+  {
+    "label": "memory.grow",
+    "kind": 24
+  },
+  {
+    "label": "i32.const",
+    "kind": 24
+  },
+  {
+    "label": "i64.const",
+    "kind": 24
+  },
+  {
+    "label": "f32.const",
+    "kind": 24
+  },
+  {
+    "label": "f64.const",
+    "kind": 24
+  },
+  {
+    "label": "i32.eqz",
+    "kind": 24
+  },
+  {
+    "label": "i32.eq",
+    "kind": 24
+  },
+  {
+    "label": "i32.ne",
+    "kind": 24
+  },
+  {
+    "label": "i32.lt_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.lt_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.gt_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.gt_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.le_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.le_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.ge_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.ge_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.eqz",
+    "kind": 24
+  },
+  {
+    "label": "i64.eq",
+    "kind": 24
+  },
+  {
+    "label": "i64.ne",
+    "kind": 24
+  },
+  {
+    "label": "i64.lt_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.lt_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.gt_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.gt_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.le_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.le_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.ge_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.ge_u",
+    "kind": 24
+  },
+  {
+    "label": "f32.eq",
+    "kind": 24
+  },
+  {
+    "label": "f32.ne",
+    "kind": 24
+  },
+  {
+    "label": "f32.lt",
+    "kind": 24
+  },
+  {
+    "label": "f32.gt",
+    "kind": 24
+  },
+  {
+    "label": "f32.le",
+    "kind": 24
+  },
+  {
+    "label": "f32.ge",
+    "kind": 24
+  },
+  {
+    "label": "f64.eq",
+    "kind": 24
+  },
+  {
+    "label": "f64.ne",
+    "kind": 24
+  },
+  {
+    "label": "f64.lt",
+    "kind": 24
+  },
+  {
+    "label": "f64.gt",
+    "kind": 24
+  },
+  {
+    "label": "f64.le",
+    "kind": 24
+  },
+  {
+    "label": "f64.ge",
+    "kind": 24
+  },
+  {
+    "label": "i32.clz",
+    "kind": 24
+  },
+  {
+    "label": "i32.ctz",
+    "kind": 24
+  },
+  {
+    "label": "i32.popcnt",
+    "kind": 24
+  },
+  {
+    "label": "i32.add",
+    "kind": 24
+  },
+  {
+    "label": "i32.sub",
+    "kind": 24
+  },
+  {
+    "label": "i32.mul",
+    "kind": 24
+  },
+  {
+    "label": "i32.div_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.div_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.rem_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.rem_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.and",
+    "kind": 24
+  },
+  {
+    "label": "i32.or",
+    "kind": 24
+  },
+  {
+    "label": "i32.xor",
+    "kind": 24
+  },
+  {
+    "label": "i32.shl",
+    "kind": 24
+  },
+  {
+    "label": "i32.shr_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.shr_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.rotl",
+    "kind": 24
+  },
+  {
+    "label": "i32.rotr",
+    "kind": 24
+  },
+  {
+    "label": "i64.clz",
+    "kind": 24
+  },
+  {
+    "label": "i64.ctz",
+    "kind": 24
+  },
+  {
+    "label": "i64.popcnt",
+    "kind": 24
+  },
+  {
+    "label": "i64.add",
+    "kind": 24
+  },
+  {
+    "label": "i64.sub",
+    "kind": 24
+  },
+  {
+    "label": "i64.mul",
+    "kind": 24
+  },
+  {
+    "label": "i64.div_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.div_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.rem_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.rem_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.and",
+    "kind": 24
+  },
+  {
+    "label": "i64.or",
+    "kind": 24
+  },
+  {
+    "label": "i64.xor",
+    "kind": 24
+  },
+  {
+    "label": "i64.shl",
+    "kind": 24
+  },
+  {
+    "label": "i64.shr_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.shr_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.rotl",
+    "kind": 24
+  },
+  {
+    "label": "i64.rotr",
+    "kind": 24
+  },
+  {
+    "label": "f32.abs",
+    "kind": 24
+  },
+  {
+    "label": "f32.neg",
+    "kind": 24
+  },
+  {
+    "label": "f32.ceil",
+    "kind": 24
+  },
+  {
+    "label": "f32.floor",
+    "kind": 24
+  },
+  {
+    "label": "f32.trunc",
+    "kind": 24
+  },
+  {
+    "label": "f32.nearest",
+    "kind": 24
+  },
+  {
+    "label": "f32.sqrt",
+    "kind": 24
+  },
+  {
+    "label": "f32.add",
+    "kind": 24
+  },
+  {
+    "label": "f32.sub",
+    "kind": 24
+  },
+  {
+    "label": "f32.mul",
+    "kind": 24
+  },
+  {
+    "label": "f32.div",
+    "kind": 24
+  },
+  {
+    "label": "f32.min",
+    "kind": 24
+  },
+  {
+    "label": "f32.max",
+    "kind": 24
+  },
+  {
+    "label": "f32.copysign",
+    "kind": 24
+  },
+  {
+    "label": "f64.abs",
+    "kind": 24
+  },
+  {
+    "label": "f64.neg",
+    "kind": 24
+  },
+  {
+    "label": "f64.ceil",
+    "kind": 24
+  },
+  {
+    "label": "f64.floor",
+    "kind": 24
+  },
+  {
+    "label": "f64.trunc",
+    "kind": 24
+  },
+  {
+    "label": "f64.nearest",
+    "kind": 24
+  },
+  {
+    "label": "f64.sqrt",
+    "kind": 24
+  },
+  {
+    "label": "f64.add",
+    "kind": 24
+  },
+  {
+    "label": "f64.sub",
+    "kind": 24
+  },
+  {
+    "label": "f64.mul",
+    "kind": 24
+  },
+  {
+    "label": "f64.div",
+    "kind": 24
+  },
+  {
+    "label": "f64.min",
+    "kind": 24
+  },
+  {
+    "label": "f64.max",
+    "kind": 24
+  },
+  {
+    "label": "f64.copysign",
+    "kind": 24
+  },
+  {
+    "label": "i32.wrap_i64",
+    "kind": 24
+  },
+  {
+    "label": "i32.trunc_f32_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.trunc_f32_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.trunc_f64_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.trunc_f64_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.extend_i32_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.extend_i32_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.trunc_f32_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.trunc_f32_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.trunc_f64_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.trunc_f64_u",
+    "kind": 24
+  },
+  {
+    "label": "f32.convert_i32_s",
+    "kind": 24
+  },
+  {
+    "label": "f32.convert_i32_u",
+    "kind": 24
+  },
+  {
+    "label": "f32.convert_i64_s",
+    "kind": 24
+  },
+  {
+    "label": "f32.convert_i64_u",
+    "kind": 24
+  },
+  {
+    "label": "f32.demote_f64",
+    "kind": 24
+  },
+  {
+    "label": "f64.convert_i32_s",
+    "kind": 24
+  },
+  {
+    "label": "f64.convert_i32_u",
+    "kind": 24
+  },
+  {
+    "label": "f64.convert_i64_s",
+    "kind": 24
+  },
+  {
+    "label": "f64.convert_i64_u",
+    "kind": 24
+  },
+  {
+    "label": "f64.promote_f32",
+    "kind": 24
+  },
+  {
+    "label": "i32.reinterpret_f32",
+    "kind": 24
+  },
+  {
+    "label": "i64.reinterpret_f64",
+    "kind": 24
+  },
+  {
+    "label": "f32.reinterpret_i32",
+    "kind": 24
+  },
+  {
+    "label": "f64.reinterpret_i64",
+    "kind": 24
+  },
+  {
+    "label": "v128.load",
+    "kind": 24
+  },
+  {
+    "label": "v128.store",
+    "kind": 24
+  },
+  {
+    "label": "v128.const",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.splat",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.extract_lane_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.extract_lane_u",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.replace_lane",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.splat",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extract_lane_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extract_lane_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.replace_lane",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.splat",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extract_lane",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.replace_lane",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.splat",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extract_lane",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.replace_lane",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.splat",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.extract_lane",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.replace_lane",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.splat",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.extract_lane",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.replace_lane",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.swizzle",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.shuffle",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.add",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.add_sat_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.add_sat_u",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.sub",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.sub_sat_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.sub_sat_u",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.mul",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.min_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.min_u",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.max_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.max_u",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.avgr_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.add",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.add_sat_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.add_sat_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.sub",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.sub_sat_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.sub_sat_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.mul",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.min_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.min_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.max_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.max_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.avgr_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.add",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.sub",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.mul",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.min_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.min_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.max_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.max_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.dot_i16x8_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.add",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.sub",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.mul",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.add",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.sub",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.mul",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.div",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.min",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.max",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.pmin",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.pmax",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.add",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.sub",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.mul",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.div",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.min",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.max",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.pmin",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.pmax",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.trunc_sat_f32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.trunc_sat_f32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.convert_i32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.convert_i32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "memory",
+    "kind": 14
+  },
+  {
+    "label": "offset",
+    "kind": 14
+  }
+]

@@ -91,37 +91,47 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         SyntaxKind::PLAIN_INSTR => {
             if token.kind() == SyntaxKind::INSTR_NAME {
                 ctx.push(CmpCtx::Instr);
-                if parent
-                    .parent()
-                    .is_some_and(|grand| grand.kind() == SyntaxKind::MODULE_FIELD_FUNC)
-                {
-                    // Given the code below:
-                    // (func (export "foo") (par))
-                    //                          ^ cursor
-                    // User is probably going to type "param",
-                    // but parser treat it as a plain instruction,
-                    // so we catch this case here, though these keywords aren't instruction names.
-                    let prev_node = parent
-                        .siblings_with_tokens(Direction::Prev)
-                        .skip(1)
-                        .find(|element| matches!(element, SyntaxElement::Node(..)))
-                        .map(|element| element.kind());
-                    if !matches!(
-                        prev_node,
-                        Some(
-                            SyntaxKind::PLAIN_INSTR
-                                | SyntaxKind::BLOCK_BLOCK
-                                | SyntaxKind::BLOCK_IF
-                                | SyntaxKind::BLOCK_LOOP
-                        )
-                    ) && find_leading_l_paren(token).is_some()
-                    {
-                        ctx.reserve(3);
-                        ctx.push(CmpCtx::KeywordImExport);
-                        ctx.push(CmpCtx::KeywordType);
-                        ctx.push(CmpCtx::KeywordParamResult);
-                        ctx.push(CmpCtx::KeywordLocal);
+                let grand = parent.parent();
+                match grand.as_ref().map(|grand| grand.kind()) {
+                    Some(SyntaxKind::MODULE_FIELD_FUNC) => {
+                        // Given the code below:
+                        // (func (export "foo") (par))
+                        //                          ^ cursor
+                        // User is probably going to type "param",
+                        // but parser treat it as a plain instruction,
+                        // so we catch this case here, though these keywords aren't instruction names.
+                        let prev_node = parent
+                            .siblings_with_tokens(Direction::Prev)
+                            .skip(1)
+                            .find(|element| matches!(element, SyntaxElement::Node(..)))
+                            .map(|element| element.kind());
+                        if !matches!(
+                            prev_node,
+                            Some(
+                                SyntaxKind::PLAIN_INSTR
+                                    | SyntaxKind::BLOCK_BLOCK
+                                    | SyntaxKind::BLOCK_IF
+                                    | SyntaxKind::BLOCK_LOOP
+                            )
+                        ) && find_leading_l_paren(token).is_some()
+                        {
+                            ctx.reserve(3);
+                            ctx.push(CmpCtx::KeywordImExport);
+                            ctx.push(CmpCtx::KeywordType);
+                            ctx.push(CmpCtx::KeywordParamResult);
+                            ctx.push(CmpCtx::KeywordLocal);
+                        }
                     }
+                    Some(SyntaxKind::OFFSET) => {
+                        if grand
+                            .and_then(|grand| support::token(&grand, SyntaxKind::KEYWORD))
+                            .is_none()
+                        {
+                            ctx.push(CmpCtx::KeywordMemory);
+                            ctx.push(CmpCtx::KeywordOffset);
+                        }
+                    }
+                    _ => {}
                 }
             } else {
                 let instr_name = support::token(&parent, SyntaxKind::INSTR_NAME)?;
@@ -193,7 +203,14 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::KeywordData);
             }
         }
-        SyntaxKind::EXPORT_DESC_MEMORY => ctx.push(CmpCtx::Memory),
+        SyntaxKind::MODULE_FIELD_DATA => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordMemory);
+                ctx.push(CmpCtx::KeywordOffset);
+                ctx.push(CmpCtx::Instr);
+            }
+        }
+        SyntaxKind::EXPORT_DESC_MEMORY | SyntaxKind::MEM_USE => ctx.push(CmpCtx::Memory),
         SyntaxKind::EXPORT_DESC_TABLE => ctx.push(CmpCtx::Table),
         SyntaxKind::TABLE_TYPE | SyntaxKind::IMPORT_DESC_TABLE_TYPE => ctx.push(CmpCtx::RefType),
         SyntaxKind::IMPORT_DESC_TYPE_USE => {
@@ -217,7 +234,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::Func);
             }
         }
-        SyntaxKind::ELEM_EXPR => ctx.push(CmpCtx::Instr),
+        SyntaxKind::ELEM_EXPR | SyntaxKind::OFFSET => ctx.push(CmpCtx::Instr),
         SyntaxKind::MODULE => {
             if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::KeywordModuleField);
@@ -289,6 +306,8 @@ enum CmpCtx {
     KeywordFunc,
     KeywordElem,
     KeywordItem,
+    KeywordMemory,
+    KeywordOffset,
 }
 
 fn get_cmp_list(
@@ -603,6 +622,16 @@ fn get_cmp_list(
                 }),
                 CmpCtx::KeywordItem => items.push(CompletionItem {
                     label: "item".to_string(),
+                    kind: Some(CompletionItemKind::KEYWORD),
+                    ..Default::default()
+                }),
+                CmpCtx::KeywordMemory => items.push(CompletionItem {
+                    label: "memory".to_string(),
+                    kind: Some(CompletionItemKind::KEYWORD),
+                    ..Default::default()
+                }),
+                CmpCtx::KeywordOffset => items.push(CompletionItem {
+                    label: "offset".to_string(),
                     kind: Some(CompletionItemKind::KEYWORD),
                     ..Default::default()
                 }),

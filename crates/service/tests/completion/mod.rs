@@ -5,6 +5,8 @@ use lsp_types::{
 #[cfg(test)]
 mod block;
 #[cfg(test)]
+mod data;
+#[cfg(test)]
 mod func;
 #[cfg(test)]
 mod func_type;
