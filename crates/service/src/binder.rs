@@ -473,6 +473,22 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                 }
                 module_field_id += 1;
             }
+            SyntaxKind::MEM_USE => {
+                if let Some(symbol) = node
+                    .ancestors()
+                    .find(|node| node.kind() == SyntaxKind::MODULE)
+                    .map(SymbolItemKey::from)
+                    .zip(
+                        node.children()
+                            .find(|child| child.kind() == SyntaxKind::INDEX),
+                    )
+                    .and_then(|(region, index)| {
+                        create_ref_symbol(db, index, region, SymbolItemKind::MemoryRef)
+                    })
+                {
+                    symbols.push(symbol);
+                }
+            }
             _ => {}
         }
     }

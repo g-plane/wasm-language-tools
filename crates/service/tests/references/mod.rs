@@ -495,6 +495,7 @@ fn memory_def_int_idx() {
 (module
     (memory (data))
     (export \"\" (memory 0))
+    (data (memory 0))
 )
 (module (memory))
 ";
@@ -514,6 +515,7 @@ fn memory_def_ident_idx() {
 (module
     (memory $memory (data))
     (export \"\" (memory $memory))
+    (data (memory $memory))
 )
 (module (memory $memory))
 ";
@@ -533,6 +535,7 @@ fn memory_ref_int_idx() {
 (module
     (memory (data))
     (export \"\" (memory 0))
+    (data (memory 0))
 )
 (module (memory))
 ";
@@ -552,6 +555,7 @@ fn memory_ref_ident_idx() {
 (module
     (memory $memory (data))
     (export \"\" (memory $memory))
+    (data (memory $memory))
 )
 (module (memory $memory))
 ";
