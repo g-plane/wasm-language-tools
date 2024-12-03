@@ -131,7 +131,18 @@ cargo install --git https://github.com/g-plane/wasm-language-tools.git wat_serve
 ### Editor Support
 
 - Visual Studio Code: Install the [WebAssembly Language Tools](https://marketplace.visualstudio.com/items?itemName=gplane.wasm-language-tools) extension.
-- Neovim: You need to configure with `nvim-lspconfig` manually at the moment.
+- Neovim: You need to configure manually at the moment:
+  ```lua
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = "wat",
+    callback = function(args)
+      vim.lsp.start({
+        name = "wasm-language-tools",
+        cmd = { "wat_server" }, -- or the absolute path to the binary
+      })
+    end,
+  })
+  ```
 - Zed: Coming soon.
 - Helix: Add the following lines to `<config_dir>/helix/languages.toml`:
   ```toml
