@@ -93,7 +93,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                 kind,
                 idx: Idx {
                     num: Some(id),
-                    name: token(&node, SyntaxKind::IDENT)
+                    name: token(node, SyntaxKind::IDENT)
                         .map(|token| db.ident(token.text().to_string())),
                 },
             })
