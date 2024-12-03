@@ -1,6 +1,6 @@
 use super::{
     instr::instr,
-    must, node, resume, retry, retry_once,
+    must, node, retry, retry_once,
     token::{
         ident, keyword, l_paren, r_paren, string, trivias, trivias_prefixed, unsigned_int, word,
     },
@@ -146,7 +146,7 @@ fn module_field_export(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("export")),
-        resume(name),
+        must(trivias_prefixed(name)),
         must(retry_once(export_desc, [])),
         r_paren,
     )
@@ -438,8 +438,8 @@ fn import(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("import")),
-        resume(module_name),
-        resume(name),
+        must(trivias_prefixed(module_name)),
+        must(trivias_prefixed(name)),
         r_paren,
     )
         .parse_next(input)
@@ -464,7 +464,7 @@ fn export(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("export")),
-        resume(name),
+        must(trivias_prefixed(name)),
         r_paren,
     )
         .parse_next(input)
@@ -790,7 +790,7 @@ fn mem_use(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("memory")),
-        resume(index),
+        must(trivias_prefixed(index)),
         r_paren,
     )
         .parse_next(input)
@@ -812,7 +812,7 @@ fn table_use(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("table")),
-        resume(index),
+        must(trivias_prefixed(index)),
         r_paren,
     )
         .parse_next(input)

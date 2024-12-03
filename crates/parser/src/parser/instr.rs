@@ -1,6 +1,6 @@
 use super::{
     module::type_use,
-    node, resume, retry, retry_once, tok,
+    must, node, retry, retry_once, tok,
     token::{
         float, ident, int, keyword, l_paren, r_paren, string, trivias, trivias_prefixed,
         unsigned_int_impl, word,
@@ -50,7 +50,7 @@ fn block_block(input: &mut Input) -> GreenResult {
                 retry_once(instr, []),
                 peek((trivias, alt((word.verify(|word: &str| word == "end"), ")")))),
             ),
-            resume(keyword("end")),
+            must(trivias_prefixed(keyword("end"))),
             opt(trivias_prefixed(ident)),
         )
             .map(|(keyword, label, block_type, (instrs, _), end, id)| {
@@ -120,7 +120,7 @@ fn block_loop(input: &mut Input) -> GreenResult {
                 retry_once(instr, []),
                 peek((trivias, alt((word.verify(|word: &str| word == "end"), ")")))),
             ),
-            resume(keyword("end")),
+            must(trivias_prefixed(keyword("end"))),
             opt(trivias_prefixed(ident)),
         )
             .map(|(keyword, label, block_type, (instrs, _), end, id)| {
@@ -203,7 +203,7 @@ fn block_if(input: &mut Input) -> GreenResult {
                     peek((trivias, alt((word.verify(|word: &str| word == "end"), ")")))),
                 ),
             )),
-            resume(keyword("end")),
+            must(trivias_prefixed(keyword("end"))),
             opt(trivias_prefixed(ident)),
         )
             .map(

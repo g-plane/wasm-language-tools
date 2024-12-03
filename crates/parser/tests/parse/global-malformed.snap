@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..77
-  MODULE@0..76
+ROOT@0..94
+  MODULE@0..93
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -46,9 +46,19 @@ ROOT@0..77
       L_PAREN@66..67 "("
       KEYWORD@67..73 "global"
       R_PAREN@73..74 ")"
-    WHITESPACE@74..75 "\n"
-    R_PAREN@75..76 ")"
-  WHITESPACE@76..77 "\n"
+    WHITESPACE@74..77 "\n  "
+    MODULE_FIELD_GLOBAL@77..91
+      L_PAREN@77..78 "("
+      KEYWORD@78..84 "global"
+      WHITESPACE@84..85 " "
+      GLOBAL_TYPE@85..90
+        L_PAREN@85..86 "("
+        KEYWORD@86..89 "mut"
+        R_PAREN@89..90 ")"
+      R_PAREN@90..91 ")"
+    WHITESPACE@91..92 "\n"
+    R_PAREN@92..93 ")"
+  WHITESPACE@93..94 "\n"
 
 error: expected `mut`
   ┌─ global-malformed.wat:2:12
@@ -73,3 +83,9 @@ error: expected `(`
   │
 5 │   (global)
   │          ^
+
+error: expected value type
+  ┌─ global-malformed.wat:6:15
+  │
+6 │   (global (mut))
+  │               ^

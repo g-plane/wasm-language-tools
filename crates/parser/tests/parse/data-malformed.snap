@@ -1,0 +1,28 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..31
+  MODULE@0..30
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_DATA@10..28
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "data"
+      WHITESPACE@15..16 " "
+      MEM_USE@16..24
+        L_PAREN@16..17 "("
+        KEYWORD@17..23 "memory"
+        R_PAREN@23..24 ")"
+      WHITESPACE@24..25 " "
+      STRING@25..27 "\"\""
+      R_PAREN@27..28 ")"
+    WHITESPACE@28..29 "\n"
+    R_PAREN@29..30 ")"
+  WHITESPACE@30..31 "\n"
+
+error: expected index (identifier or unsigned integer)
+  ┌─ data-malformed.wat:2:16
+  │
+2 │   (data (memory) "")
+  │                ^

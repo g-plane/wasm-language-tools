@@ -35,4 +35,6 @@ source: crates/formatter/tests/parser.rs
       (then
         (drop))
       (else
-        (drop)))))
+        (drop))))
+  (func
+    if))

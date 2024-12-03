@@ -1,5 +1,5 @@
 use super::{
-    must, node, resume, retry_once, tok,
+    must, node, retry_once, tok,
     token::{ident, keyword, l_paren, r_paren, trivias_prefixed, unsigned_int, word},
     GreenResult, Input,
 };
@@ -149,7 +149,7 @@ pub(super) fn global_type(input: &mut Input) -> GreenResult {
         (
             l_paren,
             trivias_prefixed(keyword("mut")),
-            resume(val_type),
+            must(trivias_prefixed(val_type)),
             r_paren,
         )
             .map(|(l_paren, mut keyword, val_type, r_paren)| {

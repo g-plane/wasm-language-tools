@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..197
-  MODULE@0..196
+ROOT@0..236
+  MODULE@0..235
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -125,9 +125,32 @@ ROOT@0..197
         WHITESPACE@191..192 " "
         R_PAREN@192..193 ")"
       R_PAREN@193..194 ")"
-    WHITESPACE@194..195 "\n"
-    R_PAREN@195..196 ")"
-  WHITESPACE@196..197 "\n"
+    WHITESPACE@194..197 "\n  "
+    MODULE_FIELD_FUNC@197..212
+      L_PAREN@197..198 "("
+      KEYWORD@198..202 "func"
+      WHITESPACE@202..203 " "
+      IMPORT@203..211
+        L_PAREN@203..204 "("
+        KEYWORD@204..210 "import"
+        R_PAREN@210..211 ")"
+      R_PAREN@211..212 ")"
+    WHITESPACE@212..215 "\n  "
+    MODULE_FIELD_FUNC@215..233
+      L_PAREN@215..216 "("
+      KEYWORD@216..220 "func"
+      WHITESPACE@220..221 " "
+      IMPORT@221..232
+        L_PAREN@221..222 "("
+        KEYWORD@222..228 "import"
+        WHITESPACE@228..229 " "
+        MODULE_NAME@229..231
+          STRING@229..231 "\"\""
+        R_PAREN@231..232 ")"
+      R_PAREN@232..233 ")"
+    WHITESPACE@233..234 "\n"
+    R_PAREN@234..235 ")"
+  WHITESPACE@235..236 "\n"
 
 error: expected string literal
   ┌─ imports-malformed.wat:2:11
@@ -200,3 +223,21 @@ error: expected `(`
    │
 10 │   (import "" "" (global ))
    │                         ^
+
+error: expected string literal
+   ┌─ imports-malformed.wat:11:16
+   │
+11 │   (func (import))
+   │                ^
+
+error: expected string literal
+   ┌─ imports-malformed.wat:11:16
+   │
+11 │   (func (import))
+   │                ^
+
+error: expected string literal
+   ┌─ imports-malformed.wat:12:19
+   │
+12 │   (func (import ""))
+   │                   ^

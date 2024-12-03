@@ -3,4 +3,6 @@
   (export "" (func $))
   (export "")
   (export "" (func))
+  (export (func))
+  (func (export))
 )

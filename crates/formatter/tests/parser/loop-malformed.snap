@@ -32,4 +32,6 @@ source: crates/formatter/tests/parser.rs
   (func
     (i32.const 0)
     (loop (param $x i32)
-      (drop))))
+      (drop)))
+  (func
+    loop))

@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..478
-  MODULE@0..477
+ROOT@0..490
+  MODULE@0..489
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -303,9 +303,18 @@ ROOT@0..478
         R_PAREN@470..471 ")"
       WHITESPACE@471..474 "\n  "
       R_PAREN@474..475 ")"
-    WHITESPACE@475..476 "\n"
-    R_PAREN@476..477 ")"
-  WHITESPACE@477..478 "\n"
+    WHITESPACE@475..478 "\n  "
+    MODULE_FIELD_FUNC@478..487
+      L_PAREN@478..479 "("
+      KEYWORD@479..483 "func"
+      WHITESPACE@483..484 " "
+      BLOCK_IF@484..486
+        KEYWORD@484..486 "if"
+        BLOCK_IF_THEN@486..486
+      R_PAREN@486..487 ")"
+    WHITESPACE@487..488 "\n"
+    R_PAREN@488..489 ")"
+  WHITESPACE@489..490 "\n"
 
 error: expected operand
   ┌─ if-malformed.wat:3:41
@@ -336,3 +345,9 @@ error: expected operand
   │
 8 │     (if (result i32) (param i32) (i32.const 1) (then))
   │                             ^^^
+
+error: expected `end`
+   ┌─ if-malformed.wat:11:11
+   │
+11 │   (func if)
+   │           ^

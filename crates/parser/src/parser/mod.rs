@@ -155,7 +155,7 @@ where
     }
 }
 
-/// If you're try using `retry` and `resume` in `repeat` or `repeat_till`,
+/// If you're try using `retry` in `repeat` or `repeat_till`,
 /// you should use `retry_once` instead.
 fn retry_once<'s, P, const N: usize>(
     mut parser: P,
@@ -209,46 +209,6 @@ where
                 tokens.append(&mut trivia_tokens);
                 tokens.append(&mut error_tokens);
                 return Ok(tokens);
-            }
-        }
-
-        input.reset(&trivia_start);
-        err = err
-            .map(|err| SyntaxError::from_recoverable_error(&token_start, &err_start, input, err));
-        Err(err)
-    }
-}
-
-/// Note: use `retry_once` instead if you're using `resume` in `repeat` or `repeat_till`.
-// copied and modified from https://github.com/winnow-rs/winnow/blob/95e0c100656a98a0ff3bc8420fc8844edff6b615/src/combinator/parser.rs#L1061
-fn resume<'s, P>(
-    mut parser: P,
-) -> impl WinnowParser<Input<'s>, Option<Vec<GreenElement>>, SyntaxError>
-where
-    P: WinnowParser<Input<'s>, GreenElement, SyntaxError>,
-{
-    move |input: &mut Input<'s>| {
-        let trivia_start = input.checkpoint();
-        let mut tokens = match trivias.parse_next(input) {
-            Ok(trivias) => trivias,
-            Err(err) => return Err(err),
-        };
-        let token_start = input.checkpoint();
-        let mut err = match parser.parse_next(input) {
-            Ok(o) => {
-                tokens.push(o);
-                return Ok(Some(tokens));
-            }
-            Err(ErrMode::Incomplete(e)) => return Err(ErrMode::Incomplete(e)),
-            Err(err) => err,
-        };
-        let err_start = input.checkpoint();
-        if error_token(true).parse_next(input).is_ok() || input.eof_offset() == 0 {
-            if let Err(err_) = input.record_err(&token_start, &err_start, err) {
-                err = err_;
-            } else {
-                input.reset(&trivia_start);
-                return Ok(None);
             }
         }
 

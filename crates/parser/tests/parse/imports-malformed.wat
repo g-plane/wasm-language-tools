@@ -8,4 +8,6 @@
   (import "" "" (table ))
   (import "" "" (memory ))
   (import "" "" (global ))
+  (func (import))
+  (func (import ""))
 )

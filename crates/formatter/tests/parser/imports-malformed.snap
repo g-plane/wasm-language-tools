@@ -10,4 +10,6 @@ source: crates/formatter/tests/parser.rs
   (import "" "" (func))
   (import "" "" (table))
   (import "" "" (memory))
-  (import "" "" (global)))
+  (import "" "" (global))
+  (func (import))
+  (func (import "")))

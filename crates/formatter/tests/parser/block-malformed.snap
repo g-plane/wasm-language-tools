@@ -28,4 +28,6 @@ source: crates/formatter/tests/parser.rs
   (func
     (i32.const 0)
     (block (result i32)
-      (param i32))))
+      (param i32)))
+  (func
+    block))
