@@ -1012,11 +1012,11 @@ expression: response
     "kind": 24
   },
   {
-    "label": "memory",
+    "label": "offset",
     "kind": 14
   },
   {
-    "label": "offset",
+    "label": "memory",
     "kind": 14
   }
 ]

@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/completion/data.rs
+source: crates/service/tests/completion/elem.rs
 expression: response
 ---
 [
@@ -1013,10 +1013,6 @@ expression: response
   },
   {
     "label": "offset",
-    "kind": 14
-  },
-  {
-    "label": "memory",
     "kind": 14
   }
 ]

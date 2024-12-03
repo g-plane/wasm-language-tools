@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/completion/data.rs
+source: crates/service/tests/completion/elem.rs
 expression: response
 ---
 [
@@ -1016,7 +1016,7 @@ expression: response
     "kind": 14
   },
   {
-    "label": "memory",
+    "label": "table",
     "kind": 14
   }
 ]

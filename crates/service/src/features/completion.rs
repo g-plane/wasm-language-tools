@@ -91,47 +91,58 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         SyntaxKind::PLAIN_INSTR => {
             if token.kind() == SyntaxKind::INSTR_NAME {
                 ctx.push(CmpCtx::Instr);
-                let grand = parent.parent();
-                match grand.as_ref().map(|grand| grand.kind()) {
-                    Some(SyntaxKind::MODULE_FIELD_FUNC) => {
-                        // Given the code below:
-                        // (func (export "foo") (par))
-                        //                          ^ cursor
-                        // User is probably going to type "param",
-                        // but parser treat it as a plain instruction,
-                        // so we catch this case here, though these keywords aren't instruction names.
-                        let prev_node = parent
-                            .siblings_with_tokens(Direction::Prev)
-                            .skip(1)
-                            .find(|element| matches!(element, SyntaxElement::Node(..)))
-                            .map(|element| element.kind());
-                        if !matches!(
-                            prev_node,
-                            Some(
-                                SyntaxKind::PLAIN_INSTR
-                                    | SyntaxKind::BLOCK_BLOCK
-                                    | SyntaxKind::BLOCK_IF
-                                    | SyntaxKind::BLOCK_LOOP
-                            )
-                        ) && find_leading_l_paren(token).is_some()
-                        {
-                            ctx.reserve(3);
-                            ctx.push(CmpCtx::KeywordImExport);
-                            ctx.push(CmpCtx::KeywordType);
-                            ctx.push(CmpCtx::KeywordParamResult);
-                            ctx.push(CmpCtx::KeywordLocal);
+                if let Some(grand) = parent.parent() {
+                    match grand.kind() {
+                        SyntaxKind::MODULE_FIELD_FUNC => {
+                            // Given the code below:
+                            // (func (export "foo") (par))
+                            //                          ^ cursor
+                            // User is probably going to type "param",
+                            // but parser treat it as a plain instruction,
+                            // so we catch this case here, though these keywords aren't instruction names.
+                            let prev_node = parent
+                                .siblings_with_tokens(Direction::Prev)
+                                .skip(1)
+                                .find(|element| matches!(element, SyntaxElement::Node(..)))
+                                .map(|element| element.kind());
+                            if !matches!(
+                                prev_node,
+                                Some(
+                                    SyntaxKind::PLAIN_INSTR
+                                        | SyntaxKind::BLOCK_BLOCK
+                                        | SyntaxKind::BLOCK_IF
+                                        | SyntaxKind::BLOCK_LOOP
+                                )
+                            ) && find_leading_l_paren(token).is_some()
+                            {
+                                ctx.reserve(3);
+                                ctx.push(CmpCtx::KeywordImExport);
+                                ctx.push(CmpCtx::KeywordType);
+                                ctx.push(CmpCtx::KeywordParamResult);
+                                ctx.push(CmpCtx::KeywordLocal);
+                            }
                         }
-                    }
-                    Some(SyntaxKind::OFFSET) => {
-                        if grand
-                            .and_then(|grand| support::token(&grand, SyntaxKind::KEYWORD))
-                            .is_none()
-                        {
-                            ctx.push(CmpCtx::KeywordMemory);
-                            ctx.push(CmpCtx::KeywordOffset);
+                        SyntaxKind::OFFSET => {
+                            if support::token(&grand, SyntaxKind::KEYWORD).is_none() {
+                                ctx.push(CmpCtx::KeywordOffset);
+                                match grand.parent().map(|node| node.kind()) {
+                                    Some(SyntaxKind::MODULE_FIELD_DATA) => {
+                                        ctx.push(CmpCtx::KeywordMemory);
+                                    }
+                                    Some(SyntaxKind::MODULE_FIELD_ELEM) => {
+                                        if !grand
+                                            .siblings(Direction::Prev)
+                                            .any(|child| child.kind() == SyntaxKind::TABLE_USE)
+                                        {
+                                            ctx.push(CmpCtx::KeywordTable);
+                                        }
+                                    }
+                                    _ => {}
+                                }
+                            }
                         }
+                        _ => {}
                     }
-                    _ => {}
                 }
             } else {
                 let instr_name = support::token(&parent, SyntaxKind::INSTR_NAME)?;
@@ -210,6 +221,44 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::Instr);
             }
         }
+        SyntaxKind::MODULE_FIELD_ELEM => {
+            if find_leading_l_paren(token).is_some() {
+                if parent
+                    .children()
+                    .any(|child| child.kind() == SyntaxKind::OFFSET)
+                {
+                    ctx.push(CmpCtx::KeywordItem);
+                } else {
+                    if !parent
+                        .children()
+                        .any(|child| child.kind() == SyntaxKind::TABLE_USE)
+                    {
+                        ctx.push(CmpCtx::KeywordTable);
+                    }
+                    ctx.push(CmpCtx::KeywordOffset);
+                }
+                ctx.push(CmpCtx::Instr);
+            } else if parent
+                .children()
+                .find(|child| child.kind() == SyntaxKind::ELEM_LIST)
+                .and_then(|elem_list| support::token(&elem_list, SyntaxKind::KEYWORD))
+                .is_some_and(|keyword| keyword.text() == "func")
+            {
+                ctx.push(CmpCtx::Func);
+            } else {
+                ctx.push(CmpCtx::RefType);
+                ctx.push(CmpCtx::KeywordFunc);
+                if !parent.children_with_tokens().any(|element| {
+                    if let SyntaxElement::Token(token) = element {
+                        token.text() == "declare"
+                    } else {
+                        false
+                    }
+                }) {
+                    ctx.push(CmpCtx::KeywordDeclare);
+                }
+            }
+        }
         SyntaxKind::EXPORT_DESC_MEMORY | SyntaxKind::MEM_USE => ctx.push(CmpCtx::Memory),
         SyntaxKind::EXPORT_DESC_TABLE => ctx.push(CmpCtx::Table),
         SyntaxKind::TABLE_TYPE | SyntaxKind::IMPORT_DESC_TABLE_TYPE => ctx.push(CmpCtx::RefType),
@@ -235,6 +284,13 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             }
         }
         SyntaxKind::ELEM_EXPR | SyntaxKind::OFFSET => ctx.push(CmpCtx::Instr),
+        SyntaxKind::ELEM_LIST => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordItem);
+                ctx.push(CmpCtx::Instr);
+            }
+        }
+        SyntaxKind::TABLE_USE => ctx.push(CmpCtx::Table),
         SyntaxKind::MODULE => {
             if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::KeywordModuleField);
@@ -308,6 +364,8 @@ enum CmpCtx {
     KeywordItem,
     KeywordMemory,
     KeywordOffset,
+    KeywordDeclare,
+    KeywordTable,
 }
 
 fn get_cmp_list(
@@ -632,6 +690,16 @@ fn get_cmp_list(
                 }),
                 CmpCtx::KeywordOffset => items.push(CompletionItem {
                     label: "offset".to_string(),
+                    kind: Some(CompletionItemKind::KEYWORD),
+                    ..Default::default()
+                }),
+                CmpCtx::KeywordDeclare => items.push(CompletionItem {
+                    label: "declare".to_string(),
+                    kind: Some(CompletionItemKind::KEYWORD),
+                    ..Default::default()
+                }),
+                CmpCtx::KeywordTable => items.push(CompletionItem {
+                    label: "table".to_string(),
                     kind: Some(CompletionItemKind::KEYWORD),
                     ..Default::default()
                 }),

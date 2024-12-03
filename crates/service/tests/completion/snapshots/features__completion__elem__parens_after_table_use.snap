@@ -1,8 +1,12 @@
 ---
-source: crates/service/tests/completion/data.rs
+source: crates/service/tests/completion/elem.rs
 expression: response
 ---
 [
+  {
+    "label": "offset",
+    "kind": 14
+  },
   {
     "label": "unreachable",
     "kind": 24
@@ -1010,13 +1014,5 @@ expression: response
   {
     "label": "f32x4.convert_i32x4_u",
     "kind": 24
-  },
-  {
-    "label": "offset",
-    "kind": 14
-  },
-  {
-    "label": "memory",
-    "kind": 14
   }
 ]
