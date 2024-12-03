@@ -1,0 +1,12 @@
+(module
+  (elem ())
+  (elem dec)
+  (elem declare)
+  (elem declare ())
+  (elem funcref ())
+  (elem funcref (item))
+  (elem func ())
+  (elem (table))
+  (elem (table 0) (offset ()))
+  (elem (offset) ())
+)

@@ -1,0 +1,181 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..202
+  MODULE@0..201
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_ELEM@10..19
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "elem"
+      WHITESPACE@15..16 " "
+      ERROR@16..17 "("
+      ERROR@17..18 ")"
+      R_PAREN@18..19 ")"
+    WHITESPACE@19..22 "\n  "
+    MODULE_FIELD_ELEM@22..32
+      L_PAREN@22..23 "("
+      KEYWORD@23..27 "elem"
+      WHITESPACE@27..28 " "
+      ERROR@28..31 "dec"
+      R_PAREN@31..32 ")"
+    WHITESPACE@32..35 "\n  "
+    MODULE_FIELD_ELEM@35..49
+      L_PAREN@35..36 "("
+      KEYWORD@36..40 "elem"
+      WHITESPACE@40..41 " "
+      KEYWORD@41..48 "declare"
+      R_PAREN@48..49 ")"
+    WHITESPACE@49..52 "\n  "
+    MODULE_FIELD_ELEM@52..69
+      L_PAREN@52..53 "("
+      KEYWORD@53..57 "elem"
+      WHITESPACE@57..58 " "
+      KEYWORD@58..65 "declare"
+      WHITESPACE@65..66 " "
+      ERROR@66..67 "("
+      ERROR@67..68 ")"
+      R_PAREN@68..69 ")"
+    WHITESPACE@69..72 "\n  "
+    MODULE_FIELD_ELEM@72..89
+      L_PAREN@72..73 "("
+      KEYWORD@73..77 "elem"
+      WHITESPACE@77..78 " "
+      ELEM_LIST@78..88
+        REF_TYPE@78..85 "funcref"
+        WHITESPACE@85..86 " "
+        ERROR@86..87 "("
+        ERROR@87..88 ")"
+      R_PAREN@88..89 ")"
+    WHITESPACE@89..92 "\n  "
+    MODULE_FIELD_ELEM@92..113
+      L_PAREN@92..93 "("
+      KEYWORD@93..97 "elem"
+      WHITESPACE@97..98 " "
+      ELEM_LIST@98..112
+        REF_TYPE@98..105 "funcref"
+        WHITESPACE@105..106 " "
+        ELEM_EXPR@106..112
+          L_PAREN@106..107 "("
+          KEYWORD@107..111 "item"
+          R_PAREN@111..112 ")"
+      R_PAREN@112..113 ")"
+    WHITESPACE@113..116 "\n  "
+    MODULE_FIELD_ELEM@116..130
+      L_PAREN@116..117 "("
+      KEYWORD@117..121 "elem"
+      WHITESPACE@121..122 " "
+      ELEM_LIST@122..129
+        KEYWORD@122..126 "func"
+        WHITESPACE@126..127 " "
+        ERROR@127..128 "("
+        ERROR@128..129 ")"
+      R_PAREN@129..130 ")"
+    WHITESPACE@130..133 "\n  "
+    MODULE_FIELD_ELEM@133..147
+      L_PAREN@133..134 "("
+      KEYWORD@134..138 "elem"
+      WHITESPACE@138..139 " "
+      TABLE_USE@139..146
+        L_PAREN@139..140 "("
+        KEYWORD@140..145 "table"
+        R_PAREN@145..146 ")"
+      R_PAREN@146..147 ")"
+    WHITESPACE@147..150 "\n  "
+    MODULE_FIELD_ELEM@150..178
+      L_PAREN@150..151 "("
+      KEYWORD@151..155 "elem"
+      WHITESPACE@155..156 " "
+      TABLE_USE@156..165
+        L_PAREN@156..157 "("
+        KEYWORD@157..162 "table"
+        WHITESPACE@162..163 " "
+        INDEX@163..164
+          UNSIGNED_INT@163..164 "0"
+        R_PAREN@164..165 ")"
+      WHITESPACE@165..166 " "
+      OFFSET@166..177
+        L_PAREN@166..167 "("
+        KEYWORD@167..173 "offset"
+        WHITESPACE@173..174 " "
+        ERROR@174..175 "("
+        ERROR@175..176 ")"
+        R_PAREN@176..177 ")"
+      R_PAREN@177..178 ")"
+    WHITESPACE@178..181 "\n  "
+    MODULE_FIELD_ELEM@181..199
+      L_PAREN@181..182 "("
+      KEYWORD@182..186 "elem"
+      WHITESPACE@186..187 " "
+      OFFSET@187..195
+        L_PAREN@187..188 "("
+        KEYWORD@188..194 "offset"
+        R_PAREN@194..195 ")"
+      WHITESPACE@195..196 " "
+      ERROR@196..197 "("
+      ERROR@197..198 ")"
+      R_PAREN@198..199 ")"
+    WHITESPACE@199..200 "\n"
+    R_PAREN@200..201 ")"
+  WHITESPACE@201..202 "\n"
+
+error: expected offset
+  ┌─ elem-malformed.wat:2:9
+  │
+2 │   (elem ())
+  │         ^^
+
+error: expected offset
+  ┌─ elem-malformed.wat:3:9
+  │
+3 │   (elem dec)
+  │         ^^^
+
+error: expected ref type
+  ┌─ elem-malformed.wat:4:16
+  │
+4 │   (elem declare)
+  │                ^
+
+error: expected ref type
+  ┌─ elem-malformed.wat:5:17
+  │
+5 │   (elem declare ())
+  │                 ^^
+
+error: invalid instruction name
+  ┌─ elem-malformed.wat:6:17
+  │
+6 │   (elem funcref ())
+  │                 ^^
+
+error: expected index (identifier or unsigned integer)
+  ┌─ elem-malformed.wat:8:14
+  │
+8 │   (elem func ())
+  │              ^^
+
+error: expected index (identifier or unsigned integer)
+  ┌─ elem-malformed.wat:9:15
+  │
+9 │   (elem (table))
+  │               ^
+
+error: expected offset
+  ┌─ elem-malformed.wat:9:16
+  │
+9 │   (elem (table))
+  │                ^
+
+error: invalid instruction name
+   ┌─ elem-malformed.wat:10:27
+   │
+10 │   (elem (table 0) (offset ()))
+   │                           ^^
+
+error: expected ref type
+   ┌─ elem-malformed.wat:11:18
+   │
+11 │   (elem (offset) ())
+   │                  ^^

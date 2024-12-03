@@ -103,39 +103,43 @@ fn module_field_elem(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("elem")),
         opt(trivias_prefixed(ident)),
-        opt(trivias_prefixed(keyword("declare"))), // postpone syntax error for using this with table use
-        opt(trivias_prefixed(table_use)),
-        opt(trivias_prefixed(offset)),
-        opt(trivias_prefixed(elem_list)),
+        alt((
+            (
+                trivias_prefixed(keyword("declare")),
+                must(retry_once(elem_list, [])),
+            )
+                .map(|(declare, elem_list)| (Some(declare), elem_list, None)),
+            trivias_prefixed(elem_list).map(|elem_list| (Some(elem_list), None, None)),
+            (
+                opt(trivias_prefixed(table_use)),
+                must(retry_once(offset, [])),
+                opt(retry_once(elem_list, [])),
+            ),
+        )),
         r_paren,
     )
         .parse_next(input)
-        .map(
-            |(l_paren, mut keyword, id, declare, table_use, offset, elem_list, r_paren)| {
-                let mut children = Vec::with_capacity(8);
-                children.push(l_paren);
-                children.append(&mut keyword);
-                if let Some(mut id) = id {
-                    children.append(&mut id);
-                }
-                if let Some(mut declare) = declare {
-                    children.append(&mut declare);
-                }
-                if let Some(mut table_use) = table_use {
-                    children.append(&mut table_use);
-                }
-                if let Some(mut offset) = offset {
-                    children.append(&mut offset);
-                }
-                if let Some(mut elem_list) = elem_list {
-                    children.append(&mut elem_list);
-                }
-                if let Some(mut r_paren) = r_paren {
-                    children.append(&mut r_paren);
-                }
-                node(MODULE_FIELD_ELEM, children)
-            },
-        )
+        .map(|(l_paren, mut keyword, id, (a, b, elem_list), r_paren)| {
+            let mut children = Vec::with_capacity(8);
+            children.push(l_paren);
+            children.append(&mut keyword);
+            if let Some(mut id) = id {
+                children.append(&mut id);
+            }
+            if let Some(mut a) = a {
+                children.append(&mut a);
+            }
+            if let Some(mut b) = b {
+                children.append(&mut b);
+            }
+            if let Some(mut elem_list) = elem_list {
+                children.append(&mut elem_list);
+            }
+            if let Some(mut r_paren) = r_paren {
+                children.append(&mut r_paren);
+            }
+            node(MODULE_FIELD_ELEM, children)
+        })
 }
 
 fn module_field_export(input: &mut Input) -> GreenResult {
@@ -722,7 +726,7 @@ fn elem_list(input: &mut Input) -> GreenResult {
     alt((
         (
             alt((keyword("func"), index)),
-            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(index)),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry_once(index, [])),
         )
             .map(|(keyword_or_first_idx, indexes)| {
                 let mut children = Vec::with_capacity(2);
@@ -734,7 +738,7 @@ fn elem_list(input: &mut Input) -> GreenResult {
             }),
         (
             ref_type,
-            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(elem_expr)),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry_once(elem_expr, [])),
         )
             .map(|(ty, exprs)| {
                 let mut children = Vec::with_capacity(2);
@@ -848,6 +852,7 @@ fn offset(input: &mut Input) -> GreenResult {
             }),
         preceded(peek('('), instr).map(|child| node(OFFSET, [child])),
     ))
+    .context(StrContext::Expected(StrContextValue::Description("offset")))
     .parse_next(input)
 }
 
