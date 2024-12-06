@@ -11,7 +11,7 @@ use lsp_types::{
         CodeActionRequest, Completion, DocumentDiagnosticRequest, DocumentSymbolRequest,
         FoldingRangeRequest, Formatting, GotoDeclaration, GotoDefinition, GotoTypeDefinition,
         HoverRequest, InlayHintRequest, PrepareRenameRequest, RangeFormatting, References, Rename,
-        SemanticTokensFullRequest, SemanticTokensRangeRequest,
+        SelectionRangeRequest, SemanticTokensFullRequest, SemanticTokensRangeRequest,
     },
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
     InitializeParams, PublishDiagnosticsParams, Uri,
@@ -288,6 +288,20 @@ impl Server {
                                     }),
                                 }))?,
                             }
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<SelectionRangeRequest>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.selection_range(params),
+                                )?),
+                                error: None,
+                            }))?;
                             continue;
                         }
                         Err(ExtractError::MethodMismatch(r)) => req = r,

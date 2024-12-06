@@ -22,9 +22,9 @@ use lsp_types::{
     CallHierarchyServerCapability, CodeActionKind, CodeActionOptions, CodeActionProviderCapability,
     CompletionOptions, DeclarationCapability, DiagnosticOptions, DiagnosticServerCapabilities,
     FoldingRangeProviderCapability, HoverProviderCapability, InitializeParams, InitializeResult,
-    OneOf, RenameOptions, SemanticTokenType, SemanticTokensClientCapabilities,
-    SemanticTokensFullOptions, SemanticTokensLegend, SemanticTokensOptions,
-    SemanticTokensServerCapabilities, ServerCapabilities, ServerInfo,
+    OneOf, RenameOptions, SelectionRangeProviderCapability, SemanticTokenType,
+    SemanticTokensClientCapabilities, SemanticTokensFullOptions, SemanticTokensLegend,
+    SemanticTokensOptions, SemanticTokensServerCapabilities, ServerCapabilities, ServerInfo,
     TextDocumentClientCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind,
     TextDocumentSyncOptions, TextDocumentSyncSaveOptions, TypeDefinitionProviderCapability, Uri,
 };
@@ -135,6 +135,7 @@ impl LanguageService {
                     prepare_provider: Some(true),
                     work_done_progress_options: Default::default(),
                 })),
+                selection_range_provider: Some(SelectionRangeProviderCapability::Simple(true)),
                 semantic_tokens_provider: Some(
                     SemanticTokensServerCapabilities::SemanticTokensOptions(
                         SemanticTokensOptions {

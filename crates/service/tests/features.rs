@@ -23,4 +23,6 @@ mod references;
 #[cfg(test)]
 mod rename;
 #[cfg(test)]
+mod selection_range;
+#[cfg(test)]
 mod semantic_tokens;

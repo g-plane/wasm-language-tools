@@ -10,6 +10,7 @@ mod hover;
 mod inlay_hint;
 mod references;
 mod rename;
+mod selection_range;
 mod semantic_tokens;
 
 pub(crate) use self::semantic_tokens::SemanticTokenKind;
