@@ -5,6 +5,7 @@ use lsp_types::{SelectionRange, SelectionRangeParams};
 use wat_syntax::SyntaxNode;
 
 impl LanguageService {
+    /// Handler for `textDocument/selectionRange` request.
     pub fn selection_range(&self, params: SelectionRangeParams) -> Option<Vec<SelectionRange>> {
         let uri = self.uri(params.text_document.uri);
         let line_index = self.line_index(uri);
