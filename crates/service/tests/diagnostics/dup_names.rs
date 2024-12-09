@@ -92,3 +92,17 @@ fn blocks() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn exports() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+  (func (export "func"))
+  (export "func" (func 0)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

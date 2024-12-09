@@ -1,0 +1,75 @@
+---
+source: crates/service/tests/diagnostics/dup_names.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 16
+        },
+        "end": {
+          "line": 2,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "duplicated export `func` in this module",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 10
+              },
+              "end": {
+                "line": 3,
+                "character": 16
+              }
+            }
+          },
+          "message": "already exported here as `func`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 10
+        },
+        "end": {
+          "line": 3,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "duplicated export `func` in this module",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 16
+              },
+              "end": {
+                "line": 2,
+                "character": 22
+              }
+            }
+          },
+          "message": "already exported here as `func`"
+        }
+      ]
+    }
+  ]
+}

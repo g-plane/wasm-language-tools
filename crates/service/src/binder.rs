@@ -4,8 +4,8 @@ use crate::{
     InternUri,
 };
 use rowan::{
-    ast::{support::token, AstNode, SyntaxNodePtr},
-    GreenNode,
+    ast::{support, AstNode, SyntaxNodePtr},
+    GreenNode, TextRange,
 };
 use std::{hash::Hash, rc::Rc};
 use wat_syntax::{
@@ -24,6 +24,7 @@ pub(crate) trait SymbolTablesCtx: FilesCtx + IdentsCtx {
 pub(crate) struct SymbolTable {
     pub symbols: Vec<SymbolItem>,
     pub blocks: Vec<(SymbolItemKey, SymbolItemKey, Idx)>,
+    pub exports: Vec<ExportItem>,
 }
 fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTable> {
     fn create_parent_based_symbol(
@@ -39,7 +40,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
             kind,
             idx: Idx {
                 num: Some(id),
-                name: token(&node, SyntaxKind::IDENT)
+                name: support::token(&node, SyntaxKind::IDENT)
                     .map(|token| db.ident(token.text().to_string())),
             },
         })
@@ -50,7 +51,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
         region: SymbolItemKey,
         kind: SymbolItemKind,
     ) -> Option<SymbolItem> {
-        token(&node, SyntaxKind::IDENT)
+        support::token(&node, SyntaxKind::IDENT)
             .map(|ident| SymbolItem {
                 key: node.clone().into(),
                 green: node.green().into(),
@@ -93,7 +94,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                 kind,
                 idx: Idx {
                     num: Some(id),
-                    name: token(node, SyntaxKind::IDENT)
+                    name: support::token(node, SyntaxKind::IDENT)
                         .map(|token| db.ident(token.text().to_string())),
                 },
             })
@@ -103,6 +104,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
     let mut module_field_id = 0;
     let mut symbols = Vec::with_capacity(2);
     let mut blocks = vec![];
+    let mut exports = vec![];
     for node in root.descendants() {
         match node.kind() {
             SyntaxKind::MODULE => {
@@ -489,10 +491,30 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                     symbols.push(symbol);
                 }
             }
+            SyntaxKind::MODULE_FIELD_EXPORT | SyntaxKind::EXPORT => {
+                if let Some((name, module)) = node
+                    .children()
+                    .find(|node| node.kind() == SyntaxKind::NAME)
+                    .zip(
+                        node.ancestors()
+                            .find(|node| node.kind() == SyntaxKind::MODULE),
+                    )
+                {
+                    exports.push(ExportItem {
+                        name: name.to_string(),
+                        range: name.text_range(),
+                        module: SyntaxNodePtr::new(&module),
+                    });
+                }
+            }
             _ => {}
         }
     }
-    Rc::new(SymbolTable { symbols, blocks })
+    Rc::new(SymbolTable {
+        symbols,
+        blocks,
+        exports,
+    })
 }
 
 impl SymbolTable {
@@ -633,4 +655,11 @@ pub enum SymbolItemKind {
     TableRef,
     BlockDef,
     BlockRef,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ExportItem {
+    pub name: String, // with double quotes
+    pub range: TextRange,
+    pub module: SyntaxNodePtr<WatLanguage>,
 }

@@ -157,6 +157,43 @@ pub fn check(
                 }
             }),
     );
+
+    diags.extend(
+        symbol_table
+            .exports
+            .iter()
+            .fold(FxHashMap::default(), |mut map, export| {
+                map.entry((&export.name, export.module))
+                    .or_insert_with(|| Vec::with_capacity(1))
+                    .push(export.range);
+                map
+            })
+            .iter()
+            .filter(|(_, ranges)| ranges.len() > 1)
+            .flat_map(|((name, _), ranges)| {
+                let name = &name[1..name.len() - 1];
+                ranges.iter().map(move |range| Diagnostic {
+                    range: helpers::rowan_range_to_lsp_range(line_index, *range),
+                    severity: Some(DiagnosticSeverity::ERROR),
+                    source: Some("wat".into()),
+                    message: format!("duplicated export `{name}` in this module"),
+                    related_information: Some(
+                        ranges
+                            .iter()
+                            .filter(|other| *other != range)
+                            .map(|range| DiagnosticRelatedInformation {
+                                location: Location {
+                                    uri: service.lookup_uri(uri),
+                                    range: helpers::rowan_range_to_lsp_range(line_index, *range),
+                                },
+                                message: format!("already exported here as `{name}`"),
+                            })
+                            .collect(),
+                    ),
+                    ..Default::default()
+                })
+            }),
+    );
 }
 
 fn get_ident_range(symbol: &SymbolItem, root: &SyntaxNode) -> TextRange {
