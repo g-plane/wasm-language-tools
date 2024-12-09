@@ -9,8 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    name: release
+  crates:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,3 +29,39 @@ jobs:
           cargo publish -p wat_service
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  github:
+    strategy:
+      fail-fast: false
+      matrix:
+        settings:
+          - host: macos-latest
+            target: x86_64-apple-darwin
+          - host: macos-latest
+            target: aarch64-apple-darwin
+          - host: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - host: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+          - host: windows-latest
+            target: x86_64-pc-windows-gnu
+    name: ${{ matrix.settings.target }}
+    runs-on: ${{ matrix.settings.host }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.settings.target }}
+      - shell: pwsh
+        run: |
+          cargo build --target=${{ matrix.settings.target }} --release
+          if (Test-Path ./target/${{ matrix.settings.target }}/release/wat_server.exe) {
+            Copy-Item ./target/${{ matrix.settings.target }}/release/wat_server.exe ./target/${{ matrix.settings.target }}/release/wat_server-${{ matrix.settings.target }}.exe
+          }
+          elseif (Test-Path ./target/${{ matrix.settings.target }}/release/wat_server) {
+            Copy-Item ./target/${{ matrix.settings.target }}/release/wat_server ./target/${{ matrix.settings.target }}/release/wat_server-${{ matrix.settings.target }}
+          }
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ./target/${{ matrix.settings.target }}/release/wat_server-${{ matrix.settings.target }}*
