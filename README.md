@@ -142,6 +142,20 @@ cargo install --git https://github.com/g-plane/wasm-language-tools.git wat_serve
       })
     end,
   })
+  -- Optional: Format on save
+  vim.api.nvim_create_autocmd("LspAttach", {
+    callback = function(args)
+      local client = vim.lsp.get_client_by_id(args.data.client_id)
+      if client.name == "wasm-language-tools" then
+        vim.api.nvim_create_autocmd("BufWritePre", {
+          buffer = args.buf,
+          callback = function()
+            vim.lsp.buf.format({ bufnr = args.buf, id = client.id })
+          end,
+        })
+      end
+    end,
+  })
   ```
 - Zed: Coming soon.
 - Helix: Add the following lines to `<config_dir>/helix/languages.toml`:
