@@ -13,6 +13,7 @@ fn same_kind() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -27,6 +28,7 @@ fn different_kinds() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -40,6 +42,7 @@ fn param_and_local() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -54,6 +57,7 @@ fn different_scopes() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
@@ -69,6 +73,7 @@ fn ref_idx() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
@@ -89,6 +94,7 @@ fn blocks() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -103,6 +109,7 @@ fn exports() {
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }

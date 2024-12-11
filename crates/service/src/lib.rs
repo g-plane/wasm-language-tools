@@ -12,7 +12,7 @@ mod refactorings;
 mod types_analyzer;
 
 use self::features::SemanticTokenKind;
-pub use crate::config::ServiceConfig;
+pub use crate::config::*;
 use crate::{
     binder::SymbolTables,
     files::{Files, FilesCtx},

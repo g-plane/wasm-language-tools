@@ -13,7 +13,7 @@ use lsp_types::{
         FoldingRangeRequest, Formatting, GotoDeclaration, GotoDefinition, GotoTypeDefinition,
         HoverRequest, InlayHintRequest, PrepareRenameRequest, RangeFormatting, References,
         RegisterCapability, Rename, Request as _, SelectionRangeRequest, SemanticTokensFullRequest,
-        SemanticTokensRangeRequest, WorkspaceConfiguration,
+        SemanticTokensRangeRequest, WorkspaceConfiguration, WorkspaceDiagnosticRefresh,
     },
     ConfigurationItem, ConfigurationParams, DidChangeTextDocumentParams,
     DidCloseTextDocumentParams, DidOpenTextDocumentParams, InitializeParams,
@@ -405,22 +405,33 @@ impl Server {
                     };
                 }
                 Message::Response(response) => {
-                    self.handle_response(response)?;
+                    self.handle_response(&conn, response)?;
                 }
             }
         }
         Ok(())
     }
 
-    fn handle_response(&mut self, response: Response) -> anyhow::Result<()> {
+    fn handle_response(&mut self, conn: &Connection, response: Response) -> anyhow::Result<()> {
         if let Some((uris, configs)) = self.req_queue.outgoing.complete(response.id).zip(
             response
                 .result
                 .and_then(|result| serde_json::from_value::<Vec<_>>(result).ok()),
         ) {
-            uris.into_iter()
+            uris.iter()
                 .zip(configs)
-                .for_each(|(uri, config)| self.service.set_config(uri, config));
+                .for_each(|(uri, config)| self.service.set_config(uri.clone(), config));
+            if self.support_pull_diagnostics {
+                conn.sender
+                    .send(Message::Request(self.req_queue.outgoing.register(
+                        WorkspaceDiagnosticRefresh::METHOD.into(),
+                        serde_json::Value::Null,
+                        vec![],
+                    )))?;
+            } else {
+                uris.into_iter()
+                    .try_for_each(|uri| self.publish_diagnostics(conn, uri))?;
+            }
         }
         Ok(())
     }

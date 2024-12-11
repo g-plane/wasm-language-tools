@@ -5,4 +5,32 @@ use serde::{Deserialize, Serialize};
 pub struct ServiceConfig {
     /// Configuration about formatting.
     pub format: wat_formatter::config::LanguageOptions,
+    /// Configuration about linting.
+    pub lint: Lints,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+/// Configuration about linting.
+pub struct Lints {
+    /// Lint for detecting unused items.
+    pub unused: LintLevel,
+}
+
+impl Default for Lints {
+    fn default() -> Self {
+        Self {
+            unused: LintLevel::Warn,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+/// Severity level when lint reports.
+pub enum LintLevel {
+    #[serde(alias = "allow")]
+    Allow,
+    #[serde(alias = "warn")]
+    Warn,
+    #[serde(alias = "deny")]
+    Deny,
 }

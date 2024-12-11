@@ -1,0 +1,39 @@
+---
+source: crates/service/tests/diagnostics/unused.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 3
+        },
+        "end": {
+          "line": 2,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "source": "wat",
+      "message": "`0` is never used"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 8
+        },
+        "end": {
+          "line": 3,
+          "character": 10
+        }
+      },
+      "severity": 2,
+      "source": "wat",
+      "message": "`$t` is never used"
+    }
+  ]
+}

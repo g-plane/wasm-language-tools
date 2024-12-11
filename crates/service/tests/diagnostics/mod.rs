@@ -2,6 +2,7 @@ use lsp_types::{
     Diagnostic, DocumentDiagnosticParams, DocumentDiagnosticReport, DocumentDiagnosticReportResult,
     FullDocumentDiagnosticReport, RelatedFullDocumentDiagnosticReport, TextDocumentIdentifier, Uri,
 };
+use wat_service::{LanguageService, LintLevel, Lints, ServiceConfig};
 
 #[cfg(test)]
 mod dup_names;
@@ -13,6 +14,8 @@ mod multi_modules;
 mod typeck;
 #[cfg(test)]
 mod undef;
+#[cfg(test)]
+mod unused;
 
 fn create_params(uri: Uri) -> DocumentDiagnosticParams {
     DocumentDiagnosticParams {
@@ -36,4 +39,17 @@ fn pick_diagnostics(response: DocumentDiagnosticReportResult) -> Vec<Diagnostic>
     } else {
         panic!("expected full document diagnostic report");
     }
+}
+
+fn allow_unused(service: &mut LanguageService, uri: Uri) {
+    service.set_config(
+        uri,
+        ServiceConfig {
+            lint: Lints {
+                unused: LintLevel::Allow,
+                ..Default::default()
+            },
+            ..Default::default()
+        },
+    );
 }

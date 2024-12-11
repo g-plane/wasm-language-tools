@@ -7,6 +7,7 @@ mod literal_operands;
 mod multi_modules;
 mod typeck;
 mod undef;
+mod unused;
 
 pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
     let line_index = service.line_index(uri);
@@ -43,6 +44,14 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
     });
     undef::check(service, &mut diagnostics, &line_index, &symbol_table);
     dup_names::check(
+        service,
+        &mut diagnostics,
+        uri,
+        &line_index,
+        &root,
+        &symbol_table,
+    );
+    unused::check(
         service,
         &mut diagnostics,
         uri,
