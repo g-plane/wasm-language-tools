@@ -1,0 +1,19 @@
+---
+source: crates/service/tests/formatting/range.rs
+expression: response
+---
+[
+  {
+    "range": {
+      "start": {
+        "line": 2,
+        "character": 2
+      },
+      "end": {
+        "line": 4,
+        "character": 3
+      }
+    },
+    "newText": "(func ;; comment\n  )"
+  }
+]
