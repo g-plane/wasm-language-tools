@@ -1,20 +1,23 @@
 use lsp_server::{
-    Connection, ExtractError, Message, Notification, Request, RequestId, Response, ResponseError,
+    Connection, ExtractError, Message, Notification, ReqQueue, Request, RequestId, Response,
+    ResponseError,
 };
 use lsp_types::{
     notification::{
-        DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument, Notification as _,
-        PublishDiagnostics,
+        DidChangeConfiguration, DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument,
+        Notification as _, PublishDiagnostics,
     },
     request::{
         CallHierarchyIncomingCalls, CallHierarchyOutgoingCalls, CallHierarchyPrepare,
         CodeActionRequest, Completion, DocumentDiagnosticRequest, DocumentSymbolRequest,
         FoldingRangeRequest, Formatting, GotoDeclaration, GotoDefinition, GotoTypeDefinition,
-        HoverRequest, InlayHintRequest, PrepareRenameRequest, RangeFormatting, References, Rename,
-        SelectionRangeRequest, SemanticTokensFullRequest, SemanticTokensRangeRequest,
+        HoverRequest, InlayHintRequest, PrepareRenameRequest, RangeFormatting, References,
+        RegisterCapability, Rename, Request as _, SelectionRangeRequest, SemanticTokensFullRequest,
+        SemanticTokensRangeRequest, WorkspaceConfiguration,
     },
-    DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
-    InitializeParams, PublishDiagnosticsParams, Uri,
+    ConfigurationItem, ConfigurationParams, DidChangeTextDocumentParams,
+    DidCloseTextDocumentParams, DidOpenTextDocumentParams, InitializeParams,
+    PublishDiagnosticsParams, Uri,
 };
 use wat_service::LanguageService;
 
@@ -22,6 +25,8 @@ use wat_service::LanguageService;
 pub struct Server {
     service: LanguageService,
     support_pull_diagnostics: bool,
+    support_pull_config: bool,
+    req_queue: ReqQueue<(), Vec<Uri>>,
 }
 
 impl Server {
@@ -35,7 +40,22 @@ impl Server {
             .as_ref()
             .and_then(|it| it.diagnostic.as_ref())
             .is_some();
+        self.support_pull_config = matches!(
+            params
+                .capabilities
+                .workspace
+                .as_ref()
+                .and_then(|it| it.configuration),
+            Some(true)
+        );
         connection.initialize_finish(id, serde_json::to_value(self.service.initialize(params))?)?;
+        connection
+            .sender
+            .send(Message::Request(self.req_queue.outgoing.register(
+                RegisterCapability::METHOD.into(),
+                self.service.dynamic_capabilities(),
+                vec![],
+            )))?;
         self.server_loop(connection)?;
         io_threads.join()?;
         Ok(())
@@ -372,11 +392,31 @@ impl Server {
                             self.handle_did_close_text_document(params, &conn)?;
                             continue;
                         }
+                        Err(ExtractError::MethodMismatch(n)) => notification = n,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    };
+                    match cast_notification::<DidChangeConfiguration>(notification) {
+                        Ok(..) => {
+                            self.handle_did_change_configuration(&conn)?;
+                            continue;
+                        }
                         Err(ExtractError::MethodMismatch(..)) => continue,
                         Err(ExtractError::JsonError { .. }) => continue,
                     };
                 }
-                Message::Response(_) => {}
+                Message::Response(response) => {
+                    if let Some((uris, configs)) =
+                        self.req_queue.outgoing.complete(response.id).zip(
+                            response
+                                .result
+                                .and_then(|result| serde_json::from_value::<Vec<_>>(result).ok()),
+                        )
+                    {
+                        uris.into_iter()
+                            .zip(configs)
+                            .for_each(|(uri, config)| self.service.set_config(uri, config));
+                    }
+                }
             }
         }
         Ok(())
@@ -387,10 +427,23 @@ impl Server {
         params: DidOpenTextDocumentParams,
         conn: &Connection,
     ) -> anyhow::Result<()> {
-        self.service
-            .commit(params.text_document.uri.clone(), params.text_document.text);
+        let uri = params.text_document.uri;
+        self.service.commit(uri.clone(), params.text_document.text);
         if !self.support_pull_diagnostics {
-            self.publish_diagnostics(conn, params.text_document.uri)?;
+            self.publish_diagnostics(conn, uri.clone())?;
+        }
+        if self.support_pull_config {
+            conn.sender
+                .send(Message::Request(self.req_queue.outgoing.register(
+                    WorkspaceConfiguration::METHOD.into(),
+                    ConfigurationParams {
+                        items: vec![ConfigurationItem {
+                            scope_uri: Some(uri.clone()),
+                            section: Some("wasmLanguageTools".to_string()),
+                        }],
+                    },
+                    vec![uri],
+                )))?;
         }
         Ok(())
     }
@@ -423,6 +476,33 @@ impl Server {
                 version: None,
             })?,
         }))?;
+        Ok(())
+    }
+
+    fn handle_did_change_configuration(&mut self, conn: &Connection) -> anyhow::Result<()> {
+        if !self.support_pull_config {
+            return Ok(());
+        }
+        let uris = self
+            .service
+            .get_configs()
+            .map(|(uri, _)| uri)
+            .collect::<Vec<_>>();
+        conn.sender.send(Message::Request(
+            self.req_queue.outgoing.register(
+                WorkspaceConfiguration::METHOD.into(),
+                ConfigurationParams {
+                    items: uris
+                        .iter()
+                        .map(|uri| ConfigurationItem {
+                            scope_uri: Some(uri.clone()),
+                            section: Some("wasmLanguageTools".to_string()),
+                        })
+                        .collect(),
+                },
+                uris,
+            ),
+        ))?;
         Ok(())
     }
 

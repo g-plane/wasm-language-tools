@@ -2,6 +2,7 @@
 
 mod binder;
 mod checker;
+mod config;
 mod data_set;
 mod features;
 mod files;
@@ -11,6 +12,7 @@ mod refactorings;
 mod types_analyzer;
 
 use self::features::SemanticTokenKind;
+pub use crate::config::ServiceConfig;
 use crate::{
     binder::SymbolTables,
     files::{Files, FilesCtx},
@@ -19,16 +21,17 @@ use crate::{
 };
 use indexmap::{IndexMap, IndexSet};
 use lsp_types::{
-    CallHierarchyServerCapability, CodeActionKind, CodeActionOptions, CodeActionProviderCapability,
-    CompletionOptions, DeclarationCapability, DiagnosticOptions, DiagnosticServerCapabilities,
-    FoldingRangeProviderCapability, HoverProviderCapability, InitializeParams, InitializeResult,
-    OneOf, RenameOptions, SelectionRangeProviderCapability, SemanticTokenType,
+    notification::DidChangeConfiguration, CallHierarchyServerCapability, CodeActionKind,
+    CodeActionOptions, CodeActionProviderCapability, CompletionOptions, DeclarationCapability,
+    DiagnosticOptions, DiagnosticServerCapabilities, FoldingRangeProviderCapability,
+    HoverProviderCapability, InitializeParams, InitializeResult, OneOf, Registration,
+    RegistrationParams, RenameOptions, SelectionRangeProviderCapability, SemanticTokenType,
     SemanticTokensClientCapabilities, SemanticTokensFullOptions, SemanticTokensLegend,
     SemanticTokensOptions, SemanticTokensServerCapabilities, ServerCapabilities, ServerInfo,
     TextDocumentClientCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind,
     TextDocumentSyncOptions, TextDocumentSyncSaveOptions, TypeDefinitionProviderCapability, Uri,
 };
-use rustc_hash::FxBuildHasher;
+use rustc_hash::{FxBuildHasher, FxHashMap};
 use salsa::{InternId, InternKey};
 
 #[salsa::database(Files, Idents, SymbolTables, TypesAnalyzer)]
@@ -48,6 +51,7 @@ use salsa::{InternId, InternKey};
 pub struct LanguageService {
     storage: salsa::Storage<Self>,
     semantic_token_kinds: IndexSet<SemanticTokenKind, FxBuildHasher>,
+    configs: FxHashMap<InternUri, ServiceConfig>,
 }
 impl salsa::Database for LanguageService {}
 
@@ -167,11 +171,39 @@ impl LanguageService {
         }
     }
 
+    #[inline]
     /// Commit a document to the service, usually called when handling `textDocument/didOpen` or
     /// `textDocument/didChange` notifications.
     pub fn commit(&mut self, uri: Uri, source: String) {
         let uri = self.uri(uri);
         self.set_source(uri, source);
+    }
+
+    #[inline]
+    /// Get configurations of all opened documents.
+    pub fn get_configs(&self) -> impl Iterator<Item = (Uri, &ServiceConfig)> {
+        self.configs
+            .iter()
+            .map(|(uri, config)| (self.lookup_uri(*uri), config))
+    }
+
+    #[inline]
+    /// Update or insert configuration of a specific document.
+    pub fn set_config(&mut self, uri: Uri, config: ServiceConfig) {
+        self.configs.insert(self.uri(uri), config);
+    }
+
+    #[inline]
+    /// Get dynamically registered capabilities.
+    pub fn dynamic_capabilities(&self) -> RegistrationParams {
+        use lsp_types::notification::Notification;
+        RegistrationParams {
+            registrations: vec![Registration {
+                id: DidChangeConfiguration::METHOD.into(),
+                method: DidChangeConfiguration::METHOD.into(),
+                register_options: None,
+            }],
+        }
     }
 }
 
@@ -183,5 +215,20 @@ impl InternKey for InternUri {
     }
     fn as_intern_id(&self) -> InternId {
         self.0
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_and_set_configs() {
+        let mut service = LanguageService::default();
+        assert_eq!(service.get_configs().count(), 0);
+
+        let uri = "untitled://test".parse::<Uri>().unwrap();
+        service.set_config(uri.clone(), ServiceConfig::default());
+        assert_eq!(service.get_configs().next().unwrap().0, uri);
     }
 }
