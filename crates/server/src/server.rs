@@ -405,19 +405,22 @@ impl Server {
                     };
                 }
                 Message::Response(response) => {
-                    if let Some((uris, configs)) =
-                        self.req_queue.outgoing.complete(response.id).zip(
-                            response
-                                .result
-                                .and_then(|result| serde_json::from_value::<Vec<_>>(result).ok()),
-                        )
-                    {
-                        uris.into_iter()
-                            .zip(configs)
-                            .for_each(|(uri, config)| self.service.set_config(uri, config));
-                    }
+                    self.handle_response(response)?;
                 }
             }
+        }
+        Ok(())
+    }
+
+    fn handle_response(&mut self, response: Response) -> anyhow::Result<()> {
+        if let Some((uris, configs)) = self.req_queue.outgoing.complete(response.id).zip(
+            response
+                .result
+                .and_then(|result| serde_json::from_value::<Vec<_>>(result).ok()),
+        ) {
+            uris.into_iter()
+                .zip(configs)
+                .for_each(|(uri, config)| self.service.set_config(uri, config));
         }
         Ok(())
     }
