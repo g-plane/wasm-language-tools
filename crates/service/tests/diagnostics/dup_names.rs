@@ -30,7 +30,7 @@ fn different_kinds() {
     service.commit(uri.clone(), source.into());
     allow_unused(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert_json_snapshot!(response);
+    assert!(pick_diagnostics(response).is_empty());
 }
 
 #[test]

@@ -37,7 +37,13 @@ pub fn check(
             })
             .fold(FxHashMap::default(), |mut map, symbol| {
                 if let Some(name) = symbol.idx.name {
-                    map.entry((name, &symbol.region))
+                    let kind = if symbol.kind == SymbolItemKind::Local {
+                        // re-map this symbol kind to make comparison easier
+                        SymbolItemKind::Param
+                    } else {
+                        symbol.kind.clone()
+                    };
+                    map.entry((name, &symbol.region, kind))
                         .or_insert_with(|| Vec::with_capacity(1))
                         .push(symbol);
                 }
@@ -45,7 +51,7 @@ pub fn check(
             })
             .iter()
             .filter(|(_, symbols)| symbols.len() > 1)
-            .flat_map(|((name, _), symbols)| {
+            .flat_map(|((name, ..), symbols)| {
                 let name = service.lookup_ident(*name);
                 symbols.iter().map(move |symbol| Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(
