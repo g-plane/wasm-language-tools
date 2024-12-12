@@ -2,7 +2,7 @@ use super::FilesCtx;
 use crate::{
     binder::{SymbolItem, SymbolItemKind, SymbolTable},
     helpers,
-    idx::{IdentsCtx, Idx},
+    idx::IdentsCtx,
     InternUri, LanguageService,
 };
 use line_index::LineIndex;
@@ -32,7 +32,6 @@ pub fn check(
                         | SymbolItemKind::Type
                         | SymbolItemKind::GlobalDef
                         | SymbolItemKind::MemoryDef
-                        | SymbolItemKind::BlockDef
                 )
             })
             .fold(FxHashMap::default(), |mut map, symbol| {
@@ -79,88 +78,6 @@ pub fn check(
                     ),
                     ..Default::default()
                 })
-            }),
-    );
-
-    diags.extend(
-        symbol_table
-            .symbols
-            .iter()
-            .fold(FxHashMap::default(), |mut map, symbol| {
-                if let SymbolItem {
-                    kind: SymbolItemKind::BlockDef,
-                    idx: Idx {
-                        name: Some(name), ..
-                    },
-                    ..
-                } = symbol
-                {
-                    let name = *name;
-                    let mut current = symbol;
-                    while let Some(
-                        parent @ SymbolItem {
-                            kind: SymbolItemKind::BlockDef,
-                            idx,
-                            ..
-                        },
-                    ) = symbol_table
-                        .symbols
-                        .iter()
-                        .find(|sym| sym.key == current.region)
-                    {
-                        if idx.name.is_some_and(|other| other == name) {
-                            map.entry((symbol, name))
-                                .or_insert_with(|| Vec::with_capacity(1))
-                                .push(get_ident_range(parent, root));
-                        }
-                        current = parent;
-                    }
-                    map.entry((symbol, name)).or_default().extend(
-                        symbol_table
-                            .symbols
-                            .iter()
-                            .filter(|other| {
-                                *other != symbol
-                                    && other.kind == SymbolItemKind::BlockDef
-                                    && other.idx.name.is_some_and(|other| other == name)
-                                    && symbol
-                                        .key
-                                        .ptr
-                                        .text_range()
-                                        .contains_range(other.key.ptr.text_range())
-                            })
-                            .map(|other| get_ident_range(other, root)),
-                    );
-                }
-                map
-            })
-            .into_iter()
-            .filter(|(_, ranges)| ranges.len() > 1)
-            .map(|((symbol, name), mut ranges)| {
-                ranges.sort_by_key(|range| range.start());
-                let name = service.lookup_ident(name);
-                Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(
-                        line_index,
-                        get_ident_range(symbol, root),
-                    ),
-                    severity: Some(DiagnosticSeverity::ERROR),
-                    source: Some("wat".into()),
-                    message: format!("duplicated name `{name}` in this scope"),
-                    related_information: Some(
-                        ranges
-                            .into_iter()
-                            .map(|range| DiagnosticRelatedInformation {
-                                location: Location {
-                                    uri: service.lookup_uri(uri),
-                                    range: helpers::rowan_range_to_lsp_range(line_index, range),
-                                },
-                                message: format!("already defined here as `{name}`"),
-                            })
-                            .collect(),
-                    ),
-                    ..Default::default()
-                }
             }),
     );
 

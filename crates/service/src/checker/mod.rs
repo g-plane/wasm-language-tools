@@ -5,6 +5,7 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 mod dup_names;
 mod literal_operands;
 mod multi_modules;
+mod shadow;
 mod typeck;
 mod undef;
 mod unused;
@@ -52,6 +53,14 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
         &symbol_table,
     );
     unused::check(
+        service,
+        &mut diagnostics,
+        uri,
+        &line_index,
+        &root,
+        &symbol_table,
+    );
+    shadow::check(
         service,
         &mut diagnostics,
         uri,

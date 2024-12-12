@@ -11,6 +11,8 @@ mod literal_operands;
 #[cfg(test)]
 mod multi_modules;
 #[cfg(test)]
+mod shadow;
+#[cfg(test)]
 mod typeck;
 #[cfg(test)]
 mod undef;

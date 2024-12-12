@@ -14,12 +14,15 @@ pub struct ServiceConfig {
 pub struct Lints {
     /// Lint for detecting unused items.
     pub unused: LintLevel,
+    /// Lint for detecting shadowing.
+    pub shadow: LintLevel,
 }
 
 impl Default for Lints {
     fn default() -> Self {
         Self {
             unused: LintLevel::Warn,
+            shadow: LintLevel::Warn,
         }
     }
 }
