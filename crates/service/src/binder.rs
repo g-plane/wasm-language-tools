@@ -585,22 +585,10 @@ impl SymbolTable {
         node: SyntaxNode,
         kind: SymbolItemKind,
     ) -> impl Iterator<Item = &SymbolItem> {
-        debug_assert_eq!(node.kind(), SyntaxKind::MODULE);
         let key = node.into();
         self.symbols
             .iter()
             .filter(move |symbol| symbol.kind == kind && symbol.region == key)
-    }
-
-    pub fn get_declared_params_and_locals(
-        &self,
-        node: SyntaxNode,
-    ) -> impl Iterator<Item = &SymbolItem> {
-        let key = node.into();
-        self.symbols.iter().filter(move |symbol| {
-            matches!(symbol.kind, SymbolItemKind::Param | SymbolItemKind::Local)
-                && symbol.region == key
-        })
     }
 }
 

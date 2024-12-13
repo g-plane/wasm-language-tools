@@ -290,10 +290,9 @@ fn resolve_expected_types(
             .into_iter()
             .flatten()
             .next()?;
-        let root = SyntaxNode::new_root(service.root(uri));
+        let root = instr.syntax().ancestors().last()?;
         let related = symbol_table
-            .get_declared_params_and_locals(func.key.ptr.to_node(&root))
-            .filter(|symbol| symbol.kind == SymbolItemKind::Param)
+            .get_declared_fields(func.key.ptr.to_node(&root), SymbolItemKind::Param)
             .map(|symbol| {
                 Some((
                     symbol.key.ptr.text_range(),

@@ -418,10 +418,16 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
+                    let func = func.into();
                     let has_dollar = token.text().starts_with('$');
                     items.extend(
                         symbol_table
-                            .get_declared_params_and_locals(func)
+                            .symbols
+                            .iter()
+                            .filter(|symbol| {
+                                matches!(symbol.kind, SymbolItemKind::Param | SymbolItemKind::Local)
+                                    && symbol.region == func
+                            })
                             .filter_map(|symbol| {
                                 let (label, insert_text) =
                                     get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
