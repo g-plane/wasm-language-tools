@@ -783,13 +783,13 @@ fn guess_preferred_type(
                 .find(|node| node.kind() == SyntaxKind::PLAIN_INSTR)?;
             let index = instr
                 .children()
-                .filter(|child| child.kind() == SyntaxKind::OPERAND)
+                .filter(|child| {
+                    child.kind() == SyntaxKind::OPERAND
+                        && child
+                            .children()
+                            .any(|child| child.kind() == SyntaxKind::PLAIN_INSTR)
+                })
                 .position(|operand| operand == operand_instr)?;
-            let index = if helpers::ast::is_call(&instr) {
-                index.checked_sub(1)?
-            } else {
-                index
-            };
             let types = types_analyzer::resolve_param_types(service, uri, &instr)?;
             if let Some(OperandType::Val(val_type)) = types.get(index) {
                 Some(*val_type)
