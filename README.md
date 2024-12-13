@@ -139,6 +139,10 @@ cargo install --git https://github.com/g-plane/wasm-language-tools.git wat_serve
       vim.lsp.start({
         name = "wasm-language-tools",
         cmd = { "wat_server" }, -- or the absolute path to the binary
+        settings = { -- this section is optional
+          format = {},
+          lint = { unused = "warn" },
+        },
       })
     end,
   })
@@ -163,6 +167,7 @@ cargo install --git https://github.com/g-plane/wasm-language-tools.git wat_serve
   [language-server.wasm-language-tools]
   command = "wat_server" # or the absolute path to the binary
   args = []
+  config = { format = {}, lint = { unused = "warn" } } # this section is optional
 
   [[language]]
   name = "wat"
