@@ -30,9 +30,9 @@ pub fn check(
             | SymbolItemKind::TypeUse
             | SymbolItemKind::GlobalRef
             | SymbolItemKind::MemoryRef
-            | SymbolItemKind::TableRef => !symbol_table
+            | SymbolItemKind::TableRef => symbol_table
                 .find_defs(&symbol.key)
-                .is_some_and(|defs| defs.count() > 0),
+                .is_none_or(|defs| defs.count() == 0),
             SymbolItemKind::LocalRef => symbol_table.find_param_or_local_def(&symbol.key).is_none(),
             SymbolItemKind::BlockRef => !symbol_table
                 .blocks
