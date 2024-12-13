@@ -243,12 +243,7 @@ fn resolve_type(
                         .flatten()
                         .next()
                         .and_then(|func| service.get_func_sig(uri, func.clone().into()))
-                        .map(|sig| {
-                            sig.results
-                                .iter()
-                                .map(|ty| OperandType::Val(ty.clone()))
-                                .collect()
-                        })
+                        .map(|sig| sig.results.iter().map(|ty| OperandType::Val(*ty)).collect())
                 }
                 "local.get" => {
                     let idx = plain_instr.operands().next()?;
@@ -302,7 +297,7 @@ fn resolve_expected_types(
         service.get_func_sig(uri, func.clone().into()).map(|sig| {
             sig.params
                 .iter()
-                .map(|ty| OperandType::Val(ty.0.clone()))
+                .map(|ty| OperandType::Val(ty.0))
                 .zip(related)
                 .collect()
         })

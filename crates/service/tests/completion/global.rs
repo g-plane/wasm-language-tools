@@ -172,3 +172,43 @@ fn export_following_ident() {
     let response = service.completion(create_params(uri, Position::new(4, 25)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn preferred_type_by_instr() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (global $a i32)
+  (global $b i64)
+  (global $c f32)
+  (global $d f64)
+  (func (param f64))
+  (func
+    (f32.add
+      (global.get $))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(9, 18)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn preferred_type_by_call() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (global $a i32)
+  (global $b i64)
+  (global $c f32)
+  (global $d f64)
+  (func (param f64))
+  (func
+    (call 4
+      (global.get $))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(9, 18)));
+    assert_json_snapshot!(response);
+}

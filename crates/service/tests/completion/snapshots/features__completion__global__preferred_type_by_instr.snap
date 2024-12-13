@@ -1,0 +1,38 @@
+---
+source: crates/service/tests/completion/global.rs
+expression: response
+---
+[
+  {
+    "label": "$a",
+    "labelDetails": {
+      "description": "i32"
+    },
+    "kind": 6,
+    "sortText": "1"
+  },
+  {
+    "label": "$b",
+    "labelDetails": {
+      "description": "i64"
+    },
+    "kind": 6,
+    "sortText": "1"
+  },
+  {
+    "label": "$c",
+    "labelDetails": {
+      "description": "f32"
+    },
+    "kind": 6,
+    "sortText": "0"
+  },
+  {
+    "label": "$d",
+    "labelDetails": {
+      "description": "f64"
+    },
+    "kind": 6,
+    "sortText": "1"
+  }
+]

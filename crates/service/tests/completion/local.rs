@@ -167,3 +167,34 @@ fn locals_and_params_in_different_funcs() {
     let response = service.completion(create_params(uri, Position::new(4, 19)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn preferred_type_by_instr() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func (param $a i32) (param $b i64) (param $c f32) (param $d f64)
+    (f32.add
+      (local.get $))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(4, 18)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn preferred_type_by_call() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func (param f64))
+  (func (param $a i32) (param $b i64) (param $c f32) (param $d f64)
+    (call 0
+      (local.get $))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(5, 18)));
+    assert_json_snapshot!(response);
+}

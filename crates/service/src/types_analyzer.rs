@@ -1,16 +1,17 @@
 use crate::{
     binder::{SymbolItem, SymbolItemKind, SymbolTablesCtx},
+    data_set::{OperandType, INSTR_METAS},
     files::FilesCtx,
     helpers,
     idx::Idx,
-    InternUri,
+    InternUri, LanguageService,
 };
 use rowan::{
     ast::{
-        support::{child, children},
+        support::{child, children, token},
         AstNode,
     },
-    GreenNode, Language, NodeOrToken, SyntaxNode,
+    GreenNode, Language, NodeOrToken,
 };
 use std::{
     fmt::{self, Debug},
@@ -19,7 +20,7 @@ use std::{
 };
 use wat_syntax::{
     ast::{Param, Result, TypeUse, ValType as AstValType},
-    SyntaxKind, WatLanguage,
+    SyntaxKind, SyntaxNode, WatLanguage,
 };
 
 #[salsa::query_group(TypesAnalyzer)]
@@ -136,7 +137,36 @@ fn render_func_header(
     content
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) fn resolve_param_types(
+    service: &LanguageService,
+    uri: InternUri,
+    instr: &SyntaxNode,
+) -> Option<Vec<OperandType>> {
+    debug_assert!(instr.kind() == SyntaxKind::PLAIN_INSTR);
+    let instr_name = token(instr, SyntaxKind::INSTR_NAME)?;
+    let instr_name = instr_name.text();
+    if matches!(instr_name, "call" | "return_call") {
+        let symbol_table = service.symbol_table(uri);
+        let idx = instr
+            .children()
+            .find(|child| child.kind() == SyntaxKind::OPERAND)?;
+        let func = symbol_table
+            .find_defs(&idx.clone().into())
+            .into_iter()
+            .flatten()
+            .next()?;
+        service.get_func_sig(uri, func.clone().into()).map(|sig| {
+            sig.params
+                .iter()
+                .map(|ty| OperandType::Val(ty.0))
+                .collect()
+        })
+    } else {
+        INSTR_METAS.get(instr_name).map(|meta| meta.params.clone())
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum ValType {
     I32,
     I64,

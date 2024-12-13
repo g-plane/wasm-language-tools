@@ -1,10 +1,10 @@
 use crate::{
     binder::{SymbolItemKind, SymbolTable, SymbolTablesCtx},
-    data_set,
+    data_set::{self, OperandType},
     files::FilesCtx,
     helpers,
     idx::{IdentsCtx, Idx},
-    types_analyzer::TypesAnalyzerCtx,
+    types_analyzer::{self, TypesAnalyzerCtx, ValType},
     InternUri, LanguageService,
 };
 use lsp_types::{
@@ -419,6 +419,7 @@ fn get_cmp_list(
                         return items;
                     };
                     let func = func.into();
+                    let preferred_type = guess_preferred_type(service, uri, token);
                     let has_dollar = token.text().starts_with('$');
                     items.extend(
                         symbol_table
@@ -431,16 +432,22 @@ fn get_cmp_list(
                             .filter_map(|symbol| {
                                 let (label, insert_text) =
                                     get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
+                                let ty = service.extract_type(symbol.green.clone());
                                 Some(CompletionItem {
                                     label,
                                     insert_text,
                                     kind: Some(CompletionItemKind::VARIABLE),
-                                    label_details: service.extract_type(symbol.green.clone()).map(
-                                        |ty| CompletionItemLabelDetails {
-                                            description: Some(ty.to_string()),
-                                            ..Default::default()
-                                        },
-                                    ),
+                                    label_details: ty.map(|ty| CompletionItemLabelDetails {
+                                        description: Some(ty.to_string()),
+                                        ..Default::default()
+                                    }),
+                                    sort_text: preferred_type.zip(ty).map(|(expected, it)| {
+                                        if expected == it {
+                                            "0".into()
+                                        } else {
+                                            "1".into()
+                                        }
+                                    }),
                                     ..Default::default()
                                 })
                             }),
@@ -509,6 +516,7 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
+                    let preferred_type = guess_preferred_type(service, uri, token);
                     let has_dollar = token.text().starts_with('$');
                     items.extend(
                         symbol_table
@@ -516,16 +524,22 @@ fn get_cmp_list(
                             .filter_map(|symbol| {
                                 let (label, insert_text) =
                                     get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
+                                let ty = service.extract_global_type(symbol.green.clone());
                                 Some(CompletionItem {
                                     label,
                                     insert_text,
                                     kind: Some(CompletionItemKind::VARIABLE),
-                                    label_details: service
-                                        .extract_global_type(symbol.green.clone())
-                                        .map(|ty| CompletionItemLabelDetails {
-                                            description: Some(ty.to_string()),
-                                            ..Default::default()
-                                        }),
+                                    label_details: ty.map(|ty| CompletionItemLabelDetails {
+                                        description: Some(ty.to_string()),
+                                        ..Default::default()
+                                    }),
+                                    sort_text: preferred_type.zip(ty).map(|(expected, it)| {
+                                        if expected == it {
+                                            "0".into()
+                                        } else {
+                                            "1".into()
+                                        }
+                                    }),
                                     ..Default::default()
                                 })
                             }),
@@ -753,4 +767,34 @@ fn find_leading_l_paren(token: &SyntaxToken) -> Option<SyntaxToken> {
 fn is_l_paren(token: &SyntaxToken) -> bool {
     let kind = token.kind();
     kind == SyntaxKind::L_PAREN || kind == SyntaxKind::ERROR && token.text() == "("
+}
+
+fn guess_preferred_type(
+    service: &LanguageService,
+    uri: InternUri,
+    token: &SyntaxToken,
+) -> Option<ValType> {
+    token
+        .parent_ancestors()
+        .find(|node| node.kind() == SyntaxKind::OPERAND)
+        .and_then(|operand_instr| {
+            let instr = operand_instr
+                .ancestors()
+                .find(|node| node.kind() == SyntaxKind::PLAIN_INSTR)?;
+            let index = instr
+                .children()
+                .filter(|child| child.kind() == SyntaxKind::OPERAND)
+                .position(|operand| operand == operand_instr)?;
+            let index = if helpers::ast::is_call(&instr) {
+                index.checked_sub(1)?
+            } else {
+                index
+            };
+            let types = types_analyzer::resolve_param_types(service, uri, &instr)?;
+            if let Some(OperandType::Val(val_type)) = types.get(index) {
+                Some(*val_type)
+            } else {
+                None
+            }
+        })
 }
