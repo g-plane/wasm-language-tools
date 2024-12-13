@@ -17,7 +17,7 @@ pub(crate) use self::semantic_tokens::SemanticTokenKind;
 use crate::{files::FilesCtx, helpers, InternUri, LanguageService};
 use lsp_types::Position;
 use rowan::TokenAtOffset;
-use wat_syntax::{is_punc, is_trivia, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
+use wat_syntax::{is_punc, is_trivia, SyntaxNode, SyntaxToken};
 
 fn find_meaningful_token(
     service: &LanguageService,
@@ -42,15 +42,4 @@ fn find_meaningful_token(
             }
         }
     }
-}
-
-fn is_call(node: &SyntaxNode) -> bool {
-    node.children_with_tokens().any(|element| {
-        if let SyntaxElement::Token(token) = element {
-            token.kind() == SyntaxKind::INSTR_NAME
-                && matches!(token.text(), "call" | "ref.func" | "return_call")
-        } else {
-            false
-        }
-    })
 }

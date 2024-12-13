@@ -35,8 +35,8 @@ pub fn lsp_range_to_rowan_range(line_index: &LineIndex, range: Range) -> Option<
 }
 
 pub(crate) mod ast {
-    use rowan::{GreenNode, NodeOrToken};
-    use wat_syntax::SyntaxKind;
+    use rowan::{ast::support, GreenNode, NodeOrToken};
+    use wat_syntax::{SyntaxKind, SyntaxNode};
 
     pub fn find_func_type_of_type_def(green: &GreenNode) -> Option<GreenNode> {
         green.children().find_map(|child| match child {
@@ -45,5 +45,10 @@ pub(crate) mod ast {
             }
             _ => None,
         })
+    }
+
+    pub fn is_call(node: &SyntaxNode) -> bool {
+        support::token(node, SyntaxKind::INSTR_NAME)
+            .is_some_and(|token| matches!(token.text(), "call" | "ref.func" | "return_call"))
     }
 }

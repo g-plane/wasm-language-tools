@@ -119,7 +119,7 @@ impl LanguageService {
                 let parent = token.parent();
                 let grand = parent.as_ref().and_then(|parent| parent.parent());
                 if grand.as_ref().is_some_and(|grand| {
-                    super::is_call(grand)
+                    helpers::ast::is_call(grand)
                         || matches!(
                             grand.kind(),
                             SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC
@@ -149,7 +149,7 @@ impl LanguageService {
                     .as_ref()
                     .and_then(|parent| parent.parent())
                     .is_some_and(|grand| {
-                        super::is_call(&grand)
+                        helpers::ast::is_call(&grand)
                             || matches!(
                                 grand.kind(),
                                 SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC

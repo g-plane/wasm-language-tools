@@ -1,4 +1,3 @@
-use super::{find_meaningful_token, is_call};
 use crate::{
     binder::{SymbolItem, SymbolItemKind, SymbolTablesCtx},
     files::FilesCtx,
@@ -33,7 +32,7 @@ impl LanguageService {
         let root = SyntaxNode::new_root(self.root(uri));
         let symbol_table = self.symbol_table(uri);
 
-        let token = find_meaningful_token(
+        let token = super::find_meaningful_token(
             self,
             uri,
             &root,
@@ -186,7 +185,7 @@ impl LanguageService {
         let func = call_def_symbol.key.ptr.to_node(&root);
         let items = func
             .descendants()
-            .filter(|node| node.kind() == SyntaxKind::PLAIN_INSTR && is_call(node))
+            .filter(|node| node.kind() == SyntaxKind::PLAIN_INSTR && helpers::ast::is_call(node))
             .flat_map(|node| {
                 let plain_instr_range =
                     helpers::rowan_range_to_lsp_range(&line_index, node.text_range());
