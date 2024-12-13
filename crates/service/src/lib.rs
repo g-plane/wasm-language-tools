@@ -52,6 +52,7 @@ pub struct LanguageService {
     storage: salsa::Storage<Self>,
     semantic_token_kinds: IndexSet<SemanticTokenKind, FxBuildHasher>,
     configs: FxHashMap<InternUri, ServiceConfig>,
+    global_config: ServiceConfig,
 }
 impl salsa::Database for LanguageService {}
 
@@ -88,6 +89,13 @@ impl LanguageService {
                 }
             });
             self.semantic_token_kinds = kinds_map.keys().cloned().collect();
+        }
+
+        if let Some(config) = params
+            .initialization_options
+            .and_then(|config| serde_json::from_value(config).ok())
+        {
+            self.global_config = config;
         }
 
         InitializeResult {
@@ -180,6 +188,12 @@ impl LanguageService {
     }
 
     #[inline]
+    // This should be used internally.
+    fn get_config(&self, uri: InternUri) -> &ServiceConfig {
+        self.configs.get(&uri).unwrap_or(&self.global_config)
+    }
+
+    #[inline]
     /// Get configurations of all opened documents.
     pub fn get_configs(&self) -> impl Iterator<Item = (Uri, &ServiceConfig)> {
         self.configs
@@ -191,6 +205,12 @@ impl LanguageService {
     /// Update or insert configuration of a specific document.
     pub fn set_config(&mut self, uri: Uri, config: ServiceConfig) {
         self.configs.insert(self.uri(uri), config);
+    }
+
+    #[inline]
+    /// Update global configuration.
+    pub fn set_global_config(&mut self, config: ServiceConfig) {
+        self.global_config = config;
     }
 
     #[inline]

@@ -15,13 +15,7 @@ impl LanguageService {
         let root = Root::cast(SyntaxNode::new_root(self.root(uri)))?;
         let formatted = wat_formatter::format(
             &root,
-            &build_options(
-                &params.options,
-                self.configs
-                    .get(&uri)
-                    .map(|config| config.format.clone())
-                    .unwrap_or_default(),
-            ),
+            &build_options(&params.options, self.get_config(uri).format.clone()),
         );
         let text_edit = TextEdit {
             range: helpers::rowan_range_to_lsp_range(&line_index, root.syntax().text_range()),
@@ -37,13 +31,7 @@ impl LanguageService {
         let root = Root::cast(SyntaxNode::new_root(self.root(uri)))?;
         let (formatted, range) = wat_formatter::format_range(
             &root,
-            &build_options(
-                &params.options,
-                self.configs
-                    .get(&uri)
-                    .map(|config| config.format.clone())
-                    .unwrap_or_default(),
-            ),
+            &build_options(&params.options, self.get_config(uri).format.clone()),
             helpers::lsp_range_to_rowan_range(&line_index, params.range)?,
             &line_index,
         )?;

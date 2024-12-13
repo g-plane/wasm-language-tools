@@ -15,9 +15,9 @@ use lsp_types::{
         RegisterCapability, Rename, Request as _, SelectionRangeRequest, SemanticTokensFullRequest,
         SemanticTokensRangeRequest, WorkspaceConfiguration, WorkspaceDiagnosticRefresh,
     },
-    ConfigurationItem, ConfigurationParams, DidChangeTextDocumentParams,
-    DidCloseTextDocumentParams, DidOpenTextDocumentParams, InitializeParams,
-    PublishDiagnosticsParams, Uri,
+    ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams,
+    DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
+    InitializeParams, PublishDiagnosticsParams, Uri,
 };
 use wat_service::LanguageService;
 
@@ -396,8 +396,8 @@ impl Server {
                         Err(ExtractError::JsonError { .. }) => continue,
                     };
                     match cast_notification::<DidChangeConfiguration>(notification) {
-                        Ok(..) => {
-                            self.handle_did_change_configuration(&conn)?;
+                        Ok(params) => {
+                            self.handle_did_change_configuration(params, &conn)?;
                             continue;
                         }
                         Err(ExtractError::MethodMismatch(..)) => continue,
@@ -493,7 +493,14 @@ impl Server {
         Ok(())
     }
 
-    fn handle_did_change_configuration(&mut self, conn: &Connection) -> anyhow::Result<()> {
+    fn handle_did_change_configuration(
+        &mut self,
+        params: DidChangeConfigurationParams,
+        conn: &Connection,
+    ) -> anyhow::Result<()> {
+        if let Ok(config) = serde_json::from_value(params.settings) {
+            self.service.set_global_config(config);
+        }
         if !self.support_pull_config {
             return Ok(());
         }

@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(default)]
 /// Language service configuration. This can be different for each document.
 pub struct ServiceConfig {
     /// Configuration about formatting.
@@ -10,6 +11,7 @@ pub struct ServiceConfig {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(default)]
 /// Configuration about linting.
 pub struct Lints {
     /// Lint for detecting unused items.

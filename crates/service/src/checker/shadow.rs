@@ -19,10 +19,10 @@ pub fn check(
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
 ) {
-    let severity = match service.configs.get(&uri).map(|config| &config.lint.shadow) {
-        Some(LintLevel::Allow) => return,
-        Some(LintLevel::Warn) | None => DiagnosticSeverity::WARNING,
-        Some(LintLevel::Deny) => DiagnosticSeverity::ERROR,
+    let severity = match service.get_config(uri).lint.shadow {
+        LintLevel::Allow => return,
+        LintLevel::Warn => DiagnosticSeverity::WARNING,
+        LintLevel::Deny => DiagnosticSeverity::ERROR,
     };
     diags.extend(
         symbol_table
