@@ -580,7 +580,7 @@ impl SymbolTable {
             .find(|symbol| symbol.kind == SymbolItemKind::BlockRef && &symbol.key == key)
     }
 
-    pub fn get_declared_fields(
+    pub fn get_declared(
         &self,
         node: SyntaxNode,
         kind: SymbolItemKind,

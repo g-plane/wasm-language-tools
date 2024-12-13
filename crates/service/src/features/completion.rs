@@ -456,7 +456,7 @@ fn get_cmp_list(
                     let has_dollar = token.text().starts_with('$');
                     items.extend(
                         symbol_table
-                            .get_declared_fields(module, SymbolItemKind::Func)
+                            .get_declared(module, SymbolItemKind::Func)
                             .filter_map(|symbol| {
                                 let (label, insert_text) =
                                     get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
@@ -489,7 +489,7 @@ fn get_cmp_list(
                     let has_dollar = token.text().starts_with('$');
                     items.extend(
                         symbol_table
-                            .get_declared_fields(module, SymbolItemKind::Type)
+                            .get_declared(module, SymbolItemKind::Type)
                             .filter_map(|symbol| {
                                 let (label, insert_text) =
                                     get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
@@ -512,7 +512,7 @@ fn get_cmp_list(
                     let has_dollar = token.text().starts_with('$');
                     items.extend(
                         symbol_table
-                            .get_declared_fields(module, SymbolItemKind::GlobalDef)
+                            .get_declared(module, SymbolItemKind::GlobalDef)
                             .filter_map(|symbol| {
                                 let (label, insert_text) =
                                     get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
@@ -548,7 +548,7 @@ fn get_cmp_list(
                     let has_dollar = token.text().starts_with('$');
                     items.extend(
                         symbol_table
-                            .get_declared_fields(module, SymbolItemKind::MemoryDef)
+                            .get_declared(module, SymbolItemKind::MemoryDef)
                             .filter_map(|symbol| {
                                 let (label, insert_text) =
                                     get_idx_cmp_text(service, &symbol.idx, has_dollar)?;

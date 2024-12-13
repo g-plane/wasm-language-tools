@@ -292,7 +292,7 @@ fn resolve_expected_types(
             .next()?;
         let root = instr.syntax().ancestors().last()?;
         let related = symbol_table
-            .get_declared_fields(func.key.ptr.to_node(&root), SymbolItemKind::Param)
+            .get_declared(func.key.ptr.to_node(&root), SymbolItemKind::Param)
             .map(|symbol| {
                 Some((
                     symbol.key.ptr.text_range(),
