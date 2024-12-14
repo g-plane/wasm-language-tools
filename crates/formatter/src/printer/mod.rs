@@ -201,6 +201,34 @@ where
     docs
 }
 fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>> {
+    let respect_first_whitespace = token
+        .siblings_with_tokens(Direction::Next)
+        .skip(1)
+        .find(|element| {
+            !matches!(
+                element.kind(),
+                SyntaxKind::WHITESPACE | SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT
+            )
+        })
+        .is_some_and(|element| {
+            matches!(
+                element.kind(),
+                SyntaxKind::MODULE_FIELD_DATA
+                    | SyntaxKind::MODULE_FIELD_ELEM
+                    | SyntaxKind::MODULE_FIELD_EXPORT
+                    | SyntaxKind::MODULE_FIELD_FUNC
+                    | SyntaxKind::MODULE_FIELD_GLOBAL
+                    | SyntaxKind::MODULE_FIELD_IMPORT
+                    | SyntaxKind::MODULE_FIELD_MEMORY
+                    | SyntaxKind::MODULE_FIELD_START
+                    | SyntaxKind::MODULE_FIELD_TABLE
+                    | SyntaxKind::MODULE_FIELD_TYPE
+                    | SyntaxKind::PLAIN_INSTR
+                    | SyntaxKind::BLOCK_BLOCK
+                    | SyntaxKind::BLOCK_IF
+                    | SyntaxKind::BLOCK_LOOP
+            )
+        });
     let trivias = token
         .siblings_with_tokens(Direction::Next)
         .skip(1)
@@ -218,7 +246,7 @@ fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>
             }
             _ => None,
         })
-        .skip_while(|token| token.kind() == SyntaxKind::WHITESPACE)
+        .skip_while(|token| !respect_first_whitespace && token.kind() == SyntaxKind::WHITESPACE)
         .collect::<Vec<_>>();
     if trivias
         .iter()
@@ -227,7 +255,9 @@ fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>
         return vec![];
     }
     let mut docs = Vec::with_capacity(3);
-    docs.push(Doc::space());
+    if !respect_first_whitespace {
+        docs.push(Doc::space());
+    }
     trivias.iter().for_each(|token| match token.kind() {
         SyntaxKind::LINE_COMMENT => {
             docs.push(format_line_comment(token.text(), ctx));

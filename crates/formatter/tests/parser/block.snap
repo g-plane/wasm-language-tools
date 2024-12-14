@@ -1,7 +1,8 @@
 ---
 source: crates/formatter/tests/parser.rs
 ---
-(module ;; Auxiliary definition
+(module
+  ;; Auxiliary definition
   (memory 1)
 
   (func $dummy)

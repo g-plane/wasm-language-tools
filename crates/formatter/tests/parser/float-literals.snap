@@ -1,7 +1,8 @@
 ---
 source: crates/formatter/tests/parser.rs
 ---
-(module ;; f32 special values
+(module
+  ;; f32 special values
   (func (export "f32.nan") (result i32)
     (i32.reinterpret_f32
       (f32.const nan)))

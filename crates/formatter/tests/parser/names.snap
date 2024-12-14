@@ -1,7 +1,8 @@
 ---
 source: crates/formatter/tests/parser.rs
 ---
-(module ;; Test that we can use the empty string as a symbol.
+(module
+  ;; Test that we can use the empty string as a symbol.
   (func (export "") (result i32)
     (i32.const 0))
 

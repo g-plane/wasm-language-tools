@@ -1,7 +1,8 @@
 ---
 source: crates/formatter/tests/parser.rs
 ---
-(module ;; Functions
+(module
+  ;; Functions
   (import "spectest" "print_i32" (func (param i32)))
   (func (import "spectest" "print_i64") (param i64))
   (import "spectest" "print_i32" (func $print_i32 (param i32)))
