@@ -754,12 +754,7 @@ fn find_leading_l_paren(token: &SyntaxToken) -> Option<SyntaxToken> {
         token
             .siblings_with_tokens(Direction::Prev)
             .skip(1)
-            .skip_while(|element| {
-                matches!(
-                    element.kind(),
-                    SyntaxKind::WHITESPACE | SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT
-                )
-            })
+            .skip_while(|element| element.kind().is_trivia())
             .find_map(SyntaxElement::into_token)
             .filter(is_l_paren)
     }

@@ -77,6 +77,28 @@ pub enum SyntaxKind {
     ROOT,
 }
 
+impl SyntaxKind {
+    #[inline]
+    /// Checks if it is whitespace or comment.
+    pub fn is_trivia(self) -> bool {
+        matches!(
+            self,
+            SyntaxKind::WHITESPACE | SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT
+        )
+    }
+
+    #[inline]
+    pub fn is_comment(self) -> bool {
+        matches!(self, SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT)
+    }
+
+    #[inline]
+    /// Checks if it is punctuation.
+    pub fn is_punc(self) -> bool {
+        matches!(self, SyntaxKind::L_PAREN | SyntaxKind::R_PAREN)
+    }
+}
+
 impl From<SyntaxKind> for rowan::SyntaxKind {
     fn from(kind: SyntaxKind) -> Self {
         Self(kind as u16)

@@ -170,12 +170,10 @@ where
         return vec![];
     }
     let mut docs = Vec::with_capacity(3);
-    if trivias.first().is_some_and(|token| {
-        matches!(
-            token.kind(),
-            SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT
-        )
-    }) {
+    if trivias
+        .first()
+        .is_some_and(|token| token.kind().is_comment())
+    {
         docs.push(Doc::soft_line());
     }
     trivias.iter().for_each(|token| match token.kind() {

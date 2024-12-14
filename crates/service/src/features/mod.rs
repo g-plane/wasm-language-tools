@@ -17,7 +17,7 @@ pub(crate) use self::semantic_tokens::SemanticTokenKind;
 use crate::{files::FilesCtx, helpers, InternUri, LanguageService};
 use lsp_types::Position;
 use rowan::TokenAtOffset;
-use wat_syntax::{is_punc, is_trivia, SyntaxNode, SyntaxToken};
+use wat_syntax::{SyntaxNode, SyntaxToken};
 
 fn find_meaningful_token(
     service: &LanguageService,
@@ -31,8 +31,8 @@ fn find_meaningful_token(
         TokenAtOffset::None => None,
         TokenAtOffset::Single(token) => Some(token),
         TokenAtOffset::Between(left, right) => {
-            let left_check = is_trivia(&left) || is_punc(&left);
-            let right_check = is_trivia(&right) || is_punc(&right);
+            let left_check = left.kind().is_trivia() || left.kind().is_punc();
+            let right_check = right.kind().is_trivia() || right.kind().is_punc();
             if left_check && right_check || !left_check && !right_check {
                 None
             } else if left_check {

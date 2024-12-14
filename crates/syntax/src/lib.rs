@@ -24,18 +24,3 @@ impl rowan::Language for WatLanguage {
 pub type SyntaxNode = rowan::SyntaxNode<WatLanguage>;
 pub type SyntaxToken = rowan::SyntaxToken<WatLanguage>;
 pub type SyntaxElement = rowan::SyntaxElement<WatLanguage>;
-
-#[inline]
-/// Checks if a token is whitespace or comment.
-pub fn is_trivia(token: &SyntaxToken) -> bool {
-    matches!(
-        token.kind(),
-        SyntaxKind::WHITESPACE | SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT
-    )
-}
-
-#[inline]
-/// Checks if a token is punctuation.
-pub fn is_punc(token: &SyntaxToken) -> bool {
-    matches!(token.kind(), SyntaxKind::L_PAREN | SyntaxKind::R_PAREN)
-}
