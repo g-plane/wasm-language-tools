@@ -1,10 +1,10 @@
 use crate::{
     binder::{SymbolItemKind, SymbolTable, SymbolTablesCtx},
-    data_set::{self, OperandType},
+    data_set,
     files::FilesCtx,
     helpers,
     idx::{IdentsCtx, Idx},
-    types_analyzer::{self, TypesAnalyzerCtx, ValType},
+    types_analyzer::{self, OperandType, TypesAnalyzerCtx, ValType},
     InternUri, LanguageService,
 };
 use lsp_types::{

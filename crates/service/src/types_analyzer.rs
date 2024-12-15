@@ -1,6 +1,6 @@
 use crate::{
     binder::{SymbolItem, SymbolItemKind, SymbolTablesCtx},
-    data_set::{OperandType, INSTR_METAS},
+    data_set::INSTR_METAS,
     files::FilesCtx,
     helpers,
     idx::Idx,
@@ -155,12 +155,9 @@ pub(crate) fn resolve_param_types(
             .into_iter()
             .flatten()
             .next()?;
-        service.get_func_sig(uri, func.clone().into()).map(|sig| {
-            sig.params
-                .iter()
-                .map(|ty| OperandType::Val(ty.0))
-                .collect()
-        })
+        service
+            .get_func_sig(uri, func.clone().into())
+            .map(|sig| sig.params.iter().map(|ty| OperandType::Val(ty.0)).collect())
     } else {
         INSTR_METAS.get(instr_name).map(|meta| meta.params.clone())
     }
@@ -243,6 +240,13 @@ impl TryFrom<GreenNode> for ValType {
             })
             .ok_or(())
     }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) enum OperandType {
+    Val(ValType),
+    Generic,
+    Never,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

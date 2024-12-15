@@ -279,3 +279,21 @@ fn mixed_matches_from_call() {
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
+
+#[test]
+fn undefined_local_and_global() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (i32.add
+      ;; undefined locals and globals shouldn't be reported as 'missing operands'
+      (global.get 1)
+      (local.get 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

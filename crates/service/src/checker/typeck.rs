@@ -1,9 +1,9 @@
 use crate::{
     binder::{SymbolItemKind, SymbolTable},
-    data_set::{self, OperandType},
+    data_set,
     files::FilesCtx,
     helpers,
-    types_analyzer::TypesAnalyzerCtx,
+    types_analyzer::{OperandType, TypesAnalyzerCtx},
     InternUri, LanguageService,
 };
 use line_index::LineIndex;
@@ -250,7 +250,9 @@ fn resolve_type(
                     symbol_table
                         .find_param_or_local_def(&idx.syntax().clone().into())
                         .and_then(|symbol| service.extract_type(symbol.green.clone()))
-                        .map(|ty| vec![OperandType::Val(ty)])
+                        .map(|ty| OperandType::Val(ty))
+                        .or(Some(OperandType::Never))
+                        .map(|ty| vec![ty])
                 }
                 "global.get" => {
                     let idx = plain_instr.operands().next()?;
@@ -260,7 +262,9 @@ fn resolve_type(
                         .flatten()
                         .next()
                         .and_then(|symbol| service.extract_global_type(symbol.green.clone()))
-                        .map(|ty| vec![OperandType::Val(ty)])
+                        .map(|ty| OperandType::Val(ty))
+                        .or(Some(OperandType::Never))
+                        .map(|ty| vec![ty])
                 }
                 _ => data_set::INSTR_METAS
                     .get(instr_name.text())

@@ -1,0 +1,39 @@
+---
+source: crates/service/tests/diagnostics/typeck.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 18
+        },
+        "end": {
+          "line": 5,
+          "character": 19
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "cannot find `1` in this scope"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 17
+        },
+        "end": {
+          "line": 6,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "source": "wat",
+      "message": "cannot find `0` in this scope"
+    }
+  ]
+}

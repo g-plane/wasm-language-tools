@@ -1,4 +1,4 @@
-use crate::types_analyzer::ValType;
+use crate::types_analyzer::{OperandType, ValType};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::{collections::HashMap, sync::LazyLock};
 
@@ -8,11 +8,7 @@ pub(crate) struct InstrMeta {
     pub params: Vec<OperandType>,
     pub results: Vec<OperandType>,
 }
-#[derive(Clone, Debug)]
-pub(crate) enum OperandType {
-    Val(ValType),
-    Generic,
-}
+
 pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = LazyLock::new(|| {
     let mut map = HashMap::with_capacity_and_hasher(424, FxBuildHasher);
     map.insert(
