@@ -541,10 +541,8 @@ impl Server {
                     uris,
                 ),
             ))?;
-        } else {
-            if let Ok(config) = serde_json::from_value(params.settings) {
-                self.service.set_global_config(config);
-            }
+        } else if let Ok(config) = serde_json::from_value(params.settings) {
+            self.service.set_global_config(config);
         }
         Ok(())
     }

@@ -250,7 +250,7 @@ fn resolve_type(
                     symbol_table
                         .find_param_or_local_def(&idx.syntax().clone().into())
                         .and_then(|symbol| service.extract_type(symbol.green.clone()))
-                        .map(|ty| OperandType::Val(ty))
+                        .map(OperandType::Val)
                         .or(Some(OperandType::Never))
                         .map(|ty| vec![ty])
                 }
@@ -262,7 +262,7 @@ fn resolve_type(
                         .flatten()
                         .next()
                         .and_then(|symbol| service.extract_global_type(symbol.green.clone()))
-                        .map(|ty| OperandType::Val(ty))
+                        .map(OperandType::Val)
                         .or(Some(OperandType::Never))
                         .map(|ty| vec![ty])
                 }
