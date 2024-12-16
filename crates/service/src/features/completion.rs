@@ -9,9 +9,9 @@ use crate::{
 };
 use lsp_types::{
     CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionParams,
-    CompletionResponse, Documentation, MarkupContent, MarkupKind, Position,
+    CompletionResponse, Documentation, MarkupContent, MarkupKind,
 };
-use rowan::{ast::support, Direction, TokenAtOffset};
+use rowan::{ast::support, Direction};
 use smallvec::SmallVec;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
@@ -19,24 +19,16 @@ impl LanguageService {
     /// Handler for `textDocument/completion` request.
     pub fn completion(&self, params: CompletionParams) -> Option<CompletionResponse> {
         let uri = self.uri(params.text_document_position.text_document.uri);
-        let token = find_token(self, uri, params.text_document_position.position)?;
+        let line_index = self.line_index(uri);
+        let root = SyntaxNode::new_root(self.root(uri));
+        let token = helpers::ast::find_token(
+            &root,
+            helpers::lsp_pos_to_rowan_pos(&line_index, params.text_document_position.position)?,
+        )?;
 
         let cmp_ctx = get_cmp_ctx(&token)?;
         let items = get_cmp_list(self, cmp_ctx, &token, uri, &self.symbol_table(uri));
         Some(CompletionResponse::Array(items))
-    }
-}
-
-fn find_token(
-    service: &LanguageService,
-    uri: InternUri,
-    position: Position,
-) -> Option<SyntaxToken> {
-    let offset = helpers::lsp_pos_to_rowan_pos(&service.line_index(uri), position)?;
-    match SyntaxNode::new_root(service.root(uri)).token_at_offset(offset) {
-        TokenAtOffset::None => None,
-        TokenAtOffset::Single(token) => Some(token),
-        TokenAtOffset::Between(left, _) => Some(left),
     }
 }
 

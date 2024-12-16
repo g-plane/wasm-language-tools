@@ -28,8 +28,9 @@ use lsp_types::{
     RegistrationParams, RenameOptions, SelectionRangeProviderCapability, SemanticTokenType,
     SemanticTokensClientCapabilities, SemanticTokensFullOptions, SemanticTokensLegend,
     SemanticTokensOptions, SemanticTokensServerCapabilities, ServerCapabilities, ServerInfo,
-    TextDocumentClientCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind,
-    TextDocumentSyncOptions, TextDocumentSyncSaveOptions, TypeDefinitionProviderCapability, Uri,
+    SignatureHelpOptions, TextDocumentClientCapabilities, TextDocumentSyncCapability,
+    TextDocumentSyncKind, TextDocumentSyncOptions, TextDocumentSyncSaveOptions,
+    TypeDefinitionProviderCapability, Uri,
 };
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use salsa::{InternId, InternKey};
@@ -161,6 +162,10 @@ impl LanguageService {
                         },
                     ),
                 ),
+                signature_help_provider: Some(SignatureHelpOptions {
+                    trigger_characters: Some(['(', ')'].iter().map(char::to_string).collect()),
+                    ..Default::default()
+                }),
                 text_document_sync: Some(TextDocumentSyncCapability::Options(
                     TextDocumentSyncOptions {
                         open_close: Some(true),

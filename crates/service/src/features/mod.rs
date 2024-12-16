@@ -12,6 +12,7 @@ mod references;
 mod rename;
 mod selection_range;
 mod semantic_tokens;
+mod signature_help;
 
 pub(crate) use self::semantic_tokens::SemanticTokenKind;
 use crate::{files::FilesCtx, helpers, InternUri, LanguageService};

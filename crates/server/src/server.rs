@@ -13,7 +13,8 @@ use lsp_types::{
         FoldingRangeRequest, Formatting, GotoDeclaration, GotoDefinition, GotoTypeDefinition,
         HoverRequest, InlayHintRequest, PrepareRenameRequest, RangeFormatting, References,
         RegisterCapability, Rename, Request as _, SelectionRangeRequest, SemanticTokensFullRequest,
-        SemanticTokensRangeRequest, WorkspaceConfiguration, WorkspaceDiagnosticRefresh,
+        SemanticTokensRangeRequest, SignatureHelpRequest, WorkspaceConfiguration,
+        WorkspaceDiagnosticRefresh,
     },
     ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams,
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
@@ -357,6 +358,20 @@ impl Server {
                                 id,
                                 result: Some(serde_json::to_value(
                                     self.service.semantic_tokens_range(params),
+                                )?),
+                                error: None,
+                            }))?;
+                            continue;
+                        }
+                        Err(ExtractError::MethodMismatch(r)) => req = r,
+                        Err(ExtractError::JsonError { .. }) => continue,
+                    }
+                    match cast_req::<SignatureHelpRequest>(req) {
+                        Ok((id, params)) => {
+                            conn.sender.send(Message::Response(Response {
+                                id,
+                                result: Some(serde_json::to_value(
+                                    self.service.signature_help(params),
                                 )?),
                                 error: None,
                             }))?;

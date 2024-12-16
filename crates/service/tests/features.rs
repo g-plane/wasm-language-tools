@@ -26,3 +26,5 @@ mod rename;
 mod selection_range;
 #[cfg(test)]
 mod semantic_tokens;
+#[cfg(test)]
+mod signature_help;

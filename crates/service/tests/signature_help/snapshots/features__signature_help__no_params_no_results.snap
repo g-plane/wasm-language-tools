@@ -1,0 +1,13 @@
+---
+source: crates/service/tests/signature_help/mod.rs
+expression: response
+---
+{
+  "signatures": [
+    {
+      "label": "(func $func)",
+      "parameters": []
+    }
+  ],
+  "activeSignature": 0
+}

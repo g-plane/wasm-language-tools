@@ -249,7 +249,7 @@ pub(crate) enum OperandType {
     Never,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct FuncSig {
     pub(crate) params: Vec<(ValType, Option<String>)>,
     pub(crate) results: Vec<ValType>,
