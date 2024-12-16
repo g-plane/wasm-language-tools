@@ -212,3 +212,17 @@ fn in_global_with_paren() {
     let response = service.completion(create_params(uri, Position::new(2, 17)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn nested() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func $func
+    (call $func ())))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(3, 17)));
+    assert_json_snapshot!(response);
+}

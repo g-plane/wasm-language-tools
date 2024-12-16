@@ -136,6 +136,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                         _ => {}
                     }
                 }
+            } else if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::Instr);
             } else {
                 let instr_name = support::token(&parent, SyntaxKind::INSTR_NAME)?;
                 add_cmp_ctx_for_operands(instr_name.text(), &parent, &mut ctx);
