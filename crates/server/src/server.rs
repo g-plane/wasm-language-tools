@@ -25,6 +25,7 @@ use wat_service::LanguageService;
 pub struct Server {
     service: LanguageService,
     support_pull_diagnostics: bool,
+    support_refresh_diagnostics: bool,
     support_pull_config: bool,
     req_queue: ReqQueue<(), Vec<Uri>>,
 }
@@ -40,6 +41,15 @@ impl Server {
             .as_ref()
             .and_then(|it| it.diagnostic.as_ref())
             .is_some();
+        self.support_refresh_diagnostics = matches!(
+            params
+                .capabilities
+                .workspace
+                .as_ref()
+                .and_then(|it| it.diagnostic.as_ref())
+                .and_then(|it| it.refresh_support),
+            Some(true)
+        );
         self.support_pull_config = matches!(
             params
                 .capabilities
@@ -421,16 +431,13 @@ impl Server {
             uris.iter()
                 .zip(configs)
                 .for_each(|(uri, config)| self.service.set_config(uri.clone(), config));
-            if self.support_pull_diagnostics {
+            if self.support_refresh_diagnostics {
                 conn.sender
                     .send(Message::Request(self.req_queue.outgoing.register(
                         WorkspaceDiagnosticRefresh::METHOD.into(),
                         serde_json::Value::Null,
                         vec![],
                     )))?;
-            } else {
-                uris.into_iter()
-                    .try_for_each(|uri| self.publish_diagnostics(conn, uri))?;
             }
         }
         Ok(())
