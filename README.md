@@ -140,8 +140,10 @@ cargo install --git https://github.com/g-plane/wasm-language-tools.git wat_serve
         name = "wasm-language-tools",
         cmd = { "wat_server" }, -- or the absolute path to the binary
         settings = { -- this section is optional
-          format = {},
-          lint = { unused = "warn" },
+          wasmLanguageTools = { -- must be under the key "wasmLanguageTools"
+            format = {},
+            lint = { unused = "warn" },
+          },
         },
       })
     end,
