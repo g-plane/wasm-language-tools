@@ -498,32 +498,32 @@ impl Server {
         params: DidChangeConfigurationParams,
         conn: &Connection,
     ) -> anyhow::Result<()> {
-        if let Ok(config) = serde_json::from_value(params.settings) {
-            self.service.set_global_config(config);
+        if self.support_pull_config {
+            let uris = self
+                .service
+                .get_configs()
+                .map(|(uri, _)| uri)
+                .collect::<Vec<_>>();
+            conn.sender.send(Message::Request(
+                self.req_queue.outgoing.register(
+                    WorkspaceConfiguration::METHOD.into(),
+                    ConfigurationParams {
+                        items: uris
+                            .iter()
+                            .map(|uri| ConfigurationItem {
+                                scope_uri: Some(uri.clone()),
+                                section: Some("wasmLanguageTools".to_string()),
+                            })
+                            .collect(),
+                    },
+                    uris,
+                ),
+            ))?;
+        } else {
+            if let Ok(config) = serde_json::from_value(params.settings) {
+                self.service.set_global_config(config);
+            }
         }
-        if !self.support_pull_config {
-            return Ok(());
-        }
-        let uris = self
-            .service
-            .get_configs()
-            .map(|(uri, _)| uri)
-            .collect::<Vec<_>>();
-        conn.sender.send(Message::Request(
-            self.req_queue.outgoing.register(
-                WorkspaceConfiguration::METHOD.into(),
-                ConfigurationParams {
-                    items: uris
-                        .iter()
-                        .map(|uri| ConfigurationItem {
-                            scope_uri: Some(uri.clone()),
-                            section: Some("wasmLanguageTools".to_string()),
-                        })
-                        .collect(),
-                },
-                uris,
-            ),
-        ))?;
         Ok(())
     }
 
