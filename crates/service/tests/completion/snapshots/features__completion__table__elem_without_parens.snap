@@ -5,6 +5,9 @@ expression: response
 [
   {
     "label": "$f",
+    "labelDetails": {
+      "description": "[] -> []"
+    },
     "kind": 3,
     "detail": "(func $f)",
     "documentation": {

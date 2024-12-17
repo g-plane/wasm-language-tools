@@ -5,6 +5,9 @@ expression: response
 [
   {
     "label": "0",
+    "labelDetails": {
+      "description": "[] -> []"
+    },
     "kind": 3,
     "detail": "(func)",
     "documentation": {
@@ -14,6 +17,9 @@ expression: response
   },
   {
     "label": "$func",
+    "labelDetails": {
+      "description": "[] -> []"
+    },
     "kind": 3,
     "detail": "(func $func)",
     "documentation": {

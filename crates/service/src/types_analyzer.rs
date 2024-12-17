@@ -35,6 +35,8 @@ pub(crate) trait TypesAnalyzerCtx: FilesCtx + SymbolTablesCtx {
     #[salsa::memoized]
     fn get_func_sig(&self, uri: InternUri, symbol: SymbolItemWithGreenEq) -> Option<FuncSig>;
     #[salsa::memoized]
+    fn render_compact_func_sig(&self, signature: FuncSig) -> String;
+    #[salsa::memoized]
     fn render_func_header(&self, uri: InternUri, symbol: SymbolItemWithGreenEq) -> String;
 }
 fn extract_type(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<ValType> {
@@ -110,6 +112,32 @@ fn get_func_sig(
         })
 }
 
+fn render_compact_func_sig(_: &dyn TypesAnalyzerCtx, signature: FuncSig) -> String {
+    let mut ret = String::with_capacity(
+        "[] -> []".len() + signature.params.len() * 5 + signature.results.len() * 5,
+    );
+    ret.push('[');
+    let mut params = signature.params.iter();
+    if let Some((ty, _)) = params.next() {
+        ret.push_str(&ty.to_string());
+        params.for_each(|(ty, _)| {
+            ret.push_str(", ");
+            ret.push_str(&ty.to_string());
+        });
+    }
+    ret.push_str("] -> [");
+    let mut results = signature.results.iter();
+    if let Some(ty) = results.next() {
+        ret.push_str(&ty.to_string());
+        results.for_each(|ty| {
+            ret.push_str(", ");
+            ret.push_str(&ty.to_string());
+        });
+    }
+    ret.push(']');
+    ret
+}
+
 fn render_func_header(
     db: &dyn TypesAnalyzerCtx,
     uri: InternUri,
@@ -163,7 +191,7 @@ pub(crate) fn resolve_param_types(
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub(crate) enum ValType {
     I32,
     I64,
@@ -249,7 +277,7 @@ pub(crate) enum OperandType {
     Never,
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub(crate) struct FuncSig {
     pub(crate) params: Vec<(ValType, Option<String>)>,
     pub(crate) results: Vec<ValType>,

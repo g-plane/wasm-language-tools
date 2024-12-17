@@ -181,3 +181,21 @@ fn doc_comment() {
     let response = service.completion(create_params(uri, Position::new(2, 16)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn label_details() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (call ))
+    (func $f1 (param i32) (param $p1 i64) (result i32 i64) (result f32))
+    (func $f2 (param i32 i64) (result i32) (result f32))
+    (func $f3 (param i32) (param i64))
+    (func $f4 (result i32) (result f32))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 16)));
+    assert_json_snapshot!(response);
+}

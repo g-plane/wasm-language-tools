@@ -469,6 +469,16 @@ fn get_cmp_list(
                                     detail: Some(
                                         service.render_func_header(uri, symbol.clone().into()),
                                     ),
+                                    label_details: Some(CompletionItemLabelDetails {
+                                        description: Some(
+                                            service.render_compact_func_sig(
+                                                service
+                                                    .get_func_sig(uri, symbol.clone().into())
+                                                    .unwrap_or_default(),
+                                            ),
+                                        ),
+                                        ..Default::default()
+                                    }),
                                     documentation: Some(Documentation::MarkupContent(
                                         MarkupContent {
                                             kind: MarkupKind::Markdown,
