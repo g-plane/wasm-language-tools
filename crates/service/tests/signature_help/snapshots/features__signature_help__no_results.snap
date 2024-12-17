@@ -6,6 +6,10 @@ expression: response
   "signatures": [
     {
       "label": "(func $func (param $p i32) (param f32) (param f64))",
+      "documentation": {
+        "kind": "markdown",
+        "value": ""
+      },
       "parameters": [
         {
           "label": [

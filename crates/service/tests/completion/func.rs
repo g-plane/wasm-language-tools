@@ -165,3 +165,19 @@ fn export_desc_func_incomplete() {
     let response = service.completion(create_params(uri, Position::new(2, 20)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn doc_comment() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (call ))
+    ;;; doc comment
+    (func $func)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 16)));
+    assert_json_snapshot!(response);
+}

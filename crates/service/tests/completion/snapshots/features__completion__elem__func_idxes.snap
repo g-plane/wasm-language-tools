@@ -6,9 +6,10 @@ expression: response
   {
     "label": "$f",
     "kind": 3,
+    "detail": "(func $f)",
     "documentation": {
       "kind": "markdown",
-      "value": "```wat\n(func $f)\n```"
+      "value": ""
     }
   }
 ]

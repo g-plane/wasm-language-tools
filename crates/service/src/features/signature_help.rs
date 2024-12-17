@@ -3,7 +3,8 @@ use crate::{
     types_analyzer::TypesAnalyzerCtx, LanguageService,
 };
 use lsp_types::{
-    ParameterInformation, ParameterLabel, SignatureHelp, SignatureHelpParams, SignatureInformation,
+    Documentation, MarkupContent, MarkupKind, ParameterInformation, ParameterLabel, SignatureHelp,
+    SignatureHelpParams, SignatureInformation,
 };
 use rowan::{ast::support, Direction};
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode};
@@ -100,7 +101,10 @@ impl LanguageService {
         Some(SignatureHelp {
             signatures: vec![SignatureInformation {
                 label,
-                documentation: None,
+                documentation: Some(Documentation::MarkupContent(MarkupContent {
+                    kind: MarkupKind::Markdown,
+                    value: helpers::ast::get_doc_comment(&func.key.ptr.to_node(&root)),
+                })),
                 parameters: Some(parameters),
                 active_parameter: operand.and_then(|operand| {
                     node.children()

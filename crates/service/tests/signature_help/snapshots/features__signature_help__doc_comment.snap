@@ -5,10 +5,10 @@ expression: response
 {
   "signatures": [
     {
-      "label": "(func $func (param i32) (param i32) (param i32))",
+      "label": "(func $func (param i32) (param i32) (result i32))",
       "documentation": {
         "kind": "markdown",
-        "value": ""
+        "value": "doc comment"
       },
       "parameters": [
         {
@@ -22,15 +22,9 @@ expression: response
             24,
             35
           ]
-        },
-        {
-          "label": [
-            36,
-            47
-          ]
         }
       ],
-      "activeParameter": 1
+      "activeParameter": 0
     }
   ],
   "activeSignature": 0

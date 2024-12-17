@@ -11,11 +11,8 @@ use crate::{
 use lsp_types::{
     Hover, HoverContents, HoverParams, LanguageString, MarkedString, MarkupContent, MarkupKind,
 };
-use rowan::{
-    ast::{support::child, AstNode},
-    Direction,
-};
-use wat_syntax::{ast::GlobalType, SyntaxElement, SyntaxKind, SyntaxNode};
+use rowan::ast::{support::child, AstNode};
+use wat_syntax::{ast::GlobalType, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     /// Handler for `textDocument/hover` request.
@@ -210,31 +207,7 @@ fn create_func_hover(
     root: &SyntaxNode,
 ) -> String {
     let node = symbol.key.ptr.to_node(root);
-    let doc = node
-        .siblings_with_tokens(Direction::Prev)
-        .skip(1)
-        .take_while(|element| {
-            matches!(
-                element.kind(),
-                SyntaxKind::LINE_COMMENT | SyntaxKind::WHITESPACE
-            )
-        })
-        .filter_map(|element| match element {
-            SyntaxElement::Token(token) if token.kind() == SyntaxKind::LINE_COMMENT => Some(token),
-            _ => None,
-        })
-        .skip_while(|token| !token.text().starts_with(";;;"))
-        .take_while(|token| token.text().starts_with(";;;"))
-        .fold(String::new(), |mut doc, comment| {
-            if !doc.is_empty() {
-                doc.insert(0, '\n');
-            }
-            if let Some(text) = comment.text().strip_prefix(";;;") {
-                doc.insert_str(0, text.strip_prefix([' ', '\t']).unwrap_or(text));
-            }
-            doc
-        });
-
+    let doc = helpers::ast::get_doc_comment(&node);
     let mut content = format!(
         "```wat\n{}\n```",
         service.render_func_header(uri, symbol.into())

@@ -18,7 +18,7 @@ expression: response
     "detail": "(func $func)",
     "documentation": {
       "kind": "markdown",
-      "value": ""
+      "value": "doc comment"
     }
   }
 ]

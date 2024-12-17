@@ -126,3 +126,18 @@ fn no_results() {
     let response = service.signature_help(create_params(uri, Position::new(3, 17)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn doc_comment() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  ;;; doc comment
+  (func $func (param i32) (param i32) (result i32)
+    (call $func ())))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.signature_help(create_params(uri, Position::new(4, 17)));
+    assert_json_snapshot!(response);
+}

@@ -35,8 +35,8 @@ pub fn lsp_range_to_rowan_range(line_index: &LineIndex, range: Range) -> Option<
 }
 
 pub(crate) mod ast {
-    use rowan::{ast::support, GreenNode, NodeOrToken, TextSize, TokenAtOffset};
-    use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
+    use rowan::{ast::support, Direction, GreenNode, NodeOrToken, TextSize, TokenAtOffset};
+    use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
     pub fn find_func_type_of_type_def(green: &GreenNode) -> Option<GreenNode> {
         green.children().find_map(|child| match child {
@@ -58,5 +58,33 @@ pub(crate) mod ast {
             TokenAtOffset::Single(token) => Some(token),
             TokenAtOffset::Between(left, _) => Some(left),
         }
+    }
+
+    pub fn get_doc_comment(node: &SyntaxNode) -> String {
+        node.siblings_with_tokens(Direction::Prev)
+            .skip(1)
+            .map_while(|element| match element {
+                SyntaxElement::Token(token)
+                    if matches!(
+                        token.kind(),
+                        SyntaxKind::LINE_COMMENT | SyntaxKind::WHITESPACE
+                    ) =>
+                {
+                    Some(token)
+                }
+                _ => None,
+            })
+            .filter(|token| token.kind() == SyntaxKind::LINE_COMMENT)
+            .skip_while(|token| !token.text().starts_with(";;;"))
+            .take_while(|token| token.text().starts_with(";;;"))
+            .fold(String::new(), |mut doc, comment| {
+                if !doc.is_empty() {
+                    doc.insert(0, '\n');
+                }
+                if let Some(text) = comment.text().strip_prefix(";;;") {
+                    doc.insert_str(0, text.strip_prefix([' ', '\t']).unwrap_or(text));
+                }
+                doc
+            })
     }
 }

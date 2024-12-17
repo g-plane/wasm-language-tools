@@ -27,7 +27,7 @@ impl LanguageService {
         )?;
 
         let cmp_ctx = get_cmp_ctx(&token)?;
-        let items = get_cmp_list(self, cmp_ctx, &token, uri, &self.symbol_table(uri));
+        let items = get_cmp_list(self, cmp_ctx, &token, uri, &self.symbol_table(uri), &root);
         Some(CompletionResponse::Array(items))
     }
 }
@@ -368,6 +368,7 @@ fn get_cmp_list(
     token: &SyntaxToken,
     uri: InternUri,
     symbol_table: &SymbolTable,
+    root: &SyntaxNode,
 ) -> Vec<CompletionItem> {
     ctx.into_iter()
         .fold(Vec::with_capacity(2), |mut items, ctx| {
@@ -465,13 +466,14 @@ fn get_cmp_list(
                                     label,
                                     insert_text,
                                     kind: Some(CompletionItemKind::FUNCTION),
+                                    detail: Some(
+                                        service.render_func_header(uri, symbol.clone().into()),
+                                    ),
                                     documentation: Some(Documentation::MarkupContent(
                                         MarkupContent {
                                             kind: MarkupKind::Markdown,
-                                            value: format!(
-                                                "```wat\n{}\n```",
-                                                service
-                                                    .render_func_header(uri, symbol.clone().into())
+                                            value: helpers::ast::get_doc_comment(
+                                                &symbol.key.ptr.to_node(root),
                                             ),
                                         },
                                     )),
