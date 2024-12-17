@@ -129,6 +129,19 @@ fn imported_func_ident_idx() {
 }
 
 #[test]
+fn func_in_implicit_module() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(func $func)
+(func (call $func))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(2, 16)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn param_or_local_not_defined() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
@@ -183,6 +196,20 @@ fn param_ident_idx() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.goto_definition(create_params(uri, Position::new(3, 25)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn param_in_implicit_module() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(func $func (param i32)
+    (local.get 0)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(2, 16)));
     assert_json_snapshot!(response);
 }
 

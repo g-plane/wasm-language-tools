@@ -17,29 +17,42 @@ use winnow::{
 };
 
 pub(super) fn module(input: &mut Input) -> GreenResult {
-    (
-        l_paren,
-        trivias_prefixed(keyword("module")),
-        opt(trivias_prefixed(ident)),
-        repeat::<_, _, Vec<_>, _, _>(0.., retry_once(module_field, [])),
-        r_paren,
-    )
-        .parse_next(input)
-        .map(|(l_paren, mut keyword, id, fields, r_paren)| {
-            let mut children = Vec::with_capacity(4);
-            children.push(l_paren);
-            children.append(&mut keyword);
-            if let Some(mut id) = id {
-                children.append(&mut id);
-            }
-            fields
-                .into_iter()
-                .for_each(|mut field| children.append(&mut field));
-            if let Some(mut r_paren) = r_paren {
-                children.append(&mut r_paren);
-            }
-            node(MODULE, children)
-        })
+    alt((
+        (
+            l_paren,
+            trivias_prefixed(keyword("module")),
+            opt(trivias_prefixed(ident)),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry_once(module_field, [])),
+            r_paren,
+        )
+            .map(|(l_paren, mut keyword, id, fields, r_paren)| {
+                let mut children = Vec::with_capacity(4);
+                children.push(l_paren);
+                children.append(&mut keyword);
+                if let Some(mut id) = id {
+                    children.append(&mut id);
+                }
+                fields
+                    .into_iter()
+                    .for_each(|mut field| children.append(&mut field));
+                if let Some(mut r_paren) = r_paren {
+                    children.append(&mut r_paren);
+                }
+                node(MODULE, children)
+            }),
+        (
+            module_field,
+            repeat::<_, _, Vec<_>, _, _>(0.., retry_once(module_field, [])),
+        )
+            .map(|(first_field, fields)| {
+                let mut children = vec![first_field];
+                fields
+                    .into_iter()
+                    .for_each(|mut field| children.append(&mut field));
+                node(MODULE, children)
+            }),
+    ))
+    .parse_next(input)
 }
 
 fn module_field(input: &mut Input) -> GreenResult {

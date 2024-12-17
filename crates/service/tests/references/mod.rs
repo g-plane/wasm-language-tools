@@ -93,6 +93,22 @@ fn func_ident_idx() {
 }
 
 #[test]
+fn func_in_implicit_module() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(func $func)
+(func (call $func))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let include_decl =
+        service.find_references(create_params(uri.clone(), Position::new(1, 8), true));
+    assert_json_snapshot!(include_decl);
+    let exclude_decl = service.find_references(create_params(uri, Position::new(1, 8), false));
+    assert_json_snapshot!(exclude_decl);
+}
+
+#[test]
 fn param_int_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "

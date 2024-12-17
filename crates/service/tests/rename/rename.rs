@@ -114,6 +114,21 @@ fn func_conflicts() {
 }
 
 #[test]
+fn func_in_implicit_module() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(func $func)
+(func (call $func))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service
+        .rename(create_params(uri, Position::new(2, 14), "$f"))
+        .unwrap();
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn param() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
