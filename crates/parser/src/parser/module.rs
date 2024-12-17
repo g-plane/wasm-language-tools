@@ -40,6 +40,7 @@ pub(super) fn module(input: &mut Input) -> GreenResult {
                 }
                 node(MODULE, children)
             }),
+        // wabt allows top-level module fields
         (
             module_field,
             repeat::<_, _, Vec<_>, _, _>(0.., retry_once(module_field, [])),
