@@ -466,9 +466,10 @@ fn get_cmp_list(
                                     label,
                                     insert_text,
                                     kind: Some(CompletionItemKind::FUNCTION),
-                                    detail: Some(
-                                        service.render_func_header(uri, symbol.clone().into()),
-                                    ),
+                                    detail: Some(service.render_func_header(
+                                        symbol.idx.name,
+                                        service.get_func_sig(uri, symbol.clone().into()),
+                                    )),
                                     label_details: Some(CompletionItemLabelDetails {
                                         description: Some(
                                             service.render_compact_func_sig(

@@ -210,7 +210,7 @@ fn create_func_hover(
     let doc = helpers::ast::get_doc_comment(&node);
     let mut content = format!(
         "```wat\n{}\n```",
-        service.render_func_header(uri, symbol.into())
+        service.render_func_header(symbol.idx.name, service.get_func_sig(uri, symbol.into()))
     );
     if !doc.is_empty() {
         content.push_str("\n---\n");
@@ -295,7 +295,7 @@ fn create_type_def_hover(service: &LanguageService, symbol: &SymbolItem) -> Mark
         content_value.push_str(" (func");
         if !sig.params.is_empty() || !sig.results.is_empty() {
             content_value.push(' ');
-            content_value.push_str(&sig.to_string());
+            content_value.push_str(&service.render_func_sig(sig));
         }
         content_value.push(')');
     }

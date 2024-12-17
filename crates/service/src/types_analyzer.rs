@@ -3,7 +3,7 @@ use crate::{
     data_set::INSTR_METAS,
     files::FilesCtx,
     helpers,
-    idx::Idx,
+    idx::InternIdent,
     InternUri, LanguageService,
 };
 use rowan::{
@@ -35,9 +35,11 @@ pub(crate) trait TypesAnalyzerCtx: FilesCtx + SymbolTablesCtx {
     #[salsa::memoized]
     fn get_func_sig(&self, uri: InternUri, symbol: SymbolItemWithGreenEq) -> Option<FuncSig>;
     #[salsa::memoized]
+    fn render_func_sig(&self, signature: FuncSig) -> String;
+    #[salsa::memoized]
     fn render_compact_func_sig(&self, signature: FuncSig) -> String;
     #[salsa::memoized]
-    fn render_func_header(&self, uri: InternUri, symbol: SymbolItemWithGreenEq) -> String;
+    fn render_func_header(&self, name: Option<InternIdent>, signature: Option<FuncSig>) -> String;
 }
 fn extract_type(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<ValType> {
     node.clone().try_into().ok().or_else(|| {
@@ -59,11 +61,11 @@ fn extract_global_type(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<Val
         .and_then(|global_type| db.extract_type(global_type.to_owned()))
 }
 
-fn extract_sig(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
+fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
     let root = SyntaxNode::new_root(node);
     let params = children::<Param>(&root).fold(vec![], |mut acc, param| {
         if let Some((ident, ty)) = param.ident_token().zip(param.val_types().next()) {
-            acc.push((ValType::from(ty), Some(ident.text().to_string())));
+            acc.push((ValType::from(ty), Some(db.ident(ident.text().to_string()))));
         } else {
             acc.extend(
                 param
@@ -112,6 +114,48 @@ fn get_func_sig(
         })
 }
 
+fn render_func_sig(db: &dyn TypesAnalyzerCtx, signature: FuncSig) -> String {
+    let mut ret = String::with_capacity(signature.params.len() * 9 + signature.results.len() * 10);
+    let mut params = signature.params.iter();
+    if let Some((ty, name)) = params.next() {
+        ret.push_str("(param");
+        if let Some(name) = name {
+            ret.push(' ');
+            ret.push_str(&db.lookup_ident(*name));
+        }
+        ret.push(' ');
+        ret.push_str(&ty.to_string());
+        ret.push(')');
+        params.for_each(|(ty, name)| {
+            ret.push(' ');
+            ret.push_str("(param");
+            if let Some(name) = name {
+                ret.push(' ');
+                ret.push_str(&db.lookup_ident(*name));
+            }
+            ret.push(' ');
+            ret.push_str(&ty.to_string());
+            ret.push(')');
+        });
+    }
+    let mut results = signature.results.iter();
+    if let Some(ty) = results.next() {
+        if !ret.is_empty() {
+            ret.push(' ');
+        }
+        ret.push_str("(result ");
+        ret.push_str(&ty.to_string());
+        ret.push(')');
+        results.for_each(|ty| {
+            ret.push(' ');
+            ret.push_str("(result ");
+            ret.push_str(&ty.to_string());
+            ret.push(')');
+        });
+    }
+    ret
+}
+
 fn render_compact_func_sig(_: &dyn TypesAnalyzerCtx, signature: FuncSig) -> String {
     let mut ret = String::with_capacity(
         "[] -> []".len() + signature.params.len() * 5 + signature.results.len() * 5,
@@ -140,25 +184,18 @@ fn render_compact_func_sig(_: &dyn TypesAnalyzerCtx, signature: FuncSig) -> Stri
 
 fn render_func_header(
     db: &dyn TypesAnalyzerCtx,
-    uri: InternUri,
-    symbol: SymbolItemWithGreenEq,
+    name: Option<InternIdent>,
+    signature: Option<FuncSig>,
 ) -> String {
     let mut content = "(func".to_string();
-    if let SymbolItem {
-        kind: SymbolItemKind::Func,
-        idx: Idx {
-            name: Some(name), ..
-        },
-        ..
-    } = symbol.0
-    {
+    if let Some(name) = name {
         content.push(' ');
         content.push_str(&db.lookup_ident(name));
     }
-    if let Some(sig) = db.get_func_sig(uri, symbol.clone()) {
+    if let Some(sig) = signature {
         if !sig.params.is_empty() || !sig.results.is_empty() {
             content.push(' ');
-            content.push_str(&sig.to_string());
+            content.push_str(&db.render_func_sig(sig));
         }
     }
     content.push(')');
@@ -279,34 +316,8 @@ pub(crate) enum OperandType {
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub(crate) struct FuncSig {
-    pub(crate) params: Vec<(ValType, Option<String>)>,
+    pub(crate) params: Vec<(ValType, Option<InternIdent>)>,
     pub(crate) results: Vec<ValType>,
-}
-impl fmt::Display for FuncSig {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut written = false;
-        self.params.iter().try_for_each(|param| {
-            if written {
-                write!(f, " ")?;
-            }
-            write!(f, "(param")?;
-            if let Some(name) = &param.1 {
-                write!(f, " {}", name)?;
-            }
-            write!(f, " {})", param.0)?;
-            written = true;
-            Ok(())
-        })?;
-        self.results.iter().try_for_each(|result| {
-            if written {
-                write!(f, " ")?;
-            }
-            write!(f, "(result {})", result)?;
-            written = true;
-            Ok(())
-        })?;
-        Ok(())
-    }
 }
 
 #[derive(Clone)]

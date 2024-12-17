@@ -74,9 +74,9 @@ impl LanguageService {
                 }
                 let start = label.len();
                 label.push_str("(param");
-                if let Some(name) = &param.1 {
+                if let Some(name) = param.1 {
                     label.push(' ');
-                    label.push_str(name);
+                    label.push_str(&self.lookup_ident(name));
                 }
                 label.push(' ');
                 label.push_str(&param.0.to_string());
