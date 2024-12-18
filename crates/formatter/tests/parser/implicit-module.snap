@@ -1,0 +1,4 @@
+---
+source: crates/formatter/tests/parser.rs
+---
+(func $f (param i32))

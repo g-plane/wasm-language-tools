@@ -482,9 +482,12 @@ impl DocGen for Module {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         let mut docs = Vec::with_capacity(2);
         let mut trivias = vec![];
+        let mut is_explicit_module = true;
         if let Some(l_paren) = self.l_paren_token() {
             docs.push(Doc::text("("));
             trivias = format_trivias_after_token(l_paren, ctx);
+        } else {
+            is_explicit_module = false;
         }
         if let Some(keyword) = self.keyword() {
             docs.append(&mut trivias);
@@ -500,9 +503,9 @@ impl DocGen for Module {
             docs.push(Doc::text(ident.to_string()));
             trivias = format_trivias_after_token(ident, ctx);
         }
-        docs.push(
+        let module_fields =
             Doc::list(self.module_fields().fold(vec![], |mut docs, module_field| {
-                if trivias.is_empty() {
+                if trivias.is_empty() && is_explicit_module {
                     docs.push(Doc::hard_line());
                 } else {
                     docs.append(&mut trivias);
@@ -515,11 +518,16 @@ impl DocGen for Module {
                 }
                 trivias = format_trivias_after_node(module_field, ctx);
                 docs
-            }))
-            .nest(ctx.indent_width),
-        );
+            }));
+        if is_explicit_module {
+            docs.push(module_fields.nest(ctx.indent_width));
+        } else {
+            docs.push(module_fields);
+        }
         docs.append(&mut trivias);
-        docs.push(Doc::text(")"));
+        if is_explicit_module {
+            docs.push(Doc::text(")"));
+        }
         Doc::list(docs)
     }
 }

@@ -1,0 +1,25 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..27
+  WHITESPACE@0..2 "  "
+  MODULE@2..26
+    MODULE_FIELD_FUNC@2..26
+      L_PAREN@2..3 "("
+      KEYWORD@3..7 "func"
+      WHITESPACE@7..8 " "
+      IDENT@8..10 "$f"
+      WHITESPACE@10..11 " "
+      TYPE_USE@11..24
+        PARAM@11..24
+          L_PAREN@11..12 "("
+          WHITESPACE@12..13 " "
+          KEYWORD@13..18 "param"
+          WHITESPACE@18..19 " "
+          VAL_TYPE@19..22
+            NUM_TYPE@19..22 "i32"
+          WHITESPACE@22..23 " "
+          R_PAREN@23..24 ")"
+      WHITESPACE@24..25 " "
+      R_PAREN@25..26 ")"
+  WHITESPACE@26..27 "\n"
