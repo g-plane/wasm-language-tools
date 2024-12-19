@@ -10,6 +10,7 @@ use rowan::{ast::support, Direction};
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
+    /// Handler for `textDocument/signatureHelp` request.
     pub fn signature_help(&self, params: SignatureHelpParams) -> Option<SignatureHelp> {
         let uri = self.uri(params.text_document_position_params.text_document.uri);
         let line_index = self.line_index(uri);
