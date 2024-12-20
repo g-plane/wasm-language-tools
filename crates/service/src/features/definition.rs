@@ -60,14 +60,22 @@ impl LanguageService {
                 })
             })
             .or_else(|| {
-                symbol_table.find_block_def(&key).map(|symbol| {
-                    GotoDefinitionResponse::Scalar(create_location_by_symbol(
-                        &params,
-                        &line_index,
-                        symbol,
-                        &root,
-                    ))
-                })
+                symbol_table
+                    .find_block_def(&key)
+                    .and_then(|key| {
+                        symbol_table
+                            .symbols
+                            .iter()
+                            .find(|symbol| symbol.key == *key)
+                    })
+                    .map(|symbol| {
+                        GotoDefinitionResponse::Scalar(create_location_by_symbol(
+                            &params,
+                            &line_index,
+                            symbol,
+                            &root,
+                        ))
+                    })
             })
     }
 

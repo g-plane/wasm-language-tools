@@ -71,53 +71,54 @@ impl LanguageService {
             .symbols
             .iter()
             .find(|symbol| symbol.key == symbol_key)?;
-        let text_edits = symbol_table
-            .symbols
-            .iter()
-            .filter(|sym| match &sym.kind {
-                SymbolItemKind::Func
-                | SymbolItemKind::Call
-                | SymbolItemKind::Param
-                | SymbolItemKind::Local
-                | SymbolItemKind::LocalRef
-                | SymbolItemKind::Type
-                | SymbolItemKind::TypeUse
-                | SymbolItemKind::GlobalDef
-                | SymbolItemKind::GlobalRef
-                | SymbolItemKind::MemoryDef
-                | SymbolItemKind::MemoryRef
-                | SymbolItemKind::TableDef
-                | SymbolItemKind::TableRef => {
-                    symbol.region == sym.region
-                        && symbol.idx.name.is_some_and(|name| name == old_name)
-                }
-                SymbolItemKind::BlockDef => {
-                    symbol == *sym
-                        || symbol_table.blocks.iter().any(|(ref_key, def_key, _)| {
-                            &symbol_key == ref_key && def_key == &sym.key
-                        })
-                }
-                SymbolItemKind::BlockRef => {
-                    symbol == *sym
-                        || symbol_table.blocks.iter().any(|(ref_key, def_key, _)| {
-                            &sym.key == ref_key && def_key == &symbol.key
-                        })
-                        || symbol_table
-                            .find_block_def(&symbol_key)
-                            .is_some_and(|def_symbol| {
-                                symbol_table.blocks.iter().any(|(ref_key, def_key, _)| {
-                                    &sym.key == ref_key && def_key == &def_symbol.key
-                                })
+        let text_edits =
+            symbol_table
+                .symbols
+                .iter()
+                .filter(|sym| match &sym.kind {
+                    SymbolItemKind::Func
+                    | SymbolItemKind::Call
+                    | SymbolItemKind::Param
+                    | SymbolItemKind::Local
+                    | SymbolItemKind::LocalRef
+                    | SymbolItemKind::Type
+                    | SymbolItemKind::TypeUse
+                    | SymbolItemKind::GlobalDef
+                    | SymbolItemKind::GlobalRef
+                    | SymbolItemKind::MemoryDef
+                    | SymbolItemKind::MemoryRef
+                    | SymbolItemKind::TableDef
+                    | SymbolItemKind::TableRef => {
+                        symbol.region == sym.region
+                            && symbol.idx.name.is_some_and(|name| name == old_name)
+                    }
+                    SymbolItemKind::BlockDef => {
+                        symbol == *sym
+                            || symbol_table.blocks.iter().any(|block| {
+                                symbol_key == block.ref_key && block.def_key == sym.key
                             })
-                }
-                SymbolItemKind::Module => false,
-            })
-            .filter_map(|sym| support::token(&sym.key.ptr.to_node(&root), SyntaxKind::IDENT))
-            .map(|token| TextEdit {
-                range: helpers::rowan_range_to_lsp_range(&line_index, token.text_range()),
-                new_text: params.new_name.clone(),
-            })
-            .collect();
+                    }
+                    SymbolItemKind::BlockRef => {
+                        symbol == *sym
+                            || symbol_table.blocks.iter().any(|block| {
+                                sym.key == block.ref_key && block.def_key == symbol.key
+                            })
+                            || symbol_table
+                                .find_block_def(&symbol_key)
+                                .is_some_and(|def_key| {
+                                    symbol_table.blocks.iter().any(|block| {
+                                        sym.key == block.ref_key && block.def_key == *def_key
+                                    })
+                                })
+                    }
+                    SymbolItemKind::Module => false,
+                })
+                .filter_map(|sym| support::token(&sym.key.ptr.to_node(&root), SyntaxKind::IDENT))
+                .map(|token| TextEdit {
+                    range: helpers::rowan_range_to_lsp_range(&line_index, token.text_range()),
+                    new_text: params.new_name.clone(),
+                })
+                .collect();
 
         let mut changes = HashMap::new();
         changes.insert(params.text_document_position.text_document.uri, text_edits);

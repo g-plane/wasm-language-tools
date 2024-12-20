@@ -23,7 +23,7 @@ pub(crate) trait SymbolTablesCtx: FilesCtx + IdentsCtx {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct SymbolTable {
     pub symbols: Vec<SymbolItem>,
-    pub blocks: Vec<(SymbolItemKey, SymbolItemKey, Idx)>,
+    pub blocks: Vec<BlockItem>,
     pub exports: Vec<ExportItem>,
 }
 fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTable> {
@@ -308,7 +308,12 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                                 }) {
                                     let mut idx = parent.idx.clone();
                                     idx.num = Some(levels);
-                                    blocks.push((symbol.key.clone(), key.clone(), idx));
+                                    blocks.push(BlockItem {
+                                        ref_key: symbol.key.clone(),
+                                        ref_idx: symbol.idx.clone(),
+                                        def_key: key.clone(),
+                                        def_idx: idx,
+                                    });
                                     current = parent;
                                     levels += 1;
                                 }
@@ -565,12 +570,12 @@ impl SymbolTable {
             .find(|symbol| symbol.kind == SymbolItemKind::LocalRef && &symbol.key == key)
     }
 
-    pub fn find_block_def(&self, key: &SymbolItemKey) -> Option<&SymbolItem> {
+    pub fn find_block_def(&self, key: &SymbolItemKey) -> Option<&SymbolItemKey> {
         self.find_block_ref(key).and_then(|block_ref| {
             self.blocks
                 .iter()
-                .find(|(ref_key, _, idx)| key == ref_key && block_ref.idx.is_defined_by(idx))
-                .and_then(|(_, def_key, _)| self.symbols.iter().find(|sym| &sym.key == def_key))
+                .find(|block| *key == block.ref_key && block_ref.idx.is_defined_by(&block.def_idx))
+                .map(|block| &block.def_key)
         })
     }
 
@@ -643,6 +648,14 @@ pub enum SymbolItemKind {
     TableRef,
     BlockDef,
     BlockRef,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct BlockItem {
+    pub ref_key: SymbolItemKey,
+    pub ref_idx: Idx,
+    pub def_key: SymbolItemKey,
+    pub def_idx: Idx,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

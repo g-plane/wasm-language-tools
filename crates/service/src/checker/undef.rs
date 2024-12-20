@@ -34,10 +34,9 @@ pub fn check(
                 .find_defs(&symbol.key)
                 .is_none_or(|defs| defs.count() == 0),
             SymbolItemKind::LocalRef => symbol_table.find_param_or_local_def(&symbol.key).is_none(),
-            SymbolItemKind::BlockRef => !symbol_table
-                .blocks
-                .iter()
-                .any(|(ref_key, _, idx)| ref_key == &symbol.key && symbol.idx.is_defined_by(idx)),
+            SymbolItemKind::BlockRef => !symbol_table.blocks.iter().any(|block| {
+                block.ref_key == symbol.key && symbol.idx.is_defined_by(&block.def_idx)
+            }),
         })
         .map(|symbol| Diagnostic {
             range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.ptr.text_range()),
