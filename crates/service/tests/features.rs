@@ -9,6 +9,8 @@ mod definition;
 #[cfg(test)]
 mod diagnostics;
 #[cfg(test)]
+mod document_highlight;
+#[cfg(test)]
 mod document_symbol;
 #[cfg(test)]
 mod folding_range;

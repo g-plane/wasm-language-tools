@@ -3,6 +3,7 @@ mod code_action;
 mod completion;
 mod definition;
 mod diagnostics;
+mod document_highlight;
 mod document_symbol;
 mod folding_range;
 mod formatting;

@@ -1,0 +1,71 @@
+---
+source: crates/service/tests/document_highlight/mod.rs
+expression: response
+---
+[
+  {
+    "range": {
+      "start": {
+        "line": 2,
+        "character": 10
+      },
+      "end": {
+        "line": 2,
+        "character": 12
+      }
+    },
+    "kind": 3
+  },
+  {
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 20
+      },
+      "end": {
+        "line": 3,
+        "character": 21
+      }
+    },
+    "kind": 2
+  },
+  {
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 35
+      },
+      "end": {
+        "line": 3,
+        "character": 37
+      }
+    },
+    "kind": 2
+  },
+  {
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 51
+      },
+      "end": {
+        "line": 3,
+        "character": 52
+      }
+    },
+    "kind": 3
+  },
+  {
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 66
+      },
+      "end": {
+        "line": 3,
+        "character": 68
+      }
+    },
+    "kind": 3
+  }
+]
