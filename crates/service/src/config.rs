@@ -16,8 +16,13 @@ pub struct ServiceConfig {
 pub struct Lints {
     /// Lint for detecting unused items.
     pub unused: LintLevel,
+
     /// Lint for detecting shadowing.
     pub shadow: LintLevel,
+
+    #[serde(alias = "implicitModule")]
+    /// Lint for top-level module fields without declaring a module.
+    pub implicit_module: LintLevel,
 }
 
 impl Default for Lints {
@@ -25,6 +30,7 @@ impl Default for Lints {
         Self {
             unused: LintLevel::Warn,
             shadow: LintLevel::Warn,
+            implicit_module: LintLevel::Allow,
         }
     }
 }

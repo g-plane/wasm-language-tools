@@ -7,6 +7,8 @@ use wat_service::{LanguageService, LintLevel, Lints, ServiceConfig};
 #[cfg(test)]
 mod dup_names;
 #[cfg(test)]
+mod implicit_module;
+#[cfg(test)]
 mod literal_operands;
 #[cfg(test)]
 mod multi_modules;

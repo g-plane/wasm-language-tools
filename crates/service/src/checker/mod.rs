@@ -3,6 +3,7 @@ use lsp_types::Diagnostic;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 mod dup_names;
+mod implicit_module;
 mod literal_operands;
 mod multi_modules;
 mod shadow;
@@ -19,6 +20,9 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
     root.descendants().for_each(|node| match node.kind() {
         SyntaxKind::ROOT => {
             multi_modules::check(&mut diagnostics, &line_index, &node);
+        }
+        SyntaxKind::MODULE => {
+            implicit_module::check(service, &mut diagnostics, uri, &line_index, &node);
         }
         SyntaxKind::MODULE_FIELD_FUNC | SyntaxKind::MODULE_FIELD_GLOBAL => {
             typeck::check_stacked(
