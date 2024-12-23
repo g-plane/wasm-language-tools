@@ -1,6 +1,6 @@
 use super::find_meaningful_token;
 use crate::{
-    binder::{SymbolItem, SymbolItemKey, SymbolItemKind, SymbolTable, SymbolTablesCtx},
+    binder::{SymbolItem, SymbolItemKind, SymbolTablesCtx},
     files::FilesCtx,
     helpers, LanguageService,
 };
@@ -141,60 +141,25 @@ impl LanguageService {
                         .collect(),
                 )
             }
-            SymbolItemKind::BlockDef => Some(get_block_refs(
-                &current_symbol.key,
-                &params,
-                &symbol_table,
-                &line_index,
-                &root,
-            )),
+            SymbolItemKind::BlockDef => Some(
+                symbol_table
+                    .find_block_references(&current_symbol.key, params.context.include_declaration)
+                    .map(|symbol| create_location_by_symbol(&params, &line_index, symbol, &root))
+                    .collect(),
+            ),
             SymbolItemKind::BlockRef => {
                 let def_key = symbol_table.find_block_def(&key)?;
-                Some(get_block_refs(
-                    def_key,
-                    &params,
-                    &symbol_table,
-                    &line_index,
-                    &root,
-                ))
+                Some(
+                    symbol_table
+                        .find_block_references(def_key, params.context.include_declaration)
+                        .map(|symbol| {
+                            create_location_by_symbol(&params, &line_index, symbol, &root)
+                        })
+                        .collect(),
+                )
             }
         }
     }
-}
-
-fn get_block_refs(
-    def_key: &SymbolItemKey,
-    params: &ReferenceParams,
-    symbol_table: &SymbolTable,
-    line_index: &LineIndex,
-    root: &SyntaxNode,
-) -> Vec<Location> {
-    let mut locations = Vec::with_capacity(1);
-    if params.context.include_declaration {
-        if let Some(symbol) = symbol_table
-            .symbols
-            .iter()
-            .find(|symbol| symbol.key == *def_key)
-        {
-            locations.push(create_location_by_symbol(params, line_index, symbol, root));
-        }
-    }
-    locations.extend(
-        symbol_table
-            .blocks
-            .iter()
-            .filter(|block| {
-                block.def_key == *def_key && block.ref_idx.is_defined_by(&block.def_idx)
-            })
-            .filter_map(|block| {
-                symbol_table
-                    .symbols
-                    .iter()
-                    .find(|symbol| symbol.key == block.ref_key)
-            })
-            .map(|symbol| create_location_by_symbol(params, line_index, symbol, root)),
-    );
-    locations
 }
 
 fn create_location_by_symbol(

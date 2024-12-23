@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItem, SymbolItemKey, SymbolItemKind, SymbolTable, SymbolTablesCtx},
+    binder::{SymbolItem, SymbolItemKind, SymbolTablesCtx},
     files::FilesCtx,
     helpers, LanguageService,
 };
@@ -164,20 +164,24 @@ impl LanguageService {
                                 .collect(),
                         )
                     }
-                    SymbolItemKind::BlockDef => Some(create_block_highlights(
-                        &current_symbol.key,
-                        &symbol_table,
-                        &line_index,
-                        &root,
-                    )),
+                    SymbolItemKind::BlockDef => Some(
+                        symbol_table
+                            .find_block_references(&current_symbol.key, true)
+                            .filter_map(|symbol| {
+                                create_symbol_highlight(symbol, &root, &line_index)
+                            })
+                            .collect(),
+                    ),
                     SymbolItemKind::BlockRef => {
                         let def_key = symbol_table.find_block_def(&key)?;
-                        Some(create_block_highlights(
-                            def_key,
-                            &symbol_table,
-                            &line_index,
-                            &root,
-                        ))
+                        Some(
+                            symbol_table
+                                .find_block_references(def_key, true)
+                                .filter_map(|symbol| {
+                                    create_symbol_highlight(symbol, &root, &line_index)
+                                })
+                                .collect(),
+                        )
                     }
                 }
             }
@@ -207,39 +211,6 @@ fn create_symbol_highlight(
             }
             _ => None,
         })
-}
-
-fn create_block_highlights(
-    def_key: &SymbolItemKey,
-    symbol_table: &SymbolTable,
-    line_index: &LineIndex,
-    root: &SyntaxNode,
-) -> Vec<DocumentHighlight> {
-    let mut highlights = Vec::with_capacity(1);
-    if let Some(highlight) = symbol_table
-        .symbols
-        .iter()
-        .find(|symbol| symbol.key == *def_key)
-        .and_then(|def_symbol| create_symbol_highlight(def_symbol, root, line_index))
-    {
-        highlights.push(highlight);
-    }
-    highlights.extend(
-        symbol_table
-            .blocks
-            .iter()
-            .filter(|block| {
-                block.def_key == *def_key && block.ref_idx.is_defined_by(&block.def_idx)
-            })
-            .map(|block| DocumentHighlight {
-                range: helpers::rowan_range_to_lsp_range(
-                    line_index,
-                    block.ref_key.ptr.text_range(),
-                ),
-                kind: Some(DocumentHighlightKind::READ),
-            }),
-    );
-    highlights
 }
 
 fn get_highlight_kind_of_symbol(

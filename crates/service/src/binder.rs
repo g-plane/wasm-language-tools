@@ -595,6 +595,31 @@ impl SymbolTable {
             .iter()
             .filter(move |symbol| symbol.kind == kind && symbol.region == key)
     }
+
+    pub fn find_block_references<'a>(
+        &'a self,
+        def_key: &'a SymbolItemKey,
+        with_decl: bool,
+    ) -> impl Iterator<Item = &'a SymbolItem> {
+        if with_decl {
+            self.symbols.iter().find(|symbol| symbol.key == *def_key)
+        } else {
+            None
+        }
+        .into_iter()
+        .chain(
+            self.blocks
+                .iter()
+                .filter(|block| {
+                    block.def_key == *def_key && block.ref_idx.is_defined_by(&block.def_idx)
+                })
+                .filter_map(|block| {
+                    self.symbols
+                        .iter()
+                        .find(|symbol| symbol.key == block.ref_key)
+                }),
+        )
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
