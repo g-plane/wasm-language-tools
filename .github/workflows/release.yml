@@ -35,15 +35,17 @@ jobs:
       fail-fast: false
       matrix:
         settings:
-          - host: macos-latest
+          - name: x86_64-macos
+            host: macos-latest
             target: x86_64-apple-darwin
-          - host: macos-latest
+          - name: arm-macos
+            host: macos-latest
             target: aarch64-apple-darwin
-          - host: ubuntu-latest
+          - name: x86_64-linux
+            host: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-          - host: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-          - host: windows-latest
+          - name: x86_64-windows
+            host: windows-latest
             target: x86_64-pc-windows-gnu
     name: ${{ matrix.settings.target }}
     runs-on: ${{ matrix.settings.host }}
@@ -56,12 +58,12 @@ jobs:
         run: |
           cargo build --target=${{ matrix.settings.target }} --release
           if (Test-Path ./target/${{ matrix.settings.target }}/release/wat_server.exe) {
-            Copy-Item ./target/${{ matrix.settings.target }}/release/wat_server.exe ./target/${{ matrix.settings.target }}/release/wat_server-${{ matrix.settings.target }}.exe
+            Copy-Item ./target/${{ matrix.settings.target }}/release/wat_server.exe ./target/${{ matrix.settings.target }}/release/wat_server-${{ matrix.settings.name }}.exe
           }
           elseif (Test-Path ./target/${{ matrix.settings.target }}/release/wat_server) {
-            Copy-Item ./target/${{ matrix.settings.target }}/release/wat_server ./target/${{ matrix.settings.target }}/release/wat_server-${{ matrix.settings.target }}
+            Copy-Item ./target/${{ matrix.settings.target }}/release/wat_server ./target/${{ matrix.settings.target }}/release/wat_server-${{ matrix.settings.name }}
           }
       - uses: softprops/action-gh-release@v2
         with:
           files: |
-            ./target/${{ matrix.settings.target }}/release/wat_server-${{ matrix.settings.target }}*
+            ./target/${{ matrix.settings.target }}/release/wat_server-${{ matrix.settings.name }}*
