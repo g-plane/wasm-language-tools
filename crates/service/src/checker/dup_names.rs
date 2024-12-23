@@ -6,10 +6,14 @@ use crate::{
     InternUri, LanguageService,
 };
 use line_index::LineIndex;
-use lsp_types::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location};
+use lsp_types::{
+    Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, NumberOrString,
+};
 use rowan::{ast::support::token, TextRange};
 use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
+
+const DIAGNOSTIC_CODE: &str = "duplicated-names";
 
 pub fn check(
     service: &LanguageService,
@@ -59,6 +63,7 @@ pub fn check(
                     ),
                     severity: Some(DiagnosticSeverity::ERROR),
                     source: Some("wat".into()),
+                    code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
                     message: format!("duplicated name `{name}` in this scope"),
                     related_information: Some(
                         symbols
@@ -99,6 +104,7 @@ pub fn check(
                     range: helpers::rowan_range_to_lsp_range(line_index, *range),
                     severity: Some(DiagnosticSeverity::ERROR),
                     source: Some("wat".into()),
+                    code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
                     message: format!("duplicated export `{name}` in this module"),
                     related_information: Some(
                         ranges

@@ -17,6 +17,7 @@ expression: response
         }
       },
       "severity": 1,
+      "code": "literal-operands",
       "source": "wat",
       "message": "expected memory argument"
     },
@@ -32,6 +33,7 @@ expression: response
         }
       },
       "severity": 1,
+      "code": "literal-operands",
       "source": "wat",
       "message": "expected memory argument"
     }

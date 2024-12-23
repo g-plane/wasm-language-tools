@@ -17,6 +17,7 @@ expression: response
         }
       },
       "severity": 1,
+      "code": "duplicated-names",
       "source": "wat",
       "message": "duplicated export `func` in this module",
       "relatedInformation": [
@@ -50,6 +51,7 @@ expression: response
         }
       },
       "severity": 1,
+      "code": "duplicated-names",
       "source": "wat",
       "message": "duplicated export `func` in this module",
       "relatedInformation": [

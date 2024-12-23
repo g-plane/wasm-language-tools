@@ -5,9 +5,11 @@ use crate::{
     InternUri, LanguageService, LintLevel,
 };
 use line_index::LineIndex;
-use lsp_types::{Diagnostic, DiagnosticSeverity};
+use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
 use rowan::ast::support;
 use wat_syntax::{SyntaxKind, SyntaxNode};
+
+const DIAGNOSTIC_CODE: &str = "unused";
 
 pub fn check(
     service: &LanguageService,
@@ -114,6 +116,7 @@ fn report(
         range: helpers::rowan_range_to_lsp_range(line_index, range),
         severity: Some(severity),
         source: Some("wat".into()),
+        code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
         message: format!(
             "`{}` is never used",
             symbol

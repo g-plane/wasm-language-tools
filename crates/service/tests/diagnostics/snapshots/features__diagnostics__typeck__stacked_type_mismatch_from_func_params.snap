@@ -17,6 +17,7 @@ expression: response
         }
       },
       "severity": 1,
+      "code": "type-check",
       "source": "wat",
       "message": "expected type `i32`, found `f32`",
       "relatedInformation": [

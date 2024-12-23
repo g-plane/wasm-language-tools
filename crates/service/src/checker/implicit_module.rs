@@ -4,6 +4,8 @@ use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
 use rowan::ast::support;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
+const DIAGNOSTIC_CODE: &str = "implicit-module";
+
 pub fn check(
     service: &LanguageService,
     diags: &mut Vec<Diagnostic>,
@@ -21,7 +23,7 @@ pub fn check(
             range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
             severity: Some(severity),
             source: Some("wat".into()),
-            code: Some(NumberOrString::String("implicit-module".into())),
+            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
             message: "top-level module fields should be wrapped in a module".into(),
             ..Default::default()
         });

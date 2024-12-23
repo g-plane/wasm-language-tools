@@ -5,7 +5,9 @@ use crate::{
     LanguageService,
 };
 use line_index::LineIndex;
-use lsp_types::{Diagnostic, DiagnosticSeverity};
+use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
+
+const DIAGNOSTIC_CODE: &str = "undef";
 
 pub fn check(
     service: &LanguageService,
@@ -42,6 +44,7 @@ pub fn check(
             range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.ptr.text_range()),
             severity: Some(DiagnosticSeverity::ERROR),
             source: Some("wat".into()),
+            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
             message: format!(
                 "cannot find `{}` in this scope",
                 symbol

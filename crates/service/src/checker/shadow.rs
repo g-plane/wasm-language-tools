@@ -6,10 +6,14 @@ use crate::{
     InternUri, LanguageService, LintLevel,
 };
 use line_index::LineIndex;
-use lsp_types::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location};
+use lsp_types::{
+    Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, NumberOrString,
+};
 use rowan::{ast::support::token, TextRange};
 use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
+
+const DIAGNOSTIC_CODE: &str = "shadow";
 
 pub fn check(
     service: &LanguageService,
@@ -68,6 +72,7 @@ pub fn check(
                     ),
                     severity: Some(severity),
                     source: Some("wat".into()),
+                    code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
                     message: format!("`{name}` is shadowed"),
                     related_information: Some(
                         ranges

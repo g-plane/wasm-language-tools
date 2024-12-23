@@ -17,6 +17,7 @@ expression: response
         }
       },
       "severity": 1,
+      "code": "undef",
       "source": "wat",
       "message": "cannot find `$d` in this scope"
     },
@@ -32,6 +33,7 @@ expression: response
         }
       },
       "severity": 1,
+      "code": "undef",
       "source": "wat",
       "message": "cannot find `3` in this scope"
     }

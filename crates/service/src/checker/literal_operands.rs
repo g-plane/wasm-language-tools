@@ -1,11 +1,13 @@
 use crate::helpers;
 use line_index::LineIndex;
-use lsp_types::{Diagnostic, DiagnosticSeverity};
+use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
 use rowan::ast::{
     support::{children, token},
     AstNode,
 };
 use wat_syntax::{ast::Operand, SyntaxKind, SyntaxNode};
+
+const DIAGNOSTIC_CODE: &str = "literal-operands";
 
 pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxNode) {
     let Some(instr_name) = token(node, SyntaxKind::INSTR_NAME) else {
@@ -24,6 +26,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                         range: helpers::rowan_range_to_lsp_range(line_index, operand.text_range()),
                         severity: Some(DiagnosticSeverity::ERROR),
                         source: Some("wat".into()),
+                        code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
                         message: $msg.into(),
                         ..Default::default()
                     });

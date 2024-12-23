@@ -17,6 +17,7 @@ expression: response
         }
       },
       "severity": 2,
+      "code": "unused",
       "source": "wat",
       "message": "`$p` is never used"
     },
@@ -32,6 +33,7 @@ expression: response
         }
       },
       "severity": 2,
+      "code": "unused",
       "source": "wat",
       "message": "`1` is never used"
     }

@@ -17,6 +17,7 @@ expression: response
         }
       },
       "severity": 1,
+      "code": "literal-operands",
       "source": "wat",
       "message": "expected integer"
     },
@@ -32,6 +33,7 @@ expression: response
         }
       },
       "severity": 1,
+      "code": "literal-operands",
       "source": "wat",
       "message": "expected integer"
     },
@@ -47,6 +49,7 @@ expression: response
         }
       },
       "severity": 1,
+      "code": "literal-operands",
       "source": "wat",
       "message": "expected integer"
     }

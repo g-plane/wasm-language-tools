@@ -17,6 +17,7 @@ expression: response
         }
       },
       "severity": 2,
+      "code": "shadow",
       "source": "wat",
       "message": "`$b` is shadowed",
       "relatedInformation": [
@@ -50,6 +51,7 @@ expression: response
         }
       },
       "severity": 2,
+      "code": "shadow",
       "source": "wat",
       "message": "`$b` is shadowed",
       "relatedInformation": [

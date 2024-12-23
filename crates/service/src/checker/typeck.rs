@@ -7,7 +7,9 @@ use crate::{
     InternUri, LanguageService,
 };
 use line_index::LineIndex;
-use lsp_types::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location};
+use lsp_types::{
+    Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, NumberOrString,
+};
 use rowan::{
     ast::{
         support::{children, token},
@@ -19,6 +21,8 @@ use wat_syntax::{
     ast::{Instr, PlainInstr},
     SyntaxKind, SyntaxNode,
 };
+
+const DIAGNOSTIC_CODE: &str = "type-check";
 
 pub fn check_folded(
     diags: &mut Vec<Diagnostic>,
@@ -62,6 +66,7 @@ pub fn check_folded(
                         ),
                         severity: Some(DiagnosticSeverity::ERROR),
                         source: Some("wat".into()),
+                        code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
                         message: "expected instr".into(),
                         ..Default::default()
                     });
@@ -83,6 +88,7 @@ pub fn check_folded(
             range: helpers::rowan_range_to_lsp_range(line_index, instr.syntax().text_range()),
             severity: Some(DiagnosticSeverity::ERROR),
             source: Some("wat".into()),
+            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
             message: build_incorrect_operands_count_msg(expected_count, received_count),
             ..Default::default()
         });
@@ -101,6 +107,7 @@ pub fn check_folded(
                     ),
                     severity: Some(DiagnosticSeverity::ERROR),
                     source: Some("wat".into()),
+                    code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
                     message: format!("expected type `{expected}`, found `{received}`"),
                     related_information: related.as_ref().map(|(range, message)| {
                         vec![DiagnosticRelatedInformation {
@@ -172,6 +179,7 @@ pub fn check_stacked(
                     ),
                     severity: Some(DiagnosticSeverity::ERROR),
                     source: Some("wat".into()),
+                    code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
                     message: build_incorrect_operands_count_msg(expected_count, types_stack.len()),
                     ..Default::default()
                 });
@@ -196,6 +204,7 @@ pub fn check_stacked(
                                 ),
                                 severity: Some(DiagnosticSeverity::ERROR),
                                 source: Some("wat".into()),
+                                code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
                                 message: format!("expected type `{expected}`, found `{received}`"),
                                 related_information: related.as_ref().map(|(range, message)| {
                                     vec![DiagnosticRelatedInformation {

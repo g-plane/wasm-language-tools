@@ -17,6 +17,7 @@ expression: response
         }
       },
       "severity": 1,
+      "code": "type-check",
       "source": "wat",
       "message": "expected 2 operands, found 3"
     }
