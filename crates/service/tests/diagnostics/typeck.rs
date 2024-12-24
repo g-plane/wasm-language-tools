@@ -304,8 +304,8 @@ fn block_type_in_stack() {
     let source = "
 (module
   (func (param i32 i32) (result i32)
-    (local.get 0)
-    (block (result i32)
+    (block (result i32 i32)
+      (local.get 0)
       (local.get 1))
     i32.add))
 ";
@@ -323,8 +323,8 @@ fn block_type_folded() {
 (module
   (func (param i32 i32) (result i32)
     (i32.add
-      (local.get 0)
-      (block (result i32)
+      (block (result i32 i32)
+        (local.get 0)
         (local.get 1)))))
 ";
     let mut service = LanguageService::default();
