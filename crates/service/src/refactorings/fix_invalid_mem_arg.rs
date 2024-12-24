@@ -1,6 +1,8 @@
 use crate::{files::FilesCtx, helpers, InternUri, LanguageService};
 use line_index::LineIndex;
-use lsp_types::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
+use lsp_types::{
+    CodeAction, CodeActionContext, CodeActionKind, NumberOrString, TextEdit, WorkspaceEdit,
+};
 use rowan::{ast::AstNode, SyntaxElementChildren, TextRange};
 use std::collections::HashMap;
 use wat_syntax::{ast::Operand, SyntaxElement, SyntaxKind, SyntaxNode, WatLanguage};
@@ -10,6 +12,7 @@ pub fn act(
     uri: InternUri,
     line_index: &LineIndex,
     node: &SyntaxNode,
+    context: &CodeActionContext,
 ) -> Option<CodeAction> {
     let mut text_edits = vec![];
 
@@ -86,6 +89,20 @@ pub fn act(
                 ..Default::default()
             }),
             is_preferred: Some(true),
+            diagnostics: Some(
+                context
+                    .diagnostics
+                    .iter()
+                    .filter(|diagnostic| {
+                        if let Some(NumberOrString::String(s)) = &diagnostic.code {
+                            s.starts_with("syntax/")
+                        } else {
+                            false
+                        }
+                    })
+                    .cloned()
+                    .collect(),
+            ),
             ..Default::default()
         })
     }

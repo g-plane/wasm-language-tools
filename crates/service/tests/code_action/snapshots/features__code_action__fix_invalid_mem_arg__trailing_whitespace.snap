@@ -6,6 +6,7 @@ expression: response
   {
     "title": "Fix invalid memory argument",
     "kind": "quickfix",
+    "diagnostics": [],
     "edit": {
       "changes": {
         "untitled:test": [

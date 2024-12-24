@@ -6,7 +6,22 @@ expression: response
   {
     "title": "Fix invalid memory argument",
     "kind": "quickfix",
-    "diagnostics": [],
+    "diagnostics": [
+      {
+        "range": {
+          "start": {
+            "line": 0,
+            "character": 0
+          },
+          "end": {
+            "line": 0,
+            "character": 0
+          }
+        },
+        "code": "syntax/operand",
+        "message": "syntax error: expected operand"
+      }
+    ],
     "edit": {
       "changes": {
         "untitled:test": [

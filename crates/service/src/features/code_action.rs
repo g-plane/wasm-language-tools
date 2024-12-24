@@ -10,13 +10,19 @@ impl LanguageService {
 
         let mut quickfix = params.context.only.is_none();
         let mut rewrite = params.context.only.is_none();
-        params.context.only.into_iter().flatten().for_each(|kind| {
-            if kind == CodeActionKind::QUICKFIX {
-                quickfix = true;
-            } else if kind == CodeActionKind::REFACTOR_REWRITE {
-                rewrite = true;
-            }
-        });
+        params
+            .context
+            .only
+            .iter()
+            .flatten()
+            .cloned()
+            .for_each(|kind| {
+                if kind == CodeActionKind::QUICKFIX {
+                    quickfix = true;
+                } else if kind == CodeActionKind::REFACTOR_REWRITE {
+                    rewrite = true;
+                }
+            });
 
         let mut actions = vec![];
         let range = helpers::lsp_range_to_rowan_range(&line_index, params.range)?;
@@ -25,7 +31,8 @@ impl LanguageService {
             match it.kind() {
                 SyntaxKind::PLAIN_INSTR => {
                     if quickfix {
-                        if let Some(action) = fix_invalid_mem_arg::act(self, uri, &line_index, &it)
+                        if let Some(action) =
+                            fix_invalid_mem_arg::act(self, uri, &line_index, &it, &params.context)
                         {
                             actions.push(CodeActionOrCommand::CodeAction(action));
                         }
