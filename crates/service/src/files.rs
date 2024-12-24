@@ -1,9 +1,9 @@
 use crate::InternUri;
 use line_index::{LineIndex, TextSize};
-use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range, Uri};
+use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString, Position, Range, Uri};
 use rowan::GreenNode;
 use std::rc::Rc;
-use wat_parser::Parser;
+use wat_parser::{Message, Parser};
 
 #[salsa::query_group(Files)]
 pub(crate) trait FilesCtx: salsa::Database {
@@ -47,6 +47,14 @@ fn parse(db: &dyn FilesCtx, uri: InternUri) -> (GreenNode, Vec<Diagnostic>) {
                 ),
                 severity: Some(DiagnosticSeverity::ERROR),
                 source: Some("wat".into()),
+                code: if let Message::Name(name) = error.message {
+                    Some(NumberOrString::String(format!(
+                        "syntax/{}",
+                        name.replace(' ', "-")
+                    )))
+                } else {
+                    None
+                },
                 message: format!("syntax error: {}", error.message),
                 ..Default::default()
             }

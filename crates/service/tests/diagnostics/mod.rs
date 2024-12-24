@@ -15,6 +15,8 @@ mod multi_modules;
 #[cfg(test)]
 mod shadow;
 #[cfg(test)]
+mod syntax;
+#[cfg(test)]
 mod typeck;
 #[cfg(test)]
 mod undef;

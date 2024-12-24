@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/syntax.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 2
+        },
+        "end": {
+          "line": 2,
+          "character": 8
+        }
+      },
+      "severity": 1,
+      "code": "syntax/module-field",
+      "source": "wat",
+      "message": "syntax error: expected module field"
+    }
+  ]
+}
