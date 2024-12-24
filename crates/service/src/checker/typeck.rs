@@ -18,7 +18,7 @@ use rowan::{
     TextRange,
 };
 use wat_syntax::{
-    ast::{Instr, PlainInstr},
+    ast::{BlockInstr, Instr, PlainInstr},
     SyntaxKind, SyntaxNode,
 };
 
@@ -153,8 +153,8 @@ pub fn check_stacked(
     }
 
     let mut types_stack = Vec::<(_, Instr)>::with_capacity(2);
-    children::<Instr>(node).for_each(|instr| {
-        if let Instr::Plain(plain_instr) = &instr {
+    children::<Instr>(node).for_each(|instr| match &instr {
+        Instr::Plain(plain_instr) => {
             let Some(instr_name) = plain_instr.instr_name() else {
                 return;
             };
@@ -230,6 +230,11 @@ pub fn check_stacked(
                 types_stack.extend(types.into_iter().map(|ty| (ty, instr.clone())));
             }
         }
+        Instr::Block(block_instr) => {
+            if let Some(types) = resolve_block_type(service, block_instr) {
+                types_stack.extend(types.into_iter().map(|ty| (ty, instr.clone())));
+            }
+        }
     });
 }
 
@@ -240,7 +245,7 @@ fn resolve_type(
     instr: &Instr,
 ) -> Option<Vec<OperandType>> {
     match instr {
-        Instr::Block(..) => None,
+        Instr::Block(block_instr) => resolve_block_type(service, block_instr),
         Instr::Plain(plain_instr) => {
             let instr_name = plain_instr.instr_name()?;
             match instr_name.text() {
@@ -281,6 +286,23 @@ fn resolve_type(
             }
         }
     }
+}
+
+fn resolve_block_type(
+    service: &LanguageService,
+    block_instr: &BlockInstr,
+) -> Option<Vec<OperandType>> {
+    block_instr
+        .syntax()
+        .children()
+        .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
+        .map(|block_type| {
+            service
+                .extract_block_type(block_type.green().into())
+                .into_iter()
+                .map(OperandType::Val)
+                .collect()
+        })
 }
 
 type ExpectedType = (OperandType, Option<(TextRange, String)>);

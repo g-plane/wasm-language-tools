@@ -297,3 +297,39 @@ fn undefined_local_and_global() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn block_type_in_stack() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func (param i32 i32) (result i32)
+    (local.get 0)
+    (block (result i32)
+      (local.get 1))
+    i32.add))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
+
+#[test]
+fn block_type_folded() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func (param i32 i32) (result i32)
+    (i32.add
+      (local.get 0)
+      (block (result i32)
+        (local.get 1)))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}

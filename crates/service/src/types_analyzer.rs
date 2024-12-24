@@ -11,7 +11,7 @@ use rowan::{
         support::{child, children, token},
         AstNode,
     },
-    GreenNode, Language, NodeOrToken,
+    GreenNode, GreenNodeData, Language, NodeOrToken,
 };
 use std::{
     fmt::{self, Debug},
@@ -30,6 +30,8 @@ pub(crate) trait TypesAnalyzerCtx: FilesCtx + SymbolTablesCtx {
     #[salsa::memoized]
     fn extract_global_type(&self, node: GreenNode) -> Option<ValType>;
     #[salsa::memoized]
+    fn extract_block_type(&self, node: GreenNode) -> Vec<ValType>;
+    #[salsa::memoized]
     fn extract_sig(&self, node: GreenNode) -> FuncSig;
 
     #[salsa::memoized]
@@ -42,10 +44,10 @@ pub(crate) trait TypesAnalyzerCtx: FilesCtx + SymbolTablesCtx {
     fn render_func_header(&self, name: Option<InternIdent>, signature: Option<FuncSig>) -> String;
 }
 fn extract_type(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<ValType> {
-    node.clone().try_into().ok().or_else(|| {
+    (&*node).try_into().ok().or_else(|| {
         node.children().find_map(|child| match child {
             NodeOrToken::Node(node) if node.kind() == SyntaxKind::VAL_TYPE.into() => {
-                node.to_owned().try_into().ok()
+                node.try_into().ok()
             }
             _ => None,
         })
@@ -59,6 +61,22 @@ fn extract_global_type(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<Val
             _ => None,
         })
         .and_then(|global_type| db.extract_type(global_type.to_owned()))
+}
+
+fn extract_block_type(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Vec<ValType> {
+    node.children()
+        .filter_map(|element| match element {
+            NodeOrToken::Node(node) if node.kind() == SyntaxKind::RESULT.into() => Some(node),
+            _ => None,
+        })
+        .flat_map(|child| child.children())
+        .filter_map(|element| match element {
+            NodeOrToken::Node(node) if node.kind() == SyntaxKind::VAL_TYPE.into() => {
+                node.try_into().ok()
+            }
+            _ => None,
+        })
+        .collect()
 }
 
 fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
@@ -277,9 +295,9 @@ impl From<AstValType> for ValType {
     }
 }
 
-impl TryFrom<GreenNode> for ValType {
+impl TryFrom<&GreenNodeData> for ValType {
     type Error = ();
-    fn try_from(node: GreenNode) -> std::result::Result<Self, Self::Error> {
+    fn try_from(node: &GreenNodeData) -> std::result::Result<Self, Self::Error> {
         node.children()
             .find_map(|child| {
                 if let NodeOrToken::Token(token) = child {
