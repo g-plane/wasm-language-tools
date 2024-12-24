@@ -21,7 +21,7 @@ ROOT@0..31
     R_PAREN@29..30 ")"
   WHITESPACE@30..31 "\n"
 
-error: expected index (identifier or unsigned integer)
+error: expected idx
   ┌─ data-malformed.wat:2:16
   │
 2 │   (data (memory) "")

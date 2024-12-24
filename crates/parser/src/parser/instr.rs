@@ -8,11 +8,10 @@ use super::{
     ty::{heap_type, result},
     GreenElement, GreenResult, Input,
 };
-use crate::error::SyntaxError;
+use crate::error::{Message, SyntaxError};
 use wat_syntax::SyntaxKind::*;
 use winnow::{
     combinator::{alt, dispatch, fail, opt, peek, preceded, repeat, repeat_till},
-    error::{StrContext, StrContextValue},
     token::any,
     Parser,
 };
@@ -365,7 +364,7 @@ fn plain_instr(input: &mut Input) -> GreenResult {
 }
 
 fn instr_name(input: &mut Input) -> GreenResult {
-    word.context(StrContext::Label("instruction name"))
+    word.context(Message::Description("invalid instruction name"))
         .parse_next(input)
         .map(|text| tok(INSTR_NAME, text))
 }
@@ -386,9 +385,7 @@ fn operand<'s>(allow_instr: bool) -> impl Parser<Input<'s>, GreenElement, Syntax
         _ => fail,
     }
     .map(|child| node(OPERAND, [child]))
-    .context(StrContext::Expected(StrContextValue::Description(
-        "operand",
-    )))
+    .context(Message::Name("operand"))
 }
 
 fn mem_arg(input: &mut Input) -> GreenResult {

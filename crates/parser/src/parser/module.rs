@@ -7,11 +7,10 @@ use super::{
     ty::{func_type, global_type, memory_type, param, ref_type, result, table_type, val_type},
     GreenElement, GreenResult, Input,
 };
-use crate::error::SyntaxError;
+use crate::error::{Message, SyntaxError};
 use wat_syntax::SyntaxKind::{self, *};
 use winnow::{
     combinator::{alt, dispatch, empty, fail, opt, peek, preceded, repeat},
-    error::{StrContext, StrContextValue},
     token::any,
     Parser,
 };
@@ -70,9 +69,7 @@ fn module_field(input: &mut Input) -> GreenResult {
         "elem" => module_field_elem,
         _ => fail,
     }
-    .context(StrContext::Expected(StrContextValue::Description(
-        "module field",
-    )))
+    .context(Message::Name("module field"))
     .parse_next(input)
 }
 
@@ -504,9 +501,7 @@ fn import_desc(input: &mut Input) -> GreenResult {
         "table" => import_desc_table_type,
         _ => fail,
     }
-    .context(StrContext::Expected(StrContextValue::Description(
-        "import descriptor",
-    )))
+    .context(Message::Name("import descriptor"))
     .parse_next(input)
 }
 
@@ -622,9 +617,7 @@ fn export_desc(input: &mut Input) -> GreenResult {
         "global" => export_desc_variant("global", EXPORT_DESC_GLOBAL),
         _ => fail,
     }
-    .context(StrContext::Expected(StrContextValue::Description(
-        "export desc",
-    )))
+    .context(Message::Name("export descriptor"))
     .parse_next(input)
 }
 
@@ -793,9 +786,7 @@ fn elem_expr(input: &mut Input) -> GreenResult {
 
 fn index(input: &mut Input) -> GreenResult {
     alt((ident, unsigned_int))
-        .context(StrContext::Expected(StrContextValue::Description(
-            "index (identifier or unsigned integer)",
-        )))
+        .context(Message::Name("idx"))
         .parse_next(input)
         .map(|child| node(INDEX, [child]))
 }
@@ -866,7 +857,7 @@ fn offset(input: &mut Input) -> GreenResult {
             }),
         preceded(peek('('), instr).map(|child| node(OFFSET, [child])),
     ))
-    .context(StrContext::Expected(StrContextValue::Description("offset")))
+    .context(Message::Name("offset"))
     .parse_next(input)
 }
 

@@ -3,12 +3,12 @@ use self::{
     module::module,
     token::{block_comment, error_term, error_token, line_comment, trivias, ws},
 };
-use crate::error::SyntaxError;
+use crate::error::{Message, SyntaxError};
 use rowan::{GreenNode, GreenToken, NodeOrToken};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 use winnow::{
     combinator::{alt, repeat},
-    error::{ErrMode, FromRecoverableError, StrContext},
+    error::{ErrMode, FromRecoverableError},
     stream::{Recover, Recoverable, Stream},
     Located, PResult, Parser as WinnowParser, RecoverableParser,
 };
@@ -98,7 +98,7 @@ where
 {
     move |input: &mut Input<'s>| {
         let mut error_token_parser =
-            error_token(false).context(StrContext::Label("unexpected token"));
+            error_token(false).context(Message::Description("unexpected token"));
         let mut error_term_parser = error_term(allowed_names);
         let mut tokens = Vec::with_capacity(1);
         loop {
@@ -166,7 +166,7 @@ where
 {
     move |input: &mut Input<'s>| {
         let mut error_token_parser =
-            error_token(false).context(StrContext::Label("unexpected token"));
+            error_token(false).context(Message::Description("unexpected token"));
         let mut error_term_parser = error_term(allowed_names);
         let mut tokens = Vec::with_capacity(1);
 

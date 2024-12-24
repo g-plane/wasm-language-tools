@@ -463,7 +463,7 @@ error: expected value type
 16 │   (func (param $p i))
    │                   ^
 
-error: expected index (identifier or unsigned integer)
+error: expected idx
    ┌─ func-malformed.wat:17:15
    │
 17 │   (func (type $))

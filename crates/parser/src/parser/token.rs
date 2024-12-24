@@ -1,10 +1,10 @@
 use super::{tok, GreenElement, GreenResult, Input};
-use crate::error::SyntaxError;
+use crate::error::{Message, SyntaxError};
 use wat_syntax::SyntaxKind::*;
 use winnow::{
     ascii::{hex_digit0, line_ending, multispace1, take_escaped, till_line_ending},
     combinator::{alt, dispatch, empty, eof, fail, not, opt, peek, preceded, repeat, repeat_till},
-    error::{ErrMode, FromRecoverableError, StrContext, StrContextValue},
+    error::{ErrMode, FromRecoverableError},
     stream::{AsChar, Recover, Stream},
     token::{any, none_of, one_of, take_till, take_until, take_while},
     PResult, Parser,
@@ -12,13 +12,14 @@ use winnow::{
 
 pub(super) fn l_paren(input: &mut Input) -> GreenResult {
     '('.map(|_| tok(L_PAREN, "("))
-        .context(StrContext::Expected(StrContextValue::CharLiteral('(')))
+        .context(Message::Char('('))
         .parse_next(input)
 }
 
 pub(super) fn r_paren(input: &mut Input) -> PResult<Option<Vec<GreenElement>>, SyntaxError> {
-    let mut parser = ')'.context(StrContext::Expected(StrContextValue::CharLiteral(')')));
-    let mut error_token_parser = error_token(false).context(StrContext::Label("unexpected token"));
+    let mut parser = ')'.context(Message::Char(')'));
+    let mut error_token_parser =
+        error_token(false).context(Message::Description("unexpected token"));
     let mut tokens = Vec::with_capacity(1);
     let start = input.checkpoint();
     loop {
@@ -131,9 +132,7 @@ pub(super) fn keyword<'s>(
 ) -> impl Parser<Input<'s>, GreenElement, SyntaxError> {
     word.verify(move |word: &str| word == keyword)
         .map(|text| tok(KEYWORD, text))
-        .context(StrContext::Expected(StrContextValue::StringLiteral(
-            keyword,
-        )))
+        .context(Message::Str(keyword))
 }
 
 pub(super) fn ident(input: &mut Input) -> GreenResult {
@@ -142,9 +141,7 @@ pub(super) fn ident(input: &mut Input) -> GreenResult {
 fn ident_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
     ('$', take_while(1.., is_id_char))
         .take()
-        .context(StrContext::Expected(StrContextValue::Description(
-            "identifier",
-        )))
+        .context(Message::Name("identifier"))
         .parse_next(input)
 }
 
@@ -174,9 +171,7 @@ pub fn is_id_char(c: char) -> bool {
 
 pub(super) fn string(input: &mut Input) -> GreenResult {
     string_impl
-        .context(StrContext::Expected(StrContextValue::Description(
-            "string literal",
-        )))
+        .context(Message::Name("string literal"))
         .parse_next(input)
         .map(|text| tok(STRING, text))
 }

@@ -3,10 +3,10 @@ use super::{
     token::{ident, keyword, l_paren, r_paren, trivias_prefixed, unsigned_int, word},
     GreenResult, Input,
 };
+use crate::error::Message;
 use wat_syntax::SyntaxKind::*;
 use winnow::{
     combinator::{alt, opt, repeat},
-    error::{StrContext, StrContextValue},
     Parser,
 };
 
@@ -15,9 +15,7 @@ pub(super) fn ref_type(input: &mut Input) -> GreenResult {
         "funcref" | "externref" => Some(tok(REF_TYPE, word)),
         _ => None,
     })
-    .context(StrContext::Expected(StrContextValue::Description(
-        "ref type",
-    )))
+    .context(Message::Name("ref type"))
     .parse_next(input)
 }
 
@@ -28,9 +26,7 @@ pub(super) fn val_type(input: &mut Input) -> GreenResult {
         "funcref" | "externref" => Some(tok(REF_TYPE, word)),
         _ => None,
     })
-    .context(StrContext::Expected(StrContextValue::Description(
-        "value type",
-    )))
+    .context(Message::Name("value type"))
     .parse_next(input)
     .map(|ty| node(VAL_TYPE, [ty]))
 }
@@ -119,9 +115,7 @@ pub(super) fn result(input: &mut Input) -> GreenResult {
 
 pub(super) fn table_type(input: &mut Input) -> GreenResult {
     (limits, must(retry_once(ref_type, [])))
-        .context(StrContext::Expected(StrContextValue::Description(
-            "table type",
-        )))
+        .context(Message::Name("table type"))
         .parse_next(input)
         .map(|(limits, ref_type)| {
             if let Some(mut ref_type) = ref_type {
@@ -136,9 +130,7 @@ pub(super) fn table_type(input: &mut Input) -> GreenResult {
 
 pub(super) fn memory_type(input: &mut Input) -> GreenResult {
     limits
-        .context(StrContext::Expected(StrContextValue::Description(
-            "memory type",
-        )))
+        .context(Message::Name("memory type"))
         .parse_next(input)
         .map(|limits| node(MEMORY_TYPE, [limits]))
 }

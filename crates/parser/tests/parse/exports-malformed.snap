@@ -77,25 +77,25 @@ ROOT@0..123
     R_PAREN@121..122 ")"
   WHITESPACE@122..123 "\n"
 
-error: expected export desc
+error: expected export descriptor
   ┌─ exports-malformed.wat:2:14
   │
 2 │   (export "" (fu))
   │              ^^^^
 
-error: expected index (identifier or unsigned integer)
+error: expected idx
   ┌─ exports-malformed.wat:3:20
   │
 3 │   (export "" (func $))
   │                    ^
 
-error: expected export desc
+error: expected export descriptor
   ┌─ exports-malformed.wat:4:13
   │
 4 │   (export "")
   │             ^
 
-error: expected index (identifier or unsigned integer)
+error: expected idx
   ┌─ exports-malformed.wat:5:19
   │
 5 │   (export "" (func))
@@ -107,7 +107,7 @@ error: expected string literal
 6 │   (export (func))
   │           ^
 
-error: expected index (identifier or unsigned integer)
+error: expected idx
   ┌─ exports-malformed.wat:6:16
   │
 6 │   (export (func))

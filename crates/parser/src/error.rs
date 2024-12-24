@@ -1,6 +1,7 @@
 use crate::parser::Input;
+use std::fmt;
 use winnow::{
-    error::{AddContext, FromRecoverableError, ParserError, StrContext},
+    error::{AddContext, FromRecoverableError, ParserError},
     stream::{Location, Stream},
 };
 
@@ -9,7 +10,7 @@ use winnow::{
 pub struct SyntaxError {
     pub start: usize,
     pub end: usize,
-    pub message: StrContext,
+    pub message: Message,
 }
 
 impl SyntaxError {
@@ -17,7 +18,7 @@ impl SyntaxError {
         Self {
             start: 0,
             end: 0,
-            message: StrContext::Label("<unknown syntax error>"),
+            message: Message::Description("<unknown syntax error>"),
         }
     }
 }
@@ -34,15 +35,15 @@ impl FromRecoverableError<Input<'_>, SyntaxError> for SyntaxError {
     }
 }
 
-impl AddContext<Input<'_>, StrContext> for SyntaxError {
+impl AddContext<Input<'_>, Message> for SyntaxError {
     fn add_context(
         mut self,
         input: &Input,
         _token_start: &<Input as Stream>::Checkpoint,
-        context: StrContext,
+        message: Message,
     ) -> Self {
         self.start = input.location();
-        self.message = context;
+        self.message = message;
         self
     }
 }
@@ -59,5 +60,25 @@ impl ParserError<Input<'_>> for SyntaxError {
         _kind: winnow::error::ErrorKind,
     ) -> Self {
         self
+    }
+}
+
+#[derive(Clone, Debug)]
+/// Syntax error message.
+pub enum Message {
+    Char(char),
+    Str(&'static str),
+    Name(&'static str),
+    Description(&'static str),
+}
+
+impl fmt::Display for Message {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Char(c) => write!(f, "expected `{c}`"),
+            Self::Str(c) => write!(f, "expected `{c}`"),
+            Self::Name(c) => write!(f, "expected {c}"),
+            Self::Description(c) => c.fmt(f),
+        }
     }
 }

@@ -150,13 +150,13 @@ error: invalid instruction name
 6 │   (elem funcref ())
   │                 ^^
 
-error: expected index (identifier or unsigned integer)
+error: expected idx
   ┌─ elem-malformed.wat:8:14
   │
 8 │   (elem func ())
   │              ^^
 
-error: expected index (identifier or unsigned integer)
+error: expected idx
   ┌─ elem-malformed.wat:9:15
   │
 9 │   (elem (table))
