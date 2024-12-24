@@ -57,10 +57,11 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 )
             ) && find_leading_l_paren(token).is_some()
             {
-                ctx.reserve(3);
+                ctx.reserve(5);
                 ctx.push(CmpCtx::KeywordImExport);
                 ctx.push(CmpCtx::KeywordType);
-                ctx.push(CmpCtx::KeywordParamResult);
+                ctx.push(CmpCtx::KeywordParam);
+                ctx.push(CmpCtx::KeywordResult);
                 ctx.push(CmpCtx::KeywordLocal);
             }
             if matches!(
@@ -107,11 +108,31 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                                 )
                             ) && find_leading_l_paren(token).is_some()
                             {
-                                ctx.reserve(3);
+                                ctx.reserve(5);
                                 ctx.push(CmpCtx::KeywordImExport);
                                 ctx.push(CmpCtx::KeywordType);
-                                ctx.push(CmpCtx::KeywordParamResult);
+                                ctx.push(CmpCtx::KeywordParam);
+                                ctx.push(CmpCtx::KeywordResult);
                                 ctx.push(CmpCtx::KeywordLocal);
+                            }
+                        }
+                        SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_IF | SyntaxKind::BLOCK_LOOP => {
+                            let prev_node = parent
+                                .siblings_with_tokens(Direction::Prev)
+                                .skip(1)
+                                .find(|element| matches!(element, SyntaxElement::Node(..)))
+                                .map(|element| element.kind());
+                            if !matches!(
+                                prev_node,
+                                Some(
+                                    SyntaxKind::PLAIN_INSTR
+                                        | SyntaxKind::BLOCK_BLOCK
+                                        | SyntaxKind::BLOCK_IF
+                                        | SyntaxKind::BLOCK_LOOP
+                                )
+                            ) && find_leading_l_paren(token).is_some()
+                            {
+                                ctx.push(CmpCtx::KeywordResult);
                             }
                         }
                         SyntaxKind::OFFSET => {
@@ -143,6 +164,18 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 add_cmp_ctx_for_operands(instr_name.text(), &parent, &mut ctx);
             }
         }
+        SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_IF | SyntaxKind::BLOCK_LOOP => {
+            if find_leading_l_paren(token).is_some() {
+                if token
+                    .siblings_with_tokens(Direction::Prev)
+                    .skip(1)
+                    .all(|element| !matches!(element, SyntaxElement::Node(..)))
+                {
+                    ctx.push(CmpCtx::KeywordResult);
+                }
+                ctx.push(CmpCtx::Instr);
+            }
+        }
         SyntaxKind::OPERAND => {
             let instr = parent
                 .ancestors()
@@ -158,7 +191,9 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         SyntaxKind::TYPE_USE => ctx.push(CmpCtx::FuncType),
         SyntaxKind::FUNC_TYPE => {
             if find_leading_l_paren(token).is_some() {
-                ctx.push(CmpCtx::KeywordParamResult);
+                ctx.reserve(2);
+                ctx.push(CmpCtx::KeywordParam);
+                ctx.push(CmpCtx::KeywordResult);
             }
         }
         SyntaxKind::INDEX => {
@@ -258,7 +293,9 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         SyntaxKind::TABLE_TYPE | SyntaxKind::IMPORT_DESC_TABLE_TYPE => ctx.push(CmpCtx::RefType),
         SyntaxKind::IMPORT_DESC_TYPE_USE => {
             if find_leading_l_paren(token).is_some() {
-                ctx.push(CmpCtx::KeywordParamResult);
+                ctx.reserve(3);
+                ctx.push(CmpCtx::KeywordParam);
+                ctx.push(CmpCtx::KeywordResult);
                 ctx.push(CmpCtx::KeywordType);
             }
         }
@@ -348,7 +385,8 @@ enum CmpCtx {
     KeywordModuleField,
     KeywordImExport,
     KeywordType,
-    KeywordParamResult,
+    KeywordParam,
+    KeywordResult,
     KeywordLocal,
     KeywordMut,
     KeywordPortDesc,
@@ -666,13 +704,16 @@ fn get_cmp_list(
                     kind: Some(CompletionItemKind::KEYWORD),
                     ..Default::default()
                 }),
-                CmpCtx::KeywordParamResult => {
-                    items.extend(["param", "result"].iter().map(|keyword| CompletionItem {
-                        label: keyword.to_string(),
-                        kind: Some(CompletionItemKind::KEYWORD),
-                        ..Default::default()
-                    }));
-                }
+                CmpCtx::KeywordParam => items.push(CompletionItem {
+                    label: "param".to_string(),
+                    kind: Some(CompletionItemKind::KEYWORD),
+                    ..Default::default()
+                }),
+                CmpCtx::KeywordResult => items.push(CompletionItem {
+                    label: "result".to_string(),
+                    kind: Some(CompletionItemKind::KEYWORD),
+                    ..Default::default()
+                }),
                 CmpCtx::KeywordLocal => items.push(CompletionItem {
                     label: "local".to_string(),
                     kind: Some(CompletionItemKind::KEYWORD),

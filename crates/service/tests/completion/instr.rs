@@ -226,3 +226,31 @@ fn nested() {
     let response = service.completion(create_params(uri, Position::new(3, 17)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn in_block() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (block (i32.const 0) ()))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 32)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn after_block_type() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (block (result i32) ()))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 31)));
+    assert_json_snapshot!(response);
+}

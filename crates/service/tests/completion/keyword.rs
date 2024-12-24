@@ -162,3 +162,23 @@ fn module_field_memory_keyword_without_paren() {
     let response = service.completion(create_params(uri, Position::new(0, 16)));
     assert!(response.is_none());
 }
+
+#[test]
+fn block_type_result_keyword_after_paren() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "(module (func (block ())))";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(0, 22)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn block_type_result_keyword_incomplete() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "(module (func (block (r))))";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(0, 23)));
+    assert_json_snapshot!(response);
+}
