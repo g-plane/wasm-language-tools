@@ -21,6 +21,8 @@ mod typeck;
 #[cfg(test)]
 mod undef;
 #[cfg(test)]
+mod unknown_instr;
+#[cfg(test)]
 mod unused;
 
 fn create_params(uri: Uri) -> DocumentDiagnosticParams {

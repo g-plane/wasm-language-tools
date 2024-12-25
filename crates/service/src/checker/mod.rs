@@ -9,6 +9,7 @@ mod multi_modules;
 mod shadow;
 mod typeck;
 mod undef;
+mod unknown_instr;
 mod unused;
 
 pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
@@ -35,6 +36,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
             );
         }
         SyntaxKind::PLAIN_INSTR => {
+            unknown_instr::check(&mut diagnostics, &line_index, &node);
             literal_operands::check(&mut diagnostics, &line_index, &node);
             typeck::check_folded(
                 &mut diagnostics,
