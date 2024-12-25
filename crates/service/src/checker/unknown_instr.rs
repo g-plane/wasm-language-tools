@@ -1,5 +1,4 @@
 use crate::{data_set::INSTR_NAMES, helpers};
-use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
 use rowan::ast::support;
@@ -13,16 +12,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
     };
     let instr_name = token.text();
     if !INSTR_NAMES.contains(&instr_name) {
-        let matcher = SkimMatcherV2::default();
-        let message = if let Some((_, guess)) = INSTR_NAMES
-            .iter()
-            .filter_map(|name| {
-                matcher
-                    .fuzzy_match(name, instr_name)
-                    .map(|score| (score, name))
-            })
-            .max_by_key(|(score, _)| *score)
-        {
+        let message = if let Some(guess) = helpers::fuzzy_search(INSTR_NAMES, instr_name) {
             format!("unknown instruction `{instr_name}`, do you mean `{guess}`?")
         } else {
             format!("unknown instruction `{instr_name}`")

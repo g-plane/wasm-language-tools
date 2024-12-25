@@ -34,6 +34,24 @@ pub fn lsp_range_to_rowan_range(line_index: &LineIndex, range: Range) -> Option<
         .map(|(start, end)| TextRange::new(TextSize::new(start.into()), TextSize::new(end.into())))
 }
 
+pub fn fuzzy_search<S>(haystack: impl IntoIterator<Item = S>, needle: &str) -> Option<S>
+where
+    S: AsRef<str>,
+{
+    use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
+
+    let matcher = SkimMatcherV2::default();
+    haystack
+        .into_iter()
+        .filter_map(|name| {
+            matcher
+                .fuzzy_match(name.as_ref(), needle)
+                .map(|score| (score, name))
+        })
+        .max_by_key(|(score, _)| *score)
+        .map(|(_, guess)| guess)
+}
+
 pub(crate) mod ast {
     use rowan::{ast::support, Direction, GreenNode, NodeOrToken, TextSize, TokenAtOffset};
     use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
