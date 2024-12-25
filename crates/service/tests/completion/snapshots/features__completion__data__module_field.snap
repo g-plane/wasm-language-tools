@@ -92,6 +92,14 @@ expression: response
     "kind": 24
   },
   {
+    "label": "table.get",
+    "kind": 24
+  },
+  {
+    "label": "table.set",
+    "kind": 24
+  },
+  {
     "label": "i32.load",
     "kind": 24
   },
@@ -700,6 +708,110 @@ expression: response
     "kind": 24
   },
   {
+    "label": "i32.extend8_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.extend16_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.extend8_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.extend16_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.extend32_s",
+    "kind": 24
+  },
+  {
+    "label": "ref.null",
+    "kind": 24
+  },
+  {
+    "label": "ref.is_null",
+    "kind": 24
+  },
+  {
+    "label": "ref.func",
+    "kind": 24
+  },
+  {
+    "label": "i32.trunc_sat_f32_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.trunc_sat_f32_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.trunc_sat_f64_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.trunc_sat_f64_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.trunc_sat_f32_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.trunc_sat_f32_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.trunc_sat_f64_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.trunc_sat_f64_u",
+    "kind": 24
+  },
+  {
+    "label": "memory.init",
+    "kind": 24
+  },
+  {
+    "label": "data.drop",
+    "kind": 24
+  },
+  {
+    "label": "memory.copy",
+    "kind": 24
+  },
+  {
+    "label": "memory.fill",
+    "kind": 24
+  },
+  {
+    "label": "table.init",
+    "kind": 24
+  },
+  {
+    "label": "elem.drop",
+    "kind": 24
+  },
+  {
+    "label": "table.copy",
+    "kind": 24
+  },
+  {
+    "label": "table.grow",
+    "kind": 24
+  },
+  {
+    "label": "table.size",
+    "kind": 24
+  },
+  {
+    "label": "table.fill",
+    "kind": 24
+  },
+  {
     "label": "v128.load",
     "kind": 24
   },
@@ -1017,6 +1129,10 @@ expression: response
   },
   {
     "label": "f32x4.convert_i32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "v128.load8_lane",
     "kind": 24
   }
 ]

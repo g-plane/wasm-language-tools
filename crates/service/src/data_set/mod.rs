@@ -5,7 +5,7 @@ mod instr_meta;
 pub(crate) static VALUE_TYPES: [&str; 7] =
     ["i32", "i64", "f32", "f64", "v128", "funcref", "externref"];
 
-pub(crate) static INSTR_NAMES: [&str; 252] = [
+pub(crate) static INSTR_NAMES: [&str; 281] = [
     "unreachable",
     "nop",
     "block",
@@ -26,6 +26,8 @@ pub(crate) static INSTR_NAMES: [&str; 252] = [
     "local.tee",
     "global.get",
     "global.set",
+    "table.get",
+    "table.set",
     "i32.load",
     "i64.load",
     "f32.load",
@@ -178,6 +180,32 @@ pub(crate) static INSTR_NAMES: [&str; 252] = [
     "i64.reinterpret_f64",
     "f32.reinterpret_i32",
     "f64.reinterpret_i64",
+    "i32.extend8_s",
+    "i32.extend16_s",
+    "i64.extend8_s",
+    "i64.extend16_s",
+    "i64.extend32_s",
+    "ref.null",
+    "ref.is_null",
+    "ref.func",
+    "i32.trunc_sat_f32_s",
+    "i32.trunc_sat_f32_u",
+    "i32.trunc_sat_f64_s",
+    "i32.trunc_sat_f64_u",
+    "i64.trunc_sat_f32_s",
+    "i64.trunc_sat_f32_u",
+    "i64.trunc_sat_f64_s",
+    "i64.trunc_sat_f64_u",
+    "memory.init",
+    "data.drop",
+    "memory.copy",
+    "memory.fill",
+    "table.init",
+    "elem.drop",
+    "table.copy",
+    "table.grow",
+    "table.size",
+    "table.fill",
     "v128.load",
     "v128.store",
     "v128.const",
@@ -258,6 +286,7 @@ pub(crate) static INSTR_NAMES: [&str; 252] = [
     "i32x4.trunc_sat_f32x4_u",
     "f32x4.convert_i32x4_s",
     "f32x4.convert_i32x4_u",
+    "v128.load8_lane",
 ];
 
 pub(crate) static MODULE_FIELDS: [&str; 10] = [
