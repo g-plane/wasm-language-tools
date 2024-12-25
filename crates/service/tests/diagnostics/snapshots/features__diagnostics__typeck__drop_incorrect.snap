@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/typeck.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 4
+        },
+        "end": {
+          "line": 3,
+          "character": 8
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected 1 operand, found 0"
+    }
+  ]
+}

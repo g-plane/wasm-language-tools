@@ -333,3 +333,34 @@ fn block_type_folded() {
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
+
+#[test]
+fn drop_correct() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    i64.const 0
+    drop))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
+
+#[test]
+fn drop_incorrect() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    drop))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
