@@ -16,7 +16,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
         InstrMeta {
             bin_op: "0x1A",
             operands_count: 0,
-            params: vec![OperandType::Generic],
+            params: vec![OperandType::Any],
             results: vec![],
         },
     );
@@ -26,11 +26,11 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
             bin_op: "0x1B",
             operands_count: 0,
             params: vec![
-                OperandType::Generic,
-                OperandType::Generic,
+                OperandType::Any,
+                OperandType::Any,
                 OperandType::Val(ValType::I32),
             ],
-            results: vec![OperandType::Generic],
+            results: vec![OperandType::Any],
         },
     );
     map.insert(
@@ -39,11 +39,11 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
             bin_op: "0x1C",
             operands_count: 1,
             params: vec![
-                OperandType::Generic,
-                OperandType::Generic,
+                OperandType::Any,
+                OperandType::Any,
                 OperandType::Val(ValType::I32),
             ],
-            results: vec![OperandType::Generic],
+            results: vec![OperandType::Any],
         },
     );
     map.insert(
@@ -52,7 +52,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
             bin_op: "0x20",
             operands_count: 1,
             params: vec![],
-            results: vec![OperandType::Generic],
+            results: vec![OperandType::Any],
         },
     );
     map.insert(
@@ -60,7 +60,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
         InstrMeta {
             bin_op: "0x21",
             operands_count: 1,
-            params: vec![OperandType::Generic],
+            params: vec![OperandType::Any],
             results: vec![],
         },
     );
@@ -69,8 +69,8 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
         InstrMeta {
             bin_op: "0x22",
             operands_count: 1,
-            params: vec![OperandType::Generic],
-            results: vec![OperandType::Generic],
+            params: vec![OperandType::Any],
+            results: vec![OperandType::Any],
         },
     );
     map.insert(
@@ -79,7 +79,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
             bin_op: "0x23",
             operands_count: 1,
             params: vec![],
-            results: vec![OperandType::Generic],
+            results: vec![OperandType::Any],
         },
     );
     map.insert(
@@ -87,7 +87,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
         InstrMeta {
             bin_op: "0x24",
             operands_count: 1,
-            params: vec![OperandType::Generic],
+            params: vec![OperandType::Any],
             results: vec![],
         },
     );
@@ -97,7 +97,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
             bin_op: "0x25",
             operands_count: 1,
             params: vec![OperandType::Val(ValType::I32)],
-            results: vec![OperandType::Generic],
+            results: vec![OperandType::Any],
         },
     );
     map.insert(
@@ -105,7 +105,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
         InstrMeta {
             bin_op: "0x26",
             operands_count: 1,
-            params: vec![OperandType::Val(ValType::I32), OperandType::Generic],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Any],
             results: vec![],
         },
     );
@@ -1783,7 +1783,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
             bin_op: "0xD0",
             operands_count: 1,
             params: vec![],
-            results: vec![OperandType::Generic],
+            results: vec![OperandType::Any],
         },
     );
     map.insert(
@@ -1791,7 +1791,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
         InstrMeta {
             bin_op: "0xD1",
             operands_count: 0,
-            params: vec![OperandType::Generic],
+            params: vec![OperandType::Any],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
@@ -1964,7 +1964,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
         InstrMeta {
             bin_op: "0xFC 0x0F",
             operands_count: 1,
-            params: vec![OperandType::Generic, OperandType::Val(ValType::I32)],
+            params: vec![OperandType::Any, OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
@@ -1984,7 +1984,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
             operands_count: 1,
             params: vec![
                 OperandType::Val(ValType::I32),
-                OperandType::Generic,
+                OperandType::Any,
                 OperandType::Val(ValType::I32),
             ],
             results: vec![],

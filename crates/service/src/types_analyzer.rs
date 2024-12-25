@@ -329,7 +329,7 @@ impl TryFrom<&GreenNodeData> for ValType {
 #[derive(Clone, Debug)]
 pub(crate) enum OperandType {
     Val(ValType),
-    Generic,
+    Any,
     Never,
 }
 
