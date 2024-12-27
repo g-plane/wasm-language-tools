@@ -33,12 +33,12 @@ pub fn check(
     check_sequence(diags, service, uri, line_index, symbol_table, sequence);
 }
 
-pub fn unfold(node: SyntaxNode, stack: &mut Vec<Instr>) {
+pub fn unfold(node: SyntaxNode, sequence: &mut Vec<Instr>) {
     node.children()
         .filter_map(|child| child.first_child().and_then(Instr::cast))
-        .for_each(|child| unfold(child.syntax().clone(), stack));
+        .for_each(|child| unfold(child.syntax().clone(), sequence));
     if let Some(node) = Instr::cast(node) {
-        stack.push(node);
+        sequence.push(node);
     }
 }
 
