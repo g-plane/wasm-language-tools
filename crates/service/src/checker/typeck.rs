@@ -10,13 +10,7 @@ use line_index::LineIndex;
 use lsp_types::{
     Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, NumberOrString,
 };
-use rowan::{
-    ast::{
-        support::{children, token},
-        AstNode,
-    },
-    TextRange,
-};
+use rowan::{ast::AstNode, TextRange};
 use wat_syntax::{
     ast::{BlockInstr, Instr, PlainInstr},
     SyntaxKind, SyntaxNode,
@@ -24,111 +18,7 @@ use wat_syntax::{
 
 const DIAGNOSTIC_CODE: &str = "type-check";
 
-pub fn check_folded(
-    diags: &mut Vec<Diagnostic>,
-    service: &LanguageService,
-    uri: InternUri,
-    line_index: &LineIndex,
-    node: SyntaxNode,
-    symbol_table: &SymbolTable,
-) {
-    let Some(instr) = PlainInstr::cast(node) else {
-        return;
-    };
-    let Some(instr_name) = instr.instr_name() else {
-        return;
-    };
-    if instr.l_paren_token().is_none() {
-        return;
-    }
-    let is_call = instr_name.text() == "call";
-    let meta = data_set::INSTR_METAS.get(instr_name.text());
-
-    let skipped_count = if is_call {
-        1
-    } else {
-        meta.map(|meta| meta.operands_count).unwrap_or_default()
-    };
-    let received_types =
-        instr
-            .operands()
-            .skip(skipped_count)
-            .fold(vec![], |mut received, operand| {
-                if let Some(instr) = operand.instr() {
-                    if let Some(types) = resolve_type(service, uri, symbol_table, &instr) {
-                        received.extend(types.into_iter().map(|ty| (ty, operand.clone())));
-                    }
-                } else if meta.is_some() {
-                    diags.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(
-                            line_index,
-                            operand.syntax().text_range(),
-                        ),
-                        severity: Some(DiagnosticSeverity::ERROR),
-                        source: Some("wat".into()),
-                        code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-                        message: "expected instr".into(),
-                        ..Default::default()
-                    });
-                }
-                received
-            });
-    let Some(params) = resolve_expected_types(service, uri, symbol_table, &instr, meta) else {
-        return;
-    };
-
-    let expected_count = params.len() + skipped_count;
-    let received_count = received_types.len()
-        + instr
-            .operands()
-            .filter(|operand| operand.instr().is_none())
-            .count();
-    if expected_count != received_count {
-        diags.push(Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(line_index, instr.syntax().text_range()),
-            severity: Some(DiagnosticSeverity::ERROR),
-            source: Some("wat".into()),
-            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-            message: build_incorrect_operands_count_msg(expected_count, received_count),
-            ..Default::default()
-        });
-    }
-
-    let type_mismatches = params.iter().zip(received_types.iter()).filter_map(|pair| {
-        if let ((OperandType::Val(expected), related), (OperandType::Val(received), operand)) = pair
-        {
-            if expected == received {
-                None
-            } else {
-                Some(Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(
-                        line_index,
-                        operand.syntax().text_range(),
-                    ),
-                    severity: Some(DiagnosticSeverity::ERROR),
-                    source: Some("wat".into()),
-                    code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-                    message: format!("expected type `{expected}`, found `{received}`"),
-                    related_information: related.as_ref().map(|(range, message)| {
-                        vec![DiagnosticRelatedInformation {
-                            location: Location {
-                                uri: service.lookup_uri(uri),
-                                range: helpers::rowan_range_to_lsp_range(line_index, *range),
-                            },
-                            message: message.clone(),
-                        }]
-                    }),
-                    ..Default::default()
-                })
-            }
-        } else {
-            None
-        }
-    });
-    diags.extend(type_mismatches);
-}
-
-pub fn check_stacked(
+pub fn check(
     diags: &mut Vec<Diagnostic>,
     service: &LanguageService,
     uri: InternUri,
@@ -136,24 +26,32 @@ pub fn check_stacked(
     node: &SyntaxNode,
     symbol_table: &SymbolTable,
 ) {
-    if node
-        .children()
-        .filter(|child| {
-            matches!(
-                child.kind(),
-                SyntaxKind::PLAIN_INSTR
-                    | SyntaxKind::BLOCK_BLOCK
-                    | SyntaxKind::BLOCK_IF
-                    | SyntaxKind::BLOCK_LOOP
-            )
-        })
-        .all(|child| token(&child, SyntaxKind::L_PAREN).is_some())
-    {
-        return;
-    }
+    let mut sequence = Vec::with_capacity(1);
+    node.children()
+        .filter(|child| Instr::can_cast(child.kind()))
+        .for_each(|child| unfold(child, &mut sequence));
+    check_sequence(diags, service, uri, line_index, symbol_table, sequence);
+}
 
+pub fn unfold(node: SyntaxNode, stack: &mut Vec<Instr>) {
+    node.children()
+        .filter_map(|child| child.first_child().and_then(Instr::cast))
+        .for_each(|child| unfold(child.syntax().clone(), stack));
+    if let Some(node) = Instr::cast(node) {
+        stack.push(node);
+    }
+}
+
+fn check_sequence(
+    diags: &mut Vec<Diagnostic>,
+    service: &LanguageService,
+    uri: InternUri,
+    line_index: &LineIndex,
+    symbol_table: &SymbolTable,
+    sequence: Vec<Instr>,
+) {
     let mut types_stack = Vec::<(_, Instr)>::with_capacity(2);
-    children::<Instr>(node).for_each(|instr| match &instr {
+    sequence.into_iter().for_each(|instr| match &instr {
         Instr::Plain(plain_instr) => {
             let Some(instr_name) = plain_instr.instr_name() else {
                 return;
@@ -164,11 +62,7 @@ pub fn check_stacked(
             else {
                 return;
             };
-            let expected_count = if plain_instr.l_paren_token().is_some() {
-                0
-            } else {
-                params.len()
-            };
+            let expected_count = params.len();
             let pop_count = if let Some(count) = types_stack.len().checked_sub(expected_count) {
                 count
             } else {

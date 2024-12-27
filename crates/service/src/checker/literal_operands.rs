@@ -1,4 +1,7 @@
-use crate::helpers;
+use crate::{
+    data_set::{InstrMeta, INSTR_METAS},
+    helpers,
+};
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
 use rowan::ast::{
@@ -13,6 +16,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
     let Some(instr_name) = token(node, SyntaxKind::INSTR_NAME) else {
         return;
     };
+    let instr_name = instr_name.text();
     let mut operands = children::<Operand>(node);
 
     macro_rules! check_operand {
@@ -35,7 +39,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         };
     }
 
-    match instr_name.text() {
+    match instr_name {
         "call" | "local.get" | "local.set" | "local.tee" | "global.get" | "global.set"
         | "table.get" | "table.set" | "ref.func" | "memory.init" | "data.drop" | "elem.drop"
         | "table.grow" | "table.size" | "table.fill" | "br" | "br_if" => {
@@ -101,6 +105,27 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 "expected identifier or unsigned integer"
             );
         }
-        _ => {}
+        _ => {
+            if let Some(InstrMeta {
+                operands_count: 0, ..
+            }) = INSTR_METAS.get(instr_name)
+            {
+                diags.extend(
+                    operands
+                        .filter(|operand| operand.instr().is_none())
+                        .map(|operand| Diagnostic {
+                            range: helpers::rowan_range_to_lsp_range(
+                                line_index,
+                                operand.syntax().text_range(),
+                            ),
+                            severity: Some(DiagnosticSeverity::ERROR),
+                            source: Some("wat".into()),
+                            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                            message: "unexpected operand".into(),
+                            ..Default::default()
+                        }),
+                );
+            }
+        }
     }
 }

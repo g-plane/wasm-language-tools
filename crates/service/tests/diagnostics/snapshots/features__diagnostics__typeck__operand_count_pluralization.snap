@@ -13,7 +13,7 @@ expression: response
         },
         "end": {
           "line": 0,
-          "character": 25
+          "character": 23
         }
       },
       "severity": 1,

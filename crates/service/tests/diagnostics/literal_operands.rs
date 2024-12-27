@@ -114,3 +114,25 @@ fn mem_arg_and_index() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn expected_instr() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "(module (func (i32.add 1 (i32.const 0))))";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn ignored_expecting_instr() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "(module (func (br_table 0 1)))";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}

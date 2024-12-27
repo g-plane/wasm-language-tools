@@ -26,7 +26,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
             implicit_module::check(service, &mut diagnostics, uri, &line_index, &node);
         }
         SyntaxKind::MODULE_FIELD_FUNC | SyntaxKind::MODULE_FIELD_GLOBAL => {
-            typeck::check_stacked(
+            typeck::check(
                 &mut diagnostics,
                 service,
                 uri,
@@ -38,14 +38,6 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
         SyntaxKind::PLAIN_INSTR => {
             unknown_instr::check(&mut diagnostics, &line_index, &node);
             literal_operands::check(&mut diagnostics, &line_index, &node);
-            typeck::check_folded(
-                &mut diagnostics,
-                service,
-                uri,
-                &line_index,
-                node,
-                &symbol_table,
-            );
         }
         _ => {}
     });

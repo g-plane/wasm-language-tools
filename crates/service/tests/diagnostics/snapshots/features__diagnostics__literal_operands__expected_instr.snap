@@ -1,0 +1,41 @@
+---
+source: crates/service/tests/diagnostics/literal_operands.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 14
+        },
+        "end": {
+          "line": 0,
+          "character": 39
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected 2 operands, found 1"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 23
+        },
+        "end": {
+          "line": 0,
+          "character": 24
+        }
+      },
+      "severity": 1,
+      "code": "literal-operands",
+      "source": "wat",
+      "message": "unexpected operand"
+    }
+  ]
+}
