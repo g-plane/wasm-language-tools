@@ -6,6 +6,7 @@ use crate::{
     types_analyzer::{OperandType, TypesAnalyzerCtx},
     InternUri, LanguageService,
 };
+use itertools::{EitherOrBoth, Itertools};
 use line_index::LineIndex;
 use lsp_types::{
     Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, NumberOrString,
@@ -62,10 +63,44 @@ fn check_sequence(
             else {
                 return;
             };
-            let expected_count = params.len();
-            let pop_count = if let Some(count) = types_stack.len().checked_sub(expected_count) {
-                count
-            } else {
+            let rest_len = types_stack.len().saturating_sub(params.len());
+            let pops = types_stack.get(rest_len..).unwrap_or(&*types_stack);
+            let mut mismatch = false;
+            let mut related_information = vec![];
+            params.iter().zip_longest(pops).for_each(|pair| match pair {
+                EitherOrBoth::Both(
+                    (OperandType::Val(expected), related),
+                    (OperandType::Val(received), related_instr),
+                ) if expected != received => {
+                    mismatch = true;
+                    related_information.push(DiagnosticRelatedInformation {
+                        location: Location {
+                            uri: service.lookup_uri(uri),
+                            range: helpers::rowan_range_to_lsp_range(
+                                line_index,
+                                related_instr.syntax().text_range(),
+                            ),
+                        },
+                        message: format!("expected type `{expected}`, found `{received}`"),
+                    });
+                    if let Some((range, message)) = related {
+                        related_information.push(DiagnosticRelatedInformation {
+                            location: Location {
+                                uri: service.lookup_uri(uri),
+                                range: helpers::rowan_range_to_lsp_range(line_index, *range),
+                            },
+                            message: message.clone(),
+                        });
+                    }
+                }
+                EitherOrBoth::Left(..) => {
+                    mismatch = true;
+                }
+                _ => {}
+            });
+            if mismatch {
+                let expected_types = format!("[{}]", params.iter().map(|(ty, _)| ty).join(", "));
+                let received_types = format!("[{}]", pops.iter().map(|(ty, _)| ty).join(", "));
                 diags.push(Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(
                         line_index,
@@ -74,52 +109,17 @@ fn check_sequence(
                     severity: Some(DiagnosticSeverity::ERROR),
                     source: Some("wat".into()),
                     code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-                    message: build_incorrect_operands_count_msg(expected_count, types_stack.len()),
+                    message: format!("expected types {expected_types}, found {received_types}"),
+                    related_information: if related_information.is_empty() {
+                        None
+                    } else {
+                        Some(related_information)
+                    },
                     ..Default::default()
                 });
-                0
-            };
-            let type_mismatches = params
-                .iter()
-                .zip(types_stack.drain(pop_count..))
-                .filter_map(|pair| {
-                    if let (
-                        (OperandType::Val(expected), related),
-                        (OperandType::Val(received), related_instr),
-                    ) = pair
-                    {
-                        if expected == &received {
-                            None
-                        } else {
-                            Some(Diagnostic {
-                                range: helpers::rowan_range_to_lsp_range(
-                                    line_index,
-                                    related_instr.syntax().text_range(),
-                                ),
-                                severity: Some(DiagnosticSeverity::ERROR),
-                                source: Some("wat".into()),
-                                code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-                                message: format!("expected type `{expected}`, found `{received}`"),
-                                related_information: related.as_ref().map(|(range, message)| {
-                                    vec![DiagnosticRelatedInformation {
-                                        location: Location {
-                                            uri: service.lookup_uri(uri),
-                                            range: helpers::rowan_range_to_lsp_range(
-                                                line_index, *range,
-                                            ),
-                                        },
-                                        message: message.clone(),
-                                    }]
-                                }),
-                                ..Default::default()
-                            })
-                        }
-                    } else {
-                        None
-                    }
-                });
-            diags.extend(type_mismatches);
+            }
 
+            types_stack.truncate(rest_len);
             if let Some(types) = resolve_type(service, uri, symbol_table, &instr) {
                 types_stack.extend(types.into_iter().map(|ty| (ty, instr.clone())));
             }
@@ -238,11 +238,4 @@ fn resolve_expected_types(
                 .collect()
         })
     }
-}
-
-fn build_incorrect_operands_count_msg(expected: usize, received: usize) -> String {
-    format!(
-        "expected {expected} {}, found {received}",
-        if expected == 1 { "operand" } else { "operands" },
-    )
 }

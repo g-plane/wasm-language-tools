@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected 1 operand, found 0"
+      "message": "expected types [any], found []"
     }
   ]
 }

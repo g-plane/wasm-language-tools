@@ -12,6 +12,7 @@ exclude = ["/tests"]
 [dependencies]
 fuzzy-matcher = "0.3"
 indexmap = "2.5"
+itertools = "0.13"
 line-index.workspace = true
 lsp-types.workspace = true
 rowan.workspace = true

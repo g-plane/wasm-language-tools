@@ -9,17 +9,35 @@ expression: response
       "range": {
         "start": {
           "line": 0,
-          "character": 23
+          "character": 14
         },
         "end": {
           "line": 0,
-          "character": 36
+          "character": 51
         }
       },
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected type `i32`, found `i64`"
+      "message": "expected types [i32, i32], found [i64, i32]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 0,
+                "character": 23
+              },
+              "end": {
+                "line": 0,
+                "character": 36
+              }
+            }
+          },
+          "message": "expected type `i32`, found `i64`"
+        }
+      ]
     }
   ]
 }

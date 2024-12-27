@@ -14,7 +14,7 @@ use rowan::{
     GreenNode, GreenNodeData, Language, NodeOrToken,
 };
 use std::{
-    fmt::{self, Debug},
+    fmt::{self, Debug, Display},
     hash::Hash,
     ops::Deref,
 };
@@ -257,8 +257,7 @@ pub(crate) enum ValType {
     FuncRef,
     ExternRef,
 }
-
-impl fmt::Display for ValType {
+impl Display for ValType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ValType::I32 => write!(f, "i32"),
@@ -331,6 +330,15 @@ pub(crate) enum OperandType {
     Val(ValType),
     Any,
     Never,
+}
+impl Display for OperandType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            OperandType::Val(ty) => Display::fmt(ty, f),
+            OperandType::Any => write!(f, "any"),
+            OperandType::Never => write!(f, "never"),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]

@@ -8,18 +8,36 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 8,
+          "line": 9,
           "character": 8
         },
         "end": {
-          "line": 8,
-          "character": 18
+          "line": 9,
+          "character": 15
         }
       },
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected type `i32`, found `f32`"
+      "message": "expected types [i32, i32], found [i32, f32]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 8,
+                "character": 8
+              },
+              "end": {
+                "line": 8,
+                "character": 18
+              }
+            }
+          },
+          "message": "expected type `i32`, found `f32`"
+        }
+      ]
     }
   ]
 }

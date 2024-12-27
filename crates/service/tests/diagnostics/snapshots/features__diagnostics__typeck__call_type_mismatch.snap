@@ -9,18 +9,34 @@ expression: response
       "range": {
         "start": {
           "line": 3,
-          "character": 20
+          "character": 10
         },
         "end": {
           "line": 3,
-          "character": 33
+          "character": 34
         }
       },
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected type `f32`, found `i32`",
+      "message": "expected types [f32], found [i32]",
       "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 20
+              },
+              "end": {
+                "line": 3,
+                "character": 33
+              }
+            }
+          },
+          "message": "expected type `f32`, found `i32`"
+        },
         {
           "location": {
             "uri": "untitled:test",
