@@ -5,7 +5,7 @@ use crate::{
     InternUri, LanguageService, LintLevel,
 };
 use line_index::LineIndex;
-use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
+use lsp_types::{Diagnostic, DiagnosticSeverity, DiagnosticTag, NumberOrString};
 use rowan::ast::support;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
@@ -126,6 +126,7 @@ fn report(
                 .or_else(|| symbol.idx.num.map(|num| num.to_string()))
                 .unwrap_or_default()
         ),
+        tags: Some(vec![DiagnosticTag::UNNECESSARY]),
         ..Default::default()
     }
 }
