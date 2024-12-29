@@ -52,12 +52,14 @@ fn check_sequence(
     sequence: Vec<Instr>,
 ) {
     let mut types_stack = Vec::<(_, Instr)>::with_capacity(2);
+    let mut has_never = false;
     sequence.into_iter().for_each(|instr| match &instr {
         Instr::Plain(plain_instr) => {
             let Some(instr_name) = plain_instr.instr_name() else {
                 return;
             };
-            let meta = data_set::INSTR_METAS.get(instr_name.text());
+            let instr_name = instr_name.text();
+            let meta = data_set::INSTR_METAS.get(instr_name);
             let Some(params) =
                 resolve_expected_types(service, uri, symbol_table, plain_instr, meta)
             else {
@@ -93,7 +95,7 @@ fn check_sequence(
                         });
                     }
                 }
-                EitherOrBoth::Left(..) => {
+                EitherOrBoth::Left(..) if !has_never => {
                     mismatch = true;
                 }
                 _ => {}
@@ -122,6 +124,9 @@ fn check_sequence(
             types_stack.truncate(rest_len);
             if let Some(types) = resolve_type(service, uri, symbol_table, &instr) {
                 types_stack.extend(types.into_iter().map(|ty| (ty, instr.clone())));
+            }
+            if helpers::can_produce_never(instr_name) {
+                has_never = true;
             }
         }
         Instr::Block(block_instr) => {

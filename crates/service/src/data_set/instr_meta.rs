@@ -10,7 +10,16 @@ pub(crate) struct InstrMeta {
 }
 
 pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = LazyLock::new(|| {
-    let mut map = HashMap::with_capacity_and_hasher(424, FxBuildHasher);
+    let mut map = HashMap::with_capacity_and_hasher(425, FxBuildHasher);
+    map.insert(
+        "unreachable",
+        InstrMeta {
+            bin_op: "0x00",
+            operands_count: 0,
+            params: vec![],
+            results: vec![],
+        },
+    );
     map.insert(
         "drop",
         InstrMeta {

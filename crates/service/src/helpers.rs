@@ -52,6 +52,10 @@ where
         .map(|(_, guess)| guess)
 }
 
+pub fn can_produce_never(instr_name: &str) -> bool {
+    matches!(instr_name, "unreachable" | "return" | "return_call" | "br")
+}
+
 pub(crate) mod ast {
     use rowan::{ast::support, Direction, GreenNode, NodeOrToken, TextSize, TokenAtOffset};
     use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};

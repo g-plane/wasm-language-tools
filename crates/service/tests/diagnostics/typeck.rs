@@ -361,3 +361,36 @@ fn incomplete_folded() {
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
+
+#[test]
+fn unreachable_with_matched_count() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func (param i32 f32) (result i32)
+    (unreachable)
+    (local.get 1)
+    i32.add))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn unreachable_with_mismatched_count() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func (param i32 f32) (result i32)
+    (unreachable)
+    i32.add))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
