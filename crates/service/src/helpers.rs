@@ -53,7 +53,10 @@ where
 }
 
 pub fn can_produce_never(instr_name: &str) -> bool {
-    matches!(instr_name, "unreachable" | "return" | "return_call" | "br")
+    matches!(
+        instr_name,
+        "unreachable" | "return" | "return_call" | "br" | "br_table"
+    )
 }
 
 pub(crate) mod ast {
