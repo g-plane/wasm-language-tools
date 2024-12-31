@@ -1,6 +1,6 @@
 use super::{
     module::type_use,
-    must, node, retry, retry_once, tok,
+    must, node, retry_once, tok,
     token::{
         float, ident, int, keyword, l_paren, r_paren, string, trivias, trivias_prefixed,
         unsigned_int_impl, word,
@@ -77,7 +77,7 @@ fn block_block(input: &mut Input) -> GreenResult {
             trivias_prefixed(keyword("block")),
             opt(trivias_prefixed(ident)),
             opt(trivias_prefixed(block_type)),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry_once(instr, [])),
             r_paren,
             opt(trivias_prefixed(ident)),
         )
@@ -147,7 +147,7 @@ fn block_loop(input: &mut Input) -> GreenResult {
             trivias_prefixed(keyword("loop")),
             opt(trivias_prefixed(ident)),
             opt(trivias_prefixed(block_type)),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry_once(instr, [])),
             r_paren,
             opt(trivias_prefixed(ident)),
         )
@@ -250,16 +250,16 @@ fn block_if(input: &mut Input) -> GreenResult {
             opt(trivias_prefixed(block_type)),
             repeat_till::<_, _, Vec<_>, _, _, _, _>(
                 0..,
-                retry(instr, []),
+                retry_once(instr, []),
                 (trivias, l_paren, trivias_prefixed(keyword("then"))),
             ),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry_once(instr, [])),
             r_paren,
             opt((
                 trivias,
                 l_paren,
                 trivias_prefixed(keyword("else")),
-                repeat::<_, _, Vec<_>, _, _>(0.., retry(instr, [])),
+                repeat::<_, _, Vec<_>, _, _>(0.., retry_once(instr, [])),
                 r_paren,
             )),
             r_paren,
