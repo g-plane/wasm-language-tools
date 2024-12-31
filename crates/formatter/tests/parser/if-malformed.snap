@@ -37,4 +37,7 @@ source: crates/formatter/tests/parser.rs
       (else
         (drop))))
   (func
-    if))
+    if)
+  (func
+    (if (result i32)
+      (i32.const 1))))

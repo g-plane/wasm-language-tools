@@ -251,10 +251,20 @@ fn block_if(input: &mut Input) -> GreenResult {
             repeat_till::<_, _, Vec<_>, _, _, _, _>(
                 0..,
                 retry_once(instr, []),
-                (trivias, l_paren, trivias_prefixed(keyword("then"))),
+                peek(alt((
+                    (trivias, '(', trivias_prefixed(keyword("then"))).void(),
+                    (trivias, ')').void(),
+                ))),
             ),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry_once(instr, [])),
-            r_paren,
+            (
+                trivias,
+                must((
+                    l_paren,
+                    trivias_prefixed(keyword("then")),
+                    repeat::<_, _, Vec<_>, _, _>(0.., retry_once(instr, [])),
+                    r_paren,
+                )),
+            ),
             opt((
                 trivias,
                 l_paren,
@@ -270,9 +280,8 @@ fn block_if(input: &mut Input) -> GreenResult {
                     mut if_keyword,
                     id,
                     block_type,
-                    (cond_instrs, (mut trivias_before_then, then_l_paren, mut then_keyword)),
-                    then_instrs,
-                    then_r_paren,
+                    (cond_instrs, ..),
+                    (mut trivias_before_then, then),
                     else_branch,
                     r_paren,
                 )| {
@@ -289,17 +298,18 @@ fn block_if(input: &mut Input) -> GreenResult {
                         .into_iter()
                         .for_each(|mut instr| children.append(&mut instr));
                     children.append(&mut trivias_before_then);
-
-                    let mut then_children = Vec::with_capacity(4);
-                    then_children.push(then_l_paren);
-                    then_children.append(&mut then_keyword);
-                    then_instrs
-                        .into_iter()
-                        .for_each(|mut instr| then_children.append(&mut instr));
-                    if let Some(mut r_paren) = then_r_paren {
-                        then_children.append(&mut r_paren);
+                    if let Some((l_paren, mut keyword, instrs, r_paren)) = then {
+                        let mut then_children = Vec::with_capacity(4);
+                        then_children.push(l_paren);
+                        then_children.append(&mut keyword);
+                        instrs
+                            .into_iter()
+                            .for_each(|mut instr| then_children.append(&mut instr));
+                        if let Some(mut r_paren) = r_paren {
+                            then_children.append(&mut r_paren);
+                        }
+                        children.push(node(BLOCK_IF_THEN, then_children));
                     }
-                    children.push(node(BLOCK_IF_THEN, then_children));
 
                     if let Some((mut trivias, l_paren, mut keyword, instrs, r_paren)) = else_branch
                     {

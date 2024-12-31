@@ -9,4 +9,5 @@
     (if (param $x i32) (then (drop)) (else (drop)))
   )
   (func if)
+  (func (if (result i32) (i32.const 1)))
 )

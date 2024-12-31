@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..490
-  MODULE@0..489
+ROOT@0..531
+  MODULE@0..530
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -312,9 +312,36 @@ ROOT@0..490
         KEYWORD@484..486 "if"
         BLOCK_IF_THEN@486..486
       R_PAREN@486..487 ")"
-    WHITESPACE@487..488 "\n"
-    R_PAREN@488..489 ")"
-  WHITESPACE@489..490 "\n"
+    WHITESPACE@487..490 "\n  "
+    MODULE_FIELD_FUNC@490..528
+      L_PAREN@490..491 "("
+      KEYWORD@491..495 "func"
+      WHITESPACE@495..496 " "
+      BLOCK_IF@496..527
+        L_PAREN@496..497 "("
+        KEYWORD@497..499 "if"
+        WHITESPACE@499..500 " "
+        BLOCK_TYPE@500..512
+          RESULT@500..512
+            L_PAREN@500..501 "("
+            KEYWORD@501..507 "result"
+            WHITESPACE@507..508 " "
+            VAL_TYPE@508..511
+              NUM_TYPE@508..511 "i32"
+            R_PAREN@511..512 ")"
+        WHITESPACE@512..513 " "
+        PLAIN_INSTR@513..526
+          L_PAREN@513..514 "("
+          INSTR_NAME@514..523 "i32.const"
+          WHITESPACE@523..524 " "
+          OPERAND@524..525
+            INT@524..525 "1"
+          R_PAREN@525..526 ")"
+        R_PAREN@526..527 ")"
+      R_PAREN@527..528 ")"
+    WHITESPACE@528..529 "\n"
+    R_PAREN@529..530 ")"
+  WHITESPACE@530..531 "\n"
 
 error: expected operand
   ┌─ if-malformed.wat:3:41
@@ -351,3 +378,9 @@ error: expected `end`
    │
 11 │   (func if)
    │           ^
+
+error: expected `(`
+   ┌─ if-malformed.wat:12:39
+   │
+12 │   (func (if (result i32) (i32.const 1)))
+   │                                       ^
