@@ -57,7 +57,7 @@ impl LanguageService {
             )?
             .next()?;
         let signature = self
-            .get_func_sig(uri, func.clone().into())
+            .get_func_sig(uri, func.key.ptr, func.green.clone())
             .unwrap_or_default();
 
         let mut label = "(func".to_string();

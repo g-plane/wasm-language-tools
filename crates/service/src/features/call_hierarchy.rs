@@ -56,7 +56,7 @@ impl LanguageService {
                         tags: None,
                         detail: Some(self.render_func_header(
                             symbol.idx.name,
-                            self.get_func_sig(uri, symbol.clone().into()),
+                            self.get_func_sig(uri, symbol.key.ptr, symbol.green.clone()),
                         )),
                         uri: params
                             .text_document_position_params
@@ -85,7 +85,7 @@ impl LanguageService {
                                 tags: None,
                                 detail: Some(self.render_func_header(
                                     symbol.idx.name,
-                                    self.get_func_sig(uri, symbol.clone().into()),
+                                    self.get_func_sig(uri, symbol.key.ptr, symbol.green.clone()),
                                 )),
                                 uri: params
                                     .text_document_position_params
@@ -160,7 +160,7 @@ impl LanguageService {
                         tags: None,
                         detail: Some(self.render_func_header(
                             func_symbol.idx.name,
-                            self.get_func_sig(uri, func_symbol.clone().into()),
+                            self.get_func_sig(uri, func_symbol.key.ptr, func_symbol.green.clone()),
                         )),
                         uri: params.item.uri.clone(),
                         range: helpers::rowan_range_to_lsp_range(
@@ -217,7 +217,11 @@ impl LanguageService {
                                 tags: None,
                                 detail: Some(self.render_func_header(
                                     func_symbol.idx.name,
-                                    self.get_func_sig(uri, func_symbol.clone().into()),
+                                    self.get_func_sig(
+                                        uri,
+                                        func_symbol.key.ptr,
+                                        func_symbol.green.clone(),
+                                    ),
                                 )),
                                 uri: self.lookup_uri(uri),
                                 range: helpers::rowan_range_to_lsp_range(

@@ -506,13 +506,21 @@ fn get_cmp_list(
                                     kind: Some(CompletionItemKind::FUNCTION),
                                     detail: Some(service.render_func_header(
                                         symbol.idx.name,
-                                        service.get_func_sig(uri, symbol.clone().into()),
+                                        service.get_func_sig(
+                                            uri,
+                                            symbol.key.ptr,
+                                            symbol.green.clone(),
+                                        ),
                                     )),
                                     label_details: Some(CompletionItemLabelDetails {
                                         description: Some(
                                             service.render_compact_func_sig(
                                                 service
-                                                    .get_func_sig(uri, symbol.clone().into())
+                                                    .get_func_sig(
+                                                        uri,
+                                                        symbol.key.ptr,
+                                                        symbol.green.clone(),
+                                                    )
                                                     .unwrap_or_default(),
                                             ),
                                         ),

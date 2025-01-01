@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItem, SymbolItemKind, SymbolTablesCtx},
+    binder::{SymbolItem, SymbolTablesCtx},
     data_set::INSTR_METAS,
     files::FilesCtx,
     helpers,
@@ -9,7 +9,7 @@ use crate::{
 use rowan::{
     ast::{
         support::{child, children, token},
-        AstNode,
+        AstNode, SyntaxNodePtr,
     },
     GreenNode, GreenNodeData, Language, NodeOrToken,
 };
@@ -35,7 +35,12 @@ pub(crate) trait TypesAnalyzerCtx: FilesCtx + SymbolTablesCtx {
     fn extract_sig(&self, node: GreenNode) -> FuncSig;
 
     #[salsa::memoized]
-    fn get_func_sig(&self, uri: InternUri, symbol: SymbolItemWithGreenEq) -> Option<FuncSig>;
+    fn get_func_sig(
+        &self,
+        uri: InternUri,
+        ptr: SyntaxNodePtr<WatLanguage>,
+        green: GreenNode,
+    ) -> Option<FuncSig>;
     #[salsa::memoized]
     fn render_func_sig(&self, signature: FuncSig) -> String;
     #[salsa::memoized]
@@ -104,11 +109,10 @@ fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
 fn get_func_sig(
     db: &dyn TypesAnalyzerCtx,
     uri: InternUri,
-    symbol: SymbolItemWithGreenEq,
+    ptr: SyntaxNodePtr<WatLanguage>,
+    green: GreenNode,
 ) -> Option<FuncSig> {
-    debug_assert!(matches!(symbol.kind, SymbolItemKind::Func));
-    symbol
-        .green
+    green
         .children()
         .find_map(|child| match child {
             NodeOrToken::Node(node) if node.kind() == SyntaxKind::TYPE_USE.into() => Some(node),
@@ -121,7 +125,7 @@ fn get_func_sig(
             }) {
                 Some(db.extract_sig(type_use.to_owned()))
             } else {
-                let node = symbol.key.ptr.to_node(&SyntaxNode::new_root(db.root(uri)));
+                let node = ptr.to_node(&SyntaxNode::new_root(db.root(uri)));
                 let symbol_table = db.symbol_table(uri);
                 child::<TypeUse>(&node)
                     .and_then(|type_use| type_use.index())
@@ -240,7 +244,7 @@ pub(crate) fn resolve_param_types(
             .flatten()
             .next()?;
         service
-            .get_func_sig(uri, func.clone().into())
+            .get_func_sig(uri, func.key.ptr, func.green.clone())
             .map(|sig| sig.params.iter().map(|ty| OperandType::Val(ty.0)).collect())
     } else {
         INSTR_METAS.get(instr_name).map(|meta| meta.params.clone())

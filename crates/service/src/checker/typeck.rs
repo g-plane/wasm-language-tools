@@ -242,7 +242,9 @@ fn resolve_type(
                         .into_iter()
                         .flatten()
                         .next()
-                        .and_then(|func| service.get_func_sig(uri, func.clone().into()))
+                        .and_then(|func| {
+                            service.get_func_sig(uri, func.key.ptr, func.green.clone())
+                        })
                         .map(|sig| sig.results.iter().map(|ty| OperandType::Val(*ty)).collect())
                 }
                 "local.get" => {
@@ -315,13 +317,15 @@ fn resolve_expected_types(
                     "parameter originally defined here".into(),
                 ))
             });
-        service.get_func_sig(uri, func.clone().into()).map(|sig| {
-            sig.params
-                .iter()
-                .map(|ty| OperandType::Val(ty.0))
-                .zip(related)
-                .collect()
-        })
+        service
+            .get_func_sig(uri, func.key.ptr, func.green.clone())
+            .map(|sig| {
+                sig.params
+                    .iter()
+                    .map(|ty| OperandType::Val(ty.0))
+                    .zip(related)
+                    .collect()
+            })
     } else {
         meta.map(|meta| {
             meta.params

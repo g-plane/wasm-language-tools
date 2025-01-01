@@ -210,7 +210,10 @@ fn create_func_hover(
     let doc = helpers::ast::get_doc_comment(&node);
     let mut content = format!(
         "```wat\n{}\n```",
-        service.render_func_header(symbol.idx.name, service.get_func_sig(uri, symbol.into()))
+        service.render_func_header(
+            symbol.idx.name,
+            service.get_func_sig(uri, symbol.key.ptr, symbol.green)
+        )
     );
     if !doc.is_empty() {
         content.push_str("\n---\n");
