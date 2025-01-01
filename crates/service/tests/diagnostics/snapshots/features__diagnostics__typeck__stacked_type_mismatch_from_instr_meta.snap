@@ -58,6 +58,40 @@ expression: response
     {
       "range": {
         "start": {
+          "line": 9,
+          "character": 15
+        },
+        "end": {
+          "line": 9,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found [f32] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 9,
+                "character": 8
+              },
+              "end": {
+                "line": 9,
+                "character": 15
+              }
+            }
+          },
+          "message": "expected type `i32`, found `f32`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
           "line": 13,
           "character": 8
         },
@@ -102,6 +136,40 @@ expression: response
             }
           },
           "message": "expected type `f32`, found `i32`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 15
+        },
+        "end": {
+          "line": 13,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found [f32] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 13,
+                "character": 8
+              },
+              "end": {
+                "line": 13,
+                "character": 15
+              }
+            }
+          },
+          "message": "expected type `i32`, found `f32`"
         }
       ]
     }

@@ -25,8 +25,18 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
         SyntaxKind::MODULE => {
             implicit_module::check(service, &mut diagnostics, uri, &line_index, &node);
         }
-        SyntaxKind::MODULE_FIELD_FUNC | SyntaxKind::MODULE_FIELD_GLOBAL => {
-            typeck::check(
+        SyntaxKind::MODULE_FIELD_FUNC => {
+            typeck::check_func(
+                &mut diagnostics,
+                service,
+                uri,
+                &line_index,
+                &node,
+                &symbol_table,
+            );
+        }
+        SyntaxKind::MODULE_FIELD_GLOBAL => {
+            typeck::check_global(
                 &mut diagnostics,
                 service,
                 uri,

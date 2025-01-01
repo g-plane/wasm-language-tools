@@ -28,7 +28,7 @@ fn call_undefined() {
 #[test]
 fn local_defined() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "(module (func (param $p i32) (local.get 0)))";
+    let source = "(module (func (param $p i32) (local.get 0) (drop)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     allow_unused(&mut service, uri.clone());
@@ -39,7 +39,7 @@ fn local_defined() {
 #[test]
 fn local_undefined() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "(module (func (local.get 0)))";
+    let source = "(module (func (local.get 0) (drop)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     allow_unused(&mut service, uri.clone());
@@ -72,7 +72,14 @@ fn type_use_undefined() {
 #[test]
 fn global_defined() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "(module (func (global.get $foo)) (global $foo i32))";
+    let source = "
+(module
+  (func
+    (global.get $foo)
+    (drop))
+  (global $foo i32
+    i32.const 0))
+";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     allow_unused(&mut service, uri.clone());
@@ -83,7 +90,7 @@ fn global_defined() {
 #[test]
 fn global_undefined() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "(module (func (global.get $bar)))";
+    let source = "(module (func (global.get $bar) (drop)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     allow_unused(&mut service, uri.clone());
@@ -120,7 +127,8 @@ fn table_defined() {
 (module
   (table $table 0 funcref)
   (func
-    (table.size $table)))
+    (table.size $table)
+    (drop)))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -135,7 +143,8 @@ fn table_undefined() {
     let source = "
 (module
   (func
-    (table.size $table)))
+    (table.size $table)
+    (drop)))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -156,8 +165,10 @@ fn block() {
           (br_table $a $b $c $d)
           (br_table 0 1 2 3))
         (i32.const 1)
+        (drop)
         (return))
       (i32.const 1)
+      (drop)
       (return))))
 ";
     let mut service = LanguageService::default();

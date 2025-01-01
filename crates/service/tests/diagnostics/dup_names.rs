@@ -9,7 +9,7 @@ fn same_kind() {
     let source = "
 (module
   (func $f (param i32))
-  (func $f (result f32)))
+  (func $f (result f32) (f32.const 0)))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -23,7 +23,7 @@ fn different_kinds() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
 (module
-  (global $f i32)
+  (global $f i32 i32.const)
   (func $f))
 ";
     let mut service = LanguageService::default();

@@ -48,7 +48,9 @@ fn param_used() {
 (module
   (func (export "") (param $p i32) (param i32)
     (local.get 0)
-    (local.get 1)))
+    (local.get 1)
+    (drop)
+    (drop)))
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -76,7 +78,9 @@ fn local_used() {
 (module
   (func (export "") (local $l i32) (local i32)
     (local.get 0)
-    (local.get 1)))
+    (local.get 1)
+    (drop)
+    (drop)))
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -119,8 +123,8 @@ fn global_unused() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = r#"
 (module
-  (global i32)
-  (global $g i32))
+  (global i32 i32.const 0)
+  (global $g i32 i32.const 0))
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -133,10 +137,10 @@ fn global_used() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = r#"
 (module
-  (global (export "g") i32)
-  (global $g i32)
+  (global (export "g") i32 i32.const 0)
+  (global $g i32 i32.const 0)
   (func (export "f")
-    (global.get $g)))
+    (drop (global.get $g))))
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -194,7 +198,8 @@ fn table_used() {
 (module
   (func (export "func")
     (table.get 1
-      (i32.const 0)))
+      (i32.const 0))
+    (drop))
   (table 0 funcref)
   (table $table (export "table") 0 funcref))
 "#;

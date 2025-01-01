@@ -22,7 +22,38 @@ use wat_syntax::{
 
 const DIAGNOSTIC_CODE: &str = "type-check";
 
-pub fn check(
+pub fn check_func(
+    diags: &mut Vec<Diagnostic>,
+    service: &LanguageService,
+    uri: InternUri,
+    line_index: &LineIndex,
+    node: &SyntaxNode,
+    symbol_table: &SymbolTable,
+) {
+    let results = service
+        .get_func_sig(uri, SyntaxNodePtr::new(node), node.green().into())
+        .map(|sig| {
+            sig.results
+                .into_iter()
+                .map(OperandType::Val)
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    check_block_like(
+        diags,
+        &Shared {
+            service,
+            uri,
+            symbol_table,
+            line_index,
+        },
+        node,
+        Vec::with_capacity(2),
+        &results,
+    );
+}
+
+pub fn check_global(
     diags: &mut Vec<Diagnostic>,
     service: &LanguageService,
     uri: InternUri,
@@ -32,12 +63,18 @@ pub fn check(
 ) {
     check_block_like(
         diags,
-        service,
-        uri,
-        line_index,
-        symbol_table,
+        &Shared {
+            service,
+            uri,
+            symbol_table,
+            line_index,
+        },
         node,
         Vec::with_capacity(2),
+        &[service
+            .extract_global_type(node.green().into())
+            .map(OperandType::Val)
+            .unwrap_or(OperandType::Any)],
     );
 }
 
@@ -56,19 +93,24 @@ pub fn unfold(node: SyntaxNode, sequence: &mut Vec<Instr>) {
     }
 }
 
+struct Shared<'a> {
+    service: &'a LanguageService,
+    uri: InternUri,
+    symbol_table: &'a SymbolTable,
+    line_index: &'a LineIndex,
+}
+
 fn check_block_like(
     diags: &mut Vec<Diagnostic>,
-    service: &LanguageService,
-    uri: InternUri,
-    line_index: &LineIndex,
-    symbol_table: &SymbolTable,
+    shared: &Shared,
     node: &SyntaxNode,
     init_stack: Vec<(OperandType, Instr)>,
+    expected_results: &[OperandType],
 ) {
     let mut type_stack = TypeStack {
-        uri,
-        service,
-        line_index,
+        uri: shared.uri,
+        service: shared.service,
+        line_index: shared.line_index,
         stack: init_stack,
         has_never: false,
     };
@@ -84,15 +126,13 @@ fn check_block_like(
             };
             let instr_name = instr_name.text();
             let meta = data_set::INSTR_METAS.get(instr_name);
-            let Some(params) =
-                resolve_expected_types(service, uri, symbol_table, plain_instr, meta)
-            else {
+            let Some(params) = resolve_expected_types(shared, plain_instr, meta) else {
                 return;
             };
             if let Some(diag) = type_stack.check(&params, &instr) {
                 diags.push(diag);
             }
-            if let Some(types) = resolve_type(service, uri, symbol_table, &instr) {
+            if let Some(types) = resolve_type(shared, plain_instr) {
                 type_stack
                     .stack
                     .extend(types.into_iter().map(|ty| (ty, instr.clone())));
@@ -107,8 +147,8 @@ fn check_block_like(
                 .children()
                 .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
                 .and_then(|block_type| {
-                    service.get_func_sig(
-                        uri,
+                    shared.service.get_func_sig(
+                        shared.uri,
                         SyntaxNodePtr::new(&block_type),
                         block_type.green().into(),
                     )
@@ -133,50 +173,42 @@ fn check_block_like(
                         .collect()
                 })
                 .unwrap_or_default();
+            let results = signature
+                .map(|signature| {
+                    signature
+                        .results
+                        .iter()
+                        .map(|ty| OperandType::Val(*ty))
+                        .collect::<Vec<_>>()
+                })
+                .unwrap_or_default();
             match block_instr {
                 BlockInstr::Block(..) | BlockInstr::Loop(..) => {
-                    check_block_like(
-                        diags,
-                        service,
-                        uri,
-                        line_index,
-                        symbol_table,
-                        node,
-                        init_stack,
-                    );
+                    check_block_like(diags, shared, node, init_stack, &results);
                 }
                 BlockInstr::If(block_if) => {
                     if let Some(then_block) = block_if.then_block() {
                         check_block_like(
                             diags,
-                            service,
-                            uri,
-                            line_index,
-                            symbol_table,
+                            shared,
                             then_block.syntax(),
                             init_stack.clone(),
+                            &results,
                         );
                     }
                     if let Some(else_block) = block_if.else_block() {
-                        check_block_like(
-                            diags,
-                            service,
-                            uri,
-                            line_index,
-                            symbol_table,
-                            else_block.syntax(),
-                            init_stack,
-                        );
+                        check_block_like(diags, shared, else_block.syntax(), init_stack, &results);
                     }
                 }
             }
-            if let Some(types) = resolve_block_type(service, uri, block_instr) {
-                type_stack
-                    .stack
-                    .extend(types.into_iter().map(|ty| (ty, instr.clone())));
-            }
+            type_stack
+                .stack
+                .extend(results.into_iter().map(|ty| (ty, instr.clone())));
         }
     });
+    if let Some(diag) = type_stack.check_to_bottom(expected_results, node) {
+        diags.push(diag);
+    }
 }
 
 struct TypeStack<'a> {
@@ -247,96 +279,134 @@ impl TypeStack<'_> {
         self.stack.truncate(rest_len);
         diagnostic
     }
-}
 
-fn resolve_type(
-    service: &LanguageService,
-    uri: InternUri,
-    symbol_table: &SymbolTable,
-    instr: &Instr,
-) -> Option<Vec<OperandType>> {
-    match instr {
-        Instr::Block(block_instr) => resolve_block_type(service, uri, block_instr),
-        Instr::Plain(plain_instr) => {
-            let instr_name = plain_instr.instr_name()?;
-            match instr_name.text() {
-                "call" => {
-                    let idx = plain_instr.operands().next()?;
-                    symbol_table
-                        .find_defs(&idx.syntax().clone().into())
-                        .into_iter()
-                        .flatten()
-                        .next()
-                        .and_then(|func| {
-                            service.get_func_sig(uri, func.key.ptr, func.green.clone())
-                        })
-                        .map(|sig| sig.results.iter().map(|ty| OperandType::Val(*ty)).collect())
+    fn check_to_bottom(
+        &mut self,
+        expected: &[OperandType],
+        block_like_node: &SyntaxNode,
+    ) -> Option<Diagnostic> {
+        let mut diagnostic = None;
+        let mut mismatch = false;
+        let mut related_information = vec![];
+        expected
+            .iter()
+            .zip_longest(&self.stack)
+            .for_each(|pair| match pair {
+                EitherOrBoth::Both(
+                    OperandType::Val(expected),
+                    (OperandType::Val(received), related_instr),
+                ) if expected != received => {
+                    mismatch = true;
+                    related_information.push(DiagnosticRelatedInformation {
+                        location: Location {
+                            uri: self.service.lookup_uri(self.uri),
+                            range: helpers::rowan_range_to_lsp_range(
+                                self.line_index,
+                                pick_instr_range(related_instr),
+                            ),
+                        },
+                        message: format!("expected type `{expected}`, found `{received}`"),
+                    });
                 }
-                "local.get" => {
-                    let idx = plain_instr.operands().next()?;
-                    symbol_table
-                        .find_param_or_local_def(&idx.syntax().clone().into())
-                        .and_then(|symbol| service.extract_type(symbol.green.clone()))
-                        .map(OperandType::Val)
-                        .or(Some(OperandType::Never))
-                        .map(|ty| vec![ty])
+                EitherOrBoth::Left(..) | EitherOrBoth::Right(..) if !self.has_never => {
+                    mismatch = true;
                 }
-                "global.get" => {
-                    let idx = plain_instr.operands().next()?;
-                    symbol_table
-                        .find_defs(&idx.syntax().clone().into())
-                        .into_iter()
-                        .flatten()
-                        .next()
-                        .and_then(|symbol| service.extract_global_type(symbol.green.clone()))
-                        .map(OperandType::Val)
-                        .or(Some(OperandType::Never))
-                        .map(|ty| vec![ty])
-                }
-                _ => data_set::INSTR_METAS
-                    .get(instr_name.text())
-                    .map(|meta| meta.results.clone()),
-            }
+                _ => {}
+            });
+        if mismatch {
+            let expected_types = format!("[{}]", expected.iter().join(", "));
+            let received_types = format!("[{}]", self.stack.iter().map(|(ty, _)| ty).join(", "));
+            diagnostic = Some(Diagnostic {
+                range: helpers::rowan_range_to_lsp_range(
+                    self.line_index,
+                    block_like_node
+                        .last_child_or_token()
+                        .map(|it| it.text_range())
+                        .unwrap_or_else(|| block_like_node.text_range()),
+                ),
+                severity: Some(DiagnosticSeverity::ERROR),
+                source: Some("wat".into()),
+                code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                message: format!(
+                    "expected types {expected_types}, found {received_types} at the end"
+                ),
+                related_information: if related_information.is_empty() {
+                    None
+                } else {
+                    Some(related_information)
+                },
+                ..Default::default()
+            });
         }
+        self.stack.clear();
+        diagnostic
     }
 }
 
-fn resolve_block_type(
-    service: &LanguageService,
-    uri: InternUri,
-    block_instr: &BlockInstr,
-) -> Option<Vec<OperandType>> {
-    block_instr
-        .syntax()
-        .children()
-        .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
-        .and_then(|block_type| {
-            service.get_func_sig(
-                uri,
-                SyntaxNodePtr::new(&block_type),
-                block_type.green().into(),
-            )
-        })
-        .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
+fn resolve_type(shared: &Shared, plain_instr: &PlainInstr) -> Option<Vec<OperandType>> {
+    let instr_name = plain_instr.instr_name()?;
+    match instr_name.text() {
+        "call" => {
+            let idx = plain_instr.operands().next()?;
+            shared
+                .symbol_table
+                .find_defs(&idx.syntax().clone().into())
+                .into_iter()
+                .flatten()
+                .next()
+                .and_then(|func| {
+                    shared
+                        .service
+                        .get_func_sig(shared.uri, func.key.ptr, func.green.clone())
+                })
+                .map(|sig| sig.results.iter().map(|ty| OperandType::Val(*ty)).collect())
+        }
+        "local.get" => {
+            let idx = plain_instr.operands().next()?;
+            shared
+                .symbol_table
+                .find_param_or_local_def(&idx.syntax().clone().into())
+                .and_then(|symbol| shared.service.extract_type(symbol.green.clone()))
+                .map(OperandType::Val)
+                .or(Some(OperandType::Never))
+                .map(|ty| vec![ty])
+        }
+        "global.get" => {
+            let idx = plain_instr.operands().next()?;
+            shared
+                .symbol_table
+                .find_defs(&idx.syntax().clone().into())
+                .into_iter()
+                .flatten()
+                .next()
+                .and_then(|symbol| shared.service.extract_global_type(symbol.green.clone()))
+                .map(OperandType::Val)
+                .or(Some(OperandType::Never))
+                .map(|ty| vec![ty])
+        }
+        _ => data_set::INSTR_METAS
+            .get(instr_name.text())
+            .map(|meta| meta.results.clone()),
+    }
 }
 
 type ExpectedType = (OperandType, Option<(TextRange, String)>);
 fn resolve_expected_types(
-    service: &LanguageService,
-    uri: InternUri,
-    symbol_table: &SymbolTable,
+    shared: &Shared,
     instr: &PlainInstr,
     meta: Option<&data_set::InstrMeta>,
 ) -> Option<Vec<ExpectedType>> {
     if instr.instr_name()?.text() == "call" {
         let idx = instr.operands().next()?;
-        let func = symbol_table
+        let func = shared
+            .symbol_table
             .find_defs(&idx.syntax().clone().into())
             .into_iter()
             .flatten()
             .next()?;
         let root = instr.syntax().ancestors().last()?;
-        let related = symbol_table
+        let related = shared
+            .symbol_table
             .get_declared(func.key.ptr.to_node(&root), SymbolItemKind::Param)
             .map(|symbol| {
                 Some((
@@ -344,8 +414,9 @@ fn resolve_expected_types(
                     "parameter originally defined here".into(),
                 ))
             });
-        service
-            .get_func_sig(uri, func.key.ptr, func.green.clone())
+        shared
+            .service
+            .get_func_sig(shared.uri, func.key.ptr, func.green.clone())
             .map(|sig| {
                 sig.params
                     .iter()

@@ -31,7 +31,7 @@ fn incomplete_module() {
 #[test]
 fn top_level_module_fields() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "(func) (global i32)";
+    let source = "(func) (global i32 i32.const 0)";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     configure(&mut service, uri.clone());

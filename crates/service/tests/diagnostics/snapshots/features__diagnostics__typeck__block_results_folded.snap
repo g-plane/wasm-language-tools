@@ -19,41 +19,23 @@ expression: response
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected types [i32, f32], found [i32, i32] at the end",
-      "relatedInformation": [
-        {
-          "location": {
-            "uri": "untitled:test",
-            "range": {
-              "start": {
-                "line": 4,
-                "character": 8
-              },
-              "end": {
-                "line": 4,
-                "character": 19
-              }
-            }
-          },
-          "message": "expected type `f32`, found `i32`"
-        }
-      ]
+      "message": "expected types [i32, i32], found [i32] at the end"
     },
     {
       "range": {
         "start": {
-          "line": 9,
-          "character": 8
+          "line": 8,
+          "character": 19
         },
         "end": {
-          "line": 9,
-          "character": 15
+          "line": 8,
+          "character": 20
         }
       },
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected types [i32, i32], found [i32, f32]",
+      "message": "expected types [i32, i32], found [i32, f32] at the end",
       "relatedInformation": [
         {
           "location": {
@@ -61,17 +43,33 @@ expression: response
             "range": {
               "start": {
                 "line": 8,
-                "character": 8
+                "character": 6
               },
               "end": {
                 "line": 8,
-                "character": 18
+                "character": 19
               }
             }
           },
           "message": "expected type `i32`, found `f32`"
         }
       ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 19
+        },
+        "end": {
+          "line": 13,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32, i32, i32] at the end"
     }
   ]
 }

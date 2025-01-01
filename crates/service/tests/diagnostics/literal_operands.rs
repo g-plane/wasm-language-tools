@@ -10,9 +10,9 @@ fn index() {
 (module
     (func
         (call \"\")
-        (local.get 1.0)
+        (local.get 1.0) (drop)
         (local.set 1.0 (i32.const 0))
-        (global.get 1.0)
+        (global.get 1.0) (drop)
         (global.set \"\" (i32.const 0))
     )
 )
@@ -86,7 +86,7 @@ fn mem_arg() {
     let source = "
 (module
     (func
-        (i32.load 1 (i32.const 0))
+        (i32.load 1 (i32.const 0)) (drop)
         (f64.store 1 (i32.const 0) (f64.const 0.0))
     )
 )
@@ -105,6 +105,7 @@ fn mem_arg_and_index() {
 (module
     (func
         (v128.load8_lane 1 \"\" (i32.const 0) (v128.const 0))
+        (drop)
     )
 )
 ";
@@ -118,7 +119,7 @@ fn mem_arg_and_index() {
 #[test]
 fn expected_instr() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "(module (func (i32.add 1 (i32.const 0))))";
+    let source = "(module (func (result i32) (i32.add 1 (i32.const 0))))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     allow_unused(&mut service, uri.clone());

@@ -9,11 +9,11 @@ expression: response
       "range": {
         "start": {
           "line": 0,
-          "character": 14
+          "character": 27
         },
         "end": {
           "line": 0,
-          "character": 39
+          "character": 52
         }
       },
       "severity": 1,
@@ -25,11 +25,11 @@ expression: response
       "range": {
         "start": {
           "line": 0,
-          "character": 23
+          "character": 36
         },
         "end": {
           "line": 0,
-          "character": 24
+          "character": 37
         }
       },
       "severity": 1,

@@ -8,12 +8,12 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 0,
-          "character": 14
+          "line": 3,
+          "character": 4
         },
         "end": {
-          "line": 0,
-          "character": 51
+          "line": 5,
+          "character": 20
         }
       },
       "severity": 1,
@@ -26,12 +26,12 @@ expression: response
             "uri": "untitled:test",
             "range": {
               "start": {
-                "line": 0,
-                "character": 23
+                "line": 4,
+                "character": 6
               },
               "end": {
-                "line": 0,
-                "character": 36
+                "line": 4,
+                "character": 19
               }
             }
           },
