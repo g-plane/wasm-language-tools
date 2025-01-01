@@ -31,7 +31,15 @@ pub fn check(
     node.children()
         .filter(|child| Instr::can_cast(child.kind()))
         .for_each(|child| unfold(child, &mut sequence));
-    check_sequence(diags, service, uri, line_index, symbol_table, sequence);
+    check_sequence(
+        diags,
+        service,
+        uri,
+        line_index,
+        symbol_table,
+        sequence,
+        Vec::with_capacity(2),
+    );
 }
 
 pub fn unfold(node: SyntaxNode, sequence: &mut Vec<Instr>) {
@@ -56,9 +64,15 @@ fn check_sequence(
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     sequence: Vec<Instr>,
+    init_stack: Vec<(OperandType, Instr)>,
 ) {
-    let mut types_stack = Vec::<(_, Instr)>::with_capacity(2);
-    let mut has_never = false;
+    let mut type_stack = TypeStack {
+        uri,
+        service,
+        line_index,
+        stack: init_stack,
+        has_never: false,
+    };
     sequence.into_iter().for_each(|instr| match &instr {
         Instr::Plain(plain_instr) => {
             let Some(instr_name) = plain_instr.instr_name() else {
@@ -71,68 +85,16 @@ fn check_sequence(
             else {
                 return;
             };
-            let rest_len = types_stack.len().saturating_sub(params.len());
-            let pops = types_stack.get(rest_len..).unwrap_or(&*types_stack);
-            let mut mismatch = false;
-            let mut related_information = vec![];
-            params.iter().zip_longest(pops).for_each(|pair| match pair {
-                EitherOrBoth::Both(
-                    (OperandType::Val(expected), related),
-                    (OperandType::Val(received), related_instr),
-                ) if expected != received => {
-                    mismatch = true;
-                    related_information.push(DiagnosticRelatedInformation {
-                        location: Location {
-                            uri: service.lookup_uri(uri),
-                            range: helpers::rowan_range_to_lsp_range(
-                                line_index,
-                                related_instr.syntax().text_range(),
-                            ),
-                        },
-                        message: format!("expected type `{expected}`, found `{received}`"),
-                    });
-                    if let Some((range, message)) = related {
-                        related_information.push(DiagnosticRelatedInformation {
-                            location: Location {
-                                uri: service.lookup_uri(uri),
-                                range: helpers::rowan_range_to_lsp_range(line_index, *range),
-                            },
-                            message: message.clone(),
-                        });
-                    }
-                }
-                EitherOrBoth::Left(..) if !has_never => {
-                    mismatch = true;
-                }
-                _ => {}
-            });
-            if mismatch {
-                let expected_types = format!("[{}]", params.iter().map(|(ty, _)| ty).join(", "));
-                let received_types = format!("[{}]", pops.iter().map(|(ty, _)| ty).join(", "));
-                diags.push(Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(
-                        line_index,
-                        instr.syntax().text_range(),
-                    ),
-                    severity: Some(DiagnosticSeverity::ERROR),
-                    source: Some("wat".into()),
-                    code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-                    message: format!("expected types {expected_types}, found {received_types}"),
-                    related_information: if related_information.is_empty() {
-                        None
-                    } else {
-                        Some(related_information)
-                    },
-                    ..Default::default()
-                });
+            if let Some(diag) = type_stack.check(&params, &instr) {
+                diags.push(diag);
             }
-
-            types_stack.truncate(rest_len);
             if let Some(types) = resolve_type(service, uri, symbol_table, &instr) {
-                types_stack.extend(types.into_iter().map(|ty| (ty, instr.clone())));
+                type_stack
+                    .stack
+                    .extend(types.into_iter().map(|ty| (ty, instr.clone())));
             }
             if helpers::can_produce_never(instr_name) {
-                has_never = true;
+                type_stack.has_never = true;
             }
         }
         Instr::Block(block_instr) => {
@@ -181,10 +143,85 @@ fn check_sequence(
                 }
             }
             if let Some(types) = resolve_block_type(service, block_instr) {
-                types_stack.extend(types.into_iter().map(|ty| (ty, instr.clone())));
+                type_stack
+                    .stack
+                    .extend(types.into_iter().map(|ty| (ty, instr.clone())));
             }
         }
     });
+}
+
+struct TypeStack<'a> {
+    uri: InternUri,
+    service: &'a LanguageService,
+    line_index: &'a LineIndex,
+    stack: Vec<(OperandType, Instr)>,
+    has_never: bool,
+}
+impl TypeStack<'_> {
+    fn check(&mut self, expected: &[ExpectedType], instr: &Instr) -> Option<Diagnostic> {
+        let mut diagnostic = None;
+        let rest_len = self.stack.len().saturating_sub(expected.len());
+        let pops = self.stack.get(rest_len..).unwrap_or(&*self.stack);
+        let mut mismatch = false;
+        let mut related_information = vec![];
+        expected
+            .iter()
+            .zip_longest(pops)
+            .for_each(|pair| match pair {
+                EitherOrBoth::Both(
+                    (OperandType::Val(expected), related),
+                    (OperandType::Val(received), related_instr),
+                ) if expected != received => {
+                    mismatch = true;
+                    related_information.push(DiagnosticRelatedInformation {
+                        location: Location {
+                            uri: self.service.lookup_uri(self.uri),
+                            range: helpers::rowan_range_to_lsp_range(
+                                self.line_index,
+                                related_instr.syntax().text_range(),
+                            ),
+                        },
+                        message: format!("expected type `{expected}`, found `{received}`"),
+                    });
+                    if let Some((range, message)) = related {
+                        related_information.push(DiagnosticRelatedInformation {
+                            location: Location {
+                                uri: self.service.lookup_uri(self.uri),
+                                range: helpers::rowan_range_to_lsp_range(self.line_index, *range),
+                            },
+                            message: message.clone(),
+                        });
+                    }
+                }
+                EitherOrBoth::Left(..) if !self.has_never => {
+                    mismatch = true;
+                }
+                _ => {}
+            });
+        if mismatch {
+            let expected_types = format!("[{}]", expected.iter().map(|(ty, _)| ty).join(", "));
+            let received_types = format!("[{}]", pops.iter().map(|(ty, _)| ty).join(", "));
+            diagnostic = Some(Diagnostic {
+                range: helpers::rowan_range_to_lsp_range(
+                    self.line_index,
+                    instr.syntax().text_range(),
+                ),
+                severity: Some(DiagnosticSeverity::ERROR),
+                source: Some("wat".into()),
+                code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                message: format!("expected types {expected_types}, found {received_types}"),
+                related_information: if related_information.is_empty() {
+                    None
+                } else {
+                    Some(related_information)
+                },
+                ..Default::default()
+            });
+        }
+        self.stack.truncate(rest_len);
+        diagnostic
+    }
 }
 
 fn resolve_type(
