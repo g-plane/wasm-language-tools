@@ -205,13 +205,14 @@ ROOT@0..4343
         KEYWORD@333..335 "if"
         WHITESPACE@335..336 " "
         BLOCK_TYPE@336..348
-          RESULT@336..348
-            L_PAREN@336..337 "("
-            KEYWORD@337..343 "result"
-            WHITESPACE@343..344 " "
-            VAL_TYPE@344..347
-              NUM_TYPE@344..347 "i32"
-            R_PAREN@347..348 ")"
+          TYPE_USE@336..348
+            RESULT@336..348
+              L_PAREN@336..337 "("
+              KEYWORD@337..343 "result"
+              WHITESPACE@343..344 " "
+              VAL_TYPE@344..347
+                NUM_TYPE@344..347 "i32"
+              R_PAREN@347..348 ")"
         WHITESPACE@348..349 " "
         PLAIN_INSTR@349..362
           L_PAREN@349..350 "("
@@ -360,13 +361,14 @@ ROOT@0..4343
         KEYWORD@593..595 "if"
         WHITESPACE@595..596 " "
         BLOCK_TYPE@596..608
-          RESULT@596..608
-            L_PAREN@596..597 "("
-            KEYWORD@597..603 "result"
-            WHITESPACE@603..604 " "
-            VAL_TYPE@604..607
-              NUM_TYPE@604..607 "i32"
-            R_PAREN@607..608 ")"
+          TYPE_USE@596..608
+            RESULT@596..608
+              L_PAREN@596..597 "("
+              KEYWORD@597..603 "result"
+              WHITESPACE@603..604 " "
+              VAL_TYPE@604..607
+                NUM_TYPE@604..607 "i32"
+              R_PAREN@607..608 ")"
         WHITESPACE@608..609 " "
         PLAIN_INSTR@609..622
           L_PAREN@609..610 "("
@@ -425,19 +427,20 @@ ROOT@0..4343
         KEYWORD@716..718 "if"
         WHITESPACE@718..719 " "
         BLOCK_TYPE@719..739
-          RESULT@719..739
-            L_PAREN@719..720 "("
-            KEYWORD@720..726 "result"
-            WHITESPACE@726..727 " "
-            VAL_TYPE@727..730
-              NUM_TYPE@727..730 "i32"
-            WHITESPACE@730..731 " "
-            VAL_TYPE@731..734
-              NUM_TYPE@731..734 "i64"
-            WHITESPACE@734..735 " "
-            VAL_TYPE@735..738
-              NUM_TYPE@735..738 "i32"
-            R_PAREN@738..739 ")"
+          TYPE_USE@719..739
+            RESULT@719..739
+              L_PAREN@719..720 "("
+              KEYWORD@720..726 "result"
+              WHITESPACE@726..727 " "
+              VAL_TYPE@727..730
+                NUM_TYPE@727..730 "i32"
+              WHITESPACE@730..731 " "
+              VAL_TYPE@731..734
+                NUM_TYPE@731..734 "i64"
+              WHITESPACE@734..735 " "
+              VAL_TYPE@735..738
+                NUM_TYPE@735..738 "i32"
+              R_PAREN@738..739 ")"
         WHITESPACE@739..740 " "
         PLAIN_INSTR@740..753
           L_PAREN@740..741 "("
@@ -596,13 +599,14 @@ ROOT@0..4343
         KEYWORD@1084..1086 "if"
         WHITESPACE@1086..1087 " "
         BLOCK_TYPE@1087..1099
-          RESULT@1087..1099
-            L_PAREN@1087..1088 "("
-            KEYWORD@1088..1094 "result"
-            WHITESPACE@1094..1095 " "
-            VAL_TYPE@1095..1098
-              NUM_TYPE@1095..1098 "i32"
-            R_PAREN@1098..1099 ")"
+          TYPE_USE@1087..1099
+            RESULT@1087..1099
+              L_PAREN@1087..1088 "("
+              KEYWORD@1088..1094 "result"
+              WHITESPACE@1094..1095 " "
+              VAL_TYPE@1095..1098
+                NUM_TYPE@1095..1098 "i32"
+              R_PAREN@1098..1099 ")"
         WHITESPACE@1099..1100 " "
         PLAIN_INSTR@1100..1113
           L_PAREN@1100..1101 "("
@@ -698,13 +702,14 @@ ROOT@0..4343
             KEYWORD@1266..1268 "if"
             WHITESPACE@1268..1269 " "
             BLOCK_TYPE@1269..1281
-              RESULT@1269..1281
-                L_PAREN@1269..1270 "("
-                KEYWORD@1270..1276 "result"
-                WHITESPACE@1276..1277 " "
-                VAL_TYPE@1277..1280
-                  NUM_TYPE@1277..1280 "i32"
-                R_PAREN@1280..1281 ")"
+              TYPE_USE@1269..1281
+                RESULT@1269..1281
+                  L_PAREN@1269..1270 "("
+                  KEYWORD@1270..1276 "result"
+                  WHITESPACE@1276..1277 " "
+                  VAL_TYPE@1277..1280
+                    NUM_TYPE@1277..1280 "i32"
+                  R_PAREN@1280..1281 ")"
             WHITESPACE@1281..1282 " "
             PLAIN_INSTR@1282..1295
               L_PAREN@1282..1283 "("
@@ -846,13 +851,14 @@ ROOT@0..4343
             KEYWORD@1557..1559 "if"
             WHITESPACE@1559..1560 " "
             BLOCK_TYPE@1560..1572
-              RESULT@1560..1572
-                L_PAREN@1560..1561 "("
-                KEYWORD@1561..1567 "result"
-                WHITESPACE@1567..1568 " "
-                VAL_TYPE@1568..1571
-                  NUM_TYPE@1568..1571 "i32"
-                R_PAREN@1571..1572 ")"
+              TYPE_USE@1560..1572
+                RESULT@1560..1572
+                  L_PAREN@1560..1561 "("
+                  KEYWORD@1561..1567 "result"
+                  WHITESPACE@1567..1568 " "
+                  VAL_TYPE@1568..1571
+                    NUM_TYPE@1568..1571 "i32"
+                  R_PAREN@1571..1572 ")"
             WHITESPACE@1572..1573 " "
             PLAIN_INSTR@1573..1586
               L_PAREN@1573..1574 "("
@@ -951,13 +957,14 @@ ROOT@0..4343
             KEYWORD@1787..1789 "if"
             WHITESPACE@1789..1790 " "
             BLOCK_TYPE@1790..1802
-              RESULT@1790..1802
-                L_PAREN@1790..1791 "("
-                KEYWORD@1791..1797 "result"
-                WHITESPACE@1797..1798 " "
-                VAL_TYPE@1798..1801
-                  NUM_TYPE@1798..1801 "i32"
-                R_PAREN@1801..1802 ")"
+              TYPE_USE@1790..1802
+                RESULT@1790..1802
+                  L_PAREN@1790..1791 "("
+                  KEYWORD@1791..1797 "result"
+                  WHITESPACE@1797..1798 " "
+                  VAL_TYPE@1798..1801
+                    NUM_TYPE@1798..1801 "i32"
+                  R_PAREN@1801..1802 ")"
             WHITESPACE@1802..1803 " "
             PLAIN_INSTR@1803..1816
               L_PAREN@1803..1804 "("
@@ -1081,13 +1088,14 @@ ROOT@0..4343
             KEYWORD@2052..2054 "if"
             WHITESPACE@2054..2055 " "
             BLOCK_TYPE@2055..2067
-              RESULT@2055..2067
-                L_PAREN@2055..2056 "("
-                KEYWORD@2056..2062 "result"
-                WHITESPACE@2062..2063 " "
-                VAL_TYPE@2063..2066
-                  NUM_TYPE@2063..2066 "i32"
-                R_PAREN@2066..2067 ")"
+              TYPE_USE@2055..2067
+                RESULT@2055..2067
+                  L_PAREN@2055..2056 "("
+                  KEYWORD@2056..2062 "result"
+                  WHITESPACE@2062..2063 " "
+                  VAL_TYPE@2063..2066
+                    NUM_TYPE@2063..2066 "i32"
+                  R_PAREN@2066..2067 ")"
             WHITESPACE@2067..2068 " "
             PLAIN_INSTR@2068..2081
               L_PAREN@2068..2069 "("
@@ -1211,13 +1219,14 @@ ROOT@0..4343
             KEYWORD@2318..2320 "if"
             WHITESPACE@2320..2321 " "
             BLOCK_TYPE@2321..2333
-              RESULT@2321..2333
-                L_PAREN@2321..2322 "("
-                KEYWORD@2322..2328 "result"
-                WHITESPACE@2328..2329 " "
-                VAL_TYPE@2329..2332
-                  NUM_TYPE@2329..2332 "i32"
-                R_PAREN@2332..2333 ")"
+              TYPE_USE@2321..2333
+                RESULT@2321..2333
+                  L_PAREN@2321..2322 "("
+                  KEYWORD@2322..2328 "result"
+                  WHITESPACE@2328..2329 " "
+                  VAL_TYPE@2329..2332
+                    NUM_TYPE@2329..2332 "i32"
+                  R_PAREN@2332..2333 ")"
             WHITESPACE@2333..2334 " "
             PLAIN_INSTR@2334..2347
               L_PAREN@2334..2335 "("
@@ -1309,26 +1318,28 @@ ROOT@0..4343
         KEYWORD@2516..2520 "loop"
         WHITESPACE@2520..2521 " "
         BLOCK_TYPE@2521..2533
-          RESULT@2521..2533
-            L_PAREN@2521..2522 "("
-            KEYWORD@2522..2528 "result"
-            WHITESPACE@2528..2529 " "
-            VAL_TYPE@2529..2532
-              NUM_TYPE@2529..2532 "i32"
-            R_PAREN@2532..2533 ")"
+          TYPE_USE@2521..2533
+            RESULT@2521..2533
+              L_PAREN@2521..2522 "("
+              KEYWORD@2522..2528 "result"
+              WHITESPACE@2528..2529 " "
+              VAL_TYPE@2529..2532
+                NUM_TYPE@2529..2532 "i32"
+              R_PAREN@2532..2533 ")"
         WHITESPACE@2533..2540 "\n      "
         BLOCK_IF@2540..2664
           L_PAREN@2540..2541 "("
           KEYWORD@2541..2543 "if"
           WHITESPACE@2543..2544 " "
           BLOCK_TYPE@2544..2556
-            RESULT@2544..2556
-              L_PAREN@2544..2545 "("
-              KEYWORD@2545..2551 "result"
-              WHITESPACE@2551..2552 " "
-              VAL_TYPE@2552..2555
-                NUM_TYPE@2552..2555 "i32"
-              R_PAREN@2555..2556 ")"
+            TYPE_USE@2544..2556
+              RESULT@2544..2556
+                L_PAREN@2544..2545 "("
+                KEYWORD@2545..2551 "result"
+                WHITESPACE@2551..2552 " "
+                VAL_TYPE@2552..2555
+                  NUM_TYPE@2552..2555 "i32"
+                R_PAREN@2555..2556 ")"
           WHITESPACE@2556..2557 " "
           PLAIN_INSTR@2557..2570
             L_PAREN@2557..2558 "("
@@ -1436,13 +1447,14 @@ ROOT@0..4343
         KEYWORD@2770..2774 "loop"
         WHITESPACE@2774..2775 " "
         BLOCK_TYPE@2775..2787
-          RESULT@2775..2787
-            L_PAREN@2775..2776 "("
-            KEYWORD@2776..2782 "result"
-            WHITESPACE@2782..2783 " "
-            VAL_TYPE@2783..2786
-              NUM_TYPE@2783..2786 "i32"
-            R_PAREN@2786..2787 ")"
+          TYPE_USE@2775..2787
+            RESULT@2775..2787
+              L_PAREN@2775..2776 "("
+              KEYWORD@2776..2782 "result"
+              WHITESPACE@2782..2783 " "
+              VAL_TYPE@2783..2786
+                NUM_TYPE@2783..2786 "i32"
+              R_PAREN@2786..2787 ")"
         WHITESPACE@2787..2794 "\n      "
         PLAIN_INSTR@2794..2807
           L_PAREN@2794..2795 "("
@@ -1457,13 +1469,14 @@ ROOT@0..4343
           KEYWORD@2815..2817 "if"
           WHITESPACE@2817..2818 " "
           BLOCK_TYPE@2818..2830
-            RESULT@2818..2830
-              L_PAREN@2818..2819 "("
-              KEYWORD@2819..2825 "result"
-              WHITESPACE@2825..2826 " "
-              VAL_TYPE@2826..2829
-                NUM_TYPE@2826..2829 "i32"
-              R_PAREN@2829..2830 ")"
+            TYPE_USE@2818..2830
+              RESULT@2818..2830
+                L_PAREN@2818..2819 "("
+                KEYWORD@2819..2825 "result"
+                WHITESPACE@2825..2826 " "
+                VAL_TYPE@2826..2829
+                  NUM_TYPE@2826..2829 "i32"
+                R_PAREN@2829..2830 ")"
           WHITESPACE@2830..2831 " "
           PLAIN_INSTR@2831..2844
             L_PAREN@2831..2832 "("
@@ -1563,13 +1576,14 @@ ROOT@0..4343
         KEYWORD@3031..3035 "loop"
         WHITESPACE@3035..3036 " "
         BLOCK_TYPE@3036..3048
-          RESULT@3036..3048
-            L_PAREN@3036..3037 "("
-            KEYWORD@3037..3043 "result"
-            WHITESPACE@3043..3044 " "
-            VAL_TYPE@3044..3047
-              NUM_TYPE@3044..3047 "i32"
-            R_PAREN@3047..3048 ")"
+          TYPE_USE@3036..3048
+            RESULT@3036..3048
+              L_PAREN@3036..3037 "("
+              KEYWORD@3037..3043 "result"
+              WHITESPACE@3043..3044 " "
+              VAL_TYPE@3044..3047
+                NUM_TYPE@3044..3047 "i32"
+              R_PAREN@3047..3048 ")"
         WHITESPACE@3048..3055 "\n      "
         PLAIN_INSTR@3055..3068
           L_PAREN@3055..3056 "("
@@ -1592,13 +1606,14 @@ ROOT@0..4343
           KEYWORD@3090..3092 "if"
           WHITESPACE@3092..3093 " "
           BLOCK_TYPE@3093..3105
-            RESULT@3093..3105
-              L_PAREN@3093..3094 "("
-              KEYWORD@3094..3100 "result"
-              WHITESPACE@3100..3101 " "
-              VAL_TYPE@3101..3104
-                NUM_TYPE@3101..3104 "i32"
-              R_PAREN@3104..3105 ")"
+            TYPE_USE@3093..3105
+              RESULT@3093..3105
+                L_PAREN@3093..3094 "("
+                KEYWORD@3094..3100 "result"
+                WHITESPACE@3100..3101 " "
+                VAL_TYPE@3101..3104
+                  NUM_TYPE@3101..3104 "i32"
+                R_PAREN@3104..3105 ")"
           WHITESPACE@3105..3106 " "
           PLAIN_INSTR@3106..3119
             L_PAREN@3106..3107 "("
@@ -1690,26 +1705,28 @@ ROOT@0..4343
         KEYWORD@3290..3292 "if"
         WHITESPACE@3292..3293 " "
         BLOCK_TYPE@3293..3305
-          RESULT@3293..3305
-            L_PAREN@3293..3294 "("
-            KEYWORD@3294..3300 "result"
-            WHITESPACE@3300..3301 " "
-            VAL_TYPE@3301..3304
-              NUM_TYPE@3301..3304 "i32"
-            R_PAREN@3304..3305 ")"
+          TYPE_USE@3293..3305
+            RESULT@3293..3305
+              L_PAREN@3293..3294 "("
+              KEYWORD@3294..3300 "result"
+              WHITESPACE@3300..3301 " "
+              VAL_TYPE@3301..3304
+                NUM_TYPE@3301..3304 "i32"
+              R_PAREN@3304..3305 ")"
         WHITESPACE@3305..3312 "\n      "
         BLOCK_IF@3312..3400
           L_PAREN@3312..3313 "("
           KEYWORD@3313..3315 "if"
           WHITESPACE@3315..3316 " "
           BLOCK_TYPE@3316..3328
-            RESULT@3316..3328
-              L_PAREN@3316..3317 "("
-              KEYWORD@3317..3323 "result"
-              WHITESPACE@3323..3324 " "
-              VAL_TYPE@3324..3327
-                NUM_TYPE@3324..3327 "i32"
-              R_PAREN@3327..3328 ")"
+            TYPE_USE@3316..3328
+              RESULT@3316..3328
+                L_PAREN@3316..3317 "("
+                KEYWORD@3317..3323 "result"
+                WHITESPACE@3323..3324 " "
+                VAL_TYPE@3324..3327
+                  NUM_TYPE@3324..3327 "i32"
+                R_PAREN@3327..3328 ")"
           WHITESPACE@3328..3329 " "
           PLAIN_INSTR@3329..3342
             L_PAREN@3329..3330 "("

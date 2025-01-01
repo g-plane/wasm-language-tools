@@ -5,7 +5,7 @@ use super::{
         float, ident, int, keyword, l_paren, r_paren, string, trivias, trivias_prefixed,
         unsigned_int_impl, word,
     },
-    ty::{heap_type, result},
+    ty::heap_type,
     GreenElement, GreenResult, Input,
 };
 use crate::error::{Message, SyntaxError};
@@ -31,11 +31,9 @@ fn block_instr(input: &mut Input) -> GreenResult {
 }
 
 fn block_type(input: &mut Input) -> GreenResult {
-    alt((
-        result.map(|child| node(BLOCK_TYPE, [child])),
-        type_use.map(|child| node(BLOCK_TYPE, [child])),
-    ))
-    .parse_next(input)
+    type_use
+        .parse_next(input)
+        .map(|child| node(BLOCK_TYPE, [child]))
 }
 
 fn block_block(input: &mut Input) -> GreenResult {

@@ -11,7 +11,10 @@ use line_index::LineIndex;
 use lsp_types::{
     Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, NumberOrString,
 };
-use rowan::{ast::AstNode, TextRange};
+use rowan::{
+    ast::{AstNode, SyntaxNodePtr},
+    TextRange,
+};
 use wat_syntax::{
     ast::{BlockInstr, Instr, PlainInstr},
     SyntaxKind, SyntaxNode,
@@ -142,7 +145,7 @@ fn check_sequence(
                     }
                 }
             }
-            if let Some(types) = resolve_block_type(service, block_instr) {
+            if let Some(types) = resolve_block_type(service, uri, block_instr) {
                 type_stack
                     .stack
                     .extend(types.into_iter().map(|ty| (ty, instr.clone())));
@@ -231,7 +234,7 @@ fn resolve_type(
     instr: &Instr,
 ) -> Option<Vec<OperandType>> {
     match instr {
-        Instr::Block(block_instr) => resolve_block_type(service, block_instr),
+        Instr::Block(block_instr) => resolve_block_type(service, uri, block_instr),
         Instr::Plain(plain_instr) => {
             let instr_name = plain_instr.instr_name()?;
             match instr_name.text() {
@@ -278,19 +281,21 @@ fn resolve_type(
 
 fn resolve_block_type(
     service: &LanguageService,
+    uri: InternUri,
     block_instr: &BlockInstr,
 ) -> Option<Vec<OperandType>> {
     block_instr
         .syntax()
         .children()
         .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
-        .map(|block_type| {
-            service
-                .extract_block_type(block_type.green().into())
-                .into_iter()
-                .map(OperandType::Val)
-                .collect()
+        .and_then(|block_type| {
+            service.get_func_sig(
+                uri,
+                SyntaxNodePtr::new(&block_type),
+                block_type.green().into(),
+            )
         })
+        .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
 }
 
 type ExpectedType = (OperandType, Option<(TextRange, String)>);

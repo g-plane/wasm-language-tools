@@ -152,13 +152,14 @@ ROOT@0..421
         KEYWORD@235..240 "block"
         WHITESPACE@240..241 " "
         BLOCK_TYPE@241..253
-          RESULT@241..253
-            L_PAREN@241..242 "("
-            KEYWORD@242..248 "result"
-            WHITESPACE@248..249 " "
-            VAL_TYPE@249..252
-              NUM_TYPE@249..252 "i32"
-            R_PAREN@252..253 ")"
+          TYPE_USE@241..253
+            RESULT@241..253
+              L_PAREN@241..242 "("
+              KEYWORD@242..248 "result"
+              WHITESPACE@248..249 " "
+              VAL_TYPE@249..252
+                NUM_TYPE@249..252 "i32"
+              R_PAREN@252..253 ")"
         WHITESPACE@253..254 " "
         PLAIN_INSTR@254..265
           L_PAREN@254..255 "("
@@ -194,13 +195,14 @@ ROOT@0..421
         KEYWORD@303..308 "block"
         WHITESPACE@308..309 " "
         BLOCK_TYPE@309..321
-          RESULT@309..321
-            L_PAREN@309..310 "("
-            KEYWORD@310..316 "result"
-            WHITESPACE@316..317 " "
-            VAL_TYPE@317..320
-              NUM_TYPE@317..320 "i32"
-            R_PAREN@320..321 ")"
+          TYPE_USE@309..321
+            RESULT@309..321
+              L_PAREN@309..310 "("
+              KEYWORD@310..316 "result"
+              WHITESPACE@316..317 " "
+              VAL_TYPE@317..320
+                NUM_TYPE@317..320 "i32"
+              R_PAREN@320..321 ")"
         WHITESPACE@321..322 " "
         PLAIN_INSTR@322..333
           L_PAREN@322..323 "("
@@ -236,13 +238,14 @@ ROOT@0..421
         KEYWORD@371..376 "block"
         WHITESPACE@376..377 " "
         BLOCK_TYPE@377..389
-          RESULT@377..389
-            L_PAREN@377..378 "("
-            KEYWORD@378..384 "result"
-            WHITESPACE@384..385 " "
-            VAL_TYPE@385..388
-              NUM_TYPE@385..388 "i32"
-            R_PAREN@388..389 ")"
+          TYPE_USE@377..389
+            RESULT@377..389
+              L_PAREN@377..378 "("
+              KEYWORD@378..384 "result"
+              WHITESPACE@384..385 " "
+              VAL_TYPE@385..388
+                NUM_TYPE@385..388 "i32"
+              R_PAREN@388..389 ")"
         WHITESPACE@389..390 " "
         PLAIN_INSTR@390..401
           L_PAREN@390..391 "("

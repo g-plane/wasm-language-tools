@@ -325,9 +325,7 @@ impl DocGen for BlockLoop {
 
 impl DocGen for BlockType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        if let Some(result) = self.result() {
-            result.doc(ctx)
-        } else if let Some(type_use) = self.type_use() {
+        if let Some(type_use) = self.type_use() {
             type_use.doc(ctx)
         } else {
             Doc::nil()

@@ -30,8 +30,6 @@ pub(crate) trait TypesAnalyzerCtx: FilesCtx + SymbolTablesCtx {
     #[salsa::memoized]
     fn extract_global_type(&self, node: GreenNode) -> Option<ValType>;
     #[salsa::memoized]
-    fn extract_block_type(&self, node: GreenNode) -> Vec<ValType>;
-    #[salsa::memoized]
     fn extract_sig(&self, node: GreenNode) -> FuncSig;
 
     #[salsa::memoized]
@@ -66,23 +64,6 @@ fn extract_global_type(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<Val
             _ => None,
         })
         .and_then(|global_type| db.extract_type(global_type.to_owned()))
-}
-
-fn extract_block_type(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Vec<ValType> {
-    node.children()
-        .find_map(|element| match element {
-            NodeOrToken::Node(node) if node.kind() == SyntaxKind::RESULT.into() => Some(node),
-            _ => None,
-        })
-        .into_iter()
-        .flat_map(|child| child.children())
-        .filter_map(|element| match element {
-            NodeOrToken::Node(node) if node.kind() == SyntaxKind::VAL_TYPE.into() => {
-                node.try_into().ok()
-            }
-            _ => None,
-        })
-        .collect()
 }
 
 fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {

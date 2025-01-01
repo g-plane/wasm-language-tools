@@ -1,4 +1,4 @@
-use super::{module::TypeUse, ty::Result, SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage};
+use super::{module::TypeUse, SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage};
 use rowan::{
     ast::{
         support::{child, children, token},
@@ -383,10 +383,6 @@ pub struct BlockType {
     syntax: SyntaxNode,
 }
 impl BlockType {
-    #[inline]
-    pub fn result(&self) -> Option<Result> {
-        child(&self.syntax)
-    }
     #[inline]
     pub fn type_use(&self) -> Option<TypeUse> {
         child(&self.syntax)
