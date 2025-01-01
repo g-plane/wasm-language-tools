@@ -6,6 +6,7 @@ use crate::{
     idx::InternIdent,
     InternUri, LanguageService,
 };
+use itertools::Itertools;
 use rowan::{
     ast::{
         support::{child, children, token},
@@ -120,70 +121,38 @@ fn get_func_sig(
 
 fn render_func_sig(db: &dyn TypesAnalyzerCtx, signature: FuncSig) -> String {
     let mut ret = String::with_capacity(signature.params.len() * 9 + signature.results.len() * 10);
-    let mut params = signature.params.iter();
-    if let Some((ty, name)) = params.next() {
-        ret.push_str("(param");
-        if let Some(name) = name {
-            ret.push(' ');
-            ret.push_str(&db.lookup_ident(*name));
-        }
-        ret.push(' ');
-        ret.push_str(&ty.to_string());
-        ret.push(')');
-        params.for_each(|(ty, name)| {
-            ret.push(' ');
-            ret.push_str("(param");
+    let params = signature
+        .params
+        .into_iter()
+        .map(|(ty, name)| {
             if let Some(name) = name {
-                ret.push(' ');
-                ret.push_str(&db.lookup_ident(*name));
+                format!("(param {} {ty})", db.lookup_ident(name))
+            } else {
+                format!("(param {ty})")
             }
-            ret.push(' ');
-            ret.push_str(&ty.to_string());
-            ret.push(')');
-        });
+        })
+        .join(" ");
+    ret.push_str(&params);
+    let results = signature
+        .results
+        .into_iter()
+        .map(|ty| format!("(result {ty})"))
+        .join(" ");
+    if !params.is_empty() && !results.is_empty() {
+        ret.push(' ');
     }
-    let mut results = signature.results.iter();
-    if let Some(ty) = results.next() {
-        if !ret.is_empty() {
-            ret.push(' ');
-        }
-        ret.push_str("(result ");
-        ret.push_str(&ty.to_string());
-        ret.push(')');
-        results.for_each(|ty| {
-            ret.push(' ');
-            ret.push_str("(result ");
-            ret.push_str(&ty.to_string());
-            ret.push(')');
-        });
-    }
+    ret.push_str(&results);
     ret
 }
 
 fn render_compact_func_sig(_: &dyn TypesAnalyzerCtx, signature: FuncSig) -> String {
-    let mut ret = String::with_capacity(
-        "[] -> []".len() + signature.params.len() * 5 + signature.results.len() * 5,
-    );
-    ret.push('[');
-    let mut params = signature.params.iter();
-    if let Some((ty, _)) = params.next() {
-        ret.push_str(&ty.to_string());
-        params.for_each(|(ty, _)| {
-            ret.push_str(", ");
-            ret.push_str(&ty.to_string());
-        });
-    }
-    ret.push_str("] -> [");
-    let mut results = signature.results.iter();
-    if let Some(ty) = results.next() {
-        ret.push_str(&ty.to_string());
-        results.for_each(|ty| {
-            ret.push_str(", ");
-            ret.push_str(&ty.to_string());
-        });
-    }
-    ret.push(']');
-    ret
+    let params = signature
+        .params
+        .iter()
+        .map(|(ty, _)| ty.to_string())
+        .join(", ");
+    let results = signature.results.iter().map(ValType::to_string).join(", ");
+    format!("[{params}] -> [{results}]")
 }
 
 fn render_func_header(

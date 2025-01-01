@@ -8,6 +8,7 @@ use crate::{
     types_analyzer::TypesAnalyzerCtx,
     InternUri, LanguageService,
 };
+use itertools::Itertools;
 use lsp_types::{
     Hover, HoverContents, HoverParams, LanguageString, MarkedString, MarkupContent, MarkupKind,
 };
@@ -56,19 +57,11 @@ impl LanguageService {
                             .and_then(|symbol| match symbol.kind {
                                 SymbolItemKind::Call => {
                                     symbol_table.find_defs(&key).map(|symbols| {
-                                        let contents =
-                                            symbols.fold(String::new(), |mut contents, symbol| {
-                                                if !contents.is_empty() {
-                                                    contents.push_str("\n---\n");
-                                                }
-                                                contents.push_str(&create_func_hover(
-                                                    self,
-                                                    uri,
-                                                    symbol.clone(),
-                                                    &root,
-                                                ));
-                                                contents
-                                            });
+                                        let contents = symbols
+                                            .map(|symbol| {
+                                                create_func_hover(self, uri, symbol.clone(), &root)
+                                            })
+                                            .join("\n---\n");
                                         Hover {
                                             contents: HoverContents::Markup(MarkupContent {
                                                 kind: MarkupKind::Markdown,

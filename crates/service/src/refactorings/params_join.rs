@@ -1,4 +1,5 @@
 use crate::{files::FilesCtx, helpers, InternUri, LanguageService};
+use itertools::Itertools;
 use line_index::LineIndex;
 use lsp_types::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rowan::TextRange;
@@ -28,21 +29,14 @@ pub fn act(
                 .filter(|child| child.kind() == SyntaxKind::VAL_TYPE)
         })
         .collect::<Vec<_>>();
-    let [first, rest @ ..] = &types[..] else {
-        return None;
-    };
-    if rest.is_empty() {
+    if types.len() <= 1 {
         return None;
     }
 
-    let mut new_text = rest
-        .iter()
-        .fold(format!("(param {first}"), |mut new_text, ty| {
-            new_text.push(' ');
-            new_text.push_str(&ty.to_string());
-            new_text
-        });
-    new_text.push(')');
+    let new_text = format!(
+        "(param {})",
+        types.iter().map(|ty| ty.to_string()).join(" ")
+    );
 
     #[expect(clippy::mutable_key_type)]
     let mut changes = HashMap::with_capacity(1);
