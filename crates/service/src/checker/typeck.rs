@@ -36,7 +36,13 @@ pub fn check(
 
 pub fn unfold(node: SyntaxNode, sequence: &mut Vec<Instr>) {
     node.children()
-        .filter_map(|child| child.first_child().and_then(Instr::cast))
+        .filter_map(|child| {
+            if child.kind() == SyntaxKind::OPERAND {
+                child.first_child().and_then(Instr::cast)
+            } else {
+                None
+            }
+        })
         .for_each(|child| unfold(child.syntax().clone(), sequence));
     if let Some(node) = Instr::cast(node) {
         sequence.push(node);
@@ -130,6 +136,50 @@ fn check_sequence(
             }
         }
         Instr::Block(block_instr) => {
+            match block_instr {
+                BlockInstr::Block(block_block) => {
+                    check(
+                        diags,
+                        service,
+                        uri,
+                        line_index,
+                        block_block.syntax(),
+                        symbol_table,
+                    );
+                }
+                BlockInstr::Loop(block_loop) => {
+                    check(
+                        diags,
+                        service,
+                        uri,
+                        line_index,
+                        block_loop.syntax(),
+                        symbol_table,
+                    );
+                }
+                BlockInstr::If(block_if) => {
+                    if let Some(then_block) = block_if.then_block() {
+                        check(
+                            diags,
+                            service,
+                            uri,
+                            line_index,
+                            then_block.syntax(),
+                            symbol_table,
+                        );
+                    }
+                    if let Some(else_block) = block_if.else_block() {
+                        check(
+                            diags,
+                            service,
+                            uri,
+                            line_index,
+                            else_block.syntax(),
+                            symbol_table,
+                        );
+                    }
+                }
+            }
             if let Some(types) = resolve_block_type(service, block_instr) {
                 types_stack.extend(types.into_iter().map(|ty| (ty, instr.clone())));
             }
