@@ -226,7 +226,12 @@ pub(crate) fn resolve_param_types(
             .next()?;
         service
             .get_func_sig(uri, func.key.ptr, func.green.clone())
-            .map(|sig| sig.params.iter().map(|ty| OperandType::Val(ty.0)).collect())
+            .map(|sig| {
+                sig.params
+                    .iter()
+                    .map(|(ty, ..)| OperandType::Val(*ty))
+                    .collect()
+            })
     } else {
         INSTR_METAS.get(instr_name).map(|meta| meta.params.clone())
     }

@@ -30,17 +30,13 @@ pub fn check(
     node: &SyntaxNode,
     symbol_table: &SymbolTable,
 ) {
-    let mut sequence = Vec::with_capacity(1);
-    node.children()
-        .filter(|child| Instr::can_cast(child.kind()))
-        .for_each(|child| unfold(child, &mut sequence));
-    check_sequence(
+    check_block_like(
         diags,
         service,
         uri,
         line_index,
         symbol_table,
-        sequence,
+        node,
         Vec::with_capacity(2),
     );
 }
@@ -60,13 +56,13 @@ pub fn unfold(node: SyntaxNode, sequence: &mut Vec<Instr>) {
     }
 }
 
-fn check_sequence(
+fn check_block_like(
     diags: &mut Vec<Diagnostic>,
     service: &LanguageService,
     uri: InternUri,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
-    sequence: Vec<Instr>,
+    node: &SyntaxNode,
     init_stack: Vec<(OperandType, Instr)>,
 ) {
     let mut type_stack = TypeStack {
@@ -76,6 +72,11 @@ fn check_sequence(
         stack: init_stack,
         has_never: false,
     };
+    let mut sequence = Vec::with_capacity(1);
+    node.children()
+        .filter(|child| Instr::can_cast(child.kind()))
+        .for_each(|child| unfold(child, &mut sequence));
+
     sequence.into_iter().for_each(|instr| match &instr {
         Instr::Plain(plain_instr) => {
             let Some(instr_name) = plain_instr.instr_name() else {
@@ -101,46 +102,70 @@ fn check_sequence(
             }
         }
         Instr::Block(block_instr) => {
+            let node = block_instr.syntax();
+            let signature = node
+                .children()
+                .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
+                .and_then(|block_type| {
+                    service.get_func_sig(
+                        uri,
+                        SyntaxNodePtr::new(&block_type),
+                        block_type.green().into(),
+                    )
+                });
+            let params = signature.as_ref().map(|signature| &signature.params);
+            if let Some(diag) = params.and_then(|params| {
+                type_stack.check(
+                    &params
+                        .iter()
+                        .map(|(ty, ..)| (OperandType::Val(*ty), None))
+                        .collect::<Vec<_>>(),
+                    &instr,
+                )
+            }) {
+                diags.push(diag);
+            };
+            let init_stack = params
+                .map(|params| {
+                    params
+                        .iter()
+                        .map(|(ty, ..)| (OperandType::Val(*ty), instr.clone()))
+                        .collect()
+                })
+                .unwrap_or_default();
             match block_instr {
-                BlockInstr::Block(block_block) => {
-                    check(
+                BlockInstr::Block(..) | BlockInstr::Loop(..) => {
+                    check_block_like(
                         diags,
                         service,
                         uri,
                         line_index,
-                        block_block.syntax(),
                         symbol_table,
-                    );
-                }
-                BlockInstr::Loop(block_loop) => {
-                    check(
-                        diags,
-                        service,
-                        uri,
-                        line_index,
-                        block_loop.syntax(),
-                        symbol_table,
+                        node,
+                        init_stack,
                     );
                 }
                 BlockInstr::If(block_if) => {
                     if let Some(then_block) = block_if.then_block() {
-                        check(
+                        check_block_like(
                             diags,
                             service,
                             uri,
                             line_index,
-                            then_block.syntax(),
                             symbol_table,
+                            then_block.syntax(),
+                            init_stack.clone(),
                         );
                     }
                     if let Some(else_block) = block_if.else_block() {
-                        check(
+                        check_block_like(
                             diags,
                             service,
                             uri,
                             line_index,
-                            else_block.syntax(),
                             symbol_table,
+                            else_block.syntax(),
+                            init_stack,
                         );
                     }
                 }
@@ -182,7 +207,7 @@ impl TypeStack<'_> {
                             uri: self.service.lookup_uri(self.uri),
                             range: helpers::rowan_range_to_lsp_range(
                                 self.line_index,
-                                related_instr.syntax().text_range(),
+                                pick_instr_range(related_instr),
                             ),
                         },
                         message: format!("expected type `{expected}`, found `{received}`"),
@@ -206,10 +231,7 @@ impl TypeStack<'_> {
             let expected_types = format!("[{}]", expected.iter().map(|(ty, _)| ty).join(", "));
             let received_types = format!("[{}]", pops.iter().map(|(ty, _)| ty).join(", "));
             diagnostic = Some(Diagnostic {
-                range: helpers::rowan_range_to_lsp_range(
-                    self.line_index,
-                    instr.syntax().text_range(),
-                ),
+                range: helpers::rowan_range_to_lsp_range(self.line_index, pick_instr_range(instr)),
                 severity: Some(DiagnosticSeverity::ERROR),
                 source: Some("wat".into()),
                 code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
@@ -327,7 +349,7 @@ fn resolve_expected_types(
             .map(|sig| {
                 sig.params
                     .iter()
-                    .map(|ty| OperandType::Val(ty.0))
+                    .map(|(ty, ..)| OperandType::Val(*ty))
                     .zip(related)
                     .collect()
             })
@@ -338,5 +360,17 @@ fn resolve_expected_types(
                 .map(|param| (param.clone(), None))
                 .collect()
         })
+    }
+}
+
+fn pick_instr_range(instr: &Instr) -> TextRange {
+    match instr {
+        Instr::Plain(plain_instr) => plain_instr.syntax().text_range(),
+        Instr::Block(block_instr) => block_instr
+            .syntax()
+            .children()
+            .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
+            .map(|block_type| block_type.text_range())
+            .unwrap_or_else(|| block_instr.syntax().text_range()),
     }
 }

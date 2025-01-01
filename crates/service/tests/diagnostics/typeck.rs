@@ -570,3 +570,82 @@ fn new_stack_for_new_block() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn block_params_boundary_missing() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    i32.const 0
+    block (param i32 i32)
+      i32.add
+      drop
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn block_params_boundary_mismatched() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    i32.const 0
+    f32.const 1
+    block (param i32 i32)
+      i32.add
+      drop
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn block_params_mismatched() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    i32.const 0
+    f32.const 1
+    block (param i32 f32)
+      i32.add
+      drop
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn block_params_correct() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    i32.const 0
+    i32.const 1
+    block (param i32 i32)
+      i32.add
+      drop
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
