@@ -12,7 +12,7 @@ use lsp_types::{
     Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, NumberOrString,
 };
 use rowan::{
-    ast::{AstNode, SyntaxNodePtr},
+    ast::{support, AstNode, SyntaxNodePtr},
     TextRange,
 };
 use wat_syntax::{
@@ -133,11 +133,20 @@ fn check_block_like(
                 return;
             };
             let instr_name = instr_name.text();
+            let is_never = helpers::can_produce_never(instr_name);
             let meta = data_set::INSTR_METAS.get(instr_name);
             let Some(params) = resolve_expected_types(shared, plain_instr, meta) else {
                 return;
             };
-            if let Some(diag) = type_stack.check(&params, &instr) {
+            let diag = if is_never {
+                type_stack.check_to_bottom(
+                    &params.iter().map(|(ty, ..)| ty.clone()).collect::<Vec<_>>(),
+                    ReportRange::Instr(&instr),
+                )
+            } else {
+                type_stack.check(&params, ReportRange::Instr(&instr))
+            };
+            if let Some(diag) = diag {
                 diags.push(diag);
             }
             if let Some(types) = resolve_type(shared, plain_instr) {
@@ -145,9 +154,7 @@ fn check_block_like(
                     .stack
                     .extend(types.into_iter().map(|ty| (ty, instr.clone())));
             }
-            if helpers::can_produce_never(instr_name) {
-                type_stack.has_never = true;
-            }
+            type_stack.has_never |= is_never;
         }
         Instr::Block(block_instr) => {
             let node = block_instr.syntax();
@@ -168,7 +175,7 @@ fn check_block_like(
                         .iter()
                         .map(|(ty, ..)| (OperandType::Val(*ty), None))
                         .collect::<Vec<_>>(),
-                    &instr,
+                    ReportRange::Instr(&instr),
                 )
             }) {
                 diags.push(diag);
@@ -195,16 +202,10 @@ fn check_block_like(
                     check_block_like(diags, shared, node, init_stack, &results);
                 }
                 BlockInstr::If(block_if) => {
-                    if let Some(mut diag) =
-                        type_stack.check(&[(OperandType::Val(ValType::I32), None)], &instr)
-                    {
-                        diag.range = helpers::rowan_range_to_lsp_range(
-                            shared.line_index,
-                            block_if
-                                .keyword()
-                                .map(|token| token.text_range())
-                                .unwrap_or_else(|| node.text_range()),
-                        );
+                    if let Some(mut diag) = type_stack.check(
+                        &[(OperandType::Val(ValType::I32), None)],
+                        ReportRange::Keyword(node),
+                    ) {
                         diag.message.push_str(" for the condition of `if` block");
                         diags.push(diag);
                     }
@@ -251,7 +252,7 @@ fn check_block_like(
                 .extend(results.into_iter().map(|ty| (ty, instr.clone())));
         }
     });
-    if let Some(diag) = type_stack.check_to_bottom(expected_results, node) {
+    if let Some(diag) = type_stack.check_to_bottom(expected_results, ReportRange::Last(node)) {
         diags.push(diag);
     }
 }
@@ -264,7 +265,11 @@ struct TypeStack<'a> {
     has_never: bool,
 }
 impl TypeStack<'_> {
-    fn check(&mut self, expected: &[ExpectedType], instr: &Instr) -> Option<Diagnostic> {
+    fn check(
+        &mut self,
+        expected: &[ExpectedType],
+        report_range: ReportRange,
+    ) -> Option<Diagnostic> {
         let mut diagnostic = None;
         let rest_len = self.stack.len().saturating_sub(expected.len());
         let pops = self.stack.get(rest_len..).unwrap_or(&*self.stack);
@@ -284,7 +289,7 @@ impl TypeStack<'_> {
                             uri: self.service.lookup_uri(self.uri),
                             range: helpers::rowan_range_to_lsp_range(
                                 self.line_index,
-                                pick_instr_range(related_instr),
+                                ReportRange::Instr(related_instr).pick(),
                             ),
                         },
                         message: format!("expected type `{expected}`, found `{received}`"),
@@ -308,7 +313,7 @@ impl TypeStack<'_> {
             let expected_types = format!("[{}]", expected.iter().map(|(ty, _)| ty).join(", "));
             let received_types = format!("[{}]", pops.iter().map(|(ty, _)| ty).join(", "));
             diagnostic = Some(Diagnostic {
-                range: helpers::rowan_range_to_lsp_range(self.line_index, pick_instr_range(instr)),
+                range: helpers::rowan_range_to_lsp_range(self.line_index, report_range.pick()),
                 severity: Some(DiagnosticSeverity::ERROR),
                 source: Some("wat".into()),
                 code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
@@ -328,7 +333,7 @@ impl TypeStack<'_> {
     fn check_to_bottom(
         &mut self,
         expected: &[OperandType],
-        block_like_node: &SyntaxNode,
+        report_range: ReportRange,
     ) -> Option<Diagnostic> {
         let mut diagnostic = None;
         let mut mismatch = false;
@@ -347,7 +352,7 @@ impl TypeStack<'_> {
                             uri: self.service.lookup_uri(self.uri),
                             range: helpers::rowan_range_to_lsp_range(
                                 self.line_index,
-                                pick_instr_range(related_instr),
+                                ReportRange::Instr(related_instr).pick(),
                             ),
                         },
                         message: format!("expected type `{expected}`, found `{received}`"),
@@ -362,18 +367,17 @@ impl TypeStack<'_> {
             let expected_types = format!("[{}]", expected.iter().join(", "));
             let received_types = format!("[{}]", self.stack.iter().map(|(ty, _)| ty).join(", "));
             diagnostic = Some(Diagnostic {
-                range: helpers::rowan_range_to_lsp_range(
-                    self.line_index,
-                    block_like_node
-                        .last_child_or_token()
-                        .map(|it| it.text_range())
-                        .unwrap_or_else(|| block_like_node.text_range()),
-                ),
+                range: helpers::rowan_range_to_lsp_range(self.line_index, report_range.pick()),
                 severity: Some(DiagnosticSeverity::ERROR),
                 source: Some("wat".into()),
                 code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
                 message: format!(
-                    "expected types {expected_types}, found {received_types} at the end"
+                    "expected types {expected_types}, found {received_types}{}",
+                    if let ReportRange::Last(..) = report_range {
+                        " at the end"
+                    } else {
+                        ""
+                    }
                 ),
                 related_information: if related_information.is_empty() {
                     None
@@ -441,52 +445,84 @@ fn resolve_expected_types(
     instr: &PlainInstr,
     meta: Option<&data_set::InstrMeta>,
 ) -> Option<Vec<ExpectedType>> {
-    if instr.instr_name()?.text() == "call" {
-        let idx = instr.operands().next()?;
-        let func = shared
-            .symbol_table
-            .find_defs(&idx.syntax().clone().into())
-            .into_iter()
-            .flatten()
-            .next()?;
-        let root = instr.syntax().ancestors().last()?;
-        let related = shared
-            .symbol_table
-            .get_declared(func.key.ptr.to_node(&root), SymbolItemKind::Param)
-            .map(|symbol| {
-                Some((
-                    symbol.key.ptr.text_range(),
-                    "parameter originally defined here".into(),
-                ))
-            });
-        shared
-            .service
-            .get_func_sig(shared.uri, func.key.ptr, func.green.clone())
-            .map(|sig| {
-                sig.params
-                    .iter()
-                    .map(|(ty, ..)| OperandType::Val(*ty))
-                    .zip(related)
-                    .collect()
-            })
-    } else {
-        meta.map(|meta| {
+    match instr.instr_name()?.text() {
+        "call" => {
+            let idx = instr.operands().next()?;
+            let func = shared
+                .symbol_table
+                .find_defs(&idx.syntax().clone().into())
+                .into_iter()
+                .flatten()
+                .next()?;
+            let root = instr.syntax().ancestors().last()?;
+            let related = shared
+                .symbol_table
+                .get_declared(func.key.ptr.to_node(&root), SymbolItemKind::Param)
+                .map(|symbol| {
+                    Some((
+                        symbol.key.ptr.text_range(),
+                        "parameter originally defined here".into(),
+                    ))
+                });
+            shared
+                .service
+                .get_func_sig(shared.uri, func.key.ptr, func.green.clone())
+                .map(|sig| {
+                    sig.params
+                        .iter()
+                        .map(|(ty, ..)| OperandType::Val(*ty))
+                        .zip(related)
+                        .collect()
+                })
+        }
+        "return" => {
+            let func = instr
+                .syntax()
+                .ancestors()
+                .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)?;
+            shared
+                .service
+                .get_func_sig(shared.uri, SyntaxNodePtr::new(&func), func.green().into())
+                .map(|sig| {
+                    sig.results
+                        .into_iter()
+                        .map(|ty| (OperandType::Val(ty), None))
+                        .collect()
+                })
+        }
+        _ => meta.map(|meta| {
             meta.params
                 .iter()
                 .map(|param| (param.clone(), None))
                 .collect()
-        })
+        }),
     }
 }
 
-fn pick_instr_range(instr: &Instr) -> TextRange {
-    match instr {
-        Instr::Plain(plain_instr) => plain_instr.syntax().text_range(),
-        Instr::Block(block_instr) => block_instr
-            .syntax()
-            .children()
-            .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
-            .map(|block_type| block_type.text_range())
-            .unwrap_or_else(|| block_instr.syntax().text_range()),
+enum ReportRange<'a> {
+    Instr(&'a Instr),
+    Keyword(&'a SyntaxNode),
+    Last(&'a SyntaxNode),
+}
+impl ReportRange<'_> {
+    fn pick(&self) -> TextRange {
+        match self {
+            ReportRange::Instr(instr) => match instr {
+                Instr::Plain(plain_instr) => plain_instr.syntax().text_range(),
+                Instr::Block(block_instr) => block_instr
+                    .syntax()
+                    .children()
+                    .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
+                    .map(|block_type| block_type.text_range())
+                    .unwrap_or_else(|| block_instr.syntax().text_range()),
+            },
+            ReportRange::Keyword(node) => support::token(node, SyntaxKind::KEYWORD)
+                .map(|token| token.text_range())
+                .unwrap_or_else(|| node.text_range()),
+            ReportRange::Last(node) => node
+                .last_child_or_token()
+                .map(|it| it.text_range())
+                .unwrap_or_else(|| node.text_range()),
+        }
     }
 }

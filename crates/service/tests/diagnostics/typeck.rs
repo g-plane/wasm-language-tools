@@ -1265,3 +1265,73 @@ fn if_cond_correct() {
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
+
+#[test]
+fn return_incorrect() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func (result i32)
+    (block
+      (return))
+    (unreachable))
+  (func (result i32)
+    (block
+      (f32.const 0)
+      (return))
+    (unreachable))
+  (func (result i32)
+    (block
+      (i32.const 0)
+      (i32.const 0)
+      (return))
+    (unreachable))
+  (func (result i32)
+    block
+      return
+    end
+    unreachable)
+  (func (result i32)
+    block
+      f32.const 0
+      return
+    end
+    unreachable)
+  (func (result i32)
+    block
+      i32.const 0
+      i32.const 0
+      return
+    end
+    unreachable))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn return_correct() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func (result i32)
+    (block
+      (i32.const 0)
+      (return))
+    (unreachable))
+  (func (result i32)
+    block
+      i32.const 0
+      return
+    end
+    unreachable))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
