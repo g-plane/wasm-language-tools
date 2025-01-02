@@ -308,12 +308,13 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                                 }) {
                                     let mut idx = parent.idx.clone();
                                     idx.num = Some(levels);
-                                    blocks.push(BlockItem {
-                                        ref_key: symbol.key.clone(),
-                                        ref_idx: symbol.idx.clone(),
-                                        def_key: key.clone(),
-                                        def_idx: idx,
-                                    });
+                                    if symbol.idx.is_defined_by(&idx) {
+                                        blocks.push(BlockItem {
+                                            ref_key: symbol.key.clone(),
+                                            def_key: key.clone(),
+                                            def_idx: idx,
+                                        });
+                                    }
                                     current = parent;
                                     levels += 1;
                                 }
@@ -571,12 +572,14 @@ impl SymbolTable {
     }
 
     pub fn find_block_def(&self, key: &SymbolItemKey) -> Option<&SymbolItemKey> {
-        self.find_block_ref(key).and_then(|block_ref| {
+        if self.find_block_ref(key).is_some() {
             self.blocks
                 .iter()
-                .find(|block| *key == block.ref_key && block_ref.idx.is_defined_by(&block.def_idx))
+                .find(|block| *key == block.ref_key)
                 .map(|block| &block.def_key)
-        })
+        } else {
+            None
+        }
     }
 
     pub fn find_block_ref(&self, key: &SymbolItemKey) -> Option<&SymbolItem> {
@@ -610,9 +613,7 @@ impl SymbolTable {
         .chain(
             self.blocks
                 .iter()
-                .filter(|block| {
-                    block.def_key == *def_key && block.ref_idx.is_defined_by(&block.def_idx)
-                })
+                .filter(|block| block.def_key == *def_key)
                 .filter_map(|block| {
                     self.symbols
                         .iter()
@@ -678,7 +679,6 @@ pub enum SymbolItemKind {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BlockItem {
     pub ref_key: SymbolItemKey,
-    pub ref_idx: Idx,
     pub def_key: SymbolItemKey,
     pub def_idx: Idx,
 }
