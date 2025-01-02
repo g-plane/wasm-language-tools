@@ -195,9 +195,33 @@ fn check_block_like(
                             init_stack.clone(),
                             &results,
                         );
+                    } else {
+                        diags.push(Diagnostic {
+                            range: helpers::rowan_range_to_lsp_range(
+                                shared.line_index,
+                                node.text_range(),
+                            ),
+                            severity: Some(DiagnosticSeverity::ERROR),
+                            source: Some("wat".into()),
+                            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                            message: "missing then branch".into(),
+                            ..Default::default()
+                        });
                     }
                     if let Some(else_block) = block_if.else_block() {
                         check_block_like(diags, shared, else_block.syntax(), init_stack, &results);
+                    } else if !results.is_empty() {
+                        diags.push(Diagnostic {
+                            range: helpers::rowan_range_to_lsp_range(
+                                shared.line_index,
+                                node.text_range(),
+                            ),
+                            severity: Some(DiagnosticSeverity::ERROR),
+                            source: Some("wat".into()),
+                            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                            message: "missing else branch".into(),
+                            ..Default::default()
+                        });
                     }
                 }
             }

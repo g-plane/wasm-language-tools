@@ -907,16 +907,22 @@ fn then_results_correct() {
     (if (result i32 i32)
       (i32.const 1)
       (then
+        (unreachable))
+      (else
         (unreachable))))
   (func (result i32 i32)
     (if (result i32 i32)
       (i32.const 1)
       (then
         (i32.const 0)
-        (i32.const 0))))
+        (i32.const 0))
+      (else
+        (unreachable))))
   (func (result i32 i32)
     i32.const 1
     if (result i32 i32)
+      unreachable
+    else
       unreachable
     end)
   (func (result i32 i32)
@@ -924,6 +930,8 @@ fn then_results_correct() {
     if (result i32 i32)
       i32.const 0
       i32.const 0
+    else
+      unreachable
     end))
 ";
     let mut service = LanguageService::default();
@@ -1124,6 +1132,54 @@ fn global_results_correct() {
     unreachable)
   (global (mut)
     i32.const 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn missing_then() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (if
+      (i32.const 0))
+    (if
+      (i32.const 0)
+      (else))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn missing_else() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (drop
+      (if (result i32)
+        (i32.const 1)
+        (then
+          (i32.const 0)))))
+  (func
+    i32.const 1
+    if (result i32)
+      i32.const 0
+    end)
+  (func
+    i32.const 1
+    if
+     ;; missing else is allowed since both branches return nothing
+    end))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
