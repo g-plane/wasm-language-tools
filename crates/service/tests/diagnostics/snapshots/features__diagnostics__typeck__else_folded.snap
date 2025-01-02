@@ -8,11 +8,11 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 7,
+          "line": 8,
           "character": 8
         },
         "end": {
-          "line": 9,
+          "line": 10,
           "character": 24
         }
       },
@@ -26,11 +26,11 @@ expression: response
             "uri": "untitled:test",
             "range": {
               "start": {
-                "line": 9,
+                "line": 10,
                 "character": 10
               },
               "end": {
-                "line": 9,
+                "line": 10,
                 "character": 23
               }
             }

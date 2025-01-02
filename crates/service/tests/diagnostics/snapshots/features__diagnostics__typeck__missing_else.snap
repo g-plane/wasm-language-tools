@@ -51,22 +51,6 @@ expression: response
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected types [], found [i32, i32] at the end"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 17,
-          "character": 7
-        },
-        "end": {
-          "line": 17,
-          "character": 8
-        }
-      },
-      "severity": 1,
-      "code": "type-check",
-      "source": "wat",
       "message": "expected types [], found [i32] at the end"
     }
   ]

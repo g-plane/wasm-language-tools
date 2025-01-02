@@ -3,7 +3,7 @@ use crate::{
     data_set,
     files::FilesCtx,
     helpers,
-    types_analyzer::{OperandType, TypesAnalyzerCtx},
+    types_analyzer::{OperandType, TypesAnalyzerCtx, ValType},
     InternUri, LanguageService,
 };
 use itertools::{EitherOrBoth, Itertools};
@@ -79,15 +79,23 @@ pub fn check_global(
 }
 
 pub fn unfold(node: SyntaxNode, sequence: &mut Vec<Instr>) {
-    node.children()
-        .filter_map(|child| {
-            if child.kind() == SyntaxKind::OPERAND {
-                child.first_child().and_then(Instr::cast)
-            } else {
-                None
-            }
-        })
-        .for_each(|child| unfold(child.syntax().clone(), sequence));
+    match node.kind() {
+        SyntaxKind::PLAIN_INSTR => node
+            .children()
+            .filter_map(|child| {
+                if child.kind() == SyntaxKind::OPERAND {
+                    child.first_child().and_then(Instr::cast)
+                } else {
+                    None
+                }
+            })
+            .for_each(|child| unfold(child.syntax().clone(), sequence)),
+        SyntaxKind::BLOCK_IF => node
+            .children()
+            .filter_map(Instr::cast)
+            .for_each(|child| unfold(child.syntax().clone(), sequence)),
+        _ => {}
+    }
     if let Some(node) = Instr::cast(node) {
         sequence.push(node);
     }
@@ -187,6 +195,19 @@ fn check_block_like(
                     check_block_like(diags, shared, node, init_stack, &results);
                 }
                 BlockInstr::If(block_if) => {
+                    if let Some(mut diag) =
+                        type_stack.check(&[(OperandType::Val(ValType::I32), None)], &instr)
+                    {
+                        diag.range = helpers::rowan_range_to_lsp_range(
+                            shared.line_index,
+                            block_if
+                                .keyword()
+                                .map(|token| token.text_range())
+                                .unwrap_or_else(|| node.text_range()),
+                        );
+                        diag.message.push_str(" for the condition of `if` block");
+                        diags.push(diag);
+                    }
                     if let Some(then_block) = block_if.then_block() {
                         check_block_like(
                             diags,
