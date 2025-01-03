@@ -12,7 +12,7 @@ use itertools::Itertools;
 use lsp_types::{
     Hover, HoverContents, HoverParams, LanguageString, MarkedString, MarkupContent, MarkupKind,
 };
-use rowan::ast::{support::child, AstNode};
+use rowan::ast::{support::child, AstNode, SyntaxNodePtr};
 use wat_syntax::{ast::GlobalType, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
@@ -102,6 +102,23 @@ impl LanguageService {
                                         )),
                                     })
                                 }
+                                SymbolItemKind::BlockRef => symbol_table
+                                    .find_block_def(&key)
+                                    .and_then(|def_key| {
+                                        symbol_table
+                                            .symbols
+                                            .iter()
+                                            .find(|symbol| &symbol.key == def_key)
+                                    })
+                                    .map(|block| Hover {
+                                        contents: HoverContents::Scalar(create_block_hover(
+                                            self, block, uri, &root,
+                                        )),
+                                        range: Some(helpers::rowan_range_to_lsp_range(
+                                            &line_index,
+                                            token.text_range(),
+                                        )),
+                                    }),
                                 _ => None,
                             })
                     })
@@ -188,6 +205,9 @@ fn create_def_hover(
         ))),
         SymbolItemKind::GlobalDef => Some(HoverContents::Scalar(create_global_def_hover(
             service, symbol, root,
+        ))),
+        SymbolItemKind::BlockDef => Some(HoverContents::Scalar(create_block_hover(
+            service, symbol, uri, root,
         ))),
         _ => None,
     }
@@ -294,6 +314,53 @@ fn create_type_def_hover(service: &LanguageService, symbol: &SymbolItem) -> Mark
             content_value.push_str(&service.render_func_sig(sig));
         }
         content_value.push(')');
+    }
+    content_value.push(')');
+    create_marked_string(content_value)
+}
+
+fn create_block_hover(
+    service: &LanguageService,
+    symbol: &SymbolItem,
+    uri: InternUri,
+    root: &SyntaxNode,
+) -> MarkedString {
+    let mut content_value = format!(
+        "({}",
+        match symbol.key.ptr.kind() {
+            SyntaxKind::BLOCK_IF => "if",
+            SyntaxKind::BLOCK_LOOP => "loop",
+            _ => "block",
+        }
+    );
+    if let SymbolItem {
+        kind: SymbolItemKind::BlockDef,
+        idx: Idx {
+            name: Some(name), ..
+        },
+        ..
+    } = symbol
+    {
+        content_value.push(' ');
+        content_value.push_str(&service.lookup_ident(*name));
+    }
+    if let Some(sig) = symbol
+        .key
+        .ptr
+        .to_node(root)
+        .children()
+        .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
+        .and_then(|block_type| {
+            service.get_func_sig(
+                uri,
+                SyntaxNodePtr::new(&block_type),
+                block_type.green().into(),
+            )
+        })
+        .map(|sig| service.render_func_sig(sig))
+    {
+        content_value.push(' ');
+        content_value.push_str(&sig);
     }
     content_value.push(')');
     create_marked_string(content_value)

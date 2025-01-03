@@ -478,3 +478,105 @@ fn instr_name() {
     let response = service.hover(create_params(uri, Position::new(2, 19)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn block_int_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (block (result i32 f32)
+      br 0)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(4, 9)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn block_ident_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (block $b (param i64 f64) (result i32 f32)
+      br $b)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(4, 9)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn block_via_type_use() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (type $t (func (param i32) (param i32) (result i32)))
+  (func
+    (block $b (type $t)
+      br $b)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(5, 9)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn block_decl() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (block $b (param i64 f64) (result i32 f32))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(3, 11)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn block_keyword() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (block (result i32 f32))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(3, 6)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn loop_keyword() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (loop (result i32 f32))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(3, 6)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn if_keyword() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (if (result i32 f32))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(3, 6)));
+    assert_json_snapshot!(response);
+}
