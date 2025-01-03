@@ -675,7 +675,12 @@ fn block_results_folded() {
     (block (result i32 i32)
       (i32.const 0)
       (i32.const 0)
-      (i32.const 0))))
+      (i32.const 0)))
+  (func (result i32 i32)
+    (block (result i32 i32)
+      (i32.const 0)
+      (i32.const 0)
+      (f32.const 0))))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -703,6 +708,12 @@ fn block_results_sequence() {
       i32.const 0
       i32.const 0
       i32.const 0
+    end)
+  (func (result i32 i32)
+    block (result i32 i32)
+      i32.const 0
+      i32.const 0
+      f32.const 0
     end))
 ";
     let mut service = LanguageService::default();
@@ -784,7 +795,12 @@ fn loop_results_folded() {
     (loop (result i32 i32)
       (i32.const 0)
       (i32.const 0)
-      (i32.const 0))))
+      (i32.const 0)))
+  (func (result i32 i32)
+    (loop (result i32 i32)
+      (i32.const 0)
+      (i32.const 0)
+      (f32.const 0))))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -812,6 +828,12 @@ fn loop_results_sequence() {
       i32.const 0
       i32.const 0
       i32.const 0
+    end)
+  (func (result i32 i32)
+    loop (result i32 i32)
+      i32.const 0
+      i32.const 0
+      f32.const 0
     end))
 ";
     let mut service = LanguageService::default();
@@ -900,6 +922,15 @@ fn then_results_folded() {
         (i32.const 0)
         (i32.const 0))
       (else
+        (unreachable))))
+  (func (result i32 i32)
+    (if (result i32 i32)
+      (i32.const 1)
+      (then
+        (i32.const 0)
+        (i32.const 0)
+        (f32.const 0))
+      (else
         (unreachable)))))
 ";
     let mut service = LanguageService::default();
@@ -935,6 +966,15 @@ fn then_results_sequence() {
       i32.const 0
       i32.const 0
       i32.const 0
+    else
+      unreachable
+    end)
+  (func (result i32 i32)
+    i32.const 1
+    if (result i32 i32)
+      i32.const 0
+      i32.const 0
+      f32.const 0
     else
       unreachable
     end))
@@ -1050,7 +1090,15 @@ fn else_results_folded() {
       (else
         (i32.const 0)
         (i32.const 0)
-        (i32.const 0)))))
+        (i32.const 0))))
+  (func (result i32 i32)
+    (if (result i32 i32)
+      (i32.const 1)
+      (then (i32.const 0) (i32.const 0))
+      (else
+        (i32.const 0)
+        (i32.const 0)
+        (f32.const 0)))))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -1090,6 +1138,16 @@ fn else_results_sequence() {
       i32.const 0
       i32.const 0
       i32.const 0
+    end)
+  (func (result i32 i32)
+    i32.const 1
+    if (result i32 i32)
+      i32.const 0
+      i32.const 0
+    else
+      i32.const 0
+      i32.const 0
+      f32.const 0
     end))
 ";
     let mut service = LanguageService::default();
@@ -1194,7 +1252,11 @@ fn func_results_incorrect() {
   (func (result i32 i32)
     block (result i32 i32 i32)
       unreachable
-    end))
+    end)
+  (func (result i32 i32)
+    i32.const 0
+    i32.const 0
+    f32.const 0))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

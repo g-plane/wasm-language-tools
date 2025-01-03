@@ -334,7 +334,8 @@ impl TypeStack<'_> {
         let mut related_information = vec![];
         expected
             .iter()
-            .zip_longest(&self.stack)
+            .rev()
+            .zip_longest(self.stack.iter().rev())
             .for_each(|pair| match pair {
                 EitherOrBoth::Both(
                     OperandType::Val(expected),

@@ -70,6 +70,40 @@ expression: response
       "code": "type-check",
       "source": "wat",
       "message": "expected types [i32, i32], found [i32, i32, i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 22,
+          "character": 4
+        },
+        "end": {
+          "line": 22,
+          "character": 7
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32, i32, f32] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 21,
+                "character": 6
+              },
+              "end": {
+                "line": 21,
+                "character": 17
+              }
+            }
+          },
+          "message": "expected type `i32`, found `f32`"
+        }
+      ]
     }
   ]
 }
