@@ -58,27 +58,11 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 15,
+          "line": 13,
           "character": 6
         },
         "end": {
-          "line": 15,
-          "character": 14
-        }
-      },
-      "severity": 1,
-      "code": "type-check",
-      "source": "wat",
-      "message": "expected types [i32], found [i32, i32]"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 19,
-          "character": 6
-        },
-        "end": {
-          "line": 19,
+          "line": 13,
           "character": 12
         }
       },
@@ -90,11 +74,11 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 25,
+          "line": 19,
           "character": 6
         },
         "end": {
-          "line": 25,
+          "line": 19,
           "character": 12
         }
       },
@@ -108,11 +92,11 @@ expression: response
             "uri": "untitled:test",
             "range": {
               "start": {
-                "line": 24,
+                "line": 18,
                 "character": 6
               },
               "end": {
-                "line": 24,
+                "line": 18,
                 "character": 17
               }
             }
@@ -120,22 +104,6 @@ expression: response
           "message": "expected type `i32`, found `f32`"
         }
       ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 32,
-          "character": 6
-        },
-        "end": {
-          "line": 32,
-          "character": 12
-        }
-      },
-      "severity": 1,
-      "code": "type-check",
-      "source": "wat",
-      "message": "expected types [i32], found [i32, i32]"
     }
   ]
 }

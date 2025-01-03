@@ -1281,12 +1281,6 @@ fn return_incorrect() {
       (return))
     (unreachable))
   (func (result i32)
-    (block
-      (i32.const 0)
-      (i32.const 0)
-      (return))
-    (unreachable))
-  (func (result i32)
     block
       return
     end
@@ -1294,13 +1288,6 @@ fn return_incorrect() {
   (func (result i32)
     block
       f32.const 0
-      return
-    end
-    unreachable)
-  (func (result i32)
-    block
-      i32.const 0
-      i32.const 0
       return
     end
     unreachable))
@@ -1323,7 +1310,20 @@ fn return_correct() {
       (return))
     (unreachable))
   (func (result i32)
+    (block
+      (i32.const 0)
+      (i32.const 0)
+      (return))
+    (unreachable))
+  (func (result i32)
     block
+      i32.const 0
+      return
+    end
+    unreachable)
+  (func (result i32)
+    block
+      i32.const 0
       i32.const 0
       return
     end

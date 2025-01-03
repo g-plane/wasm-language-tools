@@ -133,20 +133,11 @@ fn check_block_like(
                 return;
             };
             let instr_name = instr_name.text();
-            let is_never = helpers::can_produce_never(instr_name);
             let meta = data_set::INSTR_METAS.get(instr_name);
             let Some(params) = resolve_expected_types(shared, plain_instr, meta) else {
                 return;
             };
-            let diag = if is_never {
-                type_stack.check_to_bottom(
-                    &params.iter().map(|(ty, ..)| ty.clone()).collect::<Vec<_>>(),
-                    ReportRange::Instr(&instr),
-                )
-            } else {
-                type_stack.check(&params, ReportRange::Instr(&instr))
-            };
-            if let Some(diag) = diag {
+            if let Some(diag) = type_stack.check(&params, ReportRange::Instr(&instr)) {
                 diags.push(diag);
             }
             if let Some(types) = resolve_type(shared, plain_instr) {
@@ -154,7 +145,7 @@ fn check_block_like(
                     .stack
                     .extend(types.into_iter().map(|ty| (ty, instr.clone())));
             }
-            type_stack.has_never |= is_never;
+            type_stack.has_never |= helpers::can_produce_never(instr_name);
         }
         Instr::Block(block_instr) => {
             let node = block_instr.syntax();
