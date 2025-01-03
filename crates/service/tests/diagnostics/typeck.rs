@@ -724,6 +724,16 @@ fn block_results_correct() {
   (func (result i32 i32)
     (block (result i32 i32)
       (i32.const 0)
+      (f32.const 0)
+      (unreachable)))
+  (func (result i32 i32)
+    (block (result i32 i32)
+      (f32.const 0)
+      (i32.const 0)
+      (unreachable)))
+  (func (result i32 i32)
+    (block (result i32 i32)
+      (i32.const 0)
       (i32.const 0)))
   (func (result i32 i32)
     (block (type $t)
@@ -731,6 +741,18 @@ fn block_results_correct() {
       (i32.const 0)))
   (func (result i32 i32)
     block (result i32 i32)
+      unreachable
+    end)
+  (func (result i32 i32)
+    block (result i32 i32)
+      i32.const 0
+      f32.const 0
+      unreachable
+    end)
+  (func (result i32 i32)
+    block (result i32 i32)
+      f32.const 0
+      i32.const 0
       unreachable
     end)
   (func (result i32 i32)
@@ -810,9 +832,31 @@ fn loop_results_correct() {
   (func (result i32 i32)
     (loop (result i32 i32)
       (i32.const 0)
+      (f32.const 0)
+      (unreachable)))
+  (func (result i32 i32)
+    (loop (result i32 i32)
+      (f32.const 0)
+      (i32.const 0)
+      (unreachable)))
+  (func (result i32 i32)
+    (loop (result i32 i32)
+      (i32.const 0)
       (i32.const 0)))
   (func (result i32 i32)
     loop (result i32 i32)
+      unreachable
+    end)
+  (func (result i32 i32)
+    loop (result i32 i32)
+      i32.const 0
+      f32.const 0
+      unreachable
+    end)
+  (func (result i32 i32)
+    loop (result i32 i32)
+      f32.const 0
+      i32.const 0
       unreachable
     end)
   (func (result i32 i32)
@@ -919,12 +963,48 @@ fn then_results_correct() {
       (i32.const 1)
       (then
         (i32.const 0)
+        (f32.const 0)
+        (unreachable))
+      (else
+        (unreachable))))
+  (func (result i32 i32)
+    (if (result i32 i32)
+      (i32.const 1)
+      (then
+        (f32.const 0)
+        (i32.const 0)
+        (unreachable))
+      (else
+        (unreachable))))
+  (func (result i32 i32)
+    (if (result i32 i32)
+      (i32.const 1)
+      (then
+        (i32.const 0)
         (i32.const 0))
       (else
         (unreachable))))
   (func (result i32 i32)
     i32.const 1
     if (result i32 i32)
+      unreachable
+    else
+      unreachable
+    end)
+  (func (result i32 i32)
+    i32.const 1
+    if (result i32 i32)
+      f32.const 0
+      i32.const 0
+      unreachable
+    else
+      unreachable
+    end)
+  (func (result i32 i32)
+    i32.const 1
+    if (result i32 i32)
+      i32.const 0
+      f32.const 0
       unreachable
     else
       unreachable
@@ -1040,10 +1120,46 @@ fn else_results_correct() {
         (i32.const 0)
         (i32.const 0))))
   (func (result i32 i32)
+    (if (result i32 i32)
+      (i32.const 1)
+      (then
+        (unreachable))
+      (else
+        (f32.const 0)
+        (i32.const 0)
+        (unreachable))))
+  (func (result i32 i32)
+    (if (result i32 i32)
+      (i32.const 1)
+      (then
+        (unreachable))
+      (else
+        (i32.const 0)
+        (f32.const 0)
+        (unreachable))))
+  (func (result i32 i32)
     i32.const 1
     if (result i32 i32)
       unreachable
     else
+      unreachable
+    end)
+  (func (result i32 i32)
+    i32.const 1
+    if (result i32 i32)
+      unreachable
+    else
+      f32.const 0
+      i32.const 0
+      unreachable
+    end)
+  (func (result i32 i32)
+    i32.const 1
+    if (result i32 i32)
+      unreachable
+    else
+      i32.const 0
+      f32.const 0
       unreachable
     end)
   (func (result i32 i32)
@@ -1094,6 +1210,13 @@ fn func_results_correct() {
 (module
   (func (result i32 i32)
     unreachable)
+  (func (result i32 i32)
+    (f32.const 0)
+    (unreachable))
+  (func (result i32 i32)
+    (f32.const 0)
+    (f32.const 0)
+    (unreachable))
   (func (result i32 i32)
     block (result i32 i32)
       unreachable

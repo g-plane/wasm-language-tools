@@ -326,6 +326,9 @@ impl TypeStack<'_> {
         expected: &[OperandType],
         report_range: ReportRange,
     ) -> Option<Diagnostic> {
+        if self.has_never {
+            return None;
+        }
         let mut diagnostic = None;
         let mut mismatch = false;
         let mut related_information = vec![];
@@ -349,7 +352,7 @@ impl TypeStack<'_> {
                         message: format!("expected type `{expected}`, found `{received}`"),
                     });
                 }
-                EitherOrBoth::Left(..) | EitherOrBoth::Right(..) if !self.has_never => {
+                EitherOrBoth::Left(..) | EitherOrBoth::Right(..) => {
                     mismatch = true;
                 }
                 _ => {}
