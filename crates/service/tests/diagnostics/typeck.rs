@@ -169,7 +169,12 @@ fn stacked_type_mismatch_from_func_params() {
         local.get 0
         local.get 1
         call $swap
-        i32.sub))
+        i32.sub)
+
+    (func (param f32 f64))
+    (func
+        i32.const 0
+        call 2))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

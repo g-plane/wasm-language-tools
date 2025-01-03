@@ -54,6 +54,56 @@ expression: response
           "message": "parameter originally defined here"
         }
       ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 14,
+          "character": 8
+        },
+        "end": {
+          "line": 14,
+          "character": 14
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [f32, f64], found [i32]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 13,
+                "character": 8
+              },
+              "end": {
+                "line": 13,
+                "character": 19
+              }
+            }
+          },
+          "message": "expected type `f64`, found `i32`"
+        },
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 11,
+                "character": 21
+              },
+              "end": {
+                "line": 11,
+                "character": 24
+              }
+            }
+          },
+          "message": "parameter originally defined here"
+        }
+      ]
     }
   ]
 }
