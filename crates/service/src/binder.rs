@@ -293,7 +293,6 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                                 )
                             })
                             .for_each(|symbol| {
-                                symbols.push(symbol.clone());
                                 let mut current = &symbol;
                                 let mut levels = 0;
                                 while let Some(
@@ -318,6 +317,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                                     current = parent;
                                     levels += 1;
                                 }
+                                symbols.push(symbol);
                             });
                     }
                     Some(
