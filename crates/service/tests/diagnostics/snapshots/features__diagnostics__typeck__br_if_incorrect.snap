@@ -1,0 +1,775 @@
+---
+source: crates/service/tests/diagnostics/typeck.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 6
+        },
+        "end": {
+          "line": 6,
+          "character": 25
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [f64], found []"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 25
+        },
+        "end": {
+          "line": 6,
+          "character": 26
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [f64] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 11,
+          "character": 8
+        },
+        "end": {
+          "line": 12,
+          "character": 24
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found [i64]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 12,
+                "character": 10
+              },
+              "end": {
+                "line": 12,
+                "character": 23
+              }
+            }
+          },
+          "message": "expected type `i32`, found `i64`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 6
+        },
+        "end": {
+          "line": 12,
+          "character": 25
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [f64], found []"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 12,
+          "character": 25
+        },
+        "end": {
+          "line": 12,
+          "character": 26
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [f64] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 16,
+          "character": 6
+        },
+        "end": {
+          "line": 17,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32]"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 18,
+          "character": 19
+        },
+        "end": {
+          "line": 18,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found [i32, i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 21,
+          "character": 6
+        },
+        "end": {
+          "line": 22,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32]"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 23,
+          "character": 19
+        },
+        "end": {
+          "line": 23,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found [i32, i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 29,
+          "character": 22
+        },
+        "end": {
+          "line": 29,
+          "character": 23
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 34,
+          "character": 22
+        },
+        "end": {
+          "line": 34,
+          "character": 23
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 38,
+          "character": 6
+        },
+        "end": {
+          "line": 40,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32]"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 41,
+          "character": 19
+        },
+        "end": {
+          "line": 41,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found [i32, i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 44,
+          "character": 6
+        },
+        "end": {
+          "line": 46,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32]"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 47,
+          "character": 19
+        },
+        "end": {
+          "line": 47,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found [i32, i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 52,
+          "character": 8
+        },
+        "end": {
+          "line": 54,
+          "character": 24
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i64, i32]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 53,
+                "character": 10
+              },
+              "end": {
+                "line": 53,
+                "character": 23
+              }
+            }
+          },
+          "message": "expected type `i32`, found `i64`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 59,
+          "character": 8
+        },
+        "end": {
+          "line": 61,
+          "character": 24
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i64, i32]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 60,
+                "character": 10
+              },
+              "end": {
+                "line": 60,
+                "character": 23
+              }
+            }
+          },
+          "message": "expected type `i32`, found `i64`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 66,
+          "character": 6
+        },
+        "end": {
+          "line": 66,
+          "character": 15
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found []"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 69,
+          "character": 6
+        },
+        "end": {
+          "line": 70,
+          "character": 14
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found []"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 73,
+          "character": 6
+        },
+        "end": {
+          "line": 74,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found [i64]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 74,
+                "character": 8
+              },
+              "end": {
+                "line": 74,
+                "character": 21
+              }
+            }
+          },
+          "message": "expected type `i32`, found `i64`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 77,
+          "character": 6
+        },
+        "end": {
+          "line": 79,
+          "character": 14
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32]"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 80,
+          "character": 19
+        },
+        "end": {
+          "line": 80,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found [i32, i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 85,
+          "character": 8
+        },
+        "end": {
+          "line": 86,
+          "character": 24
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32]"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 86,
+          "character": 24
+        },
+        "end": {
+          "line": 86,
+          "character": 25
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 89,
+          "character": 6
+        },
+        "end": {
+          "line": 91,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32, i64]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 91,
+                "character": 8
+              },
+              "end": {
+                "line": 91,
+                "character": 21
+              }
+            }
+          },
+          "message": "expected type `i32`, found `i64`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 92,
+          "character": 19
+        },
+        "end": {
+          "line": 92,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found [i32, i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 100,
+          "character": 10
+        },
+        "end": {
+          "line": 100,
+          "character": 19
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found []"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 98,
+          "character": 6
+        },
+        "end": {
+          "line": 100,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "missing `else` branch"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 100,
+          "character": 21
+        },
+        "end": {
+          "line": 100,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [i32, i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 101,
+          "character": 4
+        },
+        "end": {
+          "line": 101,
+          "character": 13
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found []"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 109,
+          "character": 10
+        },
+        "end": {
+          "line": 110,
+          "character": 26
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32]"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 107,
+          "character": 6
+        },
+        "end": {
+          "line": 110,
+          "character": 28
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "missing `else` branch"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 110,
+          "character": 28
+        },
+        "end": {
+          "line": 110,
+          "character": 29
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [i32, i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 111,
+          "character": 4
+        },
+        "end": {
+          "line": 111,
+          "character": 13
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found []"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 116,
+          "character": 8
+        },
+        "end": {
+          "line": 116,
+          "character": 17
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found []"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 122,
+          "character": 8
+        },
+        "end": {
+          "line": 123,
+          "character": 24
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32]"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 132,
+          "character": 8
+        },
+        "end": {
+          "line": 132,
+          "character": 15
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [f32, f32, i32], found [f64, f64, i32]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 130,
+                "character": 8
+              },
+              "end": {
+                "line": 130,
+                "character": 19
+              }
+            }
+          },
+          "message": "expected type `f32`, found `f64`"
+        },
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 129,
+                "character": 8
+              },
+              "end": {
+                "line": 129,
+                "character": 19
+              }
+            }
+          },
+          "message": "expected type `f32`, found `f64`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 133,
+          "character": 6
+        },
+        "end": {
+          "line": 133,
+          "character": 9
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [f64, f64], found [f32, f32] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 132,
+                "character": 8
+              },
+              "end": {
+                "line": 132,
+                "character": 15
+              }
+            }
+          },
+          "message": "expected type `f64`, found `f32`"
+        },
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 132,
+                "character": 8
+              },
+              "end": {
+                "line": 132,
+                "character": 15
+              }
+            }
+          },
+          "message": "expected type `f64`, found `f32`"
+        }
+      ]
+    }
+  ]
+}

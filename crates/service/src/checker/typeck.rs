@@ -16,7 +16,7 @@ use rowan::{
     TextRange,
 };
 use wat_syntax::{
-    ast::{BlockInstr, Instr, PlainInstr},
+    ast::{BlockInstr, Instr, Operand, PlainInstr},
     SyntaxKind, SyntaxNode,
 };
 
@@ -429,6 +429,11 @@ fn resolve_type(shared: &Shared, plain_instr: &PlainInstr) -> Option<Vec<Operand
                 .or(Some(OperandType::Never))
                 .map(|ty| vec![ty])
         }
+        "br" | "br_if" => plain_instr
+            .operands()
+            .next()
+            .and_then(|idx| resolve_br_types(shared, idx))
+            .map(|types| types.collect()),
         _ => data_set::INSTR_METAS
             .get(instr_name.text())
             .map(|meta| meta.results.clone()),
@@ -486,6 +491,21 @@ fn resolve_expected_types(
                         .collect()
                 })
         }
+        "br" => instr
+            .operands()
+            .next()
+            .and_then(|idx| resolve_br_types(shared, idx))
+            .map(|types| types.map(|ty| (ty, None)).collect()),
+        "br_if" => {
+            let mut types = instr
+                .operands()
+                .next()
+                .and_then(|idx| resolve_br_types(shared, idx))
+                .map(|types| types.map(|ty| (ty, None)).collect::<Vec<_>>())
+                .unwrap_or_default();
+            types.push((OperandType::Val(ValType::I32), None));
+            Some(types)
+        }
         _ => meta.map(|meta| {
             meta.params
                 .iter()
@@ -493,6 +513,30 @@ fn resolve_expected_types(
                 .collect()
         }),
     }
+}
+fn resolve_br_types(shared: &Shared, idx: Operand) -> Option<impl Iterator<Item = OperandType>> {
+    let key = idx.syntax().clone().into();
+    shared
+        .symbol_table
+        .blocks
+        .iter()
+        .find(|block| block.ref_key == key)
+        .and_then(|block| {
+            block
+                .def_key
+                .ptr
+                .to_node(&SyntaxNode::new_root(shared.service.root(shared.uri)))
+                .children()
+                .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
+        })
+        .and_then(|block_type| {
+            shared.service.get_func_sig(
+                shared.uri,
+                SyntaxNodePtr::new(&block_type),
+                block_type.green().into(),
+            )
+        })
+        .map(|sig| sig.results.into_iter().map(OperandType::Val))
 }
 
 enum ReportRange<'a> {
