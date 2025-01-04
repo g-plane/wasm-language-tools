@@ -541,7 +541,7 @@ expression: response
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "missing `else` branch"
+      "message": "missing `else` branch with expected types [i32]"
     },
     {
       "range": {
@@ -605,7 +605,7 @@ expression: response
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "missing `else` branch"
+      "message": "missing `else` branch with expected types [i32]"
     },
     {
       "range": {

@@ -49,7 +49,7 @@ expression: response
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "missing `then` branch"
+      "message": "missing `then` branch with expected types []"
     },
     {
       "range": {
@@ -65,7 +65,7 @@ expression: response
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "missing `then` branch"
+      "message": "missing `then` branch with expected types []"
     }
   ]
 }

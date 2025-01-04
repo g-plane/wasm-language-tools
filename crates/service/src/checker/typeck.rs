@@ -208,7 +208,10 @@ fn check_block_like(
                             severity: Some(DiagnosticSeverity::ERROR),
                             source: Some("wat".into()),
                             code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-                            message: "missing `then` branch".into(),
+                            message: format!(
+                                "missing `then` branch with expected types [{}]",
+                                results.iter().join(", ")
+                            ),
                             ..Default::default()
                         });
                     }
@@ -223,7 +226,10 @@ fn check_block_like(
                             severity: Some(DiagnosticSeverity::ERROR),
                             source: Some("wat".into()),
                             code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-                            message: "missing `else` branch".into(),
+                            message: format!(
+                                "missing `else` branch with expected types [{}]",
+                                results.iter().join(", ")
+                            ),
                             ..Default::default()
                         });
                     }
