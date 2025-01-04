@@ -95,7 +95,7 @@ fn is_used(symbol_table: &SymbolTable, def_symbol: &SymbolItem, ref_kind: Symbol
 }
 
 fn is_exported(root: &SyntaxNode, def_symbol: &SymbolItem) -> bool {
-    let node = def_symbol.key.ptr.to_node(root);
+    let node = def_symbol.key.to_node(root);
     node.children()
         .any(|child| child.kind() == SyntaxKind::EXPORT)
 }
@@ -107,7 +107,7 @@ fn report(
     severity: DiagnosticSeverity,
     symbol: &SymbolItem,
 ) -> Diagnostic {
-    let node = symbol.key.ptr.to_node(root);
+    let node = symbol.key.to_node(root);
     let range = support::token(&node, SyntaxKind::IDENT)
         .or_else(|| support::token(&node, SyntaxKind::KEYWORD))
         .map(|token| token.text_range())

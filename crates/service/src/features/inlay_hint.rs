@@ -23,15 +23,15 @@ impl LanguageService {
             .iter()
             .filter_map(|symbol| match symbol.kind {
                 SymbolItemKind::LocalRef => {
-                    if !range.contains_range(symbol.key.ptr.text_range()) {
+                    if !range.contains_range(symbol.key.text_range()) {
                         return None;
                     }
-                    let param_or_local = symbol_table.find_param_or_local_def(&symbol.key)?;
+                    let param_or_local = symbol_table.find_param_or_local_def(symbol.key)?;
                     let ty = self.extract_type(param_or_local.green.clone())?;
                     Some(InlayHint {
                         position: helpers::rowan_pos_to_lsp_pos(
                             &line_index,
-                            symbol.key.ptr.text_range().end(),
+                            symbol.key.text_range().end(),
                         ),
                         label: InlayHintLabel::String(ty.to_string()),
                         kind: Some(InlayHintKind::TYPE),
@@ -43,17 +43,17 @@ impl LanguageService {
                     })
                 }
                 SymbolItemKind::GlobalRef => {
-                    if !range.contains_range(symbol.key.ptr.text_range()) {
+                    if !range.contains_range(symbol.key.text_range()) {
                         return None;
                     }
                     let global = symbol_table
-                        .find_defs(&symbol.key)
+                        .find_defs(symbol.key)
                         .and_then(|mut defs| defs.next())?;
                     let ty = self.extract_global_type(global.green.clone())?;
                     Some(InlayHint {
                         position: helpers::rowan_pos_to_lsp_pos(
                             &line_index,
-                            symbol.key.ptr.text_range().end(),
+                            symbol.key.text_range().end(),
                         ),
                         label: InlayHintLabel::String(ty.to_string()),
                         kind: Some(InlayHintKind::TYPE),
@@ -65,7 +65,7 @@ impl LanguageService {
                     })
                 }
                 SymbolItemKind::Func => {
-                    let func = symbol.key.ptr.to_node(&root);
+                    let func = symbol.key.to_node(&root);
                     func.last_child_or_token()
                         .map(|last| last.text_range())
                         .filter(|last| range.contains_range(*last))

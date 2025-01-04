@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItemKind, SymbolTable},
+    binder::{SymbolItemKey, SymbolItemKind, SymbolTable},
     data_set,
     files::FilesCtx,
     helpers,
@@ -395,14 +395,14 @@ fn resolve_type(shared: &Shared, plain_instr: &PlainInstr) -> Option<Vec<Operand
             let idx = plain_instr.operands().next()?;
             shared
                 .symbol_table
-                .find_defs(&idx.syntax().clone().into())
+                .find_defs(SymbolItemKey::new(idx.syntax()))
                 .into_iter()
                 .flatten()
                 .next()
                 .and_then(|func| {
                     shared
                         .service
-                        .get_func_sig(shared.uri, func.key.ptr, func.green.clone())
+                        .get_func_sig(shared.uri, func.key, func.green.clone())
                 })
                 .map(|sig| sig.results.iter().map(|ty| OperandType::Val(*ty)).collect())
         }
@@ -410,7 +410,7 @@ fn resolve_type(shared: &Shared, plain_instr: &PlainInstr) -> Option<Vec<Operand
             let idx = plain_instr.operands().next()?;
             shared
                 .symbol_table
-                .find_param_or_local_def(&idx.syntax().clone().into())
+                .find_param_or_local_def(SymbolItemKey::new(idx.syntax()))
                 .and_then(|symbol| shared.service.extract_type(symbol.green.clone()))
                 .map(OperandType::Val)
                 .or(Some(OperandType::Never))
@@ -420,7 +420,7 @@ fn resolve_type(shared: &Shared, plain_instr: &PlainInstr) -> Option<Vec<Operand
             let idx = plain_instr.operands().next()?;
             shared
                 .symbol_table
-                .find_defs(&idx.syntax().clone().into())
+                .find_defs(SymbolItemKey::new(idx.syntax()))
                 .into_iter()
                 .flatten()
                 .next()
@@ -451,23 +451,23 @@ fn resolve_expected_types(
             let idx = instr.operands().next()?;
             let func = shared
                 .symbol_table
-                .find_defs(&idx.syntax().clone().into())
+                .find_defs(SymbolItemKey::new(idx.syntax()))
                 .into_iter()
                 .flatten()
                 .next()?;
             let root = instr.syntax().ancestors().last()?;
             let related = shared
                 .symbol_table
-                .get_declared(func.key.ptr.to_node(&root), SymbolItemKind::Param)
+                .get_declared(func.key.to_node(&root), SymbolItemKind::Param)
                 .map(|symbol| {
                     Some((
-                        symbol.key.ptr.text_range(),
+                        symbol.key.text_range(),
                         "parameter originally defined here".into(),
                     ))
                 });
             shared
                 .service
-                .get_func_sig(shared.uri, func.key.ptr, func.green.clone())
+                .get_func_sig(shared.uri, func.key, func.green.clone())
                 .map(|sig| {
                     sig.params
                         .iter()
@@ -515,7 +515,7 @@ fn resolve_expected_types(
     }
 }
 fn resolve_br_types(shared: &Shared, idx: Operand) -> Option<impl Iterator<Item = OperandType>> {
-    let key = idx.syntax().clone().into();
+    let key = SymbolItemKey::new(idx.syntax());
     shared
         .symbol_table
         .blocks
@@ -524,7 +524,6 @@ fn resolve_br_types(shared: &Shared, idx: Operand) -> Option<impl Iterator<Item 
         .and_then(|block| {
             block
                 .def_key
-                .ptr
                 .to_node(&SyntaxNode::new_root(shared.service.root(shared.uri)))
                 .children()
                 .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)

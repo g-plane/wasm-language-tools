@@ -25,9 +25,9 @@ impl LanguageService {
             .filter_map(|symbol| match &symbol.kind {
                 SymbolItemKind::Module => {
                     let module_range =
-                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.ptr.text_range());
+                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());
                     Some((
-                        symbol.key.clone(),
+                        symbol.key,
                         DocumentSymbol {
                             name: "module".into(),
                             detail: None,
@@ -42,9 +42,9 @@ impl LanguageService {
                 }
                 SymbolItemKind::Func => {
                     let range =
-                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.ptr.text_range());
+                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());
                     Some((
-                        symbol.key.clone(),
+                        symbol.key,
                         DocumentSymbol {
                             name: symbol
                                 .idx
@@ -57,23 +57,23 @@ impl LanguageService {
                             tags: None,
                             deprecated: None,
                             range,
-                            selection_range: token(
-                                &symbol.key.ptr.to_node(&root),
-                                SyntaxKind::IDENT,
-                            )
-                            .map(|token| {
-                                helpers::rowan_range_to_lsp_range(&line_index, token.text_range())
-                            })
-                            .unwrap_or(range),
+                            selection_range: token(&symbol.key.to_node(&root), SyntaxKind::IDENT)
+                                .map(|token| {
+                                    helpers::rowan_range_to_lsp_range(
+                                        &line_index,
+                                        token.text_range(),
+                                    )
+                                })
+                                .unwrap_or(range),
                             children: None,
                         },
                     ))
                 }
                 SymbolItemKind::Local => {
                     let range =
-                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.ptr.text_range());
+                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());
                     Some((
-                        symbol.key.clone(),
+                        symbol.key,
                         DocumentSymbol {
                             name: symbol
                                 .idx
@@ -86,14 +86,14 @@ impl LanguageService {
                             tags: None,
                             deprecated: None,
                             range,
-                            selection_range: token(
-                                &symbol.key.ptr.to_node(&root),
-                                SyntaxKind::IDENT,
-                            )
-                            .map(|token| {
-                                helpers::rowan_range_to_lsp_range(&line_index, token.text_range())
-                            })
-                            .unwrap_or(range),
+                            selection_range: token(&symbol.key.to_node(&root), SyntaxKind::IDENT)
+                                .map(|token| {
+                                    helpers::rowan_range_to_lsp_range(
+                                        &line_index,
+                                        token.text_range(),
+                                    )
+                                })
+                                .unwrap_or(range),
                             children: None,
                         },
                     ))
@@ -103,9 +103,9 @@ impl LanguageService {
                 | SymbolItemKind::MemoryDef
                 | SymbolItemKind::TableDef => {
                     let range =
-                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.ptr.text_range());
+                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());
                     Some((
-                        symbol.key.clone(),
+                        symbol.key,
                         DocumentSymbol {
                             name: symbol
                                 .idx
@@ -118,14 +118,14 @@ impl LanguageService {
                             tags: None,
                             deprecated: None,
                             range,
-                            selection_range: token(
-                                &symbol.key.ptr.to_node(&root),
-                                SyntaxKind::IDENT,
-                            )
-                            .map(|token| {
-                                helpers::rowan_range_to_lsp_range(&line_index, token.text_range())
-                            })
-                            .unwrap_or(range),
+                            selection_range: token(&symbol.key.to_node(&root), SyntaxKind::IDENT)
+                                .map(|token| {
+                                    helpers::rowan_range_to_lsp_range(
+                                        &line_index,
+                                        token.text_range(),
+                                    )
+                                })
+                                .unwrap_or(range),
                             children: None,
                         },
                     ))
@@ -144,7 +144,7 @@ impl LanguageService {
         symbol_table
             .symbols
             .iter()
-            .filter(|symbol| symbol.region.ptr.kind() != SyntaxKind::ROOT)
+            .filter(|symbol| symbol.region.kind() != SyntaxKind::ROOT)
             .rev()
             .for_each(|symbol| {
                 if let Some((mut lsp_symbol, parent)) = symbols_map

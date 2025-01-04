@@ -1,4 +1,8 @@
-use crate::{binder::SymbolTablesCtx, files::FilesCtx, helpers, InternUri, LanguageService};
+use crate::{
+    binder::{SymbolItemKey, SymbolTablesCtx},
+    files::FilesCtx,
+    helpers, InternUri, LanguageService,
+};
 use line_index::LineCol;
 use lsp_types::{
     SemanticToken, SemanticTokens, SemanticTokensParams, SemanticTokensRangeParams,
@@ -133,7 +137,10 @@ impl LanguageService {
                     })
                     .and(parent)
                 {
-                    if symbol_table.find_param_def(&operand.into()).is_some() {
+                    if symbol_table
+                        .find_param_def(SymbolItemKey::new(&operand))
+                        .is_some()
+                    {
                         token_kinds.get_index_of(&SemanticTokenKind::Param)
                     } else {
                         token_kinds.get_index_of(&SemanticTokenKind::Var)
@@ -165,7 +172,7 @@ impl LanguageService {
                     .is_some_and(|node| node.kind() == SyntaxKind::PARAM)
                     || parent
                         .as_ref()
-                        .and_then(|parent| symbol_table.find_param_def(&parent.clone().into()))
+                        .and_then(|parent| symbol_table.find_param_def(SymbolItemKey::new(parent)))
                         .is_some()
                 {
                     token_kinds.get_index_of(&SemanticTokenKind::Param)

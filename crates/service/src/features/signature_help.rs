@@ -1,6 +1,10 @@
 use crate::{
-    binder::SymbolTablesCtx, files::FilesCtx, helpers, idx::IdentsCtx,
-    types_analyzer::TypesAnalyzerCtx, LanguageService,
+    binder::{SymbolItemKey, SymbolTablesCtx},
+    files::FilesCtx,
+    helpers,
+    idx::IdentsCtx,
+    types_analyzer::TypesAnalyzerCtx,
+    LanguageService,
 };
 use lsp_types::{
     Documentation, MarkupContent, MarkupKind, ParameterInformation, ParameterLabel, SignatureHelp,
@@ -49,15 +53,14 @@ impl LanguageService {
 
         let symbol_table = self.symbol_table(uri);
         let func = symbol_table
-            .find_defs(
+            .find_defs(SymbolItemKey::new(
                 &node
                     .children()
-                    .find(|child| child.kind() == SyntaxKind::OPERAND)?
-                    .into(),
-            )?
+                    .find(|child| child.kind() == SyntaxKind::OPERAND)?,
+            ))?
             .next()?;
         let signature = self
-            .get_func_sig(uri, func.key.ptr, func.green.clone())
+            .get_func_sig(uri, func.key, func.green.clone())
             .unwrap_or_default();
 
         let mut label = "(func".to_string();
@@ -104,7 +107,7 @@ impl LanguageService {
                 label,
                 documentation: Some(Documentation::MarkupContent(MarkupContent {
                     kind: MarkupKind::Markdown,
-                    value: helpers::ast::get_doc_comment(&func.key.ptr.to_node(&root)),
+                    value: helpers::ast::get_doc_comment(&func.key.to_node(&root)),
                 })),
                 parameters: Some(parameters),
                 active_parameter: operand.and_then(|operand| {

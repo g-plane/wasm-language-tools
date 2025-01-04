@@ -1,6 +1,6 @@
 use super::find_meaningful_token;
 use crate::{
-    binder::{SymbolItemKind, SymbolTablesCtx},
+    binder::{SymbolItemKey, SymbolItemKind, SymbolTablesCtx},
     files::FilesCtx,
     helpers,
     idx::IdentsCtx,
@@ -66,7 +66,7 @@ impl LanguageService {
         let symbol_table = self.symbol_table(uri);
 
         let old_name = self.ident(ident_token.text().to_string());
-        let symbol_key = ident_token.parent()?.into();
+        let symbol_key = SymbolItemKey::new(&ident_token.parent()?);
         let symbol = symbol_table
             .symbols
             .iter()
@@ -104,16 +104,16 @@ impl LanguageService {
                                 sym.key == block.ref_key && block.def_key == symbol.key
                             })
                             || symbol_table
-                                .find_block_def(&symbol_key)
+                                .find_block_def(symbol_key)
                                 .is_some_and(|def_key| {
                                     symbol_table.blocks.iter().any(|block| {
-                                        sym.key == block.ref_key && block.def_key == *def_key
+                                        sym.key == block.ref_key && block.def_key == def_key
                                     })
                                 })
                     }
                     SymbolItemKind::Module => false,
                 })
-                .filter_map(|sym| support::token(&sym.key.ptr.to_node(&root), SyntaxKind::IDENT))
+                .filter_map(|sym| support::token(&sym.key.to_node(&root), SyntaxKind::IDENT))
                 .map(|token| TextEdit {
                     range: helpers::rowan_range_to_lsp_range(&line_index, token.text_range()),
                     new_text: params.new_name.clone(),

@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItem, SymbolItemKind, SymbolTablesCtx},
+    binder::{SymbolItem, SymbolItemKey, SymbolItemKind, SymbolTablesCtx},
     files::FilesCtx,
     helpers, LanguageService,
 };
@@ -57,7 +57,7 @@ impl LanguageService {
             }
             SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
                 let symbol_table = self.symbol_table(uri);
-                let key = token.parent()?.into();
+                let key = SymbolItemKey::new(&token.parent()?);
                 let current_symbol = symbol_table
                     .symbols
                     .iter()
@@ -117,7 +117,7 @@ impl LanguageService {
                             _ => return None,
                         };
                         let defs = symbol_table
-                            .find_defs(&current_symbol.key)?
+                            .find_defs(current_symbol.key)?
                             .collect::<SmallVec<[_; 1]>>();
                         Some(
                             symbol_table
@@ -142,7 +142,7 @@ impl LanguageService {
                     }
                     SymbolItemKind::LocalRef => {
                         let param_or_local =
-                            symbol_table.find_param_or_local_def(&current_symbol.key)?;
+                            symbol_table.find_param_or_local_def(current_symbol.key)?;
                         Some(
                             symbol_table
                                 .symbols
@@ -166,14 +166,14 @@ impl LanguageService {
                     }
                     SymbolItemKind::BlockDef => Some(
                         symbol_table
-                            .find_block_references(&current_symbol.key, true)
+                            .find_block_references(current_symbol.key, true)
                             .filter_map(|symbol| {
                                 create_symbol_highlight(symbol, &root, &line_index)
                             })
                             .collect(),
                     ),
                     SymbolItemKind::BlockRef => {
-                        let def_key = symbol_table.find_block_def(&key)?;
+                        let def_key = symbol_table.find_block_def(key)?;
                         Some(
                             symbol_table
                                 .find_block_references(def_key, true)
@@ -195,7 +195,7 @@ fn create_symbol_highlight(
     root: &SyntaxNode,
     line_index: &LineIndex,
 ) -> Option<DocumentHighlight> {
-    let node = symbol.key.ptr.to_node(root);
+    let node = symbol.key.to_node(root);
     node.children_with_tokens()
         .find_map(|element| match element {
             SyntaxElement::Token(token)
@@ -231,7 +231,7 @@ fn get_highlight_kind_of_symbol(
         | SymbolItemKind::MemoryRef
         | SymbolItemKind::BlockRef => Some(DocumentHighlightKind::READ),
         SymbolItemKind::LocalRef | SymbolItemKind::GlobalRef | SymbolItemKind::TableRef => {
-            let node = symbol.key.ptr.to_node(root);
+            let node = symbol.key.to_node(root);
             if node
                 .siblings_with_tokens(Direction::Prev)
                 .any(|element| is_write_access_instr(element, &node))

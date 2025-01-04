@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItemKind, SymbolTable, SymbolTablesCtx},
+    binder::{SymbolItemKey, SymbolItemKind, SymbolTable, SymbolTablesCtx},
     data_set,
     files::FilesCtx,
     helpers,
@@ -451,7 +451,7 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
-                    let func = func.into();
+                    let func = SymbolItemKey::new(&func);
                     let preferred_type = guess_preferred_type(service, uri, token);
                     let has_dollar = token.text().starts_with('$');
                     items.extend(
@@ -506,11 +506,7 @@ fn get_cmp_list(
                                     kind: Some(CompletionItemKind::FUNCTION),
                                     detail: Some(service.render_func_header(
                                         symbol.idx.name,
-                                        service.get_func_sig(
-                                            uri,
-                                            symbol.key.ptr,
-                                            symbol.green.clone(),
-                                        ),
+                                        service.get_func_sig(uri, symbol.key, symbol.green.clone()),
                                     )),
                                     label_details: Some(CompletionItemLabelDetails {
                                         description: Some(
@@ -518,7 +514,7 @@ fn get_cmp_list(
                                                 service
                                                     .get_func_sig(
                                                         uri,
-                                                        symbol.key.ptr,
+                                                        symbol.key,
                                                         symbol.green.clone(),
                                                     )
                                                     .unwrap_or_default(),
@@ -530,7 +526,7 @@ fn get_cmp_list(
                                         MarkupContent {
                                             kind: MarkupKind::Markdown,
                                             value: helpers::ast::get_doc_comment(
-                                                &symbol.key.ptr.to_node(root),
+                                                &symbol.key.to_node(root),
                                             ),
                                         },
                                     )),
@@ -632,7 +628,7 @@ fn get_cmp_list(
                     let Some(module) = token
                         .parent_ancestors()
                         .find(|node| node.kind() == SyntaxKind::MODULE)
-                        .map(|module| module.into())
+                        .map(|module| SymbolItemKey::new(&module))
                     else {
                         return items;
                     };
@@ -664,11 +660,7 @@ fn get_cmp_list(
                             .iter()
                             .filter(|symbol| {
                                 symbol.kind == SymbolItemKind::BlockDef
-                                    && symbol
-                                        .key
-                                        .ptr
-                                        .text_range()
-                                        .contains_range(token.text_range())
+                                    && symbol.key.text_range().contains_range(token.text_range())
                             })
                             .rev()
                             .enumerate()

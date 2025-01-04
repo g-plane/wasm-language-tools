@@ -1,6 +1,6 @@
 use super::find_meaningful_token;
 use crate::{
-    binder::{SymbolItem, SymbolItemKind, SymbolTablesCtx},
+    binder::{SymbolItem, SymbolItemKey, SymbolItemKind, SymbolTablesCtx},
     files::FilesCtx,
     helpers, LanguageService,
 };
@@ -34,7 +34,7 @@ impl LanguageService {
         let line_index = self.line_index(uri);
         let symbol_table = self.symbol_table(uri);
 
-        let key = parent.into();
+        let key = SymbolItemKey::new(&parent);
         let current_symbol = symbol_table
             .symbols
             .iter()
@@ -93,7 +93,7 @@ impl LanguageService {
                     _ => return None,
                 };
                 let defs = symbol_table
-                    .find_defs(&current_symbol.key)?
+                    .find_defs(current_symbol.key)?
                     .collect::<SmallVec<[_; 1]>>();
                 Some(
                     symbol_table
@@ -118,7 +118,7 @@ impl LanguageService {
                 )
             }
             SymbolItemKind::LocalRef => {
-                let param_or_local = symbol_table.find_param_or_local_def(&current_symbol.key)?;
+                let param_or_local = symbol_table.find_param_or_local_def(current_symbol.key)?;
                 Some(
                     symbol_table
                         .symbols
@@ -143,12 +143,12 @@ impl LanguageService {
             }
             SymbolItemKind::BlockDef => Some(
                 symbol_table
-                    .find_block_references(&current_symbol.key, params.context.include_declaration)
+                    .find_block_references(current_symbol.key, params.context.include_declaration)
                     .map(|symbol| create_location_by_symbol(&params, &line_index, symbol, &root))
                     .collect(),
             ),
             SymbolItemKind::BlockRef => {
-                let def_key = symbol_table.find_block_def(&key)?;
+                let def_key = symbol_table.find_block_def(key)?;
                 Some(
                     symbol_table
                         .find_block_references(def_key, params.context.include_declaration)
@@ -168,7 +168,7 @@ fn create_location_by_symbol(
     symbol: &SymbolItem,
     root: &SyntaxNode,
 ) -> Location {
-    let node = symbol.key.ptr.to_node(root);
+    let node = symbol.key.to_node(root);
     let range = token(&node, SyntaxKind::IDENT)
         .or_else(|| token(&node, SyntaxKind::KEYWORD))
         .map(|token| token.text_range())

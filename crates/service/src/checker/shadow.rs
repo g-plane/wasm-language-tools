@@ -52,9 +52,8 @@ pub fn check(
                                     && other.idx.name.is_some_and(|other| other == name)
                                     && symbol
                                         .key
-                                        .ptr
                                         .text_range()
-                                        .contains_range(other.key.ptr.text_range())
+                                        .contains_range(other.key.text_range())
                             })
                             .map(|other| get_ident_range(other, root)),
                     );
@@ -93,7 +92,7 @@ pub fn check(
 }
 
 fn get_ident_range(symbol: &SymbolItem, root: &SyntaxNode) -> TextRange {
-    token(&symbol.key.ptr.to_node(root), SyntaxKind::IDENT)
+    token(&symbol.key.to_node(root), SyntaxKind::IDENT)
         .map(|token| token.text_range())
-        .unwrap_or_else(|| symbol.key.ptr.text_range())
+        .unwrap_or_else(|| symbol.key.text_range())
 }

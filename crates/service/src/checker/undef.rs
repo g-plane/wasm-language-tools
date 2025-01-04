@@ -33,15 +33,15 @@ pub fn check(
             | SymbolItemKind::GlobalRef
             | SymbolItemKind::MemoryRef
             | SymbolItemKind::TableRef => symbol_table
-                .find_defs(&symbol.key)
+                .find_defs(symbol.key)
                 .is_none_or(|defs| defs.count() == 0),
-            SymbolItemKind::LocalRef => symbol_table.find_param_or_local_def(&symbol.key).is_none(),
+            SymbolItemKind::LocalRef => symbol_table.find_param_or_local_def(symbol.key).is_none(),
             SymbolItemKind::BlockRef => !symbol_table.blocks.iter().any(|block| {
                 block.ref_key == symbol.key && symbol.idx.is_defined_by(&block.def_idx)
             }),
         })
         .map(|symbol| Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.ptr.text_range()),
+            range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
             severity: Some(DiagnosticSeverity::ERROR),
             source: Some("wat".into()),
             code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),

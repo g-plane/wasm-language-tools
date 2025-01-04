@@ -1,6 +1,6 @@
 use super::find_meaningful_token;
 use crate::{
-    binder::{SymbolItem, SymbolItemKind, SymbolTablesCtx},
+    binder::{SymbolItem, SymbolItemKey, SymbolItemKind, SymbolTablesCtx},
     data_set,
     files::FilesCtx,
     helpers,
@@ -39,9 +39,9 @@ impl LanguageService {
                 let symbol_table = self.symbol_table(uri);
 
                 let parent = token.parent()?;
-                let key = parent.into();
+                let key = SymbolItemKey::new(&parent);
                 symbol_table
-                    .find_param_or_local_def(&key)
+                    .find_param_or_local_def(key)
                     .map(|symbol| Hover {
                         contents: HoverContents::Scalar(create_param_or_local_hover(self, symbol)),
                         range: Some(helpers::rowan_range_to_lsp_range(
@@ -56,7 +56,7 @@ impl LanguageService {
                             .find(|symbol| symbol.key == key)
                             .and_then(|symbol| match symbol.kind {
                                 SymbolItemKind::Call => {
-                                    symbol_table.find_defs(&key).map(|symbols| {
+                                    symbol_table.find_defs(key).map(|symbols| {
                                         let contents = symbols
                                             .map(|symbol| {
                                                 create_func_hover(self, uri, symbol.clone(), &root)
@@ -75,7 +75,7 @@ impl LanguageService {
                                     })
                                 }
                                 SymbolItemKind::TypeUse => {
-                                    symbol_table.find_defs(&key).map(|symbols| Hover {
+                                    symbol_table.find_defs(key).map(|symbols| Hover {
                                         contents: HoverContents::Array(
                                             symbols
                                                 .map(|symbol| create_type_def_hover(self, symbol))
@@ -88,7 +88,7 @@ impl LanguageService {
                                     })
                                 }
                                 SymbolItemKind::GlobalRef => {
-                                    symbol_table.find_defs(&key).map(|symbols| Hover {
+                                    symbol_table.find_defs(key).map(|symbols| Hover {
                                         contents: HoverContents::Array(
                                             symbols
                                                 .map(|symbol| {
@@ -103,12 +103,12 @@ impl LanguageService {
                                     })
                                 }
                                 SymbolItemKind::BlockRef => symbol_table
-                                    .find_block_def(&key)
+                                    .find_block_def(key)
                                     .and_then(|def_key| {
                                         symbol_table
                                             .symbols
                                             .iter()
-                                            .find(|symbol| &symbol.key == def_key)
+                                            .find(|symbol| symbol.key == def_key)
                                     })
                                     .map(|block| Hover {
                                         contents: HoverContents::Scalar(create_block_hover(
@@ -152,7 +152,7 @@ impl LanguageService {
             }
             SyntaxKind::KEYWORD => {
                 let parent = token.parent()?;
-                let key = parent.into();
+                let key = SymbolItemKey::new(&parent);
 
                 let symbol_table = self.symbol_table(uri);
                 symbol_table
@@ -219,13 +219,13 @@ fn create_func_hover(
     symbol: SymbolItem,
     root: &SyntaxNode,
 ) -> String {
-    let node = symbol.key.ptr.to_node(root);
+    let node = symbol.key.to_node(root);
     let doc = helpers::ast::get_doc_comment(&node);
     let mut content = format!(
         "```wat\n{}\n```",
         service.render_func_header(
             symbol.idx.name,
-            service.get_func_sig(uri, symbol.key.ptr, symbol.green)
+            service.get_func_sig(uri, symbol.key, symbol.green)
         )
     );
     if !doc.is_empty() {
@@ -275,7 +275,7 @@ fn create_global_def_hover(
             content_value.push_str(&service.lookup_ident(name));
         }
     }
-    let node = symbol.key.ptr.to_node(root);
+    let node = symbol.key.to_node(root);
     if let Some(global_type) = child::<GlobalType>(&node) {
         let mutable = global_type.mut_keyword().is_some();
         if mutable {
@@ -327,7 +327,7 @@ fn create_block_hover(
 ) -> MarkedString {
     let mut content_value = format!(
         "({}",
-        match symbol.key.ptr.kind() {
+        match symbol.key.kind() {
             SyntaxKind::BLOCK_IF => "if",
             SyntaxKind::BLOCK_LOOP => "loop",
             _ => "block",
@@ -346,7 +346,6 @@ fn create_block_hover(
     }
     if let Some(sig) = symbol
         .key
-        .ptr
         .to_node(root)
         .children()
         .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)

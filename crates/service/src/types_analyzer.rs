@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItem, SymbolTablesCtx},
+    binder::{SymbolItem, SymbolItemKey, SymbolTablesCtx},
     data_set::INSTR_METAS,
     files::FilesCtx,
     helpers,
@@ -111,7 +111,7 @@ fn get_func_sig(
                 let symbol_table = db.symbol_table(uri);
                 child::<TypeUse>(&node)
                     .and_then(|type_use| type_use.index())
-                    .and_then(|idx| symbol_table.find_defs(&idx.syntax().clone().into()))
+                    .and_then(|idx| symbol_table.find_defs(SymbolItemKey::new(idx.syntax())))
                     .and_then(|mut symbols| symbols.next())
                     .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.green))
                     .map(|func_type| db.extract_sig(func_type))
@@ -189,12 +189,12 @@ pub(crate) fn resolve_param_types(
             .children()
             .find(|child| child.kind() == SyntaxKind::OPERAND)?;
         let func = symbol_table
-            .find_defs(&idx.clone().into())
+            .find_defs(SymbolItemKey::new(&idx))
             .into_iter()
             .flatten()
             .next()?;
         service
-            .get_func_sig(uri, func.key.ptr, func.green.clone())
+            .get_func_sig(uri, func.key, func.green.clone())
             .map(|sig| {
                 sig.params
                     .iter()
