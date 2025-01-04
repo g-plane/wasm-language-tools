@@ -119,6 +119,27 @@ fn get_func_sig(
         })
 }
 
+// The reason why we don't put this function to Salsa is because
+// the block node comes with block body and can be huge.
+// Once the body changed (even block type is unchanged), memoization will be skipped.
+// Also, Salsa requires the ownership of GreenNode,
+// which means we must clone the whole huge block green node.
+pub fn get_block_sig(
+    service: &LanguageService,
+    uri: InternUri,
+    node: &SyntaxNode,
+) -> Option<FuncSig> {
+    node.children()
+        .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
+        .and_then(|block_type| {
+            service.get_func_sig(
+                uri,
+                SyntaxNodePtr::new(&block_type),
+                block_type.green().into(),
+            )
+        })
+}
+
 fn render_func_sig(db: &dyn TypesAnalyzerCtx, signature: FuncSig) -> String {
     let mut ret = String::with_capacity(signature.params.len() * 9 + signature.results.len() * 10);
     let params = signature

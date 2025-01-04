@@ -5,14 +5,14 @@ use crate::{
     files::FilesCtx,
     helpers,
     idx::{IdentsCtx, Idx},
-    types_analyzer::TypesAnalyzerCtx,
+    types_analyzer::{get_block_sig, TypesAnalyzerCtx},
     InternUri, LanguageService,
 };
 use itertools::Itertools;
 use lsp_types::{
     Hover, HoverContents, HoverParams, LanguageString, MarkedString, MarkupContent, MarkupKind,
 };
-use rowan::ast::{support::child, AstNode, SyntaxNodePtr};
+use rowan::ast::{support::child, AstNode};
 use wat_syntax::{ast::GlobalType, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
@@ -344,18 +344,7 @@ fn create_block_hover(
         content_value.push(' ');
         content_value.push_str(&service.lookup_ident(*name));
     }
-    if let Some(sig) = symbol
-        .key
-        .to_node(root)
-        .children()
-        .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
-        .and_then(|block_type| {
-            service.get_func_sig(
-                uri,
-                SyntaxNodePtr::new(&block_type),
-                block_type.green().into(),
-            )
-        })
+    if let Some(sig) = get_block_sig(service, uri, &symbol.key.to_node(root))
         .map(|sig| service.render_func_sig(sig))
     {
         content_value.push(' ');

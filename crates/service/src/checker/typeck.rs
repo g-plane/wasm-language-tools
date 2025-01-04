@@ -3,7 +3,7 @@ use crate::{
     data_set,
     files::FilesCtx,
     helpers,
-    types_analyzer::{OperandType, TypesAnalyzerCtx, ValType},
+    types_analyzer::{get_block_sig, OperandType, TypesAnalyzerCtx, ValType},
     InternUri, LanguageService,
 };
 use itertools::{EitherOrBoth, Itertools};
@@ -149,16 +149,7 @@ fn check_block_like(
         }
         Instr::Block(block_instr) => {
             let node = block_instr.syntax();
-            let signature = node
-                .children()
-                .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
-                .and_then(|block_type| {
-                    shared.service.get_func_sig(
-                        shared.uri,
-                        SyntaxNodePtr::new(&block_type),
-                        block_type.green().into(),
-                    )
-                });
+            let signature = get_block_sig(shared.service, shared.uri, node);
             let params = signature.as_ref().map(|signature| &signature.params);
             if let Some(diag) = params.and_then(|params| {
                 type_stack.check(
@@ -522,17 +513,12 @@ fn resolve_br_types(shared: &Shared, idx: Operand) -> Option<impl Iterator<Item 
         .iter()
         .find(|block| block.ref_key == key)
         .and_then(|block| {
-            block
-                .def_key
-                .to_node(&SyntaxNode::new_root(shared.service.root(shared.uri)))
-                .children()
-                .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
-        })
-        .and_then(|block_type| {
-            shared.service.get_func_sig(
+            get_block_sig(
+                shared.service,
                 shared.uri,
-                SyntaxNodePtr::new(&block_type),
-                block_type.green().into(),
+                &block
+                    .def_key
+                    .to_node(&SyntaxNode::new_root(shared.service.root(shared.uri))),
             )
         })
         .map(|sig| sig.results.into_iter().map(OperandType::Val))
