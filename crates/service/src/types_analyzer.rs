@@ -46,6 +46,13 @@ pub(crate) trait TypesAnalyzerCtx: FilesCtx + SymbolTablesCtx {
     fn render_compact_func_sig(&self, signature: FuncSig) -> String;
     #[salsa::memoized]
     fn render_func_header(&self, name: Option<InternIdent>, signature: Option<FuncSig>) -> String;
+    #[salsa::memoized]
+    fn render_block_header(
+        &self,
+        kind: SyntaxKind,
+        name: Option<InternIdent>,
+        signature: Option<FuncSig>,
+    ) -> String;
 }
 fn extract_type(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<ValType> {
     (&*node).try_into().ok().or_else(|| {
@@ -182,6 +189,34 @@ fn render_func_header(
     signature: Option<FuncSig>,
 ) -> String {
     let mut content = "(func".to_string();
+    if let Some(name) = name {
+        content.push(' ');
+        content.push_str(&db.lookup_ident(name));
+    }
+    if let Some(sig) = signature {
+        if !sig.params.is_empty() || !sig.results.is_empty() {
+            content.push(' ');
+            content.push_str(&db.render_func_sig(sig));
+        }
+    }
+    content.push(')');
+    content
+}
+
+fn render_block_header(
+    db: &dyn TypesAnalyzerCtx,
+    kind: SyntaxKind,
+    name: Option<InternIdent>,
+    signature: Option<FuncSig>,
+) -> String {
+    let mut content = format!(
+        "({}",
+        match kind {
+            SyntaxKind::BLOCK_IF => "if",
+            SyntaxKind::BLOCK_LOOP => "loop",
+            _ => "block",
+        }
+    );
     if let Some(name) = name {
         content.push(' ');
         content.push_str(&db.lookup_ident(name));

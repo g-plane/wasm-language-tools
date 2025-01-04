@@ -5,7 +5,7 @@ use crate::{
     files::FilesCtx,
     helpers,
     idx::{IdentsCtx, Idx},
-    types_analyzer::{get_block_sig, TypesAnalyzerCtx},
+    types_analyzer::{self, TypesAnalyzerCtx},
     InternUri, LanguageService,
 };
 use itertools::Itertools;
@@ -325,33 +325,11 @@ fn create_block_hover(
     uri: InternUri,
     root: &SyntaxNode,
 ) -> MarkedString {
-    let mut content_value = format!(
-        "({}",
-        match symbol.key.kind() {
-            SyntaxKind::BLOCK_IF => "if",
-            SyntaxKind::BLOCK_LOOP => "loop",
-            _ => "block",
-        }
-    );
-    if let SymbolItem {
-        kind: SymbolItemKind::BlockDef,
-        idx: Idx {
-            name: Some(name), ..
-        },
-        ..
-    } = symbol
-    {
-        content_value.push(' ');
-        content_value.push_str(&service.lookup_ident(*name));
-    }
-    if let Some(sig) = get_block_sig(service, uri, &symbol.key.to_node(root))
-        .map(|sig| service.render_func_sig(sig))
-    {
-        content_value.push(' ');
-        content_value.push_str(&sig);
-    }
-    content_value.push(')');
-    create_marked_string(content_value)
+    create_marked_string(service.render_block_header(
+        symbol.key.kind(),
+        symbol.idx.name,
+        types_analyzer::get_block_sig(service, uri, &symbol.key.to_node(root)),
+    ))
 }
 
 fn create_marked_string(value: String) -> MarkedString {

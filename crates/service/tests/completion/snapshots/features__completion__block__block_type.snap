@@ -6,10 +6,10 @@ expression: response
   {
     "label": "$b",
     "labelDetails": {
-      "description": "[]"
+      "description": "[i32, i32]"
     },
     "kind": 6,
-    "detail": "(block $b)"
+    "detail": "(if $b (result i32) (result i32))"
   },
   {
     "label": "1",
@@ -22,10 +22,10 @@ expression: response
   {
     "label": "2",
     "labelDetails": {
-      "description": "[]"
+      "description": "[i32]"
     },
     "kind": 6,
-    "detail": "(block)"
+    "detail": "(block (param i32) (param i32) (result i32))"
   },
   {
     "label": "$a",
@@ -38,9 +38,9 @@ expression: response
   {
     "label": "4",
     "labelDetails": {
-      "description": "[]"
+      "description": "[i32]"
     },
     "kind": 6,
-    "detail": "(block)"
+    "detail": "(loop (result i32))"
   }
 ]

@@ -7,6 +7,7 @@ use crate::{
     types_analyzer::{self, OperandType, TypesAnalyzerCtx, ValType},
     InternUri, LanguageService,
 };
+use itertools::Itertools;
 use lsp_types::{
     CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionParams,
     CompletionResponse, Documentation, MarkupContent, MarkupKind,
@@ -671,10 +672,26 @@ fn get_cmp_list(
                                 };
                                 let (label, insert_text) =
                                     get_idx_cmp_text(service, &idx, has_dollar)?;
+                                let block_node = symbol.key.to_node(root);
+                                let sig = types_analyzer::get_block_sig(service, uri, &block_node);
                                 Some(CompletionItem {
                                     label,
                                     insert_text,
                                     kind: Some(CompletionItemKind::VARIABLE),
+                                    label_details: Some(CompletionItemLabelDetails {
+                                        description: Some(format!(
+                                            "[{}]",
+                                            sig.as_ref()
+                                                .map(|sig| sig.results.iter().join(", "))
+                                                .unwrap_or_default()
+                                        )),
+                                        ..Default::default()
+                                    }),
+                                    detail: Some(service.render_block_header(
+                                        symbol.key.kind(),
+                                        idx.name,
+                                        sig,
+                                    )),
                                     ..Default::default()
                                 })
                             }),

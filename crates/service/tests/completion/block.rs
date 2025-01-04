@@ -107,3 +107,25 @@ fn multiple_indexes() {
     let response = service.completion(create_params(uri, Position::new(8, 29)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn block_type() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (type $t (func (result i32)))
+  (func
+    (loop (type $t)
+      (block $a
+        (block (param i32 i32) (result i32)
+          (block
+            (if $b (result i32 i32)
+              (br_table ))))))
+    (block)
+    (block $c)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(9, 24)));
+    assert_json_snapshot!(response);
+}

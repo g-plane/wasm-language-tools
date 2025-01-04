@@ -5,22 +5,42 @@ expression: response
 [
   {
     "label": "$b",
-    "kind": 6
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(block $b)"
   },
   {
     "label": "1",
-    "kind": 6
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(block)"
   },
   {
     "label": "2",
-    "kind": 6
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(block)"
   },
   {
     "label": "$a",
-    "kind": 6
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(block $a)"
   },
   {
     "label": "4",
-    "kind": 6
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(block)"
   }
 ]

@@ -5,12 +5,20 @@ expression: response
 [
   {
     "label": "$b",
+    "labelDetails": {
+      "description": "[]"
+    },
     "kind": 6,
+    "detail": "(block $b)",
     "insertText": "b"
   },
   {
     "label": "$a",
+    "labelDetails": {
+      "description": "[]"
+    },
     "kind": 6,
+    "detail": "(block $a)",
     "insertText": "a"
   }
 ]
