@@ -27,6 +27,7 @@ jobs:
             cargo publish -p wat_formatter
           fi
           cargo publish -p wat_service
+          cargo publish -p wat_server
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
