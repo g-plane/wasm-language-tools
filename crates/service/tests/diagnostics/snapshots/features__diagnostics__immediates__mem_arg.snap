@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/literal_operands.rs
+source: crates/service/tests/diagnostics/immediates.rs
 expression: response
 ---
 {
@@ -9,17 +9,17 @@ expression: response
       "range": {
         "start": {
           "line": 3,
-          "character": 19
+          "character": 18
         },
         "end": {
           "line": 3,
-          "character": 22
+          "character": 19
         }
       },
       "severity": 1,
-      "code": "literal-operands",
+      "code": "immediates",
       "source": "wat",
-      "message": "expected integer"
+      "message": "expected memory argument"
     },
     {
       "range": {
@@ -29,19 +29,19 @@ expression: response
         },
         "end": {
           "line": 4,
-          "character": 22
+          "character": 20
         }
       },
       "severity": 1,
-      "code": "literal-operands",
+      "code": "immediates",
       "source": "wat",
-      "message": "expected integer"
+      "message": "expected memory argument"
     },
     {
       "range": {
         "start": {
           "line": 5,
-          "character": 20
+          "character": 15
         },
         "end": {
           "line": 5,
@@ -49,9 +49,9 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "literal-operands",
+      "code": "immediates",
       "source": "wat",
-      "message": "expected integer"
+      "message": "missing memory argument"
     }
   ]
 }

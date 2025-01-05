@@ -23,7 +23,7 @@ fn different_kinds() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
 (module
-  (global $f i32 i32.const)
+  (global $f i32 i32.const 0)
   (func $f))
 ";
     let mut service = LanguageService::default();

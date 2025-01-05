@@ -14,6 +14,9 @@ fn index() {
         (local.set 1.0 (i32.const 0))
         (global.get 1.0) (drop)
         (global.set \"\" (i32.const 0))
+        (call)
+        (local.get)
+        (local.set (i32.const 0))
     )
 )
 ";
@@ -29,10 +32,13 @@ fn int() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
 (module
-    (func (result i32 i64 v128)
+    (func (result i32 i64 v128 i32 i64 v128)
         (i32.const 1.0)
         (i64.const 1.0)
         (v128.const 1.0)
+        (i32.const)
+        (i64.const)
+        (v128.const)
     )
 )
 ";
@@ -48,9 +54,11 @@ fn float() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
 (module
-    (func (result f32 f64)
+    (func (result f32 f64 f32 f64)
         (f32.const 1)
         (f64.const $a)
+        (f32.const)
+        (f64.const)
     )
 )
 ";
@@ -88,6 +96,7 @@ fn mem_arg() {
     (func
         (i32.load 1 (i32.const 0)) (drop)
         (f64.store 1 (i32.const 0) (f64.const 0.0))
+        (drop (i32.load (i32.const 0)))
     )
 )
 ";
@@ -117,9 +126,14 @@ fn mem_arg_and_index() {
 }
 
 #[test]
-fn expected_instr() {
+fn br_table() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "(module (func (result i32) (i32.add 1 (i32.const 0))))";
+    let source = r#"
+(module
+  (func
+    (block $a
+      (br_table 0 1.0 $a "" (unreachable)))))
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     allow_unused(&mut service, uri.clone());
@@ -128,12 +142,50 @@ fn expected_instr() {
 }
 
 #[test]
-fn ignored_expecting_instr() {
+fn select_incorrect() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "(module (func (br_table 0 1)))";
+    let source = r#"
+(module
+  (type $t (func (result i32)))
+  (func
+    (select $t
+      (unreachable))))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn select_correct() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+  (type $t (func (result i32)))
+  (func
+    (select
+      (i32.const 0)
+      (i32.const 1)
+      (i32.const 2))
+    (select (type $t)
+      (unreachable))))
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     allow_unused(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
+}
+
+#[test]
+fn expected_instr() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "(module (func (result i32) (i32.add 1 (i32.const 0))))";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    allow_unused(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
 }

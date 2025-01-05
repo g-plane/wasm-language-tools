@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/literal_operands.rs
+source: crates/service/tests/diagnostics/immediates.rs
 expression: response
 ---
 {
@@ -9,17 +9,17 @@ expression: response
       "range": {
         "start": {
           "line": 3,
-          "character": 14
+          "character": 19
         },
         "end": {
           "line": 3,
-          "character": 16
+          "character": 22
         }
       },
       "severity": 1,
-      "code": "literal-operands",
+      "code": "immediates",
       "source": "wat",
-      "message": "expected identifier or unsigned integer"
+      "message": "expected integer"
     },
     {
       "range": {
@@ -33,57 +33,73 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "literal-operands",
+      "code": "immediates",
       "source": "wat",
-      "message": "expected identifier or unsigned integer"
+      "message": "expected integer"
     },
     {
       "range": {
         "start": {
           "line": 5,
-          "character": 19
-        },
-        "end": {
-          "line": 5,
-          "character": 22
-        }
-      },
-      "severity": 1,
-      "code": "literal-operands",
-      "source": "wat",
-      "message": "expected identifier or unsigned integer"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 6,
           "character": 20
         },
         "end": {
-          "line": 6,
+          "line": 5,
           "character": 23
         }
       },
       "severity": 1,
-      "code": "literal-operands",
+      "code": "immediates",
       "source": "wat",
-      "message": "expected identifier or unsigned integer"
+      "message": "expected integer"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 9
+        },
+        "end": {
+          "line": 6,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "missing integer"
     },
     {
       "range": {
         "start": {
           "line": 7,
-          "character": 20
+          "character": 9
         },
         "end": {
           "line": 7,
-          "character": 22
+          "character": 18
         }
       },
       "severity": 1,
-      "code": "literal-operands",
+      "code": "immediates",
       "source": "wat",
-      "message": "expected identifier or unsigned integer"
+      "message": "missing integer"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 9
+        },
+        "end": {
+          "line": 8,
+          "character": 19
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "missing integer"
     }
   ]
 }

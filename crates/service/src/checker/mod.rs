@@ -3,8 +3,8 @@ use lsp_types::Diagnostic;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 mod dup_names;
+mod immediates;
 mod implicit_module;
-mod literal_operands;
 mod multi_modules;
 mod shadow;
 mod typeck;
@@ -47,7 +47,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
         }
         SyntaxKind::PLAIN_INSTR => {
             unknown_instr::check(&mut diagnostics, &line_index, &node);
-            literal_operands::check(&mut diagnostics, &line_index, &node);
+            immediates::check(&mut diagnostics, &line_index, &node);
         }
         _ => {}
     });

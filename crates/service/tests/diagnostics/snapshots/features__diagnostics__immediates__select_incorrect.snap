@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/literal_operands.rs
+source: crates/service/tests/diagnostics/immediates.rs
 expression: response
 ---
 {
@@ -9,17 +9,17 @@ expression: response
       "range": {
         "start": {
           "line": 4,
-          "character": 19
+          "character": 12
         },
         "end": {
           "line": 4,
-          "character": 21
+          "character": 14
         }
       },
       "severity": 1,
-      "code": "literal-operands",
+      "code": "immediates",
       "source": "wat",
-      "message": "expected floating-point number"
+      "message": "expected type use"
     }
   ]
 }

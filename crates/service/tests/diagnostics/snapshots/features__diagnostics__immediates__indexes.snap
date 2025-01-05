@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/literal_operands.rs
+source: crates/service/tests/diagnostics/immediates.rs
 expression: response
 ---
 {
@@ -17,7 +17,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "literal-operands",
+      "code": "immediates",
       "source": "wat",
       "message": "expected identifier or unsigned integer"
     },
@@ -33,7 +33,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "literal-operands",
+      "code": "immediates",
       "source": "wat",
       "message": "expected identifier or unsigned integer"
     },
@@ -49,7 +49,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "literal-operands",
+      "code": "immediates",
       "source": "wat",
       "message": "expected identifier or unsigned integer"
     }
