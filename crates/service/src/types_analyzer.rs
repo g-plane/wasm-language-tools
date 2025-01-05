@@ -344,14 +344,12 @@ impl TryFrom<&GreenNodeData> for ValType {
 pub(crate) enum OperandType {
     Val(ValType),
     Any,
-    Never,
 }
 impl Display for OperandType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             OperandType::Val(ty) => Display::fmt(ty, f),
             OperandType::Any => write!(f, "any"),
-            OperandType::Never => write!(f, "never"),
         }
     }
 }

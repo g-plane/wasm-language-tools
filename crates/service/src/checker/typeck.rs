@@ -410,7 +410,7 @@ fn resolve_type(shared: &Shared, plain_instr: &PlainInstr) -> Option<Vec<Operand
                 .find_param_or_local_def(SymbolItemKey::new(idx.syntax()))
                 .and_then(|symbol| shared.service.extract_type(symbol.green.clone()))
                 .map(OperandType::Val)
-                .or(Some(OperandType::Never))
+                .or(Some(OperandType::Any))
                 .map(|ty| vec![ty])
         }
         "global.get" => {
@@ -423,7 +423,7 @@ fn resolve_type(shared: &Shared, plain_instr: &PlainInstr) -> Option<Vec<Operand
                 .next()
                 .and_then(|symbol| shared.service.extract_global_type(symbol.green.clone()))
                 .map(OperandType::Val)
-                .or(Some(OperandType::Never))
+                .or(Some(OperandType::Any))
                 .map(|ty| vec![ty])
         }
         "br" | "br_if" => plain_instr
