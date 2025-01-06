@@ -978,47 +978,44 @@ ROOT@0..3407
         L_PAREN@2465..2466 "("
         INSTR_NAME@2466..2472 "select"
         WHITESPACE@2472..2473 " "
-        OPERAND@2473..2506
-          BLOCK_LOOP@2473..2506
-            L_PAREN@2473..2474 "("
-            KEYWORD@2474..2478 "loop"
-            WHITESPACE@2478..2479 " "
-            BLOCK_TYPE@2479..2491
-              TYPE_USE@2479..2491
-                RESULT@2479..2491
-                  L_PAREN@2479..2480 "("
-                  KEYWORD@2480..2486 "result"
-                  WHITESPACE@2486..2487 " "
-                  VAL_TYPE@2487..2490
-                    NUM_TYPE@2487..2490 "i32"
-                  R_PAREN@2490..2491 ")"
-            WHITESPACE@2491..2492 " "
-            PLAIN_INSTR@2492..2505
-              L_PAREN@2492..2493 "("
-              INSTR_NAME@2493..2502 "i32.const"
-              WHITESPACE@2502..2503 " "
-              IMMEDIATE@2503..2504
-                INT@2503..2504 "1"
-              R_PAREN@2504..2505 ")"
-            R_PAREN@2505..2506 ")"
+        BLOCK_LOOP@2473..2506
+          L_PAREN@2473..2474 "("
+          KEYWORD@2474..2478 "loop"
+          WHITESPACE@2478..2479 " "
+          BLOCK_TYPE@2479..2491
+            TYPE_USE@2479..2491
+              RESULT@2479..2491
+                L_PAREN@2479..2480 "("
+                KEYWORD@2480..2486 "result"
+                WHITESPACE@2486..2487 " "
+                VAL_TYPE@2487..2490
+                  NUM_TYPE@2487..2490 "i32"
+                R_PAREN@2490..2491 ")"
+          WHITESPACE@2491..2492 " "
+          PLAIN_INSTR@2492..2505
+            L_PAREN@2492..2493 "("
+            INSTR_NAME@2493..2502 "i32.const"
+            WHITESPACE@2502..2503 " "
+            IMMEDIATE@2503..2504
+              INT@2503..2504 "1"
+            R_PAREN@2504..2505 ")"
+          R_PAREN@2505..2506 ")"
         WHITESPACE@2506..2507 " "
-        OPERAND@2507..2520
-          PLAIN_INSTR@2507..2520
-            L_PAREN@2507..2508 "("
-            INSTR_NAME@2508..2517 "i32.const"
-            WHITESPACE@2517..2518 " "
-            IMMEDIATE@2518..2519
-              INT@2518..2519 "2"
-            R_PAREN@2519..2520 ")"
+        PLAIN_INSTR@2507..2520
+          L_PAREN@2507..2508 "("
+          INSTR_NAME@2508..2517 "i32.const"
+          WHITESPACE@2517..2518 " "
+          IMMEDIATE@2518..2519
+            INT@2518..2519 "2"
+          R_PAREN@2519..2520 ")"
         WHITESPACE@2520..2521 " "
-        OPERAND@2521..2534
-          PLAIN_INSTR@2521..2534
-            L_PAREN@2521..2522 "("
-            INSTR_NAME@2522..2531 "i32.const"
-            WHITESPACE@2531..2532 " "
-            IMMEDIATE@2532..2533
-              INT@2532..2533 "3"
-            R_PAREN@2533..2534 ")"
+        PLAIN_INSTR@2521..2534
+          L_PAREN@2521..2522 "("
+          INSTR_NAME@2522..2531 "i32.const"
+          WHITESPACE@2531..2532 " "
+          IMMEDIATE@2532..2533
+            INT@2532..2533 "3"
+          R_PAREN@2533..2534 ")"
         R_PAREN@2534..2535 ")"
       WHITESPACE@2535..2538 "\n  "
       R_PAREN@2538..2539 ")"
@@ -1048,47 +1045,44 @@ ROOT@0..3407
         L_PAREN@2590..2591 "("
         INSTR_NAME@2591..2597 "select"
         WHITESPACE@2597..2598 " "
-        OPERAND@2598..2611
-          PLAIN_INSTR@2598..2611
-            L_PAREN@2598..2599 "("
-            INSTR_NAME@2599..2608 "i32.const"
-            WHITESPACE@2608..2609 " "
-            IMMEDIATE@2609..2610
-              INT@2609..2610 "2"
-            R_PAREN@2610..2611 ")"
+        PLAIN_INSTR@2598..2611
+          L_PAREN@2598..2599 "("
+          INSTR_NAME@2599..2608 "i32.const"
+          WHITESPACE@2608..2609 " "
+          IMMEDIATE@2609..2610
+            INT@2609..2610 "2"
+          R_PAREN@2610..2611 ")"
         WHITESPACE@2611..2612 " "
-        OPERAND@2612..2645
-          BLOCK_LOOP@2612..2645
-            L_PAREN@2612..2613 "("
-            KEYWORD@2613..2617 "loop"
-            WHITESPACE@2617..2618 " "
-            BLOCK_TYPE@2618..2630
-              TYPE_USE@2618..2630
-                RESULT@2618..2630
-                  L_PAREN@2618..2619 "("
-                  KEYWORD@2619..2625 "result"
-                  WHITESPACE@2625..2626 " "
-                  VAL_TYPE@2626..2629
-                    NUM_TYPE@2626..2629 "i32"
-                  R_PAREN@2629..2630 ")"
-            WHITESPACE@2630..2631 " "
-            PLAIN_INSTR@2631..2644
-              L_PAREN@2631..2632 "("
-              INSTR_NAME@2632..2641 "i32.const"
-              WHITESPACE@2641..2642 " "
-              IMMEDIATE@2642..2643
-                INT@2642..2643 "1"
-              R_PAREN@2643..2644 ")"
-            R_PAREN@2644..2645 ")"
+        BLOCK_LOOP@2612..2645
+          L_PAREN@2612..2613 "("
+          KEYWORD@2613..2617 "loop"
+          WHITESPACE@2617..2618 " "
+          BLOCK_TYPE@2618..2630
+            TYPE_USE@2618..2630
+              RESULT@2618..2630
+                L_PAREN@2618..2619 "("
+                KEYWORD@2619..2625 "result"
+                WHITESPACE@2625..2626 " "
+                VAL_TYPE@2626..2629
+                  NUM_TYPE@2626..2629 "i32"
+                R_PAREN@2629..2630 ")"
+          WHITESPACE@2630..2631 " "
+          PLAIN_INSTR@2631..2644
+            L_PAREN@2631..2632 "("
+            INSTR_NAME@2632..2641 "i32.const"
+            WHITESPACE@2641..2642 " "
+            IMMEDIATE@2642..2643
+              INT@2642..2643 "1"
+            R_PAREN@2643..2644 ")"
+          R_PAREN@2644..2645 ")"
         WHITESPACE@2645..2646 " "
-        OPERAND@2646..2659
-          PLAIN_INSTR@2646..2659
-            L_PAREN@2646..2647 "("
-            INSTR_NAME@2647..2656 "i32.const"
-            WHITESPACE@2656..2657 " "
-            IMMEDIATE@2657..2658
-              INT@2657..2658 "3"
-            R_PAREN@2658..2659 ")"
+        PLAIN_INSTR@2646..2659
+          L_PAREN@2646..2647 "("
+          INSTR_NAME@2647..2656 "i32.const"
+          WHITESPACE@2656..2657 " "
+          IMMEDIATE@2657..2658
+            INT@2657..2658 "3"
+          R_PAREN@2658..2659 ")"
         R_PAREN@2659..2660 ")"
       WHITESPACE@2660..2663 "\n  "
       R_PAREN@2663..2664 ")"
@@ -1118,47 +1112,44 @@ ROOT@0..3407
         L_PAREN@2716..2717 "("
         INSTR_NAME@2717..2723 "select"
         WHITESPACE@2723..2724 " "
-        OPERAND@2724..2737
-          PLAIN_INSTR@2724..2737
-            L_PAREN@2724..2725 "("
-            INSTR_NAME@2725..2734 "i32.const"
-            WHITESPACE@2734..2735 " "
-            IMMEDIATE@2735..2736
-              INT@2735..2736 "2"
-            R_PAREN@2736..2737 ")"
+        PLAIN_INSTR@2724..2737
+          L_PAREN@2724..2725 "("
+          INSTR_NAME@2725..2734 "i32.const"
+          WHITESPACE@2734..2735 " "
+          IMMEDIATE@2735..2736
+            INT@2735..2736 "2"
+          R_PAREN@2736..2737 ")"
         WHITESPACE@2737..2738 " "
-        OPERAND@2738..2751
-          PLAIN_INSTR@2738..2751
-            L_PAREN@2738..2739 "("
-            INSTR_NAME@2739..2748 "i32.const"
-            WHITESPACE@2748..2749 " "
-            IMMEDIATE@2749..2750
-              INT@2749..2750 "3"
-            R_PAREN@2750..2751 ")"
+        PLAIN_INSTR@2738..2751
+          L_PAREN@2738..2739 "("
+          INSTR_NAME@2739..2748 "i32.const"
+          WHITESPACE@2748..2749 " "
+          IMMEDIATE@2749..2750
+            INT@2749..2750 "3"
+          R_PAREN@2750..2751 ")"
         WHITESPACE@2751..2752 " "
-        OPERAND@2752..2785
-          BLOCK_LOOP@2752..2785
-            L_PAREN@2752..2753 "("
-            KEYWORD@2753..2757 "loop"
-            WHITESPACE@2757..2758 " "
-            BLOCK_TYPE@2758..2770
-              TYPE_USE@2758..2770
-                RESULT@2758..2770
-                  L_PAREN@2758..2759 "("
-                  KEYWORD@2759..2765 "result"
-                  WHITESPACE@2765..2766 " "
-                  VAL_TYPE@2766..2769
-                    NUM_TYPE@2766..2769 "i32"
-                  R_PAREN@2769..2770 ")"
-            WHITESPACE@2770..2771 " "
-            PLAIN_INSTR@2771..2784
-              L_PAREN@2771..2772 "("
-              INSTR_NAME@2772..2781 "i32.const"
-              WHITESPACE@2781..2782 " "
-              IMMEDIATE@2782..2783
-                INT@2782..2783 "1"
-              R_PAREN@2783..2784 ")"
-            R_PAREN@2784..2785 ")"
+        BLOCK_LOOP@2752..2785
+          L_PAREN@2752..2753 "("
+          KEYWORD@2753..2757 "loop"
+          WHITESPACE@2757..2758 " "
+          BLOCK_TYPE@2758..2770
+            TYPE_USE@2758..2770
+              RESULT@2758..2770
+                L_PAREN@2758..2759 "("
+                KEYWORD@2759..2765 "result"
+                WHITESPACE@2765..2766 " "
+                VAL_TYPE@2766..2769
+                  NUM_TYPE@2766..2769 "i32"
+                R_PAREN@2769..2770 ")"
+          WHITESPACE@2770..2771 " "
+          PLAIN_INSTR@2771..2784
+            L_PAREN@2771..2772 "("
+            INSTR_NAME@2772..2781 "i32.const"
+            WHITESPACE@2781..2782 " "
+            IMMEDIATE@2782..2783
+              INT@2782..2783 "1"
+            R_PAREN@2783..2784 ")"
+          R_PAREN@2784..2785 ")"
         R_PAREN@2785..2786 ")"
       WHITESPACE@2786..2789 "\n  "
       R_PAREN@2789..2790 ")"
@@ -1460,14 +1451,13 @@ ROOT@0..3407
               IMMEDIATE@3317..3318
                 INT@3317..3318 "2"
               WHITESPACE@3318..3319 " "
-              OPERAND@3319..3333
-                PLAIN_INSTR@3319..3333
-                  L_PAREN@3319..3320 "("
-                  INSTR_NAME@3320..3329 "i32.const"
-                  WHITESPACE@3329..3330 " "
-                  IMMEDIATE@3330..3332
-                    INT@3330..3332 "18"
-                  R_PAREN@3332..3333 ")"
+              PLAIN_INSTR@3319..3333
+                L_PAREN@3319..3320 "("
+                INSTR_NAME@3320..3329 "i32.const"
+                WHITESPACE@3329..3330 " "
+                IMMEDIATE@3330..3332
+                  INT@3330..3332 "18"
+                R_PAREN@3332..3333 ")"
               R_PAREN@3333..3334 ")"
             R_PAREN@3334..3335 ")"
           WHITESPACE@3335..3344 "\n        "
@@ -1478,14 +1468,13 @@ ROOT@0..3407
             IMMEDIATE@3348..3349
               INT@3348..3349 "0"
             WHITESPACE@3349..3350 " "
-            OPERAND@3350..3364
-              PLAIN_INSTR@3350..3364
-                L_PAREN@3350..3351 "("
-                INSTR_NAME@3351..3360 "i32.const"
-                WHITESPACE@3360..3361 " "
-                IMMEDIATE@3361..3363
-                  INT@3361..3363 "20"
-                R_PAREN@3363..3364 ")"
+            PLAIN_INSTR@3350..3364
+              L_PAREN@3350..3351 "("
+              INSTR_NAME@3351..3360 "i32.const"
+              WHITESPACE@3360..3361 " "
+              IMMEDIATE@3361..3363
+                INT@3361..3363 "20"
+              R_PAREN@3363..3364 ")"
             R_PAREN@3364..3365 ")"
           WHITESPACE@3365..3372 "\n      "
           R_PAREN@3372..3373 ")"

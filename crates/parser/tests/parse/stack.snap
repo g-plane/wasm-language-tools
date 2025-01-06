@@ -249,14 +249,13 @@ ROOT@0..1103
         IMMEDIATE@706..708
           IDENT@706..708 "$i"
         WHITESPACE@708..709 " "
-        OPERAND@709..723
-          PLAIN_INSTR@709..723
-            L_PAREN@709..710 "("
-            INSTR_NAME@710..719 "local.get"
-            WHITESPACE@719..720 " "
-            IMMEDIATE@720..722
-              IDENT@720..722 "$n"
-            R_PAREN@722..723 ")"
+        PLAIN_INSTR@709..723
+          L_PAREN@709..710 "("
+          INSTR_NAME@710..719 "local.get"
+          WHITESPACE@719..720 " "
+          IMMEDIATE@720..722
+            IDENT@720..722 "$n"
+          R_PAREN@722..723 ")"
         R_PAREN@723..724 ")"
       WHITESPACE@724..729 "\n    "
       PLAIN_INSTR@729..759
@@ -266,14 +265,13 @@ ROOT@0..1103
         IMMEDIATE@740..744
           IDENT@740..744 "$res"
         WHITESPACE@744..745 " "
-        OPERAND@745..758
-          PLAIN_INSTR@745..758
-            L_PAREN@745..746 "("
-            INSTR_NAME@746..755 "i64.const"
-            WHITESPACE@755..756 " "
-            IMMEDIATE@756..757
-              INT@756..757 "1"
-            R_PAREN@757..758 ")"
+        PLAIN_INSTR@745..758
+          L_PAREN@745..746 "("
+          INSTR_NAME@746..755 "i64.const"
+          WHITESPACE@755..756 " "
+          IMMEDIATE@756..757
+            INT@756..757 "1"
+          R_PAREN@757..758 ")"
         R_PAREN@758..759 ")"
       WHITESPACE@759..764 "\n    "
       BLOCK_BLOCK@764..1077
@@ -290,23 +288,21 @@ ROOT@0..1103
             L_PAREN@801..802 "("
             INSTR_NAME@802..808 "i64.eq"
             WHITESPACE@808..809 " "
-            OPERAND@809..823
-              PLAIN_INSTR@809..823
-                L_PAREN@809..810 "("
-                INSTR_NAME@810..819 "local.get"
-                WHITESPACE@819..820 " "
-                IMMEDIATE@820..822
-                  IDENT@820..822 "$i"
-                R_PAREN@822..823 ")"
+            PLAIN_INSTR@809..823
+              L_PAREN@809..810 "("
+              INSTR_NAME@810..819 "local.get"
+              WHITESPACE@819..820 " "
+              IMMEDIATE@820..822
+                IDENT@820..822 "$i"
+              R_PAREN@822..823 ")"
             WHITESPACE@823..824 " "
-            OPERAND@824..837
-              PLAIN_INSTR@824..837
-                L_PAREN@824..825 "("
-                INSTR_NAME@825..834 "i64.const"
-                WHITESPACE@834..835 " "
-                IMMEDIATE@835..836
-                  INT@835..836 "0"
-                R_PAREN@836..837 ")"
+            PLAIN_INSTR@824..837
+              L_PAREN@824..825 "("
+              INSTR_NAME@825..834 "i64.const"
+              WHITESPACE@834..835 " "
+              IMMEDIATE@835..836
+                INT@835..836 "0"
+              R_PAREN@836..837 ")"
             R_PAREN@837..838 ")"
           WHITESPACE@838..847 "\n        "
           BLOCK_IF@847..1042
@@ -326,23 +322,21 @@ ROOT@0..1103
                 L_PAREN@892..893 "("
                 INSTR_NAME@893..900 "i64.mul"
                 WHITESPACE@900..901 " "
-                OPERAND@901..915
-                  PLAIN_INSTR@901..915
-                    L_PAREN@901..902 "("
-                    INSTR_NAME@902..911 "local.get"
-                    WHITESPACE@911..912 " "
-                    IMMEDIATE@912..914
-                      IDENT@912..914 "$i"
-                    R_PAREN@914..915 ")"
+                PLAIN_INSTR@901..915
+                  L_PAREN@901..902 "("
+                  INSTR_NAME@902..911 "local.get"
+                  WHITESPACE@911..912 " "
+                  IMMEDIATE@912..914
+                    IDENT@912..914 "$i"
+                  R_PAREN@914..915 ")"
                 WHITESPACE@915..916 " "
-                OPERAND@916..932
-                  PLAIN_INSTR@916..932
-                    L_PAREN@916..917 "("
-                    INSTR_NAME@917..926 "local.get"
-                    WHITESPACE@926..927 " "
-                    IMMEDIATE@927..931
-                      IDENT@927..931 "$res"
-                    R_PAREN@931..932 ")"
+                PLAIN_INSTR@916..932
+                  L_PAREN@916..917 "("
+                  INSTR_NAME@917..926 "local.get"
+                  WHITESPACE@926..927 " "
+                  IMMEDIATE@927..931
+                    IDENT@927..931 "$res"
+                  R_PAREN@931..932 ")"
                 R_PAREN@932..933 ")"
               WHITESPACE@933..944 "\n          "
               PLAIN_INSTR@944..958
@@ -355,23 +349,21 @@ ROOT@0..1103
                 L_PAREN@969..970 "("
                 INSTR_NAME@970..977 "i64.sub"
                 WHITESPACE@977..978 " "
-                OPERAND@978..992
-                  PLAIN_INSTR@978..992
-                    L_PAREN@978..979 "("
-                    INSTR_NAME@979..988 "local.get"
-                    WHITESPACE@988..989 " "
-                    IMMEDIATE@989..991
-                      IDENT@989..991 "$i"
-                    R_PAREN@991..992 ")"
+                PLAIN_INSTR@978..992
+                  L_PAREN@978..979 "("
+                  INSTR_NAME@979..988 "local.get"
+                  WHITESPACE@988..989 " "
+                  IMMEDIATE@989..991
+                    IDENT@989..991 "$i"
+                  R_PAREN@991..992 ")"
                 WHITESPACE@992..993 " "
-                OPERAND@993..1006
-                  PLAIN_INSTR@993..1006
-                    L_PAREN@993..994 "("
-                    INSTR_NAME@994..1003 "i64.const"
-                    WHITESPACE@1003..1004 " "
-                    IMMEDIATE@1004..1005
-                      INT@1004..1005 "1"
-                    R_PAREN@1005..1006 ")"
+                PLAIN_INSTR@993..1006
+                  L_PAREN@993..994 "("
+                  INSTR_NAME@994..1003 "i64.const"
+                  WHITESPACE@1003..1004 " "
+                  IMMEDIATE@1004..1005
+                    INT@1004..1005 "1"
+                  R_PAREN@1005..1006 ")"
                 R_PAREN@1006..1007 ")"
               WHITESPACE@1007..1018 "\n          "
               PLAIN_INSTR@1018..1030

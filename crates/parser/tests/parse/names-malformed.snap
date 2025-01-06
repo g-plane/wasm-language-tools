@@ -24,7 +24,7 @@ ROOT@0..44
     R_PAREN@42..43 ")"
   WHITESPACE@43..44 "\n"
 
-error: expected operand
+error: expected instruction
   ┌─ names-malformed.wat:3:16
   │
 3 │     (local.get $)

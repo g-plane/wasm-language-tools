@@ -302,31 +302,31 @@ ROOT@0..466
     R_PAREN@464..465 ")"
   WHITESPACE@465..466 "\n"
 
-error: expected operand
+error: expected instruction
   ┌─ loop-malformed.wat:2:61
   │
 2 │   (func (i32.const 0) (loop (type $sig) (result i32) (param i32)))
   │                                                             ^^^
 
-error: expected operand
+error: expected instruction
   ┌─ loop-malformed.wat:3:61
   │
 3 │   (func (i32.const 0) (loop (param i32) (type $sig) (result i32)))
   │                                                             ^^^
 
-error: expected operand
+error: expected instruction
   ┌─ loop-malformed.wat:5:61
   │
 5 │   (func (i32.const 0) (loop (result i32) (type $sig) (param i32)))
   │                                                             ^^^
 
-error: expected operand
+error: expected instruction
   ┌─ loop-malformed.wat:6:49
   │
 6 │   (func (i32.const 0) (loop (result i32) (param i32) (type $sig)))
   │                                                 ^^^
 
-error: expected operand
+error: expected instruction
   ┌─ loop-malformed.wat:7:49
   │
 7 │   (func (i32.const 0) (loop (result i32) (param i32)))

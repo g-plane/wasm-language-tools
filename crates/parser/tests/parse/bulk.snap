@@ -118,32 +118,29 @@ ROOT@0..422
         L_PAREN@225..226 "("
         INSTR_NAME@226..237 "memory.fill"
         WHITESPACE@237..244 "\n      "
-        OPERAND@244..257
-          PLAIN_INSTR@244..257
-            L_PAREN@244..245 "("
-            INSTR_NAME@245..254 "local.get"
-            WHITESPACE@254..255 " "
-            IMMEDIATE@255..256
-              INT@255..256 "0"
-            R_PAREN@256..257 ")"
+        PLAIN_INSTR@244..257
+          L_PAREN@244..245 "("
+          INSTR_NAME@245..254 "local.get"
+          WHITESPACE@254..255 " "
+          IMMEDIATE@255..256
+            INT@255..256 "0"
+          R_PAREN@256..257 ")"
         WHITESPACE@257..264 "\n      "
-        OPERAND@264..277
-          PLAIN_INSTR@264..277
-            L_PAREN@264..265 "("
-            INSTR_NAME@265..274 "local.get"
-            WHITESPACE@274..275 " "
-            IMMEDIATE@275..276
-              INT@275..276 "1"
-            R_PAREN@276..277 ")"
+        PLAIN_INSTR@264..277
+          L_PAREN@264..265 "("
+          INSTR_NAME@265..274 "local.get"
+          WHITESPACE@274..275 " "
+          IMMEDIATE@275..276
+            INT@275..276 "1"
+          R_PAREN@276..277 ")"
         WHITESPACE@277..284 "\n      "
-        OPERAND@284..297
-          PLAIN_INSTR@284..297
-            L_PAREN@284..285 "("
-            INSTR_NAME@285..294 "local.get"
-            WHITESPACE@294..295 " "
-            IMMEDIATE@295..296
-              INT@295..296 "2"
-            R_PAREN@296..297 ")"
+        PLAIN_INSTR@284..297
+          L_PAREN@284..285 "("
+          INSTR_NAME@285..294 "local.get"
+          WHITESPACE@294..295 " "
+          IMMEDIATE@295..296
+            INT@295..296 "2"
+          R_PAREN@296..297 ")"
         R_PAREN@297..298 ")"
       R_PAREN@298..299 ")"
     WHITESPACE@299..300 "\n"

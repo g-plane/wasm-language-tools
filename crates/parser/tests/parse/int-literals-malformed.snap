@@ -171,49 +171,49 @@ ROOT@0..346
     R_PAREN@344..345 ")"
   WHITESPACE@345..346 "\n"
 
-error: expected operand
+error: expected instruction
   ┌─ int-literals-malformed.wat:2:26
   │
 2 │   (global i32 (i32.const _100))
   │                          ^^^^
 
-error: expected operand
+error: expected instruction
   ┌─ int-literals-malformed.wat:3:26
   │
 3 │   (global i32 (i32.const +_100))
   │                          ^^^^^
 
-error: expected operand
+error: expected instruction
   ┌─ int-literals-malformed.wat:4:26
   │
 4 │   (global i32 (i32.const -_100))
   │                          ^^^^^
 
-error: expected operand
+error: expected instruction
   ┌─ int-literals-malformed.wat:5:26
   │
 5 │   (global i32 (i32.const 99_))
   │                          ^^^
 
-error: expected operand
+error: expected instruction
   ┌─ int-literals-malformed.wat:7:26
   │
 7 │   (global i32 (i32.const _0x100))
   │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
   ┌─ int-literals-malformed.wat:8:26
   │
 8 │   (global i32 (i32.const 0_x100))
   │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
   ┌─ int-literals-malformed.wat:9:26
   │
 9 │   (global i32 (i32.const 0x_100))
   │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ int-literals-malformed.wat:10:26
    │
 10 │   (global i32 (i32.const 0x00_))

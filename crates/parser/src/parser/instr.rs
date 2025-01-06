@@ -341,7 +341,13 @@ fn plain_instr(input: &mut Input) -> GreenResult {
             l_paren,
             trivias_prefixed(instr_name),
             repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(immediate)),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry_once(operand, [])),
+            repeat::<_, _, Vec<_>, _, _>(
+                0..,
+                retry_once(
+                    preceded(peek('('), instr).context(Message::Name("instruction")),
+                    [],
+                ),
+            ),
             r_paren,
         )
             .map(|(l_paren, mut instr_name, immediates, operands, r_paren)| {
@@ -395,13 +401,6 @@ fn immediate(input: &mut Input) -> GreenResult {
     .context(Message::Name("immediate"))
     .parse_next(input)
     .map(|child| node(IMMEDIATE, [child]))
-}
-
-fn operand(input: &mut Input) -> GreenResult {
-    preceded(peek('('), instr)
-        .context(Message::Name("operand"))
-        .parse_next(input)
-        .map(|child| node(OPERAND, [child]))
 }
 
 fn mem_arg(input: &mut Input) -> GreenResult {

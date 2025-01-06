@@ -33,14 +33,13 @@ ROOT@0..9339
         L_PAREN@72..73 "("
         INSTR_NAME@73..92 "i32.reinterpret_f32"
         WHITESPACE@92..93 " "
-        OPERAND@93..108
-          PLAIN_INSTR@93..108
-            L_PAREN@93..94 "("
-            INSTR_NAME@94..103 "f32.const"
-            WHITESPACE@103..104 " "
-            IMMEDIATE@104..107
-              FLOAT@104..107 "nan"
-            R_PAREN@107..108 ")"
+        PLAIN_INSTR@93..108
+          L_PAREN@93..94 "("
+          INSTR_NAME@94..103 "f32.const"
+          WHITESPACE@103..104 " "
+          IMMEDIATE@104..107
+            FLOAT@104..107 "nan"
+          R_PAREN@107..108 ")"
         R_PAREN@108..109 ")"
       R_PAREN@109..110 ")"
     WHITESPACE@110..113 "\n  "
@@ -69,14 +68,13 @@ ROOT@0..9339
         L_PAREN@160..161 "("
         INSTR_NAME@161..180 "i32.reinterpret_f32"
         WHITESPACE@180..181 " "
-        OPERAND@181..197
-          PLAIN_INSTR@181..197
-            L_PAREN@181..182 "("
-            INSTR_NAME@182..191 "f32.const"
-            WHITESPACE@191..192 " "
-            IMMEDIATE@192..196
-              FLOAT@192..196 "+nan"
-            R_PAREN@196..197 ")"
+        PLAIN_INSTR@181..197
+          L_PAREN@181..182 "("
+          INSTR_NAME@182..191 "f32.const"
+          WHITESPACE@191..192 " "
+          IMMEDIATE@192..196
+            FLOAT@192..196 "+nan"
+          R_PAREN@196..197 ")"
         R_PAREN@197..198 ")"
       R_PAREN@198..199 ")"
     WHITESPACE@199..202 "\n  "
@@ -105,14 +103,13 @@ ROOT@0..9339
         L_PAREN@249..250 "("
         INSTR_NAME@250..269 "i32.reinterpret_f32"
         WHITESPACE@269..270 " "
-        OPERAND@270..286
-          PLAIN_INSTR@270..286
-            L_PAREN@270..271 "("
-            INSTR_NAME@271..280 "f32.const"
-            WHITESPACE@280..281 " "
-            IMMEDIATE@281..285
-              FLOAT@281..285 "-nan"
-            R_PAREN@285..286 ")"
+        PLAIN_INSTR@270..286
+          L_PAREN@270..271 "("
+          INSTR_NAME@271..280 "f32.const"
+          WHITESPACE@280..281 " "
+          IMMEDIATE@281..285
+            FLOAT@281..285 "-nan"
+          R_PAREN@285..286 ")"
         R_PAREN@286..287 ")"
       R_PAREN@287..288 ")"
     WHITESPACE@288..291 "\n  "
@@ -141,14 +138,13 @@ ROOT@0..9339
         L_PAREN@335..336 "("
         INSTR_NAME@336..355 "i32.reinterpret_f32"
         WHITESPACE@355..356 " "
-        OPERAND@356..380
-          PLAIN_INSTR@356..380
-            L_PAREN@356..357 "("
-            INSTR_NAME@357..366 "f32.const"
-            WHITESPACE@366..367 " "
-            IMMEDIATE@367..379
-              FLOAT@367..379 "nan:0x400000"
-            R_PAREN@379..380 ")"
+        PLAIN_INSTR@356..380
+          L_PAREN@356..357 "("
+          INSTR_NAME@357..366 "f32.const"
+          WHITESPACE@366..367 " "
+          IMMEDIATE@367..379
+            FLOAT@367..379 "nan:0x400000"
+          R_PAREN@379..380 ")"
         R_PAREN@380..381 ")"
       R_PAREN@381..382 ")"
     WHITESPACE@382..385 "\n  "
@@ -177,14 +173,13 @@ ROOT@0..9339
         L_PAREN@450..451 "("
         INSTR_NAME@451..470 "i32.reinterpret_f32"
         WHITESPACE@470..471 " "
-        OPERAND@471..495
-          PLAIN_INSTR@471..495
-            L_PAREN@471..472 "("
-            INSTR_NAME@472..481 "f32.const"
-            WHITESPACE@481..482 " "
-            IMMEDIATE@482..494
-              FLOAT@482..494 "nan:0x200000"
-            R_PAREN@494..495 ")"
+        PLAIN_INSTR@471..495
+          L_PAREN@471..472 "("
+          INSTR_NAME@472..481 "f32.const"
+          WHITESPACE@481..482 " "
+          IMMEDIATE@482..494
+            FLOAT@482..494 "nan:0x200000"
+          R_PAREN@494..495 ")"
         R_PAREN@495..496 ")"
       R_PAREN@496..497 ")"
     WHITESPACE@497..500 "\n  "
@@ -213,14 +208,13 @@ ROOT@0..9339
         L_PAREN@547..548 "("
         INSTR_NAME@548..567 "i32.reinterpret_f32"
         WHITESPACE@567..568 " "
-        OPERAND@568..593
-          PLAIN_INSTR@568..593
-            L_PAREN@568..569 "("
-            INSTR_NAME@569..578 "f32.const"
-            WHITESPACE@578..579 " "
-            IMMEDIATE@579..592
-              FLOAT@579..592 "-nan:0x7fffff"
-            R_PAREN@592..593 ")"
+        PLAIN_INSTR@568..593
+          L_PAREN@568..569 "("
+          INSTR_NAME@569..578 "f32.const"
+          WHITESPACE@578..579 " "
+          IMMEDIATE@579..592
+            FLOAT@579..592 "-nan:0x7fffff"
+          R_PAREN@592..593 ")"
         R_PAREN@593..594 ")"
       R_PAREN@594..595 ")"
     WHITESPACE@595..598 "\n  "
@@ -249,14 +243,13 @@ ROOT@0..9339
         L_PAREN@641..642 "("
         INSTR_NAME@642..661 "i32.reinterpret_f32"
         WHITESPACE@661..662 " "
-        OPERAND@662..686
-          PLAIN_INSTR@662..686
-            L_PAREN@662..663 "("
-            INSTR_NAME@663..672 "f32.const"
-            WHITESPACE@672..673 " "
-            IMMEDIATE@673..685
-              FLOAT@673..685 "nan:0x012345"
-            R_PAREN@685..686 ")"
+        PLAIN_INSTR@662..686
+          L_PAREN@662..663 "("
+          INSTR_NAME@663..672 "f32.const"
+          WHITESPACE@672..673 " "
+          IMMEDIATE@673..685
+            FLOAT@673..685 "nan:0x012345"
+          R_PAREN@685..686 ")"
         R_PAREN@686..687 ")"
       R_PAREN@687..688 ")"
     WHITESPACE@688..691 "\n  "
@@ -285,14 +278,13 @@ ROOT@0..9339
         L_PAREN@743..744 "("
         INSTR_NAME@744..763 "i32.reinterpret_f32"
         WHITESPACE@763..764 " "
-        OPERAND@764..789
-          PLAIN_INSTR@764..789
-            L_PAREN@764..765 "("
-            INSTR_NAME@765..774 "f32.const"
-            WHITESPACE@774..775 " "
-            IMMEDIATE@775..788
-              FLOAT@775..788 "+nan:0x304050"
-            R_PAREN@788..789 ")"
+        PLAIN_INSTR@764..789
+          L_PAREN@764..765 "("
+          INSTR_NAME@765..774 "f32.const"
+          WHITESPACE@774..775 " "
+          IMMEDIATE@775..788
+            FLOAT@775..788 "+nan:0x304050"
+          R_PAREN@788..789 ")"
         R_PAREN@789..790 ")"
       R_PAREN@790..791 ")"
     WHITESPACE@791..794 "\n  "
@@ -321,14 +313,13 @@ ROOT@0..9339
         L_PAREN@846..847 "("
         INSTR_NAME@847..866 "i32.reinterpret_f32"
         WHITESPACE@866..867 " "
-        OPERAND@867..892
-          PLAIN_INSTR@867..892
-            L_PAREN@867..868 "("
-            INSTR_NAME@868..877 "f32.const"
-            WHITESPACE@877..878 " "
-            IMMEDIATE@878..891
-              FLOAT@878..891 "-nan:0x2abcde"
-            R_PAREN@891..892 ")"
+        PLAIN_INSTR@867..892
+          L_PAREN@867..868 "("
+          INSTR_NAME@868..877 "f32.const"
+          WHITESPACE@877..878 " "
+          IMMEDIATE@878..891
+            FLOAT@878..891 "-nan:0x2abcde"
+          R_PAREN@891..892 ")"
         R_PAREN@892..893 ")"
       R_PAREN@893..894 ")"
     WHITESPACE@894..897 "\n  "
@@ -357,14 +348,13 @@ ROOT@0..9339
         L_PAREN@940..941 "("
         INSTR_NAME@941..960 "i32.reinterpret_f32"
         WHITESPACE@960..961 " "
-        OPERAND@961..976
-          PLAIN_INSTR@961..976
-            L_PAREN@961..962 "("
-            INSTR_NAME@962..971 "f32.const"
-            WHITESPACE@971..972 " "
-            IMMEDIATE@972..975
-              FLOAT@972..975 "inf"
-            R_PAREN@975..976 ")"
+        PLAIN_INSTR@961..976
+          L_PAREN@961..962 "("
+          INSTR_NAME@962..971 "f32.const"
+          WHITESPACE@971..972 " "
+          IMMEDIATE@972..975
+            FLOAT@972..975 "inf"
+          R_PAREN@975..976 ")"
         R_PAREN@976..977 ")"
       R_PAREN@977..978 ")"
     WHITESPACE@978..981 "\n  "
@@ -393,14 +383,13 @@ ROOT@0..9339
         L_PAREN@1033..1034 "("
         INSTR_NAME@1034..1053 "i32.reinterpret_f32"
         WHITESPACE@1053..1054 " "
-        OPERAND@1054..1070
-          PLAIN_INSTR@1054..1070
-            L_PAREN@1054..1055 "("
-            INSTR_NAME@1055..1064 "f32.const"
-            WHITESPACE@1064..1065 " "
-            IMMEDIATE@1065..1069
-              FLOAT@1065..1069 "+inf"
-            R_PAREN@1069..1070 ")"
+        PLAIN_INSTR@1054..1070
+          L_PAREN@1054..1055 "("
+          INSTR_NAME@1055..1064 "f32.const"
+          WHITESPACE@1064..1065 " "
+          IMMEDIATE@1065..1069
+            FLOAT@1065..1069 "+inf"
+          R_PAREN@1069..1070 ")"
         R_PAREN@1070..1071 ")"
       R_PAREN@1071..1072 ")"
     WHITESPACE@1072..1075 "\n  "
@@ -429,14 +418,13 @@ ROOT@0..9339
         L_PAREN@1127..1128 "("
         INSTR_NAME@1128..1147 "i32.reinterpret_f32"
         WHITESPACE@1147..1148 " "
-        OPERAND@1148..1164
-          PLAIN_INSTR@1148..1164
-            L_PAREN@1148..1149 "("
-            INSTR_NAME@1149..1158 "f32.const"
-            WHITESPACE@1158..1159 " "
-            IMMEDIATE@1159..1163
-              FLOAT@1159..1163 "-inf"
-            R_PAREN@1163..1164 ")"
+        PLAIN_INSTR@1148..1164
+          L_PAREN@1148..1149 "("
+          INSTR_NAME@1149..1158 "f32.const"
+          WHITESPACE@1158..1159 " "
+          IMMEDIATE@1159..1163
+            FLOAT@1159..1163 "-inf"
+          R_PAREN@1163..1164 ")"
         R_PAREN@1164..1165 ")"
       R_PAREN@1165..1166 ")"
     WHITESPACE@1166..1170 "\n\n  "
@@ -467,14 +455,13 @@ ROOT@0..9339
         L_PAREN@1226..1227 "("
         INSTR_NAME@1227..1246 "i32.reinterpret_f32"
         WHITESPACE@1246..1247 " "
-        OPERAND@1247..1266
-          PLAIN_INSTR@1247..1266
-            L_PAREN@1247..1248 "("
-            INSTR_NAME@1248..1257 "f32.const"
-            WHITESPACE@1257..1258 " "
-            IMMEDIATE@1258..1265
-              FLOAT@1258..1265 "0x0.0p0"
-            R_PAREN@1265..1266 ")"
+        PLAIN_INSTR@1247..1266
+          L_PAREN@1247..1248 "("
+          INSTR_NAME@1248..1257 "f32.const"
+          WHITESPACE@1257..1258 " "
+          IMMEDIATE@1258..1265
+            FLOAT@1258..1265 "0x0.0p0"
+          R_PAREN@1265..1266 ")"
         R_PAREN@1266..1267 ")"
       R_PAREN@1267..1268 ")"
     WHITESPACE@1268..1271 "\n  "
@@ -503,14 +490,13 @@ ROOT@0..9339
         L_PAREN@1319..1320 "("
         INSTR_NAME@1320..1339 "i32.reinterpret_f32"
         WHITESPACE@1339..1340 " "
-        OPERAND@1340..1360
-          PLAIN_INSTR@1340..1360
-            L_PAREN@1340..1341 "("
-            INSTR_NAME@1341..1350 "f32.const"
-            WHITESPACE@1350..1351 " "
-            IMMEDIATE@1351..1359
-              FLOAT@1351..1359 "+0x0.0p0"
-            R_PAREN@1359..1360 ")"
+        PLAIN_INSTR@1340..1360
+          L_PAREN@1340..1341 "("
+          INSTR_NAME@1341..1350 "f32.const"
+          WHITESPACE@1350..1351 " "
+          IMMEDIATE@1351..1359
+            FLOAT@1351..1359 "+0x0.0p0"
+          R_PAREN@1359..1360 ")"
         R_PAREN@1360..1361 ")"
       R_PAREN@1361..1362 ")"
     WHITESPACE@1362..1365 "\n  "
@@ -539,14 +525,13 @@ ROOT@0..9339
         L_PAREN@1413..1414 "("
         INSTR_NAME@1414..1433 "i32.reinterpret_f32"
         WHITESPACE@1433..1434 " "
-        OPERAND@1434..1454
-          PLAIN_INSTR@1434..1454
-            L_PAREN@1434..1435 "("
-            INSTR_NAME@1435..1444 "f32.const"
-            WHITESPACE@1444..1445 " "
-            IMMEDIATE@1445..1453
-              FLOAT@1445..1453 "-0x0.0p0"
-            R_PAREN@1453..1454 ")"
+        PLAIN_INSTR@1434..1454
+          L_PAREN@1434..1435 "("
+          INSTR_NAME@1435..1444 "f32.const"
+          WHITESPACE@1444..1445 " "
+          IMMEDIATE@1445..1453
+            FLOAT@1445..1453 "-0x0.0p0"
+          R_PAREN@1453..1454 ")"
         R_PAREN@1454..1455 ")"
       R_PAREN@1455..1456 ")"
     WHITESPACE@1456..1459 "\n  "
@@ -575,14 +560,13 @@ ROOT@0..9339
         L_PAREN@1498..1499 "("
         INSTR_NAME@1499..1518 "i32.reinterpret_f32"
         WHITESPACE@1518..1519 " "
-        OPERAND@1519..1544
-          PLAIN_INSTR@1519..1544
-            L_PAREN@1519..1520 "("
-            INSTR_NAME@1520..1529 "f32.const"
-            WHITESPACE@1529..1530 " "
-            IMMEDIATE@1530..1543
-              FLOAT@1530..1543 "0x1.921fb6p+2"
-            R_PAREN@1543..1544 ")"
+        PLAIN_INSTR@1519..1544
+          L_PAREN@1519..1520 "("
+          INSTR_NAME@1520..1529 "f32.const"
+          WHITESPACE@1529..1530 " "
+          IMMEDIATE@1530..1543
+            FLOAT@1530..1543 "0x1.921fb6p+2"
+          R_PAREN@1543..1544 ")"
         R_PAREN@1544..1545 ")"
       R_PAREN@1545..1546 ")"
     WHITESPACE@1546..1549 "\n  "
@@ -611,14 +595,13 @@ ROOT@0..9339
         L_PAREN@1596..1597 "("
         INSTR_NAME@1597..1616 "i32.reinterpret_f32"
         WHITESPACE@1616..1617 " "
-        OPERAND@1617..1637
-          PLAIN_INSTR@1617..1637
-            L_PAREN@1617..1618 "("
-            INSTR_NAME@1618..1627 "f32.const"
-            WHITESPACE@1627..1628 " "
-            IMMEDIATE@1628..1636
-              FLOAT@1628..1636 "0x1p-149"
-            R_PAREN@1636..1637 ")"
+        PLAIN_INSTR@1617..1637
+          L_PAREN@1617..1618 "("
+          INSTR_NAME@1618..1627 "f32.const"
+          WHITESPACE@1627..1628 " "
+          IMMEDIATE@1628..1636
+            FLOAT@1628..1636 "0x1p-149"
+          R_PAREN@1636..1637 ")"
         R_PAREN@1637..1638 ")"
       R_PAREN@1638..1639 ")"
     WHITESPACE@1639..1642 "\n  "
@@ -647,14 +630,13 @@ ROOT@0..9339
         L_PAREN@1687..1688 "("
         INSTR_NAME@1688..1707 "i32.reinterpret_f32"
         WHITESPACE@1707..1708 " "
-        OPERAND@1708..1728
-          PLAIN_INSTR@1708..1728
-            L_PAREN@1708..1709 "("
-            INSTR_NAME@1709..1718 "f32.const"
-            WHITESPACE@1718..1719 " "
-            IMMEDIATE@1719..1727
-              FLOAT@1719..1727 "0x1p-126"
-            R_PAREN@1727..1728 ")"
+        PLAIN_INSTR@1708..1728
+          L_PAREN@1708..1709 "("
+          INSTR_NAME@1709..1718 "f32.const"
+          WHITESPACE@1718..1719 " "
+          IMMEDIATE@1719..1727
+            FLOAT@1719..1727 "0x1p-126"
+          R_PAREN@1727..1728 ")"
         R_PAREN@1728..1729 ")"
       R_PAREN@1729..1730 ")"
     WHITESPACE@1730..1733 "\n  "
@@ -683,14 +665,13 @@ ROOT@0..9339
         L_PAREN@1778..1779 "("
         INSTR_NAME@1779..1798 "i32.reinterpret_f32"
         WHITESPACE@1798..1799 " "
-        OPERAND@1799..1826
-          PLAIN_INSTR@1799..1826
-            L_PAREN@1799..1800 "("
-            INSTR_NAME@1800..1809 "f32.const"
-            WHITESPACE@1809..1810 " "
-            IMMEDIATE@1810..1825
-              FLOAT@1810..1825 "0x1.fffffep+127"
-            R_PAREN@1825..1826 ")"
+        PLAIN_INSTR@1799..1826
+          L_PAREN@1799..1800 "("
+          INSTR_NAME@1800..1809 "f32.const"
+          WHITESPACE@1809..1810 " "
+          IMMEDIATE@1810..1825
+            FLOAT@1810..1825 "0x1.fffffep+127"
+          R_PAREN@1825..1826 ")"
         R_PAREN@1826..1827 ")"
       R_PAREN@1827..1828 ")"
     WHITESPACE@1828..1831 "\n  "
@@ -719,14 +700,13 @@ ROOT@0..9339
         L_PAREN@1879..1880 "("
         INSTR_NAME@1880..1899 "i32.reinterpret_f32"
         WHITESPACE@1899..1900 " "
-        OPERAND@1900..1927
-          PLAIN_INSTR@1900..1927
-            L_PAREN@1900..1901 "("
-            INSTR_NAME@1901..1910 "f32.const"
-            WHITESPACE@1910..1911 " "
-            IMMEDIATE@1911..1926
-              FLOAT@1911..1926 "0x1.fffffcp-127"
-            R_PAREN@1926..1927 ")"
+        PLAIN_INSTR@1900..1927
+          L_PAREN@1900..1901 "("
+          INSTR_NAME@1901..1910 "f32.const"
+          WHITESPACE@1910..1911 " "
+          IMMEDIATE@1911..1926
+            FLOAT@1911..1926 "0x1.fffffcp-127"
+          R_PAREN@1926..1927 ")"
         R_PAREN@1927..1928 ")"
       R_PAREN@1928..1929 ")"
     WHITESPACE@1929..1932 "\n  "
@@ -755,14 +735,13 @@ ROOT@0..9339
         L_PAREN@1979..1980 "("
         INSTR_NAME@1980..1999 "i32.reinterpret_f32"
         WHITESPACE@1999..2000 " "
-        OPERAND@2000..2019
-          PLAIN_INSTR@2000..2019
-            L_PAREN@2000..2001 "("
-            INSTR_NAME@2001..2010 "f32.const"
-            WHITESPACE@2010..2011 " "
-            IMMEDIATE@2011..2018
-              FLOAT@2011..2018 "0x1.p10"
-            R_PAREN@2018..2019 ")"
+        PLAIN_INSTR@2000..2019
+          L_PAREN@2000..2001 "("
+          INSTR_NAME@2001..2010 "f32.const"
+          WHITESPACE@2010..2011 " "
+          IMMEDIATE@2011..2018
+            FLOAT@2011..2018 "0x1.p10"
+          R_PAREN@2018..2019 ")"
         R_PAREN@2019..2020 ")"
       R_PAREN@2020..2021 ")"
     WHITESPACE@2021..2024 "\n  "
@@ -791,14 +770,13 @@ ROOT@0..9339
         L_PAREN@2067..2068 "("
         INSTR_NAME@2068..2087 "i32.reinterpret_f32"
         WHITESPACE@2087..2088 " "
-        OPERAND@2088..2107
-          PLAIN_INSTR@2088..2107
-            L_PAREN@2088..2089 "("
-            INSTR_NAME@2089..2098 "f32.const"
-            WHITESPACE@2098..2099 " "
-            IMMEDIATE@2099..2106
-              INT@2099..2106 "0x12345"
-            R_PAREN@2106..2107 ")"
+        PLAIN_INSTR@2088..2107
+          L_PAREN@2088..2089 "("
+          INSTR_NAME@2089..2098 "f32.const"
+          WHITESPACE@2098..2099 " "
+          IMMEDIATE@2099..2106
+            INT@2099..2106 "0x12345"
+          R_PAREN@2106..2107 ")"
         R_PAREN@2107..2108 ")"
       R_PAREN@2108..2109 ")"
     WHITESPACE@2109..2112 "\n  "
@@ -827,14 +805,13 @@ ROOT@0..9339
         L_PAREN@2156..2157 "("
         INSTR_NAME@2157..2176 "i32.reinterpret_f32"
         WHITESPACE@2176..2177 " "
-        OPERAND@2177..2217
-          PLAIN_INSTR@2177..2217
-            L_PAREN@2177..2178 "("
-            INSTR_NAME@2178..2187 "f32.const"
-            WHITESPACE@2187..2188 " "
-            IMMEDIATE@2188..2216
-              INT@2188..2216 "0x1_0000_0000_0000_00 ..."
-            R_PAREN@2216..2217 ")"
+        PLAIN_INSTR@2177..2217
+          L_PAREN@2177..2178 "("
+          INSTR_NAME@2178..2187 "f32.const"
+          WHITESPACE@2187..2188 " "
+          IMMEDIATE@2188..2216
+            INT@2188..2216 "0x1_0000_0000_0000_00 ..."
+          R_PAREN@2216..2217 ")"
         R_PAREN@2217..2218 ")"
       R_PAREN@2218..2219 ")"
     WHITESPACE@2219..2222 "\n  "
@@ -863,14 +840,13 @@ ROOT@0..9339
         L_PAREN@2266..2267 "("
         INSTR_NAME@2267..2286 "i32.reinterpret_f32"
         WHITESPACE@2286..2287 " "
-        OPERAND@2287..2311
-          PLAIN_INSTR@2287..2311
-            L_PAREN@2287..2288 "("
-            INSTR_NAME@2288..2297 "f32.const"
-            WHITESPACE@2297..2298 " "
-            IMMEDIATE@2298..2310
-              INT@2298..2310 "-0x8000_0000"
-            R_PAREN@2310..2311 ")"
+        PLAIN_INSTR@2287..2311
+          L_PAREN@2287..2288 "("
+          INSTR_NAME@2288..2297 "f32.const"
+          WHITESPACE@2297..2298 " "
+          IMMEDIATE@2298..2310
+            INT@2298..2310 "-0x8000_0000"
+          R_PAREN@2310..2311 ")"
         R_PAREN@2311..2312 ")"
       R_PAREN@2312..2313 ")"
     WHITESPACE@2313..2316 "\n  "
@@ -899,14 +875,13 @@ ROOT@0..9339
         L_PAREN@2360..2361 "("
         INSTR_NAME@2361..2380 "i32.reinterpret_f32"
         WHITESPACE@2380..2381 " "
-        OPERAND@2381..2415
-          PLAIN_INSTR@2381..2415
-            L_PAREN@2381..2382 "("
-            INSTR_NAME@2382..2391 "f32.const"
-            WHITESPACE@2391..2392 " "
-            IMMEDIATE@2392..2414
-              INT@2392..2414 "-0x8000_0000_0000_0000"
-            R_PAREN@2414..2415 ")"
+        PLAIN_INSTR@2381..2415
+          L_PAREN@2381..2382 "("
+          INSTR_NAME@2382..2391 "f32.const"
+          WHITESPACE@2391..2392 " "
+          IMMEDIATE@2392..2414
+            INT@2392..2414 "-0x8000_0000_0000_0000"
+          R_PAREN@2414..2415 ")"
         R_PAREN@2415..2416 ")"
       R_PAREN@2416..2417 ")"
     WHITESPACE@2417..2421 "\n\n  "
@@ -937,14 +912,13 @@ ROOT@0..9339
         L_PAREN@2491..2492 "("
         INSTR_NAME@2492..2511 "i32.reinterpret_f32"
         WHITESPACE@2511..2512 " "
-        OPERAND@2512..2529
-          PLAIN_INSTR@2512..2529
-            L_PAREN@2512..2513 "("
-            INSTR_NAME@2513..2522 "f32.const"
-            WHITESPACE@2522..2523 " "
-            IMMEDIATE@2523..2528
-              FLOAT@2523..2528 "0.0e0"
-            R_PAREN@2528..2529 ")"
+        PLAIN_INSTR@2512..2529
+          L_PAREN@2512..2513 "("
+          INSTR_NAME@2513..2522 "f32.const"
+          WHITESPACE@2522..2523 " "
+          IMMEDIATE@2523..2528
+            FLOAT@2523..2528 "0.0e0"
+          R_PAREN@2528..2529 ")"
         R_PAREN@2529..2530 ")"
       R_PAREN@2530..2531 ")"
     WHITESPACE@2531..2534 "\n  "
@@ -973,14 +947,13 @@ ROOT@0..9339
         L_PAREN@2586..2587 "("
         INSTR_NAME@2587..2606 "i32.reinterpret_f32"
         WHITESPACE@2606..2607 " "
-        OPERAND@2607..2625
-          PLAIN_INSTR@2607..2625
-            L_PAREN@2607..2608 "("
-            INSTR_NAME@2608..2617 "f32.const"
-            WHITESPACE@2617..2618 " "
-            IMMEDIATE@2618..2624
-              FLOAT@2618..2624 "+0.0e0"
-            R_PAREN@2624..2625 ")"
+        PLAIN_INSTR@2607..2625
+          L_PAREN@2607..2608 "("
+          INSTR_NAME@2608..2617 "f32.const"
+          WHITESPACE@2617..2618 " "
+          IMMEDIATE@2618..2624
+            FLOAT@2618..2624 "+0.0e0"
+          R_PAREN@2624..2625 ")"
         R_PAREN@2625..2626 ")"
       R_PAREN@2626..2627 ")"
     WHITESPACE@2627..2630 "\n  "
@@ -1009,14 +982,13 @@ ROOT@0..9339
         L_PAREN@2682..2683 "("
         INSTR_NAME@2683..2702 "i32.reinterpret_f32"
         WHITESPACE@2702..2703 " "
-        OPERAND@2703..2721
-          PLAIN_INSTR@2703..2721
-            L_PAREN@2703..2704 "("
-            INSTR_NAME@2704..2713 "f32.const"
-            WHITESPACE@2713..2714 " "
-            IMMEDIATE@2714..2720
-              FLOAT@2714..2720 "-0.0e0"
-            R_PAREN@2720..2721 ")"
+        PLAIN_INSTR@2703..2721
+          L_PAREN@2703..2704 "("
+          INSTR_NAME@2704..2713 "f32.const"
+          WHITESPACE@2713..2714 " "
+          IMMEDIATE@2714..2720
+            FLOAT@2714..2720 "-0.0e0"
+          R_PAREN@2720..2721 ")"
         R_PAREN@2721..2722 ")"
       R_PAREN@2722..2723 ")"
     WHITESPACE@2723..2726 "\n  "
@@ -1045,14 +1017,13 @@ ROOT@0..9339
         L_PAREN@2769..2770 "("
         INSTR_NAME@2770..2789 "i32.reinterpret_f32"
         WHITESPACE@2789..2790 " "
-        OPERAND@2790..2821
-          PLAIN_INSTR@2790..2821
-            L_PAREN@2790..2791 "("
-            INSTR_NAME@2791..2800 "f32.const"
-            WHITESPACE@2800..2801 " "
-            IMMEDIATE@2801..2820
-              FLOAT@2801..2820 "6.28318548202514648"
-            R_PAREN@2820..2821 ")"
+        PLAIN_INSTR@2790..2821
+          L_PAREN@2790..2791 "("
+          INSTR_NAME@2791..2800 "f32.const"
+          WHITESPACE@2800..2801 " "
+          IMMEDIATE@2801..2820
+            FLOAT@2801..2820 "6.28318548202514648"
+          R_PAREN@2820..2821 ")"
         R_PAREN@2821..2822 ")"
       R_PAREN@2822..2823 ")"
     WHITESPACE@2823..2826 "\n  "
@@ -1081,14 +1052,13 @@ ROOT@0..9339
         L_PAREN@2877..2878 "("
         INSTR_NAME@2878..2897 "i32.reinterpret_f32"
         WHITESPACE@2897..2898 " "
-        OPERAND@2898..2920
-          PLAIN_INSTR@2898..2920
-            L_PAREN@2898..2899 "("
-            INSTR_NAME@2899..2908 "f32.const"
-            WHITESPACE@2908..2909 " "
-            IMMEDIATE@2909..2919
-              FLOAT@2909..2919 "1.4013e-45"
-            R_PAREN@2919..2920 ")"
+        PLAIN_INSTR@2898..2920
+          L_PAREN@2898..2899 "("
+          INSTR_NAME@2899..2908 "f32.const"
+          WHITESPACE@2908..2909 " "
+          IMMEDIATE@2909..2919
+            FLOAT@2909..2919 "1.4013e-45"
+          R_PAREN@2919..2920 ")"
         R_PAREN@2920..2921 ")"
       R_PAREN@2921..2922 ")"
     WHITESPACE@2922..2925 "\n  "
@@ -1117,14 +1087,13 @@ ROOT@0..9339
         L_PAREN@2974..2975 "("
         INSTR_NAME@2975..2994 "i32.reinterpret_f32"
         WHITESPACE@2994..2995 " "
-        OPERAND@2995..3020
-          PLAIN_INSTR@2995..3020
-            L_PAREN@2995..2996 "("
-            INSTR_NAME@2996..3005 "f32.const"
-            WHITESPACE@3005..3006 " "
-            IMMEDIATE@3006..3019
-              FLOAT@3006..3019 "1.1754944e-38"
-            R_PAREN@3019..3020 ")"
+        PLAIN_INSTR@2995..3020
+          L_PAREN@2995..2996 "("
+          INSTR_NAME@2996..3005 "f32.const"
+          WHITESPACE@3005..3006 " "
+          IMMEDIATE@3006..3019
+            FLOAT@3006..3019 "1.1754944e-38"
+          R_PAREN@3019..3020 ")"
         R_PAREN@3020..3021 ")"
       R_PAREN@3021..3022 ")"
     WHITESPACE@3022..3025 "\n  "
@@ -1153,14 +1122,13 @@ ROOT@0..9339
         L_PAREN@3077..3078 "("
         INSTR_NAME@3078..3097 "i32.reinterpret_f32"
         WHITESPACE@3097..3098 " "
-        OPERAND@3098..3123
-          PLAIN_INSTR@3098..3123
-            L_PAREN@3098..3099 "("
-            INSTR_NAME@3099..3108 "f32.const"
-            WHITESPACE@3108..3109 " "
-            IMMEDIATE@3109..3122
-              FLOAT@3109..3122 "1.1754942e-38"
-            R_PAREN@3122..3123 ")"
+        PLAIN_INSTR@3098..3123
+          L_PAREN@3098..3099 "("
+          INSTR_NAME@3099..3108 "f32.const"
+          WHITESPACE@3108..3109 " "
+          IMMEDIATE@3109..3122
+            FLOAT@3109..3122 "1.1754942e-38"
+          R_PAREN@3122..3123 ")"
         R_PAREN@3123..3124 ")"
       R_PAREN@3124..3125 ")"
     WHITESPACE@3125..3128 "\n  "
@@ -1189,14 +1157,13 @@ ROOT@0..9339
         L_PAREN@3177..3178 "("
         INSTR_NAME@3178..3197 "i32.reinterpret_f32"
         WHITESPACE@3197..3198 " "
-        OPERAND@3198..3223
-          PLAIN_INSTR@3198..3223
-            L_PAREN@3198..3199 "("
-            INSTR_NAME@3199..3208 "f32.const"
-            WHITESPACE@3208..3209 " "
-            IMMEDIATE@3209..3222
-              FLOAT@3209..3222 "3.4028234e+38"
-            R_PAREN@3222..3223 ")"
+        PLAIN_INSTR@3198..3223
+          L_PAREN@3198..3199 "("
+          INSTR_NAME@3199..3208 "f32.const"
+          WHITESPACE@3208..3209 " "
+          IMMEDIATE@3209..3222
+            FLOAT@3209..3222 "3.4028234e+38"
+          R_PAREN@3222..3223 ")"
         R_PAREN@3223..3224 ")"
       R_PAREN@3224..3225 ")"
     WHITESPACE@3225..3228 "\n  "
@@ -1225,14 +1192,13 @@ ROOT@0..9339
         L_PAREN@3279..3280 "("
         INSTR_NAME@3280..3299 "i32.reinterpret_f32"
         WHITESPACE@3299..3300 " "
-        OPERAND@3300..3317
-          PLAIN_INSTR@3300..3317
-            L_PAREN@3300..3301 "("
-            INSTR_NAME@3301..3310 "f32.const"
-            WHITESPACE@3310..3311 " "
-            IMMEDIATE@3311..3316
-              FLOAT@3311..3316 "1.e10"
-            R_PAREN@3316..3317 ")"
+        PLAIN_INSTR@3300..3317
+          L_PAREN@3300..3301 "("
+          INSTR_NAME@3301..3310 "f32.const"
+          WHITESPACE@3310..3311 " "
+          IMMEDIATE@3311..3316
+            FLOAT@3311..3316 "1.e10"
+          R_PAREN@3316..3317 ")"
         R_PAREN@3317..3318 ")"
       R_PAREN@3318..3319 ")"
     WHITESPACE@3319..3322 "\n  "
@@ -1261,14 +1227,13 @@ ROOT@0..9339
         L_PAREN@3369..3370 "("
         INSTR_NAME@3370..3389 "i32.reinterpret_f32"
         WHITESPACE@3389..3390 " "
-        OPERAND@3390..3407
-          PLAIN_INSTR@3390..3407
-            L_PAREN@3390..3391 "("
-            INSTR_NAME@3391..3400 "f32.const"
-            WHITESPACE@3400..3401 " "
-            IMMEDIATE@3401..3406
-              INT@3401..3406 "12345"
-            R_PAREN@3406..3407 ")"
+        PLAIN_INSTR@3390..3407
+          L_PAREN@3390..3391 "("
+          INSTR_NAME@3391..3400 "f32.const"
+          WHITESPACE@3400..3401 " "
+          IMMEDIATE@3401..3406
+            INT@3401..3406 "12345"
+          R_PAREN@3406..3407 ")"
         R_PAREN@3407..3408 ")"
       R_PAREN@3408..3409 ")"
     WHITESPACE@3409..3412 "\n  "
@@ -1297,14 +1262,13 @@ ROOT@0..9339
         L_PAREN@3460..3461 "("
         INSTR_NAME@3461..3480 "i32.reinterpret_f32"
         WHITESPACE@3480..3481 " "
-        OPERAND@3481..3520
-          PLAIN_INSTR@3481..3520
-            L_PAREN@3481..3482 "("
-            INSTR_NAME@3482..3491 "f32.const"
-            WHITESPACE@3491..3492 " "
-            IMMEDIATE@3492..3519
-              INT@3492..3519 "100_000_000_000_000_0 ..."
-            R_PAREN@3519..3520 ")"
+        PLAIN_INSTR@3481..3520
+          L_PAREN@3481..3482 "("
+          INSTR_NAME@3482..3491 "f32.const"
+          WHITESPACE@3491..3492 " "
+          IMMEDIATE@3492..3519
+            INT@3492..3519 "100_000_000_000_000_0 ..."
+          R_PAREN@3519..3520 ")"
         R_PAREN@3520..3521 ")"
       R_PAREN@3521..3522 ")"
     WHITESPACE@3522..3525 "\n  "
@@ -1333,14 +1297,13 @@ ROOT@0..9339
         L_PAREN@3573..3574 "("
         INSTR_NAME@3574..3593 "i32.reinterpret_f32"
         WHITESPACE@3593..3594 " "
-        OPERAND@3594..3617
-          PLAIN_INSTR@3594..3617
-            L_PAREN@3594..3595 "("
-            INSTR_NAME@3595..3604 "f32.const"
-            WHITESPACE@3604..3605 " "
-            IMMEDIATE@3605..3616
-              INT@3605..3616 "-2147483648"
-            R_PAREN@3616..3617 ")"
+        PLAIN_INSTR@3594..3617
+          L_PAREN@3594..3595 "("
+          INSTR_NAME@3595..3604 "f32.const"
+          WHITESPACE@3604..3605 " "
+          IMMEDIATE@3605..3616
+            INT@3605..3616 "-2147483648"
+          R_PAREN@3616..3617 ")"
         R_PAREN@3617..3618 ")"
       R_PAREN@3618..3619 ")"
     WHITESPACE@3619..3622 "\n  "
@@ -1369,14 +1332,13 @@ ROOT@0..9339
         L_PAREN@3670..3671 "("
         INSTR_NAME@3671..3690 "i32.reinterpret_f32"
         WHITESPACE@3690..3691 " "
-        OPERAND@3691..3723
-          PLAIN_INSTR@3691..3723
-            L_PAREN@3691..3692 "("
-            INSTR_NAME@3692..3701 "f32.const"
-            WHITESPACE@3701..3702 " "
-            IMMEDIATE@3702..3722
-              INT@3702..3722 "-9223372036854775808"
-            R_PAREN@3722..3723 ")"
+        PLAIN_INSTR@3691..3723
+          L_PAREN@3691..3692 "("
+          INSTR_NAME@3692..3701 "f32.const"
+          WHITESPACE@3701..3702 " "
+          IMMEDIATE@3702..3722
+            INT@3702..3722 "-9223372036854775808"
+          R_PAREN@3722..3723 ")"
         R_PAREN@3723..3724 ")"
       R_PAREN@3724..3725 ")"
     WHITESPACE@3725..3729 "\n\n  "
@@ -1407,14 +1369,13 @@ ROOT@0..9339
         L_PAREN@3842..3843 "("
         INSTR_NAME@3843..3862 "i32.reinterpret_f32"
         WHITESPACE@3862..3863 " "
-        OPERAND@3863..3886
-          PLAIN_INSTR@3863..3886
-            L_PAREN@3863..3864 "("
-            INSTR_NAME@3864..3873 "f32.const"
-            WHITESPACE@3873..3874 " "
-            IMMEDIATE@3874..3885
-              FLOAT@3874..3885 "1.000000119"
-            R_PAREN@3885..3886 ")"
+        PLAIN_INSTR@3863..3886
+          L_PAREN@3863..3864 "("
+          INSTR_NAME@3864..3873 "f32.const"
+          WHITESPACE@3873..3874 " "
+          IMMEDIATE@3874..3885
+            FLOAT@3874..3885 "1.000000119"
+          R_PAREN@3885..3886 ")"
         R_PAREN@3886..3887 ")"
       R_PAREN@3887..3888 ")"
     WHITESPACE@3888..3892 "\n\n  "
@@ -1445,14 +1406,13 @@ ROOT@0..9339
         L_PAREN@3954..3955 "("
         INSTR_NAME@3955..3974 "i64.reinterpret_f64"
         WHITESPACE@3974..3975 " "
-        OPERAND@3975..3990
-          PLAIN_INSTR@3975..3990
-            L_PAREN@3975..3976 "("
-            INSTR_NAME@3976..3985 "f64.const"
-            WHITESPACE@3985..3986 " "
-            IMMEDIATE@3986..3989
-              FLOAT@3986..3989 "nan"
-            R_PAREN@3989..3990 ")"
+        PLAIN_INSTR@3975..3990
+          L_PAREN@3975..3976 "("
+          INSTR_NAME@3976..3985 "f64.const"
+          WHITESPACE@3985..3986 " "
+          IMMEDIATE@3986..3989
+            FLOAT@3986..3989 "nan"
+          R_PAREN@3989..3990 ")"
         R_PAREN@3990..3991 ")"
       R_PAREN@3991..3992 ")"
     WHITESPACE@3992..3995 "\n  "
@@ -1481,14 +1441,13 @@ ROOT@0..9339
         L_PAREN@4042..4043 "("
         INSTR_NAME@4043..4062 "i64.reinterpret_f64"
         WHITESPACE@4062..4063 " "
-        OPERAND@4063..4079
-          PLAIN_INSTR@4063..4079
-            L_PAREN@4063..4064 "("
-            INSTR_NAME@4064..4073 "f64.const"
-            WHITESPACE@4073..4074 " "
-            IMMEDIATE@4074..4078
-              FLOAT@4074..4078 "+nan"
-            R_PAREN@4078..4079 ")"
+        PLAIN_INSTR@4063..4079
+          L_PAREN@4063..4064 "("
+          INSTR_NAME@4064..4073 "f64.const"
+          WHITESPACE@4073..4074 " "
+          IMMEDIATE@4074..4078
+            FLOAT@4074..4078 "+nan"
+          R_PAREN@4078..4079 ")"
         R_PAREN@4079..4080 ")"
       R_PAREN@4080..4081 ")"
     WHITESPACE@4081..4084 "\n  "
@@ -1517,14 +1476,13 @@ ROOT@0..9339
         L_PAREN@4131..4132 "("
         INSTR_NAME@4132..4151 "i64.reinterpret_f64"
         WHITESPACE@4151..4152 " "
-        OPERAND@4152..4168
-          PLAIN_INSTR@4152..4168
-            L_PAREN@4152..4153 "("
-            INSTR_NAME@4153..4162 "f64.const"
-            WHITESPACE@4162..4163 " "
-            IMMEDIATE@4163..4167
-              FLOAT@4163..4167 "-nan"
-            R_PAREN@4167..4168 ")"
+        PLAIN_INSTR@4152..4168
+          L_PAREN@4152..4153 "("
+          INSTR_NAME@4153..4162 "f64.const"
+          WHITESPACE@4162..4163 " "
+          IMMEDIATE@4163..4167
+            FLOAT@4163..4167 "-nan"
+          R_PAREN@4167..4168 ")"
         R_PAREN@4168..4169 ")"
       R_PAREN@4169..4170 ")"
     WHITESPACE@4170..4173 "\n  "
@@ -1553,14 +1511,13 @@ ROOT@0..9339
         L_PAREN@4217..4218 "("
         INSTR_NAME@4218..4237 "i64.reinterpret_f64"
         WHITESPACE@4237..4238 " "
-        OPERAND@4238..4269
-          PLAIN_INSTR@4238..4269
-            L_PAREN@4238..4239 "("
-            INSTR_NAME@4239..4248 "f64.const"
-            WHITESPACE@4248..4249 " "
-            IMMEDIATE@4249..4268
-              FLOAT@4249..4268 "nan:0x8000000000000"
-            R_PAREN@4268..4269 ")"
+        PLAIN_INSTR@4238..4269
+          L_PAREN@4238..4239 "("
+          INSTR_NAME@4239..4248 "f64.const"
+          WHITESPACE@4248..4249 " "
+          IMMEDIATE@4249..4268
+            FLOAT@4249..4268 "nan:0x8000000000000"
+          R_PAREN@4268..4269 ")"
         R_PAREN@4269..4270 ")"
       R_PAREN@4270..4271 ")"
     WHITESPACE@4271..4274 "\n  "
@@ -1589,14 +1546,13 @@ ROOT@0..9339
         L_PAREN@4339..4340 "("
         INSTR_NAME@4340..4359 "i64.reinterpret_f64"
         WHITESPACE@4359..4360 " "
-        OPERAND@4360..4391
-          PLAIN_INSTR@4360..4391
-            L_PAREN@4360..4361 "("
-            INSTR_NAME@4361..4370 "f64.const"
-            WHITESPACE@4370..4371 " "
-            IMMEDIATE@4371..4390
-              FLOAT@4371..4390 "nan:0x4000000000000"
-            R_PAREN@4390..4391 ")"
+        PLAIN_INSTR@4360..4391
+          L_PAREN@4360..4361 "("
+          INSTR_NAME@4361..4370 "f64.const"
+          WHITESPACE@4370..4371 " "
+          IMMEDIATE@4371..4390
+            FLOAT@4371..4390 "nan:0x4000000000000"
+          R_PAREN@4390..4391 ")"
         R_PAREN@4391..4392 ")"
       R_PAREN@4392..4393 ")"
     WHITESPACE@4393..4396 "\n  "
@@ -1625,14 +1581,13 @@ ROOT@0..9339
         L_PAREN@4443..4444 "("
         INSTR_NAME@4444..4463 "i64.reinterpret_f64"
         WHITESPACE@4463..4464 " "
-        OPERAND@4464..4496
-          PLAIN_INSTR@4464..4496
-            L_PAREN@4464..4465 "("
-            INSTR_NAME@4465..4474 "f64.const"
-            WHITESPACE@4474..4475 " "
-            IMMEDIATE@4475..4495
-              FLOAT@4475..4495 "-nan:0xfffffffffffff"
-            R_PAREN@4495..4496 ")"
+        PLAIN_INSTR@4464..4496
+          L_PAREN@4464..4465 "("
+          INSTR_NAME@4465..4474 "f64.const"
+          WHITESPACE@4474..4475 " "
+          IMMEDIATE@4475..4495
+            FLOAT@4475..4495 "-nan:0xfffffffffffff"
+          R_PAREN@4495..4496 ")"
         R_PAREN@4496..4497 ")"
       R_PAREN@4497..4498 ")"
     WHITESPACE@4498..4501 "\n  "
@@ -1661,14 +1616,13 @@ ROOT@0..9339
         L_PAREN@4544..4545 "("
         INSTR_NAME@4545..4564 "i64.reinterpret_f64"
         WHITESPACE@4564..4565 " "
-        OPERAND@4565..4596
-          PLAIN_INSTR@4565..4596
-            L_PAREN@4565..4566 "("
-            INSTR_NAME@4566..4575 "f64.const"
-            WHITESPACE@4575..4576 " "
-            IMMEDIATE@4576..4595
-              FLOAT@4576..4595 "nan:0x0123456789abc"
-            R_PAREN@4595..4596 ")"
+        PLAIN_INSTR@4565..4596
+          L_PAREN@4565..4566 "("
+          INSTR_NAME@4566..4575 "f64.const"
+          WHITESPACE@4575..4576 " "
+          IMMEDIATE@4576..4595
+            FLOAT@4576..4595 "nan:0x0123456789abc"
+          R_PAREN@4595..4596 ")"
         R_PAREN@4596..4597 ")"
       R_PAREN@4597..4598 ")"
     WHITESPACE@4598..4601 "\n  "
@@ -1697,14 +1651,13 @@ ROOT@0..9339
         L_PAREN@4653..4654 "("
         INSTR_NAME@4654..4673 "i64.reinterpret_f64"
         WHITESPACE@4673..4674 " "
-        OPERAND@4674..4706
-          PLAIN_INSTR@4674..4706
-            L_PAREN@4674..4675 "("
-            INSTR_NAME@4675..4684 "f64.const"
-            WHITESPACE@4684..4685 " "
-            IMMEDIATE@4685..4705
-              FLOAT@4685..4705 "+nan:0x3040506070809"
-            R_PAREN@4705..4706 ")"
+        PLAIN_INSTR@4674..4706
+          L_PAREN@4674..4675 "("
+          INSTR_NAME@4675..4684 "f64.const"
+          WHITESPACE@4684..4685 " "
+          IMMEDIATE@4685..4705
+            FLOAT@4685..4705 "+nan:0x3040506070809"
+          R_PAREN@4705..4706 ")"
         R_PAREN@4706..4707 ")"
       R_PAREN@4707..4708 ")"
     WHITESPACE@4708..4711 "\n  "
@@ -1733,14 +1686,13 @@ ROOT@0..9339
         L_PAREN@4763..4764 "("
         INSTR_NAME@4764..4783 "i64.reinterpret_f64"
         WHITESPACE@4783..4784 " "
-        OPERAND@4784..4816
-          PLAIN_INSTR@4784..4816
-            L_PAREN@4784..4785 "("
-            INSTR_NAME@4785..4794 "f64.const"
-            WHITESPACE@4794..4795 " "
-            IMMEDIATE@4795..4815
-              FLOAT@4795..4815 "-nan:0x2abcdef012345"
-            R_PAREN@4815..4816 ")"
+        PLAIN_INSTR@4784..4816
+          L_PAREN@4784..4785 "("
+          INSTR_NAME@4785..4794 "f64.const"
+          WHITESPACE@4794..4795 " "
+          IMMEDIATE@4795..4815
+            FLOAT@4795..4815 "-nan:0x2abcdef012345"
+          R_PAREN@4815..4816 ")"
         R_PAREN@4816..4817 ")"
       R_PAREN@4817..4818 ")"
     WHITESPACE@4818..4821 "\n  "
@@ -1769,14 +1721,13 @@ ROOT@0..9339
         L_PAREN@4864..4865 "("
         INSTR_NAME@4865..4884 "i64.reinterpret_f64"
         WHITESPACE@4884..4885 " "
-        OPERAND@4885..4900
-          PLAIN_INSTR@4885..4900
-            L_PAREN@4885..4886 "("
-            INSTR_NAME@4886..4895 "f64.const"
-            WHITESPACE@4895..4896 " "
-            IMMEDIATE@4896..4899
-              FLOAT@4896..4899 "inf"
-            R_PAREN@4899..4900 ")"
+        PLAIN_INSTR@4885..4900
+          L_PAREN@4885..4886 "("
+          INSTR_NAME@4886..4895 "f64.const"
+          WHITESPACE@4895..4896 " "
+          IMMEDIATE@4896..4899
+            FLOAT@4896..4899 "inf"
+          R_PAREN@4899..4900 ")"
         R_PAREN@4900..4901 ")"
       R_PAREN@4901..4902 ")"
     WHITESPACE@4902..4905 "\n  "
@@ -1805,14 +1756,13 @@ ROOT@0..9339
         L_PAREN@4957..4958 "("
         INSTR_NAME@4958..4977 "i64.reinterpret_f64"
         WHITESPACE@4977..4978 " "
-        OPERAND@4978..4994
-          PLAIN_INSTR@4978..4994
-            L_PAREN@4978..4979 "("
-            INSTR_NAME@4979..4988 "f64.const"
-            WHITESPACE@4988..4989 " "
-            IMMEDIATE@4989..4993
-              FLOAT@4989..4993 "+inf"
-            R_PAREN@4993..4994 ")"
+        PLAIN_INSTR@4978..4994
+          L_PAREN@4978..4979 "("
+          INSTR_NAME@4979..4988 "f64.const"
+          WHITESPACE@4988..4989 " "
+          IMMEDIATE@4989..4993
+            FLOAT@4989..4993 "+inf"
+          R_PAREN@4993..4994 ")"
         R_PAREN@4994..4995 ")"
       R_PAREN@4995..4996 ")"
     WHITESPACE@4996..4999 "\n  "
@@ -1841,14 +1791,13 @@ ROOT@0..9339
         L_PAREN@5051..5052 "("
         INSTR_NAME@5052..5071 "i64.reinterpret_f64"
         WHITESPACE@5071..5072 " "
-        OPERAND@5072..5088
-          PLAIN_INSTR@5072..5088
-            L_PAREN@5072..5073 "("
-            INSTR_NAME@5073..5082 "f64.const"
-            WHITESPACE@5082..5083 " "
-            IMMEDIATE@5083..5087
-              FLOAT@5083..5087 "-inf"
-            R_PAREN@5087..5088 ")"
+        PLAIN_INSTR@5072..5088
+          L_PAREN@5072..5073 "("
+          INSTR_NAME@5073..5082 "f64.const"
+          WHITESPACE@5082..5083 " "
+          IMMEDIATE@5083..5087
+            FLOAT@5083..5087 "-inf"
+          R_PAREN@5087..5088 ")"
         R_PAREN@5088..5089 ")"
       R_PAREN@5089..5090 ")"
     WHITESPACE@5090..5094 "\n\n  "
@@ -1879,14 +1828,13 @@ ROOT@0..9339
         L_PAREN@5150..5151 "("
         INSTR_NAME@5151..5170 "i64.reinterpret_f64"
         WHITESPACE@5170..5171 " "
-        OPERAND@5171..5190
-          PLAIN_INSTR@5171..5190
-            L_PAREN@5171..5172 "("
-            INSTR_NAME@5172..5181 "f64.const"
-            WHITESPACE@5181..5182 " "
-            IMMEDIATE@5182..5189
-              FLOAT@5182..5189 "0x0.0p0"
-            R_PAREN@5189..5190 ")"
+        PLAIN_INSTR@5171..5190
+          L_PAREN@5171..5172 "("
+          INSTR_NAME@5172..5181 "f64.const"
+          WHITESPACE@5181..5182 " "
+          IMMEDIATE@5182..5189
+            FLOAT@5182..5189 "0x0.0p0"
+          R_PAREN@5189..5190 ")"
         R_PAREN@5190..5191 ")"
       R_PAREN@5191..5192 ")"
     WHITESPACE@5192..5195 "\n  "
@@ -1915,14 +1863,13 @@ ROOT@0..9339
         L_PAREN@5243..5244 "("
         INSTR_NAME@5244..5263 "i64.reinterpret_f64"
         WHITESPACE@5263..5264 " "
-        OPERAND@5264..5284
-          PLAIN_INSTR@5264..5284
-            L_PAREN@5264..5265 "("
-            INSTR_NAME@5265..5274 "f64.const"
-            WHITESPACE@5274..5275 " "
-            IMMEDIATE@5275..5283
-              FLOAT@5275..5283 "+0x0.0p0"
-            R_PAREN@5283..5284 ")"
+        PLAIN_INSTR@5264..5284
+          L_PAREN@5264..5265 "("
+          INSTR_NAME@5265..5274 "f64.const"
+          WHITESPACE@5274..5275 " "
+          IMMEDIATE@5275..5283
+            FLOAT@5275..5283 "+0x0.0p0"
+          R_PAREN@5283..5284 ")"
         R_PAREN@5284..5285 ")"
       R_PAREN@5285..5286 ")"
     WHITESPACE@5286..5289 "\n  "
@@ -1951,14 +1898,13 @@ ROOT@0..9339
         L_PAREN@5337..5338 "("
         INSTR_NAME@5338..5357 "i64.reinterpret_f64"
         WHITESPACE@5357..5358 " "
-        OPERAND@5358..5378
-          PLAIN_INSTR@5358..5378
-            L_PAREN@5358..5359 "("
-            INSTR_NAME@5359..5368 "f64.const"
-            WHITESPACE@5368..5369 " "
-            IMMEDIATE@5369..5377
-              FLOAT@5369..5377 "-0x0.0p0"
-            R_PAREN@5377..5378 ")"
+        PLAIN_INSTR@5358..5378
+          L_PAREN@5358..5359 "("
+          INSTR_NAME@5359..5368 "f64.const"
+          WHITESPACE@5368..5369 " "
+          IMMEDIATE@5369..5377
+            FLOAT@5369..5377 "-0x0.0p0"
+          R_PAREN@5377..5378 ")"
         R_PAREN@5378..5379 ")"
       R_PAREN@5379..5380 ")"
     WHITESPACE@5380..5383 "\n  "
@@ -1987,14 +1933,13 @@ ROOT@0..9339
         L_PAREN@5422..5423 "("
         INSTR_NAME@5423..5442 "i64.reinterpret_f64"
         WHITESPACE@5442..5443 " "
-        OPERAND@5443..5475
-          PLAIN_INSTR@5443..5475
-            L_PAREN@5443..5444 "("
-            INSTR_NAME@5444..5453 "f64.const"
-            WHITESPACE@5453..5454 " "
-            IMMEDIATE@5454..5474
-              FLOAT@5454..5474 "0x1.921fb54442d18p+2"
-            R_PAREN@5474..5475 ")"
+        PLAIN_INSTR@5443..5475
+          L_PAREN@5443..5444 "("
+          INSTR_NAME@5444..5453 "f64.const"
+          WHITESPACE@5453..5454 " "
+          IMMEDIATE@5454..5474
+            FLOAT@5454..5474 "0x1.921fb54442d18p+2"
+          R_PAREN@5474..5475 ")"
         R_PAREN@5475..5476 ")"
       R_PAREN@5476..5477 ")"
     WHITESPACE@5477..5480 "\n  "
@@ -2023,14 +1968,13 @@ ROOT@0..9339
         L_PAREN@5527..5528 "("
         INSTR_NAME@5528..5547 "i64.reinterpret_f64"
         WHITESPACE@5547..5548 " "
-        OPERAND@5548..5583
-          PLAIN_INSTR@5548..5583
-            L_PAREN@5548..5549 "("
-            INSTR_NAME@5549..5558 "f64.const"
-            WHITESPACE@5558..5559 " "
-            IMMEDIATE@5559..5582
-              FLOAT@5559..5582 "0x0.0000000000001p-1022"
-            R_PAREN@5582..5583 ")"
+        PLAIN_INSTR@5548..5583
+          L_PAREN@5548..5549 "("
+          INSTR_NAME@5549..5558 "f64.const"
+          WHITESPACE@5558..5559 " "
+          IMMEDIATE@5559..5582
+            FLOAT@5559..5582 "0x0.0000000000001p-1022"
+          R_PAREN@5582..5583 ")"
         R_PAREN@5583..5584 ")"
       R_PAREN@5584..5585 ")"
     WHITESPACE@5585..5588 "\n  "
@@ -2059,14 +2003,13 @@ ROOT@0..9339
         L_PAREN@5633..5634 "("
         INSTR_NAME@5634..5653 "i64.reinterpret_f64"
         WHITESPACE@5653..5654 " "
-        OPERAND@5654..5675
-          PLAIN_INSTR@5654..5675
-            L_PAREN@5654..5655 "("
-            INSTR_NAME@5655..5664 "f64.const"
-            WHITESPACE@5664..5665 " "
-            IMMEDIATE@5665..5674
-              FLOAT@5665..5674 "0x1p-1022"
-            R_PAREN@5674..5675 ")"
+        PLAIN_INSTR@5654..5675
+          L_PAREN@5654..5655 "("
+          INSTR_NAME@5655..5664 "f64.const"
+          WHITESPACE@5664..5665 " "
+          IMMEDIATE@5665..5674
+            FLOAT@5665..5674 "0x1p-1022"
+          R_PAREN@5674..5675 ")"
         R_PAREN@5675..5676 ")"
       R_PAREN@5676..5677 ")"
     WHITESPACE@5677..5680 "\n  "
@@ -2095,14 +2038,13 @@ ROOT@0..9339
         L_PAREN@5728..5729 "("
         INSTR_NAME@5729..5748 "i64.reinterpret_f64"
         WHITESPACE@5748..5749 " "
-        OPERAND@5749..5784
-          PLAIN_INSTR@5749..5784
-            L_PAREN@5749..5750 "("
-            INSTR_NAME@5750..5759 "f64.const"
-            WHITESPACE@5759..5760 " "
-            IMMEDIATE@5760..5783
-              FLOAT@5760..5783 "0x0.fffffffffffffp-1022"
-            R_PAREN@5783..5784 ")"
+        PLAIN_INSTR@5749..5784
+          L_PAREN@5749..5750 "("
+          INSTR_NAME@5750..5759 "f64.const"
+          WHITESPACE@5759..5760 " "
+          IMMEDIATE@5760..5783
+            FLOAT@5760..5783 "0x0.fffffffffffffp-1022"
+          R_PAREN@5783..5784 ")"
         R_PAREN@5784..5785 ")"
       R_PAREN@5785..5786 ")"
     WHITESPACE@5786..5789 "\n  "
@@ -2131,14 +2073,13 @@ ROOT@0..9339
         L_PAREN@5834..5835 "("
         INSTR_NAME@5835..5854 "i64.reinterpret_f64"
         WHITESPACE@5854..5855 " "
-        OPERAND@5855..5890
-          PLAIN_INSTR@5855..5890
-            L_PAREN@5855..5856 "("
-            INSTR_NAME@5856..5865 "f64.const"
-            WHITESPACE@5865..5866 " "
-            IMMEDIATE@5866..5889
-              FLOAT@5866..5889 "0x1.fffffffffffffp+1023"
-            R_PAREN@5889..5890 ")"
+        PLAIN_INSTR@5855..5890
+          L_PAREN@5855..5856 "("
+          INSTR_NAME@5856..5865 "f64.const"
+          WHITESPACE@5865..5866 " "
+          IMMEDIATE@5866..5889
+            FLOAT@5866..5889 "0x1.fffffffffffffp+1023"
+          R_PAREN@5889..5890 ")"
         R_PAREN@5890..5891 ")"
       R_PAREN@5891..5892 ")"
     WHITESPACE@5892..5895 "\n  "
@@ -2167,14 +2108,13 @@ ROOT@0..9339
         L_PAREN@5942..5943 "("
         INSTR_NAME@5943..5962 "i64.reinterpret_f64"
         WHITESPACE@5962..5963 " "
-        OPERAND@5963..5983
-          PLAIN_INSTR@5963..5983
-            L_PAREN@5963..5964 "("
-            INSTR_NAME@5964..5973 "f64.const"
-            WHITESPACE@5973..5974 " "
-            IMMEDIATE@5974..5982
-              FLOAT@5974..5982 "0x1.p100"
-            R_PAREN@5982..5983 ")"
+        PLAIN_INSTR@5963..5983
+          L_PAREN@5963..5964 "("
+          INSTR_NAME@5964..5973 "f64.const"
+          WHITESPACE@5973..5974 " "
+          IMMEDIATE@5974..5982
+            FLOAT@5974..5982 "0x1.p100"
+          R_PAREN@5982..5983 ")"
         R_PAREN@5983..5984 ")"
       R_PAREN@5984..5985 ")"
     WHITESPACE@5985..5988 "\n  "
@@ -2203,14 +2143,13 @@ ROOT@0..9339
         L_PAREN@6031..6032 "("
         INSTR_NAME@6032..6051 "i64.reinterpret_f64"
         WHITESPACE@6051..6052 " "
-        OPERAND@6052..6071
-          PLAIN_INSTR@6052..6071
-            L_PAREN@6052..6053 "("
-            INSTR_NAME@6053..6062 "f64.const"
-            WHITESPACE@6062..6063 " "
-            IMMEDIATE@6063..6070
-              INT@6063..6070 "0x12345"
-            R_PAREN@6070..6071 ")"
+        PLAIN_INSTR@6052..6071
+          L_PAREN@6052..6053 "("
+          INSTR_NAME@6053..6062 "f64.const"
+          WHITESPACE@6062..6063 " "
+          IMMEDIATE@6063..6070
+            INT@6063..6070 "0x12345"
+          R_PAREN@6070..6071 ")"
         R_PAREN@6071..6072 ")"
       R_PAREN@6072..6073 ")"
     WHITESPACE@6073..6076 "\n  "
@@ -2239,14 +2178,13 @@ ROOT@0..9339
         L_PAREN@6120..6121 "("
         INSTR_NAME@6121..6140 "i64.reinterpret_f64"
         WHITESPACE@6140..6141 " "
-        OPERAND@6141..6181
-          PLAIN_INSTR@6141..6181
-            L_PAREN@6141..6142 "("
-            INSTR_NAME@6142..6151 "f64.const"
-            WHITESPACE@6151..6152 " "
-            IMMEDIATE@6152..6180
-              INT@6152..6180 "0x1_0000_0000_0000_00 ..."
-            R_PAREN@6180..6181 ")"
+        PLAIN_INSTR@6141..6181
+          L_PAREN@6141..6142 "("
+          INSTR_NAME@6142..6151 "f64.const"
+          WHITESPACE@6151..6152 " "
+          IMMEDIATE@6152..6180
+            INT@6152..6180 "0x1_0000_0000_0000_00 ..."
+          R_PAREN@6180..6181 ")"
         R_PAREN@6181..6182 ")"
       R_PAREN@6182..6183 ")"
     WHITESPACE@6183..6186 "\n  "
@@ -2275,14 +2213,13 @@ ROOT@0..9339
         L_PAREN@6230..6231 "("
         INSTR_NAME@6231..6250 "i64.reinterpret_f64"
         WHITESPACE@6250..6251 " "
-        OPERAND@6251..6275
-          PLAIN_INSTR@6251..6275
-            L_PAREN@6251..6252 "("
-            INSTR_NAME@6252..6261 "f64.const"
-            WHITESPACE@6261..6262 " "
-            IMMEDIATE@6262..6274
-              INT@6262..6274 "-0x8000_0000"
-            R_PAREN@6274..6275 ")"
+        PLAIN_INSTR@6251..6275
+          L_PAREN@6251..6252 "("
+          INSTR_NAME@6252..6261 "f64.const"
+          WHITESPACE@6261..6262 " "
+          IMMEDIATE@6262..6274
+            INT@6262..6274 "-0x8000_0000"
+          R_PAREN@6274..6275 ")"
         R_PAREN@6275..6276 ")"
       R_PAREN@6276..6277 ")"
     WHITESPACE@6277..6280 "\n  "
@@ -2311,14 +2248,13 @@ ROOT@0..9339
         L_PAREN@6324..6325 "("
         INSTR_NAME@6325..6344 "i64.reinterpret_f64"
         WHITESPACE@6344..6345 " "
-        OPERAND@6345..6379
-          PLAIN_INSTR@6345..6379
-            L_PAREN@6345..6346 "("
-            INSTR_NAME@6346..6355 "f64.const"
-            WHITESPACE@6355..6356 " "
-            IMMEDIATE@6356..6378
-              INT@6356..6378 "-0x8000_0000_0000_0000"
-            R_PAREN@6378..6379 ")"
+        PLAIN_INSTR@6345..6379
+          L_PAREN@6345..6346 "("
+          INSTR_NAME@6346..6355 "f64.const"
+          WHITESPACE@6355..6356 " "
+          IMMEDIATE@6356..6378
+            INT@6356..6378 "-0x8000_0000_0000_0000"
+          R_PAREN@6378..6379 ")"
         R_PAREN@6379..6380 ")"
       R_PAREN@6380..6381 ")"
     WHITESPACE@6381..6385 "\n\n  "
@@ -2349,14 +2285,13 @@ ROOT@0..9339
         L_PAREN@6463..6464 "("
         INSTR_NAME@6464..6483 "i64.reinterpret_f64"
         WHITESPACE@6483..6484 " "
-        OPERAND@6484..6501
-          PLAIN_INSTR@6484..6501
-            L_PAREN@6484..6485 "("
-            INSTR_NAME@6485..6494 "f64.const"
-            WHITESPACE@6494..6495 " "
-            IMMEDIATE@6495..6500
-              FLOAT@6495..6500 "0.0e0"
-            R_PAREN@6500..6501 ")"
+        PLAIN_INSTR@6484..6501
+          L_PAREN@6484..6485 "("
+          INSTR_NAME@6485..6494 "f64.const"
+          WHITESPACE@6494..6495 " "
+          IMMEDIATE@6495..6500
+            FLOAT@6495..6500 "0.0e0"
+          R_PAREN@6500..6501 ")"
         R_PAREN@6501..6502 ")"
       R_PAREN@6502..6503 ")"
     WHITESPACE@6503..6506 "\n  "
@@ -2385,14 +2320,13 @@ ROOT@0..9339
         L_PAREN@6558..6559 "("
         INSTR_NAME@6559..6578 "i64.reinterpret_f64"
         WHITESPACE@6578..6579 " "
-        OPERAND@6579..6597
-          PLAIN_INSTR@6579..6597
-            L_PAREN@6579..6580 "("
-            INSTR_NAME@6580..6589 "f64.const"
-            WHITESPACE@6589..6590 " "
-            IMMEDIATE@6590..6596
-              FLOAT@6590..6596 "+0.0e0"
-            R_PAREN@6596..6597 ")"
+        PLAIN_INSTR@6579..6597
+          L_PAREN@6579..6580 "("
+          INSTR_NAME@6580..6589 "f64.const"
+          WHITESPACE@6589..6590 " "
+          IMMEDIATE@6590..6596
+            FLOAT@6590..6596 "+0.0e0"
+          R_PAREN@6596..6597 ")"
         R_PAREN@6597..6598 ")"
       R_PAREN@6598..6599 ")"
     WHITESPACE@6599..6602 "\n  "
@@ -2421,14 +2355,13 @@ ROOT@0..9339
         L_PAREN@6654..6655 "("
         INSTR_NAME@6655..6674 "i64.reinterpret_f64"
         WHITESPACE@6674..6675 " "
-        OPERAND@6675..6693
-          PLAIN_INSTR@6675..6693
-            L_PAREN@6675..6676 "("
-            INSTR_NAME@6676..6685 "f64.const"
-            WHITESPACE@6685..6686 " "
-            IMMEDIATE@6686..6692
-              FLOAT@6686..6692 "-0.0e0"
-            R_PAREN@6692..6693 ")"
+        PLAIN_INSTR@6675..6693
+          L_PAREN@6675..6676 "("
+          INSTR_NAME@6676..6685 "f64.const"
+          WHITESPACE@6685..6686 " "
+          IMMEDIATE@6686..6692
+            FLOAT@6686..6692 "-0.0e0"
+          R_PAREN@6692..6693 ")"
         R_PAREN@6693..6694 ")"
       R_PAREN@6694..6695 ")"
     WHITESPACE@6695..6698 "\n  "
@@ -2457,14 +2390,13 @@ ROOT@0..9339
         L_PAREN@6741..6742 "("
         INSTR_NAME@6742..6761 "i64.reinterpret_f64"
         WHITESPACE@6761..6762 " "
-        OPERAND@6762..6793
-          PLAIN_INSTR@6762..6793
-            L_PAREN@6762..6763 "("
-            INSTR_NAME@6763..6772 "f64.const"
-            WHITESPACE@6772..6773 " "
-            IMMEDIATE@6773..6792
-              FLOAT@6773..6792 "6.28318530717958623"
-            R_PAREN@6792..6793 ")"
+        PLAIN_INSTR@6762..6793
+          L_PAREN@6762..6763 "("
+          INSTR_NAME@6763..6772 "f64.const"
+          WHITESPACE@6772..6773 " "
+          IMMEDIATE@6773..6792
+            FLOAT@6773..6792 "6.28318530717958623"
+          R_PAREN@6792..6793 ")"
         R_PAREN@6793..6794 ")"
       R_PAREN@6794..6795 ")"
     WHITESPACE@6795..6798 "\n  "
@@ -2493,14 +2425,13 @@ ROOT@0..9339
         L_PAREN@6849..6850 "("
         INSTR_NAME@6850..6869 "i64.reinterpret_f64"
         WHITESPACE@6869..6870 " "
-        OPERAND@6870..6894
-          PLAIN_INSTR@6870..6894
-            L_PAREN@6870..6871 "("
-            INSTR_NAME@6871..6880 "f64.const"
-            WHITESPACE@6880..6881 " "
-            IMMEDIATE@6881..6893
-              FLOAT@6881..6893 "4.94066e-324"
-            R_PAREN@6893..6894 ")"
+        PLAIN_INSTR@6870..6894
+          L_PAREN@6870..6871 "("
+          INSTR_NAME@6871..6880 "f64.const"
+          WHITESPACE@6880..6881 " "
+          IMMEDIATE@6881..6893
+            FLOAT@6881..6893 "4.94066e-324"
+          R_PAREN@6893..6894 ")"
         R_PAREN@6894..6895 ")"
       R_PAREN@6895..6896 ")"
     WHITESPACE@6896..6899 "\n  "
@@ -2529,14 +2460,13 @@ ROOT@0..9339
         L_PAREN@6948..6949 "("
         INSTR_NAME@6949..6968 "i64.reinterpret_f64"
         WHITESPACE@6968..6969 " "
-        OPERAND@6969..7004
-          PLAIN_INSTR@6969..7004
-            L_PAREN@6969..6970 "("
-            INSTR_NAME@6970..6979 "f64.const"
-            WHITESPACE@6979..6980 " "
-            IMMEDIATE@6980..7003
-              FLOAT@6980..7003 "2.2250738585072012e-308"
-            R_PAREN@7003..7004 ")"
+        PLAIN_INSTR@6969..7004
+          L_PAREN@6969..6970 "("
+          INSTR_NAME@6970..6979 "f64.const"
+          WHITESPACE@6979..6980 " "
+          IMMEDIATE@6980..7003
+            FLOAT@6980..7003 "2.2250738585072012e-308"
+          R_PAREN@7003..7004 ")"
         R_PAREN@7004..7005 ")"
       R_PAREN@7005..7006 ")"
     WHITESPACE@7006..7009 "\n  "
@@ -2565,14 +2495,13 @@ ROOT@0..9339
         L_PAREN@7061..7062 "("
         INSTR_NAME@7062..7081 "i64.reinterpret_f64"
         WHITESPACE@7081..7082 " "
-        OPERAND@7082..7117
-          PLAIN_INSTR@7082..7117
-            L_PAREN@7082..7083 "("
-            INSTR_NAME@7083..7092 "f64.const"
-            WHITESPACE@7092..7093 " "
-            IMMEDIATE@7093..7116
-              FLOAT@7093..7116 "2.2250738585072011e-308"
-            R_PAREN@7116..7117 ")"
+        PLAIN_INSTR@7082..7117
+          L_PAREN@7082..7083 "("
+          INSTR_NAME@7083..7092 "f64.const"
+          WHITESPACE@7092..7093 " "
+          IMMEDIATE@7093..7116
+            FLOAT@7093..7116 "2.2250738585072011e-308"
+          R_PAREN@7116..7117 ")"
         R_PAREN@7117..7118 ")"
       R_PAREN@7118..7119 ")"
     WHITESPACE@7119..7122 "\n  "
@@ -2601,14 +2530,13 @@ ROOT@0..9339
         L_PAREN@7171..7172 "("
         INSTR_NAME@7172..7191 "i64.reinterpret_f64"
         WHITESPACE@7191..7192 " "
-        OPERAND@7192..7227
-          PLAIN_INSTR@7192..7227
-            L_PAREN@7192..7193 "("
-            INSTR_NAME@7193..7202 "f64.const"
-            WHITESPACE@7202..7203 " "
-            IMMEDIATE@7203..7226
-              FLOAT@7203..7226 "1.7976931348623157e+308"
-            R_PAREN@7226..7227 ")"
+        PLAIN_INSTR@7192..7227
+          L_PAREN@7192..7193 "("
+          INSTR_NAME@7193..7202 "f64.const"
+          WHITESPACE@7202..7203 " "
+          IMMEDIATE@7203..7226
+            FLOAT@7203..7226 "1.7976931348623157e+308"
+          R_PAREN@7226..7227 ")"
         R_PAREN@7227..7228 ")"
       R_PAREN@7228..7229 ")"
     WHITESPACE@7229..7232 "\n  "
@@ -2637,14 +2565,13 @@ ROOT@0..9339
         L_PAREN@7283..7284 "("
         INSTR_NAME@7284..7303 "i64.reinterpret_f64"
         WHITESPACE@7303..7304 " "
-        OPERAND@7304..7322
-          PLAIN_INSTR@7304..7322
-            L_PAREN@7304..7305 "("
-            INSTR_NAME@7305..7314 "f64.const"
-            WHITESPACE@7314..7315 " "
-            IMMEDIATE@7315..7321
-              FLOAT@7315..7321 "1.e100"
-            R_PAREN@7321..7322 ")"
+        PLAIN_INSTR@7304..7322
+          L_PAREN@7304..7305 "("
+          INSTR_NAME@7305..7314 "f64.const"
+          WHITESPACE@7314..7315 " "
+          IMMEDIATE@7315..7321
+            FLOAT@7315..7321 "1.e100"
+          R_PAREN@7321..7322 ")"
         R_PAREN@7322..7323 ")"
       R_PAREN@7323..7324 ")"
     WHITESPACE@7324..7327 "\n  "
@@ -2673,14 +2600,13 @@ ROOT@0..9339
         L_PAREN@7374..7375 "("
         INSTR_NAME@7375..7394 "i64.reinterpret_f64"
         WHITESPACE@7394..7395 " "
-        OPERAND@7395..7412
-          PLAIN_INSTR@7395..7412
-            L_PAREN@7395..7396 "("
-            INSTR_NAME@7396..7405 "f64.const"
-            WHITESPACE@7405..7406 " "
-            IMMEDIATE@7406..7411
-              INT@7406..7411 "12345"
-            R_PAREN@7411..7412 ")"
+        PLAIN_INSTR@7395..7412
+          L_PAREN@7395..7396 "("
+          INSTR_NAME@7396..7405 "f64.const"
+          WHITESPACE@7405..7406 " "
+          IMMEDIATE@7406..7411
+            INT@7406..7411 "12345"
+          R_PAREN@7411..7412 ")"
         R_PAREN@7412..7413 ")"
       R_PAREN@7413..7414 ")"
     WHITESPACE@7414..7417 "\n  "
@@ -2709,14 +2635,13 @@ ROOT@0..9339
         L_PAREN@7465..7466 "("
         INSTR_NAME@7466..7485 "i64.reinterpret_f64"
         WHITESPACE@7485..7486 " "
-        OPERAND@7486..7525
-          PLAIN_INSTR@7486..7525
-            L_PAREN@7486..7487 "("
-            INSTR_NAME@7487..7496 "f64.const"
-            WHITESPACE@7496..7497 " "
-            IMMEDIATE@7497..7524
-              INT@7497..7524 "100_000_000_000_000_0 ..."
-            R_PAREN@7524..7525 ")"
+        PLAIN_INSTR@7486..7525
+          L_PAREN@7486..7487 "("
+          INSTR_NAME@7487..7496 "f64.const"
+          WHITESPACE@7496..7497 " "
+          IMMEDIATE@7497..7524
+            INT@7497..7524 "100_000_000_000_000_0 ..."
+          R_PAREN@7524..7525 ")"
         R_PAREN@7525..7526 ")"
       R_PAREN@7526..7527 ")"
     WHITESPACE@7527..7530 "\n  "
@@ -2745,14 +2670,13 @@ ROOT@0..9339
         L_PAREN@7578..7579 "("
         INSTR_NAME@7579..7598 "i64.reinterpret_f64"
         WHITESPACE@7598..7599 " "
-        OPERAND@7599..7622
-          PLAIN_INSTR@7599..7622
-            L_PAREN@7599..7600 "("
-            INSTR_NAME@7600..7609 "f64.const"
-            WHITESPACE@7609..7610 " "
-            IMMEDIATE@7610..7621
-              INT@7610..7621 "-2147483648"
-            R_PAREN@7621..7622 ")"
+        PLAIN_INSTR@7599..7622
+          L_PAREN@7599..7600 "("
+          INSTR_NAME@7600..7609 "f64.const"
+          WHITESPACE@7609..7610 " "
+          IMMEDIATE@7610..7621
+            INT@7610..7621 "-2147483648"
+          R_PAREN@7621..7622 ")"
         R_PAREN@7622..7623 ")"
       R_PAREN@7623..7624 ")"
     WHITESPACE@7624..7627 "\n  "
@@ -2781,14 +2705,13 @@ ROOT@0..9339
         L_PAREN@7675..7676 "("
         INSTR_NAME@7676..7695 "i64.reinterpret_f64"
         WHITESPACE@7695..7696 " "
-        OPERAND@7696..7728
-          PLAIN_INSTR@7696..7728
-            L_PAREN@7696..7697 "("
-            INSTR_NAME@7697..7706 "f64.const"
-            WHITESPACE@7706..7707 " "
-            IMMEDIATE@7707..7727
-              INT@7707..7727 "-9223372036854775808"
-            R_PAREN@7727..7728 ")"
+        PLAIN_INSTR@7696..7728
+          L_PAREN@7696..7697 "("
+          INSTR_NAME@7697..7706 "f64.const"
+          WHITESPACE@7706..7707 " "
+          IMMEDIATE@7707..7727
+            INT@7707..7727 "-9223372036854775808"
+          R_PAREN@7727..7728 ")"
         R_PAREN@7728..7729 ")"
       R_PAREN@7729..7730 ")"
     WHITESPACE@7730..7734 "\n\n  "
@@ -2819,14 +2742,13 @@ ROOT@0..9339
         L_PAREN@7847..7848 "("
         INSTR_NAME@7848..7867 "i64.reinterpret_f64"
         WHITESPACE@7867..7868 " "
-        OPERAND@7868..7891
-          PLAIN_INSTR@7868..7891
-            L_PAREN@7868..7869 "("
-            INSTR_NAME@7869..7878 "f64.const"
-            WHITESPACE@7878..7879 " "
-            IMMEDIATE@7879..7890
-              FLOAT@7879..7890 "1.000000119"
-            R_PAREN@7890..7891 ")"
+        PLAIN_INSTR@7868..7891
+          L_PAREN@7868..7869 "("
+          INSTR_NAME@7869..7878 "f64.const"
+          WHITESPACE@7878..7879 " "
+          IMMEDIATE@7879..7890
+            FLOAT@7879..7890 "1.000000119"
+          R_PAREN@7890..7891 ")"
         R_PAREN@7891..7892 ")"
       R_PAREN@7892..7893 ")"
     WHITESPACE@7893..7897 "\n\n  "

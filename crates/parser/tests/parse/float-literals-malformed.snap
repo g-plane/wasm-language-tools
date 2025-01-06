@@ -644,229 +644,229 @@ ROOT@0..1361
     R_PAREN@1359..1360 ")"
   WHITESPACE@1360..1361 "\n"
 
-error: expected operand
+error: expected instruction
   ┌─ float-literals-malformed.wat:2:26
   │
 2 │   (global f32 (f32.const _100))
   │                          ^^^^
 
-error: expected operand
+error: expected instruction
   ┌─ float-literals-malformed.wat:3:26
   │
 3 │   (global f32 (f32.const +_100))
   │                          ^^^^^
 
-error: expected operand
+error: expected instruction
   ┌─ float-literals-malformed.wat:4:26
   │
 4 │   (global f32 (f32.const -_100))
   │                          ^^^^^
 
-error: expected operand
+error: expected instruction
   ┌─ float-literals-malformed.wat:5:26
   │
 5 │   (global f32 (f32.const 99_))
   │                          ^^^
 
-error: expected operand
+error: expected instruction
   ┌─ float-literals-malformed.wat:6:26
   │
 6 │   (global f32 (f32.const _1.0))
   │                          ^^^^
 
-error: expected operand
+error: expected instruction
   ┌─ float-literals-malformed.wat:7:26
   │
 7 │   (global f32 (f32.const 1.0_))
   │                          ^^^^
 
-error: expected operand
+error: expected instruction
   ┌─ float-literals-malformed.wat:8:26
   │
 8 │   (global f32 (f32.const 1_.0))
   │                          ^^^^
 
-error: expected operand
+error: expected instruction
   ┌─ float-literals-malformed.wat:9:26
   │
 9 │   (global f32 (f32.const 1._0))
   │                          ^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:10:26
    │
 10 │   (global f32 (f32.const _1e1))
    │                          ^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:11:26
    │
 11 │   (global f32 (f32.const 1e1_))
    │                          ^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:12:26
    │
 12 │   (global f32 (f32.const 1_e1))
    │                          ^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:13:26
    │
 13 │   (global f32 (f32.const 1e_1))
    │                          ^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:14:26
    │
 14 │   (global f32 (f32.const _1.0e1))
    │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:15:26
    │
 15 │   (global f32 (f32.const 1.0e1_))
    │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:16:26
    │
 16 │   (global f32 (f32.const 1.0_e1))
    │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:17:26
    │
 17 │   (global f32 (f32.const 1.0e_1))
    │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:18:26
    │
 18 │   (global f32 (f32.const 1.0e+_1))
    │                          ^^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:19:26
    │
 19 │   (global f32 (f32.const 1.0e_+1))
    │                          ^^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:20:26
    │
 20 │   (global f32 (f32.const _0x100))
    │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:21:26
    │
 21 │   (global f32 (f32.const 0_x100))
    │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:22:26
    │
 22 │   (global f32 (f32.const 0x_100))
    │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:23:26
    │
 23 │   (global f32 (f32.const 0x00_))
    │                          ^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:25:26
    │
 25 │   (global f32 (f32.const 0x_1.0))
    │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:26:26
    │
 26 │   (global f32 (f32.const 0x1.0_))
    │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:27:26
    │
 27 │   (global f32 (f32.const 0x1_.0))
    │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:28:26
    │
 28 │   (global f32 (f32.const 0x1._0))
    │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:29:26
    │
 29 │   (global f32 (f32.const 0x_1p1))
    │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:30:26
    │
 30 │   (global f32 (f32.const 0x1p1_))
    │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:31:26
    │
 31 │   (global f32 (f32.const 0x1_p1))
    │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:32:26
    │
 32 │   (global f32 (f32.const 0x1p_1))
    │                          ^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:33:26
    │
 33 │   (global f32 (f32.const 0x_1.0p1))
    │                          ^^^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:34:26
    │
 34 │   (global f32 (f32.const 0x1.0p1_))
    │                          ^^^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:35:26
    │
 35 │   (global f32 (f32.const 0x1.0_p1))
    │                          ^^^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:36:26
    │
 36 │   (global f32 (f32.const 0x1.0p_1))
    │                          ^^^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:37:26
    │
 37 │   (global f32 (f32.const 0x1.0p+_1))
    │                          ^^^^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:38:26
    │
 38 │   (global f32 (f32.const 0x1.0p_+1))
    │                          ^^^^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:39:33
    │
 39 │   (func (result i32) (i32.const nan:arithmetic))
    │                                 ^^^^^^^^^^^^^^
 
-error: expected operand
+error: expected instruction
    ┌─ float-literals-malformed.wat:40:33
    │
 40 │   (func (result i32) (i32.const nan:canonical))
