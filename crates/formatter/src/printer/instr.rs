@@ -354,16 +354,6 @@ impl DocGen for Instr {
     }
 }
 
-impl DocGen for Operand {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        if let Some(instr) = self.instr() {
-            instr.doc(ctx)
-        } else {
-            Doc::nil()
-        }
-    }
-}
-
 impl DocGen for PlainInstr {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         let mut docs = Vec::with_capacity(2);

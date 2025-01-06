@@ -39,7 +39,6 @@ pub(crate) fn format_node(node: SyntaxNode, ctx: &Ctx) -> Option<Doc<'static>> {
         SyntaxKind::BLOCK_IF_THEN => BlockIfThen::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::BLOCK_IF_ELSE => BlockIfElse::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::IMMEDIATE => Immediate::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::OPERAND => Operand::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::TYPE_USE => TypeUse::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::LIMITS => Limits::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::IMPORT => Import::cast(node).map(|node| node.doc(ctx)),
