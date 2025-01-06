@@ -25,7 +25,7 @@ ROOT@0..44
   WHITESPACE@43..44 "\n"
 
 error: expected operand
-  ┌─ names-malformed.wat:3:17
+  ┌─ names-malformed.wat:3:16
   │
 3 │     (local.get $)
-  │                 ^
+  │                ^

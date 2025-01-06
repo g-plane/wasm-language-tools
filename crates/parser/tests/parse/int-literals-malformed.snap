@@ -82,7 +82,7 @@ ROOT@0..346
         L_PAREN@151..152 "("
         INSTR_NAME@152..161 "i32.const"
         WHITESPACE@161..162 " "
-        OPERAND@162..168
+        IMMEDIATE@162..168
           INT@162..168 "1__000"
         R_PAREN@168..169 ")"
       R_PAREN@169..170 ")"
@@ -163,7 +163,7 @@ ROOT@0..346
         L_PAREN@320..321 "("
         INSTR_NAME@321..330 "i32.const"
         WHITESPACE@330..331 " "
-        OPERAND@331..341
+        IMMEDIATE@331..341
           INT@331..341 "0xff__ffff"
         R_PAREN@341..342 ")"
       R_PAREN@342..343 ")"
@@ -178,16 +178,16 @@ error: expected operand
   │                          ^^^^
 
 error: expected operand
-  ┌─ int-literals-malformed.wat:3:27
+  ┌─ int-literals-malformed.wat:3:26
   │
 3 │   (global i32 (i32.const +_100))
-  │                           ^^^^
+  │                          ^^^^^
 
 error: expected operand
-  ┌─ int-literals-malformed.wat:4:27
+  ┌─ int-literals-malformed.wat:4:26
   │
 4 │   (global i32 (i32.const -_100))
-  │                           ^^^^
+  │                          ^^^^^
 
 error: expected operand
   ┌─ int-literals-malformed.wat:5:26
@@ -202,16 +202,16 @@ error: expected operand
   │                          ^^^^^^
 
 error: expected operand
-  ┌─ int-literals-malformed.wat:8:28
+  ┌─ int-literals-malformed.wat:8:26
   │
 8 │   (global i32 (i32.const 0_x100))
-  │                            ^^^^
+  │                          ^^^^^^
 
 error: expected operand
-  ┌─ int-literals-malformed.wat:9:27
+  ┌─ int-literals-malformed.wat:9:26
   │
 9 │   (global i32 (i32.const 0x_100))
-  │                           ^^^^^
+  │                          ^^^^^^
 
 error: expected operand
    ┌─ int-literals-malformed.wat:10:26

@@ -14,7 +14,7 @@ ROOT@0..466
         L_PAREN@16..17 "("
         INSTR_NAME@17..26 "i32.const"
         WHITESPACE@26..27 " "
-        OPERAND@27..28
+        IMMEDIATE@27..28
           INT@27..28 "0"
         R_PAREN@28..29 ")"
       WHITESPACE@29..30 " "
@@ -56,7 +56,7 @@ ROOT@0..466
         L_PAREN@83..84 "("
         INSTR_NAME@84..93 "i32.const"
         WHITESPACE@93..94 " "
-        OPERAND@94..95
+        IMMEDIATE@94..95
           INT@94..95 "0"
         R_PAREN@95..96 ")"
       WHITESPACE@96..97 " "
@@ -78,7 +78,7 @@ ROOT@0..466
           L_PAREN@115..116 "("
           INSTR_NAME@116..120 "type"
           WHITESPACE@120..121 " "
-          OPERAND@121..125
+          IMMEDIATE@121..125
             IDENT@121..125 "$sig"
           R_PAREN@125..126 ")"
         WHITESPACE@126..127 " "
@@ -99,7 +99,7 @@ ROOT@0..466
         L_PAREN@150..151 "("
         INSTR_NAME@151..160 "i32.const"
         WHITESPACE@160..161 " "
-        OPERAND@161..162
+        IMMEDIATE@161..162
           INT@161..162 "0"
         R_PAREN@162..163 ")"
       WHITESPACE@163..164 " "
@@ -129,7 +129,7 @@ ROOT@0..466
           L_PAREN@195..196 "("
           INSTR_NAME@196..200 "type"
           WHITESPACE@200..201 " "
-          OPERAND@201..205
+          IMMEDIATE@201..205
             IDENT@201..205 "$sig"
           R_PAREN@205..206 ")"
         R_PAREN@206..207 ")"
@@ -143,7 +143,7 @@ ROOT@0..466
         L_PAREN@217..218 "("
         INSTR_NAME@218..227 "i32.const"
         WHITESPACE@227..228 " "
-        OPERAND@228..229
+        IMMEDIATE@228..229
           INT@228..229 "0"
         R_PAREN@229..230 ")"
       WHITESPACE@230..231 " "
@@ -165,7 +165,7 @@ ROOT@0..466
           L_PAREN@250..251 "("
           INSTR_NAME@251..255 "type"
           WHITESPACE@255..256 " "
-          OPERAND@256..260
+          IMMEDIATE@256..260
             IDENT@256..260 "$sig"
           R_PAREN@260..261 ")"
         WHITESPACE@261..262 " "
@@ -186,7 +186,7 @@ ROOT@0..466
         L_PAREN@284..285 "("
         INSTR_NAME@285..294 "i32.const"
         WHITESPACE@294..295 " "
-        OPERAND@295..296
+        IMMEDIATE@295..296
           INT@295..296 "0"
         R_PAREN@296..297 ")"
       WHITESPACE@297..298 " "
@@ -215,7 +215,7 @@ ROOT@0..466
           L_PAREN@329..330 "("
           INSTR_NAME@330..334 "type"
           WHITESPACE@334..335 " "
-          OPERAND@335..339
+          IMMEDIATE@335..339
             IDENT@335..339 "$sig"
           R_PAREN@339..340 ")"
         R_PAREN@340..341 ")"
@@ -229,7 +229,7 @@ ROOT@0..466
         L_PAREN@351..352 "("
         INSTR_NAME@352..361 "i32.const"
         WHITESPACE@361..362 " "
-        OPERAND@362..363
+        IMMEDIATE@362..363
           INT@362..363 "0"
         R_PAREN@363..364 ")"
       WHITESPACE@364..365 " "
@@ -264,7 +264,7 @@ ROOT@0..466
         L_PAREN@406..407 "("
         INSTR_NAME@407..416 "i32.const"
         WHITESPACE@416..417 " "
-        OPERAND@417..418
+        IMMEDIATE@417..418
           INT@417..418 "0"
         R_PAREN@418..419 ")"
       WHITESPACE@419..420 " "

@@ -6,9 +6,9 @@ use super::{
         unsigned_int_impl, word,
     },
     ty::heap_type,
-    GreenElement, GreenResult, Input,
+    GreenResult, Input,
 };
-use crate::error::{Message, SyntaxError};
+use crate::error::Message;
 use wat_syntax::SyntaxKind::*;
 use winnow::{
     combinator::{alt, dispatch, fail, opt, peek, preceded, repeat, repeat_till},
@@ -340,13 +340,17 @@ fn plain_instr(input: &mut Input) -> GreenResult {
         (
             l_paren,
             trivias_prefixed(instr_name),
-            repeat::<_, _, Vec<_>, _, _>(0.., retry_once(operand(true), [])),
+            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(immediate)),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry_once(operand, [])),
             r_paren,
         )
-            .map(|(l_paren, mut instr_name, operands, r_paren)| {
+            .map(|(l_paren, mut instr_name, immediates, operands, r_paren)| {
                 let mut children = Vec::with_capacity(4);
                 children.push(l_paren);
                 children.append(&mut instr_name);
+                immediates
+                    .into_iter()
+                    .for_each(|mut immediate| children.append(&mut immediate));
                 operands
                     .into_iter()
                     .for_each(|mut operand| children.append(&mut operand));
@@ -357,14 +361,14 @@ fn plain_instr(input: &mut Input) -> GreenResult {
             }),
         (
             instr_name,
-            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(operand(false))),
+            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(immediate)),
         )
-            .map(|(instr_name, operands)| {
+            .map(|(instr_name, immediates)| {
                 let mut children = Vec::with_capacity(2);
                 children.push(instr_name);
-                operands
+                immediates
                     .into_iter()
-                    .for_each(|mut operand| children.append(&mut operand));
+                    .for_each(|mut immediate| children.append(&mut immediate));
                 node(PLAIN_INSTR, children)
             }),
     ))
@@ -377,23 +381,27 @@ fn instr_name(input: &mut Input) -> GreenResult {
         .map(|text| tok(INSTR_NAME, text))
 }
 
-fn operand<'s>(allow_instr: bool) -> impl Parser<Input<'s>, GreenElement, SyntaxError> {
+fn immediate(input: &mut Input) -> GreenResult {
     dispatch! {peek(any);
         '0'..='9' | '+' | '-' => alt((int, float)),
         '.' | 'i' | 'n' => float,
         '"' => string,
         '$' => ident,
-        '(' => dispatch! {peek(preceded(('(', trivias), word));
-            "type" | "param" | "result" => type_use,
-            _ if allow_instr => instr,
-            _ => fail,
-        },
+        '(' => type_use,
         'o' | 'a' => mem_arg,
         'f' | 'e' => heap_type,
         _ => fail,
     }
-    .map(|child| node(OPERAND, [child]))
-    .context(Message::Name("operand"))
+    .context(Message::Name("immediate"))
+    .parse_next(input)
+    .map(|child| node(IMMEDIATE, [child]))
+}
+
+fn operand(input: &mut Input) -> GreenResult {
+    preceded(peek('('), instr)
+        .context(Message::Name("operand"))
+        .parse_next(input)
+        .map(|child| node(OPERAND, [child]))
 }
 
 fn mem_arg(input: &mut Input) -> GreenResult {
