@@ -840,21 +840,17 @@ fn guess_preferred_type(
 ) -> Option<ValType> {
     token
         .parent_ancestors()
-        .find(|node| node.kind() == SyntaxKind::OPERAND)
-        .and_then(|operand_instr| {
-            let instr = operand_instr
+        .find(|node| node.kind() == SyntaxKind::PLAIN_INSTR)
+        .and_then(|parent_instr| {
+            let grand_instr = parent_instr
                 .ancestors()
+                .skip(1)
                 .find(|node| node.kind() == SyntaxKind::PLAIN_INSTR)?;
-            let index = instr
+            let index = grand_instr
                 .children()
-                .filter(|child| {
-                    child.kind() == SyntaxKind::OPERAND
-                        && child
-                            .children()
-                            .any(|child| child.kind() == SyntaxKind::PLAIN_INSTR)
-                })
-                .position(|operand| operand == operand_instr)?;
-            let types = types_analyzer::resolve_param_types(service, uri, &instr)?;
+                .filter(|child| child.kind() == SyntaxKind::PLAIN_INSTR)
+                .position(|instr| instr == parent_instr)?;
+            let types = types_analyzer::resolve_param_types(service, uri, &grand_instr)?;
             if let Some(OperandType::Val(val_type)) = types.get(index) {
                 Some(*val_type)
             } else {

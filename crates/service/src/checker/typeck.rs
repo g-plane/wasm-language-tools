@@ -82,13 +82,7 @@ pub fn unfold(node: SyntaxNode, sequence: &mut Vec<Instr>) {
     match node.kind() {
         SyntaxKind::PLAIN_INSTR => node
             .children()
-            .filter_map(|child| {
-                if child.kind() == SyntaxKind::OPERAND {
-                    child.first_child().and_then(Instr::cast)
-                } else {
-                    None
-                }
-            })
+            .filter_map(Instr::cast)
             .for_each(|child| unfold(child.syntax().clone(), sequence)),
         SyntaxKind::BLOCK_IF => node
             .children()
