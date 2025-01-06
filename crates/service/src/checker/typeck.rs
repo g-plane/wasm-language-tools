@@ -79,16 +79,10 @@ pub fn check_global(
 }
 
 pub fn unfold(node: SyntaxNode, sequence: &mut Vec<Instr>) {
-    match node.kind() {
-        SyntaxKind::PLAIN_INSTR => node
-            .children()
+    if matches!(node.kind(), SyntaxKind::PLAIN_INSTR | SyntaxKind::BLOCK_IF) {
+        node.children()
             .filter_map(Instr::cast)
-            .for_each(|child| unfold(child.syntax().clone(), sequence)),
-        SyntaxKind::BLOCK_IF => node
-            .children()
-            .filter_map(Instr::cast)
-            .for_each(|child| unfold(child.syntax().clone(), sequence)),
-        _ => {}
+            .for_each(|child| unfold(child.syntax().clone(), sequence));
     }
     if let Some(node) = Instr::cast(node) {
         sequence.push(node);
