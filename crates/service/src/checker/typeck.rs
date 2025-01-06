@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItemKey, SymbolItemKind, SymbolTable},
+    binder::{SymbolItemKey, SymbolTable},
     data_set,
     files::FilesCtx,
     helpers,
@@ -155,7 +155,7 @@ fn check_block_like(
                 type_stack.check(
                     &params
                         .iter()
-                        .map(|(ty, ..)| (OperandType::Val(*ty), None))
+                        .map(|(ty, _)| OperandType::Val(*ty))
                         .collect::<Vec<_>>(),
                     ReportRange::Instr(&instr),
                 )
@@ -185,7 +185,7 @@ fn check_block_like(
                 }
                 BlockInstr::If(block_if) => {
                     if let Some(mut diag) = type_stack.check(
-                        &[(OperandType::Val(ValType::I32), None)],
+                        &[OperandType::Val(ValType::I32)],
                         ReportRange::Keyword(node),
                     ) {
                         diag.message.push_str(" for the condition of `if` block");
@@ -253,11 +253,7 @@ struct TypeStack<'a> {
     has_never: bool,
 }
 impl TypeStack<'_> {
-    fn check(
-        &mut self,
-        expected: &[ExpectedType],
-        report_range: ReportRange,
-    ) -> Option<Diagnostic> {
+    fn check(&mut self, expected: &[OperandType], report_range: ReportRange) -> Option<Diagnostic> {
         let mut diagnostic = None;
         let rest_len = self.stack.len().saturating_sub(expected.len());
         let pops = self.stack.get(rest_len..).unwrap_or(&*self.stack);
@@ -269,7 +265,7 @@ impl TypeStack<'_> {
             .zip_longest(pops.iter().rev())
             .for_each(|pair| match pair {
                 EitherOrBoth::Both(
-                    (OperandType::Val(expected), related),
+                    OperandType::Val(expected),
                     (OperandType::Val(received), related_instr),
                 ) if expected != received => {
                     mismatch = true;
@@ -283,15 +279,6 @@ impl TypeStack<'_> {
                         },
                         message: format!("expected type `{expected}`, found `{received}`"),
                     });
-                    if let Some((range, message)) = related {
-                        related_information.push(DiagnosticRelatedInformation {
-                            location: Location {
-                                uri: self.service.lookup_uri(self.uri),
-                                range: helpers::rowan_range_to_lsp_range(self.line_index, *range),
-                            },
-                            message: message.clone(),
-                        });
-                    }
                 }
                 EitherOrBoth::Left(..) if !self.has_never => {
                     mismatch = true;
@@ -299,7 +286,7 @@ impl TypeStack<'_> {
                 _ => {}
             });
         if mismatch {
-            let expected_types = format!("[{}]", expected.iter().map(|(ty, _)| ty).join(", "));
+            let expected_types = format!("[{}]", expected.iter().join(", "));
             let received_types = format!("[{}]", pops.iter().map(|(ty, _)| ty).join(", "));
             diagnostic = Some(Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(self.line_index, report_range.pick()),
@@ -429,20 +416,18 @@ fn resolve_type(shared: &Shared, plain_instr: &PlainInstr) -> Option<Vec<Operand
         "br" | "br_if" => plain_instr
             .operands()
             .next()
-            .and_then(|idx| resolve_br_types(shared, idx))
-            .map(|types| types.collect()),
+            .and_then(|idx| resolve_br_types(shared, idx)),
         _ => data_set::INSTR_METAS
             .get(instr_name.text())
             .map(|meta| meta.results.clone()),
     }
 }
 
-type ExpectedType = (OperandType, Option<(TextRange, String)>);
 fn resolve_expected_types(
     shared: &Shared,
     instr: &PlainInstr,
     meta: Option<&data_set::InstrMeta>,
-) -> Option<Vec<ExpectedType>> {
+) -> Option<Vec<OperandType>> {
     match instr.instr_name()?.text() {
         "call" => {
             let idx = instr.operands().next()?;
@@ -452,16 +437,6 @@ fn resolve_expected_types(
                 .into_iter()
                 .flatten()
                 .next()?;
-            let root = instr.syntax().ancestors().last()?;
-            let related = shared
-                .symbol_table
-                .get_declared(func.key.to_node(&root), SymbolItemKind::Param)
-                .map(|symbol| {
-                    Some((
-                        symbol.key.text_range(),
-                        "parameter originally defined here".into(),
-                    ))
-                });
             shared
                 .service
                 .get_func_sig(shared.uri, func.key, func.green.clone())
@@ -469,7 +444,6 @@ fn resolve_expected_types(
                     sig.params
                         .iter()
                         .map(|(ty, ..)| OperandType::Val(*ty))
-                        .zip(related)
                         .collect()
                 })
         }
@@ -481,37 +455,25 @@ fn resolve_expected_types(
             shared
                 .service
                 .get_func_sig(shared.uri, SyntaxNodePtr::new(&func), func.green().into())
-                .map(|sig| {
-                    sig.results
-                        .into_iter()
-                        .map(|ty| (OperandType::Val(ty), None))
-                        .collect()
-                })
+                .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
         }
         "br" => instr
             .operands()
             .next()
-            .and_then(|idx| resolve_br_types(shared, idx))
-            .map(|types| types.map(|ty| (ty, None)).collect()),
+            .and_then(|idx| resolve_br_types(shared, idx)),
         "br_if" => {
             let mut types = instr
                 .operands()
                 .next()
                 .and_then(|idx| resolve_br_types(shared, idx))
-                .map(|types| types.map(|ty| (ty, None)).collect::<Vec<_>>())
                 .unwrap_or_default();
-            types.push((OperandType::Val(ValType::I32), None));
+            types.push(OperandType::Val(ValType::I32));
             Some(types)
         }
-        _ => meta.map(|meta| {
-            meta.params
-                .iter()
-                .map(|param| (param.clone(), None))
-                .collect()
-        }),
+        _ => meta.map(|meta| meta.params.clone()),
     }
 }
-fn resolve_br_types(shared: &Shared, idx: Operand) -> Option<impl Iterator<Item = OperandType>> {
+fn resolve_br_types(shared: &Shared, idx: Operand) -> Option<Vec<OperandType>> {
     let key = SymbolItemKey::new(idx.syntax());
     shared
         .symbol_table
@@ -527,7 +489,7 @@ fn resolve_br_types(shared: &Shared, idx: Operand) -> Option<impl Iterator<Item 
                     .to_node(&SyntaxNode::new_root(shared.service.root(shared.uri))),
             )
         })
-        .map(|sig| sig.results.into_iter().map(OperandType::Val))
+        .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
 }
 
 enum ReportRange<'a> {

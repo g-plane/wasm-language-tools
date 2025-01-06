@@ -36,22 +36,6 @@ expression: response
             }
           },
           "message": "expected type `i32`, found `f32`"
-        },
-        {
-          "location": {
-            "uri": "untitled:test",
-            "range": {
-              "start": {
-                "line": 2,
-                "character": 23
-              },
-              "end": {
-                "line": 2,
-                "character": 26
-              }
-            }
-          },
-          "message": "parameter originally defined here"
         }
       ]
     },
@@ -86,22 +70,6 @@ expression: response
             }
           },
           "message": "expected type `f64`, found `i32`"
-        },
-        {
-          "location": {
-            "uri": "untitled:test",
-            "range": {
-              "start": {
-                "line": 11,
-                "character": 21
-              },
-              "end": {
-                "line": 11,
-                "character": 24
-              }
-            }
-          },
-          "message": "parameter originally defined here"
         }
       ]
     }

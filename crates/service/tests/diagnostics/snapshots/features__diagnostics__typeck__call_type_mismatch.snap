@@ -36,22 +36,6 @@ expression: response
             }
           },
           "message": "expected type `f32`, found `i32`"
-        },
-        {
-          "location": {
-            "uri": "untitled:test",
-            "range": {
-              "start": {
-                "line": 2,
-                "character": 21
-              },
-              "end": {
-                "line": 2,
-                "character": 24
-              }
-            }
-          },
-          "message": "parameter originally defined here"
         }
       ]
     }
