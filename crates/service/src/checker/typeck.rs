@@ -174,8 +174,8 @@ fn check_block_like(
                 .map(|signature| {
                     signature
                         .results
-                        .iter()
-                        .map(|ty| OperandType::Val(*ty))
+                        .into_iter()
+                        .map(OperandType::Val)
                         .collect::<Vec<_>>()
                 })
                 .unwrap_or_default();
@@ -388,7 +388,7 @@ fn resolve_type(shared: &Shared, plain_instr: &PlainInstr) -> Option<Vec<Operand
                         .service
                         .get_func_sig(shared.uri, func.key, func.green.clone())
                 })
-                .map(|sig| sig.results.iter().map(|ty| OperandType::Val(*ty)).collect())
+                .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
         }
         "local.get" => {
             let idx = plain_instr.operands().next()?;
@@ -429,34 +429,40 @@ fn resolve_expected_types(
     meta: Option<&data_set::InstrMeta>,
 ) -> Option<Vec<OperandType>> {
     match instr.instr_name()?.text() {
-        "call" => {
-            let idx = instr.operands().next()?;
-            let func = shared
-                .symbol_table
-                .find_defs(SymbolItemKey::new(idx.syntax()))
-                .into_iter()
-                .flatten()
-                .next()?;
-            shared
-                .service
-                .get_func_sig(shared.uri, func.key, func.green.clone())
-                .map(|sig| {
-                    sig.params
-                        .iter()
-                        .map(|(ty, ..)| OperandType::Val(*ty))
-                        .collect()
-                })
-        }
-        "return" => {
-            let func = instr
-                .syntax()
-                .ancestors()
-                .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)?;
-            shared
-                .service
-                .get_func_sig(shared.uri, SyntaxNodePtr::new(&func), func.green().into())
-                .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
-        }
+        "call" => instr
+            .operands()
+            .next()
+            .and_then(|idx| {
+                shared
+                    .symbol_table
+                    .find_defs(SymbolItemKey::new(idx.syntax()))
+            })
+            .into_iter()
+            .flatten()
+            .next()
+            .and_then(|func| {
+                shared
+                    .service
+                    .get_func_sig(shared.uri, func.key, func.green.clone())
+            })
+            .map(|sig| {
+                sig.params
+                    .into_iter()
+                    .map(|(ty, ..)| OperandType::Val(ty))
+                    .collect()
+            }),
+        "return" => instr
+            .syntax()
+            .ancestors()
+            .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
+            .and_then(|func| {
+                shared.service.get_func_sig(
+                    shared.uri,
+                    SyntaxNodePtr::new(&func),
+                    func.green().into(),
+                )
+            })
+            .map(|sig| sig.results.into_iter().map(OperandType::Val).collect()),
         "br" => instr
             .operands()
             .next()
