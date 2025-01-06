@@ -384,7 +384,7 @@ fn operand<'s>(allow_instr: bool) -> impl Parser<Input<'s>, GreenElement, Syntax
         '"' => string,
         '$' => ident,
         '(' => dispatch! {peek(preceded(('(', trivias), word));
-            "type" => type_use,
+            "type" | "param" | "result" => type_use,
             _ if allow_instr => instr,
             _ => fail,
         },

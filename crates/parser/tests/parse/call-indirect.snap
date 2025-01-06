@@ -232,13 +232,15 @@ ROOT@0..1284
       PLAIN_INSTR@926..937
         INSTR_NAME@926..937 "unreachable"
       WHITESPACE@937..938 " "
-      PLAIN_INSTR@938..951
+      PLAIN_INSTR@938..960
         INSTR_NAME@938..951 "call_indirect"
-      WHITESPACE@951..952 " "
-      PLAIN_INSTR@952..960
-        L_PAREN@952..953 "("
-        INSTR_NAME@953..959 "result"
-        R_PAREN@959..960 ")"
+        WHITESPACE@951..952 " "
+        OPERAND@952..960
+          TYPE_USE@952..960
+            RESULT@952..960
+              L_PAREN@952..953 "("
+              KEYWORD@953..959 "result"
+              R_PAREN@959..960 ")"
       R_PAREN@960..961 ")"
     WHITESPACE@961..964 "\n  "
     MODULE_FIELD_FUNC@964..1014
@@ -248,18 +250,20 @@ ROOT@0..1284
       PLAIN_INSTR@970..981
         INSTR_NAME@970..981 "unreachable"
       WHITESPACE@981..982 " "
-      PLAIN_INSTR@982..995
+      PLAIN_INSTR@982..1013
         INSTR_NAME@982..995 "call_indirect"
-      WHITESPACE@995..996 " "
-      PLAIN_INSTR@996..1004
-        L_PAREN@996..997 "("
-        INSTR_NAME@997..1003 "result"
-        R_PAREN@1003..1004 ")"
-      WHITESPACE@1004..1005 " "
-      PLAIN_INSTR@1005..1013
-        L_PAREN@1005..1006 "("
-        INSTR_NAME@1006..1012 "result"
-        R_PAREN@1012..1013 ")"
+        WHITESPACE@995..996 " "
+        OPERAND@996..1013
+          TYPE_USE@996..1013
+            RESULT@996..1004
+              L_PAREN@996..997 "("
+              KEYWORD@997..1003 "result"
+              R_PAREN@1003..1004 ")"
+            WHITESPACE@1004..1005 " "
+            RESULT@1005..1013
+              L_PAREN@1005..1006 "("
+              KEYWORD@1006..1012 "result"
+              R_PAREN@1012..1013 ")"
       R_PAREN@1013..1014 ")"
     WHITESPACE@1014..1017 "\n  "
     MODULE_FIELD_FUNC@1017..1081
@@ -269,18 +273,20 @@ ROOT@0..1284
       PLAIN_INSTR@1023..1034
         INSTR_NAME@1023..1034 "unreachable"
       WHITESPACE@1034..1035 " "
-      PLAIN_INSTR@1035..1048
+      PLAIN_INSTR@1035..1066
         INSTR_NAME@1035..1048 "call_indirect"
-      WHITESPACE@1048..1049 " "
-      PLAIN_INSTR@1049..1057
-        L_PAREN@1049..1050 "("
-        INSTR_NAME@1050..1056 "result"
-        R_PAREN@1056..1057 ")"
-      WHITESPACE@1057..1058 " "
-      PLAIN_INSTR@1058..1066
-        L_PAREN@1058..1059 "("
-        INSTR_NAME@1059..1065 "result"
-        R_PAREN@1065..1066 ")"
+        WHITESPACE@1048..1049 " "
+        OPERAND@1049..1066
+          TYPE_USE@1049..1066
+            RESULT@1049..1057
+              L_PAREN@1049..1050 "("
+              KEYWORD@1050..1056 "result"
+              R_PAREN@1056..1057 ")"
+            WHITESPACE@1057..1058 " "
+            RESULT@1058..1066
+              L_PAREN@1058..1059 "("
+              KEYWORD@1059..1065 "result"
+              R_PAREN@1065..1066 ")"
       WHITESPACE@1066..1067 " "
       PLAIN_INSTR@1067..1080
         INSTR_NAME@1067..1080 "call_indirect"
@@ -293,26 +299,30 @@ ROOT@0..1284
       PLAIN_INSTR@1090..1101
         INSTR_NAME@1090..1101 "unreachable"
       WHITESPACE@1101..1102 " "
-      PLAIN_INSTR@1102..1115
+      PLAIN_INSTR@1102..1133
         INSTR_NAME@1102..1115 "call_indirect"
-      WHITESPACE@1115..1116 " "
-      PLAIN_INSTR@1116..1124
-        L_PAREN@1116..1117 "("
-        INSTR_NAME@1117..1123 "result"
-        R_PAREN@1123..1124 ")"
-      WHITESPACE@1124..1125 " "
-      PLAIN_INSTR@1125..1133
-        L_PAREN@1125..1126 "("
-        INSTR_NAME@1126..1132 "result"
-        R_PAREN@1132..1133 ")"
+        WHITESPACE@1115..1116 " "
+        OPERAND@1116..1133
+          TYPE_USE@1116..1133
+            RESULT@1116..1124
+              L_PAREN@1116..1117 "("
+              KEYWORD@1117..1123 "result"
+              R_PAREN@1123..1124 ")"
+            WHITESPACE@1124..1125 " "
+            RESULT@1125..1133
+              L_PAREN@1125..1126 "("
+              KEYWORD@1126..1132 "result"
+              R_PAREN@1132..1133 ")"
       WHITESPACE@1133..1134 " "
-      PLAIN_INSTR@1134..1147
+      PLAIN_INSTR@1134..1156
         INSTR_NAME@1134..1147 "call_indirect"
-      WHITESPACE@1147..1148 " "
-      PLAIN_INSTR@1148..1156
-        L_PAREN@1148..1149 "("
-        INSTR_NAME@1149..1155 "result"
-        R_PAREN@1155..1156 ")"
+        WHITESPACE@1147..1148 " "
+        OPERAND@1148..1156
+          TYPE_USE@1148..1156
+            RESULT@1148..1156
+              L_PAREN@1148..1149 "("
+              KEYWORD@1149..1155 "result"
+              R_PAREN@1155..1156 ")"
       R_PAREN@1156..1157 ")"
     WHITESPACE@1157..1160 "\n  "
     MODULE_FIELD_FUNC@1160..1212
