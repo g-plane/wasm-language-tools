@@ -598,6 +598,10 @@ impl PlainInstr {
         children(&self.syntax)
     }
     #[inline]
+    pub fn instrs(&self) -> AstChildren<Instr> {
+        children(&self.syntax)
+    }
+    #[inline]
     pub fn operands(&self) -> AstChildren<Operand> {
         children(&self.syntax)
     }
