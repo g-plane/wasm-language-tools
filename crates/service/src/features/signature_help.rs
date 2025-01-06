@@ -56,7 +56,7 @@ impl LanguageService {
             .find_defs(SymbolItemKey::new(
                 &node
                     .children()
-                    .find(|child| child.kind() == SyntaxKind::OPERAND)?,
+                    .find(|child| child.kind() == SyntaxKind::IMMEDIATE)?,
             ))?
             .next()?;
         let signature = self
@@ -110,24 +110,25 @@ impl LanguageService {
                     value: helpers::ast::get_doc_comment(&func.key.to_node(&root)),
                 })),
                 parameters: Some(parameters),
-                active_parameter: operand.and_then(|operand| {
-                    node.children()
-                        .filter(|child| {
-                            child.kind() == SyntaxKind::OPERAND
-                                && child.first_child().is_some_and(|child| {
-                                    matches!(
-                                        child.kind(),
-                                        SyntaxKind::PLAIN_INSTR
-                                            | SyntaxKind::BLOCK_BLOCK
-                                            | SyntaxKind::BLOCK_IF
-                                            | SyntaxKind::BLOCK_LOOP
-                                    )
-                                })
-                        })
-                        .position(|child| child == operand)
-                        .map(|index| if is_next { index + 1 } else { index } as u32)
-                        .or_else(|| (!signature.params.is_empty() && is_next).then_some(0))
-                }),
+                active_parameter: operand
+                    .and_then(|operand| {
+                        node.children()
+                            .filter(|child| {
+                                child.kind() == SyntaxKind::OPERAND
+                                    && child.first_child().is_some_and(|child| {
+                                        matches!(
+                                            child.kind(),
+                                            SyntaxKind::PLAIN_INSTR
+                                                | SyntaxKind::BLOCK_BLOCK
+                                                | SyntaxKind::BLOCK_IF
+                                                | SyntaxKind::BLOCK_LOOP
+                                        )
+                                    })
+                            })
+                            .position(|child| child == operand)
+                            .map(|index| if is_next { index + 1 } else { index } as u32)
+                    })
+                    .or_else(|| (!signature.params.is_empty() && is_next).then_some(0)),
             }],
             active_signature: Some(0),
             active_parameter: None,

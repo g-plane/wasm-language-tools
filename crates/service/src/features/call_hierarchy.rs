@@ -198,8 +198,8 @@ impl LanguageService {
                 let plain_instr_range =
                     helpers::rowan_range_to_lsp_range(&line_index, node.text_range());
                 node.children()
-                    .filter(|child| child.kind() == SyntaxKind::OPERAND)
-                    .filter_map(|operand| symbol_table.find_defs(SymbolItemKey::new(&operand)))
+                    .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                    .filter_map(|immediate| symbol_table.find_defs(SymbolItemKey::new(&immediate)))
                     .flatten()
                     .filter(|symbol| symbol.kind == SymbolItemKind::Func)
                     .map(move |func_symbol| {

@@ -162,7 +162,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::Instr);
             } else {
                 let instr_name = support::token(&parent, SyntaxKind::INSTR_NAME)?;
-                add_cmp_ctx_for_operands(instr_name.text(), &parent, &mut ctx);
+                add_cmp_ctx_for_immediates(instr_name.text(), &parent, &mut ctx);
             }
         }
         SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_IF | SyntaxKind::BLOCK_LOOP => {
@@ -177,12 +177,12 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::Instr);
             }
         }
-        SyntaxKind::OPERAND => {
+        SyntaxKind::IMMEDIATE => {
             let instr = parent
                 .ancestors()
                 .find(|node| node.kind() == SyntaxKind::PLAIN_INSTR)?;
             let instr_name = support::token(&instr, SyntaxKind::INSTR_NAME)?;
-            add_cmp_ctx_for_operands(instr_name.text(), &parent, &mut ctx);
+            add_cmp_ctx_for_immediates(instr_name.text(), &parent, &mut ctx);
         }
         SyntaxKind::PARAM | SyntaxKind::RESULT | SyntaxKind::LOCAL | SyntaxKind::GLOBAL_TYPE => {
             if !token.text().starts_with('$') {
@@ -341,17 +341,21 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         Some(ctx)
     }
 }
-fn add_cmp_ctx_for_operands(instr_name: &str, node: &SyntaxNode, ctx: &mut SmallVec<[CmpCtx; 4]>) {
+fn add_cmp_ctx_for_immediates(
+    instr_name: &str,
+    node: &SyntaxNode,
+    ctx: &mut SmallVec<[CmpCtx; 4]>,
+) {
     match instr_name.split_once('.') {
         Some(("local", _)) => ctx.push(CmpCtx::Local),
         Some(("global", _)) => ctx.push(CmpCtx::Global),
         Some(("ref", "func")) => ctx.push(CmpCtx::Func),
         Some(("table", snd)) => {
             if snd == "init"
-                && node.kind() == SyntaxKind::OPERAND
+                && node.kind() == SyntaxKind::IMMEDIATE
                 && node
                     .prev_sibling()
-                    .is_some_and(|prev| prev.kind() == SyntaxKind::OPERAND)
+                    .is_some_and(|prev| prev.kind() == SyntaxKind::IMMEDIATE)
             {
                 // elem id
             } else {

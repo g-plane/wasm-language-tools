@@ -1,11 +1,8 @@
 use crate::helpers;
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
-use rowan::ast::{
-    support::{children, token},
-    AstNode,
-};
-use wat_syntax::{ast::Operand, SyntaxKind, SyntaxNode};
+use rowan::ast::support::token;
+use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "immediates";
 
@@ -13,13 +10,15 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
     let Some(instr_name) = token(node, SyntaxKind::INSTR_NAME) else {
         return;
     };
-    let mut operands = children::<Operand>(node).filter(|operand| operand.instr().is_none());
+    let mut immediates = node
+        .children()
+        .filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
 
     macro_rules! check_immediate {
         ($kind:pat, $syntax:literal, $required:literal) => {
-            let immediate = operands
+            let immediate = immediates
                 .next()
-                .and_then(|operand| operand.syntax().first_child_or_token());
+                .and_then(|immediate| immediate.first_child_or_token());
             if let Some(immediate) = immediate {
                 if !matches!(immediate.kind(), $kind) {
                     diags.push(Diagnostic {
@@ -72,16 +71,16 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         }
         "br_table" => {
             diags.extend(
-                operands
+                immediates
                     .filter(|immediate| {
-                        !immediate.syntax().first_token().is_some_and(|token| {
+                        !immediate.first_token().is_some_and(|token| {
                             matches!(token.kind(), SyntaxKind::IDENT | SyntaxKind::INT)
                         })
                     })
                     .map(|immediate| Diagnostic {
                         range: helpers::rowan_range_to_lsp_range(
                             line_index,
-                            immediate.syntax().text_range(),
+                            immediate.text_range(),
                         ),
                         severity: Some(DiagnosticSeverity::ERROR),
                         source: Some("wat".into()),
@@ -149,8 +148,8 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         }
         _ => {}
     }
-    diags.extend(operands.map(|immediate| Diagnostic {
-        range: helpers::rowan_range_to_lsp_range(line_index, immediate.syntax().text_range()),
+    diags.extend(immediates.map(|immediate| Diagnostic {
+        range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
         severity: Some(DiagnosticSeverity::ERROR),
         source: Some("wat".into()),
         code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),

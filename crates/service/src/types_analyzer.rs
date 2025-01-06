@@ -243,7 +243,7 @@ pub(crate) fn resolve_param_types(
         let symbol_table = service.symbol_table(uri);
         let idx = instr
             .children()
-            .find(|child| child.kind() == SyntaxKind::OPERAND)?;
+            .find(|child| child.kind() == SyntaxKind::IMMEDIATE)?;
         let func = symbol_table
             .find_defs(SymbolItemKey::new(&idx))
             .into_iter()

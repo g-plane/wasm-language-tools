@@ -130,7 +130,7 @@ impl LanguageService {
                         )
                 }) {
                     token_kinds.get_index_of(&SemanticTokenKind::Func)
-                } else if let Some(operand) = grand
+                } else if let Some(immediate) = grand
                     .filter(|grand| {
                         support::token(grand, SyntaxKind::INSTR_NAME)
                             .is_some_and(|name| name.text().starts_with("local."))
@@ -138,7 +138,7 @@ impl LanguageService {
                     .and(parent)
                 {
                     if symbol_table
-                        .find_param_def(SymbolItemKey::new(&operand))
+                        .find_param_def(SymbolItemKey::new(&immediate))
                         .is_some()
                     {
                         token_kinds.get_index_of(&SemanticTokenKind::Param)
