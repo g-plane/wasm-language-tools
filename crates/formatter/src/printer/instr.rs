@@ -386,14 +386,14 @@ impl DocGen for PlainInstr {
             docs.push(immediate.doc(ctx));
             trivias = format_trivias_after_node(immediate, ctx);
         });
-        self.operands().for_each(|operand| {
+        self.instrs().for_each(|instr| {
             if trivias.is_empty() {
                 docs.push(Doc::hard_line());
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(operand.doc(ctx));
-            trivias = format_trivias_after_node(operand, ctx);
+            docs.push(instr.doc(ctx));
+            trivias = format_trivias_after_node(instr, ctx);
         });
         if self.r_paren_token().is_some() {
             docs.append(&mut trivias);
