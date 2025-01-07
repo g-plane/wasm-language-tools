@@ -9,7 +9,7 @@ fn with_fuzzy() {
     let source = "(module (func (log)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }

@@ -9,7 +9,7 @@ fn call_defined() {
     let source = "(module (func $foo (call $foo)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
@@ -20,7 +20,7 @@ fn call_undefined() {
     let source = "(module (func $foo (call $bar)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -31,7 +31,7 @@ fn local_defined() {
     let source = "(module (func (param $p i32) (local.get 0) (drop)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
@@ -42,7 +42,7 @@ fn local_undefined() {
     let source = "(module (func (local.get 0) (drop)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -53,7 +53,7 @@ fn type_use_defined() {
     let source = "(module (func (type $t)) (type $t (func)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
@@ -64,7 +64,7 @@ fn type_use_undefined() {
     let source = "(module (func (type $t)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -82,7 +82,7 @@ fn global_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
@@ -93,7 +93,7 @@ fn global_undefined() {
     let source = "(module (func (global.get $bar) (drop)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -104,7 +104,7 @@ fn memory_defined() {
     let source = "(module (memory 1) (export \"\" (memory 0)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
@@ -115,7 +115,7 @@ fn memory_undefined() {
     let source = "(module (export \"\" (memory 0)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -132,7 +132,7 @@ fn table_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
@@ -148,7 +148,7 @@ fn table_undefined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -173,7 +173,7 @@ fn block() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -188,7 +188,7 @@ fn export() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }

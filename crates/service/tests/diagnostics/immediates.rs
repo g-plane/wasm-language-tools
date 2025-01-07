@@ -22,7 +22,7 @@ fn index() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -44,7 +44,7 @@ fn int() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -64,7 +64,7 @@ fn float() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -83,7 +83,7 @@ fn indexes() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -102,7 +102,7 @@ fn mem_arg() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -120,7 +120,7 @@ fn mem_arg_and_index() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -136,7 +136,7 @@ fn br_table() {
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -153,7 +153,7 @@ fn select_incorrect() {
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -174,7 +174,7 @@ fn select_correct() {
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
@@ -185,7 +185,7 @@ fn expected_instr() {
     let source = "(module (func (result i32) (i32.add 1 (i32.const 0))))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    allow_unused(&mut service, uri.clone());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }

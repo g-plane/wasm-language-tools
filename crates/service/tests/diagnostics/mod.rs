@@ -49,7 +49,7 @@ fn pick_diagnostics(response: DocumentDiagnosticReportResult) -> Vec<Diagnostic>
     }
 }
 
-fn allow_unused(service: &mut LanguageService, uri: Uri) {
+fn calm(service: &mut LanguageService, uri: Uri) {
     service.set_config(
         uri,
         ServiceConfig {
