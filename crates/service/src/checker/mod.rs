@@ -10,6 +10,7 @@ mod shadow;
 mod typeck;
 mod undef;
 mod unknown_instr;
+mod unreachable;
 mod unused;
 
 pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
@@ -33,6 +34,14 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                 &line_index,
                 &node,
                 &symbol_table,
+            );
+            unreachable::check(
+                &mut diagnostics,
+                service.get_config(uri),
+                &line_index,
+                &symbol_table,
+                &root,
+                &node,
             );
         }
         SyntaxKind::MODULE_FIELD_GLOBAL => {

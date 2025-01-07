@@ -23,6 +23,8 @@ mod undef;
 #[cfg(test)]
 mod unknown_instr;
 #[cfg(test)]
+mod unreachable;
+#[cfg(test)]
 mod unused;
 
 fn create_params(uri: Uri) -> DocumentDiagnosticParams {
@@ -55,6 +57,7 @@ fn calm(service: &mut LanguageService, uri: Uri) {
         ServiceConfig {
             lint: Lints {
                 unused: LintLevel::Allow,
+                unreachable: LintLevel::Allow,
                 ..Default::default()
             },
             ..Default::default()

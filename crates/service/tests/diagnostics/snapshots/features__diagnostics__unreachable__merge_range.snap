@@ -1,0 +1,66 @@
+---
+source: crates/service/tests/diagnostics/unreachable.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 4
+        },
+        "end": {
+          "line": 6,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 4
+        },
+        "end": {
+          "line": 14,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 24,
+          "character": 12
+        },
+        "end": {
+          "line": 30,
+          "character": 26
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    }
+  ]
+}

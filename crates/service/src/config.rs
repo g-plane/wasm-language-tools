@@ -23,6 +23,9 @@ pub struct Lints {
     #[serde(alias = "implicitModule")]
     /// Lint for top-level module fields without declaring a module.
     pub implicit_module: LintLevel,
+
+    /// Lint for detecting unreachable code.
+    pub unreachable: LintLevel,
 }
 
 impl Default for Lints {
@@ -31,6 +34,7 @@ impl Default for Lints {
             unused: LintLevel::Warn,
             shadow: LintLevel::Warn,
             implicit_module: LintLevel::Allow,
+            unreachable: LintLevel::Warn,
         }
     }
 }

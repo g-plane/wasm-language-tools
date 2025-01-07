@@ -1,0 +1,332 @@
+---
+source: crates/service/tests/diagnostics/unreachable.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 4
+        },
+        "end": {
+          "line": 4,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 4
+        },
+        "end": {
+          "line": 8,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 12,
+          "character": 4
+        },
+        "end": {
+          "line": 12,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 15,
+          "character": 4
+        },
+        "end": {
+          "line": 15,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 19,
+          "character": 6
+        },
+        "end": {
+          "line": 20,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 25,
+          "character": 4
+        },
+        "end": {
+          "line": 25,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 33,
+          "character": 4
+        },
+        "end": {
+          "line": 33,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 34,
+          "character": 4
+        },
+        "end": {
+          "line": 34,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 40,
+          "character": 6
+        },
+        "end": {
+          "line": 40,
+          "character": 9
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 44,
+          "character": 6
+        },
+        "end": {
+          "line": 44,
+          "character": 9
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 45,
+          "character": 4
+        },
+        "end": {
+          "line": 45,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 46,
+          "character": 4
+        },
+        "end": {
+          "line": 46,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 51,
+          "character": 4
+        },
+        "end": {
+          "line": 51,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 52,
+          "character": 4
+        },
+        "end": {
+          "line": 52,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 61,
+          "character": 8
+        },
+        "end": {
+          "line": 61,
+          "character": 11
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 62,
+          "character": 8
+        },
+        "end": {
+          "line": 63,
+          "character": 9
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 64,
+          "character": 4
+        },
+        "end": {
+          "line": 64,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    }
+  ]
+}
