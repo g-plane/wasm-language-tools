@@ -141,6 +141,50 @@ fn simple_unreachable() {
 }
 
 #[test]
+fn nested_if() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func (param i32)
+    local.get 0
+    if
+      nop
+      unreachable
+      nop
+    else
+      local.get 0
+      if
+        unreachable
+      end
+      nop
+    end
+    nop)
+
+  (func (param i32)
+    local.get 0
+    if
+      nop
+      unreachable
+      nop
+    else
+      local.get 0
+      if
+        unreachable
+      else
+        unreachable
+      end
+      nop
+    end
+    nop))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn merge_range() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
