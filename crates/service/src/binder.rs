@@ -4,13 +4,13 @@ use crate::{
     InternUri,
 };
 use rowan::{
-    ast::{support, AstNode, SyntaxNodePtr},
+    ast::{support, AstNode},
     GreenNode, TextRange,
 };
 use std::{hash::Hash, rc::Rc};
 use wat_syntax::{
     ast::{ModuleFieldFunc, PlainInstr},
-    SyntaxKind, SyntaxNode, WatLanguage,
+    SyntaxKind, SyntaxNode, SyntaxNodePtr,
 };
 
 #[salsa::query_group(SymbolTables)]
@@ -618,7 +618,7 @@ impl SymbolTable {
     }
 }
 
-pub type SymbolItemKey = SyntaxNodePtr<WatLanguage>;
+pub type SymbolItemKey = SyntaxNodePtr;
 
 #[derive(Clone, Debug)]
 pub struct SymbolItem {
@@ -672,5 +672,5 @@ pub struct BlockItem {
 pub struct ExportItem {
     pub name: String, // with double quotes
     pub range: TextRange,
-    pub module: SyntaxNodePtr<WatLanguage>,
+    pub module: SyntaxNodePtr,
 }

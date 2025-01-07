@@ -10,7 +10,7 @@ use itertools::Itertools;
 use rowan::{
     ast::{
         support::{child, children, token},
-        AstNode, SyntaxNodePtr,
+        AstNode,
     },
     GreenNode, GreenNodeData, Language, NodeOrToken,
 };
@@ -21,7 +21,7 @@ use std::{
 };
 use wat_syntax::{
     ast::{Param, Result, TypeUse, ValType as AstValType},
-    SyntaxKind, SyntaxNode, WatLanguage,
+    SyntaxKind, SyntaxNode, SyntaxNodePtr, WatLanguage,
 };
 
 #[salsa::query_group(TypesAnalyzer)]
@@ -34,12 +34,8 @@ pub(crate) trait TypesAnalyzerCtx: FilesCtx + SymbolTablesCtx {
     fn extract_sig(&self, node: GreenNode) -> FuncSig;
 
     #[salsa::memoized]
-    fn get_func_sig(
-        &self,
-        uri: InternUri,
-        ptr: SyntaxNodePtr<WatLanguage>,
-        green: GreenNode,
-    ) -> Option<FuncSig>;
+    fn get_func_sig(&self, uri: InternUri, ptr: SyntaxNodePtr, green: GreenNode)
+        -> Option<FuncSig>;
     #[salsa::memoized]
     fn render_func_sig(&self, signature: FuncSig) -> String;
     #[salsa::memoized]
@@ -98,7 +94,7 @@ fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
 fn get_func_sig(
     db: &dyn TypesAnalyzerCtx,
     uri: InternUri,
-    ptr: SyntaxNodePtr<WatLanguage>,
+    ptr: SyntaxNodePtr,
     green: GreenNode,
 ) -> Option<FuncSig> {
     green

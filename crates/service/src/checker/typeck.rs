@@ -12,12 +12,12 @@ use lsp_types::{
     Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, NumberOrString,
 };
 use rowan::{
-    ast::{support, AstNode, SyntaxNodePtr},
+    ast::{support, AstNode},
     TextRange,
 };
 use wat_syntax::{
     ast::{BlockInstr, Immediate, Instr, PlainInstr},
-    SyntaxKind, SyntaxNode,
+    SyntaxKind, SyntaxNode, SyntaxNodePtr,
 };
 
 const DIAGNOSTIC_CODE: &str = "type-check";

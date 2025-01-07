@@ -24,3 +24,4 @@ impl rowan::Language for WatLanguage {
 pub type SyntaxNode = rowan::SyntaxNode<WatLanguage>;
 pub type SyntaxToken = rowan::SyntaxToken<WatLanguage>;
 pub type SyntaxElement = rowan::SyntaxElement<WatLanguage>;
+pub type SyntaxNodePtr = rowan::ast::SyntaxNodePtr<WatLanguage>;
