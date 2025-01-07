@@ -457,10 +457,10 @@ impl AstNode for Instr {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Operand {
+pub struct Immediate {
     syntax: SyntaxNode,
 }
-impl Operand {
+impl Immediate {
     #[inline]
     pub fn float(&self) -> Option<SyntaxToken> {
         token(&self.syntax, SyntaxKind::FLOAT)
@@ -482,10 +482,6 @@ impl Operand {
         child(&self.syntax)
     }
     #[inline]
-    pub fn instr(&self) -> Option<Instr> {
-        child(&self.syntax)
-    }
-    #[inline]
     pub fn mem_arg(&self) -> Option<SyntaxToken> {
         token(&self.syntax, SyntaxKind::MEM_ARG)
     }
@@ -494,14 +490,14 @@ impl Operand {
         token(&self.syntax, SyntaxKind::HEAP_TYPE)
     }
 }
-impl AstNode for Operand {
+impl AstNode for Immediate {
     type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
         Self: Sized,
     {
-        kind == SyntaxKind::OPERAND
+        kind == SyntaxKind::IMMEDIATE
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self>
@@ -509,7 +505,7 @@ impl AstNode for Operand {
         Self: Sized,
     {
         if Self::can_cast(syntax.kind()) {
-            Some(Operand { syntax })
+            Some(Immediate { syntax })
         } else {
             None
         }
@@ -534,7 +530,11 @@ impl PlainInstr {
         token(&self.syntax, SyntaxKind::INSTR_NAME)
     }
     #[inline]
-    pub fn operands(&self) -> AstChildren<Operand> {
+    pub fn immediates(&self) -> AstChildren<Immediate> {
+        children(&self.syntax)
+    }
+    #[inline]
+    pub fn instrs(&self) -> AstChildren<Instr> {
         children(&self.syntax)
     }
     #[inline]

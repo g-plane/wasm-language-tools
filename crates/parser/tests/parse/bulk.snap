@@ -52,7 +52,7 @@ ROOT@0..422
             L_PAREN@100..101 "("
             INSTR_NAME@101..109 "ref.func"
             WHITESPACE@109..110 " "
-            OPERAND@110..111
+            IMMEDIATE@110..111
               INT@110..111 "0"
             R_PAREN@111..112 ")"
         WHITESPACE@112..113 " "
@@ -61,7 +61,7 @@ ROOT@0..422
             L_PAREN@113..114 "("
             INSTR_NAME@114..122 "ref.null"
             WHITESPACE@122..123 " "
-            OPERAND@123..127
+            IMMEDIATE@123..127
               HEAP_TYPE@123..127 "func"
             R_PAREN@127..128 ")"
         WHITESPACE@128..129 " "
@@ -70,7 +70,7 @@ ROOT@0..422
             L_PAREN@129..130 "("
             INSTR_NAME@130..138 "ref.func"
             WHITESPACE@138..139 " "
-            OPERAND@139..140
+            IMMEDIATE@139..140
               INT@139..140 "1"
             R_PAREN@140..141 ")"
       R_PAREN@141..142 ")"
@@ -118,32 +118,29 @@ ROOT@0..422
         L_PAREN@225..226 "("
         INSTR_NAME@226..237 "memory.fill"
         WHITESPACE@237..244 "\n      "
-        OPERAND@244..257
-          PLAIN_INSTR@244..257
-            L_PAREN@244..245 "("
-            INSTR_NAME@245..254 "local.get"
-            WHITESPACE@254..255 " "
-            OPERAND@255..256
-              INT@255..256 "0"
-            R_PAREN@256..257 ")"
+        PLAIN_INSTR@244..257
+          L_PAREN@244..245 "("
+          INSTR_NAME@245..254 "local.get"
+          WHITESPACE@254..255 " "
+          IMMEDIATE@255..256
+            INT@255..256 "0"
+          R_PAREN@256..257 ")"
         WHITESPACE@257..264 "\n      "
-        OPERAND@264..277
-          PLAIN_INSTR@264..277
-            L_PAREN@264..265 "("
-            INSTR_NAME@265..274 "local.get"
-            WHITESPACE@274..275 " "
-            OPERAND@275..276
-              INT@275..276 "1"
-            R_PAREN@276..277 ")"
+        PLAIN_INSTR@264..277
+          L_PAREN@264..265 "("
+          INSTR_NAME@265..274 "local.get"
+          WHITESPACE@274..275 " "
+          IMMEDIATE@275..276
+            INT@275..276 "1"
+          R_PAREN@276..277 ")"
         WHITESPACE@277..284 "\n      "
-        OPERAND@284..297
-          PLAIN_INSTR@284..297
-            L_PAREN@284..285 "("
-            INSTR_NAME@285..294 "local.get"
-            WHITESPACE@294..295 " "
-            OPERAND@295..296
-              INT@295..296 "2"
-            R_PAREN@296..297 ")"
+        PLAIN_INSTR@284..297
+          L_PAREN@284..285 "("
+          INSTR_NAME@285..294 "local.get"
+          WHITESPACE@294..295 " "
+          IMMEDIATE@295..296
+            INT@295..296 "2"
+          R_PAREN@296..297 ")"
         R_PAREN@297..298 ")"
       R_PAREN@298..299 ")"
     WHITESPACE@299..300 "\n"
@@ -181,7 +178,7 @@ ROOT@0..422
           L_PAREN@350..351 "("
           INSTR_NAME@351..360 "i32.const"
           WHITESPACE@360..361 " "
-          OPERAND@361..362
+          IMMEDIATE@361..362
             INT@361..362 "0"
           R_PAREN@362..363 ")"
       WHITESPACE@363..364 " "
@@ -203,7 +200,7 @@ ROOT@0..422
           L_PAREN@389..390 "("
           INSTR_NAME@390..399 "i32.const"
           WHITESPACE@399..400 " "
-          OPERAND@400..401
+          IMMEDIATE@400..401
             INT@400..401 "0"
           R_PAREN@401..402 ")"
       WHITESPACE@402..403 " "

@@ -10,8 +10,11 @@ use lsp_types::{
     Documentation, MarkupContent, MarkupKind, ParameterInformation, ParameterLabel, SignatureHelp,
     SignatureHelpParams, SignatureInformation,
 };
-use rowan::{ast::support, Direction};
-use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode};
+use rowan::{
+    ast::{support, AstNode},
+    Direction,
+};
+use wat_syntax::{ast::Instr, SyntaxElement, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     /// Handler for `textDocument/signatureHelp` request.
@@ -26,23 +29,21 @@ impl LanguageService {
                 params.text_document_position_params.position,
             )?,
         )?;
-        let (node, operand, is_next) = if token.kind() == SyntaxKind::ERROR {
+        let (node, instr, is_next) = if token.kind() == SyntaxKind::ERROR {
             (
                 token.parent()?,
                 token
                     .siblings_with_tokens(Direction::Prev)
                     .skip(1)
                     .find_map(|sibling| match sibling {
-                        SyntaxElement::Node(node) if node.kind() == SyntaxKind::OPERAND => {
-                            Some(node)
-                        }
+                        SyntaxElement::Node(node) => Instr::cast(node),
                         _ => None,
                     }),
                 true,
             )
         } else {
-            let operand = token.parent()?.parent()?;
-            (operand.parent()?, Some(operand), false)
+            let instr = token.parent()?;
+            (instr.parent()?, Instr::cast(instr), false)
         };
         if node.kind() != SyntaxKind::PLAIN_INSTR
             || support::token(&node, SyntaxKind::INSTR_NAME)
@@ -56,7 +57,7 @@ impl LanguageService {
             .find_defs(SymbolItemKey::new(
                 &node
                     .children()
-                    .find(|child| child.kind() == SyntaxKind::OPERAND)?,
+                    .find(|child| child.kind() == SyntaxKind::IMMEDIATE)?,
             ))?
             .next()?;
         let signature = self
@@ -110,24 +111,14 @@ impl LanguageService {
                     value: helpers::ast::get_doc_comment(&func.key.to_node(&root)),
                 })),
                 parameters: Some(parameters),
-                active_parameter: operand.and_then(|operand| {
-                    node.children()
-                        .filter(|child| {
-                            child.kind() == SyntaxKind::OPERAND
-                                && child.first_child().is_some_and(|child| {
-                                    matches!(
-                                        child.kind(),
-                                        SyntaxKind::PLAIN_INSTR
-                                            | SyntaxKind::BLOCK_BLOCK
-                                            | SyntaxKind::BLOCK_IF
-                                            | SyntaxKind::BLOCK_LOOP
-                                    )
-                                })
-                        })
-                        .position(|child| child == operand)
-                        .map(|index| if is_next { index + 1 } else { index } as u32)
-                        .or_else(|| (!signature.params.is_empty() && is_next).then_some(0))
-                }),
+                active_parameter: instr
+                    .and_then(|instr| {
+                        node.children()
+                            .filter_map(Instr::cast)
+                            .position(|child| child == instr)
+                            .map(|index| if is_next { index + 1 } else { index } as u32)
+                    })
+                    .or_else(|| (!signature.params.is_empty() && is_next).then_some(0)),
             }],
             active_signature: Some(0),
             active_parameter: None,

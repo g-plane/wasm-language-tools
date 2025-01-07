@@ -600,7 +600,7 @@ ROOT@0..1830
         L_PAREN@1002..1003 "("
         INSTR_NAME@1003..1012 "i32.const"
         WHITESPACE@1012..1013 " "
-        OPERAND@1013..1014
+        IMMEDIATE@1013..1014
           INT@1013..1014 "0"
         R_PAREN@1014..1015 ")"
       R_PAREN@1015..1016 ")"
@@ -650,7 +650,7 @@ ROOT@0..1830
         L_PAREN@1106..1107 "("
         INSTR_NAME@1107..1116 "i32.const"
         WHITESPACE@1116..1117 " "
-        OPERAND@1117..1118
+        IMMEDIATE@1117..1118
           INT@1117..1118 "0"
         R_PAREN@1118..1119 ")"
       R_PAREN@1119..1120 ")"
@@ -687,7 +687,7 @@ ROOT@0..1830
         L_PAREN@1178..1179 "("
         INSTR_NAME@1179..1188 "i32.const"
         WHITESPACE@1188..1189 " "
-        OPERAND@1189..1190
+        IMMEDIATE@1189..1190
           INT@1189..1190 "0"
         R_PAREN@1190..1191 ")"
       R_PAREN@1191..1192 ")"
@@ -772,7 +772,7 @@ ROOT@0..1830
         L_PAREN@1339..1340 "("
         INSTR_NAME@1340..1349 "i32.const"
         WHITESPACE@1349..1350 " "
-        OPERAND@1350..1351
+        IMMEDIATE@1350..1351
           INT@1350..1351 "0"
         R_PAREN@1351..1352 ")"
       WHITESPACE@1352..1355 "\n  "

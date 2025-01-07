@@ -235,7 +235,7 @@ ROOT@0..1284
       PLAIN_INSTR@938..960
         INSTR_NAME@938..951 "call_indirect"
         WHITESPACE@951..952 " "
-        OPERAND@952..960
+        IMMEDIATE@952..960
           TYPE_USE@952..960
             RESULT@952..960
               L_PAREN@952..953 "("
@@ -253,7 +253,7 @@ ROOT@0..1284
       PLAIN_INSTR@982..1013
         INSTR_NAME@982..995 "call_indirect"
         WHITESPACE@995..996 " "
-        OPERAND@996..1013
+        IMMEDIATE@996..1013
           TYPE_USE@996..1013
             RESULT@996..1004
               L_PAREN@996..997 "("
@@ -276,7 +276,7 @@ ROOT@0..1284
       PLAIN_INSTR@1035..1066
         INSTR_NAME@1035..1048 "call_indirect"
         WHITESPACE@1048..1049 " "
-        OPERAND@1049..1066
+        IMMEDIATE@1049..1066
           TYPE_USE@1049..1066
             RESULT@1049..1057
               L_PAREN@1049..1050 "("
@@ -302,7 +302,7 @@ ROOT@0..1284
       PLAIN_INSTR@1102..1133
         INSTR_NAME@1102..1115 "call_indirect"
         WHITESPACE@1115..1116 " "
-        OPERAND@1116..1133
+        IMMEDIATE@1116..1133
           TYPE_USE@1116..1133
             RESULT@1116..1124
               L_PAREN@1116..1117 "("
@@ -317,7 +317,7 @@ ROOT@0..1284
       PLAIN_INSTR@1134..1156
         INSTR_NAME@1134..1147 "call_indirect"
         WHITESPACE@1147..1148 " "
-        OPERAND@1148..1156
+        IMMEDIATE@1148..1156
           TYPE_USE@1148..1156
             RESULT@1148..1156
               L_PAREN@1148..1149 "("

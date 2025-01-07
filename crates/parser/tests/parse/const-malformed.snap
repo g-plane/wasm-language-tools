@@ -279,110 +279,110 @@ ROOT@0..570
     R_PAREN@568..569 ")"
   WHITESPACE@569..570 "\n"
 
-error: expected operand
-  ┌─ const-malformed.wat:2:21
+error: expected instruction
+  ┌─ const-malformed.wat:2:20
   │
 2 │   (func (i32.const 0x) drop)
-  │                     ^
+  │                    ^^
 
-error: expected operand
-  ┌─ const-malformed.wat:3:21
+error: expected instruction
+  ┌─ const-malformed.wat:3:20
   │
 3 │   (func (i32.const 1x) drop)
-  │                     ^
+  │                    ^^
 
-error: expected operand
-  ┌─ const-malformed.wat:4:21
+error: expected instruction
+  ┌─ const-malformed.wat:4:20
   │
 4 │   (func (i32.const 0xg) drop)
-  │                     ^^
+  │                    ^^^
 
-error: expected operand
+error: expected instruction
   ┌─ const-malformed.wat:5:20
   │
 5 │   (func (f32.const .0) drop)
   │                    ^^
 
-error: expected operand
+error: expected instruction
   ┌─ const-malformed.wat:6:20
   │
 6 │   (func (f32.const .0e0) drop)
   │                    ^^^^
 
-error: expected operand
-  ┌─ const-malformed.wat:7:21
+error: expected instruction
+  ┌─ const-malformed.wat:7:20
   │
 7 │   (func (f32.const 0e) drop)
-  │                     ^
+  │                    ^^
 
-error: expected operand
-  ┌─ const-malformed.wat:8:21
+error: expected instruction
+  ┌─ const-malformed.wat:8:20
   │
 8 │   (func (f32.const 0e+) drop)
-  │                     ^^
+  │                    ^^^
 
-error: expected operand
-  ┌─ const-malformed.wat:9:23
+error: expected instruction
+  ┌─ const-malformed.wat:9:20
   │
 9 │   (func (f32.const 0.0e) drop)
-  │                       ^
+  │                    ^^^^
 
-error: expected operand
-   ┌─ const-malformed.wat:10:23
+error: expected instruction
+   ┌─ const-malformed.wat:10:20
    │
 10 │   (func (f32.const 0.0e-) drop)
-   │                       ^^
+   │                    ^^^^^
 
-error: expected operand
-   ┌─ const-malformed.wat:11:21
+error: expected instruction
+   ┌─ const-malformed.wat:11:20
    │
 11 │   (func (f32.const 0x.) drop)
-   │                     ^^
+   │                    ^^^
 
-error: expected operand
-   ┌─ const-malformed.wat:12:24
+error: expected instruction
+   ┌─ const-malformed.wat:12:20
    │
 12 │   (func (f32.const 0x0.g) drop)
-   │                        ^
+   │                    ^^^^^
 
-error: expected operand
-   ┌─ const-malformed.wat:13:23
+error: expected instruction
+   ┌─ const-malformed.wat:13:20
    │
 13 │   (func (f32.const 0x0p) drop)
-   │                       ^
+   │                    ^^^^
 
-error: expected operand
-   ┌─ const-malformed.wat:14:23
+error: expected instruction
+   ┌─ const-malformed.wat:14:20
    │
 14 │   (func (f32.const 0x0p+) drop)
-   │                       ^^
+   │                    ^^^^^
 
-error: expected operand
-   ┌─ const-malformed.wat:15:23
+error: expected instruction
+   ┌─ const-malformed.wat:15:20
    │
 15 │   (func (f32.const 0x0p-) drop)
-   │                       ^^
+   │                    ^^^^^
 
-error: expected operand
-   ┌─ const-malformed.wat:16:25
+error: expected instruction
+   ┌─ const-malformed.wat:16:20
    │
 16 │   (func (f32.const 0x0.0p) drop)
-   │                         ^
+   │                    ^^^^^^
 
-error: expected operand
-   ┌─ const-malformed.wat:17:25
+error: expected instruction
+   ┌─ const-malformed.wat:17:20
    │
 17 │   (func (f32.const 0x0.0p+) drop)
-   │                         ^^
+   │                    ^^^^^^^
 
-error: expected operand
-   ┌─ const-malformed.wat:18:25
+error: expected instruction
+   ┌─ const-malformed.wat:18:20
    │
 18 │   (func (f32.const 0x0.0p-) drop)
-   │                         ^^
+   │                    ^^^^^^^
 
-error: expected operand
-   ┌─ const-malformed.wat:19:23
+error: expected instruction
+   ┌─ const-malformed.wat:19:20
    │
 19 │   (func (f32.const 0x0pA) drop)
-   │                       ^^
+   │                    ^^^^^

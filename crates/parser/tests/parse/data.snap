@@ -26,7 +26,7 @@ ROOT@0..1101
           L_PAREN@32..33 "("
           INSTR_NAME@33..42 "i32.const"
           WHITESPACE@42..43 " "
-          OPERAND@43..44
+          IMMEDIATE@43..44
             INT@43..44 "0"
           R_PAREN@44..45 ")"
       R_PAREN@45..46 ")"
@@ -40,7 +40,7 @@ ROOT@0..1101
           L_PAREN@55..56 "("
           INSTR_NAME@56..65 "i32.const"
           WHITESPACE@65..66 " "
-          OPERAND@66..67
+          IMMEDIATE@66..67
             INT@66..67 "1"
           R_PAREN@67..68 ")"
       WHITESPACE@68..69 " "
@@ -63,7 +63,7 @@ ROOT@0..1101
           L_PAREN@99..100 "("
           INSTR_NAME@100..109 "i32.const"
           WHITESPACE@109..110 " "
-          OPERAND@110..111
+          IMMEDIATE@110..111
             INT@110..111 "0"
           R_PAREN@111..112 ")"
         R_PAREN@112..113 ")"
@@ -81,7 +81,7 @@ ROOT@0..1101
           L_PAREN@131..132 "("
           INSTR_NAME@132..141 "i32.const"
           WHITESPACE@141..142 " "
-          OPERAND@142..143
+          IMMEDIATE@142..143
             INT@142..143 "0"
           R_PAREN@143..144 ")"
         R_PAREN@144..145 ")"
@@ -112,7 +112,7 @@ ROOT@0..1101
           L_PAREN@181..182 "("
           INSTR_NAME@182..191 "i32.const"
           WHITESPACE@191..192 " "
-          OPERAND@192..193
+          IMMEDIATE@192..193
             INT@192..193 "0"
           R_PAREN@193..194 ")"
       R_PAREN@194..195 ")"
@@ -134,7 +134,7 @@ ROOT@0..1101
           L_PAREN@217..218 "("
           INSTR_NAME@218..227 "i32.const"
           WHITESPACE@227..228 " "
-          OPERAND@228..229
+          IMMEDIATE@228..229
             INT@228..229 "1"
           R_PAREN@229..230 ")"
       WHITESPACE@230..231 " "
@@ -165,7 +165,7 @@ ROOT@0..1101
           L_PAREN@276..277 "("
           INSTR_NAME@277..286 "i32.const"
           WHITESPACE@286..287 " "
-          OPERAND@287..288
+          IMMEDIATE@287..288
             INT@287..288 "0"
           R_PAREN@288..289 ")"
         R_PAREN@289..290 ")"
@@ -191,7 +191,7 @@ ROOT@0..1101
           L_PAREN@319..320 "("
           INSTR_NAME@320..329 "i32.const"
           WHITESPACE@329..330 " "
-          OPERAND@330..331
+          IMMEDIATE@330..331
             INT@330..331 "0"
           R_PAREN@331..332 ")"
         R_PAREN@332..333 ")"
@@ -222,7 +222,7 @@ ROOT@0..1101
           L_PAREN@370..371 "("
           INSTR_NAME@371..380 "i32.const"
           WHITESPACE@380..381 " "
-          OPERAND@381..382
+          IMMEDIATE@381..382
             INT@381..382 "0"
           R_PAREN@382..383 ")"
       R_PAREN@383..384 ")"
@@ -244,7 +244,7 @@ ROOT@0..1101
           L_PAREN@405..406 "("
           INSTR_NAME@406..415 "i32.const"
           WHITESPACE@415..416 " "
-          OPERAND@416..417
+          IMMEDIATE@416..417
             INT@416..417 "1"
           R_PAREN@417..418 ")"
       WHITESPACE@418..419 " "
@@ -275,7 +275,7 @@ ROOT@0..1101
           L_PAREN@461..462 "("
           INSTR_NAME@462..471 "i32.const"
           WHITESPACE@471..472 " "
-          OPERAND@472..473
+          IMMEDIATE@472..473
             INT@472..473 "0"
           R_PAREN@473..474 ")"
         R_PAREN@474..475 ")"
@@ -301,7 +301,7 @@ ROOT@0..1101
           L_PAREN@505..506 "("
           INSTR_NAME@506..515 "i32.const"
           WHITESPACE@515..516 " "
-          OPERAND@516..517
+          IMMEDIATE@516..517
             INT@516..517 "0"
           R_PAREN@517..518 ")"
         R_PAREN@518..519 ")"
@@ -326,7 +326,7 @@ ROOT@0..1101
           L_PAREN@548..549 "("
           INSTR_NAME@549..558 "i32.const"
           WHITESPACE@558..559 " "
-          OPERAND@559..560
+          IMMEDIATE@559..560
             INT@559..560 "0"
           R_PAREN@560..561 ")"
       R_PAREN@561..562 ")"
@@ -342,7 +342,7 @@ ROOT@0..1101
           L_PAREN@575..576 "("
           INSTR_NAME@576..585 "i32.const"
           WHITESPACE@585..586 " "
-          OPERAND@586..587
+          IMMEDIATE@586..587
             INT@586..587 "1"
           R_PAREN@587..588 ")"
       WHITESPACE@588..589 " "
@@ -367,7 +367,7 @@ ROOT@0..1101
           L_PAREN@623..624 "("
           INSTR_NAME@624..633 "i32.const"
           WHITESPACE@633..634 " "
-          OPERAND@634..635
+          IMMEDIATE@634..635
             INT@634..635 "0"
           R_PAREN@635..636 ")"
         R_PAREN@636..637 ")"
@@ -387,7 +387,7 @@ ROOT@0..1101
           L_PAREN@659..660 "("
           INSTR_NAME@660..669 "i32.const"
           WHITESPACE@669..670 " "
-          OPERAND@670..671
+          IMMEDIATE@670..671
             INT@670..671 "0"
           R_PAREN@671..672 ")"
         R_PAREN@672..673 ")"
@@ -420,7 +420,7 @@ ROOT@0..1101
           L_PAREN@713..714 "("
           INSTR_NAME@714..723 "i32.const"
           WHITESPACE@723..724 " "
-          OPERAND@724..725
+          IMMEDIATE@724..725
             INT@724..725 "0"
           R_PAREN@725..726 ")"
       R_PAREN@726..727 ")"
@@ -444,7 +444,7 @@ ROOT@0..1101
           L_PAREN@753..754 "("
           INSTR_NAME@754..763 "i32.const"
           WHITESPACE@763..764 " "
-          OPERAND@764..765
+          IMMEDIATE@764..765
             INT@764..765 "1"
           R_PAREN@765..766 ")"
       WHITESPACE@766..767 " "
@@ -477,7 +477,7 @@ ROOT@0..1101
           L_PAREN@816..817 "("
           INSTR_NAME@817..826 "i32.const"
           WHITESPACE@826..827 " "
-          OPERAND@827..828
+          IMMEDIATE@827..828
             INT@827..828 "0"
           R_PAREN@828..829 ")"
         R_PAREN@829..830 ")"
@@ -505,7 +505,7 @@ ROOT@0..1101
           L_PAREN@863..864 "("
           INSTR_NAME@864..873 "i32.const"
           WHITESPACE@873..874 " "
-          OPERAND@874..875
+          IMMEDIATE@874..875
             INT@874..875 "0"
           R_PAREN@875..876 ")"
         R_PAREN@876..877 ")"
@@ -538,7 +538,7 @@ ROOT@0..1101
           L_PAREN@918..919 "("
           INSTR_NAME@919..928 "i32.const"
           WHITESPACE@928..929 " "
-          OPERAND@929..930
+          IMMEDIATE@929..930
             INT@929..930 "0"
           R_PAREN@930..931 ")"
       R_PAREN@931..932 ")"
@@ -562,7 +562,7 @@ ROOT@0..1101
           L_PAREN@958..959 "("
           INSTR_NAME@959..968 "i32.const"
           WHITESPACE@968..969 " "
-          OPERAND@969..970
+          IMMEDIATE@969..970
             INT@969..970 "1"
           R_PAREN@970..971 ")"
       WHITESPACE@971..972 " "
@@ -595,7 +595,7 @@ ROOT@0..1101
           L_PAREN@1019..1020 "("
           INSTR_NAME@1020..1029 "i32.const"
           WHITESPACE@1029..1030 " "
-          OPERAND@1030..1031
+          IMMEDIATE@1030..1031
             INT@1030..1031 "0"
           R_PAREN@1031..1032 ")"
         R_PAREN@1032..1033 ")"
@@ -623,7 +623,7 @@ ROOT@0..1101
           L_PAREN@1068..1069 "("
           INSTR_NAME@1069..1078 "i32.const"
           WHITESPACE@1078..1079 " "
-          OPERAND@1079..1080
+          IMMEDIATE@1079..1080
             INT@1079..1080 "0"
           R_PAREN@1080..1081 ")"
         R_PAREN@1081..1082 ")"

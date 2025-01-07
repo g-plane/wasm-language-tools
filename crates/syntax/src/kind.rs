@@ -41,7 +41,7 @@ pub enum SyntaxKind {
     BLOCK_IF,
     BLOCK_IF_THEN,
     BLOCK_IF_ELSE,
-    OPERAND,
+    IMMEDIATE,
     TYPE_USE,
     LIMITS,
     IMPORT,

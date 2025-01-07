@@ -16,7 +16,7 @@ use rowan::{
     TextRange,
 };
 use wat_syntax::{
-    ast::{BlockInstr, Instr, Operand, PlainInstr},
+    ast::{BlockInstr, Immediate, Instr, PlainInstr},
     SyntaxKind, SyntaxNode,
 };
 
@@ -79,22 +79,10 @@ pub fn check_global(
 }
 
 pub fn unfold(node: SyntaxNode, sequence: &mut Vec<Instr>) {
-    match node.kind() {
-        SyntaxKind::PLAIN_INSTR => node
-            .children()
-            .filter_map(|child| {
-                if child.kind() == SyntaxKind::OPERAND {
-                    child.first_child().and_then(Instr::cast)
-                } else {
-                    None
-                }
-            })
-            .for_each(|child| unfold(child.syntax().clone(), sequence)),
-        SyntaxKind::BLOCK_IF => node
-            .children()
+    if matches!(node.kind(), SyntaxKind::PLAIN_INSTR | SyntaxKind::BLOCK_IF) {
+        node.children()
             .filter_map(Instr::cast)
-            .for_each(|child| unfold(child.syntax().clone(), sequence)),
-        _ => {}
+            .for_each(|child| unfold(child.syntax().clone(), sequence));
     }
     if let Some(node) = Instr::cast(node) {
         sequence.push(node);
@@ -376,7 +364,7 @@ fn resolve_type(shared: &Shared, plain_instr: &PlainInstr) -> Option<Vec<Operand
     let instr_name = plain_instr.instr_name()?;
     match instr_name.text() {
         "call" => {
-            let idx = plain_instr.operands().next()?;
+            let idx = plain_instr.immediates().next()?;
             shared
                 .symbol_table
                 .find_defs(SymbolItemKey::new(idx.syntax()))
@@ -391,7 +379,7 @@ fn resolve_type(shared: &Shared, plain_instr: &PlainInstr) -> Option<Vec<Operand
                 .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
         }
         "local.get" => {
-            let idx = plain_instr.operands().next()?;
+            let idx = plain_instr.immediates().next()?;
             shared
                 .symbol_table
                 .find_param_or_local_def(SymbolItemKey::new(idx.syntax()))
@@ -401,7 +389,7 @@ fn resolve_type(shared: &Shared, plain_instr: &PlainInstr) -> Option<Vec<Operand
                 .map(|ty| vec![ty])
         }
         "global.get" => {
-            let idx = plain_instr.operands().next()?;
+            let idx = plain_instr.immediates().next()?;
             shared
                 .symbol_table
                 .find_defs(SymbolItemKey::new(idx.syntax()))
@@ -414,7 +402,7 @@ fn resolve_type(shared: &Shared, plain_instr: &PlainInstr) -> Option<Vec<Operand
                 .map(|ty| vec![ty])
         }
         "br" | "br_if" => plain_instr
-            .operands()
+            .immediates()
             .next()
             .and_then(|idx| resolve_br_types(shared, idx)),
         _ => data_set::INSTR_METAS
@@ -430,7 +418,7 @@ fn resolve_expected_types(
 ) -> Option<Vec<OperandType>> {
     match instr.instr_name()?.text() {
         "call" => instr
-            .operands()
+            .immediates()
             .next()
             .and_then(|idx| {
                 shared
@@ -464,12 +452,12 @@ fn resolve_expected_types(
             })
             .map(|sig| sig.results.into_iter().map(OperandType::Val).collect()),
         "br" => instr
-            .operands()
+            .immediates()
             .next()
             .and_then(|idx| resolve_br_types(shared, idx)),
         "br_if" => {
             let mut types = instr
-                .operands()
+                .immediates()
                 .next()
                 .and_then(|idx| resolve_br_types(shared, idx))
                 .unwrap_or_default();
@@ -479,7 +467,7 @@ fn resolve_expected_types(
         _ => meta.map(|meta| meta.params.clone()),
     }
 }
-fn resolve_br_types(shared: &Shared, idx: Operand) -> Option<Vec<OperandType>> {
+fn resolve_br_types(shared: &Shared, idx: Immediate) -> Option<Vec<OperandType>> {
     let key = SymbolItemKey::new(idx.syntax());
     shared
         .symbol_table

@@ -37,7 +37,7 @@ ROOT@0..631
         L_PAREN@53..54 "("
         INSTR_NAME@54..63 "i32.const"
         WHITESPACE@63..64 " "
-        OPERAND@64..65
+        IMMEDIATE@64..65
           INT@64..65 "0"
         R_PAREN@65..66 ")"
       R_PAREN@66..67 ")"
@@ -59,7 +59,7 @@ ROOT@0..631
         L_PAREN@88..89 "("
         INSTR_NAME@89..93 "type"
         WHITESPACE@93..94 " "
-        OPERAND@94..98
+        IMMEDIATE@94..98
           IDENT@94..98 "$sig"
         R_PAREN@98..99 ")"
       WHITESPACE@99..100 " "
@@ -74,7 +74,7 @@ ROOT@0..631
         L_PAREN@113..114 "("
         INSTR_NAME@114..123 "i32.const"
         WHITESPACE@123..124 " "
-        OPERAND@124..125
+        IMMEDIATE@124..125
           INT@124..125 "0"
         R_PAREN@125..126 ")"
       R_PAREN@126..127 ")"
@@ -104,7 +104,7 @@ ROOT@0..631
         L_PAREN@161..162 "("
         INSTR_NAME@162..166 "type"
         WHITESPACE@166..167 " "
-        OPERAND@167..171
+        IMMEDIATE@167..171
           IDENT@167..171 "$sig"
         R_PAREN@171..172 ")"
       WHITESPACE@172..173 " "
@@ -112,7 +112,7 @@ ROOT@0..631
         L_PAREN@173..174 "("
         INSTR_NAME@174..183 "i32.const"
         WHITESPACE@183..184 " "
-        OPERAND@184..185
+        IMMEDIATE@184..185
           INT@184..185 "0"
         R_PAREN@185..186 ")"
       R_PAREN@186..187 ")"
@@ -134,7 +134,7 @@ ROOT@0..631
         L_PAREN@209..210 "("
         INSTR_NAME@210..214 "type"
         WHITESPACE@214..215 " "
-        OPERAND@215..219
+        IMMEDIATE@215..219
           IDENT@215..219 "$sig"
         R_PAREN@219..220 ")"
       WHITESPACE@220..221 " "
@@ -149,7 +149,7 @@ ROOT@0..631
         L_PAREN@233..234 "("
         INSTR_NAME@234..243 "i32.const"
         WHITESPACE@243..244 " "
-        OPERAND@244..245
+        IMMEDIATE@244..245
           INT@244..245 "0"
         R_PAREN@245..246 ")"
       R_PAREN@246..247 ")"
@@ -178,7 +178,7 @@ ROOT@0..631
         L_PAREN@281..282 "("
         INSTR_NAME@282..286 "type"
         WHITESPACE@286..287 " "
-        OPERAND@287..291
+        IMMEDIATE@287..291
           IDENT@287..291 "$sig"
         R_PAREN@291..292 ")"
       WHITESPACE@292..293 " "
@@ -186,7 +186,7 @@ ROOT@0..631
         L_PAREN@293..294 "("
         INSTR_NAME@294..303 "i32.const"
         WHITESPACE@303..304 " "
-        OPERAND@304..305
+        IMMEDIATE@304..305
           INT@304..305 "0"
         R_PAREN@305..306 ")"
       R_PAREN@306..307 ")"
@@ -215,7 +215,7 @@ ROOT@0..631
         L_PAREN@341..342 "("
         INSTR_NAME@342..351 "i32.const"
         WHITESPACE@351..352 " "
-        OPERAND@352..353
+        IMMEDIATE@352..353
           INT@352..353 "0"
         R_PAREN@353..354 ")"
       R_PAREN@354..355 ")"
@@ -314,7 +314,7 @@ ROOT@0..631
         L_PAREN@505..506 "("
         INSTR_NAME@506..515 "local.get"
         WHITESPACE@515..516 " "
-        OPERAND@516..517
+        IMMEDIATE@516..517
           INT@516..517 "0"
         R_PAREN@517..518 ")"
       R_PAREN@518..519 ")"
@@ -343,7 +343,7 @@ ROOT@0..631
         L_PAREN@553..554 "("
         INSTR_NAME@554..563 "local.get"
         WHITESPACE@563..564 " "
-        OPERAND@564..565
+        IMMEDIATE@564..565
           INT@564..565 "0"
         R_PAREN@565..566 ")"
       R_PAREN@566..567 ")"
@@ -391,67 +391,67 @@ ROOT@0..631
     R_PAREN@629..630 ")"
   WHITESPACE@630..631 "\n"
 
-error: expected operand
+error: expected instruction
   ┌─ func-malformed.wat:2:41
   │
 2 │   (func (type $sig) (result i32) (param i32) (i32.const 0))
   │                                         ^^^
 
-error: expected operand
+error: expected instruction
   ┌─ func-malformed.wat:3:41
   │
 3 │   (func (param i32) (type $sig) (result i32) (i32.const 0))
   │                                         ^^^
 
-error: expected operand
+error: expected instruction
   ┌─ func-malformed.wat:5:41
   │
 5 │   (func (result i32) (type $sig) (param i32) (i32.const 0))
   │                                         ^^^
 
-error: expected operand
+error: expected instruction
   ┌─ func-malformed.wat:6:29
   │
 6 │   (func (result i32) (param i32) (type $sig) (i32.const 0))
   │                             ^^^
 
-error: expected operand
+error: expected instruction
   ┌─ func-malformed.wat:7:29
   │
 7 │   (func (result i32) (param i32) (i32.const 0))
   │                             ^^^
 
-error: expected operand
+error: expected instruction
   ┌─ func-malformed.wat:9:22
   │
 9 │   (func (nop) (local i32))
   │                      ^^^
 
-error: expected operand
+error: expected instruction
    ┌─ func-malformed.wat:10:22
    │
 10 │   (func (nop) (param i32))
    │                      ^^^
 
-error: expected operand
+error: expected instruction
    ┌─ func-malformed.wat:11:23
    │
 11 │   (func (nop) (result i32))
    │                       ^^^
 
-error: expected operand
+error: expected instruction
    ┌─ func-malformed.wat:12:28
    │
 12 │   (func (local i32) (param i32))
    │                            ^^^
 
-error: expected operand
+error: expected instruction
    ┌─ func-malformed.wat:13:29
    │
 13 │   (func (local i32) (result i32) (local.get 0))
    │                             ^^^
 
-error: expected operand
+error: expected instruction
    ┌─ func-malformed.wat:14:29
    │
 14 │   (func (result i32) (param i32) (local.get 0))

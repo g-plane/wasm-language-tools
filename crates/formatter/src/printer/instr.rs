@@ -333,25 +333,23 @@ impl DocGen for BlockType {
     }
 }
 
-impl DocGen for Instr {
+impl DocGen for Immediate {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        match self {
-            Instr::Block(block_instr) => block_instr.doc(ctx),
-            Instr::Plain(plain_instr) => plain_instr.doc(ctx),
-        }
-    }
-}
-
-impl DocGen for Operand {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        if let Some(instr) = self.instr() {
-            instr.doc(ctx)
-        } else if let Some(type_use) = self.type_use() {
+        if let Some(type_use) = self.type_use() {
             type_use.doc(ctx)
         } else if let Some(token) = self.syntax().first_token() {
             Doc::text(token.to_string())
         } else {
             Doc::nil()
+        }
+    }
+}
+
+impl DocGen for Instr {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        match self {
+            Instr::Block(block_instr) => block_instr.doc(ctx),
+            Instr::Plain(plain_instr) => plain_instr.doc(ctx),
         }
     }
 }
@@ -369,18 +367,23 @@ impl DocGen for PlainInstr {
             docs.push(Doc::text(instr_name.to_string()));
             trivias = format_trivias_after_token(instr_name, ctx);
         }
-        self.operands().for_each(|operand| {
+        self.immediates().for_each(|immediate| {
             if trivias.is_empty() {
-                if operand.instr().is_some() {
-                    docs.push(Doc::hard_line());
-                } else {
-                    docs.push(Doc::space());
-                }
+                docs.push(Doc::space());
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(operand.doc(ctx));
-            trivias = format_trivias_after_node(operand, ctx);
+            docs.push(immediate.doc(ctx));
+            trivias = format_trivias_after_node(immediate, ctx);
+        });
+        self.instrs().for_each(|instr| {
+            if trivias.is_empty() {
+                docs.push(Doc::hard_line());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(instr.doc(ctx));
+            trivias = format_trivias_after_node(instr, ctx);
         });
         if self.r_paren_token().is_some() {
             docs.append(&mut trivias);

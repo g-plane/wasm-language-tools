@@ -3,9 +3,9 @@ use line_index::LineIndex;
 use lsp_types::{
     CodeAction, CodeActionContext, CodeActionKind, NumberOrString, TextEdit, WorkspaceEdit,
 };
-use rowan::{ast::AstNode, SyntaxElementChildren, TextRange};
+use rowan::{SyntaxElementChildren, TextRange};
 use std::collections::HashMap;
-use wat_syntax::{ast::Operand, SyntaxElement, SyntaxKind, SyntaxNode, WatLanguage};
+use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, WatLanguage};
 
 pub fn act(
     service: &LanguageService,
@@ -115,10 +115,8 @@ fn check_after_eq(children: &mut SyntaxElementChildren<WatLanguage>) -> Option<T
         }
         _ => None,
     });
-    children
-        .next()
-        .and_then(SyntaxElement::into_node)
-        .and_then(Operand::cast)
-        .and_then(|operand| operand.int())
-        .and(range)
+    match children.next() {
+        Some(SyntaxElement::Token(token)) if token.kind() == SyntaxKind::ERROR => range,
+        _ => None,
+    }
 }

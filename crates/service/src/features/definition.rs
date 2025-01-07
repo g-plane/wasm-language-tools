@@ -31,7 +31,7 @@ impl LanguageService {
         )?;
 
         let parent = token.parent()?;
-        if !matches!(parent.kind(), SyntaxKind::OPERAND | SyntaxKind::INDEX) {
+        if !matches!(parent.kind(), SyntaxKind::IMMEDIATE | SyntaxKind::INDEX) {
             return None;
         }
 
@@ -97,7 +97,7 @@ impl LanguageService {
         )?;
 
         let parent = token.parent()?;
-        if !matches!(parent.kind(), SyntaxKind::OPERAND | SyntaxKind::INDEX) {
+        if !matches!(parent.kind(), SyntaxKind::IMMEDIATE | SyntaxKind::INDEX) {
             return None;
         }
 
@@ -149,7 +149,7 @@ impl LanguageService {
             params.text_document_position_params.position,
         )?;
         let parent = token.parent()?;
-        if parent.kind() == SyntaxKind::OPERAND {
+        if parent.kind() == SyntaxKind::IMMEDIATE {
             symbol_table
                 .find_defs(SymbolItemKey::new(&parent))
                 .map(|symbols| {

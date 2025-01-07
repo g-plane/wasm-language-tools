@@ -252,10 +252,10 @@ fn is_write_access_instr(element: SyntaxElement, node: &SyntaxNode) -> bool {
         }
         let text = token.text();
         if text == "table.copy" {
-            // The first operand in `table.copy` is the destination table.
+            // The first immediate in `table.copy` is the destination table.
             node.siblings_with_tokens(Direction::Prev)
                 .skip(1)
-                .all(|element| element.kind() != SyntaxKind::OPERAND)
+                .all(|element| element.kind() != SyntaxKind::IMMEDIATE)
         } else {
             matches!(
                 text,
