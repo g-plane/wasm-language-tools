@@ -18,8 +18,8 @@ expression: response
             "character": 0
           }
         },
-        "code": "syntax/operand",
-        "message": "syntax error: expected operand"
+        "code": "syntax/",
+        "message": "syntax error: expected"
       }
     ],
     "edit": {

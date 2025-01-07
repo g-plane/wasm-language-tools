@@ -67,8 +67,8 @@ fn diagnostics() {
     let mut params = create_params(uri, Range::new(Position::new(2, 25), Position::new(2, 25)));
     params.context = CodeActionContext {
         diagnostics: vec![Diagnostic {
-            message: "syntax error: expected operand".into(),
-            code: Some(NumberOrString::String("syntax/operand".into())),
+            message: "syntax error: expected".into(),
+            code: Some(NumberOrString::String("syntax/".into())),
             ..Default::default()
         }],
         ..Default::default()
