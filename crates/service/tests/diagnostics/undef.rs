@@ -162,8 +162,10 @@ fn block() {
     (block $a
       (block $b
         (block $c
-          (br_table $a $b $c $d)
-          (br_table 0 1 2 3))
+          (br_table $a $b $c $d
+           (i32.const 0))
+          (br_table 0 1 2 3
+            (i32.const 0)))
         (i32.const 1)
         (drop)
         (return))

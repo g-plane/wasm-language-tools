@@ -464,6 +464,7 @@ fn resolve_expected_types(
             types.push(OperandType::Val(ValType::I32));
             Some(types)
         }
+        "br_table" => Some(vec![OperandType::Val(ValType::I32)]),
         _ => meta.map(|meta| meta.params.clone()),
     }
 }
