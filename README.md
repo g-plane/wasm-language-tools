@@ -126,7 +126,7 @@ We don't provide pre-built binaries at the moment.
 If you have installed Rust, you can run Cargo to install:
 
 ```shell
-cargo install --git https://github.com/g-plane/wasm-language-tools.git wat_server
+cargo install wat_server
 ```
 
 ### Editor Support
