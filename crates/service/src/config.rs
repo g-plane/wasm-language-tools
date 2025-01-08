@@ -34,7 +34,7 @@ impl Default for Lints {
             unused: LintLevel::Warn,
             shadow: LintLevel::Warn,
             implicit_module: LintLevel::Allow,
-            unreachable: LintLevel::Warn,
+            unreachable: LintLevel::Hint,
         }
     }
 }
@@ -44,6 +44,8 @@ impl Default for Lints {
 pub enum LintLevel {
     #[serde(alias = "allow")]
     Allow,
+    #[serde(alias = "hint")]
+    Hint,
     #[serde(alias = "warn")]
     Warn,
     #[serde(alias = "deny")]

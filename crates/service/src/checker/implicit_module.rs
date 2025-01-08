@@ -14,6 +14,7 @@ pub fn check(
 ) {
     let severity = match lint_level {
         LintLevel::Allow => return,
+        LintLevel::Hint => DiagnosticSeverity::HINT,
         LintLevel::Warn => DiagnosticSeverity::WARNING,
         LintLevel::Deny => DiagnosticSeverity::ERROR,
     };
