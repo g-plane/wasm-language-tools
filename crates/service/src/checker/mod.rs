@@ -7,6 +7,7 @@ mod immediates;
 mod implicit_module;
 mod multi_modules;
 mod shadow;
+mod syntax;
 mod typeck;
 mod undef;
 mod unknown_instr;
@@ -19,7 +20,8 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
     let symbol_table = service.symbol_table(uri);
     let config = &service.get_config(uri);
 
-    let mut diagnostics = service.parser_result(uri).1;
+    let mut diagnostics = Vec::with_capacity(4);
+    syntax::check(service, &mut diagnostics, uri, &line_index, &root);
     root.descendants().for_each(|node| match node.kind() {
         SyntaxKind::ROOT => {
             multi_modules::check(&mut diagnostics, &line_index, &node);

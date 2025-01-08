@@ -19,7 +19,7 @@ pub(crate) trait FilesCtx: salsa::Database {
 
     #[salsa::memoized]
     #[salsa::invoke(parse)]
-    fn parser_result(&self, uri: InternUri) -> (GreenNode, Vec<Diagnostic>);
+    fn parser_result(&self, uri: InternUri) -> (GreenNode, Rc<Vec<Diagnostic>>);
 
     #[salsa::memoized]
     fn root(&self, uri: InternUri) -> GreenNode;
@@ -29,7 +29,7 @@ fn get_line_index(db: &dyn FilesCtx, uri: InternUri) -> Rc<LineIndex> {
     Rc::new(LineIndex::new(&db.source(uri)))
 }
 
-fn parse(db: &dyn FilesCtx, uri: InternUri) -> (GreenNode, Vec<Diagnostic>) {
+fn parse(db: &dyn FilesCtx, uri: InternUri) -> (GreenNode, Rc<Vec<Diagnostic>>) {
     let source = db.source(uri);
     let line_index = db.line_index(uri);
     let mut parser = Parser::new(&source);
@@ -60,7 +60,7 @@ fn parse(db: &dyn FilesCtx, uri: InternUri) -> (GreenNode, Vec<Diagnostic>) {
             }
         })
         .collect();
-    (green, syntax_errors)
+    (green, Rc::new(syntax_errors))
 }
 
 fn root(db: &dyn FilesCtx, uri: InternUri) -> GreenNode {

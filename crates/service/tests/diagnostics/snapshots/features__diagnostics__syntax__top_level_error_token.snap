@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/syntax.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 8
+        },
+        "end": {
+          "line": 0,
+          "character": 9
+        }
+      },
+      "severity": 1,
+      "code": "syntax",
+      "source": "wat",
+      "message": "syntax error: unexpected token"
+    }
+  ]
+}

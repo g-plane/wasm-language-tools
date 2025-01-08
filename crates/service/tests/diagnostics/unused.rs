@@ -94,7 +94,7 @@ fn type_unused() {
     let source = r#"
 (module
   (type (func))
-  (type $t (func))))
+  (type $t (func)))
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
