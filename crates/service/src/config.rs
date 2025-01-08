@@ -39,7 +39,7 @@ impl Default for Lints {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 /// Severity level when lint reports.
 pub enum LintLevel {
     #[serde(alias = "allow")]

@@ -17,6 +17,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
     let line_index = service.line_index(uri);
     let root = SyntaxNode::new_root(service.root(uri));
     let symbol_table = service.symbol_table(uri);
+    let config = &service.get_config(uri);
 
     let mut diagnostics = service.parser_result(uri).1;
     root.descendants().for_each(|node| match node.kind() {
@@ -24,7 +25,12 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
             multi_modules::check(&mut diagnostics, &line_index, &node);
         }
         SyntaxKind::MODULE => {
-            implicit_module::check(service, &mut diagnostics, uri, &line_index, &node);
+            implicit_module::check(
+                &mut diagnostics,
+                config.lint.implicit_module,
+                &line_index,
+                &node,
+            );
         }
         SyntaxKind::MODULE_FIELD_FUNC => {
             typeck::check_func(
@@ -32,15 +38,15 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                 service,
                 uri,
                 &line_index,
-                &node,
                 &symbol_table,
+                &node,
             );
             unreachable::check(
                 &mut diagnostics,
-                service.get_config(uri),
+                config.lint.unreachable,
                 &line_index,
-                &symbol_table,
                 &root,
+                &symbol_table,
                 &node,
             );
         }
@@ -50,8 +56,8 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                 service,
                 uri,
                 &line_index,
-                &node,
                 &symbol_table,
+                &node,
             );
         }
         SyntaxKind::PLAIN_INSTR => {
@@ -72,7 +78,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
     unused::check(
         service,
         &mut diagnostics,
-        uri,
+        config.lint.unused,
         &line_index,
         &root,
         &symbol_table,
@@ -80,6 +86,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
     shadow::check(
         service,
         &mut diagnostics,
+        config.lint.shadow,
         uri,
         &line_index,
         &root,

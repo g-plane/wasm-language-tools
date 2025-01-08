@@ -27,8 +27,8 @@ pub fn check_func(
     service: &LanguageService,
     uri: InternUri,
     line_index: &LineIndex,
-    node: &SyntaxNode,
     symbol_table: &SymbolTable,
+    node: &SyntaxNode,
 ) {
     let results = service
         .get_func_sig(uri, SyntaxNodePtr::new(node), node.green().into())
@@ -58,8 +58,8 @@ pub fn check_global(
     service: &LanguageService,
     uri: InternUri,
     line_index: &LineIndex,
-    node: &SyntaxNode,
     symbol_table: &SymbolTable,
+    node: &SyntaxNode,
 ) {
     check_block_like(
         diags,

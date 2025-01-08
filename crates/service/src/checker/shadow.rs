@@ -18,12 +18,13 @@ const DIAGNOSTIC_CODE: &str = "shadow";
 pub fn check(
     service: &LanguageService,
     diags: &mut Vec<Diagnostic>,
+    lint_level: LintLevel,
     uri: InternUri,
     line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
 ) {
-    let severity = match service.get_config(uri).lint.shadow {
+    let severity = match lint_level {
         LintLevel::Allow => return,
         LintLevel::Warn => DiagnosticSeverity::WARNING,
         LintLevel::Deny => DiagnosticSeverity::ERROR,

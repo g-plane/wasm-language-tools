@@ -2,7 +2,7 @@ use crate::{
     binder::{SymbolItem, SymbolItemKind, SymbolTable},
     helpers,
     idx::IdentsCtx,
-    InternUri, LanguageService, LintLevel,
+    LanguageService, LintLevel,
 };
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity, DiagnosticTag, NumberOrString};
@@ -14,12 +14,12 @@ const DIAGNOSTIC_CODE: &str = "unused";
 pub fn check(
     service: &LanguageService,
     diags: &mut Vec<Diagnostic>,
-    uri: InternUri,
+    lint_level: LintLevel,
     line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
 ) {
-    let severity = match service.get_config(uri).lint.unused {
+    let severity = match lint_level {
         LintLevel::Allow => return,
         LintLevel::Warn => DiagnosticSeverity::WARNING,
         LintLevel::Deny => DiagnosticSeverity::ERROR,

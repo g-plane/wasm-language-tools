@@ -1,6 +1,6 @@
 use crate::{
     binder::{SymbolItemKey, SymbolTable},
-    helpers, LintLevel, ServiceConfig,
+    helpers, LintLevel,
 };
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity, DiagnosticTag, NumberOrString};
@@ -16,10 +16,10 @@ const DIAGNOSTIC_CODE: &str = "unreachable";
 
 pub fn check(
     diags: &mut Vec<Diagnostic>,
-    config: &ServiceConfig,
+    lint_level: LintLevel,
     line_index: &LineIndex,
-    symbol_table: &SymbolTable,
     root: &SyntaxNode,
+    symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) {
     Checker {
@@ -27,7 +27,7 @@ pub fn check(
         line_index,
         symbol_table,
         root,
-        severity: match config.lint.unreachable {
+        severity: match lint_level {
             LintLevel::Allow => return,
             LintLevel::Warn => DiagnosticSeverity::WARNING,
             LintLevel::Deny => DiagnosticSeverity::ERROR,

@@ -1,4 +1,4 @@
-use crate::{helpers, InternUri, LanguageService, LintLevel};
+use crate::{helpers, LintLevel};
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
 use rowan::ast::support;
@@ -7,13 +7,12 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 const DIAGNOSTIC_CODE: &str = "implicit-module";
 
 pub fn check(
-    service: &LanguageService,
     diags: &mut Vec<Diagnostic>,
-    uri: InternUri,
+    lint_level: LintLevel,
     line_index: &LineIndex,
     node: &SyntaxNode,
 ) {
-    let severity = match service.get_config(uri).lint.implicit_module {
+    let severity = match lint_level {
         LintLevel::Allow => return,
         LintLevel::Warn => DiagnosticSeverity::WARNING,
         LintLevel::Deny => DiagnosticSeverity::ERROR,
