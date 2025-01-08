@@ -63,7 +63,7 @@ impl Checker<'_> {
         ) {
             match (result, unreachable, node.last_token()) {
                 (ControlFlow::Continue(..), true, Some(token)) if is_end_keyword(&token) => {
-                    self.report_token(token);
+                    self.report_token(&token);
                 }
                 _ => {}
             }
@@ -112,7 +112,13 @@ impl Checker<'_> {
         }
         match instr {
             Instr::Plain(plain) => {
+                plain
+                    .instrs()
+                    .try_for_each(|instr| self.check_instr(&instr, parent_block, unreachable));
                 if let Some(instr_name) = plain.instr_name() {
+                    if *unreachable && !self.last_reported.contains_range(instr_name.text_range()) {
+                        self.report_token(&instr_name);
+                    }
                     let instr_name = instr_name.text();
                     if matches!(instr_name, "br" | "br_if" | "br_table") {
                         self.jumps
@@ -134,9 +140,6 @@ impl Checker<'_> {
                     }
                     *unreachable |= helpers::can_produce_never(instr_name);
                 }
-                plain
-                    .instrs()
-                    .try_for_each(|instr| self.check_instr(&instr, parent_block, unreachable));
             }
             Instr::Block(BlockInstr::Block(block_block)) => {
                 if self.check_block_like(block_block.syntax()) {
@@ -158,7 +161,7 @@ impl Checker<'_> {
                 if if_branch && else_branch {
                     *unreachable = true;
                     if let Some(keyword) = block_if.end_keyword() {
-                        self.report_token(keyword);
+                        self.report_token(&keyword);
                     }
                 }
             }
@@ -166,11 +169,11 @@ impl Checker<'_> {
         ControlFlow::Continue(())
     }
 
-    fn report_token(&mut self, token: SyntaxToken) {
-        let range = token.text_range();
-        self.last_reported = range;
+    fn report_token(&mut self, token: &SyntaxToken) {
+        // We don't update the last reported range for token here
+        // because token is atomic and nothing can be smaller than it.
         self.diags.push(Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(self.line_index, range),
+            range: helpers::rowan_range_to_lsp_range(self.line_index, token.text_range()),
             severity: Some(self.severity),
             source: Some("wat".into()),
             code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),

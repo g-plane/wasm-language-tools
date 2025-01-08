@@ -315,3 +315,24 @@ fn br_if_c() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn folded_plain_instr() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (nop)
+    (i32.add
+      (nop)
+      (unreachable
+        (i32.const 1))
+      (i32.const 0))
+    (nop)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
