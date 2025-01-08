@@ -148,9 +148,8 @@ impl Checker<'_> {
                 }
             }
             Instr::Block(BlockInstr::Loop(block_loop)) => {
-                if self.check_block_like(block_loop.syntax()) {
-                    *unreachable = true;
-                }
+                self.check_block_like(block_loop.syntax());
+                *unreachable = true;
             }
             Instr::Block(BlockInstr::If(block_if)) => {
                 block_if

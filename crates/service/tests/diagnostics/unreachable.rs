@@ -30,13 +30,13 @@ fn simple_reachable() {
     nop
     return)
   (func
-    loop
+    block
       block
         nop
       end
     end)
   (func (param i32)
-    loop
+    block
       local.get 0
       if
         br 0
@@ -350,6 +350,111 @@ fn folded_block_if() {
       (nop)
       (then)
       (else))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn infinite_loop() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    loop
+    end
+    nop)
+  (func
+    loop
+      block
+      end
+    end
+    nop)
+  (func (param i32)
+    loop
+      nop
+      block
+        nop
+        block
+          nop
+          block
+            local.get 0
+            if
+              br 0
+            end
+          end
+        end
+      end
+    end
+    nop)
+  (func (param i32)
+    loop
+      nop
+      block
+        nop
+        block
+          nop
+          block
+            local.get 0
+            br_if 0
+          end
+        end
+      end
+    end
+    nop))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn finite_loop() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    loop
+      br 0
+    end
+    nop)
+  (func (param i32)
+    loop $loop
+      nop
+      block
+        nop
+        block
+          nop
+          block
+            local.get 0
+            if
+              br $loop
+            end
+          end
+        end
+      end
+    end
+    nop)
+  (func (param i32)
+    loop $loop
+      nop
+      block
+        nop
+        block
+          nop
+          block
+            local.get 0
+            br_if $loop
+          end
+        end
+      end
+    end
+    nop))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

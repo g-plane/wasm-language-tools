@@ -1,0 +1,28 @@
+---
+source: crates/service/tests/diagnostics/unreachable.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 4
+        },
+        "end": {
+          "line": 5,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    }
+  ]
+}
