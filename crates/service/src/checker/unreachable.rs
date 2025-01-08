@@ -152,6 +152,9 @@ impl Checker<'_> {
                 }
             }
             Instr::Block(BlockInstr::If(block_if)) => {
+                block_if
+                    .instrs()
+                    .try_for_each(|instr| self.check_instr(&instr, parent_block, unreachable));
                 let if_branch = block_if
                     .then_block()
                     .is_some_and(|block| self.check_block_like(block.syntax()));
