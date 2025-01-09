@@ -130,7 +130,10 @@ fn check_block_like(
             type_stack
                 .stack
                 .extend(results.into_iter().map(|ty| (ty, instr.clone())));
-            type_stack.has_never |= helpers::can_produce_never(instr_name);
+            if helpers::can_produce_never(instr_name) {
+                type_stack.has_never = true;
+                type_stack.stack.clear();
+            }
         }
         Instr::Block(block_instr) => {
             let node = block_instr.syntax();
@@ -296,9 +299,6 @@ impl TypeStack<'_> {
         expected: &[OperandType],
         report_range: ReportRange,
     ) -> Option<Diagnostic> {
-        if self.has_never {
-            return None;
-        }
         let mut diagnostic = None;
         let mut mismatch = false;
         let mut related_information = vec![];
@@ -323,7 +323,10 @@ impl TypeStack<'_> {
                         message: format!("expected type `{expected}`, found `{received}`"),
                     });
                 }
-                EitherOrBoth::Left(..) | EitherOrBoth::Right(..) => {
+                EitherOrBoth::Left(..) if !self.has_never => {
+                    mismatch = true;
+                }
+                EitherOrBoth::Right(..) => {
                     mismatch = true;
                 }
                 _ => {}

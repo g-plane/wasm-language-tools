@@ -1861,3 +1861,28 @@ fn br_if_correct() {
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
+
+#[test]
+fn excessive_at_end() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    block (result i32 i32)
+      i32.const 0
+      i32.const 0
+      i32.const 0
+      unreachable
+      i32.const 0
+      i32.const 0
+      i32.const 0
+    end
+    drop
+    drop))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

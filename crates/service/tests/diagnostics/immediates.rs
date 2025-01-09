@@ -148,8 +148,9 @@ fn select_incorrect() {
 (module
   (type $t (func (result i32)))
   (func
-    (select $t
-      (unreachable))))
+    (drop
+      (select $t
+        (unreachable)))))
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -169,8 +170,9 @@ fn select_correct() {
       (i32.const 0)
       (i32.const 1)
       (i32.const 2))
-    (select (type $t)
-      (unreachable))))
+    (drop
+      (select (type $t)
+        (unreachable)))))
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

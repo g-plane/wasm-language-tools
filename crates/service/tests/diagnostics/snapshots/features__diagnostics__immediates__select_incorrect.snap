@@ -8,12 +8,12 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 4,
-          "character": 12
+          "line": 5,
+          "character": 14
         },
         "end": {
-          "line": 4,
-          "character": 14
+          "line": 5,
+          "character": 16
         }
       },
       "severity": 1,

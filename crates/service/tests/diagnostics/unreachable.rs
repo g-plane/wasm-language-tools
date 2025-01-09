@@ -328,6 +328,7 @@ fn folded_plain_instr() {
       (unreachable
         (i32.const 1))
       (i32.const 0))
+    (drop)
     (nop)))
 ";
     let mut service = LanguageService::default();
