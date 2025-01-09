@@ -122,17 +122,14 @@ fn check_block_like(
             };
             let instr_name = instr_name.text();
             let meta = data_set::INSTR_METAS.get(instr_name);
-            let Some(params) = resolve_expected_types(shared, plain_instr, meta) else {
-                return;
-            };
+            let params = resolve_expected_types(shared, instr_name, plain_instr, meta);
             if let Some(diag) = type_stack.check(&params, ReportRange::Instr(&instr)) {
                 diags.push(diag);
             }
-            if let Some(types) = resolve_type(shared, plain_instr) {
-                type_stack
-                    .stack
-                    .extend(types.into_iter().map(|ty| (ty, instr.clone())));
-            }
+            let results = resolve_resulted_type(shared, instr_name, plain_instr);
+            type_stack
+                .stack
+                .extend(results.into_iter().map(|ty| (ty, instr.clone())));
             type_stack.has_never |= helpers::can_produce_never(instr_name);
         }
         Instr::Block(block_instr) => {
@@ -360,63 +357,78 @@ impl TypeStack<'_> {
     }
 }
 
-fn resolve_type(shared: &Shared, plain_instr: &PlainInstr) -> Option<Vec<OperandType>> {
-    let instr_name = plain_instr.instr_name()?;
-    match instr_name.text() {
-        "call" => {
-            let idx = plain_instr.immediates().next()?;
-            shared
-                .symbol_table
-                .find_defs(SymbolItemKey::new(idx.syntax()))
-                .into_iter()
-                .flatten()
-                .next()
-                .and_then(|func| {
-                    shared
-                        .service
-                        .get_func_sig(shared.uri, func.key, func.green.clone())
-                })
-                .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
-        }
-        "local.get" => {
-            let idx = plain_instr.immediates().next()?;
-            shared
-                .symbol_table
-                .find_param_or_local_def(SymbolItemKey::new(idx.syntax()))
-                .and_then(|symbol| shared.service.extract_type(symbol.green.clone()))
-                .map(OperandType::Val)
-                .or(Some(OperandType::Any))
-                .map(|ty| vec![ty])
-        }
-        "global.get" => {
-            let idx = plain_instr.immediates().next()?;
-            shared
-                .symbol_table
-                .find_defs(SymbolItemKey::new(idx.syntax()))
-                .into_iter()
-                .flatten()
-                .next()
-                .and_then(|symbol| shared.service.extract_global_type(symbol.green.clone()))
-                .map(OperandType::Val)
-                .or(Some(OperandType::Any))
-                .map(|ty| vec![ty])
-        }
+fn resolve_resulted_type(
+    shared: &Shared,
+    instr_name: &str,
+    plain_instr: &PlainInstr,
+) -> Vec<OperandType> {
+    match instr_name {
+        "call" => plain_instr
+            .immediates()
+            .next()
+            .and_then(|idx| {
+                shared
+                    .symbol_table
+                    .find_defs(SymbolItemKey::new(idx.syntax()))
+            })
+            .into_iter()
+            .flatten()
+            .next()
+            .and_then(|func| {
+                shared
+                    .service
+                    .get_func_sig(shared.uri, func.key, func.green.clone())
+            })
+            .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
+            .unwrap_or_default(),
+        "local.get" => plain_instr
+            .immediates()
+            .next()
+            .and_then(|idx| {
+                shared
+                    .symbol_table
+                    .find_param_or_local_def(SymbolItemKey::new(idx.syntax()))
+            })
+            .and_then(|symbol| shared.service.extract_type(symbol.green.clone()))
+            .map(OperandType::Val)
+            .or(Some(OperandType::Any))
+            .map(|ty| vec![ty])
+            .unwrap_or_default(),
+        "global.get" => plain_instr
+            .immediates()
+            .next()
+            .and_then(|idx| {
+                shared
+                    .symbol_table
+                    .find_defs(SymbolItemKey::new(idx.syntax()))
+            })
+            .into_iter()
+            .flatten()
+            .next()
+            .and_then(|symbol| shared.service.extract_global_type(symbol.green.clone()))
+            .map(OperandType::Val)
+            .or(Some(OperandType::Any))
+            .map(|ty| vec![ty])
+            .unwrap_or_default(),
         "br" | "br_if" => plain_instr
             .immediates()
             .next()
-            .and_then(|idx| resolve_br_types(shared, idx)),
+            .map(|idx| resolve_br_types(shared, idx))
+            .unwrap_or_default(),
         _ => data_set::INSTR_METAS
-            .get(instr_name.text())
-            .map(|meta| meta.results.clone()),
+            .get(instr_name)
+            .map(|meta| meta.results.clone())
+            .unwrap_or_default(),
     }
 }
 
 fn resolve_expected_types(
     shared: &Shared,
+    instr_name: &str,
     instr: &PlainInstr,
     meta: Option<&data_set::InstrMeta>,
-) -> Option<Vec<OperandType>> {
-    match instr.instr_name()?.text() {
+) -> Vec<OperandType> {
+    match instr_name {
         "call" => instr
             .immediates()
             .next()
@@ -438,7 +450,8 @@ fn resolve_expected_types(
                     .into_iter()
                     .map(|(ty, ..)| OperandType::Val(ty))
                     .collect()
-            }),
+            })
+            .unwrap_or_default(),
         "return" => instr
             .syntax()
             .ancestors()
@@ -450,25 +463,27 @@ fn resolve_expected_types(
                     func.green().into(),
                 )
             })
-            .map(|sig| sig.results.into_iter().map(OperandType::Val).collect()),
+            .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
+            .unwrap_or_default(),
         "br" => instr
             .immediates()
             .next()
-            .and_then(|idx| resolve_br_types(shared, idx)),
+            .map(|idx| resolve_br_types(shared, idx))
+            .unwrap_or_default(),
         "br_if" => {
             let mut types = instr
                 .immediates()
                 .next()
-                .and_then(|idx| resolve_br_types(shared, idx))
+                .map(|idx| resolve_br_types(shared, idx))
                 .unwrap_or_default();
             types.push(OperandType::Val(ValType::I32));
-            Some(types)
+            types
         }
-        "br_table" => Some(vec![OperandType::Val(ValType::I32)]),
-        _ => meta.map(|meta| meta.params.clone()),
+        "br_table" => vec![OperandType::Val(ValType::I32)],
+        _ => meta.map(|meta| meta.params.clone()).unwrap_or_default(),
     }
 }
-fn resolve_br_types(shared: &Shared, idx: Immediate) -> Option<Vec<OperandType>> {
+fn resolve_br_types(shared: &Shared, idx: Immediate) -> Vec<OperandType> {
     let key = SymbolItemKey::new(idx.syntax());
     shared
         .symbol_table
@@ -485,6 +500,7 @@ fn resolve_br_types(shared: &Shared, idx: Immediate) -> Option<Vec<OperandType>>
             )
         })
         .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
+        .unwrap_or_default()
 }
 
 enum ReportRange<'a> {

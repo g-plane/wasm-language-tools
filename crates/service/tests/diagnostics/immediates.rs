@@ -15,7 +15,7 @@ fn index() {
         (global.get 1.0) (drop)
         (global.set \"\" (i32.const 0))
         (call)
-        (local.get)
+        (local.get) (drop)
         (local.set (i32.const 0))
     )
 )
