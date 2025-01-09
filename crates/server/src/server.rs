@@ -4,8 +4,8 @@ use lsp_server::{
 };
 use lsp_types::{
     notification::{
-        DidChangeConfiguration, DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument,
-        Notification as _, PublishDiagnostics,
+        DidChangeConfiguration, DidChangeTextDocument, DidOpenTextDocument, Notification as _,
+        PublishDiagnostics,
     },
     request::{
         CallHierarchyIncomingCalls, CallHierarchyOutgoingCalls, CallHierarchyPrepare,
@@ -17,8 +17,7 @@ use lsp_types::{
         WorkspaceConfiguration, WorkspaceDiagnosticRefresh,
     },
     ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams,
-    DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
-    InitializeParams, PublishDiagnosticsParams, Uri,
+    DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams, Uri,
 };
 use wat_service::LanguageService;
 
@@ -426,14 +425,6 @@ impl Server {
                         Err(ExtractError::MethodMismatch(n)) => notification = n,
                         Err(ExtractError::JsonError { .. }) => continue,
                     };
-                    match cast_notification::<DidCloseTextDocument>(notification) {
-                        Ok(params) => {
-                            self.handle_did_close_text_document(params, &conn)?;
-                            continue;
-                        }
-                        Err(ExtractError::MethodMismatch(n)) => notification = n,
-                        Err(ExtractError::JsonError { .. }) => continue,
-                    };
                     match cast_notification::<DidChangeConfiguration>(notification) {
                         Ok(params) => {
                             self.handle_did_change_configuration(params, &conn)?;
@@ -510,22 +501,6 @@ impl Server {
                 self.publish_diagnostics(conn, params.text_document.uri)?;
             }
         }
-        Ok(())
-    }
-
-    fn handle_did_close_text_document(
-        &mut self,
-        params: DidCloseTextDocumentParams,
-        conn: &Connection,
-    ) -> anyhow::Result<()> {
-        conn.sender.send(Message::Notification(Notification {
-            method: PublishDiagnostics::METHOD.to_string(),
-            params: serde_json::to_value(PublishDiagnosticsParams {
-                uri: params.text_document.uri,
-                diagnostics: vec![],
-                version: None,
-            })?,
-        }))?;
         Ok(())
     }
 
