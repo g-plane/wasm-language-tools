@@ -9,12 +9,108 @@ pub(crate) struct InstrMeta {
 }
 
 pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = LazyLock::new(|| {
-    let mut map = HashMap::with_capacity_and_hasher(425, FxBuildHasher);
+    let mut map = HashMap::with_capacity_and_hasher(437, FxBuildHasher);
     map.insert(
         "unreachable",
         InstrMeta {
             bin_op: "0x00",
             params: vec![],
+            results: vec![],
+        },
+    );
+    map.insert(
+        "nop",
+        InstrMeta {
+            bin_op: "0x01",
+            params: vec![],
+            results: vec![],
+        },
+    );
+    map.insert(
+        "block",
+        InstrMeta {
+            bin_op: "0x02",
+            params: vec![],
+            results: vec![],
+        },
+    );
+    map.insert(
+        "loop",
+        InstrMeta {
+            bin_op: "0x03",
+            params: vec![],
+            results: vec![],
+        },
+    );
+    map.insert(
+        "if",
+        InstrMeta {
+            bin_op: "0x04",
+            params: vec![OperandType::Val(ValType::I32)],
+            results: vec![],
+        },
+    );
+    map.insert(
+        "else",
+        InstrMeta {
+            bin_op: "0x05",
+            params: vec![],
+            results: vec![],
+        },
+    );
+    map.insert(
+        "end",
+        InstrMeta {
+            bin_op: "0x0B",
+            params: vec![],
+            results: vec![],
+        },
+    );
+    map.insert(
+        "br",
+        InstrMeta {
+            bin_op: "0x0C",
+            params: vec![],
+            results: vec![],
+        },
+    );
+    map.insert(
+        "br_if",
+        InstrMeta {
+            bin_op: "0x0D",
+            params: vec![OperandType::Val(ValType::I32)],
+            results: vec![],
+        },
+    );
+    map.insert(
+        "br_table",
+        InstrMeta {
+            bin_op: "0x0E",
+            params: vec![OperandType::Val(ValType::I32)],
+            results: vec![],
+        },
+    );
+    map.insert(
+        "return",
+        InstrMeta {
+            bin_op: "0x0F",
+            params: vec![],
+            results: vec![],
+        },
+    );
+    map.insert(
+        "call",
+        InstrMeta {
+            bin_op: "0x10",
+            params: vec![],
+            results: vec![],
+        },
+    );
+    map.insert(
+        "call_indirect",
+        InstrMeta {
+            bin_op: "0x11",
+            params: vec![OperandType::Val(ValType::I32)],
             results: vec![],
         },
     );
