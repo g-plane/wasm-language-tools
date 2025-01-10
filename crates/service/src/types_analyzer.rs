@@ -1,6 +1,6 @@
 use crate::{
     binder::{SymbolItem, SymbolItemKey, SymbolTablesCtx},
-    data_set::INSTR_METAS,
+    data_set::INSTR_SIG,
     helpers,
     idx::InternIdent,
     syntax_tree::SyntaxTreeCtx,
@@ -260,7 +260,7 @@ pub(crate) fn resolve_param_types(
                     .collect()
             })
     } else {
-        INSTR_METAS.get(instr_name).map(|meta| meta.params.clone())
+        INSTR_SIG.get(instr_name).map(|sig| sig.params.clone())
     }
 }
 
@@ -360,6 +360,12 @@ impl Display for OperandType {
 pub(crate) struct Signature {
     pub(crate) params: Vec<(ValType, Option<InternIdent>)>,
     pub(crate) results: Vec<ValType>,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct ResolvedSig {
+    pub(crate) params: Vec<OperandType>,
+    pub(crate) results: Vec<OperandType>,
 }
 
 #[derive(Clone)]

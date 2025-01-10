@@ -1,131 +1,110 @@
-use crate::types_analyzer::{OperandType, ValType};
+use crate::types_analyzer::{OperandType, ResolvedSig, ValType};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::{collections::HashMap, sync::LazyLock};
 
-pub(crate) struct InstrMeta {
-    pub bin_op: &'static str,
-    pub params: Vec<OperandType>,
-    pub results: Vec<OperandType>,
-}
-
-pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = LazyLock::new(|| {
+pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = LazyLock::new(|| {
     let mut map = HashMap::with_capacity_and_hasher(437, FxBuildHasher);
     map.insert(
         "unreachable",
-        InstrMeta {
-            bin_op: "0x00",
+        ResolvedSig {
             params: vec![],
             results: vec![],
         },
     );
     map.insert(
         "nop",
-        InstrMeta {
-            bin_op: "0x01",
+        ResolvedSig {
             params: vec![],
             results: vec![],
         },
     );
     map.insert(
         "block",
-        InstrMeta {
-            bin_op: "0x02",
+        ResolvedSig {
             params: vec![],
             results: vec![],
         },
     );
     map.insert(
         "loop",
-        InstrMeta {
-            bin_op: "0x03",
+        ResolvedSig {
             params: vec![],
             results: vec![],
         },
     );
     map.insert(
         "if",
-        InstrMeta {
-            bin_op: "0x04",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![],
         },
     );
     map.insert(
         "else",
-        InstrMeta {
-            bin_op: "0x05",
+        ResolvedSig {
             params: vec![],
             results: vec![],
         },
     );
     map.insert(
         "end",
-        InstrMeta {
-            bin_op: "0x0B",
+        ResolvedSig {
             params: vec![],
             results: vec![],
         },
     );
     map.insert(
         "br",
-        InstrMeta {
-            bin_op: "0x0C",
+        ResolvedSig {
             params: vec![],
             results: vec![],
         },
     );
     map.insert(
         "br_if",
-        InstrMeta {
-            bin_op: "0x0D",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![],
         },
     );
     map.insert(
         "br_table",
-        InstrMeta {
-            bin_op: "0x0E",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![],
         },
     );
     map.insert(
         "return",
-        InstrMeta {
-            bin_op: "0x0F",
+        ResolvedSig {
             params: vec![],
             results: vec![],
         },
     );
     map.insert(
         "call",
-        InstrMeta {
-            bin_op: "0x10",
+        ResolvedSig {
             params: vec![],
             results: vec![],
         },
     );
     map.insert(
         "call_indirect",
-        InstrMeta {
-            bin_op: "0x11",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![],
         },
     );
     map.insert(
         "drop",
-        InstrMeta {
-            bin_op: "0x1A",
+        ResolvedSig {
             params: vec![OperandType::Any],
             results: vec![],
         },
     );
     map.insert(
         "select",
-        InstrMeta {
-            bin_op: "0x1B",
+        ResolvedSig {
             params: vec![
                 OperandType::Any,
                 OperandType::Any,
@@ -136,8 +115,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "select",
-        InstrMeta {
-            bin_op: "0x1C",
+        ResolvedSig {
             params: vec![
                 OperandType::Any,
                 OperandType::Any,
@@ -148,176 +126,154 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "local.get",
-        InstrMeta {
-            bin_op: "0x20",
+        ResolvedSig {
             params: vec![],
             results: vec![OperandType::Any],
         },
     );
     map.insert(
         "local.set",
-        InstrMeta {
-            bin_op: "0x21",
+        ResolvedSig {
             params: vec![OperandType::Any],
             results: vec![],
         },
     );
     map.insert(
         "local.tee",
-        InstrMeta {
-            bin_op: "0x22",
+        ResolvedSig {
             params: vec![OperandType::Any],
             results: vec![OperandType::Any],
         },
     );
     map.insert(
         "global.get",
-        InstrMeta {
-            bin_op: "0x23",
+        ResolvedSig {
             params: vec![],
             results: vec![OperandType::Any],
         },
     );
     map.insert(
         "global.set",
-        InstrMeta {
-            bin_op: "0x24",
+        ResolvedSig {
             params: vec![OperandType::Any],
             results: vec![],
         },
     );
     map.insert(
         "table.get",
-        InstrMeta {
-            bin_op: "0x25",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Any],
         },
     );
     map.insert(
         "table.set",
-        InstrMeta {
-            bin_op: "0x26",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32), OperandType::Any],
             results: vec![],
         },
     );
     map.insert(
         "i32.load",
-        InstrMeta {
-            bin_op: "0x28",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.load",
-        InstrMeta {
-            bin_op: "0x29",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "f32.load",
-        InstrMeta {
-            bin_op: "0x2A",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f64.load",
-        InstrMeta {
-            bin_op: "0x2B",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "i32.load8_s",
-        InstrMeta {
-            bin_op: "0x2C",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.load8_u",
-        InstrMeta {
-            bin_op: "0x2D",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.load16_s",
-        InstrMeta {
-            bin_op: "0x2E",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.load16_u",
-        InstrMeta {
-            bin_op: "0x2F",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.load8_s",
-        InstrMeta {
-            bin_op: "0x30",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.load8_u",
-        InstrMeta {
-            bin_op: "0x31",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.load16_s",
-        InstrMeta {
-            bin_op: "0x32",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.load16_u",
-        InstrMeta {
-            bin_op: "0x33",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.load32_s",
-        InstrMeta {
-            bin_op: "0x34",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.load32_u",
-        InstrMeta {
-            bin_op: "0x35",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i32.store",
-        InstrMeta {
-            bin_op: "0x36",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -327,8 +283,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.store",
-        InstrMeta {
-            bin_op: "0x37",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I64),
@@ -338,8 +293,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32.store",
-        InstrMeta {
-            bin_op: "0x38",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::F32),
@@ -349,8 +303,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64.store",
-        InstrMeta {
-            bin_op: "0x39",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::F64),
@@ -360,8 +313,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.store8",
-        InstrMeta {
-            bin_op: "0x3A",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -371,8 +323,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.store16",
-        InstrMeta {
-            bin_op: "0x3B",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -382,8 +333,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.store8",
-        InstrMeta {
-            bin_op: "0x3C",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I64),
@@ -393,8 +343,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.store16",
-        InstrMeta {
-            bin_op: "0x3D",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I64),
@@ -404,8 +353,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.store32",
-        InstrMeta {
-            bin_op: "0x3E",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I64),
@@ -415,64 +363,56 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "memory.size",
-        InstrMeta {
-            bin_op: "0x3F",
+        ResolvedSig {
             params: vec![],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "memory.grow",
-        InstrMeta {
-            bin_op: "0x40",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.const",
-        InstrMeta {
-            bin_op: "0x41",
+        ResolvedSig {
             params: vec![],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.const",
-        InstrMeta {
-            bin_op: "0x42",
+        ResolvedSig {
             params: vec![],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "f32.const",
-        InstrMeta {
-            bin_op: "0x43",
+        ResolvedSig {
             params: vec![],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f64.const",
-        InstrMeta {
-            bin_op: "0x44",
+        ResolvedSig {
             params: vec![],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "i32.eqz",
-        InstrMeta {
-            bin_op: "0x45",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.eq",
-        InstrMeta {
-            bin_op: "0x46",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -482,8 +422,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.ne",
-        InstrMeta {
-            bin_op: "0x47",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -493,8 +432,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.lt_s",
-        InstrMeta {
-            bin_op: "0x48",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -504,8 +442,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.lt_u",
-        InstrMeta {
-            bin_op: "0x49",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -515,8 +452,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.gt_s",
-        InstrMeta {
-            bin_op: "0x4A",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -526,8 +462,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.gt_u",
-        InstrMeta {
-            bin_op: "0x4B",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -537,8 +472,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.le_s",
-        InstrMeta {
-            bin_op: "0x4C",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -548,8 +482,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.le_u",
-        InstrMeta {
-            bin_op: "0x4D",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -559,8 +492,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.ge_s",
-        InstrMeta {
-            bin_op: "0x4E",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -570,8 +502,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.ge_u",
-        InstrMeta {
-            bin_op: "0x4F",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -581,16 +512,14 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.eqz",
-        InstrMeta {
-            bin_op: "0x50",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.eq",
-        InstrMeta {
-            bin_op: "0x51",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -600,8 +529,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.ne",
-        InstrMeta {
-            bin_op: "0x52",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -611,8 +539,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.lt_s",
-        InstrMeta {
-            bin_op: "0x53",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -622,8 +549,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.lt_u",
-        InstrMeta {
-            bin_op: "0x54",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -633,8 +559,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.gt_s",
-        InstrMeta {
-            bin_op: "0x55",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -644,8 +569,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.gt_u",
-        InstrMeta {
-            bin_op: "0x56",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -655,8 +579,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.le_s",
-        InstrMeta {
-            bin_op: "0x57",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -666,8 +589,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.le_u",
-        InstrMeta {
-            bin_op: "0x58",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -677,8 +599,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.ge_s",
-        InstrMeta {
-            bin_op: "0x59",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -688,8 +609,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.ge_u",
-        InstrMeta {
-            bin_op: "0x5A",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -699,8 +619,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32.eq",
-        InstrMeta {
-            bin_op: "0x5B",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F32),
                 OperandType::Val(ValType::F32),
@@ -710,8 +629,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32.ne",
-        InstrMeta {
-            bin_op: "0x5C",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F32),
                 OperandType::Val(ValType::F32),
@@ -721,8 +639,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32.lt",
-        InstrMeta {
-            bin_op: "0x5D",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F32),
                 OperandType::Val(ValType::F32),
@@ -732,8 +649,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32.gt",
-        InstrMeta {
-            bin_op: "0x5E",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F32),
                 OperandType::Val(ValType::F32),
@@ -743,8 +659,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32.le",
-        InstrMeta {
-            bin_op: "0x5F",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F32),
                 OperandType::Val(ValType::F32),
@@ -754,8 +669,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32.ge",
-        InstrMeta {
-            bin_op: "0x60",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F32),
                 OperandType::Val(ValType::F32),
@@ -765,8 +679,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64.eq",
-        InstrMeta {
-            bin_op: "0x61",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F64),
                 OperandType::Val(ValType::F64),
@@ -776,8 +689,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64.ne",
-        InstrMeta {
-            bin_op: "0x62",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F64),
                 OperandType::Val(ValType::F64),
@@ -787,8 +699,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64.lt",
-        InstrMeta {
-            bin_op: "0x63",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F64),
                 OperandType::Val(ValType::F64),
@@ -798,8 +709,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64.gt",
-        InstrMeta {
-            bin_op: "0x64",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F64),
                 OperandType::Val(ValType::F64),
@@ -809,8 +719,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64.le",
-        InstrMeta {
-            bin_op: "0x65",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F64),
                 OperandType::Val(ValType::F64),
@@ -820,8 +729,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64.ge",
-        InstrMeta {
-            bin_op: "0x66",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F64),
                 OperandType::Val(ValType::F64),
@@ -831,32 +739,28 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.clz",
-        InstrMeta {
-            bin_op: "0x67",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.ctz",
-        InstrMeta {
-            bin_op: "0x68",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.popcnt",
-        InstrMeta {
-            bin_op: "0x69",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.add",
-        InstrMeta {
-            bin_op: "0x6A",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -866,8 +770,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.sub",
-        InstrMeta {
-            bin_op: "0x6B",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -877,8 +780,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.mul",
-        InstrMeta {
-            bin_op: "0x6C",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -888,8 +790,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.div_s",
-        InstrMeta {
-            bin_op: "0x6D",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -899,8 +800,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.div_u",
-        InstrMeta {
-            bin_op: "0x6E",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -910,8 +810,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.rem_s",
-        InstrMeta {
-            bin_op: "0x6F",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -921,8 +820,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.rem_u",
-        InstrMeta {
-            bin_op: "0x70",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -932,8 +830,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.and",
-        InstrMeta {
-            bin_op: "0x71",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -943,8 +840,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.or",
-        InstrMeta {
-            bin_op: "0x72",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -954,8 +850,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.xor",
-        InstrMeta {
-            bin_op: "0x73",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -965,8 +860,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.shl",
-        InstrMeta {
-            bin_op: "0x74",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -976,8 +870,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.shr_s",
-        InstrMeta {
-            bin_op: "0x75",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -987,8 +880,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.shr_u",
-        InstrMeta {
-            bin_op: "0x76",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -998,8 +890,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.rotl",
-        InstrMeta {
-            bin_op: "0x77",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -1009,8 +900,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.rotr",
-        InstrMeta {
-            bin_op: "0x78",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -1020,32 +910,28 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.clz",
-        InstrMeta {
-            bin_op: "0x79",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.ctz",
-        InstrMeta {
-            bin_op: "0x7A",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.popcnt",
-        InstrMeta {
-            bin_op: "0x7B",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.add",
-        InstrMeta {
-            bin_op: "0x7C",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -1055,8 +941,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.sub",
-        InstrMeta {
-            bin_op: "0x7D",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -1066,8 +951,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.mul",
-        InstrMeta {
-            bin_op: "0x7E",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -1077,8 +961,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.div_s",
-        InstrMeta {
-            bin_op: "0x7F",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -1088,8 +971,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.div_u",
-        InstrMeta {
-            bin_op: "0x80",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -1099,8 +981,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.rem_s",
-        InstrMeta {
-            bin_op: "0x81",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -1110,8 +991,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.rem_u",
-        InstrMeta {
-            bin_op: "0x82",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -1121,8 +1001,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.and",
-        InstrMeta {
-            bin_op: "0x83",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -1132,8 +1011,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.or",
-        InstrMeta {
-            bin_op: "0x84",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -1143,8 +1021,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.xor",
-        InstrMeta {
-            bin_op: "0x85",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -1154,8 +1031,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.shl",
-        InstrMeta {
-            bin_op: "0x86",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -1165,8 +1041,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.shr_s",
-        InstrMeta {
-            bin_op: "0x87",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -1176,8 +1051,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.shr_u",
-        InstrMeta {
-            bin_op: "0x88",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -1187,8 +1061,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.rotl",
-        InstrMeta {
-            bin_op: "0x89",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -1198,8 +1071,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64.rotr",
-        InstrMeta {
-            bin_op: "0x8A",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
@@ -1209,64 +1081,56 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32.abs",
-        InstrMeta {
-            bin_op: "0x8B",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.neg",
-        InstrMeta {
-            bin_op: "0x8C",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.ceil",
-        InstrMeta {
-            bin_op: "0x8D",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.floor",
-        InstrMeta {
-            bin_op: "0x8E",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.trunc",
-        InstrMeta {
-            bin_op: "0x8F",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.nearest",
-        InstrMeta {
-            bin_op: "0x90",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.sqrt",
-        InstrMeta {
-            bin_op: "0x91",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.add",
-        InstrMeta {
-            bin_op: "0x92",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F32),
                 OperandType::Val(ValType::F32),
@@ -1276,8 +1140,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32.sub",
-        InstrMeta {
-            bin_op: "0x93",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F32),
                 OperandType::Val(ValType::F32),
@@ -1287,8 +1150,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32.mul",
-        InstrMeta {
-            bin_op: "0x94",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F32),
                 OperandType::Val(ValType::F32),
@@ -1298,8 +1160,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32.div",
-        InstrMeta {
-            bin_op: "0x95",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F32),
                 OperandType::Val(ValType::F32),
@@ -1309,8 +1170,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32.min",
-        InstrMeta {
-            bin_op: "0x96",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F32),
                 OperandType::Val(ValType::F32),
@@ -1320,8 +1180,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32.max",
-        InstrMeta {
-            bin_op: "0x97",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F32),
                 OperandType::Val(ValType::F32),
@@ -1331,8 +1190,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32.copysign",
-        InstrMeta {
-            bin_op: "0x98",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F32),
                 OperandType::Val(ValType::F32),
@@ -1342,64 +1200,56 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64.abs",
-        InstrMeta {
-            bin_op: "0x99",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.neg",
-        InstrMeta {
-            bin_op: "0x9A",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.ceil",
-        InstrMeta {
-            bin_op: "0x9B",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.floor",
-        InstrMeta {
-            bin_op: "0x9C",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.trunc",
-        InstrMeta {
-            bin_op: "0x9D",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.nearest",
-        InstrMeta {
-            bin_op: "0x9E",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.sqrt",
-        InstrMeta {
-            bin_op: "0x9F",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.add",
-        InstrMeta {
-            bin_op: "0xA0",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F64),
                 OperandType::Val(ValType::F64),
@@ -1409,8 +1259,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64.sub",
-        InstrMeta {
-            bin_op: "0xA1",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F64),
                 OperandType::Val(ValType::F64),
@@ -1420,8 +1269,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64.mul",
-        InstrMeta {
-            bin_op: "0xA2",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F64),
                 OperandType::Val(ValType::F64),
@@ -1431,8 +1279,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64.div",
-        InstrMeta {
-            bin_op: "0xA3",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F64),
                 OperandType::Val(ValType::F64),
@@ -1442,8 +1289,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64.min",
-        InstrMeta {
-            bin_op: "0xA4",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F64),
                 OperandType::Val(ValType::F64),
@@ -1453,8 +1299,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64.max",
-        InstrMeta {
-            bin_op: "0xA5",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F64),
                 OperandType::Val(ValType::F64),
@@ -1464,8 +1309,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64.copysign",
-        InstrMeta {
-            bin_op: "0xA6",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::F64),
                 OperandType::Val(ValType::F64),
@@ -1475,336 +1319,294 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32.wrap_i64",
-        InstrMeta {
-            bin_op: "0xA7",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.trunc_f32_s",
-        InstrMeta {
-            bin_op: "0xA8",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.trunc_f32_u",
-        InstrMeta {
-            bin_op: "0xA9",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.trunc_f64_s",
-        InstrMeta {
-            bin_op: "0xAA",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.trunc_f64_u",
-        InstrMeta {
-            bin_op: "0xAB",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.extend_i32_s",
-        InstrMeta {
-            bin_op: "0xAC",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.extend_i32_u",
-        InstrMeta {
-            bin_op: "0xAD",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.trunc_f32_s",
-        InstrMeta {
-            bin_op: "0xAE",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.trunc_f32_u",
-        InstrMeta {
-            bin_op: "0xAF",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.trunc_f64_s",
-        InstrMeta {
-            bin_op: "0xB0",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.trunc_f64_u",
-        InstrMeta {
-            bin_op: "0xB1",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "f32.convert_i32_s",
-        InstrMeta {
-            bin_op: "0xB2",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.convert_i32_u",
-        InstrMeta {
-            bin_op: "0xB3",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.convert_i64_s",
-        InstrMeta {
-            bin_op: "0xB4",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.convert_i64_u",
-        InstrMeta {
-            bin_op: "0xB5",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.demote_f64",
-        InstrMeta {
-            bin_op: "0xB6",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f64.convert_i32_s",
-        InstrMeta {
-            bin_op: "0xB7",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.convert_i32_u",
-        InstrMeta {
-            bin_op: "0xB8",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.convert_i64_s",
-        InstrMeta {
-            bin_op: "0xB9",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.convert_i64_u",
-        InstrMeta {
-            bin_op: "0xBA",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.promote_f32",
-        InstrMeta {
-            bin_op: "0xBB",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "i32.reinterpret_f32",
-        InstrMeta {
-            bin_op: "0xBC",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.reinterpret_f64",
-        InstrMeta {
-            bin_op: "0xBD",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "f32.reinterpret_i32",
-        InstrMeta {
-            bin_op: "0xBE",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f64.reinterpret_i64",
-        InstrMeta {
-            bin_op: "0xBF",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "i32.extend8_s",
-        InstrMeta {
-            bin_op: "0xC0",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.extend16_s",
-        InstrMeta {
-            bin_op: "0xC1",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.extend8_s",
-        InstrMeta {
-            bin_op: "0xC2",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.extend16_s",
-        InstrMeta {
-            bin_op: "0xC3",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.extend32_s",
-        InstrMeta {
-            bin_op: "0xC4",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "ref.null",
-        InstrMeta {
-            bin_op: "0xD0",
+        ResolvedSig {
             params: vec![],
             results: vec![OperandType::Any],
         },
     );
     map.insert(
         "ref.is_null",
-        InstrMeta {
-            bin_op: "0xD1",
+        ResolvedSig {
             params: vec![OperandType::Any],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "ref.func",
-        InstrMeta {
-            bin_op: "0xD2",
+        ResolvedSig {
             params: vec![],
             results: vec![OperandType::Val(ValType::FuncRef)],
         },
     );
     map.insert(
         "i32.trunc_sat_f32_s",
-        InstrMeta {
-            bin_op: "0xFC 0x00",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.trunc_sat_f32_u",
-        InstrMeta {
-            bin_op: "0xFC 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.trunc_sat_f64_s",
-        InstrMeta {
-            bin_op: "0xFC 0x02",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.trunc_sat_f64_u",
-        InstrMeta {
-            bin_op: "0xFC 0x03",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.trunc_sat_f32_s",
-        InstrMeta {
-            bin_op: "0xFC 0x04",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.trunc_sat_f32_u",
-        InstrMeta {
-            bin_op: "0xFC 0x05",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.trunc_sat_f64_s",
-        InstrMeta {
-            bin_op: "0xFC 0x06",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.trunc_sat_f64_u",
-        InstrMeta {
-            bin_op: "0xFC 0x07",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "memory.init",
-        InstrMeta {
-            bin_op: "0xFC 0x08",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -1815,16 +1617,14 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "data.drop",
-        InstrMeta {
-            bin_op: "0xFC 0x09",
+        ResolvedSig {
             params: vec![],
             results: vec![],
         },
     );
     map.insert(
         "memory.copy",
-        InstrMeta {
-            bin_op: "0xFC 0x0A",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -1835,8 +1635,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "memory.fill",
-        InstrMeta {
-            bin_op: "0xFC 0x0B",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -1847,8 +1646,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "table.init",
-        InstrMeta {
-            bin_op: "0xFC 0x0C",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -1859,16 +1657,14 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "elem.drop",
-        InstrMeta {
-            bin_op: "0xFC 0x0D",
+        ResolvedSig {
             params: vec![],
             results: vec![],
         },
     );
     map.insert(
         "table.copy",
-        InstrMeta {
-            bin_op: "0xFC 0x0E",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::I32),
@@ -1879,24 +1675,21 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "table.grow",
-        InstrMeta {
-            bin_op: "0xFC 0x0F",
+        ResolvedSig {
             params: vec![OperandType::Any, OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "table.size",
-        InstrMeta {
-            bin_op: "0xFC 0x10",
+        ResolvedSig {
             params: vec![],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "table.fill",
-        InstrMeta {
-            bin_op: "0xFC 0x11",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Any,
@@ -1907,96 +1700,84 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "v128.load",
-        InstrMeta {
-            bin_op: "0xFD 0x00",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.load8x8_s",
-        InstrMeta {
-            bin_op: "0xFD 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.load8x8_u",
-        InstrMeta {
-            bin_op: "0xFD 0x02",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.load16x4_s",
-        InstrMeta {
-            bin_op: "0xFD 0x03",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.load16x4_u",
-        InstrMeta {
-            bin_op: "0xFD 0x04",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.load32x2_s",
-        InstrMeta {
-            bin_op: "0xFD 0x05",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.load32x2_u",
-        InstrMeta {
-            bin_op: "0xFD 0x06",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.load8_splat",
-        InstrMeta {
-            bin_op: "0xFD 0x07",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.load16_splat",
-        InstrMeta {
-            bin_op: "0xFD 0x08",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.load32_splat",
-        InstrMeta {
-            bin_op: "0xFD 0x09",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.load64_splat",
-        InstrMeta {
-            bin_op: "0xFD 0x0A",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.store",
-        InstrMeta {
-            bin_op: "0xFD 0x0B",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::V128),
@@ -2006,16 +1787,14 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "v128.const",
-        InstrMeta {
-            bin_op: "0xFD 0x0C",
+        ResolvedSig {
             params: vec![],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.shuffle",
-        InstrMeta {
-            bin_op: "0xFD 0x0D",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2025,8 +1804,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.swizzle",
-        InstrMeta {
-            bin_op: "0xFD 0x0E",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2036,72 +1814,63 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.splat",
-        InstrMeta {
-            bin_op: "0xFD 0x0F",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.splat",
-        InstrMeta {
-            bin_op: "0xFD 0x10",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.splat",
-        InstrMeta {
-            bin_op: "0xFD 0x11",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.splat",
-        InstrMeta {
-            bin_op: "0xFD 0x12",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.splat",
-        InstrMeta {
-            bin_op: "0xFD 0x13",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.splat",
-        InstrMeta {
-            bin_op: "0xFD 0x14",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.extract_lane_s",
-        InstrMeta {
-            bin_op: "0xFD 0x15",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i8x16.extract_lane_u",
-        InstrMeta {
-            bin_op: "0xFD 0x16",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i8x16.replace_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x17",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::I32),
@@ -2111,24 +1880,21 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.extract_lane_s",
-        InstrMeta {
-            bin_op: "0xFD 0x18",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i16x8.extract_lane_u",
-        InstrMeta {
-            bin_op: "0xFD 0x19",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i16x8.replace_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x1A",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::I32),
@@ -2138,16 +1904,14 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.extract_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x1B",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32x4.replace_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x1C",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::I32),
@@ -2157,16 +1921,14 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.extract_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x1D",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64x2.replace_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x1E",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::I64),
@@ -2176,16 +1938,14 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32x4.extract_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x1F",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32x4.replace_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x20",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::F32),
@@ -2195,16 +1955,14 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.extract_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x21",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64x2.replace_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x22",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::F64),
@@ -2214,8 +1972,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.eq",
-        InstrMeta {
-            bin_op: "0xFD 0x23",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2225,8 +1982,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.ne",
-        InstrMeta {
-            bin_op: "0xFD 0x24",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2236,8 +1992,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.lt_s",
-        InstrMeta {
-            bin_op: "0xFD 0x25",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2247,8 +2002,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.lt_u",
-        InstrMeta {
-            bin_op: "0xFD 0x26",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2258,8 +2012,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.gt_s",
-        InstrMeta {
-            bin_op: "0xFD 0x27",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2269,8 +2022,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.gt_u",
-        InstrMeta {
-            bin_op: "0xFD 0x28",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2280,8 +2032,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.le_s",
-        InstrMeta {
-            bin_op: "0xFD 0x29",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2291,8 +2042,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.le_u",
-        InstrMeta {
-            bin_op: "0xFD 0x2A",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2302,8 +2052,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.ge_s",
-        InstrMeta {
-            bin_op: "0xFD 0x2B",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2313,8 +2062,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.ge_u",
-        InstrMeta {
-            bin_op: "0xFD 0x2C",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2324,8 +2072,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.eq",
-        InstrMeta {
-            bin_op: "0xFD 0x2D",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2335,8 +2082,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.ne",
-        InstrMeta {
-            bin_op: "0xFD 0x2E",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2346,8 +2092,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.lt_s",
-        InstrMeta {
-            bin_op: "0xFD 0x2F",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2357,8 +2102,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.lt_u",
-        InstrMeta {
-            bin_op: "0xFD 0x30",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2368,8 +2112,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.gt_s",
-        InstrMeta {
-            bin_op: "0xFD 0x31",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2379,8 +2122,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.gt_u",
-        InstrMeta {
-            bin_op: "0xFD 0x32",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2390,8 +2132,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.le_s",
-        InstrMeta {
-            bin_op: "0xFD 0x33",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2401,8 +2142,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.le_u",
-        InstrMeta {
-            bin_op: "0xFD 0x34",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2412,8 +2152,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.ge_s",
-        InstrMeta {
-            bin_op: "0xFD 0x35",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2423,8 +2162,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.ge_u",
-        InstrMeta {
-            bin_op: "0xFD 0x36",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2434,8 +2172,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.eq",
-        InstrMeta {
-            bin_op: "0xFD 0x37",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2445,8 +2182,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.ne",
-        InstrMeta {
-            bin_op: "0xFD 0x38",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2456,8 +2192,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.lt_s",
-        InstrMeta {
-            bin_op: "0xFD 0x39",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2467,8 +2202,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.lt_u",
-        InstrMeta {
-            bin_op: "0xFD 0x3A",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2478,8 +2212,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.gt_s",
-        InstrMeta {
-            bin_op: "0xFD 0x3B",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2489,8 +2222,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.gt_u",
-        InstrMeta {
-            bin_op: "0xFD 0x3C",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2500,8 +2232,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.le_s",
-        InstrMeta {
-            bin_op: "0xFD 0x3D",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2511,8 +2242,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.le_u",
-        InstrMeta {
-            bin_op: "0xFD 0x3E",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2522,8 +2252,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.ge_s",
-        InstrMeta {
-            bin_op: "0xFD 0x3F",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2533,8 +2262,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.ge_u",
-        InstrMeta {
-            bin_op: "0xFD 0x40",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2544,8 +2272,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32x4.eq",
-        InstrMeta {
-            bin_op: "0xFD 0x41",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2555,8 +2282,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32x4.ne",
-        InstrMeta {
-            bin_op: "0xFD 0x42",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2566,8 +2292,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32x4.lt",
-        InstrMeta {
-            bin_op: "0xFD 0x43",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2577,8 +2302,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32x4.gt",
-        InstrMeta {
-            bin_op: "0xFD 0x44",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2588,8 +2312,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32x4.le",
-        InstrMeta {
-            bin_op: "0xFD 0x45",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2599,8 +2322,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32x4.ge",
-        InstrMeta {
-            bin_op: "0xFD 0x46",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2610,8 +2332,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.eq",
-        InstrMeta {
-            bin_op: "0xFD 0x47",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2621,8 +2342,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.ne",
-        InstrMeta {
-            bin_op: "0xFD 0x48",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2632,8 +2352,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.lt",
-        InstrMeta {
-            bin_op: "0xFD 0x49",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2643,8 +2362,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.gt",
-        InstrMeta {
-            bin_op: "0xFD 0x4A",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2654,8 +2372,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.le",
-        InstrMeta {
-            bin_op: "0xFD 0x4B",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2665,8 +2382,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.ge",
-        InstrMeta {
-            bin_op: "0xFD 0x4C",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2676,16 +2392,14 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "v128.not",
-        InstrMeta {
-            bin_op: "0xFD 0x4D",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.and",
-        InstrMeta {
-            bin_op: "0xFD 0x4E",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2695,8 +2409,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "v128.andnot",
-        InstrMeta {
-            bin_op: "0xFD 0x4F",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2706,8 +2419,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "v128.or",
-        InstrMeta {
-            bin_op: "0xFD 0x50",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2717,8 +2429,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "v128.xor",
-        InstrMeta {
-            bin_op: "0xFD 0x51",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2728,8 +2439,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "v128.bitselect",
-        InstrMeta {
-            bin_op: "0xFD 0x52",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2740,16 +2450,14 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "v128.any_true",
-        InstrMeta {
-            bin_op: "0xFD 0x53",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "v128.load8_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x54",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::V128),
@@ -2759,8 +2467,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "v128.load16_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x55",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::V128),
@@ -2770,8 +2477,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "v128.load32_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x56",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::V128),
@@ -2781,8 +2487,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "v128.load64_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x57",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::V128),
@@ -2792,8 +2497,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "v128.store8_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x58",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::V128),
@@ -2803,8 +2507,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "v128.store16_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x59",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::V128),
@@ -2814,8 +2517,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "v128.store32_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x5A",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::V128),
@@ -2825,8 +2527,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "v128.store64_lane",
-        InstrMeta {
-            bin_op: "0xFD 0x5B",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::I32),
                 OperandType::Val(ValType::V128),
@@ -2836,80 +2537,70 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "v128.load32_zero",
-        InstrMeta {
-            bin_op: "0xFD 0x5C",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.load64_zero",
-        InstrMeta {
-            bin_op: "0xFD 0x5D",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.demote_f64x2_zero",
-        InstrMeta {
-            bin_op: "0xFD 0x5E",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.promote_low_f32x4",
-        InstrMeta {
-            bin_op: "0xFD 0x5F",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.abs",
-        InstrMeta {
-            bin_op: "0xFD 0x60",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.neg",
-        InstrMeta {
-            bin_op: "0xFD 0x61",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.popcnt",
-        InstrMeta {
-            bin_op: "0xFD 0x62",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.all_true",
-        InstrMeta {
-            bin_op: "0xFD 0x63",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i8x16.bitmask",
-        InstrMeta {
-            bin_op: "0xFD 0x64",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i8x16.narrow_i16x8_s",
-        InstrMeta {
-            bin_op: "0xFD 0x65",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2919,8 +2610,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.narrow_i16x8_u",
-        InstrMeta {
-            bin_op: "0xFD 0x66",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -2930,40 +2620,35 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32x4.ceil",
-        InstrMeta {
-            bin_op: "0xFD 0x67",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.floor",
-        InstrMeta {
-            bin_op: "0xFD 0x68",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.trunc",
-        InstrMeta {
-            bin_op: "0xFD 0x69",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.nearest",
-        InstrMeta {
-            bin_op: "0xFD 0x6A",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.shl",
-        InstrMeta {
-            bin_op: "0xFD 0x6B",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::I32),
@@ -2973,8 +2658,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.shr_s",
-        InstrMeta {
-            bin_op: "0xFD 0x6C",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::I32),
@@ -2984,8 +2668,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.shr_u",
-        InstrMeta {
-            bin_op: "0xFD 0x6D",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::I32),
@@ -2995,8 +2678,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.add",
-        InstrMeta {
-            bin_op: "0xFD 0x6E",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3006,8 +2688,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.add_sat_s",
-        InstrMeta {
-            bin_op: "0xFD 0x6F",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3017,8 +2698,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.add_sat_u",
-        InstrMeta {
-            bin_op: "0xFD 0x70",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3028,8 +2708,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.sub",
-        InstrMeta {
-            bin_op: "0xFD 0x71",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3039,8 +2718,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.sub_sat_s",
-        InstrMeta {
-            bin_op: "0xFD 0x72",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3050,8 +2728,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.sub_sat_u",
-        InstrMeta {
-            bin_op: "0xFD 0x73",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3061,24 +2738,21 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.ceil",
-        InstrMeta {
-            bin_op: "0xFD 0x74",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.floor",
-        InstrMeta {
-            bin_op: "0xFD 0x75",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.min_s",
-        InstrMeta {
-            bin_op: "0xFD 0x76",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3088,8 +2762,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.min_u",
-        InstrMeta {
-            bin_op: "0xFD 0x77",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3099,8 +2772,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.max_s",
-        InstrMeta {
-            bin_op: "0xFD 0x78",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3110,8 +2782,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i8x16.max_u",
-        InstrMeta {
-            bin_op: "0xFD 0x79",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3121,16 +2792,14 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.trunc",
-        InstrMeta {
-            bin_op: "0xFD 0x7A",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.avgr_u",
-        InstrMeta {
-            bin_op: "0xFD 0x7B",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3140,56 +2809,49 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.extadd_pairwise_i8x16_s",
-        InstrMeta {
-            bin_op: "0xFD 0x7C",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.extadd_pairwise_i8x16_u",
-        InstrMeta {
-            bin_op: "0xFD 0x7D",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.extadd_pairwise_i16x8_s",
-        InstrMeta {
-            bin_op: "0xFD 0x7E",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.extadd_pairwise_i16x8_u",
-        InstrMeta {
-            bin_op: "0xFD 0x7F",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.abs",
-        InstrMeta {
-            bin_op: "0xFD 0x80 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.neg",
-        InstrMeta {
-            bin_op: "0xFD 0x81 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.q15mulr_sat_s",
-        InstrMeta {
-            bin_op: "0xFD 0x82 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3199,24 +2861,21 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.all_true",
-        InstrMeta {
-            bin_op: "0xFD 0x83 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i16x8.bitmask",
-        InstrMeta {
-            bin_op: "0xFD 0x84 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i16x8.narrow_i32x4_s",
-        InstrMeta {
-            bin_op: "0xFD 0x85 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3226,8 +2885,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.narrow_i32x4_u",
-        InstrMeta {
-            bin_op: "0xFD 0x86 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3237,40 +2895,35 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.extend_low_i8x16_s",
-        InstrMeta {
-            bin_op: "0xFD 0x87 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.extend_high_i8x16_s",
-        InstrMeta {
-            bin_op: "0xFD 0x88 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.extend_low_i8x16_u",
-        InstrMeta {
-            bin_op: "0xFD 0x89 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.extend_high_i8x16_u",
-        InstrMeta {
-            bin_op: "0xFD 0x8A 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.shl",
-        InstrMeta {
-            bin_op: "0xFD 0x8B 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::I32),
@@ -3280,8 +2933,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.shr_s",
-        InstrMeta {
-            bin_op: "0xFD 0x8C 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::I32),
@@ -3291,8 +2943,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.shr_u",
-        InstrMeta {
-            bin_op: "0xFD 0x8D 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::I32),
@@ -3302,8 +2953,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.add",
-        InstrMeta {
-            bin_op: "0xFD 0x8E 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3313,8 +2963,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.add_sat_s",
-        InstrMeta {
-            bin_op: "0xFD 0x8F 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3324,8 +2973,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.add_sat_u",
-        InstrMeta {
-            bin_op: "0xFD 0x90 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3335,8 +2983,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.sub",
-        InstrMeta {
-            bin_op: "0xFD 0x91 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3346,8 +2993,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.sub_sat_s",
-        InstrMeta {
-            bin_op: "0xFD 0x92 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3357,8 +3003,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.sub_sat_u",
-        InstrMeta {
-            bin_op: "0xFD 0x93 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3368,16 +3013,14 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.nearest",
-        InstrMeta {
-            bin_op: "0xFD 0x94 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.mul",
-        InstrMeta {
-            bin_op: "0xFD 0x95 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3387,8 +3030,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.min_s",
-        InstrMeta {
-            bin_op: "0xFD 0x96 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3398,8 +3040,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.min_u",
-        InstrMeta {
-            bin_op: "0xFD 0x97 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3409,8 +3050,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.max_s",
-        InstrMeta {
-            bin_op: "0xFD 0x98 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3420,8 +3060,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.max_u",
-        InstrMeta {
-            bin_op: "0xFD 0x99 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3431,8 +3070,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.avgr_u",
-        InstrMeta {
-            bin_op: "0xFD 0x9B 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3442,8 +3080,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.extmul_low_i8x16_s",
-        InstrMeta {
-            bin_op: "0xFD 0x9C 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3453,8 +3090,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.extmul_high_i8x16_s",
-        InstrMeta {
-            bin_op: "0xFD 0x9D 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3464,8 +3100,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.extmul_low_i8x16_u",
-        InstrMeta {
-            bin_op: "0xFD 0x9E 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3475,8 +3110,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i16x8.extmul_high_i8x16_u",
-        InstrMeta {
-            bin_op: "0xFD 0x9F 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3486,72 +3120,63 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.abs",
-        InstrMeta {
-            bin_op: "0xFD 0xA0 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.neg",
-        InstrMeta {
-            bin_op: "0xFD 0xA1 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.all_true",
-        InstrMeta {
-            bin_op: "0xFD 0xA3 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32x4.bitmask",
-        InstrMeta {
-            bin_op: "0xFD 0xA4 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32x4.extend_low_i16x8_s",
-        InstrMeta {
-            bin_op: "0xFD 0xA7 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.extend_high_i16x8_s",
-        InstrMeta {
-            bin_op: "0xFD 0xA8 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.extend_low_i16x8_u",
-        InstrMeta {
-            bin_op: "0xFD 0xA9 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.extend_high_i16x8_u",
-        InstrMeta {
-            bin_op: "0xFD 0xAA 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.shl",
-        InstrMeta {
-            bin_op: "0xFD 0xAB 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::I32),
@@ -3561,8 +3186,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.shr_s",
-        InstrMeta {
-            bin_op: "0xFD 0xAC 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::I32),
@@ -3572,8 +3196,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.shr_u",
-        InstrMeta {
-            bin_op: "0xFD 0xAD 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::I32),
@@ -3583,8 +3206,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.add",
-        InstrMeta {
-            bin_op: "0xFD 0xAE 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3594,8 +3216,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.sub",
-        InstrMeta {
-            bin_op: "0xFD 0xB1 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3605,8 +3226,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.mul",
-        InstrMeta {
-            bin_op: "0xFD 0xB5 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3616,8 +3236,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.min_s",
-        InstrMeta {
-            bin_op: "0xFD 0xB6 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3627,8 +3246,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.min_u",
-        InstrMeta {
-            bin_op: "0xFD 0xB7 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3638,8 +3256,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.max_s",
-        InstrMeta {
-            bin_op: "0xFD 0xB8 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3649,8 +3266,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.max_u",
-        InstrMeta {
-            bin_op: "0xFD 0xB9 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3660,8 +3276,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.dot_i16x8_s",
-        InstrMeta {
-            bin_op: "0xFD 0xBA 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3671,8 +3286,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.extmul_low_i16x8_s",
-        InstrMeta {
-            bin_op: "0xFD 0xBC 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3682,8 +3296,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.extmul_high_i16x8_s",
-        InstrMeta {
-            bin_op: "0xFD 0xBD 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3693,8 +3306,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.extmul_low_i16x8_u",
-        InstrMeta {
-            bin_op: "0xFD 0xBE 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3704,8 +3316,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.extmul_high_i16x8_u",
-        InstrMeta {
-            bin_op: "0xFD 0xBF 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3715,72 +3326,63 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.abs",
-        InstrMeta {
-            bin_op: "0xFD 0xC0 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.neg",
-        InstrMeta {
-            bin_op: "0xFD 0xC1 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.all_true",
-        InstrMeta {
-            bin_op: "0xFD 0xC3 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64x2.bitmask",
-        InstrMeta {
-            bin_op: "0xFD 0xC4 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64x2.extend_low_i32x4_s",
-        InstrMeta {
-            bin_op: "0xFD 0xC7 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.extend_high_i32x4_s",
-        InstrMeta {
-            bin_op: "0xFD 0xC8 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.extend_low_i32x4_u",
-        InstrMeta {
-            bin_op: "0xFD 0xC9 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.extend_high_i32x4_u",
-        InstrMeta {
-            bin_op: "0xFD 0xCA 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.shl",
-        InstrMeta {
-            bin_op: "0xFD 0xCB 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::I32),
@@ -3790,8 +3392,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.shr_s",
-        InstrMeta {
-            bin_op: "0xFD 0xCC 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::I32),
@@ -3801,8 +3402,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.shr_u",
-        InstrMeta {
-            bin_op: "0xFD 0xCD 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::I32),
@@ -3812,8 +3412,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.add",
-        InstrMeta {
-            bin_op: "0xFD 0xCE 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3823,8 +3422,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.sub",
-        InstrMeta {
-            bin_op: "0xFD 0xD1 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3834,8 +3432,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.mul",
-        InstrMeta {
-            bin_op: "0xFD 0xD5 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3845,8 +3442,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.eq",
-        InstrMeta {
-            bin_op: "0xFD 0xD6 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3856,8 +3452,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.ne",
-        InstrMeta {
-            bin_op: "0xFD 0xD7 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3867,8 +3462,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.lt_s",
-        InstrMeta {
-            bin_op: "0xFD 0xD8 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3878,8 +3472,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.gt_s",
-        InstrMeta {
-            bin_op: "0xFD 0xD9 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3889,8 +3482,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.le_s",
-        InstrMeta {
-            bin_op: "0xFD 0xDA 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3900,8 +3492,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.ge_s",
-        InstrMeta {
-            bin_op: "0xFD 0xDB 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3911,8 +3502,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.extmul_low_i32x4_s",
-        InstrMeta {
-            bin_op: "0xFD 0xDC 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3922,8 +3512,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.extmul_high_i32x4_s",
-        InstrMeta {
-            bin_op: "0xFD 0xDD 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3933,8 +3522,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.extmul_low_i32x4_u",
-        InstrMeta {
-            bin_op: "0xFD 0xDE 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3944,8 +3532,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i64x2.extmul_high_i32x4_u",
-        InstrMeta {
-            bin_op: "0xFD 0xDF 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3955,32 +3542,28 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32x4.abs",
-        InstrMeta {
-            bin_op: "0xFD 0xE0 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.neg",
-        InstrMeta {
-            bin_op: "0xFD 0xE1 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.sqrt",
-        InstrMeta {
-            bin_op: "0xFD 0xE3 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.add",
-        InstrMeta {
-            bin_op: "0xFD 0xE4 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -3990,8 +3573,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32x4.sub",
-        InstrMeta {
-            bin_op: "0xFD 0xE5 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -4001,8 +3583,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32x4.mul",
-        InstrMeta {
-            bin_op: "0xFD 0xE6 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -4012,8 +3593,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32x4.div",
-        InstrMeta {
-            bin_op: "0xFD 0xE7 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -4023,8 +3603,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32x4.min",
-        InstrMeta {
-            bin_op: "0xFD 0xE8 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -4034,8 +3613,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32x4.max",
-        InstrMeta {
-            bin_op: "0xFD 0xE9 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -4045,8 +3623,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32x4.pmin",
-        InstrMeta {
-            bin_op: "0xFD 0xEA 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -4056,8 +3633,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f32x4.pmax",
-        InstrMeta {
-            bin_op: "0xFD 0xEB 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -4067,32 +3643,28 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.abs",
-        InstrMeta {
-            bin_op: "0xFD 0xEC 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.neg",
-        InstrMeta {
-            bin_op: "0xFD 0xED 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.sqrt",
-        InstrMeta {
-            bin_op: "0xFD 0xEF 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.add",
-        InstrMeta {
-            bin_op: "0xFD 0xF0 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -4102,8 +3674,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.sub",
-        InstrMeta {
-            bin_op: "0xFD 0xF1 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -4113,8 +3684,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.mul",
-        InstrMeta {
-            bin_op: "0xFD 0xF2 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -4124,8 +3694,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.div",
-        InstrMeta {
-            bin_op: "0xFD 0xF3 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -4135,8 +3704,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.min",
-        InstrMeta {
-            bin_op: "0xFD 0xF4 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -4146,8 +3714,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.max",
-        InstrMeta {
-            bin_op: "0xFD 0xF5 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -4157,8 +3724,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.pmin",
-        InstrMeta {
-            bin_op: "0xFD 0xF6 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -4168,8 +3734,7 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "f64x2.pmax",
-        InstrMeta {
-            bin_op: "0xFD 0xF7 0x01",
+        ResolvedSig {
             params: vec![
                 OperandType::Val(ValType::V128),
                 OperandType::Val(ValType::V128),
@@ -4179,67 +3744,501 @@ pub(crate) static INSTR_METAS: LazyLock<FxHashMap<&'static str, InstrMeta>> = La
     );
     map.insert(
         "i32x4.trunc_sat_f32x4_s",
-        InstrMeta {
-            bin_op: "0xFD 0xF8 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.trunc_sat_f32x4_u",
-        InstrMeta {
-            bin_op: "0xFD 0xF9 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.convert_i32x4_s",
-        InstrMeta {
-            bin_op: "0xFD 0xFA 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.convert_i32x4_u",
-        InstrMeta {
-            bin_op: "0xFD 0xFB 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.trunc_sat_f64x2_s_zero",
-        InstrMeta {
-            bin_op: "0xFD 0xFC 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.trunc_sat_f64x2_u_zero",
-        InstrMeta {
-            bin_op: "0xFD 0xFD 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.convert_low_i32x4_s",
-        InstrMeta {
-            bin_op: "0xFD 0xFE 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.convert_low_i32x4_u",
-        InstrMeta {
-            bin_op: "0xFD 0xFF 0x01",
+        ResolvedSig {
             params: vec![OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
+    map
+});
+
+pub(crate) static INSTR_OP_CODES: LazyLock<FxHashMap<&'static str, u32>> = LazyLock::new(|| {
+    let mut map = HashMap::with_capacity_and_hasher(437, FxBuildHasher);
+    map.insert("unreachable", 0x00);
+    map.insert("nop", 0x01);
+    map.insert("block", 0x02);
+    map.insert("loop", 0x03);
+    map.insert("if", 0x04);
+    map.insert("else", 0x05);
+    map.insert("end", 0x0B);
+    map.insert("br", 0x0C);
+    map.insert("br_if", 0x0D);
+    map.insert("br_table", 0x0E);
+    map.insert("return", 0x0F);
+    map.insert("call", 0x10);
+    map.insert("call_indirect", 0x11);
+    map.insert("drop", 0x1A);
+    map.insert("select", 0x1B);
+    map.insert("select", 0x1C);
+    map.insert("local.get", 0x20);
+    map.insert("local.set", 0x21);
+    map.insert("local.tee", 0x22);
+    map.insert("global.get", 0x23);
+    map.insert("global.set", 0x24);
+    map.insert("table.get", 0x25);
+    map.insert("table.set", 0x26);
+    map.insert("i32.load", 0x28);
+    map.insert("i64.load", 0x29);
+    map.insert("f32.load", 0x2A);
+    map.insert("f64.load", 0x2B);
+    map.insert("i32.load8_s", 0x2C);
+    map.insert("i32.load8_u", 0x2D);
+    map.insert("i32.load16_s", 0x2E);
+    map.insert("i32.load16_u", 0x2F);
+    map.insert("i64.load8_s", 0x30);
+    map.insert("i64.load8_u", 0x31);
+    map.insert("i64.load16_s", 0x32);
+    map.insert("i64.load16_u", 0x33);
+    map.insert("i64.load32_s", 0x34);
+    map.insert("i64.load32_u", 0x35);
+    map.insert("i32.store", 0x36);
+    map.insert("i64.store", 0x37);
+    map.insert("f32.store", 0x38);
+    map.insert("f64.store", 0x39);
+    map.insert("i32.store8", 0x3A);
+    map.insert("i32.store16", 0x3B);
+    map.insert("i64.store8", 0x3C);
+    map.insert("i64.store16", 0x3D);
+    map.insert("i64.store32", 0x3E);
+    map.insert("memory.size", 0x3F);
+    map.insert("memory.grow", 0x40);
+    map.insert("i32.const", 0x41);
+    map.insert("i64.const", 0x42);
+    map.insert("f32.const", 0x43);
+    map.insert("f64.const", 0x44);
+    map.insert("i32.eqz", 0x45);
+    map.insert("i32.eq", 0x46);
+    map.insert("i32.ne", 0x47);
+    map.insert("i32.lt_s", 0x48);
+    map.insert("i32.lt_u", 0x49);
+    map.insert("i32.gt_s", 0x4A);
+    map.insert("i32.gt_u", 0x4B);
+    map.insert("i32.le_s", 0x4C);
+    map.insert("i32.le_u", 0x4D);
+    map.insert("i32.ge_s", 0x4E);
+    map.insert("i32.ge_u", 0x4F);
+    map.insert("i64.eqz", 0x50);
+    map.insert("i64.eq", 0x51);
+    map.insert("i64.ne", 0x52);
+    map.insert("i64.lt_s", 0x53);
+    map.insert("i64.lt_u", 0x54);
+    map.insert("i64.gt_s", 0x55);
+    map.insert("i64.gt_u", 0x56);
+    map.insert("i64.le_s", 0x57);
+    map.insert("i64.le_u", 0x58);
+    map.insert("i64.ge_s", 0x59);
+    map.insert("i64.ge_u", 0x5A);
+    map.insert("f32.eq", 0x5B);
+    map.insert("f32.ne", 0x5C);
+    map.insert("f32.lt", 0x5D);
+    map.insert("f32.gt", 0x5E);
+    map.insert("f32.le", 0x5F);
+    map.insert("f32.ge", 0x60);
+    map.insert("f64.eq", 0x61);
+    map.insert("f64.ne", 0x62);
+    map.insert("f64.lt", 0x63);
+    map.insert("f64.gt", 0x64);
+    map.insert("f64.le", 0x65);
+    map.insert("f64.ge", 0x66);
+    map.insert("i32.clz", 0x67);
+    map.insert("i32.ctz", 0x68);
+    map.insert("i32.popcnt", 0x69);
+    map.insert("i32.add", 0x6A);
+    map.insert("i32.sub", 0x6B);
+    map.insert("i32.mul", 0x6C);
+    map.insert("i32.div_s", 0x6D);
+    map.insert("i32.div_u", 0x6E);
+    map.insert("i32.rem_s", 0x6F);
+    map.insert("i32.rem_u", 0x70);
+    map.insert("i32.and", 0x71);
+    map.insert("i32.or", 0x72);
+    map.insert("i32.xor", 0x73);
+    map.insert("i32.shl", 0x74);
+    map.insert("i32.shr_s", 0x75);
+    map.insert("i32.shr_u", 0x76);
+    map.insert("i32.rotl", 0x77);
+    map.insert("i32.rotr", 0x78);
+    map.insert("i64.clz", 0x79);
+    map.insert("i64.ctz", 0x7A);
+    map.insert("i64.popcnt", 0x7B);
+    map.insert("i64.add", 0x7C);
+    map.insert("i64.sub", 0x7D);
+    map.insert("i64.mul", 0x7E);
+    map.insert("i64.div_s", 0x7F);
+    map.insert("i64.div_u", 0x80);
+    map.insert("i64.rem_s", 0x81);
+    map.insert("i64.rem_u", 0x82);
+    map.insert("i64.and", 0x83);
+    map.insert("i64.or", 0x84);
+    map.insert("i64.xor", 0x85);
+    map.insert("i64.shl", 0x86);
+    map.insert("i64.shr_s", 0x87);
+    map.insert("i64.shr_u", 0x88);
+    map.insert("i64.rotl", 0x89);
+    map.insert("i64.rotr", 0x8A);
+    map.insert("f32.abs", 0x8B);
+    map.insert("f32.neg", 0x8C);
+    map.insert("f32.ceil", 0x8D);
+    map.insert("f32.floor", 0x8E);
+    map.insert("f32.trunc", 0x8F);
+    map.insert("f32.nearest", 0x90);
+    map.insert("f32.sqrt", 0x91);
+    map.insert("f32.add", 0x92);
+    map.insert("f32.sub", 0x93);
+    map.insert("f32.mul", 0x94);
+    map.insert("f32.div", 0x95);
+    map.insert("f32.min", 0x96);
+    map.insert("f32.max", 0x97);
+    map.insert("f32.copysign", 0x98);
+    map.insert("f64.abs", 0x99);
+    map.insert("f64.neg", 0x9A);
+    map.insert("f64.ceil", 0x9B);
+    map.insert("f64.floor", 0x9C);
+    map.insert("f64.trunc", 0x9D);
+    map.insert("f64.nearest", 0x9E);
+    map.insert("f64.sqrt", 0x9F);
+    map.insert("f64.add", 0xA0);
+    map.insert("f64.sub", 0xA1);
+    map.insert("f64.mul", 0xA2);
+    map.insert("f64.div", 0xA3);
+    map.insert("f64.min", 0xA4);
+    map.insert("f64.max", 0xA5);
+    map.insert("f64.copysign", 0xA6);
+    map.insert("i32.wrap_i64", 0xA7);
+    map.insert("i32.trunc_f32_s", 0xA8);
+    map.insert("i32.trunc_f32_u", 0xA9);
+    map.insert("i32.trunc_f64_s", 0xAA);
+    map.insert("i32.trunc_f64_u", 0xAB);
+    map.insert("i64.extend_i32_s", 0xAC);
+    map.insert("i64.extend_i32_u", 0xAD);
+    map.insert("i64.trunc_f32_s", 0xAE);
+    map.insert("i64.trunc_f32_u", 0xAF);
+    map.insert("i64.trunc_f64_s", 0xB0);
+    map.insert("i64.trunc_f64_u", 0xB1);
+    map.insert("f32.convert_i32_s", 0xB2);
+    map.insert("f32.convert_i32_u", 0xB3);
+    map.insert("f32.convert_i64_s", 0xB4);
+    map.insert("f32.convert_i64_u", 0xB5);
+    map.insert("f32.demote_f64", 0xB6);
+    map.insert("f64.convert_i32_s", 0xB7);
+    map.insert("f64.convert_i32_u", 0xB8);
+    map.insert("f64.convert_i64_s", 0xB9);
+    map.insert("f64.convert_i64_u", 0xBA);
+    map.insert("f64.promote_f32", 0xBB);
+    map.insert("i32.reinterpret_f32", 0xBC);
+    map.insert("i64.reinterpret_f64", 0xBD);
+    map.insert("f32.reinterpret_i32", 0xBE);
+    map.insert("f64.reinterpret_i64", 0xBF);
+    map.insert("i32.extend8_s", 0xC0);
+    map.insert("i32.extend16_s", 0xC1);
+    map.insert("i64.extend8_s", 0xC2);
+    map.insert("i64.extend16_s", 0xC3);
+    map.insert("i64.extend32_s", 0xC4);
+    map.insert("ref.null", 0xD0);
+    map.insert("ref.is_null", 0xD1);
+    map.insert("ref.func", 0xD2);
+    map.insert("i32.trunc_sat_f32_s", 0xFC00);
+    map.insert("i32.trunc_sat_f32_u", 0xFC01);
+    map.insert("i32.trunc_sat_f64_s", 0xFC02);
+    map.insert("i32.trunc_sat_f64_u", 0xFC03);
+    map.insert("i64.trunc_sat_f32_s", 0xFC04);
+    map.insert("i64.trunc_sat_f32_u", 0xFC05);
+    map.insert("i64.trunc_sat_f64_s", 0xFC06);
+    map.insert("i64.trunc_sat_f64_u", 0xFC07);
+    map.insert("memory.init", 0xFC08);
+    map.insert("data.drop", 0xFC09);
+    map.insert("memory.copy", 0xFC0A);
+    map.insert("memory.fill", 0xFC0B);
+    map.insert("table.init", 0xFC0C);
+    map.insert("elem.drop", 0xFC0D);
+    map.insert("table.copy", 0xFC0E);
+    map.insert("table.grow", 0xFC0F);
+    map.insert("table.size", 0xFC10);
+    map.insert("table.fill", 0xFC11);
+    map.insert("v128.load", 0xFD00);
+    map.insert("v128.load8x8_s", 0xFD01);
+    map.insert("v128.load8x8_u", 0xFD02);
+    map.insert("v128.load16x4_s", 0xFD03);
+    map.insert("v128.load16x4_u", 0xFD04);
+    map.insert("v128.load32x2_s", 0xFD05);
+    map.insert("v128.load32x2_u", 0xFD06);
+    map.insert("v128.load8_splat", 0xFD07);
+    map.insert("v128.load16_splat", 0xFD08);
+    map.insert("v128.load32_splat", 0xFD09);
+    map.insert("v128.load64_splat", 0xFD0A);
+    map.insert("v128.store", 0xFD0B);
+    map.insert("v128.const", 0xFD0C);
+    map.insert("i8x16.shuffle", 0xFD0D);
+    map.insert("i8x16.swizzle", 0xFD0E);
+    map.insert("i8x16.splat", 0xFD0F);
+    map.insert("i16x8.splat", 0xFD10);
+    map.insert("i32x4.splat", 0xFD11);
+    map.insert("i64x2.splat", 0xFD12);
+    map.insert("f32x4.splat", 0xFD13);
+    map.insert("f64x2.splat", 0xFD14);
+    map.insert("i8x16.extract_lane_s", 0xFD15);
+    map.insert("i8x16.extract_lane_u", 0xFD16);
+    map.insert("i8x16.replace_lane", 0xFD17);
+    map.insert("i16x8.extract_lane_s", 0xFD18);
+    map.insert("i16x8.extract_lane_u", 0xFD19);
+    map.insert("i16x8.replace_lane", 0xFD1A);
+    map.insert("i32x4.extract_lane", 0xFD1B);
+    map.insert("i32x4.replace_lane", 0xFD1C);
+    map.insert("i64x2.extract_lane", 0xFD1D);
+    map.insert("i64x2.replace_lane", 0xFD1E);
+    map.insert("f32x4.extract_lane", 0xFD1F);
+    map.insert("f32x4.replace_lane", 0xFD20);
+    map.insert("f64x2.extract_lane", 0xFD21);
+    map.insert("f64x2.replace_lane", 0xFD22);
+    map.insert("i8x16.eq", 0xFD23);
+    map.insert("i8x16.ne", 0xFD24);
+    map.insert("i8x16.lt_s", 0xFD25);
+    map.insert("i8x16.lt_u", 0xFD26);
+    map.insert("i8x16.gt_s", 0xFD27);
+    map.insert("i8x16.gt_u", 0xFD28);
+    map.insert("i8x16.le_s", 0xFD29);
+    map.insert("i8x16.le_u", 0xFD2A);
+    map.insert("i8x16.ge_s", 0xFD2B);
+    map.insert("i8x16.ge_u", 0xFD2C);
+    map.insert("i16x8.eq", 0xFD2D);
+    map.insert("i16x8.ne", 0xFD2E);
+    map.insert("i16x8.lt_s", 0xFD2F);
+    map.insert("i16x8.lt_u", 0xFD30);
+    map.insert("i16x8.gt_s", 0xFD31);
+    map.insert("i16x8.gt_u", 0xFD32);
+    map.insert("i16x8.le_s", 0xFD33);
+    map.insert("i16x8.le_u", 0xFD34);
+    map.insert("i16x8.ge_s", 0xFD35);
+    map.insert("i16x8.ge_u", 0xFD36);
+    map.insert("i32x4.eq", 0xFD37);
+    map.insert("i32x4.ne", 0xFD38);
+    map.insert("i32x4.lt_s", 0xFD39);
+    map.insert("i32x4.lt_u", 0xFD3A);
+    map.insert("i32x4.gt_s", 0xFD3B);
+    map.insert("i32x4.gt_u", 0xFD3C);
+    map.insert("i32x4.le_s", 0xFD3D);
+    map.insert("i32x4.le_u", 0xFD3E);
+    map.insert("i32x4.ge_s", 0xFD3F);
+    map.insert("i32x4.ge_u", 0xFD40);
+    map.insert("f32x4.eq", 0xFD41);
+    map.insert("f32x4.ne", 0xFD42);
+    map.insert("f32x4.lt", 0xFD43);
+    map.insert("f32x4.gt", 0xFD44);
+    map.insert("f32x4.le", 0xFD45);
+    map.insert("f32x4.ge", 0xFD46);
+    map.insert("f64x2.eq", 0xFD47);
+    map.insert("f64x2.ne", 0xFD48);
+    map.insert("f64x2.lt", 0xFD49);
+    map.insert("f64x2.gt", 0xFD4A);
+    map.insert("f64x2.le", 0xFD4B);
+    map.insert("f64x2.ge", 0xFD4C);
+    map.insert("v128.not", 0xFD4D);
+    map.insert("v128.and", 0xFD4E);
+    map.insert("v128.andnot", 0xFD4F);
+    map.insert("v128.or", 0xFD50);
+    map.insert("v128.xor", 0xFD51);
+    map.insert("v128.bitselect", 0xFD52);
+    map.insert("v128.any_true", 0xFD53);
+    map.insert("v128.load8_lane", 0xFD54);
+    map.insert("v128.load16_lane", 0xFD55);
+    map.insert("v128.load32_lane", 0xFD56);
+    map.insert("v128.load64_lane", 0xFD57);
+    map.insert("v128.store8_lane", 0xFD58);
+    map.insert("v128.store16_lane", 0xFD59);
+    map.insert("v128.store32_lane", 0xFD5A);
+    map.insert("v128.store64_lane", 0xFD5B);
+    map.insert("v128.load32_zero", 0xFD5C);
+    map.insert("v128.load64_zero", 0xFD5D);
+    map.insert("f32x4.demote_f64x2_zero", 0xFD5E);
+    map.insert("f64x2.promote_low_f32x4", 0xFD5F);
+    map.insert("i8x16.abs", 0xFD60);
+    map.insert("i8x16.neg", 0xFD61);
+    map.insert("i8x16.popcnt", 0xFD62);
+    map.insert("i8x16.all_true", 0xFD63);
+    map.insert("i8x16.bitmask", 0xFD64);
+    map.insert("i8x16.narrow_i16x8_s", 0xFD65);
+    map.insert("i8x16.narrow_i16x8_u", 0xFD66);
+    map.insert("f32x4.ceil", 0xFD67);
+    map.insert("f32x4.floor", 0xFD68);
+    map.insert("f32x4.trunc", 0xFD69);
+    map.insert("f32x4.nearest", 0xFD6A);
+    map.insert("i8x16.shl", 0xFD6B);
+    map.insert("i8x16.shr_s", 0xFD6C);
+    map.insert("i8x16.shr_u", 0xFD6D);
+    map.insert("i8x16.add", 0xFD6E);
+    map.insert("i8x16.add_sat_s", 0xFD6F);
+    map.insert("i8x16.add_sat_u", 0xFD70);
+    map.insert("i8x16.sub", 0xFD71);
+    map.insert("i8x16.sub_sat_s", 0xFD72);
+    map.insert("i8x16.sub_sat_u", 0xFD73);
+    map.insert("f64x2.ceil", 0xFD74);
+    map.insert("f64x2.floor", 0xFD75);
+    map.insert("i8x16.min_s", 0xFD76);
+    map.insert("i8x16.min_u", 0xFD77);
+    map.insert("i8x16.max_s", 0xFD78);
+    map.insert("i8x16.max_u", 0xFD79);
+    map.insert("f64x2.trunc", 0xFD7A);
+    map.insert("i8x16.avgr_u", 0xFD7B);
+    map.insert("i16x8.extadd_pairwise_i8x16_s", 0xFD7C);
+    map.insert("i16x8.extadd_pairwise_i8x16_u", 0xFD7D);
+    map.insert("i32x4.extadd_pairwise_i16x8_s", 0xFD7E);
+    map.insert("i32x4.extadd_pairwise_i16x8_u", 0xFD7F);
+    map.insert("i16x8.abs", 0xFD8001);
+    map.insert("i16x8.neg", 0xFD8101);
+    map.insert("i16x8.q15mulr_sat_s", 0xFD8201);
+    map.insert("i16x8.all_true", 0xFD8301);
+    map.insert("i16x8.bitmask", 0xFD8401);
+    map.insert("i16x8.narrow_i32x4_s", 0xFD8501);
+    map.insert("i16x8.narrow_i32x4_u", 0xFD8601);
+    map.insert("i16x8.extend_low_i8x16_s", 0xFD8701);
+    map.insert("i16x8.extend_high_i8x16_s", 0xFD8801);
+    map.insert("i16x8.extend_low_i8x16_u", 0xFD8901);
+    map.insert("i16x8.extend_high_i8x16_u", 0xFD8A01);
+    map.insert("i16x8.shl", 0xFD8B01);
+    map.insert("i16x8.shr_s", 0xFD8C01);
+    map.insert("i16x8.shr_u", 0xFD8D01);
+    map.insert("i16x8.add", 0xFD8E01);
+    map.insert("i16x8.add_sat_s", 0xFD8F01);
+    map.insert("i16x8.add_sat_u", 0xFD9001);
+    map.insert("i16x8.sub", 0xFD9101);
+    map.insert("i16x8.sub_sat_s", 0xFD9201);
+    map.insert("i16x8.sub_sat_u", 0xFD9301);
+    map.insert("f64x2.nearest", 0xFD9401);
+    map.insert("i16x8.mul", 0xFD9501);
+    map.insert("i16x8.min_s", 0xFD9601);
+    map.insert("i16x8.min_u", 0xFD9701);
+    map.insert("i16x8.max_s", 0xFD9801);
+    map.insert("i16x8.max_u", 0xFD9901);
+    map.insert("i16x8.avgr_u", 0xFD9B01);
+    map.insert("i16x8.extmul_low_i8x16_s", 0xFD9C01);
+    map.insert("i16x8.extmul_high_i8x16_s", 0xFD9D01);
+    map.insert("i16x8.extmul_low_i8x16_u", 0xFD9E01);
+    map.insert("i16x8.extmul_high_i8x16_u", 0xFD9F01);
+    map.insert("i32x4.abs", 0xFDA001);
+    map.insert("i32x4.neg", 0xFDA101);
+    map.insert("i32x4.all_true", 0xFDA301);
+    map.insert("i32x4.bitmask", 0xFDA401);
+    map.insert("i32x4.extend_low_i16x8_s", 0xFDA701);
+    map.insert("i32x4.extend_high_i16x8_s", 0xFDA801);
+    map.insert("i32x4.extend_low_i16x8_u", 0xFDA901);
+    map.insert("i32x4.extend_high_i16x8_u", 0xFDAA01);
+    map.insert("i32x4.shl", 0xFDAB01);
+    map.insert("i32x4.shr_s", 0xFDAC01);
+    map.insert("i32x4.shr_u", 0xFDAD01);
+    map.insert("i32x4.add", 0xFDAE01);
+    map.insert("i32x4.sub", 0xFDB101);
+    map.insert("i32x4.mul", 0xFDB501);
+    map.insert("i32x4.min_s", 0xFDB601);
+    map.insert("i32x4.min_u", 0xFDB701);
+    map.insert("i32x4.max_s", 0xFDB801);
+    map.insert("i32x4.max_u", 0xFDB901);
+    map.insert("i32x4.dot_i16x8_s", 0xFDBA01);
+    map.insert("i32x4.extmul_low_i16x8_s", 0xFDBC01);
+    map.insert("i32x4.extmul_high_i16x8_s", 0xFDBD01);
+    map.insert("i32x4.extmul_low_i16x8_u", 0xFDBE01);
+    map.insert("i32x4.extmul_high_i16x8_u", 0xFDBF01);
+    map.insert("i64x2.abs", 0xFDC001);
+    map.insert("i64x2.neg", 0xFDC101);
+    map.insert("i64x2.all_true", 0xFDC301);
+    map.insert("i64x2.bitmask", 0xFDC401);
+    map.insert("i64x2.extend_low_i32x4_s", 0xFDC701);
+    map.insert("i64x2.extend_high_i32x4_s", 0xFDC801);
+    map.insert("i64x2.extend_low_i32x4_u", 0xFDC901);
+    map.insert("i64x2.extend_high_i32x4_u", 0xFDCA01);
+    map.insert("i64x2.shl", 0xFDCB01);
+    map.insert("i64x2.shr_s", 0xFDCC01);
+    map.insert("i64x2.shr_u", 0xFDCD01);
+    map.insert("i64x2.add", 0xFDCE01);
+    map.insert("i64x2.sub", 0xFDD101);
+    map.insert("i64x2.mul", 0xFDD501);
+    map.insert("i64x2.eq", 0xFDD601);
+    map.insert("i64x2.ne", 0xFDD701);
+    map.insert("i64x2.lt_s", 0xFDD801);
+    map.insert("i64x2.gt_s", 0xFDD901);
+    map.insert("i64x2.le_s", 0xFDDA01);
+    map.insert("i64x2.ge_s", 0xFDDB01);
+    map.insert("i64x2.extmul_low_i32x4_s", 0xFDDC01);
+    map.insert("i64x2.extmul_high_i32x4_s", 0xFDDD01);
+    map.insert("i64x2.extmul_low_i32x4_u", 0xFDDE01);
+    map.insert("i64x2.extmul_high_i32x4_u", 0xFDDF01);
+    map.insert("f32x4.abs", 0xFDE001);
+    map.insert("f32x4.neg", 0xFDE101);
+    map.insert("f32x4.sqrt", 0xFDE301);
+    map.insert("f32x4.add", 0xFDE401);
+    map.insert("f32x4.sub", 0xFDE501);
+    map.insert("f32x4.mul", 0xFDE601);
+    map.insert("f32x4.div", 0xFDE701);
+    map.insert("f32x4.min", 0xFDE801);
+    map.insert("f32x4.max", 0xFDE901);
+    map.insert("f32x4.pmin", 0xFDEA01);
+    map.insert("f32x4.pmax", 0xFDEB01);
+    map.insert("f64x2.abs", 0xFDEC01);
+    map.insert("f64x2.neg", 0xFDED01);
+    map.insert("f64x2.sqrt", 0xFDEF01);
+    map.insert("f64x2.add", 0xFDF001);
+    map.insert("f64x2.sub", 0xFDF101);
+    map.insert("f64x2.mul", 0xFDF201);
+    map.insert("f64x2.div", 0xFDF301);
+    map.insert("f64x2.min", 0xFDF401);
+    map.insert("f64x2.max", 0xFDF501);
+    map.insert("f64x2.pmin", 0xFDF601);
+    map.insert("f64x2.pmax", 0xFDF701);
+    map.insert("i32x4.trunc_sat_f32x4_s", 0xFDF801);
+    map.insert("i32x4.trunc_sat_f32x4_u", 0xFDF901);
+    map.insert("f32x4.convert_i32x4_s", 0xFDFA01);
+    map.insert("f32x4.convert_i32x4_u", 0xFDFB01);
+    map.insert("i32x4.trunc_sat_f64x2_s_zero", 0xFDFC01);
+    map.insert("i32x4.trunc_sat_f64x2_u_zero", 0xFDFD01);
+    map.insert("f64x2.convert_low_i32x4_s", 0xFDFE01);
+    map.insert("f64x2.convert_low_i32x4_u", 0xFDFF01);
     map
 });

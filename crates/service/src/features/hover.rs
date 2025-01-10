@@ -170,10 +170,13 @@ impl LanguageService {
             }
             SyntaxKind::INSTR_NAME => {
                 let name = token.text();
-                data_set::INSTR_METAS.get(name).map(|instr| Hover {
+                data_set::INSTR_OP_CODES.get(name).map(|code| Hover {
                     contents: HoverContents::Markup(MarkupContent {
                         kind: MarkupKind::Markdown,
-                        value: format!("```wat\n{name}\n```\nBinary Opcode: {}", instr.bin_op),
+                        value: format!(
+                            "```wat\n{name}\n```\nBinary Opcode: {}",
+                            format_op_code(*code)
+                        ),
                     }),
                     range: Some(helpers::rowan_range_to_lsp_range(
                         &line_index,
@@ -337,4 +340,19 @@ fn create_marked_string(value: String) -> MarkedString {
         language: "wat".into(),
         value,
     })
+}
+
+fn format_op_code(code: u32) -> String {
+    if code >> 16 > 0 {
+        format!(
+            "0x{:02X} 0x{:02X} 0x{:02X}",
+            code >> 16,
+            (code >> 8) & 0xFF,
+            code & 0xFF
+        )
+    } else if code >> 8 > 0 {
+        format!("0x{:02X} 0x{:02X}", code >> 8, code & 0xFF)
+    } else {
+        format!("0x{:02X}", code)
+    }
 }

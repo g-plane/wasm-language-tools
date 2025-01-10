@@ -480,6 +480,34 @@ fn instr_name() {
 }
 
 #[test]
+fn two_slots_instr_op_code() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (v128.store (unreachable)))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(2, 19)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn three_slots_instr_op_code() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (f64x2.sqrt (unreachable)))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(2, 19)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn block_int_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "

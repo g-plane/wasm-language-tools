@@ -2,7 +2,7 @@ use crate::{
     binder::{SymbolItemKey, SymbolTable},
     data_set, helpers,
     syntax_tree::SyntaxTreeCtx,
-    types_analyzer::{get_block_sig, OperandType, TypesAnalyzerCtx, ValType},
+    types_analyzer::{get_block_sig, OperandType, ResolvedSig, TypesAnalyzerCtx, ValType},
     uri::{InternUri, UrisCtx},
     LanguageService,
 };
@@ -121,8 +121,8 @@ fn check_block_like(
                 return;
             };
             let instr_name = instr_name.text();
-            let meta = data_set::INSTR_METAS.get(instr_name);
-            let params = resolve_expected_types(shared, instr_name, plain_instr, meta);
+            let sig = data_set::INSTR_SIG.get(instr_name);
+            let params = resolve_expected_types(shared, instr_name, plain_instr, sig);
             if let Some(diag) = type_stack.check(&params, ReportRange::Instr(&instr)) {
                 diags.push(diag);
             }
@@ -412,9 +412,9 @@ fn resolve_resulted_type(
             .next()
             .map(|idx| resolve_br_types(shared, idx))
             .unwrap_or_default(),
-        _ => data_set::INSTR_METAS
+        _ => data_set::INSTR_SIG
             .get(instr_name)
-            .map(|meta| meta.results.clone())
+            .map(|sig| sig.results.clone())
             .unwrap_or_default(),
     }
 }
@@ -423,7 +423,7 @@ fn resolve_expected_types(
     shared: &Shared,
     instr_name: &str,
     instr: &PlainInstr,
-    meta: Option<&data_set::InstrMeta>,
+    signature: Option<&ResolvedSig>,
 ) -> Vec<OperandType> {
     match instr_name {
         "call" => instr
@@ -477,7 +477,7 @@ fn resolve_expected_types(
             types
         }
         "br_table" => vec![OperandType::Val(ValType::I32)],
-        _ => meta.map(|meta| meta.params.clone()).unwrap_or_default(),
+        _ => signature.map(|sig| sig.params.clone()).unwrap_or_default(),
     }
 }
 fn resolve_br_types(shared: &Shared, idx: Immediate) -> Vec<OperandType> {

@@ -205,7 +205,7 @@ fn stacked_type_mismatch_from_func_results() {
 }
 
 #[test]
-fn stacked_type_mismatch_from_instr_meta() {
+fn stacked_type_mismatch_from_instr_sig() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
 (module
@@ -230,7 +230,7 @@ fn stacked_type_mismatch_from_instr_meta() {
 }
 
 #[test]
-fn mixed_type_mismatch_from_instr_meta() {
+fn mixed_type_mismatch_from_instr_sig() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
 (module
