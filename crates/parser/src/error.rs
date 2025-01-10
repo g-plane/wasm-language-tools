@@ -5,7 +5,7 @@ use winnow::{
     stream::{Location, Stream},
 };
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 /// The syntax error comes with location and message.
 pub struct SyntaxError {
     pub start: usize,
@@ -63,7 +63,7 @@ impl ParserError<Input<'_>> for SyntaxError {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 /// Syntax error message.
 pub enum Message {
     Char(char),

@@ -1,7 +1,7 @@
 use crate::{helpers, syntax_tree::SyntaxTreeCtx, uri::InternUri, LanguageService};
-use line_index::LineIndex;
-use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
-use std::rc::Rc;
+use line_index::{LineIndex, TextSize};
+use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString, Position, Range};
+use wat_parser::Message;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "syntax";
@@ -13,8 +13,28 @@ pub fn check(
     line_index: &LineIndex,
     root: &SyntaxNode,
 ) {
-    let mut errors = Rc::unwrap_or_clone(service.parse(uri).1);
-    diags.append(&mut errors);
+    diags.extend(service.parse(uri).1.iter().map(|error| {
+        let start = line_index.line_col(TextSize::new(error.start as u32));
+        let end = line_index.line_col(TextSize::new(error.end as u32));
+        Diagnostic {
+            range: Range::new(
+                Position::new(start.line, start.col),
+                Position::new(end.line, end.col),
+            ),
+            severity: Some(DiagnosticSeverity::ERROR),
+            source: Some("wat".into()),
+            code: if let Message::Name(name) = error.message {
+                Some(NumberOrString::String(format!(
+                    "{DIAGNOSTIC_CODE}/{}",
+                    name.replace(' ', "-")
+                )))
+            } else {
+                Some(NumberOrString::String(DIAGNOSTIC_CODE.into()))
+            },
+            message: format!("syntax error: {}", error.message),
+            ..Default::default()
+        }
+    }));
     diags.extend(
         root.children_with_tokens()
             .filter_map(|element| match element {
