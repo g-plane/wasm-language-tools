@@ -1,7 +1,9 @@
 use crate::{
     binder::{SymbolItem, SymbolItemKey, SymbolItemKind, SymbolTablesCtx},
     files::FilesCtx,
-    helpers, LanguageService,
+    helpers,
+    uri::UrisCtx,
+    LanguageService,
 };
 use line_index::LineIndex;
 use lsp_types::{DocumentHighlight, DocumentHighlightKind, DocumentHighlightParams};

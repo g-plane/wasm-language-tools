@@ -1,7 +1,9 @@
 use crate::{
     binder::{SymbolItemKey, SymbolTablesCtx},
     files::FilesCtx,
-    helpers, InternUri, LanguageService,
+    helpers,
+    uri::{InternUri, UrisCtx},
+    LanguageService,
 };
 use line_index::LineCol;
 use lsp_types::{

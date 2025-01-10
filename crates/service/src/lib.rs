@@ -10,6 +10,7 @@ mod helpers;
 mod idx;
 mod refactorings;
 mod types_analyzer;
+mod uri;
 
 use self::features::SemanticTokenKind;
 pub use crate::config::*;
@@ -18,6 +19,7 @@ use crate::{
     files::{Files, FilesCtx},
     idx::Idents,
     types_analyzer::TypesAnalyzer,
+    uri::{Uris, UrisCtx},
 };
 use indexmap::{IndexMap, IndexSet};
 use lsp_types::{
@@ -33,9 +35,8 @@ use lsp_types::{
     TypeDefinitionProviderCapability, Uri,
 };
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use salsa::{InternId, InternKey};
 
-#[salsa::database(Files, Idents, SymbolTables, TypesAnalyzer)]
+#[salsa::database(Uris, Files, Idents, SymbolTables, TypesAnalyzer)]
 #[derive(Default)]
 /// The language service comes with handlers for LSP requests.
 ///
@@ -52,7 +53,7 @@ use salsa::{InternId, InternKey};
 pub struct LanguageService {
     storage: salsa::Storage<Self>,
     semantic_token_kinds: IndexSet<SemanticTokenKind, FxBuildHasher>,
-    configs: FxHashMap<InternUri, ServiceConfig>,
+    configs: FxHashMap<crate::uri::InternUri, ServiceConfig>,
     global_config: ServiceConfig,
 }
 impl salsa::Database for LanguageService {}
@@ -195,7 +196,7 @@ impl LanguageService {
 
     #[inline]
     // This should be used internally.
-    fn get_config(&self, uri: InternUri) -> &ServiceConfig {
+    fn get_config(&self, uri: crate::uri::InternUri) -> &ServiceConfig {
         self.configs.get(&uri).unwrap_or(&self.global_config)
     }
 
@@ -230,17 +231,6 @@ impl LanguageService {
                 register_options: None,
             }],
         }
-    }
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-struct InternUri(InternId);
-impl InternKey for InternUri {
-    fn from_intern_id(v: salsa::InternId) -> Self {
-        InternUri(v)
-    }
-    fn as_intern_id(&self) -> InternId {
-        self.0
     }
 }
 

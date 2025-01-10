@@ -1,4 +1,8 @@
-use crate::{files::FilesCtx, helpers, InternUri, LanguageService};
+use crate::{
+    helpers,
+    uri::{InternUri, UrisCtx},
+    LanguageService,
+};
 use itertools::Itertools;
 use line_index::LineIndex;
 use lsp_types::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};

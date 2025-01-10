@@ -1,4 +1,4 @@
-use crate::{checker, files::FilesCtx, LanguageService};
+use crate::{checker, uri::UrisCtx, LanguageService};
 use lsp_types::{
     DocumentDiagnosticParams, DocumentDiagnosticReport, DocumentDiagnosticReportResult,
     FullDocumentDiagnosticReport, PublishDiagnosticsParams, RelatedFullDocumentDiagnosticReport,

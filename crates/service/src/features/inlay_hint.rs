@@ -4,6 +4,7 @@ use crate::{
     helpers,
     idx::IdentsCtx,
     types_analyzer::TypesAnalyzerCtx,
+    uri::UrisCtx,
     LanguageService,
 };
 use lsp_types::{InlayHint, InlayHintKind, InlayHintLabel, InlayHintParams};

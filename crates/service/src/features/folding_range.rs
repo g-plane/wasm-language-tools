@@ -1,5 +1,4 @@
-use super::FilesCtx;
-use crate::{helpers, LanguageService};
+use crate::{helpers, uri::UrisCtx, FilesCtx, LanguageService};
 use lsp_types::{FoldingRange, FoldingRangeKind, FoldingRangeParams};
 use rowan::ast::support::token;
 use wat_syntax::{SyntaxKind, SyntaxNode};

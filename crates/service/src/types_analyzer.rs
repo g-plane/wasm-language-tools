@@ -4,7 +4,8 @@ use crate::{
     files::FilesCtx,
     helpers,
     idx::InternIdent,
-    InternUri, LanguageService,
+    uri::InternUri,
+    LanguageService,
 };
 use itertools::Itertools;
 use rowan::{

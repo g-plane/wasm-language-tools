@@ -1,4 +1,4 @@
-use crate::{files::FilesCtx, helpers, InternUri, LanguageService};
+use crate::{files::FilesCtx, helpers, uri::InternUri, LanguageService};
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
 use std::rc::Rc;

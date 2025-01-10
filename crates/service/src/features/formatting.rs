@@ -1,5 +1,4 @@
-use super::FilesCtx;
-use crate::{helpers, LanguageService};
+use crate::{helpers, uri::UrisCtx, FilesCtx, LanguageService};
 use lsp_types::{
     DocumentFormattingParams, DocumentRangeFormattingParams, FormattingOptions, TextEdit,
 };

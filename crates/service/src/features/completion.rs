@@ -5,7 +5,8 @@ use crate::{
     helpers,
     idx::{IdentsCtx, Idx},
     types_analyzer::{self, OperandType, TypesAnalyzerCtx, ValType},
-    InternUri, LanguageService,
+    uri::{InternUri, UrisCtx},
+    LanguageService,
 };
 use itertools::Itertools;
 use lsp_types::{

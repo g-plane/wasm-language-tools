@@ -1,7 +1,7 @@
 use crate::{
     files::FilesCtx,
     idx::{IdentsCtx, Idx},
-    InternUri,
+    uri::InternUri,
 };
 use rowan::{
     ast::{support, AstNode},

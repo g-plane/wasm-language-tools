@@ -4,6 +4,7 @@ use crate::{
     files::FilesCtx,
     helpers,
     idx::IdentsCtx,
+    uri::UrisCtx,
     LanguageService,
 };
 use lsp_types::{

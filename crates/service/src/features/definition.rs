@@ -2,7 +2,9 @@ use super::find_meaningful_token;
 use crate::{
     binder::{SymbolItem, SymbolItemKey, SymbolTablesCtx},
     files::FilesCtx,
-    helpers, LanguageService,
+    helpers,
+    uri::UrisCtx,
+    LanguageService,
 };
 use line_index::LineIndex;
 use lsp_types::{GotoDefinitionParams, GotoDefinitionResponse, Location};

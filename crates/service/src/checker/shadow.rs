@@ -1,9 +1,9 @@
-use super::FilesCtx;
 use crate::{
     binder::{SymbolItem, SymbolItemKind, SymbolTable},
     helpers,
     idx::{IdentsCtx, Idx},
-    InternUri, LanguageService, LintLevel,
+    uri::{InternUri, UrisCtx},
+    LanguageService, LintLevel,
 };
 use line_index::LineIndex;
 use lsp_types::{

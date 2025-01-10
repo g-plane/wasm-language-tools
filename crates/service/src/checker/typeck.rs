@@ -4,7 +4,8 @@ use crate::{
     files::FilesCtx,
     helpers,
     types_analyzer::{get_block_sig, OperandType, TypesAnalyzerCtx, ValType},
-    InternUri, LanguageService,
+    uri::{InternUri, UrisCtx},
+    LanguageService,
 };
 use itertools::{EitherOrBoth, Itertools};
 use line_index::LineIndex;

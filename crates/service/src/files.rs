@@ -1,15 +1,12 @@
-use crate::InternUri;
+use crate::uri::InternUri;
 use line_index::{LineIndex, TextSize};
-use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString, Position, Range, Uri};
+use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString, Position, Range};
 use rowan::GreenNode;
 use std::rc::Rc;
 use wat_parser::{Message, Parser};
 
 #[salsa::query_group(Files)]
 pub(crate) trait FilesCtx: salsa::Database {
-    #[salsa::interned]
-    fn uri(&self, uri: Uri) -> InternUri;
-
     #[salsa::input]
     fn source(&self, uri: InternUri) -> String;
 
