@@ -5,10 +5,10 @@ mod checker;
 mod config;
 mod data_set;
 mod features;
-mod files;
 mod helpers;
 mod idx;
 mod refactorings;
+mod syntax_tree;
 mod types_analyzer;
 mod uri;
 
@@ -16,8 +16,8 @@ use self::features::SemanticTokenKind;
 pub use crate::config::*;
 use crate::{
     binder::SymbolTables,
-    files::{Files, FilesCtx},
     idx::Idents,
+    syntax_tree::{SyntaxTree, SyntaxTreeCtx},
     types_analyzer::TypesAnalyzer,
     uri::{Uris, UrisCtx},
 };
@@ -36,7 +36,7 @@ use lsp_types::{
 };
 use rustc_hash::{FxBuildHasher, FxHashMap};
 
-#[salsa::database(Uris, Files, Idents, SymbolTables, TypesAnalyzer)]
+#[salsa::database(Uris, Idents, SyntaxTree, SymbolTables, TypesAnalyzer)]
 #[derive(Default)]
 /// The language service comes with handlers for LSP requests.
 ///

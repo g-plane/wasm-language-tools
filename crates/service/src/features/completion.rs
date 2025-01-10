@@ -1,9 +1,8 @@
 use crate::{
     binder::{SymbolItemKey, SymbolItemKind, SymbolTable, SymbolTablesCtx},
-    data_set,
-    files::FilesCtx,
-    helpers,
+    data_set, helpers,
     idx::{IdentsCtx, Idx},
+    syntax_tree::SyntaxTreeCtx,
     types_analyzer::{self, OperandType, TypesAnalyzerCtx, ValType},
     uri::{InternUri, UrisCtx},
     LanguageService,

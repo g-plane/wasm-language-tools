@@ -1,9 +1,9 @@
 use crate::{
     binder::{SymbolItem, SymbolItemKey, SymbolTablesCtx},
     data_set::INSTR_METAS,
-    files::FilesCtx,
     helpers,
     idx::InternIdent,
+    syntax_tree::SyntaxTreeCtx,
     uri::InternUri,
     LanguageService,
 };
@@ -26,7 +26,7 @@ use wat_syntax::{
 };
 
 #[salsa::query_group(TypesAnalyzer)]
-pub(crate) trait TypesAnalyzerCtx: FilesCtx + SymbolTablesCtx {
+pub(crate) trait TypesAnalyzerCtx: SyntaxTreeCtx + SymbolTablesCtx {
     #[salsa::memoized]
     fn extract_type(&self, node: GreenNode) -> Option<ValType>;
     #[salsa::memoized]

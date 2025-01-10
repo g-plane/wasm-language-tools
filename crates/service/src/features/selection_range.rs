@@ -1,5 +1,5 @@
 use super::find_meaningful_token;
-use crate::{helpers, uri::UrisCtx, FilesCtx, LanguageService};
+use crate::{helpers, syntax_tree::SyntaxTreeCtx, uri::UrisCtx, LanguageService};
 use line_index::LineIndex;
 use lsp_types::{SelectionRange, SelectionRangeParams};
 use wat_syntax::SyntaxNode;

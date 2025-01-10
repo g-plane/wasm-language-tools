@@ -1,8 +1,8 @@
 use super::find_meaningful_token;
 use crate::{
     binder::{SymbolItem, SymbolItemKey, SymbolTablesCtx},
-    files::FilesCtx,
     helpers,
+    syntax_tree::SyntaxTreeCtx,
     uri::UrisCtx,
     LanguageService,
 };

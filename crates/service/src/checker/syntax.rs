@@ -1,4 +1,4 @@
-use crate::{files::FilesCtx, helpers, uri::InternUri, LanguageService};
+use crate::{helpers, syntax_tree::SyntaxTreeCtx, uri::InternUri, LanguageService};
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
 use std::rc::Rc;
@@ -13,7 +13,7 @@ pub fn check(
     line_index: &LineIndex,
     root: &SyntaxNode,
 ) {
-    let mut errors = Rc::unwrap_or_clone(service.parser_result(uri).1);
+    let mut errors = Rc::unwrap_or_clone(service.parse(uri).1);
     diags.append(&mut errors);
     diags.extend(
         root.children_with_tokens()

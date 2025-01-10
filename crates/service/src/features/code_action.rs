@@ -1,4 +1,4 @@
-use crate::{files::FilesCtx, helpers, refactorings::*, uri::UrisCtx, LanguageService};
+use crate::{helpers, refactorings::*, syntax_tree::SyntaxTreeCtx, uri::UrisCtx, LanguageService};
 use lsp_types::{CodeActionKind, CodeActionOrCommand, CodeActionParams};
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode};
 

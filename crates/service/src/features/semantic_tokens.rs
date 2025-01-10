@@ -1,7 +1,7 @@
 use crate::{
     binder::{SymbolItemKey, SymbolTablesCtx},
-    files::FilesCtx,
     helpers,
+    syntax_tree::SyntaxTreeCtx,
     uri::{InternUri, UrisCtx},
     LanguageService,
 };

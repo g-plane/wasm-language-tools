@@ -1,6 +1,6 @@
 use crate::{
-    files::FilesCtx,
     idx::{IdentsCtx, Idx},
+    syntax_tree::SyntaxTreeCtx,
     uri::InternUri,
 };
 use rowan::{
@@ -14,7 +14,7 @@ use wat_syntax::{
 };
 
 #[salsa::query_group(SymbolTables)]
-pub(crate) trait SymbolTablesCtx: FilesCtx + IdentsCtx {
+pub(crate) trait SymbolTablesCtx: SyntaxTreeCtx + IdentsCtx {
     #[salsa::memoized]
     #[salsa::invoke(create_symbol_table)]
     fn symbol_table(&self, uri: InternUri) -> Rc<SymbolTable>;

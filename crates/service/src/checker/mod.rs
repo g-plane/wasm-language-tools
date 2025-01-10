@@ -1,4 +1,4 @@
-use crate::{binder::SymbolTablesCtx, files::FilesCtx, uri::InternUri, LanguageService};
+use crate::{binder::SymbolTablesCtx, syntax_tree::SyntaxTreeCtx, uri::InternUri, LanguageService};
 use lsp_types::Diagnostic;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
