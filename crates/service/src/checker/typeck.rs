@@ -407,7 +407,7 @@ fn resolve_resulted_type(
             .next()
             .and_then(|symbol| shared.service.extract_global_type(symbol.green.clone()))
             .map_or(OperandType::Any, OperandType::Val)],
-        "br" | "br_if" => plain_instr
+        "br_if" => plain_instr
             .immediates()
             .next()
             .map(|idx| resolve_br_types(shared, idx))
