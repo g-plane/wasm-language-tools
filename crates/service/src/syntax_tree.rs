@@ -3,7 +3,7 @@ use line_index::{LineIndex, TextSize};
 use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString, Position, Range};
 use rowan::GreenNode;
 use std::rc::Rc;
-use wat_parser::{Message, Parser};
+use wat_parser::{parse_to_green, Message};
 
 #[salsa::query_group(SyntaxTree)]
 pub(crate) trait SyntaxTreeCtx: salsa::Database {
@@ -28,11 +28,9 @@ fn get_line_index(db: &dyn SyntaxTreeCtx, uri: InternUri) -> Rc<LineIndex> {
 fn parse(db: &dyn SyntaxTreeCtx, uri: InternUri) -> (GreenNode, Rc<Vec<Diagnostic>>) {
     let source = db.source(uri);
     let line_index = db.line_index(uri);
-    let mut parser = Parser::new(&source);
-    let green = parser.parse_to_green();
-    let syntax_errors = parser
-        .errors()
-        .iter()
+    let (green, errors) = parse_to_green(&source);
+    let syntax_errors = errors
+        .into_iter()
         .map(|error| {
             let start = line_index.line_col(TextSize::new(error.start as u32));
             let end = line_index.line_col(TextSize::new(error.end as u32));

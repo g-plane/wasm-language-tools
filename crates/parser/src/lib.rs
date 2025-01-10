@@ -5,5 +5,5 @@ mod parser;
 
 pub use crate::{
     error::{Message, SyntaxError},
-    parser::{is_id_char, Parser},
+    parser::{is_id_char, parse, parse_to_green},
 };

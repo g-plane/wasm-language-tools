@@ -17,8 +17,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     };
 
-    let mut parser = wat_parser::Parser::new(&input);
-    let tree = parser.parse();
+    let (tree, _) = wat_parser::parse(&input);
     print!("{}", format(&Root::cast(tree).unwrap(), &options));
     Ok(())
 }

@@ -18,38 +18,19 @@ mod module;
 mod token;
 mod ty;
 
-#[derive(Debug)]
-/// Create a parser with some source code, then parse it.
-pub struct Parser<'s> {
-    input: Input<'s>,
-    errors: Vec<SyntaxError>,
+/// Parse the code into a rowan syntax node.
+pub fn parse(source: &str) -> (SyntaxNode, Vec<SyntaxError>) {
+    let (green, errors) = parse_to_green(source);
+    (SyntaxNode::new_root(green), errors)
 }
-impl<'s> Parser<'s> {
-    /// Create a parser instance with specific source code.
-    /// Once created, source code can't be changed.
-    pub fn new(source: &'s str) -> Self {
-        Self {
-            input: Recoverable::new(Located::new(source)),
-            errors: Vec::new(),
-        }
-    }
 
-    /// Parse the code into a rowan syntax node.
-    pub fn parse(&mut self) -> SyntaxNode {
-        SyntaxNode::new_root(self.parse_to_green())
-    }
-
-    /// Parse the code into a rowan green node.
-    pub fn parse_to_green(&mut self) -> GreenNode {
-        let (_, tree, errors) = root.recoverable_parse(*self.input);
-        self.errors = errors;
-        tree.expect("parser should always succeed even if there are syntax errors")
-    }
-
-    /// Retrieve syntax errors.
-    pub fn errors(&self) -> &[SyntaxError] {
-        &self.errors
-    }
+/// Parse the code into a rowan green node.
+pub fn parse_to_green(source: &str) -> (GreenNode, Vec<SyntaxError>) {
+    let (_, tree, errors) = root.recoverable_parse(*Input::new(Located::new(source)));
+    (
+        tree.expect("parser should always succeed even if there are syntax errors"),
+        errors,
+    )
 }
 
 type GreenElement = NodeOrToken<GreenNode, GreenToken>;

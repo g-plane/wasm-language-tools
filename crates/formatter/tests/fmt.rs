@@ -34,8 +34,7 @@ fn fmt_snapshot() {
 }
 
 fn run_format_test(path: &Path, input: &str, options: &FormatOptions) -> String {
-    let mut parser = wat_parser::Parser::new(&input);
-    let tree = parser.parse();
+    let (tree, _) = wat_parser::parse(input);
     let output = format(&Root::cast(tree).unwrap(), options);
 
     assert!(
@@ -44,9 +43,7 @@ fn run_format_test(path: &Path, input: &str, options: &FormatOptions) -> String 
         path.display()
     );
 
-    let mut parser = wat_parser::Parser::new(&output);
-    let tree = parser.parse();
-    let errors = parser.errors();
+    let (tree, errors) = wat_parser::parse(input);
     assert!(
         errors.is_empty(),
         "syntax error in stability test '{}': {:?}",
