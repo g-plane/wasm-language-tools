@@ -32,23 +32,28 @@ pub(crate) trait TypesAnalyzerCtx: SyntaxTreeCtx + SymbolTablesCtx {
     #[salsa::memoized]
     fn extract_global_type(&self, node: GreenNode) -> Option<ValType>;
     #[salsa::memoized]
-    fn extract_sig(&self, node: GreenNode) -> FuncSig;
+    fn extract_sig(&self, node: GreenNode) -> Signature;
 
     #[salsa::memoized]
-    fn get_func_sig(&self, uri: InternUri, ptr: SyntaxNodePtr, green: GreenNode)
-        -> Option<FuncSig>;
+    fn get_func_sig(
+        &self,
+        uri: InternUri,
+        ptr: SyntaxNodePtr,
+        green: GreenNode,
+    ) -> Option<Signature>;
     #[salsa::memoized]
-    fn render_func_sig(&self, signature: FuncSig) -> String;
+    fn render_sig(&self, signature: Signature) -> String;
     #[salsa::memoized]
-    fn render_compact_func_sig(&self, signature: FuncSig) -> String;
+    fn render_compact_sig(&self, signature: Signature) -> String;
     #[salsa::memoized]
-    fn render_func_header(&self, name: Option<InternIdent>, signature: Option<FuncSig>) -> String;
+    fn render_func_header(&self, name: Option<InternIdent>, signature: Option<Signature>)
+        -> String;
     #[salsa::memoized]
     fn render_block_header(
         &self,
         kind: SyntaxKind,
         name: Option<InternIdent>,
-        signature: Option<FuncSig>,
+        signature: Option<Signature>,
     ) -> String;
 }
 fn extract_type(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<ValType> {
@@ -71,7 +76,7 @@ fn extract_global_type(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<Val
         .and_then(|global_type| db.extract_type(global_type.to_owned()))
 }
 
-fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
+fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Signature {
     let root = SyntaxNode::new_root(node);
     let params = children::<Param>(&root).fold(vec![], |mut acc, param| {
         if let Some((ident, ty)) = param.ident_token().zip(param.val_types().next()) {
@@ -89,7 +94,7 @@ fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> FuncSig {
         .flat_map(|result| result.val_types())
         .map(ValType::from)
         .collect();
-    FuncSig { params, results }
+    Signature { params, results }
 }
 
 fn get_func_sig(
@@ -97,7 +102,7 @@ fn get_func_sig(
     uri: InternUri,
     ptr: SyntaxNodePtr,
     green: GreenNode,
-) -> Option<FuncSig> {
+) -> Option<Signature> {
     green
         .children()
         .find_map(|child| match child {
@@ -132,7 +137,7 @@ pub fn get_block_sig(
     service: &LanguageService,
     uri: InternUri,
     node: &SyntaxNode,
-) -> Option<FuncSig> {
+) -> Option<Signature> {
     node.children()
         .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
         .and_then(|block_type| {
@@ -144,7 +149,7 @@ pub fn get_block_sig(
         })
 }
 
-fn render_func_sig(db: &dyn TypesAnalyzerCtx, signature: FuncSig) -> String {
+fn render_sig(db: &dyn TypesAnalyzerCtx, signature: Signature) -> String {
     let mut ret = String::with_capacity(signature.params.len() * 9 + signature.results.len() * 10);
     let params = signature
         .params
@@ -170,7 +175,7 @@ fn render_func_sig(db: &dyn TypesAnalyzerCtx, signature: FuncSig) -> String {
     ret
 }
 
-fn render_compact_func_sig(_: &dyn TypesAnalyzerCtx, signature: FuncSig) -> String {
+fn render_compact_sig(_: &dyn TypesAnalyzerCtx, signature: Signature) -> String {
     let params = signature
         .params
         .iter()
@@ -183,7 +188,7 @@ fn render_compact_func_sig(_: &dyn TypesAnalyzerCtx, signature: FuncSig) -> Stri
 fn render_func_header(
     db: &dyn TypesAnalyzerCtx,
     name: Option<InternIdent>,
-    signature: Option<FuncSig>,
+    signature: Option<Signature>,
 ) -> String {
     let mut content = "(func".to_string();
     if let Some(name) = name {
@@ -193,7 +198,7 @@ fn render_func_header(
     if let Some(sig) = signature {
         if !sig.params.is_empty() || !sig.results.is_empty() {
             content.push(' ');
-            content.push_str(&db.render_func_sig(sig));
+            content.push_str(&db.render_sig(sig));
         }
     }
     content.push(')');
@@ -204,7 +209,7 @@ fn render_block_header(
     db: &dyn TypesAnalyzerCtx,
     kind: SyntaxKind,
     name: Option<InternIdent>,
-    signature: Option<FuncSig>,
+    signature: Option<Signature>,
 ) -> String {
     let mut content = format!(
         "({}",
@@ -221,7 +226,7 @@ fn render_block_header(
     if let Some(sig) = signature {
         if !sig.params.is_empty() || !sig.results.is_empty() {
             content.push(' ');
-            content.push_str(&db.render_func_sig(sig));
+            content.push_str(&db.render_sig(sig));
         }
     }
     content.push(')');
@@ -352,7 +357,7 @@ impl Display for OperandType {
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
-pub(crate) struct FuncSig {
+pub(crate) struct Signature {
     pub(crate) params: Vec<(ValType, Option<InternIdent>)>,
     pub(crate) results: Vec<ValType>,
 }

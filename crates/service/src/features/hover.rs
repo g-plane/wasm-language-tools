@@ -311,7 +311,7 @@ fn create_type_def_hover(service: &LanguageService, symbol: &SymbolItem) -> Mark
         content_value.push_str(" (func");
         if !sig.params.is_empty() || !sig.results.is_empty() {
             content_value.push(' ');
-            content_value.push_str(&service.render_func_sig(sig));
+            content_value.push_str(&service.render_sig(sig));
         }
         content_value.push(')');
     }

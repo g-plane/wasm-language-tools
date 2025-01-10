@@ -515,7 +515,7 @@ fn get_cmp_list(
                                     )),
                                     label_details: Some(CompletionItemLabelDetails {
                                         description: Some(
-                                            service.render_compact_func_sig(
+                                            service.render_compact_sig(
                                                 service
                                                     .get_func_sig(
                                                         uri,
