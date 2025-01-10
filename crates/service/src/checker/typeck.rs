@@ -384,7 +384,7 @@ fn resolve_resulted_type(
             })
             .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
             .unwrap_or_default(),
-        "local.get" => plain_instr
+        "local.get" => vec![plain_instr
             .immediates()
             .next()
             .and_then(|idx| {
@@ -393,11 +393,8 @@ fn resolve_resulted_type(
                     .find_param_or_local_def(SymbolItemKey::new(idx.syntax()))
             })
             .and_then(|symbol| shared.service.extract_type(symbol.green.clone()))
-            .map(OperandType::Val)
-            .or(Some(OperandType::Any))
-            .map(|ty| vec![ty])
-            .unwrap_or_default(),
-        "global.get" => plain_instr
+            .map_or(OperandType::Any, OperandType::Val)],
+        "global.get" => vec![plain_instr
             .immediates()
             .next()
             .and_then(|idx| {
@@ -409,10 +406,7 @@ fn resolve_resulted_type(
             .flatten()
             .next()
             .and_then(|symbol| shared.service.extract_global_type(symbol.green.clone()))
-            .map(OperandType::Val)
-            .or(Some(OperandType::Any))
-            .map(|ty| vec![ty])
-            .unwrap_or_default(),
+            .map_or(OperandType::Any, OperandType::Val)],
         "br" | "br_if" => plain_instr
             .immediates()
             .next()
