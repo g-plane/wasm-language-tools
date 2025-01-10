@@ -15,7 +15,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, root: &SyntaxN
                 severity: Some(DiagnosticSeverity::ERROR),
                 source: Some("wat".into()),
                 code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-                message: "only one module is allowed in one file".into(),
+                message: "only one module is allowed".into(),
                 ..Default::default()
             }),
     );

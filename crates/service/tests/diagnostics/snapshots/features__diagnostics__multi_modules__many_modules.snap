@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "multiple-modules",
       "source": "wat",
-      "message": "only one module is allowed in one file"
+      "message": "only one module is allowed"
     },
     {
       "range": {
@@ -35,7 +35,7 @@ expression: response
       "severity": 1,
       "code": "multiple-modules",
       "source": "wat",
-      "message": "only one module is allowed in one file"
+      "message": "only one module is allowed"
     }
   ]
 }
