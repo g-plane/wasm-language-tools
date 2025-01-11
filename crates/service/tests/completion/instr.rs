@@ -254,3 +254,31 @@ fn after_block_type() {
     let response = service.completion(create_params(uri, Position::new(2, 31)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn following_dot() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (i32.))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 15)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn after_dot() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (i32.c))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 16)));
+    assert_json_snapshot!(response);
+}

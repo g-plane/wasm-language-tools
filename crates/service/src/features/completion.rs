@@ -85,7 +85,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         SyntaxKind::PLAIN_INSTR => {
             if token.kind() == SyntaxKind::INSTR_NAME {
                 ctx.push(CmpCtx::Instr);
-                if let Some(grand) = parent.parent() {
+                if let (Some(grand), false) = (parent.parent(), token.text().contains('.')) {
                     match grand.kind() {
                         SyntaxKind::MODULE_FIELD_FUNC => {
                             // Given the code below:
@@ -417,11 +417,26 @@ fn get_cmp_list(
         .fold(Vec::with_capacity(2), |mut items, ctx| {
             match ctx {
                 CmpCtx::Instr => {
-                    items.extend(data_set::INSTR_NAMES.iter().map(|ty| CompletionItem {
-                        label: ty.to_string(),
-                        kind: Some(CompletionItemKind::OPERATOR),
-                        ..Default::default()
-                    }));
+                    if let Some((left, _)) = token.text().split_once('.') {
+                        items.extend(
+                            data_set::INSTR_NAMES
+                                .iter()
+                                .filter_map(|name| {
+                                    name.strip_prefix(left).and_then(|s| s.strip_prefix('.'))
+                                })
+                                .map(|name| CompletionItem {
+                                    label: name.to_string(),
+                                    kind: Some(CompletionItemKind::OPERATOR),
+                                    ..Default::default()
+                                }),
+                        );
+                    } else {
+                        items.extend(data_set::INSTR_NAMES.iter().map(|name| CompletionItem {
+                            label: name.to_string(),
+                            kind: Some(CompletionItemKind::OPERATOR),
+                            ..Default::default()
+                        }));
+                    }
                 }
                 CmpCtx::ValType => {
                     items.extend(data_set::VALUE_TYPES.iter().map(|ty| CompletionItem {

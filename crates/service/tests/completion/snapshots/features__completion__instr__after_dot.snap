@@ -1,0 +1,206 @@
+---
+source: crates/service/tests/completion/instr.rs
+expression: response
+---
+[
+  {
+    "label": "load",
+    "kind": 24
+  },
+  {
+    "label": "load8_s",
+    "kind": 24
+  },
+  {
+    "label": "load8_u",
+    "kind": 24
+  },
+  {
+    "label": "load16_s",
+    "kind": 24
+  },
+  {
+    "label": "load16_u",
+    "kind": 24
+  },
+  {
+    "label": "store",
+    "kind": 24
+  },
+  {
+    "label": "store8",
+    "kind": 24
+  },
+  {
+    "label": "store16",
+    "kind": 24
+  },
+  {
+    "label": "const",
+    "kind": 24
+  },
+  {
+    "label": "eqz",
+    "kind": 24
+  },
+  {
+    "label": "eq",
+    "kind": 24
+  },
+  {
+    "label": "ne",
+    "kind": 24
+  },
+  {
+    "label": "lt_s",
+    "kind": 24
+  },
+  {
+    "label": "lt_u",
+    "kind": 24
+  },
+  {
+    "label": "gt_s",
+    "kind": 24
+  },
+  {
+    "label": "gt_u",
+    "kind": 24
+  },
+  {
+    "label": "le_s",
+    "kind": 24
+  },
+  {
+    "label": "le_u",
+    "kind": 24
+  },
+  {
+    "label": "ge_s",
+    "kind": 24
+  },
+  {
+    "label": "ge_u",
+    "kind": 24
+  },
+  {
+    "label": "clz",
+    "kind": 24
+  },
+  {
+    "label": "ctz",
+    "kind": 24
+  },
+  {
+    "label": "popcnt",
+    "kind": 24
+  },
+  {
+    "label": "add",
+    "kind": 24
+  },
+  {
+    "label": "sub",
+    "kind": 24
+  },
+  {
+    "label": "mul",
+    "kind": 24
+  },
+  {
+    "label": "div_s",
+    "kind": 24
+  },
+  {
+    "label": "div_u",
+    "kind": 24
+  },
+  {
+    "label": "rem_s",
+    "kind": 24
+  },
+  {
+    "label": "rem_u",
+    "kind": 24
+  },
+  {
+    "label": "and",
+    "kind": 24
+  },
+  {
+    "label": "or",
+    "kind": 24
+  },
+  {
+    "label": "xor",
+    "kind": 24
+  },
+  {
+    "label": "shl",
+    "kind": 24
+  },
+  {
+    "label": "shr_s",
+    "kind": 24
+  },
+  {
+    "label": "shr_u",
+    "kind": 24
+  },
+  {
+    "label": "rotl",
+    "kind": 24
+  },
+  {
+    "label": "rotr",
+    "kind": 24
+  },
+  {
+    "label": "wrap_i64",
+    "kind": 24
+  },
+  {
+    "label": "trunc_f32_s",
+    "kind": 24
+  },
+  {
+    "label": "trunc_f32_u",
+    "kind": 24
+  },
+  {
+    "label": "trunc_f64_s",
+    "kind": 24
+  },
+  {
+    "label": "trunc_f64_u",
+    "kind": 24
+  },
+  {
+    "label": "reinterpret_f32",
+    "kind": 24
+  },
+  {
+    "label": "extend8_s",
+    "kind": 24
+  },
+  {
+    "label": "extend16_s",
+    "kind": 24
+  },
+  {
+    "label": "trunc_sat_f32_s",
+    "kind": 24
+  },
+  {
+    "label": "trunc_sat_f32_u",
+    "kind": 24
+  },
+  {
+    "label": "trunc_sat_f64_s",
+    "kind": 24
+  },
+  {
+    "label": "trunc_sat_f64_u",
+    "kind": 24
+  }
+]
