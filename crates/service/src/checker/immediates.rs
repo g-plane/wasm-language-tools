@@ -1,8 +1,8 @@
 use crate::helpers;
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
-use rowan::ast::support::token;
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use rowan::ast::{support::token, AstNode};
+use wat_syntax::{ast::Immediate, SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "immediates";
 
@@ -67,7 +67,39 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
             );
         }
         "select" => {
-            check_immediate!(SyntaxKind::TYPE_USE, "type use", false);
+            if let Some(immediate) = immediates.next() {
+                let range = immediate.text_range();
+                'a: {
+                    let Some(type_use) =
+                        Immediate::cast(immediate).and_then(|immediate| immediate.type_use())
+                    else {
+                        diags.push(Diagnostic {
+                            range: helpers::rowan_range_to_lsp_range(line_index, range),
+                            severity: Some(DiagnosticSeverity::ERROR),
+                            source: Some("wat".into()),
+                            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                            message: "expected result type".into(),
+                            ..Default::default()
+                        });
+                        break 'a;
+                    };
+                    let mut children = type_use.syntax().children();
+                    if children.next().is_some_and(|child| {
+                        child.kind() == SyntaxKind::RESULT && child.children().count() == 1
+                    }) && children.next().is_none()
+                    {
+                        break 'a;
+                    }
+                    diags.push(Diagnostic {
+                        range: helpers::rowan_range_to_lsp_range(line_index, range),
+                        severity: Some(DiagnosticSeverity::ERROR),
+                        source: Some("wat".into()),
+                        code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                        message: "there must be exactly one result type".into(),
+                        ..Default::default()
+                    });
+                }
+            }
         }
         "br_table" => {
             diags.extend(

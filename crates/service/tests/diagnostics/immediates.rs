@@ -150,6 +150,30 @@ fn select_incorrect() {
   (func
     (drop
       (select $t
+        (unreachable))))
+  (func
+    (drop
+      (select (type $t)
+        (unreachable))))
+  (func
+    (drop
+      (select (result i32) $t
+        (unreachable))))
+  (func
+    (drop
+      (select (param i32) (result i32)
+        (unreachable))))
+  (func
+    (drop
+      (select (result i32) (result)
+        (unreachable))))
+  (func
+    (drop
+      (select (result)
+        (unreachable))))
+  (func
+    (drop
+      (select (result i32 i32)
         (unreachable)))))
 "#;
     let mut service = LanguageService::default();
@@ -164,14 +188,13 @@ fn select_correct() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = r#"
 (module
-  (type $t (func (result i32)))
   (func
     (select
       (i32.const 0)
       (i32.const 1)
       (i32.const 2))
     (drop
-      (select (type $t)
+      (select (result i32)
         (unreachable)))))
 "#;
     let mut service = LanguageService::default();
