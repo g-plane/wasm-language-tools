@@ -13,6 +13,8 @@ mod immediates;
 #[cfg(test)]
 mod implicit_module;
 #[cfg(test)]
+mod import_occur;
+#[cfg(test)]
 mod multi_modules;
 #[cfg(test)]
 mod shadow;

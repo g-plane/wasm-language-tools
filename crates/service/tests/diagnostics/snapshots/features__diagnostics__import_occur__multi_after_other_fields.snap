@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/import_occur.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 2
+        },
+        "end": {
+          "line": 3,
+          "character": 25
+        }
+      },
+      "severity": 1,
+      "code": "import-occurrence",
+      "source": "wat",
+      "message": "import must occur before all non-import definitions"
+    }
+  ]
+}

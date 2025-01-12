@@ -6,6 +6,7 @@ mod dup_names;
 mod global_mut;
 mod immediates;
 mod implicit_module;
+mod import_occur;
 mod multi_modules;
 mod shadow;
 mod syntax;
@@ -62,6 +63,9 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                 &symbol_table,
                 &node,
             );
+        }
+        SyntaxKind::MODULE_FIELD_IMPORT => {
+            import_occur::check(&mut diagnostics, &line_index, &node);
         }
         SyntaxKind::PLAIN_INSTR => {
             unknown_instr::check(&mut diagnostics, &line_index, &node);
