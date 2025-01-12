@@ -362,10 +362,23 @@ pub(crate) struct Signature {
     pub(crate) results: Vec<ValType>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub(crate) struct ResolvedSig {
     pub(crate) params: Vec<OperandType>,
     pub(crate) results: Vec<OperandType>,
+}
+
+impl From<Signature> for ResolvedSig {
+    fn from(sig: Signature) -> Self {
+        ResolvedSig {
+            params: sig
+                .params
+                .into_iter()
+                .map(|(ty, _)| OperandType::Val(ty))
+                .collect(),
+            results: sig.results.into_iter().map(OperandType::Val).collect(),
+        }
+    }
 }
 
 #[derive(Clone)]
