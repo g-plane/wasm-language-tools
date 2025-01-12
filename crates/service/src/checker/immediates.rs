@@ -2,9 +2,11 @@ use crate::helpers;
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
 use rowan::ast::{support::token, AstNode};
-use wat_syntax::{ast::Immediate, SyntaxKind, SyntaxNode};
+use wat_syntax::{ast::Immediate, SyntaxKind, SyntaxNode, SyntaxToken};
 
 const DIAGNOSTIC_CODE: &str = "immediates";
+
+const INDEX: [SyntaxKind; 2] = [SyntaxKind::IDENT, SyntaxKind::INT];
 
 pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxNode) {
     let Some(instr_name) = token(node, SyntaxKind::INSTR_NAME) else {
@@ -14,56 +16,37 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         .children()
         .filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
 
-    macro_rules! check_immediate {
-        ($kind:pat, $syntax:literal, $required:literal) => {
-            let immediate = immediates
-                .next()
-                .and_then(|immediate| immediate.first_child_or_token());
-            if let Some(immediate) = immediate {
-                if !matches!(immediate.kind(), $kind) {
-                    diags.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(
-                            line_index,
-                            immediate.text_range(),
-                        ),
-                        severity: Some(DiagnosticSeverity::ERROR),
-                        source: Some("wat".into()),
-                        code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-                        message: format!("expected {}", $syntax),
-                        ..Default::default()
-                    });
-                }
-            } else if $required {
-                diags.push(Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(line_index, instr_name.text_range()),
-                    severity: Some(DiagnosticSeverity::ERROR),
-                    source: Some("wat".into()),
-                    code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-                    message: format!("missing {}", $syntax),
-                    ..Default::default()
-                });
-            }
-        };
-    }
-
     match instr_name.text() {
         "call" | "local.get" | "local.set" | "local.tee" | "global.get" | "global.set"
         | "table.get" | "table.set" | "ref.func" | "memory.init" | "data.drop" | "elem.drop"
         | "table.grow" | "table.size" | "table.fill" | "br" | "br_if" => {
-            check_immediate!(
-                SyntaxKind::IDENT | SyntaxKind::INT,
+            check_immediate(
+                diags,
+                &mut immediates,
+                INDEX,
                 "identifier or unsigned integer",
-                true
+                &instr_name,
+                line_index,
             );
         }
         "i32.const" | "i64.const" | "v128.const" => {
-            check_immediate!(SyntaxKind::INT, "integer", true);
+            check_immediate(
+                diags,
+                &mut immediates,
+                SyntaxKind::INT,
+                "integer",
+                &instr_name,
+                line_index,
+            );
         }
         "f32.const" | "f64.const" => {
-            check_immediate!(
-                SyntaxKind::FLOAT | SyntaxKind::INT,
+            check_immediate(
+                diags,
+                &mut immediates,
+                [SyntaxKind::FLOAT, SyntaxKind::INT],
                 "floating-point number",
-                true
+                &instr_name,
+                line_index,
             );
         }
         "select" => {
@@ -124,15 +107,21 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
             return;
         }
         "table.init" | "table.copy" => {
-            check_immediate!(
-                SyntaxKind::IDENT | SyntaxKind::INT,
+            check_immediate(
+                diags,
+                &mut immediates,
+                INDEX,
                 "identifier or unsigned integer",
-                true
+                &instr_name,
+                line_index,
             );
-            check_immediate!(
-                SyntaxKind::IDENT | SyntaxKind::INT,
+            check_immediate(
+                diags,
+                &mut immediates,
+                INDEX,
                 "identifier or unsigned integer",
-                true
+                &instr_name,
+                line_index,
             );
         }
         "i32.load" | "i64.load" | "f32.load" | "f64.load" | "i32.load8_s" | "i32.load8_u"
@@ -143,7 +132,14 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         | "v128.load16x4_s" | "v128.load16x4_u" | "v128.load32x2_s" | "v128.load32x2_u"
         | "v128.load8_splat" | "v128.load16_splat" | "v128.load32_splat" | "v128.load64_splat"
         | "v128.load32_zero" | "v128.load64_zero" | "v128.store" => {
-            check_immediate!(SyntaxKind::MEM_ARG, "memory argument", true);
+            check_immediate(
+                diags,
+                &mut immediates,
+                SyntaxKind::MEM_ARG,
+                "memory argument",
+                &instr_name,
+                line_index,
+            );
         }
         "i8x16.shuffle"
         | "i8x16.extract_lane_s"
@@ -160,23 +156,43 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         | "f32x4.replace_lane"
         | "f64x2.extract_lane"
         | "f64x2.replace_lane" => {
-            check_immediate!(
-                SyntaxKind::IDENT | SyntaxKind::INT,
+            check_immediate(
+                diags,
+                &mut immediates,
+                INDEX,
                 "identifier or unsigned integer",
-                true
+                &instr_name,
+                line_index,
             );
         }
         "v128.load8_lane" | "v128.load16_lane" | "v128.load32_lane" | "v128.load64_lane"
         | "v128.store8_lane" | "v128.store16_lane" | "v128.store32_lane" | "v128.store64_lane" => {
-            check_immediate!(SyntaxKind::MEM_ARG, "memory argument", true);
-            check_immediate!(
-                SyntaxKind::IDENT | SyntaxKind::INT,
+            check_immediate(
+                diags,
+                &mut immediates,
+                SyntaxKind::MEM_ARG,
+                "memory argument",
+                &instr_name,
+                line_index,
+            );
+            check_immediate(
+                diags,
+                &mut immediates,
+                INDEX,
                 "identifier or unsigned integer",
-                true
+                &instr_name,
+                line_index,
             );
         }
         "ref.null" => {
-            check_immediate!(SyntaxKind::HEAP_TYPE, "heap type", true);
+            check_immediate(
+                diags,
+                &mut immediates,
+                SyntaxKind::HEAP_TYPE,
+                "heap type",
+                &instr_name,
+                line_index,
+            );
         }
         _ => {}
     }
@@ -188,4 +204,52 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         message: "unexpected immediate".into(),
         ..Default::default()
     }));
+}
+
+fn check_immediate(
+    diags: &mut Vec<Diagnostic>,
+    immediates: &mut impl Iterator<Item = SyntaxNode>,
+    expected: impl SyntaxKindCmp,
+    description: &'static str,
+    instr_name: &SyntaxToken,
+    line_index: &LineIndex,
+) {
+    let immediate = immediates
+        .next()
+        .and_then(|immediate| immediate.first_child_or_token());
+    if let Some(immediate) = immediate {
+        if !expected.cmp(immediate.kind()) {
+            diags.push(Diagnostic {
+                range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
+                severity: Some(DiagnosticSeverity::ERROR),
+                source: Some("wat".into()),
+                code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                message: format!("expected {description}",),
+                ..Default::default()
+            })
+        }
+    } else {
+        diags.push(Diagnostic {
+            range: helpers::rowan_range_to_lsp_range(line_index, instr_name.text_range()),
+            severity: Some(DiagnosticSeverity::ERROR),
+            source: Some("wat".into()),
+            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+            message: format!("missing {description}"),
+            ..Default::default()
+        });
+    }
+}
+
+trait SyntaxKindCmp {
+    fn cmp(self, other: SyntaxKind) -> bool;
+}
+impl SyntaxKindCmp for SyntaxKind {
+    fn cmp(self, other: SyntaxKind) -> bool {
+        self == other
+    }
+}
+impl<const N: usize> SyntaxKindCmp for [SyntaxKind; N] {
+    fn cmp(self, other: SyntaxKind) -> bool {
+        self.into_iter().any(|kind| kind == other)
+    }
 }
