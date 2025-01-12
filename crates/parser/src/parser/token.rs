@@ -23,10 +23,7 @@ pub(super) fn r_paren(input: &mut Input) -> PResult<Option<Vec<GreenElement>>, S
     let mut tokens = Vec::with_capacity(1);
     let start = input.checkpoint();
     loop {
-        let mut trivia_tokens = match trivias.parse_next(input) {
-            Ok(trivias) => trivias,
-            Err(err) => return Err(err),
-        };
+        let mut trivia_tokens = trivias.parse_next(input)?;
         let token_start = input.checkpoint();
         let mut err = match parser.parse_next(input) {
             Ok(..) => {
