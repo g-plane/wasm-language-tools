@@ -121,7 +121,7 @@ fn check_block_like(
                 return;
             };
             let instr_name = instr_name.text();
-            let sig = resolve_sig(shared, instr_name, plain_instr);
+            let sig = resolve_sig(shared, instr_name, plain_instr, &type_stack);
             if let Some(diag) = type_stack.check(&sig.params, ReportRange::Instr(&instr)) {
                 diags.push(diag);
             }
@@ -358,7 +358,12 @@ impl TypeStack<'_> {
     }
 }
 
-fn resolve_sig(shared: &Shared, instr_name: &str, instr: &PlainInstr) -> ResolvedSig {
+fn resolve_sig(
+    shared: &Shared,
+    instr_name: &str,
+    instr: &PlainInstr,
+    type_stack: &TypeStack,
+) -> ResolvedSig {
     match instr_name {
         "call" => instr
             .immediates()
@@ -445,6 +450,29 @@ fn resolve_sig(shared: &Shared, instr_name: &str, instr: &PlainInstr) -> Resolve
             params: vec![OperandType::Val(ValType::I32)],
             results: vec![],
         },
+        "select" => {
+            let ty = if let Some(ty) = instr
+                .immediates()
+                .next()
+                .and_then(|immediate| immediate.type_use())
+                .and_then(|type_use| type_use.results().next())
+                .and_then(|result| result.val_types().next())
+                .and_then(|val_type| val_type.try_into().ok())
+            {
+                OperandType::Val(ty)
+            } else {
+                type_stack
+                    .stack
+                    .len()
+                    .checked_sub(2)
+                    .and_then(|i| type_stack.stack.get(i))
+                    .map_or(OperandType::Any, |(ty, _)| ty.clone())
+            };
+            ResolvedSig {
+                params: vec![ty.clone(), ty.clone(), OperandType::Val(ValType::I32)],
+                results: vec![ty],
+            }
+        }
         _ => data_set::INSTR_SIG
             .get(instr_name)
             .cloned()
