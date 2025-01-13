@@ -1,8 +1,9 @@
 use crate::{
     binder::{SymbolItemKey, SymbolTable},
     data_set, helpers,
-    syntax_tree::SyntaxTreeCtx,
-    types_analyzer::{get_block_sig, OperandType, ResolvedSig, TypesAnalyzerCtx, ValType},
+    types_analyzer::{
+        get_block_sig, resolve_br_types, OperandType, ResolvedSig, TypesAnalyzerCtx, ValType,
+    },
     uri::{InternUri, UrisCtx},
     LanguageService,
 };
@@ -16,7 +17,7 @@ use rowan::{
     TextRange,
 };
 use wat_syntax::{
-    ast::{BlockInstr, Immediate, Instr, PlainInstr},
+    ast::{BlockInstr, Instr, PlainInstr},
     SyntaxKind, SyntaxNode, SyntaxNodePtr,
 };
 
@@ -432,7 +433,7 @@ fn resolve_sig(
             params: instr
                 .immediates()
                 .next()
-                .map(|idx| resolve_br_types(shared, idx))
+                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, idx))
                 .unwrap_or_default(),
             results: vec![],
         },
@@ -440,7 +441,7 @@ fn resolve_sig(
             let results = instr
                 .immediates()
                 .next()
-                .map(|idx| resolve_br_types(shared, idx))
+                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, idx))
                 .unwrap_or_default();
             let mut params = results.clone();
             params.push(OperandType::Val(ValType::I32));
@@ -478,26 +479,6 @@ fn resolve_sig(
             .cloned()
             .unwrap_or_default(),
     }
-}
-
-fn resolve_br_types(shared: &Shared, idx: Immediate) -> Vec<OperandType> {
-    let key = SymbolItemKey::new(idx.syntax());
-    shared
-        .symbol_table
-        .blocks
-        .iter()
-        .find(|block| block.ref_key == key)
-        .and_then(|block| {
-            get_block_sig(
-                shared.service,
-                shared.uri,
-                &block
-                    .def_key
-                    .to_node(&SyntaxNode::new_root(shared.service.root(shared.uri))),
-            )
-        })
-        .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
-        .unwrap_or_default()
 }
 
 enum ReportRange<'a> {

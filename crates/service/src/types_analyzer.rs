@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItem, SymbolItemKey, SymbolTablesCtx},
+    binder::{SymbolItem, SymbolItemKey, SymbolTable, SymbolTablesCtx},
     data_set::INSTR_SIG,
     helpers,
     idx::InternIdent,
@@ -21,7 +21,7 @@ use std::{
     ops::Deref,
 };
 use wat_syntax::{
-    ast::{Param, Result, TypeUse, ValType as AstValType},
+    ast::{Immediate, Param, Result, TypeUse, ValType as AstValType},
     SyntaxKind, SyntaxNode, SyntaxNodePtr, WatLanguage,
 };
 
@@ -262,6 +262,30 @@ pub(crate) fn resolve_param_types(
     } else {
         INSTR_SIG.get(instr_name).map(|sig| sig.params.clone())
     }
+}
+
+pub(crate) fn resolve_br_types(
+    service: &LanguageService,
+    uri: InternUri,
+    symbol_table: &SymbolTable,
+    immediate: Immediate,
+) -> Vec<OperandType> {
+    let key = SymbolItemKey::new(immediate.syntax());
+    symbol_table
+        .blocks
+        .iter()
+        .find(|block| block.ref_key == key)
+        .and_then(|block| {
+            get_block_sig(
+                service,
+                uri,
+                &block
+                    .def_key
+                    .to_node(&SyntaxNode::new_root(service.root(uri))),
+            )
+        })
+        .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
+        .unwrap_or_default()
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
