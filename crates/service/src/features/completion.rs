@@ -159,7 +159,11 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                                 )
                             ) && find_leading_l_paren(token).is_some()
                             {
-                                ctx.push(CmpCtx::KeywordResult);
+                                ctx.extend([
+                                    CmpCtx::KeywordParam,
+                                    CmpCtx::KeywordResult,
+                                    CmpCtx::KeywordType,
+                                ]);
                             }
                         }
                         SyntaxKind::OFFSET => {
@@ -201,7 +205,11 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                     .skip(1)
                     .all(|element| !matches!(element, SyntaxElement::Node(..)))
                 {
-                    ctx.push(CmpCtx::KeywordResult);
+                    ctx.extend([
+                        CmpCtx::KeywordParam,
+                        CmpCtx::KeywordResult,
+                        CmpCtx::KeywordType,
+                    ]);
                 }
                 ctx.push(CmpCtx::Instr);
             }

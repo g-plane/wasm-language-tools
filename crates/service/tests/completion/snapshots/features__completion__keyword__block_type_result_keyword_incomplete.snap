@@ -1128,7 +1128,15 @@ expression: response
     "kind": 24
   },
   {
+    "label": "param",
+    "kind": 14
+  },
+  {
     "label": "result",
+    "kind": 14
+  },
+  {
+    "label": "type",
     "kind": 14
   }
 ]
