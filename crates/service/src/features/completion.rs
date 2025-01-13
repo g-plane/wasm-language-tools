@@ -41,15 +41,14 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             let prev_node = token
                 .siblings_with_tokens(Direction::Prev)
                 .skip(1)
-                .find(|element| matches!(element, SyntaxElement::Node(..)))
-                .map(|element| element.kind());
+                .find(|element| matches!(element, SyntaxElement::Node(..)));
             let next_node = token
                 .siblings_with_tokens(Direction::Next)
                 .skip(1)
                 .find(|element| matches!(element, SyntaxElement::Node(..)))
                 .map(|element| element.kind());
             if !matches!(
-                prev_node,
+                prev_node.as_ref().map(|element| element.kind()),
                 Some(
                     SyntaxKind::PLAIN_INSTR
                         | SyntaxKind::BLOCK_BLOCK
@@ -64,6 +63,18 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::KeywordParam);
                 ctx.push(CmpCtx::KeywordResult);
                 ctx.push(CmpCtx::KeywordLocal);
+            } else if let Some(node) = prev_node.as_ref().and_then(|prev| match prev {
+                SyntaxElement::Node(node) if node.kind() == SyntaxKind::PLAIN_INSTR => Some(node),
+                _ => None,
+            }) {
+                if let Some(instr_name) = support::token(node, SyntaxKind::INSTR_NAME) {
+                    add_cmp_ctx_for_immediates(
+                        instr_name.text(),
+                        node,
+                        find_leading_l_paren(token).is_some(),
+                        &mut ctx,
+                    );
+                }
             }
             if matches!(
                 next_node,
@@ -117,6 +128,19 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                                 ctx.push(CmpCtx::KeywordLocal);
                             }
                         }
+                        SyntaxKind::PLAIN_INSTR => {
+                            if let (Some(instr_name), Some(..)) = (
+                                support::token(&grand, SyntaxKind::INSTR_NAME),
+                                find_leading_l_paren(token),
+                            ) {
+                                add_cmp_ctx_for_immediates(
+                                    instr_name.text(),
+                                    &grand,
+                                    true,
+                                    &mut ctx,
+                                );
+                            }
+                        }
                         SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_IF | SyntaxKind::BLOCK_LOOP => {
                             let prev_node = parent
                                 .siblings_with_tokens(Direction::Prev)
@@ -160,9 +184,12 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 }
             } else if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::Instr);
+                if let Some(instr_name) = support::token(&parent, SyntaxKind::INSTR_NAME) {
+                    add_cmp_ctx_for_immediates(instr_name.text(), &parent, true, &mut ctx);
+                }
             } else {
                 let instr_name = support::token(&parent, SyntaxKind::INSTR_NAME)?;
-                add_cmp_ctx_for_immediates(instr_name.text(), &parent, &mut ctx);
+                add_cmp_ctx_for_immediates(instr_name.text(), &parent, false, &mut ctx);
             }
         }
         SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_IF | SyntaxKind::BLOCK_LOOP => {
@@ -182,7 +209,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 .ancestors()
                 .find(|node| node.kind() == SyntaxKind::PLAIN_INSTR)?;
             let instr_name = support::token(&instr, SyntaxKind::INSTR_NAME)?;
-            add_cmp_ctx_for_immediates(instr_name.text(), &parent, &mut ctx);
+            add_cmp_ctx_for_immediates(instr_name.text(), &parent, false, &mut ctx);
         }
         SyntaxKind::PARAM | SyntaxKind::RESULT | SyntaxKind::LOCAL | SyntaxKind::GLOBAL_TYPE => {
             if !token.text().starts_with('$') {
@@ -344,33 +371,48 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
 fn add_cmp_ctx_for_immediates(
     instr_name: &str,
     node: &SyntaxNode,
+    has_leading_l_paren: bool,
     ctx: &mut SmallVec<[CmpCtx; 4]>,
 ) {
-    match instr_name.split_once('.') {
-        Some(("local", _)) => ctx.push(CmpCtx::Local),
-        Some(("global", _)) => ctx.push(CmpCtx::Global),
-        Some(("ref", "func")) => ctx.push(CmpCtx::Func),
-        Some(("table", snd)) => {
-            if snd == "init"
-                && node.kind() == SyntaxKind::IMMEDIATE
-                && node
-                    .prev_sibling()
-                    .is_some_and(|prev| prev.kind() == SyntaxKind::IMMEDIATE)
-            {
-                // elem id
-            } else {
-                ctx.push(CmpCtx::Table);
+    if has_leading_l_paren {
+        match instr_name {
+            "select" => ctx.push(CmpCtx::KeywordResult),
+            "call_indirect" => {
+                ctx.extend([
+                    CmpCtx::KeywordType,
+                    CmpCtx::KeywordParam,
+                    CmpCtx::KeywordResult,
+                ]);
             }
-        }
-        Some((_, snd)) if snd.starts_with("load") || snd.starts_with("store") => {
-            ctx.push(CmpCtx::MemArg);
-        }
-        None => match instr_name {
-            "call" | "return_call" => ctx.push(CmpCtx::Func),
-            "br" | "br_if" | "br_table" => ctx.push(CmpCtx::Block),
             _ => {}
-        },
-        _ => {}
+        }
+    } else {
+        match instr_name.split_once('.') {
+            Some(("local", _)) => ctx.push(CmpCtx::Local),
+            Some(("global", _)) => ctx.push(CmpCtx::Global),
+            Some(("ref", "func")) => ctx.push(CmpCtx::Func),
+            Some(("table", snd)) => {
+                if snd == "init"
+                    && node.kind() == SyntaxKind::IMMEDIATE
+                    && node
+                        .prev_sibling()
+                        .is_some_and(|prev| prev.kind() == SyntaxKind::IMMEDIATE)
+                {
+                    // elem id
+                } else {
+                    ctx.push(CmpCtx::Table);
+                }
+            }
+            Some((_, snd)) if snd.starts_with("load") || snd.starts_with("store") => {
+                ctx.push(CmpCtx::MemArg);
+            }
+            None => match instr_name {
+                "call" | "return_call" => ctx.push(CmpCtx::Func),
+                "br" | "br_if" | "br_table" => ctx.push(CmpCtx::Block),
+                _ => {}
+            },
+            _ => {}
+        }
     }
 }
 

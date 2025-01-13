@@ -110,6 +110,22 @@ fn globals_following_ident() {
 }
 
 #[test]
+fn in_sequence() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func global.get )
+    (global i32)
+    (global $global i32)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 21)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn export() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "

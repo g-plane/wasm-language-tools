@@ -44,3 +44,45 @@ fn types_incomplete_type() {
     let response = service.completion(create_params(uri, Position::new(2, 19)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn sequence_select_following_paren() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func select ())
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 18)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn folded_select_following_paren() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (select ()))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 19)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn folded_select_incomplete_keyword() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (select (re)))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 21)));
+    assert_json_snapshot!(response);
+}

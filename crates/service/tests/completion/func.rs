@@ -107,6 +107,21 @@ fn call_named_incomplete() {
 }
 
 #[test]
+fn call_in_sequence() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func call )
+    (func $func)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 15)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn ref_func() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
