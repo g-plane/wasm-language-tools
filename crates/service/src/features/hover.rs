@@ -13,7 +13,10 @@ use lsp_types::{
     Hover, HoverContents, HoverParams, LanguageString, MarkedString, MarkupContent, MarkupKind,
 };
 use rowan::ast::{support::child, AstNode};
-use wat_syntax::{ast::GlobalType, SyntaxKind, SyntaxNode};
+use wat_syntax::{
+    ast::{GlobalType, PlainInstr},
+    SyntaxKind, SyntaxNode,
+};
 
 impl LanguageService {
     /// Handler for `textDocument/hover` request.
@@ -170,7 +173,17 @@ impl LanguageService {
             }
             SyntaxKind::INSTR_NAME => {
                 let name = token.text();
-                data_set::INSTR_OP_CODES.get(name).map(|code| Hover {
+                let key = if name == "select" {
+                    let parent = token.parent().and_then(PlainInstr::cast)?;
+                    if parent.immediates().count() > 0 {
+                        "select."
+                    } else {
+                        "select"
+                    }
+                } else {
+                    name
+                };
+                data_set::INSTR_OP_CODES.get(key).map(|code| Hover {
                     contents: HoverContents::Markup(MarkupContent {
                         kind: MarkupKind::Markdown,
                         value: format!(

@@ -3,7 +3,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::{collections::HashMap, sync::LazyLock};
 
 pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = LazyLock::new(|| {
-    let mut map = HashMap::with_capacity_and_hasher(437, FxBuildHasher);
+    let mut map = HashMap::with_capacity_and_hasher(436, FxBuildHasher);
     map.insert(
         "unreachable",
         ResolvedSig {
@@ -100,17 +100,6 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
         ResolvedSig {
             params: vec![OperandType::Any],
             results: vec![],
-        },
-    );
-    map.insert(
-        "select",
-        ResolvedSig {
-            params: vec![
-                OperandType::Any,
-                OperandType::Any,
-                OperandType::Val(ValType::I32),
-            ],
-            results: vec![OperandType::Any],
         },
     );
     map.insert(
@@ -3818,7 +3807,7 @@ pub(crate) static INSTR_OP_CODES: LazyLock<FxHashMap<&'static str, u32>> = LazyL
     map.insert("call_indirect", 0x11);
     map.insert("drop", 0x1A);
     map.insert("select", 0x1B);
-    map.insert("select", 0x1C);
+    map.insert("select.", 0x1C);
     map.insert("local.get", 0x20);
     map.insert("local.set", 0x21);
     map.insert("local.tee", 0x22);

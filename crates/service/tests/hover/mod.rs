@@ -508,6 +508,32 @@ fn three_slots_instr_op_code() {
 }
 
 #[test]
+fn select() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func (select)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(2, 12)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn select_with_result() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func (select (result i32))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(2, 12)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn block_int_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
