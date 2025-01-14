@@ -119,6 +119,15 @@ It also provides an out-of-the-box formatter (a.k.a. pretty printer) for WebAsse
   </picture>
 </details>
 
+<details>
+  <summary>Signature Help</summary>
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/3beaeb93-63ca-469a-bded-bbff53e9eca1">
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/87314ee1-7ffe-4aa7-ac0a-9931108ed430">
+    <img src="https://github.com/user-attachments/assets/3beaeb93-63ca-469a-bded-bbff53e9eca1">
+  </picture>
+</details>
+
 ## 🍵 Usage
 
 We don't provide pre-built binaries at the moment.
