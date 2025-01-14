@@ -85,6 +85,14 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
             }
         }
         "br_table" => {
+            check_immediate(
+                diags,
+                &mut immediates,
+                INDEX,
+                "identifier or unsigned integer",
+                &instr_name,
+                line_index,
+            );
             diags.extend(
                 immediates
                     .filter(|immediate| {

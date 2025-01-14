@@ -36,6 +36,22 @@ expression: response
       "code": "immediates",
       "source": "wat",
       "message": "expected identifier or unsigned integer"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 6
+        },
+        "end": {
+          "line": 8,
+          "character": 14
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "missing identifier or unsigned integer"
     }
   ]
 }

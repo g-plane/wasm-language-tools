@@ -132,7 +132,12 @@ fn br_table() {
 (module
   (func
     (block $a
-      (br_table 0 1.0 $a "" (unreachable)))))
+      (br_table 0 1.0 $a "" (unreachable))))
+  (func
+    block
+      i32.const 0
+      br_table
+    end))
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
