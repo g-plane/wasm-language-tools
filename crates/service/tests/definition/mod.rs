@@ -2,11 +2,8 @@ use lsp_types::{
     GotoDefinitionParams, Position, TextDocumentIdentifier, TextDocumentPositionParams, Uri,
 };
 
-#[cfg(test)]
 mod goto_declaration;
-#[cfg(test)]
 mod goto_definition;
-#[cfg(test)]
 mod goto_type_definition;
 
 fn create_params(uri: Uri, position: Position) -> GotoDefinitionParams {

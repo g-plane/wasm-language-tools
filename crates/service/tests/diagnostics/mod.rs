@@ -4,31 +4,18 @@ use lsp_types::{
 };
 use wat_service::{LanguageService, LintLevel, Lints, ServiceConfig};
 
-#[cfg(test)]
 mod dup_names;
-#[cfg(test)]
 mod global_mut;
-#[cfg(test)]
 mod immediates;
-#[cfg(test)]
 mod implicit_module;
-#[cfg(test)]
 mod import_occur;
-#[cfg(test)]
 mod multi_modules;
-#[cfg(test)]
 mod shadow;
-#[cfg(test)]
 mod syntax;
-#[cfg(test)]
 mod typeck;
-#[cfg(test)]
 mod undef;
-#[cfg(test)]
 mod unknown_instr;
-#[cfg(test)]
 mod unreachable;
-#[cfg(test)]
 mod unused;
 
 fn create_params(uri: Uri) -> DocumentDiagnosticParams {

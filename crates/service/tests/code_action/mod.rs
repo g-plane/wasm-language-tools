@@ -1,10 +1,7 @@
 use lsp_types::{CodeActionContext, CodeActionParams, Range, TextDocumentIdentifier, Uri};
 
-#[cfg(test)]
 mod fix_invalid_mem_arg;
-#[cfg(test)]
 mod func_header_split;
-#[cfg(test)]
 mod params_join;
 
 fn create_params(uri: Uri, range: Range) -> CodeActionParams {
