@@ -466,9 +466,8 @@ fn resolve_sig(
                 .and_then(|immediate| immediate.type_use())
                 .and_then(|type_use| type_use.results().next())
                 .and_then(|result| result.val_types().next())
-                .and_then(|val_type| val_type.try_into().ok())
             {
-                OperandType::Val(ty)
+                OperandType::Val(ty.into())
             } else {
                 type_stack
                     .stack
