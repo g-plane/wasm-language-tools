@@ -20,6 +20,22 @@ expression: response
       "code": "type-check",
       "source": "wat",
       "message": "expected types [i32, i32], found [i32, i32, i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 24,
+          "character": 4
+        },
+        "end": {
+          "line": 24,
+          "character": 7
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32, i32, i32] at the end"
     }
   ]
 }

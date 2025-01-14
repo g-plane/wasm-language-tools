@@ -1863,6 +1863,103 @@ fn br_if_correct() {
 }
 
 #[test]
+fn br_table_incorrect() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    block
+      br_table 0
+    end)
+  (func
+    block (result f32)
+      br_table 0
+    end
+    unreachable)
+  (func
+    block (result f32)
+      f64.const 0
+      br_table 0
+    end
+    unreachable)
+  (func
+    block (result f32)
+      i32.const 0
+      br_table 0
+    end
+    unreachable)
+  (func
+    block (result f32)
+      f32.const 0
+      br_table 0
+    end
+    unreachable)
+  (func
+    block (result f32)
+      f64.const 0
+      i32.const 0
+      br_table 0
+    end
+    unreachable)
+  (func
+    block (result f32 f32)
+      block (result f64 f64)
+        f64.const 0
+        f64.const 0
+        i32.const 0
+        br_table 1
+      end
+      unreachable
+    end
+    unreachable))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn br_table_correct() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    block (result f32)
+      f32.const 0
+      i32.const 0
+      br_table 0
+    end
+    unreachable)
+  (func
+    block (result f32)
+      i32.const 0
+      f32.const 0
+      i32.const 0
+      br_table 0
+    end
+    unreachable)
+  (func
+    block (result f32 f32)
+      block (result f64 f64)
+        f32.const 0
+        f32.const 0
+        i32.const 0
+        br_table 1
+      end
+      unreachable
+    end
+    unreachable))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
+
+#[test]
 fn excessive_at_end() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
@@ -1873,6 +1970,19 @@ fn excessive_at_end() {
       i32.const 0
       i32.const 0
       unreachable
+      i32.const 0
+      i32.const 0
+      i32.const 0
+    end
+    drop
+    drop)
+  (func
+    block (result i32 i32)
+      i32.const 0
+      i32.const 0
+      i32.const 0
+      i32.const 0
+      br_table 0
       i32.const 0
       i32.const 0
       i32.const 0

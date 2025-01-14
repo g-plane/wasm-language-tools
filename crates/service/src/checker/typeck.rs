@@ -447,10 +447,18 @@ fn resolve_sig(
             params.push(OperandType::Val(ValType::I32));
             ResolvedSig { params, results }
         }
-        "br_table" => ResolvedSig {
-            params: vec![OperandType::Val(ValType::I32)],
-            results: vec![],
-        },
+        "br_table" => {
+            let mut params = instr
+                .immediates()
+                .next()
+                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, idx))
+                .unwrap_or_default();
+            params.push(OperandType::Val(ValType::I32));
+            ResolvedSig {
+                params,
+                results: vec![],
+            }
+        }
         "select" => {
             let ty = if let Some(ty) = instr
                 .immediates()
