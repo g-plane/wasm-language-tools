@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        settings:
+        include:
           - name: x86_64-macos
             host: macos-latest
             target: x86_64-apple-darwin
@@ -48,23 +48,23 @@ jobs:
           - name: x86_64-windows
             host: windows-latest
             target: x86_64-pc-windows-gnu
-    name: ${{ matrix.settings.target }}
-    runs-on: ${{ matrix.settings.host }}
+    name: ${{ matrix.target }}
+    runs-on: ${{ matrix.host }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.settings.target }}
+          targets: ${{ matrix.target }}
       - shell: pwsh
         run: |
-          cargo build --target=${{ matrix.settings.target }} --release
-          if (Test-Path ./target/${{ matrix.settings.target }}/release/wat_server.exe) {
-            Copy-Item ./target/${{ matrix.settings.target }}/release/wat_server.exe ./target/${{ matrix.settings.target }}/release/wat_server-${{ matrix.settings.name }}.exe
+          cargo build --target=${{ matrix.target }} --release
+          if (Test-Path ./target/${{ matrix.target }}/release/wat_server.exe) {
+            7z a wat_server-${{ matrix.name }}.zip ./target/${{ matrix.target }}/release/wat_server.exe
           }
-          elseif (Test-Path ./target/${{ matrix.settings.target }}/release/wat_server) {
-            Copy-Item ./target/${{ matrix.settings.target }}/release/wat_server ./target/${{ matrix.settings.target }}/release/wat_server-${{ matrix.settings.name }}
+          elseif (Test-Path ./target/${{ matrix.target }}/release/wat_server) {
+            7z a wat_server-${{ matrix.name }}.zip ./target/${{ matrix.target }}/release/wat_server
           }
       - uses: softprops/action-gh-release@v2
         with:
           files: |
-            ./target/${{ matrix.settings.target }}/release/wat_server-${{ matrix.settings.name }}*
+            wat_server-${{ matrix.name }}.zip
