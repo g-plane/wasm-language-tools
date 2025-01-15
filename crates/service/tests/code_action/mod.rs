@@ -3,6 +3,7 @@ use lsp_types::{CodeActionContext, CodeActionParams, Range, TextDocumentIdentifi
 mod br_if_to_if_br;
 mod fix_invalid_mem_arg;
 mod func_header_split;
+mod if_br_to_br_if;
 mod params_join;
 
 fn create_params(uri: Uri, range: Range) -> CodeActionParams {

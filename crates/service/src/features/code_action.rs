@@ -77,6 +77,13 @@ impl LanguageService {
                         }
                     }
                 }
+                SyntaxKind::BLOCK_IF => {
+                    if rewrite {
+                        if let Some(action) = if_br_to_br_if::act(self, uri, &line_index, &it) {
+                            actions.push(CodeActionOrCommand::CodeAction(action));
+                        }
+                    }
+                }
                 _ => {}
             }
             node = it;
