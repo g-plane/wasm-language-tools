@@ -1,0 +1,29 @@
+---
+source: crates/service/tests/code_action/func_header_join.rs
+expression: response
+---
+[
+  {
+    "title": "Join results",
+    "kind": "refactor.rewrite",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 10
+              },
+              "end": {
+                "line": 2,
+                "character": 39
+              }
+            },
+            "newText": "(result i32 i64 f64)"
+          }
+        ]
+      }
+    }
+  }
+]

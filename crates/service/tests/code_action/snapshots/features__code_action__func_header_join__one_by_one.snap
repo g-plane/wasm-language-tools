@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/code_action/params_join.rs
+source: crates/service/tests/code_action/func_header_join.rs
 expression: response
 ---
 [
@@ -17,10 +17,10 @@ expression: response
               },
               "end": {
                 "line": 2,
-                "character": 37
+                "character": 33
               }
             },
-            "newText": "(param i32 i64 f64)"
+            "newText": "(param i32 f64)"
           }
         ]
       }

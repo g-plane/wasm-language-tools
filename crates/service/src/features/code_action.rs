@@ -29,6 +29,20 @@ impl LanguageService {
         let mut node = SyntaxNode::new_root(self.root(uri));
         while let Some(SyntaxElement::Node(it)) = node.child_or_token_at_range(range) {
             match it.kind() {
+                SyntaxKind::MODULE_FIELD_FUNC => {
+                    if rewrite {
+                        if let Some(action) = func_header_join::act(
+                            self,
+                            uri,
+                            &line_index,
+                            &it,
+                            SyntaxKind::LOCAL,
+                            range,
+                        ) {
+                            actions.push(CodeActionOrCommand::CodeAction(action));
+                        }
+                    }
+                }
                 SyntaxKind::PLAIN_INSTR => {
                     if quickfix {
                         if let Some(action) =
@@ -72,7 +86,24 @@ impl LanguageService {
                 }
                 SyntaxKind::TYPE_USE | SyntaxKind::FUNC_TYPE => {
                     if rewrite {
-                        if let Some(action) = params_join::act(self, uri, &line_index, &it, range) {
+                        if let Some(action) = func_header_join::act(
+                            self,
+                            uri,
+                            &line_index,
+                            &it,
+                            SyntaxKind::PARAM,
+                            range,
+                        ) {
+                            actions.push(CodeActionOrCommand::CodeAction(action));
+                        }
+                        if let Some(action) = func_header_join::act(
+                            self,
+                            uri,
+                            &line_index,
+                            &it,
+                            SyntaxKind::RESULT,
+                            range,
+                        ) {
                             actions.push(CodeActionOrCommand::CodeAction(action));
                         }
                     }
