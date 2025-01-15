@@ -31,7 +31,7 @@ pub fn lsp_range_to_rowan_range(line_index: &LineIndex, range: Range) -> Option<
             line: range.end.line,
             col: range.end.character,
         }))
-        .map(|(start, end)| TextRange::new(TextSize::new(start.into()), TextSize::new(end.into())))
+        .map(|(start, end)| TextRange::new(start, end))
 }
 
 pub fn fuzzy_search<S>(haystack: impl IntoIterator<Item = S>, needle: &str) -> Option<S>

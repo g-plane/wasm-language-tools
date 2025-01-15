@@ -4,7 +4,7 @@ use self::{
     config::FormatOptions,
     printer::{format_node, Ctx, DocGen},
 };
-use line_index::{LineIndex, TextSize};
+use line_index::LineIndex;
 use rowan::{ast::AstNode, TextRange};
 use tiny_pretty::{IndentKind, PrintOptions};
 use wat_syntax::{ast::Root, SyntaxElement};
@@ -33,7 +33,7 @@ pub fn format_range(
         node = it;
     }
     let range = node.text_range();
-    let col = line_index.line_col(TextSize::new(range.start().into())).col as usize;
+    let col = line_index.line_col(range.start()).col as usize;
 
     let ctx = Ctx::new(options);
     let doc = format_node(node, &ctx)?.nest(col);
