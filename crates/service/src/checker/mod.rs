@@ -63,6 +63,14 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                 &symbol_table,
                 &node,
             );
+            unreachable::check(
+                &mut diagnostics,
+                config.lint.unreachable,
+                &line_index,
+                &root,
+                &symbol_table,
+                &node,
+            );
         }
         SyntaxKind::MODULE_FIELD_IMPORT => {
             import_occur::check(&mut diagnostics, &line_index, &node);
