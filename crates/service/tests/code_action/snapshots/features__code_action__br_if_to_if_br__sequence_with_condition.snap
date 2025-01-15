@@ -1,0 +1,29 @@
+---
+source: crates/service/tests/code_action/br_if_to_if_br.rs
+expression: response
+---
+[
+  {
+    "title": "Convert `br_if` to `if` with `br`",
+    "kind": "refactor.rewrite",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 4
+              },
+              "end": {
+                "line": 4,
+                "character": 11
+              }
+            },
+            "newText": "if\n      br 0\n    end"
+          }
+        ]
+      }
+    }
+  }
+]

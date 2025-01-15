@@ -37,6 +37,11 @@ impl LanguageService {
                             actions.push(CodeActionOrCommand::CodeAction(action));
                         }
                     }
+                    if rewrite {
+                        if let Some(action) = br_if_to_if_br::act(self, uri, &line_index, &it) {
+                            actions.push(CodeActionOrCommand::CodeAction(action));
+                        }
+                    }
                 }
                 SyntaxKind::PARAM => {
                     if rewrite {

@@ -1,5 +1,6 @@
 use lsp_types::{CodeActionContext, CodeActionParams, Range, TextDocumentIdentifier, Uri};
 
+mod br_if_to_if_br;
 mod fix_invalid_mem_arg;
 mod func_header_split;
 mod params_join;
