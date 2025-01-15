@@ -27,11 +27,7 @@ pub fn act(
     };
     let types = params
         .iter()
-        .flat_map(|param| {
-            param
-                .children()
-                .filter(|child| child.kind() == SyntaxKind::VAL_TYPE)
-        })
+        .flat_map(|param| param.children())
         .collect::<Vec<_>>();
     if types.len() <= 1 {
         return None;

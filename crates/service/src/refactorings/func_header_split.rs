@@ -16,10 +16,7 @@ pub fn act(
     node: &SyntaxNode,
     kind: SyntaxKind,
 ) -> Option<CodeAction> {
-    let types = node
-        .children()
-        .filter(|child| child.kind() == SyntaxKind::VAL_TYPE)
-        .collect::<Vec<_>>();
+    let types = node.children().collect::<Vec<_>>();
     if types.len() <= 1 {
         return None;
     }
