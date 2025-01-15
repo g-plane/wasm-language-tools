@@ -72,3 +72,45 @@ fn func_end() {
     let response = service.inlay_hint(create_params(uri, Position::new(6, 0)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn block_end() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (block $b)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.inlay_hint(create_params(uri, Position::new(4, 0)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn loop_end() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (loop $b)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.inlay_hint(create_params(uri, Position::new(4, 0)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn if_end() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    (if $b)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.inlay_hint(create_params(uri, Position::new(4, 0)));
+    assert_json_snapshot!(response);
+}

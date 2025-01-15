@@ -8,7 +8,7 @@ use crate::{
     LanguageService,
 };
 use lsp_types::{InlayHint, InlayHintKind, InlayHintLabel, InlayHintParams};
-use wat_syntax::SyntaxNode;
+use wat_syntax::{SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     /// Handler for `textDocument/inlayHint` request.
@@ -75,6 +75,32 @@ impl LanguageService {
                             position: helpers::rowan_pos_to_lsp_pos(&line_index, last.end()),
                             label: InlayHintLabel::String(format!(
                                 "(func {})",
+                                self.lookup_ident(name)
+                            )),
+                            kind: None,
+                            text_edits: None,
+                            tooltip: None,
+                            padding_left: Some(true),
+                            padding_right: None,
+                            data: None,
+                        })
+                }
+                SymbolItemKind::BlockDef => {
+                    let block = symbol.key.to_node(&root);
+                    block
+                        .last_child_or_token()
+                        .map(|last| last.text_range())
+                        .filter(|last| range.contains_range(*last))
+                        .zip(symbol.idx.name)
+                        .map(|(last, name)| InlayHint {
+                            position: helpers::rowan_pos_to_lsp_pos(&line_index, last.end()),
+                            label: InlayHintLabel::String(format!(
+                                "({} {})",
+                                match symbol.key.kind() {
+                                    SyntaxKind::BLOCK_IF => "if",
+                                    SyntaxKind::BLOCK_LOOP => "loop",
+                                    _ => "block",
+                                },
                                 self.lookup_ident(name)
                             )),
                             kind: None,
