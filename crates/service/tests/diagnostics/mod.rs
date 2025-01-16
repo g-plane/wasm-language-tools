@@ -4,6 +4,7 @@ use lsp_types::{
 };
 use wat_service::{LanguageService, LintLevel, Lints, ServiceConfig};
 
+mod br_table_branches;
 mod dup_names;
 mod global_mut;
 mod immediates;

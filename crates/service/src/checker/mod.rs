@@ -2,6 +2,7 @@ use crate::{binder::SymbolTablesCtx, syntax_tree::SyntaxTreeCtx, uri::InternUri,
 use lsp_types::Diagnostic;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
+mod br_table_branches;
 mod dup_names;
 mod global_mut;
 mod immediates;
@@ -84,6 +85,14 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                 uri,
                 &line_index,
                 &root,
+                &symbol_table,
+                &node,
+            );
+            br_table_branches::check(
+                &mut diagnostics,
+                service,
+                uri,
+                &line_index,
                 &symbol_table,
                 &node,
             );

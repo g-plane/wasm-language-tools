@@ -1,0 +1,41 @@
+---
+source: crates/service/tests/diagnostics/br_table_branches.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 21
+        },
+        "end": {
+          "line": 8,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "code": "br-table-branches",
+      "source": "wat",
+      "message": "type mismatch in `br_table`: expected [i64], found [f32]"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 23
+        },
+        "end": {
+          "line": 8,
+          "character": 24
+        }
+      },
+      "severity": 1,
+      "code": "br-table-branches",
+      "source": "wat",
+      "message": "type mismatch in `br_table`: expected [i64], found [i32]"
+    }
+  ]
+}

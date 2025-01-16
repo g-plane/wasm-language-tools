@@ -268,7 +268,7 @@ pub(crate) fn resolve_br_types(
     service: &LanguageService,
     uri: InternUri,
     symbol_table: &SymbolTable,
-    immediate: Immediate,
+    immediate: &Immediate,
 ) -> Vec<OperandType> {
     let key = SymbolItemKey::new(immediate.syntax());
     symbol_table
@@ -366,7 +366,7 @@ impl TryFrom<&GreenNodeData> for ValType {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum OperandType {
     Val(ValType),
     Any,

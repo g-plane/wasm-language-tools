@@ -433,7 +433,7 @@ fn resolve_sig(
             params: instr
                 .immediates()
                 .next()
-                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, idx))
+                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, &idx))
                 .unwrap_or_default(),
             results: vec![],
         },
@@ -441,7 +441,7 @@ fn resolve_sig(
             let results = instr
                 .immediates()
                 .next()
-                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, idx))
+                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, &idx))
                 .unwrap_or_default();
             let mut params = results.clone();
             params.push(OperandType::Val(ValType::I32));
@@ -451,7 +451,7 @@ fn resolve_sig(
             let mut params = instr
                 .immediates()
                 .next()
-                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, idx))
+                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, &idx))
                 .unwrap_or_default();
             params.push(OperandType::Val(ValType::I32));
             ResolvedSig {
