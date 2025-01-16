@@ -130,9 +130,10 @@ It also provides an out-of-the-box formatter (a.k.a. pretty printer) for WebAsse
 
 ## 🍵 Usage
 
-We don't provide pre-built binaries at the moment.
+We've provided pre-built binaries on [GitHub Releases](https://github.com/g-plane/wasm-language-tools/releases).
+You can download it according to your platform, then extract it from the compressed file.
 
-If you have installed Rust, you can run Cargo to install:
+Or, if you've installed Rust, you can run Cargo to install it globally:
 
 ```shell
 cargo install wat_server
