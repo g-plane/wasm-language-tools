@@ -24,7 +24,7 @@ fn func_types_following_int_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
 (module
-    (func (type 1))
+    (func (type 0))
     (type (func))
     (type $type (func))
 )

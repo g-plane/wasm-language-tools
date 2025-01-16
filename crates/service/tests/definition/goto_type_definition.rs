@@ -79,7 +79,7 @@ fn func_int_idx_type_use_int_idx() {
 (module
     (type (func))
     (func (type 0)
-        (call 1)
+        (call 0)
     )
 )
 ";
@@ -113,7 +113,7 @@ fn func_int_idx_type_use_ident_idx() {
 (module
     (type $type (func))
     (func (type $type)
-        (call 1)
+        (call 0)
     )
 )
 ";

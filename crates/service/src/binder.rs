@@ -1,5 +1,5 @@
 use crate::{
-    idx::{IdentsCtx, Idx},
+    idx::{IdentsCtx, Idx, IdxGen},
     syntax_tree::SyntaxTreeCtx,
     uri::InternUri,
 };
@@ -101,14 +101,22 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
     }
 
     let root = SyntaxNode::new_root(db.root(uri));
-    let mut module_field_id = 0;
+    let mut func_idx_gen = IdxGen::default();
+    let mut type_idx_gen = IdxGen::default();
+    let mut global_idx_gen = IdxGen::default();
+    let mut mem_idx_gen = IdxGen::default();
+    let mut table_idx_gen = IdxGen::default();
     let mut symbols = Vec::with_capacity(2);
     let mut blocks = vec![];
     let mut exports = vec![];
     for node in root.descendants() {
         match node.kind() {
             SyntaxKind::MODULE => {
-                module_field_id = 0;
+                func_idx_gen = IdxGen::default();
+                type_idx_gen = IdxGen::default();
+                global_idx_gen = IdxGen::default();
+                mem_idx_gen = IdxGen::default();
+                table_idx_gen = IdxGen::default();
                 let region = if let Some(parent) = node.parent() {
                     SymbolItemKey::new(&parent)
                 } else {
@@ -129,20 +137,19 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                 if let Some(symbol) = create_parent_based_symbol(
                     db,
                     node.clone(),
-                    module_field_id,
+                    func_idx_gen.pull(),
                     SymbolItemKind::Func,
                 ) {
                     symbols.push(symbol);
                 }
-                module_field_id += 1;
                 let Some(func) = ModuleFieldFunc::cast(node.clone()) else {
                     continue;
                 };
-                let local_index = func
-                    .type_use()
+                let mut local_idx_gen = IdxGen::default();
+                func.type_use()
                     .iter()
                     .flat_map(|type_use| type_use.params())
-                    .fold(0, |i, param| {
+                    .for_each(|param| {
                         if let Some(ident) = param.ident_token() {
                             let param = param.syntax();
                             symbols.push(SymbolItem {
@@ -151,29 +158,27 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                                 region: SymbolItemKey::new(&node),
                                 kind: SymbolItemKind::Param,
                                 idx: Idx {
-                                    num: Some(i),
+                                    num: Some(local_idx_gen.pull()),
                                     name: Some(db.ident(ident.text().to_string())),
                                 },
                             });
-                            i + 1
                         } else {
-                            param.val_types().fold(i, |i, val_type| {
+                            symbols.extend(param.val_types().map(|val_type| {
                                 let val_type = val_type.syntax();
-                                symbols.push(SymbolItem {
+                                SymbolItem {
                                     key: SymbolItemKey::new(val_type),
                                     green: val_type.green().into(),
                                     region: SymbolItemKey::new(&node),
                                     kind: SymbolItemKind::Param,
                                     idx: Idx {
-                                        num: Some(i),
+                                        num: Some(local_idx_gen.pull()),
                                         name: None,
                                     },
-                                });
-                                i + 1
-                            })
+                                }
+                            }));
                         }
                     });
-                func.locals().fold(local_index, |i, local| {
+                func.locals().for_each(|local| {
                     if let Some(ident) = local.ident_token() {
                         let local = local.syntax();
                         symbols.push(SymbolItem {
@@ -182,26 +187,24 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             region: SymbolItemKey::new(&node),
                             kind: SymbolItemKind::Local,
                             idx: Idx {
-                                num: Some(i),
+                                num: Some(local_idx_gen.pull()),
                                 name: Some(db.ident(ident.text().to_string())),
                             },
                         });
-                        i + 1
                     } else {
-                        local.val_types().fold(i, |i, val_type| {
+                        symbols.extend(local.val_types().map(|val_type| {
                             let val_type = val_type.syntax();
-                            symbols.push(SymbolItem {
+                            SymbolItem {
                                 key: SymbolItemKey::new(val_type),
                                 green: val_type.green().into(),
                                 region: SymbolItemKey::new(&node),
                                 kind: SymbolItemKind::Local,
                                 idx: Idx {
-                                    num: Some(i),
+                                    num: Some(local_idx_gen.pull()),
                                     name: None,
                                 },
-                            });
-                            i + 1
-                        })
+                            }
+                        }));
                     }
                 });
             }
@@ -209,23 +212,21 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                 if let Some(symbol) = create_parent_based_symbol(
                     db,
                     node.clone(),
-                    module_field_id,
+                    type_idx_gen.pull(),
                     SymbolItemKind::Type,
                 ) {
                     symbols.push(symbol);
                 }
-                module_field_id += 1;
             }
             SyntaxKind::MODULE_FIELD_GLOBAL => {
                 if let Some(symbol) = create_parent_based_symbol(
                     db,
                     node.clone(),
-                    module_field_id,
+                    global_idx_gen.pull(),
                     SymbolItemKind::GlobalDef,
                 ) {
                     symbols.push(symbol);
                 }
-                module_field_id += 1;
             }
             SyntaxKind::PLAIN_INSTR => {
                 let Some(instr) = PlainInstr::cast(node.clone()) else {
@@ -394,23 +395,21 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                 if let Some(symbol) = create_parent_based_symbol(
                     db,
                     node.clone(),
-                    module_field_id,
+                    mem_idx_gen.pull(),
                     SymbolItemKind::MemoryDef,
                 ) {
                     symbols.push(symbol);
                 }
-                module_field_id += 1;
             }
             SyntaxKind::MODULE_FIELD_TABLE => {
                 if let Some(symbol) = create_parent_based_symbol(
                     db,
                     node.clone(),
-                    module_field_id,
+                    table_idx_gen.pull(),
                     SymbolItemKind::TableDef,
                 ) {
                     symbols.push(symbol);
                 }
-                module_field_id += 1;
             }
             SyntaxKind::EXPORT_DESC_MEMORY => {
                 if let Some(symbol) = node
@@ -446,35 +445,40 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
             }
             SyntaxKind::IMPORT_DESC_TYPE_USE => {
                 if let Some(symbol) =
-                    create_import_desc_symbol(db, &node, module_field_id, SymbolItemKind::Func)
+                    create_import_desc_symbol(db, &node, func_idx_gen.pull(), SymbolItemKind::Func)
                 {
                     symbols.push(symbol);
                 }
-                module_field_id += 1;
             }
             SyntaxKind::IMPORT_DESC_TABLE_TYPE => {
-                if let Some(symbol) =
-                    create_import_desc_symbol(db, &node, module_field_id, SymbolItemKind::TableDef)
-                {
+                if let Some(symbol) = create_import_desc_symbol(
+                    db,
+                    &node,
+                    table_idx_gen.pull(),
+                    SymbolItemKind::TableDef,
+                ) {
                     symbols.push(symbol);
                 }
-                module_field_id += 1;
             }
             SyntaxKind::IMPORT_DESC_MEMORY_TYPE => {
-                if let Some(symbol) =
-                    create_import_desc_symbol(db, &node, module_field_id, SymbolItemKind::MemoryDef)
-                {
+                if let Some(symbol) = create_import_desc_symbol(
+                    db,
+                    &node,
+                    mem_idx_gen.pull(),
+                    SymbolItemKind::MemoryDef,
+                ) {
                     symbols.push(symbol);
                 }
-                module_field_id += 1;
             }
             SyntaxKind::IMPORT_DESC_GLOBAL_TYPE => {
-                if let Some(symbol) =
-                    create_import_desc_symbol(db, &node, module_field_id, SymbolItemKind::GlobalDef)
-                {
+                if let Some(symbol) = create_import_desc_symbol(
+                    db,
+                    &node,
+                    global_idx_gen.pull(),
+                    SymbolItemKind::GlobalDef,
+                ) {
                     symbols.push(symbol);
                 }
-                module_field_id += 1;
             }
             SyntaxKind::MEM_USE => {
                 if let Some(symbol) = node

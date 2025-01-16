@@ -197,7 +197,7 @@ fn table_used() {
     let source = r#"
 (module
   (func (export "func")
-    (table.get 1
+    (table.get 0
       (i32.const 0))
     (drop))
   (table 0 funcref)

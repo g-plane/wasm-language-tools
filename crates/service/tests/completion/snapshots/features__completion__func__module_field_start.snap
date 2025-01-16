@@ -4,24 +4,24 @@ expression: response
 ---
 [
   {
-    "label": "$func",
+    "label": "0",
     "labelDetails": {
       "description": "[] -> []"
     },
     "kind": 3,
-    "detail": "(func $func)",
+    "detail": "(func)",
     "documentation": {
       "kind": "markdown",
       "value": ""
     }
   },
   {
-    "label": "1",
+    "label": "$func",
     "labelDetails": {
       "description": "[] -> []"
     },
     "kind": 3,
-    "detail": "(func)",
+    "detail": "(func $func)",
     "documentation": {
       "kind": "markdown",
       "value": ""

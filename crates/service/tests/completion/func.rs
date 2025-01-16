@@ -6,16 +6,16 @@ use wat_service::LanguageService;
 #[test]
 fn module_field_start() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "
+    let source = r#"
 (module
+    (import "" "" (func))
     (start )
     (func $func)
-    (import \"\" \"\" (func))
 )
-";
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 11)));
+    let response = service.completion(create_params(uri, Position::new(3, 11)));
     assert_json_snapshot!(response);
 }
 

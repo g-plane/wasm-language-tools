@@ -60,3 +60,15 @@ pub(crate) trait IdentsCtx {
     #[salsa::interned]
     fn ident(&self, ident: String) -> InternIdent;
 }
+
+#[derive(Default)]
+pub(crate) struct IdxGen(u32);
+
+impl IdxGen {
+    /// Get numeric idx then increment for next.
+    pub fn pull(&mut self) -> u32 {
+        let idx = self.0;
+        self.0 += 1;
+        idx
+    }
+}

@@ -8,7 +8,7 @@ fn symbols() {
     let source = "
 (module
     (func $func (param $p i32) (local $l1 i32) (local $l2 i32) (local i32))
-    (func (type 2))
+    (func (type 0))
     (type (func))
     (type $ty (func))
     (global $global i32)

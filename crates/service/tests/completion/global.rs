@@ -66,7 +66,7 @@ fn globals_following_int_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
 (module
-    (func (global.get 1))
+    (func (global.get 0))
     (global i32)
     (global $global i32)
 )
@@ -220,7 +220,7 @@ fn preferred_type_by_call() {
   (global $d f64)
   (func (param f64))
   (func
-    (call 4
+    (call 0
       (global.get $))))
 ";
     let mut service = LanguageService::default();
