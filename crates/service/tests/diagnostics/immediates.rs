@@ -210,6 +210,71 @@ fn select_correct() {
 }
 
 #[test]
+fn call_indirect_incorrect() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+  (func
+    i32.const 0
+    call_indirect
+    i32.const 0
+    call_indirect 0.0
+    i32.const 0
+    call_indirect 0.0 0
+    i32.const 0
+    call_indirect 0.0 (param)
+    i32.const 0
+    call_indirect 0
+    i32.const 0
+    call_indirect 0 0.0))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn call_indirect_correct() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+  (type (func))
+  (func
+    i32.const 0
+    call_indirect 0 (type 0)
+    i32.const 0
+    call_indirect 0 (param)
+    i32.const 0
+    call_indirect 0 (param) (param)
+    i32.const 0
+    call_indirect 0 (result)
+    i32.const 0
+    call_indirect 0 (result) (result)
+    i32.const 0
+    call_indirect 0 (param) (result)
+    i32.const 0
+    call_indirect (type 0)
+    i32.const 0
+    call_indirect (param)
+    i32.const 0
+    call_indirect (param) (param)
+    i32.const 0
+    call_indirect (result)
+    i32.const 0
+    call_indirect (result) (result)
+    i32.const 0
+    call_indirect (param) (result)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
+
+#[test]
 fn expected_instr() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "(module (func (result i32) (i32.add 1 (i32.const 0))))";

@@ -2,6 +2,7 @@ use crate::helpers;
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
 use rowan::ast::{support::token, AstNode};
+use std::iter::Peekable;
 use wat_syntax::{ast::Immediate, SyntaxKind, SyntaxNode, SyntaxToken};
 
 const DIAGNOSTIC_CODE: &str = "immediates";
@@ -14,13 +15,14 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
     };
     let mut immediates = node
         .children()
-        .filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+        .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
+        .peekable();
 
     match instr_name.text() {
         "call" | "local.get" | "local.set" | "local.tee" | "global.get" | "global.set"
         | "table.get" | "table.set" | "ref.func" | "memory.init" | "data.drop" | "elem.drop"
         | "table.grow" | "table.size" | "table.fill" | "br" | "br_if" => {
-            check_immediate(
+            check_immediate::<true>(
                 diags,
                 &mut immediates,
                 INDEX,
@@ -30,7 +32,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
             );
         }
         "i32.const" | "i64.const" | "v128.const" => {
-            check_immediate(
+            check_immediate::<true>(
                 diags,
                 &mut immediates,
                 SyntaxKind::INT,
@@ -40,7 +42,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
             );
         }
         "f32.const" | "f64.const" => {
-            check_immediate(
+            check_immediate::<true>(
                 diags,
                 &mut immediates,
                 [SyntaxKind::FLOAT, SyntaxKind::INT],
@@ -85,7 +87,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
             }
         }
         "br_table" => {
-            check_immediate(
+            check_immediate::<true>(
                 diags,
                 &mut immediates,
                 INDEX,
@@ -114,8 +116,8 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
             );
             return;
         }
-        "table.init" | "table.copy" => {
-            check_immediate(
+        "call_indirect" => {
+            check_immediate::<false>(
                 diags,
                 &mut immediates,
                 INDEX,
@@ -123,7 +125,25 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 &instr_name,
                 line_index,
             );
-            check_immediate(
+            check_immediate::<true>(
+                diags,
+                &mut immediates,
+                SyntaxKind::TYPE_USE,
+                "type use",
+                &instr_name,
+                line_index,
+            );
+        }
+        "table.init" | "table.copy" => {
+            check_immediate::<true>(
+                diags,
+                &mut immediates,
+                INDEX,
+                "identifier or unsigned integer",
+                &instr_name,
+                line_index,
+            );
+            check_immediate::<true>(
                 diags,
                 &mut immediates,
                 INDEX,
@@ -140,7 +160,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         | "v128.load16x4_s" | "v128.load16x4_u" | "v128.load32x2_s" | "v128.load32x2_u"
         | "v128.load8_splat" | "v128.load16_splat" | "v128.load32_splat" | "v128.load64_splat"
         | "v128.load32_zero" | "v128.load64_zero" | "v128.store" => {
-            check_immediate(
+            check_immediate::<true>(
                 diags,
                 &mut immediates,
                 SyntaxKind::MEM_ARG,
@@ -164,7 +184,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         | "f32x4.replace_lane"
         | "f64x2.extract_lane"
         | "f64x2.replace_lane" => {
-            check_immediate(
+            check_immediate::<true>(
                 diags,
                 &mut immediates,
                 INDEX,
@@ -175,7 +195,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         }
         "v128.load8_lane" | "v128.load16_lane" | "v128.load32_lane" | "v128.load64_lane"
         | "v128.store8_lane" | "v128.store16_lane" | "v128.store32_lane" | "v128.store64_lane" => {
-            check_immediate(
+            check_immediate::<true>(
                 diags,
                 &mut immediates,
                 SyntaxKind::MEM_ARG,
@@ -183,7 +203,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 &instr_name,
                 line_index,
             );
-            check_immediate(
+            check_immediate::<true>(
                 diags,
                 &mut immediates,
                 INDEX,
@@ -193,7 +213,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
             );
         }
         "ref.null" => {
-            check_immediate(
+            check_immediate::<true>(
                 diags,
                 &mut immediates,
                 SyntaxKind::HEAP_TYPE,
@@ -214,19 +234,21 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
     }));
 }
 
-fn check_immediate(
+fn check_immediate<const REQUIRED: bool>(
     diags: &mut Vec<Diagnostic>,
-    immediates: &mut impl Iterator<Item = SyntaxNode>,
+    immediates: &mut Peekable<impl Iterator<Item = SyntaxNode>>,
     expected: impl SyntaxKindCmp,
     description: &'static str,
     instr_name: &SyntaxToken,
     line_index: &LineIndex,
 ) {
     let immediate = immediates
-        .next()
+        .peek()
         .and_then(|immediate| immediate.first_child_or_token());
     if let Some(immediate) = immediate {
-        if !expected.cmp(immediate.kind()) {
+        if expected.cmp(immediate.kind()) {
+            immediates.next();
+        } else if REQUIRED {
             diags.push(Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
                 severity: Some(DiagnosticSeverity::ERROR),
@@ -234,9 +256,10 @@ fn check_immediate(
                 code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
                 message: format!("expected {description}",),
                 ..Default::default()
-            })
+            });
+            immediates.next();
         }
-    } else {
+    } else if REQUIRED {
         diags.push(Diagnostic {
             range: helpers::rowan_range_to_lsp_range(line_index, instr_name.text_range()),
             severity: Some(DiagnosticSeverity::ERROR),

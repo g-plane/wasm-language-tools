@@ -1,0 +1,137 @@
+---
+source: crates/service/tests/diagnostics/immediates.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 4
+        },
+        "end": {
+          "line": 4,
+          "character": 17
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "missing type use"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 18
+        },
+        "end": {
+          "line": 6,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "expected type use"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 18
+        },
+        "end": {
+          "line": 8,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "expected type use"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 22
+        },
+        "end": {
+          "line": 8,
+          "character": 23
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 18
+        },
+        "end": {
+          "line": 10,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "expected type use"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 22
+        },
+        "end": {
+          "line": 10,
+          "character": 29
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 12,
+          "character": 4
+        },
+        "end": {
+          "line": 12,
+          "character": 17
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "missing type use"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 14,
+          "character": 20
+        },
+        "end": {
+          "line": 14,
+          "character": 23
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "expected type use"
+    }
+  ]
+}
