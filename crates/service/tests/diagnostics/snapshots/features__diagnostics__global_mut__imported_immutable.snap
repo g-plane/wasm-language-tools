@@ -1,0 +1,43 @@
+---
+source: crates/service/tests/diagnostics/global_mut.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 15
+        },
+        "end": {
+          "line": 5,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "code": "global-mutation",
+      "source": "wat",
+      "message": "mutating an immutable global is not allowed",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 32
+              },
+              "end": {
+                "line": 2,
+                "character": 35
+              }
+            }
+          },
+          "message": "immutable global type"
+        }
+      ]
+    }
+  ]
+}

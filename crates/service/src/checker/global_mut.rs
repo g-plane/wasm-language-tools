@@ -8,9 +8,9 @@ use line_index::LineIndex;
 use lsp_types::{
     Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, NumberOrString,
 };
-use rowan::ast::AstNode;
+use rowan::ast::{support, AstNode};
 use wat_syntax::{
-    ast::{ModuleFieldGlobal, PlainInstr},
+    ast::{GlobalType, PlainInstr},
     SyntaxNode,
 };
 
@@ -35,25 +35,17 @@ pub fn check(
     diags.extend(instr.immediates().filter_map(|immediate| {
         let defs = symbol_table.find_defs(SymbolItemKey::new(immediate.syntax()))?;
         let related_information = defs
-            .filter_map(|def| {
-                ModuleFieldGlobal::cast(def.key.to_node(root))
-                    .and_then(|global| global.global_type())
-                    .and_then(|global_type| {
-                        if global_type.mut_keyword().is_none() {
-                            Some(DiagnosticRelatedInformation {
-                                location: Location {
-                                    uri: service.lookup_uri(uri),
-                                    range: helpers::rowan_range_to_lsp_range(
-                                        line_index,
-                                        global_type.syntax().text_range(),
-                                    ),
-                                },
-                                message: "immutable global type".into(),
-                            })
-                        } else {
-                            None
-                        }
-                    })
+            .filter_map(|def| support::child::<GlobalType>(&def.key.to_node(root)))
+            .filter(|global_type| global_type.mut_keyword().is_none())
+            .map(|global_type| DiagnosticRelatedInformation {
+                location: Location {
+                    uri: service.lookup_uri(uri),
+                    range: helpers::rowan_range_to_lsp_range(
+                        line_index,
+                        global_type.syntax().text_range(),
+                    ),
+                },
+                message: "immutable global type".into(),
             })
             .collect::<Vec<_>>();
         if related_information.is_empty() {
