@@ -395,6 +395,38 @@ fn imported_global_ident_idx() {
 }
 
 #[test]
+fn exported_global_int_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+    (global i32)
+    (export "" (global 0))
+)
+(module (global i32))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(3, 23)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn exported_global_ident_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+    (global $global i32)
+    (export "" (global $global))
+)
+(module (global $global i32))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, Position::new(3, 26)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn memory_not_defined() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "

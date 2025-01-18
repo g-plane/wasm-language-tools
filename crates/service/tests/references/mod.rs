@@ -431,13 +431,14 @@ fn type_use_ident_idx() {
 #[test]
 fn global_def_int_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "
+    let source = r#"
 (module
     (global i32)
     (func (global.get 0))
+    (export "" (global 0))
 )
 (module (global i32))
-";
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let include_decl =
@@ -450,13 +451,14 @@ fn global_def_int_idx() {
 #[test]
 fn global_def_ident_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "
+    let source = r#"
 (module
     (global $global i32)
     (func (global.get 0) (global.get $global))
+    (export "" (global $global))
 )
 (module (global $global i32))
-";
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let include_decl =
@@ -469,13 +471,14 @@ fn global_def_ident_idx() {
 #[test]
 fn global_ref_int_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "
+    let source = r#"
 (module
     (global i32)
     (func (global.get 0))
+    (export "" (global 0))
 )
 (module (global i32))
-";
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let include_decl =
@@ -488,13 +491,14 @@ fn global_ref_int_idx() {
 #[test]
 fn global_ref_ident_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "
+    let source = r#"
 (module
     (global $global i32)
     (func (global.get 0) (global.get $global))
+    (export "" (global $global))
 )
 (module (global $global i32))
-";
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let include_decl =

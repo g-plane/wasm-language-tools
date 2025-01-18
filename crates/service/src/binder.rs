@@ -411,6 +411,22 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                     symbols.push(symbol);
                 }
             }
+            SyntaxKind::EXPORT_DESC_GLOBAL => {
+                if let Some(symbol) = node
+                    .ancestors()
+                    .find(|node| node.kind() == SyntaxKind::MODULE)
+                    .map(|node| SymbolItemKey::new(&node))
+                    .zip(
+                        node.children()
+                            .find(|child| child.kind() == SyntaxKind::INDEX),
+                    )
+                    .and_then(|(region, index)| {
+                        create_ref_symbol(db, index, region, SymbolItemKind::GlobalRef)
+                    })
+                {
+                    symbols.push(symbol);
+                }
+            }
             SyntaxKind::EXPORT_DESC_MEMORY => {
                 if let Some(symbol) = node
                     .ancestors()
