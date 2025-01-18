@@ -9,6 +9,7 @@ mod immediates;
 mod implicit_module;
 mod import_occur;
 mod multi_modules;
+mod needless_mut;
 mod shadow;
 mod syntax;
 mod typeck;
@@ -121,6 +122,14 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
         &mut diagnostics,
         config.lint.shadow,
         uri,
+        &line_index,
+        &root,
+        &symbol_table,
+    );
+    needless_mut::check(
+        service,
+        &mut diagnostics,
+        config.lint.needless_mut,
         &line_index,
         &root,
         &symbol_table,

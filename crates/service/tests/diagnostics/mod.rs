@@ -11,6 +11,7 @@ mod immediates;
 mod implicit_module;
 mod import_occur;
 mod multi_modules;
+mod needless_mut;
 mod shadow;
 mod syntax;
 mod typeck;

@@ -26,6 +26,9 @@ pub struct Lints {
 
     /// Lint for detecting unreachable code.
     pub unreachable: LintLevel,
+
+    /// Lint for detecting mutable globals that are never mutated.
+    pub needless_mut: LintLevel,
 }
 
 impl Default for Lints {
@@ -35,6 +38,7 @@ impl Default for Lints {
             shadow: LintLevel::Warn,
             implicit_module: LintLevel::Allow,
             unreachable: LintLevel::Hint,
+            needless_mut: LintLevel::Warn,
         }
     }
 }

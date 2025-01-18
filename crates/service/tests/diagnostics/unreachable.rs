@@ -9,9 +9,8 @@ fn disable_other_lints(service: &mut LanguageService, uri: Uri) {
         ServiceConfig {
             lint: Lints {
                 unused: LintLevel::Allow,
-                shadow: LintLevel::Allow,
-                implicit_module: LintLevel::Allow,
                 unreachable: LintLevel::Warn,
+                ..Default::default()
             },
             ..Default::default()
         },

@@ -1318,15 +1318,15 @@ fn global_results_incorrect() {
 #[test]
 fn global_results_correct() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "
+    let source = r#"
 (module
   (global i32
     i32.const 0)
   (global i32
     unreachable)
-  (global (mut)
+  (global (export "") (mut)
     i32.const 0))
-";
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
