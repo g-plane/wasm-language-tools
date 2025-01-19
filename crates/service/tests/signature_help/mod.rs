@@ -141,3 +141,34 @@ fn doc_comment() {
     let response = service.signature_help(create_params(uri, Position::new(4, 17)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn call_indirect_type_use() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (table 0 funcref)
+  (type (func (param f32) (result f64)))
+  (func (result f64)
+    (call_indirect 0 (type 0) ())))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.signature_help(create_params(uri, Position::new(5, 31)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn call_indirect_inline_func_type() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (table 0 funcref)
+  (func (result f64)
+    (call_indirect 0 (param f32) (result f64) ())))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.signature_help(create_params(uri, Position::new(4, 47)));
+    assert_json_snapshot!(response);
+}

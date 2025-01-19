@@ -1,9 +1,9 @@
 use crate::{
-    binder::{SymbolItemKey, SymbolTablesCtx},
+    binder::{SymbolItem, SymbolItemKey, SymbolTablesCtx},
     helpers,
-    idx::IdentsCtx,
+    idx::{IdentsCtx, Idx},
     syntax_tree::SyntaxTreeCtx,
-    types_analyzer::TypesAnalyzerCtx,
+    types_analyzer::{TypesAnalyzerCtx, ValType},
     uri::UrisCtx,
     LanguageService,
 };
@@ -11,11 +11,11 @@ use lsp_types::{
     Documentation, MarkupContent, MarkupKind, ParameterInformation, ParameterLabel, SignatureHelp,
     SignatureHelpParams, SignatureInformation,
 };
-use rowan::{
-    ast::{support, AstNode},
-    Direction,
+use rowan::{ast::AstNode, Direction};
+use wat_syntax::{
+    ast::{Instr, PlainInstr},
+    SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodePtr,
 };
-use wat_syntax::{ast::Instr, SyntaxElement, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     /// Handler for `textDocument/signatureHelp` request.
@@ -23,6 +23,8 @@ impl LanguageService {
         let uri = self.uri(params.text_document_position_params.text_document.uri);
         let line_index = self.line_index(uri);
         let root = SyntaxNode::new_root(self.root(uri));
+        let symbol_table = self.symbol_table(uri);
+
         let token = helpers::ast::find_token(
             &root,
             helpers::lsp_pos_to_rowan_pos(
@@ -46,30 +48,44 @@ impl LanguageService {
             let instr = token.parent()?;
             (instr.parent()?, Instr::cast(instr), false)
         };
-        if node.kind() != SyntaxKind::PLAIN_INSTR
-            || support::token(&node, SyntaxKind::INSTR_NAME)
-                .is_none_or(|token| token.text() != "call")
-        {
-            return None;
-        }
-
-        let symbol_table = self.symbol_table(uri);
-        let func = symbol_table
-            .find_defs(SymbolItemKey::new(
-                &node
-                    .children()
-                    .find(|child| child.kind() == SyntaxKind::IMMEDIATE)?,
-            ))?
-            .next()?;
-        let signature = self
-            .get_func_sig(uri, func.key, func.green.clone())
-            .unwrap_or_default();
+        let parent_instr = PlainInstr::cast(node.clone())?;
+        let (signature, func) = match parent_instr.instr_name()?.text() {
+            "call" => {
+                let first_immediate = parent_instr.immediates().next()?;
+                let func = symbol_table
+                    .find_defs(SymbolItemKey::new(first_immediate.syntax()))?
+                    .next()?;
+                (
+                    self.get_func_sig(uri, func.key, func.green.clone())
+                        .unwrap_or_default(),
+                    Some(func),
+                )
+            }
+            "call_indirect" => {
+                let type_use = parent_instr
+                    .immediates()
+                    .find_map(|immediate| immediate.type_use())?;
+                let type_use = type_use.syntax();
+                let mut sig = self
+                    .get_type_use_sig(uri, SyntaxNodePtr::new(type_use), type_use.green().into())
+                    .unwrap_or_default();
+                sig.params.push((ValType::I32, None));
+                (sig, None)
+            }
+            _ => return None,
+        };
 
         let mut label = "(func".to_string();
         let mut parameters = Vec::with_capacity(signature.params.len());
-        if let Some(name) = func.idx.name {
+        if let Some(SymbolItem {
+            idx: Idx {
+                name: Some(name), ..
+            },
+            ..
+        }) = func
+        {
             label.push(' ');
-            label.push_str(&self.lookup_ident(name));
+            label.push_str(&self.lookup_ident(*name));
         }
         if !signature.params.is_empty() || !signature.results.is_empty() {
             label.push(' ');
@@ -107,10 +123,12 @@ impl LanguageService {
         Some(SignatureHelp {
             signatures: vec![SignatureInformation {
                 label,
-                documentation: Some(Documentation::MarkupContent(MarkupContent {
-                    kind: MarkupKind::Markdown,
-                    value: helpers::ast::get_doc_comment(&func.key.to_node(&root)),
-                })),
+                documentation: func.map(|func| {
+                    Documentation::MarkupContent(MarkupContent {
+                        kind: MarkupKind::Markdown,
+                        value: helpers::ast::get_doc_comment(&func.key.to_node(&root)),
+                    })
+                }),
                 parameters: Some(parameters),
                 active_parameter: instr
                     .and_then(|instr| {
