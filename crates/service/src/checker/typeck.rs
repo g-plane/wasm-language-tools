@@ -481,6 +481,23 @@ fn resolve_sig(
                 results: vec![ty],
             }
         }
+        "call_indirect" => {
+            let sig = instr
+                .immediates()
+                .find_map(|immediate| immediate.type_use())
+                .and_then(|type_use| {
+                    let node = type_use.syntax();
+                    shared.service.get_type_use_sig(
+                        shared.uri,
+                        SyntaxNodePtr::new(node),
+                        node.green().into(),
+                    )
+                })
+                .unwrap_or_default();
+            let mut sig = ResolvedSig::from(sig);
+            sig.params.push(OperandType::Val(ValType::I32));
+            sig
+        }
         _ => data_set::INSTR_SIG
             .get(instr_name)
             .cloned()

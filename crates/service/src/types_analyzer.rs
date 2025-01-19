@@ -42,6 +42,13 @@ pub(crate) trait TypesAnalyzerCtx: SyntaxTreeCtx + SymbolTablesCtx {
         green: GreenNode,
     ) -> Option<Signature>;
     #[salsa::memoized]
+    fn get_type_use_sig(
+        &self,
+        uri: InternUri,
+        ptr: SyntaxNodePtr,
+        type_use: GreenNode,
+    ) -> Option<Signature>;
+    #[salsa::memoized]
     fn render_sig(&self, signature: Signature) -> String;
     #[salsa::memoized]
     fn render_compact_sig(&self, signature: Signature) -> String;
@@ -126,6 +133,28 @@ fn get_func_sig(
                     .map(|func_type| db.extract_sig(func_type))
             }
         })
+}
+
+fn get_type_use_sig(
+    db: &dyn TypesAnalyzerCtx,
+    uri: InternUri,
+    ptr: SyntaxNodePtr,
+    type_use: GreenNode,
+) -> Option<Signature> {
+    if type_use.children().any(|child| {
+        let kind = child.kind();
+        kind == SyntaxKind::PARAM.into() || kind == SyntaxKind::RESULT.into()
+    }) {
+        Some(db.extract_sig(type_use.to_owned()))
+    } else {
+        let symbol_table = db.symbol_table(uri);
+        TypeUse::cast(ptr.to_node(&SyntaxNode::new_root(db.root(uri))))
+            .and_then(|type_use| type_use.index())
+            .and_then(|idx| symbol_table.find_defs(SymbolItemKey::new(idx.syntax())))
+            .and_then(|mut symbols| symbols.next())
+            .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.green))
+            .map(|func_type| db.extract_sig(func_type))
+    }
 }
 
 // The reason why we don't put this function to Salsa is because
