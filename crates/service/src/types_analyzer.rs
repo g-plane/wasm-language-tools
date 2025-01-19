@@ -9,10 +9,7 @@ use crate::{
 };
 use itertools::Itertools;
 use rowan::{
-    ast::{
-        support::{child, children, token},
-        AstNode,
-    },
+    ast::{support, AstNode},
     GreenNode, GreenNodeData, Language, NodeOrToken,
 };
 use std::{
@@ -21,7 +18,7 @@ use std::{
     ops::Deref,
 };
 use wat_syntax::{
-    ast::{Immediate, Param, Result, TypeUse, ValType as AstValType},
+    ast::{BlockType, Immediate, Param, Result, TypeUse, ValType as AstValType},
     SyntaxKind, SyntaxNode, SyntaxNodePtr, WatLanguage,
 };
 
@@ -85,7 +82,7 @@ fn extract_global_type(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<Val
 
 fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Signature {
     let root = SyntaxNode::new_root(node);
-    let params = children::<Param>(&root).fold(vec![], |mut acc, param| {
+    let params = support::children::<Param>(&root).fold(vec![], |mut acc, param| {
         if let Some((ident, ty)) = param.ident_token().zip(param.val_types().next()) {
             acc.push((ValType::from(ty), Some(db.ident(ident.text().to_string()))));
         } else {
@@ -97,7 +94,7 @@ fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Signature {
         }
         acc
     });
-    let results = children::<Result>(&root)
+    let results = support::children::<Result>(&root)
         .flat_map(|result| result.val_types())
         .map(ValType::from)
         .collect();
@@ -125,7 +122,7 @@ fn get_func_sig(
             } else {
                 let node = ptr.to_node(&SyntaxNode::new_root(db.root(uri)));
                 let symbol_table = db.symbol_table(uri);
-                child::<TypeUse>(&node)
+                support::child::<TypeUse>(&node)
                     .and_then(|type_use| type_use.index())
                     .and_then(|idx| symbol_table.find_defs(SymbolItemKey::new(idx.syntax())))
                     .and_then(|mut symbols| symbols.next())
@@ -167,14 +164,11 @@ pub fn get_block_sig(
     uri: InternUri,
     node: &SyntaxNode,
 ) -> Option<Signature> {
-    node.children()
-        .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
-        .and_then(|block_type| {
-            service.get_func_sig(
-                uri,
-                SyntaxNodePtr::new(&block_type),
-                block_type.green().into(),
-            )
+    support::child::<BlockType>(node)
+        .and_then(|block_type| block_type.type_use())
+        .and_then(|type_use| {
+            let node = type_use.syntax();
+            service.get_type_use_sig(uri, SyntaxNodePtr::new(node), node.green().into())
         })
 }
 
@@ -268,7 +262,7 @@ pub(crate) fn resolve_param_types(
     instr: &SyntaxNode,
 ) -> Option<Vec<OperandType>> {
     debug_assert!(instr.kind() == SyntaxKind::PLAIN_INSTR);
-    let instr_name = token(instr, SyntaxKind::INSTR_NAME)?;
+    let instr_name = support::token(instr, SyntaxKind::INSTR_NAME)?;
     let instr_name = instr_name.text();
     if matches!(instr_name, "call" | "return_call") {
         let symbol_table = service.symbol_table(uri);
