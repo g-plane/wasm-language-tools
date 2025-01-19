@@ -2143,7 +2143,7 @@ fn call_indirect_incorrect() {
   (func
     i32.const 0
     f32.const 0
-    call_indirect (type 0))
+    call_indirect 0 (type 0))
   (func
     call_indirect (param f32) (result f64))
   (func
@@ -2155,7 +2155,7 @@ fn call_indirect_incorrect() {
   (func
     i32.const 0
     f32.const 0
-    call_indirect (param f32) (result f64)))
+    call_indirect 0 (param f32) (result f64)))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

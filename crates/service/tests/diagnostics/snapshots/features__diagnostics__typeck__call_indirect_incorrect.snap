@@ -127,7 +127,7 @@ expression: response
         },
         "end": {
           "line": 15,
-          "character": 26
+          "character": 28
         }
       },
       "severity": 1,
@@ -173,11 +173,11 @@ expression: response
       "range": {
         "start": {
           "line": 15,
-          "character": 26
+          "character": 28
         },
         "end": {
           "line": 15,
-          "character": 27
+          "character": 29
         }
       },
       "severity": 1,
@@ -307,7 +307,7 @@ expression: response
         },
         "end": {
           "line": 27,
-          "character": 42
+          "character": 44
         }
       },
       "severity": 1,
@@ -353,11 +353,11 @@ expression: response
       "range": {
         "start": {
           "line": 27,
-          "character": 42
+          "character": 44
         },
         "end": {
           "line": 27,
-          "character": 43
+          "character": 45
         }
       },
       "severity": 1,
