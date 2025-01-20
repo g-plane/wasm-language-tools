@@ -862,15 +862,9 @@ fn get_idx_cmp_text(
 ) -> Option<(String, Option<String>)> {
     if has_dollar {
         let name = service.lookup_ident(idx.name?);
-        Some((name.to_owned(), Some(name.strip_prefix('$')?.to_string())))
+        Some((name.to_string(), Some(name.strip_prefix('$')?.to_string())))
     } else {
-        Some((
-            idx.name
-                .map(|name| service.lookup_ident(name))
-                .or_else(|| idx.num.map(|num| num.to_string()))
-                .unwrap_or_default(),
-            None,
-        ))
+        Some((idx.render(service).to_string(), None))
     }
 }
 

@@ -84,7 +84,7 @@ fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Signature {
     let root = SyntaxNode::new_root(node);
     let params = support::children::<Param>(&root).fold(vec![], |mut acc, param| {
         if let Some((ident, ty)) = param.ident_token().zip(param.val_types().next()) {
-            acc.push((ValType::from(ty), Some(db.ident(ident.text().to_string()))));
+            acc.push((ValType::from(ty), Some(db.ident(ident.text().into()))));
         } else {
             acc.extend(
                 param

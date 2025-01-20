@@ -1,4 +1,6 @@
+use crate::LanguageService;
 use salsa::{InternId, InternKey};
+use std::{fmt, rc::Rc};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Idx {
@@ -42,6 +44,26 @@ impl Idx {
             _ => false,
         }
     }
+
+    pub fn render<'a>(&'a self, service: &'a LanguageService) -> IdxRender<'a> {
+        IdxRender { idx: self, service }
+    }
+}
+
+pub(crate) struct IdxRender<'a> {
+    pub idx: &'a Idx,
+    pub service: &'a LanguageService,
+}
+impl fmt::Display for IdxRender<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(name) = &self.idx.name {
+            self.service.lookup_ident(*name).fmt(f)
+        } else if let Some(num) = self.idx.num {
+            num.fmt(f)
+        } else {
+            Ok(())
+        }
+    }
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
@@ -58,7 +80,7 @@ impl InternKey for InternIdent {
 #[salsa::query_group(Idents)]
 pub(crate) trait IdentsCtx {
     #[salsa::interned]
-    fn ident(&self, ident: String) -> InternIdent;
+    fn ident(&self, ident: Rc<str>) -> InternIdent;
 }
 
 #[derive(Default)]

@@ -1,7 +1,6 @@
 use crate::{
     binder::{SymbolItemKind, SymbolTablesCtx},
     helpers,
-    idx::IdentsCtx,
     syntax_tree::SyntaxTreeCtx,
     uri::UrisCtx,
     LanguageService,
@@ -47,12 +46,7 @@ impl LanguageService {
                     Some((
                         symbol.key,
                         DocumentSymbol {
-                            name: symbol
-                                .idx
-                                .name
-                                .map(|name| self.lookup_ident(name))
-                                .or_else(|| symbol.idx.num.map(|num| num.to_string()))
-                                .unwrap_or_default(),
+                            name: symbol.idx.render(self).to_string(),
                             detail: None,
                             kind: SymbolKind::FUNCTION,
                             tags: None,
@@ -76,12 +70,7 @@ impl LanguageService {
                     Some((
                         symbol.key,
                         DocumentSymbol {
-                            name: symbol
-                                .idx
-                                .name
-                                .map(|name| self.lookup_ident(name))
-                                .or_else(|| symbol.idx.num.map(|num| num.to_string()))
-                                .unwrap_or_default(),
+                            name: symbol.idx.render(self).to_string(),
                             detail: None,
                             kind: SymbolKind::VARIABLE,
                             tags: None,
@@ -108,12 +97,7 @@ impl LanguageService {
                     Some((
                         symbol.key,
                         DocumentSymbol {
-                            name: symbol
-                                .idx
-                                .name
-                                .map(|name| self.lookup_ident(name))
-                                .or_else(|| symbol.idx.num.map(|num| num.to_string()))
-                                .unwrap_or_default(),
+                            name: symbol.idx.render(self).to_string(),
                             detail: None,
                             kind: SymbolKind::VARIABLE,
                             tags: None,

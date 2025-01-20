@@ -66,7 +66,7 @@ impl LanguageService {
         let root = SyntaxNode::new_root(self.root(uri));
         let symbol_table = self.symbol_table(uri);
 
-        let old_name = self.ident(ident_token.text().to_string());
+        let old_name = self.ident(ident_token.text().into());
         let symbol_key = SymbolItemKey::new(&ident_token.parent()?);
         let symbol = symbol_table
             .symbols

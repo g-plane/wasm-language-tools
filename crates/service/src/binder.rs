@@ -41,7 +41,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
             idx: Idx {
                 num: Some(id),
                 name: support::token(&node, SyntaxKind::IDENT)
-                    .map(|token| db.ident(token.text().to_string())),
+                    .map(|token| db.ident(token.text().into())),
             },
         })
     }
@@ -59,7 +59,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                 kind: kind.clone(),
                 idx: Idx {
                     num: None,
-                    name: Some(db.ident(ident.text().to_string())),
+                    name: Some(db.ident(ident.text().into())),
                 },
             })
             .or_else(|| {
@@ -95,7 +95,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                 idx: Idx {
                     num: Some(id),
                     name: support::token(node, SyntaxKind::IDENT)
-                        .map(|token| db.ident(token.text().to_string())),
+                        .map(|token| db.ident(token.text().into())),
                 },
             })
     }
@@ -159,7 +159,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                                 kind: SymbolItemKind::Param,
                                 idx: Idx {
                                     num: Some(local_idx_gen.pull()),
-                                    name: Some(db.ident(ident.text().to_string())),
+                                    name: Some(db.ident(ident.text().into())),
                                 },
                             });
                         } else {
@@ -188,7 +188,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             kind: SymbolItemKind::Local,
                             idx: Idx {
                                 num: Some(local_idx_gen.pull()),
-                                name: Some(db.ident(ident.text().to_string())),
+                                name: Some(db.ident(ident.text().into())),
                             },
                         });
                     } else {

@@ -1,7 +1,6 @@
 use crate::{
     binder::{SymbolItem, SymbolItemKey, SymbolItemKind, SymbolTablesCtx},
     helpers,
-    idx::IdentsCtx,
     syntax_tree::SyntaxTreeCtx,
     types_analyzer::TypesAnalyzerCtx,
     uri::UrisCtx,
@@ -47,12 +46,7 @@ impl LanguageService {
             .find_map(|symbol| match &symbol.kind {
                 SymbolItemKind::Func if symbol.key.text_range() == parent_range => {
                     Some(vec![CallHierarchyItem {
-                        name: symbol
-                            .idx
-                            .name
-                            .map(|name| self.lookup_ident(name))
-                            .or_else(|| symbol.idx.num.map(|num| num.to_string()))
-                            .unwrap_or_default(),
+                        name: symbol.idx.render(self).to_string(),
                         kind: SymbolKind::FUNCTION,
                         tags: None,
                         detail: Some(self.render_func_header(
@@ -76,12 +70,7 @@ impl LanguageService {
                     symbol_table.find_defs(symbol.key).map(|symbols| {
                         symbols
                             .map(|symbol| CallHierarchyItem {
-                                name: symbol
-                                    .idx
-                                    .name
-                                    .map(|name| self.lookup_ident(name))
-                                    .or_else(|| symbol.idx.num.map(|num| num.to_string()))
-                                    .unwrap_or_default(),
+                                name: symbol.idx.render(self).to_string(),
                                 kind: SymbolKind::FUNCTION,
                                 tags: None,
                                 detail: Some(self.render_func_header(
@@ -150,12 +139,7 @@ impl LanguageService {
                     });
                 CallHierarchyIncomingCall {
                     from: CallHierarchyItem {
-                        name: func_symbol
-                            .idx
-                            .name
-                            .map(|name| self.lookup_ident(name))
-                            .or_else(|| func_symbol.idx.num.map(|num| num.to_string()))
-                            .unwrap_or_default(),
+                        name: func_symbol.idx.render(self).to_string(),
                         kind: SymbolKind::FUNCTION,
                         tags: None,
                         detail: Some(self.render_func_header(
@@ -207,12 +191,7 @@ impl LanguageService {
                         let line_index = self.line_index(uri);
                         CallHierarchyOutgoingCall {
                             to: CallHierarchyItem {
-                                name: func_symbol
-                                    .idx
-                                    .name
-                                    .map(|name| self.lookup_ident(name))
-                                    .or_else(|| func_symbol.idx.num.map(|num| num.to_string()))
-                                    .unwrap_or_default(),
+                                name: func_symbol.idx.render(self).to_string(),
                                 kind: SymbolKind::FUNCTION,
                                 tags: None,
                                 detail: Some(self.render_func_header(

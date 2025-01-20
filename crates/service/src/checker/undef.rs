@@ -1,8 +1,6 @@
 use crate::{
     binder::{SymbolItemKind, SymbolTable},
-    helpers,
-    idx::IdentsCtx,
-    LanguageService,
+    helpers, LanguageService,
 };
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
@@ -45,15 +43,7 @@ pub fn check(
             severity: Some(DiagnosticSeverity::ERROR),
             source: Some("wat".into()),
             code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-            message: format!(
-                "cannot find `{}` in this scope",
-                symbol
-                    .idx
-                    .name
-                    .map(|name| service.lookup_ident(name))
-                    .or_else(|| symbol.idx.num.map(|num| num.to_string()))
-                    .unwrap_or_default()
-            ),
+            message: format!("cannot find `{}` in this scope", symbol.idx.render(service)),
             ..Default::default()
         });
     diags.extend(diagnostics);

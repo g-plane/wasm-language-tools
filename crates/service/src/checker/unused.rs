@@ -1,8 +1,6 @@
 use crate::{
     binder::{SymbolItem, SymbolItemKind, SymbolTable},
-    helpers,
-    idx::IdentsCtx,
-    LanguageService, LintLevel,
+    helpers, LanguageService, LintLevel,
 };
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity, DiagnosticTag, NumberOrString};
@@ -118,15 +116,7 @@ fn report(
         severity: Some(severity),
         source: Some("wat".into()),
         code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-        message: format!(
-            "`{}` is never used",
-            symbol
-                .idx
-                .name
-                .map(|name| service.lookup_ident(name))
-                .or_else(|| symbol.idx.num.map(|num| num.to_string()))
-                .unwrap_or_default()
-        ),
+        message: format!("`{}` is never used", symbol.idx.render(service)),
         tags: Some(vec![DiagnosticTag::UNNECESSARY]),
         ..Default::default()
     }
