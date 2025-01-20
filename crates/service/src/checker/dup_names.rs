@@ -36,6 +36,7 @@ pub fn check(
                         | SymbolItemKind::Type
                         | SymbolItemKind::GlobalDef
                         | SymbolItemKind::MemoryDef
+                        | SymbolItemKind::TableDef
                 )
             })
             .fold(FxHashMap::default(), |mut map, symbol| {
