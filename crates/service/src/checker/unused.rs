@@ -1,6 +1,8 @@
 use crate::{
     binder::{SymbolItem, SymbolItemKind, SymbolTable},
-    helpers, LanguageService, LintLevel,
+    helpers,
+    idx::IdentsCtx,
+    LanguageService, LintLevel,
 };
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity, DiagnosticTag, NumberOrString};
@@ -29,60 +31,74 @@ pub fn check(
             .iter()
             .filter_map(|symbol| match symbol.kind {
                 SymbolItemKind::Func => {
-                    if !is_used(symbol_table, symbol, SymbolItemKind::Call)
-                        && !is_exported(root, symbol)
+                    if is_prefixed_with_underscore(service, symbol)
+                        || is_used(symbol_table, symbol, SymbolItemKind::Call)
+                        || is_exported(root, symbol)
                     {
-                        Some(report(service, line_index, root, severity, symbol))
-                    } else {
                         None
+                    } else {
+                        Some(report(service, line_index, root, severity, symbol))
                     }
                 }
                 SymbolItemKind::Param | SymbolItemKind::Local => {
-                    if !is_used(symbol_table, symbol, SymbolItemKind::LocalRef) {
-                        Some(report(service, line_index, root, severity, symbol))
-                    } else {
+                    if is_prefixed_with_underscore(service, symbol)
+                        || is_used(symbol_table, symbol, SymbolItemKind::LocalRef)
+                    {
                         None
+                    } else {
+                        Some(report(service, line_index, root, severity, symbol))
                     }
                 }
                 SymbolItemKind::Type => {
-                    if !is_used(symbol_table, symbol, SymbolItemKind::TypeUse)
-                        && !is_exported(root, symbol)
+                    if is_prefixed_with_underscore(service, symbol)
+                        || is_used(symbol_table, symbol, SymbolItemKind::TypeUse)
+                        || is_exported(root, symbol)
                     {
-                        Some(report(service, line_index, root, severity, symbol))
-                    } else {
                         None
+                    } else {
+                        Some(report(service, line_index, root, severity, symbol))
                     }
                 }
                 SymbolItemKind::GlobalDef => {
-                    if !is_used(symbol_table, symbol, SymbolItemKind::GlobalRef)
-                        && !is_exported(root, symbol)
+                    if is_prefixed_with_underscore(service, symbol)
+                        || is_used(symbol_table, symbol, SymbolItemKind::GlobalRef)
+                        || is_exported(root, symbol)
                     {
-                        Some(report(service, line_index, root, severity, symbol))
-                    } else {
                         None
+                    } else {
+                        Some(report(service, line_index, root, severity, symbol))
                     }
                 }
                 SymbolItemKind::MemoryDef => {
-                    if !is_used(symbol_table, symbol, SymbolItemKind::MemoryRef)
-                        && !is_exported(root, symbol)
+                    if is_prefixed_with_underscore(service, symbol)
+                        || is_used(symbol_table, symbol, SymbolItemKind::MemoryRef)
+                        || is_exported(root, symbol)
                     {
-                        Some(report(service, line_index, root, severity, symbol))
-                    } else {
                         None
+                    } else {
+                        Some(report(service, line_index, root, severity, symbol))
                     }
                 }
                 SymbolItemKind::TableDef => {
-                    if !is_used(symbol_table, symbol, SymbolItemKind::TableRef)
-                        && !is_exported(root, symbol)
+                    if is_prefixed_with_underscore(service, symbol)
+                        || is_used(symbol_table, symbol, SymbolItemKind::TableRef)
+                        || is_exported(root, symbol)
                     {
-                        Some(report(service, line_index, root, severity, symbol))
-                    } else {
                         None
+                    } else {
+                        Some(report(service, line_index, root, severity, symbol))
                     }
                 }
                 _ => None,
             }),
     );
+}
+
+fn is_prefixed_with_underscore(service: &LanguageService, symbol: &SymbolItem) -> bool {
+    symbol
+        .idx
+        .name
+        .is_some_and(|name| service.lookup_ident(name).starts_with("$_"))
 }
 
 fn is_used(symbol_table: &SymbolTable, def_symbol: &SymbolItem, ref_kind: SymbolItemKind) -> bool {

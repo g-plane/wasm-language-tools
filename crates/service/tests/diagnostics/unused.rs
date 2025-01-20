@@ -4,6 +4,30 @@ use lsp_types::Uri;
 use wat_service::LanguageService;
 
 #[test]
+fn prefixed_with_underscore() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+  (func $_ (param $_ i32) (local $_l i32))
+  (func $_f (param $_p i32) (local $_ i32))
+  (type $_ (func))
+  (type $_t (func))
+  (global $_ i32
+    i32.const 0)
+  (global $_g i32
+    i32.const 0)
+  (memory $_ 0)
+  (memory $_m 0)
+  (table $_ 0 funcref)
+  (table $_t 0 funcref))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
+
+#[test]
 fn func_unused() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "(module (func) (func $f))";
