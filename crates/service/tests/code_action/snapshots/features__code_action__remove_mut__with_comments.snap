@@ -1,0 +1,72 @@
+---
+source: crates/service/tests/code_action/remove_mut.rs
+expression: response
+---
+[
+  {
+    "title": "Remove `mut`",
+    "kind": "quickfix",
+    "diagnostics": [
+      {
+        "range": {
+          "start": {
+            "line": 2,
+            "character": 20
+          },
+          "end": {
+            "line": 2,
+            "character": 23
+          }
+        },
+        "code": "needless-mut",
+        "message": ""
+      }
+    ],
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 13
+              },
+              "end": {
+                "line": 2,
+                "character": 14
+              }
+            },
+            "newText": ""
+          },
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 20
+              },
+              "end": {
+                "line": 2,
+                "character": 23
+              }
+            },
+            "newText": ""
+          },
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 32
+              },
+              "end": {
+                "line": 2,
+                "character": 33
+              }
+            },
+            "newText": ""
+          }
+        ]
+      }
+    },
+    "isPreferred": true
+  }
+]

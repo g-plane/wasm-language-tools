@@ -115,6 +115,15 @@ impl LanguageService {
                         }
                     }
                 }
+                SyntaxKind::GLOBAL_TYPE => {
+                    if quickfix {
+                        if let Some(action) =
+                            remove_mut::act(self, uri, &line_index, &it, &params.context)
+                        {
+                            actions.push(CodeActionOrCommand::CodeAction(action));
+                        }
+                    }
+                }
                 _ => {}
             }
             node = it;
