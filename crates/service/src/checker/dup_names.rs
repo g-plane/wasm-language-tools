@@ -55,7 +55,16 @@ pub fn check(
             })
             .iter()
             .filter(|(_, symbols)| symbols.len() > 1)
-            .flat_map(|((name, ..), symbols)| {
+            .flat_map(|((name, _, kind), symbols)| {
+                let kind = match kind {
+                    SymbolKind::Func => "func",
+                    SymbolKind::Param | SymbolKind::Local => "param or local",
+                    SymbolKind::Type => "type",
+                    SymbolKind::GlobalDef => "global",
+                    SymbolKind::MemoryDef => "memory",
+                    SymbolKind::TableDef => "table",
+                    _ => unreachable!(),
+                };
                 let name = service.lookup_ident(*name);
                 symbols.iter().map(move |symbol| Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(
@@ -65,7 +74,7 @@ pub fn check(
                     severity: Some(DiagnosticSeverity::ERROR),
                     source: Some("wat".into()),
                     code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-                    message: format!("duplicated name `{name}` in this scope"),
+                    message: format!("duplicated {kind} name `{name}` in this scope"),
                     related_information: Some(
                         symbols
                             .iter()

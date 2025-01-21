@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "undef",
       "source": "wat",
-      "message": "cannot find `$d` in this scope"
+      "message": "cannot find label `$d` in this scope"
     },
     {
       "range": {
@@ -35,7 +35,7 @@ expression: response
       "severity": 1,
       "code": "undef",
       "source": "wat",
-      "message": "cannot find `3` in this scope"
+      "message": "cannot find label `3` in this scope"
     }
   ]
 }

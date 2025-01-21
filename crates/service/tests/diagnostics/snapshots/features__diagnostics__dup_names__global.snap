@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "duplicated-names",
       "source": "wat",
-      "message": "duplicated name `$_` in this scope",
+      "message": "duplicated global name `$_` in this scope",
       "relatedInformation": [
         {
           "location": {
@@ -53,7 +53,7 @@ expression: response
       "severity": 1,
       "code": "duplicated-names",
       "source": "wat",
-      "message": "duplicated name `$_` in this scope",
+      "message": "duplicated global name `$_` in this scope",
       "relatedInformation": [
         {
           "location": {

@@ -19,7 +19,7 @@ expression: response
       "severity": 2,
       "code": "unused",
       "source": "wat",
-      "message": "`$p` is never used",
+      "message": "param `$p` is never used",
       "tags": [
         1
       ]
@@ -38,7 +38,7 @@ expression: response
       "severity": 2,
       "code": "unused",
       "source": "wat",
-      "message": "`1` is never used",
+      "message": "param `1` is never used",
       "tags": [
         1
       ]

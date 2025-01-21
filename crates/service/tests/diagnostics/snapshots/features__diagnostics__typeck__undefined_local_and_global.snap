@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "undef",
       "source": "wat",
-      "message": "cannot find `1` in this scope"
+      "message": "cannot find global `1` in this scope"
     },
     {
       "range": {
@@ -35,7 +35,7 @@ expression: response
       "severity": 1,
       "code": "undef",
       "source": "wat",
-      "message": "cannot find `0` in this scope"
+      "message": "cannot find param or local `0` in this scope"
     }
   ]
 }

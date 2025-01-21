@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "undef",
       "source": "wat",
-      "message": "cannot find `$table` in this scope"
+      "message": "cannot find table `$table` in this scope"
     }
   ]
 }

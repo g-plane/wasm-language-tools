@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "undef",
       "source": "wat",
-      "message": "cannot find `$bar` in this scope"
+      "message": "cannot find func `$bar` in this scope"
     }
   ]
 }

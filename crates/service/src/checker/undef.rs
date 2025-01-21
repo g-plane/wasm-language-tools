@@ -38,13 +38,28 @@ pub fn check(
                 block.ref_key == symbol.key && symbol.idx.is_defined_by(&block.def_idx)
             }),
         })
-        .map(|symbol| Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
-            severity: Some(DiagnosticSeverity::ERROR),
-            source: Some("wat".into()),
-            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-            message: format!("cannot find `{}` in this scope", symbol.idx.render(service)),
-            ..Default::default()
+        .map(|symbol| {
+            let kind = match symbol.kind {
+                SymbolKind::Call => "func",
+                SymbolKind::LocalRef => "param or local",
+                SymbolKind::TypeUse => "type",
+                SymbolKind::GlobalRef => "global",
+                SymbolKind::MemoryRef => "memory",
+                SymbolKind::TableRef => "table",
+                SymbolKind::BlockRef => "label",
+                _ => unreachable!(),
+            };
+            Diagnostic {
+                range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
+                severity: Some(DiagnosticSeverity::ERROR),
+                source: Some("wat".into()),
+                code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                message: format!(
+                    "cannot find {kind} `{}` in this scope",
+                    symbol.idx.render(service)
+                ),
+                ..Default::default()
+            }
         });
     diags.extend(diagnostics);
 }

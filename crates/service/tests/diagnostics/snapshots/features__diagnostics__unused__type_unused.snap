@@ -19,7 +19,7 @@ expression: response
       "severity": 2,
       "code": "unused",
       "source": "wat",
-      "message": "`0` is never used",
+      "message": "type `0` is never used",
       "tags": [
         1
       ]
@@ -38,7 +38,7 @@ expression: response
       "severity": 2,
       "code": "unused",
       "source": "wat",
-      "message": "`$t` is never used",
+      "message": "type `$t` is never used",
       "tags": [
         1
       ]
