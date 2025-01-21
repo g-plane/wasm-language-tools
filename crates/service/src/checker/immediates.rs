@@ -125,7 +125,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 &instr_name,
                 line_index,
             );
-            check_immediate::<true>(
+            check_immediate::<false>(
                 diags,
                 &mut immediates,
                 SyntaxKind::TYPE_USE,
@@ -254,7 +254,7 @@ fn check_immediate<const REQUIRED: bool>(
                 severity: Some(DiagnosticSeverity::ERROR),
                 source: Some("wat".into()),
                 code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-                message: format!("expected {description}",),
+                message: format!("expected {description}"),
                 ..Default::default()
             });
             immediates.next();

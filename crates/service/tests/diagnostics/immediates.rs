@@ -216,15 +216,11 @@ fn call_indirect_incorrect() {
 (module
   (func
     i32.const 0
-    call_indirect
-    i32.const 0
     call_indirect 0.0
     i32.const 0
     call_indirect 0.0 0
     i32.const 0
     call_indirect 0.0 (param)
-    i32.const 0
-    call_indirect 0
     i32.const 0
     call_indirect 0 0.0)
   (table 0 funcref))
@@ -244,6 +240,8 @@ fn call_indirect_correct() {
   (type (func))
   (func
     i32.const 0
+    call_indirect 0
+    i32.const 0
     call_indirect 0 (type 0)
     i32.const 0
     call_indirect 0 (param)
@@ -255,6 +253,8 @@ fn call_indirect_correct() {
     call_indirect 0 (result) (result)
     i32.const 0
     call_indirect 0 (param) (result)
+    i32.const 0
+    call_indirect
     i32.const 0
     call_indirect (type 0)
     i32.const 0

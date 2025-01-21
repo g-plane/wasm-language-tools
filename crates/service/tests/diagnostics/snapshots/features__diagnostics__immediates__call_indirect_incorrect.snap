@@ -9,17 +9,17 @@ expression: response
       "range": {
         "start": {
           "line": 4,
-          "character": 4
+          "character": 18
         },
         "end": {
           "line": 4,
-          "character": 17
+          "character": 21
         }
       },
       "severity": 1,
       "code": "immediates",
       "source": "wat",
-      "message": "missing type use"
+      "message": "unexpected immediate"
     },
     {
       "range": {
@@ -35,32 +35,16 @@ expression: response
       "severity": 1,
       "code": "immediates",
       "source": "wat",
-      "message": "expected type use"
+      "message": "unexpected immediate"
     },
     {
       "range": {
         "start": {
-          "line": 8,
-          "character": 18
-        },
-        "end": {
-          "line": 8,
-          "character": 21
-        }
-      },
-      "severity": 1,
-      "code": "immediates",
-      "source": "wat",
-      "message": "expected type use"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 8,
+          "line": 6,
           "character": 22
         },
         "end": {
-          "line": 8,
+          "line": 6,
           "character": 23
         }
       },
@@ -72,27 +56,27 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 10,
+          "line": 8,
           "character": 18
         },
         "end": {
-          "line": 10,
+          "line": 8,
           "character": 21
         }
       },
       "severity": 1,
       "code": "immediates",
       "source": "wat",
-      "message": "expected type use"
+      "message": "unexpected immediate"
     },
     {
       "range": {
         "start": {
-          "line": 10,
+          "line": 8,
           "character": 22
         },
         "end": {
-          "line": 10,
+          "line": 8,
           "character": 29
         }
       },
@@ -104,34 +88,18 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 12,
-          "character": 4
-        },
-        "end": {
-          "line": 12,
-          "character": 17
-        }
-      },
-      "severity": 1,
-      "code": "immediates",
-      "source": "wat",
-      "message": "missing type use"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 14,
+          "line": 10,
           "character": 20
         },
         "end": {
-          "line": 14,
+          "line": 10,
           "character": 23
         }
       },
       "severity": 1,
       "code": "immediates",
       "source": "wat",
-      "message": "expected type use"
+      "message": "unexpected immediate"
     }
   ]
 }
