@@ -232,3 +232,37 @@ fn table_used() {
     let response = service.pull_diagnostics(create_params(uri));
     assert!(pick_diagnostics(response).is_empty());
 }
+
+#[test]
+fn call_indirect_implicit() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+  (table 0 funcref)
+  (func (export "")
+    f32.const 0
+    i32.const 0
+    call_indirect (param f32)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
+
+#[test]
+fn call_indirect_explicit() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+  (table 0 funcref)
+  (func (export "")
+    f32.const 0
+    i32.const 0
+    call_indirect 0 (param f32)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}

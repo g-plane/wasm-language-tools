@@ -47,13 +47,13 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
     }
     fn create_ref_symbol(
         db: &dyn SymbolTablesCtx,
-        node: SyntaxNode,
+        node: &SyntaxNode,
         region: SymbolKey,
         kind: SymbolKind,
     ) -> Option<Symbol> {
-        support::token(&node, SyntaxKind::IDENT)
+        support::token(node, SyntaxKind::IDENT)
             .map(|ident| Symbol {
-                key: SymbolKey::new(&node),
+                key: SymbolKey::new(node),
                 green: node.green().into(),
                 region,
                 kind: kind.clone(),
@@ -69,7 +69,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                     .and_then(|token| token.text().parse().ok())
                     .map(|num| Symbol {
                         green: node.green().into(),
-                        key: SymbolKey::new(&node),
+                        key: SymbolKey::new(node),
                         region,
                         kind,
                         idx: Idx {
@@ -242,7 +242,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             continue;
                         };
                         symbols.extend(node.children().filter_map(|node| {
-                            create_ref_symbol(db, node, region, SymbolKind::Call)
+                            create_ref_symbol(db, &node, region, SymbolKind::Call)
                         }));
                     }
                     Some("local.get" | "local.set" | "local.tee") => {
@@ -254,7 +254,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             continue;
                         };
                         symbols.extend(node.children().filter_map(|node| {
-                            create_ref_symbol(db, node, region, SymbolKind::LocalRef)
+                            create_ref_symbol(db, &node, region, SymbolKind::LocalRef)
                         }));
                     }
                     Some("global.get" | "global.set") => {
@@ -266,7 +266,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             continue;
                         };
                         symbols.extend(node.children().filter_map(|node| {
-                            create_ref_symbol(db, node, region, SymbolKind::GlobalRef)
+                            create_ref_symbol(db, &node, region, SymbolKind::GlobalRef)
                         }));
                     }
                     Some("br" | "br_if" | "br_table") => {
@@ -286,7 +286,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                         };
                         node.children()
                             .filter_map(|node| {
-                                create_ref_symbol(db, node, region, SymbolKind::BlockRef)
+                                create_ref_symbol(db, &node, region, SymbolKind::BlockRef)
                             })
                             .for_each(|symbol| {
                                 let mut current = &symbol;
@@ -315,6 +315,38 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                                 symbols.push(symbol);
                             });
                     }
+                    Some("call_indirect") => {
+                        let Some(region) = node
+                            .ancestors()
+                            .find(|node| node.kind() == SyntaxKind::MODULE)
+                            .map(|node| SymbolKey::new(&node))
+                        else {
+                            continue;
+                        };
+                        symbols.push(
+                            instr
+                                .immediates()
+                                .next()
+                                .and_then(|immediate| {
+                                    create_ref_symbol(
+                                        db,
+                                        immediate.syntax(),
+                                        region,
+                                        SymbolKind::TableRef,
+                                    )
+                                })
+                                .unwrap_or_else(|| Symbol {
+                                    green: node.green().into(),
+                                    key: SymbolKey::new(&node),
+                                    region,
+                                    kind: SymbolKind::TableRef,
+                                    idx: Idx {
+                                        num: Some(0),
+                                        name: None,
+                                    },
+                                }),
+                        );
+                    }
                     Some(
                         "table.get" | "table.set" | "table.size" | "table.grow" | "table.fill"
                         | "table.copy",
@@ -327,7 +359,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             continue;
                         };
                         symbols.extend(node.children().filter_map(|node| {
-                            create_ref_symbol(db, node, region, SymbolKind::TableRef)
+                            create_ref_symbol(db, &node, region, SymbolKind::TableRef)
                         }));
                     }
                     Some("table.init") => {
@@ -340,7 +372,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                         };
                         let mut children = node.children();
                         if let Some(symbol) = children.next().and_then(|node| {
-                            create_ref_symbol(db, node, region, SymbolKind::TableRef)
+                            create_ref_symbol(db, &node, region, SymbolKind::TableRef)
                         }) {
                             symbols.push(symbol);
                         }
@@ -368,7 +400,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             .find(|child| child.kind() == SyntaxKind::INDEX),
                     )
                     .and_then(|(region, index)| {
-                        create_ref_symbol(db, index, region, SymbolKind::Call)
+                        create_ref_symbol(db, &index, region, SymbolKind::Call)
                     })
                 {
                     symbols.push(symbol);
@@ -384,7 +416,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             .find(|child| child.kind() == SyntaxKind::INDEX),
                     )
                     .and_then(|(region, index)| {
-                        create_ref_symbol(db, index, region, SymbolKind::TypeUse)
+                        create_ref_symbol(db, &index, region, SymbolKind::TypeUse)
                     })
                 {
                     symbols.push(symbol);
@@ -420,7 +452,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             .find(|child| child.kind() == SyntaxKind::INDEX),
                     )
                     .and_then(|(region, index)| {
-                        create_ref_symbol(db, index, region, SymbolKind::GlobalRef)
+                        create_ref_symbol(db, &index, region, SymbolKind::GlobalRef)
                     })
                 {
                     symbols.push(symbol);
@@ -436,7 +468,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             .find(|child| child.kind() == SyntaxKind::INDEX),
                     )
                     .and_then(|(region, index)| {
-                        create_ref_symbol(db, index, region, SymbolKind::MemoryRef)
+                        create_ref_symbol(db, &index, region, SymbolKind::MemoryRef)
                     })
                 {
                     symbols.push(symbol);
@@ -452,7 +484,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             .find(|child| child.kind() == SyntaxKind::INDEX),
                     )
                     .and_then(|(region, index)| {
-                        create_ref_symbol(db, index, region, SymbolKind::TableRef)
+                        create_ref_symbol(db, &index, region, SymbolKind::TableRef)
                     })
                 {
                     symbols.push(symbol);
@@ -499,7 +531,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
                             .find(|child| child.kind() == SyntaxKind::INDEX),
                     )
                     .and_then(|(region, index)| {
-                        create_ref_symbol(db, index, region, SymbolKind::MemoryRef)
+                        create_ref_symbol(db, &index, region, SymbolKind::MemoryRef)
                     })
                 {
                     symbols.push(symbol);

@@ -20,6 +20,38 @@ expression: response
       "code": "undef",
       "source": "wat",
       "message": "cannot find table `$table` in this scope"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 4
+        },
+        "end": {
+          "line": 7,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find table `0` in this scope"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 19
+        },
+        "end": {
+          "line": 8,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find table `0` in this scope"
     }
   ]
 }

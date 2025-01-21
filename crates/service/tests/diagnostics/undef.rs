@@ -144,7 +144,13 @@ fn table_undefined() {
 (module
   (func
     (table.size $table)
-    (drop)))
+    (drop)
+    (call_indirect (param f32)
+      (f32.const 0)
+      (i32.const 0))
+    (call_indirect 0 (param f32)
+      (f32.const 0)
+      (i32.const 0))))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

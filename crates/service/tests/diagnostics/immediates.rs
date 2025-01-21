@@ -226,7 +226,8 @@ fn call_indirect_incorrect() {
     i32.const 0
     call_indirect 0
     i32.const 0
-    call_indirect 0 0.0))
+    call_indirect 0 0.0)
+  (table 0 funcref))
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -265,7 +266,8 @@ fn call_indirect_correct() {
     i32.const 0
     call_indirect (result) (result)
     i32.const 0
-    call_indirect (param) (result)))
+    call_indirect (param) (result))
+  (table 0 funcref))
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
