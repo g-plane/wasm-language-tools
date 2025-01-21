@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItemKind, SymbolTable},
+    binder::{SymbolKind, SymbolTable},
     helpers, LanguageService,
 };
 use line_index::LineIndex;
@@ -17,24 +17,24 @@ pub fn check(
         .symbols
         .iter()
         .filter(|symbol| match &symbol.kind {
-            SymbolItemKind::Module
-            | SymbolItemKind::Func
-            | SymbolItemKind::Param
-            | SymbolItemKind::Local
-            | SymbolItemKind::Type
-            | SymbolItemKind::GlobalDef
-            | SymbolItemKind::MemoryDef
-            | SymbolItemKind::TableDef
-            | SymbolItemKind::BlockDef => false,
-            SymbolItemKind::Call
-            | SymbolItemKind::TypeUse
-            | SymbolItemKind::GlobalRef
-            | SymbolItemKind::MemoryRef
-            | SymbolItemKind::TableRef => symbol_table
+            SymbolKind::Module
+            | SymbolKind::Func
+            | SymbolKind::Param
+            | SymbolKind::Local
+            | SymbolKind::Type
+            | SymbolKind::GlobalDef
+            | SymbolKind::MemoryDef
+            | SymbolKind::TableDef
+            | SymbolKind::BlockDef => false,
+            SymbolKind::Call
+            | SymbolKind::TypeUse
+            | SymbolKind::GlobalRef
+            | SymbolKind::MemoryRef
+            | SymbolKind::TableRef => symbol_table
                 .find_defs(symbol.key)
                 .is_none_or(|defs| defs.count() == 0),
-            SymbolItemKind::LocalRef => symbol_table.find_param_or_local_def(symbol.key).is_none(),
-            SymbolItemKind::BlockRef => !symbol_table.blocks.iter().any(|block| {
+            SymbolKind::LocalRef => symbol_table.find_param_or_local_def(symbol.key).is_none(),
+            SymbolKind::BlockRef => !symbol_table.blocks.iter().any(|block| {
                 block.ref_key == symbol.key && symbol.idx.is_defined_by(&block.def_idx)
             }),
         })

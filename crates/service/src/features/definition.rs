@@ -1,6 +1,6 @@
 use super::find_meaningful_token;
 use crate::{
-    binder::{SymbolItem, SymbolItemKey, SymbolTablesCtx},
+    binder::{Symbol, SymbolKey, SymbolTablesCtx},
     helpers,
     syntax_tree::SyntaxTreeCtx,
     uri::UrisCtx,
@@ -39,7 +39,7 @@ impl LanguageService {
 
         let line_index = self.line_index(uri);
         let symbol_table = self.symbol_table(uri);
-        let key = SymbolItemKey::new(&parent);
+        let key = SymbolKey::new(&parent);
         symbol_table
             .find_param_or_local_def(key)
             .map(|symbol| {
@@ -107,12 +107,12 @@ impl LanguageService {
         match grand.kind() {
             SyntaxKind::PLAIN_INSTR => {
                 symbol_table
-                    .find_defs(SymbolItemKey::new(&parent))
+                    .find_defs(SymbolKey::new(&parent))
                     .map(|symbols| {
                         GotoDefinitionResponse::Array(
                             symbols
                                 .filter_map(|symbol| {
-                                    symbol_table.find_defs(SymbolItemKey::new(
+                                    symbol_table.find_defs(SymbolKey::new(
                                         child::<TypeUse>(&symbol.key.to_node(&root))?
                                             .index()?
                                             .syntax(),
@@ -153,7 +153,7 @@ impl LanguageService {
         let parent = token.parent()?;
         if parent.kind() == SyntaxKind::IMMEDIATE {
             symbol_table
-                .find_defs(SymbolItemKey::new(&parent))
+                .find_defs(SymbolKey::new(&parent))
                 .map(|symbols| {
                     GotoDefinitionResponse::Array(
                         symbols
@@ -172,7 +172,7 @@ impl LanguageService {
 fn create_location_by_symbol(
     params: &GotoDefinitionParams,
     line_index: &LineIndex,
-    symbol: &SymbolItem,
+    symbol: &Symbol,
     root: &SyntaxNode,
 ) -> Location {
     let node = symbol.key.to_node(root);

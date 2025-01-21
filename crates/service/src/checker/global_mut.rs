@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItemKey, SymbolTable},
+    binder::{SymbolKey, SymbolTable},
     helpers,
     uri::{InternUri, UrisCtx},
     LanguageService,
@@ -33,7 +33,7 @@ pub fn check(
         _ => return,
     }
     diags.extend(instr.immediates().filter_map(|immediate| {
-        let defs = symbol_table.find_defs(SymbolItemKey::new(immediate.syntax()))?;
+        let defs = symbol_table.find_defs(SymbolKey::new(immediate.syntax()))?;
         let related_information = defs
             .filter_map(|def| support::child::<GlobalType>(&def.key.to_node(root)))
             .filter(|global_type| global_type.mut_keyword().is_none())

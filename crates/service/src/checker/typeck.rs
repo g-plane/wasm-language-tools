@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItemKey, SymbolTable},
+    binder::{SymbolKey, SymbolTable},
     data_set, helpers,
     types_analyzer::{
         get_block_sig, resolve_br_types, OperandType, ResolvedSig, TypesAnalyzerCtx, ValType,
@@ -369,11 +369,7 @@ fn resolve_sig(
         "call" => instr
             .immediates()
             .next()
-            .and_then(|idx| {
-                shared
-                    .symbol_table
-                    .find_defs(SymbolItemKey::new(idx.syntax()))
-            })
+            .and_then(|idx| shared.symbol_table.find_defs(SymbolKey::new(idx.syntax())))
             .into_iter()
             .flatten()
             .next()
@@ -392,7 +388,7 @@ fn resolve_sig(
                 .and_then(|idx| {
                     shared
                         .symbol_table
-                        .find_param_or_local_def(SymbolItemKey::new(idx.syntax()))
+                        .find_param_or_local_def(SymbolKey::new(idx.syntax()))
                 })
                 .and_then(|symbol| shared.service.extract_type(symbol.green.clone()))
                 .map_or(OperandType::Any, OperandType::Val)],
@@ -402,11 +398,7 @@ fn resolve_sig(
             results: vec![instr
                 .immediates()
                 .next()
-                .and_then(|idx| {
-                    shared
-                        .symbol_table
-                        .find_defs(SymbolItemKey::new(idx.syntax()))
-                })
+                .and_then(|idx| shared.symbol_table.find_defs(SymbolKey::new(idx.syntax())))
                 .into_iter()
                 .flatten()
                 .next()

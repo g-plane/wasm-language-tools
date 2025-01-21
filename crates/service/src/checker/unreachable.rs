@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItemKey, SymbolTable},
+    binder::{SymbolKey, SymbolTable},
     helpers, LintLevel,
 };
 use line_index::LineIndex;
@@ -124,7 +124,7 @@ impl Checker<'_> {
                     if matches!(instr_name, "br" | "br_if" | "br_table") {
                         self.jumps
                             .extend(plain.immediates().filter_map(|immediate| {
-                                let key = SymbolItemKey::new(immediate.syntax());
+                                let key = SymbolKey::new(immediate.syntax());
                                 self.symbol_table
                                     .blocks
                                     .iter()

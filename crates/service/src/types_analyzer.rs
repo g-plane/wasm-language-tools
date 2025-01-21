@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItem, SymbolItemKey, SymbolTable, SymbolTablesCtx},
+    binder::{Symbol, SymbolKey, SymbolTable, SymbolTablesCtx},
     data_set::INSTR_SIG,
     helpers,
     idx::InternIdent,
@@ -124,7 +124,7 @@ fn get_func_sig(
                 let symbol_table = db.symbol_table(uri);
                 support::child::<TypeUse>(&node)
                     .and_then(|type_use| type_use.index())
-                    .and_then(|idx| symbol_table.find_defs(SymbolItemKey::new(idx.syntax())))
+                    .and_then(|idx| symbol_table.find_defs(SymbolKey::new(idx.syntax())))
                     .and_then(|mut symbols| symbols.next())
                     .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.green))
                     .map(|func_type| db.extract_sig(func_type))
@@ -147,7 +147,7 @@ fn get_type_use_sig(
         let symbol_table = db.symbol_table(uri);
         TypeUse::cast(ptr.to_node(&SyntaxNode::new_root(db.root(uri))))
             .and_then(|type_use| type_use.index())
-            .and_then(|idx| symbol_table.find_defs(SymbolItemKey::new(idx.syntax())))
+            .and_then(|idx| symbol_table.find_defs(SymbolKey::new(idx.syntax())))
             .and_then(|mut symbols| symbols.next())
             .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.green))
             .map(|func_type| db.extract_sig(func_type))
@@ -270,7 +270,7 @@ pub(crate) fn resolve_param_types(
             .children()
             .find(|child| child.kind() == SyntaxKind::IMMEDIATE)?;
         let func = symbol_table
-            .find_defs(SymbolItemKey::new(&idx))
+            .find_defs(SymbolKey::new(&idx))
             .into_iter()
             .flatten()
             .next()?;
@@ -293,7 +293,7 @@ pub(crate) fn resolve_br_types(
     symbol_table: &SymbolTable,
     immediate: &Immediate,
 ) -> Vec<OperandType> {
-    let key = SymbolItemKey::new(immediate.syntax());
+    let key = SymbolKey::new(immediate.syntax());
     symbol_table
         .blocks
         .iter()
@@ -429,31 +429,31 @@ impl From<Signature> for ResolvedSig {
 }
 
 #[derive(Clone)]
-pub(crate) struct SymbolItemWithGreenEq(SymbolItem);
-impl PartialEq for SymbolItemWithGreenEq {
+pub(crate) struct SymbolWithGreenEq(Symbol);
+impl PartialEq for SymbolWithGreenEq {
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0 && self.0.green == other.0.green
     }
 }
-impl Eq for SymbolItemWithGreenEq {}
-impl Hash for SymbolItemWithGreenEq {
+impl Eq for SymbolWithGreenEq {}
+impl Hash for SymbolWithGreenEq {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.0.hash(state);
         self.0.green.hash(state);
     }
 }
-impl From<SymbolItem> for SymbolItemWithGreenEq {
-    fn from(symbol: SymbolItem) -> Self {
-        SymbolItemWithGreenEq(symbol)
+impl From<Symbol> for SymbolWithGreenEq {
+    fn from(symbol: Symbol) -> Self {
+        SymbolWithGreenEq(symbol)
     }
 }
-impl Deref for SymbolItemWithGreenEq {
-    type Target = SymbolItem;
+impl Deref for SymbolWithGreenEq {
+    type Target = Symbol;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
-impl Debug for SymbolItemWithGreenEq {
+impl Debug for SymbolWithGreenEq {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self.0)
     }

@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItem, SymbolItemKey, SymbolItemKind, SymbolTablesCtx},
+    binder::{Symbol, SymbolKey, SymbolKind, SymbolTablesCtx},
     helpers,
     syntax_tree::SyntaxTreeCtx,
     uri::UrisCtx,
@@ -59,29 +59,27 @@ impl LanguageService {
             }
             SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
                 let symbol_table = self.symbol_table(uri);
-                let key = SymbolItemKey::new(&token.parent()?);
+                let key = SymbolKey::new(&token.parent()?);
                 let current_symbol = symbol_table
                     .symbols
                     .iter()
                     .find(|symbol| symbol.key == key)?;
                 match &current_symbol.kind {
-                    SymbolItemKind::Module => None,
-                    SymbolItemKind::Func
-                    | SymbolItemKind::Param
-                    | SymbolItemKind::Local
-                    | SymbolItemKind::Type
-                    | SymbolItemKind::GlobalDef
-                    | SymbolItemKind::MemoryDef
-                    | SymbolItemKind::TableDef => {
+                    SymbolKind::Module => None,
+                    SymbolKind::Func
+                    | SymbolKind::Param
+                    | SymbolKind::Local
+                    | SymbolKind::Type
+                    | SymbolKind::GlobalDef
+                    | SymbolKind::MemoryDef
+                    | SymbolKind::TableDef => {
                         let ref_kind = match current_symbol.kind {
-                            SymbolItemKind::Func => SymbolItemKind::Call,
-                            SymbolItemKind::Param | SymbolItemKind::Local => {
-                                SymbolItemKind::LocalRef
-                            }
-                            SymbolItemKind::Type => SymbolItemKind::TypeUse,
-                            SymbolItemKind::GlobalDef => SymbolItemKind::GlobalRef,
-                            SymbolItemKind::MemoryDef => SymbolItemKind::MemoryRef,
-                            SymbolItemKind::TableDef => SymbolItemKind::TableRef,
+                            SymbolKind::Func => SymbolKind::Call,
+                            SymbolKind::Param | SymbolKind::Local => SymbolKind::LocalRef,
+                            SymbolKind::Type => SymbolKind::TypeUse,
+                            SymbolKind::GlobalDef => SymbolKind::GlobalRef,
+                            SymbolKind::MemoryDef => SymbolKind::MemoryRef,
+                            SymbolKind::TableDef => SymbolKind::TableRef,
                             _ => return None,
                         };
                         Some(
@@ -105,17 +103,17 @@ impl LanguageService {
                                 .collect(),
                         )
                     }
-                    SymbolItemKind::Call
-                    | SymbolItemKind::TypeUse
-                    | SymbolItemKind::GlobalRef
-                    | SymbolItemKind::MemoryRef
-                    | SymbolItemKind::TableRef => {
+                    SymbolKind::Call
+                    | SymbolKind::TypeUse
+                    | SymbolKind::GlobalRef
+                    | SymbolKind::MemoryRef
+                    | SymbolKind::TableRef => {
                         let def_kind = match current_symbol.kind {
-                            SymbolItemKind::Call => SymbolItemKind::Func,
-                            SymbolItemKind::TypeUse => SymbolItemKind::Type,
-                            SymbolItemKind::GlobalRef => SymbolItemKind::GlobalDef,
-                            SymbolItemKind::MemoryRef => SymbolItemKind::MemoryDef,
-                            SymbolItemKind::TableRef => SymbolItemKind::TableDef,
+                            SymbolKind::Call => SymbolKind::Func,
+                            SymbolKind::TypeUse => SymbolKind::Type,
+                            SymbolKind::GlobalRef => SymbolKind::GlobalDef,
+                            SymbolKind::MemoryRef => SymbolKind::MemoryDef,
+                            SymbolKind::TableRef => SymbolKind::TableDef,
                             _ => return None,
                         };
                         let defs = symbol_table
@@ -142,7 +140,7 @@ impl LanguageService {
                                 .collect(),
                         )
                     }
-                    SymbolItemKind::LocalRef => {
+                    SymbolKind::LocalRef => {
                         let param_or_local =
                             symbol_table.find_param_or_local_def(current_symbol.key)?;
                         Some(
@@ -150,11 +148,11 @@ impl LanguageService {
                                 .symbols
                                 .iter()
                                 .filter(|symbol| match &symbol.kind {
-                                    SymbolItemKind::Param | SymbolItemKind::Local => {
+                                    SymbolKind::Param | SymbolKind::Local => {
                                         current_symbol.idx.is_defined_by(&symbol.idx)
                                             && symbol.region == current_symbol.region
                                     }
-                                    SymbolItemKind::LocalRef => {
+                                    SymbolKind::LocalRef => {
                                         symbol.idx.is_defined_by(&param_or_local.idx)
                                             && symbol.region == current_symbol.region
                                     }
@@ -166,7 +164,7 @@ impl LanguageService {
                                 .collect(),
                         )
                     }
-                    SymbolItemKind::BlockDef => Some(
+                    SymbolKind::BlockDef => Some(
                         symbol_table
                             .find_block_references(current_symbol.key, true)
                             .filter_map(|symbol| {
@@ -174,7 +172,7 @@ impl LanguageService {
                             })
                             .collect(),
                     ),
-                    SymbolItemKind::BlockRef => {
+                    SymbolKind::BlockRef => {
                         let def_key = symbol_table.find_block_def(key)?;
                         Some(
                             symbol_table
@@ -193,7 +191,7 @@ impl LanguageService {
 }
 
 fn create_symbol_highlight(
-    symbol: &SymbolItem,
+    symbol: &Symbol,
     root: &SyntaxNode,
     line_index: &LineIndex,
 ) -> Option<DocumentHighlight> {
@@ -216,23 +214,22 @@ fn create_symbol_highlight(
 }
 
 fn get_highlight_kind_of_symbol(
-    symbol: &SymbolItem,
+    symbol: &Symbol,
     root: &SyntaxNode,
 ) -> Option<DocumentHighlightKind> {
     match symbol.kind {
-        SymbolItemKind::Func
-        | SymbolItemKind::Param
-        | SymbolItemKind::Local
-        | SymbolItemKind::Type
-        | SymbolItemKind::GlobalDef
-        | SymbolItemKind::MemoryDef
-        | SymbolItemKind::TableDef
-        | SymbolItemKind::BlockDef => Some(DocumentHighlightKind::WRITE),
-        SymbolItemKind::Call
-        | SymbolItemKind::TypeUse
-        | SymbolItemKind::MemoryRef
-        | SymbolItemKind::BlockRef => Some(DocumentHighlightKind::READ),
-        SymbolItemKind::LocalRef | SymbolItemKind::GlobalRef | SymbolItemKind::TableRef => {
+        SymbolKind::Func
+        | SymbolKind::Param
+        | SymbolKind::Local
+        | SymbolKind::Type
+        | SymbolKind::GlobalDef
+        | SymbolKind::MemoryDef
+        | SymbolKind::TableDef
+        | SymbolKind::BlockDef => Some(DocumentHighlightKind::WRITE),
+        SymbolKind::Call | SymbolKind::TypeUse | SymbolKind::MemoryRef | SymbolKind::BlockRef => {
+            Some(DocumentHighlightKind::READ)
+        }
+        SymbolKind::LocalRef | SymbolKind::GlobalRef | SymbolKind::TableRef => {
             let node = symbol.key.to_node(root);
             if node
                 .siblings_with_tokens(Direction::Prev)
@@ -243,7 +240,7 @@ fn get_highlight_kind_of_symbol(
                 Some(DocumentHighlightKind::READ)
             }
         }
-        SymbolItemKind::Module => None,
+        SymbolKind::Module => None,
     }
 }
 

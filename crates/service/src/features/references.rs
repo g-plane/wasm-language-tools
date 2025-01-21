@@ -1,6 +1,6 @@
 use super::find_meaningful_token;
 use crate::{
-    binder::{SymbolItem, SymbolItemKey, SymbolItemKind, SymbolTablesCtx},
+    binder::{Symbol, SymbolKey, SymbolKind, SymbolTablesCtx},
     helpers,
     syntax_tree::SyntaxTreeCtx,
     uri::UrisCtx,
@@ -36,27 +36,27 @@ impl LanguageService {
         let line_index = self.line_index(uri);
         let symbol_table = self.symbol_table(uri);
 
-        let key = SymbolItemKey::new(&parent);
+        let key = SymbolKey::new(&parent);
         let current_symbol = symbol_table
             .symbols
             .iter()
             .find(|symbol| symbol.key == key)?;
         match &current_symbol.kind {
-            SymbolItemKind::Module => None,
-            SymbolItemKind::Func
-            | SymbolItemKind::Param
-            | SymbolItemKind::Local
-            | SymbolItemKind::Type
-            | SymbolItemKind::GlobalDef
-            | SymbolItemKind::MemoryDef
-            | SymbolItemKind::TableDef => {
+            SymbolKind::Module => None,
+            SymbolKind::Func
+            | SymbolKind::Param
+            | SymbolKind::Local
+            | SymbolKind::Type
+            | SymbolKind::GlobalDef
+            | SymbolKind::MemoryDef
+            | SymbolKind::TableDef => {
                 let ref_kind = match current_symbol.kind {
-                    SymbolItemKind::Func => SymbolItemKind::Call,
-                    SymbolItemKind::Param | SymbolItemKind::Local => SymbolItemKind::LocalRef,
-                    SymbolItemKind::Type => SymbolItemKind::TypeUse,
-                    SymbolItemKind::GlobalDef => SymbolItemKind::GlobalRef,
-                    SymbolItemKind::MemoryDef => SymbolItemKind::MemoryRef,
-                    SymbolItemKind::TableDef => SymbolItemKind::TableRef,
+                    SymbolKind::Func => SymbolKind::Call,
+                    SymbolKind::Param | SymbolKind::Local => SymbolKind::LocalRef,
+                    SymbolKind::Type => SymbolKind::TypeUse,
+                    SymbolKind::GlobalDef => SymbolKind::GlobalRef,
+                    SymbolKind::MemoryDef => SymbolKind::MemoryRef,
+                    SymbolKind::TableDef => SymbolKind::TableRef,
                     _ => return None,
                 };
                 Some(
@@ -81,17 +81,17 @@ impl LanguageService {
                         .collect(),
                 )
             }
-            SymbolItemKind::Call
-            | SymbolItemKind::TypeUse
-            | SymbolItemKind::GlobalRef
-            | SymbolItemKind::MemoryRef
-            | SymbolItemKind::TableRef => {
+            SymbolKind::Call
+            | SymbolKind::TypeUse
+            | SymbolKind::GlobalRef
+            | SymbolKind::MemoryRef
+            | SymbolKind::TableRef => {
                 let def_kind = match current_symbol.kind {
-                    SymbolItemKind::Call => SymbolItemKind::Func,
-                    SymbolItemKind::TypeUse => SymbolItemKind::Type,
-                    SymbolItemKind::GlobalRef => SymbolItemKind::GlobalDef,
-                    SymbolItemKind::MemoryRef => SymbolItemKind::MemoryDef,
-                    SymbolItemKind::TableRef => SymbolItemKind::TableDef,
+                    SymbolKind::Call => SymbolKind::Func,
+                    SymbolKind::TypeUse => SymbolKind::Type,
+                    SymbolKind::GlobalRef => SymbolKind::GlobalDef,
+                    SymbolKind::MemoryRef => SymbolKind::MemoryDef,
+                    SymbolKind::TableRef => SymbolKind::TableDef,
                     _ => return None,
                 };
                 let defs = symbol_table
@@ -119,19 +119,19 @@ impl LanguageService {
                         .collect(),
                 )
             }
-            SymbolItemKind::LocalRef => {
+            SymbolKind::LocalRef => {
                 let param_or_local = symbol_table.find_param_or_local_def(current_symbol.key)?;
                 Some(
                     symbol_table
                         .symbols
                         .iter()
                         .filter(|symbol| match &symbol.kind {
-                            SymbolItemKind::Param | SymbolItemKind::Local => {
+                            SymbolKind::Param | SymbolKind::Local => {
                                 params.context.include_declaration
                                     && current_symbol.idx.is_defined_by(&symbol.idx)
                                     && symbol.region == current_symbol.region
                             }
-                            SymbolItemKind::LocalRef => {
+                            SymbolKind::LocalRef => {
                                 symbol.idx.is_defined_by(&param_or_local.idx)
                                     && symbol.region == current_symbol.region
                             }
@@ -143,13 +143,13 @@ impl LanguageService {
                         .collect(),
                 )
             }
-            SymbolItemKind::BlockDef => Some(
+            SymbolKind::BlockDef => Some(
                 symbol_table
                     .find_block_references(current_symbol.key, params.context.include_declaration)
                     .map(|symbol| create_location_by_symbol(&params, &line_index, symbol, &root))
                     .collect(),
             ),
-            SymbolItemKind::BlockRef => {
+            SymbolKind::BlockRef => {
                 let def_key = symbol_table.find_block_def(key)?;
                 Some(
                     symbol_table
@@ -167,7 +167,7 @@ impl LanguageService {
 fn create_location_by_symbol(
     params: &ReferenceParams,
     line_index: &LineIndex,
-    symbol: &SymbolItem,
+    symbol: &Symbol,
     root: &SyntaxNode,
 ) -> Location {
     let node = symbol.key.to_node(root);

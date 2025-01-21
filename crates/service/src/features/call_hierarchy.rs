@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItem, SymbolItemKey, SymbolItemKind, SymbolTablesCtx},
+    binder::{Symbol, SymbolKey, SymbolKind, SymbolTablesCtx},
     helpers,
     syntax_tree::SyntaxTreeCtx,
     types_analyzer::TypesAnalyzerCtx,
@@ -10,7 +10,7 @@ use line_index::LineIndex;
 use lsp_types::{
     CallHierarchyIncomingCall, CallHierarchyIncomingCallsParams, CallHierarchyItem,
     CallHierarchyOutgoingCall, CallHierarchyOutgoingCallsParams, CallHierarchyPrepareParams, Range,
-    SymbolKind,
+    SymbolKind as LspSymbolKind,
 };
 use rowan::ast::support::token;
 use wat_syntax::{SyntaxKind, SyntaxNode};
@@ -44,10 +44,10 @@ impl LanguageService {
             .symbols
             .iter()
             .find_map(|symbol| match &symbol.kind {
-                SymbolItemKind::Func if symbol.key.text_range() == parent_range => {
+                SymbolKind::Func if symbol.key.text_range() == parent_range => {
                     Some(vec![CallHierarchyItem {
                         name: symbol.idx.render(self).to_string(),
-                        kind: SymbolKind::FUNCTION,
+                        kind: LspSymbolKind::FUNCTION,
                         tags: None,
                         detail: Some(self.render_func_header(
                             symbol.idx.name,
@@ -66,12 +66,12 @@ impl LanguageService {
                         data: None,
                     }])
                 }
-                SymbolItemKind::Call if symbol.key.text_range() == parent_range => {
+                SymbolKind::Call if symbol.key.text_range() == parent_range => {
                     symbol_table.find_defs(symbol.key).map(|symbols| {
                         symbols
                             .map(|symbol| CallHierarchyItem {
                                 name: symbol.idx.render(self).to_string(),
-                                kind: SymbolKind::FUNCTION,
+                                kind: LspSymbolKind::FUNCTION,
                                 tags: None,
                                 detail: Some(self.render_func_header(
                                     symbol.idx.name,
@@ -108,13 +108,13 @@ impl LanguageService {
         let line_index = self.line_index(uri);
         let callee_def_range = helpers::lsp_range_to_rowan_range(&line_index, params.item.range)?;
         let callee_def = symbol_table.symbols.iter().find(|symbol| {
-            symbol.kind == SymbolItemKind::Func && symbol.key.text_range() == callee_def_range
+            symbol.kind == SymbolKind::Func && symbol.key.text_range() == callee_def_range
         })?;
         let items = symbol_table
             .symbols
             .iter()
             .filter(|symbol| {
-                symbol.kind == SymbolItemKind::Call
+                symbol.kind == SymbolKind::Call
                     && symbol.idx.is_defined_by(&callee_def.idx)
                     && callee_def.region == symbol.region
             })
@@ -125,9 +125,9 @@ impl LanguageService {
                     .ancestors()
                     .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
                     .and_then(|node| {
-                        let key = SymbolItemKey::new(&node);
+                        let key = SymbolKey::new(&node);
                         symbol_table.symbols.iter().find_map(move |symbol| {
-                            (symbol.kind == SymbolItemKind::Func && symbol.key == key)
+                            (symbol.kind == SymbolKind::Func && symbol.key == key)
                                 .then_some((call_symbol, symbol))
                         })
                     })
@@ -140,7 +140,7 @@ impl LanguageService {
                 CallHierarchyIncomingCall {
                     from: CallHierarchyItem {
                         name: func_symbol.idx.render(self).to_string(),
-                        kind: SymbolKind::FUNCTION,
+                        kind: LspSymbolKind::FUNCTION,
                         tags: None,
                         detail: Some(self.render_func_header(
                             func_symbol.idx.name,
@@ -173,7 +173,7 @@ impl LanguageService {
         let line_index = self.line_index(uri);
         let call_def_range = helpers::lsp_range_to_rowan_range(&line_index, params.item.range)?;
         let call_def_symbol = symbol_table.symbols.iter().find(|symbol| {
-            symbol.kind == SymbolItemKind::Func && symbol.key.text_range() == call_def_range
+            symbol.kind == SymbolKind::Func && symbol.key.text_range() == call_def_range
         })?;
         let func = call_def_symbol.key.to_node(&root);
         let items = func
@@ -184,15 +184,15 @@ impl LanguageService {
                     helpers::rowan_range_to_lsp_range(&line_index, node.text_range());
                 node.children()
                     .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
-                    .filter_map(|immediate| symbol_table.find_defs(SymbolItemKey::new(&immediate)))
+                    .filter_map(|immediate| symbol_table.find_defs(SymbolKey::new(&immediate)))
                     .flatten()
-                    .filter(|symbol| symbol.kind == SymbolItemKind::Func)
+                    .filter(|symbol| symbol.kind == SymbolKind::Func)
                     .map(move |func_symbol| {
                         let line_index = self.line_index(uri);
                         CallHierarchyOutgoingCall {
                             to: CallHierarchyItem {
                                 name: func_symbol.idx.render(self).to_string(),
-                                kind: SymbolKind::FUNCTION,
+                                kind: LspSymbolKind::FUNCTION,
                                 tags: None,
                                 detail: Some(self.render_func_header(
                                     func_symbol.idx.name,
@@ -223,7 +223,7 @@ impl LanguageService {
     }
 }
 
-fn create_selection_range(symbol: &SymbolItem, root: &SyntaxNode, line_index: &LineIndex) -> Range {
+fn create_selection_range(symbol: &Symbol, root: &SyntaxNode, line_index: &LineIndex) -> Range {
     let node = symbol.key.to_node(root);
     let range = token(&node, SyntaxKind::IDENT)
         .or_else(|| token(&node, SyntaxKind::KEYWORD))

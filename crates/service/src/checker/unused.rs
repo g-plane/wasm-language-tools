@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItem, SymbolItemKind, SymbolTable},
+    binder::{Symbol, SymbolKind, SymbolTable},
     helpers,
     idx::IdentsCtx,
     LanguageService, LintLevel,
@@ -30,9 +30,9 @@ pub fn check(
             .symbols
             .iter()
             .filter_map(|symbol| match symbol.kind {
-                SymbolItemKind::Func => {
+                SymbolKind::Func => {
                     if is_prefixed_with_underscore(service, symbol)
-                        || is_used(symbol_table, symbol, SymbolItemKind::Call)
+                        || is_used(symbol_table, symbol, SymbolKind::Call)
                         || is_exported(root, symbol)
                     {
                         None
@@ -40,18 +40,18 @@ pub fn check(
                         Some(report(service, line_index, root, severity, symbol))
                     }
                 }
-                SymbolItemKind::Param | SymbolItemKind::Local => {
+                SymbolKind::Param | SymbolKind::Local => {
                     if is_prefixed_with_underscore(service, symbol)
-                        || is_used(symbol_table, symbol, SymbolItemKind::LocalRef)
+                        || is_used(symbol_table, symbol, SymbolKind::LocalRef)
                     {
                         None
                     } else {
                         Some(report(service, line_index, root, severity, symbol))
                     }
                 }
-                SymbolItemKind::Type => {
+                SymbolKind::Type => {
                     if is_prefixed_with_underscore(service, symbol)
-                        || is_used(symbol_table, symbol, SymbolItemKind::TypeUse)
+                        || is_used(symbol_table, symbol, SymbolKind::TypeUse)
                         || is_exported(root, symbol)
                     {
                         None
@@ -59,9 +59,9 @@ pub fn check(
                         Some(report(service, line_index, root, severity, symbol))
                     }
                 }
-                SymbolItemKind::GlobalDef => {
+                SymbolKind::GlobalDef => {
                     if is_prefixed_with_underscore(service, symbol)
-                        || is_used(symbol_table, symbol, SymbolItemKind::GlobalRef)
+                        || is_used(symbol_table, symbol, SymbolKind::GlobalRef)
                         || is_exported(root, symbol)
                     {
                         None
@@ -69,9 +69,9 @@ pub fn check(
                         Some(report(service, line_index, root, severity, symbol))
                     }
                 }
-                SymbolItemKind::MemoryDef => {
+                SymbolKind::MemoryDef => {
                     if is_prefixed_with_underscore(service, symbol)
-                        || is_used(symbol_table, symbol, SymbolItemKind::MemoryRef)
+                        || is_used(symbol_table, symbol, SymbolKind::MemoryRef)
                         || is_exported(root, symbol)
                     {
                         None
@@ -79,9 +79,9 @@ pub fn check(
                         Some(report(service, line_index, root, severity, symbol))
                     }
                 }
-                SymbolItemKind::TableDef => {
+                SymbolKind::TableDef => {
                     if is_prefixed_with_underscore(service, symbol)
-                        || is_used(symbol_table, symbol, SymbolItemKind::TableRef)
+                        || is_used(symbol_table, symbol, SymbolKind::TableRef)
                         || is_exported(root, symbol)
                     {
                         None
@@ -94,14 +94,14 @@ pub fn check(
     );
 }
 
-fn is_prefixed_with_underscore(service: &LanguageService, symbol: &SymbolItem) -> bool {
+fn is_prefixed_with_underscore(service: &LanguageService, symbol: &Symbol) -> bool {
     symbol
         .idx
         .name
         .is_some_and(|name| service.lookup_ident(name).starts_with("$_"))
 }
 
-fn is_used(symbol_table: &SymbolTable, def_symbol: &SymbolItem, ref_kind: SymbolItemKind) -> bool {
+fn is_used(symbol_table: &SymbolTable, def_symbol: &Symbol, ref_kind: SymbolKind) -> bool {
     symbol_table.symbols.iter().any(|other| {
         other.kind == ref_kind
             && other.idx.is_defined_by(&def_symbol.idx)
@@ -109,7 +109,7 @@ fn is_used(symbol_table: &SymbolTable, def_symbol: &SymbolItem, ref_kind: Symbol
     })
 }
 
-fn is_exported(root: &SyntaxNode, def_symbol: &SymbolItem) -> bool {
+fn is_exported(root: &SyntaxNode, def_symbol: &Symbol) -> bool {
     let node = def_symbol.key.to_node(root);
     node.children()
         .any(|child| child.kind() == SyntaxKind::EXPORT)
@@ -120,7 +120,7 @@ fn report(
     line_index: &LineIndex,
     root: &SyntaxNode,
     severity: DiagnosticSeverity,
-    symbol: &SymbolItem,
+    symbol: &Symbol,
 ) -> Diagnostic {
     let node = symbol.key.to_node(root);
     let range = support::token(&node, SyntaxKind::IDENT)

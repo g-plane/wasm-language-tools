@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItemKind, SymbolTable},
+    binder::{SymbolKind, SymbolTable},
     config::LintLevel,
     helpers, LanguageService,
 };
@@ -32,7 +32,7 @@ pub fn check(
         .symbols
         .iter()
         .filter_map(|symbol| {
-            if symbol.kind == SymbolItemKind::GlobalDef {
+            if symbol.kind == SymbolKind::GlobalDef {
                 let node = symbol.key.to_node(root);
                 let global_type = support::child::<GlobalType>(&node);
                 if ModuleFieldGlobal::cast(node)
@@ -53,7 +53,7 @@ pub fn check(
     symbol_table
         .symbols
         .iter()
-        .filter(|symbol| symbol.kind == SymbolItemKind::GlobalRef)
+        .filter(|symbol| symbol.kind == SymbolKind::GlobalRef)
         .for_each(|symbol| {
             let parent = symbol.key.to_node(root).parent();
             if parent

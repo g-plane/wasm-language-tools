@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItem, SymbolItemKey, SymbolTablesCtx},
+    binder::{Symbol, SymbolKey, SymbolTablesCtx},
     helpers,
     idx::{IdentsCtx, Idx},
     syntax_tree::SyntaxTreeCtx,
@@ -53,7 +53,7 @@ impl LanguageService {
             "call" => {
                 let first_immediate = parent_instr.immediates().next()?;
                 let func = symbol_table
-                    .find_defs(SymbolItemKey::new(first_immediate.syntax()))?
+                    .find_defs(SymbolKey::new(first_immediate.syntax()))?
                     .next()?;
                 (
                     self.get_func_sig(uri, func.key, func.green.clone())
@@ -77,7 +77,7 @@ impl LanguageService {
 
         let mut label = "(func".to_string();
         let mut parameters = Vec::with_capacity(signature.params.len());
-        if let Some(SymbolItem {
+        if let Some(Symbol {
             idx: Idx {
                 name: Some(name), ..
             },

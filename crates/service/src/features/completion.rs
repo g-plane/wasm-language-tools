@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItemKey, SymbolItemKind, SymbolTable, SymbolTablesCtx},
+    binder::{SymbolKey, SymbolKind, SymbolTable, SymbolTablesCtx},
     data_set, helpers,
     idx::{IdentsCtx, Idx},
     syntax_tree::SyntaxTreeCtx,
@@ -514,7 +514,7 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
-                    let func = SymbolItemKey::new(&func);
+                    let func = SymbolKey::new(&func);
                     let preferred_type = guess_preferred_type(service, uri, token);
                     let has_dollar = token.text().starts_with('$');
                     items.extend(
@@ -522,7 +522,7 @@ fn get_cmp_list(
                             .symbols
                             .iter()
                             .filter(|symbol| {
-                                matches!(symbol.kind, SymbolItemKind::Param | SymbolItemKind::Local)
+                                matches!(symbol.kind, SymbolKind::Param | SymbolKind::Local)
                                     && symbol.region == func
                             })
                             .filter_map(|symbol| {
@@ -559,7 +559,7 @@ fn get_cmp_list(
                     let has_dollar = token.text().starts_with('$');
                     items.extend(
                         symbol_table
-                            .get_declared(module, SymbolItemKind::Func)
+                            .get_declared(module, SymbolKind::Func)
                             .filter_map(|symbol| {
                                 let (label, insert_text) =
                                     get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
@@ -608,7 +608,7 @@ fn get_cmp_list(
                     let has_dollar = token.text().starts_with('$');
                     items.extend(
                         symbol_table
-                            .get_declared(module, SymbolItemKind::Type)
+                            .get_declared(module, SymbolKind::Type)
                             .filter_map(|symbol| {
                                 let (label, insert_text) =
                                     get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
@@ -632,7 +632,7 @@ fn get_cmp_list(
                     let has_dollar = token.text().starts_with('$');
                     items.extend(
                         symbol_table
-                            .get_declared(module, SymbolItemKind::GlobalDef)
+                            .get_declared(module, SymbolKind::GlobalDef)
                             .filter_map(|symbol| {
                                 let (label, insert_text) =
                                     get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
@@ -674,7 +674,7 @@ fn get_cmp_list(
                     let has_dollar = token.text().starts_with('$');
                     items.extend(
                         symbol_table
-                            .get_declared(module, SymbolItemKind::MemoryDef)
+                            .get_declared(module, SymbolKind::MemoryDef)
                             .filter_map(|symbol| {
                                 let (label, insert_text) =
                                     get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
@@ -691,7 +691,7 @@ fn get_cmp_list(
                     let Some(module) = token
                         .parent_ancestors()
                         .find(|node| node.kind() == SyntaxKind::MODULE)
-                        .map(|module| SymbolItemKey::new(&module))
+                        .map(|module| SymbolKey::new(&module))
                     else {
                         return items;
                     };
@@ -701,7 +701,7 @@ fn get_cmp_list(
                             .symbols
                             .iter()
                             .filter(|symbol| {
-                                symbol.kind == SymbolItemKind::TableDef && symbol.region == module
+                                symbol.kind == SymbolKind::TableDef && symbol.region == module
                             })
                             .filter_map(|symbol| {
                                 let (label, insert_text) =
@@ -722,7 +722,7 @@ fn get_cmp_list(
                             .symbols
                             .iter()
                             .filter(|symbol| {
-                                symbol.kind == SymbolItemKind::BlockDef
+                                symbol.kind == SymbolKind::BlockDef
                                     && symbol.key.text_range().contains_range(token.text_range())
                             })
                             .rev()

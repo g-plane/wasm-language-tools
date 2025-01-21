@@ -1,6 +1,6 @@
 use super::find_meaningful_token;
 use crate::{
-    binder::{SymbolItemKey, SymbolItemKind, SymbolTablesCtx},
+    binder::{SymbolKey, SymbolKind, SymbolTablesCtx},
     helpers,
     idx::IdentsCtx,
     syntax_tree::SyntaxTreeCtx,
@@ -67,7 +67,7 @@ impl LanguageService {
         let symbol_table = self.symbol_table(uri);
 
         let old_name = self.ident(ident_token.text().into());
-        let symbol_key = SymbolItemKey::new(&ident_token.parent()?);
+        let symbol_key = SymbolKey::new(&ident_token.parent()?);
         let symbol = symbol_table
             .symbols
             .iter()
@@ -77,29 +77,29 @@ impl LanguageService {
                 .symbols
                 .iter()
                 .filter(|sym| match &sym.kind {
-                    SymbolItemKind::Func
-                    | SymbolItemKind::Call
-                    | SymbolItemKind::Param
-                    | SymbolItemKind::Local
-                    | SymbolItemKind::LocalRef
-                    | SymbolItemKind::Type
-                    | SymbolItemKind::TypeUse
-                    | SymbolItemKind::GlobalDef
-                    | SymbolItemKind::GlobalRef
-                    | SymbolItemKind::MemoryDef
-                    | SymbolItemKind::MemoryRef
-                    | SymbolItemKind::TableDef
-                    | SymbolItemKind::TableRef => {
+                    SymbolKind::Func
+                    | SymbolKind::Call
+                    | SymbolKind::Param
+                    | SymbolKind::Local
+                    | SymbolKind::LocalRef
+                    | SymbolKind::Type
+                    | SymbolKind::TypeUse
+                    | SymbolKind::GlobalDef
+                    | SymbolKind::GlobalRef
+                    | SymbolKind::MemoryDef
+                    | SymbolKind::MemoryRef
+                    | SymbolKind::TableDef
+                    | SymbolKind::TableRef => {
                         symbol.region == sym.region
                             && symbol.idx.name.is_some_and(|name| name == old_name)
                     }
-                    SymbolItemKind::BlockDef => {
+                    SymbolKind::BlockDef => {
                         symbol == *sym
                             || symbol_table.blocks.iter().any(|block| {
                                 symbol_key == block.ref_key && block.def_key == sym.key
                             })
                     }
-                    SymbolItemKind::BlockRef => {
+                    SymbolKind::BlockRef => {
                         symbol == *sym
                             || symbol_table.blocks.iter().any(|block| {
                                 sym.key == block.ref_key && block.def_key == symbol.key
@@ -112,7 +112,7 @@ impl LanguageService {
                                     })
                                 })
                     }
-                    SymbolItemKind::Module => false,
+                    SymbolKind::Module => false,
                 })
                 .filter_map(|sym| support::token(&sym.key.to_node(&root), SyntaxKind::IDENT))
                 .map(|token| TextEdit {

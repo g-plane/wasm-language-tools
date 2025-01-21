@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItemKey, SymbolTablesCtx},
+    binder::{SymbolKey, SymbolTablesCtx},
     helpers,
     syntax_tree::SyntaxTreeCtx,
     uri::{InternUri, UrisCtx},
@@ -140,7 +140,7 @@ impl LanguageService {
                     .and(parent)
                 {
                     if symbol_table
-                        .find_param_def(SymbolItemKey::new(&immediate))
+                        .find_param_def(SymbolKey::new(&immediate))
                         .is_some()
                     {
                         token_kinds.get_index_of(&SemanticTokenKind::Param)
@@ -174,7 +174,7 @@ impl LanguageService {
                     .is_some_and(|node| node.kind() == SyntaxKind::PARAM)
                     || parent
                         .as_ref()
-                        .and_then(|parent| symbol_table.find_param_def(SymbolItemKey::new(parent)))
+                        .and_then(|parent| symbol_table.find_param_def(SymbolKey::new(parent)))
                         .is_some()
                 {
                     token_kinds.get_index_of(&SemanticTokenKind::Param)

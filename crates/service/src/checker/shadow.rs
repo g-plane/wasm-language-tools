@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItem, SymbolItemKind, SymbolTable},
+    binder::{Symbol, SymbolKind, SymbolTable},
     helpers,
     idx::{IdentsCtx, Idx},
     uri::{InternUri, UrisCtx},
@@ -35,8 +35,8 @@ pub fn check(
             .symbols
             .iter()
             .fold(FxHashMap::<_, Vec<_>>::default(), |mut map, symbol| {
-                if let SymbolItem {
-                    kind: SymbolItemKind::BlockDef,
+                if let Symbol {
+                    kind: SymbolKind::BlockDef,
                     idx: Idx {
                         name: Some(name), ..
                     },
@@ -50,7 +50,7 @@ pub fn check(
                             .iter()
                             .filter(|other| {
                                 *other != symbol
-                                    && other.kind == SymbolItemKind::BlockDef
+                                    && other.kind == SymbolKind::BlockDef
                                     && other.idx.name.is_some_and(|other| other == name)
                                     && symbol
                                         .key
@@ -93,7 +93,7 @@ pub fn check(
     );
 }
 
-fn get_ident_range(symbol: &SymbolItem, root: &SyntaxNode) -> TextRange {
+fn get_ident_range(symbol: &Symbol, root: &SyntaxNode) -> TextRange {
     token(&symbol.key.to_node(root), SyntaxKind::IDENT)
         .map(|token| token.text_range())
         .unwrap_or_else(|| symbol.key.text_range())

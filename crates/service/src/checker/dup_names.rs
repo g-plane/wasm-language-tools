@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItem, SymbolItemKind, SymbolTable},
+    binder::{Symbol, SymbolKind, SymbolTable},
     helpers,
     idx::IdentsCtx,
     uri::{InternUri, UrisCtx},
@@ -30,20 +30,20 @@ pub fn check(
             .filter(|symbol| {
                 matches!(
                     symbol.kind,
-                    SymbolItemKind::Func
-                        | SymbolItemKind::Param
-                        | SymbolItemKind::Local
-                        | SymbolItemKind::Type
-                        | SymbolItemKind::GlobalDef
-                        | SymbolItemKind::MemoryDef
-                        | SymbolItemKind::TableDef
+                    SymbolKind::Func
+                        | SymbolKind::Param
+                        | SymbolKind::Local
+                        | SymbolKind::Type
+                        | SymbolKind::GlobalDef
+                        | SymbolKind::MemoryDef
+                        | SymbolKind::TableDef
                 )
             })
             .fold(FxHashMap::default(), |mut map, symbol| {
                 if let Some(name) = symbol.idx.name {
-                    let kind = if symbol.kind == SymbolItemKind::Local {
+                    let kind = if symbol.kind == SymbolKind::Local {
                         // re-map this symbol kind to make comparison easier
-                        SymbolItemKind::Param
+                        SymbolKind::Param
                     } else {
                         symbol.kind.clone()
                     };
@@ -126,7 +126,7 @@ pub fn check(
     );
 }
 
-fn get_ident_range(symbol: &SymbolItem, root: &SyntaxNode) -> TextRange {
+fn get_ident_range(symbol: &Symbol, root: &SyntaxNode) -> TextRange {
     token(&symbol.key.to_node(root), SyntaxKind::IDENT)
         .map(|token| token.text_range())
         .unwrap_or_else(|| symbol.key.text_range())

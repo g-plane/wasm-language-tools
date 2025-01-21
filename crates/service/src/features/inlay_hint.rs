@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolItemKind, SymbolTablesCtx},
+    binder::{SymbolKind, SymbolTablesCtx},
     helpers,
     idx::IdentsCtx,
     syntax_tree::SyntaxTreeCtx,
@@ -23,7 +23,7 @@ impl LanguageService {
             .symbols
             .iter()
             .filter_map(|symbol| match symbol.kind {
-                SymbolItemKind::LocalRef => {
+                SymbolKind::LocalRef => {
                     if !range.contains_range(symbol.key.text_range()) {
                         return None;
                     }
@@ -43,7 +43,7 @@ impl LanguageService {
                         data: None,
                     })
                 }
-                SymbolItemKind::GlobalRef => {
+                SymbolKind::GlobalRef => {
                     if !range.contains_range(symbol.key.text_range()) {
                         return None;
                     }
@@ -65,7 +65,7 @@ impl LanguageService {
                         data: None,
                     })
                 }
-                SymbolItemKind::Func => {
+                SymbolKind::Func => {
                     let func = symbol.key.to_node(&root);
                     func.last_child_or_token()
                         .map(|last| last.text_range())
@@ -85,7 +85,7 @@ impl LanguageService {
                             data: None,
                         })
                 }
-                SymbolItemKind::BlockDef => {
+                SymbolKind::BlockDef => {
                     let block = symbol.key.to_node(&root);
                     block
                         .last_child_or_token()
