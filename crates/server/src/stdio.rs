@@ -1,8 +1,10 @@
 use crate::message::Message;
 use compio::{
+    arrayvec::ArrayVec,
     fs::{Stdin, Stdout},
     io::{AsyncRead, AsyncWrite},
 };
+use std::io::Read;
 
 macro_rules! buf_try {
     ($e:expr) => {{
@@ -28,28 +30,26 @@ impl Default for Stdio {
 
 impl Stdio {
     pub async fn read(&mut self) -> anyhow::Result<Message> {
-        let mut s = Vec::new();
+        let buf = buf_try!(self.stdin.read(ArrayVec::<_, 30>::new_const()).await);
         let total_length: usize;
-        let buf = buf_try!(self.stdin.read(Vec::with_capacity(30)).await);
-        if buf.starts_with(b"Content-Length") {
-            if let Some((left, right)) = String::from_utf8_lossy(&buf).split_once("\r\n\r\n") {
-                total_length = left.trim_start_matches("Content-Length:").trim().parse()?;
-                s.reserve_exact(total_length);
-                s.extend_from_slice(right.as_bytes());
-            } else {
-                return Err(anyhow::anyhow!("invalid header `Content-Length`"));
-            }
+        let head;
+        if let Some((left, right)) = buf.strip_prefix(b"Content-Length: ").and_then(|rest| {
+            rest.iter()
+                .position(|c| *c == b'\r')
+                .and_then(|i| rest.get(..i).zip(rest.get(i + 4..)))
+        }) {
+            total_length = String::from_utf8_lossy(left).parse()?;
+            head = right;
         } else {
-            return Err(anyhow::anyhow!("missing header `Content-Length`"));
+            return Err(anyhow::anyhow!("invalid header `Content-Length`"));
         }
 
-        let mut buf = buf_try!(
+        let tail = buf_try!(
             self.stdin
-                .read(Vec::with_capacity(total_length - s.len()))
+                .read(Vec::with_capacity(total_length - head.len()))
                 .await
         );
-        s.append(&mut buf);
-        serde_json::from_slice(&s).map_err(anyhow::Error::from)
+        serde_json::from_reader(head.chain(&*tail)).map_err(anyhow::Error::from)
     }
 
     pub async fn write(&mut self, message: Message) -> anyhow::Result<()> {
