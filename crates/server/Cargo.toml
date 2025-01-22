@@ -11,8 +11,9 @@ exclude = ["/tests"]
 
 [dependencies]
 anyhow = "1.0"
-lsp-server = "0.7"
+compio = { version = "0.13", features = ["macros"] }
 lsp-types.workspace = true
+rustc-hash.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 tracing = "0.1"
