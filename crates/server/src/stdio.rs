@@ -32,9 +32,9 @@ impl Stdio {
         let total_length: usize;
         let buf = buf_try!(self.stdin.read(Vec::with_capacity(30)).await);
         if buf.starts_with(b"Content-Length") {
-            if let Some((left, right)) = String::from_utf8_lossy(&buf).split_once("\r\n") {
+            if let Some((left, right)) = String::from_utf8_lossy(&buf).split_once("\r\n\r\n") {
                 total_length = left.trim_start_matches("Content-Length:").trim().parse()?;
-                s.reserve_exact(total_length + 2);
+                s.reserve_exact(total_length);
                 s.extend_from_slice(right.as_bytes());
             } else {
                 return Err(anyhow::anyhow!("invalid header `Content-Length`"));
@@ -45,7 +45,7 @@ impl Stdio {
 
         let mut buf = buf_try!(
             self.stdin
-                .read(Vec::with_capacity(total_length - s.len() + 2))
+                .read(Vec::with_capacity(total_length - s.len()))
                 .await
         );
         s.append(&mut buf);
