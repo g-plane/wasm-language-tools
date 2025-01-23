@@ -7,7 +7,7 @@ use compio::runtime::Runtime;
 use lsp_types::{
     error_codes,
     notification::{
-        Cancel, DidChangeConfiguration, DidChangeTextDocument, DidOpenTextDocument,
+        Cancel, DidChangeConfiguration, DidChangeTextDocument, DidOpenTextDocument, Exit,
         Notification as _, PublishDiagnostics,
     },
     request::{
@@ -16,7 +16,7 @@ use lsp_types::{
         DocumentSymbolRequest, FoldingRangeRequest, Formatting, GotoDeclaration, GotoDefinition,
         GotoTypeDefinition, HoverRequest, InlayHintRequest, PrepareRenameRequest, RangeFormatting,
         References, RegisterCapability, Rename, Request as _, SelectionRangeRequest,
-        SemanticTokensFullRequest, SemanticTokensRangeRequest, SignatureHelpRequest,
+        SemanticTokensFullRequest, SemanticTokensRangeRequest, Shutdown, SignatureHelpRequest,
         WorkspaceConfiguration, WorkspaceDiagnosticRefresh,
     },
     CancelParams, ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams,
@@ -54,15 +54,7 @@ impl Server {
             };
             match message {
                 Message::Request { id, method, params } => {
-                    if method == "shutdown" {
-                        self.stdio
-                            .write(Message::OkResponse {
-                                id,
-                                result: serde_json::Value::Null,
-                            })
-                            .await?;
-                        return Ok(());
-                    } else if let Some(message) = self.is_cancelled_by_client(id) {
+                    if let Some(message) = self.is_cancelled_by_client(id) {
                         self.stdio.write(message).await?;
                     } else if let Some(message) = self.is_cancelled_by_server(id) {
                         self.stdio.write(message).await?;
@@ -119,7 +111,15 @@ impl Server {
                         Err(CastError::JsonError(..)) => continue,
                     };
                     match try_cast_notification::<Cancel>(&method, params) {
-                        Ok(params) => self.handle_cancel(params),
+                        Ok(params) => {
+                            self.handle_cancel(params);
+                            continue;
+                        }
+                        Err(CastError::MethodMismatch(p)) => params = p,
+                        Err(CastError::JsonError(..)) => continue,
+                    };
+                    match try_cast_notification::<Exit>(&method, params) {
+                        Ok(..) => return Ok(()),
                         Err(CastError::MethodMismatch(..)) => {}
                         Err(CastError::JsonError(..)) => {}
                     };
@@ -399,9 +399,19 @@ impl Server {
             Err(CastError::JsonError(..)) => return Ok(None),
         }
         match try_cast_request::<DocumentSymbolRequest>(&method, params) {
-            Ok(params) => Ok(Some(Message::OkResponse {
+            Ok(params) => {
+                return Ok(Some(Message::OkResponse {
+                    id,
+                    result: serde_json::to_value(service.document_symbol(params))?,
+                }));
+            }
+            Err(CastError::MethodMismatch(p)) => params = p,
+            Err(CastError::JsonError(..)) => return Ok(None),
+        }
+        match try_cast_request::<Shutdown>(&method, params) {
+            Ok(..) => Ok(Some(Message::OkResponse {
                 id,
-                result: serde_json::to_value(service.document_symbol(params))?,
+                result: serde_json::Value::Null,
             })),
             Err(CastError::MethodMismatch(..)) => Ok(None),
             Err(CastError::JsonError(..)) => Ok(None),
