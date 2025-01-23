@@ -8,8 +8,7 @@ use std::env;
 use tracing::{event, Level};
 use tracing_subscriber::prelude::*;
 
-#[compio::main]
-async fn main() -> anyhow::Result<()> {
+fn main() -> anyhow::Result<()> {
     if env::args().any(|arg| arg == "-v" || arg == "-V" || arg == "--version") {
         println!("wat_server v{}", env!("CARGO_PKG_VERSION"));
         return Ok(());
@@ -25,7 +24,10 @@ async fn main() -> anyhow::Result<()> {
     let _enter = span.enter();
 
     event!(Level::INFO, "wat_server starting");
-    let mut server = Server::default();
-    server.run().await?;
+    let runtime = compio::runtime::Runtime::new()?;
+    runtime.block_on(async {
+        let mut server = Server::default();
+        server.run().await
+    })?;
     Ok(())
 }

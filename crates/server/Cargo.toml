@@ -11,7 +11,7 @@ exclude = ["/tests"]
 
 [dependencies]
 anyhow = "1.0"
-compio = { version = "0.13", features = ["arrayvec", "macros"] }
+compio = { version = "0.13", features = ["arrayvec"] }
 lsp-types.workspace = true
 rustc-hash.workspace = true
 serde.workspace = true
