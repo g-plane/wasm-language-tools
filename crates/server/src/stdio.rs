@@ -5,6 +5,7 @@ use compio::{
     io::{AsyncRead, AsyncWrite},
 };
 use std::io::Read;
+use tracing::{event, Level};
 
 macro_rules! buf_try {
     ($e:expr) => {{
@@ -49,7 +50,11 @@ impl Stdio {
                 .read(Vec::with_capacity(total_length - head.len()))
                 .await
         );
-        serde_json::from_reader(head.chain(&*tail)).map_err(anyhow::Error::from)
+        serde_json::from_reader(head.chain(&*tail))
+            .inspect(|message| {
+                event!(Level::DEBUG, "client → server:\n{message:#?}");
+            })
+            .map_err(anyhow::Error::from)
     }
 
     pub async fn write(&mut self, message: Message) -> anyhow::Result<()> {
@@ -65,6 +70,7 @@ impl Stdio {
         );
         buf_try!(self.stdout.write(s).await);
         self.stdout.flush().await?;
+        event!(Level::DEBUG, "server → client:\n{value:#?}");
         Ok(())
     }
 }
