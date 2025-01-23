@@ -1,10 +1,11 @@
 use crate::message::Message;
+use async_lock::Mutex;
 use compio::{
     arrayvec::ArrayVec,
     fs::{Stdin, Stdout},
     io::{AsyncRead, AsyncWrite},
 };
-use std::io::Read;
+use std::{io::Read, sync::Arc};
 use tracing::{event, Level};
 
 macro_rules! buf_try {
@@ -15,16 +16,17 @@ macro_rules! buf_try {
     }};
 }
 
+#[derive(Clone)]
 pub struct Stdio {
     stdin: Stdin,
-    stdout: Stdout,
+    stdout: Arc<Mutex<Stdout>>,
 }
 
 impl Default for Stdio {
     fn default() -> Self {
         Self {
             stdin: compio::fs::stdin(),
-            stdout: compio::fs::stdout(),
+            stdout: Arc::new(Mutex::new(compio::fs::stdout())),
         }
     }
 }
@@ -57,19 +59,20 @@ impl Stdio {
             .map_err(anyhow::Error::from)
     }
 
-    pub async fn write(&mut self, message: Message) -> anyhow::Result<()> {
+    pub async fn write(&self, message: Message) -> anyhow::Result<()> {
+        let mut stdout = self.stdout.lock().await;
         let mut value = serde_json::to_value(message)?;
         if let serde_json::Value::Object(map) = &mut value {
             map.insert("jsonrpc".into(), "2.0".into());
         }
         let s = serde_json::to_vec(&value)?;
         buf_try!(
-            self.stdout
+            stdout
                 .write(format!("Content-Length: {}\r\n\r\n", s.len()))
                 .await
         );
-        buf_try!(self.stdout.write(s).await);
-        self.stdout.flush().await?;
+        buf_try!(stdout.write(s).await);
+        stdout.flush().await?;
         event!(Level::DEBUG, "server → client:\n{value:#?}");
         Ok(())
     }
