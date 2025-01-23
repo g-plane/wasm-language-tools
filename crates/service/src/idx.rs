@@ -1,6 +1,6 @@
 use crate::LanguageService;
 use salsa::{InternId, InternKey};
-use std::{fmt, rc::Rc};
+use std::{fmt, sync::Arc};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Idx {
@@ -80,7 +80,7 @@ impl InternKey for InternIdent {
 #[salsa::query_group(Idents)]
 pub(crate) trait IdentsCtx {
     #[salsa::interned]
-    fn ident(&self, ident: Rc<str>) -> InternIdent;
+    fn ident(&self, ident: Arc<str>) -> InternIdent;
 }
 
 #[derive(Default)]

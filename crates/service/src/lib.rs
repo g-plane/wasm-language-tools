@@ -35,6 +35,7 @@ use lsp_types::{
     TypeDefinitionProviderCapability, Uri,
 };
 use rustc_hash::{FxBuildHasher, FxHashMap};
+use salsa::{Database, ParallelDatabase, Snapshot};
 
 #[salsa::database(Uris, Idents, SyntaxTree, SymbolTables, TypesAnalyzer)]
 #[derive(Default)]
@@ -56,7 +57,17 @@ pub struct LanguageService {
     configs: FxHashMap<crate::uri::InternUri, ServiceConfig>,
     global_config: ServiceConfig,
 }
-impl salsa::Database for LanguageService {}
+impl Database for LanguageService {}
+impl ParallelDatabase for LanguageService {
+    fn snapshot(&self) -> Snapshot<Self> {
+        Snapshot::new(LanguageService {
+            storage: self.storage.snapshot(),
+            semantic_token_kinds: self.semantic_token_kinds.clone(),
+            configs: self.configs.clone(),
+            global_config: self.global_config.clone(),
+        })
+    }
+}
 
 impl LanguageService {
     /// This method isn't used to create language service instance.
@@ -237,6 +248,13 @@ impl LanguageService {
     /// Check if the current request is cancelled.
     pub fn is_cancelled(&self) -> bool {
         self.storage.salsa_runtime().is_current_revision_canceled()
+    }
+
+    #[inline]
+    /// Fork to create a read-only language service snapshot
+    /// which can be used in a different thread or async context.
+    pub fn fork(&self) -> Snapshot<Self> {
+        self.snapshot()
     }
 }
 

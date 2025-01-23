@@ -7,7 +7,7 @@ use rowan::{
     ast::{support, AstNode},
     GreenNode, TextRange,
 };
-use std::{hash::Hash, rc::Rc};
+use std::{hash::Hash, sync::Arc};
 use wat_syntax::{
     ast::{ModuleFieldFunc, PlainInstr},
     SyntaxKind, SyntaxNode, SyntaxNodePtr,
@@ -17,7 +17,7 @@ use wat_syntax::{
 pub(crate) trait SymbolTablesCtx: SyntaxTreeCtx + IdentsCtx {
     #[salsa::memoized]
     #[salsa::invoke(create_symbol_table)]
-    fn symbol_table(&self, uri: InternUri) -> Rc<SymbolTable>;
+    fn symbol_table(&self, uri: InternUri) -> Arc<SymbolTable>;
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -26,7 +26,7 @@ pub(crate) struct SymbolTable {
     pub blocks: Vec<BlockItem>,
     pub exports: Vec<ExportItem>,
 }
-fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTable> {
+fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTable> {
     fn create_parent_based_symbol(
         db: &dyn SymbolTablesCtx,
         node: SyntaxNode,
@@ -556,7 +556,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Rc<SymbolTab
             _ => {}
         }
     }
-    Rc::new(SymbolTable {
+    Arc::new(SymbolTable {
         symbols,
         blocks,
         exports,
