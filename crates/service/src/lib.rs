@@ -232,6 +232,12 @@ impl LanguageService {
             }],
         }
     }
+
+    #[inline]
+    /// Check if the current request is cancelled.
+    pub fn is_cancelled(&self) -> bool {
+        self.storage.salsa_runtime().is_current_revision_canceled()
+    }
 }
 
 #[cfg(test)]

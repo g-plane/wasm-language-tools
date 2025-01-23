@@ -4,9 +4,10 @@ use crate::{
     stdio::Stdio,
 };
 use lsp_types::{
+    error_codes,
     notification::{
-        DidChangeConfiguration, DidChangeTextDocument, DidOpenTextDocument, Notification as _,
-        PublishDiagnostics,
+        Cancel, DidChangeConfiguration, DidChangeTextDocument, DidOpenTextDocument,
+        Notification as _, PublishDiagnostics,
     },
     request::{
         CallHierarchyIncomingCalls, CallHierarchyOutgoingCalls, CallHierarchyPrepare,
@@ -17,9 +18,10 @@ use lsp_types::{
         SemanticTokensFullRequest, SemanticTokensRangeRequest, SignatureHelpRequest,
         WorkspaceConfiguration, WorkspaceDiagnosticRefresh,
     },
-    ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams,
-    DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams, Uri,
+    CancelParams, ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams,
+    DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams, NumberOrString, Uri,
 };
+use rustc_hash::FxHashSet;
 use wat_service::LanguageService;
 
 #[derive(Default)]
@@ -30,6 +32,7 @@ pub struct Server {
     support_refresh_diagnostics: bool,
     support_pull_config: bool,
     sent_requests: SentRequests<Vec<Uri>>,
+    cancelled_requests: FxHashSet<u32>,
 }
 
 impl Server {
@@ -106,6 +109,12 @@ impl Server {
                 method,
                 mut params,
             } => {
+                if let Some(message) = self.is_cancelled_by_client(id) {
+                    return Ok(Some(message));
+                }
+                if let Some(message) = self.is_cancelled_by_server(id) {
+                    return Ok(Some(message));
+                }
                 match try_cast_request::<CallHierarchyPrepare>(&method, params) {
                     Ok(params) => {
                         return Ok(Some(Message::OkResponse {
@@ -381,7 +390,13 @@ impl Server {
                 match try_cast_notification::<DidChangeConfiguration>(&method, params) {
                     Ok(params) => {
                         self.handle_did_change_configuration(params).await?;
+                        return Ok(None);
                     }
+                    Err(CastError::MethodMismatch(p)) => params = p,
+                    Err(CastError::JsonError(..)) => return Ok(None),
+                };
+                match try_cast_notification::<Cancel>(&method, params) {
+                    Ok(params) => self.handle_cancel(params),
                     Err(CastError::MethodMismatch(..)) => {}
                     Err(CastError::JsonError(..)) => {}
                 };
@@ -486,6 +501,12 @@ impl Server {
         Ok(())
     }
 
+    fn handle_cancel(&mut self, params: CancelParams) {
+        if let NumberOrString::Number(id) = params.id {
+            self.cancelled_requests.insert(id as u32);
+        }
+    }
+
     async fn publish_diagnostics(&mut self, uri: Uri) -> anyhow::Result<()> {
         self.stdio
             .write(Message::Notification {
@@ -493,5 +514,35 @@ impl Server {
                 params: serde_json::to_value(self.service.publish_diagnostics(uri))?,
             })
             .await
+    }
+
+    fn is_cancelled_by_client(&mut self, request_id: u32) -> Option<Message> {
+        if self.cancelled_requests.remove(&request_id) {
+            Some(Message::ErrResponse {
+                id: request_id,
+                error: ResponseError {
+                    code: error_codes::REQUEST_CANCELLED,
+                    message: "".into(),
+                    data: None,
+                },
+            })
+        } else {
+            None
+        }
+    }
+
+    fn is_cancelled_by_server(&self, request_id: u32) -> Option<Message> {
+        if self.service.is_cancelled() {
+            Some(Message::ErrResponse {
+                id: request_id,
+                error: ResponseError {
+                    code: error_codes::SERVER_CANCELLED,
+                    message: "This request is cancelled by server.".into(),
+                    data: None,
+                },
+            })
+        } else {
+            None
+        }
     }
 }

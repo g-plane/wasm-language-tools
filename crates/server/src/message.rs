@@ -28,7 +28,7 @@ pub enum Message {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ResponseError {
-    pub code: i32,
+    pub code: i64,
     pub message: String,
     pub data: Option<Value>,
 }
