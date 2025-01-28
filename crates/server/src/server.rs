@@ -1,9 +1,8 @@
 use crate::{
     message::{try_cast_notification, try_cast_request, CastError, Message, ResponseError},
     sent::SentRequests,
-    stdio::Stdio,
+    stdio,
 };
-use compio::runtime::Runtime;
 use lsp_types::{
     error_codes,
     notification::{
@@ -23,12 +22,11 @@ use lsp_types::{
     DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams, NumberOrString, Uri,
 };
 use rustc_hash::FxHashSet;
-use std::{ops::Deref, sync::Arc};
+use std::ops::Deref;
 use wat_service::LanguageService;
 
 #[derive(Default)]
 pub struct Server {
-    stdio: Stdio,
     service: LanguageService,
     support_pull_diagnostics: bool,
     support_refresh_diagnostics: bool,
@@ -38,48 +36,38 @@ pub struct Server {
 }
 
 impl Server {
-    pub async fn run(&mut self, runtime: Arc<Runtime>) -> anyhow::Result<()> {
+    pub async fn run(&mut self) -> anyhow::Result<()> {
         self.initialize().await?;
-        self.stdio
-            .write(self.sent_requests.add(
-                RegisterCapability::METHOD.into(),
-                serde_json::to_value(self.service.dynamic_capabilities())?,
-                vec![],
-            ))
-            .await?;
+        stdio::write(self.sent_requests.add(
+            RegisterCapability::METHOD.into(),
+            serde_json::to_value(self.service.dynamic_capabilities())?,
+            vec![],
+        ))
+        .await?;
 
         loop {
-            let Ok(message) = self.stdio.read().await else {
+            let Ok(message) = stdio::read().await else {
                 continue;
             };
             match message {
                 Message::Request { id, method, params } => {
                     if let Some(message) = self.is_cancelled_by_client(id) {
-                        self.stdio.write(message).await?;
+                        stdio::write(message).await?;
                     } else if let Some(message) = self.is_cancelled_by_server(id) {
-                        self.stdio.write(message).await?;
+                        stdio::write(message).await?;
                     } else {
-                        runtime
-                            .spawn({
-                                let service = self.service.fork();
-                                let stdio = self.stdio.clone();
-                                let runtime = Arc::clone(&runtime);
-                                async move {
-                                    runtime
-                                        .spawn_blocking(|| {
-                                            // TODO: handle request here once compio released new version
-                                        })
-                                        .await
-                                        .expect("failed to handle request");
-                                    if let Ok(Some(message)) =
-                                        Self::handle_request(service, id, method, params).await
-                                    {
-                                        stdio.write(message).await?;
-                                    }
-                                    Ok::<_, anyhow::Error>(())
+                        blocking::unblock({
+                            let service = self.service.fork();
+                            move || {
+                                if let Ok(Some(message)) =
+                                    Self::handle_request(service, id, method, params)
+                                {
+                                    stdio::write_sync(message)?;
                                 }
-                            })
-                            .detach();
+                                Ok::<_, anyhow::Error>(())
+                            }
+                        })
+                        .detach();
                     }
                 }
                 Message::OkResponse { id, result } => {
@@ -130,7 +118,7 @@ impl Server {
     }
 
     async fn initialize(&mut self) -> anyhow::Result<()> {
-        let message = self.stdio.read().await?;
+        let message = stdio::read().await?;
         let (id, params) = match message {
             Message::Request { id, method, params } if method == "initialize" => {
                 (id, serde_json::from_value::<InitializeParams>(params)?)
@@ -153,16 +141,15 @@ impl Server {
                 .and_then(|it| it.configuration),
             Some(true)
         );
-        self.stdio
-            .write(Message::OkResponse {
-                id,
-                result: serde_json::to_value(self.service.initialize(params))?,
-            })
-            .await?;
+        stdio::write(Message::OkResponse {
+            id,
+            result: serde_json::to_value(self.service.initialize(params))?,
+        })
+        .await?;
         Ok(())
     }
 
-    async fn handle_request(
+    fn handle_request(
         service: impl Deref<Target = LanguageService>,
         id: u32,
         method: String,
@@ -428,13 +415,12 @@ impl Server {
                 .zip(configs)
                 .for_each(|(uri, config)| self.service.set_config(uri.clone(), config));
             if self.support_refresh_diagnostics {
-                self.stdio
-                    .write(self.sent_requests.add(
-                        WorkspaceDiagnosticRefresh::METHOD.into(),
-                        serde_json::Value::Null,
-                        vec![],
-                    ))
-                    .await?;
+                stdio::write(self.sent_requests.add(
+                    WorkspaceDiagnosticRefresh::METHOD.into(),
+                    serde_json::Value::Null,
+                    vec![],
+                ))
+                .await?;
             }
         }
         Ok(())
@@ -450,18 +436,17 @@ impl Server {
             self.publish_diagnostics(uri.clone()).await?;
         }
         if self.support_pull_config {
-            self.stdio
-                .write(self.sent_requests.add(
-                    WorkspaceConfiguration::METHOD.into(),
-                    serde_json::to_value(ConfigurationParams {
-                        items: vec![ConfigurationItem {
-                            scope_uri: Some(uri.clone()),
-                            section: Some("wasmLanguageTools".to_string()),
-                        }],
-                    })?,
-                    vec![uri],
-                ))
-                .await?;
+            stdio::write(self.sent_requests.add(
+                WorkspaceConfiguration::METHOD.into(),
+                serde_json::to_value(ConfigurationParams {
+                    items: vec![ConfigurationItem {
+                        scope_uri: Some(uri.clone()),
+                        section: Some("wasmLanguageTools".to_string()),
+                    }],
+                })?,
+                vec![uri],
+            ))
+            .await?;
         }
         Ok(())
     }
@@ -490,23 +475,22 @@ impl Server {
                 .get_configs()
                 .map(|(uri, _)| uri)
                 .collect::<Vec<_>>();
-            self.stdio
-                .write(
-                    self.sent_requests.add(
-                        WorkspaceConfiguration::METHOD.into(),
-                        serde_json::to_value(ConfigurationParams {
-                            items: uris
-                                .iter()
-                                .map(|uri| ConfigurationItem {
-                                    scope_uri: Some(uri.clone()),
-                                    section: Some("wasmLanguageTools".to_string()),
-                                })
-                                .collect(),
-                        })?,
-                        uris,
-                    ),
-                )
-                .await?;
+            stdio::write(
+                self.sent_requests.add(
+                    WorkspaceConfiguration::METHOD.into(),
+                    serde_json::to_value(ConfigurationParams {
+                        items: uris
+                            .iter()
+                            .map(|uri| ConfigurationItem {
+                                scope_uri: Some(uri.clone()),
+                                section: Some("wasmLanguageTools".to_string()),
+                            })
+                            .collect(),
+                    })?,
+                    uris,
+                ),
+            )
+            .await?;
         } else if let Ok(config) = serde_json::from_value(params.settings) {
             self.service.set_global_config(config);
         }
@@ -520,12 +504,11 @@ impl Server {
     }
 
     async fn publish_diagnostics(&mut self, uri: Uri) -> anyhow::Result<()> {
-        self.stdio
-            .write(Message::Notification {
-                method: PublishDiagnostics::METHOD.into(),
-                params: serde_json::to_value(self.service.publish_diagnostics(uri))?,
-            })
-            .await
+        stdio::write(Message::Notification {
+            method: PublishDiagnostics::METHOD.into(),
+            params: serde_json::to_value(self.service.publish_diagnostics(uri))?,
+        })
+        .await
     }
 
     fn is_cancelled_by_client(&mut self, request_id: u32) -> Option<Message> {

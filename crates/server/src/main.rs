@@ -4,7 +4,7 @@ mod server;
 mod stdio;
 
 use crate::server::Server;
-use std::{env, sync::Arc};
+use std::env;
 use tracing::{event, Level};
 use tracing_subscriber::prelude::*;
 
@@ -24,10 +24,9 @@ fn main() -> anyhow::Result<()> {
     let _enter = span.enter();
 
     event!(Level::INFO, "wat_server starting");
-    let runtime = Arc::new(compio::runtime::Runtime::new()?);
-    runtime.block_on(async {
+    async_io::block_on(async {
         let mut server = Server::default();
-        server.run(Arc::clone(&runtime)).await
+        server.run().await
     })?;
     Ok(())
 }
