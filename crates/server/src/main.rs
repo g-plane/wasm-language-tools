@@ -24,7 +24,7 @@ fn main() -> anyhow::Result<()> {
     let _enter = span.enter();
 
     event!(Level::INFO, "wat_server starting");
-    async_io::block_on(async {
+    futures_lite::future::block_on(async {
         let mut server = Server::default();
         server.run().await
     })?;
