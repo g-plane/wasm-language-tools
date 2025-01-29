@@ -1,12 +1,12 @@
-mod message;
-mod sent;
-mod server;
-mod stdio;
-
 use crate::server::Server;
 use std::env;
 use tracing::{event, Level};
 use tracing_subscriber::prelude::*;
+
+mod message;
+mod sent;
+mod server;
+mod stdio;
 
 fn main() -> anyhow::Result<()> {
     if env::args().any(|arg| arg == "-v" || arg == "-V" || arg == "--version") {
