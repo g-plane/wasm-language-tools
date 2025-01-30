@@ -41,7 +41,6 @@ impl Server {
         stdio::write(self.sent_requests.add(
             RegisterCapability::METHOD.into(),
             serde_json::to_value(self.service.dynamic_capabilities())?,
-            vec![],
         ))
         .await?;
 
@@ -418,7 +417,6 @@ impl Server {
                 stdio::write(self.sent_requests.add(
                     WorkspaceDiagnosticRefresh::METHOD.into(),
                     serde_json::Value::Null,
-                    vec![],
                 ))
                 .await?;
             }
@@ -436,7 +434,7 @@ impl Server {
             self.publish_diagnostics(uri.clone()).await?;
         }
         if self.support_pull_config {
-            stdio::write(self.sent_requests.add(
+            stdio::write(self.sent_requests.add_with_data(
                 WorkspaceConfiguration::METHOD.into(),
                 serde_json::to_value(ConfigurationParams {
                     items: vec![ConfigurationItem {
@@ -476,7 +474,7 @@ impl Server {
                 .map(|(uri, _)| uri)
                 .collect::<Vec<_>>();
             stdio::write(
-                self.sent_requests.add(
+                self.sent_requests.add_with_data(
                     WorkspaceConfiguration::METHOD.into(),
                     serde_json::to_value(ConfigurationParams {
                         items: uris
