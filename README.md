@@ -174,7 +174,7 @@ cargo install wat_server
     end,
   })
   ```
-- Zed: Coming soon.
+- Zed: Install the [WebAssembly Text Format](https://zed.dev/extensions?query=WebAssembly+Text+Format) extension.
 - Helix: Add the following lines to `<config_dir>/helix/languages.toml`:
   ```toml
   [language-server.wasm-language-tools]
