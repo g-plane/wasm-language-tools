@@ -25,10 +25,7 @@ pub fn write(message: Message) -> Task<Result<()>> {
 }
 
 pub fn write_sync(message: Message) -> Result<()> {
-    let mut value = serde_json::to_value(message)?;
-    if let serde_json::Value::Object(map) = &mut value {
-        map.insert("jsonrpc".into(), "2.0".into());
-    }
+    let value = serde_json::to_value(message)?;
     let json = serde_json::to_vec(&value)?;
     let mut stdout = std::io::stdout().lock();
     write!(stdout, "Content-Length: {}\r\n\r\n", json.len())?;
