@@ -38,10 +38,11 @@ pub struct Server {
 impl Server {
     pub async fn run(&mut self) -> anyhow::Result<()> {
         self.initialize().await?;
-        stdio::write(self.sent_requests.add(
-            RegisterCapability::METHOD.into(),
-            serde_json::to_value(self.service.dynamic_capabilities())?,
-        ))
+        stdio::write(Message::Request {
+            id: self.sent_requests.next_id(),
+            method: RegisterCapability::METHOD.into(),
+            params: serde_json::to_value(self.service.dynamic_capabilities())?,
+        })
         .await?;
 
         loop {
@@ -414,10 +415,11 @@ impl Server {
                 .zip(configs)
                 .for_each(|(uri, config)| self.service.set_config(uri.clone(), config));
             if self.support_refresh_diagnostics {
-                stdio::write(self.sent_requests.add(
-                    WorkspaceDiagnosticRefresh::METHOD.into(),
-                    serde_json::Value::Null,
-                ))
+                stdio::write(Message::Request {
+                    id: self.sent_requests.next_id(),
+                    method: WorkspaceDiagnosticRefresh::METHOD.into(),
+                    params: serde_json::Value::Null,
+                })
                 .await?;
             }
         }
@@ -434,7 +436,7 @@ impl Server {
             self.publish_diagnostics(uri.clone()).await?;
         }
         if self.support_pull_config {
-            stdio::write(self.sent_requests.add_with_data(
+            stdio::write(self.sent_requests.add(
                 WorkspaceConfiguration::METHOD.into(),
                 serde_json::to_value(ConfigurationParams {
                     items: vec![ConfigurationItem {
@@ -474,7 +476,7 @@ impl Server {
                 .map(|(uri, _)| uri)
                 .collect::<Vec<_>>();
             stdio::write(
-                self.sent_requests.add_with_data(
+                self.sent_requests.add(
                     WorkspaceConfiguration::METHOD.into(),
                     serde_json::to_value(ConfigurationParams {
                         items: uris

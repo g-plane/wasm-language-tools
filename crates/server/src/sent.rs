@@ -9,16 +9,15 @@ pub struct SentRequests<T> {
 }
 
 impl<T> SentRequests<T> {
-    pub fn add(&mut self, method: String, params: Value) -> Message {
+    pub fn next_id(&mut self) -> u32 {
         let id = self.id;
         self.id += 1;
-        Message::Request { id, method, params }
+        id
     }
 
-    pub fn add_with_data(&mut self, method: String, params: Value, data: T) -> Message {
-        let id = self.id;
+    pub fn add(&mut self, method: String, params: Value, data: T) -> Message {
+        let id = self.next_id();
         self.data.insert(id, data);
-        self.id += 1;
         Message::Request { id, method, params }
     }
 
