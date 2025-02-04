@@ -1335,6 +1335,20 @@ fn global_results_correct() {
 }
 
 #[test]
+fn imported_global() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+  (global (import "" "") i32))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
+
+#[test]
 fn missing_then() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "

@@ -17,7 +17,7 @@ use rowan::{
     TextRange,
 };
 use wat_syntax::{
-    ast::{BlockInstr, Instr, PlainInstr},
+    ast::{BlockInstr, Import, Instr, PlainInstr},
     SyntaxKind, SyntaxNode, SyntaxNodePtr,
 };
 
@@ -62,6 +62,10 @@ pub fn check_global(
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) {
+    let ty = service
+        .extract_global_type(node.green().into())
+        .map(OperandType::Val)
+        .unwrap_or(OperandType::Any);
     check_block_like(
         diags,
         &Shared {
@@ -71,11 +75,12 @@ pub fn check_global(
             line_index,
         },
         node,
-        Vec::with_capacity(2),
-        &[service
-            .extract_global_type(node.green().into())
-            .map(OperandType::Val)
-            .unwrap_or(OperandType::Any)],
+        if support::child::<Import>(node).is_some() {
+            vec![(ty.clone(), None)]
+        } else {
+            Vec::with_capacity(1)
+        },
+        &[ty],
     );
 }
 
@@ -101,7 +106,7 @@ fn check_block_like(
     diags: &mut Vec<Diagnostic>,
     shared: &Shared,
     node: &SyntaxNode,
-    init_stack: Vec<(OperandType, Instr)>,
+    init_stack: Vec<(OperandType, Option<Instr>)>,
     expected_results: &[OperandType],
 ) {
     let mut type_stack = TypeStack {
@@ -128,7 +133,7 @@ fn check_block_like(
             }
             type_stack
                 .stack
-                .extend(sig.results.into_iter().map(|ty| (ty, instr.clone())));
+                .extend(sig.results.into_iter().map(|ty| (ty, Some(instr.clone()))));
             if helpers::can_produce_never(instr_name) {
                 type_stack.has_never = true;
                 type_stack.stack.clear();
@@ -153,7 +158,7 @@ fn check_block_like(
                 .map(|params| {
                     params
                         .iter()
-                        .map(|(ty, ..)| (OperandType::Val(*ty), instr.clone()))
+                        .map(|(ty, ..)| (OperandType::Val(*ty), Some(instr.clone())))
                         .collect()
                 })
                 .unwrap_or_default();
@@ -224,7 +229,7 @@ fn check_block_like(
             }
             type_stack
                 .stack
-                .extend(results.into_iter().map(|ty| (ty, instr.clone())));
+                .extend(results.into_iter().map(|ty| (ty, Some(instr.clone()))));
         }
     });
     if let Some(diag) = type_stack.check_to_bottom(expected_results, ReportRange::Last(node)) {
@@ -236,7 +241,7 @@ struct TypeStack<'a> {
     uri: InternUri,
     service: &'a LanguageService,
     line_index: &'a LineIndex,
-    stack: Vec<(OperandType, Instr)>,
+    stack: Vec<(OperandType, Option<Instr>)>,
     has_never: bool,
 }
 impl TypeStack<'_> {
@@ -256,16 +261,18 @@ impl TypeStack<'_> {
                     (OperandType::Val(received), related_instr),
                 ) if expected != received => {
                     mismatch = true;
-                    related_information.push(DiagnosticRelatedInformation {
-                        location: Location {
-                            uri: self.service.lookup_uri(self.uri),
-                            range: helpers::rowan_range_to_lsp_range(
-                                self.line_index,
-                                ReportRange::Instr(related_instr).pick(),
-                            ),
-                        },
-                        message: format!("expected type `{expected}`, found `{received}`"),
-                    });
+                    if let Some(related_instr) = related_instr {
+                        related_information.push(DiagnosticRelatedInformation {
+                            location: Location {
+                                uri: self.service.lookup_uri(self.uri),
+                                range: helpers::rowan_range_to_lsp_range(
+                                    self.line_index,
+                                    ReportRange::Instr(related_instr).pick(),
+                                ),
+                            },
+                            message: format!("expected type `{expected}`, found `{received}`"),
+                        });
+                    }
                 }
                 EitherOrBoth::Left(..) if !self.has_never => {
                     mismatch = true;
@@ -311,16 +318,18 @@ impl TypeStack<'_> {
                     (OperandType::Val(received), related_instr),
                 ) if expected != received => {
                     mismatch = true;
-                    related_information.push(DiagnosticRelatedInformation {
-                        location: Location {
-                            uri: self.service.lookup_uri(self.uri),
-                            range: helpers::rowan_range_to_lsp_range(
-                                self.line_index,
-                                ReportRange::Instr(related_instr).pick(),
-                            ),
-                        },
-                        message: format!("expected type `{expected}`, found `{received}`"),
-                    });
+                    if let Some(related_instr) = related_instr {
+                        related_information.push(DiagnosticRelatedInformation {
+                            location: Location {
+                                uri: self.service.lookup_uri(self.uri),
+                                range: helpers::rowan_range_to_lsp_range(
+                                    self.line_index,
+                                    ReportRange::Instr(related_instr).pick(),
+                                ),
+                            },
+                            message: format!("expected type `{expected}`, found `{received}`"),
+                        });
+                    }
                 }
                 EitherOrBoth::Left(..) if !self.has_never => {
                     mismatch = true;
