@@ -31,12 +31,12 @@ pub fn write(message: Message) -> Task<Result<()>> {
 }
 
 pub fn write_sync(message: Message) -> Result<()> {
-    let value = serde_json::to_value(message)?;
-    let json = serde_json::to_vec(&value)?;
+    event!(Level::DEBUG, "server → client:\n{message:#?}");
+    let json = serde_json::to_string(&message)?;
     let mut stdout = std::io::stdout().lock();
     write!(stdout, "Content-Length: {}\r\n\r\n", json.len())?;
-    stdout.write_all(&json)?;
+    stdout.write_all(&json.as_bytes())?;
     stdout.flush()?;
-    event!(Level::DEBUG, "server → client:\n{value:#?}");
+    event!(Level::DEBUG, "stdout: {json}");
     Ok(())
 }
