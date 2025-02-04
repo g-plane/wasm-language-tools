@@ -7,11 +7,17 @@ use tracing::{event, Level};
 
 pub fn read() -> Task<Result<Message>> {
     unblock(|| {
+        let mut length = 0;
         let mut stdin = std::io::stdin().lock();
         let mut buf = String::with_capacity(30);
         stdin.read_line(&mut buf)?;
-        let length = buf.trim_start_matches("Content-Length:").trim().parse()?;
-        stdin.read_line(&mut buf)?; // empty line
+        while !buf.trim().is_empty() {
+            if let Some(value) = buf.strip_prefix("Content-Length:") {
+                length = value.trim().parse()?;
+            }
+            buf.clear();
+            stdin.read_line(&mut buf)?;
+        }
         serde_json::from_reader(stdin.take(length))
             .inspect(|message| {
                 event!(Level::DEBUG, "client → server:\n{message:#?}");
