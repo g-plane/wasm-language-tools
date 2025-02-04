@@ -83,6 +83,19 @@ fn param_used() {
 }
 
 #[test]
+fn params_in_imported_func() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+  (func $_ (import "" "") (param i32) (param $p i32)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
+
+#[test]
 fn local_unused() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = r#"

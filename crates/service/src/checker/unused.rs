@@ -6,7 +6,7 @@ use crate::{
 };
 use line_index::LineIndex;
 use lsp_types::{Diagnostic, DiagnosticSeverity, DiagnosticTag, NumberOrString};
-use rowan::ast::support;
+use rowan::{ast::support, Direction};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "unused";
@@ -25,73 +25,86 @@ pub fn check(
         LintLevel::Warn => DiagnosticSeverity::WARNING,
         LintLevel::Deny => DiagnosticSeverity::ERROR,
     };
-    diags.extend(
-        symbol_table
-            .symbols
-            .iter()
-            .filter_map(|symbol| match symbol.kind {
-                SymbolKind::Func => {
-                    if is_prefixed_with_underscore(service, symbol)
-                        || is_used(symbol_table, symbol, SymbolKind::Call)
-                        || is_exported(root, symbol)
-                    {
-                        None
-                    } else {
-                        Some(report(service, line_index, root, severity, symbol))
-                    }
+    diags.extend(symbol_table.symbols.iter().filter_map(|symbol| {
+        match symbol.kind {
+            SymbolKind::Func => {
+                if is_prefixed_with_underscore(service, symbol)
+                    || is_used(symbol_table, symbol, SymbolKind::Call)
+                    || is_exported(root, symbol)
+                {
+                    None
+                } else {
+                    Some(report(service, line_index, root, severity, symbol))
                 }
-                SymbolKind::Param | SymbolKind::Local => {
-                    if is_prefixed_with_underscore(service, symbol)
-                        || is_used(symbol_table, symbol, SymbolKind::LocalRef)
-                    {
-                        None
-                    } else {
-                        Some(report(service, line_index, root, severity, symbol))
-                    }
+            }
+            SymbolKind::Param | SymbolKind::Local => {
+                if is_prefixed_with_underscore(service, symbol)
+                    || is_used(symbol_table, symbol, SymbolKind::LocalRef)
+                    || symbol
+                        .key
+                        .to_node(root)
+                        .parent()
+                        .and_then(|parent| {
+                            if parent.kind() == SyntaxKind::TYPE_USE {
+                                Some(parent)
+                            } else {
+                                parent.parent()
+                            }
+                        })
+                        .map(|node| {
+                            node.siblings(Direction::Prev)
+                                .any(|sibling| sibling.kind() == SyntaxKind::IMPORT)
+                        })
+                        .unwrap_or_default()
+                {
+                    None
+                } else {
+                    Some(report(service, line_index, root, severity, symbol))
                 }
-                SymbolKind::Type => {
-                    if is_prefixed_with_underscore(service, symbol)
-                        || is_used(symbol_table, symbol, SymbolKind::TypeUse)
-                        || is_exported(root, symbol)
-                    {
-                        None
-                    } else {
-                        Some(report(service, line_index, root, severity, symbol))
-                    }
+            }
+            SymbolKind::Type => {
+                if is_prefixed_with_underscore(service, symbol)
+                    || is_used(symbol_table, symbol, SymbolKind::TypeUse)
+                    || is_exported(root, symbol)
+                {
+                    None
+                } else {
+                    Some(report(service, line_index, root, severity, symbol))
                 }
-                SymbolKind::GlobalDef => {
-                    if is_prefixed_with_underscore(service, symbol)
-                        || is_used(symbol_table, symbol, SymbolKind::GlobalRef)
-                        || is_exported(root, symbol)
-                    {
-                        None
-                    } else {
-                        Some(report(service, line_index, root, severity, symbol))
-                    }
+            }
+            SymbolKind::GlobalDef => {
+                if is_prefixed_with_underscore(service, symbol)
+                    || is_used(symbol_table, symbol, SymbolKind::GlobalRef)
+                    || is_exported(root, symbol)
+                {
+                    None
+                } else {
+                    Some(report(service, line_index, root, severity, symbol))
                 }
-                SymbolKind::MemoryDef => {
-                    if is_prefixed_with_underscore(service, symbol)
-                        || is_used(symbol_table, symbol, SymbolKind::MemoryRef)
-                        || is_exported(root, symbol)
-                    {
-                        None
-                    } else {
-                        Some(report(service, line_index, root, severity, symbol))
-                    }
+            }
+            SymbolKind::MemoryDef => {
+                if is_prefixed_with_underscore(service, symbol)
+                    || is_used(symbol_table, symbol, SymbolKind::MemoryRef)
+                    || is_exported(root, symbol)
+                {
+                    None
+                } else {
+                    Some(report(service, line_index, root, severity, symbol))
                 }
-                SymbolKind::TableDef => {
-                    if is_prefixed_with_underscore(service, symbol)
-                        || is_used(symbol_table, symbol, SymbolKind::TableRef)
-                        || is_exported(root, symbol)
-                    {
-                        None
-                    } else {
-                        Some(report(service, line_index, root, severity, symbol))
-                    }
+            }
+            SymbolKind::TableDef => {
+                if is_prefixed_with_underscore(service, symbol)
+                    || is_used(symbol_table, symbol, SymbolKind::TableRef)
+                    || is_exported(root, symbol)
+                {
+                    None
+                } else {
+                    Some(report(service, line_index, root, severity, symbol))
                 }
-                _ => None,
-            }),
-    );
+            }
+            _ => None,
+        }
+    }));
 }
 
 fn is_prefixed_with_underscore(service: &LanguageService, symbol: &Symbol) -> bool {
