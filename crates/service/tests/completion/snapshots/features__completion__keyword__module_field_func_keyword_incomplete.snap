@@ -1124,7 +1124,67 @@ expression: response
     "kind": 24
   },
   {
+    "label": "v128.not",
+    "kind": 24
+  },
+  {
+    "label": "v128.and",
+    "kind": 24
+  },
+  {
+    "label": "v128.andnot",
+    "kind": 24
+  },
+  {
+    "label": "v128.or",
+    "kind": 24
+  },
+  {
+    "label": "v128.xor",
+    "kind": 24
+  },
+  {
+    "label": "v128.bitselect",
+    "kind": 24
+  },
+  {
+    "label": "v128.any_true",
+    "kind": 24
+  },
+  {
     "label": "v128.load8_lane",
+    "kind": 24
+  },
+  {
+    "label": "v128.load16_lane",
+    "kind": 24
+  },
+  {
+    "label": "v128.load32_lane",
+    "kind": 24
+  },
+  {
+    "label": "v128.load64_lane",
+    "kind": 24
+  },
+  {
+    "label": "v128.store8_lane",
+    "kind": 24
+  },
+  {
+    "label": "v128.store16_lane",
+    "kind": 24
+  },
+  {
+    "label": "v128.store32_lane",
+    "kind": 24
+  },
+  {
+    "label": "v128.load32_zero",
+    "kind": 24
+  },
+  {
+    "label": "v128.load64_zero",
     "kind": 24
   },
   {

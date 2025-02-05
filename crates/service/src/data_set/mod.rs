@@ -5,7 +5,7 @@ mod instr_meta;
 pub(crate) static VALUE_TYPES: [&str; 7] =
     ["i32", "i64", "f32", "f64", "v128", "funcref", "externref"];
 
-pub(crate) static INSTR_NAMES: [&str; 281] = [
+pub(crate) static INSTR_NAMES: [&str; 296] = [
     "unreachable",
     "nop",
     "block",
@@ -286,7 +286,22 @@ pub(crate) static INSTR_NAMES: [&str; 281] = [
     "i32x4.trunc_sat_f32x4_u",
     "f32x4.convert_i32x4_s",
     "f32x4.convert_i32x4_u",
+    "v128.not",
+    "v128.and",
+    "v128.andnot",
+    "v128.or",
+    "v128.xor",
+    "v128.bitselect",
+    "v128.any_true",
     "v128.load8_lane",
+    "v128.load16_lane",
+    "v128.load32_lane",
+    "v128.load64_lane",
+    "v128.store8_lane",
+    "v128.store16_lane",
+    "v128.store32_lane",
+    "v128.load32_zero",
+    "v128.load64_zero",
 ];
 
 pub(crate) static MODULE_FIELDS: [&str; 10] = [
