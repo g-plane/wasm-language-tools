@@ -117,8 +117,12 @@ impl Checker<'_> {
                     .instrs()
                     .try_for_each(|instr| self.check_instr(&instr, parent_block, unreachable));
                 if let Some(instr_name) = plain.instr_name() {
-                    if *unreachable && !self.last_reported.contains_range(instr_name.text_range()) {
-                        self.report_token(&instr_name);
+                    if *unreachable {
+                        if self.jumps.contains(parent_block) {
+                            *unreachable = false;
+                        } else if !self.last_reported.contains_range(instr_name.text_range()) {
+                            self.report_token(&instr_name);
+                        }
                     }
                     let instr_name = instr_name.text();
                     if matches!(instr_name, "br" | "br_if" | "br_table") {
