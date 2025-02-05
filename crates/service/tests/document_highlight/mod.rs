@@ -89,6 +89,22 @@ fn ref_type() {
 }
 
 #[test]
+fn non_idx_int() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func (param i32)
+    (local.get 0)
+    (f32.const 0)
+    (f64.const 0)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.document_highlight(create_params(uri, Position::new(5, 16)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn float() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
