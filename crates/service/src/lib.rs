@@ -119,6 +119,7 @@ impl LanguageService {
                         code_action_kinds: Some(vec![
                             CodeActionKind::QUICKFIX,
                             CodeActionKind::REFACTOR_REWRITE,
+                            CodeActionKind::REFACTOR_INLINE,
                         ]),
                         resolve_provider: Some(false),
                         ..Default::default()

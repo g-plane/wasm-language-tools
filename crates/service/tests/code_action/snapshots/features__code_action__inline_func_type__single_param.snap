@@ -1,0 +1,29 @@
+---
+source: crates/service/tests/code_action/inline_func_type.rs
+expression: response
+---
+[
+  {
+    "title": "Inline func type `0`",
+    "kind": "refactor.inline",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 16
+              },
+              "end": {
+                "line": 3,
+                "character": 16
+              }
+            },
+            "newText": " (param $a i32)"
+          }
+        ]
+      }
+    }
+  }
+]

@@ -1,4 +1,7 @@
-use crate::{helpers, refactorings::*, syntax_tree::SyntaxTreeCtx, uri::UrisCtx, LanguageService};
+use crate::{
+    binder::SymbolTablesCtx, helpers, refactorings::*, syntax_tree::SyntaxTreeCtx, uri::UrisCtx,
+    LanguageService,
+};
 use lsp_types::{CodeActionKind, CodeActionOrCommand, CodeActionParams};
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode};
 
@@ -7,9 +10,12 @@ impl LanguageService {
     pub fn code_action(&self, params: CodeActionParams) -> Option<Vec<CodeActionOrCommand>> {
         let uri = self.uri(params.text_document.uri.clone());
         let line_index = self.line_index(uri);
+        let root = SyntaxNode::new_root(self.root(uri));
+        let symbol_table = self.symbol_table(uri);
 
         let mut quickfix = params.context.only.is_none();
         let mut rewrite = params.context.only.is_none();
+        let mut inline = params.context.only.is_none();
         params
             .context
             .only
@@ -21,12 +27,14 @@ impl LanguageService {
                     quickfix = true;
                 } else if kind == CodeActionKind::REFACTOR_REWRITE {
                     rewrite = true;
+                } else if kind == CodeActionKind::REFACTOR_INLINE {
+                    inline = true;
                 }
             });
 
         let mut actions = vec![];
         let range = helpers::lsp_range_to_rowan_range(&line_index, params.range)?;
-        let mut node = SyntaxNode::new_root(self.root(uri));
+        let mut node = root.clone();
         while let Some(SyntaxElement::Node(it)) = node.child_or_token_at_range(range) {
             match it.kind() {
                 SyntaxKind::MODULE_FIELD_FUNC => {
@@ -104,6 +112,13 @@ impl LanguageService {
                             SyntaxKind::RESULT,
                             range,
                         ) {
+                            actions.push(CodeActionOrCommand::CodeAction(action));
+                        }
+                    }
+                    if inline {
+                        if let Some(action) =
+                            inline_func_type::act(self, uri, &line_index, &root, &symbol_table, &it)
+                        {
                             actions.push(CodeActionOrCommand::CodeAction(action));
                         }
                     }

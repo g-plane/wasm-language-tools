@@ -5,6 +5,7 @@ mod fix_invalid_mem_arg;
 mod func_header_join;
 mod func_header_split;
 mod if_br_to_br_if;
+mod inline_func_type;
 mod remove_mut;
 
 fn create_params(uri: Uri, range: Range) -> CodeActionParams {
