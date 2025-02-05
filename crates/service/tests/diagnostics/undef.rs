@@ -112,7 +112,17 @@ fn memory_defined() {
 #[test]
 fn memory_undefined() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "(module (export \"\" (memory 0)))";
+    let source = r#"
+(module
+  (func
+    i32.const 0
+    i32.load
+    drop
+    i32.const 0
+    i32.load 0
+    drop)
+  (export "" (memory 0)))
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());

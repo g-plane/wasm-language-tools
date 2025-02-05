@@ -215,6 +215,40 @@ fn memory_used() {
 }
 
 #[test]
+fn memory_implicit() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+  (func $_
+    i32.const 0
+    f32.load
+    drop)
+  (memory 1))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
+
+#[test]
+fn memory_explicit() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+  (func $_
+    i32.const 0
+    f32.load 0
+    drop)
+  (memory 1))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
+
+#[test]
 fn table_unused() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = r#"

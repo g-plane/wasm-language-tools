@@ -8,12 +8,44 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 0,
-          "character": 27
+          "line": 4,
+          "character": 4
         },
         "end": {
-          "line": 0,
-          "character": 28
+          "line": 4,
+          "character": 12
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find memory `0` in this scope"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 13
+        },
+        "end": {
+          "line": 7,
+          "character": 14
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find memory `0` in this scope"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 21
+        },
+        "end": {
+          "line": 9,
+          "character": 22
         }
       },
       "severity": 1,

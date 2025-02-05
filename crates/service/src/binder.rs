@@ -79,6 +79,32 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                     })
             })
     }
+    fn create_first_optional_ref_symbol(
+        db: &dyn SymbolTablesCtx,
+        instr: PlainInstr,
+        kind: SymbolKind,
+    ) -> Option<Symbol> {
+        let node = instr.syntax();
+        node.ancestors()
+            .find(|node| node.kind() == SyntaxKind::MODULE)
+            .map(|region| {
+                let region = SymbolKey::new(&region);
+                instr
+                    .immediates()
+                    .next()
+                    .and_then(|immediate| create_ref_symbol(db, immediate.syntax(), region, kind))
+                    .unwrap_or_else(|| Symbol {
+                        green: node.green().into(),
+                        key: SymbolKey::new(&node),
+                        region,
+                        kind,
+                        idx: Idx {
+                            num: Some(0),
+                            name: None,
+                        },
+                    })
+            })
+    }
     fn create_import_desc_symbol(
         db: &dyn SymbolTablesCtx,
         node: &SyntaxNode,
@@ -316,36 +342,11 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                             });
                     }
                     Some("call_indirect") => {
-                        let Some(region) = node
-                            .ancestors()
-                            .find(|node| node.kind() == SyntaxKind::MODULE)
-                            .map(|node| SymbolKey::new(&node))
-                        else {
-                            continue;
-                        };
-                        symbols.push(
-                            instr
-                                .immediates()
-                                .next()
-                                .and_then(|immediate| {
-                                    create_ref_symbol(
-                                        db,
-                                        immediate.syntax(),
-                                        region,
-                                        SymbolKind::TableRef,
-                                    )
-                                })
-                                .unwrap_or_else(|| Symbol {
-                                    green: node.green().into(),
-                                    key: SymbolKey::new(&node),
-                                    region,
-                                    kind: SymbolKind::TableRef,
-                                    idx: Idx {
-                                        num: Some(0),
-                                        name: None,
-                                    },
-                                }),
-                        );
+                        if let Some(symbol) =
+                            create_first_optional_ref_symbol(db, instr, SymbolKind::TableRef)
+                        {
+                            symbols.push(symbol);
+                        }
                     }
                     Some(
                         "table.get" | "table.set" | "table.size" | "table.grow" | "table.fill"
@@ -374,6 +375,27 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                         if let Some(symbol) = children.next().and_then(|node| {
                             create_ref_symbol(db, &node, region, SymbolKind::TableRef)
                         }) {
+                            symbols.push(symbol);
+                        }
+                    }
+                    Some(
+                        "i32.load" | "i64.load" | "f32.load" | "f64.load" | "i32.load8_s"
+                        | "i32.load8_u" | "i32.load16_s" | "i32.load16_u" | "i64.load8_s"
+                        | "i64.load8_u" | "i64.load16_s" | "i64.load16_u" | "i64.load32_s"
+                        | "i64.load32_u" | "i32.store" | "i64.store" | "f32.store" | "f64.store"
+                        | "i32.store8" | "i32.store16" | "i64.store8" | "i64.store16"
+                        | "i64.store32" | "v128.load" | "v128.load8x8_s" | "v128.load8x8_u"
+                        | "v128.load16x4_s" | "v128.load16x4_u" | "v128.load32x2_s"
+                        | "v128.load32x2_u" | "v128.load8_splat" | "v128.load16_splat"
+                        | "v128.load32_splat" | "v128.load64_splat" | "v128.load32_zero"
+                        | "v128.load64_zero" | "v128.store" | "v128.load8_lane"
+                        | "v128.load16_lane" | "v128.load32_lane" | "v128.load64_lane"
+                        | "v128.store8_lane" | "v128.store16_lane" | "v128.store32_lane"
+                        | "v128.store64_lane",
+                    ) => {
+                        if let Some(symbol) =
+                            create_first_optional_ref_symbol(db, instr, SymbolKind::MemoryRef)
+                        {
                             symbols.push(symbol);
                         }
                     }
@@ -686,7 +708,7 @@ impl Hash for Symbol {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum SymbolKind {
     Module,
     Func,

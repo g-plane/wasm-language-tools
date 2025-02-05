@@ -511,14 +511,16 @@ fn global_ref_ident_idx() {
 #[test]
 fn memory_def_int_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "
+    let source = r#"
 (module
     (memory (data))
-    (export \"\" (memory 0))
+    (export "" (memory 0))
     (data (memory 0))
+    (func
+        (i32.store))
 )
 (module (memory))
-";
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let include_decl =
@@ -531,14 +533,16 @@ fn memory_def_int_idx() {
 #[test]
 fn memory_def_ident_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "
+    let source = r#"
 (module
     (memory $memory (data))
-    (export \"\" (memory $memory))
+    (export "" (memory $memory))
     (data (memory $memory))
+    (func
+        (f32.store $memory))
 )
 (module (memory $memory))
-";
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let include_decl =
@@ -551,14 +555,16 @@ fn memory_def_ident_idx() {
 #[test]
 fn memory_ref_int_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "
+    let source = r#"
 (module
     (memory (data))
-    (export \"\" (memory 0))
+    (export "" (memory 0))
     (data (memory 0))
+    (func
+        (i64.store))
 )
 (module (memory))
-";
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let include_decl =
@@ -571,14 +577,16 @@ fn memory_ref_int_idx() {
 #[test]
 fn memory_ref_ident_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
-    let source = "
+    let source = r#"
 (module
     (memory $memory (data))
-    (export \"\" (memory $memory))
+    (export "" (memory $memory))
     (data (memory $memory))
+    (func
+        (f64.store $memory))
 )
 (module (memory $memory))
-";
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let include_decl =
