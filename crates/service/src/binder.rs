@@ -56,7 +56,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                 key: SymbolKey::new(node),
                 green: node.green().into(),
                 region,
-                kind: kind.clone(),
+                kind,
                 idx: Idx {
                     num: None,
                     name: Some(db.ident(ident.text().into())),
@@ -95,7 +95,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                     .and_then(|immediate| create_ref_symbol(db, immediate.syntax(), region, kind))
                     .unwrap_or_else(|| Symbol {
                         green: node.green().into(),
-                        key: SymbolKey::new(&node),
+                        key: SymbolKey::new(node),
                         region,
                         kind,
                         idx: Idx {
@@ -255,9 +255,10 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                 }
             }
             SyntaxKind::PLAIN_INSTR => {
-                let Some(instr) = PlainInstr::cast(node.clone()) else {
+                let Some(instr) = PlainInstr::cast(node) else {
                     continue;
                 };
+                let node = instr.syntax();
                 match instr.instr_name().as_ref().map(|token| token.text()) {
                     Some("call" | "ref.func" | "return_call") => {
                         let Some(region) = node

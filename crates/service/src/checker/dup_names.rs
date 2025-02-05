@@ -45,7 +45,7 @@ pub fn check(
                         // re-map this symbol kind to make comparison easier
                         SymbolKind::Param
                     } else {
-                        symbol.kind.clone()
+                        symbol.kind
                     };
                     map.entry((name, &symbol.region, kind))
                         .or_insert_with(|| Vec::with_capacity(1))

@@ -35,7 +35,7 @@ pub fn write_sync(message: Message) -> Result<()> {
     let json = serde_json::to_string(&message)?;
     let mut stdout = std::io::stdout().lock();
     write!(stdout, "Content-Length: {}\r\n\r\n", json.len())?;
-    stdout.write_all(&json.as_bytes())?;
+    stdout.write_all(json.as_bytes())?;
     stdout.flush()?;
     event!(Level::DEBUG, "stdout: {json}");
     Ok(())
