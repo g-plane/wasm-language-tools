@@ -69,7 +69,9 @@ jobs:
           files: |
             wat_server-${{ matrix.name }}.zip
       - name: Release VS Code Extension
+        if: matrix.host == 'windows-latest' # Windows is slowest
         run: |
+          choco install curl
           curl -L \
             -X POST \
             -H "Accept: application/vnd.github+json" \
