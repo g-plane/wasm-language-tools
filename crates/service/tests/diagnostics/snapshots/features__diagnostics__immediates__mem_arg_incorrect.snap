@@ -1,0 +1,105 @@
+---
+source: crates/service/tests/diagnostics/immediates.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 13
+        },
+        "end": {
+          "line": 4,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 13
+        },
+        "end": {
+          "line": 7,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 17
+        },
+        "end": {
+          "line": 7,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 13
+        },
+        "end": {
+          "line": 10,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 17
+        },
+        "end": {
+          "line": 10,
+          "character": 25
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 15
+        },
+        "end": {
+          "line": 13,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    }
+  ]
+}

@@ -160,7 +160,15 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         | "v128.load16x4_s" | "v128.load16x4_u" | "v128.load32x2_s" | "v128.load32x2_u"
         | "v128.load8_splat" | "v128.load16_splat" | "v128.load32_splat" | "v128.load64_splat"
         | "v128.load32_zero" | "v128.load64_zero" | "v128.store" => {
-            check_immediate::<true>(
+            check_immediate::<false>(
+                diags,
+                &mut immediates,
+                INDEX,
+                "identifier or unsigned integer",
+                &instr_name,
+                line_index,
+            );
+            check_immediate::<false>(
                 diags,
                 &mut immediates,
                 SyntaxKind::MEM_ARG,
@@ -195,7 +203,15 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         }
         "v128.load8_lane" | "v128.load16_lane" | "v128.load32_lane" | "v128.load64_lane"
         | "v128.store8_lane" | "v128.store16_lane" | "v128.store32_lane" | "v128.store64_lane" => {
-            check_immediate::<true>(
+            check_immediate::<false>(
+                diags,
+                &mut immediates,
+                INDEX,
+                "identifier or unsigned integer",
+                &instr_name,
+                line_index,
+            );
+            check_immediate::<false>(
                 diags,
                 &mut immediates,
                 SyntaxKind::MEM_ARG,
@@ -203,11 +219,11 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 &instr_name,
                 line_index,
             );
-            check_immediate::<true>(
+            check_immediate::<false>(
                 diags,
                 &mut immediates,
-                INDEX,
-                "identifier or unsigned integer",
+                SyntaxKind::INT,
+                "unsigned integer",
                 &instr_name,
                 line_index,
             );

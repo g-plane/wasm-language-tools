@@ -89,16 +89,24 @@ fn indexes() {
 }
 
 #[test]
-fn mem_arg() {
+fn mem_arg_incorrect() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
 (module
-    (func
-        (i32.load 1 (i32.const 0)) (drop)
-        (f64.store 1 (i32.const 0) (f64.const 0.0))
-        (drop (i32.load (i32.const 0)))
-    )
-)
+  (func
+    i32.const 0
+    i32.load 0.0
+    drop
+    i32.const 0
+    f32.load 0.0 0
+    drop
+    i32.const 0
+    i64.load 0.0 offset=0
+    drop
+    i32.const 0
+    f64.load 0 0.0
+    drop)
+  (memory 1))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -108,21 +116,109 @@ fn mem_arg() {
 }
 
 #[test]
-fn mem_arg_and_index() {
+fn mem_arg_correct() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
 (module
-    (func
-        (v128.load8_lane 1 \"\" (i32.const 0) (v128.const 0))
-        (drop)
-    )
-)
+  (func
+    i32.const 0
+    i32.load 0
+    drop
+    i32.const 0
+    f32.load 0 offset=0
+    drop
+    i32.const 0
+    i64.load 0 align=0
+    drop
+    i32.const 0
+    f64.load
+    drop
+    i32.const 0
+    v128.load offset=0
+    drop
+    i32.const 0
+    i32.const 0
+    i32.store align=0)
+  (memory 1))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
+
+#[test]
+fn v128_load_store_incorrect() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    i32.const 0
+    v128.const 0
+    v128.load8_lane 0.0
+    drop
+    i32.const 0
+    v128.const 0
+    v128.load16_lane 0.0 0
+    drop
+    i32.const 0
+    v128.const 0
+    v128.load32_lane 0.0 offset=0
+    drop
+    i32.const 0
+    v128.const 0
+    v128.store8_lane 0 0.0
+    i32.const 0
+    v128.const 0
+    v128.store16_lane 0 align=0 0.0)
+  (memory 1))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
+}
+
+#[test]
+fn v128_load_store_correct() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func
+    i32.const 0
+    v128.const 0
+    v128.load8_lane 0
+    drop
+    i32.const 0
+    v128.const 0
+    v128.load16_lane 0 offset=0
+    drop
+    i32.const 0
+    v128.const 0
+    v128.load32_lane 0 align=0
+    drop
+    i32.const 0
+    v128.const 0
+    v128.load64_lane 0 align=0 1
+    drop
+    i32.const 0
+    v128.const 0
+    v128.store8_lane
+    i32.const 0
+    v128.const 0
+    v128.store16_lane offset=0
+    i32.const 0
+    v128.const 0
+    v128.store32_lane align=0 1)
+  (memory 1))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
 }
 
 #[test]

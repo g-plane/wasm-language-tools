@@ -1,0 +1,121 @@
+---
+source: crates/service/tests/diagnostics/immediates.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 20
+        },
+        "end": {
+          "line": 5,
+          "character": 23
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 21
+        },
+        "end": {
+          "line": 9,
+          "character": 24
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 25
+        },
+        "end": {
+          "line": 9,
+          "character": 26
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 21
+        },
+        "end": {
+          "line": 13,
+          "character": 24
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 25
+        },
+        "end": {
+          "line": 13,
+          "character": 33
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 17,
+          "character": 23
+        },
+        "end": {
+          "line": 17,
+          "character": 26
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 20,
+          "character": 32
+        },
+        "end": {
+          "line": 20,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    }
+  ]
+}
