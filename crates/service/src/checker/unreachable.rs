@@ -141,9 +141,9 @@ impl Checker<'_> {
                                     .blocks
                                     .iter()
                                     .find(|block| block.ref_key == key)
-                                    .map(|block| block.def_key.to_node(self.root))
                             })
                             .for_each(|block| {
+                                let block = block.def_key.to_node(self.root);
                                 if block.kind() == SyntaxKind::BLOCK_LOOP {
                                     self.start_jumps.insert(block);
                                 } else {
@@ -166,7 +166,7 @@ impl Checker<'_> {
                     *unreachable = self.start_jumps.contains(block_loop)
                         && self
                             .end_jumps
-                            .iter()
+                            .iter() /* internal jumps can break out of the loop */
                             .all(|jump| !loop_range.contains_range(jump.text_range()));
                 }
             }
