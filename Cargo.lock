@@ -1121,7 +1121,7 @@ checksum = "65fc09f10666a9f147042251e0dda9c18f166ff7de300607007e96bdebc1068d"
 
 [[package]]
 name = "wat_formatter"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "insta",
  "line-index",
@@ -1136,7 +1136,7 @@ dependencies = [
 
 [[package]]
 name = "wat_parser"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "codespan-reporting",
  "insta",
@@ -1148,7 +1148,7 @@ dependencies = [
 
 [[package]]
 name = "wat_server"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "anyhow",
  "async-task",
@@ -1166,7 +1166,7 @@ dependencies = [
 
 [[package]]
 name = "wat_service"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "criterion",
  "fuzzy-matcher",
@@ -1188,7 +1188,7 @@ dependencies = [
 
 [[package]]
 name = "wat_syntax"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "rowan",
 ]
