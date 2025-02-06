@@ -13,7 +13,7 @@ exclude = ["/tests"]
 [dependencies]
 rowan.workspace = true
 wat_syntax = { path = "../syntax", version = "0.3" }
-winnow = { version = "0.6", features = ["unstable-recover"] }
+winnow = { version = "0.7", features = ["unstable-recover"] }
 
 [dev-dependencies]
 codespan-reporting = "0.11"

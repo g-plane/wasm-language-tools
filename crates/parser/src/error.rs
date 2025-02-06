@@ -30,7 +30,7 @@ impl FromRecoverableError<Input<'_>, SyntaxError> for SyntaxError {
         input: &Input,
         mut e: SyntaxError,
     ) -> Self {
-        e.end = input.location();
+        e.end = input.current_token_start();
         e
     }
 }
@@ -42,24 +42,21 @@ impl AddContext<Input<'_>, Message> for SyntaxError {
         _token_start: &<Input as Stream>::Checkpoint,
         message: Message,
     ) -> Self {
-        self.start = input.location();
+        self.start = input.current_token_start();
         self.message = message;
         self
     }
 }
 
 impl ParserError<Input<'_>> for SyntaxError {
-    fn from_error_kind(_input: &Input, _kind: winnow::error::ErrorKind) -> Self {
+    type Inner = Self;
+
+    fn from_input(_input: &Input<'_>) -> Self {
         SyntaxError::new()
     }
 
-    fn append(
-        self,
-        _input: &Input,
-        _token_start: &<Input as Stream>::Checkpoint,
-        _kind: winnow::error::ErrorKind,
-    ) -> Self {
-        self
+    fn into_inner(self) -> Result<Self::Inner, Self> {
+        Ok(self)
     }
 }
 

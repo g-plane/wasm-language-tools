@@ -4,10 +4,10 @@ use wat_syntax::SyntaxKind::*;
 use winnow::{
     ascii::{hex_digit0, line_ending, multispace1, take_escaped, till_line_ending},
     combinator::{alt, dispatch, empty, eof, fail, not, opt, peek, preceded, repeat, repeat_till},
-    error::{ErrMode, FromRecoverableError},
+    error::FromRecoverableError,
     stream::{AsChar, Recover, Stream},
     token::{any, none_of, one_of, take_till, take_until, take_while},
-    PResult, Parser,
+    Parser,
 };
 
 pub(super) fn l_paren(input: &mut Input) -> GreenResult {
@@ -16,7 +16,7 @@ pub(super) fn l_paren(input: &mut Input) -> GreenResult {
         .parse_next(input)
 }
 
-pub(super) fn r_paren(input: &mut Input) -> PResult<Option<Vec<GreenElement>>, SyntaxError> {
+pub(super) fn r_paren(input: &mut Input) -> Result<Option<Vec<GreenElement>>, SyntaxError> {
     let mut parser = ')'.context(Message::Char(')'));
     let mut error_token_parser =
         error_token(false).context(Message::Description("unexpected token"));
@@ -31,7 +31,6 @@ pub(super) fn r_paren(input: &mut Input) -> PResult<Option<Vec<GreenElement>>, S
                 tokens.push(tok(R_PAREN, ")"));
                 return Ok(Some(tokens));
             }
-            Err(ErrMode::Incomplete(e)) => return Err(ErrMode::Incomplete(e)),
             Err(err) => err,
         };
         input.reset(&token_start);
@@ -56,13 +55,12 @@ pub(super) fn r_paren(input: &mut Input) -> PResult<Option<Vec<GreenElement>>, S
         }
 
         input.reset(&start);
-        err = err
-            .map(|err| SyntaxError::from_recoverable_error(&token_start, &err_start, input, err));
+        err = SyntaxError::from_recoverable_error(&token_start, &err_start, input, err);
         return Err(err);
     }
 }
 
-pub(super) fn word<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
+pub(super) fn word<'s>(input: &mut Input<'s>) -> Result<&'s str, SyntaxError> {
     (
         one_of(|c: char| c.is_ascii_lowercase()),
         take_while(0.., is_id_char),
@@ -71,7 +69,7 @@ pub(super) fn word<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
         .parse_next(input)
 }
 
-pub(super) fn trivias(input: &mut Input) -> PResult<Vec<GreenElement>, SyntaxError> {
+pub(super) fn trivias(input: &mut Input) -> Result<Vec<GreenElement>, SyntaxError> {
     repeat(0.., alt((ws, line_comment, block_comment))).parse_next(input)
 }
 
@@ -105,7 +103,7 @@ pub(super) fn block_comment(input: &mut Input) -> GreenResult {
         .parse_next(input)
         .map(|text| tok(BLOCK_COMMENT, text))
 }
-fn block_comment_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
+fn block_comment_impl<'s>(input: &mut Input<'s>) -> Result<&'s str, SyntaxError> {
     (
         "(;",
         repeat_till::<_, _, (), _, _, _, _>(
@@ -135,7 +133,7 @@ pub(super) fn keyword<'s>(
 pub(super) fn ident(input: &mut Input) -> GreenResult {
     ident_impl.parse_next(input).map(|text| tok(IDENT, text))
 }
-fn ident_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
+fn ident_impl<'s>(input: &mut Input<'s>) -> Result<&'s str, SyntaxError> {
     ('$', take_while(1.., is_id_char))
         .take()
         .context(Message::Name("identifier"))
@@ -172,7 +170,7 @@ pub(super) fn string(input: &mut Input) -> GreenResult {
         .parse_next(input)
         .map(|text| tok(STRING, text))
 }
-fn string_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
+fn string_impl<'s>(input: &mut Input<'s>) -> Result<&'s str, SyntaxError> {
     (
         '"',
         take_escaped(
@@ -192,7 +190,7 @@ fn string_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
 pub(super) fn int(input: &mut Input) -> GreenResult {
     int_impl.parse_next(input).map(|text| tok(INT, text))
 }
-fn int_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
+fn int_impl<'s>(input: &mut Input<'s>) -> Result<&'s str, SyntaxError> {
     (
         opt(one_of(['+', '-'])),
         unsigned_int_impl,
@@ -207,7 +205,7 @@ pub(super) fn unsigned_int(input: &mut Input) -> GreenResult {
         .parse_next(input)
         .map(|text| tok(UNSIGNED_INT, text))
 }
-pub(super) fn unsigned_int_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
+pub(super) fn unsigned_int_impl<'s>(input: &mut Input<'s>) -> Result<&'s str, SyntaxError> {
     dispatch! {opt("0x");
         Some(..) => unsigned_hex,
         None => unsigned_dec,
@@ -216,7 +214,7 @@ pub(super) fn unsigned_int_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, S
     .verify(|text: &str| !text.ends_with('_'))
     .parse_next(input)
 }
-fn unsigned_hex<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
+fn unsigned_hex<'s>(input: &mut Input<'s>) -> Result<&'s str, SyntaxError> {
     (
         one_of(AsChar::is_hex_digit),
         take_while(0.., |c: char| c.is_ascii_hexdigit() || c == '_'),
@@ -224,7 +222,7 @@ fn unsigned_hex<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
         .take()
         .parse_next(input)
 }
-fn unsigned_dec<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
+fn unsigned_dec<'s>(input: &mut Input<'s>) -> Result<&'s str, SyntaxError> {
     (
         one_of(AsChar::is_dec_digit),
         take_while(0.., |c: char| c.is_ascii_digit() || c == '_'),
@@ -236,7 +234,7 @@ fn unsigned_dec<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
 pub(super) fn float(input: &mut Input) -> GreenResult {
     float_impl.parse_next(input).map(|text| tok(FLOAT, text))
 }
-fn float_impl<'s>(input: &mut Input<'s>) -> PResult<&'s str, SyntaxError> {
+fn float_impl<'s>(input: &mut Input<'s>) -> Result<&'s str, SyntaxError> {
     (
         opt(one_of(['+', '-'])),
         alt((
@@ -305,7 +303,7 @@ pub(super) fn error_term<'s, const N: usize>(
         error_term_inner,
     )
 }
-fn error_term_inner(input: &mut Input) -> PResult<Vec<GreenElement>, SyntaxError> {
+fn error_term_inner(input: &mut Input) -> Result<Vec<GreenElement>, SyntaxError> {
     (
         '('.map(|_| tok(ERROR, "(")),
         repeat(

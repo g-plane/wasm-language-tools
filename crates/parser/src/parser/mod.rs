@@ -8,9 +8,9 @@ use rowan::{GreenNode, GreenToken, NodeOrToken};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 use winnow::{
     combinator::{alt, repeat},
-    error::{ErrMode, FromRecoverableError},
+    error::FromRecoverableError,
     stream::{Recover, Recoverable, Stream},
-    Located, PResult, Parser as WinnowParser, RecoverableParser,
+    LocatingSlice, Parser, RecoverableParser,
 };
 
 mod instr;
@@ -26,7 +26,7 @@ pub fn parse(source: &str) -> (SyntaxNode, Vec<SyntaxError>) {
 
 /// Parse the code into a rowan green node.
 pub fn parse_to_green(source: &str) -> (GreenNode, Vec<SyntaxError>) {
-    let (_, tree, errors) = root.recoverable_parse(*Input::new(Located::new(source)));
+    let (_, tree, errors) = root.recoverable_parse(*Input::new(LocatingSlice::new(source)));
     (
         tree.expect("parser should always succeed even if there are syntax errors"),
         errors,
@@ -34,8 +34,8 @@ pub fn parse_to_green(source: &str) -> (GreenNode, Vec<SyntaxError>) {
 }
 
 type GreenElement = NodeOrToken<GreenNode, GreenToken>;
-type GreenResult = PResult<GreenElement, SyntaxError>;
-pub(crate) type Input<'s> = Recoverable<Located<&'s str>, SyntaxError>;
+type GreenResult = Result<GreenElement, SyntaxError>;
+pub(crate) type Input<'s> = Recoverable<LocatingSlice<&'s str>, SyntaxError>;
 
 fn tok(kind: SyntaxKind, text: &str) -> GreenElement {
     NodeOrToken::Token(GreenToken::new(kind.into(), text))
@@ -49,7 +49,7 @@ where
     NodeOrToken::Node(GreenNode::new(kind.into(), children))
 }
 
-fn root(input: &mut Input) -> PResult<GreenNode, SyntaxError> {
+fn root(input: &mut Input) -> Result<GreenNode, SyntaxError> {
     (
         repeat::<_, _, Vec<_>, _, _>(0.., retry_once(module, [])),
         repeat(
@@ -73,9 +73,9 @@ fn root(input: &mut Input) -> PResult<GreenNode, SyntaxError> {
 fn retry<'s, P, const N: usize>(
     mut parser: P,
     allowed_names: [&'static str; N],
-) -> impl WinnowParser<Input<'s>, Vec<GreenElement>, SyntaxError>
+) -> impl Parser<Input<'s>, Vec<GreenElement>, SyntaxError>
 where
-    P: WinnowParser<Input<'s>, GreenElement, SyntaxError>,
+    P: Parser<Input<'s>, GreenElement, SyntaxError>,
 {
     move |input: &mut Input<'s>| {
         let mut error_token_parser =
@@ -95,7 +95,6 @@ where
                     tokens.push(o);
                     return Ok(tokens);
                 }
-                Err(ErrMode::Incomplete(e)) => return Err(ErrMode::Incomplete(e)),
                 Err(err) => err,
             };
             input.reset(&token_start);
@@ -128,9 +127,7 @@ where
             }
 
             input.reset(&trivia_start);
-            err = err.map(|err| {
-                SyntaxError::from_recoverable_error(&token_start, &err_start, input, err)
-            });
+            err = SyntaxError::from_recoverable_error(&token_start, &err_start, input, err);
             return Err(err);
         }
     }
@@ -141,9 +138,9 @@ where
 fn retry_once<'s, P, const N: usize>(
     mut parser: P,
     allowed_names: [&'static str; N],
-) -> impl WinnowParser<Input<'s>, Vec<GreenElement>, SyntaxError>
+) -> impl Parser<Input<'s>, Vec<GreenElement>, SyntaxError>
 where
-    P: WinnowParser<Input<'s>, GreenElement, SyntaxError>,
+    P: Parser<Input<'s>, GreenElement, SyntaxError>,
 {
     move |input: &mut Input<'s>| {
         let mut error_token_parser =
@@ -163,7 +160,6 @@ where
                 tokens.push(o);
                 return Ok(tokens);
             }
-            Err(ErrMode::Incomplete(e)) => return Err(ErrMode::Incomplete(e)),
             Err(err) => err,
         };
         input.reset(&token_start);
@@ -194,8 +190,7 @@ where
         }
 
         input.reset(&trivia_start);
-        err = err
-            .map(|err| SyntaxError::from_recoverable_error(&token_start, &err_start, input, err));
+        err = SyntaxError::from_recoverable_error(&token_start, &err_start, input, err);
         Err(err)
     }
 }
@@ -203,15 +198,14 @@ where
 /// This is similar to [`opt`](winnow::combinator::opt),
 /// but it will record recoverable error if the parser fails.
 /// This can be used to avoid switch to another branch of [`alt`](winnow::combinator::alt).
-fn must<'s, P, O>(mut parser: P) -> impl WinnowParser<Input<'s>, Option<O>, SyntaxError>
+fn must<'s, P, O>(mut parser: P) -> impl Parser<Input<'s>, Option<O>, SyntaxError>
 where
-    P: WinnowParser<Input<'s>, O, SyntaxError>,
+    P: Parser<Input<'s>, O, SyntaxError>,
 {
     move |input: &mut Input<'s>| {
         let start = input.checkpoint();
         let mut err = match parser.parse_next(input) {
             Ok(o) => return Ok(Some(o)),
-            Err(ErrMode::Incomplete(e)) => return Err(ErrMode::Incomplete(e)),
             Err(err) => err,
         };
         let err_start = input.checkpoint();
@@ -222,7 +216,7 @@ where
             return Ok(None);
         }
         input.reset(&start);
-        err = err.map(|err| SyntaxError::from_recoverable_error(&start, &err_start, input, err));
+        err = SyntaxError::from_recoverable_error(&start, &err_start, input, err);
         Err(err)
     }
 }
