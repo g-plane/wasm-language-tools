@@ -142,36 +142,11 @@ cargo install wat_server
 ### Editor Support
 
 - Visual Studio Code: Install the [WebAssembly Language Tools](https://marketplace.visualstudio.com/items?itemName=gplane.wasm-language-tools) extension.
-- Neovim: You need to configure manually at the moment:
+- Neovim: Built-in support in [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#wasm_language_tools):
   ```lua
-  vim.api.nvim_create_autocmd("FileType", {
-    pattern = "wat",
-    callback = function(args)
-      vim.lsp.start({
-        name = "wasm-language-tools",
-        cmd = { "wat_server" }, -- or the absolute path to the binary
-        settings = { -- this section is optional
-          wasmLanguageTools = { -- must be under the key "wasmLanguageTools"
-            format = {},
-            lint = { unused = "warn" },
-          },
-        },
-      })
-    end,
-  })
-  -- Optional: Format on save
-  vim.api.nvim_create_autocmd("LspAttach", {
-    callback = function(args)
-      local client = vim.lsp.get_client_by_id(args.data.client_id)
-      if client.name == "wasm-language-tools" then
-        vim.api.nvim_create_autocmd("BufWritePre", {
-          buffer = args.buf,
-          callback = function()
-            vim.lsp.buf.format({ bufnr = args.buf, id = client.id })
-          end,
-        })
-      end
-    end,
+  require("lspconfig").wasm_language_tools.setup({
+    -- `settings` section is optional
+    settings = { format = {}, lint = {} },
   })
   ```
 - Zed: Install the [WebAssembly Text Format](https://zed.dev/extensions?query=WebAssembly+Text+Format) extension.
