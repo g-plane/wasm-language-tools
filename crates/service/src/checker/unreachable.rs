@@ -57,6 +57,9 @@ impl Checker<'_> {
             .children()
             .filter_map(Instr::cast)
             .try_for_each(|instr| self.check_instr(&instr, &mut unreachable));
+        if self.end_jumps.contains(node) {
+            unreachable = false;
+        }
         // When the last instr produces never, the `end` keyword should be marked unreachable.
         // But for then-block and else-block, they don't have `end` keyword.
         // (That `end` keyword comes from their children.)

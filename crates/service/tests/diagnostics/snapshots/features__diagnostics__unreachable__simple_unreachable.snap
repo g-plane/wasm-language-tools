@@ -103,25 +103,6 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 25,
-          "character": 4
-        },
-        "end": {
-          "line": 25,
-          "character": 7
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
           "line": 33,
           "character": 4
         },
@@ -299,25 +280,6 @@ expression: response
         "end": {
           "line": 63,
           "character": 9
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 64,
-          "character": 4
-        },
-        "end": {
-          "line": 64,
-          "character": 7
         }
       },
       "severity": 2,

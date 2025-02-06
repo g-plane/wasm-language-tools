@@ -312,7 +312,7 @@ fn br_if_c() {
     service.commit(uri.clone(), source.into());
     disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert_json_snapshot!(response);
+    assert!(pick_diagnostics(response).is_empty());
 }
 
 #[test]
@@ -433,6 +433,19 @@ fn finite_loop() {
     loop
       block
         br 0
+      end
+    end
+    nop)
+  (func (param i32)
+    loop
+      nop
+      block
+        local.get 0
+        if
+          br 0
+        else
+          br 1
+        end
       end
     end
     nop)
