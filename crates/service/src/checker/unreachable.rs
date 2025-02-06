@@ -33,7 +33,8 @@ pub fn check(
             LintLevel::Warn => DiagnosticSeverity::WARNING,
             LintLevel::Deny => DiagnosticSeverity::ERROR,
         },
-        jumps: FxHashSet::default(),
+        start_jumps: FxHashSet::default(),
+        end_jumps: FxHashSet::default(),
         last_reported: TextRange::default(),
     }
     .check_block_like(node);
@@ -45,7 +46,8 @@ struct Checker<'a> {
     symbol_table: &'a SymbolTable,
     root: &'a SyntaxNode,
     severity: DiagnosticSeverity,
-    jumps: FxHashSet<SyntaxNode>,
+    start_jumps: FxHashSet<SyntaxNode>,
+    end_jumps: FxHashSet<SyntaxNode>,
     last_reported: TextRange,
 }
 impl Checker<'_> {
@@ -54,7 +56,7 @@ impl Checker<'_> {
         let result = node
             .children()
             .filter_map(Instr::cast)
-            .try_for_each(|instr| self.check_instr(&instr, node, &mut unreachable));
+            .try_for_each(|instr| self.check_instr(&instr, &mut unreachable));
         // When the last instr produces never, the `end` keyword should be marked unreachable.
         // But for then-block and else-block, they don't have `end` keyword.
         // (That `end` keyword comes from their children.)
@@ -72,41 +74,42 @@ impl Checker<'_> {
         unreachable
     }
 
-    fn check_instr(
-        &mut self,
-        instr: &Instr,
-        parent_block: &SyntaxNode,
-        unreachable: &mut bool,
-    ) -> ControlFlow<(), ()> {
+    fn check_instr(&mut self, instr: &Instr, unreachable: &mut bool) -> ControlFlow<(), ()> {
         if *unreachable {
-            if self.jumps.contains(parent_block) {
+            let instr_node = instr.syntax();
+            if instr_node
+                .prev_sibling()
+                .is_some_and(|prev| self.end_jumps.contains(&prev))
+            {
                 *unreachable = false;
             } else {
-                let end = parent_block
-                    .last_token()
-                    .filter(is_end_keyword)
-                    .map(|token| token.text_range())
-                    .unwrap_or_else(|| {
+                if let Some(end) = instr_node
+                    .ancestors()
+                    .skip(1)
+                    .find(is_block_like)
+                    .and_then(|parent_block| {
                         parent_block
-                            .last_child()
-                            .as_ref()
-                            .unwrap_or_else(|| instr.syntax())
-                            .text_range()
+                            .last_token()
+                            .filter(is_end_keyword)
+                            .map(|token| token.text_range())
+                            .or_else(|| parent_block.last_child().map(|last| last.text_range()))
                     })
-                    .end();
-                let range = TextRange::new(instr.syntax().text_range().start(), end);
-                // avoid duplicate diagnostics
-                if !self.last_reported.contains_range(range) {
-                    self.diags.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(self.line_index, range),
-                        severity: Some(self.severity),
-                        source: Some("wat".into()),
-                        code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
-                        message: "unreachable code".into(),
-                        tags: Some(vec![DiagnosticTag::UNNECESSARY]),
-                        ..Default::default()
-                    });
-                    self.last_reported = range;
+                    .map(|range| range.end())
+                {
+                    let range = TextRange::new(instr_node.text_range().start(), end);
+                    // avoid duplicate diagnostics
+                    if !self.last_reported.contains_range(range) {
+                        self.diags.push(Diagnostic {
+                            range: helpers::rowan_range_to_lsp_range(self.line_index, range),
+                            severity: Some(self.severity),
+                            source: Some("wat".into()),
+                            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                            message: "unreachable code".into(),
+                            tags: Some(vec![DiagnosticTag::UNNECESSARY]),
+                            ..Default::default()
+                        });
+                        self.last_reported = range;
+                    }
                 }
                 return ControlFlow::Break(());
             }
@@ -115,10 +118,14 @@ impl Checker<'_> {
             Instr::Plain(plain) => {
                 plain
                     .instrs()
-                    .try_for_each(|instr| self.check_instr(&instr, parent_block, unreachable));
+                    .try_for_each(|instr| self.check_instr(&instr, unreachable));
                 if let Some(instr_name) = plain.instr_name() {
                     if *unreachable {
-                        if self.jumps.contains(parent_block) {
+                        if plain
+                            .syntax()
+                            .prev_sibling()
+                            .is_some_and(|prev| self.end_jumps.contains(&prev))
+                        {
                             *unreachable = false;
                         } else if !self.last_reported.contains_range(instr_name.text_range()) {
                             self.report_token(&instr_name);
@@ -126,22 +133,23 @@ impl Checker<'_> {
                     }
                     let instr_name = instr_name.text();
                     if matches!(instr_name, "br" | "br_if" | "br_table") {
-                        self.jumps
-                            .extend(plain.immediates().filter_map(|immediate| {
+                        plain
+                            .immediates()
+                            .filter_map(|immediate| {
                                 let key = SymbolKey::new(immediate.syntax());
                                 self.symbol_table
                                     .blocks
                                     .iter()
                                     .find(|block| block.ref_key == key)
-                                    .and_then(|block| {
-                                        block
-                                            .def_key
-                                            .to_node(self.root)
-                                            .ancestors()
-                                            .skip(1)
-                                            .find(is_block_like)
-                                    })
-                            }));
+                            })
+                            .for_each(|block| {
+                                let block = block.def_key.to_node(self.root);
+                                if block.kind() == SyntaxKind::BLOCK_LOOP {
+                                    self.start_jumps.insert(block);
+                                } else {
+                                    self.end_jumps.insert(block);
+                                }
+                            });
                     }
                     *unreachable |= helpers::can_produce_never(instr_name);
                 }
@@ -152,13 +160,20 @@ impl Checker<'_> {
                 }
             }
             Instr::Block(BlockInstr::Loop(block_loop)) => {
-                self.check_block_like(block_loop.syntax());
-                *unreachable = true;
+                let block_loop = block_loop.syntax();
+                if self.check_block_like(block_loop) {
+                    let loop_range = block_loop.text_range();
+                    *unreachable = self.start_jumps.contains(block_loop)
+                        && self
+                            .end_jumps
+                            .iter() /* internal jumps can break out of the loop */
+                            .all(|jump| !loop_range.contains_range(jump.text_range()));
+                }
             }
             Instr::Block(BlockInstr::If(block_if)) => {
                 block_if
                     .instrs()
-                    .try_for_each(|instr| self.check_instr(&instr, parent_block, unreachable));
+                    .try_for_each(|instr| self.check_instr(&instr, unreachable));
                 let if_branch = block_if
                     .then_block()
                     .is_some_and(|block| self.check_block_like(block.syntax()));
@@ -198,7 +213,8 @@ fn is_block_like(node: &SyntaxNode) -> bool {
             | SyntaxKind::MODULE_FIELD_GLOBAL
             | SyntaxKind::BLOCK_BLOCK
             | SyntaxKind::BLOCK_LOOP
-            | SyntaxKind::BLOCK_IF
+            | SyntaxKind::BLOCK_IF_THEN
+            | SyntaxKind::BLOCK_IF_ELSE
     )
 }
 
