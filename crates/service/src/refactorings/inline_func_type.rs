@@ -29,15 +29,13 @@ pub fn act(
     let index = type_use.index()?;
     let index = index.syntax();
     let type_def = symbol_table.find_defs(SymbolKey::new(index))?.next()?;
-    let func_type = ModuleFieldType::cast(type_def.key.to_node(root))?
-        .func_type()?
-        .syntax()
-        .clone_for_update();
-    func_type.splice_children(0..func_type.first_child()?.index(), vec![]);
-    func_type.splice_children(
-        func_type.last_child()?.index() + 1..func_type.children_with_tokens().count(),
-        vec![],
-    );
+    let func_type = ModuleFieldType::cast(type_def.key.to_node(root))?.func_type()?;
+    func_type.syntax().first_child()?; // skip empty func type
+    let mut new_text = String::with_capacity(8);
+    for node in func_type.syntax().children() {
+        new_text.push(' ');
+        new_text.push_str(&node.to_string());
+    }
 
     let end = helpers::rowan_pos_to_lsp_pos(line_index, node.text_range().end());
     #[expect(clippy::mutable_key_type)]
@@ -46,7 +44,7 @@ pub fn act(
         service.lookup_uri(uri),
         vec![TextEdit {
             range: Range { start: end, end },
-            new_text: format!(" {func_type}"),
+            new_text,
         }],
     );
     Some(CodeAction {

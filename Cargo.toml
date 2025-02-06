@@ -7,7 +7,7 @@ criterion = "0.5"
 insta = { version = "1.39", features = ["glob", "json"] }
 line-index = "0.1"
 lsp-types = "0.97"
-rowan = "0.15"
+rowan = "0.16"
 rustc-hash = "2.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
