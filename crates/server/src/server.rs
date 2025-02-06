@@ -491,8 +491,14 @@ impl Server {
                 ),
             )
             .await?;
-        } else if let Ok(config) = serde_json::from_value(params.settings) {
-            self.service.set_global_config(config);
+        }
+        match &params.settings {
+            serde_json::Value::Object(object) if !object.is_empty() => {
+                if let Ok(config) = serde_json::from_value(params.settings) {
+                    self.service.set_global_config(config);
+                }
+            }
+            _ => {}
         }
         Ok(())
     }
