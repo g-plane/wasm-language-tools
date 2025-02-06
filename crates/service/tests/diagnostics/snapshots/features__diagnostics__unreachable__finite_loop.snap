@@ -8,11 +8,30 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 5,
+          "line": 10,
+          "character": 6
+        },
+        "end": {
+          "line": 10,
+          "character": 9
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 11,
           "character": 4
         },
         "end": {
-          "line": 5,
+          "line": 11,
           "character": 7
         }
       },

@@ -365,11 +365,13 @@ fn infinite_loop() {
 (module
   (func
     loop
+      br 0
     end
     nop)
   (func
     loop
       block
+        br 1
       end
     end
     nop)
@@ -377,15 +379,11 @@ fn infinite_loop() {
     loop
       nop
       block
-        nop
-        block
-          nop
-          block
-            local.get 0
-            if
-              br 0
-            end
-          end
+        local.get 0
+        if
+          br 0
+        else
+          br 2
         end
       end
     end
@@ -394,17 +392,26 @@ fn infinite_loop() {
     loop
       nop
       block
-        nop
-        block
-          nop
-          block
-            local.get 0
-            br_if 0
-          end
+        local.get 0
+        if
+          br 2
+        else
+          br 2
         end
       end
     end
-    nop))
+    nop)
+  (func
+    (loop
+      (br 0))
+    (nop))
+  (func (local $x i32)
+    (block $incr_loop_break
+      (loop $incr_loop
+        (br $incr_loop)
+        (br_if $incr_loop_break
+          (local.get $x))))
+    (nop)))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -420,7 +427,21 @@ fn finite_loop() {
 (module
   (func
     loop
-      br 0
+    end
+    nop)
+  (func
+    loop
+      block
+        br 0
+      end
+    end
+    nop)
+  (func (param i32)
+    loop $loop
+      local.get 0
+      if
+        br $loop
+      end
     end
     nop)
   (func (param i32)
@@ -454,7 +475,27 @@ fn finite_loop() {
         end
       end
     end
-    nop))
+    nop)
+  (func
+    (loop)
+    (nop))
+  (func (local $x i32)
+    (block $incr_loop_break
+      (loop $incr_loop
+        (if
+          (local.get $x)
+          (then
+            (br $incr_loop))
+          (else
+            (br $incr_loop_break)))))
+    (nop))
+  (func (local $x i32)
+    (block $incr_loop_break
+      (loop $incr_loop
+        (br_if $incr_loop_break
+          (local.get $x))
+        (br $incr_loop)))
+    (nop)))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

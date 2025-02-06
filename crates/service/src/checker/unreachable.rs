@@ -33,6 +33,7 @@ pub fn check(
             LintLevel::Warn => DiagnosticSeverity::WARNING,
             LintLevel::Deny => DiagnosticSeverity::ERROR,
         },
+        start_jumps: FxHashSet::default(),
         end_jumps: FxHashSet::default(),
         last_reported: TextRange::default(),
     }
@@ -45,6 +46,7 @@ struct Checker<'a> {
     symbol_table: &'a SymbolTable,
     root: &'a SyntaxNode,
     severity: DiagnosticSeverity,
+    start_jumps: FxHashSet<SyntaxNode>,
     end_jumps: FxHashSet<SyntaxNode>,
     last_reported: TextRange,
 }
@@ -142,7 +144,11 @@ impl Checker<'_> {
                                     .map(|block| block.def_key.to_node(self.root))
                             })
                             .for_each(|block| {
-                                self.end_jumps.insert(block);
+                                if block.kind() == SyntaxKind::BLOCK_LOOP {
+                                    self.start_jumps.insert(block);
+                                } else {
+                                    self.end_jumps.insert(block);
+                                }
                             });
                     }
                     *unreachable |= helpers::can_produce_never(instr_name);
@@ -154,8 +160,15 @@ impl Checker<'_> {
                 }
             }
             Instr::Block(BlockInstr::Loop(block_loop)) => {
-                self.check_block_like(block_loop.syntax());
-                *unreachable = !self.end_jumps.contains(block_loop.syntax());
+                let block_loop = block_loop.syntax();
+                if self.check_block_like(block_loop) {
+                    let loop_range = block_loop.text_range();
+                    *unreachable = self.start_jumps.contains(block_loop)
+                        && self
+                            .end_jumps
+                            .iter()
+                            .all(|jump| !loop_range.contains_range(jump.text_range()));
+                }
             }
             Instr::Block(BlockInstr::If(block_if)) => {
                 block_if
