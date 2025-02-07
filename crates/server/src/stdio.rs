@@ -5,12 +5,16 @@ use blocking::unblock;
 use std::io::{BufRead, Read, Write};
 use tracing::{event, Level};
 
-pub fn read() -> Task<Result<Message>> {
+pub fn read() -> Task<Result<Option<Message>>> {
     unblock(|| {
         let mut length = 0;
         let mut stdin = std::io::stdin().lock();
         let mut buf = String::with_capacity(30);
-        stdin.read_line(&mut buf)?;
+        // when stdin closed, read size will be 0, so we exit;
+        // otherwise caller will be trapped in an infinite loop
+        if stdin.read_line(&mut buf)? == 0 {
+            return Ok(None);
+        }
         while !buf.trim().is_empty() {
             if let Some(value) = buf.strip_prefix("Content-Length:") {
                 length = value.trim().parse()?;

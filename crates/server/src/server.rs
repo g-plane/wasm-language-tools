@@ -46,8 +46,10 @@ impl Server {
         .await?;
 
         loop {
-            let Ok(message) = stdio::read().await else {
-                continue;
+            let message = match stdio::read().await {
+                Ok(Some(message)) => message,
+                Ok(None) => return Ok(()),
+                _ => continue,
             };
             match message {
                 Message::Request { id, method, params } => {
@@ -118,12 +120,11 @@ impl Server {
     }
 
     async fn initialize(&mut self) -> anyhow::Result<()> {
-        let message = stdio::read().await?;
-        let (id, params) = match message {
-            Message::Request { id, method, params } if method == "initialize" => {
+        let (id, params) = match stdio::read().await {
+            Ok(Some(Message::Request { id, method, params })) if method == "initialize" => {
                 (id, serde_json::from_value::<InitializeParams>(params)?)
             }
-            _ => return Ok(()),
+            _ => return Err(anyhow::anyhow!("expected `initialize` request")),
         };
         self.support_pull_diagnostics = params
             .capabilities
