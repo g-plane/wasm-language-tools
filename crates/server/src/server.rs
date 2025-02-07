@@ -6,7 +6,7 @@ use crate::{
 use lsp_types::{
     error_codes,
     notification::{
-        Cancel, DidChangeConfiguration, DidChangeTextDocument, DidOpenTextDocument, Exit,
+        DidChangeConfiguration, DidChangeTextDocument, DidOpenTextDocument, Exit,
         Notification as _, PublishDiagnostics,
     },
     request::{
@@ -18,10 +18,9 @@ use lsp_types::{
         SemanticTokensFullRequest, SemanticTokensRangeRequest, Shutdown, SignatureHelpRequest,
         WorkspaceConfiguration, WorkspaceDiagnosticRefresh,
     },
-    CancelParams, ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams,
-    DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams, NumberOrString, Uri,
+    ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams,
+    DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams, Uri,
 };
-use rustc_hash::FxHashSet;
 use std::ops::Deref;
 use wat_service::LanguageService;
 
@@ -32,7 +31,6 @@ pub struct Server {
     support_refresh_diagnostics: bool,
     support_pull_config: bool,
     sent_requests: SentRequests<Vec<Uri>>,
-    cancelled_requests: FxHashSet<u32>,
 }
 
 impl Server {
@@ -53,9 +51,7 @@ impl Server {
             };
             match message {
                 Message::Request { id, method, params } => {
-                    if let Some(message) = self.is_cancelled_by_client(id) {
-                        stdio::write(message).await?;
-                    } else if let Some(message) = self.is_cancelled_by_server(id) {
+                    if let Some(message) = self.is_cancelled_by_server(id) {
                         stdio::write(message).await?;
                     } else {
                         blocking::unblock({
@@ -95,14 +91,6 @@ impl Server {
                     match try_cast_notification::<DidChangeConfiguration>(&method, params) {
                         Ok(params) => {
                             self.handle_did_change_configuration(params).await?;
-                            continue;
-                        }
-                        Err(CastError::MethodMismatch(p)) => params = p,
-                        Err(CastError::JsonError(..)) => continue,
-                    };
-                    match try_cast_notification::<Cancel>(&method, params) {
-                        Ok(params) => {
-                            self.handle_cancel(params);
                             continue;
                         }
                         Err(CastError::MethodMismatch(p)) => params = p,
@@ -504,33 +492,12 @@ impl Server {
         Ok(())
     }
 
-    fn handle_cancel(&mut self, params: CancelParams) {
-        if let NumberOrString::Number(id) = params.id {
-            self.cancelled_requests.insert(id as u32);
-        }
-    }
-
     async fn publish_diagnostics(&mut self, uri: Uri) -> anyhow::Result<()> {
         stdio::write(Message::Notification {
             method: PublishDiagnostics::METHOD.into(),
             params: serde_json::to_value(self.service.publish_diagnostics(uri))?,
         })
         .await
-    }
-
-    fn is_cancelled_by_client(&mut self, request_id: u32) -> Option<Message> {
-        if self.cancelled_requests.remove(&request_id) {
-            Some(Message::ErrResponse {
-                id: request_id,
-                error: ResponseError {
-                    code: error_codes::REQUEST_CANCELLED,
-                    message: "".into(),
-                    data: None,
-                },
-            })
-        } else {
-            None
-        }
     }
 
     fn is_cancelled_by_server(&self, request_id: u32) -> Option<Message> {
