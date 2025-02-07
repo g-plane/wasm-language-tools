@@ -1,6 +1,6 @@
 [package]
 name = "wat_formatter"
-version = "0.3.1"
+version = "0.3.2"
 description = "WebAssembly Text Format formatter."
 authors = ["Pig Fang <g-plane@hotmail.com>"]
 repository = "https://github.com/g-plane/wasm-language-tools"
