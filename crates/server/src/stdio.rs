@@ -26,6 +26,7 @@ pub fn read() -> Task<Result<Option<Message>>> {
             .inspect(|message| {
                 event!(Level::DEBUG, "client → server:\n{message:#?}");
             })
+            .map(Some)
             .map_err(anyhow::Error::from)
     })
 }
