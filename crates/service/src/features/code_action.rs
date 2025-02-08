@@ -139,6 +139,15 @@ impl LanguageService {
                         }
                     }
                 }
+                SyntaxKind::IMMEDIATE | SyntaxKind::INDEX => {
+                    if rewrite {
+                        if let Some(action) =
+                            idx_conversion::act(self, uri, &line_index, &symbol_table, &it)
+                        {
+                            actions.push(CodeActionOrCommand::CodeAction(action));
+                        }
+                    }
+                }
                 _ => {}
             }
             node = it;

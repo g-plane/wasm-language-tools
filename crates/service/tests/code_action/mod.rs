@@ -4,6 +4,7 @@ mod br_if_to_if_br;
 mod fix_invalid_mem_arg;
 mod func_header_join;
 mod func_header_split;
+mod idx_conversion;
 mod if_br_to_br_if;
 mod inline_func_type;
 mod remove_mut;
