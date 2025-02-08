@@ -10,7 +10,19 @@ expression: response
     },
     "kind": 6,
     "sortText": "1",
-    "insertText": "a"
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 17
+        },
+        "end": {
+          "line": 4,
+          "character": 18
+        }
+      },
+      "newText": "$a"
+    }
   },
   {
     "label": "$b",
@@ -19,7 +31,19 @@ expression: response
     },
     "kind": 6,
     "sortText": "1",
-    "insertText": "b"
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 17
+        },
+        "end": {
+          "line": 4,
+          "character": 18
+        }
+      },
+      "newText": "$b"
+    }
   },
   {
     "label": "$c",
@@ -28,7 +52,19 @@ expression: response
     },
     "kind": 6,
     "sortText": "0",
-    "insertText": "c"
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 17
+        },
+        "end": {
+          "line": 4,
+          "character": 18
+        }
+      },
+      "newText": "$c"
+    }
   },
   {
     "label": "$d",
@@ -37,6 +73,18 @@ expression: response
     },
     "kind": 6,
     "sortText": "1",
-    "insertText": "d"
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 17
+        },
+        "end": {
+          "line": 4,
+          "character": 18
+        }
+      },
+      "newText": "$d"
+    }
   }
 ]

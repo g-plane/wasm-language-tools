@@ -5,10 +5,36 @@ expression: response
 [
   {
     "label": "0",
-    "kind": 8
+    "kind": 8,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 16
+        },
+        "end": {
+          "line": 2,
+          "character": 17
+        }
+      },
+      "newText": "0"
+    }
   },
   {
     "label": "$type",
-    "kind": 8
+    "kind": 8,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 16
+        },
+        "end": {
+          "line": 2,
+          "character": 17
+        }
+      },
+      "newText": "$type"
+    }
   }
 ]

@@ -4,11 +4,43 @@ expression: response
 ---
 [
   {
+    "label": "0",
+    "labelDetails": {
+      "description": "i32"
+    },
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 22
+        },
+        "end": {
+          "line": 2,
+          "character": 24
+        }
+      },
+      "newText": "0"
+    }
+  },
+  {
     "label": "$global",
     "labelDetails": {
       "description": "i32"
     },
     "kind": 6,
-    "insertText": "global"
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 22
+        },
+        "end": {
+          "line": 2,
+          "character": 24
+        }
+      },
+      "newText": "$global"
+    }
   }
 ]

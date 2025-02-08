@@ -8,13 +8,39 @@ expression: response
     "labelDetails": {
       "description": "i32"
     },
-    "kind": 6
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 23
+        },
+        "end": {
+          "line": 4,
+          "character": 24
+        }
+      },
+      "newText": "0"
+    }
   },
   {
     "label": "$global",
     "labelDetails": {
       "description": "i32"
     },
-    "kind": 6
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 23
+        },
+        "end": {
+          "line": 4,
+          "character": 24
+        }
+      },
+      "newText": "$global"
+    }
   }
 ]

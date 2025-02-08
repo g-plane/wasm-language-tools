@@ -1,16 +1,17 @@
 use crate::{
-    binder::{SymbolKey, SymbolKind, SymbolTable, SymbolTablesCtx},
+    binder::{SymbolKey, SymbolKind, SymbolTablesCtx},
     data_set, helpers,
-    idx::{IdentsCtx, Idx},
+    idx::Idx,
     syntax_tree::SyntaxTreeCtx,
     types_analyzer::{self, OperandType, TypesAnalyzerCtx, ValType},
     uri::{InternUri, UrisCtx},
     LanguageService,
 };
 use itertools::Itertools;
+use line_index::LineIndex;
 use lsp_types::{
     CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionParams,
-    CompletionResponse, Documentation, MarkupContent, MarkupKind,
+    CompletionResponse, CompletionTextEdit, Documentation, MarkupContent, MarkupKind, TextEdit,
 };
 use rowan::{ast::support, Direction};
 use smallvec::SmallVec;
@@ -28,7 +29,7 @@ impl LanguageService {
         )?;
 
         let cmp_ctx = get_cmp_ctx(&token)?;
-        let items = get_cmp_list(self, cmp_ctx, &token, uri, &self.symbol_table(uri), &root);
+        let items = get_cmp_list(self, cmp_ctx, &token, uri, &line_index, &root);
         Some(CompletionResponse::Array(items))
     }
 }
@@ -453,9 +454,10 @@ fn get_cmp_list(
     ctx: SmallVec<[CmpCtx; 4]>,
     token: &SyntaxToken,
     uri: InternUri,
-    symbol_table: &SymbolTable,
+    line_index: &LineIndex,
     root: &SyntaxNode,
 ) -> Vec<CompletionItem> {
+    let symbol_table = service.symbol_table(uri);
     ctx.into_iter()
         .fold(Vec::with_capacity(2), |mut items, ctx| {
             match ctx {
@@ -516,7 +518,6 @@ fn get_cmp_list(
                     };
                     let func = SymbolKey::new(&func);
                     let preferred_type = guess_preferred_type(service, uri, token);
-                    let has_dollar = token.text().starts_with('$');
                     items.extend(
                         symbol_table
                             .symbols
@@ -525,14 +526,19 @@ fn get_cmp_list(
                                 matches!(symbol.kind, SymbolKind::Param | SymbolKind::Local)
                                     && symbol.region == func
                             })
-                            .filter_map(|symbol| {
-                                let (label, insert_text) =
-                                    get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
+                            .map(|symbol| {
+                                let label = symbol.idx.render(service).to_string();
                                 let ty = service.extract_type(symbol.green.clone());
-                                Some(CompletionItem {
-                                    label,
-                                    insert_text,
+                                CompletionItem {
+                                    label: label.clone(),
                                     kind: Some(CompletionItemKind::VARIABLE),
+                                    text_edit: Some(CompletionTextEdit::Edit(TextEdit {
+                                        range: helpers::rowan_range_to_lsp_range(
+                                            line_index,
+                                            token.text_range(),
+                                        ),
+                                        new_text: label,
+                                    })),
                                     label_details: ty.map(|ty| CompletionItemLabelDetails {
                                         description: Some(ty.to_string()),
                                         ..Default::default()
@@ -545,7 +551,7 @@ fn get_cmp_list(
                                         }
                                     }),
                                     ..Default::default()
-                                })
+                                }
                             }),
                     );
                 }
@@ -556,47 +562,41 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
-                    let has_dollar = token.text().starts_with('$');
-                    items.extend(
-                        symbol_table
-                            .get_declared(module, SymbolKind::Func)
-                            .filter_map(|symbol| {
-                                let (label, insert_text) =
-                                    get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
-                                Some(CompletionItem {
-                                    label,
-                                    insert_text,
-                                    kind: Some(CompletionItemKind::FUNCTION),
-                                    detail: Some(service.render_func_header(
-                                        symbol.idx.name,
-                                        service.get_func_sig(uri, symbol.key, symbol.green.clone()),
-                                    )),
-                                    label_details: Some(CompletionItemLabelDetails {
-                                        description: Some(
-                                            service.render_compact_sig(
-                                                service
-                                                    .get_func_sig(
-                                                        uri,
-                                                        symbol.key,
-                                                        symbol.green.clone(),
-                                                    )
-                                                    .unwrap_or_default(),
-                                            ),
+                    items.extend(symbol_table.get_declared(module, SymbolKind::Func).map(
+                        |symbol| {
+                            let label = symbol.idx.render(service).to_string();
+                            CompletionItem {
+                                label: label.clone(),
+                                kind: Some(CompletionItemKind::FUNCTION),
+                                text_edit: Some(CompletionTextEdit::Edit(TextEdit {
+                                    range: helpers::rowan_range_to_lsp_range(
+                                        line_index,
+                                        token.text_range(),
+                                    ),
+                                    new_text: label,
+                                })),
+                                detail: Some(service.render_func_header(
+                                    symbol.idx.name,
+                                    service.get_func_sig(uri, symbol.key, symbol.green.clone()),
+                                )),
+                                label_details: Some(CompletionItemLabelDetails {
+                                    description: Some(
+                                        service.render_compact_sig(
+                                            service
+                                                .get_func_sig(uri, symbol.key, symbol.green.clone())
+                                                .unwrap_or_default(),
                                         ),
-                                        ..Default::default()
-                                    }),
-                                    documentation: Some(Documentation::MarkupContent(
-                                        MarkupContent {
-                                            kind: MarkupKind::Markdown,
-                                            value: helpers::ast::get_doc_comment(
-                                                &symbol.key.to_node(root),
-                                            ),
-                                        },
-                                    )),
+                                    ),
                                     ..Default::default()
-                                })
-                            }),
-                    );
+                                }),
+                                documentation: Some(Documentation::MarkupContent(MarkupContent {
+                                    kind: MarkupKind::Markdown,
+                                    value: helpers::ast::get_doc_comment(&symbol.key.to_node(root)),
+                                })),
+                                ..Default::default()
+                            }
+                        },
+                    ));
                 }
                 CmpCtx::FuncType => {
                     let Some(module) = token
@@ -605,21 +605,23 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
-                    let has_dollar = token.text().starts_with('$');
-                    items.extend(
-                        symbol_table
-                            .get_declared(module, SymbolKind::Type)
-                            .filter_map(|symbol| {
-                                let (label, insert_text) =
-                                    get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
-                                Some(CompletionItem {
-                                    label,
-                                    insert_text,
-                                    kind: Some(CompletionItemKind::INTERFACE),
-                                    ..Default::default()
-                                })
-                            }),
-                    );
+                    items.extend(symbol_table.get_declared(module, SymbolKind::Type).map(
+                        |symbol| {
+                            let label = symbol.idx.render(service).to_string();
+                            CompletionItem {
+                                label: label.clone(),
+                                kind: Some(CompletionItemKind::INTERFACE),
+                                text_edit: Some(CompletionTextEdit::Edit(TextEdit {
+                                    range: helpers::rowan_range_to_lsp_range(
+                                        line_index,
+                                        token.text_range(),
+                                    ),
+                                    new_text: label,
+                                })),
+                                ..Default::default()
+                            }
+                        },
+                    ));
                 }
                 CmpCtx::Global => {
                     let Some(module) = token
@@ -629,18 +631,22 @@ fn get_cmp_list(
                         return items;
                     };
                     let preferred_type = guess_preferred_type(service, uri, token);
-                    let has_dollar = token.text().starts_with('$');
                     items.extend(
                         symbol_table
                             .get_declared(module, SymbolKind::GlobalDef)
-                            .filter_map(|symbol| {
-                                let (label, insert_text) =
-                                    get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
+                            .map(|symbol| {
+                                let label = symbol.idx.render(service).to_string();
                                 let ty = service.extract_global_type(symbol.green.clone());
-                                Some(CompletionItem {
-                                    label,
-                                    insert_text,
+                                CompletionItem {
+                                    label: label.clone(),
                                     kind: Some(CompletionItemKind::VARIABLE),
+                                    text_edit: Some(CompletionTextEdit::Edit(TextEdit {
+                                        range: helpers::rowan_range_to_lsp_range(
+                                            line_index,
+                                            token.text_range(),
+                                        ),
+                                        new_text: label,
+                                    })),
                                     label_details: ty.map(|ty| CompletionItemLabelDetails {
                                         description: Some(ty.to_string()),
                                         ..Default::default()
@@ -653,7 +659,7 @@ fn get_cmp_list(
                                         }
                                     }),
                                     ..Default::default()
-                                })
+                                }
                             }),
                     );
                 }
@@ -671,19 +677,23 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
-                    let has_dollar = token.text().starts_with('$');
                     items.extend(
                         symbol_table
                             .get_declared(module, SymbolKind::MemoryDef)
-                            .filter_map(|symbol| {
-                                let (label, insert_text) =
-                                    get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
-                                Some(CompletionItem {
-                                    label,
-                                    insert_text,
+                            .map(|symbol| {
+                                let label = symbol.idx.render(service).to_string();
+                                CompletionItem {
+                                    label: label.clone(),
                                     kind: Some(CompletionItemKind::VARIABLE),
+                                    text_edit: Some(CompletionTextEdit::Edit(TextEdit {
+                                        range: helpers::rowan_range_to_lsp_range(
+                                            line_index,
+                                            token.text_range(),
+                                        ),
+                                        new_text: label,
+                                    })),
                                     ..Default::default()
-                                })
+                                }
                             }),
                     );
                 }
@@ -695,7 +705,6 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
-                    let has_dollar = token.text().starts_with('$');
                     items.extend(
                         symbol_table
                             .symbols
@@ -703,20 +712,24 @@ fn get_cmp_list(
                             .filter(|symbol| {
                                 symbol.kind == SymbolKind::TableDef && symbol.region == module
                             })
-                            .filter_map(|symbol| {
-                                let (label, insert_text) =
-                                    get_idx_cmp_text(service, &symbol.idx, has_dollar)?;
-                                Some(CompletionItem {
-                                    label,
-                                    insert_text,
+                            .map(|symbol| {
+                                let label = symbol.idx.render(service).to_string();
+                                CompletionItem {
+                                    label: label.clone(),
                                     kind: Some(CompletionItemKind::VARIABLE),
+                                    text_edit: Some(CompletionTextEdit::Edit(TextEdit {
+                                        range: helpers::rowan_range_to_lsp_range(
+                                            line_index,
+                                            token.text_range(),
+                                        ),
+                                        new_text: label,
+                                    })),
                                     ..Default::default()
-                                })
+                                }
                             }),
                     );
                 }
                 CmpCtx::Block => {
-                    let has_dollar = token.text().starts_with('$');
                     items.extend(
                         symbol_table
                             .symbols
@@ -727,19 +740,24 @@ fn get_cmp_list(
                             })
                             .rev()
                             .enumerate()
-                            .filter_map(|(num, symbol)| {
+                            .map(|(num, symbol)| {
                                 let idx = Idx {
                                     num: Some(num as u32),
                                     name: symbol.idx.name,
                                 };
-                                let (label, insert_text) =
-                                    get_idx_cmp_text(service, &idx, has_dollar)?;
+                                let label = idx.render(service).to_string();
                                 let block_node = symbol.key.to_node(root);
                                 let sig = types_analyzer::get_block_sig(service, uri, &block_node);
-                                Some(CompletionItem {
-                                    label,
-                                    insert_text,
+                                CompletionItem {
+                                    label: label.clone(),
                                     kind: Some(CompletionItemKind::VARIABLE),
+                                    text_edit: Some(CompletionTextEdit::Edit(TextEdit {
+                                        range: helpers::rowan_range_to_lsp_range(
+                                            line_index,
+                                            token.text_range(),
+                                        ),
+                                        new_text: label,
+                                    })),
                                     label_details: Some(CompletionItemLabelDetails {
                                         description: Some(format!(
                                             "[{}]",
@@ -755,7 +773,7 @@ fn get_cmp_list(
                                         sig,
                                     )),
                                     ..Default::default()
-                                })
+                                }
                             }),
                     );
                 }
@@ -853,19 +871,6 @@ fn get_cmp_list(
             }
             items
         })
-}
-
-fn get_idx_cmp_text(
-    service: &LanguageService,
-    idx: &Idx,
-    has_dollar: bool,
-) -> Option<(String, Option<String>)> {
-    if has_dollar {
-        let name = service.lookup_ident(idx.name?);
-        Some((name.to_string(), Some(name.strip_prefix('$')?.to_string())))
-    } else {
-        Some((idx.render(service).to_string(), None))
-    }
 }
 
 fn find_leading_l_paren(token: &SyntaxToken) -> Option<SyntaxToken> {

@@ -6,6 +6,18 @@ expression: response
   {
     "label": "$memory",
     "kind": 6,
-    "insertText": "memory"
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 23
+        },
+        "end": {
+          "line": 2,
+          "character": 25
+        }
+      },
+      "newText": "$memory"
+    }
   }
 ]

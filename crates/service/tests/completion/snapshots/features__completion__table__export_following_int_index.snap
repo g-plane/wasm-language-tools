@@ -5,10 +5,36 @@ expression: response
 [
   {
     "label": "$table",
-    "kind": 6
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 20
+        },
+        "end": {
+          "line": 4,
+          "character": 21
+        }
+      },
+      "newText": "$table"
+    }
   },
   {
     "label": "1",
-    "kind": 6
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 20
+        },
+        "end": {
+          "line": 4,
+          "character": 21
+        }
+      },
+      "newText": "1"
+    }
   }
 ]

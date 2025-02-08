@@ -4,8 +4,37 @@ expression: response
 ---
 [
   {
+    "label": "0",
+    "kind": 8,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 16
+        },
+        "end": {
+          "line": 2,
+          "character": 18
+        }
+      },
+      "newText": "0"
+    }
+  },
+  {
     "label": "$type",
     "kind": 8,
-    "insertText": "type"
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 16
+        },
+        "end": {
+          "line": 2,
+          "character": 18
+        }
+      },
+      "newText": "$type"
+    }
   }
 ]

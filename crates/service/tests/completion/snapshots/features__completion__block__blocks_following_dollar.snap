@@ -10,7 +10,61 @@ expression: response
     },
     "kind": 6,
     "detail": "(block $b)",
-    "insertText": "b"
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 24
+        },
+        "end": {
+          "line": 8,
+          "character": 25
+        }
+      },
+      "newText": "$b"
+    }
+  },
+  {
+    "label": "1",
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(block)",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 24
+        },
+        "end": {
+          "line": 8,
+          "character": 25
+        }
+      },
+      "newText": "1"
+    }
+  },
+  {
+    "label": "2",
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(block)",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 24
+        },
+        "end": {
+          "line": 8,
+          "character": 25
+        }
+      },
+      "newText": "2"
+    }
   },
   {
     "label": "$a",
@@ -19,6 +73,39 @@ expression: response
     },
     "kind": 6,
     "detail": "(block $a)",
-    "insertText": "a"
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 24
+        },
+        "end": {
+          "line": 8,
+          "character": 25
+        }
+      },
+      "newText": "$a"
+    }
+  },
+  {
+    "label": "4",
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(block)",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 24
+        },
+        "end": {
+          "line": 8,
+          "character": 25
+        }
+      },
+      "newText": "4"
+    }
   }
 ]

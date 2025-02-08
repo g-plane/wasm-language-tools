@@ -6,6 +6,35 @@ expression: response
   {
     "label": "$table",
     "kind": 6,
-    "insertText": "table"
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 16
+        },
+        "end": {
+          "line": 5,
+          "character": 17
+        }
+      },
+      "newText": "$table"
+    }
+  },
+  {
+    "label": "1",
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 16
+        },
+        "end": {
+          "line": 5,
+          "character": 17
+        }
+      },
+      "newText": "1"
+    }
   }
 ]

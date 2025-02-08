@@ -9,7 +9,59 @@ expression: response
       "description": "i32"
     },
     "kind": 6,
-    "insertText": "p"
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 19
+        },
+        "end": {
+          "line": 3,
+          "character": 20
+        }
+      },
+      "newText": "$p"
+    }
+  },
+  {
+    "label": "1",
+    "labelDetails": {
+      "description": "f32"
+    },
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 19
+        },
+        "end": {
+          "line": 3,
+          "character": 20
+        }
+      },
+      "newText": "1"
+    }
+  },
+  {
+    "label": "2",
+    "labelDetails": {
+      "description": "f64"
+    },
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 19
+        },
+        "end": {
+          "line": 3,
+          "character": 20
+        }
+      },
+      "newText": "2"
+    }
   },
   {
     "label": "$l",
@@ -17,6 +69,58 @@ expression: response
       "description": "i32"
     },
     "kind": 6,
-    "insertText": "l"
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 19
+        },
+        "end": {
+          "line": 3,
+          "character": 20
+        }
+      },
+      "newText": "$l"
+    }
+  },
+  {
+    "label": "4",
+    "labelDetails": {
+      "description": "f32"
+    },
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 19
+        },
+        "end": {
+          "line": 3,
+          "character": 20
+        }
+      },
+      "newText": "4"
+    }
+  },
+  {
+    "label": "5",
+    "labelDetails": {
+      "description": "f64"
+    },
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 19
+        },
+        "end": {
+          "line": 3,
+          "character": 20
+        }
+      },
+      "newText": "5"
+    }
   }
 ]
