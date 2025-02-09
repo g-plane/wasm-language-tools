@@ -37,7 +37,8 @@ ROOT@0..422
         LIMITS@73..74
           UNSIGNED_INT@73..74 "3"
         WHITESPACE@74..75 " "
-        REF_TYPE@75..82 "funcref"
+        REF_TYPE@75..82
+          ABBR_REF_TYPE@75..82 "funcref"
       R_PAREN@82..83 ")"
     WHITESPACE@83..86 "\n  "
     MODULE_FIELD_ELEM@86..142
@@ -45,7 +46,8 @@ ROOT@0..422
       KEYWORD@87..91 "elem"
       WHITESPACE@91..92 " "
       ELEM_LIST@92..141
-        REF_TYPE@92..99 "funcref"
+        REF_TYPE@92..99
+          ABBR_REF_TYPE@92..99 "funcref"
         WHITESPACE@99..100 " "
         ELEM_EXPR@100..112
           PLAIN_INSTR@100..112

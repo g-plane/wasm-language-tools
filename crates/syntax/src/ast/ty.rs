@@ -1,4 +1,5 @@
 use super::{SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage};
+use crate::SyntaxElement;
 use rowan::{
     ast::{
         support::{child, children, token},
@@ -244,6 +245,69 @@ impl AstNode for Param {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct RefType {
+    syntax: SyntaxNode,
+}
+impl RefType {
+    #[inline]
+    pub fn abbr_ref_type(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::ABBR_REF_TYPE)
+    }
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn null_keyword(&self) -> Option<SyntaxToken> {
+        self.syntax.children_with_tokens().find_map(|it| match it {
+            SyntaxElement::Token(token)
+                if token.kind() == SyntaxKind::KEYWORD && token.text() == "null" =>
+            {
+                Some(token)
+            }
+            _ => None,
+        })
+    }
+    #[inline]
+    pub fn heap_type(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::HEAP_TYPE)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
+impl AstNode for RefType {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::REF_TYPE
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(RefType { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Result {
     syntax: SyntaxNode,
 }
@@ -301,8 +365,8 @@ impl TableType {
         child(&self.syntax)
     }
     #[inline]
-    pub fn ref_type(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::REF_TYPE)
+    pub fn ref_type(&self) -> Option<RefType> {
+        child(&self.syntax)
     }
 }
 impl AstNode for TableType {
@@ -345,8 +409,8 @@ impl ValType {
         token(&self.syntax, SyntaxKind::VEC_TYPE)
     }
     #[inline]
-    pub fn ref_type(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::REF_TYPE)
+    pub fn ref_type(&self) -> Option<RefType> {
+        child(&self.syntax)
     }
 }
 impl AstNode for ValType {

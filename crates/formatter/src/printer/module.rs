@@ -126,8 +126,8 @@ impl DocGen for ElemList {
             trivias = format_trivias_after_node(index, ctx);
         });
         if let Some(ref_type) = self.ref_type() {
-            docs.push(Doc::text(ref_type.to_string()));
-            trivias = format_trivias_after_token(ref_type, ctx);
+            docs.push(ref_type.doc(ctx));
+            trivias = format_trivias_after_node(ref_type, ctx);
         }
         self.elem_exprs().for_each(|elem_expr| {
             let has_keyword = elem_expr.keyword().is_some();
@@ -1067,8 +1067,8 @@ impl DocGen for ModuleFieldTable {
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(Doc::text(ref_type.to_string()));
-            trivias = format_trivias_after_token(ref_type, ctx);
+            docs.push(ref_type.doc(ctx));
+            trivias = format_trivias_after_node(ref_type, ctx);
         }
         if let Some(elem) = self.elem() {
             if trivias.is_empty() {

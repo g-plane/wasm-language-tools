@@ -10,7 +10,8 @@ ROOT@0..1284
       L_PAREN@10..11 "("
       KEYWORD@11..16 "table"
       WHITESPACE@16..17 " "
-      REF_TYPE@17..24 "funcref"
+      REF_TYPE@17..24
+        ABBR_REF_TYPE@17..24 "funcref"
       WHITESPACE@24..29 "\n    "
       ELEM@29..645
         L_PAREN@29..30 "("
@@ -150,7 +151,8 @@ ROOT@0..1284
         LIMITS@670..671
           UNSIGNED_INT@670..671 "1"
         WHITESPACE@671..672 " "
-        REF_TYPE@672..679 "funcref"
+        REF_TYPE@672..679
+          ABBR_REF_TYPE@672..679 "funcref"
       R_PAREN@679..680 ")"
     WHITESPACE@680..683 "\n  "
     MODULE_FIELD_FUNC@683..715

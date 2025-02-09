@@ -6,26 +6,40 @@ use super::{
 use crate::error::Message;
 use wat_syntax::SyntaxKind::*;
 use winnow::{
-    combinator::{alt, opt, repeat},
+    combinator::{alt, dispatch, fail, opt, peek, repeat},
+    token::any,
     Parser,
 };
 
-pub(super) fn ref_type(input: &mut Input) -> GreenResult {
+fn abbr_ref_type(input: &mut Input) -> GreenResult {
     word.verify_map(|word| match word {
-        "funcref" | "externref" => Some(tok(REF_TYPE, word)),
+        "funcref" | "externref" => Some(tok(ABBR_REF_TYPE, word)),
         _ => None,
     })
     .context(Message::Name("ref type"))
     .parse_next(input)
 }
 
+pub(super) fn ref_type(input: &mut Input) -> GreenResult {
+    dispatch! {peek(any);
+        '(' => fail,
+        _ => abbr_ref_type,
+    }
+    .context(Message::Name("ref type"))
+    .parse_next(input)
+    .map(|ty| node(REF_TYPE, [ty]))
+}
+
 pub(super) fn val_type(input: &mut Input) -> GreenResult {
-    word.verify_map(|word| match word {
-        "i32" | "i64" | "f32" | "f64" => Some(tok(NUM_TYPE, word)),
-        "v128" => Some(tok(VEC_TYPE, word)),
-        "funcref" | "externref" => Some(tok(REF_TYPE, word)),
-        _ => None,
-    })
+    dispatch! {peek(any);
+        '(' => ref_type,
+        _ => word.verify_map(|word| match word {
+            "i32" | "i64" | "f32" | "f64" => Some(tok(NUM_TYPE, word)),
+            "v128" => Some(tok(VEC_TYPE, word)),
+            "funcref" | "externref" => Some(node(REF_TYPE, [tok(ABBR_REF_TYPE, word)])),
+            _ => None,
+        }),
+    }
     .context(Message::Name("value type"))
     .parse_next(input)
     .map(|ty| node(VAL_TYPE, [ty]))

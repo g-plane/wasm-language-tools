@@ -731,7 +731,8 @@ ROOT@0..2705
         LIMITS@1155..1156
           UNSIGNED_INT@1155..1156 "0"
         WHITESPACE@1156..1157 " "
-        REF_TYPE@1157..1164 "funcref"
+        REF_TYPE@1157..1164
+          ABBR_REF_TYPE@1157..1164 "funcref"
       R_PAREN@1164..1165 ")"
     WHITESPACE@1165..1166 " "
     MODULE_FIELD_EXPORT@1166..1188
@@ -763,7 +764,8 @@ ROOT@0..2705
         LIMITS@1205..1206
           UNSIGNED_INT@1205..1206 "0"
         WHITESPACE@1206..1207 " "
-        REF_TYPE@1207..1214 "funcref"
+        REF_TYPE@1207..1214
+          ABBR_REF_TYPE@1207..1214 "funcref"
       R_PAREN@1214..1215 ")"
     WHITESPACE@1215..1216 " "
     MODULE_FIELD_EXPORT@1216..1238
@@ -811,7 +813,8 @@ ROOT@0..2705
         LIMITS@1278..1279
           UNSIGNED_INT@1278..1279 "0"
         WHITESPACE@1279..1280 " "
-        REF_TYPE@1280..1287 "funcref"
+        REF_TYPE@1280..1287
+          ABBR_REF_TYPE@1280..1287 "funcref"
       R_PAREN@1287..1288 ")"
     WHITESPACE@1288..1289 " "
     MODULE_FIELD_TABLE@1289..1306
@@ -822,7 +825,8 @@ ROOT@0..2705
         LIMITS@1296..1297
           UNSIGNED_INT@1296..1297 "0"
         WHITESPACE@1297..1298 " "
-        REF_TYPE@1298..1305 "funcref"
+        REF_TYPE@1298..1305
+          ABBR_REF_TYPE@1298..1305 "funcref"
       R_PAREN@1305..1306 ")"
     WHITESPACE@1306..1307 " "
     MODULE_FIELD_EXPORT@1307..1329
@@ -878,7 +882,8 @@ ROOT@0..2705
         LIMITS@1383..1384
           UNSIGNED_INT@1383..1384 "0"
         WHITESPACE@1384..1385 " "
-        REF_TYPE@1385..1392 "funcref"
+        REF_TYPE@1385..1392
+          ABBR_REF_TYPE@1385..1392 "funcref"
       R_PAREN@1392..1393 ")"
     R_PAREN@1393..1394 ")"
   WHITESPACE@1394..1395 "\n"
@@ -904,7 +909,8 @@ ROOT@0..2705
           WHITESPACE@1424..1425 " "
           UNSIGNED_INT@1425..1426 "1"
         WHITESPACE@1426..1427 " "
-        REF_TYPE@1427..1434 "funcref"
+        REF_TYPE@1427..1434
+          ABBR_REF_TYPE@1427..1434 "funcref"
       R_PAREN@1434..1435 ")"
     R_PAREN@1435..1436 ")"
   WHITESPACE@1436..1437 "\n"
@@ -920,7 +926,8 @@ ROOT@0..2705
         LIMITS@1452..1453
           UNSIGNED_INT@1452..1453 "0"
         WHITESPACE@1453..1454 " "
-        REF_TYPE@1454..1461 "funcref"
+        REF_TYPE@1454..1461
+          ABBR_REF_TYPE@1454..1461 "funcref"
       R_PAREN@1461..1462 ")"
     WHITESPACE@1462..1463 " "
     MODULE_FIELD_EXPORT@1463..1485
@@ -954,7 +961,8 @@ ROOT@0..2705
           WHITESPACE@1503..1504 " "
           UNSIGNED_INT@1504..1505 "1"
         WHITESPACE@1505..1506 " "
-        REF_TYPE@1506..1513 "funcref"
+        REF_TYPE@1506..1513
+          ABBR_REF_TYPE@1506..1513 "funcref"
       R_PAREN@1513..1514 ")"
     WHITESPACE@1514..1515 " "
     MODULE_FIELD_EXPORT@1515..1537
@@ -996,7 +1004,8 @@ ROOT@0..2705
         LIMITS@1570..1571
           UNSIGNED_INT@1570..1571 "0"
         WHITESPACE@1571..1572 " "
-        REF_TYPE@1572..1579 "funcref"
+        REF_TYPE@1572..1579
+          ABBR_REF_TYPE@1572..1579 "funcref"
       R_PAREN@1579..1580 ")"
     R_PAREN@1580..1581 ")"
   WHITESPACE@1581..1582 "\n"
@@ -1024,7 +1033,8 @@ ROOT@0..2705
           WHITESPACE@1614..1615 " "
           UNSIGNED_INT@1615..1616 "1"
         WHITESPACE@1616..1617 " "
-        REF_TYPE@1617..1624 "funcref"
+        REF_TYPE@1617..1624
+          ABBR_REF_TYPE@1617..1624 "funcref"
       R_PAREN@1624..1625 ")"
     R_PAREN@1625..1626 ")"
   WHITESPACE@1626..1627 "\n"
@@ -1042,7 +1052,8 @@ ROOT@0..2705
         LIMITS@1645..1646
           UNSIGNED_INT@1645..1646 "0"
         WHITESPACE@1646..1647 " "
-        REF_TYPE@1647..1654 "funcref"
+        REF_TYPE@1647..1654
+          ABBR_REF_TYPE@1647..1654 "funcref"
       R_PAREN@1654..1655 ")"
     WHITESPACE@1655..1656 " "
     MODULE_FIELD_EXPORT@1656..1679
@@ -1078,7 +1089,8 @@ ROOT@0..2705
           WHITESPACE@1700..1701 " "
           UNSIGNED_INT@1701..1702 "1"
         WHITESPACE@1702..1703 " "
-        REF_TYPE@1703..1710 "funcref"
+        REF_TYPE@1703..1710
+          ABBR_REF_TYPE@1703..1710 "funcref"
       R_PAREN@1710..1711 ")"
     WHITESPACE@1711..1712 " "
     MODULE_FIELD_EXPORT@1712..1735
@@ -1126,7 +1138,8 @@ ROOT@0..2705
         LIMITS@1775..1776
           UNSIGNED_INT@1775..1776 "0"
         WHITESPACE@1776..1777 " "
-        REF_TYPE@1777..1784 "funcref"
+        REF_TYPE@1777..1784
+          ABBR_REF_TYPE@1777..1784 "funcref"
       R_PAREN@1784..1785 ")"
     R_PAREN@1785..1786 ")"
   WHITESPACE@1786..1787 "\n"
@@ -1160,7 +1173,8 @@ ROOT@0..2705
           WHITESPACE@1826..1827 " "
           UNSIGNED_INT@1827..1828 "1"
         WHITESPACE@1828..1829 " "
-        REF_TYPE@1829..1836 "funcref"
+        REF_TYPE@1829..1836
+          ABBR_REF_TYPE@1829..1836 "funcref"
       R_PAREN@1836..1837 ")"
     R_PAREN@1837..1838 ")"
   WHITESPACE@1838..1839 "\n"
@@ -1194,7 +1208,8 @@ ROOT@0..2705
         LIMITS@1881..1882
           UNSIGNED_INT@1881..1882 "0"
         WHITESPACE@1882..1883 " "
-        REF_TYPE@1883..1890 "funcref"
+        REF_TYPE@1883..1890
+          ABBR_REF_TYPE@1883..1890 "funcref"
       R_PAREN@1890..1891 ")"
     R_PAREN@1891..1892 ")"
   WHITESPACE@1892..1893 "\n"
@@ -1230,7 +1245,8 @@ ROOT@0..2705
           WHITESPACE@1936..1937 " "
           UNSIGNED_INT@1937..1938 "1"
         WHITESPACE@1938..1939 " "
-        REF_TYPE@1939..1946 "funcref"
+        REF_TYPE@1939..1946
+          ABBR_REF_TYPE@1939..1946 "funcref"
       R_PAREN@1946..1947 ")"
     R_PAREN@1947..1948 ")"
   WHITESPACE@1948..1950 "\n\n"

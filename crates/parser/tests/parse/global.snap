@@ -260,7 +260,8 @@ ROOT@0..608
       WHITESPACE@492..493 " "
       GLOBAL_TYPE@493..502
         VAL_TYPE@493..502
-          REF_TYPE@493..502 "externref"
+          REF_TYPE@493..502
+            ABBR_REF_TYPE@493..502 "externref"
       WHITESPACE@502..503 " "
       PLAIN_INSTR@503..520
         L_PAREN@503..504 "("
@@ -282,7 +283,8 @@ ROOT@0..608
         KEYWORD@537..540 "mut"
         WHITESPACE@540..541 " "
         VAL_TYPE@541..550
-          REF_TYPE@541..550 "externref"
+          REF_TYPE@541..550
+            ABBR_REF_TYPE@541..550 "externref"
         R_PAREN@550..551 ")"
       WHITESPACE@551..552 " "
       PLAIN_INSTR@552..569
@@ -300,7 +302,8 @@ ROOT@0..608
       WHITESPACE@580..581 " "
       GLOBAL_TYPE@581..588
         VAL_TYPE@581..588
-          REF_TYPE@581..588 "funcref"
+          REF_TYPE@581..588
+            ABBR_REF_TYPE@581..588 "funcref"
       WHITESPACE@588..589 " "
       PLAIN_INSTR@589..604
         L_PAREN@589..590 "("

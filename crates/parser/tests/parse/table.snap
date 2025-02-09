@@ -14,7 +14,8 @@ ROOT@0..215
         LIMITS@15..16
           UNSIGNED_INT@15..16 "0"
         WHITESPACE@16..17 " "
-        REF_TYPE@17..24 "funcref"
+        REF_TYPE@17..24
+          ABBR_REF_TYPE@17..24 "funcref"
       R_PAREN@24..25 ")"
     R_PAREN@25..26 ")"
   WHITESPACE@26..27 "\n"
@@ -30,7 +31,8 @@ ROOT@0..215
         LIMITS@42..43
           UNSIGNED_INT@42..43 "1"
         WHITESPACE@43..44 " "
-        REF_TYPE@44..51 "funcref"
+        REF_TYPE@44..51
+          ABBR_REF_TYPE@44..51 "funcref"
       R_PAREN@51..52 ")"
     R_PAREN@52..53 ")"
   WHITESPACE@53..54 "\n"
@@ -48,7 +50,8 @@ ROOT@0..215
           WHITESPACE@70..71 " "
           UNSIGNED_INT@71..72 "0"
         WHITESPACE@72..73 " "
-        REF_TYPE@73..80 "funcref"
+        REF_TYPE@73..80
+          ABBR_REF_TYPE@73..80 "funcref"
       R_PAREN@80..81 ")"
     R_PAREN@81..82 ")"
   WHITESPACE@82..83 "\n"
@@ -66,7 +69,8 @@ ROOT@0..215
           WHITESPACE@99..100 " "
           UNSIGNED_INT@100..101 "1"
         WHITESPACE@101..102 " "
-        REF_TYPE@102..109 "funcref"
+        REF_TYPE@102..109
+          ABBR_REF_TYPE@102..109 "funcref"
       R_PAREN@109..110 ")"
     R_PAREN@110..111 ")"
   WHITESPACE@111..112 "\n"
@@ -84,7 +88,8 @@ ROOT@0..215
           WHITESPACE@128..129 " "
           UNSIGNED_INT@129..132 "256"
         WHITESPACE@132..133 " "
-        REF_TYPE@133..140 "funcref"
+        REF_TYPE@133..140
+          ABBR_REF_TYPE@133..140 "funcref"
       R_PAREN@140..141 ")"
     R_PAREN@141..142 ")"
   WHITESPACE@142..143 "\n"
@@ -102,7 +107,8 @@ ROOT@0..215
           WHITESPACE@159..160 " "
           UNSIGNED_INT@160..165 "65536"
         WHITESPACE@165..166 " "
-        REF_TYPE@166..173 "funcref"
+        REF_TYPE@166..173
+          ABBR_REF_TYPE@166..173 "funcref"
       R_PAREN@173..174 ")"
     R_PAREN@174..175 ")"
   WHITESPACE@175..176 "\n"
@@ -120,7 +126,8 @@ ROOT@0..215
           WHITESPACE@192..193 " "
           UNSIGNED_INT@193..204 "0xffff_ffff"
         WHITESPACE@204..205 " "
-        REF_TYPE@205..212 "funcref"
+        REF_TYPE@205..212
+          ABBR_REF_TYPE@205..212 "funcref"
       R_PAREN@212..213 ")"
     R_PAREN@213..214 ")"
   WHITESPACE@214..215 "\n"

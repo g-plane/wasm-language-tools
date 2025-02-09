@@ -2105,7 +2105,8 @@ ROOT@0..11133
       L_PAREN@4455..4456 "("
       KEYWORD@4456..4461 "table"
       WHITESPACE@4461..4462 " "
-      REF_TYPE@4462..4469 "funcref"
+      REF_TYPE@4462..4469
+        ABBR_REF_TYPE@4462..4469 "funcref"
       WHITESPACE@4469..4470 " "
       ELEM@4470..4482
         L_PAREN@4470..4471 "("

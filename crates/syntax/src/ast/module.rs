@@ -1,6 +1,6 @@
 use super::{
     instr::Instr,
-    ty::{FuncType, GlobalType, MemoryType, Param, Result, TableType, ValType},
+    ty::{FuncType, GlobalType, MemoryType, Param, RefType, Result, TableType, ValType},
     SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage,
 };
 use rowan::{
@@ -178,8 +178,8 @@ impl ElemList {
         children(&self.syntax)
     }
     #[inline]
-    pub fn ref_type(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::REF_TYPE)
+    pub fn ref_type(&self) -> Option<RefType> {
+        child(&self.syntax)
     }
     #[inline]
     pub fn elem_exprs(&self) -> AstChildren<ElemExpr> {
@@ -1596,8 +1596,8 @@ impl ModuleFieldTable {
         child(&self.syntax)
     }
     #[inline]
-    pub fn ref_type(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::REF_TYPE)
+    pub fn ref_type(&self) -> Option<RefType> {
+        child(&self.syntax)
     }
     #[inline]
     pub fn elem(&self) -> Option<Elem> {

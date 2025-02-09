@@ -26,7 +26,8 @@ ROOT@0..84
       L_PAREN@34..35 "("
       KEYWORD@35..40 "table"
       WHITESPACE@40..41 " "
-      REF_TYPE@41..48 "funcref"
+      REF_TYPE@41..48
+        ABBR_REF_TYPE@41..48 "funcref"
       WHITESPACE@48..49 " "
       ERROR@49..50 "("
       ERROR@50..51 ")"
@@ -36,7 +37,8 @@ ROOT@0..84
       L_PAREN@55..56 "("
       KEYWORD@56..61 "table"
       WHITESPACE@61..62 " "
-      REF_TYPE@62..69 "funcref"
+      REF_TYPE@62..69
+        ABBR_REF_TYPE@62..69 "funcref"
       WHITESPACE@69..70 " "
       ELEM@70..79
         L_PAREN@70..71 "("

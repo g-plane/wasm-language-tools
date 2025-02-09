@@ -347,7 +347,10 @@ impl From<AstValType> for ValType {
             }
         } else if value.vec_type().is_some() {
             ValType::V128
-        } else if let Some(ref_type) = value.ref_type() {
+        } else if let Some(ref_type) = value
+            .ref_type()
+            .and_then(|ref_type| ref_type.abbr_ref_type())
+        {
             match ref_type.text() {
                 "funcref" => ValType::FuncRef,
                 "externref" => ValType::ExternRef,
@@ -363,27 +366,36 @@ impl TryFrom<&GreenNodeData> for ValType {
     type Error = ();
     fn try_from(node: &GreenNodeData) -> std::result::Result<Self, Self::Error> {
         node.children()
-            .find_map(|child| {
-                if let NodeOrToken::Token(token) = child {
-                    match WatLanguage::kind_from_raw(token.kind()) {
-                        SyntaxKind::NUM_TYPE => match token.text() {
-                            "i32" => Some(ValType::I32),
-                            "i64" => Some(ValType::I64),
-                            "f32" => Some(ValType::F32),
-                            "f64" => Some(ValType::F64),
-                            _ => None,
-                        },
-                        SyntaxKind::VEC_TYPE => Some(ValType::V128),
-                        SyntaxKind::REF_TYPE => match token.text() {
+            .find_map(|child| match child {
+                NodeOrToken::Token(token) => match WatLanguage::kind_from_raw(token.kind()) {
+                    SyntaxKind::NUM_TYPE => match token.text() {
+                        "i32" => Some(ValType::I32),
+                        "i64" => Some(ValType::I64),
+                        "f32" => Some(ValType::F32),
+                        "f64" => Some(ValType::F64),
+                        _ => None,
+                    },
+                    SyntaxKind::VEC_TYPE => Some(ValType::V128),
+                    SyntaxKind::REF_TYPE => match token.text() {
+                        "funcref" => Some(ValType::FuncRef),
+                        "externref" => Some(ValType::ExternRef),
+                        _ => None,
+                    },
+                    _ => None,
+                },
+                NodeOrToken::Node(node) if node.kind() == SyntaxKind::REF_TYPE.into() => node
+                    .children()
+                    .next()
+                    .and_then(|child| child.into_token())
+                    .and_then(|token| match WatLanguage::kind_from_raw(token.kind()) {
+                        SyntaxKind::ABBR_REF_TYPE => match token.text() {
                             "funcref" => Some(ValType::FuncRef),
                             "externref" => Some(ValType::ExternRef),
                             _ => None,
                         },
                         _ => None,
-                    }
-                } else {
-                    None
-                }
+                    }),
+                _ => None,
             })
             .ok_or(())
     }

@@ -18,7 +18,7 @@ pub enum SyntaxKind {
     FLOAT,
     NUM_TYPE,
     VEC_TYPE,
-    REF_TYPE,
+    ABBR_REF_TYPE,
     HEAP_TYPE,
     SHARE,
     MEM_ARG,
@@ -27,6 +27,7 @@ pub enum SyntaxKind {
     // SyntaxNode
     MODULE_NAME,
     NAME,
+    REF_TYPE,
     VAL_TYPE,
     FUNC_TYPE,
     PARAM,
