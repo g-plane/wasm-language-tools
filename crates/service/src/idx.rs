@@ -2,7 +2,7 @@ use crate::LanguageService;
 use salsa::{InternId, InternKey};
 use std::{fmt, sync::Arc};
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Idx {
     pub num: Option<u32>,
     pub name: Option<InternIdent>,

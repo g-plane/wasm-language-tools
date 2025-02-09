@@ -327,7 +327,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                                 ) = symbols.iter().find(|sym| {
                                     sym.kind == SymbolKind::BlockDef && sym.key == current.region
                                 }) {
-                                    let mut idx = parent.idx.clone();
+                                    let mut idx = parent.idx;
                                     idx.num = Some(levels);
                                     if symbol.idx.is_defined_by(&idx) {
                                         blocks.push(BlockItem {
