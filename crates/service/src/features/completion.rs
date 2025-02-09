@@ -13,9 +13,12 @@ use lsp_types::{
     CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionParams,
     CompletionResponse, CompletionTextEdit, Documentation, MarkupContent, MarkupKind, TextEdit,
 };
-use rowan::{ast::support, Direction};
+use rowan::{
+    ast::{support, AstNode},
+    Direction,
+};
 use smallvec::SmallVec;
-use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
+use wat_syntax::{ast::PlainInstr, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 impl LanguageService {
     /// Handler for `textDocument/completion` request.
@@ -406,6 +409,15 @@ fn add_cmp_ctx_for_immediates(
                 }
             }
             Some((_, snd)) if snd.starts_with("load") || snd.starts_with("store") => {
+                if node.kind() == SyntaxKind::IMMEDIATE
+                    && node
+                        .prev_sibling()
+                        .is_none_or(|prev| prev.kind() != SyntaxKind::IMMEDIATE)
+                    || PlainInstr::cast(node.clone())
+                        .is_some_and(|instr| instr.immediates().count() == 0)
+                {
+                    ctx.push(CmpCtx::Memory);
+                }
                 ctx.push(CmpCtx::MemArg);
             }
             None => match instr_name {

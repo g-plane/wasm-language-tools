@@ -1,0 +1,14 @@
+---
+source: crates/service/tests/completion/memory.rs
+expression: response
+---
+[
+  {
+    "label": "offset=",
+    "kind": 15
+  },
+  {
+    "label": "align=",
+    "kind": 15
+  }
+]

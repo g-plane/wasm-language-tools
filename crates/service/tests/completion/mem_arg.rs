@@ -30,3 +30,16 @@ fn incomplete() {
     let response = service.completion(create_params(uri, Position::new(2, 23)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn after_mem_idx() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func (i32.load 0 )))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(2, 20)));
+    assert_json_snapshot!(response);
+}

@@ -47,3 +47,51 @@ fn export_desc_memory_incomplete() {
     let response = service.completion(create_params(uri, Position::new(2, 25)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn load_and_store_instr() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (memory 1)
+  (func
+    (i32.load ))
+  (memory $memory 1))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(4, 14)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn load_and_store_instr_following_mem_arg() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (memory 1)
+  (func
+    (i32.load offset=0 ))
+  (memory $memory 1))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(4, 23)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn load_and_store_instr_after_mem_arg() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (memory 1)
+  (func
+    (i32.load offset=0 0))
+  (memory $memory 1))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, Position::new(4, 24)));
+    assert_json_snapshot!(response);
+}
