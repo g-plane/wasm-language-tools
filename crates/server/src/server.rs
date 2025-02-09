@@ -51,22 +51,18 @@ impl Server {
             };
             match message {
                 Message::Request { id, method, params } => {
-                    if let Some(message) = self.is_cancelled_by_server(id) {
-                        stdio::write(message).await?;
-                    } else {
-                        blocking::unblock({
-                            let service = self.service.fork();
-                            move || {
-                                if let Ok(Some(message)) =
-                                    Self::handle_request(service, id, method, params)
-                                {
-                                    stdio::write_sync(message)?;
-                                }
-                                Ok::<_, anyhow::Error>(())
+                    blocking::unblock({
+                        let service = self.service.fork();
+                        move || {
+                            if let Ok(Some(message)) =
+                                Self::handle_request(service, id, method, params)
+                            {
+                                stdio::write_sync(message)?;
                             }
-                        })
-                        .detach();
-                    }
+                            Ok::<_, anyhow::Error>(())
+                        }
+                    })
+                    .detach();
                 }
                 Message::OkResponse { id, result } => {
                     self.handle_response(id, result).await?;
@@ -144,6 +140,16 @@ impl Server {
         method: String,
         mut params: serde_json::Value,
     ) -> anyhow::Result<Option<Message>> {
+        if service.is_cancelled() {
+            return Ok(Some(Message::ErrResponse {
+                id,
+                error: ResponseError {
+                    code: error_codes::SERVER_CANCELLED,
+                    message: "This request is cancelled by server.".into(),
+                    data: None,
+                },
+            }));
+        }
         match try_cast_request::<CallHierarchyPrepare>(&method, params) {
             Ok(params) => {
                 return Ok(Some(Message::OkResponse {
@@ -498,20 +504,5 @@ impl Server {
             params: serde_json::to_value(self.service.publish_diagnostics(uri))?,
         })
         .await
-    }
-
-    fn is_cancelled_by_server(&self, request_id: u32) -> Option<Message> {
-        if self.service.is_cancelled() {
-            Some(Message::ErrResponse {
-                id: request_id,
-                error: ResponseError {
-                    code: error_codes::SERVER_CANCELLED,
-                    message: "This request is cancelled by server.".into(),
-                    data: None,
-                },
-            })
-        } else {
-            None
-        }
     }
 }
