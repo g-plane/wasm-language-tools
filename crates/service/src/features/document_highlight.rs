@@ -33,7 +33,7 @@ impl LanguageService {
             | SyntaxKind::NUM_TYPE
             | SyntaxKind::VEC_TYPE
             | SyntaxKind::ABBR_REF_TYPE
-            | SyntaxKind::HEAP_TYPE
+            | SyntaxKind::ABS_HEAP_TYPE
             | SyntaxKind::MEM_ARG
             | SyntaxKind::FLOAT
             | SyntaxKind::SHARE => {

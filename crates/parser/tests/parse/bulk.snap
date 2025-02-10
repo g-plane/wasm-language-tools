@@ -64,7 +64,8 @@ ROOT@0..422
             INSTR_NAME@114..122 "ref.null"
             WHITESPACE@122..123 " "
             IMMEDIATE@123..127
-              HEAP_TYPE@123..127 "func"
+              HEAP_TYPE@123..127
+                ABS_HEAP_TYPE@123..127 "func"
             R_PAREN@127..128 ")"
         WHITESPACE@128..129 " "
         ELEM_EXPR@129..141

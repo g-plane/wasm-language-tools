@@ -268,7 +268,8 @@ ROOT@0..608
         INSTR_NAME@504..512 "ref.null"
         WHITESPACE@512..513 " "
         IMMEDIATE@513..519
-          HEAP_TYPE@513..519 "extern"
+          HEAP_TYPE@513..519
+            ABS_HEAP_TYPE@513..519 "extern"
         R_PAREN@519..520 ")"
       R_PAREN@520..521 ")"
     WHITESPACE@521..524 "\n  "
@@ -292,7 +293,8 @@ ROOT@0..608
         INSTR_NAME@553..561 "ref.null"
         WHITESPACE@561..562 " "
         IMMEDIATE@562..568
-          HEAP_TYPE@562..568 "extern"
+          HEAP_TYPE@562..568
+            ABS_HEAP_TYPE@562..568 "extern"
         R_PAREN@568..569 ")"
       R_PAREN@569..570 ")"
     WHITESPACE@570..573 "\n  "
@@ -310,7 +312,8 @@ ROOT@0..608
         INSTR_NAME@590..598 "ref.null"
         WHITESPACE@598..599 " "
         IMMEDIATE@599..603
-          HEAP_TYPE@599..603 "func"
+          HEAP_TYPE@599..603
+            ABS_HEAP_TYPE@599..603 "func"
         R_PAREN@603..604 ")"
       R_PAREN@604..605 ")"
     WHITESPACE@605..606 "\n"

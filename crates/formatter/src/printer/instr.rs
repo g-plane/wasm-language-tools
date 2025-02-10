@@ -337,6 +337,8 @@ impl DocGen for Immediate {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         if let Some(type_use) = self.type_use() {
             type_use.doc(ctx)
+        } else if let Some(heap_type) = self.heap_type() {
+            heap_type.doc(ctx)
         } else if let Some(token) = self.syntax().first_token() {
             Doc::text(token.to_string())
         } else {

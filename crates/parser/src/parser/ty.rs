@@ -1,4 +1,5 @@
 use super::{
+    module::index,
     must, node, retry_once, tok,
     token::{ident, keyword, l_paren, r_paren, trivias_prefixed, unsigned_int, word},
     GreenResult, Input,
@@ -46,7 +47,14 @@ pub(super) fn val_type(input: &mut Input) -> GreenResult {
 }
 
 pub(super) fn heap_type(input: &mut Input) -> GreenResult {
-    word.verify_map(|word| matches!(word, "func" | "extern").then(|| tok(HEAP_TYPE, word)))
+    alt((abs_heap_type, index))
+        .context(Message::Name("heap type"))
+        .parse_next(input)
+        .map(|ty| node(HEAP_TYPE, [ty]))
+}
+
+fn abs_heap_type(input: &mut Input) -> GreenResult {
+    word.verify_map(|word| matches!(word, "func" | "extern").then(|| tok(ABS_HEAP_TYPE, word)))
         .parse_next(input)
 }
 

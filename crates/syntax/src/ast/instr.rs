@@ -1,4 +1,4 @@
-use super::{module::TypeUse, SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage};
+use super::{module::TypeUse, ty::HeapType, SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage};
 use rowan::{
     ast::{
         support::{child, children, token},
@@ -486,8 +486,8 @@ impl Immediate {
         token(&self.syntax, SyntaxKind::MEM_ARG)
     }
     #[inline]
-    pub fn heap_type(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::HEAP_TYPE)
+    pub fn heap_type(&self) -> Option<HeapType> {
+        child(&self.syntax)
     }
 }
 impl AstNode for Immediate {

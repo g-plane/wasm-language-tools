@@ -69,6 +69,18 @@ impl DocGen for GlobalType {
     }
 }
 
+impl DocGen for HeapType {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        if let Some(abs_heap_type) = self.abs_heap_type() {
+            Doc::text(abs_heap_type.text().to_string())
+        } else if let Some(index) = self.index() {
+            index.doc(ctx)
+        } else {
+            Doc::nil()
+        }
+    }
+}
+
 impl DocGen for Limits {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         let mut docs = Vec::with_capacity(2);
@@ -137,9 +149,11 @@ impl DocGen for Param {
 }
 
 impl DocGen for RefType {
-    fn doc(&self, _: &Ctx) -> Doc<'static> {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         if let Some(abbr) = self.abbr_ref_type() {
-            Doc::text(abbr.to_string())
+            Doc::text(abbr.text().to_string())
+        } else if let Some(heap_type) = self.heap_type() {
+            heap_type.doc(ctx)
         } else {
             Doc::nil()
         }

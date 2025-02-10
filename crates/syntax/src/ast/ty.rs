@@ -1,4 +1,4 @@
-use super::{SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage};
+use super::{module::Index, SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage};
 use crate::SyntaxElement;
 use rowan::{
     ast::{
@@ -98,6 +98,46 @@ impl AstNode for GlobalType {
     {
         if Self::can_cast(syntax.kind()) {
             Some(GlobalType { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct HeapType {
+    syntax: SyntaxNode,
+}
+impl HeapType {
+    #[inline]
+    pub fn abs_heap_type(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::ABS_HEAP_TYPE)
+    }
+    #[inline]
+    pub fn index(&self) -> Option<Index> {
+        child(&self.syntax)
+    }
+}
+impl AstNode for HeapType {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::HEAP_TYPE
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(HeapType { syntax })
         } else {
             None
         }
@@ -273,8 +313,8 @@ impl RefType {
         })
     }
     #[inline]
-    pub fn heap_type(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::HEAP_TYPE)
+    pub fn heap_type(&self) -> Option<HeapType> {
+        child(&self.syntax)
     }
     #[inline]
     pub fn r_paren_token(&self) -> Option<SyntaxToken> {

@@ -784,7 +784,7 @@ fn elem_expr(input: &mut Input) -> GreenResult {
     .parse_next(input)
 }
 
-fn index(input: &mut Input) -> GreenResult {
+pub(super) fn index(input: &mut Input) -> GreenResult {
     alt((ident, unsigned_int))
         .context(Message::Name("idx"))
         .parse_next(input)
