@@ -20,8 +20,8 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
 
     match instr_name.text() {
         "call" | "local.get" | "local.set" | "local.tee" | "global.get" | "global.set"
-        | "table.get" | "table.set" | "ref.func" | "memory.init" | "data.drop" | "elem.drop"
-        | "table.grow" | "table.size" | "table.fill" | "br" | "br_if" => {
+        | "table.get" | "table.set" | "ref.func" | "data.drop" | "elem.drop" | "table.grow"
+        | "table.size" | "table.fill" | "br" | "br_if" => {
             check_immediate::<true>(
                 diags,
                 &mut immediates,
@@ -173,6 +173,52 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 &mut immediates,
                 SyntaxKind::MEM_ARG,
                 "memory argument",
+                &instr_name,
+                line_index,
+            );
+        }
+        "memory.grow" | "memory.fill" => {
+            check_immediate::<false>(
+                diags,
+                &mut immediates,
+                INDEX,
+                "identifier or unsigned integer",
+                &instr_name,
+                line_index,
+            );
+        }
+        "memory.copy" => {
+            check_immediate::<false>(
+                diags,
+                &mut immediates,
+                INDEX,
+                "identifier or unsigned integer",
+                &instr_name,
+                line_index,
+            );
+            check_immediate::<false>(
+                diags,
+                &mut immediates,
+                INDEX,
+                "identifier or unsigned integer",
+                &instr_name,
+                line_index,
+            );
+        }
+        "memory.init" => {
+            check_immediate::<true>(
+                diags,
+                &mut immediates,
+                INDEX,
+                "identifier or unsigned integer",
+                &instr_name,
+                line_index,
+            );
+            check_immediate::<false>(
+                diags,
+                &mut immediates,
+                INDEX,
+                "identifier or unsigned integer",
                 &instr_name,
                 line_index,
             );

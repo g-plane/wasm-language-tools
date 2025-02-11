@@ -1,0 +1,41 @@
+---
+source: crates/service/tests/diagnostics/immediates.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 11,
+          "character": 16
+        },
+        "end": {
+          "line": 11,
+          "character": 19
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 25,
+          "character": 16
+        },
+        "end": {
+          "line": 25,
+          "character": 19
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "unexpected immediate"
+    }
+  ]
+}

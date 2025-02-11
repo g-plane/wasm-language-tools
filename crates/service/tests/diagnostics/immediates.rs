@@ -373,6 +373,131 @@ fn call_indirect_correct() {
 }
 
 #[test]
+fn memory_grow_and_fill() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+  (memory 1)
+  (func
+    i32.const 0
+    memory.grow
+    drop
+    i32.const 0
+    memory.grow 0
+    drop
+    i32.const 0
+    memory.grow 0.0
+    drop
+
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.fill
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.fill 0
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.fill 0.0))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn memory_copy() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+  (memory 1)
+  (func
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.copy
+
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.copy 0
+
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.copy 0 0
+
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.copy 0.0
+
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.copy 0 0.0
+
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.copy 0.0 0.0))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn memory_init() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+  (memory 1)
+  (func
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.init
+
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.init 0
+
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.init 0 0
+
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.init 0.0
+
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.init 0 0.0
+
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.init 0.0 0.0))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn expected_instr() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "(module (func (result i32) (i32.add 1 (i32.const 0))))";
