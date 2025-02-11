@@ -1107,14 +1107,14 @@ impl DocGen for ModuleFieldType {
             docs.push(Doc::text(ident.to_string()));
             trivias = format_trivias_after_token(ident, ctx);
         }
-        if let Some(func_type) = self.func_type() {
+        if let Some(sub_type) = self.sub_type() {
             if trivias.is_empty() {
                 docs.push(Doc::space());
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(func_type.doc(ctx));
-            trivias = format_trivias_after_node(func_type, ctx);
+            docs.push(sub_type.doc(ctx));
+            trivias = format_trivias_after_node(sub_type, ctx);
         }
         docs.append(&mut trivias);
         docs.push(Doc::text(")"));

@@ -58,7 +58,7 @@ fn abs_heap_type(input: &mut Input) -> GreenResult {
         .parse_next(input)
 }
 
-pub(super) fn func_type(input: &mut Input) -> GreenResult {
+fn func_type(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("func")),
@@ -133,6 +133,14 @@ pub(super) fn result(input: &mut Input) -> GreenResult {
             }
             node(RESULT, children)
         })
+}
+
+fn comp_type(input: &mut Input) -> GreenResult {
+    func_type.parse_next(input)
+}
+
+pub(super) fn sub_type(input: &mut Input) -> GreenResult {
+    comp_type.parse_next(input).map(|ty| node(SUB_TYPE, [ty]))
 }
 
 pub(super) fn table_type(input: &mut Input) -> GreenResult {

@@ -4,7 +4,7 @@ use super::{
     token::{
         ident, keyword, l_paren, r_paren, string, trivias, trivias_prefixed, unsigned_int, word,
     },
-    ty::{func_type, global_type, memory_type, param, ref_type, result, table_type, val_type},
+    ty::{global_type, memory_type, param, ref_type, result, sub_type, table_type, val_type},
     GreenElement, GreenResult, Input,
 };
 use crate::error::{Message, SyntaxError};
@@ -397,7 +397,7 @@ fn module_field_type(input: &mut Input) -> GreenResult {
         l_paren,
         trivias_prefixed(keyword("type")),
         opt(trivias_prefixed(ident)),
-        must(retry_once(func_type, [])),
+        must(retry_once(sub_type, [])),
         r_paren,
     )
         .parse_next(input)

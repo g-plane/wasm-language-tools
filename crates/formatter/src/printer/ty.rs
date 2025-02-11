@@ -1,6 +1,16 @@
 use super::*;
 use tiny_pretty::Doc;
 
+impl DocGen for CompType {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        match self {
+            CompType::Array(..) => todo!(),
+            CompType::Struct(..) => todo!(),
+            CompType::Func(func_type) => func_type.doc(ctx),
+        }
+    }
+}
+
 impl DocGen for FuncType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         let mut docs = Vec::with_capacity(2);
@@ -185,6 +195,16 @@ impl DocGen for Result {
         docs.append(&mut trivias);
         docs.push(Doc::text(")"));
         Doc::list(docs)
+    }
+}
+
+impl DocGen for SubType {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        if let Some(comp_type) = self.comp_type() {
+            comp_type.doc(ctx)
+        } else {
+            Doc::nil()
+        }
     }
 }
 

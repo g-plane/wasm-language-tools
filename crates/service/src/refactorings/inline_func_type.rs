@@ -9,7 +9,7 @@ use lsp_types::{CodeAction, CodeActionKind, Range, TextEdit, WorkspaceEdit};
 use rowan::ast::AstNode;
 use std::collections::HashMap;
 use wat_syntax::{
-    ast::{ModuleFieldType, TypeUse},
+    ast::{CompType, ModuleFieldType, TypeUse},
     SyntaxNode,
 };
 
@@ -29,7 +29,12 @@ pub fn act(
     let index = type_use.index()?;
     let index = index.syntax();
     let type_def = symbol_table.find_defs(SymbolKey::new(index))?.next()?;
-    let func_type = ModuleFieldType::cast(type_def.key.to_node(root))?.func_type()?;
+    let CompType::Func(func_type) = ModuleFieldType::cast(type_def.key.to_node(root))?
+        .sub_type()?
+        .comp_type()?
+    else {
+        return None;
+    };
     func_type.syntax().first_child()?; // skip empty func type
     let mut new_text = String::with_capacity(8);
     for node in func_type.syntax().children() {

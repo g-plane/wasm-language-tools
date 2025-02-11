@@ -64,12 +64,20 @@ pub(crate) mod ast {
     use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
     pub fn find_func_type_of_type_def(green: &GreenNode) -> Option<GreenNode> {
-        green.children().find_map(|child| match child {
-            NodeOrToken::Node(node) if node.kind() == SyntaxKind::FUNC_TYPE.into() => {
-                Some(node.to_owned())
-            }
-            _ => None,
-        })
+        green
+            .children()
+            .find_map(|child| match child {
+                NodeOrToken::Node(node) if node.kind() == SyntaxKind::SUB_TYPE.into() => Some(node),
+                _ => None,
+            })
+            .and_then(|sub_type| {
+                sub_type.children().find_map(|child| match child {
+                    NodeOrToken::Node(node) if node.kind() == SyntaxKind::FUNC_TYPE.into() => {
+                        Some(node.to_owned())
+                    }
+                    _ => None,
+                })
+            })
     }
 
     pub fn is_call(node: &SyntaxNode) -> bool {

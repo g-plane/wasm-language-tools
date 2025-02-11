@@ -1,6 +1,6 @@
 use super::{
     instr::Instr,
-    ty::{FuncType, GlobalType, MemoryType, Param, RefType, Result, TableType, ValType},
+    ty::{GlobalType, MemoryType, Param, RefType, Result, SubType, TableType, ValType},
     SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage,
 };
 use rowan::{
@@ -1652,7 +1652,7 @@ impl ModuleFieldType {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn func_type(&self) -> Option<FuncType> {
+    pub fn sub_type(&self) -> Option<SubType> {
         child(&self.syntax)
     }
     #[inline]
