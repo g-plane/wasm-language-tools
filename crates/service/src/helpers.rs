@@ -55,7 +55,7 @@ where
 pub fn can_produce_never(instr_name: &str) -> bool {
     matches!(
         instr_name,
-        "unreachable" | "return" | "return_call" | "br" | "br_table"
+        "unreachable" | "return" | "br" | "br_table" | "return_call" | "return_call_indirect"
     )
 }
 
