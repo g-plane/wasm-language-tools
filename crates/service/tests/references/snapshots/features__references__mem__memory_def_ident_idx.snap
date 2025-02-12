@@ -1,0 +1,58 @@
+---
+source: crates/service/tests/references/mem.rs
+expression: include_decl
+---
+[
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 2,
+        "character": 12
+      },
+      "end": {
+        "line": 2,
+        "character": 19
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 23
+      },
+      "end": {
+        "line": 3,
+        "character": 30
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 4,
+        "character": 18
+      },
+      "end": {
+        "line": 4,
+        "character": 25
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 6,
+        "character": 19
+      },
+      "end": {
+        "line": 6,
+        "character": 26
+      }
+    }
+  }
+]
