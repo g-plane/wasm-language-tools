@@ -408,6 +408,18 @@ fn add_cmp_ctx_for_immediates(
                     ctx.push(CmpCtx::Table);
                 }
             }
+            Some(("memory", "size" | "grow" | "fill" | "copy")) => ctx.push(CmpCtx::Memory),
+            Some(("memory", "init")) => {
+                if node.kind() == SyntaxKind::IMMEDIATE
+                    && node
+                        .prev_sibling()
+                        .is_none_or(|prev| prev.kind() != SyntaxKind::IMMEDIATE)
+                    || PlainInstr::cast(node.clone())
+                        .is_some_and(|instr| instr.immediates().count() == 0)
+                {
+                    ctx.push(CmpCtx::Memory);
+                }
+            }
             Some((_, snd)) if snd.starts_with("load") || snd.starts_with("store") => {
                 if node.kind() == SyntaxKind::IMMEDIATE
                     && node
