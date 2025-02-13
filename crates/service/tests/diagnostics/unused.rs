@@ -249,6 +249,22 @@ fn memory_explicit() {
 }
 
 #[test]
+fn memory_dot() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+  (func $_
+    memory.size 0
+    drop)
+  (memory 1))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
+
+#[test]
 fn table_unused() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = r#"

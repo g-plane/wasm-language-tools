@@ -380,23 +380,38 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                         }
                     }
                     Some(
-                        "i32.load" | "i64.load" | "f32.load" | "f64.load" | "i32.load8_s"
-                        | "i32.load8_u" | "i32.load16_s" | "i32.load16_u" | "i64.load8_s"
-                        | "i64.load8_u" | "i64.load16_s" | "i64.load16_u" | "i64.load32_s"
-                        | "i64.load32_u" | "i32.store" | "i64.store" | "f32.store" | "f64.store"
-                        | "i32.store8" | "i32.store16" | "i64.store8" | "i64.store16"
-                        | "i64.store32" | "v128.load" | "v128.load8x8_s" | "v128.load8x8_u"
-                        | "v128.load16x4_s" | "v128.load16x4_u" | "v128.load32x2_s"
-                        | "v128.load32x2_u" | "v128.load8_splat" | "v128.load16_splat"
-                        | "v128.load32_splat" | "v128.load64_splat" | "v128.load32_zero"
-                        | "v128.load64_zero" | "v128.store" | "v128.load8_lane"
-                        | "v128.load16_lane" | "v128.load32_lane" | "v128.load64_lane"
-                        | "v128.store8_lane" | "v128.store16_lane" | "v128.store32_lane"
-                        | "v128.store64_lane",
+                        "memory.size" | "memory.grow" | "memory.fill" | "memory.init" | "i32.load"
+                        | "i64.load" | "f32.load" | "f64.load" | "i32.load8_s" | "i32.load8_u"
+                        | "i32.load16_s" | "i32.load16_u" | "i64.load8_s" | "i64.load8_u"
+                        | "i64.load16_s" | "i64.load16_u" | "i64.load32_s" | "i64.load32_u"
+                        | "i32.store" | "i64.store" | "f32.store" | "f64.store" | "i32.store8"
+                        | "i32.store16" | "i64.store8" | "i64.store16" | "i64.store32"
+                        | "v128.load" | "v128.load8x8_s" | "v128.load8x8_u" | "v128.load16x4_s"
+                        | "v128.load16x4_u" | "v128.load32x2_s" | "v128.load32x2_u"
+                        | "v128.load8_splat" | "v128.load16_splat" | "v128.load32_splat"
+                        | "v128.load64_splat" | "v128.load32_zero" | "v128.load64_zero"
+                        | "v128.store" | "v128.load8_lane" | "v128.load16_lane"
+                        | "v128.load32_lane" | "v128.load64_lane" | "v128.store8_lane"
+                        | "v128.store16_lane" | "v128.store32_lane" | "v128.store64_lane",
                     ) => {
                         if let Some(symbol) =
                             create_first_optional_ref_symbol(db, instr, SymbolKind::MemoryRef)
                         {
+                            symbols.push(symbol);
+                        }
+                    }
+                    Some("memory.copy") => {
+                        let Some(region) = node
+                            .ancestors()
+                            .find(|node| node.kind() == SyntaxKind::MODULE)
+                            .map(|node| SymbolKey::new(&node))
+                        else {
+                            continue;
+                        };
+                        let mut children = node.children();
+                        if let Some(symbol) = children.next().and_then(|node| {
+                            create_ref_symbol(db, &node, region, SymbolKind::MemoryRef)
+                        }) {
                             symbols.push(symbol);
                         }
                     }

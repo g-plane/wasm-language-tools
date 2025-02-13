@@ -12,7 +12,12 @@ fn memory_def_int_idx() {
     (export "" (memory 0))
     (data (memory 0))
     (func
-        (i32.store))
+        (i32.store)
+        (memory.size 0)
+        (memory.grow 0)
+        (memory.fill 0)
+        (memory.copy 0 1)
+        (memory.init 0 0))
 )
 (module (memory))
 "#;
@@ -34,7 +39,12 @@ fn memory_def_ident_idx() {
     (export "" (memory $memory))
     (data (memory $memory))
     (func
-        (f32.store $memory))
+        (f32.store $memory)
+        (memory.size $memory)
+        (memory.grow $memory)
+        (memory.fill $memory)
+        (memory.copy $memory 1)
+        (memory.init $memory 0))
 )
 (module (memory $memory))
 "#;
@@ -56,7 +66,12 @@ fn memory_ref_int_idx() {
     (export "" (memory 0))
     (data (memory 0))
     (func
-        (i64.store))
+        (i64.store)
+        (memory.size 0)
+        (memory.grow 0)
+        (memory.fill 0)
+        (memory.copy 0 1)
+        (memory.init 0 0))
 )
 (module (memory))
 "#;
@@ -78,7 +93,12 @@ fn memory_ref_ident_idx() {
     (export "" (memory $memory))
     (data (memory $memory))
     (func
-        (f64.store $memory))
+        (f64.store $memory)
+        (memory.size $memory)
+        (memory.grow $memory)
+        (memory.fill $memory)
+        (memory.copy $memory 1)
+        (memory.init $memory 0))
 )
 (module (memory $memory))
 "#;

@@ -54,5 +54,70 @@ expression: include_decl
         "character": 19
       }
     }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 7,
+        "character": 21
+      },
+      "end": {
+        "line": 7,
+        "character": 22
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 8,
+        "character": 21
+      },
+      "end": {
+        "line": 8,
+        "character": 22
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 9,
+        "character": 21
+      },
+      "end": {
+        "line": 9,
+        "character": 22
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 10,
+        "character": 21
+      },
+      "end": {
+        "line": 10,
+        "character": 22
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 11,
+        "character": 21
+      },
+      "end": {
+        "line": 11,
+        "character": 22
+      }
+    }
   }
 ]

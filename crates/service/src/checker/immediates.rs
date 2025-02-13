@@ -177,7 +177,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 line_index,
             );
         }
-        "memory.grow" | "memory.fill" => {
+        "memory.size" | "memory.grow" | "memory.fill" => {
             check_immediate::<false>(
                 diags,
                 &mut immediates,
