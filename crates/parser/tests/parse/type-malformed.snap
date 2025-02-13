@@ -86,7 +86,7 @@ error: expected `(`
 4 │   (type)
   │        ^
 
-error: expected `func`
+error: expected `sub`
   ┌─ type-malformed.wat:5:10
   │
 5 │   (type ())

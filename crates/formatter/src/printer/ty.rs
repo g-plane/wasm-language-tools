@@ -4,8 +4,8 @@ use tiny_pretty::Doc;
 impl DocGen for CompType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         match self {
-            CompType::Array(..) => todo!(),
-            CompType::Struct(..) => todo!(),
+            CompType::Array(array_type) => Doc::text(array_type.syntax().to_string()),
+            CompType::Struct(struct_type) => Doc::text(struct_type.syntax().to_string()),
             CompType::Func(func_type) => func_type.doc(ctx),
         }
     }

@@ -1,0 +1,320 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..405
+  MODULE@0..404
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_TYPE@10..25
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "type"
+      WHITESPACE@15..16 " "
+      SUB_TYPE@16..24
+        STRUCT_TYPE@16..24
+          L_PAREN@16..17 "("
+          KEYWORD@17..23 "struct"
+          R_PAREN@23..24 ")"
+      R_PAREN@24..25 ")"
+    WHITESPACE@25..28 "\n  "
+    MODULE_FIELD_TYPE@28..51
+      L_PAREN@28..29 "("
+      KEYWORD@29..33 "type"
+      WHITESPACE@33..34 " "
+      SUB_TYPE@34..50
+        STRUCT_TYPE@34..50
+          L_PAREN@34..35 "("
+          KEYWORD@35..41 "struct"
+          WHITESPACE@41..42 " "
+          FIELD@42..49
+            L_PAREN@42..43 "("
+            KEYWORD@43..48 "field"
+            R_PAREN@48..49 ")"
+          R_PAREN@49..50 ")"
+      R_PAREN@50..51 ")"
+    WHITESPACE@51..54 "\n  "
+    MODULE_FIELD_TYPE@54..80
+      L_PAREN@54..55 "("
+      KEYWORD@55..59 "type"
+      WHITESPACE@59..60 " "
+      SUB_TYPE@60..79
+        STRUCT_TYPE@60..79
+          L_PAREN@60..61 "("
+          KEYWORD@61..67 "struct"
+          WHITESPACE@67..68 " "
+          FIELD@68..78
+            L_PAREN@68..69 "("
+            KEYWORD@69..74 "field"
+            WHITESPACE@74..75 " "
+            FIELD_TYPE@75..77
+              STORAGE_TYPE@75..77
+                PACKED_TYPE@75..77 "i8"
+            R_PAREN@77..78 ")"
+          R_PAREN@78..79 ")"
+      R_PAREN@79..80 ")"
+    WHITESPACE@80..83 "\n  "
+    MODULE_FIELD_TYPE@83..118
+      L_PAREN@83..84 "("
+      KEYWORD@84..88 "type"
+      WHITESPACE@88..89 " "
+      SUB_TYPE@89..117
+        STRUCT_TYPE@89..117
+          L_PAREN@89..90 "("
+          KEYWORD@90..96 "struct"
+          WHITESPACE@96..97 " "
+          FIELD@97..116
+            L_PAREN@97..98 "("
+            KEYWORD@98..103 "field"
+            WHITESPACE@103..104 " "
+            FIELD_TYPE@104..106
+              STORAGE_TYPE@104..106
+                PACKED_TYPE@104..106 "i8"
+            WHITESPACE@106..107 " "
+            FIELD_TYPE@107..109
+              STORAGE_TYPE@107..109
+                PACKED_TYPE@107..109 "i8"
+            WHITESPACE@109..110 " "
+            FIELD_TYPE@110..112
+              STORAGE_TYPE@110..112
+                PACKED_TYPE@110..112 "i8"
+            WHITESPACE@112..113 " "
+            FIELD_TYPE@113..115
+              STORAGE_TYPE@113..115
+                PACKED_TYPE@113..115 "i8"
+            R_PAREN@115..116 ")"
+          R_PAREN@116..117 ")"
+      R_PAREN@117..118 ")"
+    WHITESPACE@118..121 "\n  "
+    MODULE_FIELD_TYPE@121..168
+      L_PAREN@121..122 "("
+      KEYWORD@122..126 "type"
+      WHITESPACE@126..127 " "
+      SUB_TYPE@127..167
+        STRUCT_TYPE@127..167
+          L_PAREN@127..128 "("
+          KEYWORD@128..134 "struct"
+          WHITESPACE@134..135 " "
+          FIELD@135..150
+            L_PAREN@135..136 "("
+            KEYWORD@136..141 "field"
+            WHITESPACE@141..142 " "
+            IDENT@142..145 "$x1"
+            WHITESPACE@145..146 " "
+            FIELD_TYPE@146..149
+              STORAGE_TYPE@146..149
+                VAL_TYPE@146..149
+                  NUM_TYPE@146..149 "i32"
+            R_PAREN@149..150 ")"
+          WHITESPACE@150..151 " "
+          FIELD@151..166
+            L_PAREN@151..152 "("
+            KEYWORD@152..157 "field"
+            WHITESPACE@157..158 " "
+            IDENT@158..161 "$y1"
+            WHITESPACE@161..162 " "
+            FIELD_TYPE@162..165
+              STORAGE_TYPE@162..165
+                VAL_TYPE@162..165
+                  NUM_TYPE@162..165 "i32"
+            R_PAREN@165..166 ")"
+          R_PAREN@166..167 ")"
+      R_PAREN@167..168 ")"
+    WHITESPACE@168..171 "\n  "
+    MODULE_FIELD_TYPE@171..253
+      L_PAREN@171..172 "("
+      KEYWORD@172..176 "type"
+      WHITESPACE@176..177 " "
+      SUB_TYPE@177..252
+        STRUCT_TYPE@177..252
+          L_PAREN@177..178 "("
+          KEYWORD@178..184 "struct"
+          WHITESPACE@184..185 " "
+          FIELD@185..251
+            L_PAREN@185..186 "("
+            KEYWORD@186..191 "field"
+            WHITESPACE@191..192 " "
+            FIELD_TYPE@192..194
+              STORAGE_TYPE@192..194
+                PACKED_TYPE@192..194 "i8"
+            WHITESPACE@194..195 " "
+            FIELD_TYPE@195..198
+              STORAGE_TYPE@195..198
+                PACKED_TYPE@195..198 "i16"
+            WHITESPACE@198..199 " "
+            FIELD_TYPE@199..202
+              STORAGE_TYPE@199..202
+                VAL_TYPE@199..202
+                  NUM_TYPE@199..202 "i32"
+            WHITESPACE@202..203 " "
+            FIELD_TYPE@203..206
+              STORAGE_TYPE@203..206
+                VAL_TYPE@203..206
+                  NUM_TYPE@203..206 "i64"
+            WHITESPACE@206..207 " "
+            FIELD_TYPE@207..210
+              STORAGE_TYPE@207..210
+                VAL_TYPE@207..210
+                  NUM_TYPE@207..210 "f32"
+            WHITESPACE@210..211 " "
+            FIELD_TYPE@211..214
+              STORAGE_TYPE@211..214
+                VAL_TYPE@211..214
+                  NUM_TYPE@211..214 "f64"
+            WHITESPACE@214..215 " "
+            FIELD_TYPE@215..221
+              STORAGE_TYPE@215..221
+                VAL_TYPE@215..221
+                  REF_TYPE@215..221
+                    ABBR_REF_TYPE@215..221 "anyref"
+            WHITESPACE@221..222 " "
+            FIELD_TYPE@222..229
+              STORAGE_TYPE@222..229
+                VAL_TYPE@222..229
+                  REF_TYPE@222..229
+                    ABBR_REF_TYPE@222..229 "funcref"
+            WHITESPACE@229..230 " "
+            FIELD_TYPE@230..237
+              STORAGE_TYPE@230..237
+                VAL_TYPE@230..237
+                  REF_TYPE@230..237
+                    L_PAREN@230..231 "("
+                    KEYWORD@231..234 "ref"
+                    WHITESPACE@234..235 " "
+                    HEAP_TYPE@235..236
+                      INDEX@235..236
+                        UNSIGNED_INT@235..236 "0"
+                    R_PAREN@236..237 ")"
+            WHITESPACE@237..238 " "
+            FIELD_TYPE@238..250
+              STORAGE_TYPE@238..250
+                VAL_TYPE@238..250
+                  REF_TYPE@238..250
+                    L_PAREN@238..239 "("
+                    KEYWORD@239..242 "ref"
+                    WHITESPACE@242..243 " "
+                    KEYWORD@243..247 "null"
+                    WHITESPACE@247..248 " "
+                    HEAP_TYPE@248..249
+                      INDEX@248..249
+                        UNSIGNED_INT@248..249 "1"
+                    R_PAREN@249..250 ")"
+            R_PAREN@250..251 ")"
+          R_PAREN@251..252 ")"
+      R_PAREN@252..253 ")"
+    WHITESPACE@253..256 "\n  "
+    MODULE_FIELD_TYPE@256..336
+      L_PAREN@256..257 "("
+      KEYWORD@257..261 "type"
+      WHITESPACE@261..262 " "
+      SUB_TYPE@262..335
+        STRUCT_TYPE@262..335
+          L_PAREN@262..263 "("
+          KEYWORD@263..269 "struct"
+          WHITESPACE@269..270 " "
+          FIELD@270..288
+            L_PAREN@270..271 "("
+            KEYWORD@271..276 "field"
+            WHITESPACE@276..277 " "
+            FIELD_TYPE@277..280
+              STORAGE_TYPE@277..280
+                VAL_TYPE@277..280
+                  NUM_TYPE@277..280 "i32"
+            WHITESPACE@280..281 " "
+            FIELD_TYPE@281..284
+              STORAGE_TYPE@281..284
+                VAL_TYPE@281..284
+                  NUM_TYPE@281..284 "i64"
+            WHITESPACE@284..285 " "
+            FIELD_TYPE@285..287
+              STORAGE_TYPE@285..287
+                PACKED_TYPE@285..287 "i8"
+            R_PAREN@287..288 ")"
+          WHITESPACE@288..289 " "
+          FIELD@289..296
+            L_PAREN@289..290 "("
+            KEYWORD@290..295 "field"
+            R_PAREN@295..296 ")"
+          WHITESPACE@296..297 " "
+          FIELD@297..304
+            L_PAREN@297..298 "("
+            KEYWORD@298..303 "field"
+            R_PAREN@303..304 ")"
+          WHITESPACE@304..305 " "
+          FIELD@305..334
+            L_PAREN@305..306 "("
+            KEYWORD@306..311 "field"
+            WHITESPACE@311..312 " "
+            FIELD_TYPE@312..326
+              STORAGE_TYPE@312..326
+                VAL_TYPE@312..326
+                  REF_TYPE@312..326
+                    L_PAREN@312..313 "("
+                    KEYWORD@313..316 "ref"
+                    WHITESPACE@316..317 " "
+                    KEYWORD@317..321 "null"
+                    WHITESPACE@321..322 " "
+                    HEAP_TYPE@322..325
+                      ABS_HEAP_TYPE@322..325 "i31"
+                    R_PAREN@325..326 ")"
+            WHITESPACE@326..327 " "
+            FIELD_TYPE@327..333
+              STORAGE_TYPE@327..333
+                VAL_TYPE@327..333
+                  REF_TYPE@327..333
+                    ABBR_REF_TYPE@327..333 "anyref"
+            R_PAREN@333..334 ")"
+          R_PAREN@334..335 ")"
+      R_PAREN@335..336 ")"
+    WHITESPACE@336..339 "\n  "
+    MODULE_FIELD_TYPE@339..402
+      L_PAREN@339..340 "("
+      KEYWORD@340..344 "type"
+      WHITESPACE@344..345 " "
+      SUB_TYPE@345..401
+        STRUCT_TYPE@345..401
+          L_PAREN@345..346 "("
+          KEYWORD@346..352 "struct"
+          WHITESPACE@352..353 " "
+          FIELD@353..368
+            L_PAREN@353..354 "("
+            KEYWORD@354..359 "field"
+            WHITESPACE@359..360 " "
+            IDENT@360..363 "$x2"
+            WHITESPACE@363..364 " "
+            FIELD_TYPE@364..367
+              STORAGE_TYPE@364..367
+                VAL_TYPE@364..367
+                  NUM_TYPE@364..367 "i32"
+            R_PAREN@367..368 ")"
+          WHITESPACE@368..369 " "
+          FIELD@369..384
+            L_PAREN@369..370 "("
+            KEYWORD@370..375 "field"
+            WHITESPACE@375..376 " "
+            FIELD_TYPE@376..379
+              STORAGE_TYPE@376..379
+                VAL_TYPE@376..379
+                  NUM_TYPE@376..379 "f32"
+            WHITESPACE@379..380 " "
+            FIELD_TYPE@380..383
+              STORAGE_TYPE@380..383
+                VAL_TYPE@380..383
+                  NUM_TYPE@380..383 "f64"
+            R_PAREN@383..384 ")"
+          WHITESPACE@384..385 " "
+          FIELD@385..400
+            L_PAREN@385..386 "("
+            KEYWORD@386..391 "field"
+            WHITESPACE@391..392 " "
+            IDENT@392..395 "$y2"
+            WHITESPACE@395..396 " "
+            FIELD_TYPE@396..399
+              STORAGE_TYPE@396..399
+                VAL_TYPE@396..399
+                  NUM_TYPE@396..399 "i32"
+            R_PAREN@399..400 ")"
+          R_PAREN@400..401 ")"
+      R_PAREN@401..402 ")"
+    WHITESPACE@402..403 "\n"
+    R_PAREN@403..404 ")"
+  WHITESPACE@404..405 "\n"

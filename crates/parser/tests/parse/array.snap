@@ -1,0 +1,411 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..540
+  MODULE@0..539
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_TYPE@10..27
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "type"
+      WHITESPACE@15..16 " "
+      SUB_TYPE@16..26
+        ARRAY_TYPE@16..26
+          L_PAREN@16..17 "("
+          KEYWORD@17..22 "array"
+          WHITESPACE@22..23 " "
+          FIELD_TYPE@23..25
+            STORAGE_TYPE@23..25
+              PACKED_TYPE@23..25 "i8"
+          R_PAREN@25..26 ")"
+      R_PAREN@26..27 ")"
+    WHITESPACE@27..30 "\n  "
+    MODULE_FIELD_TYPE@30..48
+      L_PAREN@30..31 "("
+      KEYWORD@31..35 "type"
+      WHITESPACE@35..36 " "
+      SUB_TYPE@36..47
+        ARRAY_TYPE@36..47
+          L_PAREN@36..37 "("
+          KEYWORD@37..42 "array"
+          WHITESPACE@42..43 " "
+          FIELD_TYPE@43..46
+            STORAGE_TYPE@43..46
+              PACKED_TYPE@43..46 "i16"
+          R_PAREN@46..47 ")"
+      R_PAREN@47..48 ")"
+    WHITESPACE@48..51 "\n  "
+    MODULE_FIELD_TYPE@51..69
+      L_PAREN@51..52 "("
+      KEYWORD@52..56 "type"
+      WHITESPACE@56..57 " "
+      SUB_TYPE@57..68
+        ARRAY_TYPE@57..68
+          L_PAREN@57..58 "("
+          KEYWORD@58..63 "array"
+          WHITESPACE@63..64 " "
+          FIELD_TYPE@64..67
+            STORAGE_TYPE@64..67
+              VAL_TYPE@64..67
+                NUM_TYPE@64..67 "i32"
+          R_PAREN@67..68 ")"
+      R_PAREN@68..69 ")"
+    WHITESPACE@69..72 "\n  "
+    MODULE_FIELD_TYPE@72..90
+      L_PAREN@72..73 "("
+      KEYWORD@73..77 "type"
+      WHITESPACE@77..78 " "
+      SUB_TYPE@78..89
+        ARRAY_TYPE@78..89
+          L_PAREN@78..79 "("
+          KEYWORD@79..84 "array"
+          WHITESPACE@84..85 " "
+          FIELD_TYPE@85..88
+            STORAGE_TYPE@85..88
+              VAL_TYPE@85..88
+                NUM_TYPE@85..88 "i64"
+          R_PAREN@88..89 ")"
+      R_PAREN@89..90 ")"
+    WHITESPACE@90..93 "\n  "
+    MODULE_FIELD_TYPE@93..111
+      L_PAREN@93..94 "("
+      KEYWORD@94..98 "type"
+      WHITESPACE@98..99 " "
+      SUB_TYPE@99..110
+        ARRAY_TYPE@99..110
+          L_PAREN@99..100 "("
+          KEYWORD@100..105 "array"
+          WHITESPACE@105..106 " "
+          FIELD_TYPE@106..109
+            STORAGE_TYPE@106..109
+              VAL_TYPE@106..109
+                NUM_TYPE@106..109 "f32"
+          R_PAREN@109..110 ")"
+      R_PAREN@110..111 ")"
+    WHITESPACE@111..114 "\n  "
+    MODULE_FIELD_TYPE@114..132
+      L_PAREN@114..115 "("
+      KEYWORD@115..119 "type"
+      WHITESPACE@119..120 " "
+      SUB_TYPE@120..131
+        ARRAY_TYPE@120..131
+          L_PAREN@120..121 "("
+          KEYWORD@121..126 "array"
+          WHITESPACE@126..127 " "
+          FIELD_TYPE@127..130
+            STORAGE_TYPE@127..130
+              VAL_TYPE@127..130
+                NUM_TYPE@127..130 "f64"
+          R_PAREN@130..131 ")"
+      R_PAREN@131..132 ")"
+    WHITESPACE@132..135 "\n  "
+    MODULE_FIELD_TYPE@135..156
+      L_PAREN@135..136 "("
+      KEYWORD@136..140 "type"
+      WHITESPACE@140..141 " "
+      SUB_TYPE@141..155
+        ARRAY_TYPE@141..155
+          L_PAREN@141..142 "("
+          KEYWORD@142..147 "array"
+          WHITESPACE@147..148 " "
+          FIELD_TYPE@148..154
+            STORAGE_TYPE@148..154
+              VAL_TYPE@148..154
+                REF_TYPE@148..154
+                  ABBR_REF_TYPE@148..154 "anyref"
+          R_PAREN@154..155 ")"
+      R_PAREN@155..156 ")"
+    WHITESPACE@156..159 "\n  "
+    MODULE_FIELD_TYPE@159..186
+      L_PAREN@159..160 "("
+      KEYWORD@160..164 "type"
+      WHITESPACE@164..165 " "
+      SUB_TYPE@165..185
+        ARRAY_TYPE@165..185
+          L_PAREN@165..166 "("
+          KEYWORD@166..171 "array"
+          WHITESPACE@171..172 " "
+          FIELD_TYPE@172..184
+            STORAGE_TYPE@172..184
+              VAL_TYPE@172..184
+                REF_TYPE@172..184
+                  L_PAREN@172..173 "("
+                  KEYWORD@173..176 "ref"
+                  WHITESPACE@176..177 " "
+                  HEAP_TYPE@177..183
+                    ABS_HEAP_TYPE@177..183 "struct"
+                  R_PAREN@183..184 ")"
+          R_PAREN@184..185 ")"
+      R_PAREN@185..186 ")"
+    WHITESPACE@186..189 "\n  "
+    MODULE_FIELD_TYPE@189..211
+      L_PAREN@189..190 "("
+      KEYWORD@190..194 "type"
+      WHITESPACE@194..195 " "
+      SUB_TYPE@195..210
+        ARRAY_TYPE@195..210
+          L_PAREN@195..196 "("
+          KEYWORD@196..201 "array"
+          WHITESPACE@201..202 " "
+          FIELD_TYPE@202..209
+            STORAGE_TYPE@202..209
+              VAL_TYPE@202..209
+                REF_TYPE@202..209
+                  L_PAREN@202..203 "("
+                  KEYWORD@203..206 "ref"
+                  WHITESPACE@206..207 " "
+                  HEAP_TYPE@207..208
+                    INDEX@207..208
+                      UNSIGNED_INT@207..208 "0"
+                  R_PAREN@208..209 ")"
+          R_PAREN@209..210 ")"
+      R_PAREN@210..211 ")"
+    WHITESPACE@211..214 "\n  "
+    MODULE_FIELD_TYPE@214..241
+      L_PAREN@214..215 "("
+      KEYWORD@215..219 "type"
+      WHITESPACE@219..220 " "
+      SUB_TYPE@220..240
+        ARRAY_TYPE@220..240
+          L_PAREN@220..221 "("
+          KEYWORD@221..226 "array"
+          WHITESPACE@226..227 " "
+          FIELD_TYPE@227..239
+            STORAGE_TYPE@227..239
+              VAL_TYPE@227..239
+                REF_TYPE@227..239
+                  L_PAREN@227..228 "("
+                  KEYWORD@228..231 "ref"
+                  WHITESPACE@231..232 " "
+                  KEYWORD@232..236 "null"
+                  WHITESPACE@236..237 " "
+                  HEAP_TYPE@237..238
+                    INDEX@237..238
+                      UNSIGNED_INT@237..238 "1"
+                  R_PAREN@238..239 ")"
+          R_PAREN@239..240 ")"
+      R_PAREN@240..241 ")"
+    WHITESPACE@241..244 "\n  "
+    MODULE_FIELD_TYPE@244..267
+      L_PAREN@244..245 "("
+      KEYWORD@245..249 "type"
+      WHITESPACE@249..250 " "
+      SUB_TYPE@250..266
+        ARRAY_TYPE@250..266
+          L_PAREN@250..251 "("
+          KEYWORD@251..256 "array"
+          WHITESPACE@256..257 " "
+          FIELD_TYPE@257..265
+            L_PAREN@257..258 "("
+            KEYWORD@258..261 "mut"
+            WHITESPACE@261..262 " "
+            STORAGE_TYPE@262..264
+              PACKED_TYPE@262..264 "i8"
+            R_PAREN@264..265 ")"
+          R_PAREN@265..266 ")"
+      R_PAREN@266..267 ")"
+    WHITESPACE@267..270 "\n  "
+    MODULE_FIELD_TYPE@270..294
+      L_PAREN@270..271 "("
+      KEYWORD@271..275 "type"
+      WHITESPACE@275..276 " "
+      SUB_TYPE@276..293
+        ARRAY_TYPE@276..293
+          L_PAREN@276..277 "("
+          KEYWORD@277..282 "array"
+          WHITESPACE@282..283 " "
+          FIELD_TYPE@283..292
+            L_PAREN@283..284 "("
+            KEYWORD@284..287 "mut"
+            WHITESPACE@287..288 " "
+            STORAGE_TYPE@288..291
+              PACKED_TYPE@288..291 "i16"
+            R_PAREN@291..292 ")"
+          R_PAREN@292..293 ")"
+      R_PAREN@293..294 ")"
+    WHITESPACE@294..297 "\n  "
+    MODULE_FIELD_TYPE@297..321
+      L_PAREN@297..298 "("
+      KEYWORD@298..302 "type"
+      WHITESPACE@302..303 " "
+      SUB_TYPE@303..320
+        ARRAY_TYPE@303..320
+          L_PAREN@303..304 "("
+          KEYWORD@304..309 "array"
+          WHITESPACE@309..310 " "
+          FIELD_TYPE@310..319
+            L_PAREN@310..311 "("
+            KEYWORD@311..314 "mut"
+            WHITESPACE@314..315 " "
+            STORAGE_TYPE@315..318
+              VAL_TYPE@315..318
+                NUM_TYPE@315..318 "i32"
+            R_PAREN@318..319 ")"
+          R_PAREN@319..320 ")"
+      R_PAREN@320..321 ")"
+    WHITESPACE@321..324 "\n  "
+    MODULE_FIELD_TYPE@324..348
+      L_PAREN@324..325 "("
+      KEYWORD@325..329 "type"
+      WHITESPACE@329..330 " "
+      SUB_TYPE@330..347
+        ARRAY_TYPE@330..347
+          L_PAREN@330..331 "("
+          KEYWORD@331..336 "array"
+          WHITESPACE@336..337 " "
+          FIELD_TYPE@337..346
+            L_PAREN@337..338 "("
+            KEYWORD@338..341 "mut"
+            WHITESPACE@341..342 " "
+            STORAGE_TYPE@342..345
+              VAL_TYPE@342..345
+                NUM_TYPE@342..345 "i64"
+            R_PAREN@345..346 ")"
+          R_PAREN@346..347 ")"
+      R_PAREN@347..348 ")"
+    WHITESPACE@348..351 "\n  "
+    MODULE_FIELD_TYPE@351..375
+      L_PAREN@351..352 "("
+      KEYWORD@352..356 "type"
+      WHITESPACE@356..357 " "
+      SUB_TYPE@357..374
+        ARRAY_TYPE@357..374
+          L_PAREN@357..358 "("
+          KEYWORD@358..363 "array"
+          WHITESPACE@363..364 " "
+          FIELD_TYPE@364..373
+            L_PAREN@364..365 "("
+            KEYWORD@365..368 "mut"
+            WHITESPACE@368..369 " "
+            STORAGE_TYPE@369..372
+              VAL_TYPE@369..372
+                NUM_TYPE@369..372 "f32"
+            R_PAREN@372..373 ")"
+          R_PAREN@373..374 ")"
+      R_PAREN@374..375 ")"
+    WHITESPACE@375..378 "\n  "
+    MODULE_FIELD_TYPE@378..402
+      L_PAREN@378..379 "("
+      KEYWORD@379..383 "type"
+      WHITESPACE@383..384 " "
+      SUB_TYPE@384..401
+        ARRAY_TYPE@384..401
+          L_PAREN@384..385 "("
+          KEYWORD@385..390 "array"
+          WHITESPACE@390..391 " "
+          FIELD_TYPE@391..400
+            L_PAREN@391..392 "("
+            KEYWORD@392..395 "mut"
+            WHITESPACE@395..396 " "
+            STORAGE_TYPE@396..399
+              VAL_TYPE@396..399
+                NUM_TYPE@396..399 "f64"
+            R_PAREN@399..400 ")"
+          R_PAREN@400..401 ")"
+      R_PAREN@401..402 ")"
+    WHITESPACE@402..405 "\n  "
+    MODULE_FIELD_TYPE@405..432
+      L_PAREN@405..406 "("
+      KEYWORD@406..410 "type"
+      WHITESPACE@410..411 " "
+      SUB_TYPE@411..431
+        ARRAY_TYPE@411..431
+          L_PAREN@411..412 "("
+          KEYWORD@412..417 "array"
+          WHITESPACE@417..418 " "
+          FIELD_TYPE@418..430
+            L_PAREN@418..419 "("
+            KEYWORD@419..422 "mut"
+            WHITESPACE@422..423 " "
+            STORAGE_TYPE@423..429
+              VAL_TYPE@423..429
+                REF_TYPE@423..429
+                  ABBR_REF_TYPE@423..429 "anyref"
+            R_PAREN@429..430 ")"
+          R_PAREN@430..431 ")"
+      R_PAREN@431..432 ")"
+    WHITESPACE@432..435 "\n  "
+    MODULE_FIELD_TYPE@435..468
+      L_PAREN@435..436 "("
+      KEYWORD@436..440 "type"
+      WHITESPACE@440..441 " "
+      SUB_TYPE@441..467
+        ARRAY_TYPE@441..467
+          L_PAREN@441..442 "("
+          KEYWORD@442..447 "array"
+          WHITESPACE@447..448 " "
+          FIELD_TYPE@448..466
+            L_PAREN@448..449 "("
+            KEYWORD@449..452 "mut"
+            WHITESPACE@452..453 " "
+            STORAGE_TYPE@453..465
+              VAL_TYPE@453..465
+                REF_TYPE@453..465
+                  L_PAREN@453..454 "("
+                  KEYWORD@454..457 "ref"
+                  WHITESPACE@457..458 " "
+                  HEAP_TYPE@458..464
+                    ABS_HEAP_TYPE@458..464 "struct"
+                  R_PAREN@464..465 ")"
+            R_PAREN@465..466 ")"
+          R_PAREN@466..467 ")"
+      R_PAREN@467..468 ")"
+    WHITESPACE@468..471 "\n  "
+    MODULE_FIELD_TYPE@471..499
+      L_PAREN@471..472 "("
+      KEYWORD@472..476 "type"
+      WHITESPACE@476..477 " "
+      SUB_TYPE@477..498
+        ARRAY_TYPE@477..498
+          L_PAREN@477..478 "("
+          KEYWORD@478..483 "array"
+          WHITESPACE@483..484 " "
+          FIELD_TYPE@484..497
+            L_PAREN@484..485 "("
+            KEYWORD@485..488 "mut"
+            WHITESPACE@488..489 " "
+            STORAGE_TYPE@489..496
+              VAL_TYPE@489..496
+                REF_TYPE@489..496
+                  L_PAREN@489..490 "("
+                  KEYWORD@490..493 "ref"
+                  WHITESPACE@493..494 " "
+                  HEAP_TYPE@494..495
+                    INDEX@494..495
+                      UNSIGNED_INT@494..495 "0"
+                  R_PAREN@495..496 ")"
+            R_PAREN@496..497 ")"
+          R_PAREN@497..498 ")"
+      R_PAREN@498..499 ")"
+    WHITESPACE@499..502 "\n  "
+    MODULE_FIELD_TYPE@502..537
+      L_PAREN@502..503 "("
+      KEYWORD@503..507 "type"
+      WHITESPACE@507..508 " "
+      SUB_TYPE@508..536
+        ARRAY_TYPE@508..536
+          L_PAREN@508..509 "("
+          KEYWORD@509..514 "array"
+          WHITESPACE@514..515 " "
+          FIELD_TYPE@515..535
+            L_PAREN@515..516 "("
+            KEYWORD@516..519 "mut"
+            WHITESPACE@519..520 " "
+            STORAGE_TYPE@520..534
+              VAL_TYPE@520..534
+                REF_TYPE@520..534
+                  L_PAREN@520..521 "("
+                  KEYWORD@521..524 "ref"
+                  WHITESPACE@524..525 " "
+                  KEYWORD@525..529 "null"
+                  WHITESPACE@529..530 " "
+                  HEAP_TYPE@530..533
+                    ABS_HEAP_TYPE@530..533 "i31"
+                  R_PAREN@533..534 ")"
+            R_PAREN@534..535 ")"
+          R_PAREN@535..536 ")"
+      R_PAREN@536..537 ")"
+    WHITESPACE@537..538 "\n"
+    R_PAREN@538..539 ")"
+  WHITESPACE@539..540 "\n"

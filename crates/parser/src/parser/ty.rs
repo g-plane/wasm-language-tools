@@ -1,6 +1,6 @@
 use super::{
     module::index,
-    must, node, retry_once, tok,
+    must, node, retry, retry_once, tok,
     token::{ident, keyword, l_paren, r_paren, trivias_prefixed, unsigned_int, word},
     GreenElement, GreenResult, Input,
 };
@@ -16,6 +16,7 @@ fn abbr_ref_type(input: &mut Input) -> GreenResult {
     word.verify_map(try_into_abbr_ref_type)
         .context(Message::Name("ref type"))
         .parse_next(input)
+        .map(|ty| node(REF_TYPE, [ty]))
 }
 fn try_into_abbr_ref_type(word: &str) -> Option<GreenElement> {
     match word {
@@ -32,7 +33,6 @@ pub(super) fn ref_type(input: &mut Input) -> GreenResult {
     }
     .context(Message::Name("ref type"))
     .parse_next(input)
-    .map(|ty| node(REF_TYPE, [ty]))
 }
 fn detailed_ref_type(input: &mut Input) -> GreenResult {
     (
@@ -167,12 +167,155 @@ pub(super) fn result(input: &mut Input) -> GreenResult {
         })
 }
 
+fn array_type(input: &mut Input) -> GreenResult {
+    (
+        l_paren,
+        trivias_prefixed(keyword("array")),
+        must(retry(field_type, [])),
+        r_paren,
+    )
+        .parse_next(input)
+        .map(|(l_paren, mut keyword, field_type, r_paren)| {
+            let mut children = Vec::with_capacity(4);
+            children.push(l_paren);
+            children.append(&mut keyword);
+            if let Some(mut field_type) = field_type {
+                children.append(&mut field_type);
+            }
+            if let Some(mut r_paren) = r_paren {
+                children.append(&mut r_paren);
+            }
+            node(ARRAY_TYPE, children)
+        })
+}
+
+fn struct_type(input: &mut Input) -> GreenResult {
+    (
+        l_paren,
+        trivias_prefixed(keyword("struct")),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry_once(field, [])),
+        r_paren,
+    )
+        .parse_next(input)
+        .map(|(l_paren, mut keyword, fields, r_paren)| {
+            let mut children = Vec::with_capacity(4);
+            children.push(l_paren);
+            children.append(&mut keyword);
+            fields
+                .into_iter()
+                .for_each(|mut field| children.append(&mut field));
+            if let Some(mut r_paren) = r_paren {
+                children.append(&mut r_paren);
+            }
+            node(STRUCT_TYPE, children)
+        })
+}
+
+fn field(input: &mut Input) -> GreenResult {
+    (
+        l_paren,
+        trivias_prefixed(keyword("field")),
+        alt((
+            (trivias_prefixed(ident), must(retry(field_type, []))).map(|(mut children, ty)| {
+                if let Some(mut ty) = ty {
+                    children.append(&mut ty);
+                }
+                children
+            }),
+            repeat::<_, _, Vec<_>, _, _>(0.., retry_once(field_type, []))
+                .map(|types| types.into_iter().flatten().collect()),
+        )),
+        r_paren,
+    )
+        .parse_next(input)
+        .map(|(l_paren, mut keyword, mut types, r_paren)| {
+            let mut children = Vec::with_capacity(5);
+            children.push(l_paren);
+            children.append(&mut keyword);
+            children.append(&mut types);
+            if let Some(mut r_paren) = r_paren {
+                children.append(&mut r_paren);
+            }
+            node(FIELD, children)
+        })
+}
+
+fn field_type(input: &mut Input) -> GreenResult {
+    alt((
+        (
+            l_paren,
+            trivias_prefixed(keyword("mut")),
+            must(retry(storage_type, [])),
+            r_paren,
+        )
+            .map(|(l_paren, mut keyword, storage_type, r_paren)| {
+                let mut children = Vec::with_capacity(4);
+                children.push(l_paren);
+                children.append(&mut keyword);
+                if let Some(mut storage_type) = storage_type {
+                    children.append(&mut storage_type);
+                }
+                if let Some(mut r_paren) = r_paren {
+                    children.append(&mut r_paren);
+                }
+                node(FIELD_TYPE, children)
+            }),
+        storage_type.map(|ty| node(FIELD_TYPE, [ty])),
+    ))
+    .parse_next(input)
+}
+
+fn storage_type(input: &mut Input) -> GreenResult {
+    alt((val_type, packed_type))
+        .parse_next(input)
+        .map(|ty| node(STORAGE_TYPE, [ty]))
+}
+
+fn packed_type(input: &mut Input) -> GreenResult {
+    word.verify_map(|word| match word {
+        "i8" | "i16" => Some(tok(PACKED_TYPE, word)),
+        _ => None,
+    })
+    .parse_next(input)
+}
+
 fn comp_type(input: &mut Input) -> GreenResult {
-    func_type.parse_next(input)
+    alt((func_type, struct_type, array_type)).parse_next(input)
 }
 
 pub(super) fn sub_type(input: &mut Input) -> GreenResult {
-    comp_type.parse_next(input).map(|ty| node(SUB_TYPE, [ty]))
+    alt((
+        comp_type.map(|ty| node(SUB_TYPE, [ty])),
+        (
+            l_paren,
+            trivias_prefixed(keyword("sub")),
+            opt(trivias_prefixed(keyword("final"))),
+            repeat::<_, _, Vec<_>, _, _>(0.., trivias_prefixed(index)),
+            must(retry(comp_type, [])),
+            r_paren,
+        )
+            .map(
+                |(l_paren, mut keyword, final_keyword, indexes, comp_type, r_paren)| {
+                    let mut children = Vec::with_capacity(6);
+                    children.push(l_paren);
+                    children.append(&mut keyword);
+                    if let Some(mut final_keyword) = final_keyword {
+                        children.append(&mut final_keyword);
+                    }
+                    indexes
+                        .into_iter()
+                        .for_each(|mut index| children.append(&mut index));
+                    if let Some(mut comp_type) = comp_type {
+                        children.append(&mut comp_type);
+                    }
+                    if let Some(mut r_paren) = r_paren {
+                        children.append(&mut r_paren);
+                    }
+                    node(SUB_TYPE, children)
+                },
+            ),
+    ))
+    .parse_next(input)
 }
 
 pub(super) fn table_type(input: &mut Input) -> GreenResult {
@@ -203,7 +346,7 @@ pub(super) fn global_type(input: &mut Input) -> GreenResult {
         (
             l_paren,
             trivias_prefixed(keyword("mut")),
-            must(trivias_prefixed(val_type)),
+            must(retry(val_type, [])),
             r_paren,
         )
             .map(|(l_paren, mut keyword, val_type, r_paren)| {
