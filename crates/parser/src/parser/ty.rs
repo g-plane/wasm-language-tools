@@ -266,14 +266,12 @@ fn field_type(input: &mut Input) -> GreenResult {
 }
 
 fn storage_type(input: &mut Input) -> GreenResult {
-    alt((val_type, packed_type))
-        .parse_next(input)
-        .map(|ty| node(STORAGE_TYPE, [ty]))
+    alt((val_type, packed_type)).parse_next(input)
 }
 
 fn packed_type(input: &mut Input) -> GreenResult {
     word.verify_map(|word| match word {
-        "i8" | "i16" => Some(tok(PACKED_TYPE, word)),
+        "i8" | "i16" => Some(node(PACKED_TYPE, [tok(TYPE_KEYWORD, word)])),
         _ => None,
     })
     .parse_next(input)

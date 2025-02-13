@@ -16,8 +16,8 @@ ROOT@0..540
           KEYWORD@17..22 "array"
           WHITESPACE@22..23 " "
           FIELD_TYPE@23..25
-            STORAGE_TYPE@23..25
-              PACKED_TYPE@23..25 "i8"
+            PACKED_TYPE@23..25
+              TYPE_KEYWORD@23..25 "i8"
           R_PAREN@25..26 ")"
       R_PAREN@26..27 ")"
     WHITESPACE@27..30 "\n  "
@@ -31,8 +31,8 @@ ROOT@0..540
           KEYWORD@37..42 "array"
           WHITESPACE@42..43 " "
           FIELD_TYPE@43..46
-            STORAGE_TYPE@43..46
-              PACKED_TYPE@43..46 "i16"
+            PACKED_TYPE@43..46
+              TYPE_KEYWORD@43..46 "i16"
           R_PAREN@46..47 ")"
       R_PAREN@47..48 ")"
     WHITESPACE@48..51 "\n  "
@@ -46,9 +46,8 @@ ROOT@0..540
           KEYWORD@58..63 "array"
           WHITESPACE@63..64 " "
           FIELD_TYPE@64..67
-            STORAGE_TYPE@64..67
-              VAL_TYPE@64..67
-                NUM_TYPE@64..67 "i32"
+            VAL_TYPE@64..67
+              NUM_TYPE@64..67 "i32"
           R_PAREN@67..68 ")"
       R_PAREN@68..69 ")"
     WHITESPACE@69..72 "\n  "
@@ -62,9 +61,8 @@ ROOT@0..540
           KEYWORD@79..84 "array"
           WHITESPACE@84..85 " "
           FIELD_TYPE@85..88
-            STORAGE_TYPE@85..88
-              VAL_TYPE@85..88
-                NUM_TYPE@85..88 "i64"
+            VAL_TYPE@85..88
+              NUM_TYPE@85..88 "i64"
           R_PAREN@88..89 ")"
       R_PAREN@89..90 ")"
     WHITESPACE@90..93 "\n  "
@@ -78,9 +76,8 @@ ROOT@0..540
           KEYWORD@100..105 "array"
           WHITESPACE@105..106 " "
           FIELD_TYPE@106..109
-            STORAGE_TYPE@106..109
-              VAL_TYPE@106..109
-                NUM_TYPE@106..109 "f32"
+            VAL_TYPE@106..109
+              NUM_TYPE@106..109 "f32"
           R_PAREN@109..110 ")"
       R_PAREN@110..111 ")"
     WHITESPACE@111..114 "\n  "
@@ -94,9 +91,8 @@ ROOT@0..540
           KEYWORD@121..126 "array"
           WHITESPACE@126..127 " "
           FIELD_TYPE@127..130
-            STORAGE_TYPE@127..130
-              VAL_TYPE@127..130
-                NUM_TYPE@127..130 "f64"
+            VAL_TYPE@127..130
+              NUM_TYPE@127..130 "f64"
           R_PAREN@130..131 ")"
       R_PAREN@131..132 ")"
     WHITESPACE@132..135 "\n  "
@@ -110,10 +106,9 @@ ROOT@0..540
           KEYWORD@142..147 "array"
           WHITESPACE@147..148 " "
           FIELD_TYPE@148..154
-            STORAGE_TYPE@148..154
-              VAL_TYPE@148..154
-                REF_TYPE@148..154
-                  ABBR_REF_TYPE@148..154 "anyref"
+            VAL_TYPE@148..154
+              REF_TYPE@148..154
+                ABBR_REF_TYPE@148..154 "anyref"
           R_PAREN@154..155 ")"
       R_PAREN@155..156 ")"
     WHITESPACE@156..159 "\n  "
@@ -127,15 +122,14 @@ ROOT@0..540
           KEYWORD@166..171 "array"
           WHITESPACE@171..172 " "
           FIELD_TYPE@172..184
-            STORAGE_TYPE@172..184
-              VAL_TYPE@172..184
-                REF_TYPE@172..184
-                  L_PAREN@172..173 "("
-                  KEYWORD@173..176 "ref"
-                  WHITESPACE@176..177 " "
-                  HEAP_TYPE@177..183
-                    ABS_HEAP_TYPE@177..183 "struct"
-                  R_PAREN@183..184 ")"
+            VAL_TYPE@172..184
+              REF_TYPE@172..184
+                L_PAREN@172..173 "("
+                KEYWORD@173..176 "ref"
+                WHITESPACE@176..177 " "
+                HEAP_TYPE@177..183
+                  ABS_HEAP_TYPE@177..183 "struct"
+                R_PAREN@183..184 ")"
           R_PAREN@184..185 ")"
       R_PAREN@185..186 ")"
     WHITESPACE@186..189 "\n  "
@@ -149,16 +143,15 @@ ROOT@0..540
           KEYWORD@196..201 "array"
           WHITESPACE@201..202 " "
           FIELD_TYPE@202..209
-            STORAGE_TYPE@202..209
-              VAL_TYPE@202..209
-                REF_TYPE@202..209
-                  L_PAREN@202..203 "("
-                  KEYWORD@203..206 "ref"
-                  WHITESPACE@206..207 " "
-                  HEAP_TYPE@207..208
-                    INDEX@207..208
-                      UNSIGNED_INT@207..208 "0"
-                  R_PAREN@208..209 ")"
+            VAL_TYPE@202..209
+              REF_TYPE@202..209
+                L_PAREN@202..203 "("
+                KEYWORD@203..206 "ref"
+                WHITESPACE@206..207 " "
+                HEAP_TYPE@207..208
+                  INDEX@207..208
+                    UNSIGNED_INT@207..208 "0"
+                R_PAREN@208..209 ")"
           R_PAREN@209..210 ")"
       R_PAREN@210..211 ")"
     WHITESPACE@211..214 "\n  "
@@ -172,18 +165,17 @@ ROOT@0..540
           KEYWORD@221..226 "array"
           WHITESPACE@226..227 " "
           FIELD_TYPE@227..239
-            STORAGE_TYPE@227..239
-              VAL_TYPE@227..239
-                REF_TYPE@227..239
-                  L_PAREN@227..228 "("
-                  KEYWORD@228..231 "ref"
-                  WHITESPACE@231..232 " "
-                  KEYWORD@232..236 "null"
-                  WHITESPACE@236..237 " "
-                  HEAP_TYPE@237..238
-                    INDEX@237..238
-                      UNSIGNED_INT@237..238 "1"
-                  R_PAREN@238..239 ")"
+            VAL_TYPE@227..239
+              REF_TYPE@227..239
+                L_PAREN@227..228 "("
+                KEYWORD@228..231 "ref"
+                WHITESPACE@231..232 " "
+                KEYWORD@232..236 "null"
+                WHITESPACE@236..237 " "
+                HEAP_TYPE@237..238
+                  INDEX@237..238
+                    UNSIGNED_INT@237..238 "1"
+                R_PAREN@238..239 ")"
           R_PAREN@239..240 ")"
       R_PAREN@240..241 ")"
     WHITESPACE@241..244 "\n  "
@@ -200,8 +192,8 @@ ROOT@0..540
             L_PAREN@257..258 "("
             KEYWORD@258..261 "mut"
             WHITESPACE@261..262 " "
-            STORAGE_TYPE@262..264
-              PACKED_TYPE@262..264 "i8"
+            PACKED_TYPE@262..264
+              TYPE_KEYWORD@262..264 "i8"
             R_PAREN@264..265 ")"
           R_PAREN@265..266 ")"
       R_PAREN@266..267 ")"
@@ -219,8 +211,8 @@ ROOT@0..540
             L_PAREN@283..284 "("
             KEYWORD@284..287 "mut"
             WHITESPACE@287..288 " "
-            STORAGE_TYPE@288..291
-              PACKED_TYPE@288..291 "i16"
+            PACKED_TYPE@288..291
+              TYPE_KEYWORD@288..291 "i16"
             R_PAREN@291..292 ")"
           R_PAREN@292..293 ")"
       R_PAREN@293..294 ")"
@@ -238,9 +230,8 @@ ROOT@0..540
             L_PAREN@310..311 "("
             KEYWORD@311..314 "mut"
             WHITESPACE@314..315 " "
-            STORAGE_TYPE@315..318
-              VAL_TYPE@315..318
-                NUM_TYPE@315..318 "i32"
+            VAL_TYPE@315..318
+              NUM_TYPE@315..318 "i32"
             R_PAREN@318..319 ")"
           R_PAREN@319..320 ")"
       R_PAREN@320..321 ")"
@@ -258,9 +249,8 @@ ROOT@0..540
             L_PAREN@337..338 "("
             KEYWORD@338..341 "mut"
             WHITESPACE@341..342 " "
-            STORAGE_TYPE@342..345
-              VAL_TYPE@342..345
-                NUM_TYPE@342..345 "i64"
+            VAL_TYPE@342..345
+              NUM_TYPE@342..345 "i64"
             R_PAREN@345..346 ")"
           R_PAREN@346..347 ")"
       R_PAREN@347..348 ")"
@@ -278,9 +268,8 @@ ROOT@0..540
             L_PAREN@364..365 "("
             KEYWORD@365..368 "mut"
             WHITESPACE@368..369 " "
-            STORAGE_TYPE@369..372
-              VAL_TYPE@369..372
-                NUM_TYPE@369..372 "f32"
+            VAL_TYPE@369..372
+              NUM_TYPE@369..372 "f32"
             R_PAREN@372..373 ")"
           R_PAREN@373..374 ")"
       R_PAREN@374..375 ")"
@@ -298,9 +287,8 @@ ROOT@0..540
             L_PAREN@391..392 "("
             KEYWORD@392..395 "mut"
             WHITESPACE@395..396 " "
-            STORAGE_TYPE@396..399
-              VAL_TYPE@396..399
-                NUM_TYPE@396..399 "f64"
+            VAL_TYPE@396..399
+              NUM_TYPE@396..399 "f64"
             R_PAREN@399..400 ")"
           R_PAREN@400..401 ")"
       R_PAREN@401..402 ")"
@@ -318,10 +306,9 @@ ROOT@0..540
             L_PAREN@418..419 "("
             KEYWORD@419..422 "mut"
             WHITESPACE@422..423 " "
-            STORAGE_TYPE@423..429
-              VAL_TYPE@423..429
-                REF_TYPE@423..429
-                  ABBR_REF_TYPE@423..429 "anyref"
+            VAL_TYPE@423..429
+              REF_TYPE@423..429
+                ABBR_REF_TYPE@423..429 "anyref"
             R_PAREN@429..430 ")"
           R_PAREN@430..431 ")"
       R_PAREN@431..432 ")"
@@ -339,15 +326,14 @@ ROOT@0..540
             L_PAREN@448..449 "("
             KEYWORD@449..452 "mut"
             WHITESPACE@452..453 " "
-            STORAGE_TYPE@453..465
-              VAL_TYPE@453..465
-                REF_TYPE@453..465
-                  L_PAREN@453..454 "("
-                  KEYWORD@454..457 "ref"
-                  WHITESPACE@457..458 " "
-                  HEAP_TYPE@458..464
-                    ABS_HEAP_TYPE@458..464 "struct"
-                  R_PAREN@464..465 ")"
+            VAL_TYPE@453..465
+              REF_TYPE@453..465
+                L_PAREN@453..454 "("
+                KEYWORD@454..457 "ref"
+                WHITESPACE@457..458 " "
+                HEAP_TYPE@458..464
+                  ABS_HEAP_TYPE@458..464 "struct"
+                R_PAREN@464..465 ")"
             R_PAREN@465..466 ")"
           R_PAREN@466..467 ")"
       R_PAREN@467..468 ")"
@@ -365,16 +351,15 @@ ROOT@0..540
             L_PAREN@484..485 "("
             KEYWORD@485..488 "mut"
             WHITESPACE@488..489 " "
-            STORAGE_TYPE@489..496
-              VAL_TYPE@489..496
-                REF_TYPE@489..496
-                  L_PAREN@489..490 "("
-                  KEYWORD@490..493 "ref"
-                  WHITESPACE@493..494 " "
-                  HEAP_TYPE@494..495
-                    INDEX@494..495
-                      UNSIGNED_INT@494..495 "0"
-                  R_PAREN@495..496 ")"
+            VAL_TYPE@489..496
+              REF_TYPE@489..496
+                L_PAREN@489..490 "("
+                KEYWORD@490..493 "ref"
+                WHITESPACE@493..494 " "
+                HEAP_TYPE@494..495
+                  INDEX@494..495
+                    UNSIGNED_INT@494..495 "0"
+                R_PAREN@495..496 ")"
             R_PAREN@496..497 ")"
           R_PAREN@497..498 ")"
       R_PAREN@498..499 ")"
@@ -392,17 +377,16 @@ ROOT@0..540
             L_PAREN@515..516 "("
             KEYWORD@516..519 "mut"
             WHITESPACE@519..520 " "
-            STORAGE_TYPE@520..534
-              VAL_TYPE@520..534
-                REF_TYPE@520..534
-                  L_PAREN@520..521 "("
-                  KEYWORD@521..524 "ref"
-                  WHITESPACE@524..525 " "
-                  KEYWORD@525..529 "null"
-                  WHITESPACE@529..530 " "
-                  HEAP_TYPE@530..533
-                    ABS_HEAP_TYPE@530..533 "i31"
-                  R_PAREN@533..534 ")"
+            VAL_TYPE@520..534
+              REF_TYPE@520..534
+                L_PAREN@520..521 "("
+                KEYWORD@521..524 "ref"
+                WHITESPACE@524..525 " "
+                KEYWORD@525..529 "null"
+                WHITESPACE@529..530 " "
+                HEAP_TYPE@530..533
+                  ABS_HEAP_TYPE@530..533 "i31"
+                R_PAREN@533..534 ")"
             R_PAREN@534..535 ")"
           R_PAREN@535..536 ")"
       R_PAREN@536..537 ")"

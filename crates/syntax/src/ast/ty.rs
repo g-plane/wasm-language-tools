@@ -37,7 +37,7 @@ impl AstNode for ArrayType {
     where
         Self: Sized,
     {
-        matches!(kind, SyntaxKind::ARRAY_TYPE)
+        kind == SyntaxKind::ARRAY_TYPE
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self>
@@ -177,7 +177,7 @@ impl AstNode for FieldType {
     where
         Self: Sized,
     {
-        matches!(kind, SyntaxKind::FIELD_TYPE)
+        kind == SyntaxKind::FIELD_TYPE
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self>
@@ -421,6 +421,42 @@ impl AstNode for MemoryType {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct PackedType {
+    syntax: SyntaxNode,
+}
+impl PackedType {
+    #[inline]
+    pub fn type_keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::TYPE_KEYWORD)
+    }
+}
+impl AstNode for PackedType {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::PACKED_TYPE
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(PackedType { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Param {
     syntax: SyntaxNode,
 }
@@ -501,7 +537,7 @@ impl AstNode for RecType {
     where
         Self: Sized,
     {
-        matches!(kind, SyntaxKind::REC_TYPE)
+        kind == SyntaxKind::REC_TYPE
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self>
@@ -632,18 +668,9 @@ impl AstNode for Result {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct StorageType {
-    syntax: SyntaxNode,
-}
-impl StorageType {
-    #[inline]
-    pub fn val_type(&self) -> Option<ValType> {
-        child(&self.syntax)
-    }
-    #[inline]
-    pub fn packed_type(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::PACKED_TYPE)
-    }
+pub enum StorageType {
+    Val(ValType),
+    Packed(PackedType),
 }
 impl AstNode for StorageType {
     type Language = WatLanguage;
@@ -652,22 +679,25 @@ impl AstNode for StorageType {
     where
         Self: Sized,
     {
-        matches!(kind, SyntaxKind::STORAGE_TYPE)
+        matches!(kind, SyntaxKind::VAL_TYPE | SyntaxKind::PACKED_TYPE)
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self>
     where
         Self: Sized,
     {
-        if Self::can_cast(syntax.kind()) {
-            Some(StorageType { syntax })
-        } else {
-            None
+        match syntax.kind() {
+            SyntaxKind::VAL_TYPE => Some(StorageType::Val(ValType { syntax })),
+            SyntaxKind::PACKED_TYPE => Some(StorageType::Packed(PackedType { syntax })),
+            _ => None,
         }
     }
     #[inline]
     fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
+        match self {
+            StorageType::Val(it) => it.syntax(),
+            StorageType::Packed(it) => it.syntax(),
+        }
     }
 }
 
@@ -700,7 +730,7 @@ impl AstNode for StructType {
     where
         Self: Sized,
     {
-        matches!(kind, SyntaxKind::STRUCT_TYPE)
+        kind == SyntaxKind::STRUCT_TYPE
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self>
@@ -763,7 +793,7 @@ impl AstNode for SubType {
     where
         Self: Sized,
     {
-        matches!(kind, SyntaxKind::SUB_TYPE)
+        kind == SyntaxKind::SUB_TYPE
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self>
@@ -855,7 +885,7 @@ impl AstNode for TypeDef {
     where
         Self: Sized,
     {
-        matches!(kind, SyntaxKind::TYPE_DEF)
+        kind == SyntaxKind::TYPE_DEF
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self>
