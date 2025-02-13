@@ -158,7 +158,7 @@ impl LanguageService {
                 }
             })
             .collect::<Vec<_>>();
-        lsp_symbols.reverse();
+        lsp_symbols.sort_by_key(|symbol| symbol.range.start);
         Some(DocumentSymbolResponse::Nested(lsp_symbols))
     }
 }
