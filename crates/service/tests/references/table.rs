@@ -3,7 +3,6 @@ use insta::assert_json_snapshot;
 use lsp_types::{Position, Uri};
 use wat_service::LanguageService;
 
-
 #[test]
 fn table_def_int_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
