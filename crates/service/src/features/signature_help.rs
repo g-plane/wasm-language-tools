@@ -50,7 +50,7 @@ impl LanguageService {
         };
         let parent_instr = PlainInstr::cast(node.clone())?;
         let (signature, func) = match parent_instr.instr_name()?.text() {
-            "call" => {
+            "call" | "return_call" => {
                 let first_immediate = parent_instr.immediates().next()?;
                 let func = symbol_table
                     .find_defs(SymbolKey::new(first_immediate.syntax()))?
@@ -61,7 +61,7 @@ impl LanguageService {
                     Some(func),
                 )
             }
-            "call_indirect" => {
+            "call_indirect" | "return_call_indirect" => {
                 let type_use = parent_instr
                     .immediates()
                     .find_map(|immediate| immediate.type_use())?;

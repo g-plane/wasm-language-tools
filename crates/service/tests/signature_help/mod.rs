@@ -172,3 +172,33 @@ fn call_indirect_inline_func_type() {
     let response = service.signature_help(create_params(uri, Position::new(4, 47)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn return_call() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (func $func (param i32) (param i32) (result i32)
+    (return_call $func ())))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.signature_help(create_params(uri, Position::new(3, 24)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn return_call_indirect() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+  (table 0 funcref)
+  (type (func (param f32) (result f64)))
+  (func (result f64)
+    (return_call_indirect 0 (type 0) ())))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.signature_help(create_params(uri, Position::new(5, 38)));
+    assert_json_snapshot!(response);
+}
