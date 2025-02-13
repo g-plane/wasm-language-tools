@@ -1,0 +1,109 @@
+---
+source: crates/service/tests/diagnostics/typeck/block_if.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 6
+        },
+        "end": {
+          "line": 5,
+          "character": 17
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 6
+        },
+        "end": {
+          "line": 13,
+          "character": 17
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32, f32] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 13,
+                "character": 6
+              },
+              "end": {
+                "line": 13,
+                "character": 17
+              }
+            }
+          },
+          "message": "expected type `i32`, found `f32`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 22,
+          "character": 6
+        },
+        "end": {
+          "line": 22,
+          "character": 17
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32, i32, i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 31,
+          "character": 6
+        },
+        "end": {
+          "line": 31,
+          "character": 17
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32, i32, f32] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 31,
+                "character": 6
+              },
+              "end": {
+                "line": 31,
+                "character": 17
+              }
+            }
+          },
+          "message": "expected type `i32`, found `f32`"
+        }
+      ]
+    }
+  ]
+}

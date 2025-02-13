@@ -1,0 +1,43 @@
+---
+source: crates/service/tests/diagnostics/typeck/mod.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 4
+        },
+        "end": {
+          "line": 5,
+          "character": 11
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [f32]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 4
+              },
+              "end": {
+                "line": 4,
+                "character": 17
+              }
+            }
+          },
+          "message": "expected type `i32`, found `f32`"
+        }
+      ]
+    }
+  ]
+}
