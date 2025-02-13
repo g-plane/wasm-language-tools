@@ -356,7 +356,7 @@ ROOT@0..1081
             UNSIGNED_INT@806..808 "20"
           WHITESPACE@808..809 " "
           REF_TYPE@809..816
-            ABBR_REF_TYPE@809..816 "funcref"
+            TYPE_KEYWORD@809..816 "funcref"
         R_PAREN@816..817 ")"
       R_PAREN@817..818 ")"
     WHITESPACE@818..821 "\n  "
@@ -384,7 +384,7 @@ ROOT@0..1081
           UNSIGNED_INT@864..866 "20"
         WHITESPACE@866..867 " "
         REF_TYPE@867..874
-          ABBR_REF_TYPE@867..874 "funcref"
+          TYPE_KEYWORD@867..874 "funcref"
       R_PAREN@874..875 ")"
     WHITESPACE@875..878 "\n  "
     MODULE_FIELD_IMPORT@878..927
@@ -406,7 +406,7 @@ ROOT@0..1081
             UNSIGNED_INT@915..917 "10"
           WHITESPACE@917..918 " "
           REF_TYPE@918..925
-            ABBR_REF_TYPE@918..925 "funcref"
+            TYPE_KEYWORD@918..925 "funcref"
         R_PAREN@925..926 ")"
       R_PAREN@926..927 ")"
     WHITESPACE@927..930 "\n  "
@@ -429,7 +429,7 @@ ROOT@0..1081
             UNSIGNED_INT@964..965 "0"
           WHITESPACE@965..966 " "
           REF_TYPE@966..973
-            ABBR_REF_TYPE@966..973 "funcref"
+            TYPE_KEYWORD@966..973 "funcref"
         R_PAREN@973..974 ")"
       R_PAREN@974..975 ")"
     WHITESPACE@975..979 "\n\n  "

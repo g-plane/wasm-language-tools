@@ -158,12 +158,12 @@ ROOT@0..405
             FIELD_TYPE@215..221
               VAL_TYPE@215..221
                 REF_TYPE@215..221
-                  ABBR_REF_TYPE@215..221 "anyref"
+                  TYPE_KEYWORD@215..221 "anyref"
             WHITESPACE@221..222 " "
             FIELD_TYPE@222..229
               VAL_TYPE@222..229
                 REF_TYPE@222..229
-                  ABBR_REF_TYPE@222..229 "funcref"
+                  TYPE_KEYWORD@222..229 "funcref"
             WHITESPACE@229..230 " "
             FIELD_TYPE@230..237
               VAL_TYPE@230..237
@@ -241,13 +241,13 @@ ROOT@0..405
                   KEYWORD@317..321 "null"
                   WHITESPACE@321..322 " "
                   HEAP_TYPE@322..325
-                    ABS_HEAP_TYPE@322..325 "i31"
+                    TYPE_KEYWORD@322..325 "i31"
                   R_PAREN@325..326 ")"
             WHITESPACE@326..327 " "
             FIELD_TYPE@327..333
               VAL_TYPE@327..333
                 REF_TYPE@327..333
-                  ABBR_REF_TYPE@327..333 "anyref"
+                  TYPE_KEYWORD@327..333 "anyref"
             R_PAREN@333..334 ")"
           R_PAREN@334..335 ")"
       R_PAREN@335..336 ")"

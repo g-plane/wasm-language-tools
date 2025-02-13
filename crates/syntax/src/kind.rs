@@ -19,8 +19,6 @@ pub enum SyntaxKind {
     NUM_TYPE,
     VEC_TYPE,
     TYPE_KEYWORD,
-    ABBR_REF_TYPE,
-    ABS_HEAP_TYPE,
     SHARE,
     MEM_ARG,
     ERROR,

@@ -108,7 +108,7 @@ ROOT@0..540
           FIELD_TYPE@148..154
             VAL_TYPE@148..154
               REF_TYPE@148..154
-                ABBR_REF_TYPE@148..154 "anyref"
+                TYPE_KEYWORD@148..154 "anyref"
           R_PAREN@154..155 ")"
       R_PAREN@155..156 ")"
     WHITESPACE@156..159 "\n  "
@@ -128,7 +128,7 @@ ROOT@0..540
                 KEYWORD@173..176 "ref"
                 WHITESPACE@176..177 " "
                 HEAP_TYPE@177..183
-                  ABS_HEAP_TYPE@177..183 "struct"
+                  TYPE_KEYWORD@177..183 "struct"
                 R_PAREN@183..184 ")"
           R_PAREN@184..185 ")"
       R_PAREN@185..186 ")"
@@ -308,7 +308,7 @@ ROOT@0..540
             WHITESPACE@422..423 " "
             VAL_TYPE@423..429
               REF_TYPE@423..429
-                ABBR_REF_TYPE@423..429 "anyref"
+                TYPE_KEYWORD@423..429 "anyref"
             R_PAREN@429..430 ")"
           R_PAREN@430..431 ")"
       R_PAREN@431..432 ")"
@@ -332,7 +332,7 @@ ROOT@0..540
                 KEYWORD@454..457 "ref"
                 WHITESPACE@457..458 " "
                 HEAP_TYPE@458..464
-                  ABS_HEAP_TYPE@458..464 "struct"
+                  TYPE_KEYWORD@458..464 "struct"
                 R_PAREN@464..465 ")"
             R_PAREN@465..466 ")"
           R_PAREN@466..467 ")"
@@ -385,7 +385,7 @@ ROOT@0..540
                 KEYWORD@525..529 "null"
                 WHITESPACE@529..530 " "
                 HEAP_TYPE@530..533
-                  ABS_HEAP_TYPE@530..533 "i31"
+                  TYPE_KEYWORD@530..533 "i31"
                 R_PAREN@533..534 ")"
             R_PAREN@534..535 ")"
           R_PAREN@535..536 ")"

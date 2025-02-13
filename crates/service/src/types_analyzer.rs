@@ -349,7 +349,7 @@ impl From<AstValType> for ValType {
             ValType::V128
         } else if let Some(ref_type) = value
             .ref_type()
-            .and_then(|ref_type| ref_type.abbr_ref_type())
+            .and_then(|ref_type| ref_type.type_keyword())
         {
             match ref_type.text() {
                 "funcref" => ValType::FuncRef,
@@ -388,7 +388,7 @@ impl TryFrom<&GreenNodeData> for ValType {
                     .next()
                     .and_then(|child| child.into_token())
                     .and_then(|token| match WatLanguage::kind_from_raw(token.kind()) {
-                        SyntaxKind::ABBR_REF_TYPE => match token.text() {
+                        SyntaxKind::TYPE_KEYWORD => match token.text() {
                             "funcref" => Some(ValType::FuncRef),
                             "externref" => Some(ValType::ExternRef),
                             _ => None,

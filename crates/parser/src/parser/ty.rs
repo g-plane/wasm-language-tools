@@ -21,7 +21,7 @@ fn abbr_ref_type(input: &mut Input) -> GreenResult {
 fn try_into_abbr_ref_type(word: &str) -> Option<GreenElement> {
     match word {
         "anyref" | "eqref" | "i31ref" | "structref" | "arrayref" | "nullref" | "funcref"
-        | "nullfuncref" | "externref" | "nullexternref" => Some(tok(ABBR_REF_TYPE, word)),
+        | "nullfuncref" | "externref" | "nullexternref" => Some(tok(TYPE_KEYWORD, word)),
         _ => None,
     }
 }
@@ -84,7 +84,7 @@ pub(super) fn heap_type(input: &mut Input) -> GreenResult {
 fn abs_heap_type(input: &mut Input) -> GreenResult {
     word.verify_map(|word| match word {
         "any" | "eq" | "i31" | "struct" | "array" | "none" | "func" | "nofunc" | "extern"
-        | "noextern" => Some(tok(ABS_HEAP_TYPE, word)),
+        | "noextern" => Some(tok(TYPE_KEYWORD, word)),
         _ => None,
     })
     .parse_next(input)

@@ -81,8 +81,8 @@ impl DocGen for GlobalType {
 
 impl DocGen for HeapType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        if let Some(abs_heap_type) = self.abs_heap_type() {
-            Doc::text(abs_heap_type.text().to_string())
+        if let Some(type_keyword) = self.type_keyword() {
+            Doc::text(type_keyword.text().to_string())
         } else if let Some(index) = self.index() {
             index.doc(ctx)
         } else {
@@ -160,8 +160,8 @@ impl DocGen for Param {
 
 impl DocGen for RefType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        if let Some(abbr) = self.abbr_ref_type() {
-            Doc::text(abbr.text().to_string())
+        if let Some(type_keyword) = self.type_keyword() {
+            Doc::text(type_keyword.text().to_string())
         } else if let Some(heap_type) = self.heap_type() {
             heap_type.doc(ctx)
         } else {

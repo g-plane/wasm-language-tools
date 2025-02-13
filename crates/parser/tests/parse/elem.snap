@@ -17,7 +17,7 @@ ROOT@0..3044
           UNSIGNED_INT@20..22 "10"
         WHITESPACE@22..23 " "
         REF_TYPE@23..30
-          ABBR_REF_TYPE@23..30 "funcref"
+          TYPE_KEYWORD@23..30 "funcref"
       R_PAREN@30..31 ")"
     WHITESPACE@31..34 "\n  "
     MODULE_FIELD_FUNC@34..43
@@ -42,7 +42,7 @@ ROOT@0..3044
       WHITESPACE@77..78 " "
       ELEM_LIST@78..85
         REF_TYPE@78..85
-          ABBR_REF_TYPE@78..85 "funcref"
+          TYPE_KEYWORD@78..85 "funcref"
       R_PAREN@85..86 ")"
     WHITESPACE@86..89 "\n  "
     MODULE_FIELD_ELEM@89..173
@@ -51,7 +51,7 @@ ROOT@0..3044
       WHITESPACE@94..95 " "
       ELEM_LIST@95..172
         REF_TYPE@95..102
-          ABBR_REF_TYPE@95..102 "funcref"
+          TYPE_KEYWORD@95..102 "funcref"
         WHITESPACE@102..103 " "
         ELEM_EXPR@103..116
           PLAIN_INSTR@103..116
@@ -83,7 +83,7 @@ ROOT@0..3044
             WHITESPACE@151..152 " "
             IMMEDIATE@152..156
               HEAP_TYPE@152..156
-                ABS_HEAP_TYPE@152..156 "func"
+                TYPE_KEYWORD@152..156 "func"
             R_PAREN@156..157 ")"
           R_PAREN@157..158 ")"
         WHITESPACE@158..159 " "
@@ -133,7 +133,7 @@ ROOT@0..3044
       WHITESPACE@226..227 " "
       ELEM_LIST@227..234
         REF_TYPE@227..234
-          ABBR_REF_TYPE@227..234 "funcref"
+          TYPE_KEYWORD@227..234 "funcref"
       R_PAREN@234..235 ")"
     WHITESPACE@235..238 "\n  "
     MODULE_FIELD_ELEM@238..314
@@ -144,7 +144,7 @@ ROOT@0..3044
       WHITESPACE@247..248 " "
       ELEM_LIST@248..313
         REF_TYPE@248..255
-          ABBR_REF_TYPE@248..255 "funcref"
+          TYPE_KEYWORD@248..255 "funcref"
         WHITESPACE@255..256 " "
         ELEM_EXPR@256..269
           PLAIN_INSTR@256..269
@@ -171,7 +171,7 @@ ROOT@0..3044
             WHITESPACE@293..294 " "
             IMMEDIATE@294..298
               HEAP_TYPE@294..298
-                ABS_HEAP_TYPE@294..298 "func"
+                TYPE_KEYWORD@294..298 "func"
             R_PAREN@298..299 ")"
         WHITESPACE@299..300 " "
         ELEM_EXPR@300..313
@@ -241,7 +241,7 @@ ROOT@0..3044
       WHITESPACE@408..409 " "
       ELEM_LIST@409..416
         REF_TYPE@409..416
-          ABBR_REF_TYPE@409..416 "funcref"
+          TYPE_KEYWORD@409..416 "funcref"
       R_PAREN@416..417 ")"
     WHITESPACE@417..420 "\n  "
     MODULE_FIELD_ELEM@420..489
@@ -267,7 +267,7 @@ ROOT@0..3044
       WHITESPACE@450..451 " "
       ELEM_LIST@451..488
         REF_TYPE@451..458
-          ABBR_REF_TYPE@451..458 "funcref"
+          TYPE_KEYWORD@451..458 "funcref"
         WHITESPACE@458..459 " "
         ELEM_EXPR@459..472
           PLAIN_INSTR@459..472
@@ -285,7 +285,7 @@ ROOT@0..3044
             WHITESPACE@482..483 " "
             IMMEDIATE@483..487
               HEAP_TYPE@483..487
-                ABS_HEAP_TYPE@483..487 "func"
+                TYPE_KEYWORD@483..487 "func"
             R_PAREN@487..488 ")"
       R_PAREN@488..489 ")"
     WHITESPACE@489..492 "\n  "
@@ -372,7 +372,7 @@ ROOT@0..3044
       WHITESPACE@615..616 " "
       ELEM_LIST@616..623
         REF_TYPE@616..623
-          ABBR_REF_TYPE@616..623 "funcref"
+          TYPE_KEYWORD@616..623 "funcref"
       R_PAREN@623..624 ")"
     WHITESPACE@624..627 "\n  "
     MODULE_FIELD_ELEM@627..678
@@ -687,7 +687,7 @@ ROOT@0..3044
       WHITESPACE@1115..1116 " "
       ELEM_LIST@1116..1153
         REF_TYPE@1116..1123
-          ABBR_REF_TYPE@1116..1123 "funcref"
+          TYPE_KEYWORD@1116..1123 "funcref"
         WHITESPACE@1123..1124 " "
         ELEM_EXPR@1124..1137
           PLAIN_INSTR@1124..1137
@@ -705,7 +705,7 @@ ROOT@0..3044
             WHITESPACE@1147..1148 " "
             IMMEDIATE@1148..1152
               HEAP_TYPE@1148..1152
-                ABS_HEAP_TYPE@1148..1152 "func"
+                TYPE_KEYWORD@1148..1152 "func"
             R_PAREN@1152..1153 ")"
       R_PAREN@1153..1154 ")"
     WHITESPACE@1154..1157 "\n  "
@@ -790,7 +790,7 @@ ROOT@0..3044
       WHITESPACE@1280..1281 " "
       ELEM_LIST@1281..1318
         REF_TYPE@1281..1288
-          ABBR_REF_TYPE@1281..1288 "funcref"
+          TYPE_KEYWORD@1281..1288 "funcref"
         WHITESPACE@1288..1289 " "
         ELEM_EXPR@1289..1302
           PLAIN_INSTR@1289..1302
@@ -808,7 +808,7 @@ ROOT@0..3044
             WHITESPACE@1312..1313 " "
             IMMEDIATE@1313..1317
               HEAP_TYPE@1313..1317
-                ABS_HEAP_TYPE@1313..1317 "func"
+                TYPE_KEYWORD@1313..1317 "func"
             R_PAREN@1317..1318 ")"
       R_PAREN@1318..1319 ")"
     WHITESPACE@1319..1322 "\n  "
@@ -871,7 +871,7 @@ ROOT@0..3044
       WHITESPACE@1404..1405 " "
       ELEM_LIST@1405..1456
         REF_TYPE@1405..1412
-          ABBR_REF_TYPE@1405..1412 "funcref"
+          TYPE_KEYWORD@1405..1412 "funcref"
         WHITESPACE@1412..1413 " "
         ELEM_EXPR@1413..1433
           L_PAREN@1413..1414 "("
@@ -896,7 +896,7 @@ ROOT@0..3044
             WHITESPACE@1449..1450 " "
             IMMEDIATE@1450..1454
               HEAP_TYPE@1450..1454
-                ABS_HEAP_TYPE@1450..1454 "func"
+                TYPE_KEYWORD@1450..1454 "func"
             R_PAREN@1454..1455 ")"
           R_PAREN@1455..1456 ")"
       R_PAREN@1456..1457 ")"
@@ -926,7 +926,7 @@ ROOT@0..3044
       WHITESPACE@1495..1496 " "
       ELEM_LIST@1496..1503
         REF_TYPE@1496..1503
-          ABBR_REF_TYPE@1496..1503 "funcref"
+          TYPE_KEYWORD@1496..1503 "funcref"
       R_PAREN@1503..1504 ")"
     WHITESPACE@1504..1507 "\n  "
     MODULE_FIELD_ELEM@1507..1580
@@ -954,7 +954,7 @@ ROOT@0..3044
       WHITESPACE@1541..1542 " "
       ELEM_LIST@1542..1579
         REF_TYPE@1542..1549
-          ABBR_REF_TYPE@1542..1549 "funcref"
+          TYPE_KEYWORD@1542..1549 "funcref"
         WHITESPACE@1549..1550 " "
         ELEM_EXPR@1550..1563
           PLAIN_INSTR@1550..1563
@@ -972,7 +972,7 @@ ROOT@0..3044
             WHITESPACE@1573..1574 " "
             IMMEDIATE@1574..1578
               HEAP_TYPE@1574..1578
-                ABS_HEAP_TYPE@1574..1578 "func"
+                TYPE_KEYWORD@1574..1578 "func"
             R_PAREN@1578..1579 ")"
       R_PAREN@1579..1580 ")"
     WHITESPACE@1580..1583 "\n  "
@@ -1065,7 +1065,7 @@ ROOT@0..3044
       WHITESPACE@1718..1719 " "
       ELEM_LIST@1719..1726
         REF_TYPE@1719..1726
-          ABBR_REF_TYPE@1719..1726 "funcref"
+          TYPE_KEYWORD@1719..1726 "funcref"
       R_PAREN@1726..1727 ")"
     WHITESPACE@1727..1730 "\n  "
     MODULE_FIELD_ELEM@1730..1786
@@ -1402,7 +1402,7 @@ ROOT@0..3044
       WHITESPACE@2273..2274 " "
       ELEM_LIST@2274..2311
         REF_TYPE@2274..2281
-          ABBR_REF_TYPE@2274..2281 "funcref"
+          TYPE_KEYWORD@2274..2281 "funcref"
         WHITESPACE@2281..2282 " "
         ELEM_EXPR@2282..2295
           PLAIN_INSTR@2282..2295
@@ -1420,7 +1420,7 @@ ROOT@0..3044
             WHITESPACE@2305..2306 " "
             IMMEDIATE@2306..2310
               HEAP_TYPE@2306..2310
-                ABS_HEAP_TYPE@2306..2310 "func"
+                TYPE_KEYWORD@2306..2310 "func"
             R_PAREN@2310..2311 ")"
       R_PAREN@2311..2312 ")"
     WHITESPACE@2312..2315 "\n  "
@@ -1513,7 +1513,7 @@ ROOT@0..3044
       WHITESPACE@2458..2459 " "
       ELEM_LIST@2459..2496
         REF_TYPE@2459..2466
-          ABBR_REF_TYPE@2459..2466 "funcref"
+          TYPE_KEYWORD@2459..2466 "funcref"
         WHITESPACE@2466..2467 " "
         ELEM_EXPR@2467..2480
           PLAIN_INSTR@2467..2480
@@ -1531,7 +1531,7 @@ ROOT@0..3044
             WHITESPACE@2490..2491 " "
             IMMEDIATE@2491..2495
               HEAP_TYPE@2491..2495
-                ABS_HEAP_TYPE@2491..2495 "func"
+                TYPE_KEYWORD@2491..2495 "func"
             R_PAREN@2495..2496 ")"
       R_PAREN@2496..2497 ")"
     WHITESPACE@2497..2500 "\n  "
@@ -1593,7 +1593,7 @@ ROOT@0..3044
       WHITESPACE@2604..2605 " "
       ELEM_LIST@2605..2612
         REF_TYPE@2605..2612
-          ABBR_REF_TYPE@2605..2612 "funcref"
+          TYPE_KEYWORD@2605..2612 "funcref"
       R_PAREN@2612..2613 ")"
     WHITESPACE@2613..2616 "\n  "
     MODULE_FIELD_ELEM@2616..2696
@@ -1604,7 +1604,7 @@ ROOT@0..3044
       WHITESPACE@2629..2630 " "
       ELEM_LIST@2630..2695
         REF_TYPE@2630..2637
-          ABBR_REF_TYPE@2630..2637 "funcref"
+          TYPE_KEYWORD@2630..2637 "funcref"
         WHITESPACE@2637..2638 " "
         ELEM_EXPR@2638..2651
           PLAIN_INSTR@2638..2651
@@ -1631,7 +1631,7 @@ ROOT@0..3044
             WHITESPACE@2675..2676 " "
             IMMEDIATE@2676..2680
               HEAP_TYPE@2676..2680
-                ABS_HEAP_TYPE@2676..2680 "func"
+                TYPE_KEYWORD@2676..2680 "func"
             R_PAREN@2680..2681 ")"
         WHITESPACE@2681..2682 " "
         ELEM_EXPR@2682..2695
@@ -1686,7 +1686,7 @@ ROOT@0..3044
       WHITESPACE@2773..2774 " "
       ELEM_LIST@2774..2781
         REF_TYPE@2774..2781
-          ABBR_REF_TYPE@2774..2781 "funcref"
+          TYPE_KEYWORD@2774..2781 "funcref"
       R_PAREN@2781..2782 ")"
     WHITESPACE@2782..2785 "\n  "
     MODULE_FIELD_ELEM@2785..2869
@@ -1699,7 +1699,7 @@ ROOT@0..3044
       WHITESPACE@2802..2803 " "
       ELEM_LIST@2803..2868
         REF_TYPE@2803..2810
-          ABBR_REF_TYPE@2803..2810 "funcref"
+          TYPE_KEYWORD@2803..2810 "funcref"
         WHITESPACE@2810..2811 " "
         ELEM_EXPR@2811..2824
           PLAIN_INSTR@2811..2824
@@ -1726,7 +1726,7 @@ ROOT@0..3044
             WHITESPACE@2848..2849 " "
             IMMEDIATE@2849..2853
               HEAP_TYPE@2849..2853
-                ABS_HEAP_TYPE@2849..2853 "func"
+                TYPE_KEYWORD@2849..2853 "func"
             R_PAREN@2853..2854 ")"
         WHITESPACE@2854..2855 " "
         ELEM_EXPR@2855..2868
@@ -1802,7 +1802,7 @@ ROOT@0..3044
       IDENT@2979..2981 "$t"
       WHITESPACE@2981..2982 " "
       REF_TYPE@2982..2989
-        ABBR_REF_TYPE@2982..2989 "funcref"
+        TYPE_KEYWORD@2982..2989 "funcref"
       WHITESPACE@2989..2990 " "
       ELEM@2990..3040
         L_PAREN@2990..2991 "("
@@ -1824,7 +1824,7 @@ ROOT@0..3044
             WHITESPACE@3019..3020 " "
             IMMEDIATE@3020..3024
               HEAP_TYPE@3020..3024
-                ABS_HEAP_TYPE@3020..3024 "func"
+                TYPE_KEYWORD@3020..3024 "func"
             R_PAREN@3024..3025 ")"
         WHITESPACE@3025..3026 " "
         ELEM_EXPR@3026..3039

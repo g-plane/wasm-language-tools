@@ -138,7 +138,7 @@ impl LanguageService {
                             })
                     })
             }
-            SyntaxKind::NUM_TYPE | SyntaxKind::VEC_TYPE | SyntaxKind::ABBR_REF_TYPE => {
+            SyntaxKind::NUM_TYPE | SyntaxKind::VEC_TYPE | SyntaxKind::TYPE_KEYWORD => {
                 let ty = token.text();
                 data_set::get_value_type_description(token.text()).map(|doc| Hover {
                     contents: HoverContents::Markup(MarkupContent {

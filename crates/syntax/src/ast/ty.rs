@@ -302,8 +302,8 @@ pub struct HeapType {
 }
 impl HeapType {
     #[inline]
-    pub fn abs_heap_type(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::ABS_HEAP_TYPE)
+    pub fn type_keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::TYPE_KEYWORD)
     }
     #[inline]
     pub fn index(&self) -> Option<Index> {
@@ -562,8 +562,8 @@ pub struct RefType {
 }
 impl RefType {
     #[inline]
-    pub fn abbr_ref_type(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::ABBR_REF_TYPE)
+    pub fn type_keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::TYPE_KEYWORD)
     }
     #[inline]
     pub fn l_paren_token(&self) -> Option<SyntaxToken> {

@@ -261,7 +261,7 @@ ROOT@0..608
       GLOBAL_TYPE@493..502
         VAL_TYPE@493..502
           REF_TYPE@493..502
-            ABBR_REF_TYPE@493..502 "externref"
+            TYPE_KEYWORD@493..502 "externref"
       WHITESPACE@502..503 " "
       PLAIN_INSTR@503..520
         L_PAREN@503..504 "("
@@ -269,7 +269,7 @@ ROOT@0..608
         WHITESPACE@512..513 " "
         IMMEDIATE@513..519
           HEAP_TYPE@513..519
-            ABS_HEAP_TYPE@513..519 "extern"
+            TYPE_KEYWORD@513..519 "extern"
         R_PAREN@519..520 ")"
       R_PAREN@520..521 ")"
     WHITESPACE@521..524 "\n  "
@@ -285,7 +285,7 @@ ROOT@0..608
         WHITESPACE@540..541 " "
         VAL_TYPE@541..550
           REF_TYPE@541..550
-            ABBR_REF_TYPE@541..550 "externref"
+            TYPE_KEYWORD@541..550 "externref"
         R_PAREN@550..551 ")"
       WHITESPACE@551..552 " "
       PLAIN_INSTR@552..569
@@ -294,7 +294,7 @@ ROOT@0..608
         WHITESPACE@561..562 " "
         IMMEDIATE@562..568
           HEAP_TYPE@562..568
-            ABS_HEAP_TYPE@562..568 "extern"
+            TYPE_KEYWORD@562..568 "extern"
         R_PAREN@568..569 ")"
       R_PAREN@569..570 ")"
     WHITESPACE@570..573 "\n  "
@@ -305,7 +305,7 @@ ROOT@0..608
       GLOBAL_TYPE@581..588
         VAL_TYPE@581..588
           REF_TYPE@581..588
-            ABBR_REF_TYPE@581..588 "funcref"
+            TYPE_KEYWORD@581..588 "funcref"
       WHITESPACE@588..589 " "
       PLAIN_INSTR@589..604
         L_PAREN@589..590 "("
@@ -313,7 +313,7 @@ ROOT@0..608
         WHITESPACE@598..599 " "
         IMMEDIATE@599..603
           HEAP_TYPE@599..603
-            ABS_HEAP_TYPE@599..603 "func"
+            TYPE_KEYWORD@599..603 "func"
         R_PAREN@603..604 ")"
       R_PAREN@604..605 ")"
     WHITESPACE@605..606 "\n"
