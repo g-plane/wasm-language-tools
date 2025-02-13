@@ -2,33 +2,62 @@ use super::{
     module::index,
     must, node, retry_once, tok,
     token::{ident, keyword, l_paren, r_paren, trivias_prefixed, unsigned_int, word},
-    GreenResult, Input,
+    GreenElement, GreenResult, Input,
 };
 use crate::error::Message;
 use wat_syntax::SyntaxKind::*;
 use winnow::{
-    combinator::{alt, dispatch, fail, opt, peek, repeat},
+    combinator::{alt, dispatch, opt, peek, repeat},
     token::any,
     Parser,
 };
 
 fn abbr_ref_type(input: &mut Input) -> GreenResult {
-    word.verify_map(|word| match word {
-        "funcref" | "externref" => Some(tok(ABBR_REF_TYPE, word)),
+    word.verify_map(try_into_abbr_ref_type)
+        .context(Message::Name("ref type"))
+        .parse_next(input)
+}
+fn try_into_abbr_ref_type(word: &str) -> Option<GreenElement> {
+    match word {
+        "anyref" | "eqref" | "i31ref" | "structref" | "arrayref" | "nullref" | "funcref"
+        | "nullfuncref" | "externref" | "nullexternref" => Some(tok(ABBR_REF_TYPE, word)),
         _ => None,
-    })
-    .context(Message::Name("ref type"))
-    .parse_next(input)
+    }
 }
 
 pub(super) fn ref_type(input: &mut Input) -> GreenResult {
     dispatch! {peek(any);
-        '(' => fail,
+        '(' => detailed_ref_type,
         _ => abbr_ref_type,
     }
     .context(Message::Name("ref type"))
     .parse_next(input)
     .map(|ty| node(REF_TYPE, [ty]))
+}
+fn detailed_ref_type(input: &mut Input) -> GreenResult {
+    (
+        l_paren,
+        trivias_prefixed(keyword("ref")),
+        opt(trivias_prefixed(keyword("null"))),
+        must(trivias_prefixed(heap_type)),
+        r_paren,
+    )
+        .parse_next(input)
+        .map(|(l_paren, mut keyword, null_keyword, heap_type, r_paren)| {
+            let mut children = Vec::with_capacity(5);
+            children.push(l_paren);
+            children.append(&mut keyword);
+            if let Some(mut null_keyword) = null_keyword {
+                children.append(&mut null_keyword);
+            }
+            if let Some(mut heap_type) = heap_type {
+                children.append(&mut heap_type);
+            }
+            if let Some(mut r_paren) = r_paren {
+                children.append(&mut r_paren);
+            }
+            node(REF_TYPE, children)
+        })
 }
 
 pub(super) fn val_type(input: &mut Input) -> GreenResult {
@@ -37,8 +66,7 @@ pub(super) fn val_type(input: &mut Input) -> GreenResult {
         _ => word.verify_map(|word| match word {
             "i32" | "i64" | "f32" | "f64" => Some(tok(NUM_TYPE, word)),
             "v128" => Some(tok(VEC_TYPE, word)),
-            "funcref" | "externref" => Some(node(REF_TYPE, [tok(ABBR_REF_TYPE, word)])),
-            _ => None,
+            word => try_into_abbr_ref_type(word).map(|ty| node(REF_TYPE, [ty])),
         }),
     }
     .context(Message::Name("value type"))
@@ -54,8 +82,12 @@ pub(super) fn heap_type(input: &mut Input) -> GreenResult {
 }
 
 fn abs_heap_type(input: &mut Input) -> GreenResult {
-    word.verify_map(|word| matches!(word, "func" | "extern").then(|| tok(ABS_HEAP_TYPE, word)))
-        .parse_next(input)
+    word.verify_map(|word| match word {
+        "any" | "eq" | "i31" | "struct" | "array" | "none" | "func" | "nofunc" | "extern"
+        | "noextern" => Some(tok(ABS_HEAP_TYPE, word)),
+        _ => None,
+    })
+    .parse_next(input)
 }
 
 fn func_type(input: &mut Input) -> GreenResult {

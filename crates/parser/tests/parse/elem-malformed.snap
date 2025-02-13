@@ -141,10 +141,10 @@ error: expected ref type
   │                ^
 
 error: expected ref type
-  ┌─ elem-malformed.wat:5:17
+  ┌─ elem-malformed.wat:5:18
   │
 5 │   (elem declare ())
-  │                 ^^
+  │                  ^
 
 error: invalid instruction name
   ┌─ elem-malformed.wat:6:17
@@ -177,7 +177,7 @@ error: invalid instruction name
    │                           ^^
 
 error: expected ref type
-   ┌─ elem-malformed.wat:11:18
+   ┌─ elem-malformed.wat:11:19
    │
 11 │   (elem (offset) ())
-   │                  ^^
+   │                   ^
