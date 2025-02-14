@@ -1,0 +1,140 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..214
+  MODULE@0..213
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_TYPE@10..38
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "type"
+      WHITESPACE@15..16 " "
+      IDENT@16..19 "$e0"
+      WHITESPACE@19..20 " "
+      SUB_TYPE@20..37
+        L_PAREN@20..21 "("
+        KEYWORD@21..24 "sub"
+        WHITESPACE@24..25 " "
+        ARRAY_TYPE@25..36
+          L_PAREN@25..26 "("
+          KEYWORD@26..31 "array"
+          WHITESPACE@31..32 " "
+          FIELD_TYPE@32..35
+            NUM_TYPE@32..35
+              TYPE_KEYWORD@32..35 "i32"
+          R_PAREN@35..36 ")"
+        R_PAREN@36..37 ")"
+      R_PAREN@37..38 ")"
+    WHITESPACE@38..41 "\n  "
+    MODULE_FIELD_TYPE@41..73
+      L_PAREN@41..42 "("
+      KEYWORD@42..46 "type"
+      WHITESPACE@46..47 " "
+      IDENT@47..50 "$e1"
+      WHITESPACE@50..51 " "
+      SUB_TYPE@51..72
+        L_PAREN@51..52 "("
+        KEYWORD@52..55 "sub"
+        WHITESPACE@55..56 " "
+        INDEX@56..59
+          IDENT@56..59 "$e0"
+        WHITESPACE@59..60 " "
+        ARRAY_TYPE@60..71
+          L_PAREN@60..61 "("
+          KEYWORD@61..66 "array"
+          WHITESPACE@66..67 " "
+          FIELD_TYPE@67..70
+            NUM_TYPE@67..70
+              TYPE_KEYWORD@67..70 "i32"
+          R_PAREN@70..71 ")"
+        R_PAREN@71..72 ")"
+      R_PAREN@72..73 ")"
+    WHITESPACE@73..77 "\n\n  "
+    MODULE_FIELD_TYPE@77..102
+      L_PAREN@77..78 "("
+      KEYWORD@78..82 "type"
+      WHITESPACE@82..83 " "
+      IDENT@83..86 "$e0"
+      WHITESPACE@86..87 " "
+      SUB_TYPE@87..101
+        L_PAREN@87..88 "("
+        KEYWORD@88..91 "sub"
+        WHITESPACE@91..92 " "
+        STRUCT_TYPE@92..100
+          L_PAREN@92..93 "("
+          KEYWORD@93..99 "struct"
+          R_PAREN@99..100 ")"
+        R_PAREN@100..101 ")"
+      R_PAREN@101..102 ")"
+    WHITESPACE@102..105 "\n  "
+    MODULE_FIELD_TYPE@105..134
+      L_PAREN@105..106 "("
+      KEYWORD@106..110 "type"
+      WHITESPACE@110..111 " "
+      IDENT@111..114 "$e1"
+      WHITESPACE@114..115 " "
+      SUB_TYPE@115..133
+        L_PAREN@115..116 "("
+        KEYWORD@116..119 "sub"
+        WHITESPACE@119..120 " "
+        INDEX@120..123
+          IDENT@120..123 "$e0"
+        WHITESPACE@123..124 " "
+        STRUCT_TYPE@124..132
+          L_PAREN@124..125 "("
+          KEYWORD@125..131 "struct"
+          R_PAREN@131..132 ")"
+        R_PAREN@132..133 ")"
+      R_PAREN@133..134 ")"
+    WHITESPACE@134..137 "\n  "
+    MODULE_FIELD_TYPE@137..178
+      L_PAREN@137..138 "("
+      KEYWORD@138..142 "type"
+      WHITESPACE@142..143 " "
+      IDENT@143..146 "$e2"
+      WHITESPACE@146..147 " "
+      SUB_TYPE@147..177
+        L_PAREN@147..148 "("
+        KEYWORD@148..151 "sub"
+        WHITESPACE@151..152 " "
+        INDEX@152..155
+          IDENT@152..155 "$e1"
+        WHITESPACE@155..156 " "
+        STRUCT_TYPE@156..176
+          L_PAREN@156..157 "("
+          KEYWORD@157..163 "struct"
+          WHITESPACE@163..164 " "
+          FIELD@164..175
+            L_PAREN@164..165 "("
+            KEYWORD@165..170 "field"
+            WHITESPACE@170..171 " "
+            FIELD_TYPE@171..174
+              NUM_TYPE@171..174
+                TYPE_KEYWORD@171..174 "i32"
+            R_PAREN@174..175 ")"
+          R_PAREN@175..176 ")"
+        R_PAREN@176..177 ")"
+      R_PAREN@177..178 ")"
+    WHITESPACE@178..182 "\n\n  "
+    MODULE_FIELD_TYPE@182..211
+      L_PAREN@182..183 "("
+      KEYWORD@183..187 "type"
+      WHITESPACE@187..188 " "
+      IDENT@188..191 "$t2"
+      WHITESPACE@191..192 " "
+      SUB_TYPE@192..210
+        L_PAREN@192..193 "("
+        KEYWORD@193..196 "sub"
+        WHITESPACE@196..197 " "
+        KEYWORD@197..202 "final"
+        WHITESPACE@202..203 " "
+        FUNC_TYPE@203..209
+          L_PAREN@203..204 "("
+          KEYWORD@204..208 "func"
+          R_PAREN@208..209 ")"
+        R_PAREN@209..210 ")"
+      R_PAREN@210..211 ")"
+    WHITESPACE@211..212 "\n"
+    R_PAREN@212..213 ")"
+  WHITESPACE@213..214 "\n"

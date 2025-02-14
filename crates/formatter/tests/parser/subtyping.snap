@@ -1,0 +1,12 @@
+---
+source: crates/formatter/tests/parser.rs
+---
+(module
+  (type $e0 (array i32))
+  (type $e1 (array i32))
+
+  (type $e0 (struct))
+  (type $e1 (struct))
+  (type $e2 (struct (field i32)))
+
+  (type $t2 (func)))
