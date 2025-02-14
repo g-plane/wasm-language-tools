@@ -30,8 +30,6 @@ impl LanguageService {
         match kind {
             SyntaxKind::KEYWORD
             | SyntaxKind::INSTR_NAME
-            | SyntaxKind::NUM_TYPE
-            | SyntaxKind::VEC_TYPE
             | SyntaxKind::TYPE_KEYWORD
             | SyntaxKind::MEM_ARG
             | SyntaxKind::FLOAT

@@ -50,16 +50,16 @@ ROOT@0..566
           WHITESPACE@108..109 " "
           IDENT@109..111 "$i"
           WHITESPACE@111..112 " "
-          VAL_TYPE@112..115
-            NUM_TYPE@112..115 "i32"
+          NUM_TYPE@112..115
+            TYPE_KEYWORD@112..115 "i32"
           R_PAREN@115..116 ")"
         WHITESPACE@116..117 " "
         RESULT@117..129
           L_PAREN@117..118 "("
           KEYWORD@118..124 "result"
           WHITESPACE@124..125 " "
-          VAL_TYPE@125..128
-            NUM_TYPE@125..128 "i32"
+          NUM_TYPE@125..128
+            TYPE_KEYWORD@125..128 "i32"
           R_PAREN@128..129 ")"
       WHITESPACE@129..134 "\n    "
       PLAIN_INSTR@134..171
@@ -101,16 +101,16 @@ ROOT@0..566
           WHITESPACE@238..239 " "
           IDENT@239..241 "$i"
           WHITESPACE@241..242 " "
-          VAL_TYPE@242..245
-            NUM_TYPE@242..245 "i32"
+          NUM_TYPE@242..245
+            TYPE_KEYWORD@242..245 "i32"
           R_PAREN@245..246 ")"
         WHITESPACE@246..247 " "
         RESULT@247..259
           L_PAREN@247..248 "("
           KEYWORD@248..254 "result"
           WHITESPACE@254..255 " "
-          VAL_TYPE@255..258
-            NUM_TYPE@255..258 "i32"
+          NUM_TYPE@255..258
+            TYPE_KEYWORD@255..258 "i32"
           R_PAREN@258..259 ")"
       WHITESPACE@259..264 "\n    "
       PLAIN_INSTR@264..300
@@ -152,16 +152,16 @@ ROOT@0..566
           WHITESPACE@368..369 " "
           IDENT@369..371 "$i"
           WHITESPACE@371..372 " "
-          VAL_TYPE@372..375
-            NUM_TYPE@372..375 "i32"
+          NUM_TYPE@372..375
+            TYPE_KEYWORD@372..375 "i32"
           R_PAREN@375..376 ")"
         WHITESPACE@376..377 " "
         RESULT@377..389
           L_PAREN@377..378 "("
           KEYWORD@378..384 "result"
           WHITESPACE@384..385 " "
-          VAL_TYPE@385..388
-            NUM_TYPE@385..388 "i32"
+          NUM_TYPE@385..388
+            TYPE_KEYWORD@385..388 "i32"
           R_PAREN@388..389 ")"
       WHITESPACE@389..394 "\n    "
       PLAIN_INSTR@394..439
@@ -206,8 +206,8 @@ ROOT@0..566
           WHITESPACE@496..497 " "
           IDENT@497..499 "$i"
           WHITESPACE@499..500 " "
-          VAL_TYPE@500..503
-            NUM_TYPE@500..503 "i32"
+          NUM_TYPE@500..503
+            TYPE_KEYWORD@500..503 "i32"
           R_PAREN@503..504 ")"
       WHITESPACE@504..509 "\n    "
       PLAIN_INSTR@509..559

@@ -24,9 +24,7 @@ impl LanguageService {
             SyntaxKind::IDENT
                 | SyntaxKind::INT
                 | SyntaxKind::UNSIGNED_INT
-                | SyntaxKind::NUM_TYPE
-                | SyntaxKind::VEC_TYPE
-                | SyntaxKind::REF_TYPE
+                | SyntaxKind::TYPE_KEYWORD
                 | SyntaxKind::KEYWORD
         ) {
             return None;

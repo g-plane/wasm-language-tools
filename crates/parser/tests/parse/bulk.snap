@@ -107,14 +107,14 @@ ROOT@0..422
           L_PAREN@201..202 "("
           KEYWORD@202..207 "param"
           WHITESPACE@207..208 " "
-          VAL_TYPE@208..211
-            NUM_TYPE@208..211 "i32"
+          NUM_TYPE@208..211
+            TYPE_KEYWORD@208..211 "i32"
           WHITESPACE@211..212 " "
-          VAL_TYPE@212..215
-            NUM_TYPE@212..215 "i32"
+          NUM_TYPE@212..215
+            TYPE_KEYWORD@212..215 "i32"
           WHITESPACE@215..216 " "
-          VAL_TYPE@216..219
-            NUM_TYPE@216..219 "i32"
+          NUM_TYPE@216..219
+            TYPE_KEYWORD@216..219 "i32"
           R_PAREN@219..220 ")"
       WHITESPACE@220..225 "\n    "
       PLAIN_INSTR@225..298

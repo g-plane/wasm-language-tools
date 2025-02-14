@@ -421,6 +421,42 @@ impl AstNode for MemoryType {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct NumType {
+    syntax: SyntaxNode,
+}
+impl NumType {
+    #[inline]
+    pub fn type_keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::TYPE_KEYWORD)
+    }
+}
+impl AstNode for NumType {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::NUM_TYPE
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(NumType { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PackedType {
     syntax: SyntaxNode,
 }
@@ -679,7 +715,13 @@ impl AstNode for StorageType {
     where
         Self: Sized,
     {
-        matches!(kind, SyntaxKind::VAL_TYPE | SyntaxKind::PACKED_TYPE)
+        matches!(
+            kind,
+            SyntaxKind::NUM_TYPE
+                | SyntaxKind::VEC_TYPE
+                | SyntaxKind::REF_TYPE
+                | SyntaxKind::PACKED_TYPE
+        )
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self>
@@ -687,7 +729,9 @@ impl AstNode for StorageType {
         Self: Sized,
     {
         match syntax.kind() {
-            SyntaxKind::VAL_TYPE => Some(StorageType::Val(ValType { syntax })),
+            SyntaxKind::NUM_TYPE => Some(StorageType::Val(ValType::Num(NumType { syntax }))),
+            SyntaxKind::VEC_TYPE => Some(StorageType::Val(ValType::Vec(VecType { syntax }))),
+            SyntaxKind::REF_TYPE => Some(StorageType::Val(ValType::Ref(RefType { syntax }))),
             SyntaxKind::PACKED_TYPE => Some(StorageType::Packed(PackedType { syntax })),
             _ => None,
         }
@@ -905,22 +949,10 @@ impl AstNode for TypeDef {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ValType {
-    syntax: SyntaxNode,
-}
-impl ValType {
-    #[inline]
-    pub fn num_type(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::NUM_TYPE)
-    }
-    #[inline]
-    pub fn vec_type(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::VEC_TYPE)
-    }
-    #[inline]
-    pub fn ref_type(&self) -> Option<RefType> {
-        child(&self.syntax)
-    }
+pub enum ValType {
+    Num(NumType),
+    Vec(VecType),
+    Ref(RefType),
 }
 impl AstNode for ValType {
     type Language = WatLanguage;
@@ -929,7 +961,51 @@ impl AstNode for ValType {
     where
         Self: Sized,
     {
-        kind == SyntaxKind::VAL_TYPE
+        matches!(
+            kind,
+            SyntaxKind::NUM_TYPE | SyntaxKind::VEC_TYPE | SyntaxKind::REF_TYPE
+        )
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        match syntax.kind() {
+            SyntaxKind::NUM_TYPE => Some(ValType::Num(NumType { syntax })),
+            SyntaxKind::VEC_TYPE => Some(ValType::Vec(VecType { syntax })),
+            SyntaxKind::REF_TYPE => Some(ValType::Ref(RefType { syntax })),
+            _ => None,
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            ValType::Num(it) => it.syntax(),
+            ValType::Vec(it) => it.syntax(),
+            ValType::Ref(it) => it.syntax(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct VecType {
+    syntax: SyntaxNode,
+}
+impl VecType {
+    #[inline]
+    pub fn type_keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::TYPE_KEYWORD)
+    }
+}
+impl AstNode for VecType {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::VEC_TYPE
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self>
@@ -937,7 +1013,7 @@ impl AstNode for ValType {
         Self: Sized,
     {
         if Self::can_cast(syntax.kind()) {
-            Some(ValType { syntax })
+            Some(VecType { syntax })
         } else {
             None
         }

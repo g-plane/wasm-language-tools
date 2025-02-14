@@ -336,8 +336,8 @@ ROOT@0..1284
           L_PAREN@1166..1167 "("
           KEYWORD@1167..1173 "result"
           WHITESPACE@1173..1174 " "
-          VAL_TYPE@1174..1177
-            NUM_TYPE@1174..1177 "i32"
+          NUM_TYPE@1174..1177
+            TYPE_KEYWORD@1174..1177 "i32"
           R_PAREN@1177..1178 ")"
       WHITESPACE@1178..1179 " "
       PLAIN_INSTR@1179..1190
@@ -359,8 +359,8 @@ ROOT@0..1284
           L_PAREN@1221..1222 "("
           KEYWORD@1222..1228 "result"
           WHITESPACE@1228..1229 " "
-          VAL_TYPE@1229..1232
-            NUM_TYPE@1229..1232 "i32"
+          NUM_TYPE@1229..1232
+            TYPE_KEYWORD@1229..1232 "i32"
           R_PAREN@1232..1233 ")"
       WHITESPACE@1233..1234 " "
       PLAIN_INSTR@1234..1245

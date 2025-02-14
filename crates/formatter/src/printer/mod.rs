@@ -24,7 +24,9 @@ pub(crate) fn format_node(node: SyntaxNode, ctx: &Ctx) -> Option<Doc<'static>> {
     match node.kind() {
         SyntaxKind::MODULE_NAME => ModuleName::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::NAME => Name::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::VAL_TYPE => ValType::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::NUM_TYPE => NumType::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::VEC_TYPE => VecType::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::REF_TYPE => RefType::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::FUNC_TYPE => FuncType::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::PARAM => Param::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::RESULT => Result::cast(node).map(|node| node.doc(ctx)),

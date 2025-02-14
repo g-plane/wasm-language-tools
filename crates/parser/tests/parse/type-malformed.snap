@@ -19,8 +19,8 @@ ROOT@0..104
             L_PAREN@22..23 "("
             KEYWORD@23..29 "result"
             WHITESPACE@29..30 " "
-            VAL_TYPE@30..33
-              NUM_TYPE@30..33 "i32"
+            NUM_TYPE@30..33
+              TYPE_KEYWORD@30..33 "i32"
             R_PAREN@33..34 ")"
           WHITESPACE@34..35 " "
           ERROR@35..36 "("
@@ -46,8 +46,8 @@ ROOT@0..104
             WHITESPACE@70..71 " "
             ERROR@71..73 "$x"
             WHITESPACE@73..74 " "
-            VAL_TYPE@74..77
-              NUM_TYPE@74..77 "i32"
+            NUM_TYPE@74..77
+              TYPE_KEYWORD@74..77 "i32"
             R_PAREN@77..78 ")"
           R_PAREN@78..79 ")"
       R_PAREN@79..80 ")"

@@ -19,8 +19,8 @@ ROOT@0..94
       KEYWORD@25..31 "global"
       WHITESPACE@31..32 " "
       GLOBAL_TYPE@32..35
-        VAL_TYPE@32..35
-          NUM_TYPE@32..35 "i32"
+        NUM_TYPE@32..35
+          TYPE_KEYWORD@32..35 "i32"
       WHITESPACE@35..36 " "
       ERROR@36..37 "("
       ERROR@37..38 ")"
@@ -34,8 +34,8 @@ ROOT@0..94
         L_PAREN@50..51 "("
         KEYWORD@51..54 "mut"
         WHITESPACE@54..55 " "
-        VAL_TYPE@55..58
-          NUM_TYPE@55..58 "i32"
+        NUM_TYPE@55..58
+          TYPE_KEYWORD@55..58 "i32"
         R_PAREN@58..59 ")"
       WHITESPACE@59..60 " "
       ERROR@60..61 "("

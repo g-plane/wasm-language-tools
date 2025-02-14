@@ -43,8 +43,8 @@ ROOT@0..1222
             L_PAREN@58..59 "("
             KEYWORD@59..64 "param"
             WHITESPACE@64..65 " "
-            VAL_TYPE@65..68
-              NUM_TYPE@65..68 "i32"
+            NUM_TYPE@65..68
+              TYPE_KEYWORD@65..68 "i32"
             R_PAREN@68..69 ")"
           R_PAREN@69..70 ")"
       R_PAREN@70..71 ")"
@@ -64,8 +64,8 @@ ROOT@0..1222
             WHITESPACE@92..93 " "
             IDENT@93..95 "$x"
             WHITESPACE@95..96 " "
-            VAL_TYPE@96..99
-              NUM_TYPE@96..99 "i32"
+            NUM_TYPE@96..99
+              TYPE_KEYWORD@96..99 "i32"
             R_PAREN@99..100 ")"
           R_PAREN@100..101 ")"
       R_PAREN@101..102 ")"
@@ -83,8 +83,8 @@ ROOT@0..1222
             L_PAREN@117..118 "("
             KEYWORD@118..124 "result"
             WHITESPACE@124..125 " "
-            VAL_TYPE@125..128
-              NUM_TYPE@125..128 "i32"
+            NUM_TYPE@125..128
+              TYPE_KEYWORD@125..128 "i32"
             R_PAREN@128..129 ")"
           R_PAREN@129..130 ")"
       R_PAREN@130..131 ")"
@@ -102,16 +102,16 @@ ROOT@0..1222
             L_PAREN@146..147 "("
             KEYWORD@147..152 "param"
             WHITESPACE@152..153 " "
-            VAL_TYPE@153..156
-              NUM_TYPE@153..156 "i32"
+            NUM_TYPE@153..156
+              TYPE_KEYWORD@153..156 "i32"
             R_PAREN@156..157 ")"
           WHITESPACE@157..158 " "
           RESULT@158..170
             L_PAREN@158..159 "("
             KEYWORD@159..165 "result"
             WHITESPACE@165..166 " "
-            VAL_TYPE@166..169
-              NUM_TYPE@166..169 "i32"
+            NUM_TYPE@166..169
+              TYPE_KEYWORD@166..169 "i32"
             R_PAREN@169..170 ")"
           R_PAREN@170..171 ")"
       R_PAREN@171..172 ")"
@@ -131,16 +131,16 @@ ROOT@0..1222
             WHITESPACE@193..194 " "
             IDENT@194..196 "$x"
             WHITESPACE@196..197 " "
-            VAL_TYPE@197..200
-              NUM_TYPE@197..200 "i32"
+            NUM_TYPE@197..200
+              TYPE_KEYWORD@197..200 "i32"
             R_PAREN@200..201 ")"
           WHITESPACE@201..202 " "
           RESULT@202..214
             L_PAREN@202..203 "("
             KEYWORD@203..209 "result"
             WHITESPACE@209..210 " "
-            VAL_TYPE@210..213
-              NUM_TYPE@210..213 "i32"
+            NUM_TYPE@210..213
+              TYPE_KEYWORD@210..213 "i32"
             R_PAREN@213..214 ")"
           R_PAREN@214..215 ")"
       R_PAREN@215..216 ")"
@@ -158,11 +158,11 @@ ROOT@0..1222
             L_PAREN@232..233 "("
             KEYWORD@233..238 "param"
             WHITESPACE@238..239 " "
-            VAL_TYPE@239..242
-              NUM_TYPE@239..242 "f32"
+            NUM_TYPE@239..242
+              TYPE_KEYWORD@239..242 "f32"
             WHITESPACE@242..243 " "
-            VAL_TYPE@243..246
-              NUM_TYPE@243..246 "f64"
+            NUM_TYPE@243..246
+              TYPE_KEYWORD@243..246 "f64"
             R_PAREN@246..247 ")"
           R_PAREN@247..248 ")"
       R_PAREN@248..249 ")"
@@ -180,11 +180,11 @@ ROOT@0..1222
             L_PAREN@264..265 "("
             KEYWORD@265..271 "result"
             WHITESPACE@271..272 " "
-            VAL_TYPE@272..275
-              NUM_TYPE@272..275 "i64"
+            NUM_TYPE@272..275
+              TYPE_KEYWORD@272..275 "i64"
             WHITESPACE@275..276 " "
-            VAL_TYPE@276..279
-              NUM_TYPE@276..279 "f32"
+            NUM_TYPE@276..279
+              TYPE_KEYWORD@276..279 "f32"
             R_PAREN@279..280 ")"
           R_PAREN@280..281 ")"
       R_PAREN@281..282 ")"
@@ -202,22 +202,22 @@ ROOT@0..1222
             L_PAREN@297..298 "("
             KEYWORD@298..303 "param"
             WHITESPACE@303..304 " "
-            VAL_TYPE@304..307
-              NUM_TYPE@304..307 "i32"
+            NUM_TYPE@304..307
+              TYPE_KEYWORD@304..307 "i32"
             WHITESPACE@307..308 " "
-            VAL_TYPE@308..311
-              NUM_TYPE@308..311 "i64"
+            NUM_TYPE@308..311
+              TYPE_KEYWORD@308..311 "i64"
             R_PAREN@311..312 ")"
           WHITESPACE@312..313 " "
           RESULT@313..329
             L_PAREN@313..314 "("
             KEYWORD@314..320 "result"
             WHITESPACE@320..321 " "
-            VAL_TYPE@321..324
-              NUM_TYPE@321..324 "f32"
+            NUM_TYPE@321..324
+              TYPE_KEYWORD@321..324 "f32"
             WHITESPACE@324..325 " "
-            VAL_TYPE@325..328
-              NUM_TYPE@325..328 "f64"
+            NUM_TYPE@325..328
+              TYPE_KEYWORD@325..328 "f64"
             R_PAREN@328..329 ")"
           R_PAREN@329..330 ")"
       R_PAREN@330..331 ")"
@@ -235,16 +235,16 @@ ROOT@0..1222
             L_PAREN@347..348 "("
             KEYWORD@348..353 "param"
             WHITESPACE@353..354 " "
-            VAL_TYPE@354..357
-              NUM_TYPE@354..357 "f32"
+            NUM_TYPE@354..357
+              TYPE_KEYWORD@354..357 "f32"
             R_PAREN@357..358 ")"
           WHITESPACE@358..359 " "
           PARAM@359..370
             L_PAREN@359..360 "("
             KEYWORD@360..365 "param"
             WHITESPACE@365..366 " "
-            VAL_TYPE@366..369
-              NUM_TYPE@366..369 "f64"
+            NUM_TYPE@366..369
+              TYPE_KEYWORD@366..369 "f64"
             R_PAREN@369..370 ")"
           R_PAREN@370..371 ")"
       R_PAREN@371..372 ")"
@@ -264,16 +264,16 @@ ROOT@0..1222
             WHITESPACE@393..394 " "
             IDENT@394..396 "$x"
             WHITESPACE@396..397 " "
-            VAL_TYPE@397..400
-              NUM_TYPE@397..400 "f32"
+            NUM_TYPE@397..400
+              TYPE_KEYWORD@397..400 "f32"
             R_PAREN@400..401 ")"
           WHITESPACE@401..402 " "
           PARAM@402..413
             L_PAREN@402..403 "("
             KEYWORD@403..408 "param"
             WHITESPACE@408..409 " "
-            VAL_TYPE@409..412
-              NUM_TYPE@409..412 "f64"
+            NUM_TYPE@409..412
+              TYPE_KEYWORD@409..412 "f64"
             R_PAREN@412..413 ")"
           R_PAREN@413..414 ")"
       R_PAREN@414..415 ")"
@@ -291,8 +291,8 @@ ROOT@0..1222
             L_PAREN@430..431 "("
             KEYWORD@431..436 "param"
             WHITESPACE@436..437 " "
-            VAL_TYPE@437..440
-              NUM_TYPE@437..440 "f32"
+            NUM_TYPE@437..440
+              TYPE_KEYWORD@437..440 "f32"
             R_PAREN@440..441 ")"
           WHITESPACE@441..442 " "
           PARAM@442..456
@@ -301,8 +301,8 @@ ROOT@0..1222
             WHITESPACE@448..449 " "
             IDENT@449..451 "$y"
             WHITESPACE@451..452 " "
-            VAL_TYPE@452..455
-              NUM_TYPE@452..455 "f64"
+            NUM_TYPE@452..455
+              TYPE_KEYWORD@452..455 "f64"
             R_PAREN@455..456 ")"
           R_PAREN@456..457 ")"
       R_PAREN@457..458 ")"
@@ -322,8 +322,8 @@ ROOT@0..1222
             WHITESPACE@479..480 " "
             IDENT@480..482 "$x"
             WHITESPACE@482..483 " "
-            VAL_TYPE@483..486
-              NUM_TYPE@483..486 "f32"
+            NUM_TYPE@483..486
+              TYPE_KEYWORD@483..486 "f32"
             R_PAREN@486..487 ")"
           WHITESPACE@487..488 " "
           PARAM@488..502
@@ -332,8 +332,8 @@ ROOT@0..1222
             WHITESPACE@494..495 " "
             IDENT@495..497 "$y"
             WHITESPACE@497..498 " "
-            VAL_TYPE@498..501
-              NUM_TYPE@498..501 "f64"
+            NUM_TYPE@498..501
+              TYPE_KEYWORD@498..501 "f64"
             R_PAREN@501..502 ")"
           R_PAREN@502..503 ")"
       R_PAREN@503..504 ")"
@@ -351,16 +351,16 @@ ROOT@0..1222
             L_PAREN@519..520 "("
             KEYWORD@520..526 "result"
             WHITESPACE@526..527 " "
-            VAL_TYPE@527..530
-              NUM_TYPE@527..530 "i64"
+            NUM_TYPE@527..530
+              TYPE_KEYWORD@527..530 "i64"
             R_PAREN@530..531 ")"
           WHITESPACE@531..532 " "
           RESULT@532..544
             L_PAREN@532..533 "("
             KEYWORD@533..539 "result"
             WHITESPACE@539..540 " "
-            VAL_TYPE@540..543
-              NUM_TYPE@540..543 "f32"
+            NUM_TYPE@540..543
+              TYPE_KEYWORD@540..543 "f32"
             R_PAREN@543..544 ")"
           R_PAREN@544..545 ")"
       R_PAREN@545..546 ")"
@@ -378,32 +378,32 @@ ROOT@0..1222
             L_PAREN@561..562 "("
             KEYWORD@562..567 "param"
             WHITESPACE@567..568 " "
-            VAL_TYPE@568..571
-              NUM_TYPE@568..571 "i32"
+            NUM_TYPE@568..571
+              TYPE_KEYWORD@568..571 "i32"
             R_PAREN@571..572 ")"
           WHITESPACE@572..573 " "
           PARAM@573..584
             L_PAREN@573..574 "("
             KEYWORD@574..579 "param"
             WHITESPACE@579..580 " "
-            VAL_TYPE@580..583
-              NUM_TYPE@580..583 "i64"
+            NUM_TYPE@580..583
+              TYPE_KEYWORD@580..583 "i64"
             R_PAREN@583..584 ")"
           WHITESPACE@584..585 " "
           RESULT@585..597
             L_PAREN@585..586 "("
             KEYWORD@586..592 "result"
             WHITESPACE@592..593 " "
-            VAL_TYPE@593..596
-              NUM_TYPE@593..596 "f32"
+            NUM_TYPE@593..596
+              TYPE_KEYWORD@593..596 "f32"
             R_PAREN@596..597 ")"
           WHITESPACE@597..598 " "
           RESULT@598..610
             L_PAREN@598..599 "("
             KEYWORD@599..605 "result"
             WHITESPACE@605..606 " "
-            VAL_TYPE@606..609
-              NUM_TYPE@606..609 "f64"
+            NUM_TYPE@606..609
+              TYPE_KEYWORD@606..609 "f64"
             R_PAREN@609..610 ")"
           R_PAREN@610..611 ")"
       R_PAREN@611..612 ")"
@@ -423,8 +423,8 @@ ROOT@0..1222
             WHITESPACE@633..634 " "
             IDENT@634..636 "$x"
             WHITESPACE@636..637 " "
-            VAL_TYPE@637..640
-              NUM_TYPE@637..640 "i32"
+            NUM_TYPE@637..640
+              TYPE_KEYWORD@637..640 "i32"
             R_PAREN@640..641 ")"
           WHITESPACE@641..642 " "
           PARAM@642..656
@@ -433,24 +433,24 @@ ROOT@0..1222
             WHITESPACE@648..649 " "
             IDENT@649..651 "$y"
             WHITESPACE@651..652 " "
-            VAL_TYPE@652..655
-              NUM_TYPE@652..655 "i64"
+            NUM_TYPE@652..655
+              TYPE_KEYWORD@652..655 "i64"
             R_PAREN@655..656 ")"
           WHITESPACE@656..657 " "
           RESULT@657..669
             L_PAREN@657..658 "("
             KEYWORD@658..664 "result"
             WHITESPACE@664..665 " "
-            VAL_TYPE@665..668
-              NUM_TYPE@665..668 "f32"
+            NUM_TYPE@665..668
+              TYPE_KEYWORD@665..668 "f32"
             R_PAREN@668..669 ")"
           WHITESPACE@669..670 " "
           RESULT@670..682
             L_PAREN@670..671 "("
             KEYWORD@671..677 "result"
             WHITESPACE@677..678 " "
-            VAL_TYPE@678..681
-              NUM_TYPE@678..681 "f64"
+            NUM_TYPE@678..681
+              TYPE_KEYWORD@678..681 "f64"
             R_PAREN@681..682 ")"
           R_PAREN@682..683 ")"
       R_PAREN@683..684 ")"
@@ -468,11 +468,11 @@ ROOT@0..1222
             L_PAREN@700..701 "("
             KEYWORD@701..706 "param"
             WHITESPACE@706..707 " "
-            VAL_TYPE@707..710
-              NUM_TYPE@707..710 "f32"
+            NUM_TYPE@707..710
+              TYPE_KEYWORD@707..710 "f32"
             WHITESPACE@710..711 " "
-            VAL_TYPE@711..714
-              NUM_TYPE@711..714 "f64"
+            NUM_TYPE@711..714
+              TYPE_KEYWORD@711..714 "f64"
             R_PAREN@714..715 ")"
           WHITESPACE@715..716 " "
           PARAM@716..730
@@ -481,22 +481,22 @@ ROOT@0..1222
             WHITESPACE@722..723 " "
             IDENT@723..725 "$x"
             WHITESPACE@725..726 " "
-            VAL_TYPE@726..729
-              NUM_TYPE@726..729 "i32"
+            NUM_TYPE@726..729
+              TYPE_KEYWORD@726..729 "i32"
             R_PAREN@729..730 ")"
           WHITESPACE@730..731 " "
           PARAM@731..750
             L_PAREN@731..732 "("
             KEYWORD@732..737 "param"
             WHITESPACE@737..738 " "
-            VAL_TYPE@738..741
-              NUM_TYPE@738..741 "f64"
+            NUM_TYPE@738..741
+              TYPE_KEYWORD@738..741 "f64"
             WHITESPACE@741..742 " "
-            VAL_TYPE@742..745
-              NUM_TYPE@742..745 "i32"
+            NUM_TYPE@742..745
+              TYPE_KEYWORD@742..745 "i32"
             WHITESPACE@745..746 " "
-            VAL_TYPE@746..749
-              NUM_TYPE@746..749 "i32"
+            NUM_TYPE@746..749
+              TYPE_KEYWORD@746..749 "i32"
             R_PAREN@749..750 ")"
           R_PAREN@750..751 ")"
       R_PAREN@751..752 ")"
@@ -514,25 +514,25 @@ ROOT@0..1222
             L_PAREN@767..768 "("
             KEYWORD@768..774 "result"
             WHITESPACE@774..775 " "
-            VAL_TYPE@775..778
-              NUM_TYPE@775..778 "i64"
+            NUM_TYPE@775..778
+              TYPE_KEYWORD@775..778 "i64"
             WHITESPACE@778..779 " "
-            VAL_TYPE@779..782
-              NUM_TYPE@779..782 "i64"
+            NUM_TYPE@779..782
+              TYPE_KEYWORD@779..782 "i64"
             WHITESPACE@782..783 " "
-            VAL_TYPE@783..786
-              NUM_TYPE@783..786 "f32"
+            NUM_TYPE@783..786
+              TYPE_KEYWORD@783..786 "f32"
             R_PAREN@786..787 ")"
           WHITESPACE@787..788 " "
           RESULT@788..804
             L_PAREN@788..789 "("
             KEYWORD@789..795 "result"
             WHITESPACE@795..796 " "
-            VAL_TYPE@796..799
-              NUM_TYPE@796..799 "f32"
+            NUM_TYPE@796..799
+              TYPE_KEYWORD@796..799 "f32"
             WHITESPACE@799..800 " "
-            VAL_TYPE@800..803
-              NUM_TYPE@800..803 "i32"
+            NUM_TYPE@800..803
+              TYPE_KEYWORD@800..803 "i32"
             R_PAREN@803..804 ")"
           R_PAREN@804..805 ")"
       R_PAREN@805..806 ")"
@@ -550,44 +550,44 @@ ROOT@0..1222
             L_PAREN@825..826 "("
             KEYWORD@826..831 "param"
             WHITESPACE@831..832 " "
-            VAL_TYPE@832..835
-              NUM_TYPE@832..835 "i32"
+            NUM_TYPE@832..835
+              TYPE_KEYWORD@832..835 "i32"
             WHITESPACE@835..836 " "
-            VAL_TYPE@836..839
-              NUM_TYPE@836..839 "i32"
+            NUM_TYPE@836..839
+              TYPE_KEYWORD@836..839 "i32"
             R_PAREN@839..840 ")"
           WHITESPACE@840..841 " "
           PARAM@841..856
             L_PAREN@841..842 "("
             KEYWORD@842..847 "param"
             WHITESPACE@847..848 " "
-            VAL_TYPE@848..851
-              NUM_TYPE@848..851 "i64"
+            NUM_TYPE@848..851
+              TYPE_KEYWORD@848..851 "i64"
             WHITESPACE@851..852 " "
-            VAL_TYPE@852..855
-              NUM_TYPE@852..855 "i32"
+            NUM_TYPE@852..855
+              TYPE_KEYWORD@852..855 "i32"
             R_PAREN@855..856 ")"
           WHITESPACE@856..857 " "
           RESULT@857..873
             L_PAREN@857..858 "("
             KEYWORD@858..864 "result"
             WHITESPACE@864..865 " "
-            VAL_TYPE@865..868
-              NUM_TYPE@865..868 "f32"
+            NUM_TYPE@865..868
+              TYPE_KEYWORD@865..868 "f32"
             WHITESPACE@868..869 " "
-            VAL_TYPE@869..872
-              NUM_TYPE@869..872 "f64"
+            NUM_TYPE@869..872
+              TYPE_KEYWORD@869..872 "f64"
             R_PAREN@872..873 ")"
           WHITESPACE@873..874 " "
           RESULT@874..890
             L_PAREN@874..875 "("
             KEYWORD@875..881 "result"
             WHITESPACE@881..882 " "
-            VAL_TYPE@882..885
-              NUM_TYPE@882..885 "f64"
+            NUM_TYPE@882..885
+              TYPE_KEYWORD@882..885 "f64"
             WHITESPACE@885..886 " "
-            VAL_TYPE@886..889
-              NUM_TYPE@886..889 "i32"
+            NUM_TYPE@886..889
+              TYPE_KEYWORD@886..889 "i32"
             R_PAREN@889..890 ")"
           R_PAREN@890..891 ")"
       WHITESPACE@891..894 "\n  "
@@ -613,8 +613,8 @@ ROOT@0..1222
             WHITESPACE@925..926 " "
             IDENT@926..928 "$x"
             WHITESPACE@928..929 " "
-            VAL_TYPE@929..932
-              NUM_TYPE@929..932 "f32"
+            NUM_TYPE@929..932
+              TYPE_KEYWORD@929..932 "f32"
             R_PAREN@932..933 ")"
           WHITESPACE@933..934 " "
           PARAM@934..941
@@ -631,11 +631,11 @@ ROOT@0..1222
             L_PAREN@950..951 "("
             KEYWORD@951..956 "param"
             WHITESPACE@956..957 " "
-            VAL_TYPE@957..960
-              NUM_TYPE@957..960 "f64"
+            NUM_TYPE@957..960
+              TYPE_KEYWORD@957..960 "f64"
             WHITESPACE@960..961 " "
-            VAL_TYPE@961..964
-              NUM_TYPE@961..964 "i32"
+            NUM_TYPE@961..964
+              TYPE_KEYWORD@961..964 "i32"
             R_PAREN@964..965 ")"
           WHITESPACE@965..966 " "
           PARAM@966..973
@@ -668,11 +668,11 @@ ROOT@0..1222
             L_PAREN@1012..1013 "("
             KEYWORD@1013..1019 "result"
             WHITESPACE@1019..1020 " "
-            VAL_TYPE@1020..1023
-              NUM_TYPE@1020..1023 "i64"
+            NUM_TYPE@1020..1023
+              TYPE_KEYWORD@1020..1023 "i64"
             WHITESPACE@1023..1024 " "
-            VAL_TYPE@1024..1027
-              NUM_TYPE@1024..1027 "i64"
+            NUM_TYPE@1024..1027
+              TYPE_KEYWORD@1024..1027 "i64"
             R_PAREN@1027..1028 ")"
           WHITESPACE@1028..1029 " "
           RESULT@1029..1037
@@ -684,8 +684,8 @@ ROOT@0..1222
             L_PAREN@1038..1039 "("
             KEYWORD@1039..1045 "result"
             WHITESPACE@1045..1046 " "
-            VAL_TYPE@1046..1049
-              NUM_TYPE@1046..1049 "f32"
+            NUM_TYPE@1046..1049
+              TYPE_KEYWORD@1046..1049 "f32"
             R_PAREN@1049..1050 ")"
           WHITESPACE@1050..1051 " "
           RESULT@1051..1059
@@ -709,22 +709,22 @@ ROOT@0..1222
             L_PAREN@1089..1090 "("
             KEYWORD@1090..1095 "param"
             WHITESPACE@1095..1096 " "
-            VAL_TYPE@1096..1099
-              NUM_TYPE@1096..1099 "i32"
+            NUM_TYPE@1096..1099
+              TYPE_KEYWORD@1096..1099 "i32"
             WHITESPACE@1099..1100 " "
-            VAL_TYPE@1100..1103
-              NUM_TYPE@1100..1103 "i32"
+            NUM_TYPE@1100..1103
+              TYPE_KEYWORD@1100..1103 "i32"
             R_PAREN@1103..1104 ")"
           WHITESPACE@1104..1105 " "
           PARAM@1105..1120
             L_PAREN@1105..1106 "("
             KEYWORD@1106..1111 "param"
             WHITESPACE@1111..1112 " "
-            VAL_TYPE@1112..1115
-              NUM_TYPE@1112..1115 "i64"
+            NUM_TYPE@1112..1115
+              TYPE_KEYWORD@1112..1115 "i64"
             WHITESPACE@1115..1116 " "
-            VAL_TYPE@1116..1119
-              NUM_TYPE@1116..1119 "i32"
+            NUM_TYPE@1116..1119
+              TYPE_KEYWORD@1116..1119 "i32"
             R_PAREN@1119..1120 ")"
           WHITESPACE@1120..1121 " "
           PARAM@1121..1128
@@ -738,8 +738,8 @@ ROOT@0..1222
             WHITESPACE@1135..1136 " "
             IDENT@1136..1138 "$x"
             WHITESPACE@1138..1139 " "
-            VAL_TYPE@1139..1142
-              NUM_TYPE@1139..1142 "i32"
+            NUM_TYPE@1139..1142
+              TYPE_KEYWORD@1139..1142 "i32"
             R_PAREN@1142..1143 ")"
           WHITESPACE@1143..1144 " "
           PARAM@1144..1151
@@ -756,22 +756,22 @@ ROOT@0..1222
             L_PAREN@1167..1168 "("
             KEYWORD@1168..1174 "result"
             WHITESPACE@1174..1175 " "
-            VAL_TYPE@1175..1178
-              NUM_TYPE@1175..1178 "f32"
+            NUM_TYPE@1175..1178
+              TYPE_KEYWORD@1175..1178 "f32"
             WHITESPACE@1178..1179 " "
-            VAL_TYPE@1179..1182
-              NUM_TYPE@1179..1182 "f64"
+            NUM_TYPE@1179..1182
+              TYPE_KEYWORD@1179..1182 "f64"
             R_PAREN@1182..1183 ")"
           WHITESPACE@1183..1184 " "
           RESULT@1184..1200
             L_PAREN@1184..1185 "("
             KEYWORD@1185..1191 "result"
             WHITESPACE@1191..1192 " "
-            VAL_TYPE@1192..1195
-              NUM_TYPE@1192..1195 "f64"
+            NUM_TYPE@1192..1195
+              TYPE_KEYWORD@1192..1195 "f64"
             WHITESPACE@1195..1196 " "
-            VAL_TYPE@1196..1199
-              NUM_TYPE@1196..1199 "i32"
+            NUM_TYPE@1196..1199
+              TYPE_KEYWORD@1196..1199 "i32"
             R_PAREN@1199..1200 ")"
           WHITESPACE@1200..1201 " "
           RESULT@1201..1209

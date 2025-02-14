@@ -63,7 +63,9 @@ pub(crate) trait TypesAnalyzerCtx: SyntaxTreeCtx + SymbolTablesCtx {
 fn extract_type(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<ValType> {
     (&*node).try_into().ok().or_else(|| {
         node.children().find_map(|child| match child {
-            NodeOrToken::Node(node) if node.kind() == SyntaxKind::VAL_TYPE.into() => {
+            NodeOrToken::Node(node)
+                if AstValType::can_cast(WatLanguage::kind_from_raw(node.kind())) =>
+            {
                 node.try_into().ok()
             }
             _ => None,
@@ -337,27 +339,24 @@ impl Display for ValType {
 
 impl From<AstValType> for ValType {
     fn from(value: AstValType) -> Self {
-        if let Some(num_type) = value.num_type() {
-            match num_type.text() {
-                "i32" => ValType::I32,
-                "i64" => ValType::I64,
-                "f32" => ValType::F32,
-                "f64" => ValType::F64,
-                _ => unreachable!("unsupported numtype"),
+        match value {
+            AstValType::Num(num_type) => {
+                match num_type.type_keyword().as_ref().map(|token| token.text()) {
+                    Some("i32") => ValType::I32,
+                    Some("i64") => ValType::I64,
+                    Some("f32") => ValType::F32,
+                    Some("f64") => ValType::F64,
+                    _ => unreachable!("unsupported num type"),
+                }
             }
-        } else if value.vec_type().is_some() {
-            ValType::V128
-        } else if let Some(ref_type) = value
-            .ref_type()
-            .and_then(|ref_type| ref_type.type_keyword())
-        {
-            match ref_type.text() {
-                "funcref" => ValType::FuncRef,
-                "externref" => ValType::ExternRef,
-                _ => unreachable!("unsupported reftype"),
+            AstValType::Vec(..) => ValType::V128,
+            AstValType::Ref(ref_type) => {
+                match ref_type.type_keyword().as_ref().map(|token| token.text()) {
+                    Some("funcref") => ValType::FuncRef,
+                    Some("externref") => ValType::ExternRef,
+                    _ => unreachable!("unsupported ref type"),
+                }
             }
-        } else {
-            unreachable!("unsupported valtype");
         }
     }
 }
@@ -365,39 +364,32 @@ impl From<AstValType> for ValType {
 impl TryFrom<&GreenNodeData> for ValType {
     type Error = ();
     fn try_from(node: &GreenNodeData) -> std::result::Result<Self, Self::Error> {
-        node.children()
-            .find_map(|child| match child {
-                NodeOrToken::Token(token) => match WatLanguage::kind_from_raw(token.kind()) {
-                    SyntaxKind::NUM_TYPE => match token.text() {
-                        "i32" => Some(ValType::I32),
-                        "i64" => Some(ValType::I64),
-                        "f32" => Some(ValType::F32),
-                        "f64" => Some(ValType::F64),
-                        _ => None,
-                    },
-                    SyntaxKind::VEC_TYPE => Some(ValType::V128),
-                    SyntaxKind::REF_TYPE => match token.text() {
-                        "funcref" => Some(ValType::FuncRef),
-                        "externref" => Some(ValType::ExternRef),
-                        _ => None,
-                    },
-                    _ => None,
-                },
-                NodeOrToken::Node(node) if node.kind() == SyntaxKind::REF_TYPE.into() => node
-                    .children()
-                    .next()
-                    .and_then(|child| child.into_token())
-                    .and_then(|token| match WatLanguage::kind_from_raw(token.kind()) {
-                        SyntaxKind::TYPE_KEYWORD => match token.text() {
-                            "funcref" => Some(ValType::FuncRef),
-                            "externref" => Some(ValType::ExternRef),
-                            _ => None,
-                        },
-                        _ => None,
-                    }),
-                _ => None,
-            })
-            .ok_or(())
+        match WatLanguage::kind_from_raw(node.kind()) {
+            SyntaxKind::NUM_TYPE => match node
+                .children()
+                .next()
+                .and_then(|child| child.into_token())
+                .map(|token| token.text())
+            {
+                Some("i32") => Ok(ValType::I32),
+                Some("i64") => Ok(ValType::I64),
+                Some("f32") => Ok(ValType::F32),
+                Some("f64") => Ok(ValType::F64),
+                _ => Err(()),
+            },
+            SyntaxKind::VEC_TYPE => Ok(ValType::V128),
+            SyntaxKind::REF_TYPE => match node
+                .children()
+                .next()
+                .and_then(|child| child.into_token())
+                .map(|token| token.text())
+            {
+                Some("funcref") => Ok(ValType::FuncRef),
+                Some("externref") => Ok(ValType::ExternRef),
+                _ => Err(()),
+            },
+            _ => Err(()),
+        }
     }
 }
 

@@ -121,6 +121,16 @@ impl DocGen for MemoryType {
     }
 }
 
+impl DocGen for NumType {
+    fn doc(&self, _: &Ctx) -> Doc<'static> {
+        if let Some(type_keyword) = self.type_keyword() {
+            Doc::text(type_keyword.text().to_string())
+        } else {
+            Doc::nil()
+        }
+    }
+}
+
 impl DocGen for Param {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         let mut docs = Vec::with_capacity(2);
@@ -230,12 +240,18 @@ impl DocGen for TableType {
 
 impl DocGen for ValType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        if let Some(num_type) = self.num_type() {
-            Doc::text(num_type.text().to_string())
-        } else if let Some(vec_type) = self.vec_type() {
-            Doc::text(vec_type.text().to_string())
-        } else if let Some(ref_type) = self.ref_type() {
-            ref_type.doc(ctx)
+        match self {
+            ValType::Num(num_type) => num_type.doc(ctx),
+            ValType::Vec(vec_type) => vec_type.doc(ctx),
+            ValType::Ref(ref_type) => ref_type.doc(ctx),
+        }
+    }
+}
+
+impl DocGen for VecType {
+    fn doc(&self, _: &Ctx) -> Doc<'static> {
+        if let Some(type_keyword) = self.type_keyword() {
+            Doc::text(type_keyword.text().to_string())
         } else {
             Doc::nil()
         }

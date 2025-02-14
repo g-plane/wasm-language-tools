@@ -64,14 +64,13 @@ pub(super) fn val_type(input: &mut Input) -> GreenResult {
     dispatch! {peek(any);
         '(' => ref_type,
         _ => word.verify_map(|word| match word {
-            "i32" | "i64" | "f32" | "f64" => Some(tok(NUM_TYPE, word)),
-            "v128" => Some(tok(VEC_TYPE, word)),
+            "i32" | "i64" | "f32" | "f64" => Some(node(NUM_TYPE, [tok(TYPE_KEYWORD, word)])),
+            "v128" => Some(node(VEC_TYPE, [tok(TYPE_KEYWORD, word)])),
             word => try_into_abbr_ref_type(word).map(|ty| node(REF_TYPE, [ty])),
         }),
     }
     .context(Message::Name("value type"))
     .parse_next(input)
-    .map(|ty| node(VAL_TYPE, [ty]))
 }
 
 pub(super) fn heap_type(input: &mut Input) -> GreenResult {

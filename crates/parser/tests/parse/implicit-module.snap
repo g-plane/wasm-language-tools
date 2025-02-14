@@ -16,8 +16,8 @@ ROOT@0..27
           WHITESPACE@12..13 " "
           KEYWORD@13..18 "param"
           WHITESPACE@18..19 " "
-          VAL_TYPE@19..22
-            NUM_TYPE@19..22 "i32"
+          NUM_TYPE@19..22
+            TYPE_KEYWORD@19..22 "i32"
           WHITESPACE@22..23 " "
           R_PAREN@23..24 ")"
       WHITESPACE@24..25 " "

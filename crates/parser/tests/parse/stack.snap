@@ -25,16 +25,16 @@ ROOT@0..1103
           WHITESPACE@47..48 " "
           IDENT@48..50 "$n"
           WHITESPACE@50..51 " "
-          VAL_TYPE@51..54
-            NUM_TYPE@51..54 "i64"
+          NUM_TYPE@51..54
+            TYPE_KEYWORD@51..54 "i64"
           R_PAREN@54..55 ")"
         WHITESPACE@55..56 " "
         RESULT@56..68
           L_PAREN@56..57 "("
           KEYWORD@57..63 "result"
           WHITESPACE@63..64 " "
-          VAL_TYPE@64..67
-            NUM_TYPE@64..67 "i64"
+          NUM_TYPE@64..67
+            TYPE_KEYWORD@64..67 "i64"
           R_PAREN@67..68 ")"
       WHITESPACE@68..73 "\n    "
       LOCAL@73..87
@@ -43,8 +43,8 @@ ROOT@0..1103
         WHITESPACE@79..80 " "
         IDENT@80..82 "$i"
         WHITESPACE@82..83 " "
-        VAL_TYPE@83..86
-          NUM_TYPE@83..86 "i64"
+        NUM_TYPE@83..86
+          TYPE_KEYWORD@83..86 "i64"
         R_PAREN@86..87 ")"
       WHITESPACE@87..92 "\n    "
       LOCAL@92..108
@@ -53,8 +53,8 @@ ROOT@0..1103
         WHITESPACE@98..99 " "
         IDENT@99..103 "$res"
         WHITESPACE@103..104 " "
-        VAL_TYPE@104..107
-          NUM_TYPE@104..107 "i64"
+        NUM_TYPE@104..107
+          TYPE_KEYWORD@104..107 "i64"
         R_PAREN@107..108 ")"
       WHITESPACE@108..113 "\n    "
       PLAIN_INSTR@113..125
@@ -210,16 +210,16 @@ ROOT@0..1103
           WHITESPACE@629..630 " "
           IDENT@630..632 "$n"
           WHITESPACE@632..633 " "
-          VAL_TYPE@633..636
-            NUM_TYPE@633..636 "i64"
+          NUM_TYPE@633..636
+            TYPE_KEYWORD@633..636 "i64"
           R_PAREN@636..637 ")"
         WHITESPACE@637..638 " "
         RESULT@638..650
           L_PAREN@638..639 "("
           KEYWORD@639..645 "result"
           WHITESPACE@645..646 " "
-          VAL_TYPE@646..649
-            NUM_TYPE@646..649 "i64"
+          NUM_TYPE@646..649
+            TYPE_KEYWORD@646..649 "i64"
           R_PAREN@649..650 ")"
       WHITESPACE@650..655 "\n    "
       LOCAL@655..669
@@ -228,8 +228,8 @@ ROOT@0..1103
         WHITESPACE@661..662 " "
         IDENT@662..664 "$i"
         WHITESPACE@664..665 " "
-        VAL_TYPE@665..668
-          NUM_TYPE@665..668 "i64"
+        NUM_TYPE@665..668
+          TYPE_KEYWORD@665..668 "i64"
         R_PAREN@668..669 ")"
       WHITESPACE@669..674 "\n    "
       LOCAL@674..690
@@ -238,8 +238,8 @@ ROOT@0..1103
         WHITESPACE@680..681 " "
         IDENT@681..685 "$res"
         WHITESPACE@685..686 " "
-        VAL_TYPE@686..689
-          NUM_TYPE@686..689 "i64"
+        NUM_TYPE@686..689
+          TYPE_KEYWORD@686..689 "i64"
         R_PAREN@689..690 ")"
       WHITESPACE@690..695 "\n    "
       PLAIN_INSTR@695..724

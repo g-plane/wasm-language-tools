@@ -117,9 +117,7 @@ impl LanguageService {
         let symbol_table = self.symbol_table(uri);
         let token_kinds = &self.semantic_token_kinds;
         match token.kind() {
-            SyntaxKind::NUM_TYPE | SyntaxKind::VEC_TYPE | SyntaxKind::TYPE_KEYWORD => {
-                token_kinds.get_index_of(&SemanticTokenKind::Type)
-            }
+            SyntaxKind::TYPE_KEYWORD => token_kinds.get_index_of(&SemanticTokenKind::Type),
             SyntaxKind::KEYWORD => token_kinds.get_index_of(&SemanticTokenKind::Keyword),
             SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
                 let parent = token.parent();
