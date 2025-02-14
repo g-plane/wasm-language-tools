@@ -261,11 +261,14 @@ fn field_type(input: &mut Input) -> GreenResult {
             }),
         storage_type.map(|ty| node(FIELD_TYPE, [ty])),
     ))
+    .context(Message::Name("field type"))
     .parse_next(input)
 }
 
 fn storage_type(input: &mut Input) -> GreenResult {
-    alt((val_type, packed_type)).parse_next(input)
+    alt((val_type, packed_type))
+        .context(Message::Name("storage type"))
+        .parse_next(input)
 }
 
 fn packed_type(input: &mut Input) -> GreenResult {

@@ -1,0 +1,8 @@
+---
+source: crates/formatter/tests/parser.rs
+---
+(module
+  (type (su))
+  (type (sub))
+  (type (sub ()))
+  (type (sub 0 final (struct))))

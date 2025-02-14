@@ -1,0 +1,150 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..166
+  MODULE@0..165
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_TYPE@10..21
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "type"
+      WHITESPACE@15..16 " "
+      ERROR@16..17 "("
+      ERROR@17..19 "st"
+      ERROR@19..20 ")"
+      R_PAREN@20..21 ")"
+    WHITESPACE@21..24 "\n  "
+    MODULE_FIELD_TYPE@24..42
+      L_PAREN@24..25 "("
+      KEYWORD@25..29 "type"
+      WHITESPACE@29..30 " "
+      SUB_TYPE@30..41
+        STRUCT_TYPE@30..41
+          L_PAREN@30..31 "("
+          KEYWORD@31..37 "struct"
+          WHITESPACE@37..38 " "
+          ERROR@38..39 "("
+          ERROR@39..40 ")"
+          R_PAREN@40..41 ")"
+      R_PAREN@41..42 ")"
+    WHITESPACE@42..45 "\n  "
+    MODULE_FIELD_TYPE@45..66
+      L_PAREN@45..46 "("
+      KEYWORD@46..50 "type"
+      WHITESPACE@50..51 " "
+      SUB_TYPE@51..65
+        STRUCT_TYPE@51..65
+          L_PAREN@51..52 "("
+          KEYWORD@52..58 "struct"
+          WHITESPACE@58..59 " "
+          ERROR@59..64 "field"
+          R_PAREN@64..65 ")"
+      R_PAREN@65..66 ")"
+    WHITESPACE@66..69 "\n  "
+    MODULE_FIELD_TYPE@69..99
+      L_PAREN@69..70 "("
+      KEYWORD@70..74 "type"
+      WHITESPACE@74..75 " "
+      SUB_TYPE@75..99
+        STRUCT_TYPE@75..99
+          L_PAREN@75..76 "("
+          KEYWORD@76..82 "struct"
+          WHITESPACE@82..83 " "
+          FIELD@83..98
+            L_PAREN@83..84 "("
+            KEYWORD@84..89 "field"
+            WHITESPACE@89..90 " "
+            ERROR@90..91 "("
+            ERROR@91..96 "field"
+            ERROR@96..97 ")"
+            R_PAREN@97..98 ")"
+          R_PAREN@98..99 ")"
+    WHITESPACE@99..102 "\n  "
+    MODULE_FIELD_TYPE@102..131
+      L_PAREN@102..103 "("
+      KEYWORD@103..107 "type"
+      WHITESPACE@107..108 " "
+      SUB_TYPE@108..130
+        STRUCT_TYPE@108..130
+          L_PAREN@108..109 "("
+          KEYWORD@109..115 "struct"
+          WHITESPACE@115..116 " "
+          FIELD@116..129
+            L_PAREN@116..117 "("
+            KEYWORD@117..122 "field"
+            WHITESPACE@122..123 " "
+            FIELD_TYPE@123..128
+              REF_TYPE@123..128
+                L_PAREN@123..124 "("
+                KEYWORD@124..127 "ref"
+                R_PAREN@127..128 ")"
+            R_PAREN@128..129 ")"
+          R_PAREN@129..130 ")"
+      R_PAREN@130..131 ")"
+    WHITESPACE@131..134 "\n  "
+    MODULE_FIELD_TYPE@134..163
+      L_PAREN@134..135 "("
+      KEYWORD@135..139 "type"
+      WHITESPACE@139..140 " "
+      SUB_TYPE@140..162
+        STRUCT_TYPE@140..162
+          L_PAREN@140..141 "("
+          KEYWORD@141..147 "struct"
+          WHITESPACE@147..148 " "
+          FIELD@148..161
+            L_PAREN@148..149 "("
+            KEYWORD@149..154 "field"
+            WHITESPACE@154..155 " "
+            FIELD_TYPE@155..160
+              L_PAREN@155..156 "("
+              KEYWORD@156..159 "mut"
+              R_PAREN@159..160 ")"
+            R_PAREN@160..161 ")"
+          R_PAREN@161..162 ")"
+      R_PAREN@162..163 ")"
+    WHITESPACE@163..164 "\n"
+    R_PAREN@164..165 ")"
+  WHITESPACE@165..166 "\n"
+
+error: expected `sub`
+  ┌─ struct-malformed.wat:2:10
+  │
+2 │   (type (st))
+  │          ^^^
+
+error: expected `field`
+  ┌─ struct-malformed.wat:3:18
+  │
+3 │   (type (struct ()))
+  │                  ^
+
+error: expected `(`
+  ┌─ struct-malformed.wat:4:17
+  │
+4 │   (type (struct field))
+  │                 ^^^^^
+
+error: expected field type
+  ┌─ struct-malformed.wat:5:24
+  │
+5 │   (type (struct (field (field)))
+  │                        ^^^^^^^
+
+error: expected `)`
+  ┌─ struct-malformed.wat:6:3
+  │
+6 │   (type (struct (field (ref))))
+  │   ^
+
+error: expected heap type
+  ┌─ struct-malformed.wat:6:28
+  │
+6 │   (type (struct (field (ref))))
+  │                            ^
+
+error: expected storage type
+  ┌─ struct-malformed.wat:7:28
+  │
+7 │   (type (struct (field (mut))))
+  │                            ^

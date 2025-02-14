@@ -1,0 +1,62 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..62
+  MODULE@0..61
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_TYPE@10..22
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "type"
+      WHITESPACE@15..16 " "
+      ERROR@16..17 "("
+      ERROR@17..20 "arr"
+      ERROR@20..21 ")"
+      R_PAREN@21..22 ")"
+    WHITESPACE@22..25 "\n  "
+    MODULE_FIELD_TYPE@25..39
+      L_PAREN@25..26 "("
+      KEYWORD@26..30 "type"
+      WHITESPACE@30..31 " "
+      SUB_TYPE@31..38
+        ARRAY_TYPE@31..38
+          L_PAREN@31..32 "("
+          KEYWORD@32..37 "array"
+          R_PAREN@37..38 ")"
+      R_PAREN@38..39 ")"
+    WHITESPACE@39..42 "\n  "
+    MODULE_FIELD_TYPE@42..59
+      L_PAREN@42..43 "("
+      KEYWORD@43..47 "type"
+      WHITESPACE@47..48 " "
+      SUB_TYPE@48..58
+        ARRAY_TYPE@48..58
+          L_PAREN@48..49 "("
+          KEYWORD@49..54 "array"
+          WHITESPACE@54..55 " "
+          ERROR@55..56 "("
+          ERROR@56..57 ")"
+          R_PAREN@57..58 ")"
+      R_PAREN@58..59 ")"
+    WHITESPACE@59..60 "\n"
+    R_PAREN@60..61 ")"
+  WHITESPACE@61..62 "\n"
+
+error: expected `sub`
+  ┌─ array-malformed.wat:2:10
+  │
+2 │   (type (arr))
+  │          ^^^^
+
+error: expected field type
+  ┌─ array-malformed.wat:3:15
+  │
+3 │   (type (array))
+  │               ^
+
+error: expected field type
+  ┌─ array-malformed.wat:4:16
+  │
+4 │   (type (array ()))
+  │                ^^
