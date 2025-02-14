@@ -1,12 +1,108 @@
 use super::*;
 use tiny_pretty::Doc;
 
+impl DocGen for ArrayType {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        let mut docs = Vec::with_capacity(2);
+        let mut trivias = vec![];
+        if let Some(l_paren) = self.l_paren_token() {
+            docs.push(Doc::text("("));
+            trivias = format_trivias_after_token(l_paren, ctx);
+        }
+        if let Some(keyword) = self.keyword() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text("array"));
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(field_type) = self.field_type() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(field_type.doc(ctx));
+            trivias = format_trivias_after_node(field_type, ctx);
+        }
+        docs.append(&mut trivias);
+        docs.push(Doc::text(")"));
+        Doc::list(docs)
+    }
+}
+
 impl DocGen for CompType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         match self {
-            CompType::Array(array_type) => Doc::text(array_type.syntax().to_string()),
-            CompType::Struct(struct_type) => Doc::text(struct_type.syntax().to_string()),
+            CompType::Array(array_type) => array_type.doc(ctx),
+            CompType::Struct(struct_type) => struct_type.doc(ctx),
             CompType::Func(func_type) => func_type.doc(ctx),
+        }
+    }
+}
+
+impl DocGen for Field {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        let mut docs = Vec::with_capacity(2);
+        let mut trivias = vec![];
+        if let Some(l_paren) = self.l_paren_token() {
+            docs.push(Doc::text("("));
+            trivias = format_trivias_after_token(l_paren, ctx);
+        }
+        if let Some(keyword) = self.keyword() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text("field"));
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(ident) = self.ident_token() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text(ident.to_string()));
+            trivias = format_trivias_after_token(ident, ctx);
+        }
+        self.field_types().for_each(|field_type| {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(field_type.doc(ctx));
+            trivias = format_trivias_after_node(field_type, ctx);
+        });
+        docs.append(&mut trivias);
+        docs.push(Doc::text(")"));
+        Doc::list(docs)
+    }
+}
+
+impl DocGen for FieldType {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        if let Some(l_paren) = self.l_paren_token() {
+            let mut docs = Vec::with_capacity(2);
+            docs.push(Doc::text("("));
+            let mut trivias = format_trivias_after_token(l_paren, ctx);
+            if let Some(keyword) = self.mut_keyword() {
+                docs.append(&mut trivias);
+                docs.push(Doc::text("mut"));
+                trivias = format_trivias_after_token(keyword, ctx);
+            }
+            if let Some(ty) = self.storage_type() {
+                if trivias.is_empty() {
+                    docs.push(Doc::space());
+                } else {
+                    docs.append(&mut trivias);
+                }
+                docs.push(ty.doc(ctx));
+                trivias = format_trivias_after_node(ty, ctx);
+            }
+            docs.append(&mut trivias);
+            docs.push(Doc::text(")"));
+            Doc::list(docs)
+        } else if let Some(ty) = self.storage_type() {
+            ty.doc(ctx)
+        } else {
+            Doc::nil()
         }
     }
 }
@@ -131,6 +227,16 @@ impl DocGen for NumType {
     }
 }
 
+impl DocGen for PackedType {
+    fn doc(&self, _: &Ctx) -> Doc<'static> {
+        if let Some(type_keyword) = self.type_keyword() {
+            Doc::text(type_keyword.text().to_string())
+        } else {
+            Doc::nil()
+        }
+    }
+}
+
 impl DocGen for Param {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         let mut docs = Vec::with_capacity(2);
@@ -170,10 +276,38 @@ impl DocGen for Param {
 
 impl DocGen for RefType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        if let Some(type_keyword) = self.type_keyword() {
+        if let Some(l_paren) = self.l_paren_token() {
+            let mut docs = Vec::with_capacity(2);
+            docs.push(Doc::text("("));
+            let mut trivias = format_trivias_after_token(l_paren, ctx);
+            if let Some(keyword) = self.keyword() {
+                docs.append(&mut trivias);
+                docs.push(Doc::text("ref"));
+                trivias = format_trivias_after_token(keyword, ctx);
+            }
+            if let Some(keyword) = self.null_keyword() {
+                if trivias.is_empty() {
+                    docs.push(Doc::space());
+                } else {
+                    docs.append(&mut trivias);
+                }
+                docs.push(Doc::text("null"));
+                trivias = format_trivias_after_token(keyword, ctx);
+            }
+            if let Some(heap_type) = self.heap_type() {
+                if trivias.is_empty() {
+                    docs.push(Doc::space());
+                } else {
+                    docs.append(&mut trivias);
+                }
+                docs.push(heap_type.doc(ctx));
+                trivias = format_trivias_after_node(heap_type, ctx);
+            }
+            docs.append(&mut trivias);
+            docs.push(Doc::text(")"));
+            Doc::list(docs)
+        } else if let Some(type_keyword) = self.type_keyword() {
             Doc::text(type_keyword.text().to_string())
-        } else if let Some(heap_type) = self.heap_type() {
-            heap_type.doc(ctx)
         } else {
             Doc::nil()
         }
@@ -208,9 +342,91 @@ impl DocGen for Result {
     }
 }
 
+impl DocGen for StorageType {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        match self {
+            StorageType::Val(val_type) => val_type.doc(ctx),
+            StorageType::Packed(packed_type) => packed_type.doc(ctx),
+        }
+    }
+}
+
+impl DocGen for StructType {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        let mut preferred_multi_line = false;
+        let mut docs = Vec::with_capacity(2);
+        let mut trivias = vec![];
+        if let Some(l_paren) = self.l_paren_token() {
+            docs.push(Doc::text("("));
+            trivias = format_trivias_after_token(l_paren, ctx);
+        }
+        if let Some(keyword) = self.keyword() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text("struct"));
+            preferred_multi_line = has_line_break_after_token(&keyword);
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        self.fields().for_each(|field| {
+            if trivias.is_empty() {
+                if preferred_multi_line {
+                    docs.push(Doc::hard_line());
+                } else {
+                    docs.push(Doc::space());
+                }
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(field.doc(ctx));
+            trivias = format_trivias_after_node(field, ctx);
+        });
+        docs.append(&mut trivias);
+        docs.push(Doc::text(")"));
+        Doc::list(docs).nest(ctx.indent_width)
+    }
+}
+
 impl DocGen for SubType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        if let Some(comp_type) = self.comp_type() {
+        if let Some(l_paren) = self.l_paren_token() {
+            let mut docs = Vec::with_capacity(2);
+            docs.push(Doc::text("("));
+            let mut trivias = format_trivias_after_token(l_paren, ctx);
+            if let Some(keyword) = self.keyword() {
+                docs.append(&mut trivias);
+                docs.push(Doc::text("sub"));
+                trivias = format_trivias_after_token(keyword, ctx);
+            }
+            if let Some(keyword) = self.final_keyword() {
+                if trivias.is_empty() {
+                    docs.push(Doc::space());
+                } else {
+                    docs.append(&mut trivias);
+                }
+                docs.push(Doc::text("final"));
+                trivias = format_trivias_after_token(keyword, ctx);
+            }
+            self.indexes().for_each(|index| {
+                if trivias.is_empty() {
+                    docs.push(Doc::space());
+                } else {
+                    docs.append(&mut trivias);
+                }
+                docs.push(index.doc(ctx));
+                trivias = format_trivias_after_node(index, ctx);
+            });
+            if let Some(ty) = self.comp_type() {
+                if trivias.is_empty() {
+                    docs.push(Doc::space());
+                } else {
+                    docs.append(&mut trivias);
+                }
+                docs.push(ty.doc(ctx));
+                trivias = format_trivias_after_node(ty, ctx);
+            }
+            docs.append(&mut trivias);
+            docs.push(Doc::text(")"));
+            Doc::list(docs)
+        } else if let Some(comp_type) = self.comp_type() {
             comp_type.doc(ctx)
         } else {
             Doc::nil()

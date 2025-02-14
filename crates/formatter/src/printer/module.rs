@@ -1108,8 +1108,20 @@ impl DocGen for ModuleFieldType {
             trivias = format_trivias_after_token(ident, ctx);
         }
         if let Some(sub_type) = self.sub_type() {
+            let has_multi_line_struct =
+                if let Some(CompType::Struct(struct_type)) = sub_type.comp_type() {
+                    struct_type
+                        .keyword()
+                        .is_some_and(|keyword| has_line_break_after_token(&keyword))
+                } else {
+                    false
+                };
             if trivias.is_empty() {
-                docs.push(Doc::space());
+                if has_multi_line_struct {
+                    docs.push(Doc::hard_line());
+                } else {
+                    docs.push(Doc::space());
+                }
             } else {
                 docs.append(&mut trivias);
             }
@@ -1118,7 +1130,7 @@ impl DocGen for ModuleFieldType {
         }
         docs.append(&mut trivias);
         docs.push(Doc::text(")"));
-        Doc::list(docs)
+        Doc::list(docs).nest(ctx.indent_width)
     }
 }
 
