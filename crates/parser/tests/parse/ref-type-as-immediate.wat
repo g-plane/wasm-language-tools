@@ -1,0 +1,10 @@
+(module
+  (func
+    (br_on_cast 0 ( ref 0 ) (ref  null  eq))
+    (br_on_cast 0 anyref eqref)
+    (br_on_cast 0 i31ref structref)
+    (br_on_cast 0 arrayref nullref)
+    (br_on_cast 0 funcref nullfuncref)
+    (br_on_cast 0 externref nullexternref)
+  )
+)

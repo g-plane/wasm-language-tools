@@ -1,0 +1,127 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..253
+  MODULE@0..252
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_FUNC@10..250
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "func"
+      WHITESPACE@15..20 "\n    "
+      PLAIN_INSTR@20..60
+        L_PAREN@20..21 "("
+        INSTR_NAME@21..31 "br_on_cast"
+        WHITESPACE@31..32 " "
+        IMMEDIATE@32..33
+          INT@32..33 "0"
+        WHITESPACE@33..34 " "
+        IMMEDIATE@34..43
+          REF_TYPE@34..43
+            L_PAREN@34..35 "("
+            WHITESPACE@35..36 " "
+            KEYWORD@36..39 "ref"
+            WHITESPACE@39..40 " "
+            HEAP_TYPE@40..41
+              INDEX@40..41
+                UNSIGNED_INT@40..41 "0"
+            WHITESPACE@41..42 " "
+            R_PAREN@42..43 ")"
+        WHITESPACE@43..44 " "
+        IMMEDIATE@44..59
+          REF_TYPE@44..59
+            L_PAREN@44..45 "("
+            KEYWORD@45..48 "ref"
+            WHITESPACE@48..50 "  "
+            KEYWORD@50..54 "null"
+            WHITESPACE@54..56 "  "
+            HEAP_TYPE@56..58
+              TYPE_KEYWORD@56..58 "eq"
+            R_PAREN@58..59 ")"
+        R_PAREN@59..60 ")"
+      WHITESPACE@60..65 "\n    "
+      PLAIN_INSTR@65..92
+        L_PAREN@65..66 "("
+        INSTR_NAME@66..76 "br_on_cast"
+        WHITESPACE@76..77 " "
+        IMMEDIATE@77..78
+          INT@77..78 "0"
+        WHITESPACE@78..79 " "
+        IMMEDIATE@79..85
+          REF_TYPE@79..85
+            TYPE_KEYWORD@79..85 "anyref"
+        WHITESPACE@85..86 " "
+        IMMEDIATE@86..91
+          REF_TYPE@86..91
+            TYPE_KEYWORD@86..91 "eqref"
+        R_PAREN@91..92 ")"
+      WHITESPACE@92..97 "\n    "
+      PLAIN_INSTR@97..128
+        L_PAREN@97..98 "("
+        INSTR_NAME@98..108 "br_on_cast"
+        WHITESPACE@108..109 " "
+        IMMEDIATE@109..110
+          INT@109..110 "0"
+        WHITESPACE@110..111 " "
+        IMMEDIATE@111..117
+          REF_TYPE@111..117
+            TYPE_KEYWORD@111..117 "i31ref"
+        WHITESPACE@117..118 " "
+        IMMEDIATE@118..127
+          REF_TYPE@118..127
+            TYPE_KEYWORD@118..127 "structref"
+        R_PAREN@127..128 ")"
+      WHITESPACE@128..133 "\n    "
+      PLAIN_INSTR@133..164
+        L_PAREN@133..134 "("
+        INSTR_NAME@134..144 "br_on_cast"
+        WHITESPACE@144..145 " "
+        IMMEDIATE@145..146
+          INT@145..146 "0"
+        WHITESPACE@146..147 " "
+        IMMEDIATE@147..155
+          REF_TYPE@147..155
+            TYPE_KEYWORD@147..155 "arrayref"
+        WHITESPACE@155..156 " "
+        IMMEDIATE@156..163
+          REF_TYPE@156..163
+            TYPE_KEYWORD@156..163 "nullref"
+        R_PAREN@163..164 ")"
+      WHITESPACE@164..169 "\n    "
+      PLAIN_INSTR@169..203
+        L_PAREN@169..170 "("
+        INSTR_NAME@170..180 "br_on_cast"
+        WHITESPACE@180..181 " "
+        IMMEDIATE@181..182
+          INT@181..182 "0"
+        WHITESPACE@182..183 " "
+        IMMEDIATE@183..190
+          REF_TYPE@183..190
+            TYPE_KEYWORD@183..190 "funcref"
+        WHITESPACE@190..191 " "
+        IMMEDIATE@191..202
+          REF_TYPE@191..202
+            TYPE_KEYWORD@191..202 "nullfuncref"
+        R_PAREN@202..203 ")"
+      WHITESPACE@203..208 "\n    "
+      PLAIN_INSTR@208..246
+        L_PAREN@208..209 "("
+        INSTR_NAME@209..219 "br_on_cast"
+        WHITESPACE@219..220 " "
+        IMMEDIATE@220..221
+          INT@220..221 "0"
+        WHITESPACE@221..222 " "
+        IMMEDIATE@222..231
+          REF_TYPE@222..231
+            TYPE_KEYWORD@222..231 "externref"
+        WHITESPACE@231..232 " "
+        IMMEDIATE@232..245
+          REF_TYPE@232..245
+            TYPE_KEYWORD@232..245 "nullexternref"
+        R_PAREN@245..246 ")"
+      WHITESPACE@246..249 "\n  "
+      R_PAREN@249..250 ")"
+    WHITESPACE@250..251 "\n"
+    R_PAREN@251..252 ")"
+  WHITESPACE@252..253 "\n"

@@ -5,7 +5,7 @@ use super::{
         float, ident, int, keyword, l_paren, r_paren, string, trivias, trivias_prefixed,
         unsigned_int_impl, word,
     },
-    ty::heap_type,
+    ty::{heap_type, ref_type},
     GreenResult, Input,
 };
 use crate::error::Message;
@@ -390,12 +390,11 @@ fn instr_name(input: &mut Input) -> GreenResult {
 fn immediate(input: &mut Input) -> GreenResult {
     dispatch! {peek(any);
         '0'..='9' | '+' | '-' => alt((int, float)),
-        '.' | 'i' | 'n' => float,
+        '.' => float,
         '"' => string,
         '$' => ident,
-        '(' => type_use,
-        'o' | 'a' => mem_arg,
-        'f' | 'e' => heap_type,
+        '(' => alt((type_use, ref_type)),
+        'a'..='z' => alt((float, mem_arg, heap_type, ref_type)),
         _ => fail,
     }
     .context(Message::Name("immediate"))
