@@ -58,4 +58,7 @@
   )
 
   (type $forward (func))
+
+  (func (param (ref 0)))
+  (func (result (ref 0)))
 )

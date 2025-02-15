@@ -65,4 +65,7 @@ source: crates/formatter/tests/parser.rs
     (unreachable)
     (unreachable))
 
-  (type $forward (func)))
+  (type $forward (func))
+
+  (func (param (ref 0)))
+  (func (result (ref 0))))

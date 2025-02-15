@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..1830
-  MODULE@0..1829
+ROOT@0..1882
+  MODULE@0..1881
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -1020,6 +1020,46 @@ ROOT@0..1830
           KEYWORD@1821..1825 "func"
           R_PAREN@1825..1826 ")"
       R_PAREN@1826..1827 ")"
-    WHITESPACE@1827..1828 "\n"
-    R_PAREN@1828..1829 ")"
-  WHITESPACE@1829..1830 "\n"
+    WHITESPACE@1827..1831 "\n\n  "
+    MODULE_FIELD_FUNC@1831..1853
+      L_PAREN@1831..1832 "("
+      KEYWORD@1832..1836 "func"
+      WHITESPACE@1836..1837 " "
+      TYPE_USE@1837..1852
+        PARAM@1837..1852
+          L_PAREN@1837..1838 "("
+          KEYWORD@1838..1843 "param"
+          WHITESPACE@1843..1844 " "
+          REF_TYPE@1844..1851
+            L_PAREN@1844..1845 "("
+            KEYWORD@1845..1848 "ref"
+            WHITESPACE@1848..1849 " "
+            HEAP_TYPE@1849..1850
+              INDEX@1849..1850
+                UNSIGNED_INT@1849..1850 "0"
+            R_PAREN@1850..1851 ")"
+          R_PAREN@1851..1852 ")"
+      R_PAREN@1852..1853 ")"
+    WHITESPACE@1853..1856 "\n  "
+    MODULE_FIELD_FUNC@1856..1879
+      L_PAREN@1856..1857 "("
+      KEYWORD@1857..1861 "func"
+      WHITESPACE@1861..1862 " "
+      TYPE_USE@1862..1878
+        RESULT@1862..1878
+          L_PAREN@1862..1863 "("
+          KEYWORD@1863..1869 "result"
+          WHITESPACE@1869..1870 " "
+          REF_TYPE@1870..1877
+            L_PAREN@1870..1871 "("
+            KEYWORD@1871..1874 "ref"
+            WHITESPACE@1874..1875 " "
+            HEAP_TYPE@1875..1876
+              INDEX@1875..1876
+                UNSIGNED_INT@1875..1876 "0"
+            R_PAREN@1876..1877 ")"
+          R_PAREN@1877..1878 ")"
+      R_PAREN@1878..1879 ")"
+    WHITESPACE@1879..1880 "\n"
+    R_PAREN@1880..1881 ")"
+  WHITESPACE@1881..1882 "\n"

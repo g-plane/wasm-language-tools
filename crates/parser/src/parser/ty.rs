@@ -93,7 +93,7 @@ fn func_type(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("func")),
-        repeat::<_, _, Vec<_>, _, _>(0.., retry_once(param, ["result"])),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry_once(param, ["result", "ref"])),
         repeat::<_, _, Vec<_>, _, _>(0.., retry_once(result, [])),
         r_paren,
     )
