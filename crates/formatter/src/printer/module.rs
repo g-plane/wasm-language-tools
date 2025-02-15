@@ -544,7 +544,7 @@ impl DocGen for ModuleField {
             ModuleField::Memory(module_field_memory) => module_field_memory.doc(ctx),
             ModuleField::Start(module_field_start) => module_field_start.doc(ctx),
             ModuleField::Table(module_field_table) => module_field_table.doc(ctx),
-            ModuleField::Type(module_field_type) => module_field_type.doc(ctx),
+            ModuleField::Type(type_def) => type_def.doc(ctx),
         }
     }
 }
@@ -1085,55 +1085,6 @@ impl DocGen for ModuleFieldTable {
     }
 }
 
-impl DocGen for ModuleFieldType {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren, ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("type"));
-            trivias = format_trivias_after_token(keyword, ctx);
-        }
-        if let Some(ident) = self.ident_token() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident, ctx);
-        }
-        if let Some(sub_type) = self.sub_type() {
-            let has_multi_line_struct =
-                if let Some(CompType::Struct(struct_type)) = sub_type.comp_type() {
-                    struct_type
-                        .keyword()
-                        .is_some_and(|keyword| has_line_break_after_token(&keyword))
-                } else {
-                    false
-                };
-            if trivias.is_empty() {
-                if has_multi_line_struct {
-                    docs.push(Doc::hard_line());
-                } else {
-                    docs.push(Doc::space());
-                }
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(sub_type.doc(ctx));
-            trivias = format_trivias_after_node(sub_type, ctx);
-        }
-        docs.append(&mut trivias);
-        docs.push(Doc::text(")"));
-        Doc::list(docs).nest(ctx.indent_width)
-    }
-}
-
 impl DocGen for ModuleName {
     fn doc(&self, _: &Ctx) -> Doc<'static> {
         Doc::text(self.syntax().to_string())
@@ -1205,6 +1156,55 @@ impl DocGen for TableUse {
         docs.append(&mut trivias);
         docs.push(Doc::text(")"));
         Doc::list(docs)
+    }
+}
+
+impl DocGen for TypeDef {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        let mut docs = Vec::with_capacity(2);
+        let mut trivias = vec![];
+        if let Some(l_paren) = self.l_paren_token() {
+            docs.push(Doc::text("("));
+            trivias = format_trivias_after_token(l_paren, ctx);
+        }
+        if let Some(keyword) = self.keyword() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text("type"));
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(ident) = self.ident_token() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text(ident.to_string()));
+            trivias = format_trivias_after_token(ident, ctx);
+        }
+        if let Some(sub_type) = self.sub_type() {
+            let has_multi_line_struct =
+                if let Some(CompType::Struct(struct_type)) = sub_type.comp_type() {
+                    struct_type
+                        .keyword()
+                        .is_some_and(|keyword| has_line_break_after_token(&keyword))
+                } else {
+                    false
+                };
+            if trivias.is_empty() {
+                if has_multi_line_struct {
+                    docs.push(Doc::hard_line());
+                } else {
+                    docs.push(Doc::space());
+                }
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(sub_type.doc(ctx));
+            trivias = format_trivias_after_node(sub_type, ctx);
+        }
+        docs.append(&mut trivias);
+        docs.push(Doc::text(")"));
+        Doc::list(docs).nest(ctx.indent_width)
     }
 }
 

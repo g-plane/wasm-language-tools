@@ -93,7 +93,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::Instr);
             }
         }
-        SyntaxKind::MODULE_FIELD_TYPE => {
+        SyntaxKind::TYPE_DEF => {
             if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::KeywordFunc);
             }

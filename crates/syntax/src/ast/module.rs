@@ -1015,7 +1015,7 @@ pub enum ModuleField {
     Memory(ModuleFieldMemory),
     Start(ModuleFieldStart),
     Table(ModuleFieldTable),
-    Type(ModuleFieldType),
+    Type(TypeDef),
 }
 impl AstNode for ModuleField {
     type Language = WatLanguage;
@@ -1035,7 +1035,7 @@ impl AstNode for ModuleField {
                 | SyntaxKind::MODULE_FIELD_MEMORY
                 | SyntaxKind::MODULE_FIELD_START
                 | SyntaxKind::MODULE_FIELD_TABLE
-                | SyntaxKind::MODULE_FIELD_TYPE
+                | SyntaxKind::TYPE_DEF
         )
     }
     #[inline]
@@ -1061,7 +1061,7 @@ impl AstNode for ModuleField {
             }
             SyntaxKind::MODULE_FIELD_START => Some(ModuleField::Start(ModuleFieldStart { syntax })),
             SyntaxKind::MODULE_FIELD_TABLE => Some(ModuleField::Table(ModuleFieldTable { syntax })),
-            SyntaxKind::MODULE_FIELD_TYPE => Some(ModuleField::Type(ModuleFieldType { syntax })),
+            SyntaxKind::TYPE_DEF => Some(ModuleField::Type(TypeDef { syntax })),
             _ => None,
         }
     }
@@ -1635,58 +1635,6 @@ impl AstNode for ModuleFieldTable {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ModuleFieldType {
-    syntax: SyntaxNode,
-}
-impl ModuleFieldType {
-    #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::L_PAREN)
-    }
-    #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::KEYWORD)
-    }
-    #[inline]
-    pub fn ident_token(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::IDENT)
-    }
-    #[inline]
-    pub fn sub_type(&self) -> Option<SubType> {
-        child(&self.syntax)
-    }
-    #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::R_PAREN)
-    }
-}
-impl AstNode for ModuleFieldType {
-    type Language = WatLanguage;
-    #[inline]
-    fn can_cast(kind: SyntaxKind) -> bool
-    where
-        Self: Sized,
-    {
-        kind == SyntaxKind::MODULE_FIELD_TYPE
-    }
-    #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        if Self::can_cast(syntax.kind()) {
-            Some(ModuleFieldType { syntax })
-        } else {
-            None
-        }
-    }
-    #[inline]
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ModuleName {
     syntax: SyntaxNode,
 }
@@ -1807,6 +1755,54 @@ impl AstNode for Offset {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct RecType {
+    syntax: SyntaxNode,
+}
+impl RecType {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn type_defs(&self) -> AstChildren<TypeDef> {
+        children(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
+impl AstNode for RecType {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::REC_TYPE
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(RecType { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TableUse {
     syntax: SyntaxNode,
 }
@@ -1844,6 +1840,58 @@ impl AstNode for TableUse {
     {
         if Self::can_cast(syntax.kind()) {
             Some(TableUse { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct TypeDef {
+    syntax: SyntaxNode,
+}
+impl TypeDef {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+    #[inline]
+    pub fn sub_type(&self) -> Option<SubType> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
+impl AstNode for TypeDef {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::TYPE_DEF
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(TypeDef { syntax })
         } else {
             None
         }

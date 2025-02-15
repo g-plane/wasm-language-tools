@@ -36,8 +36,6 @@ pub enum SyntaxKind {
     PARAM,
     RESULT,
     FIELD,
-    REC_TYPE,
-    TYPE_DEF,
     SUB_TYPE,
     TABLE_TYPE,
     MEMORY_TYPE,
@@ -81,7 +79,8 @@ pub enum SyntaxKind {
     MODULE_FIELD_MEMORY,
     MODULE_FIELD_START,
     MODULE_FIELD_TABLE,
-    MODULE_FIELD_TYPE,
+    TYPE_DEF,
+    REC_TYPE,
     ROOT,
 }
 

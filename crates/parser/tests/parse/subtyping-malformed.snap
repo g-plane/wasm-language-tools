@@ -6,7 +6,7 @@ ROOT@0..89
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
-    MODULE_FIELD_TYPE@10..21
+    TYPE_DEF@10..21
       L_PAREN@10..11 "("
       KEYWORD@11..15 "type"
       WHITESPACE@15..16 " "
@@ -15,7 +15,7 @@ ROOT@0..89
       ERROR@19..20 ")"
       R_PAREN@20..21 ")"
     WHITESPACE@21..24 "\n  "
-    MODULE_FIELD_TYPE@24..36
+    TYPE_DEF@24..36
       L_PAREN@24..25 "("
       KEYWORD@25..29 "type"
       WHITESPACE@29..30 " "
@@ -25,7 +25,7 @@ ROOT@0..89
         R_PAREN@34..35 ")"
       R_PAREN@35..36 ")"
     WHITESPACE@36..39 "\n  "
-    MODULE_FIELD_TYPE@39..54
+    TYPE_DEF@39..54
       L_PAREN@39..40 "("
       KEYWORD@40..44 "type"
       WHITESPACE@44..45 " "
@@ -38,7 +38,7 @@ ROOT@0..89
         R_PAREN@52..53 ")"
       R_PAREN@53..54 ")"
     WHITESPACE@54..57 "\n  "
-    MODULE_FIELD_TYPE@57..86
+    TYPE_DEF@57..86
       L_PAREN@57..58 "("
       KEYWORD@58..62 "type"
       WHITESPACE@62..63 " "

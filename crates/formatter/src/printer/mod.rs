@@ -78,7 +78,7 @@ pub(crate) fn format_node(node: SyntaxNode, ctx: &Ctx) -> Option<Doc<'static>> {
         SyntaxKind::MODULE_FIELD_MEMORY => ModuleFieldMemory::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::MODULE_FIELD_START => ModuleFieldStart::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::MODULE_FIELD_TABLE => ModuleFieldTable::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::MODULE_FIELD_TYPE => ModuleFieldType::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::TYPE_DEF => TypeDef::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::ROOT => Root::cast(node).map(|node| node.doc(ctx)),
         _ => None,
     }
@@ -222,7 +222,7 @@ fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>
                     | SyntaxKind::MODULE_FIELD_MEMORY
                     | SyntaxKind::MODULE_FIELD_START
                     | SyntaxKind::MODULE_FIELD_TABLE
-                    | SyntaxKind::MODULE_FIELD_TYPE
+                    | SyntaxKind::TYPE_DEF
                     | SyntaxKind::PLAIN_INSTR
                     | SyntaxKind::BLOCK_BLOCK
                     | SyntaxKind::BLOCK_IF

@@ -6,7 +6,7 @@ ROOT@0..405
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
-    MODULE_FIELD_TYPE@10..25
+    TYPE_DEF@10..25
       L_PAREN@10..11 "("
       KEYWORD@11..15 "type"
       WHITESPACE@15..16 " "
@@ -17,7 +17,7 @@ ROOT@0..405
           R_PAREN@23..24 ")"
       R_PAREN@24..25 ")"
     WHITESPACE@25..28 "\n  "
-    MODULE_FIELD_TYPE@28..51
+    TYPE_DEF@28..51
       L_PAREN@28..29 "("
       KEYWORD@29..33 "type"
       WHITESPACE@33..34 " "
@@ -33,7 +33,7 @@ ROOT@0..405
           R_PAREN@49..50 ")"
       R_PAREN@50..51 ")"
     WHITESPACE@51..54 "\n  "
-    MODULE_FIELD_TYPE@54..80
+    TYPE_DEF@54..80
       L_PAREN@54..55 "("
       KEYWORD@55..59 "type"
       WHITESPACE@59..60 " "
@@ -53,7 +53,7 @@ ROOT@0..405
           R_PAREN@78..79 ")"
       R_PAREN@79..80 ")"
     WHITESPACE@80..83 "\n  "
-    MODULE_FIELD_TYPE@83..118
+    TYPE_DEF@83..118
       L_PAREN@83..84 "("
       KEYWORD@84..88 "type"
       WHITESPACE@88..89 " "
@@ -85,7 +85,7 @@ ROOT@0..405
           R_PAREN@116..117 ")"
       R_PAREN@117..118 ")"
     WHITESPACE@118..121 "\n  "
-    MODULE_FIELD_TYPE@121..168
+    TYPE_DEF@121..168
       L_PAREN@121..122 "("
       KEYWORD@122..126 "type"
       WHITESPACE@126..127 " "
@@ -118,7 +118,7 @@ ROOT@0..405
           R_PAREN@166..167 ")"
       R_PAREN@167..168 ")"
     WHITESPACE@168..171 "\n  "
-    MODULE_FIELD_TYPE@171..253
+    TYPE_DEF@171..253
       L_PAREN@171..172 "("
       KEYWORD@172..176 "type"
       WHITESPACE@176..177 " "
@@ -188,7 +188,7 @@ ROOT@0..405
           R_PAREN@251..252 ")"
       R_PAREN@252..253 ")"
     WHITESPACE@253..256 "\n  "
-    MODULE_FIELD_TYPE@256..336
+    TYPE_DEF@256..336
       L_PAREN@256..257 "("
       KEYWORD@257..261 "type"
       WHITESPACE@261..262 " "
@@ -246,7 +246,7 @@ ROOT@0..405
           R_PAREN@334..335 ")"
       R_PAREN@335..336 ")"
     WHITESPACE@336..339 "\n  "
-    MODULE_FIELD_TYPE@339..402
+    TYPE_DEF@339..402
       L_PAREN@339..340 "("
       KEYWORD@340..344 "type"
       WHITESPACE@344..345 " "

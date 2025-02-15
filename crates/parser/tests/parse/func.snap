@@ -467,7 +467,7 @@ ROOT@0..1830
         R_PAREN@755..756 ")"
       R_PAREN@756..757 ")"
     WHITESPACE@757..761 "\n\n  "
-    MODULE_FIELD_TYPE@761..781
+    TYPE_DEF@761..781
       L_PAREN@761..762 "("
       KEYWORD@762..766 "type"
       WHITESPACE@766..767 " "
@@ -480,7 +480,7 @@ ROOT@0..1830
           R_PAREN@779..780 ")"
       R_PAREN@780..781 ")"
     WHITESPACE@781..784 "\n  "
-    MODULE_FIELD_TYPE@784..817
+    TYPE_DEF@784..817
       L_PAREN@784..785 "("
       KEYWORD@785..789 "type"
       WHITESPACE@789..790 " "
@@ -501,7 +501,7 @@ ROOT@0..1830
           R_PAREN@815..816 ")"
       R_PAREN@816..817 ")"
     WHITESPACE@817..820 "\n  "
-    MODULE_FIELD_TYPE@820..855
+    TYPE_DEF@820..855
       L_PAREN@820..821 "("
       KEYWORD@821..825 "type"
       WHITESPACE@825..826 " "
@@ -524,7 +524,7 @@ ROOT@0..1830
           R_PAREN@853..854 ")"
       R_PAREN@854..855 ")"
     WHITESPACE@855..858 "\n  "
-    MODULE_FIELD_TYPE@858..911
+    TYPE_DEF@858..911
       L_PAREN@858..859 "("
       KEYWORD@859..863 "type"
       WHITESPACE@863..864 " "
@@ -1008,7 +1008,7 @@ ROOT@0..1830
       WHITESPACE@1797..1800 "\n  "
       R_PAREN@1800..1801 ")"
     WHITESPACE@1801..1805 "\n\n  "
-    MODULE_FIELD_TYPE@1805..1827
+    TYPE_DEF@1805..1827
       L_PAREN@1805..1806 "("
       KEYWORD@1806..1810 "type"
       WHITESPACE@1810..1811 " "

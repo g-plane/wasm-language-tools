@@ -58,7 +58,7 @@ pub(super) fn module(input: &mut Input) -> GreenResult {
 fn module_field(input: &mut Input) -> GreenResult {
     dispatch! {peek(preceded(('(', trivias), word));
         "func" => module_field_func,
-        "type" => module_field_type,
+        "type" => type_def,
         "export" => module_field_export,
         "import" => module_field_import,
         "start" => module_field_start,
@@ -392,7 +392,7 @@ fn module_field_table(input: &mut Input) -> GreenResult {
         )
 }
 
-fn module_field_type(input: &mut Input) -> GreenResult {
+fn type_def(input: &mut Input) -> GreenResult {
     (
         l_paren,
         trivias_prefixed(keyword("type")),
@@ -414,7 +414,7 @@ fn module_field_type(input: &mut Input) -> GreenResult {
             if let Some(mut r_paren) = r_paren {
                 children.append(&mut r_paren);
             }
-            node(MODULE_FIELD_TYPE, children)
+            node(TYPE_DEF, children)
         })
 }
 

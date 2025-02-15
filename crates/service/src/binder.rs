@@ -221,7 +221,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                     }
                 });
             }
-            SyntaxKind::MODULE_FIELD_TYPE => {
+            SyntaxKind::TYPE_DEF => {
                 symbols.push(create_module_level_symbol(
                     db,
                     node.clone(),
