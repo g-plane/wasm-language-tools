@@ -381,7 +381,7 @@ impl DocGen for StructType {
         });
         docs.append(&mut trivias);
         docs.push(Doc::text(")"));
-        Doc::list(docs).nest(ctx.indent_width)
+        Doc::list(docs).nest(ctx.indent_width).group()
     }
 }
 
