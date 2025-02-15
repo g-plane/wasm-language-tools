@@ -371,7 +371,7 @@ impl DocGen for StructType {
                 if preferred_multi_line {
                     docs.push(Doc::hard_line());
                 } else {
-                    docs.push(Doc::space());
+                    docs.push(Doc::line_or_space());
                 }
             } else {
                 docs.append(&mut trivias);
