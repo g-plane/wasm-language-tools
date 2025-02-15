@@ -1016,6 +1016,7 @@ pub enum ModuleField {
     Start(ModuleFieldStart),
     Table(ModuleFieldTable),
     Type(TypeDef),
+    RecType(RecType),
 }
 impl AstNode for ModuleField {
     type Language = WatLanguage;
@@ -1036,6 +1037,7 @@ impl AstNode for ModuleField {
                 | SyntaxKind::MODULE_FIELD_START
                 | SyntaxKind::MODULE_FIELD_TABLE
                 | SyntaxKind::TYPE_DEF
+                | SyntaxKind::REC_TYPE
         )
     }
     #[inline]
@@ -1062,6 +1064,7 @@ impl AstNode for ModuleField {
             SyntaxKind::MODULE_FIELD_START => Some(ModuleField::Start(ModuleFieldStart { syntax })),
             SyntaxKind::MODULE_FIELD_TABLE => Some(ModuleField::Table(ModuleFieldTable { syntax })),
             SyntaxKind::TYPE_DEF => Some(ModuleField::Type(TypeDef { syntax })),
+            SyntaxKind::REC_TYPE => Some(ModuleField::RecType(RecType { syntax })),
             _ => None,
         }
     }
@@ -1078,6 +1081,7 @@ impl AstNode for ModuleField {
             ModuleField::Start(it) => it.syntax(),
             ModuleField::Table(it) => it.syntax(),
             ModuleField::Type(it) => it.syntax(),
+            ModuleField::RecType(it) => it.syntax(),
         }
     }
 }
