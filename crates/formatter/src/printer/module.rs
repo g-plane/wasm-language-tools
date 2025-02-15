@@ -545,6 +545,7 @@ impl DocGen for ModuleField {
             ModuleField::Start(module_field_start) => module_field_start.doc(ctx),
             ModuleField::Table(module_field_table) => module_field_table.doc(ctx),
             ModuleField::Type(type_def) => type_def.doc(ctx),
+            ModuleField::RecType(rec_type) => Doc::text(rec_type.syntax().to_string()),
         }
     }
 }

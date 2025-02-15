@@ -1,0 +1,38 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..38
+  MODULE@0..37
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    REC_TYPE@10..20
+      L_PAREN@10..11 "("
+      KEYWORD@11..14 "rec"
+      WHITESPACE@14..15 " "
+      ERROR@15..19 "type"
+      R_PAREN@19..20 ")"
+    WHITESPACE@20..23 "\n  "
+    REC_TYPE@23..35
+      L_PAREN@23..24 "("
+      KEYWORD@24..27 "rec"
+      WHITESPACE@27..28 " "
+      ERROR@28..29 "("
+      ERROR@29..33 "func"
+      ERROR@33..34 ")"
+      R_PAREN@34..35 ")"
+    WHITESPACE@35..36 "\n"
+    R_PAREN@36..37 ")"
+  WHITESPACE@37..38 "\n"
+
+error: expected `(`
+  ┌─ rec-type-malformed.wat:2:8
+  │
+2 │   (rec type)
+  │        ^^^^
+
+error: expected `type`
+  ┌─ rec-type-malformed.wat:3:9
+  │
+3 │   (rec (func))
+  │         ^^^^^

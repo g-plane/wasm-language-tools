@@ -67,6 +67,7 @@ fn module_field(input: &mut Input) -> GreenResult {
         "memory" => module_field_memory,
         "global" => module_field_global,
         "elem" => module_field_elem,
+        "rec" => rec_type,
         _ => fail,
     }
     .context(Message::Name("module field"))
@@ -415,6 +416,28 @@ fn type_def(input: &mut Input) -> GreenResult {
                 children.append(&mut r_paren);
             }
             node(TYPE_DEF, children)
+        })
+}
+
+fn rec_type(input: &mut Input) -> GreenResult {
+    (
+        l_paren,
+        trivias_prefixed(keyword("rec")),
+        repeat::<_, _, Vec<_>, _, _>(0.., retry_once(type_def, [])),
+        r_paren,
+    )
+        .parse_next(input)
+        .map(|(l_paren, mut keyword, type_defs, r_paren)| {
+            let mut children = Vec::with_capacity(4);
+            children.push(l_paren);
+            children.append(&mut keyword);
+            type_defs
+                .into_iter()
+                .for_each(|mut type_def| children.append(&mut type_def));
+            if let Some(mut r_paren) = r_paren {
+                children.append(&mut r_paren);
+            }
+            node(REC_TYPE, children)
         })
 }
 

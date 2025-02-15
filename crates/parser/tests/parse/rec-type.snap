@@ -1,0 +1,194 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..277
+  MODULE@0..276
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    REC_TYPE@10..15
+      L_PAREN@10..11 "("
+      KEYWORD@11..14 "rec"
+      R_PAREN@14..15 ")"
+    WHITESPACE@15..18 "\n  "
+    REC_TYPE@18..106
+      L_PAREN@18..19 "("
+      KEYWORD@19..22 "rec"
+      WHITESPACE@22..27 "\n    "
+      TYPE_DEF@27..62
+        L_PAREN@27..28 "("
+        KEYWORD@28..32 "type"
+        WHITESPACE@32..33 " "
+        IDENT@33..36 "$s0"
+        WHITESPACE@36..37 " "
+        SUB_TYPE@37..61
+          STRUCT_TYPE@37..61
+            L_PAREN@37..38 "("
+            KEYWORD@38..44 "struct"
+            WHITESPACE@44..45 " "
+            FIELD@45..60
+              L_PAREN@45..46 "("
+              KEYWORD@46..51 "field"
+              WHITESPACE@51..52 " "
+              FIELD_TYPE@52..59
+                REF_TYPE@52..59
+                  L_PAREN@52..53 "("
+                  KEYWORD@53..56 "ref"
+                  WHITESPACE@56..57 " "
+                  HEAP_TYPE@57..58
+                    INDEX@57..58
+                      UNSIGNED_INT@57..58 "0"
+                  R_PAREN@58..59 ")"
+              R_PAREN@59..60 ")"
+            R_PAREN@60..61 ")"
+        R_PAREN@61..62 ")"
+      WHITESPACE@62..67 "\n    "
+      TYPE_DEF@67..102
+        L_PAREN@67..68 "("
+        KEYWORD@68..72 "type"
+        WHITESPACE@72..73 " "
+        IDENT@73..76 "$s1"
+        WHITESPACE@76..77 " "
+        SUB_TYPE@77..101
+          STRUCT_TYPE@77..101
+            L_PAREN@77..78 "("
+            KEYWORD@78..84 "struct"
+            WHITESPACE@84..85 " "
+            FIELD@85..100
+              L_PAREN@85..86 "("
+              KEYWORD@86..91 "field"
+              WHITESPACE@91..92 " "
+              FIELD_TYPE@92..99
+                REF_TYPE@92..99
+                  L_PAREN@92..93 "("
+                  KEYWORD@93..96 "ref"
+                  WHITESPACE@96..97 " "
+                  HEAP_TYPE@97..98
+                    INDEX@97..98
+                      UNSIGNED_INT@97..98 "0"
+                  R_PAREN@98..99 ")"
+              R_PAREN@99..100 ")"
+            R_PAREN@100..101 ")"
+        R_PAREN@101..102 ")"
+      WHITESPACE@102..105 "\n  "
+      R_PAREN@105..106 ")"
+    WHITESPACE@106..109 "\n  "
+    REC_TYPE@109..159
+      L_PAREN@109..110 "("
+      KEYWORD@110..113 "rec"
+      WHITESPACE@113..114 " "
+      TYPE_DEF@114..158
+        L_PAREN@114..115 "("
+        KEYWORD@115..119 "type"
+        WHITESPACE@119..120 " "
+        IDENT@120..122 "$r"
+        WHITESPACE@122..123 " "
+        SUB_TYPE@123..157
+          L_PAREN@123..124 "("
+          KEYWORD@124..127 "sub"
+          WHITESPACE@127..128 " "
+          INDEX@128..130
+            IDENT@128..130 "$t"
+          WHITESPACE@130..131 " "
+          STRUCT_TYPE@131..156
+            L_PAREN@131..132 "("
+            KEYWORD@132..138 "struct"
+            WHITESPACE@138..139 " "
+            FIELD@139..155
+              L_PAREN@139..140 "("
+              KEYWORD@140..145 "field"
+              WHITESPACE@145..146 " "
+              FIELD_TYPE@146..154
+                REF_TYPE@146..154
+                  L_PAREN@146..147 "("
+                  KEYWORD@147..150 "ref"
+                  WHITESPACE@150..151 " "
+                  HEAP_TYPE@151..153
+                    INDEX@151..153
+                      IDENT@151..153 "$r"
+                  R_PAREN@153..154 ")"
+              R_PAREN@154..155 ")"
+            R_PAREN@155..156 ")"
+          R_PAREN@156..157 ")"
+        R_PAREN@157..158 ")"
+      R_PAREN@158..159 ")"
+    WHITESPACE@159..162 "\n  "
+    REC_TYPE@162..274
+      L_PAREN@162..163 "("
+      KEYWORD@163..166 "rec"
+      WHITESPACE@166..171 "\n    "
+      TYPE_DEF@171..216
+        L_PAREN@171..172 "("
+        KEYWORD@172..176 "type"
+        WHITESPACE@176..177 " "
+        IDENT@177..180 "$t1"
+        WHITESPACE@180..181 " "
+        SUB_TYPE@181..215
+          L_PAREN@181..182 "("
+          KEYWORD@182..185 "sub"
+          WHITESPACE@185..186 " "
+          FUNC_TYPE@186..214
+            L_PAREN@186..187 "("
+            KEYWORD@187..191 "func"
+            WHITESPACE@191..192 " "
+            PARAM@192..213
+              L_PAREN@192..193 "("
+              KEYWORD@193..198 "param"
+              WHITESPACE@198..199 " "
+              NUM_TYPE@199..202
+                TYPE_KEYWORD@199..202 "i32"
+              WHITESPACE@202..203 " "
+              REF_TYPE@203..212
+                L_PAREN@203..204 "("
+                KEYWORD@204..207 "ref"
+                WHITESPACE@207..208 " "
+                HEAP_TYPE@208..211
+                  INDEX@208..211
+                    IDENT@208..211 "$t3"
+                R_PAREN@211..212 ")"
+              R_PAREN@212..213 ")"
+            R_PAREN@213..214 ")"
+          R_PAREN@214..215 ")"
+        R_PAREN@215..216 ")"
+      WHITESPACE@216..221 "\n    "
+      TYPE_DEF@221..270
+        L_PAREN@221..222 "("
+        KEYWORD@222..226 "type"
+        WHITESPACE@226..227 " "
+        IDENT@227..230 "$t2"
+        WHITESPACE@230..231 " "
+        SUB_TYPE@231..269
+          L_PAREN@231..232 "("
+          KEYWORD@232..235 "sub"
+          WHITESPACE@235..236 " "
+          INDEX@236..239
+            IDENT@236..239 "$t1"
+          WHITESPACE@239..240 " "
+          FUNC_TYPE@240..268
+            L_PAREN@240..241 "("
+            KEYWORD@241..245 "func"
+            WHITESPACE@245..246 " "
+            PARAM@246..267
+              L_PAREN@246..247 "("
+              KEYWORD@247..252 "param"
+              WHITESPACE@252..253 " "
+              NUM_TYPE@253..256
+                TYPE_KEYWORD@253..256 "i32"
+              WHITESPACE@256..257 " "
+              REF_TYPE@257..266
+                L_PAREN@257..258 "("
+                KEYWORD@258..261 "ref"
+                WHITESPACE@261..262 " "
+                HEAP_TYPE@262..265
+                  INDEX@262..265
+                    IDENT@262..265 "$t2"
+                R_PAREN@265..266 ")"
+              R_PAREN@266..267 ")"
+            R_PAREN@267..268 ")"
+          R_PAREN@268..269 ")"
+        R_PAREN@269..270 ")"
+      WHITESPACE@270..273 "\n  "
+      R_PAREN@273..274 ")"
+    WHITESPACE@274..275 "\n"
+    R_PAREN@275..276 ")"
+  WHITESPACE@276..277 "\n"
