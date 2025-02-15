@@ -37,7 +37,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
         Symbol {
             key: SymbolKey::new(&node),
             green: node.green().into(),
-            region: SymbolKey::new(&module),
+            region: SymbolKey::new(module),
             kind,
             idx: Idx {
                 num: Some(id),
@@ -116,7 +116,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
         Symbol {
             key: SymbolKey::new(node),
             green: node.green().into(),
-            region: SymbolKey::new(&module),
+            region: SymbolKey::new(module),
             kind,
             idx: Idx {
                 num: Some(id),
