@@ -1,0 +1,7 @@
+---
+source: crates/formatter/tests/fmt.rs
+---
+(module
+  (rec
+    (type (struct))
+    (type (struct))))

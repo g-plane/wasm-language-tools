@@ -545,7 +545,7 @@ impl DocGen for ModuleField {
             ModuleField::Start(module_field_start) => module_field_start.doc(ctx),
             ModuleField::Table(module_field_table) => module_field_table.doc(ctx),
             ModuleField::Type(type_def) => type_def.doc(ctx),
-            ModuleField::RecType(rec_type) => Doc::text(rec_type.syntax().to_string()),
+            ModuleField::RecType(rec_type) => rec_type.doc(ctx),
         }
     }
 }
@@ -1129,6 +1129,40 @@ impl DocGen for Offset {
             docs.push(Doc::text(")"));
         }
         Doc::list(docs)
+    }
+}
+
+impl DocGen for RecType {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        let mut preferred_multi_line = false;
+        let mut docs = Vec::with_capacity(2);
+        let mut trivias = vec![];
+        if let Some(l_paren) = self.l_paren_token() {
+            docs.push(Doc::text("("));
+            trivias = format_trivias_after_token(l_paren, ctx);
+        }
+        if let Some(keyword) = self.keyword() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text("rec"));
+            preferred_multi_line = has_line_break_after_token(&keyword);
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        self.type_defs().for_each(|type_def| {
+            if trivias.is_empty() {
+                if preferred_multi_line {
+                    docs.push(Doc::hard_line());
+                } else {
+                    docs.push(Doc::line_or_space());
+                }
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(type_def.doc(ctx));
+            trivias = format_trivias_after_node(type_def, ctx);
+        });
+        docs.append(&mut trivias);
+        docs.push(Doc::text(")"));
+        Doc::list(docs).nest(ctx.indent_width).group()
     }
 }
 
