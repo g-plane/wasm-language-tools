@@ -9,4 +9,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: cargo clippy
-      - run: cargo test --all-features
+      - run: cargo test --color=always --all-features
