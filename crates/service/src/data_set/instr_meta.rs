@@ -1,4 +1,4 @@
-use crate::types_analyzer::{OperandType, ResolvedSig, ValType};
+use crate::types_analyzer::{OperandType, RefType, RefTypeKind, ResolvedSig, ValType};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::{collections::HashMap, sync::LazyLock};
 
@@ -1534,7 +1534,10 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
         "ref.func",
         ResolvedSig {
             params: vec![],
-            results: vec![OperandType::Val(ValType::FuncRef)],
+            results: vec![OperandType::Val(ValType::Ref(RefType {
+                kind: RefTypeKind::Func,
+                nullable: false,
+            }))],
         },
     );
     map.insert(

@@ -202,7 +202,10 @@ fn check_block_like(
                             code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
                             message: format!(
                                 "missing `then` branch with expected types [{}]",
-                                results.iter().join(", ")
+                                results
+                                    .iter()
+                                    .map(|ty| ty.render(shared.service))
+                                    .join(", ")
                             ),
                             ..Default::default()
                         });
@@ -220,7 +223,10 @@ fn check_block_like(
                             code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
                             message: format!(
                                 "missing `else` branch with expected types [{}]",
-                                results.iter().join(", ")
+                                results
+                                    .iter()
+                                    .map(|ty| ty.render(shared.service))
+                                    .join(", ")
                             ),
                             ..Default::default()
                         });
@@ -270,7 +276,11 @@ impl TypeStack<'_> {
                                     ReportRange::Instr(related_instr).pick(),
                                 ),
                             },
-                            message: format!("expected type `{expected}`, found `{received}`"),
+                            message: format!(
+                                "expected type `{}`, found `{}`",
+                                expected.render_compact(self.service),
+                                received.render_compact(self.service),
+                            ),
                         });
                     }
                 }
@@ -280,8 +290,16 @@ impl TypeStack<'_> {
                 _ => {}
             });
         if mismatch {
-            let expected_types = format!("[{}]", expected.iter().join(", "));
-            let received_types = format!("[{}]", pops.iter().map(|(ty, _)| ty).join(", "));
+            let expected_types = format!(
+                "[{}]",
+                expected.iter().map(|ty| ty.render(self.service)).join(", ")
+            );
+            let received_types = format!(
+                "[{}]",
+                pops.iter()
+                    .map(|(ty, _)| ty.render(self.service))
+                    .join(", ")
+            );
             diagnostic = Some(Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(self.line_index, report_range.pick()),
                 severity: Some(DiagnosticSeverity::ERROR),
@@ -327,7 +345,11 @@ impl TypeStack<'_> {
                                     ReportRange::Instr(related_instr).pick(),
                                 ),
                             },
-                            message: format!("expected type `{expected}`, found `{received}`"),
+                            message: format!(
+                                "expected type `{}`, found `{}`",
+                                expected.render_compact(self.service),
+                                received.render_compact(self.service),
+                            ),
                         });
                     }
                 }
@@ -340,8 +362,17 @@ impl TypeStack<'_> {
                 _ => {}
             });
         if mismatch {
-            let expected_types = format!("[{}]", expected.iter().join(", "));
-            let received_types = format!("[{}]", self.stack.iter().map(|(ty, _)| ty).join(", "));
+            let expected_types = format!(
+                "[{}]",
+                expected.iter().map(|ty| ty.render(self.service)).join(", ")
+            );
+            let received_types = format!(
+                "[{}]",
+                self.stack
+                    .iter()
+                    .map(|(ty, _)| ty.render(self.service))
+                    .join(", ")
+            );
             diagnostic = Some(Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(self.line_index, report_range.pick()),
                 severity: Some(DiagnosticSeverity::ERROR),
@@ -468,7 +499,8 @@ fn resolve_sig(
                 .and_then(|type_use| type_use.results().next())
                 .and_then(|result| result.val_types().next())
             {
-                OperandType::Val(ty.into())
+                ValType::from_green(&ty.syntax().green(), shared.service)
+                    .map_or(OperandType::Any, OperandType::Val)
             } else {
                 type_stack
                     .stack

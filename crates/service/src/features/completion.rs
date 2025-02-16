@@ -564,7 +564,7 @@ fn get_cmp_list(
                                         new_text: label,
                                     })),
                                     label_details: ty.map(|ty| CompletionItemLabelDetails {
-                                        description: Some(ty.to_string()),
+                                        description: Some(ty.render(service).to_string()),
                                         ..Default::default()
                                     }),
                                     sort_text: preferred_type.zip(ty).map(|(expected, it)| {
@@ -672,7 +672,7 @@ fn get_cmp_list(
                                         new_text: label,
                                     })),
                                     label_details: ty.map(|ty| CompletionItemLabelDetails {
-                                        description: Some(ty.to_string()),
+                                        description: Some(ty.render(service).to_string()),
                                         ..Default::default()
                                     }),
                                     sort_text: preferred_type.zip(ty).map(|(expected, it)| {
@@ -786,7 +786,11 @@ fn get_cmp_list(
                                         description: Some(format!(
                                             "[{}]",
                                             sig.as_ref()
-                                                .map(|sig| sig.results.iter().join(", "))
+                                                .map(|sig| sig
+                                                    .results
+                                                    .iter()
+                                                    .map(|result| result.render(service))
+                                                    .join(", "))
                                                 .unwrap_or_default()
                                         )),
                                         ..Default::default()

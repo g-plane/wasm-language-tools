@@ -452,7 +452,7 @@ fn vec_type() {
 }
 
 #[test]
-fn ref_type() {
+fn abbr_ref_type() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
 (module
@@ -632,5 +632,21 @@ fn if_keyword() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.hover(create_params(uri, Position::new(3, 6)));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn ref_type() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (param (ref any))
+        (local.get 0)
+    )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, Position::new(3, 20)));
     assert_json_snapshot!(response);
 }

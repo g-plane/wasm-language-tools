@@ -6,9 +6,9 @@ expression: response
   {
     "position": {
       "line": 3,
-      "character": 29
+      "character": 25
     },
-    "label": "(ref null func)",
+    "label": "(ref 0)",
     "kind": 1,
     "paddingLeft": true
   }

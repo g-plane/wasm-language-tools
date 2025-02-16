@@ -2,7 +2,7 @@ use crate::{
     binder::{Symbol, SymbolKey, SymbolTable, SymbolTablesCtx},
     data_set::INSTR_SIG,
     helpers,
-    idx::InternIdent,
+    idx::{Idx, InternIdent},
     syntax_tree::SyntaxTreeCtx,
     uri::InternUri,
     LanguageService,
@@ -60,13 +60,13 @@ pub(crate) trait TypesAnalyzerCtx: SyntaxTreeCtx + SymbolTablesCtx {
         signature: Option<Signature>,
     ) -> String;
 }
-fn extract_type(_: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<ValType> {
-    (&*node).try_into().ok().or_else(|| {
+fn extract_type(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<ValType> {
+    ValType::from_green(&node, db).or_else(|| {
         node.children().find_map(|child| match child {
             NodeOrToken::Node(node)
                 if AstValType::can_cast(WatLanguage::kind_from_raw(node.kind())) =>
             {
-                node.try_into().ok()
+                ValType::from_green(node, db)
             }
             _ => None,
         })
@@ -85,20 +85,26 @@ fn extract_global_type(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<Val
 fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Signature {
     let root = SyntaxNode::new_root(node);
     let params = support::children::<Param>(&root).fold(vec![], |mut acc, param| {
-        if let Some((ident, ty)) = param.ident_token().zip(param.val_types().next()) {
-            acc.push((ValType::from(ty), Some(db.ident(ident.text().into()))));
+        if let Some((ident, ty)) = param.ident_token().zip(
+            param
+                .val_types()
+                .next()
+                .and_then(|ty| ValType::from_ast(&ty, db)),
+        ) {
+            acc.push((ty, Some(db.ident(ident.text().into()))));
         } else {
             acc.extend(
                 param
                     .val_types()
-                    .map(|val_type| (ValType::from(val_type), None)),
+                    .filter_map(|ty| ValType::from_ast(&ty, db))
+                    .map(|val_type| (val_type, None)),
             );
         }
         acc
     });
     let results = support::children::<Result>(&root)
         .flat_map(|result| result.val_types())
-        .map(ValType::from)
+        .filter_map(|ty| ValType::from_ast(&ty, db))
         .collect();
     Signature { params, results }
 }
@@ -181,9 +187,9 @@ fn render_sig(db: &dyn TypesAnalyzerCtx, signature: Signature) -> String {
         .into_iter()
         .map(|(ty, name)| {
             if let Some(name) = name {
-                format!("(param {} {ty})", db.lookup_ident(name))
+                format!("(param {} {})", db.lookup_ident(name), ty.render(db))
             } else {
-                format!("(param {ty})")
+                format!("(param {})", ty.render(db))
             }
         })
         .join(" ");
@@ -191,7 +197,7 @@ fn render_sig(db: &dyn TypesAnalyzerCtx, signature: Signature) -> String {
     let results = signature
         .results
         .into_iter()
-        .map(|ty| format!("(result {ty})"))
+        .map(|ty| format!("(result {})", ty.render(db)))
         .join(" ");
     if !params.is_empty() && !results.is_empty() {
         ret.push(' ');
@@ -200,13 +206,17 @@ fn render_sig(db: &dyn TypesAnalyzerCtx, signature: Signature) -> String {
     ret
 }
 
-fn render_compact_sig(_: &dyn TypesAnalyzerCtx, signature: Signature) -> String {
+fn render_compact_sig(db: &dyn TypesAnalyzerCtx, signature: Signature) -> String {
     let params = signature
         .params
         .iter()
-        .map(|(ty, _)| ty.to_string())
+        .map(|(ty, _)| ty.render_compact(db))
         .join(", ");
-    let results = signature.results.iter().map(ValType::to_string).join(", ");
+    let results = signature
+        .results
+        .iter()
+        .map(|ty| ty.render_compact(db))
+        .join(", ");
     format!("[{params}] -> [{results}]")
 }
 
@@ -320,77 +330,292 @@ pub(crate) enum ValType {
     F32,
     F64,
     V128,
-    FuncRef,
-    ExternRef,
+    Ref(RefType),
 }
-impl Display for ValType {
+impl ValType {
+    pub(crate) fn from_ast(node: &AstValType, db: &dyn TypesAnalyzerCtx) -> Option<Self> {
+        Self::from_green(&node.syntax().green(), db)
+    }
+
+    pub(crate) fn from_green(node: &GreenNodeData, db: &dyn TypesAnalyzerCtx) -> Option<Self> {
+        match WatLanguage::kind_from_raw(node.kind()) {
+            SyntaxKind::NUM_TYPE => match node
+                .children()
+                .next()
+                .and_then(|child| child.into_token())?
+                .text()
+            {
+                "i32" => Some(ValType::I32),
+                "i64" => Some(ValType::I64),
+                "f32" => Some(ValType::F32),
+                "f64" => Some(ValType::F64),
+                _ => None,
+            },
+            SyntaxKind::VEC_TYPE => Some(ValType::V128),
+            SyntaxKind::REF_TYPE => {
+                let mut children = node.children();
+                match children.next().and_then(|child| child.into_token())?.text() {
+                    "anyref" => {
+                        return Some(ValType::Ref(RefType {
+                            kind: RefTypeKind::Any,
+                            nullable: true,
+                        }));
+                    }
+                    "eqref" => {
+                        return Some(ValType::Ref(RefType {
+                            kind: RefTypeKind::Eq,
+                            nullable: true,
+                        }));
+                    }
+                    "i31ref" => {
+                        return Some(ValType::Ref(RefType {
+                            kind: RefTypeKind::I31,
+                            nullable: true,
+                        }));
+                    }
+                    "structref" => {
+                        return Some(ValType::Ref(RefType {
+                            kind: RefTypeKind::Struct,
+                            nullable: true,
+                        }));
+                    }
+                    "arrayref" => {
+                        return Some(ValType::Ref(RefType {
+                            kind: RefTypeKind::Array,
+                            nullable: true,
+                        }));
+                    }
+                    "nullref" => {
+                        return Some(ValType::Ref(RefType {
+                            kind: RefTypeKind::None,
+                            nullable: true,
+                        }));
+                    }
+                    "funcref" => {
+                        return Some(ValType::Ref(RefType {
+                            kind: RefTypeKind::Func,
+                            nullable: true,
+                        }));
+                    }
+                    "nullfuncref" => {
+                        return Some(ValType::Ref(RefType {
+                            kind: RefTypeKind::NoFunc,
+                            nullable: true,
+                        }));
+                    }
+                    "externref" => {
+                        return Some(ValType::Ref(RefType {
+                            kind: RefTypeKind::Extern,
+                            nullable: true,
+                        }));
+                    }
+                    "nullexternref" => {
+                        return Some(ValType::Ref(RefType {
+                            kind: RefTypeKind::NoExtern,
+                            nullable: false,
+                        }));
+                    }
+                    _ => {}
+                }
+                let mut nullable = false;
+                for node_or_token in children {
+                    match node_or_token {
+                        NodeOrToken::Node(node) if node.kind() == SyntaxKind::HEAP_TYPE.into() => {
+                            return match node.children().next() {
+                                Some(NodeOrToken::Node(node))
+                                    if node.kind() == SyntaxKind::INDEX.into() =>
+                                {
+                                    let token = node.children().next()?.into_token()?;
+                                    match WatLanguage::kind_from_raw(token.kind()) {
+                                        SyntaxKind::UNSIGNED_INT => Some(ValType::Ref(RefType {
+                                            kind: RefTypeKind::Type(Idx {
+                                                num: token.text().parse().ok(),
+                                                name: None,
+                                            }),
+                                            nullable,
+                                        })),
+                                        SyntaxKind::IDENT => Some(ValType::Ref(RefType {
+                                            kind: RefTypeKind::Type(Idx {
+                                                num: None,
+                                                name: Some(db.ident(token.text().into())),
+                                            }),
+                                            nullable,
+                                        })),
+                                        _ => None,
+                                    }
+                                }
+                                Some(NodeOrToken::Token(token))
+                                    if token.kind() == SyntaxKind::TYPE_KEYWORD.into() =>
+                                {
+                                    match token.text() {
+                                        "any" => Some(ValType::Ref(RefType {
+                                            kind: RefTypeKind::Any,
+                                            nullable,
+                                        })),
+                                        "eq" => Some(ValType::Ref(RefType {
+                                            kind: RefTypeKind::Eq,
+                                            nullable,
+                                        })),
+                                        "i31" => Some(ValType::Ref(RefType {
+                                            kind: RefTypeKind::I31,
+                                            nullable,
+                                        })),
+                                        "struct" => Some(ValType::Ref(RefType {
+                                            kind: RefTypeKind::Struct,
+                                            nullable,
+                                        })),
+                                        "array" => Some(ValType::Ref(RefType {
+                                            kind: RefTypeKind::Array,
+                                            nullable,
+                                        })),
+                                        "none" => Some(ValType::Ref(RefType {
+                                            kind: RefTypeKind::None,
+                                            nullable,
+                                        })),
+                                        "func" => Some(ValType::Ref(RefType {
+                                            kind: RefTypeKind::Func,
+                                            nullable,
+                                        })),
+                                        "nofunc" => Some(ValType::Ref(RefType {
+                                            kind: RefTypeKind::NoFunc,
+                                            nullable,
+                                        })),
+                                        "extern" => Some(ValType::Ref(RefType {
+                                            kind: RefTypeKind::Extern,
+                                            nullable,
+                                        })),
+                                        "noextern" => Some(ValType::Ref(RefType {
+                                            kind: RefTypeKind::NoExtern,
+                                            nullable,
+                                        })),
+                                        _ => None,
+                                    }
+                                }
+                                _ => None,
+                            };
+                        }
+                        NodeOrToken::Token(token)
+                            if token.kind() == SyntaxKind::KEYWORD.into()
+                                && token.text() == "null" =>
+                        {
+                            nullable = true;
+                        }
+                        _ => {}
+                    }
+                }
+                None
+            }
+            _ => None,
+        }
+    }
+
+    pub(crate) fn render<'a>(&'a self, db: &'a dyn TypesAnalyzerCtx) -> ValTypeRender<'a, false> {
+        ValTypeRender { ty: self, db }
+    }
+
+    pub(crate) fn render_compact<'a>(
+        &'a self,
+        db: &'a dyn TypesAnalyzerCtx,
+    ) -> ValTypeRender<'a, true> {
+        ValTypeRender { ty: self, db }
+    }
+}
+pub(crate) struct ValTypeRender<'a, const COMPACT: bool> {
+    ty: &'a ValType,
+    db: &'a dyn TypesAnalyzerCtx,
+}
+impl Display for ValTypeRender<'_, false> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
+        match self.ty {
             ValType::I32 => write!(f, "i32"),
             ValType::I64 => write!(f, "i64"),
             ValType::F32 => write!(f, "f32"),
             ValType::F64 => write!(f, "f64"),
             ValType::V128 => write!(f, "v128"),
-            ValType::FuncRef => write!(f, "funcref"),
-            ValType::ExternRef => write!(f, "externref"),
+            ValType::Ref(ty) => {
+                write!(f, "(ref ")?;
+                if ty.nullable {
+                    write!(f, "null ")?;
+                }
+                match ty.kind {
+                    RefTypeKind::Type(idx) => {
+                        if let Some(name) = idx.name {
+                            write!(f, "{}", self.db.lookup_ident(name))?;
+                        } else if let Some(num) = idx.num {
+                            write!(f, "{num}")?;
+                        }
+                    }
+                    RefTypeKind::Any => write!(f, "any")?,
+                    RefTypeKind::Eq => write!(f, "eq")?,
+                    RefTypeKind::I31 => write!(f, "i31")?,
+                    RefTypeKind::Struct => write!(f, "struct")?,
+                    RefTypeKind::Array => write!(f, "array")?,
+                    RefTypeKind::None => write!(f, "none")?,
+                    RefTypeKind::Func => write!(f, "func")?,
+                    RefTypeKind::NoFunc => write!(f, "nofunc")?,
+                    RefTypeKind::Extern => write!(f, "extern")?,
+                    RefTypeKind::NoExtern => write!(f, "noextern")?,
+                }
+                write!(f, ")")
+            }
+        }
+    }
+}
+impl Display for ValTypeRender<'_, true> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.ty {
+            ValType::I32 => write!(f, "i32"),
+            ValType::I64 => write!(f, "i64"),
+            ValType::F32 => write!(f, "f32"),
+            ValType::F64 => write!(f, "f64"),
+            ValType::V128 => write!(f, "v128"),
+            ValType::Ref(ty) => {
+                if ty.nullable {
+                    write!(f, "nullable ")?;
+                }
+                match ty.kind {
+                    RefTypeKind::Type(idx) => {
+                        if let Some(name) = idx.name {
+                            write!(f, "type `{}`", self.db.lookup_ident(name))?;
+                        } else if let Some(num) = idx.num {
+                            write!(f, "type `{num}`")?;
+                        }
+                    }
+                    RefTypeKind::Any => write!(f, "any")?,
+                    RefTypeKind::Eq => write!(f, "eq")?,
+                    RefTypeKind::I31 => write!(f, "i31")?,
+                    RefTypeKind::Struct => write!(f, "struct")?,
+                    RefTypeKind::Array => write!(f, "array")?,
+                    RefTypeKind::None => write!(f, "none")?,
+                    RefTypeKind::Func => write!(f, "func")?,
+                    RefTypeKind::NoFunc => write!(f, "nofunc")?,
+                    RefTypeKind::Extern => write!(f, "extern")?,
+                    RefTypeKind::NoExtern => write!(f, "noextern")?,
+                }
+                write!(f, " ref")
+            }
         }
     }
 }
 
-impl From<AstValType> for ValType {
-    fn from(value: AstValType) -> Self {
-        match value {
-            AstValType::Num(num_type) => {
-                match num_type.type_keyword().as_ref().map(|token| token.text()) {
-                    Some("i32") => ValType::I32,
-                    Some("i64") => ValType::I64,
-                    Some("f32") => ValType::F32,
-                    Some("f64") => ValType::F64,
-                    _ => unreachable!("unsupported num type"),
-                }
-            }
-            AstValType::Vec(..) => ValType::V128,
-            AstValType::Ref(ref_type) => {
-                match ref_type.type_keyword().as_ref().map(|token| token.text()) {
-                    Some("funcref") => ValType::FuncRef,
-                    Some("externref") => ValType::ExternRef,
-                    _ => unreachable!("unsupported ref type"),
-                }
-            }
-        }
-    }
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub(crate) struct RefType {
+    pub kind: RefTypeKind,
+    pub nullable: bool,
 }
-
-impl TryFrom<&GreenNodeData> for ValType {
-    type Error = ();
-    fn try_from(node: &GreenNodeData) -> std::result::Result<Self, Self::Error> {
-        match WatLanguage::kind_from_raw(node.kind()) {
-            SyntaxKind::NUM_TYPE => match node
-                .children()
-                .next()
-                .and_then(|child| child.into_token())
-                .map(|token| token.text())
-            {
-                Some("i32") => Ok(ValType::I32),
-                Some("i64") => Ok(ValType::I64),
-                Some("f32") => Ok(ValType::F32),
-                Some("f64") => Ok(ValType::F64),
-                _ => Err(()),
-            },
-            SyntaxKind::VEC_TYPE => Ok(ValType::V128),
-            SyntaxKind::REF_TYPE => match node
-                .children()
-                .next()
-                .and_then(|child| child.into_token())
-                .map(|token| token.text())
-            {
-                Some("funcref") => Ok(ValType::FuncRef),
-                Some("externref") => Ok(ValType::ExternRef),
-                _ => Err(()),
-            },
-            _ => Err(()),
-        }
-    }
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub(crate) enum RefTypeKind {
+    Type(Idx),
+    Any,
+    Eq,
+    I31,
+    Struct,
+    Array,
+    None,
+    Func,
+    NoFunc,
+    Extern,
+    NoExtern,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -398,10 +623,19 @@ pub(crate) enum OperandType {
     Val(ValType),
     Any,
 }
-impl Display for OperandType {
+impl OperandType {
+    pub(crate) fn render<'a>(&'a self, db: &'a dyn TypesAnalyzerCtx) -> OperandTypeRender<'a> {
+        OperandTypeRender { ty: self, db }
+    }
+}
+pub(crate) struct OperandTypeRender<'a> {
+    ty: &'a OperandType,
+    db: &'a dyn TypesAnalyzerCtx,
+}
+impl Display for OperandTypeRender<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            OperandType::Val(ty) => Display::fmt(ty, f),
+        match self.ty {
+            OperandType::Val(ty) => write!(f, "{}", ty.render_compact(self.db)),
             OperandType::Any => write!(f, "any"),
         }
     }

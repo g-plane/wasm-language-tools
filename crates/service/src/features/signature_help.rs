@@ -12,6 +12,7 @@ use lsp_types::{
     SignatureHelpParams, SignatureInformation,
 };
 use rowan::{ast::AstNode, Direction};
+use std::fmt::Write;
 use wat_syntax::{
     ast::{Instr, PlainInstr},
     SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodePtr,
@@ -101,7 +102,7 @@ impl LanguageService {
                     label.push_str(&self.lookup_ident(name));
                 }
                 label.push(' ');
-                label.push_str(&param.0.to_string());
+                let _ = write!(label, "{}", param.0.render(self));
                 label.push(')');
                 parameters.push(ParameterInformation {
                     label: ParameterLabel::LabelOffsets([start as u32, label.len() as u32]),
@@ -114,7 +115,7 @@ impl LanguageService {
                     label.push(' ');
                 }
                 label.push_str("(result ");
-                label.push_str(&result.to_string());
+                let _ = write!(label, "{}", result.render(self));
                 label.push(')');
                 written = true;
             });

@@ -4,17 +4,17 @@ expression: response
 ---
 {
   "contents": {
-    "kind": "markdown",
-    "value": "```wat\nfuncref\n```\n\nThe type [`funcref`](https://webassembly.github.io/spec/core/syntax/types.html#syntax-reftype) denotes the infinite union of all references to [functions](https://webassembly.github.io/spec/core/syntax/modules.html#syntax-func), regardless of their [function types](https://webassembly.github.io/spec/core/syntax/types.html#syntax-functype)."
+    "language": "wat",
+    "value": "(param (ref any))"
   },
   "range": {
     "start": {
-      "line": 2,
-      "character": 17
+      "line": 3,
+      "character": 19
     },
     "end": {
-      "line": 2,
-      "character": 24
+      "line": 3,
+      "character": 20
     }
   }
 }

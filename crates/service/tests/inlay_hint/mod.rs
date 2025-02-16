@@ -114,3 +114,19 @@ fn if_end() {
     let response = service.inlay_hint(create_params(uri, Position::new(4, 0)));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn ref_type() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = "
+(module
+    (func (local $local (ref 0))
+        (local.get $local)
+    )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.inlay_hint(create_params(uri, Position::new(6, 0)));
+    assert_json_snapshot!(response);
+}

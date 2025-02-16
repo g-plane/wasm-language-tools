@@ -13,6 +13,7 @@ use lsp_types::{
     Hover, HoverContents, HoverParams, LanguageString, MarkedString, MarkupContent, MarkupKind,
 };
 use rowan::ast::{support::child, AstNode};
+use std::fmt::Write;
 use wat_syntax::{
     ast::{GlobalType, PlainInstr},
     SyntaxKind, SyntaxNode,
@@ -270,7 +271,7 @@ fn create_param_or_local_hover(service: &LanguageService, symbol: &Symbol) -> Ma
     }
     if let Some(ty) = service.extract_type(symbol.green.clone()) {
         content_value.push(' ');
-        content_value.push_str(&ty.to_string());
+        let _ = write!(content_value, "{}", ty.render(service));
     }
     content_value.push(')');
     create_marked_string(content_value)

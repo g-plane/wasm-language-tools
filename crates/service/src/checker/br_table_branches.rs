@@ -47,8 +47,8 @@ pub fn check(
                 code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
                 message: format!(
                     "type mismatch in `br_table`: expected [{}], found [{}]",
-                    expected.iter().join(", "),
-                    received.iter().join(", ")
+                    expected.iter().map(|ty| ty.render(service)).join(", "),
+                    received.iter().map(|ty| ty.render(service)).join(", ")
                 ),
                 ..Default::default()
             })
