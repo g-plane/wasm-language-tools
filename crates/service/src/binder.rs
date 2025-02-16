@@ -9,7 +9,7 @@ use rowan::{
 };
 use std::{hash::Hash, sync::Arc};
 use wat_syntax::{
-    ast::{ModuleFieldFunc, PlainInstr},
+    ast::{ModuleFieldFunc, PlainInstr, TypeDef},
     SyntaxKind, SyntaxNode, SyntaxNodePtr,
 };
 
@@ -25,6 +25,7 @@ pub(crate) struct SymbolTable {
     pub symbols: Vec<Symbol>,
     pub blocks: Vec<BlockItem>,
     pub exports: Vec<ExportItem>,
+    pub type_defs: Vec<TypeDefItem>,
 }
 fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTable> {
     fn create_module_level_symbol(
@@ -548,33 +549,39 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
             _ => {}
         });
     });
+
+    let type_defs = symbols
+        .iter()
+        .filter(|symbol| symbol.kind == SymbolKind::Type)
+        .filter_map(|symbol| {
+            let node = TypeDef::cast(symbol.key.to_node(&root))?;
+            let sub_type = node.sub_type()?;
+            let extendable = sub_type.keyword().is_some() && sub_type.final_keyword().is_none();
+            let inherits = sub_type
+                .indexes()
+                .next()
+                .and_then(|index| find_defs(&symbols, SymbolKey::new(index.syntax())))
+                .and_then(|mut defs| defs.next())
+                .map(|def| def.key);
+            Some(TypeDefItem {
+                key: symbol.key,
+                extendable,
+                inherits,
+            })
+        })
+        .collect();
+
     Arc::new(SymbolTable {
         symbols,
         blocks,
         exports,
+        type_defs,
     })
 }
 
 impl SymbolTable {
     pub fn find_defs(&self, key: SymbolKey) -> Option<impl Iterator<Item = &Symbol>> {
-        self.symbols
-            .iter()
-            .find(|symbol| symbol.key == key)
-            .and_then(|ref_symbol| {
-                let kind = match ref_symbol.kind {
-                    SymbolKind::Call => SymbolKind::Func,
-                    SymbolKind::TypeUse => SymbolKind::Type,
-                    SymbolKind::GlobalRef => SymbolKind::GlobalDef,
-                    SymbolKind::MemoryRef => SymbolKind::MemoryDef,
-                    SymbolKind::TableRef => SymbolKind::TableDef,
-                    _ => return None,
-                };
-                Some(self.symbols.iter().filter(move |symbol| {
-                    symbol.region == ref_symbol.region
-                        && symbol.kind == kind
-                        && ref_symbol.idx.is_defined_by(&symbol.idx)
-                }))
-            })
+        find_defs(&self.symbols, key)
     }
 
     pub fn find_param_def(&self, key: SymbolKey) -> Option<&Symbol> {
@@ -655,6 +662,27 @@ impl SymbolTable {
     }
 }
 
+fn find_defs(symbols: &[Symbol], key: SymbolKey) -> Option<impl Iterator<Item = &Symbol>> {
+    symbols
+        .iter()
+        .find(|symbol| symbol.key == key)
+        .and_then(|ref_symbol| {
+            let kind = match ref_symbol.kind {
+                SymbolKind::Call => SymbolKind::Func,
+                SymbolKind::TypeUse => SymbolKind::Type,
+                SymbolKind::GlobalRef => SymbolKind::GlobalDef,
+                SymbolKind::MemoryRef => SymbolKind::MemoryDef,
+                SymbolKind::TableRef => SymbolKind::TableDef,
+                _ => return None,
+            };
+            Some(symbols.iter().filter(move |symbol| {
+                symbol.region == ref_symbol.region
+                    && symbol.kind == kind
+                    && ref_symbol.idx.is_defined_by(&symbol.idx)
+            }))
+        })
+}
+
 pub type SymbolKey = SyntaxNodePtr;
 
 #[derive(Clone, Debug)]
@@ -699,15 +727,22 @@ pub enum SymbolKind {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct BlockItem {
+pub(crate) struct BlockItem {
     pub ref_key: SymbolKey,
     pub def_key: SymbolKey,
     pub def_idx: Idx,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct ExportItem {
+pub(crate) struct ExportItem {
     pub name: String, // with double quotes
     pub range: TextRange,
     pub module: SyntaxNodePtr,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct TypeDefItem {
+    pub key: SymbolKey,
+    pub extendable: bool,
+    pub inherits: Option<SymbolKey>,
 }
