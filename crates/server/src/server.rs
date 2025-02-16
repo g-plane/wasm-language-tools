@@ -1,5 +1,5 @@
 use crate::{
-    message::{try_cast_notification, try_cast_request, CastError, Message, ResponseError},
+    message::{try_cast_notification, try_cast_request, Message, ResponseError},
     sent::SentRequests,
     stdio,
 };
@@ -53,14 +53,7 @@ impl Server {
                 Message::Request { id, method, params } => {
                     blocking::unblock({
                         let service = self.service.fork();
-                        move || {
-                            if let Ok(Some(message)) =
-                                Self::handle_request(service, id, method, params)
-                            {
-                                stdio::write_sync(message)?;
-                            }
-                            Ok::<_, anyhow::Error>(())
-                        }
+                        move || stdio::write_sync(Self::handle_request(service, id, method, params))
                     })
                     .detach();
                 }
@@ -69,34 +62,32 @@ impl Server {
                 }
                 Message::Notification { method, mut params } => {
                     match try_cast_notification::<DidOpenTextDocument>(&method, params) {
-                        Ok(params) => {
+                        Ok(Ok(params)) => {
                             self.handle_did_open_text_document(params).await?;
                             continue;
                         }
-                        Err(CastError::MethodMismatch(p)) => params = p,
-                        Err(CastError::JsonError(..)) => continue,
-                    };
+                        Ok(Err(..)) => continue,
+                        Err(p) => params = p,
+                    }
                     match try_cast_notification::<DidChangeTextDocument>(&method, params) {
-                        Ok(params) => {
+                        Ok(Ok(params)) => {
                             self.handle_did_change_text_document(params).await?;
                             continue;
                         }
-                        Err(CastError::MethodMismatch(p)) => params = p,
-                        Err(CastError::JsonError(..)) => continue,
-                    };
+                        Ok(Err(..)) => continue,
+                        Err(p) => params = p,
+                    }
                     match try_cast_notification::<DidChangeConfiguration>(&method, params) {
-                        Ok(params) => {
+                        Ok(Ok(params)) => {
                             self.handle_did_change_configuration(params).await?;
                             continue;
                         }
-                        Err(CastError::MethodMismatch(p)) => params = p,
-                        Err(CastError::JsonError(..)) => continue,
-                    };
-                    match try_cast_notification::<Exit>(&method, params) {
-                        Ok(..) => return Ok(()),
-                        Err(CastError::MethodMismatch(..)) => {}
-                        Err(CastError::JsonError(..)) => {}
-                    };
+                        Ok(Err(..)) => continue,
+                        Err(p) => params = p,
+                    }
+                    if try_cast_notification::<Exit>(&method, params).is_ok() {
+                        return Ok(());
+                    }
                 }
                 _ => {}
             }
@@ -138,266 +129,223 @@ impl Server {
         service: impl Deref<Target = LanguageService>,
         id: u32,
         method: String,
-        mut params: serde_json::Value,
-    ) -> anyhow::Result<Option<Message>> {
+        params: serde_json::Value,
+    ) -> Message {
         if service.is_cancelled() {
-            return Ok(Some(Message::ErrResponse {
+            return Message::ErrResponse {
                 id,
                 error: ResponseError {
                     code: error_codes::SERVER_CANCELLED,
                     message: "This request is cancelled by server.".into(),
                     data: None,
                 },
-            }));
+            };
         }
-        match try_cast_request::<CallHierarchyPrepare>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.prepare_call_hierarchy(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<CallHierarchyIncomingCalls>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.call_hierarchy_incoming_calls(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<CallHierarchyOutgoingCalls>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.call_hierarchy_outgoing_calls(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<CodeActionRequest>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.code_action(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<Completion>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.completion(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<DocumentDiagnosticRequest>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.pull_diagnostics(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<DocumentHighlightRequest>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.document_highlight(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<FoldingRangeRequest>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.folding_range(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<Formatting>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.formatting(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<RangeFormatting>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.range_formatting(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<GotoDefinition>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.goto_definition(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<GotoTypeDefinition>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.goto_type_definition(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<GotoDeclaration>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.goto_declaration(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<HoverRequest>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.hover(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<InlayHintRequest>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.inlay_hint(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<References>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.find_references(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<PrepareRenameRequest>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.prepare_rename(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<Rename>(&method, params) {
-            Ok(params) => {
-                return match service.rename(params) {
-                    Ok(result) => Ok(Some(Message::OkResponse {
+        try_cast_request::<CallHierarchyPrepare>(&method, params)
+            .map(|params| {
+                params
+                    .and_then(|params| serde_json::to_value(service.prepare_call_hierarchy(params)))
+                    .map(|result| Message::OkResponse { id, result })
+            })
+            .or_else(|params| {
+                try_cast_request::<CallHierarchyIncomingCalls>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| {
+                            serde_json::to_value(service.call_hierarchy_incoming_calls(params))
+                        })
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<CallHierarchyOutgoingCalls>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| {
+                            serde_json::to_value(service.call_hierarchy_outgoing_calls(params))
+                        })
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<CodeActionRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.code_action(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<Completion>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.completion(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<DocumentDiagnosticRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.pull_diagnostics(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<DocumentHighlightRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.document_highlight(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<FoldingRangeRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.folding_range(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<Formatting>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.formatting(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<RangeFormatting>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.range_formatting(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<GotoDefinition>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.goto_definition(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<GotoTypeDefinition>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| {
+                            serde_json::to_value(service.goto_type_definition(params))
+                        })
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<GotoDeclaration>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.goto_declaration(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<HoverRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.hover(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<InlayHintRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.inlay_hint(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<References>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.find_references(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<PrepareRenameRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.prepare_rename(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<Rename>(&method, params).map(|params| {
+                    params.and_then(|params| match service.rename(params) {
+                        Ok(result) => serde_json::to_value(result)
+                            .map(|result| Message::OkResponse { id, result }),
+                        Err(message) => Ok(Message::ErrResponse {
+                            id,
+                            error: ResponseError {
+                                code: -1,
+                                message,
+                                data: None,
+                            },
+                        }),
+                    })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<SelectionRangeRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.selection_range(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<SemanticTokensFullRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| {
+                            serde_json::to_value(service.semantic_tokens_full(params))
+                        })
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<SemanticTokensRangeRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| {
+                            serde_json::to_value(service.semantic_tokens_range(params))
+                        })
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<SignatureHelpRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.signature_help(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<DocumentSymbolRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.document_symbol(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<Shutdown>(&method, params).map(|_| {
+                    Ok(Message::OkResponse {
                         id,
-                        result: serde_json::to_value(result)?,
-                    })),
-                    Err(message) => Ok(Some(Message::ErrResponse {
-                        id,
-                        error: ResponseError {
-                            code: -1,
-                            message,
-                            data: None,
-                        },
-                    })),
-                };
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<SelectionRangeRequest>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
+                        result: serde_json::Value::Null,
+                    })
+                })
+            })
+            .unwrap_or_else(|params| {
+                Ok(Message::ErrResponse {
                     id,
-                    result: serde_json::to_value(service.selection_range(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<SemanticTokensFullRequest>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.semantic_tokens_full(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<SemanticTokensRangeRequest>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.semantic_tokens_range(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<SignatureHelpRequest>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.signature_help(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<DocumentSymbolRequest>(&method, params) {
-            Ok(params) => {
-                return Ok(Some(Message::OkResponse {
-                    id,
-                    result: serde_json::to_value(service.document_symbol(params))?,
-                }));
-            }
-            Err(CastError::MethodMismatch(p)) => params = p,
-            Err(CastError::JsonError(..)) => return Ok(None),
-        }
-        match try_cast_request::<Shutdown>(&method, params) {
-            Ok(..) => Ok(Some(Message::OkResponse {
+                    error: ResponseError {
+                        code: -32601,
+                        message: "method not found".into(),
+                        data: Some(params),
+                    },
+                })
+            })
+            .unwrap_or_else(|error| Message::ErrResponse {
                 id,
-                result: serde_json::Value::Null,
-            })),
-            Err(CastError::MethodMismatch(..)) => Ok(None),
-            Err(CastError::JsonError(..)) => Ok(None),
-        }
+                error: ResponseError {
+                    code: -32603,
+                    message: error.to_string(),
+                    data: None,
+                },
+            })
     }
 
     async fn handle_response(&mut self, id: u32, result: serde_json::Value) -> anyhow::Result<()> {

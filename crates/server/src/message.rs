@@ -76,33 +76,32 @@ pub struct ResponseError {
 // ---------------------
 // ↓ `lsp-types` crate related code
 
-pub fn try_cast_request<R>(method: &str, params: Value) -> Result<R::Params, CastError>
+pub fn try_cast_request<R>(
+    method: &str,
+    params: Value,
+) -> Result<Result<R::Params, serde_json::Error>, Value>
 where
     R: lsp_types::request::Request,
     R::Params: serde::de::DeserializeOwned,
 {
     if method == R::METHOD {
-        serde_json::from_value(params).map_err(CastError::JsonError)
+        Ok(serde_json::from_value(params))
     } else {
-        Err(CastError::MethodMismatch(params))
+        Err(params)
     }
 }
 
-pub fn try_cast_notification<N>(method: &str, params: Value) -> Result<N::Params, CastError>
+pub fn try_cast_notification<N>(
+    method: &str,
+    params: Value,
+) -> Result<Result<N::Params, serde_json::Error>, Value>
 where
     N: lsp_types::notification::Notification,
     N::Params: serde::de::DeserializeOwned,
 {
     if method == N::METHOD {
-        serde_json::from_value(params).map_err(CastError::JsonError)
+        Ok(serde_json::from_value(params))
     } else {
-        Err(CastError::MethodMismatch(params))
+        Err(params)
     }
-}
-
-#[derive(Debug)]
-pub enum CastError {
-    MethodMismatch(Value),
-    #[expect(unused)]
-    JsonError(serde_json::Error),
 }
