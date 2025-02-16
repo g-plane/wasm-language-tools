@@ -357,61 +357,61 @@ impl ValType {
                 match children.next().and_then(|child| child.into_token())?.text() {
                     "anyref" => {
                         return Some(ValType::Ref(RefType {
-                            kind: RefTypeKind::Any,
+                            heap_ty: HeapType::Any,
                             nullable: true,
                         }));
                     }
                     "eqref" => {
                         return Some(ValType::Ref(RefType {
-                            kind: RefTypeKind::Eq,
+                            heap_ty: HeapType::Eq,
                             nullable: true,
                         }));
                     }
                     "i31ref" => {
                         return Some(ValType::Ref(RefType {
-                            kind: RefTypeKind::I31,
+                            heap_ty: HeapType::I31,
                             nullable: true,
                         }));
                     }
                     "structref" => {
                         return Some(ValType::Ref(RefType {
-                            kind: RefTypeKind::Struct,
+                            heap_ty: HeapType::Struct,
                             nullable: true,
                         }));
                     }
                     "arrayref" => {
                         return Some(ValType::Ref(RefType {
-                            kind: RefTypeKind::Array,
+                            heap_ty: HeapType::Array,
                             nullable: true,
                         }));
                     }
                     "nullref" => {
                         return Some(ValType::Ref(RefType {
-                            kind: RefTypeKind::None,
+                            heap_ty: HeapType::None,
                             nullable: true,
                         }));
                     }
                     "funcref" => {
                         return Some(ValType::Ref(RefType {
-                            kind: RefTypeKind::Func,
+                            heap_ty: HeapType::Func,
                             nullable: true,
                         }));
                     }
                     "nullfuncref" => {
                         return Some(ValType::Ref(RefType {
-                            kind: RefTypeKind::NoFunc,
+                            heap_ty: HeapType::NoFunc,
                             nullable: true,
                         }));
                     }
                     "externref" => {
                         return Some(ValType::Ref(RefType {
-                            kind: RefTypeKind::Extern,
+                            heap_ty: HeapType::Extern,
                             nullable: true,
                         }));
                     }
                     "nullexternref" => {
                         return Some(ValType::Ref(RefType {
-                            kind: RefTypeKind::NoExtern,
+                            heap_ty: HeapType::NoExtern,
                             nullable: false,
                         }));
                     }
@@ -428,14 +428,14 @@ impl ValType {
                                     let token = node.children().next()?.into_token()?;
                                     match WatLanguage::kind_from_raw(token.kind()) {
                                         SyntaxKind::UNSIGNED_INT => Some(ValType::Ref(RefType {
-                                            kind: RefTypeKind::Type(Idx {
+                                            heap_ty: HeapType::Type(Idx {
                                                 num: token.text().parse().ok(),
                                                 name: None,
                                             }),
                                             nullable,
                                         })),
                                         SyntaxKind::IDENT => Some(ValType::Ref(RefType {
-                                            kind: RefTypeKind::Type(Idx {
+                                            heap_ty: HeapType::Type(Idx {
                                                 num: None,
                                                 name: Some(db.ident(token.text().into())),
                                             }),
@@ -449,43 +449,43 @@ impl ValType {
                                 {
                                     match token.text() {
                                         "any" => Some(ValType::Ref(RefType {
-                                            kind: RefTypeKind::Any,
+                                            heap_ty: HeapType::Any,
                                             nullable,
                                         })),
                                         "eq" => Some(ValType::Ref(RefType {
-                                            kind: RefTypeKind::Eq,
+                                            heap_ty: HeapType::Eq,
                                             nullable,
                                         })),
                                         "i31" => Some(ValType::Ref(RefType {
-                                            kind: RefTypeKind::I31,
+                                            heap_ty: HeapType::I31,
                                             nullable,
                                         })),
                                         "struct" => Some(ValType::Ref(RefType {
-                                            kind: RefTypeKind::Struct,
+                                            heap_ty: HeapType::Struct,
                                             nullable,
                                         })),
                                         "array" => Some(ValType::Ref(RefType {
-                                            kind: RefTypeKind::Array,
+                                            heap_ty: HeapType::Array,
                                             nullable,
                                         })),
                                         "none" => Some(ValType::Ref(RefType {
-                                            kind: RefTypeKind::None,
+                                            heap_ty: HeapType::None,
                                             nullable,
                                         })),
                                         "func" => Some(ValType::Ref(RefType {
-                                            kind: RefTypeKind::Func,
+                                            heap_ty: HeapType::Func,
                                             nullable,
                                         })),
                                         "nofunc" => Some(ValType::Ref(RefType {
-                                            kind: RefTypeKind::NoFunc,
+                                            heap_ty: HeapType::NoFunc,
                                             nullable,
                                         })),
                                         "extern" => Some(ValType::Ref(RefType {
-                                            kind: RefTypeKind::Extern,
+                                            heap_ty: HeapType::Extern,
                                             nullable,
                                         })),
                                         "noextern" => Some(ValType::Ref(RefType {
-                                            kind: RefTypeKind::NoExtern,
+                                            heap_ty: HeapType::NoExtern,
                                             nullable,
                                         })),
                                         _ => None,
@@ -537,24 +537,24 @@ impl Display for ValTypeRender<'_, false> {
                 if ty.nullable {
                     write!(f, "null ")?;
                 }
-                match ty.kind {
-                    RefTypeKind::Type(idx) => {
+                match ty.heap_ty {
+                    HeapType::Type(idx) => {
                         if let Some(name) = idx.name {
                             write!(f, "{}", self.db.lookup_ident(name))?;
                         } else if let Some(num) = idx.num {
                             write!(f, "{num}")?;
                         }
                     }
-                    RefTypeKind::Any => write!(f, "any")?,
-                    RefTypeKind::Eq => write!(f, "eq")?,
-                    RefTypeKind::I31 => write!(f, "i31")?,
-                    RefTypeKind::Struct => write!(f, "struct")?,
-                    RefTypeKind::Array => write!(f, "array")?,
-                    RefTypeKind::None => write!(f, "none")?,
-                    RefTypeKind::Func => write!(f, "func")?,
-                    RefTypeKind::NoFunc => write!(f, "nofunc")?,
-                    RefTypeKind::Extern => write!(f, "extern")?,
-                    RefTypeKind::NoExtern => write!(f, "noextern")?,
+                    HeapType::Any => write!(f, "any")?,
+                    HeapType::Eq => write!(f, "eq")?,
+                    HeapType::I31 => write!(f, "i31")?,
+                    HeapType::Struct => write!(f, "struct")?,
+                    HeapType::Array => write!(f, "array")?,
+                    HeapType::None => write!(f, "none")?,
+                    HeapType::Func => write!(f, "func")?,
+                    HeapType::NoFunc => write!(f, "nofunc")?,
+                    HeapType::Extern => write!(f, "extern")?,
+                    HeapType::NoExtern => write!(f, "noextern")?,
                 }
                 write!(f, ")")
             }
@@ -573,24 +573,24 @@ impl Display for ValTypeRender<'_, true> {
                 if ty.nullable {
                     write!(f, "nullable ")?;
                 }
-                match ty.kind {
-                    RefTypeKind::Type(idx) => {
+                match ty.heap_ty {
+                    HeapType::Type(idx) => {
                         if let Some(name) = idx.name {
                             write!(f, "type `{}`", self.db.lookup_ident(name))?;
                         } else if let Some(num) = idx.num {
                             write!(f, "type `{num}`")?;
                         }
                     }
-                    RefTypeKind::Any => write!(f, "any")?,
-                    RefTypeKind::Eq => write!(f, "eq")?,
-                    RefTypeKind::I31 => write!(f, "i31")?,
-                    RefTypeKind::Struct => write!(f, "struct")?,
-                    RefTypeKind::Array => write!(f, "array")?,
-                    RefTypeKind::None => write!(f, "none")?,
-                    RefTypeKind::Func => write!(f, "func")?,
-                    RefTypeKind::NoFunc => write!(f, "nofunc")?,
-                    RefTypeKind::Extern => write!(f, "extern")?,
-                    RefTypeKind::NoExtern => write!(f, "noextern")?,
+                    HeapType::Any => write!(f, "any")?,
+                    HeapType::Eq => write!(f, "eq")?,
+                    HeapType::I31 => write!(f, "i31")?,
+                    HeapType::Struct => write!(f, "struct")?,
+                    HeapType::Array => write!(f, "array")?,
+                    HeapType::None => write!(f, "none")?,
+                    HeapType::Func => write!(f, "func")?,
+                    HeapType::NoFunc => write!(f, "nofunc")?,
+                    HeapType::Extern => write!(f, "extern")?,
+                    HeapType::NoExtern => write!(f, "noextern")?,
                 }
                 write!(f, " ref")
             }
@@ -600,11 +600,11 @@ impl Display for ValTypeRender<'_, true> {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub(crate) struct RefType {
-    pub kind: RefTypeKind,
+    pub heap_ty: HeapType,
     pub nullable: bool,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub(crate) enum RefTypeKind {
+pub(crate) enum HeapType {
     Type(Idx),
     Any,
     Eq,
