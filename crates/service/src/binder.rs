@@ -412,7 +412,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                     symbols.push(symbol);
                 }
             }
-            SyntaxKind::TYPE_USE => {
+            SyntaxKind::TYPE_USE | SyntaxKind::HEAP_TYPE | SyntaxKind::SUB_TYPE => {
                 if let Some(symbol) = node
                     .children()
                     .find(|child| child.kind() == SyntaxKind::INDEX)

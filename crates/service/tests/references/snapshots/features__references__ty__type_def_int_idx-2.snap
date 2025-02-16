@@ -1,21 +1,8 @@
 ---
 source: crates/service/tests/references/ty.rs
-expression: include_decl
+expression: exclude_decl
 ---
 [
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
-        "line": 2,
-        "character": 10
-      },
-      "end": {
-        "line": 2,
-        "character": 15
-      }
-    }
-  },
   {
     "uri": "untitled:test",
     "range": {
@@ -34,11 +21,24 @@ expression: include_decl
     "range": {
       "start": {
         "line": 4,
-        "character": 16
+        "character": 15
       },
       "end": {
         "line": 4,
-        "character": 21
+        "character": 16
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 4,
+        "character": 36
+      },
+      "end": {
+        "line": 4,
+        "character": 37
       }
     }
   }

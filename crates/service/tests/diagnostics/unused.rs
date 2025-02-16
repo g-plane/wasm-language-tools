@@ -156,6 +156,20 @@ fn type_used() {
 }
 
 #[test]
+fn type_used_in_subtyping() {
+    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let source = r#"
+(module
+  (type $t (sub (struct)))
+  (type $_ (sub 0 (struct))))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(pick_diagnostics(response).is_empty());
+}
+
+#[test]
 fn global_unused() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = r#"

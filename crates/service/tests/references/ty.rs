@@ -4,12 +4,13 @@ use lsp_types::{Position, Uri};
 use wat_service::LanguageService;
 
 #[test]
-fn func_type_int_idx() {
+fn type_def_int_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
 (module
     (type (func))
     (func (type 0))
+    (type (sub 0) (func (param (ref 0))))
 )
 (module (type (func)))
 ";
@@ -23,13 +24,14 @@ fn func_type_int_idx() {
 }
 
 #[test]
-fn func_type_ident_idx() {
+fn type_def_ident_idx() {
     let uri = "untitled:test".parse::<Uri>().unwrap();
     let source = "
 (module
     (type $type (func))
     (func (type 0))
     (func (type $type))
+    (type (sub $type) (func (param (ref $type))))
 )
 (module (type $type))
 ";
@@ -49,6 +51,7 @@ fn type_use_int_idx() {
 (module
     (type (func))
     (func (type 0))
+    (type (sub 0) (func (param (ref 0))))
 )
 (module (type (func)))
 ";
@@ -69,6 +72,7 @@ fn type_use_ident_idx() {
     (type $type (func))
     (func (type 0))
     (func (type $type))
+    (type (sub $type) (func (param (ref $type))))
 )
 (module (type $type))
 ";

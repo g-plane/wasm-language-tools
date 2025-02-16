@@ -28,5 +28,31 @@ expression: exclude_decl
         "character": 21
       }
     }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 5,
+        "character": 15
+      },
+      "end": {
+        "line": 5,
+        "character": 20
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 5,
+        "character": 40
+      },
+      "end": {
+        "line": 5,
+        "character": 45
+      }
+    }
   }
 ]
