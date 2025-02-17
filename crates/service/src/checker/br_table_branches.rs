@@ -3,7 +3,7 @@ use crate::{
 };
 use itertools::Itertools;
 use line_index::LineIndex;
-use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
+use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use rowan::ast::AstNode;
 use wat_syntax::{ast::PlainInstr, SyntaxNode};
 
@@ -42,9 +42,9 @@ pub fn check(
                     line_index,
                     immediate.syntax().text_range(),
                 ),
-                severity: Some(DiagnosticSeverity::ERROR),
+                severity: Some(DiagnosticSeverity::Error),
                 source: Some("wat".into()),
-                code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                 message: format!(
                     "type mismatch in `br_table`: expected [{}], found [{}]",
                     expected.iter().map(|ty| ty.render(service)).join(", "),

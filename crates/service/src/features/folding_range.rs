@@ -1,5 +1,5 @@
 use crate::{helpers, syntax_tree::SyntaxTreeCtx, uri::UrisCtx, LanguageService};
-use lsp_types::{FoldingRange, FoldingRangeKind, FoldingRangeParams};
+use lspt::{FoldingRange, FoldingRangeKind, FoldingRangeParams};
 use rowan::ast::support::token;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 

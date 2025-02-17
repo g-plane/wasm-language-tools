@@ -3,7 +3,7 @@ use crate::{
     helpers, LanguageService,
 };
 use line_index::LineIndex;
-use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
+use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 
 const DIAGNOSTIC_CODE: &str = "undef";
 
@@ -51,9 +51,9 @@ pub fn check(
             };
             Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
-                severity: Some(DiagnosticSeverity::ERROR),
+                severity: Some(DiagnosticSeverity::Error),
                 source: Some("wat".into()),
-                code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                 message: format!(
                     "cannot find {kind} `{}` in this scope",
                     symbol.idx.render(service)

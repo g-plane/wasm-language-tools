@@ -5,7 +5,8 @@ use crate::{
 };
 use itertools::Itertools;
 use line_index::LineIndex;
-use lsp_types::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
+use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
+use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
@@ -33,7 +34,7 @@ pub fn act(
         .join(" ");
 
     #[expect(clippy::mutable_key_type)]
-    let mut changes = HashMap::with_capacity(1);
+    let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
         service.lookup_uri(uri),
         vec![TextEdit {
@@ -49,7 +50,7 @@ pub fn act(
     };
     Some(CodeAction {
         title,
-        kind: Some(CodeActionKind::REFACTOR_REWRITE),
+        kind: Some(CodeActionKind::RefactorRewrite),
         edit: Some(WorkspaceEdit {
             changes: Some(changes),
             ..Default::default()

@@ -7,7 +7,7 @@ use crate::{
     LanguageService,
 };
 use line_index::LineIndex;
-use lsp_types::{Location, ReferenceParams};
+use lspt::{Location, ReferenceParams};
 use rowan::ast::support::token;
 use smallvec::SmallVec;
 use wat_syntax::{SyntaxKind, SyntaxNode};
@@ -15,10 +15,9 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 impl LanguageService {
     /// Handler for `textDocument/references` request.
     pub fn find_references(&self, params: ReferenceParams) -> Option<Vec<Location>> {
-        let uri = self.uri(params.text_document_position.text_document.uri.clone());
+        let uri = self.uri(params.text_document.uri.clone());
         let root = SyntaxNode::new_root(self.root(uri));
-        let token =
-            find_meaningful_token(self, uri, &root, params.text_document_position.position)?;
+        let token = find_meaningful_token(self, uri, &root, params.position)?;
         if !matches!(
             token.kind(),
             SyntaxKind::IDENT
@@ -174,7 +173,7 @@ fn create_location_by_symbol(
         .map(|token| token.text_range())
         .unwrap_or_else(|| node.text_range());
     Location {
-        uri: params.text_document_position.text_document.uri.clone(),
+        uri: params.text_document.uri.clone(),
         range: helpers::rowan_range_to_lsp_range(line_index, range),
     }
 }

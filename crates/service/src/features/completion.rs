@@ -9,9 +9,9 @@ use crate::{
 };
 use itertools::Itertools;
 use line_index::LineIndex;
-use lsp_types::{
+use lspt::{
     CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionParams,
-    CompletionResponse, CompletionTextEdit, Documentation, MarkupContent, MarkupKind, TextEdit,
+    MarkupContent, MarkupKind, TextEdit, Union2,
 };
 use rowan::{
     ast::{support, AstNode},
@@ -22,18 +22,17 @@ use wat_syntax::{ast::PlainInstr, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxT
 
 impl LanguageService {
     /// Handler for `textDocument/completion` request.
-    pub fn completion(&self, params: CompletionParams) -> Option<CompletionResponse> {
-        let uri = self.uri(params.text_document_position.text_document.uri);
+    pub fn completion(&self, params: CompletionParams) -> Option<Vec<CompletionItem>> {
+        let uri = self.uri(params.text_document.uri);
         let line_index = self.line_index(uri);
         let root = SyntaxNode::new_root(self.root(uri));
         let token = helpers::ast::find_token(
             &root,
-            helpers::lsp_pos_to_rowan_pos(&line_index, params.text_document_position.position)?,
+            helpers::lsp_pos_to_rowan_pos(&line_index, params.position)?,
         )?;
 
         let cmp_ctx = get_cmp_ctx(&token)?;
-        let items = get_cmp_list(self, cmp_ctx, &token, uri, &line_index, &root);
-        Some(CompletionResponse::Array(items))
+        Some(get_cmp_list(self, cmp_ctx, &token, uri, &line_index, &root))
     }
 }
 
@@ -495,14 +494,14 @@ fn get_cmp_list(
                                 })
                                 .map(|name| CompletionItem {
                                     label: name.to_string(),
-                                    kind: Some(CompletionItemKind::OPERATOR),
+                                    kind: Some(CompletionItemKind::Operator),
                                     ..Default::default()
                                 }),
                         );
                     } else {
                         items.extend(data_set::INSTR_NAMES.iter().map(|name| CompletionItem {
                             label: name.to_string(),
-                            kind: Some(CompletionItemKind::OPERATOR),
+                            kind: Some(CompletionItemKind::Operator),
                             ..Default::default()
                         }));
                     }
@@ -510,9 +509,9 @@ fn get_cmp_list(
                 CmpCtx::ValType => {
                     items.extend(data_set::VALUE_TYPES.iter().map(|ty| CompletionItem {
                         label: ty.to_string(),
-                        kind: Some(CompletionItemKind::CLASS),
+                        kind: Some(CompletionItemKind::Class),
                         documentation: data_set::get_value_type_description(ty).map(|desc| {
-                            Documentation::MarkupContent(lsp_types::MarkupContent {
+                            Union2::B(MarkupContent {
                                 kind: MarkupKind::Markdown,
                                 value: desc.into(),
                             })
@@ -523,9 +522,9 @@ fn get_cmp_list(
                 CmpCtx::RefType => {
                     items.extend(["funcref", "externref"].iter().map(|ty| CompletionItem {
                         label: ty.to_string(),
-                        kind: Some(CompletionItemKind::CLASS),
+                        kind: Some(CompletionItemKind::Class),
                         documentation: data_set::get_value_type_description(ty).map(|desc| {
-                            Documentation::MarkupContent(lsp_types::MarkupContent {
+                            Union2::B(MarkupContent {
                                 kind: MarkupKind::Markdown,
                                 value: desc.into(),
                             })
@@ -555,8 +554,8 @@ fn get_cmp_list(
                                 let ty = service.extract_type(symbol.green.clone());
                                 CompletionItem {
                                     label: label.clone(),
-                                    kind: Some(CompletionItemKind::VARIABLE),
-                                    text_edit: Some(CompletionTextEdit::Edit(TextEdit {
+                                    kind: Some(CompletionItemKind::Variable),
+                                    text_edit: Some(Union2::A(TextEdit {
                                         range: helpers::rowan_range_to_lsp_range(
                                             line_index,
                                             token.text_range(),
@@ -591,8 +590,8 @@ fn get_cmp_list(
                             let label = symbol.idx.render(service).to_string();
                             CompletionItem {
                                 label: label.clone(),
-                                kind: Some(CompletionItemKind::FUNCTION),
-                                text_edit: Some(CompletionTextEdit::Edit(TextEdit {
+                                kind: Some(CompletionItemKind::Function),
+                                text_edit: Some(Union2::A(TextEdit {
                                     range: helpers::rowan_range_to_lsp_range(
                                         line_index,
                                         token.text_range(),
@@ -613,7 +612,7 @@ fn get_cmp_list(
                                     ),
                                     ..Default::default()
                                 }),
-                                documentation: Some(Documentation::MarkupContent(MarkupContent {
+                                documentation: Some(Union2::B(MarkupContent {
                                     kind: MarkupKind::Markdown,
                                     value: helpers::ast::get_doc_comment(&symbol.key.to_node(root)),
                                 })),
@@ -634,8 +633,8 @@ fn get_cmp_list(
                             let label = symbol.idx.render(service).to_string();
                             CompletionItem {
                                 label: label.clone(),
-                                kind: Some(CompletionItemKind::INTERFACE),
-                                text_edit: Some(CompletionTextEdit::Edit(TextEdit {
+                                kind: Some(CompletionItemKind::Interface),
+                                text_edit: Some(Union2::A(TextEdit {
                                     range: helpers::rowan_range_to_lsp_range(
                                         line_index,
                                         token.text_range(),
@@ -663,8 +662,8 @@ fn get_cmp_list(
                                 let ty = service.extract_global_type(symbol.green.clone());
                                 CompletionItem {
                                     label: label.clone(),
-                                    kind: Some(CompletionItemKind::VARIABLE),
-                                    text_edit: Some(CompletionTextEdit::Edit(TextEdit {
+                                    kind: Some(CompletionItemKind::Variable),
+                                    text_edit: Some(Union2::A(TextEdit {
                                         range: helpers::rowan_range_to_lsp_range(
                                             line_index,
                                             token.text_range(),
@@ -690,7 +689,7 @@ fn get_cmp_list(
                 CmpCtx::MemArg => {
                     items.extend(["offset=", "align="].iter().map(|label| CompletionItem {
                         label: label.to_string(),
-                        kind: Some(CompletionItemKind::SNIPPET),
+                        kind: Some(CompletionItemKind::Snippet),
                         ..Default::default()
                     }));
                 }
@@ -708,8 +707,8 @@ fn get_cmp_list(
                                 let label = symbol.idx.render(service).to_string();
                                 CompletionItem {
                                     label: label.clone(),
-                                    kind: Some(CompletionItemKind::VARIABLE),
-                                    text_edit: Some(CompletionTextEdit::Edit(TextEdit {
+                                    kind: Some(CompletionItemKind::Variable),
+                                    text_edit: Some(Union2::A(TextEdit {
                                         range: helpers::rowan_range_to_lsp_range(
                                             line_index,
                                             token.text_range(),
@@ -740,8 +739,8 @@ fn get_cmp_list(
                                 let label = symbol.idx.render(service).to_string();
                                 CompletionItem {
                                     label: label.clone(),
-                                    kind: Some(CompletionItemKind::VARIABLE),
-                                    text_edit: Some(CompletionTextEdit::Edit(TextEdit {
+                                    kind: Some(CompletionItemKind::Variable),
+                                    text_edit: Some(Union2::A(TextEdit {
                                         range: helpers::rowan_range_to_lsp_range(
                                             line_index,
                                             token.text_range(),
@@ -774,8 +773,8 @@ fn get_cmp_list(
                                 let sig = types_analyzer::get_block_sig(service, uri, &block_node);
                                 CompletionItem {
                                     label: label.clone(),
-                                    kind: Some(CompletionItemKind::VARIABLE),
-                                    text_edit: Some(CompletionTextEdit::Edit(TextEdit {
+                                    kind: Some(CompletionItemKind::Variable),
+                                    text_edit: Some(Union2::A(TextEdit {
                                         range: helpers::rowan_range_to_lsp_range(
                                             line_index,
                                             token.text_range(),
@@ -807,93 +806,93 @@ fn get_cmp_list(
                 }
                 CmpCtx::KeywordModule => items.push(CompletionItem {
                     label: "module".to_string(),
-                    kind: Some(CompletionItemKind::KEYWORD),
+                    kind: Some(CompletionItemKind::Keyword),
                     ..Default::default()
                 }),
                 CmpCtx::KeywordModuleField => {
                     items.extend(data_set::MODULE_FIELDS.iter().map(|ty| CompletionItem {
                         label: ty.to_string(),
-                        kind: Some(CompletionItemKind::KEYWORD),
+                        kind: Some(CompletionItemKind::Keyword),
                         ..Default::default()
                     }));
                 }
                 CmpCtx::KeywordImExport => {
                     items.extend(["import", "export"].iter().map(|keyword| CompletionItem {
                         label: keyword.to_string(),
-                        kind: Some(CompletionItemKind::KEYWORD),
+                        kind: Some(CompletionItemKind::Keyword),
                         ..Default::default()
                     }));
                 }
                 CmpCtx::KeywordType => items.push(CompletionItem {
                     label: "type".to_string(),
-                    kind: Some(CompletionItemKind::KEYWORD),
+                    kind: Some(CompletionItemKind::Keyword),
                     ..Default::default()
                 }),
                 CmpCtx::KeywordParam => items.push(CompletionItem {
                     label: "param".to_string(),
-                    kind: Some(CompletionItemKind::KEYWORD),
+                    kind: Some(CompletionItemKind::Keyword),
                     ..Default::default()
                 }),
                 CmpCtx::KeywordResult => items.push(CompletionItem {
                     label: "result".to_string(),
-                    kind: Some(CompletionItemKind::KEYWORD),
+                    kind: Some(CompletionItemKind::Keyword),
                     ..Default::default()
                 }),
                 CmpCtx::KeywordLocal => items.push(CompletionItem {
                     label: "local".to_string(),
-                    kind: Some(CompletionItemKind::KEYWORD),
+                    kind: Some(CompletionItemKind::Keyword),
                     ..Default::default()
                 }),
                 CmpCtx::KeywordMut => items.push(CompletionItem {
                     label: "mut".to_string(),
-                    kind: Some(CompletionItemKind::KEYWORD),
+                    kind: Some(CompletionItemKind::Keyword),
                     ..Default::default()
                 }),
                 CmpCtx::KeywordPortDesc => {
                     items.extend(data_set::PORT_DESC.iter().map(|desc| CompletionItem {
                         label: desc.to_string(),
-                        kind: Some(CompletionItemKind::KEYWORD),
+                        kind: Some(CompletionItemKind::Keyword),
                         ..Default::default()
                     }));
                 }
                 CmpCtx::KeywordData => items.push(CompletionItem {
                     label: "data".to_string(),
-                    kind: Some(CompletionItemKind::KEYWORD),
+                    kind: Some(CompletionItemKind::Keyword),
                     ..Default::default()
                 }),
                 CmpCtx::KeywordFunc => items.push(CompletionItem {
                     label: "func".to_string(),
-                    kind: Some(CompletionItemKind::KEYWORD),
+                    kind: Some(CompletionItemKind::Keyword),
                     ..Default::default()
                 }),
                 CmpCtx::KeywordElem => items.push(CompletionItem {
                     label: "elem".to_string(),
-                    kind: Some(CompletionItemKind::KEYWORD),
+                    kind: Some(CompletionItemKind::Keyword),
                     ..Default::default()
                 }),
                 CmpCtx::KeywordItem => items.push(CompletionItem {
                     label: "item".to_string(),
-                    kind: Some(CompletionItemKind::KEYWORD),
+                    kind: Some(CompletionItemKind::Keyword),
                     ..Default::default()
                 }),
                 CmpCtx::KeywordMemory => items.push(CompletionItem {
                     label: "memory".to_string(),
-                    kind: Some(CompletionItemKind::KEYWORD),
+                    kind: Some(CompletionItemKind::Keyword),
                     ..Default::default()
                 }),
                 CmpCtx::KeywordOffset => items.push(CompletionItem {
                     label: "offset".to_string(),
-                    kind: Some(CompletionItemKind::KEYWORD),
+                    kind: Some(CompletionItemKind::Keyword),
                     ..Default::default()
                 }),
                 CmpCtx::KeywordDeclare => items.push(CompletionItem {
                     label: "declare".to_string(),
-                    kind: Some(CompletionItemKind::KEYWORD),
+                    kind: Some(CompletionItemKind::Keyword),
                     ..Default::default()
                 }),
                 CmpCtx::KeywordTable => items.push(CompletionItem {
                     label: "table".to_string(),
-                    kind: Some(CompletionItemKind::KEYWORD),
+                    kind: Some(CompletionItemKind::Keyword),
                     ..Default::default()
                 }),
             }

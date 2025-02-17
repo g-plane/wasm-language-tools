@@ -22,17 +22,12 @@ use crate::{
     uri::{Uris, UrisCtx},
 };
 use indexmap::{IndexMap, IndexSet};
-use lsp_types::{
-    notification::DidChangeConfiguration, CallHierarchyServerCapability, CodeActionKind,
-    CodeActionOptions, CodeActionProviderCapability, CompletionOptions, DeclarationCapability,
-    DiagnosticOptions, DiagnosticServerCapabilities, FoldingRangeProviderCapability,
-    HoverProviderCapability, InitializeParams, InitializeResult, OneOf, Registration,
-    RegistrationParams, RenameOptions, SelectionRangeProviderCapability, SemanticTokenType,
-    SemanticTokensClientCapabilities, SemanticTokensFullOptions, SemanticTokensLegend,
-    SemanticTokensOptions, SemanticTokensServerCapabilities, ServerCapabilities, ServerInfo,
-    SignatureHelpOptions, TextDocumentClientCapabilities, TextDocumentSyncCapability,
-    TextDocumentSyncKind, TextDocumentSyncOptions, TextDocumentSyncSaveOptions,
-    TypeDefinitionProviderCapability, Uri,
+use lspt::{
+    CodeActionKind, CodeActionOptions, CompletionOptions, DiagnosticOptions, InitializeParams,
+    InitializeResult, Registration, RegistrationParams, RenameOptions,
+    SemanticTokensClientCapabilities, SemanticTokensLegend, SemanticTokensOptions,
+    ServerCapabilities, ServerInfo, SignatureHelpOptions, TextDocumentClientCapabilities,
+    TextDocumentSyncKind, TextDocumentSyncOptions, Union2, Union3, Uri,
 };
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use salsa::{Database, ParallelDatabase, Snapshot};
@@ -80,27 +75,24 @@ impl LanguageService {
             ..
         }) = params.capabilities.text_document
         {
-            token_types.iter().for_each(|token_type| {
-                if *token_type == SemanticTokenType::TYPE {
-                    kinds_map.insert(SemanticTokenKind::Type, SemanticTokenType::TYPE);
-                } else if *token_type == SemanticTokenType::PARAMETER {
-                    kinds_map.insert(SemanticTokenKind::Param, SemanticTokenType::PARAMETER);
-                } else if *token_type == SemanticTokenType::VARIABLE {
-                    kinds_map.insert(SemanticTokenKind::Var, SemanticTokenType::VARIABLE);
-                } else if *token_type == SemanticTokenType::FUNCTION {
-                    kinds_map.insert(SemanticTokenKind::Func, SemanticTokenType::FUNCTION);
-                } else if *token_type == SemanticTokenType::KEYWORD {
-                    kinds_map.insert(SemanticTokenKind::Keyword, SemanticTokenType::KEYWORD);
-                } else if *token_type == SemanticTokenType::COMMENT {
-                    kinds_map.insert(SemanticTokenKind::Comment, SemanticTokenType::COMMENT);
-                } else if *token_type == SemanticTokenType::STRING {
-                    kinds_map.insert(SemanticTokenKind::String, SemanticTokenType::STRING);
-                } else if *token_type == SemanticTokenType::NUMBER {
-                    kinds_map.insert(SemanticTokenKind::Number, SemanticTokenType::NUMBER);
-                } else if *token_type == SemanticTokenType::OPERATOR {
-                    kinds_map.insert(SemanticTokenKind::Op, SemanticTokenType::OPERATOR);
-                }
-            });
+            kinds_map = token_types
+                .iter()
+                .filter_map(|token_type| {
+                    let internal_kind = match &**token_type {
+                        "type" => SemanticTokenKind::Type,
+                        "parameter" => SemanticTokenKind::Param,
+                        "variable" => SemanticTokenKind::Var,
+                        "function" => SemanticTokenKind::Func,
+                        "keyword" => SemanticTokenKind::Keyword,
+                        "comment" => SemanticTokenKind::Comment,
+                        "string" => SemanticTokenKind::String,
+                        "number" => SemanticTokenKind::Number,
+                        "operator" => SemanticTokenKind::Op,
+                        _ => return None,
+                    };
+                    Some((internal_kind, token_type.clone()))
+                })
+                .collect();
             self.semantic_token_kinds = kinds_map.keys().cloned().collect();
         }
 
@@ -113,18 +105,16 @@ impl LanguageService {
 
         InitializeResult {
             capabilities: ServerCapabilities {
-                call_hierarchy_provider: Some(CallHierarchyServerCapability::Simple(true)),
-                code_action_provider: Some(CodeActionProviderCapability::Options(
-                    CodeActionOptions {
-                        code_action_kinds: Some(vec![
-                            CodeActionKind::QUICKFIX,
-                            CodeActionKind::REFACTOR_REWRITE,
-                            CodeActionKind::REFACTOR_INLINE,
-                        ]),
-                        resolve_provider: Some(false),
-                        ..Default::default()
-                    },
-                )),
+                call_hierarchy_provider: Some(Union3::A(true)),
+                code_action_provider: Some(Union2::B(CodeActionOptions {
+                    code_action_kinds: Some(vec![
+                        CodeActionKind::QuickFix,
+                        CodeActionKind::RefactorRewrite,
+                        CodeActionKind::RefactorInline,
+                    ]),
+                    resolve_provider: Some(false),
+                    ..Default::default()
+                })),
                 completion_provider: Some(CompletionOptions {
                     trigger_characters: Some(
                         [
@@ -139,56 +129,48 @@ impl LanguageService {
                     all_commit_characters: Some(vec![")".into()]),
                     ..Default::default()
                 }),
-                definition_provider: Some(OneOf::Left(true)),
-                diagnostic_provider: Some(DiagnosticServerCapabilities::Options(
-                    DiagnosticOptions {
-                        identifier: Some("wat".into()),
-                        inter_file_dependencies: false,
-                        workspace_diagnostics: false,
-                        ..Default::default()
-                    },
-                )),
-                type_definition_provider: Some(TypeDefinitionProviderCapability::Simple(true)),
-                declaration_provider: Some(DeclarationCapability::Simple(true)),
-                document_formatting_provider: Some(OneOf::Left(true)),
-                document_highlight_provider: Some(OneOf::Left(true)),
-                document_range_formatting_provider: Some(OneOf::Left(true)),
-                document_symbol_provider: Some(OneOf::Left(true)),
-                folding_range_provider: Some(FoldingRangeProviderCapability::Simple(true)),
-                hover_provider: Some(HoverProviderCapability::Simple(true)),
-                inlay_hint_provider: Some(OneOf::Left(true)),
-                references_provider: Some(OneOf::Left(true)),
-                rename_provider: Some(OneOf::Right(RenameOptions {
-                    prepare_provider: Some(true),
-                    work_done_progress_options: Default::default(),
+                definition_provider: Some(Union2::A(true)),
+                diagnostic_provider: Some(Union2::A(DiagnosticOptions {
+                    identifier: Some("wat".into()),
+                    inter_file_dependencies: false,
+                    workspace_diagnostics: false,
+                    ..Default::default()
                 })),
-                selection_range_provider: Some(SelectionRangeProviderCapability::Simple(true)),
-                semantic_tokens_provider: Some(
-                    SemanticTokensServerCapabilities::SemanticTokensOptions(
-                        SemanticTokensOptions {
-                            legend: SemanticTokensLegend {
-                                token_types: kinds_map.into_values().collect(),
-                                token_modifiers: vec![],
-                            },
-                            range: Some(true),
-                            full: Some(SemanticTokensFullOptions::Bool(true)),
-                            ..Default::default()
-                        },
-                    ),
-                ),
+                type_definition_provider: Some(Union3::A(true)),
+                declaration_provider: Some(Union3::A(true)),
+                document_formatting_provider: Some(Union2::A(true)),
+                document_highlight_provider: Some(Union2::A(true)),
+                document_range_formatting_provider: Some(Union2::A(true)),
+                document_symbol_provider: Some(Union2::A(true)),
+                folding_range_provider: Some(Union3::A(true)),
+                hover_provider: Some(Union2::A(true)),
+                inlay_hint_provider: Some(Union3::A(true)),
+                references_provider: Some(Union2::A(true)),
+                rename_provider: Some(Union2::B(RenameOptions {
+                    prepare_provider: Some(true),
+                    work_done_progress: Default::default(),
+                })),
+                selection_range_provider: Some(Union3::A(true)),
+                semantic_tokens_provider: Some(Union2::A(SemanticTokensOptions {
+                    legend: SemanticTokensLegend {
+                        token_types: kinds_map.into_values().collect(),
+                        token_modifiers: vec![],
+                    },
+                    range: Some(Union2::A(true)),
+                    full: Some(Union2::A(true)),
+                    ..Default::default()
+                })),
                 signature_help_provider: Some(SignatureHelpOptions {
                     trigger_characters: Some(['(', ')'].iter().map(char::to_string).collect()),
                     ..Default::default()
                 }),
-                text_document_sync: Some(TextDocumentSyncCapability::Options(
-                    TextDocumentSyncOptions {
-                        open_close: Some(true),
-                        change: Some(TextDocumentSyncKind::FULL),
-                        will_save: Some(false),
-                        will_save_wait_until: Some(false),
-                        save: Some(TextDocumentSyncSaveOptions::Supported(false)),
-                    },
-                )),
+                text_document_sync: Some(Union2::A(TextDocumentSyncOptions {
+                    open_close: Some(true),
+                    change: Some(TextDocumentSyncKind::Full),
+                    will_save: Some(false),
+                    will_save_wait_until: Some(false),
+                    save: Some(Union2::A(false)),
+                })),
                 ..Default::default()
             },
             server_info: Some(ServerInfo {
@@ -201,7 +183,7 @@ impl LanguageService {
     #[inline]
     /// Commit a document to the service, usually called when handling `textDocument/didOpen` or
     /// `textDocument/didChange` notifications.
-    pub fn commit(&mut self, uri: Uri, source: String) {
+    pub fn commit(&mut self, uri: String, source: String) {
         let uri = self.uri(uri);
         self.set_source(uri, source);
     }
@@ -235,11 +217,10 @@ impl LanguageService {
     #[inline]
     /// Get dynamically registered capabilities.
     pub fn dynamic_capabilities(&self) -> RegistrationParams {
-        use lsp_types::notification::Notification;
         RegistrationParams {
             registrations: vec![Registration {
-                id: DidChangeConfiguration::METHOD.into(),
-                method: DidChangeConfiguration::METHOD.into(),
+                id: "workspace/didChangeConfiguration".into(),
+                method: "workspace/didChangeConfiguration".into(),
                 register_options: None,
             }],
         }
@@ -268,7 +249,7 @@ mod tests {
         let mut service = LanguageService::default();
         assert_eq!(service.get_configs().count(), 0);
 
-        let uri = "untitled://test".parse::<Uri>().unwrap();
+        let uri = "untitled://test".to_string();
         service.set_config(uri.clone(), ServiceConfig::default());
         assert_eq!(service.get_configs().next().unwrap().0, uri);
     }

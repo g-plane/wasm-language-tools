@@ -1,6 +1,6 @@
 use crate::{data_set::INSTR_NAMES, helpers};
 use line_index::LineIndex;
-use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
+use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use rowan::ast::support;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
@@ -19,9 +19,9 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         };
         diags.push(Diagnostic {
             range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
-            severity: Some(DiagnosticSeverity::ERROR),
+            severity: Some(DiagnosticSeverity::Error),
             source: Some("wat".into()),
-            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
             message,
             ..Default::default()
         });

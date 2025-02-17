@@ -9,8 +9,8 @@ use crate::{
     LanguageService,
 };
 use itertools::Itertools;
-use lsp_types::{
-    Hover, HoverContents, HoverParams, LanguageString, MarkedString, MarkupContent, MarkupKind,
+use lspt::{
+    Hover, HoverParams, MarkedString, MarkedStringWithLanguage, MarkupContent, MarkupKind, Union3,
 };
 use rowan::ast::{support::child, AstNode};
 use std::fmt::Write;
@@ -22,20 +22,9 @@ use wat_syntax::{
 impl LanguageService {
     /// Handler for `textDocument/hover` request.
     pub fn hover(&self, params: HoverParams) -> Option<Hover> {
-        let uri = self.uri(
-            params
-                .text_document_position_params
-                .text_document
-                .uri
-                .clone(),
-        );
+        let uri = self.uri(params.text_document.uri.clone());
         let root = SyntaxNode::new_root(self.root(uri));
-        let token = find_meaningful_token(
-            self,
-            uri,
-            &root,
-            params.text_document_position_params.position,
-        )?;
+        let token = find_meaningful_token(self, uri, &root, params.position)?;
         let line_index = self.line_index(uri);
 
         match token.kind() {
@@ -47,7 +36,7 @@ impl LanguageService {
                 symbol_table
                     .find_param_or_local_def(key)
                     .map(|symbol| Hover {
-                        contents: HoverContents::Scalar(create_param_or_local_hover(self, symbol)),
+                        contents: Union3::B(create_param_or_local_hover(self, symbol)),
                         range: Some(helpers::rowan_range_to_lsp_range(
                             &line_index,
                             token.text_range(),
@@ -66,7 +55,7 @@ impl LanguageService {
                                         })
                                         .join("\n---\n");
                                     Hover {
-                                        contents: HoverContents::Markup(MarkupContent {
+                                        contents: Union3::A(MarkupContent {
                                             kind: MarkupKind::Markdown,
                                             value: contents,
                                         }),
@@ -78,7 +67,7 @@ impl LanguageService {
                                 }),
                                 SymbolKind::TypeUse => {
                                     symbol_table.find_defs(key).map(|symbols| Hover {
-                                        contents: HoverContents::Array(
+                                        contents: Union3::C(
                                             symbols
                                                 .map(|symbol| create_type_def_hover(self, symbol))
                                                 .collect(),
@@ -91,7 +80,7 @@ impl LanguageService {
                                 }
                                 SymbolKind::GlobalRef => {
                                     symbol_table.find_defs(key).map(|symbols| Hover {
-                                        contents: HoverContents::Array(
+                                        contents: Union3::C(
                                             symbols
                                                 .map(|symbol| {
                                                     create_global_def_hover(self, symbol, &root)
@@ -113,7 +102,7 @@ impl LanguageService {
                                             .find(|symbol| symbol.key == def_key)
                                     })
                                     .map(|block| Hover {
-                                        contents: HoverContents::Scalar(create_block_hover(
+                                        contents: Union3::B(create_block_hover(
                                             self, block, uri, &root,
                                         )),
                                         range: Some(helpers::rowan_range_to_lsp_range(
@@ -142,7 +131,7 @@ impl LanguageService {
             SyntaxKind::TYPE_KEYWORD => {
                 let ty = token.text();
                 data_set::get_value_type_description(token.text()).map(|doc| Hover {
-                    contents: HoverContents::Markup(MarkupContent {
+                    contents: Union3::A(MarkupContent {
                         kind: MarkupKind::Markdown,
                         value: format!("```wat\n{ty}\n```\n\n{doc}"),
                     }),
@@ -183,7 +172,7 @@ impl LanguageService {
                     name
                 };
                 data_set::INSTR_OP_CODES.get(key).map(|code| Hover {
-                    contents: HoverContents::Markup(MarkupContent {
+                    contents: Union3::A(MarkupContent {
                         kind: MarkupKind::Markdown,
                         value: format!(
                             "```wat\n{name}\n```\nBinary Opcode: {}",
@@ -206,24 +195,18 @@ fn create_def_hover(
     uri: InternUri,
     root: &SyntaxNode,
     symbol: &Symbol,
-) -> Option<HoverContents> {
+) -> Option<Union3<MarkupContent, MarkedString, Vec<MarkedString>>> {
     match symbol.kind {
-        SymbolKind::Param | SymbolKind::Local => Some(HoverContents::Scalar(
-            create_param_or_local_hover(service, symbol),
-        )),
-        SymbolKind::Func => Some(HoverContents::Markup(MarkupContent {
+        SymbolKind::Param | SymbolKind::Local => {
+            Some(Union3::B(create_param_or_local_hover(service, symbol)))
+        }
+        SymbolKind::Func => Some(Union3::A(MarkupContent {
             kind: MarkupKind::Markdown,
             value: create_func_hover(service, uri, symbol.clone(), root),
         })),
-        SymbolKind::Type => Some(HoverContents::Scalar(create_type_def_hover(
-            service, symbol,
-        ))),
-        SymbolKind::GlobalDef => Some(HoverContents::Scalar(create_global_def_hover(
-            service, symbol, root,
-        ))),
-        SymbolKind::BlockDef => Some(HoverContents::Scalar(create_block_hover(
-            service, symbol, uri, root,
-        ))),
+        SymbolKind::Type => Some(Union3::B(create_type_def_hover(service, symbol))),
+        SymbolKind::GlobalDef => Some(Union3::B(create_global_def_hover(service, symbol, root))),
+        SymbolKind::BlockDef => Some(Union3::B(create_block_hover(service, symbol, uri, root))),
         _ => None,
     }
 }
@@ -348,7 +331,7 @@ fn create_block_hover(
 }
 
 fn create_marked_string(value: String) -> MarkedString {
-    MarkedString::LanguageString(LanguageString {
+    MarkedString::B(MarkedStringWithLanguage {
         language: "wat".into(),
         value,
     })

@@ -4,7 +4,7 @@ use crate::{
     helpers, LanguageService,
 };
 use line_index::LineIndex;
-use lsp_types::{Diagnostic, DiagnosticSeverity, DiagnosticTag, NumberOrString};
+use lspt::{Diagnostic, DiagnosticSeverity, DiagnosticTag, Union2};
 use rowan::ast::{support, AstNode};
 use wat_syntax::{
     ast::{GlobalType, ModuleFieldGlobal, PlainInstr},
@@ -23,9 +23,9 @@ pub fn check(
 ) {
     let severity = match lint_level {
         LintLevel::Allow => return,
-        LintLevel::Hint => DiagnosticSeverity::HINT,
-        LintLevel::Warn => DiagnosticSeverity::WARNING,
-        LintLevel::Deny => DiagnosticSeverity::ERROR,
+        LintLevel::Hint => DiagnosticSeverity::Hint,
+        LintLevel::Warn => DiagnosticSeverity::Warning,
+        LintLevel::Deny => DiagnosticSeverity::Error,
     };
 
     let mut mutable_globals = symbol_table
@@ -79,9 +79,9 @@ pub fn check(
                 range: helpers::rowan_range_to_lsp_range(line_index, keyword.text_range()),
                 severity: Some(severity),
                 source: Some("wat".into()),
-                code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                 message: format!("`{}` is unnecessarily mutable", symbol.idx.render(service)),
-                tags: Some(vec![DiagnosticTag::UNNECESSARY]),
+                tags: Some(vec![DiagnosticTag::Unnecessary]),
                 ..Default::default()
             }),
     );

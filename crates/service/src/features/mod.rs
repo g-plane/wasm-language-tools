@@ -17,7 +17,7 @@ mod signature_help;
 
 pub(crate) use self::semantic_tokens::SemanticTokenKind;
 use crate::{helpers, syntax_tree::SyntaxTreeCtx, uri::InternUri, LanguageService};
-use lsp_types::Position;
+use lspt::Position;
 use rowan::TokenAtOffset;
 use wat_syntax::{SyntaxNode, SyntaxToken};
 

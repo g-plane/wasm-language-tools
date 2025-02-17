@@ -1,7 +1,7 @@
 use super::find_meaningful_token;
 use crate::{helpers, syntax_tree::SyntaxTreeCtx, uri::UrisCtx, LanguageService};
 use line_index::LineIndex;
-use lsp_types::{SelectionRange, SelectionRangeParams};
+use lspt::{SelectionRange, SelectionRangeParams};
 use wat_syntax::SyntaxNode;
 
 impl LanguageService {

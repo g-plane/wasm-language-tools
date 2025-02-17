@@ -4,10 +4,9 @@ use crate::{
     LanguageService,
 };
 use line_index::LineIndex;
-use lsp_types::{
-    CodeAction, CodeActionContext, CodeActionKind, NumberOrString, TextEdit, WorkspaceEdit,
-};
+use lspt::{CodeAction, CodeActionContext, CodeActionKind, TextEdit, Union2, WorkspaceEdit};
 use rowan::{SyntaxElementChildren, TextRange};
+use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, WatLanguage};
 
@@ -83,11 +82,11 @@ pub fn act(
     if text_edits.is_empty() {
         None
     } else {
-        let mut changes = HashMap::with_capacity(1);
+        let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
         changes.insert(service.lookup_uri(uri), text_edits);
         Some(CodeAction {
             title: "Fix invalid memory argument".into(),
-            kind: Some(CodeActionKind::QUICKFIX),
+            kind: Some(CodeActionKind::QuickFix),
             edit: Some(WorkspaceEdit {
                 changes: Some(changes),
                 ..Default::default()
@@ -98,7 +97,7 @@ pub fn act(
                     .diagnostics
                     .iter()
                     .filter(|diagnostic| {
-                        if let Some(NumberOrString::String(s)) = &diagnostic.code {
+                        if let Some(Union2::B(s)) = &diagnostic.code {
                             s.starts_with("syntax/")
                         } else {
                             false

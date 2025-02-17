@@ -5,9 +5,7 @@ use crate::{
     LanguageService,
 };
 use line_index::LineIndex;
-use lsp_types::{
-    Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, NumberOrString,
-};
+use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
 use rowan::ast::{support, AstNode};
 use wat_syntax::{
     ast::{GlobalType, PlainInstr},
@@ -56,9 +54,9 @@ pub fn check(
                     line_index,
                     immediate.syntax().text_range(),
                 ),
-                severity: Some(DiagnosticSeverity::ERROR),
+                severity: Some(DiagnosticSeverity::Error),
                 source: Some("wat".into()),
-                code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                 message: "mutating an immutable global is not allowed".into(),
                 related_information: Some(related_information),
                 ..Default::default()

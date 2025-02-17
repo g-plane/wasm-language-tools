@@ -7,9 +7,9 @@ use crate::{
     uri::UrisCtx,
     LanguageService,
 };
-use lsp_types::{
-    Documentation, MarkupContent, MarkupKind, ParameterInformation, ParameterLabel, SignatureHelp,
-    SignatureHelpParams, SignatureInformation,
+use lspt::{
+    MarkupContent, MarkupKind, ParameterInformation, SignatureHelp, SignatureHelpParams,
+    SignatureInformation, Union2,
 };
 use rowan::{ast::AstNode, Direction};
 use std::fmt::Write;
@@ -21,17 +21,14 @@ use wat_syntax::{
 impl LanguageService {
     /// Handler for `textDocument/signatureHelp` request.
     pub fn signature_help(&self, params: SignatureHelpParams) -> Option<SignatureHelp> {
-        let uri = self.uri(params.text_document_position_params.text_document.uri);
+        let uri = self.uri(params.text_document.uri);
         let line_index = self.line_index(uri);
         let root = SyntaxNode::new_root(self.root(uri));
         let symbol_table = self.symbol_table(uri);
 
         let token = helpers::ast::find_token(
             &root,
-            helpers::lsp_pos_to_rowan_pos(
-                &line_index,
-                params.text_document_position_params.position,
-            )?,
+            helpers::lsp_pos_to_rowan_pos(&line_index, params.position)?,
         )?;
         let (node, instr, is_next) = if token.kind() == SyntaxKind::ERROR {
             (
@@ -105,7 +102,7 @@ impl LanguageService {
                 let _ = write!(label, "{}", param.0.render(self));
                 label.push(')');
                 parameters.push(ParameterInformation {
-                    label: ParameterLabel::LabelOffsets([start as u32, label.len() as u32]),
+                    label: Union2::B((start as u32, label.len() as u32)),
                     documentation: None,
                 });
                 written = true;
@@ -125,7 +122,7 @@ impl LanguageService {
             signatures: vec![SignatureInformation {
                 label,
                 documentation: func.map(|func| {
-                    Documentation::MarkupContent(MarkupContent {
+                    Union2::B(MarkupContent {
                         kind: MarkupKind::Markdown,
                         value: helpers::ast::get_doc_comment(&func.key.to_node(&root)),
                     })

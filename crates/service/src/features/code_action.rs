@@ -2,12 +2,12 @@ use crate::{
     binder::SymbolTablesCtx, helpers, refactorings::*, syntax_tree::SyntaxTreeCtx, uri::UrisCtx,
     LanguageService,
 };
-use lsp_types::{CodeActionKind, CodeActionOrCommand, CodeActionParams};
+use lspt::{CodeAction, CodeActionKind, CodeActionParams};
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     /// Handler for `textDocument/codeAction` request.
-    pub fn code_action(&self, params: CodeActionParams) -> Option<Vec<CodeActionOrCommand>> {
+    pub fn code_action(&self, params: CodeActionParams) -> Option<Vec<CodeAction>> {
         let uri = self.uri(params.text_document.uri.clone());
         let line_index = self.line_index(uri);
         let root = SyntaxNode::new_root(self.root(uri));
@@ -23,11 +23,11 @@ impl LanguageService {
             .flatten()
             .cloned()
             .for_each(|kind| {
-                if kind == CodeActionKind::QUICKFIX {
+                if kind == CodeActionKind::QuickFix {
                     quickfix = true;
-                } else if kind == CodeActionKind::REFACTOR_REWRITE {
+                } else if kind == CodeActionKind::RefactorRewrite {
                     rewrite = true;
-                } else if kind == CodeActionKind::REFACTOR_INLINE {
+                } else if kind == CodeActionKind::RefactorInline {
                     inline = true;
                 }
             });
@@ -47,7 +47,7 @@ impl LanguageService {
                             SyntaxKind::LOCAL,
                             range,
                         ) {
-                            actions.push(CodeActionOrCommand::CodeAction(action));
+                            actions.push(action);
                         }
                     }
                 }
@@ -56,12 +56,12 @@ impl LanguageService {
                         if let Some(action) =
                             fix_invalid_mem_arg::act(self, uri, &line_index, &it, &params.context)
                         {
-                            actions.push(CodeActionOrCommand::CodeAction(action));
+                            actions.push(action);
                         }
                     }
                     if rewrite {
                         if let Some(action) = br_if_to_if_br::act(self, uri, &line_index, &it) {
-                            actions.push(CodeActionOrCommand::CodeAction(action));
+                            actions.push(action);
                         }
                     }
                 }
@@ -70,7 +70,7 @@ impl LanguageService {
                         if let Some(action) =
                             func_header_split::act(self, uri, &line_index, &it, SyntaxKind::PARAM)
                         {
-                            actions.push(CodeActionOrCommand::CodeAction(action));
+                            actions.push(action);
                         }
                     }
                 }
@@ -79,7 +79,7 @@ impl LanguageService {
                         if let Some(action) =
                             func_header_split::act(self, uri, &line_index, &it, SyntaxKind::RESULT)
                         {
-                            actions.push(CodeActionOrCommand::CodeAction(action));
+                            actions.push(action);
                         }
                     }
                 }
@@ -88,7 +88,7 @@ impl LanguageService {
                         if let Some(action) =
                             func_header_split::act(self, uri, &line_index, &it, SyntaxKind::LOCAL)
                         {
-                            actions.push(CodeActionOrCommand::CodeAction(action));
+                            actions.push(action);
                         }
                     }
                 }
@@ -102,7 +102,7 @@ impl LanguageService {
                             SyntaxKind::PARAM,
                             range,
                         ) {
-                            actions.push(CodeActionOrCommand::CodeAction(action));
+                            actions.push(action);
                         }
                         if let Some(action) = func_header_join::act(
                             self,
@@ -112,21 +112,21 @@ impl LanguageService {
                             SyntaxKind::RESULT,
                             range,
                         ) {
-                            actions.push(CodeActionOrCommand::CodeAction(action));
+                            actions.push(action);
                         }
                     }
                     if inline {
                         if let Some(action) =
                             inline_func_type::act(self, uri, &line_index, &root, &symbol_table, &it)
                         {
-                            actions.push(CodeActionOrCommand::CodeAction(action));
+                            actions.push(action);
                         }
                     }
                 }
                 SyntaxKind::BLOCK_IF => {
                     if rewrite {
                         if let Some(action) = if_br_to_br_if::act(self, uri, &line_index, &it) {
-                            actions.push(CodeActionOrCommand::CodeAction(action));
+                            actions.push(action);
                         }
                     }
                 }
@@ -135,7 +135,7 @@ impl LanguageService {
                         if let Some(action) =
                             remove_mut::act(self, uri, &line_index, &it, &params.context)
                         {
-                            actions.push(CodeActionOrCommand::CodeAction(action));
+                            actions.push(action);
                         }
                     }
                 }
@@ -144,7 +144,7 @@ impl LanguageService {
                         if let Some(action) =
                             idx_conversion::act(self, uri, &line_index, &symbol_table, &it)
                         {
-                            actions.push(CodeActionOrCommand::CodeAction(action));
+                            actions.push(action);
                         }
                     }
                 }

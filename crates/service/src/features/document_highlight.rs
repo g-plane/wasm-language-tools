@@ -6,7 +6,7 @@ use crate::{
     LanguageService,
 };
 use line_index::LineIndex;
-use lsp_types::{DocumentHighlight, DocumentHighlightKind, DocumentHighlightParams};
+use lspt::{DocumentHighlight, DocumentHighlightKind, DocumentHighlightParams};
 use rowan::{ast::AstNode, Direction};
 use smallvec::SmallVec;
 use wat_syntax::{ast::PlainInstr, SyntaxElement, SyntaxKind, SyntaxNode};
@@ -17,15 +17,10 @@ impl LanguageService {
         &self,
         params: DocumentHighlightParams,
     ) -> Option<Vec<DocumentHighlight>> {
-        let uri = self.uri(params.text_document_position_params.text_document.uri);
+        let uri = self.uri(params.text_document.uri);
         let line_index = self.line_index(uri);
         let root = SyntaxNode::new_root(self.root(uri));
-        let token = super::find_meaningful_token(
-            self,
-            uri,
-            &root,
-            params.text_document_position_params.position,
-        )?;
+        let token = super::find_meaningful_token(self, uri, &root, params.position)?;
         let kind = token.kind();
         match kind {
             SyntaxKind::KEYWORD
@@ -46,7 +41,7 @@ impl LanguageService {
                                         &line_index,
                                         other.text_range(),
                                     ),
-                                    kind: Some(DocumentHighlightKind::TEXT),
+                                    kind: Some(DocumentHighlightKind::Text),
                                 })
                             }
                             _ => None,
@@ -203,7 +198,7 @@ impl LanguageService {
                                             &line_index,
                                             other.text_range(),
                                         ),
-                                        kind: Some(DocumentHighlightKind::TEXT),
+                                        kind: Some(DocumentHighlightKind::Text),
                                     })
                                 }
                                 _ => None,
@@ -252,9 +247,9 @@ fn get_highlight_kind_of_symbol(
         | SymbolKind::GlobalDef
         | SymbolKind::MemoryDef
         | SymbolKind::TableDef
-        | SymbolKind::BlockDef => Some(DocumentHighlightKind::WRITE),
+        | SymbolKind::BlockDef => Some(DocumentHighlightKind::Write),
         SymbolKind::Call | SymbolKind::TypeUse | SymbolKind::MemoryRef | SymbolKind::BlockRef => {
-            Some(DocumentHighlightKind::READ)
+            Some(DocumentHighlightKind::Read)
         }
         SymbolKind::LocalRef | SymbolKind::GlobalRef | SymbolKind::TableRef => {
             let node = symbol.key.to_node(root);
@@ -262,9 +257,9 @@ fn get_highlight_kind_of_symbol(
                 .siblings_with_tokens(Direction::Prev)
                 .any(|element| is_write_access_instr(element, &node))
             {
-                Some(DocumentHighlightKind::WRITE)
+                Some(DocumentHighlightKind::Write)
             } else {
-                Some(DocumentHighlightKind::READ)
+                Some(DocumentHighlightKind::Read)
             }
         }
         SymbolKind::Module => None,

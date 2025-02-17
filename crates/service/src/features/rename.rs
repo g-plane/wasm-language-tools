@@ -7,10 +7,9 @@ use crate::{
     uri::UrisCtx,
     LanguageService,
 };
-use lsp_types::{
-    PrepareRenameResponse, RenameParams, TextDocumentPositionParams, TextEdit, WorkspaceEdit,
-};
+use lspt::{PrepareRenameParams, PrepareRenameResult, RenameParams, TextEdit, WorkspaceEdit};
 use rowan::ast::support;
+use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_parser::is_id_char;
 use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
@@ -20,17 +19,14 @@ const ERR_CANT_BE_RENAMED: &str = "This can't be renamed.";
 
 impl LanguageService {
     /// Handler for `textDocument/prepareRename` request.
-    pub fn prepare_rename(
-        &self,
-        params: TextDocumentPositionParams,
-    ) -> Option<PrepareRenameResponse> {
+    pub fn prepare_rename(&self, params: PrepareRenameParams) -> Option<PrepareRenameResult> {
         let uri = self.uri(params.text_document.uri);
         let line_index = self.line_index(uri);
         let root = SyntaxNode::new_root(self.root(uri));
         let token = find_meaningful_token(self, uri, &root, params.position)
             .filter(|token| token.kind() == SyntaxKind::IDENT)?;
         let range = helpers::rowan_range_to_lsp_range(&line_index, token.text_range());
-        Some(PrepareRenameResponse::Range(range))
+        Some(PrepareRenameResult::A(range))
     }
 
     /// Handler for `textDocument/rename` request.
@@ -46,13 +42,13 @@ impl LanguageService {
             ));
         }
 
-        let uri = self.uri(params.text_document_position.text_document.uri.clone());
+        let uri = self.uri(params.text_document.uri.clone());
         // We can't assume client supports "prepareRename" so we need to check the token again.
         let token = find_meaningful_token(
             self,
             uri,
             &SyntaxNode::new_root(self.root(uri)),
-            params.text_document_position.position,
+            params.position,
         )
         .filter(|token| token.kind() == SyntaxKind::IDENT)
         .ok_or_else(|| ERR_CANT_BE_RENAMED.to_owned())?;
@@ -61,7 +57,7 @@ impl LanguageService {
 
     #[expect(clippy::mutable_key_type)]
     fn rename_impl(&self, params: RenameParams, ident_token: SyntaxToken) -> Option<WorkspaceEdit> {
-        let uri = self.uri(params.text_document_position.text_document.uri.clone());
+        let uri = self.uri(params.text_document.uri.clone());
         let line_index = self.line_index(uri);
         let root = SyntaxNode::new_root(self.root(uri));
         let symbol_table = self.symbol_table(uri);
@@ -121,8 +117,8 @@ impl LanguageService {
                 })
                 .collect();
 
-        let mut changes = HashMap::new();
-        changes.insert(params.text_document_position.text_document.uri, text_edits);
+        let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
+        changes.insert(params.text_document.uri, text_edits);
         Some(WorkspaceEdit {
             changes: Some(changes),
             ..Default::default()

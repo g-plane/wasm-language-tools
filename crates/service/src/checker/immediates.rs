@@ -1,6 +1,6 @@
 use crate::helpers;
 use line_index::LineIndex;
-use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString};
+use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use rowan::ast::{support::token, AstNode};
 use std::iter::Peekable;
 use wat_syntax::{ast::Immediate, SyntaxKind, SyntaxNode, SyntaxToken};
@@ -60,9 +60,9 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                     else {
                         diags.push(Diagnostic {
                             range: helpers::rowan_range_to_lsp_range(line_index, range),
-                            severity: Some(DiagnosticSeverity::ERROR),
+                            severity: Some(DiagnosticSeverity::Error),
                             source: Some("wat".into()),
-                            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                             message: "expected result type".into(),
                             ..Default::default()
                         });
@@ -77,9 +77,9 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                     }
                     diags.push(Diagnostic {
                         range: helpers::rowan_range_to_lsp_range(line_index, range),
-                        severity: Some(DiagnosticSeverity::ERROR),
+                        severity: Some(DiagnosticSeverity::Error),
                         source: Some("wat".into()),
-                        code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                         message: "there must be exactly one result type".into(),
                         ..Default::default()
                     });
@@ -107,9 +107,9 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                             line_index,
                             immediate.text_range(),
                         ),
-                        severity: Some(DiagnosticSeverity::ERROR),
+                        severity: Some(DiagnosticSeverity::Error),
                         source: Some("wat".into()),
-                        code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                         message: "expected identifier or unsigned integer".into(),
                         ..Default::default()
                     }),
@@ -288,9 +288,9 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
     }
     diags.extend(immediates.map(|immediate| Diagnostic {
         range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
-        severity: Some(DiagnosticSeverity::ERROR),
+        severity: Some(DiagnosticSeverity::Error),
         source: Some("wat".into()),
-        code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
         message: "unexpected immediate".into(),
         ..Default::default()
     }));
@@ -313,9 +313,9 @@ fn check_immediate<const REQUIRED: bool>(
         } else if REQUIRED {
             diags.push(Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
-                severity: Some(DiagnosticSeverity::ERROR),
+                severity: Some(DiagnosticSeverity::Error),
                 source: Some("wat".into()),
-                code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                 message: format!("expected {description}"),
                 ..Default::default()
             });
@@ -324,9 +324,9 @@ fn check_immediate<const REQUIRED: bool>(
     } else if REQUIRED {
         diags.push(Diagnostic {
             range: helpers::rowan_range_to_lsp_range(line_index, instr_name.text_range()),
-            severity: Some(DiagnosticSeverity::ERROR),
+            severity: Some(DiagnosticSeverity::Error),
             source: Some("wat".into()),
-            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
             message: format!("missing {description}"),
             ..Default::default()
         });

@@ -6,9 +6,7 @@ use crate::{
     LanguageService,
 };
 use line_index::LineIndex;
-use lsp_types::{
-    Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, NumberOrString,
-};
+use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
 use rowan::{ast::support::token, TextRange};
 use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
@@ -71,9 +69,9 @@ pub fn check(
                         line_index,
                         get_ident_range(symbol, root),
                     ),
-                    severity: Some(DiagnosticSeverity::ERROR),
+                    severity: Some(DiagnosticSeverity::Error),
                     source: Some("wat".into()),
-                    code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                     message: format!("duplicated {kind} name `{name}` in this scope"),
                     related_information: Some(
                         symbols
@@ -112,9 +110,9 @@ pub fn check(
                 let name = &name[1..name.len() - 1];
                 ranges.iter().map(move |range| Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(line_index, *range),
-                    severity: Some(DiagnosticSeverity::ERROR),
+                    severity: Some(DiagnosticSeverity::Error),
                     source: Some("wat".into()),
-                    code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                     message: format!("duplicated export `{name}` in this module"),
                     related_information: Some(
                         ranges
