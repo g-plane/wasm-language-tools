@@ -7,6 +7,7 @@ expression: response
     "title": "Fix invalid memory argument",
     "kind": "quickfix",
     "diagnostics": [],
+    "isPreferred": true,
     "edit": {
       "changes": {
         "untitled:test": [
@@ -38,7 +39,6 @@ expression: response
           }
         ]
       }
-    },
-    "isPreferred": true
+    }
   }
 ]
