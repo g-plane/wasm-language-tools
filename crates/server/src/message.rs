@@ -72,16 +72,16 @@ pub struct ResponseError {
     pub data: Option<Value>,
 }
 
-// ↑ `lsp-types` crate unrelated code
+// ↑ `lspt` crate unrelated code
 // ---------------------
-// ↓ `lsp-types` crate related code
+// ↓ `lspt` crate related code
 
 pub fn try_cast_request<R>(
     method: &str,
     params: Value,
 ) -> Result<Result<R::Params, serde_json::Error>, Value>
 where
-    R: lsp_types::request::Request,
+    R: lspt::Request,
     R::Params: serde::de::DeserializeOwned,
 {
     if method == R::METHOD {
@@ -96,7 +96,7 @@ pub fn try_cast_notification<N>(
     params: Value,
 ) -> Result<Result<N::Params, serde_json::Error>, Value>
 where
-    N: lsp_types::notification::Notification,
+    N: lspt::Notification,
     N::Params: serde::de::DeserializeOwned,
 {
     if method == N::METHOD {
