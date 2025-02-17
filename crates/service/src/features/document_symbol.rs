@@ -1,6 +1,7 @@
 use crate::{
-    binder::{SymbolKind, SymbolTablesCtx},
+    binder::{Symbol, SymbolKind, SymbolTablesCtx},
     helpers,
+    idx::IdentsCtx,
     syntax_tree::SyntaxTreeCtx,
     uri::UrisCtx,
     LanguageService,
@@ -48,7 +49,7 @@ impl LanguageService {
                     Some((
                         symbol.key,
                         DocumentSymbol {
-                            name: symbol.idx.render(self).to_string(),
+                            name: render_symbol_name(symbol, self),
                             detail: None,
                             kind: LspSymbolKind::FUNCTION,
                             tags: None,
@@ -72,7 +73,7 @@ impl LanguageService {
                     Some((
                         symbol.key,
                         DocumentSymbol {
-                            name: symbol.idx.render(self).to_string(),
+                            name: render_symbol_name(symbol, self),
                             detail: None,
                             kind: LspSymbolKind::VARIABLE,
                             tags: None,
@@ -99,7 +100,7 @@ impl LanguageService {
                     Some((
                         symbol.key,
                         DocumentSymbol {
-                            name: symbol.idx.render(self).to_string(),
+                            name: render_symbol_name(symbol, self),
                             detail: None,
                             kind: LspSymbolKind::VARIABLE,
                             tags: None,
@@ -160,5 +161,24 @@ impl LanguageService {
             .collect::<Vec<_>>();
         lsp_symbols.sort_by_key(|symbol| symbol.range.start);
         Some(DocumentSymbolResponse::Nested(lsp_symbols))
+    }
+}
+
+fn render_symbol_name(symbol: &Symbol, service: &LanguageService) -> String {
+    if let Some(name) = symbol.idx.name {
+        service.lookup_ident(name).to_string()
+    } else if let Some(num) = symbol.idx.num {
+        let kind = match symbol.kind {
+            SymbolKind::Func => "func",
+            SymbolKind::Local => "local",
+            SymbolKind::Type => "type",
+            SymbolKind::GlobalDef => "global",
+            SymbolKind::MemoryDef => "memory",
+            SymbolKind::TableDef => "table",
+            _ => unreachable!(),
+        };
+        format!("{kind} {num}")
+    } else {
+        String::new()
     }
 }

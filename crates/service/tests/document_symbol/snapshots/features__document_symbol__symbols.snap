@@ -100,7 +100,7 @@ expression: response
             }
           },
           {
-            "name": "3",
+            "name": "local 3",
             "kind": 13,
             "range": {
               "start": {
@@ -126,7 +126,7 @@ expression: response
         ]
       },
       {
-        "name": "1",
+        "name": "func 1",
         "kind": 12,
         "range": {
           "start": {
@@ -150,7 +150,7 @@ expression: response
         }
       },
       {
-        "name": "0",
+        "name": "type 0",
         "kind": 13,
         "range": {
           "start": {
@@ -222,7 +222,7 @@ expression: response
         }
       },
       {
-        "name": "1",
+        "name": "global 1",
         "kind": 13,
         "range": {
           "start": {
@@ -270,7 +270,7 @@ expression: response
         }
       },
       {
-        "name": "1",
+        "name": "memory 1",
         "kind": 13,
         "range": {
           "start": {
@@ -344,7 +344,7 @@ expression: response
     },
     "children": [
       {
-        "name": "0",
+        "name": "func 0",
         "kind": 12,
         "range": {
           "start": {
