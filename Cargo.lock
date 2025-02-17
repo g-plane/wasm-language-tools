@@ -582,6 +582,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "lspt"
+version = "0.0.0"
+source = "git+https://gitlab.com/g-plane/lspt.git#b49bcbc4ac0c3fbb6d438f526d9ebdb545c65401"
+dependencies = [
+ "rustc-hash 2.1.1",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "memchr"
 version = "2.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1273,6 +1283,7 @@ dependencies = [
  "itertools 0.14.0",
  "line-index",
  "lsp-types",
+ "lspt",
  "rowan",
  "rustc-hash 2.1.1",
  "salsa",
