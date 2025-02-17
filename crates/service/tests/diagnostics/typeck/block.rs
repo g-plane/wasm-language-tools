@@ -1,11 +1,11 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::Uri;
+use lspt::Uri;
 use wat_service::LanguageService;
 
 #[test]
 fn block_type_in_stack() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32 i32) (result i32)
@@ -23,7 +23,7 @@ fn block_type_in_stack() {
 
 #[test]
 fn block_type_folded() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32 i32) (result i32)
@@ -41,7 +41,7 @@ fn block_type_folded() {
 
 #[test]
 fn folded() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32 f32) (result i32)
@@ -59,7 +59,7 @@ fn folded() {
 
 #[test]
 fn sequence() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32 f32) (result i32)
@@ -78,7 +78,7 @@ fn sequence() {
 
 #[test]
 fn new_stack_for_new_block() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32)
@@ -97,7 +97,7 @@ fn new_stack_for_new_block() {
 
 #[test]
 fn params_boundary_missing() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -116,7 +116,7 @@ fn params_boundary_missing() {
 
 #[test]
 fn params_boundary_mismatched() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -136,7 +136,7 @@ fn params_boundary_mismatched() {
 
 #[test]
 fn params_mismatched() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -156,7 +156,7 @@ fn params_mismatched() {
 
 #[test]
 fn params_correct() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -176,7 +176,7 @@ fn params_correct() {
 
 #[test]
 fn results_folded() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32 i32)
@@ -206,7 +206,7 @@ fn results_folded() {
 
 #[test]
 fn results_sequence() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32 i32)
@@ -240,7 +240,7 @@ fn results_sequence() {
 
 #[test]
 fn results_correct() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (type $t (func (result i32 i32)))

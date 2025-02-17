@@ -1,11 +1,11 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::{Position, Range, Uri};
+use lspt::{Position, Range, Uri};
 use wat_service::LanguageService;
 
 #[test]
 fn not_idx() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -15,14 +15,14 @@ fn not_idx() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(3, 16), Position::new(3, 16)),
+        Range { start: Position { line: 3, character: 16 }, end: Position { line: 3, character: 16 } },
     ));
     assert!(response.is_none());
 }
 
 #[test]
 fn not_defined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -32,14 +32,14 @@ fn not_defined() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(3, 11), Position::new(3, 11)),
+        Range { start: Position { line: 3, character: 11 }, end: Position { line: 3, character: 11 } },
     ));
     assert!(response.is_none());
 }
 
 #[test]
 fn no_name() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -49,14 +49,14 @@ fn no_name() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(3, 11), Position::new(3, 11)),
+        Range { start: Position { line: 3, character: 11 }, end: Position { line: 3, character: 11 } },
     ));
     assert!(response.is_none());
 }
 
 #[test]
 fn ident_to_num() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $f
@@ -66,14 +66,14 @@ fn ident_to_num() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(3, 11), Position::new(3, 11)),
+        Range { start: Position { line: 3, character: 11 }, end: Position { line: 3, character: 11 } },
     ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn num_to_ident() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $f)
@@ -83,14 +83,14 @@ fn num_to_ident() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(3, 10), Position::new(3, 10)),
+        Range { start: Position { line: 3, character: 10 }, end: Position { line: 3, character: 10 } },
     ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn param() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param $p i32) (local $l i32)
@@ -100,14 +100,14 @@ fn param() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(3, 16), Position::new(3, 16)),
+        Range { start: Position { line: 3, character: 16 }, end: Position { line: 3, character: 16 } },
     ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn local() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param $p i32) (local $l i32)
@@ -117,14 +117,14 @@ fn local() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(3, 16), Position::new(3, 16)),
+        Range { start: Position { line: 3, character: 16 }, end: Position { line: 3, character: 16 } },
     ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn block() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -136,7 +136,7 @@ fn block() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(5, 13), Position::new(5, 13)),
+        Range { start: Position { line: 5, character: 13 }, end: Position { line: 5, character: 13 } },
     ));
     assert_json_snapshot!(response);
 }

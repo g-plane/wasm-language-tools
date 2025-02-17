@@ -1,11 +1,11 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::{Position, Uri};
+use lspt::{Position, Uri};
 use wat_service::LanguageService;
 
 #[test]
 fn func_int_idx() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func
@@ -17,15 +17,15 @@ fn func_int_idx() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let include_decl =
-        service.find_references(create_params(uri.clone(), Position::new(2, 9), true));
+        service.find_references(create_params(uri.clone(), Position { line: 2, character: 9 }, true));
     assert_json_snapshot!(include_decl);
-    let exclude_decl = service.find_references(create_params(uri, Position::new(2, 9), false));
+    let exclude_decl = service.find_references(create_params(uri, Position { line: 2, character: 9 }, false));
     assert_json_snapshot!(exclude_decl);
 }
 
 #[test]
 fn func_ident_idx() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func $func
@@ -37,15 +37,15 @@ fn func_ident_idx() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let include_decl =
-        service.find_references(create_params(uri.clone(), Position::new(2, 15), true));
+        service.find_references(create_params(uri.clone(), Position { line: 2, character: 15 }, true));
     assert_json_snapshot!(include_decl);
-    let exclude_decl = service.find_references(create_params(uri, Position::new(2, 15), false));
+    let exclude_decl = service.find_references(create_params(uri, Position { line: 2, character: 15 }, false));
     assert_json_snapshot!(exclude_decl);
 }
 
 #[test]
 fn func_in_implicit_module() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (func $func)
 (func (call $func))
@@ -53,15 +53,15 @@ fn func_in_implicit_module() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let include_decl =
-        service.find_references(create_params(uri.clone(), Position::new(1, 8), true));
+        service.find_references(create_params(uri.clone(), Position { line: 1, character: 8 }, true));
     assert_json_snapshot!(include_decl);
-    let exclude_decl = service.find_references(create_params(uri, Position::new(1, 8), false));
+    let exclude_decl = service.find_references(create_params(uri, Position { line: 1, character: 8 }, false));
     assert_json_snapshot!(exclude_decl);
 }
 
 #[test]
 fn call_int_idx() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func
@@ -74,15 +74,15 @@ fn call_int_idx() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let include_decl =
-        service.find_references(create_params(uri.clone(), Position::new(3, 15), true));
+        service.find_references(create_params(uri.clone(), Position { line: 3, character: 15 }, true));
     assert_json_snapshot!(include_decl);
-    let exclude_decl = service.find_references(create_params(uri, Position::new(3, 15), false));
+    let exclude_decl = service.find_references(create_params(uri, Position { line: 3, character: 15 }, false));
     assert_json_snapshot!(exclude_decl);
 }
 
 #[test]
 fn call_ident_idx() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func $func
@@ -95,8 +95,8 @@ fn call_ident_idx() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let include_decl =
-        service.find_references(create_params(uri.clone(), Position::new(3, 28), true));
+        service.find_references(create_params(uri.clone(), Position { line: 3, character: 28 }, true));
     assert_json_snapshot!(include_decl);
-    let exclude_decl = service.find_references(create_params(uri, Position::new(3, 28), false));
+    let exclude_decl = service.find_references(create_params(uri, Position { line: 3, character: 28 }, false));
     assert_json_snapshot!(exclude_decl);
 }

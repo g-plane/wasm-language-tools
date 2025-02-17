@@ -1,11 +1,11 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::{Position, Range, Uri};
+use lspt::{Position, Range};
 use wat_service::LanguageService;
 
 #[test]
 fn not_if() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -15,14 +15,23 @@ fn not_if() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(3, 9), Position::new(3, 9)),
+        Range {
+            start: Position {
+                line: 3,
+                character: 9,
+            },
+            end: Position {
+                line: 3,
+                character: 9,
+            },
+        },
     ));
     assert!(response.is_none());
 }
 
 #[test]
 fn no_then_instrs() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -35,19 +44,37 @@ fn no_then_instrs() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri.clone(),
-        Range::new(Position::new(3, 6), Position::new(3, 6)),
+        Range {
+            start: Position {
+                line: 3,
+                character: 6,
+            },
+            end: Position {
+                line: 3,
+                character: 6,
+            },
+        },
     ));
     assert!(response.is_none());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(5, 6), Position::new(5, 6)),
+        Range {
+            start: Position {
+                line: 5,
+                character: 6,
+            },
+            end: Position {
+                line: 5,
+                character: 6,
+            },
+        },
     ));
     assert!(response.is_none());
 }
 
 #[test]
 fn no_br() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -62,19 +89,37 @@ fn no_br() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri.clone(),
-        Range::new(Position::new(3, 6), Position::new(3, 6)),
+        Range {
+            start: Position {
+                line: 3,
+                character: 6,
+            },
+            end: Position {
+                line: 3,
+                character: 6,
+            },
+        },
     ));
     assert!(response.is_none());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(6, 6), Position::new(6, 6)),
+        Range {
+            start: Position {
+                line: 6,
+                character: 6,
+            },
+            end: Position {
+                line: 6,
+                character: 6,
+            },
+        },
     ));
     assert!(response.is_none());
 }
 
 #[test]
 fn more_than_br() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -91,19 +136,37 @@ fn more_than_br() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri.clone(),
-        Range::new(Position::new(3, 6), Position::new(3, 6)),
+        Range {
+            start: Position {
+                line: 3,
+                character: 6,
+            },
+            end: Position {
+                line: 3,
+                character: 6,
+            },
+        },
     ));
     assert!(response.is_none());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(7, 6), Position::new(7, 6)),
+        Range {
+            start: Position {
+                line: 7,
+                character: 6,
+            },
+            end: Position {
+                line: 7,
+                character: 6,
+            },
+        },
     ));
     assert!(response.is_none());
 }
 
 #[test]
 fn has_else() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -120,19 +183,37 @@ fn has_else() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri.clone(),
-        Range::new(Position::new(3, 6), Position::new(3, 6)),
+        Range {
+            start: Position {
+                line: 3,
+                character: 6,
+            },
+            end: Position {
+                line: 3,
+                character: 6,
+            },
+        },
     ));
     assert!(response.is_none());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(7, 6), Position::new(7, 6)),
+        Range {
+            start: Position {
+                line: 7,
+                character: 6,
+            },
+            end: Position {
+                line: 7,
+                character: 6,
+            },
+        },
     ));
     assert!(response.is_none());
 }
 
 #[test]
 fn sequence_without_condition() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -144,14 +225,23 @@ fn sequence_without_condition() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(3, 9), Position::new(3, 9)),
+        Range {
+            start: Position {
+                line: 3,
+                character: 9,
+            },
+            end: Position {
+                line: 3,
+                character: 9,
+            },
+        },
     ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn sequence_with_condition() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -164,14 +254,23 @@ fn sequence_with_condition() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(4, 9), Position::new(4, 9)),
+        Range {
+            start: Position {
+                line: 4,
+                character: 9,
+            },
+            end: Position {
+                line: 4,
+                character: 9,
+            },
+        },
     ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn folded_without_condition() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -183,14 +282,23 @@ fn folded_without_condition() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(3, 9), Position::new(3, 9)),
+        Range {
+            start: Position {
+                line: 3,
+                character: 9,
+            },
+            end: Position {
+                line: 3,
+                character: 9,
+            },
+        },
     ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn folded_with_single_condition() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -203,14 +311,23 @@ fn folded_with_single_condition() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(3, 9), Position::new(3, 9)),
+        Range {
+            start: Position {
+                line: 3,
+                character: 9,
+            },
+            end: Position {
+                line: 3,
+                character: 9,
+            },
+        },
     ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn folded_with_multi_conditions() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -224,7 +341,16 @@ fn folded_with_multi_conditions() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(3, 9), Position::new(3, 9)),
+        Range {
+            start: Position {
+                line: 3,
+                character: 9,
+            },
+            end: Position {
+                line: 3,
+                character: 9,
+            },
+        },
     ));
     assert_json_snapshot!(response);
 }

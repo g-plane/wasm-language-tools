@@ -1,18 +1,18 @@
 use insta::assert_json_snapshot;
-use lsp_types::{DocumentFormattingParams, FormattingOptions, TextDocumentIdentifier, Uri};
+use lspt::{DocumentFormattingParams, FormattingOptions, TextDocumentIdentifier};
 use wat_service::{LanguageService, ServiceConfig};
 
-fn create_params(uri: Uri, options: FormattingOptions) -> DocumentFormattingParams {
+fn create_params(uri: String, options: FormattingOptions) -> DocumentFormattingParams {
     DocumentFormattingParams {
         text_document: TextDocumentIdentifier { uri },
         options,
-        work_done_progress_params: Default::default(),
+        work_done_token: Default::default(),
     }
 }
 
 #[test]
 fn space2() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (param i32)
@@ -35,7 +35,7 @@ fn space2() {
 
 #[test]
 fn space4() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32)
@@ -58,7 +58,7 @@ fn space4() {
 
 #[test]
 fn tab() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32)
@@ -81,7 +81,7 @@ fn tab() {
 
 #[test]
 fn format_comments() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = ";;comment";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

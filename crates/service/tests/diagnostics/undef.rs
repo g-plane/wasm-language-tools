@@ -1,11 +1,11 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::Uri;
+use lspt::Uri;
 use wat_service::LanguageService;
 
 #[test]
 fn call_defined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module (func $foo (call $foo)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -16,7 +16,7 @@ fn call_defined() {
 
 #[test]
 fn call_undefined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module (func $foo (call $bar)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -27,7 +27,7 @@ fn call_undefined() {
 
 #[test]
 fn local_defined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module (func (param $p i32) (local.get 0) (drop)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -38,7 +38,7 @@ fn local_defined() {
 
 #[test]
 fn local_undefined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module (func (local.get 0) (drop)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -49,7 +49,7 @@ fn local_undefined() {
 
 #[test]
 fn type_use_defined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module (func (type $t)) (type $t (func)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -60,7 +60,7 @@ fn type_use_defined() {
 
 #[test]
 fn type_use_undefined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module (func (type $t)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -71,7 +71,7 @@ fn type_use_undefined() {
 
 #[test]
 fn global_defined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -89,7 +89,7 @@ fn global_defined() {
 
 #[test]
 fn global_undefined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module (func (global.get $bar) (drop)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -100,7 +100,7 @@ fn global_undefined() {
 
 #[test]
 fn memory_defined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module (memory 1) (export \"\" (memory 0)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -111,7 +111,7 @@ fn memory_defined() {
 
 #[test]
 fn memory_undefined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func
@@ -132,7 +132,7 @@ fn memory_undefined() {
 
 #[test]
 fn table_defined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (table $table 0 funcref)
@@ -149,7 +149,7 @@ fn table_defined() {
 
 #[test]
 fn table_undefined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -171,7 +171,7 @@ fn table_undefined() {
 
 #[test]
 fn block() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -198,7 +198,7 @@ fn block() {
 
 #[test]
 fn export() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (export \"func\" (func 0))

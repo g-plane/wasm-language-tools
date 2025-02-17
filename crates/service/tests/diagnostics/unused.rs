@@ -1,11 +1,11 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::Uri;
+use lspt::Uri;
 use wat_service::LanguageService;
 
 #[test]
 fn prefixed_with_underscore() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func $_ (param $_ i32) (local $_l i32))
@@ -29,7 +29,7 @@ fn prefixed_with_underscore() {
 
 #[test]
 fn func_unused() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module (func) (func $f))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -39,7 +39,7 @@ fn func_unused() {
 
 #[test]
 fn func_used() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func $f
@@ -54,7 +54,7 @@ fn func_used() {
 
 #[test]
 fn param_unused() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func (export "") (param $p i32) (param i32)))
@@ -67,7 +67,7 @@ fn param_unused() {
 
 #[test]
 fn param_used() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func (export "") (param $p i32) (param i32)
@@ -84,7 +84,7 @@ fn param_used() {
 
 #[test]
 fn params_in_imported_func() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func $_ (import "" "") (param i32) (param $p i32)))
@@ -97,7 +97,7 @@ fn params_in_imported_func() {
 
 #[test]
 fn local_unused() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func (export "") (local $l i32) (local i32)))
@@ -110,7 +110,7 @@ fn local_unused() {
 
 #[test]
 fn local_used() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func (export "") (local $l i32) (local i32)
@@ -127,7 +127,7 @@ fn local_used() {
 
 #[test]
 fn type_unused() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (type (func))
@@ -141,7 +141,7 @@ fn type_unused() {
 
 #[test]
 fn type_used() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (type (func))
@@ -157,7 +157,7 @@ fn type_used() {
 
 #[test]
 fn type_used_in_subtyping() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (type $t (sub (struct)))
@@ -171,7 +171,7 @@ fn type_used_in_subtyping() {
 
 #[test]
 fn global_unused() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (global i32 i32.const 0)
@@ -185,7 +185,7 @@ fn global_unused() {
 
 #[test]
 fn global_used() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (global (export "g") i32 i32.const 0)
@@ -201,7 +201,7 @@ fn global_used() {
 
 #[test]
 fn memory_unused() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (memory 0)
@@ -215,7 +215,7 @@ fn memory_unused() {
 
 #[test]
 fn memory_used() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (memory (export "") 0)
@@ -230,7 +230,7 @@ fn memory_used() {
 
 #[test]
 fn memory_implicit() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func $_
@@ -247,7 +247,7 @@ fn memory_implicit() {
 
 #[test]
 fn memory_explicit() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func $_
@@ -264,7 +264,7 @@ fn memory_explicit() {
 
 #[test]
 fn memory_dot() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func $_
@@ -280,7 +280,7 @@ fn memory_dot() {
 
 #[test]
 fn table_unused() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (table 0 funcref)
@@ -294,7 +294,7 @@ fn table_unused() {
 
 #[test]
 fn table_used() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func (export "func")
@@ -312,7 +312,7 @@ fn table_used() {
 
 #[test]
 fn call_indirect_implicit() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (table 0 funcref)
@@ -329,7 +329,7 @@ fn call_indirect_implicit() {
 
 #[test]
 fn call_indirect_explicit() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (table 0 funcref)

@@ -1,11 +1,11 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::Uri;
+use lspt::Uri;
 use wat_service::LanguageService;
 
 #[test]
 fn no_modules() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -15,7 +15,7 @@ fn no_modules() {
 
 #[test]
 fn one_module() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module)";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -25,7 +25,7 @@ fn one_module() {
 
 #[test]
 fn many_modules() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module) (module) (module)";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

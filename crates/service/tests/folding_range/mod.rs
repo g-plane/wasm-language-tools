@@ -1,18 +1,18 @@
 use insta::assert_json_snapshot;
-use lsp_types::{FoldingRangeParams, TextDocumentIdentifier, Uri};
+use lspt::{FoldingRangeParams, TextDocumentIdentifier, Uri};
 use wat_service::LanguageService;
 
-fn create_params(uri: Uri) -> FoldingRangeParams {
+fn create_params(uri: String) -> FoldingRangeParams {
     FoldingRangeParams {
         text_document: TextDocumentIdentifier { uri },
-        work_done_progress_params: Default::default(),
-        partial_result_params: Default::default(),
+        work_done_token: Default::default(),
+        partial_result_token: Default::default(),
     }
 }
 
 #[test]
 fn with_sequence() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func

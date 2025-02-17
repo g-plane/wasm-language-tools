@@ -1,9 +1,9 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::Uri;
+use lspt::Uri;
 use wat_service::LanguageService;
 
-fn disable_other_lints(service: &mut LanguageService, uri: Uri) {
+fn disable_other_lints(service: &mut LanguageService, uri: String) {
     service.set_config(
         uri,
         ServiceConfig {
@@ -19,7 +19,7 @@ fn disable_other_lints(service: &mut LanguageService, uri: Uri) {
 
 #[test]
 fn simple_reachable() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -65,7 +65,7 @@ fn simple_reachable() {
 
 #[test]
 fn simple_unreachable() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -141,7 +141,7 @@ fn simple_unreachable() {
 
 #[test]
 fn nested_if() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32)
@@ -185,7 +185,7 @@ fn nested_if() {
 
 #[test]
 fn merge_range() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -227,7 +227,7 @@ fn merge_range() {
 
 #[test]
 fn br_if_a() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $log (param i32))
@@ -257,7 +257,7 @@ fn br_if_a() {
 
 #[test]
 fn br_if_b() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $log (param i32))
@@ -287,7 +287,7 @@ fn br_if_b() {
 
 #[test]
 fn br_if_c() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $log (param i32))
@@ -317,7 +317,7 @@ fn br_if_c() {
 
 #[test]
 fn folded_plain_instr() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -339,7 +339,7 @@ fn folded_plain_instr() {
 
 #[test]
 fn folded_block_if() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32)
@@ -360,7 +360,7 @@ fn folded_block_if() {
 
 #[test]
 fn infinite_loop() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -422,7 +422,7 @@ fn infinite_loop() {
 
 #[test]
 fn finite_loop() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -519,7 +519,7 @@ fn finite_loop() {
 
 #[test]
 fn global() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (global i32
@@ -535,7 +535,7 @@ fn global() {
 
 #[test]
 fn folded_instr_with_loop() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func

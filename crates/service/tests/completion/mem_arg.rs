@@ -1,11 +1,11 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::{Position, Uri};
+use lspt::{Position, Uri};
 use wat_service::LanguageService;
 
 #[test]
 fn after_instr_name() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (i32.load ))
@@ -13,13 +13,13 @@ fn after_instr_name() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 20)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 20 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn incomplete() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (i32.load off))
@@ -27,19 +27,19 @@ fn incomplete() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 23)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 23 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn after_mem_idx() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (i32.load 0 )))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 20)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 20 }));
     assert_json_snapshot!(response);
 }

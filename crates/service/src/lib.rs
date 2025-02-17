@@ -204,7 +204,7 @@ impl LanguageService {
 
     #[inline]
     /// Update or insert configuration of a specific document.
-    pub fn set_config(&mut self, uri: Uri, config: ServiceConfig) {
+    pub fn set_config(&mut self, uri: String, config: ServiceConfig) {
         self.configs.insert(self.uri(uri), config);
     }
 

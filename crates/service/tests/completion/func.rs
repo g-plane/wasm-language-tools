@@ -1,11 +1,11 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::{Position, Uri};
+use lspt::{Position, Uri};
 use wat_service::LanguageService;
 
 #[test]
 fn module_field_start() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
     (import "" "" (func))
@@ -15,13 +15,13 @@ fn module_field_start() {
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(3, 11)));
+    let response = service.completion(create_params(uri, Position { line: 3, character: 11 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn module_field_start_following_dollar() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (start $)
@@ -30,13 +30,13 @@ fn module_field_start_following_dollar() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 11)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 11 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn module_field_start_incomplete() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (start $f)
@@ -45,13 +45,13 @@ fn module_field_start_incomplete() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 12)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 12 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn call() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (call ))
@@ -60,13 +60,13 @@ fn call() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 16)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 16 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn call_named() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func $func (call ))
@@ -74,13 +74,13 @@ fn call_named() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 22)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 22 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn call_named_following_dollar() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func $func (call $))
@@ -88,13 +88,13 @@ fn call_named_following_dollar() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 23)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 23 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn call_named_incomplete() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func $func (call $f))
@@ -102,13 +102,13 @@ fn call_named_incomplete() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 24)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 24 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn call_in_sequence() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func call )
@@ -117,13 +117,13 @@ fn call_in_sequence() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 15)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 15 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn ref_func() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (ref.func ))
@@ -132,13 +132,13 @@ fn ref_func() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 20)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 20 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn export_desc_func() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (export (func ))
@@ -147,13 +147,13 @@ fn export_desc_func() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 18)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 18 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn export_desc_func_following_dollar() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (export (func $))
@@ -162,13 +162,13 @@ fn export_desc_func_following_dollar() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 19)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 19 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn export_desc_func_incomplete() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (export (func $f))
@@ -177,13 +177,13 @@ fn export_desc_func_incomplete() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 20)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 20 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn doc_comment() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (call ))
@@ -193,13 +193,13 @@ fn doc_comment() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 16)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 16 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn label_details() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (call ))
@@ -211,6 +211,6 @@ fn label_details() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 16)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 16 }));
     assert_json_snapshot!(response);
 }

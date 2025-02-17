@@ -1,23 +1,19 @@
 use insta::assert_json_snapshot;
-use lsp_types::{
-    Position, SignatureHelpParams, TextDocumentIdentifier, TextDocumentPositionParams, Uri,
-};
+use lspt::{Position, SignatureHelpParams, TextDocumentIdentifier};
 use wat_service::LanguageService;
 
-fn create_params(uri: Uri, position: Position) -> SignatureHelpParams {
+fn create_params(uri: String, position: Position) -> SignatureHelpParams {
     SignatureHelpParams {
         context: None,
-        text_document_position_params: TextDocumentPositionParams {
-            text_document: TextDocumentIdentifier { uri },
-            position,
-        },
-        work_done_progress_params: Default::default(),
+        text_document: TextDocumentIdentifier { uri },
+        position,
+        work_done_token: Default::default(),
     }
 }
 
 #[test]
 fn first_param() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $func (param i32) (param i32) (result i32)
@@ -25,13 +21,19 @@ fn first_param() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(uri, Position::new(3, 17)));
+    let response = service.signature_help(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 17,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn first_param_end() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $func (param i32) (param i32) (result i32)
@@ -39,13 +41,19 @@ fn first_param_end() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(uri, Position::new(3, 29)));
+    let response = service.signature_help(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 29,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn first_param_before_others() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $func (param i32) (param i32) (result i32)
@@ -53,13 +61,19 @@ fn first_param_before_others() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(uri, Position::new(3, 17)));
+    let response = service.signature_help(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 17,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn non_first_param() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $func (param i32) (param i32) (result i32)
@@ -67,13 +81,19 @@ fn non_first_param() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(uri, Position::new(3, 31)));
+    let response = service.signature_help(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 31,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn middle() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $func (param i32) (param i32) (param i32)
@@ -81,13 +101,19 @@ fn middle() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(uri, Position::new(3, 31)));
+    let response = service.signature_help(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 31,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn no_params_no_results() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $func
@@ -95,13 +121,19 @@ fn no_params_no_results() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(uri, Position::new(3, 17)));
+    let response = service.signature_help(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 17,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn no_params() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $func (result i32) (result f32 f64)
@@ -109,13 +141,19 @@ fn no_params() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(uri, Position::new(3, 17)));
+    let response = service.signature_help(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 17,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn no_results() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $func (param $p i32) (param f32 f64)
@@ -123,13 +161,19 @@ fn no_results() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(uri, Position::new(3, 17)));
+    let response = service.signature_help(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 17,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn doc_comment() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   ;;; doc comment
@@ -138,13 +182,19 @@ fn doc_comment() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(uri, Position::new(4, 17)));
+    let response = service.signature_help(create_params(
+        uri,
+        Position {
+            line: 4,
+            character: 17,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn call_indirect_type_use() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (table 0 funcref)
@@ -154,13 +204,19 @@ fn call_indirect_type_use() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(uri, Position::new(5, 31)));
+    let response = service.signature_help(create_params(
+        uri,
+        Position {
+            line: 5,
+            character: 31,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn call_indirect_inline_func_type() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (table 0 funcref)
@@ -169,13 +225,19 @@ fn call_indirect_inline_func_type() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(uri, Position::new(4, 47)));
+    let response = service.signature_help(create_params(
+        uri,
+        Position {
+            line: 4,
+            character: 47,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn return_call() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $func (param i32) (param i32) (result i32)
@@ -183,13 +245,19 @@ fn return_call() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(uri, Position::new(3, 24)));
+    let response = service.signature_help(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 24,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn return_call_indirect() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (table 0 funcref)
@@ -199,6 +267,12 @@ fn return_call_indirect() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(uri, Position::new(5, 38)));
+    let response = service.signature_help(create_params(
+        uri,
+        Position {
+            line: 5,
+            character: 38,
+        },
+    ));
     assert_json_snapshot!(response);
 }

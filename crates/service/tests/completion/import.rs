@@ -1,11 +1,11 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::{Position, Uri};
+use lspt::{Position, Uri};
 use wat_service::LanguageService;
 
 #[test]
 fn desc_keyword() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (import ())
@@ -13,13 +13,19 @@ fn desc_keyword() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 13)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 13,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn table_type() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
     (import "" "" (table ))
@@ -27,13 +33,19 @@ fn table_type() {
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 25)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 25,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn global_type() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
     (import "" "" (global ))
@@ -41,13 +53,19 @@ fn global_type() {
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 26)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 26,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn global_type_after_paren() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
     (import "" "" (global ()))
@@ -55,13 +73,19 @@ fn global_type_after_paren() {
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 27)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 27,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn global_type_after_mut() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
     (import "" "" (global (mut )))
@@ -69,13 +93,19 @@ fn global_type_after_mut() {
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 31)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 31,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn type_use() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
     (import "" "" (func ()))
@@ -83,6 +113,12 @@ fn type_use() {
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 25)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 25,
+        },
+    ));
     assert_json_snapshot!(response);
 }

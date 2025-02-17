@@ -1,6 +1,6 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::Uri;
+use lspt::Uri;
 use wat_service::LanguageService;
 
 mod block;
@@ -14,7 +14,7 @@ mod select;
 
 #[test]
 fn less_operands() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module (func (result i32) (i32.add (i32.const 0))))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -25,7 +25,7 @@ fn less_operands() {
 
 #[test]
 fn more_operands() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module (func (i32.add (i32.const 0) (i32.const 0) (i32.const 0))))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -36,7 +36,7 @@ fn more_operands() {
 
 #[test]
 fn operand_count_pluralization() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module (func (result i32) (i32.eqz)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -47,7 +47,7 @@ fn operand_count_pluralization() {
 
 #[test]
 fn builtin_instr_type_mismatch() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32)
@@ -64,7 +64,7 @@ fn builtin_instr_type_mismatch() {
 
 #[test]
 fn type_mismatch_from_func_results() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func $getTwo (result i64 i32)
@@ -84,7 +84,7 @@ fn type_mismatch_from_func_results() {
 
 #[test]
 fn param_type_mismatch() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (param i64) (result i32)
@@ -101,7 +101,7 @@ fn param_type_mismatch() {
 
 #[test]
 fn local_type_mismatch() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (result i32) (local i64)
@@ -118,7 +118,7 @@ fn local_type_mismatch() {
 
 #[test]
 fn global_type_mismatch() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (global f32 f32.const 0)
@@ -136,7 +136,7 @@ fn global_type_mismatch() {
 
 #[test]
 fn call_type_mismatch() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func $f1 (param f32))
@@ -152,7 +152,7 @@ fn call_type_mismatch() {
 
 #[test]
 fn less_operands_on_stack() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (param i32 i32) (result i32)
@@ -168,7 +168,7 @@ fn less_operands_on_stack() {
 
 #[test]
 fn stacked_type_mismatch_from_func_params() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func $swap (param i32 i32) (result i32 i32)
@@ -194,7 +194,7 @@ fn stacked_type_mismatch_from_func_params() {
 
 #[test]
 fn stacked_type_mismatch_from_func_results() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func $swap (param i32 i32) (result i32 f32)
@@ -215,7 +215,7 @@ fn stacked_type_mismatch_from_func_results() {
 
 #[test]
 fn stacked_type_mismatch_from_instr_sig() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func $swap (param i32 i32) (result i32 i32)
@@ -240,7 +240,7 @@ fn stacked_type_mismatch_from_instr_sig() {
 
 #[test]
 fn mixed_type_mismatch_from_instr_sig() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (result i32)
@@ -257,7 +257,7 @@ fn mixed_type_mismatch_from_instr_sig() {
 
 #[test]
 fn mixed_matches_from_call() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $fib$naive (param i32) (result i32)
@@ -280,7 +280,7 @@ fn mixed_matches_from_call() {
 
 #[test]
 fn undefined_local_and_global() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32)
@@ -298,7 +298,7 @@ fn undefined_local_and_global() {
 
 #[test]
 fn incomplete_folded() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32)
@@ -315,7 +315,7 @@ fn incomplete_folded() {
 
 #[test]
 fn unreachable_with_matched_count() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32 f32) (result i32)
@@ -332,7 +332,7 @@ fn unreachable_with_matched_count() {
 
 #[test]
 fn unreachable_with_mismatched_count() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32 f32) (result i32)
@@ -348,7 +348,7 @@ fn unreachable_with_mismatched_count() {
 
 #[test]
 fn func_results_incorrect() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32 i32)
@@ -377,7 +377,7 @@ fn func_results_incorrect() {
 
 #[test]
 fn func_results_correct() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32 i32)
@@ -403,7 +403,7 @@ fn func_results_correct() {
 
 #[test]
 fn global_results_incorrect() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (global i32)
@@ -422,7 +422,7 @@ fn global_results_incorrect() {
 
 #[test]
 fn global_results_correct() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (global i32
@@ -441,7 +441,7 @@ fn global_results_correct() {
 
 #[test]
 fn imported_global() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (global (import "" "") i32))
@@ -455,7 +455,7 @@ fn imported_global() {
 
 #[test]
 fn excessive_at_end() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func

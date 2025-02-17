@@ -1,11 +1,11 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::{Position, Uri};
+use lspt::{Position, Uri};
 use wat_service::LanguageService;
 
 #[test]
 fn func_types() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (type ))
@@ -15,13 +15,13 @@ fn func_types() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 16)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 16 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn func_types_following_int_idx() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (type 0))
@@ -31,13 +31,13 @@ fn func_types_following_int_idx() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 17)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 17 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn func_types_following_dollar() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (type $))
@@ -47,13 +47,13 @@ fn func_types_following_dollar() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 17)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 17 }));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn func_types_following_ident() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (type $t))
@@ -63,6 +63,6 @@ fn func_types_following_ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 18)));
+    let response = service.completion(create_params(uri, Position { line: 2, character: 18 }));
     assert_json_snapshot!(response);
 }

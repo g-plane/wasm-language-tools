@@ -19,7 +19,7 @@ impl LanguageService {
     }
 
     /// Handler for `textDocument/publishDiagnostics` notification.
-    pub fn publish_diagnostics(&self, uri: Uri) -> PublishDiagnosticsParams {
+    pub fn publish_diagnostics(&self, uri: String) -> PublishDiagnosticsParams {
         PublishDiagnosticsParams {
             uri: uri.clone(),
             diagnostics: checker::check(self, self.uri(uri)),

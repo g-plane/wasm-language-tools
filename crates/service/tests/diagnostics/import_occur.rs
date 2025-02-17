@@ -1,11 +1,11 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::Uri;
+use lspt::Uri;
 use wat_service::LanguageService;
 
 #[test]
 fn empty() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module)";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -16,7 +16,7 @@ fn empty() {
 
 #[test]
 fn no_imports() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module (func))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -27,7 +27,7 @@ fn no_imports() {
 
 #[test]
 fn single() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (import "a" "b" (func))
@@ -42,7 +42,7 @@ fn single() {
 
 #[test]
 fn multi() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (import "a" "b" (func))
@@ -58,7 +58,7 @@ fn multi() {
 
 #[test]
 fn single_after_other_fields() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func)
@@ -73,7 +73,7 @@ fn single_after_other_fields() {
 
 #[test]
 fn multi_after_other_fields() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func)

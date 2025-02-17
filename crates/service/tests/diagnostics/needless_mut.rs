@@ -1,9 +1,9 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::Uri;
+use lspt::Uri;
 use wat_service::LanguageService;
 
-fn disable_other_lints(service: &mut LanguageService, uri: Uri) {
+fn disable_other_lints(service: &mut LanguageService, uri: String) {
     service.set_config(
         uri,
         ServiceConfig {
@@ -19,7 +19,7 @@ fn disable_other_lints(service: &mut LanguageService, uri: Uri) {
 
 #[test]
 fn immutable_global() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (global i32
@@ -34,7 +34,7 @@ fn immutable_global() {
 
 #[test]
 fn inline_exported_global() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (global (export "") (mut i32)
@@ -49,7 +49,7 @@ fn inline_exported_global() {
 
 #[test]
 fn module_field_export() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (export "" (global 0))
@@ -65,7 +65,7 @@ fn module_field_export() {
 
 #[test]
 fn global_set_with_int_idx() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -83,7 +83,7 @@ fn global_set_with_int_idx() {
 
 #[test]
 fn global_set_with_ident_idx() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -101,7 +101,7 @@ fn global_set_with_ident_idx() {
 
 #[test]
 fn global_get_with_int_idx() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -119,7 +119,7 @@ fn global_get_with_int_idx() {
 
 #[test]
 fn global_get_with_ident_idx() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -137,7 +137,7 @@ fn global_get_with_ident_idx() {
 
 #[test]
 fn unused_global() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (global (mut i32)
@@ -152,7 +152,7 @@ fn unused_global() {
 
 #[test]
 fn imported_global() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (import "" "" (global $global (mut i32)))
