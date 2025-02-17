@@ -27,7 +27,7 @@ use lspt::{
     InitializeResult, Registration, RegistrationParams, RenameOptions,
     SemanticTokensClientCapabilities, SemanticTokensLegend, SemanticTokensOptions,
     ServerCapabilities, ServerInfo, SignatureHelpOptions, TextDocumentClientCapabilities,
-    TextDocumentSyncKind, TextDocumentSyncOptions, Union2, Union3, Uri,
+    TextDocumentSyncKind, TextDocumentSyncOptions, Union2, Union3,
 };
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use salsa::{Database, ParallelDatabase, Snapshot};
@@ -196,7 +196,7 @@ impl LanguageService {
 
     #[inline]
     /// Get configurations of all opened documents.
-    pub fn get_configs(&self) -> impl Iterator<Item = (Uri, &ServiceConfig)> {
+    pub fn get_configs(&self) -> impl Iterator<Item = (String, &ServiceConfig)> {
         self.configs
             .iter()
             .map(|(uri, config)| (self.lookup_uri(*uri), config))

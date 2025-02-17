@@ -1,5 +1,5 @@
 use insta::assert_json_snapshot;
-use lspt::{DocumentSymbolParams, TextDocumentIdentifier, Uri};
+use lspt::{DocumentSymbolParams, TextDocumentIdentifier};
 use wat_service::LanguageService;
 
 #[test]

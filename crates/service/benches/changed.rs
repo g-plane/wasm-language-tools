@@ -3,7 +3,7 @@ use lspt::{
     ClientCapabilities, CompletionContext, CompletionParams, CompletionTriggerKind,
     DocumentSymbolParams, InitializeParams, InlayHintParams, Position, Range,
     SemanticTokensClientCapabilities, SemanticTokensParams, TextDocumentClientCapabilities,
-    TextDocumentIdentifier, Uri,
+    TextDocumentIdentifier,
 };
 use wat_service::LanguageService;
 
@@ -96,16 +96,20 @@ pub fn changed_text_bench(c: &mut Criterion) {
     });
 }
 
-fn requests_on_changed(service: &mut LanguageService, uri: &Uri) {
+fn requests_on_changed(service: &mut LanguageService, uri: &str) {
     let document_symbols = service.document_symbol(black_box(DocumentSymbolParams {
-        text_document: TextDocumentIdentifier { uri: uri.clone() },
+        text_document: TextDocumentIdentifier {
+            uri: uri.to_string(),
+        },
         work_done_token: Default::default(),
         partial_result_token: Default::default(),
     }));
     black_box(document_symbols);
 
     let inlay_hints = service.inlay_hint(black_box(InlayHintParams {
-        text_document: TextDocumentIdentifier { uri: uri.clone() },
+        text_document: TextDocumentIdentifier {
+            uri: uri.to_string(),
+        },
         range: Range {
             start: Position {
                 line: 0,
@@ -121,7 +125,9 @@ fn requests_on_changed(service: &mut LanguageService, uri: &Uri) {
     black_box(inlay_hints);
 
     let semantic_tokens = service.semantic_tokens_full(black_box(SemanticTokensParams {
-        text_document: TextDocumentIdentifier { uri: uri.clone() },
+        text_document: TextDocumentIdentifier {
+            uri: uri.to_string(),
+        },
         work_done_token: Default::default(),
         partial_result_token: Default::default(),
     }));

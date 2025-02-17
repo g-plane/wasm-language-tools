@@ -1,6 +1,5 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lspt::Uri;
 use wat_service::LanguageService;
 
 fn disable_other_lints(service: &mut LanguageService, uri: String) {

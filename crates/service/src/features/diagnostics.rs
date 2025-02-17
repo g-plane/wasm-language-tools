@@ -1,6 +1,6 @@
 use crate::{checker, uri::UrisCtx, LanguageService};
 use lspt::{
-    DocumentDiagnosticParams, PublishDiagnosticsParams, RelatedFullDocumentDiagnosticReport, Uri,
+    DocumentDiagnosticParams, PublishDiagnosticsParams, RelatedFullDocumentDiagnosticReport,
 };
 
 impl LanguageService {

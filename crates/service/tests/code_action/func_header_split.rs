@@ -1,6 +1,6 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lspt::{Position, Range, Uri};
+use lspt::{Position, Range};
 use wat_service::LanguageService;
 
 #[test]
@@ -15,7 +15,16 @@ fn single() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range { start: Position { line: 2, character: 19 }, end: Position { line: 2, character: 19 } },
+        Range {
+            start: Position {
+                line: 2,
+                character: 19,
+            },
+            end: Position {
+                line: 2,
+                character: 19,
+            },
+        },
     ));
     assert!(response.is_none());
 }
@@ -32,7 +41,16 @@ fn param() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range { start: Position { line: 2, character: 19 }, end: Position { line: 2, character: 19 } },
+        Range {
+            start: Position {
+                line: 2,
+                character: 19,
+            },
+            end: Position {
+                line: 2,
+                character: 19,
+            },
+        },
     ));
     assert_json_snapshot!(response);
 }
@@ -49,7 +67,16 @@ fn result() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range { start: Position { line: 2, character: 20 }, end: Position { line: 2, character: 20 } },
+        Range {
+            start: Position {
+                line: 2,
+                character: 20,
+            },
+            end: Position {
+                line: 2,
+                character: 20,
+            },
+        },
     ));
     assert_json_snapshot!(response);
 }
@@ -66,7 +93,16 @@ fn local() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range { start: Position { line: 2, character: 19 }, end: Position { line: 2, character: 19 } },
+        Range {
+            start: Position {
+                line: 2,
+                character: 19,
+            },
+            end: Position {
+                line: 2,
+                character: 19,
+            },
+        },
     ));
     assert_json_snapshot!(response);
 }

@@ -1,6 +1,6 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lspt::{Position, Range, Uri};
+use lspt::{Position, Range};
 use wat_service::LanguageService;
 
 #[test]
@@ -15,7 +15,16 @@ fn not_idx() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range { start: Position { line: 3, character: 16 }, end: Position { line: 3, character: 16 } },
+        Range {
+            start: Position {
+                line: 3,
+                character: 16,
+            },
+            end: Position {
+                line: 3,
+                character: 16,
+            },
+        },
     ));
     assert!(response.is_none());
 }
@@ -32,7 +41,16 @@ fn not_defined() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range { start: Position { line: 3, character: 11 }, end: Position { line: 3, character: 11 } },
+        Range {
+            start: Position {
+                line: 3,
+                character: 11,
+            },
+            end: Position {
+                line: 3,
+                character: 11,
+            },
+        },
     ));
     assert!(response.is_none());
 }
@@ -49,7 +67,16 @@ fn no_name() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range { start: Position { line: 3, character: 11 }, end: Position { line: 3, character: 11 } },
+        Range {
+            start: Position {
+                line: 3,
+                character: 11,
+            },
+            end: Position {
+                line: 3,
+                character: 11,
+            },
+        },
     ));
     assert!(response.is_none());
 }
@@ -66,7 +93,16 @@ fn ident_to_num() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range { start: Position { line: 3, character: 11 }, end: Position { line: 3, character: 11 } },
+        Range {
+            start: Position {
+                line: 3,
+                character: 11,
+            },
+            end: Position {
+                line: 3,
+                character: 11,
+            },
+        },
     ));
     assert_json_snapshot!(response);
 }
@@ -83,7 +119,16 @@ fn num_to_ident() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range { start: Position { line: 3, character: 10 }, end: Position { line: 3, character: 10 } },
+        Range {
+            start: Position {
+                line: 3,
+                character: 10,
+            },
+            end: Position {
+                line: 3,
+                character: 10,
+            },
+        },
     ));
     assert_json_snapshot!(response);
 }
@@ -100,7 +145,16 @@ fn param() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range { start: Position { line: 3, character: 16 }, end: Position { line: 3, character: 16 } },
+        Range {
+            start: Position {
+                line: 3,
+                character: 16,
+            },
+            end: Position {
+                line: 3,
+                character: 16,
+            },
+        },
     ));
     assert_json_snapshot!(response);
 }
@@ -117,7 +171,16 @@ fn local() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range { start: Position { line: 3, character: 16 }, end: Position { line: 3, character: 16 } },
+        Range {
+            start: Position {
+                line: 3,
+                character: 16,
+            },
+            end: Position {
+                line: 3,
+                character: 16,
+            },
+        },
     ));
     assert_json_snapshot!(response);
 }
@@ -136,7 +199,16 @@ fn block() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range { start: Position { line: 5, character: 13 }, end: Position { line: 5, character: 13 } },
+        Range {
+            start: Position {
+                line: 5,
+                character: 13,
+            },
+            end: Position {
+                line: 5,
+                character: 13,
+            },
+        },
     ));
     assert_json_snapshot!(response);
 }

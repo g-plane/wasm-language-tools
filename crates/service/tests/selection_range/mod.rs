@@ -1,5 +1,5 @@
 use insta::assert_json_snapshot;
-use lspt::{Position, SelectionRangeParams, TextDocumentIdentifier, Uri};
+use lspt::{Position, SelectionRangeParams, TextDocumentIdentifier};
 use wat_service::LanguageService;
 
 fn create_params(uri: String, positions: Vec<Position>) -> SelectionRangeParams {
@@ -26,6 +26,12 @@ fn sequence() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.selection_range(create_params(uri, vec![Position { line: 7, character: 17 }]));
+    let response = service.selection_range(create_params(
+        uri,
+        vec![Position {
+            line: 7,
+            character: 17,
+        }],
+    ));
     assert_json_snapshot!(response);
 }

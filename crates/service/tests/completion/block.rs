@@ -1,6 +1,6 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lspt::{Position, Uri};
+use lspt::{Position};
 use wat_service::LanguageService;
 
 #[test]

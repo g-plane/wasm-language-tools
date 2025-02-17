@@ -1,5 +1,5 @@
 use super::create_params;
-use lspt::{Position, Uri};
+use lspt::Position;
 use wat_service::LanguageService;
 
 #[test]
@@ -17,7 +17,13 @@ fn param_type_changing() {
 "
         .into(),
     );
-    let response1 = service.hover(create_params(uri.clone(), Position { line: 2, character: 20 }));
+    let response1 = service.hover(create_params(
+        uri.clone(),
+        Position {
+            line: 2,
+            character: 20,
+        },
+    ));
 
     service.commit(
         uri.clone(),
@@ -30,7 +36,13 @@ fn param_type_changing() {
 "
         .into(),
     );
-    let response2 = service.hover(create_params(uri, Position { line: 2, character: 20 }));
+    let response2 = service.hover(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 20,
+        },
+    ));
 
     assert_ne!(response1, response2);
 }
@@ -50,7 +62,13 @@ fn param_name_changing() {
 "
         .into(),
     );
-    let response1 = service.hover(create_params(uri.clone(), Position { line: 2, character: 20 }));
+    let response1 = service.hover(create_params(
+        uri.clone(),
+        Position {
+            line: 2,
+            character: 20,
+        },
+    ));
 
     service.commit(
         uri.clone(),
@@ -63,7 +81,13 @@ fn param_name_changing() {
 "
         .into(),
     );
-    let response2 = service.hover(create_params(uri, Position { line: 2, character: 20 }));
+    let response2 = service.hover(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 20,
+        },
+    ));
 
     assert_ne!(response1, response2);
 }
@@ -81,7 +105,13 @@ fn func_name_changing() {
 "
         .into(),
     );
-    let response1 = service.hover(create_params(uri.clone(), Position { line: 2, character: 12 }));
+    let response1 = service.hover(create_params(
+        uri.clone(),
+        Position {
+            line: 2,
+            character: 12,
+        },
+    ));
 
     service.commit(
         uri.clone(),
@@ -92,7 +122,13 @@ fn func_name_changing() {
 "
         .into(),
     );
-    let response2 = service.hover(create_params(uri, Position { line: 2, character: 12 }));
+    let response2 = service.hover(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 12,
+        },
+    ));
 
     assert_ne!(response1, response2);
 }
@@ -110,7 +146,13 @@ fn func_name_and_param_changing() {
 "
         .into(),
     );
-    let response1 = service.hover(create_params(uri.clone(), Position { line: 2, character: 12 }));
+    let response1 = service.hover(create_params(
+        uri.clone(),
+        Position {
+            line: 2,
+            character: 12,
+        },
+    ));
 
     service.commit(
         uri.clone(),
@@ -121,7 +163,13 @@ fn func_name_and_param_changing() {
 "
         .into(),
     );
-    let response2 = service.hover(create_params(uri, Position { line: 2, character: 12 }));
+    let response2 = service.hover(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 12,
+        },
+    ));
 
     assert_ne!(response1, response2);
 }

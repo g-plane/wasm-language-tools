@@ -1,5 +1,5 @@
 use insta::assert_json_snapshot;
-use lspt::{InlayHintParams, Position, Range, TextDocumentIdentifier, Uri};
+use lspt::{InlayHintParams, Position, Range, TextDocumentIdentifier};
 use wat_service::LanguageService;
 
 fn create_params(uri: String, doc_end: Position) -> InlayHintParams {

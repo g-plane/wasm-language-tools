@@ -1,6 +1,6 @@
 use insta::assert_json_snapshot;
 use lspt::{
-    DocumentRangeFormattingParams, FormattingOptions, Position, Range, TextDocumentIdentifier, Uri,
+    DocumentRangeFormattingParams, FormattingOptions, Position, Range, TextDocumentIdentifier,
 };
 use wat_service::{LanguageService, ServiceConfig};
 

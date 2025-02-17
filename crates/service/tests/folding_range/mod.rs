@@ -1,5 +1,5 @@
 use insta::assert_json_snapshot;
-use lspt::{FoldingRangeParams, TextDocumentIdentifier, Uri};
+use lspt::{FoldingRangeParams, TextDocumentIdentifier};
 use wat_service::LanguageService;
 
 fn create_params(uri: String) -> FoldingRangeParams {
