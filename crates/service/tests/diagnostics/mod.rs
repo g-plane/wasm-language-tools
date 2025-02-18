@@ -1,7 +1,4 @@
-use lspt::{
-    Diagnostic, DocumentDiagnosticParams, RelatedFullDocumentDiagnosticReport,
-    TextDocumentIdentifier,
-};
+use lspt::{DocumentDiagnosticParams, TextDocumentIdentifier};
 use wat_service::{LanguageService, LintLevel, Lints, ServiceConfig};
 
 mod br_table_branches;
@@ -28,10 +25,6 @@ fn create_params(uri: String) -> DocumentDiagnosticParams {
         work_done_token: Default::default(),
         partial_result_token: Default::default(),
     }
-}
-
-fn pick_diagnostics(response: RelatedFullDocumentDiagnosticReport) -> Vec<Diagnostic> {
-    response.items
 }
 
 fn calm(service: &mut LanguageService, uri: String) {

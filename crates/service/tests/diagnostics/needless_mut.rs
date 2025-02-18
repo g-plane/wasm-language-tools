@@ -28,7 +28,7 @@ fn immutable_global() {
     service.commit(uri.clone(), source.into());
     disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -43,7 +43,7 @@ fn inline_exported_global() {
     service.commit(uri.clone(), source.into());
     disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -59,7 +59,7 @@ fn module_field_export() {
     service.commit(uri.clone(), source.into());
     disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -77,7 +77,7 @@ fn global_set_with_int_idx() {
     service.commit(uri.clone(), source.into());
     disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -95,7 +95,7 @@ fn global_set_with_ident_idx() {
     service.commit(uri.clone(), source.into());
     disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]

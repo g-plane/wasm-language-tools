@@ -10,7 +10,7 @@ fn call_defined() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -32,7 +32,7 @@ fn local_defined() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -54,7 +54,7 @@ fn type_use_defined() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -83,7 +83,7 @@ fn global_defined() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -105,7 +105,7 @@ fn memory_defined() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -143,7 +143,7 @@ fn table_defined() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -207,5 +207,5 @@ fn export() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }

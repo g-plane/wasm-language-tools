@@ -10,7 +10,7 @@ fn empty() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -21,7 +21,7 @@ fn no_imports() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -36,7 +36,7 @@ fn single() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -52,7 +52,7 @@ fn multi() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]

@@ -9,7 +9,7 @@ fn no_modules() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -19,7 +19,7 @@ fn one_module() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]

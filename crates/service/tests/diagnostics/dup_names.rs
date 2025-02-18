@@ -29,7 +29,7 @@ fn different_kinds() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -58,7 +58,7 @@ fn different_scopes() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -74,7 +74,7 @@ fn ref_idx() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]

@@ -274,7 +274,7 @@ fn mixed_matches_from_call() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -309,7 +309,7 @@ fn incomplete_folded() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -342,7 +342,7 @@ fn unreachable_with_mismatched_count() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -397,7 +397,7 @@ fn func_results_correct() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -449,7 +449,7 @@ fn imported_global() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]

@@ -105,7 +105,7 @@ fn br_correct() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -335,7 +335,7 @@ fn br_if_correct() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -432,5 +432,5 @@ fn br_table_correct() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }

@@ -59,7 +59,7 @@ fn simple_reachable() {
     service.commit(uri.clone(), source.into());
     disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -311,7 +311,7 @@ fn br_if_c() {
     service.commit(uri.clone(), source.into());
     disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -548,5 +548,5 @@ fn folded_instr_with_loop() {
     service.commit(uri.clone(), source.into());
     disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }

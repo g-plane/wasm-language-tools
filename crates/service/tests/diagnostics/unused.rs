@@ -23,7 +23,7 @@ fn prefixed_with_underscore() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -48,7 +48,7 @@ fn func_used() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -78,7 +78,7 @@ fn param_used() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -91,7 +91,7 @@ fn params_in_imported_func() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -121,7 +121,7 @@ fn local_used() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -151,7 +151,7 @@ fn type_used() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -165,7 +165,7 @@ fn type_used_in_subtyping() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -195,7 +195,7 @@ fn global_used() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -224,7 +224,7 @@ fn memory_used() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -241,7 +241,7 @@ fn memory_implicit() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -258,7 +258,7 @@ fn memory_explicit() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -274,7 +274,7 @@ fn memory_dot() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -306,7 +306,7 @@ fn table_used() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -323,7 +323,7 @@ fn call_indirect_implicit() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
@@ -340,5 +340,5 @@ fn call_indirect_explicit() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
