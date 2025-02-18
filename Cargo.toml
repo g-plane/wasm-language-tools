@@ -6,7 +6,6 @@ resolver = "3"
 criterion = "0.5"
 insta = { version = "1.42", features = ["glob", "json"] }
 line-index = "0.1"
-lsp-types = "0.97"
 lspt = { git = "https://gitlab.com/g-plane/lspt.git", features = [
     "rustc-hash",
 ] }
