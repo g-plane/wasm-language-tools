@@ -55,7 +55,6 @@ impl LanguageService {
         Ok(self.rename_impl(params, token))
     }
 
-    #[expect(clippy::mutable_key_type)]
     fn rename_impl(&self, params: RenameParams, ident_token: SyntaxToken) -> Option<WorkspaceEdit> {
         let uri = self.uri(params.text_document.uri.clone());
         let line_index = self.line_index(uri);

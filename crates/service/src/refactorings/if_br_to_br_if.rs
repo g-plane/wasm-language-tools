@@ -61,7 +61,6 @@ pub fn act(
         br_if.to_string()
     };
 
-    #[expect(clippy::mutable_key_type)]
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
         service.lookup_uri(uri),

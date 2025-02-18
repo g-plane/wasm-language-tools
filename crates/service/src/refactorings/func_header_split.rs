@@ -33,7 +33,6 @@ pub fn act(
         .map(|ty| format!("({keyword} {ty})"))
         .join(" ");
 
-    #[expect(clippy::mutable_key_type)]
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
         service.lookup_uri(uri),

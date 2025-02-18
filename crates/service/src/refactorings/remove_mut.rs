@@ -55,7 +55,6 @@ pub fn act(
         });
     }
 
-    #[expect(clippy::mutable_key_type)]
     if text_edits.is_empty() {
         None
     } else {

@@ -44,7 +44,6 @@ pub fn act(
     }
 
     let end = helpers::rowan_pos_to_lsp_pos(line_index, node.text_range().end());
-    #[expect(clippy::mutable_key_type)]
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
         service.lookup_uri(uri),
