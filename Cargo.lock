@@ -337,15 +337,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
 
 [[package]]
-name = "fluent-uri"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "17c704e9dbe1ddd863da1e6ff3567795087b1eb201ce80d8fa81162e1516500d"
-dependencies = [
- "bitflags",
-]
-
-[[package]]
 name = "futures-core"
 version = "0.3.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -569,16 +560,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
-name = "lsp-types"
-version = "0.97.0"
+name = "lspt"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53353550a17c04ac46c585feb189c2db82154fc84b79c7a66c96c2c644f66071"
+checksum = "cae864993a3617e8b73c0467165e8280f0feac52643b0b4f1a74ddc2e1ca3e27"
 dependencies = [
- "bitflags",
- "fluent-uri",
+ "rustc-hash 2.1.1",
  "serde",
  "serde_json",
- "serde_repr",
 ]
 
 [[package]]
@@ -936,17 +925,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_repr"
-version = "0.1.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c64451ba24fc7a6a2d60fc75dd9c83c90903b19028d4eff35e88fc1e86564e9"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.96",
-]
-
-[[package]]
 name = "sharded-slab"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1252,7 +1230,7 @@ dependencies = [
  "async-task",
  "blocking",
  "futures-lite",
- "lsp-types",
+ "lspt",
  "rustc-hash 2.1.1",
  "serde",
  "serde_json",
@@ -1272,7 +1250,7 @@ dependencies = [
  "insta",
  "itertools 0.14.0",
  "line-index",
- "lsp-types",
+ "lspt",
  "rowan",
  "rustc-hash 2.1.1",
  "salsa",

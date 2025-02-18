@@ -1,11 +1,11 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::{Position, Uri};
+use lspt::Position;
 use wat_service::LanguageService;
 
 #[test]
 fn export_desc_memory() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (export \"\" (memory ))
@@ -14,13 +14,19 @@ fn export_desc_memory() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 23)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 23,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn export_desc_memory_following_dollar() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (export \"\" (memory $))
@@ -29,13 +35,19 @@ fn export_desc_memory_following_dollar() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 24)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 24,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn export_desc_memory_incomplete() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (export \"\" (memory $m))
@@ -44,13 +56,19 @@ fn export_desc_memory_incomplete() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 25)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 25,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn load_and_store_instr() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (memory 1)
@@ -60,13 +78,19 @@ fn load_and_store_instr() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(4, 14)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 4,
+            character: 14,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn load_and_store_instr_following_mem_arg() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (memory 1)
@@ -76,13 +100,19 @@ fn load_and_store_instr_following_mem_arg() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(4, 23)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 4,
+            character: 23,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn load_and_store_instr_after_mem_arg() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (memory 1)
@@ -92,13 +122,19 @@ fn load_and_store_instr_after_mem_arg() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(4, 24)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 4,
+            character: 24,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn memory_size() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (memory 1)
@@ -108,13 +144,19 @@ fn memory_size() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(4, 17)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 4,
+            character: 17,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn memory_fill() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (memory 1)
@@ -124,13 +166,19 @@ fn memory_fill() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(4, 19)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 4,
+            character: 19,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn memory_init() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (memory 1)
@@ -140,6 +188,12 @@ fn memory_init() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(4, 19)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 4,
+            character: 19,
+        },
+    ));
     assert!(response.is_none());
 }

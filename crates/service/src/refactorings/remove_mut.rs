@@ -4,10 +4,9 @@ use crate::{
     LanguageService,
 };
 use line_index::LineIndex;
-use lsp_types::{
-    CodeAction, CodeActionContext, CodeActionKind, NumberOrString, TextEdit, WorkspaceEdit,
-};
+use lspt::{CodeAction, CodeActionContext, CodeActionKind, TextEdit, Union2, WorkspaceEdit};
 use rowan::ast::support;
+use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
@@ -25,9 +24,7 @@ pub fn act(
         .diagnostics
         .iter()
         .find(|diagnostic| match &diagnostic.code {
-            Some(NumberOrString::String(code)) => {
-                code == "needless-mut" && diagnostic.range == token_lsp_range
-            }
+            Some(Union2::B(code)) => code == "needless-mut" && diagnostic.range == token_lsp_range,
             _ => false,
         })?;
 
@@ -58,15 +55,14 @@ pub fn act(
         });
     }
 
-    #[expect(clippy::mutable_key_type)]
     if text_edits.is_empty() {
         None
     } else {
-        let mut changes = HashMap::with_capacity(1);
+        let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
         changes.insert(service.lookup_uri(uri), text_edits);
         Some(CodeAction {
             title: "Remove `mut`".into(),
-            kind: Some(CodeActionKind::QUICKFIX),
+            kind: Some(CodeActionKind::QuickFix),
             edit: Some(WorkspaceEdit {
                 changes: Some(changes),
                 ..Default::default()

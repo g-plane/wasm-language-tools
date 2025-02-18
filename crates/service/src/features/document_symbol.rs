@@ -6,16 +6,14 @@ use crate::{
     uri::UrisCtx,
     LanguageService,
 };
-use lsp_types::{
-    DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, SymbolKind as LspSymbolKind,
-};
+use lspt::{DocumentSymbol, DocumentSymbolParams, SymbolKind as LspSymbolKind};
 use rowan::ast::support::token;
 use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     /// Handler for `textDocument/documentSymbol` request.
-    pub fn document_symbol(&self, params: DocumentSymbolParams) -> Option<DocumentSymbolResponse> {
+    pub fn document_symbol(&self, params: DocumentSymbolParams) -> Option<Vec<DocumentSymbol>> {
         let uri = self.uri(params.text_document.uri);
         let line_index = self.line_index(uri);
         let root = SyntaxNode::new_root(self.root(uri));
@@ -34,7 +32,7 @@ impl LanguageService {
                         DocumentSymbol {
                             name: "module".into(),
                             detail: None,
-                            kind: LspSymbolKind::MODULE,
+                            kind: LspSymbolKind::Module,
                             tags: None,
                             deprecated: None,
                             range: module_range,
@@ -51,7 +49,7 @@ impl LanguageService {
                         DocumentSymbol {
                             name: render_symbol_name(symbol, self),
                             detail: None,
-                            kind: LspSymbolKind::FUNCTION,
+                            kind: LspSymbolKind::Function,
                             tags: None,
                             deprecated: None,
                             range,
@@ -75,7 +73,7 @@ impl LanguageService {
                         DocumentSymbol {
                             name: render_symbol_name(symbol, self),
                             detail: None,
-                            kind: LspSymbolKind::VARIABLE,
+                            kind: LspSymbolKind::Variable,
                             tags: None,
                             deprecated: None,
                             range,
@@ -102,7 +100,7 @@ impl LanguageService {
                         DocumentSymbol {
                             name: render_symbol_name(symbol, self),
                             detail: None,
-                            kind: LspSymbolKind::VARIABLE,
+                            kind: LspSymbolKind::Variable,
                             tags: None,
                             deprecated: None,
                             range,
@@ -160,7 +158,7 @@ impl LanguageService {
             })
             .collect::<Vec<_>>();
         lsp_symbols.sort_by_key(|symbol| symbol.range.start);
-        Some(DocumentSymbolResponse::Nested(lsp_symbols))
+        Some(lsp_symbols)
     }
 }
 

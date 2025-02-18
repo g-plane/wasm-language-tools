@@ -1,11 +1,11 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::{Position, Uri};
+use lspt::Position;
 use wat_service::LanguageService;
 
 #[test]
 fn global_def_int_idx() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
     (global i32)
@@ -16,16 +16,29 @@ fn global_def_int_idx() {
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let include_decl =
-        service.find_references(create_params(uri.clone(), Position::new(2, 11), true));
+    let include_decl = service.find_references(create_params(
+        uri.clone(),
+        Position {
+            line: 2,
+            character: 11,
+        },
+        true,
+    ));
     assert_json_snapshot!(include_decl);
-    let exclude_decl = service.find_references(create_params(uri, Position::new(2, 11), false));
+    let exclude_decl = service.find_references(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 11,
+        },
+        false,
+    ));
     assert_json_snapshot!(exclude_decl);
 }
 
 #[test]
 fn global_def_ident_idx() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
     (global $global i32)
@@ -36,16 +49,29 @@ fn global_def_ident_idx() {
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let include_decl =
-        service.find_references(create_params(uri.clone(), Position::new(2, 19), true));
+    let include_decl = service.find_references(create_params(
+        uri.clone(),
+        Position {
+            line: 2,
+            character: 19,
+        },
+        true,
+    ));
     assert_json_snapshot!(include_decl);
-    let exclude_decl = service.find_references(create_params(uri, Position::new(2, 19), false));
+    let exclude_decl = service.find_references(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 19,
+        },
+        false,
+    ));
     assert_json_snapshot!(exclude_decl);
 }
 
 #[test]
 fn global_ref_int_idx() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
     (global i32)
@@ -56,16 +82,29 @@ fn global_ref_int_idx() {
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let include_decl =
-        service.find_references(create_params(uri.clone(), Position::new(3, 23), true));
+    let include_decl = service.find_references(create_params(
+        uri.clone(),
+        Position {
+            line: 3,
+            character: 23,
+        },
+        true,
+    ));
     assert_json_snapshot!(include_decl);
-    let exclude_decl = service.find_references(create_params(uri, Position::new(3, 23), false));
+    let exclude_decl = service.find_references(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 23,
+        },
+        false,
+    ));
     assert_json_snapshot!(exclude_decl);
 }
 
 #[test]
 fn global_ref_ident_idx() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
     (global $global i32)
@@ -76,9 +115,22 @@ fn global_ref_ident_idx() {
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let include_decl =
-        service.find_references(create_params(uri.clone(), Position::new(3, 44), true));
+    let include_decl = service.find_references(create_params(
+        uri.clone(),
+        Position {
+            line: 3,
+            character: 44,
+        },
+        true,
+    ));
     assert_json_snapshot!(include_decl);
-    let exclude_decl = service.find_references(create_params(uri, Position::new(3, 44), false));
+    let exclude_decl = service.find_references(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 44,
+        },
+        false,
+    ));
     assert_json_snapshot!(exclude_decl);
 }

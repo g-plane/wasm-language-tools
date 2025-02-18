@@ -22,6 +22,7 @@ expression: response
         "message": ""
       }
     ],
+    "isPreferred": true,
     "edit": {
       "changes": {
         "untitled:test": [
@@ -79,7 +80,6 @@ expression: response
           }
         ]
       }
-    },
-    "isPreferred": true
+    }
   }
 ]

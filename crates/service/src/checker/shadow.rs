@@ -6,9 +6,7 @@ use crate::{
     LanguageService, LintLevel,
 };
 use line_index::LineIndex;
-use lsp_types::{
-    Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, NumberOrString,
-};
+use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
 use rowan::{ast::support::token, TextRange};
 use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
@@ -26,9 +24,9 @@ pub fn check(
 ) {
     let severity = match lint_level {
         LintLevel::Allow => return,
-        LintLevel::Hint => DiagnosticSeverity::HINT,
-        LintLevel::Warn => DiagnosticSeverity::WARNING,
-        LintLevel::Deny => DiagnosticSeverity::ERROR,
+        LintLevel::Hint => DiagnosticSeverity::Hint,
+        LintLevel::Warn => DiagnosticSeverity::Warning,
+        LintLevel::Deny => DiagnosticSeverity::Error,
     };
     diags.extend(
         symbol_table
@@ -73,7 +71,7 @@ pub fn check(
                     ),
                     severity: Some(severity),
                     source: Some("wat".into()),
-                    code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                     message: format!("`{name}` is shadowed"),
                     related_information: Some(
                         ranges

@@ -1,8 +1,6 @@
 use crate::{checker, uri::UrisCtx, LanguageService};
-use lsp_types::{
-    DocumentDiagnosticParams, DocumentDiagnosticReport, DocumentDiagnosticReportResult,
-    FullDocumentDiagnosticReport, PublishDiagnosticsParams, RelatedFullDocumentDiagnosticReport,
-    Uri,
+use lspt::{
+    DocumentDiagnosticParams, PublishDiagnosticsParams, RelatedFullDocumentDiagnosticReport,
 };
 
 impl LanguageService {
@@ -10,21 +8,18 @@ impl LanguageService {
     pub fn pull_diagnostics(
         &self,
         params: DocumentDiagnosticParams,
-    ) -> DocumentDiagnosticReportResult {
+    ) -> RelatedFullDocumentDiagnosticReport {
         let diagnostics = checker::check(self, self.uri(params.text_document.uri));
-        DocumentDiagnosticReportResult::Report(DocumentDiagnosticReport::Full(
-            RelatedFullDocumentDiagnosticReport {
-                related_documents: None,
-                full_document_diagnostic_report: FullDocumentDiagnosticReport {
-                    result_id: None,
-                    items: diagnostics,
-                },
-            },
-        ))
+        RelatedFullDocumentDiagnosticReport {
+            kind: "full".into(),
+            result_id: None,
+            items: diagnostics,
+            related_documents: None,
+        }
     }
 
     /// Handler for `textDocument/publishDiagnostics` notification.
-    pub fn publish_diagnostics(&self, uri: Uri) -> PublishDiagnosticsParams {
+    pub fn publish_diagnostics(&self, uri: String) -> PublishDiagnosticsParams {
         PublishDiagnosticsParams {
             uri: uri.clone(),
             diagnostics: checker::check(self, self.uri(uri)),

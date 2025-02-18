@@ -1,7 +1,5 @@
 use crate::{helpers, syntax_tree::SyntaxTreeCtx, uri::UrisCtx, LanguageService};
-use lsp_types::{
-    DocumentFormattingParams, DocumentRangeFormattingParams, FormattingOptions, TextEdit,
-};
+use lspt::{DocumentFormattingParams, DocumentRangeFormattingParams, FormattingOptions, TextEdit};
 use rowan::ast::AstNode;
 use wat_formatter::config::{FormatOptions, LanguageOptions, LayoutOptions};
 use wat_syntax::{ast::Root, SyntaxNode};

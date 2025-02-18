@@ -6,20 +6,14 @@ use crate::{
     LanguageService,
 };
 use line_index::LineCol;
-use lsp_types::{
-    SemanticToken, SemanticTokens, SemanticTokensParams, SemanticTokensRangeParams,
-    SemanticTokensRangeResult, SemanticTokensResult,
-};
+use lspt::{SemanticTokens, SemanticTokensParams, SemanticTokensRangeParams};
 use rowan::ast::support;
 use std::mem;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 impl LanguageService {
     /// Handler for `textDocument/semanticTokens/full` request.
-    pub fn semantic_tokens_full(
-        &self,
-        params: SemanticTokensParams,
-    ) -> Option<SemanticTokensResult> {
+    pub fn semantic_tokens_full(&self, params: SemanticTokensParams) -> Option<SemanticTokens> {
         let uri = self.uri(params.text_document.uri);
         let mut delta_line = 0;
         let mut prev_start = 0;
@@ -31,17 +25,17 @@ impl LanguageService {
             &mut delta_line,
             &mut prev_start,
         );
-        Some(SemanticTokensResult::Tokens(SemanticTokens {
+        Some(SemanticTokens {
             result_id: None,
             data: tokens,
-        }))
+        })
     }
 
     /// Handler for `textDocument/semanticTokens/range` request.
     pub fn semantic_tokens_range(
         &self,
         params: SemanticTokensRangeParams,
-    ) -> Option<SemanticTokensRangeResult> {
+    ) -> Option<SemanticTokens> {
         let uri = self.uri(params.text_document.uri);
         let line_index = self.line_index(uri);
         let start = helpers::lsp_pos_to_rowan_pos(&line_index, params.range.start)?;
@@ -62,10 +56,10 @@ impl LanguageService {
             } = line_index.line_col(token.text_range().start());
         }
         let tokens = self.build_tokens(uri, tokens, &mut delta_line, &mut prev_start);
-        Some(SemanticTokensRangeResult::Tokens(SemanticTokens {
+        Some(SemanticTokens {
             result_id: None,
             data: tokens,
-        }))
+        })
     }
 
     fn build_tokens(
@@ -74,7 +68,7 @@ impl LanguageService {
         tokens: impl Iterator<Item = SyntaxToken>,
         delta_line: &mut u32,
         prev_start: &mut u32,
-    ) -> Vec<SemanticToken> {
+    ) -> Vec<u32> {
         let line_index = self.line_index(uri);
         tokens
             .filter_map(|token| {
@@ -94,22 +88,27 @@ impl LanguageService {
                 };
                 let range = token.text_range();
                 let col = line_index.line_col(range.start()).col;
-                Some(SemanticToken {
-                    delta_line: mem::replace(delta_line, block_comment_lines.unwrap_or_default()),
-                    delta_start: col
-                        - mem::replace(
-                            prev_start,
-                            if block_comment_lines.is_some_and(|lines| lines > 0) {
-                                0
-                            } else {
-                                col
-                            },
-                        ),
-                    length: range.len().into(),
+                Some([
+                    // delta line
+                    mem::replace(delta_line, block_comment_lines.unwrap_or_default()),
+                    // delta start
+                    col - mem::replace(
+                        prev_start,
+                        if block_comment_lines.is_some_and(|lines| lines > 0) {
+                            0
+                        } else {
+                            col
+                        },
+                    ),
+                    // length
+                    range.len().into(),
+                    // token type
                     token_type,
-                    token_modifiers_bitset: 0,
-                })
+                    // token modifiers bitset
+                    0,
+                ])
             })
+            .flatten()
             .collect()
     }
 

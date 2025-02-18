@@ -1,23 +1,19 @@
 use insta::assert_json_snapshot;
-use lsp_types::{
-    DocumentHighlightParams, Position, TextDocumentIdentifier, TextDocumentPositionParams, Uri,
-};
+use lspt::{DocumentHighlightParams, Position, TextDocumentIdentifier};
 use wat_service::LanguageService;
 
-fn create_params(uri: Uri, position: Position) -> DocumentHighlightParams {
+fn create_params(uri: String, position: Position) -> DocumentHighlightParams {
     DocumentHighlightParams {
-        text_document_position_params: TextDocumentPositionParams {
-            text_document: TextDocumentIdentifier { uri },
-            position,
-        },
-        work_done_progress_params: Default::default(),
-        partial_result_params: Default::default(),
+        text_document: TextDocumentIdentifier { uri },
+        position,
+        work_done_token: Default::default(),
+        partial_result_token: Default::default(),
     }
 }
 
 #[test]
 fn keyword() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func)
@@ -26,26 +22,38 @@ fn keyword() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(3, 6)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 6,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn instr_name() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (local.get) (local.get)))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 13)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 13,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn num_type() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param $i32 i32) (i32))
@@ -54,13 +62,19 @@ fn num_type() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(3, 21)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 21,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn vec_type() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param $v128 v128) (v128))
@@ -69,13 +83,19 @@ fn vec_type() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(3, 24)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 24,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn ref_type() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param $funcref funcref) (funcref))
@@ -84,13 +104,19 @@ fn ref_type() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(3, 26)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 26,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn non_idx_int() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32)
@@ -100,13 +126,19 @@ fn non_idx_int() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(5, 16)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 5,
+            character: 16,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn float() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $1.0 (f32.const 1.0) (f64.const 1.0))
@@ -114,13 +146,19 @@ fn float() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 41)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 41,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn func() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $f (param $f i32) (call 0) (call $f))
@@ -129,13 +167,19 @@ fn func() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 9)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 9,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn call_int() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $f (call 0) (call $f))
@@ -143,13 +187,19 @@ fn call_int() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 18)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 18,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn call_ident() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $f (call 0) (call $f))
@@ -157,13 +207,19 @@ fn call_ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 17)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 17,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn call_undefined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (call $f))
@@ -171,13 +227,19 @@ fn call_undefined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 15)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 15,
+        },
+    ));
     assert!(response.unwrap().is_empty());
 }
 
 #[test]
 fn param() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $f (param $f i32) (local.get 0) (local.get $f))
@@ -186,13 +248,19 @@ fn param() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 19)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 19,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn local() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $f (local $f i32) (local.get 0) (local.get $f) (local.set 0) (local.set $f))
@@ -201,13 +269,19 @@ fn local() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 19)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 19,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn local_ref_int() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $f (param $f i32) (local.get 0) (local.get $f) (local.set 0) (local.set $f))
@@ -215,13 +289,19 @@ fn local_ref_int() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 38)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 38,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn local_ref_ident() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $f (param $f i32) (local.get 0) (local.get $f) (local.set 0) (local.set $f))
@@ -229,13 +309,19 @@ fn local_ref_ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 52)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 52,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn local_ref_undefined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $f (local.get 0) (local.get $f))
@@ -243,13 +329,19 @@ fn local_ref_undefined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 37)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 37,
+        },
+    ));
     assert!(response.is_none());
 }
 
 #[test]
 fn type_def() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (type $t (func))
@@ -260,13 +352,19 @@ fn type_def() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 9)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 9,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn type_use_int() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (type $t (func))
@@ -277,13 +375,19 @@ fn type_use_int() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(3, 15)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 15,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn type_use_ident() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (type $t (func))
@@ -294,13 +398,19 @@ fn type_use_ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(4, 15)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 4,
+            character: 15,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn type_use_undefined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (type $t))
@@ -308,13 +418,19 @@ fn type_use_undefined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 15)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 15,
+        },
+    ));
     assert!(response.unwrap().is_empty());
 }
 
 #[test]
 fn global() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (global $g)
@@ -324,13 +440,19 @@ fn global() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 11)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 11,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn global_ref_int() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (global $g)
@@ -340,13 +462,19 @@ fn global_ref_int() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(3, 52)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 52,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn global_ref_ident() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (global $g)
@@ -356,13 +484,19 @@ fn global_ref_ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(3, 68)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 68,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn global_ref_undefined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (global.get 0) (global.get $g) (global.set 0) (global.set $g))
@@ -371,13 +505,19 @@ fn global_ref_undefined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 36)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 36,
+        },
+    ));
     assert!(response.unwrap().is_empty());
 }
 
 #[test]
 fn memory() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (memory $m)
@@ -388,13 +528,19 @@ fn memory() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 11)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 11,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn memory_ref_int() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (memory $m)
@@ -405,13 +551,19 @@ fn memory_ref_int() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(3, 17)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 17,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn memory_ref_ident() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (memory $m)
@@ -422,13 +574,19 @@ fn memory_ref_ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(4, 17)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 4,
+            character: 17,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn memory_ref_undefined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (data (memory $m))
@@ -437,13 +595,19 @@ fn memory_ref_undefined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 17)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 17,
+        },
+    ));
     assert!(response.unwrap().is_empty());
 }
 
 #[test]
 fn table() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (table $t)
@@ -460,13 +624,19 @@ fn table() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 10)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 10,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn table_ref_int() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (table $t)
@@ -483,13 +653,19 @@ fn table_ref_int() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(7, 17)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 7,
+            character: 17,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn table_ref_ident() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (table $t)
@@ -506,13 +682,19 @@ fn table_ref_ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(4, 30)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 4,
+            character: 30,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn table_ref_undefined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (table.get 0) (table.size $t))
@@ -521,13 +703,19 @@ fn table_ref_undefined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(2, 20)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 20,
+        },
+    ));
     assert!(response.unwrap().is_empty());
 }
 
 #[test]
 fn block() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -538,13 +726,19 @@ fn block() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(3, 12)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 12,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn block_ref_int() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -556,13 +750,19 @@ fn block_ref_int() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(7, 20)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 7,
+            character: 20,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn block_ref_ident() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -574,13 +774,19 @@ fn block_ref_ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(7, 25)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 7,
+            character: 25,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn block_ref_undefined() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -592,6 +798,12 @@ fn block_ref_undefined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.document_highlight(create_params(uri, Position::new(7, 18)));
+    let response = service.document_highlight(create_params(
+        uri,
+        Position {
+            line: 7,
+            character: 18,
+        },
+    ));
     assert!(response.is_none());
 }

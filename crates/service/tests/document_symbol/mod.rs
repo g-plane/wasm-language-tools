@@ -1,10 +1,10 @@
 use insta::assert_json_snapshot;
-use lsp_types::{DocumentSymbolParams, TextDocumentIdentifier, Uri};
+use lspt::{DocumentSymbolParams, TextDocumentIdentifier};
 use wat_service::LanguageService;
 
 #[test]
 fn symbols() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func $func (param $p i32) (local $l1 i32) (local $l2 i32) (local i32))
@@ -26,8 +26,8 @@ fn symbols() {
     service.commit(uri.clone(), source.into());
     let response = service.document_symbol(DocumentSymbolParams {
         text_document: TextDocumentIdentifier { uri },
-        work_done_progress_params: Default::default(),
-        partial_result_params: Default::default(),
+        work_done_token: Default::default(),
+        partial_result_token: Default::default(),
     });
     assert_json_snapshot!(response);
 }

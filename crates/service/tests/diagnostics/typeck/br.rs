@@ -1,11 +1,10 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::Uri;
 use wat_service::LanguageService;
 
 #[test]
 fn br_incorrect() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -56,7 +55,7 @@ fn br_incorrect() {
 
 #[test]
 fn br_correct() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -106,12 +105,12 @@ fn br_correct() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
 fn br_if_incorrect() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     // copied from https://github.com/WebAssembly/spec/blob/f3a0e06235d2d84bb0f3b5014da4370613886965/test/core/br_if.wast
     let source = "
 (module
@@ -260,7 +259,7 @@ fn br_if_incorrect() {
 
 #[test]
 fn br_if_correct() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     // copied from https://github.com/WebAssembly/spec/blob/f3a0e06235d2d84bb0f3b5014da4370613886965/test/core/br_if.wast
     let source = r#"
 (module
@@ -336,12 +335,12 @@ fn br_if_correct() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
 fn br_table_incorrect() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -399,7 +398,7 @@ fn br_table_incorrect() {
 
 #[test]
 fn br_table_correct() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -433,5 +432,5 @@ fn br_table_correct() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }

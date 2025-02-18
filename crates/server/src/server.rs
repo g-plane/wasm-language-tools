@@ -3,23 +3,19 @@ use crate::{
     sent::SentRequests,
     stdio,
 };
-use lsp_types::{
-    error_codes,
-    notification::{
-        DidChangeConfiguration, DidChangeTextDocument, DidOpenTextDocument, Exit,
-        Notification as _, PublishDiagnostics,
-    },
-    request::{
-        CallHierarchyIncomingCalls, CallHierarchyOutgoingCalls, CallHierarchyPrepare,
-        CodeActionRequest, Completion, DocumentDiagnosticRequest, DocumentHighlightRequest,
-        DocumentSymbolRequest, FoldingRangeRequest, Formatting, GotoDeclaration, GotoDefinition,
-        GotoTypeDefinition, HoverRequest, InlayHintRequest, PrepareRenameRequest, RangeFormatting,
-        References, RegisterCapability, Rename, Request as _, SelectionRangeRequest,
-        SemanticTokensFullRequest, SemanticTokensRangeRequest, Shutdown, SignatureHelpRequest,
-        WorkspaceConfiguration, WorkspaceDiagnosticRefresh,
-    },
-    ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams,
-    DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams, Uri,
+use lspt::{
+    CallHierarchyIncomingCallsRequest, CallHierarchyOutgoingCallsRequest,
+    CallHierarchyPrepareRequest, CodeActionRequest, CompletionRequest, ConfigurationItem,
+    ConfigurationParams, ConfigurationRequest, DeclarationRequest, DefinitionRequest,
+    DiagnosticRefreshRequest, DidChangeConfigurationNotification, DidChangeConfigurationParams,
+    DidChangeTextDocumentNotification, DidChangeTextDocumentParams,
+    DidOpenTextDocumentNotification, DidOpenTextDocumentParams, DocumentDiagnosticRequest,
+    DocumentFormattingRequest, DocumentHighlightRequest, DocumentRangeFormattingRequest,
+    DocumentSymbolRequest, ExitNotification, FoldingRangeRequest, HoverRequest, InitializeParams,
+    InlayHintRequest, Notification as _, PrepareRenameRequest, PublishDiagnosticsNotification,
+    ReferencesRequest, RegistrationRequest, RenameRequest, Request as _, SelectionRangeRequest,
+    SemanticTokensRangeRequest, SemanticTokensRequest, ShutdownRequest, SignatureHelpRequest,
+    TextDocumentContentChangeWholeDocument, TypeDefinitionRequest, Union2,
 };
 use std::ops::Deref;
 use wat_service::LanguageService;
@@ -30,7 +26,7 @@ pub struct Server {
     support_pull_diagnostics: bool,
     support_refresh_diagnostics: bool,
     support_pull_config: bool,
-    sent_requests: SentRequests<Vec<Uri>>,
+    sent_requests: SentRequests<Vec<String>>,
 }
 
 impl Server {
@@ -38,7 +34,7 @@ impl Server {
         self.initialize().await?;
         stdio::write(Message::Request {
             id: self.sent_requests.next_id(),
-            method: RegisterCapability::METHOD.into(),
+            method: RegistrationRequest::METHOD.into(),
             params: serde_json::to_value(self.service.dynamic_capabilities())?,
         })
         .await?;
@@ -61,7 +57,8 @@ impl Server {
                     self.handle_response(id, result).await?;
                 }
                 Message::Notification { method, mut params } => {
-                    match try_cast_notification::<DidOpenTextDocument>(&method, params) {
+                    match try_cast_notification::<DidOpenTextDocumentNotification>(&method, params)
+                    {
                         Ok(Ok(params)) => {
                             self.handle_did_open_text_document(params).await?;
                             continue;
@@ -69,7 +66,9 @@ impl Server {
                         Ok(Err(..)) => continue,
                         Err(p) => params = p,
                     }
-                    match try_cast_notification::<DidChangeTextDocument>(&method, params) {
+                    match try_cast_notification::<DidChangeTextDocumentNotification>(
+                        &method, params,
+                    ) {
                         Ok(Ok(params)) => {
                             self.handle_did_change_text_document(params).await?;
                             continue;
@@ -77,7 +76,9 @@ impl Server {
                         Ok(Err(..)) => continue,
                         Err(p) => params = p,
                     }
-                    match try_cast_notification::<DidChangeConfiguration>(&method, params) {
+                    match try_cast_notification::<DidChangeConfigurationNotification>(
+                        &method, params,
+                    ) {
                         Ok(Ok(params)) => {
                             self.handle_did_change_configuration(params).await?;
                             continue;
@@ -85,7 +86,7 @@ impl Server {
                         Ok(Err(..)) => continue,
                         Err(p) => params = p,
                     }
-                    if try_cast_notification::<Exit>(&method, params).is_ok() {
+                    if try_cast_notification::<ExitNotification>(&method, params).is_ok() {
                         return Ok(());
                     }
                 }
@@ -135,35 +136,39 @@ impl Server {
             return Message::ErrResponse {
                 id,
                 error: ResponseError {
-                    code: error_codes::SERVER_CANCELLED,
+                    code: -32802,
                     message: "This request is cancelled by server.".into(),
                     data: None,
                 },
             };
         }
-        try_cast_request::<CallHierarchyPrepare>(&method, params)
+        try_cast_request::<CallHierarchyPrepareRequest>(&method, params)
             .map(|params| {
                 params
                     .and_then(|params| serde_json::to_value(service.prepare_call_hierarchy(params)))
                     .map(|result| Message::OkResponse { id, result })
             })
             .or_else(|params| {
-                try_cast_request::<CallHierarchyIncomingCalls>(&method, params).map(|params| {
-                    params
-                        .and_then(|params| {
-                            serde_json::to_value(service.call_hierarchy_incoming_calls(params))
-                        })
-                        .map(|result| Message::OkResponse { id, result })
-                })
+                try_cast_request::<CallHierarchyIncomingCallsRequest>(&method, params).map(
+                    |params| {
+                        params
+                            .and_then(|params| {
+                                serde_json::to_value(service.call_hierarchy_incoming_calls(params))
+                            })
+                            .map(|result| Message::OkResponse { id, result })
+                    },
+                )
             })
             .or_else(|params| {
-                try_cast_request::<CallHierarchyOutgoingCalls>(&method, params).map(|params| {
-                    params
-                        .and_then(|params| {
-                            serde_json::to_value(service.call_hierarchy_outgoing_calls(params))
-                        })
-                        .map(|result| Message::OkResponse { id, result })
-                })
+                try_cast_request::<CallHierarchyOutgoingCallsRequest>(&method, params).map(
+                    |params| {
+                        params
+                            .and_then(|params| {
+                                serde_json::to_value(service.call_hierarchy_outgoing_calls(params))
+                            })
+                            .map(|result| Message::OkResponse { id, result })
+                    },
+                )
             })
             .or_else(|params| {
                 try_cast_request::<CodeActionRequest>(&method, params).map(|params| {
@@ -173,7 +178,7 @@ impl Server {
                 })
             })
             .or_else(|params| {
-                try_cast_request::<Completion>(&method, params).map(|params| {
+                try_cast_request::<CompletionRequest>(&method, params).map(|params| {
                     params
                         .and_then(|params| serde_json::to_value(service.completion(params)))
                         .map(|result| Message::OkResponse { id, result })
@@ -201,28 +206,28 @@ impl Server {
                 })
             })
             .or_else(|params| {
-                try_cast_request::<Formatting>(&method, params).map(|params| {
+                try_cast_request::<DocumentFormattingRequest>(&method, params).map(|params| {
                     params
                         .and_then(|params| serde_json::to_value(service.formatting(params)))
                         .map(|result| Message::OkResponse { id, result })
                 })
             })
             .or_else(|params| {
-                try_cast_request::<RangeFormatting>(&method, params).map(|params| {
+                try_cast_request::<DocumentRangeFormattingRequest>(&method, params).map(|params| {
                     params
                         .and_then(|params| serde_json::to_value(service.range_formatting(params)))
                         .map(|result| Message::OkResponse { id, result })
                 })
             })
             .or_else(|params| {
-                try_cast_request::<GotoDefinition>(&method, params).map(|params| {
+                try_cast_request::<DefinitionRequest>(&method, params).map(|params| {
                     params
                         .and_then(|params| serde_json::to_value(service.goto_definition(params)))
                         .map(|result| Message::OkResponse { id, result })
                 })
             })
             .or_else(|params| {
-                try_cast_request::<GotoTypeDefinition>(&method, params).map(|params| {
+                try_cast_request::<TypeDefinitionRequest>(&method, params).map(|params| {
                     params
                         .and_then(|params| {
                             serde_json::to_value(service.goto_type_definition(params))
@@ -231,7 +236,7 @@ impl Server {
                 })
             })
             .or_else(|params| {
-                try_cast_request::<GotoDeclaration>(&method, params).map(|params| {
+                try_cast_request::<DeclarationRequest>(&method, params).map(|params| {
                     params
                         .and_then(|params| serde_json::to_value(service.goto_declaration(params)))
                         .map(|result| Message::OkResponse { id, result })
@@ -252,7 +257,7 @@ impl Server {
                 })
             })
             .or_else(|params| {
-                try_cast_request::<References>(&method, params).map(|params| {
+                try_cast_request::<ReferencesRequest>(&method, params).map(|params| {
                     params
                         .and_then(|params| serde_json::to_value(service.find_references(params)))
                         .map(|result| Message::OkResponse { id, result })
@@ -266,7 +271,7 @@ impl Server {
                 })
             })
             .or_else(|params| {
-                try_cast_request::<Rename>(&method, params).map(|params| {
+                try_cast_request::<RenameRequest>(&method, params).map(|params| {
                     params.and_then(|params| match service.rename(params) {
                         Ok(result) => serde_json::to_value(result)
                             .map(|result| Message::OkResponse { id, result }),
@@ -289,7 +294,7 @@ impl Server {
                 })
             })
             .or_else(|params| {
-                try_cast_request::<SemanticTokensFullRequest>(&method, params).map(|params| {
+                try_cast_request::<SemanticTokensRequest>(&method, params).map(|params| {
                     params
                         .and_then(|params| {
                             serde_json::to_value(service.semantic_tokens_full(params))
@@ -321,7 +326,7 @@ impl Server {
                 })
             })
             .or_else(|params| {
-                try_cast_request::<Shutdown>(&method, params).map(|_| {
+                try_cast_request::<ShutdownRequest>(&method, params).map(|_| {
                     Ok(Message::OkResponse {
                         id,
                         result: serde_json::Value::Null,
@@ -360,7 +365,7 @@ impl Server {
             if self.support_refresh_diagnostics {
                 stdio::write(Message::Request {
                     id: self.sent_requests.next_id(),
-                    method: WorkspaceDiagnosticRefresh::METHOD.into(),
+                    method: DiagnosticRefreshRequest::METHOD.into(),
                     params: serde_json::Value::Null,
                 })
                 .await?;
@@ -380,7 +385,7 @@ impl Server {
         }
         if self.support_pull_config {
             stdio::write(self.sent_requests.add(
-                WorkspaceConfiguration::METHOD.into(),
+                ConfigurationRequest::METHOD.into(),
                 serde_json::to_value(ConfigurationParams {
                     items: vec![ConfigurationItem {
                         scope_uri: Some(uri.clone()),
@@ -398,9 +403,11 @@ impl Server {
         &mut self,
         params: DidChangeTextDocumentParams,
     ) -> anyhow::Result<()> {
-        if let Some(change) = params.content_changes.first() {
+        if let Some(Union2::B(TextDocumentContentChangeWholeDocument { text })) =
+            params.content_changes.first()
+        {
             self.service
-                .commit(params.text_document.uri.clone(), change.text.clone());
+                .commit(params.text_document.uri.clone(), text.clone());
             if !self.support_pull_diagnostics {
                 self.publish_diagnostics(params.text_document.uri).await?;
             }
@@ -420,7 +427,7 @@ impl Server {
                 .collect::<Vec<_>>();
             stdio::write(
                 self.sent_requests.add(
-                    WorkspaceConfiguration::METHOD.into(),
+                    ConfigurationRequest::METHOD.into(),
                     serde_json::to_value(ConfigurationParams {
                         items: uris
                             .iter()
@@ -446,9 +453,9 @@ impl Server {
         Ok(())
     }
 
-    async fn publish_diagnostics(&mut self, uri: Uri) -> anyhow::Result<()> {
+    async fn publish_diagnostics(&mut self, uri: String) -> anyhow::Result<()> {
         stdio::write(Message::Notification {
-            method: PublishDiagnostics::METHOD.into(),
+            method: PublishDiagnosticsNotification::METHOD.into(),
             params: serde_json::to_value(self.service.publish_diagnostics(uri))?,
         })
         .await

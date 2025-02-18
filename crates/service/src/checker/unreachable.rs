@@ -3,7 +3,7 @@ use crate::{
     helpers, LintLevel,
 };
 use line_index::LineIndex;
-use lsp_types::{Diagnostic, DiagnosticSeverity, DiagnosticTag, NumberOrString};
+use lspt::{Diagnostic, DiagnosticSeverity, DiagnosticTag, Union2};
 use rowan::{ast::AstNode, TextRange};
 use rustc_hash::FxHashSet;
 use std::ops::ControlFlow;
@@ -29,9 +29,9 @@ pub fn check(
         root,
         severity: match lint_level {
             LintLevel::Allow => return,
-            LintLevel::Hint => DiagnosticSeverity::HINT,
-            LintLevel::Warn => DiagnosticSeverity::WARNING,
-            LintLevel::Deny => DiagnosticSeverity::ERROR,
+            LintLevel::Hint => DiagnosticSeverity::Hint,
+            LintLevel::Warn => DiagnosticSeverity::Warning,
+            LintLevel::Deny => DiagnosticSeverity::Error,
         },
         start_jumps: FxHashSet::default(),
         end_jumps: FxHashSet::default(),
@@ -106,9 +106,9 @@ impl Checker<'_> {
                             range: helpers::rowan_range_to_lsp_range(self.line_index, range),
                             severity: Some(self.severity),
                             source: Some("wat".into()),
-                            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                             message: "unreachable code".into(),
-                            tags: Some(vec![DiagnosticTag::UNNECESSARY]),
+                            tags: Some(vec![DiagnosticTag::Unnecessary]),
                             ..Default::default()
                         });
                         self.last_reported = range;
@@ -201,9 +201,9 @@ impl Checker<'_> {
             range: helpers::rowan_range_to_lsp_range(self.line_index, token.text_range()),
             severity: Some(self.severity),
             source: Some("wat".into()),
-            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
             message: "unreachable code".into(),
-            tags: Some(vec![DiagnosticTag::UNNECESSARY]),
+            tags: Some(vec![DiagnosticTag::Unnecessary]),
             ..Default::default()
         });
     }

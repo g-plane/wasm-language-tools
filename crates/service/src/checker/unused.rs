@@ -5,7 +5,7 @@ use crate::{
     LanguageService, LintLevel,
 };
 use line_index::LineIndex;
-use lsp_types::{Diagnostic, DiagnosticSeverity, DiagnosticTag, NumberOrString};
+use lspt::{Diagnostic, DiagnosticSeverity, DiagnosticTag, Union2};
 use rowan::{ast::support, Direction};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
@@ -21,9 +21,9 @@ pub fn check(
 ) {
     let severity = match lint_level {
         LintLevel::Allow => return,
-        LintLevel::Hint => DiagnosticSeverity::HINT,
-        LintLevel::Warn => DiagnosticSeverity::WARNING,
-        LintLevel::Deny => DiagnosticSeverity::ERROR,
+        LintLevel::Hint => DiagnosticSeverity::Hint,
+        LintLevel::Warn => DiagnosticSeverity::Warning,
+        LintLevel::Deny => DiagnosticSeverity::Error,
     };
     diags.extend(symbol_table.symbols.iter().filter_map(|symbol| {
         match symbol.kind {
@@ -154,9 +154,9 @@ fn report(
         range: helpers::rowan_range_to_lsp_range(line_index, range),
         severity: Some(severity),
         source: Some("wat".into()),
-        code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
         message: format!("{kind} `{}` is never used", symbol.idx.render(service)),
-        tags: Some(vec![DiagnosticTag::UNNECESSARY]),
+        tags: Some(vec![DiagnosticTag::Unnecessary]),
         ..Default::default()
     }
 }

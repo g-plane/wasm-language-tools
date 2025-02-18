@@ -1,30 +1,30 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::{Diagnostic, NumberOrString, Position, Range, Uri};
+use lspt::{Diagnostic, Position, Range, Union2};
 use wat_service::LanguageService;
 
-fn create_params(uri: Uri, range: Range, token_range: Range) -> CodeActionParams {
+fn create_params(uri: String, range: Range, token_range: Range) -> CodeActionParams {
     CodeActionParams {
         text_document: TextDocumentIdentifier { uri },
         range,
         context: CodeActionContext {
             diagnostics: vec![Diagnostic {
                 range: token_range,
-                code: Some(NumberOrString::String("needless-mut".into())),
+                code: Some(Union2::B("needless-mut".into())),
                 message: "".into(),
                 ..Default::default()
             }],
             only: None,
             trigger_kind: None,
         },
-        work_done_progress_params: Default::default(),
-        partial_result_params: Default::default(),
+        work_done_token: Default::default(),
+        partial_result_token: Default::default(),
     }
 }
 
 #[test]
 fn no_mut() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (global $a i32))
@@ -33,14 +33,23 @@ fn no_mut() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(super::create_params(
         uri,
-        Range::new(Position::new(2, 15), Position::new(2, 15)),
+        Range {
+            start: Position {
+                line: 2,
+                character: 15,
+            },
+            end: Position {
+                line: 2,
+                character: 15,
+            },
+        },
     ));
     assert!(response.is_none());
 }
 
 #[test]
 fn no_diagnostics() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (global $a (mut i32)))
@@ -49,14 +58,23 @@ fn no_diagnostics() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(super::create_params(
         uri,
-        Range::new(Position::new(2, 15), Position::new(2, 15)),
+        Range {
+            start: Position {
+                line: 2,
+                character: 15,
+            },
+            end: Position {
+                line: 2,
+                character: 15,
+            },
+        },
     ));
     assert!(response.is_none());
 }
 
 #[test]
 fn unrelated_range() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (global $a (mut i32))
@@ -66,15 +84,33 @@ fn unrelated_range() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(2, 15), Position::new(2, 15)),
-        Range::new(Position::new(3, 14), Position::new(3, 17)),
+        Range {
+            start: Position {
+                line: 2,
+                character: 15,
+            },
+            end: Position {
+                line: 2,
+                character: 15,
+            },
+        },
+        Range {
+            start: Position {
+                line: 3,
+                character: 14,
+            },
+            end: Position {
+                line: 3,
+                character: 17,
+            },
+        },
     ));
     assert!(response.is_none());
 }
 
 #[test]
 fn unrelated_diagnostic() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (global $a (mut i32))
@@ -84,26 +120,44 @@ fn unrelated_diagnostic() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(CodeActionParams {
         text_document: TextDocumentIdentifier { uri },
-        range: Range::new(Position::new(2, 15), Position::new(2, 15)),
+        range: Range {
+            start: Position {
+                line: 2,
+                character: 15,
+            },
+            end: Position {
+                line: 2,
+                character: 15,
+            },
+        },
         context: CodeActionContext {
             diagnostics: vec![Diagnostic {
-                range: Range::new(Position::new(2, 15), Position::new(2, 15)),
-                code: Some(NumberOrString::String("global-mut".into())),
+                range: Range {
+                    start: Position {
+                        line: 2,
+                        character: 15,
+                    },
+                    end: Position {
+                        line: 2,
+                        character: 15,
+                    },
+                },
+                code: Some(Union2::B("global-mut".into())),
                 message: "".into(),
                 ..Default::default()
             }],
             only: None,
             trigger_kind: None,
         },
-        work_done_progress_params: Default::default(),
-        partial_result_params: Default::default(),
+        work_done_token: Default::default(),
+        partial_result_token: Default::default(),
     });
     assert!(response.is_none());
 }
 
 #[test]
 fn simple() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (global $a (mut i32)))
@@ -112,15 +166,33 @@ fn simple() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(2, 15), Position::new(2, 15)),
-        Range::new(Position::new(2, 14), Position::new(2, 17)),
+        Range {
+            start: Position {
+                line: 2,
+                character: 15,
+            },
+            end: Position {
+                line: 2,
+                character: 15,
+            },
+        },
+        Range {
+            start: Position {
+                line: 2,
+                character: 14,
+            },
+            end: Position {
+                line: 2,
+                character: 17,
+            },
+        },
     ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn missing_r_paren() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (global $a (mut i32
@@ -129,15 +201,33 @@ fn missing_r_paren() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(2, 15), Position::new(2, 15)),
-        Range::new(Position::new(2, 14), Position::new(2, 17)),
+        Range {
+            start: Position {
+                line: 2,
+                character: 15,
+            },
+            end: Position {
+                line: 2,
+                character: 15,
+            },
+        },
+        Range {
+            start: Position {
+                line: 2,
+                character: 14,
+            },
+            end: Position {
+                line: 2,
+                character: 17,
+            },
+        },
     ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn with_comments() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (global $a ((;a;) mut(;b;) i32)))
@@ -146,8 +236,26 @@ fn with_comments() {
     service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
-        Range::new(Position::new(2, 20), Position::new(2, 20)),
-        Range::new(Position::new(2, 20), Position::new(2, 23)),
+        Range {
+            start: Position {
+                line: 2,
+                character: 20,
+            },
+            end: Position {
+                line: 2,
+                character: 20,
+            },
+        },
+        Range {
+            start: Position {
+                line: 2,
+                character: 20,
+            },
+            end: Position {
+                line: 2,
+                character: 23,
+            },
+        },
     ));
     assert_json_snapshot!(response);
 }

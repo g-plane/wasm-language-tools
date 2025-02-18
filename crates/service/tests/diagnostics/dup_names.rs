@@ -1,11 +1,10 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::Uri;
 use wat_service::LanguageService;
 
 #[test]
 fn same_kind() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $f (param i32))
@@ -20,7 +19,7 @@ fn same_kind() {
 
 #[test]
 fn different_kinds() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (global $f i32 i32.const 0)
@@ -30,12 +29,12 @@ fn different_kinds() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
 fn param_and_local() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param $a i32) (local $a f32)))
@@ -49,7 +48,7 @@ fn param_and_local() {
 
 #[test]
 fn different_scopes() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param $p i32))
@@ -59,12 +58,12 @@ fn different_scopes() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
 fn ref_idx() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func $fn
@@ -75,12 +74,12 @@ fn ref_idx() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
 fn type_def() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (type $_ (func))
@@ -95,7 +94,7 @@ fn type_def() {
 
 #[test]
 fn global() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (global $_ i32
@@ -112,7 +111,7 @@ fn global() {
 
 #[test]
 fn memory() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (memory $_ 0)
@@ -127,7 +126,7 @@ fn memory() {
 
 #[test]
 fn table() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (table $_ 0 funcref)
@@ -142,7 +141,7 @@ fn table() {
 
 #[test]
 fn exports() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func (export "func"))

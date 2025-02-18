@@ -1,11 +1,10 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::Uri;
 use wat_service::LanguageService;
 
 #[test]
 fn index() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func
@@ -29,7 +28,7 @@ fn index() {
 
 #[test]
 fn int() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (result i32 i64 v128 i32 i64 v128)
@@ -51,7 +50,7 @@ fn int() {
 
 #[test]
 fn float() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func (result f32 f64 f32 f64)
@@ -71,7 +70,7 @@ fn float() {
 
 #[test]
 fn indexes() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func
@@ -90,7 +89,7 @@ fn indexes() {
 
 #[test]
 fn mem_arg_incorrect() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -117,7 +116,7 @@ fn mem_arg_incorrect() {
 
 #[test]
 fn mem_arg_correct() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -145,12 +144,12 @@ fn mem_arg_correct() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
 fn v128_load_store_incorrect() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -183,7 +182,7 @@ fn v128_load_store_incorrect() {
 
 #[test]
 fn v128_load_store_correct() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -218,12 +217,12 @@ fn v128_load_store_correct() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
 fn br_table() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func
@@ -244,7 +243,7 @@ fn br_table() {
 
 #[test]
 fn select_incorrect() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (type $t (func (result i32)))
@@ -286,7 +285,7 @@ fn select_incorrect() {
 
 #[test]
 fn select_correct() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func
@@ -302,12 +301,12 @@ fn select_correct() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
 fn call_indirect_incorrect() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (func
@@ -330,7 +329,7 @@ fn call_indirect_incorrect() {
 
 #[test]
 fn call_indirect_correct() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (type (func))
@@ -369,12 +368,12 @@ fn call_indirect_correct() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
 fn memory_grow_and_fill() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (memory 1)
@@ -411,7 +410,7 @@ fn memory_grow_and_fill() {
 
 #[test]
 fn memory_copy() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (memory 1)
@@ -455,7 +454,7 @@ fn memory_copy() {
 
 #[test]
 fn memory_init() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = r#"
 (module
   (memory 1)
@@ -499,7 +498,7 @@ fn memory_init() {
 
 #[test]
 fn expected_instr() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "(module (func (result i32) (i32.add 1 (i32.const 0))))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

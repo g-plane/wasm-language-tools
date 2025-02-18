@@ -7,7 +7,7 @@ use crate::{
     LanguageService,
 };
 use line_index::LineIndex;
-use lsp_types::{
+use lspt::{
     CallHierarchyIncomingCall, CallHierarchyIncomingCallsParams, CallHierarchyItem,
     CallHierarchyOutgoingCall, CallHierarchyOutgoingCallsParams, CallHierarchyPrepareParams, Range,
     SymbolKind as LspSymbolKind,
@@ -21,23 +21,12 @@ impl LanguageService {
         &self,
         params: CallHierarchyPrepareParams,
     ) -> Option<Vec<CallHierarchyItem>> {
-        let uri = self.uri(
-            params
-                .text_document_position_params
-                .text_document
-                .uri
-                .clone(),
-        );
+        let uri = self.uri(params.text_document.uri.clone());
         let line_index = self.line_index(uri);
         let root = SyntaxNode::new_root(self.root(uri));
         let symbol_table = self.symbol_table(uri);
 
-        let token = super::find_meaningful_token(
-            self,
-            uri,
-            &root,
-            params.text_document_position_params.position,
-        )?;
+        let token = super::find_meaningful_token(self, uri, &root, params.position)?;
         let parent_range = token.parent()?.text_range();
 
         symbol_table
@@ -47,17 +36,13 @@ impl LanguageService {
                 SymbolKind::Func if symbol.key.text_range() == parent_range => {
                     Some(vec![CallHierarchyItem {
                         name: symbol.idx.render(self).to_string(),
-                        kind: LspSymbolKind::FUNCTION,
+                        kind: LspSymbolKind::Function,
                         tags: None,
                         detail: Some(self.render_func_header(
                             symbol.idx.name,
                             self.get_func_sig(uri, symbol.key, symbol.green.clone()),
                         )),
-                        uri: params
-                            .text_document_position_params
-                            .text_document
-                            .uri
-                            .clone(),
+                        uri: params.text_document.uri.clone(),
                         range: helpers::rowan_range_to_lsp_range(
                             &line_index,
                             symbol.key.text_range(),
@@ -71,17 +56,13 @@ impl LanguageService {
                         symbols
                             .map(|symbol| CallHierarchyItem {
                                 name: symbol.idx.render(self).to_string(),
-                                kind: LspSymbolKind::FUNCTION,
+                                kind: LspSymbolKind::Function,
                                 tags: None,
                                 detail: Some(self.render_func_header(
                                     symbol.idx.name,
                                     self.get_func_sig(uri, symbol.key, symbol.green.clone()),
                                 )),
-                                uri: params
-                                    .text_document_position_params
-                                    .text_document
-                                    .uri
-                                    .clone(),
+                                uri: params.text_document.uri.clone(),
                                 range: helpers::rowan_range_to_lsp_range(
                                     &line_index,
                                     symbol.key.text_range(),
@@ -140,7 +121,7 @@ impl LanguageService {
                 CallHierarchyIncomingCall {
                     from: CallHierarchyItem {
                         name: func_symbol.idx.render(self).to_string(),
-                        kind: LspSymbolKind::FUNCTION,
+                        kind: LspSymbolKind::Function,
                         tags: None,
                         detail: Some(self.render_func_header(
                             func_symbol.idx.name,
@@ -192,7 +173,7 @@ impl LanguageService {
                         CallHierarchyOutgoingCall {
                             to: CallHierarchyItem {
                                 name: func_symbol.idx.render(self).to_string(),
-                                kind: LspSymbolKind::FUNCTION,
+                                kind: LspSymbolKind::Function,
                                 tags: None,
                                 detail: Some(self.render_func_header(
                                     func_symbol.idx.name,

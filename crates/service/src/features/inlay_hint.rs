@@ -7,7 +7,7 @@ use crate::{
     uri::UrisCtx,
     LanguageService,
 };
-use lsp_types::{InlayHint, InlayHintKind, InlayHintLabel, InlayHintParams};
+use lspt::{InlayHint, InlayHintKind, InlayHintParams, Union2};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 impl LanguageService {
@@ -34,8 +34,8 @@ impl LanguageService {
                             &line_index,
                             symbol.key.text_range().end(),
                         ),
-                        label: InlayHintLabel::String(ty.render(self).to_string()),
-                        kind: Some(InlayHintKind::TYPE),
+                        label: Union2::A(ty.render(self).to_string()),
+                        kind: Some(InlayHintKind::Type),
                         text_edits: None,
                         tooltip: None,
                         padding_left: Some(true),
@@ -56,8 +56,8 @@ impl LanguageService {
                             &line_index,
                             symbol.key.text_range().end(),
                         ),
-                        label: InlayHintLabel::String(ty.render(self).to_string()),
-                        kind: Some(InlayHintKind::TYPE),
+                        label: Union2::A(ty.render(self).to_string()),
+                        kind: Some(InlayHintKind::Type),
                         text_edits: None,
                         tooltip: None,
                         padding_left: Some(true),
@@ -73,10 +73,7 @@ impl LanguageService {
                         .zip(symbol.idx.name)
                         .map(|(last, name)| InlayHint {
                             position: helpers::rowan_pos_to_lsp_pos(&line_index, last.end()),
-                            label: InlayHintLabel::String(format!(
-                                "(func {})",
-                                self.lookup_ident(name)
-                            )),
+                            label: Union2::A(format!("(func {})", self.lookup_ident(name))),
                             kind: None,
                             text_edits: None,
                             tooltip: None,
@@ -94,7 +91,7 @@ impl LanguageService {
                         .zip(symbol.idx.name)
                         .map(|(last, name)| InlayHint {
                             position: helpers::rowan_pos_to_lsp_pos(&line_index, last.end()),
-                            label: InlayHintLabel::String(format!(
+                            label: Union2::A(format!(
                                 "({} {})",
                                 match symbol.key.kind() {
                                     SyntaxKind::BLOCK_IF => "if",

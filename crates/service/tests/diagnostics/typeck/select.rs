@@ -1,11 +1,10 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::Uri;
 use wat_service::LanguageService;
 
 #[test]
 fn incorrect() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -97,7 +96,7 @@ fn incorrect() {
 
 #[test]
 fn correct() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -128,5 +127,5 @@ fn correct() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }

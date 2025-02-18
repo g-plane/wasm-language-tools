@@ -1,5 +1,5 @@
 use crate::{binder::SymbolTablesCtx, syntax_tree::SyntaxTreeCtx, uri::InternUri, LanguageService};
-use lsp_types::Diagnostic;
+use lspt::Diagnostic;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 mod br_table_branches;

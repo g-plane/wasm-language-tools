@@ -1,11 +1,10 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::Uri;
 use wat_service::LanguageService;
 
 #[test]
 fn then_folded() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32 f32) (result i32)
@@ -27,7 +26,7 @@ fn then_folded() {
 
 #[test]
 fn else_folded() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32 f32) (result i32)
@@ -49,7 +48,7 @@ fn else_folded() {
 
 #[test]
 fn then_sequence() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32 f32) (result i32)
@@ -71,7 +70,7 @@ fn then_sequence() {
 
 #[test]
 fn else_sequence() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32 f32) (result i32)
@@ -93,7 +92,7 @@ fn else_sequence() {
 
 #[test]
 fn then_results_folded() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32 i32)
@@ -139,7 +138,7 @@ fn then_results_folded() {
 
 #[test]
 fn then_results_sequence() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32 i32)
@@ -185,7 +184,7 @@ fn then_results_sequence() {
 
 #[test]
 fn then_results_correct() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32 i32)
@@ -259,12 +258,12 @@ fn then_results_correct() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
 fn else_results_folded() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32 i32)
@@ -306,7 +305,7 @@ fn else_results_folded() {
 
 #[test]
 fn else_results_sequence() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32 i32)
@@ -356,7 +355,7 @@ fn else_results_sequence() {
 
 #[test]
 fn else_results_correct() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32 i32)
@@ -430,12 +429,12 @@ fn else_results_correct() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }
 
 #[test]
 fn missing_then() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -454,7 +453,7 @@ fn missing_then() {
 
 #[test]
 fn missing_else() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -483,7 +482,7 @@ fn missing_else() {
 
 #[test]
 fn if_cond_incorrect() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -526,7 +525,7 @@ fn if_cond_incorrect() {
 
 #[test]
 fn if_cond_correct() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func
@@ -552,5 +551,5 @@ fn if_cond_correct() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }

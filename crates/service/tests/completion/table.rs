@@ -1,11 +1,11 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::{Position, Uri};
+use lspt::Position;
 use wat_service::LanguageService;
 
 #[test]
 fn top_level() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (table )
@@ -13,13 +13,19 @@ fn top_level() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 11)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 11,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn after_top_level_paren() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (table ())
@@ -27,13 +33,19 @@ fn after_top_level_paren() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 12)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 12,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn table_type() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (table 0 )
@@ -41,13 +53,19 @@ fn table_type() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 13)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 13,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn elem_without_parens() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (func $f)
@@ -56,13 +74,19 @@ fn elem_without_parens() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(3, 25)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 25,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn elem_with_parens() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (table funcref (elem ()))
@@ -70,13 +94,19 @@ fn elem_with_parens() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 26)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 26,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn instr_after_item() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (table funcref (elem (item )))
@@ -84,13 +114,19 @@ fn instr_after_item() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 31)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 31,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn instr_after_item_and_paren() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
     (table funcref (elem (item ())))
@@ -98,13 +134,19 @@ fn instr_after_item_and_paren() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(2, 32)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 32,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn table_size() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (table $table 0 funcref)
@@ -114,13 +156,19 @@ fn table_size() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(5, 16)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 5,
+            character: 16,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn table_size_following_dollar() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (table $table 0 funcref)
@@ -130,13 +178,19 @@ fn table_size_following_dollar() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(5, 17)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 5,
+            character: 17,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn table_size_incomplete_ident() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (table $table 0 funcref)
@@ -146,13 +200,19 @@ fn table_size_incomplete_ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(5, 18)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 5,
+            character: 18,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn export() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (table $table 1 funcref)
@@ -161,13 +221,19 @@ fn export() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(4, 20)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 4,
+            character: 20,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn export_following_int_index() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (table $table 1 funcref)
@@ -176,6 +242,12 @@ fn export_following_int_index() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position::new(4, 21)));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 4,
+            character: 21,
+        },
+    ));
     assert_json_snapshot!(response);
 }

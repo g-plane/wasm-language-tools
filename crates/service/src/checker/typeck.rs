@@ -9,9 +9,7 @@ use crate::{
 };
 use itertools::{EitherOrBoth, Itertools};
 use line_index::LineIndex;
-use lsp_types::{
-    Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, NumberOrString,
-};
+use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
 use rowan::{
     ast::{support, AstNode},
     TextRange,
@@ -197,9 +195,9 @@ fn check_block_like(
                                 shared.line_index,
                                 node.text_range(),
                             ),
-                            severity: Some(DiagnosticSeverity::ERROR),
+                            severity: Some(DiagnosticSeverity::Error),
                             source: Some("wat".into()),
-                            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                             message: format!(
                                 "missing `then` branch with expected types [{}]",
                                 results
@@ -218,9 +216,9 @@ fn check_block_like(
                                 shared.line_index,
                                 node.text_range(),
                             ),
-                            severity: Some(DiagnosticSeverity::ERROR),
+                            severity: Some(DiagnosticSeverity::Error),
                             source: Some("wat".into()),
-                            code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                             message: format!(
                                 "missing `else` branch with expected types [{}]",
                                 results
@@ -302,9 +300,9 @@ impl TypeStack<'_> {
             );
             diagnostic = Some(Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(self.line_index, report_range.pick()),
-                severity: Some(DiagnosticSeverity::ERROR),
+                severity: Some(DiagnosticSeverity::Error),
                 source: Some("wat".into()),
-                code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                 message: format!("expected types {expected_types}, found {received_types}"),
                 related_information: if related_information.is_empty() {
                     None
@@ -375,9 +373,9 @@ impl TypeStack<'_> {
             );
             diagnostic = Some(Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(self.line_index, report_range.pick()),
-                severity: Some(DiagnosticSeverity::ERROR),
+                severity: Some(DiagnosticSeverity::Error),
                 source: Some("wat".into()),
-                code: Some(NumberOrString::String(DIAGNOSTIC_CODE.into())),
+                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                 message: format!(
                     "expected types {expected_types}, found {received_types}{}",
                     if let ReportRange::Last(..) = report_range {

@@ -1,11 +1,10 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lsp_types::Uri;
 use wat_service::LanguageService;
 
 #[test]
 fn folded() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32 f32) (result i32)
@@ -23,7 +22,7 @@ fn folded() {
 
 #[test]
 fn sequence() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (param i32 f32) (result i32)
@@ -42,7 +41,7 @@ fn sequence() {
 
 #[test]
 fn results_folded() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32 i32)
@@ -72,7 +71,7 @@ fn results_folded() {
 
 #[test]
 fn results_sequence() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32 i32)
@@ -106,7 +105,7 @@ fn results_sequence() {
 
 #[test]
 fn results_correct() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let source = "
 (module
   (func (result i32 i32)
@@ -152,5 +151,5 @@ fn results_correct() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(pick_diagnostics(response).is_empty());
+    assert!(response.items.is_empty());
 }

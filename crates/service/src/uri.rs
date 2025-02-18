@@ -1,4 +1,3 @@
-use lsp_types::Uri;
 use salsa::{InternId, InternKey};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
@@ -16,5 +15,5 @@ impl InternKey for InternUri {
 #[salsa::query_group(Uris)]
 pub(crate) trait UrisCtx: salsa::Database {
     #[salsa::interned]
-    fn uri(&self, uri: Uri) -> InternUri;
+    fn uri(&self, uri: String) -> InternUri;
 }

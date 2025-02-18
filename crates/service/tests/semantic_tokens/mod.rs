@@ -1,8 +1,8 @@
 use insta::assert_json_snapshot;
-use lsp_types::{
-    ClientCapabilities, InitializeParams, Position, Range, SemanticTokenType,
-    SemanticTokensClientCapabilities, SemanticTokensParams, SemanticTokensRangeParams,
-    TextDocumentClientCapabilities, TextDocumentIdentifier, Uri,
+use lspt::{
+    ClientCapabilities, InitializeParams, Position, Range, SemanticTokensClientCapabilities,
+    SemanticTokensParams, SemanticTokensRangeParams, TextDocumentClientCapabilities,
+    TextDocumentIdentifier,
 };
 use wat_service::LanguageService;
 
@@ -13,28 +13,28 @@ fn create_service() -> LanguageService {
             text_document: Some(TextDocumentClientCapabilities {
                 semantic_tokens: Some(SemanticTokensClientCapabilities {
                     token_types: vec![
-                        SemanticTokenType::NAMESPACE,
-                        SemanticTokenType::TYPE,
-                        SemanticTokenType::CLASS,
-                        SemanticTokenType::ENUM,
-                        SemanticTokenType::INTERFACE,
-                        SemanticTokenType::STRUCT,
-                        SemanticTokenType::TYPE_PARAMETER,
-                        SemanticTokenType::PARAMETER,
-                        SemanticTokenType::VARIABLE,
-                        SemanticTokenType::PROPERTY,
-                        SemanticTokenType::ENUM_MEMBER,
-                        SemanticTokenType::EVENT,
-                        SemanticTokenType::FUNCTION,
-                        SemanticTokenType::METHOD,
-                        SemanticTokenType::MACRO,
-                        SemanticTokenType::KEYWORD,
-                        SemanticTokenType::MODIFIER,
-                        SemanticTokenType::COMMENT,
-                        SemanticTokenType::STRING,
-                        SemanticTokenType::NUMBER,
-                        SemanticTokenType::REGEXP,
-                        SemanticTokenType::OPERATOR,
+                        "namespace".into(),
+                        "type".into(),
+                        "class".into(),
+                        "enum".into(),
+                        "interface".into(),
+                        "struct".into(),
+                        "typeParameter".into(),
+                        "parameter".into(),
+                        "variable".into(),
+                        "property".into(),
+                        "enumMember".into(),
+                        "event".into(),
+                        "function".into(),
+                        "method".into(),
+                        "macro".into(),
+                        "keyword".into(),
+                        "modifier".into(),
+                        "comment".into(),
+                        "string".into(),
+                        "number".into(),
+                        "regexp".into(),
+                        "operator".into(),
                     ],
                     ..Default::default()
                 }),
@@ -67,12 +67,12 @@ const SOURCE: &str = r#"
 
 #[test]
 fn full() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let mut service = create_service();
     service.commit(uri.clone(), SOURCE.into());
     let response = service.semantic_tokens_full(SemanticTokensParams {
-        work_done_progress_params: Default::default(),
-        partial_result_params: Default::default(),
+        work_done_token: Default::default(),
+        partial_result_token: Default::default(),
         text_document: TextDocumentIdentifier { uri },
     });
     assert_json_snapshot!(response);
@@ -80,28 +80,46 @@ fn full() {
 
 #[test]
 fn range() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let mut service = create_service();
     service.commit(uri.clone(), SOURCE.into());
     let response = service.semantic_tokens_range(SemanticTokensRangeParams {
-        work_done_progress_params: Default::default(),
-        partial_result_params: Default::default(),
+        work_done_token: Default::default(),
+        partial_result_token: Default::default(),
         text_document: TextDocumentIdentifier { uri },
-        range: Range::new(Position::new(4, 19), Position::new(5, 21)),
+        range: Range {
+            start: Position {
+                line: 4,
+                character: 19,
+            },
+            end: Position {
+                line: 5,
+                character: 21,
+            },
+        },
     });
     assert_json_snapshot!(response);
 }
 
 #[test]
 fn range_not_boundary() {
-    let uri = "untitled:test".parse::<Uri>().unwrap();
+    let uri = "untitled:test".to_string();
     let mut service = create_service();
     service.commit(uri.clone(), SOURCE.into());
     let response = service.semantic_tokens_range(SemanticTokensRangeParams {
-        work_done_progress_params: Default::default(),
-        partial_result_params: Default::default(),
+        work_done_token: Default::default(),
+        partial_result_token: Default::default(),
         text_document: TextDocumentIdentifier { uri },
-        range: Range::new(Position::new(4, 23), Position::new(5, 16)),
+        range: Range {
+            start: Position {
+                line: 4,
+                character: 23,
+            },
+            end: Position {
+                line: 5,
+                character: 16,
+            },
+        },
     });
     assert_json_snapshot!(response);
 }
