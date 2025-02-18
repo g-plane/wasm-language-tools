@@ -35,7 +35,7 @@ pub fn unchanged_text_bench(c: &mut Criterion) {
                         "enum".into(),
                         "interface".into(),
                         "struct".into(),
-                        "type_parameter".into(),
+                        "typeParameter".into(),
                         "parameter".into(),
                         "variable".into(),
                         "property".into(),

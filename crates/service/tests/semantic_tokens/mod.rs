@@ -19,7 +19,7 @@ fn create_service() -> LanguageService {
                         "enum".into(),
                         "interface".into(),
                         "struct".into(),
-                        "type_parameter".into(),
+                        "typeParameter".into(),
                         "parameter".into(),
                         "variable".into(),
                         "property".into(),
