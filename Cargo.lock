@@ -561,8 +561,9 @@ checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
 name = "lspt"
-version = "0.0.0"
-source = "git+https://gitlab.com/g-plane/lspt.git#e55340d4cd9b553e102b5587c3fa2b9a24268dfc"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cae864993a3617e8b73c0467165e8280f0feac52643b0b4f1a74ddc2e1ca3e27"
 dependencies = [
  "rustc-hash 2.1.1",
  "serde",
