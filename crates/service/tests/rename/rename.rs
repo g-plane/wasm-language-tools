@@ -18,19 +18,47 @@ fn invalid_new_name() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     assert_eq!(
-        service.rename(create_params(uri.clone(), Position { line: 0, character: 0 }, "0")),
+        service.rename(create_params(
+            uri.clone(),
+            Position {
+                line: 0,
+                character: 0
+            },
+            "0"
+        )),
         Err("Invalid name `0`: not a valid identifier.".into())
     );
     assert_eq!(
-        service.rename(create_params(uri.clone(), Position { line: 0, character: 0 }, "abc")),
+        service.rename(create_params(
+            uri.clone(),
+            Position {
+                line: 0,
+                character: 0
+            },
+            "abc"
+        )),
         Err("Invalid name `abc`: not a valid identifier.".into())
     );
     assert_eq!(
-        service.rename(create_params(uri.clone(), Position { line: 0, character: 0 }, "$")),
+        service.rename(create_params(
+            uri.clone(),
+            Position {
+                line: 0,
+                character: 0
+            },
+            "$"
+        )),
         Err("Invalid name `$`: not a valid identifier.".into())
     );
     assert_eq!(
-        service.rename(create_params(uri.clone(), Position { line: 0, character: 0 }, "$()")),
+        service.rename(create_params(
+            uri.clone(),
+            Position {
+                line: 0,
+                character: 0
+            },
+            "$()"
+        )),
         Err("Invalid name `$()`: not a valid identifier.".into())
     );
 }
@@ -49,27 +77,69 @@ fn ignored_tokens() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     assert_eq!(
-        service.rename(create_params(uri.clone(), Position { line: 1, character: 4 }, "$f")),
+        service.rename(create_params(
+            uri.clone(),
+            Position {
+                line: 1,
+                character: 4
+            },
+            "$f"
+        )),
         Err("This can't be renamed.".into())
     );
     assert_eq!(
-        service.rename(create_params(uri.clone(), Position { line: 2, character: 29 }, "$f")),
+        service.rename(create_params(
+            uri.clone(),
+            Position {
+                line: 2,
+                character: 29
+            },
+            "$f"
+        )),
         Err("This can't be renamed.".into())
     );
     assert_eq!(
-        service.rename(create_params(uri.clone(), Position { line: 3, character: 7 }, "$f")),
+        service.rename(create_params(
+            uri.clone(),
+            Position {
+                line: 3,
+                character: 7
+            },
+            "$f"
+        )),
         Err("This can't be renamed.".into())
     );
     assert_eq!(
-        service.rename(create_params(uri.clone(), Position { line: 3, character: 18 }, "$f")),
+        service.rename(create_params(
+            uri.clone(),
+            Position {
+                line: 3,
+                character: 18
+            },
+            "$f"
+        )),
         Err("This can't be renamed.".into())
     );
     assert_eq!(
-        service.rename(create_params(uri.clone(), Position { line: 4, character: 15 }, "$f")),
+        service.rename(create_params(
+            uri.clone(),
+            Position {
+                line: 4,
+                character: 15
+            },
+            "$f"
+        )),
         Err("This can't be renamed.".into())
     );
     assert_eq!(
-        service.rename(create_params(uri.clone(), Position { line: 4, character: 23 }, "$f")),
+        service.rename(create_params(
+            uri.clone(),
+            Position {
+                line: 4,
+                character: 23
+            },
+            "$f"
+        )),
         Err("This can't be renamed.".into())
     );
 }

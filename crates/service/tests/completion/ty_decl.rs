@@ -1,6 +1,6 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lspt::{Position};
+use lspt::Position;
 use wat_service::LanguageService;
 
 #[test]
@@ -13,7 +13,13 @@ fn func_keyword() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position { line: 2, character: 11 }));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 11,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
@@ -27,7 +33,13 @@ fn param_and_result_after_paren() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position { line: 2, character: 17 }));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 17,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
@@ -41,6 +53,12 @@ fn param_and_result_incomplete() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position { line: 2, character: 18 }));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 18,
+        },
+    ));
     assert_json_snapshot!(response);
 }

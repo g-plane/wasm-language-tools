@@ -1,6 +1,6 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lspt::{Position};
+use lspt::Position;
 use wat_service::LanguageService;
 
 #[test]
@@ -20,7 +20,13 @@ fn blocks() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position { line: 8, character: 24 }));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 8,
+            character: 24,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
@@ -41,7 +47,13 @@ fn blocks_following_int_idx() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position { line: 8, character: 25 }));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 8,
+            character: 25,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
@@ -62,7 +74,13 @@ fn blocks_following_dollar() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position { line: 8, character: 25 }));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 8,
+            character: 25,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
@@ -83,7 +101,13 @@ fn blocks_following_ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position { line: 8, character: 26 }));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 8,
+            character: 26,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
@@ -104,7 +128,13 @@ fn multiple_indexes() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position { line: 8, character: 29 }));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 8,
+            character: 29,
+        },
+    ));
     assert_json_snapshot!(response);
 }
 
@@ -126,6 +156,12 @@ fn block_type() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, Position { line: 9, character: 24 }));
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 9,
+            character: 24,
+        },
+    ));
     assert_json_snapshot!(response);
 }
