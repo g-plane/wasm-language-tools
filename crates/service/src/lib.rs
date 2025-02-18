@@ -23,11 +23,11 @@ use crate::{
 };
 use indexmap::{IndexMap, IndexSet};
 use lspt::{
-    CodeActionKind, CodeActionOptions, CompletionOptions, DiagnosticOptions, InitializeParams,
-    InitializeResult, Registration, RegistrationParams, RenameOptions,
-    SemanticTokensClientCapabilities, SemanticTokensLegend, SemanticTokensOptions,
-    ServerCapabilities, ServerInfo, SignatureHelpOptions, TextDocumentClientCapabilities,
-    TextDocumentSyncKind, TextDocumentSyncOptions, Union2, Union3,
+    CodeActionKind, CodeActionOptions, CompletionOptions, DiagnosticOptions,
+    DidChangeConfigurationNotification, InitializeParams, InitializeResult, Registration,
+    RegistrationParams, RenameOptions, SemanticTokensClientCapabilities, SemanticTokensLegend,
+    SemanticTokensOptions, ServerCapabilities, ServerInfo, SignatureHelpOptions,
+    TextDocumentClientCapabilities, TextDocumentSyncKind, TextDocumentSyncOptions, Union2, Union3,
 };
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use salsa::{Database, ParallelDatabase, Snapshot};
@@ -217,10 +217,11 @@ impl LanguageService {
     #[inline]
     /// Get dynamically registered capabilities.
     pub fn dynamic_capabilities(&self) -> RegistrationParams {
+        use lspt::Notification;
         RegistrationParams {
             registrations: vec![Registration {
-                id: "workspace/didChangeConfiguration".into(),
-                method: "workspace/didChangeConfiguration".into(),
+                id: DidChangeConfigurationNotification::METHOD.into(),
+                method: DidChangeConfigurationNotification::METHOD.into(),
                 register_options: None,
             }],
         }
