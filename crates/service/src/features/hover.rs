@@ -8,9 +8,7 @@ use crate::{
     uri::{InternUri, UrisCtx},
     LanguageService,
 };
-use lspt::{
-    Hover, HoverParams, MarkedString, MarkedStringWithLanguage, MarkupContent, MarkupKind, Union3,
-};
+use lspt::{Hover, HoverParams, MarkupContent, MarkupKind, Union3};
 use rowan::ast::{support::child, AstNode};
 use std::fmt::Write;
 use wat_syntax::{
@@ -35,7 +33,7 @@ impl LanguageService {
                 symbol_table
                     .find_param_or_local_def(key)
                     .map(|symbol| Hover {
-                        contents: Union3::B(create_param_or_local_hover(self, symbol)),
+                        contents: Union3::A(create_param_or_local_hover(self, symbol)),
                         range: Some(helpers::rowan_range_to_lsp_range(
                             &line_index,
                             token.text_range(),
@@ -63,7 +61,7 @@ impl LanguageService {
                                 }),
                                 SymbolKind::TypeUse => {
                                     symbol_table.find_def(key).map(|symbol| Hover {
-                                        contents: Union3::B(create_type_def_hover(self, symbol)),
+                                        contents: Union3::A(create_type_def_hover(self, symbol)),
                                         range: Some(helpers::rowan_range_to_lsp_range(
                                             &line_index,
                                             token.text_range(),
@@ -72,7 +70,7 @@ impl LanguageService {
                                 }
                                 SymbolKind::GlobalRef => {
                                     symbol_table.find_def(key).map(|symbol| Hover {
-                                        contents: Union3::B(create_global_def_hover(
+                                        contents: Union3::A(create_global_def_hover(
                                             self, symbol, &root,
                                         )),
                                         range: Some(helpers::rowan_range_to_lsp_range(
@@ -90,7 +88,7 @@ impl LanguageService {
                                             .find(|symbol| symbol.key == def_key)
                                     })
                                     .map(|block| Hover {
-                                        contents: Union3::B(create_block_hover(
+                                        contents: Union3::A(create_block_hover(
                                             self, block, uri, &root,
                                         )),
                                         range: Some(helpers::rowan_range_to_lsp_range(
@@ -108,7 +106,7 @@ impl LanguageService {
                             .find(|symbol| symbol.key == key)
                             .and_then(|symbol| create_def_hover(self, uri, &root, symbol))
                             .map(|contents| Hover {
-                                contents,
+                                contents: Union3::A(contents),
                                 range: Some(helpers::rowan_range_to_lsp_range(
                                     &line_index,
                                     token.text_range(),
@@ -140,7 +138,7 @@ impl LanguageService {
                     .find(|symbol| symbol.key == key)
                     .and_then(|symbol| create_def_hover(self, uri, &root, symbol))
                     .map(|contents| Hover {
-                        contents,
+                        contents: Union3::A(contents),
                         range: Some(helpers::rowan_range_to_lsp_range(
                             &line_index,
                             token.text_range(),
@@ -183,18 +181,16 @@ fn create_def_hover(
     uri: InternUri,
     root: &SyntaxNode,
     symbol: &Symbol,
-) -> Option<Union3<MarkupContent, MarkedString, Vec<MarkedString>>> {
+) -> Option<MarkupContent> {
     match symbol.kind {
-        SymbolKind::Param | SymbolKind::Local => {
-            Some(Union3::B(create_param_or_local_hover(service, symbol)))
-        }
-        SymbolKind::Func => Some(Union3::A(MarkupContent {
+        SymbolKind::Param | SymbolKind::Local => Some(create_param_or_local_hover(service, symbol)),
+        SymbolKind::Func => Some(MarkupContent {
             kind: MarkupKind::Markdown,
             value: create_func_hover(service, uri, symbol.clone(), root),
-        })),
-        SymbolKind::Type => Some(Union3::B(create_type_def_hover(service, symbol))),
-        SymbolKind::GlobalDef => Some(Union3::B(create_global_def_hover(service, symbol, root))),
-        SymbolKind::BlockDef => Some(Union3::B(create_block_hover(service, symbol, uri, root))),
+        }),
+        SymbolKind::Type => Some(create_type_def_hover(service, symbol)),
+        SymbolKind::GlobalDef => Some(create_global_def_hover(service, symbol, root)),
+        SymbolKind::BlockDef => Some(create_block_hover(service, symbol, uri, root)),
         _ => None,
     }
 }
@@ -221,66 +217,72 @@ fn create_func_hover(
     content
 }
 
-fn create_param_or_local_hover(service: &LanguageService, symbol: &Symbol) -> MarkedString {
-    let mut content_value = '('.to_string();
+fn create_param_or_local_hover(service: &LanguageService, symbol: &Symbol) -> MarkupContent {
+    let mut content = '('.to_string();
     match symbol.kind {
         SymbolKind::Param => {
-            content_value.push_str("param");
+            content.push_str("param");
             if let Some(name) = symbol.idx.name {
-                content_value.push(' ');
-                content_value.push_str(&service.lookup_ident(name));
+                content.push(' ');
+                content.push_str(&service.lookup_ident(name));
             }
         }
         SymbolKind::Local => {
-            content_value.push_str("local");
+            content.push_str("local");
             if let Some(name) = symbol.idx.name {
-                content_value.push(' ');
-                content_value.push_str(&service.lookup_ident(name));
+                content.push(' ');
+                content.push_str(&service.lookup_ident(name));
             }
         }
         _ => {}
     }
     if let Some(ty) = service.extract_type(symbol.green.clone()) {
-        content_value.push(' ');
-        let _ = write!(content_value, "{}", ty.render(service));
+        content.push(' ');
+        let _ = write!(content, "{}", ty.render(service));
     }
-    content_value.push(')');
-    create_marked_string(content_value)
+    content.push(')');
+    MarkupContent {
+        kind: MarkupKind::Markdown,
+        value: format!("```wat\n{content}\n```"),
+    }
 }
 
 fn create_global_def_hover(
     service: &LanguageService,
     symbol: &Symbol,
     root: &SyntaxNode,
-) -> MarkedString {
-    let mut content_value = '('.to_string();
+) -> MarkupContent {
+    let mut content = '('.to_string();
     if symbol.kind == SymbolKind::GlobalDef {
-        content_value.push_str("global");
+        content.push_str("global");
         if let Some(name) = symbol.idx.name {
-            content_value.push(' ');
-            content_value.push_str(&service.lookup_ident(name));
+            content.push(' ');
+            content.push_str(&service.lookup_ident(name));
         }
     }
     let node = symbol.key.to_node(root);
     if let Some(global_type) = child::<GlobalType>(&node) {
         let mutable = global_type.mut_keyword().is_some();
         if mutable {
-            content_value.push_str(" (mut");
+            content.push_str(" (mut");
         }
         if let Some(val_type) = global_type.val_type() {
-            content_value.push(' ');
-            content_value.push_str(&val_type.syntax().to_string());
+            content.push(' ');
+            content.push_str(&val_type.syntax().to_string());
         }
         if mutable {
-            content_value.push(')');
+            content.push(')');
         }
     }
-    content_value.push(')');
-    create_marked_string(content_value)
+    content.push(')');
+    MarkupContent {
+        kind: MarkupKind::Markdown,
+        value: format!("```wat\n{content}\n```"),
+    }
 }
 
-fn create_type_def_hover(service: &LanguageService, symbol: &Symbol) -> MarkedString {
-    let mut content_value = "(type".to_string();
+fn create_type_def_hover(service: &LanguageService, symbol: &Symbol) -> MarkupContent {
+    let mut content = "(type".to_string();
     if let Symbol {
         kind: SymbolKind::Type,
         idx: Idx {
@@ -289,20 +291,23 @@ fn create_type_def_hover(service: &LanguageService, symbol: &Symbol) -> MarkedSt
         ..
     } = symbol
     {
-        content_value.push(' ');
-        content_value.push_str(&service.lookup_ident(*name));
+        content.push(' ');
+        content.push_str(&service.lookup_ident(*name));
     }
     if let Some(func_type) = helpers::ast::find_func_type_of_type_def(&symbol.green) {
         let sig = service.extract_sig(func_type.to_owned());
-        content_value.push_str(" (func");
+        content.push_str(" (func");
         if !sig.params.is_empty() || !sig.results.is_empty() {
-            content_value.push(' ');
-            content_value.push_str(&service.render_sig(sig));
+            content.push(' ');
+            content.push_str(&service.render_sig(sig));
         }
-        content_value.push(')');
+        content.push(')');
     }
-    content_value.push(')');
-    create_marked_string(content_value)
+    content.push(')');
+    MarkupContent {
+        kind: MarkupKind::Markdown,
+        value: format!("```wat\n{content}\n```"),
+    }
 }
 
 fn create_block_hover(
@@ -310,19 +315,16 @@ fn create_block_hover(
     symbol: &Symbol,
     uri: InternUri,
     root: &SyntaxNode,
-) -> MarkedString {
-    create_marked_string(service.render_block_header(
+) -> MarkupContent {
+    let content = service.render_block_header(
         symbol.key.kind(),
         symbol.idx.name,
         types_analyzer::get_block_sig(service, uri, &symbol.key.to_node(root)),
-    ))
-}
-
-fn create_marked_string(value: String) -> MarkedString {
-    MarkedString::B(MarkedStringWithLanguage {
-        language: "wat".into(),
-        value,
-    })
+    );
+    MarkupContent {
+        kind: MarkupKind::Markdown,
+        value: format!("```wat\n{content}\n```"),
+    }
 }
 
 fn format_op_code(code: u32) -> String {

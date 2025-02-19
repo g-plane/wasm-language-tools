@@ -4,8 +4,8 @@ expression: response
 ---
 {
   "contents": {
-    "language": "wat",
-    "value": "(local i32)"
+    "kind": "markdown",
+    "value": "```wat\n(local i32)\n```"
   },
   "range": {
     "start": {

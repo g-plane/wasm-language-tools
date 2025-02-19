@@ -4,8 +4,8 @@ expression: response
 ---
 {
   "contents": {
-    "language": "wat",
-    "value": "(type $type (func))"
+    "kind": "markdown",
+    "value": "```wat\n(type $type (func))\n```"
   },
   "range": {
     "start": {

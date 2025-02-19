@@ -4,8 +4,8 @@ expression: response
 ---
 {
   "contents": {
-    "language": "wat",
-    "value": "(global $global (mut i64))"
+    "kind": "markdown",
+    "value": "```wat\n(global $global (mut i64))\n```"
   },
   "range": {
     "start": {
