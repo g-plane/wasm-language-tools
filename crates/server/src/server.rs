@@ -108,8 +108,15 @@ impl Server {
             .as_ref()
             .and_then(|it| it.diagnostic.as_ref())
             .is_some();
-        // read it from capabilities once https://github.com/gluon-lang/lsp-types/pull/281 is merged
-        self.support_refresh_diagnostics = true;
+        self.support_refresh_diagnostics = matches!(
+            params
+                .capabilities
+                .workspace
+                .as_ref()
+                .and_then(|it| it.diagnostics.as_ref())
+                .and_then(|it| it.refresh_support),
+            Some(true)
+        );
         self.support_pull_config = matches!(
             params
                 .capabilities
