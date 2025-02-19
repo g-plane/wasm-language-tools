@@ -16,7 +16,7 @@ pub fn check(
     let diagnostics = symbol_table
         .symbols
         .iter()
-        .filter(|symbol| match &symbol.kind {
+        .filter(|symbol| match symbol.kind {
             SymbolKind::Module
             | SymbolKind::Func
             | SymbolKind::Param

@@ -119,7 +119,7 @@ impl LanguageService {
                     symbol_table
                         .symbols
                         .iter()
-                        .filter(|symbol| match &symbol.kind {
+                        .filter(|symbol| match symbol.kind {
                             SymbolKind::Param | SymbolKind::Local => {
                                 params.context.include_declaration
                                     && current_symbol.idx.is_defined_by(&symbol.idx)

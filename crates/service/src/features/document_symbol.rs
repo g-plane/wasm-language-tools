@@ -22,7 +22,7 @@ impl LanguageService {
         let mut symbols_map = symbol_table
             .symbols
             .iter()
-            .filter_map(|symbol| match &symbol.kind {
+            .filter_map(|symbol| match symbol.kind {
                 SymbolKind::Module => {
                     let module_range =
                         helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());

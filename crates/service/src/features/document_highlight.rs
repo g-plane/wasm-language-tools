@@ -135,7 +135,7 @@ impl LanguageService {
                                 symbol_table
                                     .symbols
                                     .iter()
-                                    .filter(|symbol| match &symbol.kind {
+                                    .filter(|symbol| match symbol.kind {
                                         SymbolKind::Param | SymbolKind::Local => {
                                             current_symbol.idx.is_defined_by(&symbol.idx)
                                                 && symbol.region == current_symbol.region

@@ -30,7 +30,7 @@ impl LanguageService {
         symbol_table
             .symbols
             .iter()
-            .find_map(|symbol| match &symbol.kind {
+            .find_map(|symbol| match symbol.kind {
                 SymbolKind::Func if symbol.key.text_range() == parent_range => {
                     Some(vec![CallHierarchyItem {
                         name: symbol.idx.render(self).to_string(),
@@ -92,9 +92,10 @@ impl LanguageService {
 
         let line_index = self.line_index(uri);
         let callee_def_range = helpers::lsp_range_to_rowan_range(&line_index, params.item.range)?;
-        let callee_def = symbol_table.symbols.iter().find(|symbol| {
-            symbol.kind == SymbolKind::Func && symbol.key.text_range() == callee_def_range
-        })?;
+        let callee_def = symbol_table
+            .symbols
+            .iter()
+            .find(|symbol| symbol.key.text_range() == callee_def_range)?;
         let items = symbol_table
             .symbols
             .iter()
@@ -161,9 +162,10 @@ impl LanguageService {
 
         let line_index = self.line_index(uri);
         let call_def_range = helpers::lsp_range_to_rowan_range(&line_index, params.item.range)?;
-        let call_def_symbol = symbol_table.symbols.iter().find(|symbol| {
-            symbol.kind == SymbolKind::Func && symbol.key.text_range() == call_def_range
-        })?;
+        let call_def_symbol = symbol_table
+            .symbols
+            .iter()
+            .find(|symbol| symbol.key.text_range() == call_def_range)?;
         let func = call_def_symbol.key.to_node(&root);
         let items = func
             .descendants()
