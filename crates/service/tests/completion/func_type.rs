@@ -90,3 +90,25 @@ fn func_types_following_ident() {
     ));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn sorting() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $a (struct))
+  (type $b (array))
+  (type $c (func))
+  (func (type )))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 5,
+            character: 14,
+        },
+    ));
+    assert_json_snapshot!(response);
+}

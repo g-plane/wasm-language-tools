@@ -6,6 +6,7 @@ expression: response
   {
     "label": "0",
     "kind": 8,
+    "sortText": "0",
     "textEdit": {
       "range": {
         "start": {
@@ -23,6 +24,7 @@ expression: response
   {
     "label": "$type",
     "kind": 8,
+    "sortText": "0",
     "textEdit": {
       "range": {
         "start": {

@@ -1,0 +1,60 @@
+---
+source: crates/service/tests/completion/func_type.rs
+expression: response
+---
+[
+  {
+    "label": "$a",
+    "kind": 8,
+    "sortText": "1",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 13
+        },
+        "end": {
+          "line": 5,
+          "character": 14
+        }
+      },
+      "newText": "$a"
+    }
+  },
+  {
+    "label": "$b",
+    "kind": 8,
+    "sortText": "1",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 13
+        },
+        "end": {
+          "line": 5,
+          "character": 14
+        }
+      },
+      "newText": "$b"
+    }
+  },
+  {
+    "label": "$c",
+    "kind": 8,
+    "sortText": "0",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 13
+        },
+        "end": {
+          "line": 5,
+          "character": 14
+        }
+      },
+      "newText": "$c"
+    }
+  }
+]

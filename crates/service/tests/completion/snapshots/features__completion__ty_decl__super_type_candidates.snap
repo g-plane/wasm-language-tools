@@ -1,0 +1,78 @@
+---
+source: crates/service/tests/completion/ty_decl.rs
+expression: response
+---
+[
+  {
+    "label": "$a",
+    "kind": 8,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 12
+        },
+        "end": {
+          "line": 5,
+          "character": 13
+        }
+      },
+      "newText": "$a"
+    }
+  },
+  {
+    "label": "$b",
+    "kind": 8,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 12
+        },
+        "end": {
+          "line": 5,
+          "character": 13
+        }
+      },
+      "newText": "$b"
+    }
+  },
+  {
+    "label": "$c",
+    "kind": 8,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 12
+        },
+        "end": {
+          "line": 5,
+          "character": 13
+        }
+      },
+      "newText": "$c"
+    }
+  },
+  {
+    "label": "3",
+    "kind": 8,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 12
+        },
+        "end": {
+          "line": 5,
+          "character": 13
+        }
+      },
+      "newText": "3"
+    }
+  },
+  {
+    "label": "final",
+    "kind": 14
+  }
+]

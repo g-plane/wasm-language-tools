@@ -541,3 +541,25 @@ fn ref_type_in_array_type() {
     ));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn super_type_candidates() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $a (struct))
+  (type $b (array))
+  (type $c (func))
+  (type (sub )))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 5,
+            character: 13,
+        },
+    ));
+    assert_json_snapshot!(response);
+}

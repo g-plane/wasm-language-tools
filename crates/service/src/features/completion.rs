@@ -18,7 +18,10 @@ use rowan::{
     Direction,
 };
 use smallvec::SmallVec;
-use wat_syntax::{ast::PlainInstr, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
+use wat_syntax::{
+    ast::{CompType, PlainInstr, TypeDef},
+    SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken,
+};
 
 impl LanguageService {
     /// Handler for `textDocument/completion` request.
@@ -229,7 +232,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.extend([CmpCtx::NumTypeVecType, CmpCtx::AbbrRefType]);
             }
         }
-        SyntaxKind::TYPE_USE => ctx.push(CmpCtx::TypeDef),
+        SyntaxKind::TYPE_USE => ctx.push(CmpCtx::TypeDef(true)),
         SyntaxKind::FUNC_TYPE => {
             if find_leading_l_paren(token).is_some() {
                 ctx.extend([CmpCtx::KeywordParam, CmpCtx::KeywordResult]);
@@ -241,7 +244,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC => {
                     ctx.push(CmpCtx::Func);
                 }
-                SyntaxKind::TYPE_USE => ctx.push(CmpCtx::TypeDef),
+                SyntaxKind::TYPE_USE => ctx.push(CmpCtx::TypeDef(true)),
                 SyntaxKind::EXPORT_DESC_GLOBAL => ctx.push(CmpCtx::Global),
                 SyntaxKind::EXPORT_DESC_MEMORY => ctx.push(CmpCtx::Memory),
                 SyntaxKind::EXPORT_DESC_TABLE => ctx.push(CmpCtx::Table),
@@ -370,7 +373,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::KeywordsCompType);
             } else {
-                ctx.extend([CmpCtx::TypeDef, CmpCtx::KeywordFinal]);
+                ctx.extend([CmpCtx::TypeDef(false), CmpCtx::KeywordFinal]);
             }
         }
         SyntaxKind::STRUCT_TYPE => {
@@ -401,7 +404,11 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             }
         }
         SyntaxKind::REF_TYPE => {
-            ctx.extend([CmpCtx::TypeDef, CmpCtx::KeywordNull, CmpCtx::AbsHeapType]);
+            ctx.extend([
+                CmpCtx::TypeDef(false),
+                CmpCtx::KeywordNull,
+                CmpCtx::AbsHeapType,
+            ]);
         }
         _ => {}
     }
@@ -486,7 +493,7 @@ enum CmpCtx {
     AbbrRefType,
     Local,
     Func,
-    TypeDef,
+    TypeDef(bool),
     Global,
     MemArg,
     Memory,
@@ -685,7 +692,7 @@ fn get_cmp_list(
                         },
                     ));
                 }
-                CmpCtx::TypeDef => {
+                CmpCtx::TypeDef(prefer_func) => {
                     let Some(module) = token
                         .parent_ancestors()
                         .find(|node| node.kind() == SyntaxKind::MODULE)
@@ -705,6 +712,20 @@ fn get_cmp_list(
                                     ),
                                     new_text: label,
                                 })),
+                                sort_text: if prefer_func {
+                                    TypeDef::cast(symbol.key.to_node(root))
+                                        .and_then(|type_def| type_def.sub_type())
+                                        .and_then(|sub_type| sub_type.comp_type())
+                                        .map(|comp_type| {
+                                            if let CompType::Func(..) = comp_type {
+                                                "0".into()
+                                            } else {
+                                                "1".into()
+                                            }
+                                        })
+                                } else {
+                                    None
+                                },
                                 ..Default::default()
                             }
                         },
