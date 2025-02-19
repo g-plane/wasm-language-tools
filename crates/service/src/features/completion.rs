@@ -226,7 +226,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         SyntaxKind::PARAM | SyntaxKind::RESULT | SyntaxKind::LOCAL | SyntaxKind::GLOBAL_TYPE => {
             if !token.text().starts_with('$') {
-                ctx.extend([CmpCtx::NumType, CmpCtx::VecType, CmpCtx::AbbrRefType]);
+                ctx.extend([CmpCtx::NumTypeVecType, CmpCtx::AbbrRefType]);
             }
         }
         SyntaxKind::TYPE_USE => ctx.push(CmpCtx::TypeDef),
@@ -257,7 +257,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             } else if find_leading_l_paren(token).is_some() {
                 ctx.extend([CmpCtx::KeywordMut, CmpCtx::KeywordImExport]);
             } else {
-                ctx.extend([CmpCtx::NumType, CmpCtx::VecType, CmpCtx::AbbrRefType]);
+                ctx.extend([CmpCtx::NumTypeVecType, CmpCtx::AbbrRefType]);
             }
         }
         SyntaxKind::MODULE_FIELD_EXPORT | SyntaxKind::MODULE_FIELD_IMPORT => {
@@ -339,7 +339,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::KeywordMut);
             } else {
-                ctx.extend([CmpCtx::NumType, CmpCtx::VecType, CmpCtx::AbbrRefType]);
+                ctx.extend([CmpCtx::NumTypeVecType, CmpCtx::AbbrRefType]);
             }
         }
         SyntaxKind::ELEM => {
@@ -383,8 +383,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.extend([CmpCtx::KeywordMut, CmpCtx::KeywordRef]);
             } else {
                 ctx.extend([
-                    CmpCtx::NumType,
-                    CmpCtx::VecType,
+                    CmpCtx::NumTypeVecType,
                     CmpCtx::AbbrRefType,
                     CmpCtx::PackedType,
                 ]);
@@ -395,8 +394,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::KeywordRef);
             } else {
                 ctx.extend([
-                    CmpCtx::NumType,
-                    CmpCtx::VecType,
+                    CmpCtx::NumTypeVecType,
                     CmpCtx::AbbrRefType,
                     CmpCtx::PackedType,
                 ]);
@@ -484,8 +482,7 @@ fn add_cmp_ctx_for_immediates(
 
 enum CmpCtx {
     Instr,
-    NumType,
-    VecType,
+    NumTypeVecType,
     AbbrRefType,
     Local,
     Func,
@@ -556,8 +553,8 @@ fn get_cmp_list(
                         }));
                     }
                 }
-                CmpCtx::NumType => {
-                    items.extend(["i32", "i64", "f32", "f64"].into_iter().map(|ty| {
+                CmpCtx::NumTypeVecType => {
+                    items.extend(["i32", "i64", "f32", "f64", "v128"].into_iter().map(|ty| {
                         CompletionItem {
                             label: ty.to_string(),
                             kind: Some(CompletionItemKind::Class),
@@ -571,17 +568,6 @@ fn get_cmp_list(
                         }
                     }));
                 }
-                CmpCtx::VecType => items.push(CompletionItem {
-                    label: "v128".into(),
-                    kind: Some(CompletionItemKind::Class),
-                    documentation: data_set::get_value_type_description("v128").map(|desc| {
-                        Union2::B(MarkupContent {
-                            kind: MarkupKind::Markdown,
-                            value: desc.into(),
-                        })
-                    }),
-                    ..Default::default()
-                }),
                 CmpCtx::AbbrRefType => {
                     items.extend(
                         [
