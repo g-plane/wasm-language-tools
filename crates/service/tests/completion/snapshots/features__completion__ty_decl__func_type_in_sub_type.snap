@@ -4,7 +4,11 @@ expression: response
 ---
 [
   {
-    "label": "func",
+    "label": "param",
+    "kind": 14
+  },
+  {
+    "label": "result",
     "kind": 14
   }
 ]

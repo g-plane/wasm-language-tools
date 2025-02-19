@@ -94,7 +94,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         SyntaxKind::TYPE_DEF => {
             if find_leading_l_paren(token).is_some() {
-                ctx.push(CmpCtx::KeywordFunc);
+                ctx.extend([CmpCtx::KeywordsCompType, CmpCtx::KeywordSub]);
             }
         }
         SyntaxKind::PLAIN_INSTR => {
@@ -229,7 +229,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::ValType);
             }
         }
-        SyntaxKind::TYPE_USE => ctx.push(CmpCtx::FuncType),
+        SyntaxKind::TYPE_USE => ctx.push(CmpCtx::TypeDef),
         SyntaxKind::FUNC_TYPE => {
             if find_leading_l_paren(token).is_some() {
                 ctx.extend([CmpCtx::KeywordParam, CmpCtx::KeywordResult]);
@@ -241,7 +241,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC => {
                     ctx.push(CmpCtx::Func);
                 }
-                SyntaxKind::TYPE_USE => ctx.push(CmpCtx::FuncType),
+                SyntaxKind::TYPE_USE => ctx.push(CmpCtx::TypeDef),
                 SyntaxKind::EXPORT_DESC_GLOBAL => ctx.push(CmpCtx::Global),
                 SyntaxKind::EXPORT_DESC_MEMORY => ctx.push(CmpCtx::Memory),
                 SyntaxKind::EXPORT_DESC_TABLE => ctx.push(CmpCtx::Table),
@@ -364,6 +364,13 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::KeywordModule);
             }
         }
+        SyntaxKind::SUB_TYPE => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordsCompType);
+            } else {
+                ctx.extend([CmpCtx::TypeDef, CmpCtx::KeywordFinal]);
+            }
+        }
         _ => {}
     }
     if ctx.is_empty() {
@@ -447,7 +454,7 @@ enum CmpCtx {
     RefType,
     Local,
     Func,
-    FuncType,
+    TypeDef,
     Global,
     MemArg,
     Memory,
@@ -470,6 +477,9 @@ enum CmpCtx {
     KeywordOffset,
     KeywordDeclare,
     KeywordTable,
+    KeywordSub,
+    KeywordFinal,
+    KeywordsCompType,
 }
 
 fn get_cmp_list(
@@ -621,7 +631,7 @@ fn get_cmp_list(
                         },
                     ));
                 }
-                CmpCtx::FuncType => {
+                CmpCtx::TypeDef => {
                     let Some(module) = token
                         .parent_ancestors()
                         .find(|node| node.kind() == SyntaxKind::MODULE)
@@ -895,6 +905,25 @@ fn get_cmp_list(
                     kind: Some(CompletionItemKind::Keyword),
                     ..Default::default()
                 }),
+                CmpCtx::KeywordSub => items.push(CompletionItem {
+                    label: "sub".to_string(),
+                    kind: Some(CompletionItemKind::Keyword),
+                    ..Default::default()
+                }),
+                CmpCtx::KeywordFinal => items.push(CompletionItem {
+                    label: "final".to_string(),
+                    kind: Some(CompletionItemKind::Keyword),
+                    ..Default::default()
+                }),
+                CmpCtx::KeywordsCompType => {
+                    items.extend(["func", "struct", "array"].into_iter().map(|keyword| {
+                        CompletionItem {
+                            label: keyword.to_string(),
+                            kind: Some(CompletionItemKind::Keyword),
+                            ..Default::default()
+                        }
+                    }));
+                }
             }
             items
         })

@@ -1,0 +1,18 @@
+---
+source: crates/service/tests/completion/ty_decl.rs
+expression: response
+---
+[
+  {
+    "label": "func",
+    "kind": 14
+  },
+  {
+    "label": "struct",
+    "kind": 14
+  },
+  {
+    "label": "array",
+    "kind": 14
+  }
+]
