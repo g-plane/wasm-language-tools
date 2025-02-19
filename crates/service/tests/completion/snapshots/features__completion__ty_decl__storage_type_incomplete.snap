@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/completion/param.rs
+source: crates/service/tests/completion/ty_decl.rs
 expression: response
 ---
 [
@@ -89,6 +89,14 @@ expression: response
   },
   {
     "label": "nullexternref",
+    "kind": 7
+  },
+  {
+    "label": "i8",
+    "kind": 7
+  },
+  {
+    "label": "i16",
     "kind": 7
   }
 ]

@@ -2,9 +2,6 @@ pub(crate) use instr_meta::*;
 
 mod instr_meta;
 
-pub(crate) static VALUE_TYPES: [&str; 7] =
-    ["i32", "i64", "f32", "f64", "v128", "funcref", "externref"];
-
 pub(crate) static INSTR_NAMES: [&str; 296] = [
     "unreachable",
     "nop",

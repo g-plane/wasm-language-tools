@@ -1,0 +1,10 @@
+---
+source: crates/service/tests/completion/ty_decl.rs
+expression: response
+---
+[
+  {
+    "label": "field",
+    "kind": 14
+  }
+]

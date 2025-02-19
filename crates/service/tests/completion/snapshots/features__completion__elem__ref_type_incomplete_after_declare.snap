@@ -4,6 +4,30 @@ expression: response
 ---
 [
   {
+    "label": "anyref",
+    "kind": 7
+  },
+  {
+    "label": "eqref",
+    "kind": 7
+  },
+  {
+    "label": "i31ref",
+    "kind": 7
+  },
+  {
+    "label": "structref",
+    "kind": 7
+  },
+  {
+    "label": "arrayref",
+    "kind": 7
+  },
+  {
+    "label": "nullref",
+    "kind": 7
+  },
+  {
     "label": "funcref",
     "kind": 7,
     "documentation": {
@@ -12,12 +36,20 @@ expression: response
     }
   },
   {
+    "label": "nullfuncref",
+    "kind": 7
+  },
+  {
     "label": "externref",
     "kind": 7,
     "documentation": {
       "kind": "markdown",
       "value": "The type [`externref`](https://webassembly.github.io/spec/core/syntax/types.html#syntax-reftype) denotes the infinite union of all references to objects owned by the [embedder](https://webassembly.github.io/spec/core/intro/overview.html#embedder) and that can be passed into WebAssembly under this type."
     }
+  },
+  {
+    "label": "nullexternref",
+    "kind": 7
   },
   {
     "label": "func",

@@ -226,7 +226,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         SyntaxKind::PARAM | SyntaxKind::RESULT | SyntaxKind::LOCAL | SyntaxKind::GLOBAL_TYPE => {
             if !token.text().starts_with('$') {
-                ctx.push(CmpCtx::ValType);
+                ctx.extend([CmpCtx::NumType, CmpCtx::VecType, CmpCtx::AbbrRefType]);
             }
         }
         SyntaxKind::TYPE_USE => ctx.push(CmpCtx::TypeDef),
@@ -257,7 +257,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             } else if find_leading_l_paren(token).is_some() {
                 ctx.extend([CmpCtx::KeywordMut, CmpCtx::KeywordImExport]);
             } else {
-                ctx.push(CmpCtx::ValType);
+                ctx.extend([CmpCtx::NumType, CmpCtx::VecType, CmpCtx::AbbrRefType]);
             }
         }
         SyntaxKind::MODULE_FIELD_EXPORT | SyntaxKind::MODULE_FIELD_IMPORT => {
@@ -269,7 +269,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             if find_leading_l_paren(token).is_some() {
                 ctx.extend([CmpCtx::KeywordImExport, CmpCtx::KeywordElem]);
             } else {
-                ctx.push(CmpCtx::RefType);
+                ctx.push(CmpCtx::AbbrRefType);
             }
         }
         SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC => ctx.push(CmpCtx::Func),
@@ -309,7 +309,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             {
                 ctx.push(CmpCtx::Func);
             } else {
-                ctx.extend([CmpCtx::RefType, CmpCtx::KeywordFunc]);
+                ctx.extend([CmpCtx::AbbrRefType, CmpCtx::KeywordFunc]);
                 if !parent.children_with_tokens().any(|element| {
                     if let SyntaxElement::Token(token) = element {
                         token.text() == "declare"
@@ -323,7 +323,9 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         SyntaxKind::EXPORT_DESC_MEMORY | SyntaxKind::MEM_USE => ctx.push(CmpCtx::Memory),
         SyntaxKind::EXPORT_DESC_TABLE => ctx.push(CmpCtx::Table),
-        SyntaxKind::TABLE_TYPE | SyntaxKind::IMPORT_DESC_TABLE_TYPE => ctx.push(CmpCtx::RefType),
+        SyntaxKind::TABLE_TYPE | SyntaxKind::IMPORT_DESC_TABLE_TYPE => {
+            ctx.push(CmpCtx::AbbrRefType);
+        }
         SyntaxKind::IMPORT_DESC_TYPE_USE => {
             if find_leading_l_paren(token).is_some() {
                 ctx.extend([
@@ -337,7 +339,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::KeywordMut);
             } else {
-                ctx.push(CmpCtx::ValType);
+                ctx.extend([CmpCtx::NumType, CmpCtx::VecType, CmpCtx::AbbrRefType]);
             }
         }
         SyntaxKind::ELEM => {
@@ -370,6 +372,38 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             } else {
                 ctx.extend([CmpCtx::TypeDef, CmpCtx::KeywordFinal]);
             }
+        }
+        SyntaxKind::STRUCT_TYPE => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordField);
+            }
+        }
+        SyntaxKind::FIELD | SyntaxKind::ARRAY_TYPE => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.extend([CmpCtx::KeywordMut, CmpCtx::KeywordRef]);
+            } else {
+                ctx.extend([
+                    CmpCtx::NumType,
+                    CmpCtx::VecType,
+                    CmpCtx::AbbrRefType,
+                    CmpCtx::PackedType,
+                ]);
+            }
+        }
+        SyntaxKind::FIELD_TYPE => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordRef);
+            } else {
+                ctx.extend([
+                    CmpCtx::NumType,
+                    CmpCtx::VecType,
+                    CmpCtx::AbbrRefType,
+                    CmpCtx::PackedType,
+                ]);
+            }
+        }
+        SyntaxKind::REF_TYPE => {
+            ctx.extend([CmpCtx::TypeDef, CmpCtx::KeywordNull, CmpCtx::AbsHeapType]);
         }
         _ => {}
     }
@@ -450,8 +484,9 @@ fn add_cmp_ctx_for_immediates(
 
 enum CmpCtx {
     Instr,
-    ValType,
-    RefType,
+    NumType,
+    VecType,
+    AbbrRefType,
     Local,
     Func,
     TypeDef,
@@ -460,6 +495,8 @@ enum CmpCtx {
     Memory,
     Table,
     Block,
+    AbsHeapType,
+    PackedType,
     KeywordModule,
     KeywordModuleField,
     KeywordImExport,
@@ -480,6 +517,9 @@ enum CmpCtx {
     KeywordSub,
     KeywordFinal,
     KeywordsCompType,
+    KeywordField,
+    KeywordRef,
+    KeywordNull,
 }
 
 fn get_cmp_list(
@@ -516,31 +556,59 @@ fn get_cmp_list(
                         }));
                     }
                 }
-                CmpCtx::ValType => {
-                    items.extend(data_set::VALUE_TYPES.iter().map(|ty| CompletionItem {
-                        label: ty.to_string(),
-                        kind: Some(CompletionItemKind::Class),
-                        documentation: data_set::get_value_type_description(ty).map(|desc| {
-                            Union2::B(MarkupContent {
-                                kind: MarkupKind::Markdown,
-                                value: desc.into(),
-                            })
-                        }),
-                        ..Default::default()
+                CmpCtx::NumType => {
+                    items.extend(["i32", "i64", "f32", "f64"].into_iter().map(|ty| {
+                        CompletionItem {
+                            label: ty.to_string(),
+                            kind: Some(CompletionItemKind::Class),
+                            documentation: data_set::get_value_type_description(ty).map(|desc| {
+                                Union2::B(MarkupContent {
+                                    kind: MarkupKind::Markdown,
+                                    value: desc.into(),
+                                })
+                            }),
+                            ..Default::default()
+                        }
                     }));
                 }
-                CmpCtx::RefType => {
-                    items.extend(["funcref", "externref"].iter().map(|ty| CompletionItem {
-                        label: ty.to_string(),
-                        kind: Some(CompletionItemKind::Class),
-                        documentation: data_set::get_value_type_description(ty).map(|desc| {
-                            Union2::B(MarkupContent {
-                                kind: MarkupKind::Markdown,
-                                value: desc.into(),
-                            })
+                CmpCtx::VecType => items.push(CompletionItem {
+                    label: "v128".into(),
+                    kind: Some(CompletionItemKind::Class),
+                    documentation: data_set::get_value_type_description("v128").map(|desc| {
+                        Union2::B(MarkupContent {
+                            kind: MarkupKind::Markdown,
+                            value: desc.into(),
+                        })
+                    }),
+                    ..Default::default()
+                }),
+                CmpCtx::AbbrRefType => {
+                    items.extend(
+                        [
+                            "anyref",
+                            "eqref",
+                            "i31ref",
+                            "structref",
+                            "arrayref",
+                            "nullref",
+                            "funcref",
+                            "nullfuncref",
+                            "externref",
+                            "nullexternref",
+                        ]
+                        .into_iter()
+                        .map(|ty| CompletionItem {
+                            label: ty.into(),
+                            kind: Some(CompletionItemKind::Class),
+                            documentation: data_set::get_value_type_description(ty).map(|desc| {
+                                Union2::B(MarkupContent {
+                                    kind: MarkupKind::Markdown,
+                                    value: desc.into(),
+                                })
+                            }),
+                            ..Default::default()
                         }),
-                        ..Default::default()
-                    }));
+                    );
                 }
                 CmpCtx::Local => {
                     let Some(func) = token
@@ -814,6 +882,27 @@ fn get_cmp_list(
                             }),
                     );
                 }
+                CmpCtx::AbsHeapType => {
+                    items.extend(
+                        [
+                            "any", "eq", "i31", "struct", "array", "none", "func", "nofunc",
+                            "extern", "noextern",
+                        ]
+                        .into_iter()
+                        .map(|ty| CompletionItem {
+                            label: ty.into(),
+                            kind: Some(CompletionItemKind::Class),
+                            ..Default::default()
+                        }),
+                    );
+                }
+                CmpCtx::PackedType => {
+                    items.extend(["i8", "i16"].into_iter().map(|ty| CompletionItem {
+                        label: ty.to_string(),
+                        kind: Some(CompletionItemKind::Class),
+                        ..Default::default()
+                    }));
+                }
                 CmpCtx::KeywordModule => items.push(CompletionItem {
                     label: "module".to_string(),
                     kind: Some(CompletionItemKind::Keyword),
@@ -924,6 +1013,21 @@ fn get_cmp_list(
                         }
                     }));
                 }
+                CmpCtx::KeywordField => items.push(CompletionItem {
+                    label: "field".to_string(),
+                    kind: Some(CompletionItemKind::Keyword),
+                    ..Default::default()
+                }),
+                CmpCtx::KeywordRef => items.push(CompletionItem {
+                    label: "ref".to_string(),
+                    kind: Some(CompletionItemKind::Keyword),
+                    ..Default::default()
+                }),
+                CmpCtx::KeywordNull => items.push(CompletionItem {
+                    label: "null".to_string(),
+                    kind: Some(CompletionItemKind::Keyword),
+                    ..Default::default()
+                }),
             }
             items
         })

@@ -1,0 +1,67 @@
+---
+source: crates/service/tests/completion/ty_decl.rs
+expression: response
+---
+[
+  {
+    "label": "$t",
+    "kind": 8,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 31
+        },
+        "end": {
+          "line": 2,
+          "character": 32
+        }
+      },
+      "newText": "$t"
+    }
+  },
+  {
+    "label": "null",
+    "kind": 14
+  },
+  {
+    "label": "any",
+    "kind": 7
+  },
+  {
+    "label": "eq",
+    "kind": 7
+  },
+  {
+    "label": "i31",
+    "kind": 7
+  },
+  {
+    "label": "struct",
+    "kind": 7
+  },
+  {
+    "label": "array",
+    "kind": 7
+  },
+  {
+    "label": "none",
+    "kind": 7
+  },
+  {
+    "label": "func",
+    "kind": 7
+  },
+  {
+    "label": "nofunc",
+    "kind": 7
+  },
+  {
+    "label": "extern",
+    "kind": 7
+  },
+  {
+    "label": "noextern",
+    "kind": 7
+  }
+]
