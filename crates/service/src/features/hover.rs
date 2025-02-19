@@ -8,7 +8,6 @@ use crate::{
     uri::{InternUri, UrisCtx},
     LanguageService,
 };
-use itertools::Itertools;
 use lspt::{
     Hover, HoverParams, MarkedString, MarkedStringWithLanguage, MarkupContent, MarkupKind, Union3,
 };
@@ -48,12 +47,9 @@ impl LanguageService {
                             .iter()
                             .find(|symbol| symbol.key == key)
                             .and_then(|symbol| match symbol.kind {
-                                SymbolKind::Call => symbol_table.find_defs(key).map(|symbols| {
-                                    let contents = symbols
-                                        .map(|symbol| {
-                                            create_func_hover(self, uri, symbol.clone(), &root)
-                                        })
-                                        .join("\n---\n");
+                                SymbolKind::Call => symbol_table.find_def(key).map(|symbol| {
+                                    let contents =
+                                        create_func_hover(self, uri, symbol.clone(), &root);
                                     Hover {
                                         contents: Union3::A(MarkupContent {
                                             kind: MarkupKind::Markdown,
@@ -66,12 +62,8 @@ impl LanguageService {
                                     }
                                 }),
                                 SymbolKind::TypeUse => {
-                                    symbol_table.find_defs(key).map(|symbols| Hover {
-                                        contents: Union3::C(
-                                            symbols
-                                                .map(|symbol| create_type_def_hover(self, symbol))
-                                                .collect(),
-                                        ),
+                                    symbol_table.find_def(key).map(|symbol| Hover {
+                                        contents: Union3::B(create_type_def_hover(self, symbol)),
                                         range: Some(helpers::rowan_range_to_lsp_range(
                                             &line_index,
                                             token.text_range(),
@@ -79,14 +71,10 @@ impl LanguageService {
                                     })
                                 }
                                 SymbolKind::GlobalRef => {
-                                    symbol_table.find_defs(key).map(|symbols| Hover {
-                                        contents: Union3::C(
-                                            symbols
-                                                .map(|symbol| {
-                                                    create_global_def_hover(self, symbol, &root)
-                                                })
-                                                .collect(),
-                                        ),
+                                    symbol_table.find_def(key).map(|symbol| Hover {
+                                        contents: Union3::B(create_global_def_hover(
+                                            self, symbol, &root,
+                                        )),
                                         range: Some(helpers::rowan_range_to_lsp_range(
                                             &line_index,
                                             token.text_range(),

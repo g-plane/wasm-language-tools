@@ -43,19 +43,13 @@ impl LanguageService {
                 ))
             })
             .or_else(|| {
-                symbol_table.find_defs(key).map(|symbols| {
-                    Union2::B(
-                        symbols
-                            .map(|symbol| {
-                                create_location_by_symbol(
-                                    params.text_document.uri.clone(),
-                                    &line_index,
-                                    symbol,
-                                    &root,
-                                )
-                            })
-                            .collect(),
-                    )
+                symbol_table.find_def(key).map(|symbol| {
+                    Union2::A(create_location_by_symbol(
+                        params.text_document.uri.clone(),
+                        &line_index,
+                        symbol,
+                        &root,
+                    ))
                 })
             })
             .or_else(|| {
@@ -88,32 +82,23 @@ impl LanguageService {
 
         let grand = parent.parent()?;
         match grand.kind() {
-            SyntaxKind::PLAIN_INSTR => {
-                symbol_table
-                    .find_defs(SymbolKey::new(&parent))
-                    .map(|symbols| {
-                        Union2::B(
-                            symbols
-                                .filter_map(|symbol| {
-                                    symbol_table.find_defs(SymbolKey::new(
-                                        child::<TypeUse>(&symbol.key.to_node(&root))?
-                                            .index()?
-                                            .syntax(),
-                                    ))
-                                })
-                                .flatten()
-                                .map(|symbol| {
-                                    create_location_by_symbol(
-                                        params.text_document.uri.clone(),
-                                        &line_index,
-                                        symbol,
-                                        &root,
-                                    )
-                                })
-                                .collect(),
-                        )
-                    })
-            }
+            SyntaxKind::PLAIN_INSTR => symbol_table
+                .find_def(SymbolKey::new(&parent))
+                .and_then(|symbol| {
+                    symbol_table.find_def(SymbolKey::new(
+                        child::<TypeUse>(&symbol.key.to_node(&root))?
+                            .index()?
+                            .syntax(),
+                    ))
+                })
+                .map(|symbol| {
+                    Union2::A(create_location_by_symbol(
+                        params.text_document.uri.clone(),
+                        &line_index,
+                        symbol,
+                        &root,
+                    ))
+                }),
             _ => None,
         }
     }
@@ -130,20 +115,14 @@ impl LanguageService {
         let parent = token.parent()?;
         if parent.kind() == SyntaxKind::IMMEDIATE {
             symbol_table
-                .find_defs(SymbolKey::new(&parent))
-                .map(|symbols| {
-                    Union2::B(
-                        symbols
-                            .map(|symbol| {
-                                create_location_by_symbol(
-                                    params.text_document.uri.clone(),
-                                    &line_index,
-                                    symbol,
-                                    &root,
-                                )
-                            })
-                            .collect(),
-                    )
+                .find_def(SymbolKey::new(&parent))
+                .map(|symbol| {
+                    Union2::A(create_location_by_symbol(
+                        params.text_document.uri.clone(),
+                        &line_index,
+                        symbol,
+                        &root,
+                    ))
                 })
         } else {
             None

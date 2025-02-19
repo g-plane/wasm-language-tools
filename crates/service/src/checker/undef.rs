@@ -30,9 +30,7 @@ pub fn check(
             | SymbolKind::TypeUse
             | SymbolKind::GlobalRef
             | SymbolKind::MemoryRef
-            | SymbolKind::TableRef => symbol_table
-                .find_defs(symbol.key)
-                .is_none_or(|defs| defs.count() == 0),
+            | SymbolKind::TableRef => symbol_table.find_def(symbol.key).is_none(),
             SymbolKind::LocalRef => symbol_table.find_param_or_local_def(symbol.key).is_none(),
             SymbolKind::BlockRef => !symbol_table.blocks.iter().any(|block| {
                 block.ref_key == symbol.key && symbol.idx.is_defined_by(&block.def_idx)

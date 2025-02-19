@@ -31,9 +31,8 @@ pub fn check(
         _ => return,
     }
     diags.extend(instr.immediates().filter_map(|immediate| {
-        let defs = symbol_table.find_defs(SymbolKey::new(immediate.syntax()))?;
-        let related_information = defs
-            .filter_map(|def| support::child::<GlobalType>(&def.key.to_node(root)))
+        let def = symbol_table.find_def(SymbolKey::new(immediate.syntax()))?;
+        support::child::<GlobalType>(&def.key.to_node(root))
             .filter(|global_type| global_type.mut_keyword().is_none())
             .map(|global_type| DiagnosticRelatedInformation {
                 location: Location {
@@ -45,11 +44,7 @@ pub fn check(
                 },
                 message: "immutable global type".into(),
             })
-            .collect::<Vec<_>>();
-        if related_information.is_empty() {
-            None
-        } else {
-            Some(Diagnostic {
+            .map(|related_information| Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(
                     line_index,
                     immediate.syntax().text_range(),
@@ -58,9 +53,8 @@ pub fn check(
                 source: Some("wat".into()),
                 code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                 message: "mutating an immutable global is not allowed".into(),
-                related_information: Some(related_information),
+                related_information: Some(vec![related_information]),
                 ..Default::default()
             })
-        }
     }));
 }

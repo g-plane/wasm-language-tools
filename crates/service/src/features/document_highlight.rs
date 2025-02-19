@@ -8,7 +8,6 @@ use crate::{
 use line_index::LineIndex;
 use lspt::{DocumentHighlight, DocumentHighlightKind, DocumentHighlightParams};
 use rowan::{ast::AstNode, Direction};
-use smallvec::SmallVec;
 use wat_syntax::{ast::PlainInstr, SyntaxElement, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
@@ -107,9 +106,7 @@ impl LanguageService {
                                 SymbolKind::TableRef => SymbolKind::TableDef,
                                 _ => return None,
                             };
-                            let defs = symbol_table
-                                .find_defs(current_symbol.key)?
-                                .collect::<SmallVec<[_; 1]>>();
+                            let def = symbol_table.find_def(current_symbol.key)?;
                             Some(
                                 symbol_table
                                     .symbols
@@ -119,8 +116,7 @@ impl LanguageService {
                                             current_symbol.idx.is_defined_by(&symbol.idx)
                                                 && symbol.region == current_symbol.region
                                         } else if symbol.kind == current_symbol.kind {
-                                            defs.iter()
-                                                .any(|func| symbol.idx.is_defined_by(&func.idx))
+                                            symbol.idx.is_defined_by(&def.idx)
                                                 && symbol.region == current_symbol.region
                                         } else {
                                             false

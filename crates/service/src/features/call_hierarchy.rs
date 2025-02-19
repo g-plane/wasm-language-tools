@@ -52,25 +52,23 @@ impl LanguageService {
                     }])
                 }
                 SymbolKind::Call if symbol.key.text_range() == parent_range => {
-                    symbol_table.find_defs(symbol.key).map(|symbols| {
-                        symbols
-                            .map(|symbol| CallHierarchyItem {
-                                name: symbol.idx.render(self).to_string(),
-                                kind: LspSymbolKind::Function,
-                                tags: None,
-                                detail: Some(self.render_func_header(
-                                    symbol.idx.name,
-                                    self.get_func_sig(uri, symbol.key, symbol.green.clone()),
-                                )),
-                                uri: params.text_document.uri.clone(),
-                                range: helpers::rowan_range_to_lsp_range(
-                                    &line_index,
-                                    symbol.key.text_range(),
-                                ),
-                                selection_range: create_selection_range(symbol, &root, &line_index),
-                                data: None,
-                            })
-                            .collect()
+                    symbol_table.find_def(symbol.key).map(|symbol| {
+                        vec![CallHierarchyItem {
+                            name: symbol.idx.render(self).to_string(),
+                            kind: LspSymbolKind::Function,
+                            tags: None,
+                            detail: Some(self.render_func_header(
+                                symbol.idx.name,
+                                self.get_func_sig(uri, symbol.key, symbol.green.clone()),
+                            )),
+                            uri: params.text_document.uri.clone(),
+                            range: helpers::rowan_range_to_lsp_range(
+                                &line_index,
+                                symbol.key.text_range(),
+                            ),
+                            selection_range: create_selection_range(symbol, &root, &line_index),
+                            data: None,
+                        }]
                     })
                 }
                 _ => None,
@@ -165,8 +163,7 @@ impl LanguageService {
                     helpers::rowan_range_to_lsp_range(&line_index, node.text_range());
                 node.children()
                     .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
-                    .filter_map(|immediate| symbol_table.find_defs(SymbolKey::new(&immediate)))
-                    .flatten()
+                    .filter_map(|immediate| symbol_table.find_def(SymbolKey::new(&immediate)))
                     .filter(|symbol| symbol.kind == SymbolKind::Func)
                     .map(move |func_symbol| {
                         let line_index = self.line_index(uri);

@@ -234,7 +234,7 @@ fn call_undefined() {
             character: 15,
         },
     ));
-    assert!(response.unwrap().is_empty());
+    assert!(response.is_none());
 }
 
 #[test]
@@ -425,7 +425,7 @@ fn type_use_undefined() {
             character: 15,
         },
     ));
-    assert!(response.unwrap().is_empty());
+    assert!(response.is_none());
 }
 
 #[test]
@@ -512,7 +512,7 @@ fn global_ref_undefined() {
             character: 36,
         },
     ));
-    assert!(response.unwrap().is_empty());
+    assert!(response.is_none());
 }
 
 #[test]
@@ -602,7 +602,7 @@ fn memory_ref_undefined() {
             character: 17,
         },
     ));
-    assert!(response.unwrap().is_empty());
+    assert!(response.is_none());
 }
 
 #[test]
@@ -710,7 +710,7 @@ fn table_ref_undefined() {
             character: 20,
         },
     ));
-    assert!(response.unwrap().is_empty());
+    assert!(response.is_none());
 }
 
 #[test]

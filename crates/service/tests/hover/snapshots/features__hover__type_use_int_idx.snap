@@ -3,12 +3,10 @@ source: crates/service/tests/hover/mod.rs
 expression: response
 ---
 {
-  "contents": [
-    {
-      "language": "wat",
-      "value": "(type (func (param $param i32) (param f32) (param f64) (result i32) (result i64)))"
-    }
-  ],
+  "contents": {
+    "language": "wat",
+    "value": "(type (func (param $param i32) (param f32) (param f64) (result i32) (result i64)))"
+  },
   "range": {
     "start": {
       "line": 3,

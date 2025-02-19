@@ -407,10 +407,7 @@ fn resolve_sig(
         "call" => instr
             .immediates()
             .next()
-            .and_then(|idx| shared.symbol_table.find_defs(SymbolKey::new(idx.syntax())))
-            .into_iter()
-            .flatten()
-            .next()
+            .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
             .and_then(|func| {
                 shared
                     .service
@@ -436,10 +433,7 @@ fn resolve_sig(
             results: vec![instr
                 .immediates()
                 .next()
-                .and_then(|idx| shared.symbol_table.find_defs(SymbolKey::new(idx.syntax())))
-                .into_iter()
-                .flatten()
-                .next()
+                .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
                 .and_then(|symbol| shared.service.extract_global_type(symbol.green.clone()))
                 .map_or(OperandType::Any, OperandType::Val)],
         },

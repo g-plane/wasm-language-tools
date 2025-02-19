@@ -1,5 +1,5 @@
 use insta::assert_json_snapshot;
-use lspt::{DeclarationParams, Position, TextDocumentIdentifier, Union2};
+use lspt::{DeclarationParams, Position, TextDocumentIdentifier};
 use wat_service::LanguageService;
 
 fn create_params(uri: String, position: Position) -> DeclarationParams {
@@ -92,14 +92,24 @@ fn func_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(matches!(
-        service.goto_declaration(create_params(uri.clone(), Position { line: 3, character: 15 })),
-        Some(Union2::B(locations)) if locations.is_empty()
-    ));
-    assert!(matches!(
-        service.goto_declaration(create_params(uri.clone(), Position { line: 3, character: 25 })),
-        Some(Union2::B(locations)) if locations.is_empty()
-    ));
+    assert!(service
+        .goto_declaration(create_params(
+            uri.clone(),
+            Position {
+                line: 3,
+                character: 15
+            }
+        ))
+        .is_none());
+    assert!(service
+        .goto_declaration(create_params(
+            uri.clone(),
+            Position {
+                line: 3,
+                character: 25
+            }
+        ))
+        .is_none());
 }
 
 #[test]

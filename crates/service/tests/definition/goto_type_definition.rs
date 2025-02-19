@@ -1,5 +1,5 @@
 use insta::assert_json_snapshot;
-use lspt::{Position, TextDocumentIdentifier, TypeDefinitionParams, Union2};
+use lspt::{Position, TextDocumentIdentifier, TypeDefinitionParams};
 use wat_service::LanguageService;
 
 fn create_params(uri: String, position: Position) -> TypeDefinitionParams {
@@ -92,10 +92,15 @@ fn func_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(matches!(
-        service.goto_type_definition(create_params(uri.clone(), Position { line: 3, character: 15 })),
-        Some(Union2::B(locations)) if locations.is_empty()
-    ));
+    assert!(service
+        .goto_type_definition(create_params(
+            uri.clone(),
+            Position {
+                line: 3,
+                character: 15
+            }
+        ))
+        .is_none());
 }
 
 #[test]
@@ -110,10 +115,15 @@ fn type_use_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(matches!(
-        service.goto_type_definition(create_params(uri.clone(), Position { line: 3, character: 15 })),
-        Some(Union2::B(locations)) if locations.is_empty()
-    ));
+    assert!(service
+        .goto_type_definition(create_params(
+            uri.clone(),
+            Position {
+                line: 3,
+                character: 15
+            }
+        ))
+        .is_none());
 }
 
 #[test]

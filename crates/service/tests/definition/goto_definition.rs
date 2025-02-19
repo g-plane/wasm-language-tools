@@ -1,5 +1,5 @@
 use insta::assert_json_snapshot;
-use lspt::{DefinitionParams, Position, TextDocumentIdentifier, Union2};
+use lspt::{DefinitionParams, Position, TextDocumentIdentifier};
 use wat_service::LanguageService;
 
 fn create_params(uri: String, position: Position) -> DefinitionParams {
@@ -92,14 +92,24 @@ fn func_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(matches!(
-        service.goto_definition(create_params(uri.clone(), Position { line: 3, character: 15 })),
-        Some(Union2::B(locations)) if locations.is_empty()
-    ));
-    assert!(matches!(
-        service.goto_definition(create_params(uri.clone(), Position { line: 3, character: 25 })),
-        Some(Union2::B(locations)) if locations.is_empty()
-    ));
+    assert!(service
+        .goto_definition(create_params(
+            uri.clone(),
+            Position {
+                line: 3,
+                character: 15
+            }
+        ))
+        .is_none());
+    assert!(service
+        .goto_definition(create_params(
+            uri.clone(),
+            Position {
+                line: 3,
+                character: 25
+            }
+        ))
+        .is_none());
 }
 
 #[test]
@@ -380,14 +390,24 @@ fn type_use_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(matches!(
-        service.goto_definition(create_params(uri.clone(), Position { line: 2, character: 17 })),
-        Some(Union2::B(locations)) if locations.is_empty()
-    ));
-    assert!(matches!(
-        service.goto_definition(create_params(uri.clone(), Position { line: 3, character: 18 })),
-        Some(Union2::B(locations)) if locations.is_empty()
-    ));
+    assert!(service
+        .goto_definition(create_params(
+            uri.clone(),
+            Position {
+                line: 2,
+                character: 17
+            }
+        ))
+        .is_none());
+    assert!(service
+        .goto_definition(create_params(
+            uri.clone(),
+            Position {
+                line: 3,
+                character: 18
+            }
+        ))
+        .is_none());
 }
 
 #[test]
@@ -446,14 +466,24 @@ fn global_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(matches!(
-        service.goto_definition(create_params(uri.clone(), Position { line: 3, character: 21 })),
-        Some(Union2::B(locations)) if locations.is_empty()
-    ));
-    assert!(matches!(
-        service.goto_definition(create_params(uri.clone(), Position { line: 3, character: 40 })),
-        Some(Union2::B(locations)) if locations.is_empty()
-    ));
+    assert!(service
+        .goto_definition(create_params(
+            uri.clone(),
+            Position {
+                line: 3,
+                character: 21
+            }
+        ))
+        .is_none());
+    assert!(service
+        .goto_definition(create_params(
+            uri.clone(),
+            Position {
+                line: 3,
+                character: 40
+            }
+        ))
+        .is_none());
 }
 
 #[test]
@@ -606,10 +636,15 @@ fn memory_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(matches!(
-        service.goto_definition(create_params(uri.clone(), Position { line: 2, character: 27 })),
-        Some(Union2::B(locations)) if locations.is_empty()
-    ));
+    assert!(service
+        .goto_definition(create_params(
+            uri.clone(),
+            Position {
+                line: 2,
+                character: 27
+            }
+        ))
+        .is_none());
 }
 
 #[test]
@@ -710,10 +745,15 @@ fn table_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(matches!(
-        service.goto_definition(create_params(uri.clone(), Position { line: 3, character: 21 })),
-        Some(Union2::B(locations)) if locations.is_empty()
-    ));
+    assert!(service
+        .goto_definition(create_params(
+            uri.clone(),
+            Position {
+                line: 3,
+                character: 21
+            }
+        ))
+        .is_none());
 }
 
 #[test]

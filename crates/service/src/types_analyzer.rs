@@ -132,8 +132,7 @@ fn get_func_sig(
                 let symbol_table = db.symbol_table(uri);
                 support::child::<TypeUse>(&node)
                     .and_then(|type_use| type_use.index())
-                    .and_then(|idx| symbol_table.find_defs(SymbolKey::new(idx.syntax())))
-                    .and_then(|mut symbols| symbols.next())
+                    .and_then(|idx| symbol_table.find_def(SymbolKey::new(idx.syntax())))
                     .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.green))
                     .map(|func_type| db.extract_sig(func_type))
             }
@@ -155,8 +154,7 @@ fn get_type_use_sig(
         let symbol_table = db.symbol_table(uri);
         TypeUse::cast(ptr.to_node(&SyntaxNode::new_root(db.root(uri))))
             .and_then(|type_use| type_use.index())
-            .and_then(|idx| symbol_table.find_defs(SymbolKey::new(idx.syntax())))
-            .and_then(|mut symbols| symbols.next())
+            .and_then(|idx| symbol_table.find_def(SymbolKey::new(idx.syntax())))
             .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.green))
             .map(|func_type| db.extract_sig(func_type))
     }
@@ -281,11 +279,7 @@ pub(crate) fn resolve_param_types(
         let idx = instr
             .children()
             .find(|child| child.kind() == SyntaxKind::IMMEDIATE)?;
-        let func = symbol_table
-            .find_defs(SymbolKey::new(&idx))
-            .into_iter()
-            .flatten()
-            .next()?;
+        let func = symbol_table.find_def(SymbolKey::new(&idx))?;
         service
             .get_func_sig(uri, func.key, func.green.clone())
             .map(|sig| {

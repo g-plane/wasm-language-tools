@@ -2,18 +2,16 @@
 source: crates/service/tests/definition/goto_declaration.rs
 expression: response
 ---
-[
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
-        "line": 2,
-        "character": 10
-      },
-      "end": {
-        "line": 2,
-        "character": 15
-      }
+{
+  "uri": "untitled:test",
+  "range": {
+    "start": {
+      "line": 2,
+      "character": 10
+    },
+    "end": {
+      "line": 2,
+      "character": 15
     }
   }
-]
+}

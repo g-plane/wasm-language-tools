@@ -560,8 +560,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
             let inherits = sub_type
                 .indexes()
                 .next()
-                .and_then(|index| find_defs(&symbols, SymbolKey::new(index.syntax())))
-                .and_then(|mut defs| defs.next())
+                .and_then(|index| find_def(&symbols, SymbolKey::new(index.syntax())))
                 .map(|def| def.key);
             Some(TypeDefItem {
                 key: symbol.key,
@@ -580,8 +579,8 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
 }
 
 impl SymbolTable {
-    pub fn find_defs(&self, key: SymbolKey) -> Option<impl Iterator<Item = &Symbol>> {
-        find_defs(&self.symbols, key)
+    pub fn find_def(&self, key: SymbolKey) -> Option<&Symbol> {
+        find_def(&self.symbols, key)
     }
 
     pub fn find_param_def(&self, key: SymbolKey) -> Option<&Symbol> {
@@ -662,7 +661,7 @@ impl SymbolTable {
     }
 }
 
-fn find_defs(symbols: &[Symbol], key: SymbolKey) -> Option<impl Iterator<Item = &Symbol>> {
+fn find_def(symbols: &[Symbol], key: SymbolKey) -> Option<&Symbol> {
     symbols
         .iter()
         .find(|symbol| symbol.key == key)
@@ -675,11 +674,11 @@ fn find_defs(symbols: &[Symbol], key: SymbolKey) -> Option<impl Iterator<Item = 
                 SymbolKind::TableRef => SymbolKind::TableDef,
                 _ => return None,
             };
-            Some(symbols.iter().filter(move |symbol| {
+            symbols.iter().find(move |symbol| {
                 symbol.region == ref_symbol.region
                     && symbol.kind == kind
                     && ref_symbol.idx.is_defined_by(&symbol.idx)
-            }))
+            })
         })
 }
 

@@ -50,9 +50,7 @@ impl LanguageService {
         let (signature, func) = match parent_instr.instr_name()?.text() {
             "call" | "return_call" => {
                 let first_immediate = parent_instr.immediates().next()?;
-                let func = symbol_table
-                    .find_defs(SymbolKey::new(first_immediate.syntax()))?
-                    .next()?;
+                let func = symbol_table.find_def(SymbolKey::new(first_immediate.syntax()))?;
                 (
                     self.get_func_sig(uri, func.key, func.green.clone())
                         .unwrap_or_default(),
