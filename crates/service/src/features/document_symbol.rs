@@ -7,7 +7,6 @@ use crate::{
     LanguageService,
 };
 use lspt::{DocumentSymbol, DocumentSymbolParams, SymbolKind as LspSymbolKind};
-use rowan::ast::support::token;
 use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
@@ -53,14 +52,11 @@ impl LanguageService {
                             tags: None,
                             deprecated: None,
                             range,
-                            selection_range: token(&symbol.key.to_node(&root), SyntaxKind::IDENT)
-                                .map(|token| {
-                                    helpers::rowan_range_to_lsp_range(
-                                        &line_index,
-                                        token.text_range(),
-                                    )
-                                })
-                                .unwrap_or(range),
+                            selection_range: helpers::create_selection_range(
+                                symbol,
+                                &root,
+                                &line_index,
+                            ),
                             children: None,
                         },
                     ))
@@ -77,14 +73,11 @@ impl LanguageService {
                             tags: None,
                             deprecated: None,
                             range,
-                            selection_range: token(&symbol.key.to_node(&root), SyntaxKind::IDENT)
-                                .map(|token| {
-                                    helpers::rowan_range_to_lsp_range(
-                                        &line_index,
-                                        token.text_range(),
-                                    )
-                                })
-                                .unwrap_or(range),
+                            selection_range: helpers::create_selection_range(
+                                symbol,
+                                &root,
+                                &line_index,
+                            ),
                             children: None,
                         },
                     ))
@@ -101,14 +94,11 @@ impl LanguageService {
                             tags: None,
                             deprecated: None,
                             range,
-                            selection_range: token(&symbol.key.to_node(&root), SyntaxKind::IDENT)
-                                .map(|token| {
-                                    helpers::rowan_range_to_lsp_range(
-                                        &line_index,
-                                        token.text_range(),
-                                    )
-                                })
-                                .unwrap_or(range),
+                            selection_range: helpers::create_selection_range(
+                                symbol,
+                                &root,
+                                &line_index,
+                            ),
                             children: None,
                         },
                     ))
@@ -125,14 +115,11 @@ impl LanguageService {
                             tags: None,
                             deprecated: None,
                             range,
-                            selection_range: token(&symbol.key.to_node(&root), SyntaxKind::IDENT)
-                                .map(|token| {
-                                    helpers::rowan_range_to_lsp_range(
-                                        &line_index,
-                                        token.text_range(),
-                                    )
-                                })
-                                .unwrap_or(range),
+                            selection_range: helpers::create_selection_range(
+                                symbol,
+                                &root,
+                                &line_index,
+                            ),
                             children: None,
                         },
                     ))

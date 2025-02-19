@@ -141,11 +141,11 @@ expression: response
         "selectionRange": {
           "start": {
             "line": 3,
-            "character": 4
+            "character": 5
           },
           "end": {
             "line": 3,
-            "character": 19
+            "character": 9
           }
         }
       },
@@ -166,11 +166,11 @@ expression: response
         "selectionRange": {
           "start": {
             "line": 4,
-            "character": 4
+            "character": 5
           },
           "end": {
             "line": 4,
-            "character": 17
+            "character": 9
           }
         }
       },
@@ -289,11 +289,11 @@ expression: response
         "selectionRange": {
           "start": {
             "line": 9,
-            "character": 4
+            "character": 5
           },
           "end": {
             "line": 9,
-            "character": 16
+            "character": 11
           }
         }
       },
@@ -337,11 +337,11 @@ expression: response
         "selectionRange": {
           "start": {
             "line": 11,
-            "character": 4
+            "character": 5
           },
           "end": {
             "line": 11,
-            "character": 14
+            "character": 11
           }
         }
       },
@@ -411,11 +411,11 @@ expression: response
         "selectionRange": {
           "start": {
             "line": 16,
-            "character": 4
+            "character": 5
           },
           "end": {
             "line": 16,
-            "character": 10
+            "character": 9
           }
         }
       }
