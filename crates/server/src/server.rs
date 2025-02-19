@@ -15,7 +15,8 @@ use lspt::{
     InlayHintRequest, Notification as _, PrepareRenameRequest, PublishDiagnosticsNotification,
     ReferencesRequest, RegistrationRequest, RenameRequest, Request as _, SelectionRangeRequest,
     SemanticTokensRangeRequest, SemanticTokensRequest, ShutdownRequest, SignatureHelpRequest,
-    TextDocumentContentChangeWholeDocument, TypeDefinitionRequest, Union2,
+    TextDocumentContentChangeWholeDocument, TypeDefinitionRequest, TypeHierarchyPrepareRequest,
+    TypeHierarchySubtypesRequest, TypeHierarchySupertypesRequest, Union2,
 };
 use std::ops::Deref;
 use wat_service::LanguageService;
@@ -329,6 +330,33 @@ impl Server {
                 try_cast_request::<DocumentSymbolRequest>(&method, params).map(|params| {
                     params
                         .and_then(|params| serde_json::to_value(service.document_symbol(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<TypeHierarchyPrepareRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| {
+                            serde_json::to_value(service.prepare_type_hierarchy(params))
+                        })
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<TypeHierarchySupertypesRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| {
+                            serde_json::to_value(service.type_hierarchy_supertypes(params))
+                        })
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<TypeHierarchySubtypesRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| {
+                            serde_json::to_value(service.type_hierarchy_subtypes(params))
+                        })
                         .map(|result| Message::OkResponse { id, result })
                 })
             })

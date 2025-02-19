@@ -14,6 +14,7 @@ mod rename;
 mod selection_range;
 mod semantic_tokens;
 mod signature_help;
+mod type_hierarchy;
 
 pub(crate) use self::semantic_tokens::SemanticTokenKind;
 use crate::{helpers, syntax_tree::SyntaxTreeCtx, uri::InternUri, LanguageService};

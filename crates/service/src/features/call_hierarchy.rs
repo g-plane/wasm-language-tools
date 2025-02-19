@@ -1,18 +1,16 @@
 use crate::{
-    binder::{Symbol, SymbolKey, SymbolKind, SymbolTablesCtx},
+    binder::{SymbolKey, SymbolKind, SymbolTablesCtx},
     helpers,
     syntax_tree::SyntaxTreeCtx,
     types_analyzer::TypesAnalyzerCtx,
     uri::UrisCtx,
     LanguageService,
 };
-use line_index::LineIndex;
 use lspt::{
     CallHierarchyIncomingCall, CallHierarchyIncomingCallsParams, CallHierarchyItem,
-    CallHierarchyOutgoingCall, CallHierarchyOutgoingCallsParams, CallHierarchyPrepareParams, Range,
+    CallHierarchyOutgoingCall, CallHierarchyOutgoingCallsParams, CallHierarchyPrepareParams,
     SymbolKind as LspSymbolKind,
 };
-use rowan::ast::support::token;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 impl LanguageService {
@@ -47,7 +45,11 @@ impl LanguageService {
                             &line_index,
                             symbol.key.text_range(),
                         ),
-                        selection_range: create_selection_range(symbol, &root, &line_index),
+                        selection_range: helpers::create_selection_range(
+                            symbol,
+                            &root,
+                            &line_index,
+                        ),
                         data: None,
                     }])
                 }
@@ -66,7 +68,11 @@ impl LanguageService {
                                 &line_index,
                                 symbol.key.text_range(),
                             ),
-                            selection_range: create_selection_range(symbol, &root, &line_index),
+                            selection_range: helpers::create_selection_range(
+                                symbol,
+                                &root,
+                                &line_index,
+                            ),
                             data: None,
                         }]
                     })
@@ -130,7 +136,11 @@ impl LanguageService {
                             &line_index,
                             func_symbol.key.text_range(),
                         ),
-                        selection_range: create_selection_range(func_symbol, &root, &line_index),
+                        selection_range: helpers::create_selection_range(
+                            func_symbol,
+                            &root,
+                            &line_index,
+                        ),
                         data: None,
                     },
                     from_ranges: plain_instr_range.into_iter().collect(),
@@ -185,7 +195,7 @@ impl LanguageService {
                                     &line_index,
                                     func_symbol.key.text_range(),
                                 ),
-                                selection_range: create_selection_range(
+                                selection_range: helpers::create_selection_range(
                                     func_symbol,
                                     &SyntaxNode::new_root(self.root(uri)),
                                     &line_index,
@@ -199,13 +209,4 @@ impl LanguageService {
             .collect();
         Some(items)
     }
-}
-
-fn create_selection_range(symbol: &Symbol, root: &SyntaxNode, line_index: &LineIndex) -> Range {
-    let node = symbol.key.to_node(root);
-    let range = token(&node, SyntaxKind::IDENT)
-        .or_else(|| token(&node, SyntaxKind::KEYWORD))
-        .map(|token| token.text_range())
-        .unwrap_or_else(|| node.text_range());
-    helpers::rowan_range_to_lsp_range(line_index, range)
 }

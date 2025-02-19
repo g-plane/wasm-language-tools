@@ -1,6 +1,14 @@
+use crate::binder::Symbol;
 use line_index::{LineCol, LineIndex};
 use lspt::{Position, Range};
-use rowan::{TextRange, TextSize};
+use rowan::{
+    ast::{support, AstNode},
+    TextRange, TextSize,
+};
+use wat_syntax::{
+    ast::{CompType, TypeDef},
+    SyntaxKind, SyntaxNode,
+};
 
 pub fn rowan_pos_to_lsp_pos(line_index: &LineIndex, pos: TextSize) -> Position {
     let line_col = line_index.line_col(pos);
@@ -60,6 +68,26 @@ pub fn can_produce_never(instr_name: &str) -> bool {
         instr_name,
         "unreachable" | "return" | "br" | "br_table" | "return_call" | "return_call_indirect"
     )
+}
+
+pub fn create_selection_range(symbol: &Symbol, root: &SyntaxNode, line_index: &LineIndex) -> Range {
+    let node = symbol.key.to_node(root);
+    let range = support::token(&node, SyntaxKind::IDENT)
+        .or_else(|| support::token(&node, SyntaxKind::KEYWORD))
+        .map(|token| token.text_range())
+        .unwrap_or_else(|| node.text_range());
+    rowan_range_to_lsp_range(line_index, range)
+}
+
+pub fn infer_type_def_symbol_detail(symbol: &Symbol, root: &SyntaxNode) -> Option<String> {
+    TypeDef::cast(symbol.key.to_node(root))
+        .and_then(|node| node.sub_type())
+        .and_then(|sub_type| sub_type.comp_type())
+        .map(|comp_type| match comp_type {
+            CompType::Array(..) => "array".into(),
+            CompType::Struct(..) => "struct".into(),
+            CompType::Func(..) => "func".into(),
+        })
 }
 
 pub(crate) mod ast {

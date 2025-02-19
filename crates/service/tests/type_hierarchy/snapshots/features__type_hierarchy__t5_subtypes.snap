@@ -1,0 +1,32 @@
+---
+source: crates/service/tests/type_hierarchy/mod.rs
+expression: prepare
+---
+[
+  {
+    "name": "$t5",
+    "kind": 5,
+    "detail": "struct",
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 6,
+        "character": 2
+      },
+      "end": {
+        "line": 6,
+        "character": 31
+      }
+    },
+    "selectionRange": {
+      "start": {
+        "line": 6,
+        "character": 8
+      },
+      "end": {
+        "line": 6,
+        "character": 11
+      }
+    }
+  }
+]

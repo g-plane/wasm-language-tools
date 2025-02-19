@@ -164,6 +164,7 @@ impl LanguageService {
                     trigger_characters: Some(['(', ')'].iter().map(char::to_string).collect()),
                     ..Default::default()
                 }),
+                type_hierarchy_provider: Some(Union3::A(true)),
                 text_document_sync: Some(Union2::A(TextDocumentSyncOptions {
                     open_close: Some(true),
                     change: Some(TextDocumentSyncKind::Full),

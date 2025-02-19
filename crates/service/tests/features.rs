@@ -14,3 +14,4 @@ mod rename;
 mod selection_range;
 mod semantic_tokens;
 mod signature_help;
+mod type_hierarchy;
