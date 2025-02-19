@@ -410,6 +410,11 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 CmpCtx::AbsHeapType,
             ]);
         }
+        SyntaxKind::REC_TYPE => {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordType);
+            }
+        }
         _ => {}
     }
     if ctx.is_empty() {

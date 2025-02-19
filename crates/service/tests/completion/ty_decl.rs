@@ -563,3 +563,41 @@ fn super_type_candidates() {
     ));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn rec_type() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (rec ()))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 8,
+        },
+    ));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn after_other_type_defs_in_rec_type() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (rec (type) ()))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 15,
+        },
+    ));
+    assert_json_snapshot!(response);
+}

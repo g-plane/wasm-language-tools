@@ -301,8 +301,8 @@ pub(crate) static INSTR_NAMES: [&str; 296] = [
     "v128.load64_zero",
 ];
 
-pub(crate) static MODULE_FIELDS: [&str; 10] = [
-    "func", "type", "import", "table", "memory", "global", "export", "start", "elem", "data",
+pub(crate) static MODULE_FIELDS: [&str; 11] = [
+    "func", "type", "import", "table", "memory", "global", "export", "start", "elem", "data", "rec",
 ];
 
 pub(crate) fn get_value_type_description(value_type: &str) -> Option<&'static str> {
