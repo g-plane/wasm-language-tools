@@ -89,10 +89,31 @@ impl LanguageService {
                         },
                     ))
                 }
-                SymbolKind::Type
-                | SymbolKind::GlobalDef
-                | SymbolKind::MemoryDef
-                | SymbolKind::TableDef => {
+                SymbolKind::Type => {
+                    let range =
+                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());
+                    Some((
+                        symbol.key,
+                        DocumentSymbol {
+                            name: render_symbol_name(symbol, self),
+                            detail: helpers::infer_type_def_symbol_detail(symbol, &root),
+                            kind: LspSymbolKind::Class,
+                            tags: None,
+                            deprecated: None,
+                            range,
+                            selection_range: token(&symbol.key.to_node(&root), SyntaxKind::IDENT)
+                                .map(|token| {
+                                    helpers::rowan_range_to_lsp_range(
+                                        &line_index,
+                                        token.text_range(),
+                                    )
+                                })
+                                .unwrap_or(range),
+                            children: None,
+                        },
+                    ))
+                }
+                SymbolKind::GlobalDef | SymbolKind::MemoryDef | SymbolKind::TableDef => {
                     let range =
                         helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());
                     Some((

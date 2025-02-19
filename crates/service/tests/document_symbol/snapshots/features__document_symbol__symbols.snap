@@ -12,7 +12,7 @@ expression: response
         "character": 0
       },
       "end": {
-        "line": 11,
+        "line": 13,
         "character": 1
       }
     },
@@ -22,7 +22,7 @@ expression: response
         "character": 0
       },
       "end": {
-        "line": 11,
+        "line": 13,
         "character": 1
       }
     },
@@ -151,7 +151,8 @@ expression: response
       },
       {
         "name": "type 0",
-        "kind": 13,
+        "detail": "func",
+        "kind": 5,
         "range": {
           "start": {
             "line": 4,
@@ -175,7 +176,8 @@ expression: response
       },
       {
         "name": "$ty",
-        "kind": 13,
+        "detail": "func",
+        "kind": 5,
         "range": {
           "start": {
             "line": 5,
@@ -198,8 +200,9 @@ expression: response
         }
       },
       {
-        "name": "$global",
-        "kind": 13,
+        "name": "$struct",
+        "detail": "struct",
+        "kind": 5,
         "range": {
           "start": {
             "line": 6,
@@ -207,16 +210,65 @@ expression: response
           },
           "end": {
             "line": 6,
-            "character": 24
+            "character": 27
           }
         },
         "selectionRange": {
           "start": {
             "line": 6,
-            "character": 12
+            "character": 10
           },
           "end": {
             "line": 6,
+            "character": 17
+          }
+        }
+      },
+      {
+        "name": "$array",
+        "detail": "array",
+        "kind": 5,
+        "range": {
+          "start": {
+            "line": 7,
+            "character": 4
+          },
+          "end": {
+            "line": 7,
+            "character": 25
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 7,
+            "character": 10
+          },
+          "end": {
+            "line": 7,
+            "character": 16
+          }
+        }
+      },
+      {
+        "name": "$global",
+        "kind": 13,
+        "range": {
+          "start": {
+            "line": 8,
+            "character": 4
+          },
+          "end": {
+            "line": 8,
+            "character": 24
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 8,
+            "character": 12
+          },
+          "end": {
+            "line": 8,
             "character": 19
           }
         }
@@ -226,21 +278,21 @@ expression: response
         "kind": 13,
         "range": {
           "start": {
-            "line": 7,
+            "line": 9,
             "character": 4
           },
           "end": {
-            "line": 7,
+            "line": 9,
             "character": 16
           }
         },
         "selectionRange": {
           "start": {
-            "line": 7,
+            "line": 9,
             "character": 4
           },
           "end": {
-            "line": 7,
+            "line": 9,
             "character": 16
           }
         }
@@ -250,21 +302,21 @@ expression: response
         "kind": 13,
         "range": {
           "start": {
-            "line": 8,
+            "line": 10,
             "character": 4
           },
           "end": {
-            "line": 8,
+            "line": 10,
             "character": 22
           }
         },
         "selectionRange": {
           "start": {
-            "line": 8,
+            "line": 10,
             "character": 12
           },
           "end": {
-            "line": 8,
+            "line": 10,
             "character": 19
           }
         }
@@ -274,21 +326,21 @@ expression: response
         "kind": 13,
         "range": {
           "start": {
-            "line": 9,
+            "line": 11,
             "character": 4
           },
           "end": {
-            "line": 9,
+            "line": 11,
             "character": 14
           }
         },
         "selectionRange": {
           "start": {
-            "line": 9,
+            "line": 11,
             "character": 4
           },
           "end": {
-            "line": 9,
+            "line": 11,
             "character": 14
           }
         }
@@ -298,21 +350,21 @@ expression: response
         "kind": 13,
         "range": {
           "start": {
-            "line": 10,
+            "line": 12,
             "character": 4
           },
           "end": {
-            "line": 10,
+            "line": 12,
             "character": 28
           }
         },
         "selectionRange": {
           "start": {
-            "line": 10,
+            "line": 12,
             "character": 11
           },
           "end": {
-            "line": 10,
+            "line": 12,
             "character": 17
           }
         }
@@ -324,21 +376,21 @@ expression: response
     "kind": 2,
     "range": {
       "start": {
-        "line": 13,
+        "line": 15,
         "character": 0
       },
       "end": {
-        "line": 15,
+        "line": 17,
         "character": 1
       }
     },
     "selectionRange": {
       "start": {
-        "line": 13,
+        "line": 15,
         "character": 0
       },
       "end": {
-        "line": 15,
+        "line": 17,
         "character": 1
       }
     },
@@ -348,21 +400,21 @@ expression: response
         "kind": 12,
         "range": {
           "start": {
-            "line": 14,
+            "line": 16,
             "character": 4
           },
           "end": {
-            "line": 14,
+            "line": 16,
             "character": 10
           }
         },
         "selectionRange": {
           "start": {
-            "line": 14,
+            "line": 16,
             "character": 4
           },
           "end": {
-            "line": 14,
+            "line": 16,
             "character": 10
           }
         }

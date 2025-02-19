@@ -11,6 +11,8 @@ fn symbols() {
     (func (type 0))
     (type (func))
     (type $ty (func))
+    (type $struct (struct))
+    (type $array (array))
     (global $global i32)
     (global i32)
     (memory $memory 1)
