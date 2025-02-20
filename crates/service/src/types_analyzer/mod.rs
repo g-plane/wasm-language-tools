@@ -9,17 +9,9 @@ pub(crate) use self::{
     types::{HeapType, OperandType, RefType, ValType},
 };
 use crate::{
-    binder::{Symbol, SymbolTablesCtx},
-    idx::InternIdent,
-    syntax_tree::SyntaxTreeCtx,
-    uri::InternUri,
+    binder::SymbolTablesCtx, idx::InternIdent, syntax_tree::SyntaxTreeCtx, uri::InternUri,
 };
 use rowan::GreenNode;
-use std::{
-    fmt::{self, Debug},
-    hash::Hash,
-    ops::Deref,
-};
 use wat_syntax::{SyntaxKind, SyntaxNodePtr};
 
 mod extractor;
@@ -65,35 +57,4 @@ pub(crate) trait TypesAnalyzerCtx: SyntaxTreeCtx + SymbolTablesCtx {
         name: Option<InternIdent>,
         signature: Option<Signature>,
     ) -> String;
-}
-
-#[derive(Clone)]
-pub(crate) struct SymbolWithGreenEq(Symbol);
-impl PartialEq for SymbolWithGreenEq {
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0 && self.0.green == other.0.green
-    }
-}
-impl Eq for SymbolWithGreenEq {}
-impl Hash for SymbolWithGreenEq {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.0.hash(state);
-        self.0.green.hash(state);
-    }
-}
-impl From<Symbol> for SymbolWithGreenEq {
-    fn from(symbol: Symbol) -> Self {
-        SymbolWithGreenEq(symbol)
-    }
-}
-impl Deref for SymbolWithGreenEq {
-    type Target = Symbol;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl Debug for SymbolWithGreenEq {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self.0)
-    }
 }

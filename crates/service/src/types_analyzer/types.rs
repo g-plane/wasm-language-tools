@@ -1,7 +1,6 @@
 use super::TypesAnalyzerCtx;
 use crate::idx::Idx;
 use rowan::{ast::AstNode, GreenNodeData, Language, NodeOrToken};
-use std::{fmt::Debug, hash::Hash};
 use wat_syntax::{ast::ValType as AstValType, SyntaxKind, WatLanguage};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
