@@ -3,7 +3,7 @@ use crate::{
     data_set, helpers,
     idx::Idx,
     syntax_tree::SyntaxTreeCtx,
-    types_analyzer::{self, OperandType, TypesAnalyzerCtx, ValType},
+    types_analyzer::{self, DefTypeKind, OperandType, TypesAnalyzerCtx, ValType},
     uri::{InternUri, UrisCtx},
     LanguageService,
 };
@@ -18,10 +18,7 @@ use rowan::{
     Direction,
 };
 use smallvec::SmallVec;
-use wat_syntax::{
-    ast::{CompType, PlainInstr, TypeDef},
-    SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken,
-};
+use wat_syntax::{ast::PlainInstr, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 impl LanguageService {
     /// Handler for `textDocument/completion` request.
@@ -716,6 +713,7 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
+                    let def_types = service.def_types(uri);
                     items.extend(symbol_table.get_declared(module, SymbolKind::Type).map(
                         |symbol| {
                             let label = symbol.idx.render(service).to_string();
@@ -730,14 +728,14 @@ fn get_cmp_list(
                                     new_text: label,
                                 })),
                                 sort_text: preferred_type.as_ref().and_then(|preferred_type| {
-                                    TypeDef::cast(symbol.key.to_node(root))
-                                        .and_then(|type_def| type_def.sub_type())
-                                        .and_then(|sub_type| sub_type.comp_type())
-                                        .map(|comp_type| {
-                                            if let (CompType::Func(..), PreferredType::Func)
-                                            | (CompType::Array(..), PreferredType::Array)
-                                            | (CompType::Struct(..), PreferredType::Struct) =
-                                                (comp_type, preferred_type)
+                                    def_types
+                                        .iter()
+                                        .find(|def_type| def_type.key == symbol.key)
+                                        .map(|def_type| {
+                                            if let (DefTypeKind::Func, PreferredType::Func)
+                                            | (DefTypeKind::Array, PreferredType::Array)
+                                            | (DefTypeKind::Struct, PreferredType::Struct) =
+                                                (&def_type.kind, preferred_type)
                                             {
                                                 "0".into()
                                             } else {

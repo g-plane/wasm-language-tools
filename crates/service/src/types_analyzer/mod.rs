@@ -1,9 +1,11 @@
 use self::{
+    def_type::create_def_types,
     extractor::{extract_global_type, extract_sig, extract_type},
     renderer::{render_block_header, render_compact_sig, render_func_header, render_sig},
     signature::{get_func_sig, get_type_use_sig, Signature},
 };
 pub(crate) use self::{
+    def_type::{DefType, DefTypeKind},
     resolver::{resolve_br_types, resolve_param_types},
     signature::{get_block_sig, ResolvedSig},
     types::{HeapType, OperandType, RefType, ValType},
@@ -12,8 +14,10 @@ use crate::{
     binder::SymbolTablesCtx, idx::InternIdent, syntax_tree::SyntaxTreeCtx, uri::InternUri,
 };
 use rowan::GreenNode;
+use std::sync::Arc;
 use wat_syntax::{SyntaxKind, SyntaxNodePtr};
 
+mod def_type;
 mod extractor;
 mod renderer;
 mod resolver;
@@ -57,4 +61,8 @@ pub(crate) trait TypesAnalyzerCtx: SyntaxTreeCtx + SymbolTablesCtx {
         name: Option<InternIdent>,
         signature: Option<Signature>,
     ) -> String;
+
+    #[salsa::memoized]
+    #[salsa::invoke(create_def_types)]
+    fn def_types(&self, uri: InternUri) -> Arc<Vec<DefType>>;
 }
