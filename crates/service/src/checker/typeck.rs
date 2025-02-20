@@ -250,6 +250,7 @@ struct TypeStack<'a> {
 }
 impl TypeStack<'_> {
     fn check(&mut self, expected: &[OperandType], report_range: ReportRange) -> Option<Diagnostic> {
+        let service = self.service;
         let mut diagnostic = None;
         let rest_len = self.stack.len().saturating_sub(expected.len());
         let pops = self.stack.get(rest_len..).unwrap_or(&*self.stack);
@@ -263,12 +264,12 @@ impl TypeStack<'_> {
                 EitherOrBoth::Both(
                     OperandType::Val(expected),
                     (OperandType::Val(received), related_instr),
-                ) if expected != received => {
+                ) if !service.value_type_matches(self.uri, *received, *expected) => {
                     mismatch = true;
                     if let Some(related_instr) = related_instr {
                         related_information.push(DiagnosticRelatedInformation {
                             location: Location {
-                                uri: self.service.lookup_uri(self.uri),
+                                uri: service.lookup_uri(self.uri),
                                 range: helpers::rowan_range_to_lsp_range(
                                     self.line_index,
                                     ReportRange::Instr(related_instr).pick(),
@@ -276,8 +277,8 @@ impl TypeStack<'_> {
                             },
                             message: format!(
                                 "expected type `{}`, found `{}`",
-                                expected.render_compact(self.service),
-                                received.render_compact(self.service),
+                                expected.render_compact(service),
+                                received.render_compact(service),
                             ),
                         });
                     }
@@ -290,13 +291,11 @@ impl TypeStack<'_> {
         if mismatch {
             let expected_types = format!(
                 "[{}]",
-                expected.iter().map(|ty| ty.render(self.service)).join(", ")
+                expected.iter().map(|ty| ty.render(service)).join(", ")
             );
             let received_types = format!(
                 "[{}]",
-                pops.iter()
-                    .map(|(ty, _)| ty.render(self.service))
-                    .join(", ")
+                pops.iter().map(|(ty, _)| ty.render(service)).join(", ")
             );
             diagnostic = Some(Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(self.line_index, report_range.pick()),

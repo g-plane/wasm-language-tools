@@ -1,5 +1,5 @@
-use super::TypesAnalyzerCtx;
-use crate::idx::Idx;
+use super::{def_type::DefTypeKind, TypesAnalyzerCtx};
+use crate::{binder::SymbolKind, idx::Idx, uri::InternUri};
 use rowan::{ast::AstNode, GreenNodeData, Language, NodeOrToken};
 use wat_syntax::{ast::ValType as AstValType, SyntaxKind, WatLanguage};
 
@@ -92,7 +92,7 @@ impl ValType {
                     "nullexternref" => {
                         return Some(ValType::Ref(RefType {
                             heap_ty: HeapType::NoExtern,
-                            nullable: false,
+                            nullable: true,
                         }));
                     }
                     _ => {}
@@ -188,6 +188,13 @@ impl ValType {
             _ => None,
         }
     }
+
+    pub(crate) fn matches(&self, other: &Self, db: &dyn TypesAnalyzerCtx, uri: InternUri) -> bool {
+        match (self, other) {
+            (ValType::Ref(a), ValType::Ref(b)) => a.matches(b, db, uri),
+            _ => self == other,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -195,6 +202,12 @@ pub(crate) struct RefType {
     pub heap_ty: HeapType,
     pub nullable: bool,
 }
+impl RefType {
+    pub(crate) fn matches(&self, other: &Self, db: &dyn TypesAnalyzerCtx, uri: InternUri) -> bool {
+        self.heap_ty.matches(&other.heap_ty, db, uri) && (!self.nullable || other.nullable)
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub(crate) enum HeapType {
     Type(Idx),
@@ -208,6 +221,57 @@ pub(crate) enum HeapType {
     NoFunc,
     Extern,
     NoExtern,
+}
+impl HeapType {
+    pub(crate) fn matches(&self, other: &Self, db: &dyn TypesAnalyzerCtx, uri: InternUri) -> bool {
+        match (self, other) {
+            (
+                HeapType::Any | HeapType::Eq | HeapType::Struct | HeapType::Array | HeapType::I31,
+                HeapType::Any,
+            )
+            | (HeapType::I31 | HeapType::Struct | HeapType::Array, HeapType::Eq) => true,
+            (HeapType::None, other) => other.matches(&HeapType::Any, db, uri),
+            (HeapType::NoFunc, other) => other.matches(&HeapType::Func, db, uri),
+            (HeapType::NoExtern, other) => other.matches(&HeapType::Extern, db, uri),
+            (HeapType::Type(a), HeapType::Type(b)) => {
+                let symbol_table = db.symbol_table(uri);
+                symbol_table
+                    .symbols
+                    .iter()
+                    .find(|symbol| symbol.kind == SymbolKind::Type && a.is_defined_by(&symbol.idx))
+                    .zip(symbol_table.symbols.iter().find(|symbol| {
+                        symbol.kind == SymbolKind::Type && b.is_defined_by(&symbol.idx)
+                    }))
+                    .is_some_and(|(a, b)| {
+                        a.key == b.key
+                            || symbol_table.inheritance.iter().any(|type_def| {
+                                type_def.key == a.key
+                                    && type_def.inherits.is_some_and(|inherits| inherits == b.key)
+                            })
+                    })
+            }
+            (HeapType::Type(a), b) => {
+                let symbol_table = db.symbol_table(uri);
+                let def_types = db.def_types(uri);
+                symbol_table
+                    .symbols
+                    .iter()
+                    .find(|symbol| symbol.kind == SymbolKind::Type && a.is_defined_by(&symbol.idx))
+                    .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
+                    .is_some_and(|def_type| match (&def_type.kind, b) {
+                        (DefTypeKind::Struct, HeapType::Any | HeapType::Eq | HeapType::Struct) => {
+                            true
+                        }
+                        (DefTypeKind::Array, HeapType::Any | HeapType::Eq | HeapType::Array) => {
+                            true
+                        }
+                        (DefTypeKind::Func, HeapType::Func) => true,
+                        _ => false,
+                    })
+            }
+            (a, b) => a == b,
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
