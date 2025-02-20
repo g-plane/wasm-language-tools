@@ -1,0 +1,10 @@
+---
+source: crates/service/tests/completion/param.rs
+expression: response
+---
+[
+  {
+    "label": "ref",
+    "kind": 14
+  }
+]

@@ -122,3 +122,42 @@ fn folded_select_incomplete_keyword() {
     ));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn after_paren() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func (result ())))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 17,
+        },
+    ));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn ref_type() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func (result (ref )))
+  (type))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 21,
+        },
+    ));
+    assert_json_snapshot!(response);
+}

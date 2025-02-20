@@ -122,3 +122,42 @@ fn types_incomplete_type() {
     ));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn after_paren() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func (param ())))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 16,
+        },
+    ));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn ref_type() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func (param (ref )))
+  (type))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(
+        uri,
+        Position {
+            line: 2,
+            character: 20,
+        },
+    ));
+    assert_json_snapshot!(response);
+}

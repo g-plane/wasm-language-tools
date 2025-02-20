@@ -228,7 +228,9 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             add_cmp_ctx_for_immediates(instr_name.text(), &parent, false, &mut ctx);
         }
         SyntaxKind::PARAM | SyntaxKind::RESULT | SyntaxKind::LOCAL | SyntaxKind::GLOBAL_TYPE => {
-            if !token.text().starts_with('$') {
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordRef);
+            } else if !token.text().starts_with('$') {
                 ctx.extend([CmpCtx::NumTypeVecType, CmpCtx::AbbrRefType]);
             }
         }
@@ -258,7 +260,11 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             {
                 ctx.push(CmpCtx::Instr);
             } else if find_leading_l_paren(token).is_some() {
-                ctx.extend([CmpCtx::KeywordMut, CmpCtx::KeywordImExport]);
+                ctx.extend([
+                    CmpCtx::KeywordMut,
+                    CmpCtx::KeywordImExport,
+                    CmpCtx::KeywordRef,
+                ]);
             } else {
                 ctx.extend([CmpCtx::NumTypeVecType, CmpCtx::AbbrRefType]);
             }
@@ -340,7 +346,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         SyntaxKind::IMPORT_DESC_GLOBAL_TYPE => {
             if find_leading_l_paren(token).is_some() {
-                ctx.push(CmpCtx::KeywordMut);
+                ctx.extend([CmpCtx::KeywordMut, CmpCtx::KeywordRef]);
             } else {
                 ctx.extend([CmpCtx::NumTypeVecType, CmpCtx::AbbrRefType]);
             }
