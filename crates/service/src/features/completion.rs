@@ -234,7 +234,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.extend([CmpCtx::NumTypeVecType, CmpCtx::AbbrRefType]);
             }
         }
-        SyntaxKind::TYPE_USE => ctx.push(CmpCtx::TypeDef(true)),
+        SyntaxKind::TYPE_USE => ctx.push(CmpCtx::TypeDef(Some(PreferredType::Func))),
         SyntaxKind::FUNC_TYPE => {
             if find_leading_l_paren(token).is_some() {
                 ctx.extend([CmpCtx::KeywordParam, CmpCtx::KeywordResult]);
@@ -246,7 +246,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC => {
                     ctx.push(CmpCtx::Func);
                 }
-                SyntaxKind::TYPE_USE => ctx.push(CmpCtx::TypeDef(true)),
+                SyntaxKind::TYPE_USE => ctx.push(CmpCtx::TypeDef(Some(PreferredType::Func))),
                 SyntaxKind::EXPORT_DESC_GLOBAL => ctx.push(CmpCtx::Global),
                 SyntaxKind::EXPORT_DESC_MEMORY => ctx.push(CmpCtx::Memory),
                 SyntaxKind::EXPORT_DESC_TABLE => ctx.push(CmpCtx::Table),
@@ -379,7 +379,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::KeywordsCompType);
             } else {
-                ctx.extend([CmpCtx::TypeDef(false), CmpCtx::KeywordFinal]);
+                ctx.extend([CmpCtx::TypeDef(None), CmpCtx::KeywordFinal]);
             }
         }
         SyntaxKind::STRUCT_TYPE => {
@@ -411,7 +411,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         SyntaxKind::REF_TYPE => {
             ctx.extend([
-                CmpCtx::TypeDef(false),
+                CmpCtx::TypeDef(None),
                 CmpCtx::KeywordNull,
                 CmpCtx::AbsHeapType,
             ]);
@@ -504,7 +504,7 @@ enum CmpCtx {
     AbbrRefType,
     Local,
     Func,
-    TypeDef(bool),
+    TypeDef(Option<PreferredType>),
     Global,
     MemArg,
     Memory,
@@ -535,6 +535,12 @@ enum CmpCtx {
     KeywordField,
     KeywordRef,
     KeywordNull,
+}
+#[expect(dead_code)]
+enum PreferredType {
+    Func,
+    Array,
+    Struct,
 }
 
 fn get_cmp_list(
@@ -703,7 +709,7 @@ fn get_cmp_list(
                         },
                     ));
                 }
-                CmpCtx::TypeDef(prefer_func) => {
+                CmpCtx::TypeDef(preferred_type) => {
                     let Some(module) = token
                         .parent_ancestors()
                         .find(|node| node.kind() == SyntaxKind::MODULE)
@@ -723,20 +729,22 @@ fn get_cmp_list(
                                     ),
                                     new_text: label,
                                 })),
-                                sort_text: if prefer_func {
+                                sort_text: preferred_type.as_ref().and_then(|preferred_type| {
                                     TypeDef::cast(symbol.key.to_node(root))
                                         .and_then(|type_def| type_def.sub_type())
                                         .and_then(|sub_type| sub_type.comp_type())
                                         .map(|comp_type| {
-                                            if let CompType::Func(..) = comp_type {
+                                            if let (CompType::Func(..), PreferredType::Func)
+                                            | (CompType::Array(..), PreferredType::Array)
+                                            | (CompType::Struct(..), PreferredType::Struct) =
+                                                (comp_type, preferred_type)
+                                            {
                                                 "0".into()
                                             } else {
                                                 "1".into()
                                             }
                                         })
-                                } else {
-                                    None
-                                },
+                                }),
                                 ..Default::default()
                             }
                         },
