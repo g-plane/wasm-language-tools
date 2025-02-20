@@ -90,7 +90,7 @@ impl LanguageService {
             .find(|symbol| symbol.key.text_range() == type_def_range)?;
 
         symbol_table
-            .type_defs
+            .inheritance
             .iter()
             .find(|def| def.key == type_def.key)
             .and_then(|type_def| type_def.inherits)
@@ -128,7 +128,7 @@ impl LanguageService {
 
         Some(
             symbol_table
-                .type_defs
+                .inheritance
                 .iter()
                 .filter(|type_def| type_def.inherits.is_some_and(|inherits| inherits == key))
                 .filter_map(|type_def| {

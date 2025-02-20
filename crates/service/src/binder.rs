@@ -25,7 +25,7 @@ pub(crate) struct SymbolTable {
     pub symbols: Vec<Symbol>,
     pub blocks: Vec<BlockItem>,
     pub exports: Vec<ExportItem>,
-    pub type_defs: Vec<TypeDefItem>,
+    pub inheritance: Vec<TypeDefItem>,
 }
 fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTable> {
     fn create_module_level_symbol(
@@ -550,7 +550,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
         });
     });
 
-    let type_defs = symbols
+    let inheritance = symbols
         .iter()
         .filter(|symbol| symbol.kind == SymbolKind::Type)
         .filter_map(|symbol| {
@@ -574,7 +574,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
         symbols,
         blocks,
         exports,
-        type_defs,
+        inheritance,
     })
 }
 
