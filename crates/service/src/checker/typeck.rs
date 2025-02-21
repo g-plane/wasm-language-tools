@@ -27,6 +27,7 @@ pub fn check_func(
     uri: InternUri,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
+    module_id: u32,
     node: &SyntaxNode,
 ) {
     let results = service
@@ -45,6 +46,7 @@ pub fn check_func(
             uri,
             symbol_table,
             line_index,
+            module_id,
         },
         node,
         Vec::with_capacity(2),
@@ -58,6 +60,7 @@ pub fn check_global(
     uri: InternUri,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
+    module_id: u32,
     node: &SyntaxNode,
 ) {
     let ty = service
@@ -71,6 +74,7 @@ pub fn check_global(
             uri,
             symbol_table,
             line_index,
+            module_id,
         },
         node,
         if support::child::<Import>(node).is_some() {
@@ -98,6 +102,7 @@ struct Shared<'a> {
     uri: InternUri,
     symbol_table: &'a SymbolTable,
     line_index: &'a LineIndex,
+    module_id: u32,
 }
 
 fn check_block_like(
@@ -111,6 +116,7 @@ fn check_block_like(
         uri: shared.uri,
         service: shared.service,
         line_index: shared.line_index,
+        module_id: shared.module_id,
         stack: init_stack,
         has_never: false,
     };
@@ -245,6 +251,7 @@ struct TypeStack<'a> {
     uri: InternUri,
     service: &'a LanguageService,
     line_index: &'a LineIndex,
+    module_id: u32,
     stack: Vec<(OperandType, Option<Instr>)>,
     has_never: bool,
 }
@@ -264,7 +271,10 @@ impl TypeStack<'_> {
                 EitherOrBoth::Both(
                     OperandType::Val(expected),
                     (OperandType::Val(received), related_instr),
-                ) if !service.value_type_matches(self.uri, *received, *expected) => {
+                ) => {
+                    if service.value_type_matches(self.uri, self.module_id, *received, *expected) {
+                        return;
+                    }
                     mismatch = true;
                     if let Some(related_instr) = related_instr {
                         related_information.push(DiagnosticRelatedInformation {

@@ -67,14 +67,21 @@ pub(crate) trait TypesAnalyzerCtx: SyntaxTreeCtx + SymbolTablesCtx {
     fn def_types(&self, uri: InternUri) -> Arc<Vec<DefType>>;
 
     #[salsa::memoized]
-    fn value_type_matches(&self, uri: InternUri, sub: ValType, sup: ValType) -> bool;
+    fn value_type_matches(
+        &self,
+        uri: InternUri,
+        module_id: u32,
+        sub: ValType,
+        sup: ValType,
+    ) -> bool;
 }
 
 fn value_type_matches(
     db: &dyn TypesAnalyzerCtx,
     uri: InternUri,
+    module_id: u32,
     sub: ValType,
     sup: ValType,
 ) -> bool {
-    sub.matches(&sup, db, uri)
+    sub.matches(&sup, db, uri, module_id)
 }

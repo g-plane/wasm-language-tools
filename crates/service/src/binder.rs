@@ -131,14 +131,14 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
     let mut symbols = Vec::with_capacity(2);
     let mut blocks = vec![];
     let mut exports = vec![];
-    root.children().for_each(|module| {
+    root.children().enumerate().for_each(|(module_id, module)| {
         symbols.push(Symbol {
             green: module.green().into(),
             key: SymbolKey::new(&module),
             region: SymbolKey::new(&root),
             kind: SymbolKind::Module,
             idx: Idx {
-                num: None,
+                num: Some(module_id as u32),
                 name: None,
             },
         });
@@ -658,6 +658,12 @@ impl SymbolTable {
                         .find(|symbol| symbol.key == block.ref_key)
                 }),
         )
+    }
+
+    pub fn find_module(&self, module_id: u32) -> Option<&Symbol> {
+        self.symbols
+            .iter()
+            .find(|symbol| symbol.kind == SymbolKind::Module && symbol.idx.num == Some(module_id))
     }
 }
 

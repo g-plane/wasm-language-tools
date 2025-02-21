@@ -27,7 +27,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
     let mut diagnostics = Vec::with_capacity(4);
     syntax::check(service, &mut diagnostics, uri, &line_index, &root);
     multi_modules::check(&mut diagnostics, &line_index, &root);
-    root.children().for_each(|module| {
+    root.children().enumerate().for_each(|(module_id, module)| {
         implicit_module::check(
             &mut diagnostics,
             config.lint.implicit_module,
@@ -42,6 +42,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                     uri,
                     &line_index,
                     &symbol_table,
+                    module_id as u32,
                     &node,
                 );
                 unreachable::check(
@@ -60,6 +61,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                     uri,
                     &line_index,
                     &symbol_table,
+                    module_id as u32,
                     &node,
                 );
                 unreachable::check(
