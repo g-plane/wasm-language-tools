@@ -732,10 +732,12 @@ fn get_cmp_list(
                                         .iter()
                                         .find(|def_type| def_type.key == symbol.key)
                                         .map(|def_type| {
-                                            if let (DefTypeKind::Func, PreferredType::Func)
-                                            | (DefTypeKind::Array, PreferredType::Array)
-                                            | (DefTypeKind::Struct, PreferredType::Struct) =
-                                                (&def_type.kind, preferred_type)
+                                            if let (DefTypeKind::Func(..), PreferredType::Func)
+                                            | (DefTypeKind::Array(..), PreferredType::Array)
+                                            | (
+                                                DefTypeKind::Struct(..),
+                                                PreferredType::Struct,
+                                            ) = (&def_type.kind, preferred_type)
                                             {
                                                 "0".into()
                                             } else {

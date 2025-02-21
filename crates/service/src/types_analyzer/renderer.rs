@@ -1,6 +1,6 @@
 use super::{
     signature::Signature,
-    types::{HeapType, OperandType, ValType},
+    types::{FieldType, Fields, HeapType, OperandType, StorageType, ValType},
     TypesAnalyzerCtx,
 };
 use crate::idx::InternIdent;
@@ -201,5 +201,58 @@ impl Display for OperandTypeRender<'_> {
             OperandType::Val(ty) => write!(f, "{}", ty.render_compact(self.db)),
             OperandType::Any => write!(f, "any"),
         }
+    }
+}
+
+impl FieldType {
+    pub(crate) fn render<'a>(&'a self, db: &'a dyn TypesAnalyzerCtx) -> FieldTypeRender<'a> {
+        FieldTypeRender { ty: self, db }
+    }
+}
+pub(crate) struct FieldTypeRender<'a> {
+    ty: &'a FieldType,
+    db: &'a dyn TypesAnalyzerCtx,
+}
+impl Display for FieldTypeRender<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.ty.mutable {
+            write!(f, "(mut ")?;
+        }
+        match self.ty.storage {
+            StorageType::Val(ty) => write!(f, "{}", ty.render(self.db))?,
+            StorageType::PackedI8 => write!(f, "i8")?,
+            StorageType::PackedI16 => write!(f, "i16")?,
+        }
+        if self.ty.mutable {
+            write!(f, ")")?;
+        }
+        Ok(())
+    }
+}
+
+impl Fields {
+    pub(crate) fn render<'a>(&'a self, db: &'a dyn TypesAnalyzerCtx) -> FieldsRender<'a> {
+        FieldsRender { fields: self, db }
+    }
+}
+pub(crate) struct FieldsRender<'a> {
+    fields: &'a Fields,
+    db: &'a dyn TypesAnalyzerCtx,
+}
+impl Display for FieldsRender<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.fields.0.iter().try_fold(true, |first, field| {
+            if !first {
+                write!(f, " ")?;
+            }
+            write!(f, "(field ")?;
+            if let Some(name) = field.1 {
+                write!(f, "{} ", self.db.lookup_ident(name))?;
+            }
+            write!(f, "{}", field.0.render(self.db))?;
+            write!(f, ")")?;
+            Ok(false)
+        })?;
+        Ok(())
     }
 }

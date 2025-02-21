@@ -1,7 +1,14 @@
 use super::{def_type::DefTypeKind, TypesAnalyzerCtx};
-use crate::{binder::SymbolKind, idx::Idx, uri::InternUri};
+use crate::{
+    binder::SymbolKind,
+    idx::{Idx, InternIdent},
+    uri::InternUri,
+};
 use rowan::{ast::AstNode, GreenNodeData, Language, NodeOrToken};
-use wat_syntax::{ast::ValType as AstValType, SyntaxKind, WatLanguage};
+use wat_syntax::{
+    ast::{FieldType as AstFieldType, StorageType as AstStorageType, ValType as AstValType},
+    SyntaxKind, WatLanguage,
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub(crate) enum ValType {
@@ -259,13 +266,15 @@ impl HeapType {
                     .find(|symbol| symbol.kind == SymbolKind::Type && a.is_defined_by(&symbol.idx))
                     .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
                     .is_some_and(|def_type| match (&def_type.kind, b) {
-                        (DefTypeKind::Struct, HeapType::Any | HeapType::Eq | HeapType::Struct) => {
-                            true
-                        }
-                        (DefTypeKind::Array, HeapType::Any | HeapType::Eq | HeapType::Array) => {
-                            true
-                        }
-                        (DefTypeKind::Func, HeapType::Func) => true,
+                        (
+                            DefTypeKind::Struct(..),
+                            HeapType::Any | HeapType::Eq | HeapType::Struct,
+                        ) => true,
+                        (
+                            DefTypeKind::Array(..),
+                            HeapType::Any | HeapType::Eq | HeapType::Array,
+                        ) => true,
+                        (DefTypeKind::Func(..), HeapType::Func) => true,
                         _ => false,
                     })
             }
@@ -278,4 +287,45 @@ impl HeapType {
 pub(crate) enum OperandType {
     Val(ValType),
     Any,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct Fields(pub Vec<(FieldType, Option<InternIdent>)>);
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct FieldType {
+    pub(super) storage: StorageType,
+    pub(super) mutable: bool,
+}
+impl FieldType {
+    pub(super) fn from_ast(node: &AstFieldType, db: &dyn TypesAnalyzerCtx) -> Option<Self> {
+        node.storage_type()
+            .and_then(|storage_type| StorageType::from_ast(&storage_type, db))
+            .map(|storage| FieldType {
+                storage,
+                mutable: node.mut_keyword().is_some(),
+            })
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) enum StorageType {
+    Val(ValType),
+    PackedI8,
+    PackedI16,
+}
+impl StorageType {
+    fn from_ast(node: &AstStorageType, db: &dyn TypesAnalyzerCtx) -> Option<Self> {
+        match node {
+            AstStorageType::Val(ty) => ValType::from_ast(ty, db).map(StorageType::Val),
+            AstStorageType::Packed(ty) => {
+                ty.type_keyword()
+                    .and_then(|type_keyword| match type_keyword.text() {
+                        "i8" => Some(StorageType::PackedI8),
+                        "i16" => Some(StorageType::PackedI16),
+                        _ => None,
+                    })
+            }
+        }
+    }
 }

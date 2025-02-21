@@ -1,0 +1,20 @@
+---
+source: crates/service/tests/hover/mod.rs
+expression: response
+---
+{
+  "contents": {
+    "kind": "markdown",
+    "value": "```wat\n(type $struct (struct))\n```"
+  },
+  "range": {
+    "start": {
+      "line": 3,
+      "character": 20
+    },
+    "end": {
+      "line": 3,
+      "character": 27
+    }
+  }
+}

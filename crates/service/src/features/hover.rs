@@ -4,7 +4,7 @@ use crate::{
     data_set, helpers,
     idx::{IdentsCtx, Idx},
     syntax_tree::SyntaxTreeCtx,
-    types_analyzer::{self, TypesAnalyzerCtx},
+    types_analyzer::{self, DefType, DefTypeKind, TypesAnalyzerCtx},
     uri::{InternUri, UrisCtx},
     LanguageService,
 };
@@ -61,7 +61,9 @@ impl LanguageService {
                                 }),
                                 SymbolKind::TypeUse => {
                                     symbol_table.find_def(key).map(|symbol| Hover {
-                                        contents: Union3::A(create_type_def_hover(self, symbol)),
+                                        contents: Union3::A(create_type_def_hover(
+                                            self, uri, symbol,
+                                        )),
                                         range: Some(helpers::rowan_range_to_lsp_range(
                                             &line_index,
                                             token.text_range(),
@@ -188,7 +190,7 @@ fn create_def_hover(
             kind: MarkupKind::Markdown,
             value: create_func_hover(service, uri, symbol.clone(), root),
         }),
-        SymbolKind::Type => Some(create_type_def_hover(service, symbol)),
+        SymbolKind::Type => Some(create_type_def_hover(service, uri, symbol)),
         SymbolKind::GlobalDef => Some(create_global_def_hover(service, symbol, root)),
         SymbolKind::BlockDef => Some(create_block_hover(service, symbol, uri, root)),
         _ => None,
@@ -281,7 +283,12 @@ fn create_global_def_hover(
     }
 }
 
-fn create_type_def_hover(service: &LanguageService, symbol: &Symbol) -> MarkupContent {
+fn create_type_def_hover(
+    service: &LanguageService,
+    uri: InternUri,
+    symbol: &Symbol,
+) -> MarkupContent {
+    let def_types = service.def_types(uri);
     let mut content = "(type".to_string();
     if let Symbol {
         kind: SymbolKind::Type,
@@ -294,14 +301,35 @@ fn create_type_def_hover(service: &LanguageService, symbol: &Symbol) -> MarkupCo
         content.push(' ');
         content.push_str(&service.lookup_ident(*name));
     }
-    if let Some(func_type) = helpers::ast::find_func_type_of_type_def(&symbol.green) {
-        let sig = service.extract_sig(func_type.to_owned());
-        content.push_str(" (func");
-        if !sig.params.is_empty() || !sig.results.is_empty() {
-            content.push(' ');
-            content.push_str(&service.render_sig(sig));
+    if let Some(DefType { kind, .. }) = def_types.iter().find(|def_type| def_type.key == symbol.key)
+    {
+        content.push(' ');
+        match kind {
+            DefTypeKind::Func(sig) => {
+                content.push_str("(func");
+                if !sig.params.is_empty() || !sig.results.is_empty() {
+                    content.push(' ');
+                    content.push_str(&service.render_sig(sig.clone()));
+                }
+                content.push(')');
+            }
+            DefTypeKind::Struct(fields) => {
+                content.push_str("(struct");
+                if !fields.0.is_empty() {
+                    content.push(' ');
+                    let _ = write!(content, "{}", fields.render(service));
+                }
+                content.push(')');
+            }
+            DefTypeKind::Array(field_ty) => {
+                content.push_str("(array");
+                if let Some(field_ty) = field_ty {
+                    content.push(' ');
+                    let _ = write!(content, "{}", field_ty.render(service));
+                }
+                content.push(')');
+            }
         }
-        content.push(')');
     }
     content.push(')');
     MarkupContent {

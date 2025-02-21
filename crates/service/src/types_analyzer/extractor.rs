@@ -1,10 +1,14 @@
-use super::{signature::Signature, types::ValType, TypesAnalyzerCtx};
+use super::{
+    signature::Signature,
+    types::{FieldType, Fields, ValType},
+    TypesAnalyzerCtx,
+};
 use rowan::{
     ast::{support, AstNode},
     GreenNode, Language, NodeOrToken,
 };
 use wat_syntax::{
-    ast::{Param, Result, ValType as AstValType},
+    ast::{Param, Result, StructType, ValType as AstValType},
     SyntaxKind, SyntaxNode, WatLanguage,
 };
 
@@ -55,4 +59,25 @@ pub(super) fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Signatu
         .filter_map(|ty| ValType::from_ast(&ty, db))
         .collect();
     Signature { params, results }
+}
+
+pub(super) fn extract_fields(db: &dyn TypesAnalyzerCtx, struct_ty: &StructType) -> Fields {
+    Fields(struct_ty.fields().fold(vec![], |mut acc, field| {
+        if let Some((ty, ident)) = field
+            .field_types()
+            .next()
+            .and_then(|ty| FieldType::from_ast(&ty, db))
+            .zip(field.ident_token())
+        {
+            acc.push((ty, Some(db.ident(ident.text().into()))));
+        } else {
+            acc.extend(
+                field
+                    .field_types()
+                    .filter_map(|ty| FieldType::from_ast(&ty, db))
+                    .map(|ty| (ty, None)),
+            );
+        }
+        acc
+    }))
 }

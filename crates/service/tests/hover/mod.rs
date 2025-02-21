@@ -906,3 +906,83 @@ fn ref_type() {
     ));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn struct_type() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $struct (struct (field) (field i8 (mut anyref)) (field $x (ref $x))))
+  (func (param (ref $struct))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 24,
+        },
+    ));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn struct_type_empty() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $struct (struct (field)  ))
+  (func (param (ref $struct))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 24,
+        },
+    ));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn array_type() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $array (array  (mut nullfuncref) ))
+  (func (param (ref $array))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 24,
+        },
+    ));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn array_type_empty() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $array (array  ))
+  (func (param (ref $array))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(
+        uri,
+        Position {
+            line: 3,
+            character: 24,
+        },
+    ));
+    assert_json_snapshot!(response);
+}

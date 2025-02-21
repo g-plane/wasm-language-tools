@@ -1,4 +1,9 @@
-use super::TypesAnalyzerCtx;
+use super::{
+    extractor::extract_fields,
+    signature::Signature,
+    types::{FieldType, Fields},
+    TypesAnalyzerCtx,
+};
 use crate::{
     binder::{SymbolKey, SymbolKind},
     idx::Idx,
@@ -21,20 +26,24 @@ pub(super) fn create_def_types(db: &dyn TypesAnalyzerCtx, uri: InternUri) -> Arc
         .filter_map(|symbol| {
             let node = TypeDef::cast(symbol.key.to_node(&root))?;
             match node.sub_type()?.comp_type()? {
-                CompType::Func(..) => Some(DefType {
+                CompType::Func(func_type) => Some(DefType {
                     key: symbol.key,
                     idx: symbol.idx,
-                    kind: DefTypeKind::Func,
+                    kind: DefTypeKind::Func(db.extract_sig(func_type.syntax().green().into())),
                 }),
-                CompType::Struct(..) => Some(DefType {
+                CompType::Struct(struct_type) => Some(DefType {
                     key: symbol.key,
                     idx: symbol.idx,
-                    kind: DefTypeKind::Struct,
+                    kind: DefTypeKind::Struct(extract_fields(db, &struct_type)),
                 }),
-                CompType::Array(..) => Some(DefType {
+                CompType::Array(array_type) => Some(DefType {
                     key: symbol.key,
                     idx: symbol.idx,
-                    kind: DefTypeKind::Array,
+                    kind: DefTypeKind::Array(
+                        array_type
+                            .field_type()
+                            .and_then(|node| FieldType::from_ast(&node, db)),
+                    ),
                 }),
             }
         })
@@ -51,7 +60,7 @@ pub(crate) struct DefType {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum DefTypeKind {
-    Func,
-    Struct,
-    Array,
+    Func(Signature),
+    Struct(Fields),
+    Array(Option<FieldType>),
 }
