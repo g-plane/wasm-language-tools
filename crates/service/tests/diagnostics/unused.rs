@@ -95,6 +95,20 @@ fn params_in_imported_func() {
 }
 
 #[test]
+fn param_is_ref_type() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (type (func))
+  (func (export "") (param (ref 0)) (param $p (ref 0))))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn local_unused() {
     let uri = "untitled:test".to_string();
     let source = r#"

@@ -6,7 +6,7 @@ use crate::{
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, DiagnosticTag, Union2};
-use rowan::{ast::support, Direction};
+use rowan::{ast::support, Direction, TextRange};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "unused";
@@ -59,7 +59,13 @@ pub fn check(
                 {
                     None
                 } else {
-                    Some(report(service, line_index, root, severity, symbol))
+                    let node = symbol.key.to_node(root);
+                    let range = support::token(&node, SyntaxKind::IDENT)
+                        .map(|token| token.text_range())
+                        .unwrap_or_else(|| node.text_range());
+                    Some(report_with_range(
+                        service, line_index, range, severity, symbol,
+                    ))
                 }
             }
             SymbolKind::Type => {
@@ -140,6 +146,16 @@ fn report(
         .or_else(|| support::token(&node, SyntaxKind::KEYWORD))
         .map(|token| token.text_range())
         .unwrap_or_else(|| node.text_range());
+    report_with_range(service, line_index, range, severity, symbol)
+}
+
+fn report_with_range(
+    service: &LanguageService,
+    line_index: &LineIndex,
+    range: TextRange,
+    severity: DiagnosticSeverity,
+    symbol: &Symbol,
+) -> Diagnostic {
     let kind = match symbol.kind {
         SymbolKind::Func => "func",
         SymbolKind::Param => "param",
