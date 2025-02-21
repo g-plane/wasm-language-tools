@@ -490,8 +490,7 @@ fn resolve_sig(
                 .and_then(|type_use| type_use.results().next())
                 .and_then(|result| result.val_types().next())
             {
-                ValType::from_green(&ty.syntax().green(), shared.service)
-                    .map_or(OperandType::Any, OperandType::Val)
+                ValType::from_ast(&ty, shared.service).map_or(OperandType::Any, OperandType::Val)
             } else {
                 type_stack
                     .stack
