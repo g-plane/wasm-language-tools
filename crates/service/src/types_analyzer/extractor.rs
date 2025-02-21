@@ -37,19 +37,19 @@ pub(super) fn extract_global_type(db: &dyn TypesAnalyzerCtx, node: GreenNode) ->
 pub(super) fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Signature {
     let root = SyntaxNode::new_root(node);
     let params = support::children::<Param>(&root).fold(vec![], |mut acc, param| {
-        if let Some((ident, ty)) = param.ident_token().zip(
-            param
-                .val_types()
-                .next()
-                .and_then(|ty| ValType::from_ast(&ty, db)),
-        ) {
+        if let Some((ty, ident)) = param
+            .val_types()
+            .next()
+            .and_then(|ty| ValType::from_ast(&ty, db))
+            .zip(param.ident_token())
+        {
             acc.push((ty, Some(db.ident(ident.text().into()))));
         } else {
             acc.extend(
                 param
                     .val_types()
                     .filter_map(|ty| ValType::from_ast(&ty, db))
-                    .map(|val_type| (val_type, None)),
+                    .map(|ty| (ty, None)),
             );
         }
         acc
