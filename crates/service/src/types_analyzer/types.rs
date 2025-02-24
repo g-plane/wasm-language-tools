@@ -196,9 +196,15 @@ impl ValType {
         }
     }
 
-    pub(crate) fn matches(&self, other: &Self, db: &dyn TypesAnalyzerCtx, uri: InternUri) -> bool {
+    pub(crate) fn matches(
+        &self,
+        other: &Self,
+        db: &dyn TypesAnalyzerCtx,
+        uri: InternUri,
+        module_id: u32,
+    ) -> bool {
         match (self, other) {
-            (ValType::Ref(a), ValType::Ref(b)) => a.matches(b, db, uri),
+            (ValType::Ref(a), ValType::Ref(b)) => a.matches(b, db, uri, module_id),
             _ => self == other,
         }
     }
@@ -210,8 +216,15 @@ pub(crate) struct RefType {
     pub nullable: bool,
 }
 impl RefType {
-    pub(crate) fn matches(&self, other: &Self, db: &dyn TypesAnalyzerCtx, uri: InternUri) -> bool {
-        self.heap_ty.matches(&other.heap_ty, db, uri) && (!self.nullable || other.nullable)
+    pub(crate) fn matches(
+        &self,
+        other: &Self,
+        db: &dyn TypesAnalyzerCtx,
+        uri: InternUri,
+        module_id: u32,
+    ) -> bool {
+        self.heap_ty.matches(&other.heap_ty, db, uri, module_id)
+            && (!self.nullable || other.nullable)
     }
 }
 
@@ -230,22 +243,35 @@ pub(crate) enum HeapType {
     NoExtern,
 }
 impl HeapType {
-    pub(crate) fn matches(&self, other: &Self, db: &dyn TypesAnalyzerCtx, uri: InternUri) -> bool {
+    pub(crate) fn matches(
+        &self,
+        other: &Self,
+        db: &dyn TypesAnalyzerCtx,
+        uri: InternUri,
+        module_id: u32,
+    ) -> bool {
         match (self, other) {
             (
                 HeapType::Any | HeapType::Eq | HeapType::Struct | HeapType::Array | HeapType::I31,
                 HeapType::Any,
             )
             | (HeapType::I31 | HeapType::Struct | HeapType::Array, HeapType::Eq) => true,
-            (HeapType::None, other) => other.matches(&HeapType::Any, db, uri),
-            (HeapType::NoFunc, other) => other.matches(&HeapType::Func, db, uri),
-            (HeapType::NoExtern, other) => other.matches(&HeapType::Extern, db, uri),
+            (HeapType::None, other) => other.matches(&HeapType::Any, db, uri, module_id),
+            (HeapType::NoFunc, other) => other.matches(&HeapType::Func, db, uri, module_id),
+            (HeapType::NoExtern, other) => other.matches(&HeapType::Extern, db, uri, module_id),
             (HeapType::Type(a), HeapType::Type(b)) => {
                 let symbol_table = db.symbol_table(uri);
+                let Some(module) = symbol_table.find_module(module_id) else {
+                    return false;
+                };
                 symbol_table
                     .symbols
                     .iter()
-                    .find(|symbol| symbol.kind == SymbolKind::Type && a.is_defined_by(&symbol.idx))
+                    .find(|symbol| {
+                        symbol.kind == SymbolKind::Type
+                            && symbol.region == module.key
+                            && a.is_defined_by(&symbol.idx)
+                    })
                     .zip(symbol_table.symbols.iter().find(|symbol| {
                         symbol.kind == SymbolKind::Type && b.is_defined_by(&symbol.idx)
                     }))
@@ -259,11 +285,18 @@ impl HeapType {
             }
             (HeapType::Type(a), b) => {
                 let symbol_table = db.symbol_table(uri);
+                let Some(module) = symbol_table.find_module(module_id) else {
+                    return false;
+                };
                 let def_types = db.def_types(uri);
                 symbol_table
                     .symbols
                     .iter()
-                    .find(|symbol| symbol.kind == SymbolKind::Type && a.is_defined_by(&symbol.idx))
+                    .find(|symbol| {
+                        symbol.kind == SymbolKind::Type
+                            && symbol.region == module.key
+                            && a.is_defined_by(&symbol.idx)
+                    })
                     .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
                     .is_some_and(|def_type| match (&def_type.kind, b) {
                         (
