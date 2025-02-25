@@ -3,7 +3,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::{collections::HashMap, sync::LazyLock};
 
 pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = LazyLock::new(|| {
-    let mut map = HashMap::with_capacity_and_hasher(436, FxBuildHasher);
+    let mut map = HashMap::with_capacity_and_hasher(431, FxBuildHasher);
     map.insert(
         "unreachable",
         ResolvedSig {
@@ -19,98 +19,10 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
         },
     );
     map.insert(
-        "block",
-        ResolvedSig {
-            params: vec![],
-            results: vec![],
-        },
-    );
-    map.insert(
-        "loop",
-        ResolvedSig {
-            params: vec![],
-            results: vec![],
-        },
-    );
-    map.insert(
-        "if",
-        ResolvedSig {
-            params: vec![OperandType::Val(ValType::I32)],
-            results: vec![],
-        },
-    );
-    map.insert(
-        "else",
-        ResolvedSig {
-            params: vec![],
-            results: vec![],
-        },
-    );
-    map.insert(
-        "end",
-        ResolvedSig {
-            params: vec![],
-            results: vec![],
-        },
-    );
-    map.insert(
-        "br",
-        ResolvedSig {
-            params: vec![],
-            results: vec![],
-        },
-    );
-    map.insert(
-        "br_if",
-        ResolvedSig {
-            params: vec![OperandType::Val(ValType::I32)],
-            results: vec![],
-        },
-    );
-    map.insert(
-        "br_table",
-        ResolvedSig {
-            params: vec![OperandType::Val(ValType::I32)],
-            results: vec![],
-        },
-    );
-    map.insert(
-        "return",
-        ResolvedSig {
-            params: vec![],
-            results: vec![],
-        },
-    );
-    map.insert(
-        "call",
-        ResolvedSig {
-            params: vec![],
-            results: vec![],
-        },
-    );
-    map.insert(
-        "call_indirect",
-        ResolvedSig {
-            params: vec![OperandType::Val(ValType::I32)],
-            results: vec![],
-        },
-    );
-    map.insert(
         "drop",
         ResolvedSig {
             params: vec![OperandType::Any],
             results: vec![],
-        },
-    );
-    map.insert(
-        "select",
-        ResolvedSig {
-            params: vec![
-                OperandType::Any,
-                OperandType::Any,
-                OperandType::Val(ValType::I32),
-            ],
-            results: vec![OperandType::Any],
         },
     );
     map.insert(
@@ -1538,6 +1450,88 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
                 heap_ty: HeapType::Func,
                 nullable: false,
             }))],
+        },
+    );
+    map.insert(
+        "ref.eq",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::Ref(RefType {
+                    heap_ty: HeapType::Eq,
+                    nullable: true,
+                })),
+                OperandType::Val(ValType::Ref(RefType {
+                    heap_ty: HeapType::Eq,
+                    nullable: true,
+                })),
+            ],
+            results: vec![OperandType::Val(ValType::I32)],
+        },
+    );
+    map.insert(
+        "array.len",
+        ResolvedSig {
+            params: vec![OperandType::Val(ValType::Ref(RefType {
+                heap_ty: HeapType::Array,
+                nullable: true,
+            }))],
+            results: vec![OperandType::Val(ValType::I32)],
+        },
+    );
+    map.insert(
+        "any.convert_extern",
+        ResolvedSig {
+            params: vec![OperandType::Val(ValType::Ref(RefType {
+                heap_ty: HeapType::Extern,
+                nullable: true,
+            }))],
+            results: vec![OperandType::Val(ValType::Ref(RefType {
+                heap_ty: HeapType::Any,
+                nullable: true,
+            }))],
+        },
+    );
+    map.insert(
+        "extern.convert_any",
+        ResolvedSig {
+            params: vec![OperandType::Val(ValType::Ref(RefType {
+                heap_ty: HeapType::Any,
+                nullable: true,
+            }))],
+            results: vec![OperandType::Val(ValType::Ref(RefType {
+                heap_ty: HeapType::Extern,
+                nullable: true,
+            }))],
+        },
+    );
+    map.insert(
+        "ref.i31",
+        ResolvedSig {
+            params: vec![OperandType::Val(ValType::I32)],
+            results: vec![OperandType::Val(ValType::Ref(RefType {
+                heap_ty: HeapType::I31,
+                nullable: false,
+            }))],
+        },
+    );
+    map.insert(
+        "i31.get_s",
+        ResolvedSig {
+            params: vec![OperandType::Val(ValType::Ref(RefType {
+                heap_ty: HeapType::I31,
+                nullable: true,
+            }))],
+            results: vec![OperandType::Val(ValType::I32)],
+        },
+    );
+    map.insert(
+        "i31.get_u",
+        ResolvedSig {
+            params: vec![OperandType::Val(ValType::Ref(RefType {
+                heap_ty: HeapType::I31,
+                nullable: true,
+            }))],
+            results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
@@ -3794,7 +3788,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
 });
 
 pub(crate) static INSTR_OP_CODES: LazyLock<FxHashMap<&'static str, u32>> = LazyLock::new(|| {
-    let mut map = HashMap::with_capacity_and_hasher(437, FxBuildHasher);
+    let mut map = HashMap::with_capacity_and_hasher(476, FxBuildHasher);
     map.insert("unreachable", 0x00);
     map.insert("nop", 0x01);
     map.insert("block", 0x02);
@@ -3808,6 +3802,10 @@ pub(crate) static INSTR_OP_CODES: LazyLock<FxHashMap<&'static str, u32>> = LazyL
     map.insert("return", 0x0F);
     map.insert("call", 0x10);
     map.insert("call_indirect", 0x11);
+    map.insert("return_call", 0x12);
+    map.insert("return_call_indirect", 0x13);
+    map.insert("call_ref", 0x14);
+    map.insert("return_call_ref", 0x15);
     map.insert("drop", 0x1A);
     map.insert("select", 0x1B);
     map.insert("select.", 0x1C);
@@ -3978,6 +3976,41 @@ pub(crate) static INSTR_OP_CODES: LazyLock<FxHashMap<&'static str, u32>> = LazyL
     map.insert("ref.null", 0xD0);
     map.insert("ref.is_null", 0xD1);
     map.insert("ref.func", 0xD2);
+    map.insert("ref.eq", 0xD3);
+    map.insert("ref.as_non_null", 0xD4);
+    map.insert("br_on_null", 0xD5);
+    map.insert("br_on_non_null", 0xD6);
+    map.insert("struct.new", 0xFB00);
+    map.insert("struct.new_default", 0xFB01);
+    map.insert("struct.get", 0xFB02);
+    map.insert("struct.get_s", 0xFB03);
+    map.insert("struct.get_u", 0xFB04);
+    map.insert("struct.set", 0xFB05);
+    map.insert("array.new", 0xFB06);
+    map.insert("array.new_default", 0xFB07);
+    map.insert("array.new_fixed", 0xFB08);
+    map.insert("array.new_data", 0xFB09);
+    map.insert("array.new_elem", 0xFB0A);
+    map.insert("array.get", 0xFB0B);
+    map.insert("array.get_s", 0xFB0C);
+    map.insert("array.get_u", 0xFB0D);
+    map.insert("array.set", 0xFB0E);
+    map.insert("array.len", 0xFB0F);
+    map.insert("array.fill", 0xFB10);
+    map.insert("array.copy", 0xFB11);
+    map.insert("array.init_data", 0xFB12);
+    map.insert("array.init_elem", 0xFB13);
+    map.insert("ref.test", 0xFB14);
+    map.insert("ref.test.", 0xFB15);
+    map.insert("ref.cast", 0xFB16);
+    map.insert("ref.cast.", 0xFB17);
+    map.insert("br_on_cast", 0xFB18);
+    map.insert("br_on_cast_fail", 0xFB19);
+    map.insert("any.convert_extern", 0xFB1A);
+    map.insert("extern.convert_any", 0xFB1B);
+    map.insert("ref.i31", 0xFB1C);
+    map.insert("i31.get_s", 0xFB1D);
+    map.insert("i31.get_u", 0xFB1E);
     map.insert("i32.trunc_sat_f32_s", 0xFC00);
     map.insert("i32.trunc_sat_f32_u", 0xFC01);
     map.insert("i32.trunc_sat_f64_s", 0xFC02);

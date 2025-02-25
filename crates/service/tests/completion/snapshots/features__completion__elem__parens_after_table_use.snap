@@ -60,6 +60,22 @@ expression: response
     "kind": 24
   },
   {
+    "label": "return_call",
+    "kind": 24
+  },
+  {
+    "label": "return_call_indirect",
+    "kind": 24
+  },
+  {
+    "label": "call_ref",
+    "kind": 24
+  },
+  {
+    "label": "return_call_ref",
+    "kind": 24
+  },
+  {
     "label": "drop",
     "kind": 24
   },
@@ -733,6 +749,138 @@ expression: response
   },
   {
     "label": "ref.func",
+    "kind": 24
+  },
+  {
+    "label": "ref.eq",
+    "kind": 24
+  },
+  {
+    "label": "ref.as_non_null",
+    "kind": 24
+  },
+  {
+    "label": "br_on_null",
+    "kind": 24
+  },
+  {
+    "label": "br_on_non_null",
+    "kind": 24
+  },
+  {
+    "label": "struct.new",
+    "kind": 24
+  },
+  {
+    "label": "struct.new_default",
+    "kind": 24
+  },
+  {
+    "label": "struct.get",
+    "kind": 24
+  },
+  {
+    "label": "struct.get_s",
+    "kind": 24
+  },
+  {
+    "label": "struct.get_u",
+    "kind": 24
+  },
+  {
+    "label": "struct.set",
+    "kind": 24
+  },
+  {
+    "label": "array.new",
+    "kind": 24
+  },
+  {
+    "label": "array.new_default",
+    "kind": 24
+  },
+  {
+    "label": "array.new_fixed",
+    "kind": 24
+  },
+  {
+    "label": "array.new_data",
+    "kind": 24
+  },
+  {
+    "label": "array.new_elem",
+    "kind": 24
+  },
+  {
+    "label": "array.get",
+    "kind": 24
+  },
+  {
+    "label": "array.get_s",
+    "kind": 24
+  },
+  {
+    "label": "array.get_u",
+    "kind": 24
+  },
+  {
+    "label": "array.set",
+    "kind": 24
+  },
+  {
+    "label": "array.len",
+    "kind": 24
+  },
+  {
+    "label": "array.fill",
+    "kind": 24
+  },
+  {
+    "label": "array.copy",
+    "kind": 24
+  },
+  {
+    "label": "array.init_data",
+    "kind": 24
+  },
+  {
+    "label": "array.init_elem",
+    "kind": 24
+  },
+  {
+    "label": "ref.test",
+    "kind": 24
+  },
+  {
+    "label": "ref.cast",
+    "kind": 24
+  },
+  {
+    "label": "br_on_cast",
+    "kind": 24
+  },
+  {
+    "label": "br_on_cast_fail",
+    "kind": 24
+  },
+  {
+    "label": "any.convert_extern",
+    "kind": 24
+  },
+  {
+    "label": "extern.convert_any",
+    "kind": 24
+  },
+  {
+    "label": "ref.i31",
+    "kind": 24
+  },
+  {
+    "label": "i31.get_s",
+    "kind": 24
+  },
+  {
+    "label": "i31.get_u",
     "kind": 24
   },
   {
