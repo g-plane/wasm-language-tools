@@ -38,13 +38,9 @@ pub(super) fn render_compact_sig(db: &dyn TypesAnalyzerCtx, signature: Signature
     let params = signature
         .params
         .iter()
-        .map(|(ty, _)| ty.render_compact(db))
+        .map(|(ty, _)| ty.render(db))
         .join(", ");
-    let results = signature
-        .results
-        .iter()
-        .map(|ty| ty.render_compact(db))
-        .join(", ");
+    let results = signature.results.iter().map(|ty| ty.render(db)).join(", ");
     format!("[{params}] -> [{results}]")
 }
 
@@ -97,22 +93,15 @@ pub(super) fn render_block_header(
 }
 
 impl ValType {
-    pub(crate) fn render<'a>(&'a self, db: &'a dyn TypesAnalyzerCtx) -> ValTypeRender<'a, false> {
-        ValTypeRender { ty: self, db }
-    }
-
-    pub(crate) fn render_compact<'a>(
-        &'a self,
-        db: &'a dyn TypesAnalyzerCtx,
-    ) -> ValTypeRender<'a, true> {
+    pub(crate) fn render<'a>(&'a self, db: &'a dyn TypesAnalyzerCtx) -> ValTypeRender<'a> {
         ValTypeRender { ty: self, db }
     }
 }
-pub(crate) struct ValTypeRender<'a, const COMPACT: bool> {
+pub(crate) struct ValTypeRender<'a> {
     ty: &'a ValType,
     db: &'a dyn TypesAnalyzerCtx,
 }
-impl Display for ValTypeRender<'_, false> {
+impl Display for ValTypeRender<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.ty {
             ValType::I32 => write!(f, "i32"),
@@ -149,42 +138,6 @@ impl Display for ValTypeRender<'_, false> {
         }
     }
 }
-impl Display for ValTypeRender<'_, true> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.ty {
-            ValType::I32 => write!(f, "i32"),
-            ValType::I64 => write!(f, "i64"),
-            ValType::F32 => write!(f, "f32"),
-            ValType::F64 => write!(f, "f64"),
-            ValType::V128 => write!(f, "v128"),
-            ValType::Ref(ty) => {
-                if ty.nullable {
-                    write!(f, "nullable ")?;
-                }
-                match ty.heap_ty {
-                    HeapType::Type(idx) => {
-                        if let Some(name) = idx.name {
-                            write!(f, "type `{}`", self.db.lookup_ident(name))?;
-                        } else if let Some(num) = idx.num {
-                            write!(f, "type `{num}`")?;
-                        }
-                    }
-                    HeapType::Any => write!(f, "any")?,
-                    HeapType::Eq => write!(f, "eq")?,
-                    HeapType::I31 => write!(f, "i31")?,
-                    HeapType::Struct => write!(f, "struct")?,
-                    HeapType::Array => write!(f, "array")?,
-                    HeapType::None => write!(f, "none")?,
-                    HeapType::Func => write!(f, "func")?,
-                    HeapType::NoFunc => write!(f, "nofunc")?,
-                    HeapType::Extern => write!(f, "extern")?,
-                    HeapType::NoExtern => write!(f, "noextern")?,
-                }
-                write!(f, " ref")
-            }
-        }
-    }
-}
 
 impl OperandType {
     pub(crate) fn render<'a>(&'a self, db: &'a dyn TypesAnalyzerCtx) -> OperandTypeRender<'a> {
@@ -198,7 +151,7 @@ pub(crate) struct OperandTypeRender<'a> {
 impl Display for OperandTypeRender<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.ty {
-            OperandType::Val(ty) => write!(f, "{}", ty.render_compact(self.db)),
+            OperandType::Val(ty) => write!(f, "{}", ty.render(self.db)),
             OperandType::Any => write!(f, "any"),
         }
     }

@@ -287,8 +287,8 @@ impl TypeStack<'_> {
                             },
                             message: format!(
                                 "expected type `{}`, found `{}`",
-                                expected.render_compact(service),
-                                received.render_compact(service),
+                                expected.render(service),
+                                received.render(service),
                             ),
                         });
                     }
@@ -354,8 +354,8 @@ impl TypeStack<'_> {
                             },
                             message: format!(
                                 "expected type `{}`, found `{}`",
-                                expected.render_compact(self.service),
-                                received.render_compact(self.service),
+                                expected.render(self.service),
+                                received.render(self.service),
                             ),
                         });
                     }
