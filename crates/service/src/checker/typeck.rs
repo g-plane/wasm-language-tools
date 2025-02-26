@@ -333,6 +333,7 @@ impl TypeStack<'_> {
         let mut diagnostic = None;
         let mut mismatch = false;
         let mut related_information = vec![];
+        let service = self.service;
         expected
             .iter()
             .rev()
@@ -341,12 +342,15 @@ impl TypeStack<'_> {
                 EitherOrBoth::Both(
                     OperandType::Val(expected),
                     (OperandType::Val(received), related_instr),
-                ) if expected != received => {
+                ) => {
+                    if service.value_type_matches(self.uri, self.module_id, *received, *expected) {
+                        return;
+                    }
                     mismatch = true;
                     if let Some(related_instr) = related_instr {
                         related_information.push(DiagnosticRelatedInformation {
                             location: Location {
-                                uri: self.service.lookup_uri(self.uri),
+                                uri: service.lookup_uri(self.uri),
                                 range: helpers::rowan_range_to_lsp_range(
                                     self.line_index,
                                     ReportRange::Instr(related_instr).pick(),
@@ -354,8 +358,8 @@ impl TypeStack<'_> {
                             },
                             message: format!(
                                 "expected type `{}`, found `{}`",
-                                expected.render(self.service),
-                                received.render(self.service),
+                                expected.render(service),
+                                received.render(service),
                             ),
                         });
                     }
@@ -371,13 +375,13 @@ impl TypeStack<'_> {
         if mismatch {
             let expected_types = format!(
                 "[{}]",
-                expected.iter().map(|ty| ty.render(self.service)).join(", ")
+                expected.iter().map(|ty| ty.render(service)).join(", ")
             );
             let received_types = format!(
                 "[{}]",
                 self.stack
                     .iter()
-                    .map(|(ty, _)| ty.render(self.service))
+                    .map(|(ty, _)| ty.render(service))
                     .join(", ")
             );
             diagnostic = Some(Diagnostic {
