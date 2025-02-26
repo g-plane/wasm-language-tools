@@ -1,5 +1,5 @@
 use self::{
-    def_type::create_def_types,
+    def_type::{create_def_types, create_recursive_types, RecTypeGroup},
     extractor::{extract_global_type, extract_sig, extract_type},
     renderer::{render_block_header, render_compact_sig, render_func_header, render_sig},
     signature::{get_func_sig, get_type_use_sig, Signature},
@@ -65,6 +65,9 @@ pub(crate) trait TypesAnalyzerCtx: SyntaxTreeCtx + SymbolTablesCtx {
     #[salsa::memoized]
     #[salsa::invoke(create_def_types)]
     fn def_types(&self, uri: InternUri) -> Arc<Vec<DefType>>;
+    #[salsa::memoized]
+    #[salsa::invoke(create_recursive_types)]
+    fn rec_type_groups(&self, uri: InternUri) -> Arc<Vec<RecTypeGroup>>;
 
     #[salsa::memoized]
     fn value_type_matches(

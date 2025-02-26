@@ -281,15 +281,11 @@ impl HeapType {
                     .map(|(a, b)| (a.key, b.key))
                     .is_some_and(|(a, b)| {
                         a == b
-                            || symbol_table.inheritance.iter().any(|type_def| {
-                                type_def.key == a
-                                    && type_def.inherits.is_some_and(|inherits| inherits == b)
-                            })
                             || def_types
                                 .iter()
                                 .find(|def_type| def_type.key == a)
                                 .zip(def_types.iter().find(|def_type| def_type.key == b))
-                                .is_some_and(|(a, b)| a.kind.matches(&b.kind, db, uri, module_id))
+                                .is_some_and(|(a, b)| a.matches(b, db, uri, module_id))
                     })
             }
             (HeapType::Type(a), b) => {
