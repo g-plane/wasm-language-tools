@@ -264,6 +264,7 @@ impl HeapType {
                 let Some(module) = symbol_table.find_module(module_id) else {
                     return false;
                 };
+                let def_types = db.def_types(uri);
                 symbol_table
                     .symbols
                     .iter()
@@ -273,14 +274,22 @@ impl HeapType {
                             && a.is_defined_by(&symbol.idx)
                     })
                     .zip(symbol_table.symbols.iter().find(|symbol| {
-                        symbol.kind == SymbolKind::Type && b.is_defined_by(&symbol.idx)
+                        symbol.kind == SymbolKind::Type
+                            && symbol.region == module.key
+                            && b.is_defined_by(&symbol.idx)
                     }))
+                    .map(|(a, b)| (a.key, b.key))
                     .is_some_and(|(a, b)| {
-                        a.key == b.key
+                        a == b
                             || symbol_table.inheritance.iter().any(|type_def| {
-                                type_def.key == a.key
-                                    && type_def.inherits.is_some_and(|inherits| inherits == b.key)
+                                type_def.key == a
+                                    && type_def.inherits.is_some_and(|inherits| inherits == b)
                             })
+                            || def_types
+                                .iter()
+                                .find(|def_type| def_type.key == a)
+                                .zip(def_types.iter().find(|def_type| def_type.key == b))
+                                .is_some_and(|(a, b)| a.kind.matches(&b.kind, db, uri, module_id))
                     })
             }
             (HeapType::Type(a), b) => {
@@ -324,6 +333,22 @@ pub(crate) enum OperandType {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct Fields(pub Vec<(FieldType, Option<InternIdent>)>);
+impl Fields {
+    pub(crate) fn matches(
+        &self,
+        other: &Self,
+        db: &dyn TypesAnalyzerCtx,
+        uri: InternUri,
+        module_id: u32,
+    ) -> bool {
+        self.0.len() >= other.0.len()
+            && self
+                .0
+                .iter()
+                .zip(&other.0)
+                .all(|((a, _), (b, _))| a.matches(b, db, uri, module_id))
+    }
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct FieldType {
@@ -338,6 +363,23 @@ impl FieldType {
                 storage,
                 mutable: node.mut_keyword().is_some(),
             })
+    }
+
+    pub(crate) fn matches(
+        &self,
+        other: &Self,
+        db: &dyn TypesAnalyzerCtx,
+        uri: InternUri,
+        module_id: u32,
+    ) -> bool {
+        match (self.mutable, other.mutable) {
+            (true, true) => {
+                self.storage.matches(&other.storage, db, uri, module_id)
+                    && other.storage.matches(&self.storage, db, uri, module_id)
+            }
+            (false, false) => self.storage.matches(&other.storage, db, uri, module_id),
+            _ => false,
+        }
     }
 }
 
@@ -359,6 +401,21 @@ impl StorageType {
                         _ => None,
                     })
             }
+        }
+    }
+
+    pub(crate) fn matches(
+        &self,
+        other: &Self,
+        db: &dyn TypesAnalyzerCtx,
+        uri: InternUri,
+        module_id: u32,
+    ) -> bool {
+        match (self, other) {
+            (StorageType::Val(a), StorageType::Val(b)) => a.matches(b, db, uri, module_id),
+            (StorageType::PackedI8, StorageType::PackedI8) => true,
+            (StorageType::PackedI16, StorageType::PackedI16) => true,
+            _ => false,
         }
     }
 }

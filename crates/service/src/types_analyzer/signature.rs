@@ -17,6 +17,28 @@ pub(crate) struct Signature {
     pub(crate) params: Vec<(ValType, Option<InternIdent>)>,
     pub(crate) results: Vec<ValType>,
 }
+impl Signature {
+    pub(crate) fn matches(
+        &self,
+        other: &Self,
+        db: &dyn TypesAnalyzerCtx,
+        uri: InternUri,
+        module_id: u32,
+    ) -> bool {
+        self.params.len() == other.params.len()
+            && self.results.len() == other.results.len()
+            && other
+                .params
+                .iter()
+                .zip(&self.params)
+                .all(|((a, _), (b, _))| a.matches(b, db, uri, module_id))
+            && self
+                .results
+                .iter()
+                .zip(&other.results)
+                .all(|(a, b)| a.matches(b, db, uri, module_id))
+    }
+}
 
 #[derive(Clone, Debug, Default)]
 pub(crate) struct ResolvedSig {

@@ -64,3 +64,21 @@ pub(crate) enum DefTypeKind {
     Struct(Fields),
     Array(Option<FieldType>),
 }
+impl DefTypeKind {
+    pub(crate) fn matches(
+        &self,
+        other: &Self,
+        db: &dyn TypesAnalyzerCtx,
+        uri: InternUri,
+        module_id: u32,
+    ) -> bool {
+        match (self, other) {
+            (DefTypeKind::Func(a), DefTypeKind::Func(b)) => a.matches(b, db, uri, module_id),
+            (DefTypeKind::Struct(a), DefTypeKind::Struct(b)) => a.matches(b, db, uri, module_id),
+            (DefTypeKind::Array(Some(a)), DefTypeKind::Array(Some(b))) => {
+                a.matches(b, db, uri, module_id)
+            }
+            _ => false,
+        }
+    }
+}
