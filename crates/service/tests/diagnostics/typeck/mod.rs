@@ -10,6 +10,7 @@ mod call_indirect;
 mod drop;
 mod r#return;
 mod select;
+mod subtyping;
 
 #[test]
 fn less_operands() {
