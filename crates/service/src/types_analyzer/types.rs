@@ -241,6 +241,7 @@ pub(crate) enum HeapType {
     NoFunc,
     Extern,
     NoExtern,
+    Rec(u32), // internal use, not actually a valid heap type
 }
 impl HeapType {
     pub(crate) fn matches(

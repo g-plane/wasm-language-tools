@@ -132,6 +132,7 @@ impl Display for ValTypeRender<'_> {
                     HeapType::NoFunc => write!(f, "nofunc")?,
                     HeapType::Extern => write!(f, "extern")?,
                     HeapType::NoExtern => write!(f, "noextern")?,
+                    HeapType::Rec(..) => unreachable!("rec type is only for internal use"),
                 }
                 write!(f, ")")
             }
