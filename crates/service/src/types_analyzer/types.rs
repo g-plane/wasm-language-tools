@@ -289,20 +289,10 @@ impl HeapType {
                                 .iter()
                                 .find(|def_type| def_type.key == b)
                                 .is_some_and(|b| a.matches(b, db, uri, module_id))
-                                || a.inherits
-                                    .and_then(|inherits| {
-                                        symbol_table
-                                            .symbols
-                                            .iter()
-                                            .find(|symbol| symbol.key == inherits)
-                                    })
-                                    .is_some_and(|symbol| {
-                                        let idx = Idx {
-                                            num: symbol.idx.num,
-                                            name: None,
-                                        };
-                                        HeapType::Type(idx).matches(heap_ty_b, db, uri, module_id)
-                                    })
+                                || a.inherits.as_ref().is_some_and(|inherits| {
+                                    HeapType::Type(inherits.idx)
+                                        .matches(heap_ty_b, db, uri, module_id)
+                                })
                         } else {
                             false
                         }

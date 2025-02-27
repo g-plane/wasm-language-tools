@@ -94,8 +94,13 @@ impl LanguageService {
         def_types
             .iter()
             .find(|def_type| def_type.key == type_def.key)
-            .and_then(|def_type| def_type.inherits)
-            .and_then(|key| symbol_table.symbols.iter().find(|symbol| symbol.key == key))
+            .and_then(|def_type| def_type.inherits.as_ref())
+            .and_then(|inherits| {
+                symbol_table
+                    .symbols
+                    .iter()
+                    .find(|symbol| symbol.key == inherits.symbol)
+            })
             .map(|symbol| {
                 vec![TypeHierarchyItem {
                     name: symbol.idx.render(self).to_string(),
@@ -131,7 +136,12 @@ impl LanguageService {
         Some(
             def_types
                 .iter()
-                .filter(|def_type| def_type.inherits.is_some_and(|inherits| inherits == key))
+                .filter(|def_type| {
+                    def_type
+                        .inherits
+                        .as_ref()
+                        .is_some_and(|inherits| inherits.symbol == key)
+                })
                 .filter_map(|def_type| {
                     symbol_table
                         .symbols

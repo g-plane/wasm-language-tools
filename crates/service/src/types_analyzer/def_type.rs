@@ -5,7 +5,7 @@ use super::{
     TypesAnalyzerCtx,
 };
 use crate::{
-    binder::{Symbol, SymbolKey, SymbolKind, SymbolTable},
+    binder::{SymbolKey, SymbolKind, SymbolTable},
     idx::Idx,
     uri::InternUri,
 };
@@ -29,11 +29,22 @@ pub(super) fn create_def_types(db: &dyn TypesAnalyzerCtx, uri: InternUri) -> Arc
             let mut inherits = None;
             if let Some(sub_type) = node.sub_type() {
                 can_be_super = sub_type.keyword().is_some() && sub_type.final_keyword().is_none();
-                inherits = sub_type
-                    .indexes()
-                    .next()
-                    .and_then(|index| symbol_table.find_def(SymbolKey::new(index.syntax())))
-                    .map(|def| def.key);
+                if let Some(index) = sub_type.indexes().next() {
+                    inherits =
+                        symbol_table
+                            .find_def(SymbolKey::new(index.syntax()))
+                            .map(|symbol| Inherits {
+                                symbol: symbol.key,
+                                idx: Idx {
+                                    num: index
+                                        .unsigned_int_token()
+                                        .and_then(|int| int.text().parse().ok()),
+                                    name: index
+                                        .ident_token()
+                                        .map(|ident| db.ident(ident.text().into())),
+                                },
+                            });
+                }
             }
             match node.sub_type()?.comp_type()? {
                 CompType::Func(func_type) => Some(DefType {
@@ -72,7 +83,7 @@ pub(crate) struct DefType {
     pub key: SymbolKey,
     pub idx: Idx,
     pub can_be_super: bool,
-    pub inherits: Option<SymbolKey>,
+    pub inherits: Option<Inherits>,
     pub kind: DefTypeKind,
 }
 impl DefType {
@@ -92,10 +103,12 @@ impl DefType {
         let def_types = db.def_types(uri);
         match (
             self.inherits
-                .and_then(|a| def_types.iter().find(|def_type| def_type.key == a)),
+                .as_ref()
+                .and_then(|a| def_types.iter().find(|def_type| def_type.key == a.symbol)),
             other
                 .inherits
-                .and_then(|b| def_types.iter().find(|def_type| def_type.key == b)),
+                .as_ref()
+                .and_then(|b| def_types.iter().find(|def_type| def_type.key == b.symbol)),
         ) {
             (Some(a), Some(b)) => {
                 if !a.matches(b, db, uri, module_id) {
@@ -128,6 +141,12 @@ impl DefType {
             false
         }
     }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct Inherits {
+    pub(crate) symbol: SymbolKey,
+    pub(crate) idx: Idx,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -229,6 +248,23 @@ impl RecTypeGroup {
                     if substitute_def_type(&mut b, &symbol_table, module.key, other).is_err() {
                         return false;
                     }
+                    // check whether their super types match or not
+                    match (&a.inherits, &b.inherits) {
+                        (Some(Inherits { idx: a, .. }), Some(Inherits { idx: b, .. })) => {
+                            let mut a = HeapType::Type(*a);
+                            let mut b = HeapType::Type(*b);
+                            if substitute_heap_type(&mut a, &symbol_table, module.key, self)
+                                .is_err()
+                                || substitute_heap_type(&mut b, &symbol_table, module.key, other)
+                                    .is_err()
+                                || !a.matches(&b, db, uri, module_id)
+                            {
+                                return false;
+                            }
+                        }
+                        (None, None) => {}
+                        _ => return false,
+                    }
                     a.kind.matches(&b.kind, db, uri, module_id)
                 } else {
                     false
@@ -251,138 +287,72 @@ fn substitute_def_type(
     module: SymbolKey,
     rec_group: &RecTypeGroup,
 ) -> Result<(), ()> {
-    fn find_type_def<'a>(
-        idx: &Idx,
-        symbol_table: &'a SymbolTable,
-        module: SymbolKey,
-    ) -> Option<&'a Symbol> {
-        symbol_table.symbols.iter().find(|symbol| {
-            symbol.kind == SymbolKind::Type
-                && symbol.region == module
-                && idx.is_defined_by(&symbol.idx)
-        })
-    }
-    fn search_index_in_rec_group(symbol: &Symbol, rec_group: &RecTypeGroup) -> Option<u32> {
-        rec_group
-            .type_defs
-            .iter()
-            .position(|key| *key == symbol.key)
-            .map(|i| i as u32)
-    }
     match &mut def_type.kind {
         DefTypeKind::Func(signature) => {
             signature.params.iter_mut().try_for_each(|(param, name)| {
-                if let ValType::Ref(RefType {
-                    heap_ty: HeapType::Type(idx),
-                    nullable,
-                }) = param
-                {
-                    if let Some(symbol) = find_type_def(idx, symbol_table, module) {
-                        if let Some(i) = search_index_in_rec_group(symbol, rec_group) {
-                            *param = ValType::Ref(RefType {
-                                heap_ty: HeapType::Rec(i),
-                                nullable: *nullable,
-                            });
-                        } else if symbol.key.text_range().start() > rec_group.range.end() {
-                            return Err(());
-                        } else {
-                            *idx = Idx {
-                                num: symbol.idx.num,
-                                name: None,
-                            };
-                        }
-                    }
+                if let ValType::Ref(RefType { heap_ty, .. }) = param {
+                    substitute_heap_type(heap_ty, symbol_table, module, rec_group)?;
                 }
                 *name = None;
                 Ok(())
             })?;
             signature.results.iter_mut().try_for_each(|result| {
-                if let ValType::Ref(RefType {
-                    heap_ty: HeapType::Type(idx),
-                    nullable,
-                }) = result
-                {
-                    if let Some(symbol) = find_type_def(idx, symbol_table, module) {
-                        if let Some(i) = search_index_in_rec_group(symbol, rec_group) {
-                            *result = ValType::Ref(RefType {
-                                heap_ty: HeapType::Rec(i),
-                                nullable: *nullable,
-                            });
-                        } else if symbol.key.text_range().start() > rec_group.range.end() {
-                            return Err(());
-                        } else {
-                            *idx = Idx {
-                                num: symbol.idx.num,
-                                name: None,
-                            };
-                        }
-                    }
+                if let ValType::Ref(RefType { heap_ty, .. }) = result {
+                    substitute_heap_type(heap_ty, symbol_table, module, rec_group)?;
                 }
                 Ok(())
             })
         }
         DefTypeKind::Struct(fields) => fields.0.iter_mut().try_for_each(|(field, name)| {
             if let FieldType {
-                storage:
-                    StorageType::Val(ValType::Ref(RefType {
-                        heap_ty: HeapType::Type(idx),
-                        nullable,
-                    })),
-                mutable,
+                storage: StorageType::Val(ValType::Ref(RefType { heap_ty, .. })),
+                ..
             } = field
             {
-                if let Some(symbol) = find_type_def(idx, symbol_table, module) {
-                    if let Some(i) = search_index_in_rec_group(symbol, rec_group) {
-                        *field = FieldType {
-                            storage: StorageType::Val(ValType::Ref(RefType {
-                                heap_ty: HeapType::Rec(i),
-                                nullable: *nullable,
-                            })),
-                            mutable: *mutable,
-                        };
-                    } else if symbol.key.text_range().start() > rec_group.range.end() {
-                        return Err(());
-                    } else {
-                        *idx = Idx {
-                            num: symbol.idx.num,
-                            name: None,
-                        };
-                    }
-                }
+                substitute_heap_type(heap_ty, symbol_table, module, rec_group)?;
             }
             *name = None;
             Ok(())
         }),
         DefTypeKind::Array(field) => {
             if let Some(FieldType {
-                storage:
-                    StorageType::Val(ValType::Ref(RefType {
-                        heap_ty: HeapType::Type(idx),
-                        nullable,
-                    })),
-                mutable,
+                storage: StorageType::Val(ValType::Ref(RefType { heap_ty, .. })),
+                ..
             }) = field
             {
-                if let Some(symbol) = find_type_def(idx, symbol_table, module) {
-                    if let Some(i) = search_index_in_rec_group(symbol, rec_group) {
-                        *field = Some(FieldType {
-                            storage: StorageType::Val(ValType::Ref(RefType {
-                                heap_ty: HeapType::Rec(i),
-                                nullable: *nullable,
-                            })),
-                            mutable: *mutable,
-                        });
-                    } else if symbol.key.text_range().start() > rec_group.range.end() {
-                        return Err(());
-                    } else {
-                        *idx = Idx {
-                            num: symbol.idx.num,
-                            name: None,
-                        };
-                    }
-                }
+                substitute_heap_type(heap_ty, symbol_table, module, rec_group)?;
             }
             Ok(())
         }
     }
+}
+fn substitute_heap_type(
+    heap_type: &mut HeapType,
+    symbol_table: &SymbolTable,
+    module: SymbolKey,
+    rec_group: &RecTypeGroup,
+) -> Result<(), ()> {
+    if let HeapType::Type(idx) = heap_type {
+        if let Some(symbol) = symbol_table.symbols.iter().find(|symbol| {
+            symbol.kind == SymbolKind::Type
+                && symbol.region == module
+                && idx.is_defined_by(&symbol.idx)
+        }) {
+            if let Some(i) = rec_group
+                .type_defs
+                .iter()
+                .position(|key| *key == symbol.key)
+            {
+                *heap_type = HeapType::Rec(i as u32);
+            } else if symbol.key.text_range().start() > rec_group.range.end() {
+                return Err(());
+            } else {
+                *heap_type = HeapType::Type(Idx {
+                    num: symbol.idx.num,
+                    name: None,
+                });
+            }
+        }
+    }
+    Ok(())
 }
