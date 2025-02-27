@@ -9,7 +9,7 @@ use rowan::{
 };
 use std::{hash::Hash, sync::Arc};
 use wat_syntax::{
-    ast::{ModuleFieldFunc, PlainInstr, TypeDef},
+    ast::{ModuleFieldFunc, PlainInstr},
     SyntaxKind, SyntaxNode, SyntaxNodePtr,
 };
 
@@ -25,7 +25,6 @@ pub(crate) struct SymbolTable {
     pub symbols: Vec<Symbol>,
     pub blocks: Vec<BlockItem>,
     pub exports: Vec<ExportItem>,
-    pub inheritance: Vec<TypeDefItem>,
 }
 fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTable> {
     fn create_module_level_symbol(
@@ -550,31 +549,10 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
         });
     });
 
-    let inheritance = symbols
-        .iter()
-        .filter(|symbol| symbol.kind == SymbolKind::Type)
-        .filter_map(|symbol| {
-            let node = TypeDef::cast(symbol.key.to_node(&root))?;
-            let sub_type = node.sub_type()?;
-            let extendable = sub_type.keyword().is_some() && sub_type.final_keyword().is_none();
-            let inherits = sub_type
-                .indexes()
-                .next()
-                .and_then(|index| find_def(&symbols, SymbolKey::new(index.syntax())))
-                .map(|def| def.key);
-            Some(TypeDefItem {
-                key: symbol.key,
-                extendable,
-                inherits,
-            })
-        })
-        .collect();
-
     Arc::new(SymbolTable {
         symbols,
         blocks,
         exports,
-        inheritance,
     })
 }
 
@@ -743,11 +721,4 @@ pub(crate) struct ExportItem {
     pub name: String, // with double quotes
     pub range: TextRange,
     pub module: SyntaxNodePtr,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct TypeDefItem {
-    pub key: SymbolKey,
-    pub extendable: bool,
-    pub inherits: Option<SymbolKey>,
 }

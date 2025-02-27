@@ -25,20 +25,36 @@ pub(super) fn create_def_types(db: &dyn TypesAnalyzerCtx, uri: InternUri) -> Arc
         .filter(|symbol| symbol.kind == SymbolKind::Type)
         .filter_map(|symbol| {
             let node = TypeDef::cast(symbol.key.to_node(&root))?;
+            let mut can_be_super = false;
+            let mut inherits = None;
+            if let Some(sub_type) = node.sub_type() {
+                can_be_super = sub_type.keyword().is_some() && sub_type.final_keyword().is_none();
+                inherits = sub_type
+                    .indexes()
+                    .next()
+                    .and_then(|index| symbol_table.find_def(SymbolKey::new(index.syntax())))
+                    .map(|def| def.key);
+            }
             match node.sub_type()?.comp_type()? {
                 CompType::Func(func_type) => Some(DefType {
                     key: symbol.key,
                     idx: symbol.idx,
+                    can_be_super,
+                    inherits,
                     kind: DefTypeKind::Func(db.extract_sig(func_type.syntax().green().into())),
                 }),
                 CompType::Struct(struct_type) => Some(DefType {
                     key: symbol.key,
                     idx: symbol.idx,
+                    can_be_super,
+                    inherits,
                     kind: DefTypeKind::Struct(extract_fields(db, &struct_type)),
                 }),
                 CompType::Array(array_type) => Some(DefType {
                     key: symbol.key,
                     idx: symbol.idx,
+                    can_be_super,
+                    inherits,
                     kind: DefTypeKind::Array(
                         array_type
                             .field_type()
@@ -55,6 +71,8 @@ pub(super) fn create_def_types(db: &dyn TypesAnalyzerCtx, uri: InternUri) -> Arc
 pub(crate) struct DefType {
     pub key: SymbolKey,
     pub idx: Idx,
+    pub can_be_super: bool,
+    pub inherits: Option<SymbolKey>,
     pub kind: DefTypeKind,
 }
 impl DefType {
@@ -68,38 +86,24 @@ impl DefType {
         if !self.kind.matches(&other.kind, db, uri, module_id) {
             return false;
         }
-        let symbol_table = db.symbol_table(uri);
-        if let Some((a, b)) = symbol_table
-            .inheritance
-            .iter()
-            .find(|type_def| type_def.key == self.key)
-            .zip(
-                symbol_table
-                    .inheritance
-                    .iter()
-                    .find(|type_def| type_def.key == other.key),
-            )
-        {
-            if a.extendable != b.extendable {
-                return false;
-            }
-            let def_types = db.def_types(uri);
-            match (
-                a.inherits
-                    .and_then(|a| def_types.iter().find(|def_type| def_type.key == a)),
-                b.inherits
-                    .and_then(|b| def_types.iter().find(|def_type| def_type.key == b)),
-            ) {
-                (Some(a), Some(b)) => {
-                    if !a.matches(b, db, uri, module_id) {
-                        return false;
-                    }
-                }
-                (None, None) => {}
-                _ => return false,
-            }
-        } else {
+        if self.can_be_super != other.can_be_super {
             return false;
+        }
+        let def_types = db.def_types(uri);
+        match (
+            self.inherits
+                .and_then(|a| def_types.iter().find(|def_type| def_type.key == a)),
+            other
+                .inherits
+                .and_then(|b| def_types.iter().find(|def_type| def_type.key == b)),
+        ) {
+            (Some(a), Some(b)) => {
+                if !a.matches(b, db, uri, module_id) {
+                    return false;
+                }
+            }
+            (None, None) => {}
+            _ => return false,
         }
         let rec_type_groups = db.rec_type_groups(uri);
         if let Some(((a_group, a_index), (b_group, b_index))) = rec_type_groups

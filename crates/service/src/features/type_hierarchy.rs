@@ -2,6 +2,7 @@ use crate::{
     binder::{SymbolKind, SymbolTablesCtx},
     helpers,
     syntax_tree::SyntaxTreeCtx,
+    types_analyzer::TypesAnalyzerCtx,
     uri::UrisCtx,
     LanguageService,
 };
@@ -81,6 +82,7 @@ impl LanguageService {
         let uri = self.uri(params.item.uri.clone());
         let root = SyntaxNode::new_root(self.root(uri));
         let symbol_table = self.symbol_table(uri);
+        let def_types = self.def_types(uri);
 
         let line_index = self.line_index(uri);
         let type_def_range = helpers::lsp_range_to_rowan_range(&line_index, params.item.range)?;
@@ -89,11 +91,10 @@ impl LanguageService {
             .iter()
             .find(|symbol| symbol.key.text_range() == type_def_range)?;
 
-        symbol_table
-            .inheritance
+        def_types
             .iter()
-            .find(|def| def.key == type_def.key)
-            .and_then(|type_def| type_def.inherits)
+            .find(|def_type| def_type.key == type_def.key)
+            .and_then(|def_type| def_type.inherits)
             .and_then(|key| symbol_table.symbols.iter().find(|symbol| symbol.key == key))
             .map(|symbol| {
                 vec![TypeHierarchyItem {
@@ -117,6 +118,7 @@ impl LanguageService {
         let uri = self.uri(params.item.uri.clone());
         let root = SyntaxNode::new_root(self.root(uri));
         let symbol_table = self.symbol_table(uri);
+        let def_types = self.def_types(uri);
 
         let line_index = self.line_index(uri);
         let type_def_range = helpers::lsp_range_to_rowan_range(&line_index, params.item.range)?;
@@ -127,15 +129,14 @@ impl LanguageService {
             .key;
 
         Some(
-            symbol_table
-                .inheritance
+            def_types
                 .iter()
-                .filter(|type_def| type_def.inherits.is_some_and(|inherits| inherits == key))
-                .filter_map(|type_def| {
+                .filter(|def_type| def_type.inherits.is_some_and(|inherits| inherits == key))
+                .filter_map(|def_type| {
                     symbol_table
                         .symbols
                         .iter()
-                        .find(|symbol| symbol.key == type_def.key)
+                        .find(|symbol| symbol.key == def_type.key)
                 })
                 .map(|symbol| TypeHierarchyItem {
                     name: symbol.idx.render(self).to_string(),
