@@ -9,7 +9,7 @@ use crate::{
     idx::Idx,
     uri::InternUri,
 };
-use rowan::ast::AstNode;
+use rowan::{ast::AstNode, TextRange};
 use std::sync::Arc;
 use wat_syntax::{
     ast::{CompType, ModuleField, Root, TypeDef},
@@ -161,9 +161,13 @@ pub(super) fn create_recursive_types(
         .modules()
         .flat_map(|module| module.module_fields())
         .filter_map(|module_field| match module_field {
-            ModuleField::Type(type_def) => Some(RecTypeGroup {
-                type_defs: vec![SymbolKey::new(type_def.syntax())],
-            }),
+            ModuleField::Type(type_def) => {
+                let node = type_def.syntax();
+                Some(RecTypeGroup {
+                    type_defs: vec![SymbolKey::new(node)],
+                    range: node.text_range(),
+                })
+            }
             ModuleField::RecType(rec_type) => {
                 let rec_range = rec_type.syntax().text_range();
                 Some(RecTypeGroup {
@@ -176,6 +180,7 @@ pub(super) fn create_recursive_types(
                         })
                         .map(|symbol| symbol.key)
                         .collect(),
+                    range: rec_range,
                 })
             }
             _ => None,
@@ -187,6 +192,7 @@ pub(super) fn create_recursive_types(
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct RecTypeGroup {
     pub(crate) type_defs: Vec<SymbolKey>,
+    pub(crate) range: TextRange,
 }
 impl RecTypeGroup {
     pub(crate) fn equals(
@@ -213,8 +219,12 @@ impl RecTypeGroup {
                 {
                     let mut a = a.clone();
                     let mut b = b.clone();
-                    substitute_def_type(&mut a, &symbol_table, module.key, self);
-                    substitute_def_type(&mut b, &symbol_table, module.key, other);
+                    if substitute_def_type(&mut a, &symbol_table, module.key, self).is_err() {
+                        return false;
+                    }
+                    if substitute_def_type(&mut b, &symbol_table, module.key, other).is_err() {
+                        return false;
+                    }
                     a.kind.matches(&b.kind, db, uri, module_id)
                 } else {
                     false
@@ -222,12 +232,21 @@ impl RecTypeGroup {
             })
     }
 }
+/// Substitute typeidx.
+/// If they're in the given recursive types group, substitute it with its index in that rec group.
+/// If not, substitute it with a numeric-only idx for better comparison in later use.
+///
+/// This function will return Err if its typeidx is greater than all types in the rec group
+/// (defined after the rec group).
+/// This case is invalid according to WasmGC spec so this behaivor makes sense.
+/// Additionally, this will prevent typeidx resolution infinite loop,
+/// because this ensures that resolution is backward only.
 fn substitute_def_type(
     def_type: &mut DefType,
     symbol_table: &SymbolTable,
     module: SymbolKey,
     rec_group: &RecTypeGroup,
-) {
+) -> Result<(), ()> {
     fn find_type_def<'a>(
         idx: &Idx,
         symbol_table: &'a SymbolTable,
@@ -248,7 +267,7 @@ fn substitute_def_type(
     }
     match &mut def_type.kind {
         DefTypeKind::Func(signature) => {
-            signature.params.iter_mut().for_each(|(param, name)| {
+            signature.params.iter_mut().try_for_each(|(param, name)| {
                 if let ValType::Ref(RefType {
                     heap_ty: HeapType::Type(idx),
                     nullable,
@@ -260,6 +279,8 @@ fn substitute_def_type(
                                 heap_ty: HeapType::Rec(i),
                                 nullable: *nullable,
                             });
+                        } else if symbol.key.text_range().start() > rec_group.range.end() {
+                            return Err(());
                         } else {
                             *idx = Idx {
                                 num: symbol.idx.num,
@@ -269,8 +290,9 @@ fn substitute_def_type(
                     }
                 }
                 *name = None;
-            });
-            signature.results.iter_mut().for_each(|result| {
+                Ok(())
+            })?;
+            signature.results.iter_mut().try_for_each(|result| {
                 if let ValType::Ref(RefType {
                     heap_ty: HeapType::Type(idx),
                     nullable,
@@ -282,6 +304,8 @@ fn substitute_def_type(
                                 heap_ty: HeapType::Rec(i),
                                 nullable: *nullable,
                             });
+                        } else if symbol.key.text_range().start() > rec_group.range.end() {
+                            return Err(());
                         } else {
                             *idx = Idx {
                                 num: symbol.idx.num,
@@ -290,39 +314,41 @@ fn substitute_def_type(
                         }
                     }
                 }
-            });
+                Ok(())
+            })
         }
-        DefTypeKind::Struct(fields) => {
-            fields.0.iter_mut().for_each(|(field, name)| {
-                if let FieldType {
-                    storage:
-                        StorageType::Val(ValType::Ref(RefType {
-                            heap_ty: HeapType::Type(idx),
-                            nullable,
-                        })),
-                    mutable,
-                } = field
-                {
-                    if let Some(symbol) = find_type_def(idx, symbol_table, module) {
-                        if let Some(i) = search_index_in_rec_group(symbol, rec_group) {
-                            *field = FieldType {
-                                storage: StorageType::Val(ValType::Ref(RefType {
-                                    heap_ty: HeapType::Rec(i),
-                                    nullable: *nullable,
-                                })),
-                                mutable: *mutable,
-                            };
-                        } else {
-                            *idx = Idx {
-                                num: symbol.idx.num,
-                                name: None,
-                            };
-                        }
+        DefTypeKind::Struct(fields) => fields.0.iter_mut().try_for_each(|(field, name)| {
+            if let FieldType {
+                storage:
+                    StorageType::Val(ValType::Ref(RefType {
+                        heap_ty: HeapType::Type(idx),
+                        nullable,
+                    })),
+                mutable,
+            } = field
+            {
+                if let Some(symbol) = find_type_def(idx, symbol_table, module) {
+                    if let Some(i) = search_index_in_rec_group(symbol, rec_group) {
+                        *field = FieldType {
+                            storage: StorageType::Val(ValType::Ref(RefType {
+                                heap_ty: HeapType::Rec(i),
+                                nullable: *nullable,
+                            })),
+                            mutable: *mutable,
+                        };
+                    } else if symbol.key.text_range().start() > rec_group.range.end() {
+                        return Err(());
+                    } else {
+                        *idx = Idx {
+                            num: symbol.idx.num,
+                            name: None,
+                        };
                     }
                 }
-                *name = None;
-            });
-        }
+            }
+            *name = None;
+            Ok(())
+        }),
         DefTypeKind::Array(field) => {
             if let Some(FieldType {
                 storage:
@@ -342,6 +368,8 @@ fn substitute_def_type(
                             })),
                             mutable: *mutable,
                         });
+                    } else if symbol.key.text_range().start() > rec_group.range.end() {
+                        return Err(());
                     } else {
                         *idx = Idx {
                             num: symbol.idx.num,
@@ -350,6 +378,7 @@ fn substitute_def_type(
                     }
                 }
             }
+            Ok(())
         }
     }
 }
