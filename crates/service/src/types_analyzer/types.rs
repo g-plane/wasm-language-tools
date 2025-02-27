@@ -304,6 +304,7 @@ impl HeapType {
                     return false;
                 };
                 let def_types = db.def_types(uri);
+                #[expect(clippy::match_like_matches_macro)]
                 symbol_table
                     .symbols
                     .iter()

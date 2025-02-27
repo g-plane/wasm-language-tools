@@ -46,33 +46,26 @@ pub(super) fn create_def_types(db: &dyn TypesAnalyzerCtx, uri: InternUri) -> Arc
                             });
                 }
             }
-            match node.sub_type()?.comp_type()? {
-                CompType::Func(func_type) => Some(DefType {
-                    key: symbol.key,
-                    idx: symbol.idx,
-                    can_be_super,
-                    inherits,
-                    kind: DefTypeKind::Func(db.extract_sig(func_type.syntax().green().into())),
-                }),
-                CompType::Struct(struct_type) => Some(DefType {
-                    key: symbol.key,
-                    idx: symbol.idx,
-                    can_be_super,
-                    inherits,
-                    kind: DefTypeKind::Struct(extract_fields(db, &struct_type)),
-                }),
-                CompType::Array(array_type) => Some(DefType {
-                    key: symbol.key,
-                    idx: symbol.idx,
-                    can_be_super,
-                    inherits,
-                    kind: DefTypeKind::Array(
-                        array_type
-                            .field_type()
-                            .and_then(|node| FieldType::from_ast(&node, db)),
-                    ),
-                }),
-            }
+            let kind = match node.sub_type()?.comp_type()? {
+                CompType::Func(func_type) => {
+                    DefTypeKind::Func(db.extract_sig(func_type.syntax().green().into()))
+                }
+                CompType::Struct(struct_type) => {
+                    DefTypeKind::Struct(extract_fields(db, &struct_type))
+                }
+                CompType::Array(array_type) => DefTypeKind::Array(
+                    array_type
+                        .field_type()
+                        .and_then(|node| FieldType::from_ast(&node, db)),
+                ),
+            };
+            Some(DefType {
+                key: symbol.key,
+                idx: symbol.idx,
+                can_be_super,
+                inherits,
+                kind,
+            })
         })
         .collect();
     Arc::new(types)
@@ -240,14 +233,6 @@ impl RecTypeGroup {
                 if let (Some(a), Some(b), Some(module)) =
                     (a, b, symbol_table.find_module(module_id))
                 {
-                    let mut a = a.clone();
-                    let mut b = b.clone();
-                    if substitute_def_type(&mut a, &symbol_table, module.key, self).is_err() {
-                        return false;
-                    }
-                    if substitute_def_type(&mut b, &symbol_table, module.key, other).is_err() {
-                        return false;
-                    }
                     // check whether their super types match or not
                     match (&a.inherits, &b.inherits) {
                         (Some(Inherits { idx: a, .. }), Some(Inherits { idx: b, .. })) => {
@@ -265,7 +250,12 @@ impl RecTypeGroup {
                         (None, None) => {}
                         _ => return false,
                     }
-                    a.kind.matches(&b.kind, db, uri, module_id)
+                    // check whether their composite types match or not
+                    let mut a = a.clone();
+                    let mut b = b.clone();
+                    substitute_def_type(&mut a, &symbol_table, module.key, self).is_ok()
+                        && substitute_def_type(&mut b, &symbol_table, module.key, other).is_ok()
+                        && a.kind.matches(&b.kind, db, uri, module_id)
                 } else {
                     false
                 }
