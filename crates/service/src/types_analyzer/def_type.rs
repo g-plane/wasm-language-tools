@@ -68,6 +68,39 @@ impl DefType {
         if !self.kind.matches(&other.kind, db, uri, module_id) {
             return false;
         }
+        let symbol_table = db.symbol_table(uri);
+        if let Some((a, b)) = symbol_table
+            .inheritance
+            .iter()
+            .find(|type_def| type_def.key == self.key)
+            .zip(
+                symbol_table
+                    .inheritance
+                    .iter()
+                    .find(|type_def| type_def.key == other.key),
+            )
+        {
+            if a.extendable != b.extendable {
+                return false;
+            }
+            let def_types = db.def_types(uri);
+            match (
+                a.inherits
+                    .and_then(|a| def_types.iter().find(|def_type| def_type.key == a)),
+                b.inherits
+                    .and_then(|b| def_types.iter().find(|def_type| def_type.key == b)),
+            ) {
+                (Some(a), Some(b)) => {
+                    if !a.matches(b, db, uri, module_id) {
+                        return false;
+                    }
+                }
+                (None, None) => {}
+                _ => return false,
+            }
+        } else {
+            return false;
+        }
         let rec_type_groups = db.rec_type_groups(uri);
         if let Some(((a_group, a_index), (b_group, b_index))) = rec_type_groups
             .iter()
