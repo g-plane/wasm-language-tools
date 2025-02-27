@@ -260,7 +260,7 @@ impl HeapType {
             (HeapType::None, other) => other.matches(&HeapType::Any, db, uri, module_id),
             (HeapType::NoFunc, other) => other.matches(&HeapType::Func, db, uri, module_id),
             (HeapType::NoExtern, other) => other.matches(&HeapType::Extern, db, uri, module_id),
-            (HeapType::Type(a), HeapType::Type(b)) => {
+            (HeapType::Type(a), heap_ty_b @ HeapType::Type(b)) => {
                 let symbol_table = db.symbol_table(uri);
                 let Some(module) = symbol_table.find_module(module_id) else {
                     return false;
@@ -281,12 +281,31 @@ impl HeapType {
                     }))
                     .map(|(a, b)| (a.key, b.key))
                     .is_some_and(|(a, b)| {
-                        a == b
-                            || def_types
+                        if a == b {
+                            true
+                        } else if let Some(a) = def_types.iter().find(|def_type| def_type.key == a)
+                        {
+                            def_types
                                 .iter()
-                                .find(|def_type| def_type.key == a)
-                                .zip(def_types.iter().find(|def_type| def_type.key == b))
-                                .is_some_and(|(a, b)| a.matches(b, db, uri, module_id))
+                                .find(|def_type| def_type.key == b)
+                                .is_some_and(|b| a.matches(b, db, uri, module_id))
+                                || a.inherits
+                                    .and_then(|inherits| {
+                                        symbol_table
+                                            .symbols
+                                            .iter()
+                                            .find(|symbol| symbol.key == inherits)
+                                    })
+                                    .is_some_and(|symbol| {
+                                        let idx = Idx {
+                                            num: symbol.idx.num,
+                                            name: None,
+                                        };
+                                        HeapType::Type(idx).matches(heap_ty_b, db, uri, module_id)
+                                    })
+                        } else {
+                            false
+                        }
                     })
             }
             (HeapType::Type(a), b) => {
