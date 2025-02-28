@@ -208,6 +208,20 @@ impl ValType {
             _ => self == other,
         }
     }
+
+    pub(crate) fn type_equals(
+        &self,
+        other: &Self,
+        db: &dyn TypesAnalyzerCtx,
+        uri: InternUri,
+        module_id: u32,
+    ) -> bool {
+        if let (ValType::Ref(a), ValType::Ref(b)) = (self, other) {
+            a.type_equals(b, db, uri, module_id)
+        } else {
+            self == other
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -225,6 +239,17 @@ impl RefType {
     ) -> bool {
         self.heap_ty.matches(&other.heap_ty, db, uri, module_id)
             && (!self.nullable || other.nullable)
+    }
+
+    pub(crate) fn type_equals(
+        &self,
+        other: &Self,
+        db: &dyn TypesAnalyzerCtx,
+        uri: InternUri,
+        module_id: u32,
+    ) -> bool {
+        self.nullable == other.nullable
+            && self.heap_ty.type_equals(&other.heap_ty, db, uri, module_id)
     }
 }
 
@@ -260,7 +285,7 @@ impl HeapType {
             (HeapType::None, other) => other.matches(&HeapType::Any, db, uri, module_id),
             (HeapType::NoFunc, other) => other.matches(&HeapType::Func, db, uri, module_id),
             (HeapType::NoExtern, other) => other.matches(&HeapType::Extern, db, uri, module_id),
-            (HeapType::Type(a), heap_ty_b @ HeapType::Type(b)) => {
+            (heap_ty_a @ HeapType::Type(a), heap_ty_b @ HeapType::Type(b)) => {
                 let symbol_table = db.symbol_table(uri);
                 let Some(module) = symbol_table.find_module(module_id) else {
                     return false;
@@ -281,21 +306,16 @@ impl HeapType {
                     }))
                     .map(|(a, b)| (a.key, b.key))
                     .is_some_and(|(a, b)| {
-                        if a == b {
-                            true
-                        } else if let Some(a) = def_types.iter().find(|def_type| def_type.key == a)
-                        {
-                            def_types
+                        a == b
+                            || heap_ty_a.type_equals(heap_ty_b, db, uri, module_id)
+                            || def_types
                                 .iter()
-                                .find(|def_type| def_type.key == b)
-                                .is_some_and(|b| a.matches(b, db, uri, module_id))
-                                || a.inherits.as_ref().is_some_and(|inherits| {
+                                .find(|def_type| def_type.key == a)
+                                .and_then(|def_type| def_type.inherits.as_ref())
+                                .is_some_and(|inherits| {
                                     HeapType::Type(inherits.idx)
                                         .matches(heap_ty_b, db, uri, module_id)
                                 })
-                        } else {
-                            false
-                        }
                     })
             }
             (HeapType::Type(a), b) => {
@@ -330,6 +350,46 @@ impl HeapType {
             (a, b) => a == b,
         }
     }
+
+    pub(crate) fn type_equals(
+        &self,
+        other: &Self,
+        db: &dyn TypesAnalyzerCtx,
+        uri: InternUri,
+        module_id: u32,
+    ) -> bool {
+        if let (HeapType::Type(a), HeapType::Type(b)) = (self, other) {
+            let symbol_table = db.symbol_table(uri);
+            let Some(module) = symbol_table.find_module(module_id) else {
+                return false;
+            };
+            let def_types = db.def_types(uri);
+            symbol_table
+                .symbols
+                .iter()
+                .find(|symbol| {
+                    symbol.kind == SymbolKind::Type
+                        && symbol.region == module.key
+                        && a.is_defined_by(&symbol.idx)
+                })
+                .zip(symbol_table.symbols.iter().find(|symbol| {
+                    symbol.kind == SymbolKind::Type
+                        && symbol.region == module.key
+                        && b.is_defined_by(&symbol.idx)
+                }))
+                .map(|(a, b)| (a.key, b.key))
+                .is_some_and(|(a, b)| {
+                    a == b
+                        || def_types
+                            .iter()
+                            .find(|def_type| def_type.key == a)
+                            .zip(def_types.iter().find(|def_type| def_type.key == b))
+                            .is_some_and(|(a, b)| a.type_equals(b, db, uri, module_id))
+                })
+        } else {
+            self == other
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -354,6 +414,21 @@ impl Fields {
                 .iter()
                 .zip(&other.0)
                 .all(|((a, _), (b, _))| a.matches(b, db, uri, module_id))
+    }
+
+    pub(crate) fn type_equals(
+        &self,
+        other: &Self,
+        db: &dyn TypesAnalyzerCtx,
+        uri: InternUri,
+        module_id: u32,
+    ) -> bool {
+        self.0.len() == other.0.len()
+            && self
+                .0
+                .iter()
+                .zip(&other.0)
+                .all(|((a, _), (b, _))| a.type_equals(b, db, uri, module_id))
     }
 }
 
@@ -388,6 +463,17 @@ impl FieldType {
             _ => false,
         }
     }
+
+    pub(crate) fn type_equals(
+        &self,
+        other: &Self,
+        db: &dyn TypesAnalyzerCtx,
+        uri: InternUri,
+        module_id: u32,
+    ) -> bool {
+        self.mutable == other.mutable
+            && self.storage.type_equals(&other.storage, db, uri, module_id)
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -420,6 +506,21 @@ impl StorageType {
     ) -> bool {
         match (self, other) {
             (StorageType::Val(a), StorageType::Val(b)) => a.matches(b, db, uri, module_id),
+            (StorageType::PackedI8, StorageType::PackedI8) => true,
+            (StorageType::PackedI16, StorageType::PackedI16) => true,
+            _ => false,
+        }
+    }
+
+    pub(crate) fn type_equals(
+        &self,
+        other: &Self,
+        db: &dyn TypesAnalyzerCtx,
+        uri: InternUri,
+        module_id: u32,
+    ) -> bool {
+        match (self, other) {
+            (StorageType::Val(a), StorageType::Val(b)) => a.type_equals(b, db, uri, module_id),
             (StorageType::PackedI8, StorageType::PackedI8) => true,
             (StorageType::PackedI16, StorageType::PackedI16) => true,
             _ => false,

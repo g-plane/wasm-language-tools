@@ -80,14 +80,14 @@ pub(crate) struct DefType {
     pub kind: DefTypeKind,
 }
 impl DefType {
-    pub(crate) fn matches(
+    pub(crate) fn type_equals(
         &self,
         other: &Self,
         db: &dyn TypesAnalyzerCtx,
         uri: InternUri,
         module_id: u32,
     ) -> bool {
-        if !self.kind.matches(&other.kind, db, uri, module_id) {
+        if !self.kind.type_equals(&other.kind, db, uri, module_id) {
             return false;
         }
         if self.is_final != other.is_final {
@@ -104,7 +104,7 @@ impl DefType {
                 .and_then(|b| def_types.iter().find(|def_type| def_type.key == b.symbol)),
         ) {
             (Some(a), Some(b)) => {
-                if !a.matches(b, db, uri, module_id) {
+                if !a.type_equals(b, db, uri, module_id) {
                     return false;
                 }
             }
@@ -129,7 +129,7 @@ impl DefType {
                     .map(|i| (group, i))
             }))
         {
-            a_index == b_index && a_group.equals(b_group, db, uri, module_id)
+            a_index == b_index && a_group.type_equals(b_group, db, uri, module_id)
         } else {
             false
         }
@@ -149,7 +149,7 @@ pub(crate) enum DefTypeKind {
     Array(Option<FieldType>),
 }
 impl DefTypeKind {
-    pub(crate) fn matches(
+    pub(crate) fn type_equals(
         &self,
         other: &Self,
         db: &dyn TypesAnalyzerCtx,
@@ -157,10 +157,12 @@ impl DefTypeKind {
         module_id: u32,
     ) -> bool {
         match (self, other) {
-            (DefTypeKind::Func(a), DefTypeKind::Func(b)) => a.matches(b, db, uri, module_id),
-            (DefTypeKind::Struct(a), DefTypeKind::Struct(b)) => a.matches(b, db, uri, module_id),
+            (DefTypeKind::Func(a), DefTypeKind::Func(b)) => a.type_equals(b, db, uri, module_id),
+            (DefTypeKind::Struct(a), DefTypeKind::Struct(b)) => {
+                a.type_equals(b, db, uri, module_id)
+            }
             (DefTypeKind::Array(Some(a)), DefTypeKind::Array(Some(b))) => {
-                a.matches(b, db, uri, module_id)
+                a.type_equals(b, db, uri, module_id)
             }
             _ => false,
         }
@@ -211,7 +213,7 @@ pub(crate) struct RecTypeGroup {
     pub(crate) range: TextRange,
 }
 impl RecTypeGroup {
-    pub(crate) fn equals(
+    pub(crate) fn type_equals(
         &self,
         other: &Self,
         db: &dyn TypesAnalyzerCtx,
@@ -233,7 +235,7 @@ impl RecTypeGroup {
                 if let (Some(a), Some(b), Some(module)) =
                     (a, b, symbol_table.find_module(module_id))
                 {
-                    // check whether their super types match or not
+                    // check whether their super types equal or not
                     match (&a.inherits, &b.inherits) {
                         (Some(Inherits { idx: a, .. }), Some(Inherits { idx: b, .. })) => {
                             let mut a = HeapType::Type(*a);
@@ -242,7 +244,7 @@ impl RecTypeGroup {
                                 .is_err()
                                 || substitute_heap_type(&mut b, &symbol_table, module.key, other)
                                     .is_err()
-                                || !a.matches(&b, db, uri, module_id)
+                                || !a.type_equals(&b, db, uri, module_id)
                             {
                                 return false;
                             }
@@ -250,12 +252,12 @@ impl RecTypeGroup {
                         (None, None) => {}
                         _ => return false,
                     }
-                    // check whether their composite types match or not
+                    // check whether their composite types equal or not
                     let mut a = a.clone();
                     let mut b = b.clone();
                     substitute_def_type(&mut a, &symbol_table, module.key, self).is_ok()
                         && substitute_def_type(&mut b, &symbol_table, module.key, other).is_ok()
-                        && a.kind.matches(&b.kind, db, uri, module_id)
+                        && a.kind.type_equals(&b.kind, db, uri, module_id)
                 } else {
                     false
                 }
