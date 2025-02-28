@@ -49,6 +49,33 @@ fn subsumption2() {
 }
 
 #[test]
+fn subsumption2_ref_loop() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (rec (type $f1 (sub (func))) (type $s1 (sub (struct (field (ref $f1))))))
+  (rec (type $f2 (sub (func))) (type $s2 (sub (struct (field (ref $f2))))))
+  (rec
+    (type $g1 (sub $f1 (func)))
+    (type
+      (sub $s1 (struct
+        (field (ref $f1) (ref $f1) (ref $f2) (ref $f2) (ref $g2))))))
+  (rec
+    (type $g2 (sub $f2 (func)))
+    (type
+      (sub $s2 (struct
+        (field (ref $f1) (ref $f2) (ref $f1) (ref $f2) (ref $g1))))))
+  (func (param (ref $g2)) (result (ref $g1))
+    (local.get 0)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn subsumption3() {
     let uri = "untitled:test".to_string();
     let source = "
