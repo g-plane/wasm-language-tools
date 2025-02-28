@@ -25,10 +25,10 @@ pub(super) fn create_def_types(db: &dyn TypesAnalyzerCtx, uri: InternUri) -> Arc
         .filter(|symbol| symbol.kind == SymbolKind::Type)
         .filter_map(|symbol| {
             let node = TypeDef::cast(symbol.key.to_node(&root))?;
-            let mut can_be_super = false;
+            let mut is_final = false;
             let mut inherits = None;
             if let Some(sub_type) = node.sub_type() {
-                can_be_super = sub_type.keyword().is_some() && sub_type.final_keyword().is_none();
+                is_final = sub_type.keyword().is_none() || sub_type.final_keyword().is_some();
                 if let Some(index) = sub_type.indexes().next() {
                     inherits =
                         symbol_table
@@ -62,7 +62,7 @@ pub(super) fn create_def_types(db: &dyn TypesAnalyzerCtx, uri: InternUri) -> Arc
             Some(DefType {
                 key: symbol.key,
                 idx: symbol.idx,
-                can_be_super,
+                is_final,
                 inherits,
                 kind,
             })
@@ -75,7 +75,7 @@ pub(super) fn create_def_types(db: &dyn TypesAnalyzerCtx, uri: InternUri) -> Arc
 pub(crate) struct DefType {
     pub key: SymbolKey,
     pub idx: Idx,
-    pub can_be_super: bool,
+    pub is_final: bool,
     pub inherits: Option<Inherits>,
     pub kind: DefTypeKind,
 }
@@ -90,7 +90,7 @@ impl DefType {
         if !self.kind.matches(&other.kind, db, uri, module_id) {
             return false;
         }
-        if self.can_be_super != other.can_be_super {
+        if self.is_final != other.is_final {
             return false;
         }
         let def_types = db.def_types(uri);
