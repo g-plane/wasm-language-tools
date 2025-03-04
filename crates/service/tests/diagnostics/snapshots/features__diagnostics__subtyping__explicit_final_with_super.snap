@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/subtyping.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 16
+        },
+        "end": {
+          "line": 4,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "subtyping",
+      "source": "wat",
+      "message": "type `$s` is final"
+    }
+  ]
+}

@@ -11,6 +11,7 @@ mod multi_modules;
 mod needless_mut;
 mod shadow;
 mod start;
+mod subtyping;
 mod syntax;
 mod typeck;
 mod undef;

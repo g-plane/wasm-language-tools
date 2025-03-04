@@ -12,6 +12,7 @@ mod multi_modules;
 mod needless_mut;
 mod shadow;
 mod start;
+mod subtyping;
 mod syntax;
 mod typeck;
 mod undef;
@@ -141,6 +142,14 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
         service,
         &mut diagnostics,
         config.lint.needless_mut,
+        &line_index,
+        &root,
+        &symbol_table,
+    );
+    subtyping::check(
+        &mut diagnostics,
+        service,
+        uri,
         &line_index,
         &root,
         &symbol_table,
