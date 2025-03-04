@@ -11,6 +11,7 @@ mod import_occur;
 mod multi_modules;
 mod needless_mut;
 mod shadow;
+mod start;
 mod syntax;
 mod typeck;
 mod undef;
@@ -89,6 +90,16 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                     &node,
                 );
                 br_table_branches::check(
+                    &mut diagnostics,
+                    service,
+                    uri,
+                    &line_index,
+                    &symbol_table,
+                    &node,
+                );
+            }
+            SyntaxKind::MODULE_FIELD_START => {
+                start::check(
                     &mut diagnostics,
                     service,
                     uri,

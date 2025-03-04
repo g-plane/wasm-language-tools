@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/start.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 9
+        },
+        "end": {
+          "line": 4,
+          "character": 10
+        }
+      },
+      "severity": 1,
+      "code": "start",
+      "source": "wat",
+      "message": "start function must be type of [] -> []"
+    }
+  ]
+}
