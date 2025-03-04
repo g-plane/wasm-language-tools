@@ -4,6 +4,7 @@ use wat_service::{LanguageService, LintLevel, Lints, ServiceConfig};
 mod block_type;
 mod br_table_branches;
 mod dup_names;
+mod global_expr;
 mod global_mut;
 mod immediates;
 mod implicit_module;
