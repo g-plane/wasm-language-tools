@@ -222,7 +222,7 @@ fn param() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-    (func (param $param i32)
+    (func (param $param i32) (param $param' i32)
         (local.get $param)
     )
     (func (param $param i32))
@@ -248,7 +248,7 @@ fn local() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-    (func (local $local i32)
+    (func (local $local i32) (local $local' i32)
         (local.get $local)
     )
     (func (local $local i32))
@@ -303,6 +303,7 @@ fn call() {
         (call $func) (return_call $func)
     )
     (start $func)
+    (func $func')
 )
 (module (func $func))
 ";
@@ -326,7 +327,7 @@ fn param_access() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-    (func (param $param i32)
+    (func (param $param i32) (param $param' i32)
         (local.get $param)
     )
     (func (param $param i32))
@@ -352,7 +353,7 @@ fn local_access() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-    (func (local $local i32)
+    (func (local $local i32) (local $local' i32)
         (local.get $local)
     )
     (func (local $local i32))
@@ -380,6 +381,7 @@ fn func_type() {
 (module
     (type $type)
     (func (type $type))
+    (type $type')
 )
 (module (type $type))
 ";
@@ -405,6 +407,7 @@ fn type_use() {
 (module
     (type $type)
     (func (type $type))
+    (type $type')
 )
 (module (type $type))
 ";
@@ -430,6 +433,7 @@ fn global_def() {
 (module
     (global $global)
     (func (global.get $global))
+    (global $global')
 )
 (module (global $global))
 ";
@@ -455,6 +459,7 @@ fn global_ref() {
 (module
     (global $global)
     (func (global.get $global))
+    (global $global')
 )
 (module (global $global))
 ";
@@ -480,6 +485,7 @@ fn memory_def() {
 (module
     (memory $memory (data))
     (export \"\" (memory $memory))
+    (memory $memory' (data))
 )
 ";
     let mut service = LanguageService::default();
@@ -504,6 +510,7 @@ fn memory_ref() {
 (module
     (memory $memory (data))
     (export \"\" (memory $memory))
+    (memory $memory' (data))
 )
 ";
     let mut service = LanguageService::default();
@@ -528,7 +535,8 @@ fn table_def() {
 (module
   (table $table 0 funcref)
   (func
-    (table.size $table)))
+    (table.size $table))
+  (table $table' 0 funcref))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -552,7 +560,8 @@ fn table_ref() {
 (module
   (table $table 0 funcref)
   (func
-    (table.size $table)))
+    (table.size $table))
+  (table $table' 0 funcref))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
