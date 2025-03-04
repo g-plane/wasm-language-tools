@@ -3,7 +3,7 @@ use crate::{
     data_set, helpers,
     idx::Idx,
     syntax_tree::SyntaxTreeCtx,
-    types_analyzer::{self, DefTypeKind, OperandType, TypesAnalyzerCtx, ValType},
+    types_analyzer::{self, CompositeType, OperandType, TypesAnalyzerCtx, ValType},
     uri::{InternUri, UrisCtx},
     LanguageService,
 };
@@ -732,12 +732,15 @@ fn get_cmp_list(
                                         .iter()
                                         .find(|def_type| def_type.key == symbol.key)
                                         .map(|def_type| {
-                                            if let (DefTypeKind::Func(..), PreferredType::Func)
-                                            | (DefTypeKind::Array(..), PreferredType::Array)
+                                            if let (CompositeType::Func(..), PreferredType::Func)
                                             | (
-                                                DefTypeKind::Struct(..),
+                                                CompositeType::Array(..),
+                                                PreferredType::Array,
+                                            )
+                                            | (
+                                                CompositeType::Struct(..),
                                                 PreferredType::Struct,
-                                            ) = (&def_type.kind, preferred_type)
+                                            ) = (&def_type.comp, preferred_type)
                                             {
                                                 "0".into()
                                             } else {

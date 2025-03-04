@@ -57,8 +57,8 @@ pub fn check(
                         format!("type `{}` is final", super_type.idx.render(service)),
                     ))
                 } else if !sub_type
-                    .kind
-                    .matches(&super_type.kind, service, uri, module_id)
+                    .comp
+                    .matches(&super_type.comp, service, uri, module_id)
                 {
                     Some((
                         sub_type.key,

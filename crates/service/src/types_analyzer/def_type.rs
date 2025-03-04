@@ -46,14 +46,14 @@ pub(super) fn create_def_types(db: &dyn TypesAnalyzerCtx, uri: InternUri) -> Arc
                             });
                 }
             }
-            let kind = match node.sub_type()?.comp_type()? {
+            let comp = match node.sub_type()?.comp_type()? {
                 CompType::Func(func_type) => {
-                    DefTypeKind::Func(db.extract_sig(func_type.syntax().green().into()))
+                    CompositeType::Func(db.extract_sig(func_type.syntax().green().into()))
                 }
                 CompType::Struct(struct_type) => {
-                    DefTypeKind::Struct(extract_fields(db, &struct_type))
+                    CompositeType::Struct(extract_fields(db, &struct_type))
                 }
-                CompType::Array(array_type) => DefTypeKind::Array(
+                CompType::Array(array_type) => CompositeType::Array(
                     array_type
                         .field_type()
                         .and_then(|node| FieldType::from_ast(&node, db)),
@@ -64,7 +64,7 @@ pub(super) fn create_def_types(db: &dyn TypesAnalyzerCtx, uri: InternUri) -> Arc
                 idx: symbol.idx,
                 is_final,
                 inherits,
-                kind,
+                comp,
             })
         })
         .collect();
@@ -77,7 +77,7 @@ pub(crate) struct DefType {
     pub idx: Idx,
     pub is_final: bool,
     pub inherits: Option<Inherits>,
-    pub kind: DefTypeKind,
+    pub comp: CompositeType,
 }
 impl DefType {
     pub(crate) fn type_equals(
@@ -87,7 +87,7 @@ impl DefType {
         uri: InternUri,
         module_id: u32,
     ) -> bool {
-        if !self.kind.type_equals(&other.kind, db, uri, module_id) {
+        if !self.comp.type_equals(&other.comp, db, uri, module_id) {
             return false;
         }
         if self.is_final != other.is_final {
@@ -143,12 +143,12 @@ pub(crate) struct Inherits {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) enum DefTypeKind {
+pub(crate) enum CompositeType {
     Func(Signature),
     Struct(Fields),
     Array(Option<FieldType>),
 }
-impl DefTypeKind {
+impl CompositeType {
     pub(crate) fn matches(
         &self,
         other: &Self,
@@ -157,9 +157,11 @@ impl DefTypeKind {
         module_id: u32,
     ) -> bool {
         match (self, other) {
-            (DefTypeKind::Func(a), DefTypeKind::Func(b)) => a.matches(b, db, uri, module_id),
-            (DefTypeKind::Struct(a), DefTypeKind::Struct(b)) => a.matches(b, db, uri, module_id),
-            (DefTypeKind::Array(Some(a)), DefTypeKind::Array(Some(b))) => {
+            (CompositeType::Func(a), CompositeType::Func(b)) => a.matches(b, db, uri, module_id),
+            (CompositeType::Struct(a), CompositeType::Struct(b)) => {
+                a.matches(b, db, uri, module_id)
+            }
+            (CompositeType::Array(Some(a)), CompositeType::Array(Some(b))) => {
                 a.matches(b, db, uri, module_id)
             }
             _ => false,
@@ -174,11 +176,13 @@ impl DefTypeKind {
         module_id: u32,
     ) -> bool {
         match (self, other) {
-            (DefTypeKind::Func(a), DefTypeKind::Func(b)) => a.type_equals(b, db, uri, module_id),
-            (DefTypeKind::Struct(a), DefTypeKind::Struct(b)) => {
+            (CompositeType::Func(a), CompositeType::Func(b)) => {
                 a.type_equals(b, db, uri, module_id)
             }
-            (DefTypeKind::Array(Some(a)), DefTypeKind::Array(Some(b))) => {
+            (CompositeType::Struct(a), CompositeType::Struct(b)) => {
+                a.type_equals(b, db, uri, module_id)
+            }
+            (CompositeType::Array(Some(a)), CompositeType::Array(Some(b))) => {
                 a.type_equals(b, db, uri, module_id)
             }
             _ => false,
@@ -274,7 +278,7 @@ impl RecTypeGroup {
                     let mut b = b.clone();
                     substitute_def_type(&mut a, &symbol_table, module.key, self).is_ok()
                         && substitute_def_type(&mut b, &symbol_table, module.key, other).is_ok()
-                        && a.kind.type_equals(&b.kind, db, uri, module_id)
+                        && a.comp.type_equals(&b.comp, db, uri, module_id)
                 } else {
                     false
                 }
@@ -296,8 +300,8 @@ fn substitute_def_type(
     module: SymbolKey,
     rec_group: &RecTypeGroup,
 ) -> Result<(), ()> {
-    match &mut def_type.kind {
-        DefTypeKind::Func(signature) => {
+    match &mut def_type.comp {
+        CompositeType::Func(signature) => {
             signature.params.iter_mut().try_for_each(|(param, name)| {
                 if let ValType::Ref(RefType { heap_ty, .. }) = param {
                     substitute_heap_type(heap_ty, symbol_table, module, rec_group)?;
@@ -312,7 +316,7 @@ fn substitute_def_type(
                 Ok(())
             })
         }
-        DefTypeKind::Struct(fields) => fields.0.iter_mut().try_for_each(|(field, name)| {
+        CompositeType::Struct(fields) => fields.0.iter_mut().try_for_each(|(field, name)| {
             if let FieldType {
                 storage: StorageType::Val(ValType::Ref(RefType { heap_ty, .. })),
                 ..
@@ -323,7 +327,7 @@ fn substitute_def_type(
             *name = None;
             Ok(())
         }),
-        DefTypeKind::Array(field) => {
+        CompositeType::Array(field) => {
             if let Some(FieldType {
                 storage: StorageType::Val(ValType::Ref(RefType { heap_ty, .. })),
                 ..

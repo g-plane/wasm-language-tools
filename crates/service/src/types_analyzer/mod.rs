@@ -5,7 +5,7 @@ use self::{
     signature::{get_func_sig, get_type_use_sig, Signature},
 };
 pub(crate) use self::{
-    def_type::{DefType, DefTypeKind},
+    def_type::{CompositeType, DefType},
     resolver::{resolve_br_types, resolve_param_types},
     signature::{get_block_sig, ResolvedSig},
     types::{HeapType, OperandType, RefType, ValType},

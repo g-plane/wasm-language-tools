@@ -4,7 +4,7 @@ use crate::{
     data_set, helpers,
     idx::{IdentsCtx, Idx},
     syntax_tree::SyntaxTreeCtx,
-    types_analyzer::{self, DefType, DefTypeKind, TypesAnalyzerCtx},
+    types_analyzer::{self, CompositeType, DefType, TypesAnalyzerCtx},
     uri::{InternUri, UrisCtx},
     LanguageService,
 };
@@ -301,11 +301,11 @@ fn create_type_def_hover(
         content.push(' ');
         content.push_str(&service.lookup_ident(*name));
     }
-    if let Some(DefType { kind, .. }) = def_types.iter().find(|def_type| def_type.key == symbol.key)
+    if let Some(DefType { comp, .. }) = def_types.iter().find(|def_type| def_type.key == symbol.key)
     {
         content.push(' ');
-        match kind {
-            DefTypeKind::Func(sig) => {
+        match comp {
+            CompositeType::Func(sig) => {
                 content.push_str("(func");
                 if !sig.params.is_empty() || !sig.results.is_empty() {
                     content.push(' ');
@@ -313,7 +313,7 @@ fn create_type_def_hover(
                 }
                 content.push(')');
             }
-            DefTypeKind::Struct(fields) => {
+            CompositeType::Struct(fields) => {
                 content.push_str("(struct");
                 if !fields.0.is_empty() {
                     content.push(' ');
@@ -321,7 +321,7 @@ fn create_type_def_hover(
                 }
                 content.push(')');
             }
-            DefTypeKind::Array(field_ty) => {
+            CompositeType::Array(field_ty) => {
                 content.push_str("(array");
                 if let Some(field_ty) = field_ty {
                     content.push(' ');

@@ -1,4 +1,4 @@
-use super::{def_type::DefTypeKind, TypesAnalyzerCtx};
+use super::{def_type::CompositeType, TypesAnalyzerCtx};
 use crate::{
     binder::SymbolKind,
     idx::{Idx, InternIdent},
@@ -334,16 +334,16 @@ impl HeapType {
                             && a.is_defined_by(&symbol.idx)
                     })
                     .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
-                    .is_some_and(|def_type| match (&def_type.kind, b) {
+                    .is_some_and(|def_type| match (&def_type.comp, b) {
                         (
-                            DefTypeKind::Struct(..),
+                            CompositeType::Struct(..),
                             HeapType::Any | HeapType::Eq | HeapType::Struct,
                         ) => true,
                         (
-                            DefTypeKind::Array(..),
+                            CompositeType::Array(..),
                             HeapType::Any | HeapType::Eq | HeapType::Array,
                         ) => true,
-                        (DefTypeKind::Func(..), HeapType::Func) => true,
+                        (CompositeType::Func(..), HeapType::Func) => true,
                         _ => false,
                     })
             }
