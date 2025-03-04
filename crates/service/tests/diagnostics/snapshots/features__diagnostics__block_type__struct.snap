@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/block_type.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 17
+        },
+        "end": {
+          "line": 4,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "block-type",
+      "source": "wat",
+      "message": "block type must be function type"
+    }
+  ]
+}
