@@ -1,0 +1,23 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..34
+  MODULE@0..33
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_FUNC@10..19
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "func"
+      WHITESPACE@15..16 " "
+      IDENT@16..18 "$'"
+      R_PAREN@18..19 ")"
+    WHITESPACE@19..22 "\n  "
+    MODULE_FIELD_FUNC@22..32
+      L_PAREN@22..23 "("
+      KEYWORD@23..27 "func"
+      WHITESPACE@27..28 " "
+      IDENT@28..31 "$f'"
+      R_PAREN@31..32 ")"
+    R_PAREN@32..33 ")"
+  WHITESPACE@33..34 "\n"

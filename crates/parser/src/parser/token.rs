@@ -158,10 +158,7 @@ fn ident_impl<'s>(input: &mut Input<'s>) -> Result<&'s str, SyntaxError> {
 pub fn is_id_char(c: char) -> bool {
     c.is_ascii_alphanumeric()
         || c.is_ascii_punctuation()
-            && !matches!(
-                c,
-                '\'' | '"' | ',' | ';' | '(' | ')' | '[' | ']' | '{' | '}'
-            )
+            && !matches!(c, '"' | ',' | ';' | '(' | ')' | '[' | ']' | '{' | '}')
 }
 
 pub(super) fn string(input: &mut Input) -> GreenResult {
