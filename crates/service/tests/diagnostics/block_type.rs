@@ -19,7 +19,7 @@ fn func() {
 }
 
 #[test]
-fn r#struct() {
+fn structs() {
     let uri = "untitled:test".to_string();
     let source = "
 (module

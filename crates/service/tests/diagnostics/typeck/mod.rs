@@ -8,7 +8,7 @@ mod block_loop;
 mod br;
 mod call_indirect;
 mod drop;
-mod r#return;
+mod returning;
 mod select;
 mod subtyping;
 
