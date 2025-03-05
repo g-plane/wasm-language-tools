@@ -396,6 +396,17 @@ impl HeapType {
 pub(crate) enum OperandType {
     Val(ValType),
     Any,
+    PackedI8,
+    PackedI16,
+}
+impl From<StorageType> for OperandType {
+    fn from(value: StorageType) -> Self {
+        match value {
+            StorageType::Val(ty) => OperandType::Val(ty),
+            StorageType::PackedI8 => OperandType::PackedI8,
+            StorageType::PackedI16 => OperandType::PackedI16,
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

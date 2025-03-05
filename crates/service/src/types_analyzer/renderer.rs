@@ -154,6 +154,8 @@ impl Display for OperandTypeRender<'_> {
         match self.ty {
             OperandType::Val(ty) => write!(f, "{}", ty.render(self.db)),
             OperandType::Any => write!(f, "any"),
+            OperandType::PackedI8 => write!(f, "i8"),
+            OperandType::PackedI16 => write!(f, "i16"),
         }
     }
 }
