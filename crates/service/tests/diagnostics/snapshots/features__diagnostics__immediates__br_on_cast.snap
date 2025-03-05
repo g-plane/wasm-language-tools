@@ -8,178 +8,194 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 3,
-          "character": 14
+          "line": 5,
+          "character": 6
         },
         "end": {
-          "line": 3,
+          "line": 5,
           "character": 16
         }
       },
       "severity": 1,
       "code": "immediates",
       "source": "wat",
-      "message": "expected identifier or unsigned integer"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 4,
-          "character": 19
-        },
-        "end": {
-          "line": 4,
-          "character": 22
-        }
-      },
-      "severity": 1,
-      "code": "immediates",
-      "source": "wat",
-      "message": "expected identifier or unsigned integer"
+      "message": "missing identifier or unsigned integer"
     },
     {
       "range": {
         "start": {
           "line": 5,
-          "character": 19
+          "character": 6
         },
         "end": {
           "line": 5,
-          "character": 22
+          "character": 16
         }
       },
       "severity": 1,
       "code": "immediates",
       "source": "wat",
-      "message": "expected identifier or unsigned integer"
+      "message": "missing ref type"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 6
+        },
+        "end": {
+          "line": 5,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "missing ref type"
     },
     {
       "range": {
         "start": {
           "line": 6,
-          "character": 20
+          "character": 22
         },
         "end": {
           "line": 6,
-          "character": 23
-        }
-      },
-      "severity": 1,
-      "code": "immediates",
-      "source": "wat",
-      "message": "expected identifier or unsigned integer"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 7,
-          "character": 20
-        },
-        "end": {
-          "line": 7,
-          "character": 22
-        }
-      },
-      "severity": 1,
-      "code": "immediates",
-      "source": "wat",
-      "message": "expected identifier or unsigned integer"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 8,
-          "character": 9
-        },
-        "end": {
-          "line": 8,
-          "character": 13
-        }
-      },
-      "severity": 1,
-      "code": "immediates",
-      "source": "wat",
-      "message": "missing identifier or unsigned integer"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 9,
-          "character": 9
-        },
-        "end": {
-          "line": 9,
-          "character": 18
-        }
-      },
-      "severity": 1,
-      "code": "immediates",
-      "source": "wat",
-      "message": "missing identifier or unsigned integer"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 10,
-          "character": 9
-        },
-        "end": {
-          "line": 10,
-          "character": 18
-        }
-      },
-      "severity": 1,
-      "code": "immediates",
-      "source": "wat",
-      "message": "missing identifier or unsigned integer"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 11,
-          "character": 15
-        },
-        "end": {
-          "line": 11,
           "character": 25
         }
       },
       "severity": 1,
       "code": "immediates",
       "source": "wat",
-      "message": "missing identifier or unsigned integer"
+      "message": "expected identifier or unsigned integer"
     },
     {
       "range": {
         "start": {
-          "line": 12,
-          "character": 15
+          "line": 6,
+          "character": 6
         },
         "end": {
-          "line": 12,
-          "character": 24
+          "line": 6,
+          "character": 21
         }
       },
       "severity": 1,
       "code": "immediates",
       "source": "wat",
-      "message": "missing identifier or unsigned integer"
+      "message": "missing ref type"
     },
     {
       "range": {
         "start": {
-          "line": 13,
-          "character": 15
+          "line": 6,
+          "character": 6
         },
         "end": {
-          "line": 13,
-          "character": 24
+          "line": 6,
+          "character": 21
         }
       },
       "severity": 1,
       "code": "immediates",
       "source": "wat",
-      "message": "missing identifier or unsigned integer"
+      "message": "missing ref type"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 6
+        },
+        "end": {
+          "line": 7,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "missing ref type"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 6
+        },
+        "end": {
+          "line": 7,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "missing ref type"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 24
+        },
+        "end": {
+          "line": 8,
+          "character": 26
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "expected ref type"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 6
+        },
+        "end": {
+          "line": 8,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "missing ref type"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 6
+        },
+        "end": {
+          "line": 9,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "missing ref type"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 33
+        },
+        "end": {
+          "line": 10,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "expected ref type"
     }
   ]
 }

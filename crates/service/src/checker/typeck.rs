@@ -535,6 +535,22 @@ fn resolve_sig(
             sig.params.push(OperandType::Val(ValType::I32));
             sig
         }
+        "struct.new" => ResolvedSig {
+            params: vec![],
+            results: vec![OperandType::Any],
+        },
+        "struct.get" => ResolvedSig {
+            params: vec![],
+            results: vec![OperandType::Any],
+        },
+        "array.new" => ResolvedSig {
+            params: vec![],
+            results: vec![OperandType::Any],
+        },
+        "array.get" => ResolvedSig {
+            params: vec![],
+            results: vec![OperandType::Any],
+        },
         _ => data_set::INSTR_SIG
             .get(instr_name)
             .cloned()

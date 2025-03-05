@@ -21,7 +21,10 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
     match instr_name.text() {
         "call" | "local.get" | "local.set" | "local.tee" | "global.get" | "global.set"
         | "table.get" | "table.set" | "ref.func" | "data.drop" | "elem.drop" | "table.grow"
-        | "table.size" | "table.fill" | "br" | "br_if" => {
+        | "table.size" | "table.fill" | "br" | "br_if" | "struct.new" | "struct.new_default"
+        | "array.new" | "array.new_default" | "array.get" | "array.get_u" | "array.get_s"
+        | "array.set" | "array.fill" | "br_on_null" | "br_on_non_null" | "call_ref"
+        | "return_call" | "return_call_ref" => {
             check_immediate::<true>(
                 diags,
                 &mut immediates,
@@ -116,7 +119,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
             );
             return;
         }
-        "call_indirect" => {
+        "call_indirect" | "return_call_indirect" => {
             check_immediate::<false>(
                 diags,
                 &mut immediates,
@@ -134,7 +137,9 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 line_index,
             );
         }
-        "table.init" | "table.copy" => {
+        "table.init" | "table.copy" | "struct.get" | "struct.get_u" | "struct.get_s"
+        | "struct.set" | "array.new_data" | "array.new_elem" | "array.copy" | "array.init_data"
+        | "array.init_elem" => {
             check_immediate::<true>(
                 diags,
                 &mut immediates,
@@ -280,6 +285,60 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 &mut immediates,
                 SyntaxKind::HEAP_TYPE,
                 "heap type",
+                &instr_name,
+                line_index,
+            );
+        }
+        "ref.test" | "ref.cast" => {
+            check_immediate::<true>(
+                diags,
+                &mut immediates,
+                SyntaxKind::REF_TYPE,
+                "ref type",
+                &instr_name,
+                line_index,
+            );
+        }
+        "array.new_fixed" => {
+            check_immediate::<true>(
+                diags,
+                &mut immediates,
+                INDEX,
+                "identifier or unsigned integer",
+                &instr_name,
+                line_index,
+            );
+            check_immediate::<true>(
+                diags,
+                &mut immediates,
+                SyntaxKind::INT,
+                "unsigned integer",
+                &instr_name,
+                line_index,
+            );
+        }
+        "br_on_cast" | "br_on_cast_fail" => {
+            check_immediate::<true>(
+                diags,
+                &mut immediates,
+                INDEX,
+                "identifier or unsigned integer",
+                &instr_name,
+                line_index,
+            );
+            check_immediate::<true>(
+                diags,
+                &mut immediates,
+                SyntaxKind::REF_TYPE,
+                "ref type",
+                &instr_name,
+                line_index,
+            );
+            check_immediate::<true>(
+                diags,
+                &mut immediates,
+                SyntaxKind::REF_TYPE,
+                "ref type",
                 &instr_name,
                 line_index,
             );

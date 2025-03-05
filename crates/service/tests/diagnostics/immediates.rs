@@ -16,6 +16,9 @@ fn index() {
         (call)
         (local.get) (drop)
         (local.set (i32.const 0))
+        (drop (struct.new))
+        (drop (array.new))
+        (drop (array.get))
     )
 )
 ";
@@ -76,8 +79,12 @@ fn indexes() {
     (func
         (table.copy 1.0 1.0 (i32.const 1) (i32.const 1) (i32.const 1))
         (table.init $a \"\" (i32.const 1) (i32.const 1) (i32.const 1))
+        (drop (struct.get))
+        (drop (struct.get 0))
+        (array.copy)
     )
     (table $a 0 funcref)
+    (type (struct))
 )
 ";
     let mut service = LanguageService::default();
@@ -488,6 +495,69 @@ fn memory_init() {
     i32.const 0
     i32.const 0
     memory.init 0.0 0.0))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn ref_type() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (type (struct))
+  (func
+    ref.test anyref
+    ref.cast (ref 0)
+    ref.test (ref any)
+    ref.cast (ref null any)
+    ref.test 0))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn array_new_fixed() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (type $a (array i32))
+  (func
+    array.new_fixed
+    array.new_fixed 0
+    array.new_fixed 0 0
+    array.new_fixed $a $a))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn br_on_cast() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (type $a (array i32))
+  (func
+    block
+      br_on_cast
+      br_on_cast_fail 0.0
+      br_on_cast 0
+      br_on_cast_fail 0 $a
+      br_on_cast 0 (ref $a)
+      br_on_cast_fail 0 (ref $a) $a
+      br_on_cast_fail 0 (ref $a) anyref
+    end))
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
