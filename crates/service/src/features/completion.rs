@@ -80,15 +80,17 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                     );
                 }
             }
-            if matches!(
-                next_node,
-                Some(
-                    SyntaxKind::PLAIN_INSTR
-                        | SyntaxKind::BLOCK_BLOCK
-                        | SyntaxKind::BLOCK_IF
-                        | SyntaxKind::BLOCK_LOOP
-                ) | None
-            ) {
+            if !token.text().starts_with('$')
+                && matches!(
+                    next_node,
+                    Some(
+                        SyntaxKind::PLAIN_INSTR
+                            | SyntaxKind::BLOCK_BLOCK
+                            | SyntaxKind::BLOCK_IF
+                            | SyntaxKind::BLOCK_LOOP
+                    ) | None
+                )
+            {
                 ctx.push(CmpCtx::Instr);
             }
         }
