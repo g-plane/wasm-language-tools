@@ -1,5 +1,6 @@
 use lspt::{CompletionParams, Position, TextDocumentIdentifier};
 
+mod array;
 mod block;
 mod data;
 mod elem;
@@ -14,6 +15,7 @@ mod mem_arg;
 mod memory;
 mod param;
 mod result;
+mod structs;
 mod table;
 mod ty_decl;
 

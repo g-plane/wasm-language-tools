@@ -1,0 +1,60 @@
+---
+source: crates/service/tests/completion/array.rs
+expression: response
+---
+[
+  {
+    "label": "$a",
+    "kind": 8,
+    "sortText": "1",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 14
+        },
+        "end": {
+          "line": 6,
+          "character": 16
+        }
+      },
+      "newText": "$a"
+    }
+  },
+  {
+    "label": "1",
+    "kind": 8,
+    "sortText": "0",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 14
+        },
+        "end": {
+          "line": 6,
+          "character": 16
+        }
+      },
+      "newText": "1"
+    }
+  },
+  {
+    "label": "$b",
+    "kind": 8,
+    "sortText": "0",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 14
+        },
+        "end": {
+          "line": 6,
+          "character": 16
+        }
+      },
+      "newText": "$b"
+    }
+  }
+]

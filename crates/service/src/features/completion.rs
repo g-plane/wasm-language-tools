@@ -445,6 +445,11 @@ fn add_cmp_ctx_for_immediates(
             _ => {}
         }
     } else {
+        let is_current_first_immediate = node.kind() == SyntaxKind::IMMEDIATE
+            && node
+                .prev_sibling()
+                .is_none_or(|prev| prev.kind() != SyntaxKind::IMMEDIATE)
+            || PlainInstr::cast(node.clone()).is_some_and(|instr| instr.immediates().count() == 0);
         match instr_name.split_once('.') {
             Some(("local", _)) => ctx.push(CmpCtx::Local),
             Some(("global", _)) => ctx.push(CmpCtx::Global),
@@ -463,27 +468,25 @@ fn add_cmp_ctx_for_immediates(
             }
             Some(("memory", "size" | "grow" | "fill" | "copy")) => ctx.push(CmpCtx::Memory),
             Some(("memory", "init")) => {
-                if node.kind() == SyntaxKind::IMMEDIATE
-                    && node
-                        .prev_sibling()
-                        .is_none_or(|prev| prev.kind() != SyntaxKind::IMMEDIATE)
-                    || PlainInstr::cast(node.clone())
-                        .is_some_and(|instr| instr.immediates().count() == 0)
-                {
+                if is_current_first_immediate {
                     ctx.push(CmpCtx::Memory);
                 }
             }
             Some((_, snd)) if snd.starts_with("load") || snd.starts_with("store") => {
-                if node.kind() == SyntaxKind::IMMEDIATE
-                    && node
-                        .prev_sibling()
-                        .is_none_or(|prev| prev.kind() != SyntaxKind::IMMEDIATE)
-                    || PlainInstr::cast(node.clone())
-                        .is_some_and(|instr| instr.immediates().count() == 0)
-                {
+                if is_current_first_immediate {
                     ctx.push(CmpCtx::Memory);
                 }
                 ctx.push(CmpCtx::MemArg);
+            }
+            Some(("struct", _)) => {
+                if is_current_first_immediate {
+                    ctx.push(CmpCtx::TypeDef(Some(PreferredType::Struct)));
+                }
+            }
+            Some(("array", snd)) if snd != "len" => {
+                if is_current_first_immediate {
+                    ctx.push(CmpCtx::TypeDef(Some(PreferredType::Array)));
+                }
             }
             None => match instr_name {
                 "call" | "return_call" => ctx.push(CmpCtx::Func),
@@ -533,7 +536,6 @@ enum CmpCtx {
     KeywordRef,
     KeywordNull,
 }
-#[expect(dead_code)]
 enum PreferredType {
     Func,
     Array,
