@@ -324,7 +324,10 @@ impl HeapType {
                                 })
                     })
             }
-            (HeapType::Type(a), b) => {
+            (HeapType::Type(mut a), b) => {
+                if a.is_def() {
+                    a.name = None;
+                }
                 let symbol_table = db.symbol_table(uri);
                 let Some(module) = symbol_table.find_module(module_id) else {
                     return false;
