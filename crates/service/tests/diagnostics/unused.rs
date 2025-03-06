@@ -169,6 +169,36 @@ fn type_used() {
 }
 
 #[test]
+fn struct_used() {
+    let uri = "untitled:test".to_string();
+    let source = r"
+(module
+  (type $s (struct))
+  (func $_
+    (drop (struct.new 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn array_used() {
+    let uri = "untitled:test".to_string();
+    let source = r"
+(module
+  (type $a (array i32))
+  (func $_
+    (drop (array.new 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
 fn type_used_in_subtyping() {
     let uri = "untitled:test".to_string();
     let source = r#"
