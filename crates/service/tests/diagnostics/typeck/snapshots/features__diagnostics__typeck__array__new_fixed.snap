@@ -1,0 +1,41 @@
+---
+source: crates/service/tests/diagnostics/typeck/array.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 20
+        },
+        "end": {
+          "line": 6,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref $vec)], found [f32, (ref $vec)] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 12,
+          "character": 4
+        },
+        "end": {
+          "line": 14,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [f32, f32, f32], found [f32, f32]"
+    }
+  ]
+}

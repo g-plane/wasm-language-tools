@@ -17,7 +17,7 @@ fn index() {
         (local.get) (drop)
         (local.set (i32.const 0))
         (drop (struct.new))
-        (drop (array.new))
+        (drop (array.new (i32.const 0)))
         (drop (array.get))
     )
 )
@@ -533,7 +533,8 @@ fn array_new_fixed() {
     array.new_fixed
     array.new_fixed 0
     array.new_fixed 0 0
-    array.new_fixed $a $a))
+    array.new_fixed $a $a
+    unreachable))
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

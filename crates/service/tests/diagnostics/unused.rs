@@ -190,7 +190,9 @@ fn array_used() {
 (module
   (type $a (array i32))
   (func $_
-    (drop (array.new 0))))
+    (drop
+      (array.new_default 0
+        (i32.const 1)))))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

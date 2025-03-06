@@ -2,8 +2,8 @@ use crate::{
     binder::{SymbolKey, SymbolTable},
     data_set, helpers,
     types_analyzer::{
-        get_block_sig, resolve_br_types, CompositeType, HeapType, OperandType, RefType,
-        ResolvedSig, TypesAnalyzerCtx, ValType,
+        get_block_sig, resolve_array_type_with_idx, resolve_br_types, CompositeType, HeapType,
+        OperandType, RefType, ResolvedSig, TypesAnalyzerCtx, ValType,
     },
     uri::{InternUri, UrisCtx},
     LanguageService,
@@ -581,10 +581,70 @@ fn resolve_sig(
             params: vec![],
             results: vec![OperandType::Any],
         },
-        "array.new" => ResolvedSig {
-            params: vec![],
-            results: vec![OperandType::Any],
-        },
+        "array.new" => {
+            let mut sig = instr
+                .immediates()
+                .next()
+                .and_then(|immediate| {
+                    let def_types = shared.service.def_types(shared.uri);
+                    resolve_array_type_with_idx(shared.symbol_table, &def_types, &immediate)
+                })
+                .map(|(idx, ty)| ResolvedSig {
+                    params: vec![ty.unwrap_or(OperandType::Any)],
+                    results: vec![OperandType::Val(ValType::Ref(RefType {
+                        heap_ty: HeapType::Type(idx),
+                        nullable: false,
+                    }))],
+                })
+                .unwrap_or_else(|| ResolvedSig {
+                    params: vec![],
+                    results: vec![OperandType::Any],
+                });
+            sig.params.push(OperandType::Val(ValType::I32));
+            sig
+        }
+        "array.new_default" => instr
+            .immediates()
+            .next()
+            .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+            .map(|symbol| ResolvedSig {
+                params: vec![OperandType::Val(ValType::I32)],
+                results: vec![OperandType::Val(ValType::Ref(RefType {
+                    heap_ty: HeapType::Type(symbol.idx),
+                    nullable: false,
+                }))],
+            })
+            .unwrap_or_else(|| ResolvedSig {
+                params: vec![],
+                results: vec![OperandType::Any],
+            }),
+        "array.new_fixed" => {
+            let mut immediates = instr.immediates();
+            immediates
+                .next()
+                .and_then(|immediate| {
+                    let def_types = shared.service.def_types(shared.uri);
+                    resolve_array_type_with_idx(shared.symbol_table, &def_types, &immediate)
+                })
+                .map(|(idx, ty)| {
+                    let count = immediates
+                        .next()
+                        .and_then(|immediate| immediate.int())
+                        .and_then(|int| int.text().parse().ok())
+                        .unwrap_or_default();
+                    ResolvedSig {
+                        params: vec![ty.unwrap_or(OperandType::Any); count],
+                        results: vec![OperandType::Val(ValType::Ref(RefType {
+                            heap_ty: HeapType::Type(idx),
+                            nullable: false,
+                        }))],
+                    }
+                })
+                .unwrap_or_else(|| ResolvedSig {
+                    params: vec![],
+                    results: vec![OperandType::Any],
+                })
+        }
         "array.get" => ResolvedSig {
             params: vec![],
             results: vec![OperandType::Any],

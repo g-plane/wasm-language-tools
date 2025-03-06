@@ -1,7 +1,13 @@
-use super::{signature::get_block_sig, types::OperandType, TypesAnalyzerCtx};
+use super::{
+    def_type::{CompositeType, DefType},
+    signature::get_block_sig,
+    types::OperandType,
+    TypesAnalyzerCtx,
+};
 use crate::{
     binder::{SymbolKey, SymbolTable, SymbolTablesCtx},
     data_set::INSTR_SIG,
+    idx::Idx,
     syntax_tree::SyntaxTreeCtx,
     uri::InternUri,
     LanguageService,
@@ -58,4 +64,24 @@ pub(crate) fn resolve_br_types(
         })
         .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
         .unwrap_or_default()
+}
+
+pub(crate) fn resolve_array_type_with_idx(
+    symbol_table: &SymbolTable,
+    def_types: &[DefType],
+    immediate: &Immediate,
+) -> Option<(Idx, Option<OperandType>)> {
+    symbol_table
+        .find_def(SymbolKey::new(immediate.syntax()))
+        .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
+        .map(|def_type| {
+            if let CompositeType::Array(field) = &def_type.comp {
+                (
+                    def_type.idx,
+                    field.as_ref().map(|field| field.storage.clone().into()),
+                )
+            } else {
+                (def_type.idx, None)
+            }
+        })
 }
