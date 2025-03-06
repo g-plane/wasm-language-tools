@@ -9,10 +9,15 @@ mod mem;
 mod table;
 mod ty;
 
-fn create_params(uri: String, position: Position, include_declaration: bool) -> ReferenceParams {
+fn create_params(
+    uri: String,
+    line: u32,
+    character: u32,
+    include_declaration: bool,
+) -> ReferenceParams {
     ReferenceParams {
         text_document: TextDocumentIdentifier { uri },
-        position,
+        position: Position { line, character },
         work_done_token: Default::default(),
         partial_result_token: Default::default(),
         context: ReferenceContext {
@@ -35,63 +40,21 @@ fn ignored_tokens() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     assert!(service
-        .find_references(create_params(
-            uri.clone(),
-            Position {
-                line: 1,
-                character: 4
-            },
-            true
-        ))
+        .find_references(create_params(uri.clone(), 1, 4, true))
         .is_none());
     assert!(service
-        .find_references(create_params(
-            uri.clone(),
-            Position {
-                line: 2,
-                character: 29
-            },
-            true
-        ))
+        .find_references(create_params(uri.clone(), 2, 29, true))
         .is_none());
     assert!(service
-        .find_references(create_params(
-            uri.clone(),
-            Position {
-                line: 3,
-                character: 7
-            },
-            true
-        ))
+        .find_references(create_params(uri.clone(), 3, 7, true))
         .is_none());
     assert!(service
-        .find_references(create_params(
-            uri.clone(),
-            Position {
-                line: 3,
-                character: 25
-            },
-            true
-        ))
+        .find_references(create_params(uri.clone(), 3, 25, true))
         .is_none());
     assert!(service
-        .find_references(create_params(
-            uri.clone(),
-            Position {
-                line: 4,
-                character: 14
-            },
-            true
-        ))
+        .find_references(create_params(uri.clone(), 4, 14, true))
         .is_none());
     assert!(service
-        .find_references(create_params(
-            uri.clone(),
-            Position {
-                line: 4,
-                character: 23
-            },
-            true
-        ))
+        .find_references(create_params(uri.clone(), 4, 23, true))
         .is_none());
 }

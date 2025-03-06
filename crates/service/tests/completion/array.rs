@@ -1,6 +1,5 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lspt::Position;
 use wat_service::LanguageService;
 
 #[test]
@@ -16,13 +15,7 @@ fn array() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 6,
-            character: 14,
-        },
-    ));
+    let response = service.completion(create_params(uri, 6, 14));
     assert_json_snapshot!(response);
 }
 
@@ -39,13 +32,7 @@ fn array_following_int_idx() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 6,
-            character: 15,
-        },
-    ));
+    let response = service.completion(create_params(uri, 6, 15));
     assert_json_snapshot!(response);
 }
 
@@ -62,13 +49,7 @@ fn array_following_dollar() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 6,
-            character: 15,
-        },
-    ));
+    let response = service.completion(create_params(uri, 6, 15));
     assert_json_snapshot!(response);
 }
 
@@ -85,12 +66,6 @@ fn array_following_ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 6,
-            character: 16,
-        },
-    ));
+    let response = service.completion(create_params(uri, 6, 16));
     assert_json_snapshot!(response);
 }

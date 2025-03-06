@@ -1,6 +1,5 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lspt::Position;
 use wat_service::LanguageService;
 
 #[test]
@@ -9,13 +8,7 @@ fn module_keyword() {
     let source = "(";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 1,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 1));
     assert_json_snapshot!(response);
 }
 
@@ -25,13 +18,7 @@ fn module_keyword_incomplete() {
     let source = "(mo";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 3,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 3));
     assert_json_snapshot!(response);
 }
 
@@ -41,13 +28,7 @@ fn module_keyword_in_empty() {
     let source = " ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 1,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 1));
     assert_json_snapshot!(response);
 }
 
@@ -57,13 +38,7 @@ fn module_field_keyword() {
     let source = "(module ())";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 9,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 9));
     assert_json_snapshot!(response);
 }
 
@@ -73,13 +48,7 @@ fn module_field_keyword_incomplete() {
     let source = "(module (f)";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 10,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 10));
     assert_json_snapshot!(response);
 }
 
@@ -89,13 +58,7 @@ fn module_field_keyword_without_paren() {
     let source = "(module )";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 8,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 8));
     assert_json_snapshot!(response);
 }
 
@@ -105,13 +68,7 @@ fn module_field_func_keyword() {
     let source = "(module (func ( (i32.const 0)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 15,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 15));
     assert_json_snapshot!(response);
 }
 
@@ -121,13 +78,7 @@ fn module_field_func_keyword_incomplete() {
     let source = "(module (func (l (i32.const 0)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 16,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 16));
     assert_json_snapshot!(response);
 }
 
@@ -137,13 +88,7 @@ fn module_field_func_keyword_after_other_syntax() {
     let source = "(module (func (param) ( (i32.const 0)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 23,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 23));
     assert_json_snapshot!(response);
 }
 
@@ -153,13 +98,7 @@ fn module_field_func_keyword_in_middle() {
     let source = "(module (func (param) ( (param) (i32.const 0)))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 23,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 23));
     assert_json_snapshot!(response);
 }
 
@@ -169,13 +108,7 @@ fn no_module_field_func_keyword_without_paren() {
     let source = "(module (func p))"; // shouldn't provide "param"
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 15,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 15));
     assert_json_snapshot!(response);
 }
 
@@ -185,13 +118,7 @@ fn export_desc_keyword() {
     let source = "(module (export \"\" ())";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 20,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 20));
     assert_json_snapshot!(response);
 }
 
@@ -201,13 +128,7 @@ fn export_desc_keyword_incomplete() {
     let source = "(module (export \"\" (f))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 21,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 21));
     assert_json_snapshot!(response);
 }
 
@@ -217,13 +138,7 @@ fn export_desc_keyword_without_paren() {
     let source = "(module (export \"\" ))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 19,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 19));
     assert!(response.is_none());
 }
 
@@ -233,13 +148,7 @@ fn module_field_memory_keyword() {
     let source = "(module (memory ( ))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 17,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 17));
     assert_json_snapshot!(response);
 }
 
@@ -249,13 +158,7 @@ fn module_field_memory_keyword_without_paren() {
     let source = "(module (memory ))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 16,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 16));
     assert!(response.is_none());
 }
 
@@ -265,13 +168,7 @@ fn block_type_result_keyword_after_paren() {
     let source = "(module (func (block ())))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 22,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 22));
     assert_json_snapshot!(response);
 }
 
@@ -281,12 +178,6 @@ fn block_type_result_keyword_incomplete() {
     let source = "(module (func (block (r))))";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 0,
-            character: 23,
-        },
-    ));
+    let response = service.completion(create_params(uri, 0, 23));
     assert_json_snapshot!(response);
 }

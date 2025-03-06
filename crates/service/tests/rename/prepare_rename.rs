@@ -2,10 +2,10 @@ use insta::assert_json_snapshot;
 use lspt::{Position, PrepareRenameParams, TextDocumentIdentifier};
 use wat_service::LanguageService;
 
-fn create_params(uri: String, position: Position) -> PrepareRenameParams {
+fn create_params(uri: String, line: u32, character: u32) -> PrepareRenameParams {
     PrepareRenameParams {
         text_document: TextDocumentIdentifier { uri },
-        position,
+        position: Position { line, character },
         work_done_token: Default::default(),
     }
 }
@@ -24,58 +24,22 @@ fn ignored_tokens() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     assert!(service
-        .prepare_rename(create_params(
-            uri.clone(),
-            Position {
-                line: 1,
-                character: 4
-            }
-        ))
+        .prepare_rename(create_params(uri.clone(), 1, 4))
         .is_none());
     assert!(service
-        .prepare_rename(create_params(
-            uri.clone(),
-            Position {
-                line: 2,
-                character: 29
-            }
-        ))
+        .prepare_rename(create_params(uri.clone(), 2, 29))
         .is_none());
     assert!(service
-        .prepare_rename(create_params(
-            uri.clone(),
-            Position {
-                line: 3,
-                character: 7
-            }
-        ))
+        .prepare_rename(create_params(uri.clone(), 3, 7))
         .is_none());
     assert!(service
-        .prepare_rename(create_params(
-            uri.clone(),
-            Position {
-                line: 3,
-                character: 18
-            }
-        ))
+        .prepare_rename(create_params(uri.clone(), 3, 18))
         .is_none());
     assert!(service
-        .prepare_rename(create_params(
-            uri.clone(),
-            Position {
-                line: 4,
-                character: 15
-            }
-        ))
+        .prepare_rename(create_params(uri.clone(), 4, 15))
         .is_none());
     assert!(service
-        .prepare_rename(create_params(
-            uri.clone(),
-            Position {
-                line: 4,
-                character: 23
-            }
-        ))
+        .prepare_rename(create_params(uri.clone(), 4, 23))
         .is_none());
 }
 
@@ -90,12 +54,6 @@ fn ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.prepare_rename(create_params(
-        uri,
-        Position {
-            line: 2,
-            character: 14,
-        },
-    ));
+    let response = service.prepare_rename(create_params(uri, 2, 14));
     assert_json_snapshot!(response);
 }

@@ -1,6 +1,5 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lspt::{Position, Range};
 use wat_service::LanguageService;
 
 #[test]
@@ -13,19 +12,7 @@ fn not_br_if() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.code_action(create_params(
-        uri,
-        Range {
-            start: Position {
-                line: 3,
-                character: 9,
-            },
-            end: Position {
-                line: 3,
-                character: 9,
-            },
-        },
-    ));
+    let response = service.code_action(create_params(uri, 3, 9, 3, 9));
     assert!(response.is_none());
 }
 
@@ -39,19 +26,7 @@ fn sequence_without_condition() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.code_action(create_params(
-        uri,
-        Range {
-            start: Position {
-                line: 3,
-                character: 9,
-            },
-            end: Position {
-                line: 3,
-                character: 9,
-            },
-        },
-    ));
+    let response = service.code_action(create_params(uri, 3, 9, 3, 9));
     assert_json_snapshot!(response);
 }
 
@@ -66,19 +41,7 @@ fn sequence_with_condition() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.code_action(create_params(
-        uri,
-        Range {
-            start: Position {
-                line: 4,
-                character: 9,
-            },
-            end: Position {
-                line: 4,
-                character: 9,
-            },
-        },
-    ));
+    let response = service.code_action(create_params(uri, 4, 9, 4, 9));
     assert_json_snapshot!(response);
 }
 
@@ -92,19 +55,7 @@ fn folded_without_condition() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.code_action(create_params(
-        uri,
-        Range {
-            start: Position {
-                line: 3,
-                character: 9,
-            },
-            end: Position {
-                line: 3,
-                character: 9,
-            },
-        },
-    ));
+    let response = service.code_action(create_params(uri, 3, 9, 3, 9));
     assert_json_snapshot!(response);
 }
 
@@ -118,19 +69,7 @@ fn folded_with_single_condition() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.code_action(create_params(
-        uri,
-        Range {
-            start: Position {
-                line: 3,
-                character: 9,
-            },
-            end: Position {
-                line: 3,
-                character: 9,
-            },
-        },
-    ));
+    let response = service.code_action(create_params(uri, 3, 9, 3, 9));
     assert_json_snapshot!(response);
 }
 
@@ -144,18 +83,6 @@ fn folded_with_multi_conditions() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.code_action(create_params(
-        uri,
-        Range {
-            start: Position {
-                line: 3,
-                character: 9,
-            },
-            end: Position {
-                line: 3,
-                character: 9,
-            },
-        },
-    ));
+    let response = service.code_action(create_params(uri, 3, 9, 3, 9));
     assert_json_snapshot!(response);
 }

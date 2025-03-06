@@ -2,10 +2,10 @@ use insta::assert_json_snapshot;
 use lspt::{Position, TextDocumentIdentifier, TypeDefinitionParams};
 use wat_service::LanguageService;
 
-fn create_params(uri: String, position: Position) -> TypeDefinitionParams {
+fn create_params(uri: String, line: u32, character: u32) -> TypeDefinitionParams {
     TypeDefinitionParams {
         text_document: TextDocumentIdentifier { uri },
-        position,
+        position: Position { line, character },
         work_done_token: Default::default(),
         partial_result_token: Default::default(),
     }
@@ -25,58 +25,22 @@ fn ignored_tokens() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     assert!(service
-        .goto_type_definition(create_params(
-            uri.clone(),
-            Position {
-                line: 1,
-                character: 4
-            }
-        ))
+        .goto_type_definition(create_params(uri.clone(), 1, 4))
         .is_none());
     assert!(service
-        .goto_type_definition(create_params(
-            uri.clone(),
-            Position {
-                line: 2,
-                character: 29
-            }
-        ))
+        .goto_type_definition(create_params(uri.clone(), 2, 29))
         .is_none());
     assert!(service
-        .goto_type_definition(create_params(
-            uri.clone(),
-            Position {
-                line: 3,
-                character: 7
-            }
-        ))
+        .goto_type_definition(create_params(uri.clone(), 3, 7))
         .is_none());
     assert!(service
-        .goto_type_definition(create_params(
-            uri.clone(),
-            Position {
-                line: 3,
-                character: 25
-            }
-        ))
+        .goto_type_definition(create_params(uri.clone(), 3, 25))
         .is_none());
     assert!(service
-        .goto_type_definition(create_params(
-            uri.clone(),
-            Position {
-                line: 4,
-                character: 14
-            }
-        ))
+        .goto_type_definition(create_params(uri.clone(), 4, 14))
         .is_none());
     assert!(service
-        .goto_type_definition(create_params(
-            uri.clone(),
-            Position {
-                line: 4,
-                character: 23
-            }
-        ))
+        .goto_type_definition(create_params(uri.clone(), 4, 23))
         .is_none());
 }
 
@@ -93,13 +57,7 @@ fn func_not_defined() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     assert!(service
-        .goto_type_definition(create_params(
-            uri.clone(),
-            Position {
-                line: 3,
-                character: 15
-            }
-        ))
+        .goto_type_definition(create_params(uri.clone(), 3, 15))
         .is_none());
 }
 
@@ -116,13 +74,7 @@ fn type_use_not_defined() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     assert!(service
-        .goto_type_definition(create_params(
-            uri.clone(),
-            Position {
-                line: 3,
-                character: 15
-            }
-        ))
+        .goto_type_definition(create_params(uri.clone(), 3, 15))
         .is_none());
 }
 
@@ -139,13 +91,7 @@ fn func_int_idx_type_use_int_idx() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.goto_type_definition(create_params(
-        uri,
-        Position {
-            line: 4,
-            character: 15,
-        },
-    ));
+    let response = service.goto_type_definition(create_params(uri, 4, 15));
     assert_json_snapshot!(response);
 }
 
@@ -162,13 +108,7 @@ fn func_ident_idx_type_use_int_idx() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.goto_type_definition(create_params(
-        uri,
-        Position {
-            line: 4,
-            character: 18,
-        },
-    ));
+    let response = service.goto_type_definition(create_params(uri, 4, 18));
     assert_json_snapshot!(response);
 }
 
@@ -185,13 +125,7 @@ fn func_int_idx_type_use_ident_idx() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.goto_type_definition(create_params(
-        uri,
-        Position {
-            line: 4,
-            character: 15,
-        },
-    ));
+    let response = service.goto_type_definition(create_params(uri, 4, 15));
     assert_json_snapshot!(response);
 }
 
@@ -208,12 +142,6 @@ fn func_ident_idx_type_use_ident_idx() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.goto_type_definition(create_params(
-        uri,
-        Position {
-            line: 4,
-            character: 18,
-        },
-    ));
+    let response = service.goto_type_definition(create_params(uri, 4, 18));
     assert_json_snapshot!(response);
 }

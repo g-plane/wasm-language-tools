@@ -2,11 +2,11 @@ use insta::assert_json_snapshot;
 use lspt::{Position, SignatureHelpParams, TextDocumentIdentifier};
 use wat_service::LanguageService;
 
-fn create_params(uri: String, position: Position) -> SignatureHelpParams {
+fn create_params(uri: String, line: u32, character: u32) -> SignatureHelpParams {
     SignatureHelpParams {
         context: None,
         text_document: TextDocumentIdentifier { uri },
-        position,
+        position: Position { line, character },
         work_done_token: Default::default(),
     }
 }
@@ -21,13 +21,7 @@ fn first_param() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(
-        uri,
-        Position {
-            line: 3,
-            character: 17,
-        },
-    ));
+    let response = service.signature_help(create_params(uri, 3, 17));
     assert_json_snapshot!(response);
 }
 
@@ -41,13 +35,7 @@ fn first_param_end() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(
-        uri,
-        Position {
-            line: 3,
-            character: 29,
-        },
-    ));
+    let response = service.signature_help(create_params(uri, 3, 29));
     assert_json_snapshot!(response);
 }
 
@@ -61,13 +49,7 @@ fn first_param_before_others() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(
-        uri,
-        Position {
-            line: 3,
-            character: 17,
-        },
-    ));
+    let response = service.signature_help(create_params(uri, 3, 17));
     assert_json_snapshot!(response);
 }
 
@@ -81,13 +63,7 @@ fn non_first_param() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(
-        uri,
-        Position {
-            line: 3,
-            character: 31,
-        },
-    ));
+    let response = service.signature_help(create_params(uri, 3, 31));
     assert_json_snapshot!(response);
 }
 
@@ -101,13 +77,7 @@ fn middle() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(
-        uri,
-        Position {
-            line: 3,
-            character: 31,
-        },
-    ));
+    let response = service.signature_help(create_params(uri, 3, 31));
     assert_json_snapshot!(response);
 }
 
@@ -121,13 +91,7 @@ fn no_params_no_results() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(
-        uri,
-        Position {
-            line: 3,
-            character: 17,
-        },
-    ));
+    let response = service.signature_help(create_params(uri, 3, 17));
     assert_json_snapshot!(response);
 }
 
@@ -141,13 +105,7 @@ fn no_params() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(
-        uri,
-        Position {
-            line: 3,
-            character: 17,
-        },
-    ));
+    let response = service.signature_help(create_params(uri, 3, 17));
     assert_json_snapshot!(response);
 }
 
@@ -161,13 +119,7 @@ fn no_results() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(
-        uri,
-        Position {
-            line: 3,
-            character: 17,
-        },
-    ));
+    let response = service.signature_help(create_params(uri, 3, 17));
     assert_json_snapshot!(response);
 }
 
@@ -182,13 +134,7 @@ fn doc_comment() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(
-        uri,
-        Position {
-            line: 4,
-            character: 17,
-        },
-    ));
+    let response = service.signature_help(create_params(uri, 4, 17));
     assert_json_snapshot!(response);
 }
 
@@ -204,13 +150,7 @@ fn call_indirect_type_use() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(
-        uri,
-        Position {
-            line: 5,
-            character: 31,
-        },
-    ));
+    let response = service.signature_help(create_params(uri, 5, 31));
     assert_json_snapshot!(response);
 }
 
@@ -225,13 +165,7 @@ fn call_indirect_inline_func_type() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(
-        uri,
-        Position {
-            line: 4,
-            character: 47,
-        },
-    ));
+    let response = service.signature_help(create_params(uri, 4, 47));
     assert_json_snapshot!(response);
 }
 
@@ -245,13 +179,7 @@ fn return_call() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(
-        uri,
-        Position {
-            line: 3,
-            character: 24,
-        },
-    ));
+    let response = service.signature_help(create_params(uri, 3, 24));
     assert_json_snapshot!(response);
 }
 
@@ -267,12 +195,6 @@ fn return_call_indirect() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.signature_help(create_params(
-        uri,
-        Position {
-            line: 5,
-            character: 38,
-        },
-    ));
+    let response = service.signature_help(create_params(uri, 5, 38));
     assert_json_snapshot!(response);
 }

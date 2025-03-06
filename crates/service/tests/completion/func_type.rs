@@ -1,6 +1,5 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lspt::Position;
 use wat_service::LanguageService;
 
 #[test]
@@ -15,13 +14,7 @@ fn func_types() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 2,
-            character: 16,
-        },
-    ));
+    let response = service.completion(create_params(uri, 2, 16));
     assert_json_snapshot!(response);
 }
 
@@ -37,13 +30,7 @@ fn func_types_following_int_idx() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 2,
-            character: 17,
-        },
-    ));
+    let response = service.completion(create_params(uri, 2, 17));
     assert_json_snapshot!(response);
 }
 
@@ -59,13 +46,7 @@ fn func_types_following_dollar() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 2,
-            character: 17,
-        },
-    ));
+    let response = service.completion(create_params(uri, 2, 17));
     assert_json_snapshot!(response);
 }
 
@@ -81,13 +62,7 @@ fn func_types_following_ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 2,
-            character: 18,
-        },
-    ));
+    let response = service.completion(create_params(uri, 2, 18));
     assert_json_snapshot!(response);
 }
 
@@ -103,12 +78,6 @@ fn sorting() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(
-        uri,
-        Position {
-            line: 5,
-            character: 14,
-        },
-    ));
+    let response = service.completion(create_params(uri, 5, 14));
     assert_json_snapshot!(response);
 }

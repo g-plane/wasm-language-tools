@@ -4,10 +4,25 @@ use lspt::{
 };
 use wat_service::{LanguageService, ServiceConfig};
 
-fn create_params(uri: String, range: Range) -> DocumentRangeFormattingParams {
+fn create_params(
+    uri: String,
+    start_line: u32,
+    start_character: u32,
+    end_line: u32,
+    end_character: u32,
+) -> DocumentRangeFormattingParams {
     DocumentRangeFormattingParams {
         text_document: TextDocumentIdentifier { uri },
-        range,
+        range: Range {
+            start: Position {
+                line: start_line,
+                character: start_character,
+            },
+            end: Position {
+                line: end_line,
+                character: end_character,
+            },
+        },
         options: FormattingOptions {
             tab_size: 2,
             insert_spaces: true,
@@ -29,19 +44,7 @@ fn fully_covered_node() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.range_formatting(create_params(
-        uri,
-        Range {
-            start: Position {
-                line: 3,
-                character: 4,
-            },
-            end: Position {
-                line: 3,
-                character: 22,
-            },
-        },
-    ));
+    let response = service.range_formatting(create_params(uri, 3, 4, 3, 22));
     assert_json_snapshot!(response);
 }
 
@@ -66,19 +69,7 @@ fn overlap() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.range_formatting(create_params(
-        uri,
-        Range {
-            start: Position {
-                line: 4,
-                character: 8,
-            },
-            end: Position {
-                line: 5,
-                character: 23,
-            },
-        },
-    ));
+    let response = service.range_formatting(create_params(uri, 4, 8, 5, 23));
     assert_json_snapshot!(response);
 }
 
@@ -104,18 +95,6 @@ fn format_comments() {
             ..Default::default()
         },
     );
-    let response = service.range_formatting(create_params(
-        uri,
-        Range {
-            start: Position {
-                line: 3,
-                character: 4,
-            },
-            end: Position {
-                line: 3,
-                character: 13,
-            },
-        },
-    ));
+    let response = service.range_formatting(create_params(uri, 3, 4, 3, 13));
     assert_json_snapshot!(response);
 }

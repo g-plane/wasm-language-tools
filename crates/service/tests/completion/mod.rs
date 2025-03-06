@@ -19,10 +19,10 @@ mod structs;
 mod table;
 mod ty_decl;
 
-fn create_params(uri: String, position: Position) -> CompletionParams {
+fn create_params(uri: String, line: u32, character: u32) -> CompletionParams {
     CompletionParams {
         text_document: TextDocumentIdentifier { uri },
-        position,
+        position: Position { line, character },
         work_done_token: Default::default(),
         partial_result_token: Default::default(),
         context: Default::default(),

@@ -1,6 +1,5 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lspt::{Position, Range};
 use wat_service::LanguageService;
 
 #[test]
@@ -13,19 +12,7 @@ fn single() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.code_action(create_params(
-        uri,
-        Range {
-            start: Position {
-                line: 2,
-                character: 19,
-            },
-            end: Position {
-                line: 2,
-                character: 19,
-            },
-        },
-    ));
+    let response = service.code_action(create_params(uri, 2, 19, 2, 19));
     assert!(response.is_none());
 }
 
@@ -39,19 +26,7 @@ fn param() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.code_action(create_params(
-        uri,
-        Range {
-            start: Position {
-                line: 2,
-                character: 19,
-            },
-            end: Position {
-                line: 2,
-                character: 19,
-            },
-        },
-    ));
+    let response = service.code_action(create_params(uri, 2, 19, 2, 19));
     assert_json_snapshot!(response);
 }
 
@@ -65,19 +40,7 @@ fn result() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.code_action(create_params(
-        uri,
-        Range {
-            start: Position {
-                line: 2,
-                character: 20,
-            },
-            end: Position {
-                line: 2,
-                character: 20,
-            },
-        },
-    ));
+    let response = service.code_action(create_params(uri, 2, 20, 2, 20));
     assert_json_snapshot!(response);
 }
 
@@ -91,18 +54,6 @@ fn local() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.code_action(create_params(
-        uri,
-        Range {
-            start: Position {
-                line: 2,
-                character: 19,
-            },
-            end: Position {
-                line: 2,
-                character: 19,
-            },
-        },
-    ));
+    let response = service.code_action(create_params(uri, 2, 19, 2, 19));
     assert_json_snapshot!(response);
 }

@@ -2,7 +2,7 @@ use insta::assert_json_snapshot;
 use lspt::{InlayHintParams, Position, Range, TextDocumentIdentifier};
 use wat_service::LanguageService;
 
-fn create_params(uri: String, doc_end: Position) -> InlayHintParams {
+fn create_params(uri: String, line: u32, character: u32) -> InlayHintParams {
     InlayHintParams {
         work_done_token: Default::default(),
         text_document: TextDocumentIdentifier { uri },
@@ -11,7 +11,7 @@ fn create_params(uri: String, doc_end: Position) -> InlayHintParams {
                 line: 0,
                 character: 0,
             },
-            end: doc_end,
+            end: Position { line, character },
         },
     }
 }
@@ -28,13 +28,7 @@ fn param() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.inlay_hint(create_params(
-        uri,
-        Position {
-            line: 6,
-            character: 0,
-        },
-    ));
+    let response = service.inlay_hint(create_params(uri, 6, 0));
     assert_json_snapshot!(response);
 }
 
@@ -50,13 +44,7 @@ fn local() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.inlay_hint(create_params(
-        uri,
-        Position {
-            line: 6,
-            character: 0,
-        },
-    ));
+    let response = service.inlay_hint(create_params(uri, 6, 0));
     assert_json_snapshot!(response);
 }
 
@@ -71,13 +59,7 @@ fn global() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.inlay_hint(create_params(
-        uri,
-        Position {
-            line: 5,
-            character: 0,
-        },
-    ));
+    let response = service.inlay_hint(create_params(uri, 5, 0));
     assert_json_snapshot!(response);
 }
 
@@ -93,13 +75,7 @@ fn func_end() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.inlay_hint(create_params(
-        uri,
-        Position {
-            line: 6,
-            character: 0,
-        },
-    ));
+    let response = service.inlay_hint(create_params(uri, 6, 0));
     assert_json_snapshot!(response);
 }
 
@@ -113,13 +89,7 @@ fn block_end() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.inlay_hint(create_params(
-        uri,
-        Position {
-            line: 4,
-            character: 0,
-        },
-    ));
+    let response = service.inlay_hint(create_params(uri, 4, 0));
     assert_json_snapshot!(response);
 }
 
@@ -133,13 +103,7 @@ fn loop_end() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.inlay_hint(create_params(
-        uri,
-        Position {
-            line: 4,
-            character: 0,
-        },
-    ));
+    let response = service.inlay_hint(create_params(uri, 4, 0));
     assert_json_snapshot!(response);
 }
 
@@ -153,13 +117,7 @@ fn if_end() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.inlay_hint(create_params(
-        uri,
-        Position {
-            line: 4,
-            character: 0,
-        },
-    ));
+    let response = service.inlay_hint(create_params(uri, 4, 0));
     assert_json_snapshot!(response);
 }
 
@@ -175,12 +133,6 @@ fn ref_type() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.inlay_hint(create_params(
-        uri,
-        Position {
-            line: 6,
-            character: 0,
-        },
-    ));
+    let response = service.inlay_hint(create_params(uri, 6, 0));
     assert_json_snapshot!(response);
 }

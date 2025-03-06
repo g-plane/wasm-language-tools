@@ -31,19 +31,7 @@ fn no_mut() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.code_action(super::create_params(
-        uri,
-        Range {
-            start: Position {
-                line: 2,
-                character: 15,
-            },
-            end: Position {
-                line: 2,
-                character: 15,
-            },
-        },
-    ));
+    let response = service.code_action(super::create_params(uri, 2, 15, 2, 15));
     assert!(response.is_none());
 }
 
@@ -56,19 +44,7 @@ fn no_diagnostics() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.code_action(super::create_params(
-        uri,
-        Range {
-            start: Position {
-                line: 2,
-                character: 15,
-            },
-            end: Position {
-                line: 2,
-                character: 15,
-            },
-        },
-    ));
+    let response = service.code_action(super::create_params(uri, 2, 15, 2, 15));
     assert!(response.is_none());
 }
 
