@@ -2,7 +2,8 @@ use crate::{
     binder::{SymbolKey, SymbolTable},
     data_set, helpers,
     types_analyzer::{
-        get_block_sig, resolve_br_types, OperandType, ResolvedSig, TypesAnalyzerCtx, ValType,
+        get_block_sig, resolve_br_types, CompositeType, HeapType, OperandType, RefType,
+        ResolvedSig, TypesAnalyzerCtx, ValType,
     },
     uri::{InternUri, UrisCtx},
     LanguageService,
@@ -535,10 +536,47 @@ fn resolve_sig(
             sig.params.push(OperandType::Val(ValType::I32));
             sig
         }
-        "struct.new" => ResolvedSig {
-            params: vec![],
-            results: vec![OperandType::Any],
-        },
+        "struct.new" => {
+            let def_types = shared.service.def_types(shared.uri);
+            instr
+                .immediates()
+                .next()
+                .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+                .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
+                .map(|def_type| {
+                    let params = if let CompositeType::Struct(fields) = &def_type.comp {
+                        fields.to_operand_types()
+                    } else {
+                        vec![]
+                    };
+                    ResolvedSig {
+                        params,
+                        results: vec![OperandType::Val(ValType::Ref(RefType {
+                            heap_ty: HeapType::Type(def_type.idx),
+                            nullable: false,
+                        }))],
+                    }
+                })
+                .unwrap_or_else(|| ResolvedSig {
+                    params: vec![],
+                    results: vec![OperandType::Any],
+                })
+        }
+        "struct.new_default" => instr
+            .immediates()
+            .next()
+            .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+            .map(|symbol| ResolvedSig {
+                params: vec![],
+                results: vec![OperandType::Val(ValType::Ref(RefType {
+                    heap_ty: HeapType::Type(symbol.idx),
+                    nullable: false,
+                }))],
+            })
+            .unwrap_or_else(|| ResolvedSig {
+                params: vec![],
+                results: vec![OperandType::Any],
+            }),
         "struct.get" => ResolvedSig {
             params: vec![],
             results: vec![OperandType::Any],

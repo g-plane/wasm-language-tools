@@ -1,0 +1,43 @@
+---
+source: crates/service/tests/diagnostics/typeck/structs.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 25
+        },
+        "end": {
+          "line": 4,
+          "character": 26
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null array)], found [(ref $s)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 4
+              },
+              "end": {
+                "line": 4,
+                "character": 25
+              }
+            }
+          },
+          "message": "expected type `(ref null array)`, found `(ref $s)`"
+        }
+      ]
+    }
+  ]
+}

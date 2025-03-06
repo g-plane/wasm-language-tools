@@ -10,6 +10,7 @@ mod call_indirect;
 mod drop;
 mod returning;
 mod select;
+mod structs;
 mod subtyping;
 
 #[test]
