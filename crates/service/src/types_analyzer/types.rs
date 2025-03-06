@@ -285,7 +285,13 @@ impl HeapType {
             (HeapType::None, other) => other.matches(&HeapType::Any, db, uri, module_id),
             (HeapType::NoFunc, other) => other.matches(&HeapType::Func, db, uri, module_id),
             (HeapType::NoExtern, other) => other.matches(&HeapType::Extern, db, uri, module_id),
-            (heap_ty_a @ HeapType::Type(a), heap_ty_b @ HeapType::Type(b)) => {
+            (heap_ty_a @ HeapType::Type(mut a), heap_ty_b @ HeapType::Type(mut b)) => {
+                if a.is_def() {
+                    a.name = None;
+                }
+                if b.is_def() {
+                    b.name = None;
+                }
                 let symbol_table = db.symbol_table(uri);
                 let Some(module) = symbol_table.find_module(module_id) else {
                     return false;
@@ -358,7 +364,13 @@ impl HeapType {
         uri: InternUri,
         module_id: u32,
     ) -> bool {
-        if let (HeapType::Type(a), HeapType::Type(b)) = (self, other) {
+        if let (HeapType::Type(mut a), HeapType::Type(mut b)) = (self, other) {
+            if a.is_def() {
+                a.name = None;
+            }
+            if b.is_def() {
+                b.name = None;
+            }
             let symbol_table = db.symbol_table(uri);
             let Some(module) = symbol_table.find_module(module_id) else {
                 return false;

@@ -360,10 +360,7 @@ fn substitute_heap_type(
             } else if symbol.key.text_range().start() > rec_group.range.end() {
                 return Err(());
             } else {
-                *heap_type = HeapType::Type(Idx {
-                    num: symbol.idx.num,
-                    name: None,
-                });
+                *heap_type = HeapType::Type(symbol.idx);
             }
         }
     }
