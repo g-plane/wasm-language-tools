@@ -385,8 +385,8 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                     }
                     Some(
                         "struct.new" | "struct.new_default" | "array.new" | "array.new_default"
-                        | "array.new_fixed" | "array.get" | "array.get_u" | "array.get_s"
-                        | "array.set" | "array.fill",
+                        | "array.new_fixed" | "array.new_data" | "array.new_elem" | "array.get"
+                        | "array.get_u" | "array.get_s" | "array.set" | "array.fill",
                     ) => {
                         if let Some(symbol) = node.children().next().and_then(|node| {
                             create_ref_symbol(

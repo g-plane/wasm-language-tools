@@ -66,3 +66,39 @@ fn new_fixed() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn new_data() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $vec (array f32))
+  (func (result (ref $vec))
+    (array.new_data $vec $d
+      (i32.const 1)
+      (i32.const 3))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn new_elem() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $vec (array f32))
+  (func (result (ref $vec))
+    (array.new_elem $vec $d
+      (i32.const 1)
+      (i32.const 3))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}

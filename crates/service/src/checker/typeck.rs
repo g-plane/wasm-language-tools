@@ -645,6 +645,21 @@ fn resolve_sig(
                     results: vec![OperandType::Any],
                 })
         }
+        "array.new_data" | "array.new_elem" => instr
+            .immediates()
+            .next()
+            .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+            .map(|symbol| ResolvedSig {
+                params: vec![OperandType::Val(ValType::I32); 2],
+                results: vec![OperandType::Val(ValType::Ref(RefType {
+                    heap_ty: HeapType::Type(symbol.idx),
+                    nullable: false,
+                }))],
+            })
+            .unwrap_or_else(|| ResolvedSig {
+                params: vec![],
+                results: vec![OperandType::Any],
+            }),
         "array.get" => ResolvedSig {
             params: vec![],
             results: vec![OperandType::Any],
