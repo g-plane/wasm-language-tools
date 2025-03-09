@@ -196,6 +196,42 @@ fn block() {
 }
 
 #[test]
+fn field_defined() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field $x i32)))
+  (func (param (ref 0))
+    local.get 0
+    struct.get 0 0
+    unreachable))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn field_undefined() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field i32)))
+  (func (param (ref 0))
+    local.get 0
+    struct.get 0 $x
+    unreachable))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn export() {
     let uri = "untitled:test".to_string();
     let source = "

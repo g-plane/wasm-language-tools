@@ -62,7 +62,8 @@ impl LanguageService {
                         | SymbolKind::Type
                         | SymbolKind::GlobalDef
                         | SymbolKind::MemoryDef
-                        | SymbolKind::TableDef => {
+                        | SymbolKind::TableDef
+                        | SymbolKind::FieldDef => {
                             let ref_kind = match current_symbol.kind {
                                 SymbolKind::Func => SymbolKind::Call,
                                 SymbolKind::Param | SymbolKind::Local => SymbolKind::LocalRef,
@@ -70,6 +71,7 @@ impl LanguageService {
                                 SymbolKind::GlobalDef => SymbolKind::GlobalRef,
                                 SymbolKind::MemoryDef => SymbolKind::MemoryRef,
                                 SymbolKind::TableDef => SymbolKind::TableRef,
+                                SymbolKind::FieldDef => SymbolKind::FieldRef,
                                 _ => return None,
                             };
                             Some(
@@ -97,13 +99,15 @@ impl LanguageService {
                         | SymbolKind::TypeUse
                         | SymbolKind::GlobalRef
                         | SymbolKind::MemoryRef
-                        | SymbolKind::TableRef => {
+                        | SymbolKind::TableRef
+                        | SymbolKind::FieldRef => {
                             let def_kind = match current_symbol.kind {
                                 SymbolKind::Call => SymbolKind::Func,
                                 SymbolKind::TypeUse => SymbolKind::Type,
                                 SymbolKind::GlobalRef => SymbolKind::GlobalDef,
                                 SymbolKind::MemoryRef => SymbolKind::MemoryDef,
                                 SymbolKind::TableRef => SymbolKind::TableDef,
+                                SymbolKind::FieldRef => SymbolKind::FieldDef,
                                 _ => return None,
                             };
                             let def = symbol_table.find_def(current_symbol.key)?;
@@ -243,11 +247,15 @@ fn get_highlight_kind_of_symbol(
         | SymbolKind::GlobalDef
         | SymbolKind::MemoryDef
         | SymbolKind::TableDef
-        | SymbolKind::BlockDef => Some(DocumentHighlightKind::Write),
+        | SymbolKind::BlockDef
+        | SymbolKind::FieldDef => Some(DocumentHighlightKind::Write),
         SymbolKind::Call | SymbolKind::TypeUse | SymbolKind::MemoryRef | SymbolKind::BlockRef => {
             Some(DocumentHighlightKind::Read)
         }
-        SymbolKind::LocalRef | SymbolKind::GlobalRef | SymbolKind::TableRef => {
+        SymbolKind::LocalRef
+        | SymbolKind::GlobalRef
+        | SymbolKind::TableRef
+        | SymbolKind::FieldRef => {
             let node = symbol.key.to_node(root);
             if node
                 .siblings_with_tokens(Direction::Prev)
@@ -282,6 +290,7 @@ fn is_write_access_instr(element: SyntaxElement, node: &SyntaxNode) -> bool {
                     | "table.set"
                     | "table.grow"
                     | "table.fill"
+                    | "struct.set"
             )
         }
     } else {

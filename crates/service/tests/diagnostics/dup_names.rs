@@ -140,6 +140,21 @@ fn table() {
 }
 
 #[test]
+fn fields() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field $x i32) (field $x i32)))
+  (type (struct (field $x i32))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn exports() {
     let uri = "untitled:test".to_string();
     let source = r#"

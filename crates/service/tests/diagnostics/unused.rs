@@ -356,6 +356,36 @@ fn table_used() {
 }
 
 #[test]
+fn field_unused() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (rec (type (struct (field $x i32) (field (ref 0))))))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn field_used() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (type (struct (field $x i32) (field $_y i32)))
+  (func $_ (param (ref 0))
+    local.get 0
+    struct.get 0 $x
+    unreachable))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
 fn call_indirect_implicit() {
     let uri = "untitled:test".to_string();
     let source = r#"

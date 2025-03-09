@@ -35,6 +35,7 @@ pub fn check(
                         | SymbolKind::GlobalDef
                         | SymbolKind::MemoryDef
                         | SymbolKind::TableDef
+                        | SymbolKind::FieldDef
                 )
             })
             .fold(FxHashMap::default(), |mut map, symbol| {
@@ -61,6 +62,7 @@ pub fn check(
                     SymbolKind::GlobalDef => "global",
                     SymbolKind::MemoryDef => "memory",
                     SymbolKind::TableDef => "table",
+                    SymbolKind::FieldDef => "field",
                     _ => unreachable!(),
                 };
                 let name = service.lookup_ident(*name);

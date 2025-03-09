@@ -83,7 +83,9 @@ impl LanguageService {
                 | SymbolKind::MemoryDef
                 | SymbolKind::MemoryRef
                 | SymbolKind::TableDef
-                | SymbolKind::TableRef => {
+                | SymbolKind::TableRef
+                | SymbolKind::FieldDef
+                | SymbolKind::FieldRef => {
                     sym.region == symbol.region && sym.idx.name.is_some_and(|name| name == old_name)
                 }
                 SymbolKind::BlockDef => {

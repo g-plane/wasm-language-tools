@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/undef.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 17
+        },
+        "end": {
+          "line": 5,
+          "character": 19
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find field `$x` in this scope"
+    }
+  ]
+}

@@ -392,3 +392,37 @@ fn block_ref() {
     let response = service.rename(create_params(uri, 6, 21, "$b")).unwrap();
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn field_def() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field $x i32)))
+  (type (struct (field $x i32)))
+  (func (param (ref 0)) (result i32)
+    (struct.get 0 $x
+      (local.get 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.rename(create_params(uri, 2, 24, "$y")).unwrap();
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn field_ref() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field $x i32)))
+  (type (struct (field $x i32)))
+  (func (param (ref 0)) (result i32)
+    (struct.get 0 $x
+      (local.get 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.rename(create_params(uri, 5, 19, "$y")).unwrap();
+    assert_json_snapshot!(response);
+}

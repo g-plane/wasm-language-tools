@@ -108,6 +108,21 @@ pub fn check(
                     Some(report(service, line_index, root, severity, symbol))
                 }
             }
+            SymbolKind::FieldDef => {
+                if is_prefixed_with_underscore(service, symbol)
+                    || is_used(symbol_table, symbol, SymbolKind::FieldRef)
+                {
+                    None
+                } else {
+                    let node = symbol.key.to_node(root);
+                    let range = support::token(&node, SyntaxKind::IDENT)
+                        .map(|token| token.text_range())
+                        .unwrap_or_else(|| node.text_range());
+                    Some(report_with_range(
+                        service, line_index, range, severity, symbol,
+                    ))
+                }
+            }
             _ => None,
         }
     }));
@@ -164,6 +179,7 @@ fn report_with_range(
         SymbolKind::GlobalDef => "global",
         SymbolKind::MemoryDef => "memory",
         SymbolKind::TableDef => "table",
+        SymbolKind::FieldDef => "field",
         _ => unreachable!(),
     };
     Diagnostic {

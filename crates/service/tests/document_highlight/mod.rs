@@ -591,3 +591,69 @@ fn block_ref_undefined() {
     let response = service.document_highlight(create_params(uri, 7, 18));
     assert!(response.is_none());
 }
+
+#[test]
+fn field() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field $x i32)))
+  (type (struct (field $x i32)))
+  (func
+    struct.get 0 $x
+    struct.set 0 $x))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.document_highlight(create_params(uri, 2, 24));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn field_ref_int() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field i32)))
+  (type (struct (field i32)))
+  (func
+    struct.get 0 0
+    struct.set 0 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.document_highlight(create_params(uri, 6, 17));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn field_ref_ident() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field $x i32)))
+  (type (struct (field $x i32)))
+  (func
+    struct.get 0 $x
+    struct.set 0 $x))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.document_highlight(create_params(uri, 5, 18));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn field_ref_undefined() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field i32)))
+  (func
+    struct.get 0 $x))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.document_highlight(create_params(uri, 4, 18));
+    assert!(response.is_none());
+}

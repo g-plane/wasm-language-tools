@@ -124,6 +124,27 @@ impl LanguageService {
                         },
                     ))
                 }
+                SymbolKind::FieldDef => {
+                    let range =
+                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());
+                    Some((
+                        symbol.key,
+                        DocumentSymbol {
+                            name: render_symbol_name(symbol, self),
+                            detail: None,
+                            kind: LspSymbolKind::Field,
+                            tags: None,
+                            deprecated: None,
+                            range,
+                            selection_range: helpers::create_selection_range(
+                                symbol,
+                                &root,
+                                &line_index,
+                            ),
+                            children: None,
+                        },
+                    ))
+                }
                 SymbolKind::Param
                 | SymbolKind::Call
                 | SymbolKind::LocalRef
@@ -132,7 +153,8 @@ impl LanguageService {
                 | SymbolKind::MemoryRef
                 | SymbolKind::TableRef
                 | SymbolKind::BlockDef
-                | SymbolKind::BlockRef => None,
+                | SymbolKind::BlockRef
+                | SymbolKind::FieldRef => None,
             })
             .collect::<FxHashMap<_, _>>();
         symbol_table
@@ -181,6 +203,7 @@ fn render_symbol_name(symbol: &Symbol, service: &LanguageService) -> String {
             SymbolKind::GlobalDef => "global",
             SymbolKind::MemoryDef => "memory",
             SymbolKind::TableDef => "table",
+            SymbolKind::FieldDef => "field",
             _ => unreachable!(),
         };
         format!("{kind} {num}")

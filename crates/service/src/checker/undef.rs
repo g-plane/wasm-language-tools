@@ -25,12 +25,14 @@ pub fn check(
             | SymbolKind::GlobalDef
             | SymbolKind::MemoryDef
             | SymbolKind::TableDef
-            | SymbolKind::BlockDef => false,
+            | SymbolKind::BlockDef
+            | SymbolKind::FieldDef => false,
             SymbolKind::Call
             | SymbolKind::TypeUse
             | SymbolKind::GlobalRef
             | SymbolKind::MemoryRef
-            | SymbolKind::TableRef => symbol_table.find_def(symbol.key).is_none(),
+            | SymbolKind::TableRef
+            | SymbolKind::FieldRef => symbol_table.find_def(symbol.key).is_none(),
             SymbolKind::LocalRef => symbol_table.find_param_or_local_def(symbol.key).is_none(),
             SymbolKind::BlockRef => !symbol_table.blocks.iter().any(|block| {
                 block.ref_key == symbol.key && symbol.idx.is_defined_by(&block.def_idx)
@@ -45,6 +47,7 @@ pub fn check(
                 SymbolKind::MemoryRef => "memory",
                 SymbolKind::TableRef => "table",
                 SymbolKind::BlockRef => "label",
+                SymbolKind::FieldRef => "field",
                 _ => unreachable!(),
             };
             Diagnostic {

@@ -9,7 +9,7 @@ use rowan::{
 };
 use std::{hash::Hash, sync::Arc};
 use wat_syntax::{
-    ast::{ModuleFieldFunc, PlainInstr},
+    ast::{CompType, ModuleFieldFunc, PlainInstr, SubType},
     SyntaxKind, SyntaxNode, SyntaxNodePtr,
 };
 
@@ -229,6 +229,40 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                     SymbolKind::Type,
                     &module,
                 ));
+                if let Some(CompType::Struct(s)) =
+                    support::child::<SubType>(&node).and_then(|sub_type| sub_type.comp_type())
+                {
+                    let mut field_idx_gen = IdxGen::default();
+                    s.fields().for_each(|field| {
+                        if let Some(ident) = field.ident_token() {
+                            let field = field.syntax();
+                            symbols.push(Symbol {
+                                key: SymbolKey::new(field),
+                                green: field.green().into(),
+                                region: SymbolKey::new(&node),
+                                kind: SymbolKind::FieldDef,
+                                idx: Idx {
+                                    num: Some(field_idx_gen.pull()),
+                                    name: Some(db.ident(ident.text().into())),
+                                },
+                            });
+                        } else {
+                            symbols.extend(field.field_types().map(|field_type| {
+                                let field_type = field_type.syntax();
+                                Symbol {
+                                    key: SymbolKey::new(field_type),
+                                    green: field_type.green().into(),
+                                    region: SymbolKey::new(&node),
+                                    kind: SymbolKind::FieldDef,
+                                    idx: Idx {
+                                        num: Some(field_idx_gen.pull()),
+                                        name: None,
+                                    },
+                                }
+                            }));
+                        }
+                    });
+                }
             }
             SyntaxKind::MODULE_FIELD_GLOBAL => {
                 symbols.push(create_module_level_symbol(
@@ -409,6 +443,29 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                             )
                         }));
                     }
+                    Some("struct.get" | "struct.get_s" | "struct.get_u" | "struct.set") => {
+                        let mut children = node.children();
+                        if let Some(symbol) = children.next().and_then(|node| {
+                            create_ref_symbol(
+                                db,
+                                &node,
+                                SymbolKey::new(&module),
+                                SymbolKind::TypeUse,
+                            )
+                        }) {
+                            let key = symbol.key;
+                            symbols.push(symbol);
+                            if let Some(symbol) = children.next().and_then(|node| {
+                                // The region here is temporary.
+                                // It's used for tracking which struct it belongs to,
+                                // and it will be replaced with the actual region later.
+                                // If the struct it belongs to isn't defined, nothing will happen.
+                                create_ref_symbol(db, &node, key, SymbolKind::FieldRef)
+                            }) {
+                                symbols.push(symbol);
+                            }
+                        }
+                    }
                     _ => {}
                 }
             }
@@ -575,6 +632,21 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
         });
     });
 
+    // replace struct fields' region with their actual region
+    let type_symbols = symbols
+        .iter()
+        .filter(|symbol| matches!(symbol.kind, SymbolKind::Type | SymbolKind::TypeUse))
+        .cloned()
+        .collect::<Vec<_>>();
+    symbols
+        .iter_mut()
+        .filter(|symbol| symbol.kind == SymbolKind::FieldRef)
+        .for_each(|ref_symbol| {
+            if let Some(struct_def_symbol) = find_def(&type_symbols, ref_symbol.region) {
+                ref_symbol.region = struct_def_symbol.key;
+            }
+        });
+
     Arc::new(SymbolTable {
         symbols,
         blocks,
@@ -682,6 +754,7 @@ fn find_def(symbols: &[Symbol], key: SymbolKey) -> Option<&Symbol> {
                 SymbolKind::GlobalRef => SymbolKind::GlobalDef,
                 SymbolKind::MemoryRef => SymbolKind::MemoryDef,
                 SymbolKind::TableRef => SymbolKind::TableDef,
+                SymbolKind::FieldRef => SymbolKind::FieldDef,
                 _ => return None,
             };
             symbols.iter().find(move |symbol| {
@@ -733,6 +806,8 @@ pub enum SymbolKind {
     TableRef,
     BlockDef,
     BlockRef,
+    FieldDef,
+    FieldRef,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

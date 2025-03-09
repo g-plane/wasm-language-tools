@@ -18,6 +18,7 @@ fn symbols() {
     (memory $memory 1)
     (memory 1)
     (table $table 1 funcref)
+    (type (struct (field i32 (ref 0)) (field $field (mut i32))))
 )
 
 (module

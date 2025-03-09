@@ -12,7 +12,7 @@ expression: response
         "character": 0
       },
       "end": {
-        "line": 13,
+        "line": 14,
         "character": 1
       }
     },
@@ -22,7 +22,7 @@ expression: response
         "character": 0
       },
       "end": {
-        "line": 13,
+        "line": 14,
         "character": 1
       }
     },
@@ -368,6 +368,105 @@ expression: response
             "character": 17
           }
         }
+      },
+      {
+        "name": "type 4",
+        "detail": "struct",
+        "kind": 5,
+        "range": {
+          "start": {
+            "line": 13,
+            "character": 4
+          },
+          "end": {
+            "line": 13,
+            "character": 64
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 13,
+            "character": 5
+          },
+          "end": {
+            "line": 13,
+            "character": 9
+          }
+        },
+        "children": [
+          {
+            "name": "field 0",
+            "kind": 8,
+            "range": {
+              "start": {
+                "line": 13,
+                "character": 25
+              },
+              "end": {
+                "line": 13,
+                "character": 28
+              }
+            },
+            "selectionRange": {
+              "start": {
+                "line": 13,
+                "character": 25
+              },
+              "end": {
+                "line": 13,
+                "character": 28
+              }
+            }
+          },
+          {
+            "name": "field 1",
+            "kind": 8,
+            "range": {
+              "start": {
+                "line": 13,
+                "character": 29
+              },
+              "end": {
+                "line": 13,
+                "character": 36
+              }
+            },
+            "selectionRange": {
+              "start": {
+                "line": 13,
+                "character": 29
+              },
+              "end": {
+                "line": 13,
+                "character": 36
+              }
+            }
+          },
+          {
+            "name": "$field",
+            "kind": 8,
+            "range": {
+              "start": {
+                "line": 13,
+                "character": 38
+              },
+              "end": {
+                "line": 13,
+                "character": 62
+              }
+            },
+            "selectionRange": {
+              "start": {
+                "line": 13,
+                "character": 45
+              },
+              "end": {
+                "line": 13,
+                "character": 51
+              }
+            }
+          }
+        ]
       }
     ]
   },
@@ -376,21 +475,21 @@ expression: response
     "kind": 2,
     "range": {
       "start": {
-        "line": 15,
+        "line": 16,
         "character": 0
       },
       "end": {
-        "line": 17,
+        "line": 18,
         "character": 1
       }
     },
     "selectionRange": {
       "start": {
-        "line": 15,
+        "line": 16,
         "character": 0
       },
       "end": {
-        "line": 17,
+        "line": 18,
         "character": 1
       }
     },
@@ -400,21 +499,21 @@ expression: response
         "kind": 12,
         "range": {
           "start": {
-            "line": 16,
+            "line": 17,
             "character": 4
           },
           "end": {
-            "line": 16,
+            "line": 17,
             "character": 10
           }
         },
         "selectionRange": {
           "start": {
-            "line": 16,
+            "line": 17,
             "character": 5
           },
           "end": {
-            "line": 16,
+            "line": 17,
             "character": 9
           }
         }
