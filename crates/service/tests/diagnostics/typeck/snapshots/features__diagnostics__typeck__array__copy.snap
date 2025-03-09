@@ -1,0 +1,28 @@
+---
+source: crates/service/tests/diagnostics/typeck/array.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 11
+        },
+        "end": {
+          "line": 8,
+          "character": 14
+        }
+      },
+      "severity": 2,
+      "code": "needless-mut",
+      "source": "wat",
+      "message": "`1` is unnecessarily mutable",
+      "tags": [
+        1
+      ]
+    }
+  ]
+}

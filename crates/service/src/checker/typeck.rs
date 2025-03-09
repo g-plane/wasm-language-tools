@@ -269,11 +269,13 @@ impl TypeStack<'_> {
             .rev()
             .zip_longest(pops.iter().rev())
             .for_each(|pair| match pair {
-                EitherOrBoth::Both(
-                    OperandType::Val(expected),
-                    (OperandType::Val(received), related_instr),
-                ) => {
-                    if service.value_type_matches(self.uri, self.module_id, *received, *expected) {
+                EitherOrBoth::Both(expected, (received, related_instr)) => {
+                    if service.operand_type_matches(
+                        self.uri,
+                        self.module_id,
+                        received.clone(),
+                        expected.clone(),
+                    ) {
                         return;
                     }
                     mismatch = true;
@@ -340,11 +342,13 @@ impl TypeStack<'_> {
             .rev()
             .zip_longest(self.stack.iter().rev())
             .for_each(|pair| match pair {
-                EitherOrBoth::Both(
-                    OperandType::Val(expected),
-                    (OperandType::Val(received), related_instr),
-                ) => {
-                    if service.value_type_matches(self.uri, self.module_id, *received, *expected) {
+                EitherOrBoth::Both(expected, (received, related_instr)) => {
+                    if service.operand_type_matches(
+                        self.uri,
+                        self.module_id,
+                        received.clone(),
+                        expected.clone(),
+                    ) {
                         return;
                     }
                     mismatch = true;
@@ -660,10 +664,129 @@ fn resolve_sig(
                 params: vec![],
                 results: vec![OperandType::Any],
             }),
-        "array.get" => ResolvedSig {
-            params: vec![],
-            results: vec![OperandType::Any],
-        },
+        "array.get" => instr
+            .immediates()
+            .next()
+            .and_then(|immediate| {
+                let def_types = shared.service.def_types(shared.uri);
+                resolve_array_type_with_idx(shared.symbol_table, &def_types, &immediate)
+            })
+            .map(|(idx, ty)| ResolvedSig {
+                params: vec![
+                    OperandType::Val(ValType::Ref(RefType {
+                        heap_ty: HeapType::Type(idx),
+                        nullable: true,
+                    })),
+                    OperandType::Val(ValType::I32),
+                ],
+                results: vec![ty.unwrap_or(OperandType::Any)],
+            })
+            .unwrap_or_else(|| ResolvedSig {
+                params: vec![],
+                results: vec![OperandType::Any],
+            }),
+        "array.get_s" | "array.get_u" => instr
+            .immediates()
+            .next()
+            .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+            .map(|symbol| ResolvedSig {
+                params: vec![
+                    OperandType::Val(ValType::Ref(RefType {
+                        heap_ty: HeapType::Type(symbol.idx),
+                        nullable: true,
+                    })),
+                    OperandType::Val(ValType::I32),
+                ],
+                results: vec![OperandType::Val(ValType::I32)],
+            })
+            .unwrap_or_else(|| ResolvedSig {
+                params: vec![],
+                results: vec![OperandType::Any],
+            }),
+        "array.set" => instr
+            .immediates()
+            .next()
+            .and_then(|immediate| {
+                let def_types = shared.service.def_types(shared.uri);
+                resolve_array_type_with_idx(shared.symbol_table, &def_types, &immediate)
+            })
+            .map(|(idx, ty)| ResolvedSig {
+                params: vec![
+                    OperandType::Val(ValType::Ref(RefType {
+                        heap_ty: HeapType::Type(idx),
+                        nullable: true,
+                    })),
+                    OperandType::Val(ValType::I32),
+                    ty.unwrap_or(OperandType::Any),
+                ],
+                results: vec![],
+            })
+            .unwrap_or_default(),
+        "array.fill" => instr
+            .immediates()
+            .next()
+            .and_then(|immediate| {
+                let def_types = shared.service.def_types(shared.uri);
+                resolve_array_type_with_idx(shared.symbol_table, &def_types, &immediate)
+            })
+            .map(|(idx, ty)| ResolvedSig {
+                params: vec![
+                    OperandType::Val(ValType::Ref(RefType {
+                        heap_ty: HeapType::Type(idx),
+                        nullable: true,
+                    })),
+                    OperandType::Val(ValType::I32),
+                    ty.unwrap_or(OperandType::Any),
+                    OperandType::Val(ValType::I32),
+                ],
+                results: vec![],
+            })
+            .unwrap_or_default(),
+        "array.copy" => {
+            let mut immediates = instr.immediates();
+            immediates
+                .next()
+                .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+                .zip(
+                    immediates
+                        .next()
+                        .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax()))),
+                )
+                .map(|(dst, src)| ResolvedSig {
+                    params: vec![
+                        OperandType::Val(ValType::Ref(RefType {
+                            heap_ty: HeapType::Type(dst.idx),
+                            nullable: true,
+                        })),
+                        OperandType::Val(ValType::I32),
+                        OperandType::Val(ValType::Ref(RefType {
+                            heap_ty: HeapType::Type(src.idx),
+                            nullable: true,
+                        })),
+                        OperandType::Val(ValType::I32),
+                        OperandType::Val(ValType::I32),
+                    ],
+                    results: vec![],
+                })
+                .unwrap_or_default()
+        }
+        "array.init_data" | "array.init_elem" => instr
+            .immediates()
+            .next()
+            .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+            .map(|symbol| ResolvedSig {
+                params: vec![
+                    OperandType::Val(ValType::Ref(RefType {
+                        heap_ty: HeapType::Type(symbol.idx),
+                        nullable: true,
+                    })),
+                    OperandType::Val(ValType::I32),
+                    OperandType::Val(ValType::I32),
+                    OperandType::Val(ValType::I32),
+                ],
+                results: vec![],
+            })
+            .unwrap_or_default(),
         _ => data_set::INSTR_SIG
             .get(instr_name)
             .cloned()

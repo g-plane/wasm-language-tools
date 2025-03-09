@@ -399,6 +399,16 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                             symbols.push(symbol);
                         }
                     }
+                    Some("array.copy") => {
+                        symbols.extend(node.children().filter_map(|node| {
+                            create_ref_symbol(
+                                db,
+                                &node,
+                                SymbolKey::new(&module),
+                                SymbolKind::TypeUse,
+                            )
+                        }));
+                    }
                     _ => {}
                 }
             }

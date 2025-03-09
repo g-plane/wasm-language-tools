@@ -70,21 +70,27 @@ pub(crate) trait TypesAnalyzerCtx: SyntaxTreeCtx + SymbolTablesCtx {
     fn rec_type_groups(&self, uri: InternUri) -> Arc<Vec<RecTypeGroup>>;
 
     #[salsa::memoized]
-    fn value_type_matches(
+    fn operand_type_matches(
         &self,
         uri: InternUri,
         module_id: u32,
-        sub: ValType,
-        sup: ValType,
+        sub: OperandType,
+        sup: OperandType,
     ) -> bool;
 }
 
-fn value_type_matches(
+fn operand_type_matches(
     db: &dyn TypesAnalyzerCtx,
     uri: InternUri,
     module_id: u32,
-    sub: ValType,
-    sup: ValType,
+    sub: OperandType,
+    sup: OperandType,
 ) -> bool {
-    sub.matches(&sup, db, uri, module_id)
+    match (sub, sup) {
+        (OperandType::Val(sub), OperandType::Val(sup)) => sub.matches(&sup, db, uri, module_id),
+        (OperandType::Any, _) | (_, OperandType::Any) => true,
+        (OperandType::PackedI8, OperandType::PackedI8) => true,
+        (OperandType::PackedI16, OperandType::PackedI16) => true,
+        _ => false,
+    }
 }

@@ -407,7 +407,7 @@ impl HeapType {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub(crate) enum OperandType {
     Val(ValType),
     Any,
