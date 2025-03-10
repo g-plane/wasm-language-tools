@@ -37,7 +37,7 @@ expression: response
           },
           "end": {
             "line": 2,
-            "character": 75
+            "character": 79
           }
         },
         "selectionRange": {
@@ -53,6 +53,7 @@ expression: response
         "children": [
           {
             "name": "$l1",
+            "detail": "i32",
             "kind": 13,
             "range": {
               "start": {
@@ -77,6 +78,7 @@ expression: response
           },
           {
             "name": "$l2",
+            "detail": "f32",
             "kind": 13,
             "range": {
               "start": {
@@ -101,6 +103,7 @@ expression: response
           },
           {
             "name": "local 3",
+            "detail": "(ref 0)",
             "kind": 13,
             "range": {
               "start": {
@@ -109,17 +112,17 @@ expression: response
               },
               "end": {
                 "line": 2,
-                "character": 73
+                "character": 77
               }
             },
             "selectionRange": {
               "start": {
                 "line": 2,
-                "character": 70
+                "character": 71
               },
               "end": {
                 "line": 2,
-                "character": 73
+                "character": 74
               }
             }
           }

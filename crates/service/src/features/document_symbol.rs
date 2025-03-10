@@ -69,7 +69,9 @@ impl LanguageService {
                         symbol.key,
                         DocumentSymbol {
                             name: render_symbol_name(symbol, self),
-                            detail: None,
+                            detail: self
+                                .extract_type(symbol.green.clone())
+                                .map(|ty| ty.render(self).to_string()),
                             kind: LspSymbolKind::Variable,
                             tags: None,
                             deprecated: None,

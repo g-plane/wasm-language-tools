@@ -7,7 +7,7 @@ fn symbols() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-    (func $func (param $p i32) (local $l1 i32) (local $l2 i32) (local i32))
+    (func $func (param $p i32) (local $l1 i32) (local $l2 f32) (local (ref 0)))
     (func (type 0))
     (type (func))
     (type $ty (func))
