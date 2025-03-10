@@ -2,7 +2,9 @@ use self::{
     def_type::{create_def_types, create_recursive_types, RecTypeGroup},
     extractor::{extract_global_type, extract_sig, extract_type},
     renderer::{render_block_header, render_compact_sig, render_func_header, render_sig},
+    resolver::resolve_field_type,
     signature::{get_func_sig, get_type_use_sig, Signature},
+    types::FieldType,
 };
 pub(crate) use self::{
     def_type::{CompositeType, DefType},
@@ -11,7 +13,10 @@ pub(crate) use self::{
     types::{HeapType, OperandType, RefType, ValType},
 };
 use crate::{
-    binder::SymbolTablesCtx, idx::InternIdent, syntax_tree::SyntaxTreeCtx, uri::InternUri,
+    binder::{SymbolKey, SymbolTablesCtx},
+    idx::InternIdent,
+    syntax_tree::SyntaxTreeCtx,
+    uri::InternUri,
 };
 use rowan::GreenNode;
 use std::sync::Arc;
@@ -77,6 +82,9 @@ pub(crate) trait TypesAnalyzerCtx: SyntaxTreeCtx + SymbolTablesCtx {
         sub: OperandType,
         sup: OperandType,
     ) -> bool;
+
+    #[salsa::memoized]
+    fn resolve_field_type(&self, uri: InternUri, key: SymbolKey) -> Option<FieldType>;
 }
 
 fn operand_type_matches(

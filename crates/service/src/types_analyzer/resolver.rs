@@ -1,11 +1,11 @@
 use super::{
     def_type::{CompositeType, DefType},
     signature::get_block_sig,
-    types::OperandType,
+    types::{FieldType, Fields, OperandType},
     TypesAnalyzerCtx,
 };
 use crate::{
-    binder::{SymbolKey, SymbolTable, SymbolTablesCtx},
+    binder::{SymbolKey, SymbolKind, SymbolTable, SymbolTablesCtx},
     data_set::INSTR_SIG,
     idx::Idx,
     syntax_tree::SyntaxTreeCtx,
@@ -84,4 +84,42 @@ pub(crate) fn resolve_array_type_with_idx(
                 (def_type.idx, None)
             }
         })
+}
+
+pub(super) fn resolve_field_type(
+    db: &dyn TypesAnalyzerCtx,
+    uri: InternUri,
+    key: SymbolKey,
+) -> Option<FieldType> {
+    let symbol_table = db.symbol_table(uri);
+    let def_types = db.def_types(uri);
+    let symbol = symbol_table
+        .symbols
+        .iter()
+        .find(|symbol| symbol.key == key)?;
+    let field_def_symbol = match symbol.kind {
+        SymbolKind::FieldDef => symbol,
+        SymbolKind::FieldRef => symbol_table.symbols.iter().find(|other| {
+            other.kind == SymbolKind::FieldDef
+                && other.region == symbol.region
+                && symbol.idx.is_defined_by(&other.idx)
+        })?,
+        _ => return None,
+    };
+    let idx = field_def_symbol.idx.num?;
+    if let Some(DefType {
+        comp: CompositeType::Struct(Fields(fields)),
+        ..
+    }) = def_types
+        .iter()
+        .find(|def_type| def_type.key == field_def_symbol.region)
+    {
+        fields
+            .iter()
+            .enumerate()
+            .find(|(i, _)| *i as u32 == idx)
+            .map(|(_, (field, _))| field.clone())
+    } else {
+        None
+    }
 }

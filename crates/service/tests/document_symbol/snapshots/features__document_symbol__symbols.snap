@@ -396,6 +396,7 @@ expression: response
         "children": [
           {
             "name": "field 0",
+            "detail": "i32",
             "kind": 8,
             "range": {
               "start": {
@@ -420,6 +421,7 @@ expression: response
           },
           {
             "name": "field 1",
+            "detail": "(ref 0)",
             "kind": 8,
             "range": {
               "start": {
@@ -444,6 +446,7 @@ expression: response
           },
           {
             "name": "$field",
+            "detail": "(mut i32)",
             "kind": 8,
             "range": {
               "start": {

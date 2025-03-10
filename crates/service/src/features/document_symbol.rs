@@ -3,6 +3,7 @@ use crate::{
     helpers,
     idx::IdentsCtx,
     syntax_tree::SyntaxTreeCtx,
+    types_analyzer::TypesAnalyzerCtx,
     uri::UrisCtx,
     LanguageService,
 };
@@ -131,7 +132,9 @@ impl LanguageService {
                         symbol.key,
                         DocumentSymbol {
                             name: render_symbol_name(symbol, self),
-                            detail: None,
+                            detail: self
+                                .resolve_field_type(uri, symbol.key)
+                                .map(|ty| ty.render(self).to_string()),
                             kind: LspSymbolKind::Field,
                             tags: None,
                             deprecated: None,
