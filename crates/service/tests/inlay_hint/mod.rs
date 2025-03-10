@@ -136,3 +136,50 @@ fn ref_type() {
     let response = service.inlay_hint(create_params(uri, 6, 0));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn field() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field (mut i32))))
+  (func
+    struct.get 0 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.inlay_hint(create_params(uri, 5, 0));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn field_with_struct_changed() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field i32)))
+  (type (struct (field (mut i32))))
+  (func
+    struct.get 0 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service
+        .inlay_hint(create_params(uri.clone(), 6, 0))
+        .unwrap();
+    let first = &response.first().unwrap().label;
+
+    let source = "
+(module
+  (type (struct (field i32)))
+  (type (struct (field (mut i32))))
+  (func
+    struct.get 1 0))
+";
+    service.commit(uri.clone(), source.into());
+    let response = service
+        .inlay_hint(create_params(uri.clone(), 6, 0))
+        .unwrap();
+    let second = &response.first().unwrap().label;
+    assert_ne!(first, second);
+}

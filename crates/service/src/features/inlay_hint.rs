@@ -106,6 +106,25 @@ impl LanguageService {
                             data: None,
                         })
                 }
+                SymbolKind::FieldRef => {
+                    if !range.contains_range(symbol.key.text_range()) {
+                        return None;
+                    }
+                    self.resolve_field_type(uri, symbol.key, symbol.region)
+                        .map(|ty| InlayHint {
+                            position: helpers::rowan_pos_to_lsp_pos(
+                                &line_index,
+                                symbol.key.text_range().end(),
+                            ),
+                            label: Union2::A(ty.render(self).to_string()),
+                            kind: Some(InlayHintKind::Type),
+                            text_edits: None,
+                            tooltip: None,
+                            padding_left: Some(true),
+                            padding_right: None,
+                            data: None,
+                        })
+                }
                 _ => None,
             })
             .collect();

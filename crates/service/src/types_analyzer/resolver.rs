@@ -90,6 +90,7 @@ pub(super) fn resolve_field_type(
     db: &dyn TypesAnalyzerCtx,
     uri: InternUri,
     key: SymbolKey,
+    region: SymbolKey,
 ) -> Option<FieldType> {
     let symbol_table = db.symbol_table(uri);
     let def_types = db.def_types(uri);
@@ -101,7 +102,7 @@ pub(super) fn resolve_field_type(
         SymbolKind::FieldDef => symbol,
         SymbolKind::FieldRef => symbol_table.symbols.iter().find(|other| {
             other.kind == SymbolKind::FieldDef
-                && other.region == symbol.region
+                && other.region == region
                 && symbol.idx.is_defined_by(&other.idx)
         })?,
         _ => return None,

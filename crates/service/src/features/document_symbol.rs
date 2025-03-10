@@ -133,7 +133,7 @@ impl LanguageService {
                         DocumentSymbol {
                             name: render_symbol_name(symbol, self),
                             detail: self
-                                .resolve_field_type(uri, symbol.key)
+                                .resolve_field_type(uri, symbol.key, symbol.region)
                                 .map(|ty| ty.render(self).to_string()),
                             kind: LspSymbolKind::Field,
                             tags: None,

@@ -84,7 +84,12 @@ pub(crate) trait TypesAnalyzerCtx: SyntaxTreeCtx + SymbolTablesCtx {
     ) -> bool;
 
     #[salsa::memoized]
-    fn resolve_field_type(&self, uri: InternUri, key: SymbolKey) -> Option<FieldType>;
+    fn resolve_field_type(
+        &self,
+        uri: InternUri,
+        key: SymbolKey,
+        region: SymbolKey,
+    ) -> Option<FieldType>;
 }
 
 fn operand_type_matches(
