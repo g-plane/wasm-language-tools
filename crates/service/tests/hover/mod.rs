@@ -704,3 +704,72 @@ fn array_type_empty() {
     let response = service.hover(create_params(uri, 3, 24));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn field_decl() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field $x i32))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 2, 24));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn field_with_mut() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field (mut i32)))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 2, 26));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn field_with_ref_type() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field (ref 0)))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 2, 26));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn field_int_idx() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field (mut i32))))
+  (func
+    struct.get 0 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 4, 17));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn field_ident_idx() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field $x (mut i32))))
+  (func
+    struct.get 0 $x))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 4, 18));
+    assert_json_snapshot!(response);
+}

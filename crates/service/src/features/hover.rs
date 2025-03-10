@@ -23,11 +23,10 @@ impl LanguageService {
         let root = SyntaxNode::new_root(self.root(uri));
         let token = find_meaningful_token(self, uri, &root, params.position)?;
         let line_index = self.line_index(uri);
+        let symbol_table = self.symbol_table(uri);
 
         match token.kind() {
             SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
-                let symbol_table = self.symbol_table(uri);
-
                 let parent = token.parent()?;
                 let key = SymbolKey::new(&parent);
                 symbol_table
@@ -98,6 +97,17 @@ impl LanguageService {
                                             token.text_range(),
                                         )),
                                     }),
+                                SymbolKind::FieldRef => {
+                                    symbol_table.find_def(key).map(|symbol| Hover {
+                                        contents: Union3::A(create_field_def_hover(
+                                            self, symbol, uri,
+                                        )),
+                                        range: Some(helpers::rowan_range_to_lsp_range(
+                                            &line_index,
+                                            token.text_range(),
+                                        )),
+                                    })
+                                }
                                 _ => None,
                             })
                     })
@@ -130,10 +140,14 @@ impl LanguageService {
                 })
             }
             SyntaxKind::KEYWORD => {
-                let parent = token.parent()?;
-                let key = SymbolKey::new(&parent);
+                let node = token.parent()?;
+                let node = if node.kind() == SyntaxKind::REF_TYPE {
+                    node.parent()?
+                } else {
+                    node
+                };
+                let key = SymbolKey::new(&node);
 
-                let symbol_table = self.symbol_table(uri);
                 symbol_table
                     .symbols
                     .iter()
@@ -143,7 +157,11 @@ impl LanguageService {
                         contents: Union3::A(contents),
                         range: Some(helpers::rowan_range_to_lsp_range(
                             &line_index,
-                            token.text_range(),
+                            if matches!(token.text(), "mut" | "ref") {
+                                node.text_range()
+                            } else {
+                                token.text_range()
+                            },
                         )),
                     })
             }
@@ -193,6 +211,7 @@ fn create_def_hover(
         SymbolKind::Type => Some(create_type_def_hover(service, uri, symbol)),
         SymbolKind::GlobalDef => Some(create_global_def_hover(service, symbol, root)),
         SymbolKind::BlockDef => Some(create_block_hover(service, symbol, uri, root)),
+        SymbolKind::FieldDef => Some(create_field_def_hover(service, symbol, uri)),
         _ => None,
     }
 }
@@ -349,6 +368,27 @@ fn create_block_hover(
         symbol.idx.name,
         types_analyzer::get_block_sig(service, uri, &symbol.key.to_node(root)),
     );
+    MarkupContent {
+        kind: MarkupKind::Markdown,
+        value: format!("```wat\n{content}\n```"),
+    }
+}
+
+fn create_field_def_hover(
+    service: &LanguageService,
+    symbol: &Symbol,
+    uri: InternUri,
+) -> MarkupContent {
+    let mut content = '('.to_string();
+    content.push_str("field");
+    if let Some(name) = symbol.idx.name {
+        content.push(' ');
+        content.push_str(&service.lookup_ident(name));
+    }
+    if let Some(ty) = service.resolve_field_type(uri, symbol.key, symbol.region) {
+        let _ = write!(content, " {}", ty.render(service));
+    }
+    content.push(')');
     MarkupContent {
         kind: MarkupKind::Markdown,
         value: format!("```wat\n{content}\n```"),
