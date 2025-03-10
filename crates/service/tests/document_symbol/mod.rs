@@ -14,7 +14,7 @@ fn symbols() {
     (type $struct (struct))
     (type $array (array))
     (global $global i32)
-    (global i32)
+    (global (mut i32))
     (memory $memory 1)
     (memory 1)
     (table $table 1 funcref)

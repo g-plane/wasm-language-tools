@@ -8,8 +8,9 @@ use crate::{
     LanguageService,
 };
 use lspt::{DocumentSymbol, DocumentSymbolParams, SymbolKind as LspSymbolKind};
+use rowan::ast::AstNode;
 use rustc_hash::FxHashMap;
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::{ast::ModuleFieldGlobal, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     /// Handler for `textDocument/documentSymbol` request.
@@ -106,7 +107,38 @@ impl LanguageService {
                         },
                     ))
                 }
-                SymbolKind::GlobalDef | SymbolKind::MemoryDef | SymbolKind::TableDef => {
+                SymbolKind::GlobalDef => {
+                    let range =
+                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());
+                    Some((
+                        symbol.key,
+                        DocumentSymbol {
+                            name: render_symbol_name(symbol, self),
+                            detail: self.extract_global_type(symbol.green.clone()).map(|ty| {
+                                if ModuleFieldGlobal::cast(symbol.key.to_node(&root))
+                                    .and_then(|global| global.global_type())
+                                    .and_then(|global_type| global_type.mut_keyword())
+                                    .is_some()
+                                {
+                                    format!("(mut {})", ty.render(self))
+                                } else {
+                                    ty.render(self).to_string()
+                                }
+                            }),
+                            kind: LspSymbolKind::Variable,
+                            tags: None,
+                            deprecated: None,
+                            range,
+                            selection_range: helpers::create_selection_range(
+                                symbol,
+                                &root,
+                                &line_index,
+                            ),
+                            children: None,
+                        },
+                    ))
+                }
+                SymbolKind::MemoryDef | SymbolKind::TableDef => {
                     let range =
                         helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());
                     Some((
