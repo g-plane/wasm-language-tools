@@ -1,9 +1,5 @@
 use super::{def_type::CompositeType, TypesAnalyzerCtx};
-use crate::{
-    binder::SymbolKind,
-    idx::{Idx, InternIdent},
-    uri::InternUri,
-};
+use crate::{binder::SymbolKind, idx::Idx, uri::InternUri};
 use rowan::{ast::AstNode, GreenNodeData, Language, NodeOrToken};
 use wat_syntax::{
     ast::{FieldType as AstFieldType, StorageType as AstStorageType, ValType as AstValType},
@@ -425,7 +421,7 @@ impl From<StorageType> for OperandType {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct Fields(pub Vec<(FieldType, Option<InternIdent>)>);
+pub(crate) struct Fields(pub Vec<(FieldType, Idx)>);
 impl Fields {
     pub(crate) fn matches(
         &self,

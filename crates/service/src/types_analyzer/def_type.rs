@@ -316,7 +316,7 @@ fn substitute_def_type(
                 Ok(())
             })
         }
-        CompositeType::Struct(fields) => fields.0.iter_mut().try_for_each(|(field, name)| {
+        CompositeType::Struct(fields) => fields.0.iter_mut().try_for_each(|(field, idx)| {
             if let FieldType {
                 storage: StorageType::Val(ValType::Ref(RefType { heap_ty, .. })),
                 ..
@@ -324,7 +324,7 @@ fn substitute_def_type(
             {
                 substitute_heap_type(heap_ty, symbol_table, module, rec_group)?;
             }
-            *name = None;
+            idx.name = None;
             Ok(())
         }),
         CompositeType::Array(field) => {

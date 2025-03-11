@@ -3,6 +3,7 @@ use super::{
     types::{FieldType, Fields, ValType},
     TypesAnalyzerCtx,
 };
+use crate::idx::{Idx, IdxGen};
 use rowan::{
     ast::{support, AstNode},
     GreenNode, Language, NodeOrToken,
@@ -62,6 +63,7 @@ pub(super) fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Signatu
 }
 
 pub(super) fn extract_fields(db: &dyn TypesAnalyzerCtx, struct_ty: &StructType) -> Fields {
+    let mut field_idx_gen = IdxGen::default();
     Fields(struct_ty.fields().fold(vec![], |mut acc, field| {
         if let Some((ty, ident)) = field
             .field_types()
@@ -69,13 +71,27 @@ pub(super) fn extract_fields(db: &dyn TypesAnalyzerCtx, struct_ty: &StructType) 
             .and_then(|ty| FieldType::from_ast(&ty, db))
             .zip(field.ident_token())
         {
-            acc.push((ty, Some(db.ident(ident.text().into()))));
+            acc.push((
+                ty,
+                Idx {
+                    num: Some(field_idx_gen.pull()),
+                    name: Some(db.ident(ident.text().into())),
+                },
+            ));
         } else {
             acc.extend(
                 field
                     .field_types()
                     .filter_map(|ty| FieldType::from_ast(&ty, db))
-                    .map(|ty| (ty, None)),
+                    .map(|ty| {
+                        (
+                            ty,
+                            Idx {
+                                num: Some(field_idx_gen.pull()),
+                                name: None,
+                            },
+                        )
+                    }),
             );
         }
         acc

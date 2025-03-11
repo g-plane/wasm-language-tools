@@ -202,7 +202,7 @@ impl Display for FieldsRender<'_> {
                 write!(f, " ")?;
             }
             write!(f, "(field ")?;
-            if let Some(name) = field.1 {
+            if let Some(name) = field.1.name {
                 write!(f, "{} ", self.db.lookup_ident(name))?;
             }
             write!(f, "{}", field.0.render(self.db))?;

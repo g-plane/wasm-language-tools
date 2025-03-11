@@ -1,7 +1,7 @@
 use crate::{
     binder::{SymbolKey, SymbolKind, SymbolTablesCtx},
     data_set, helpers,
-    idx::{IdentsCtx, Idx},
+    idx::Idx,
     syntax_tree::SyntaxTreeCtx,
     types_analyzer::{self, CompositeType, Fields, OperandType, TypesAnalyzerCtx, ValType},
     uri::{InternUri, UrisCtx},
@@ -935,12 +935,8 @@ fn get_cmp_list(
                         })
                         .map(|def_type| &def_type.comp)
                     {
-                        items.extend(fields.iter().enumerate().map(|(i, (ty, ident))| {
-                            let label = if let Some(ident) = ident {
-                                service.lookup_ident(*ident).to_string()
-                            } else {
-                                i.to_string()
-                            };
+                        items.extend(fields.iter().map(|(ty, idx)| {
+                            let label = idx.render(service).to_string();
                             CompletionItem {
                                 label: label.clone(),
                                 kind: Some(CompletionItemKind::Field),
