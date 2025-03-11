@@ -419,6 +419,11 @@ impl From<StorageType> for OperandType {
         }
     }
 }
+impl From<FieldType> for OperandType {
+    fn from(value: FieldType) -> Self {
+        value.storage.into()
+    }
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct Fields(pub Vec<(FieldType, Idx)>);

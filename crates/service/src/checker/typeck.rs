@@ -2,8 +2,9 @@ use crate::{
     binder::{SymbolKey, SymbolTable},
     data_set, helpers,
     types_analyzer::{
-        get_block_sig, resolve_array_type_with_idx, resolve_br_types, CompositeType, HeapType,
-        OperandType, RefType, ResolvedSig, TypesAnalyzerCtx, ValType,
+        get_block_sig, resolve_array_type_with_idx, resolve_br_types,
+        resolve_field_type_with_struct_idx, CompositeType, HeapType, OperandType, RefType,
+        ResolvedSig, TypesAnalyzerCtx, ValType,
     },
     uri::{InternUri, UrisCtx},
     LanguageService,
@@ -581,10 +582,77 @@ fn resolve_sig(
                 params: vec![],
                 results: vec![OperandType::Any],
             }),
-        "struct.get" => ResolvedSig {
-            params: vec![],
-            results: vec![OperandType::Any],
+        "struct.get" => {
+            let mut immediates = instr.immediates();
+            immediates
+                .next()
+                .zip(immediates.next())
+                .and_then(|(struct_ref, field_ref)| {
+                    resolve_field_type_with_struct_idx(
+                        shared.service,
+                        shared.uri,
+                        &struct_ref,
+                        &field_ref,
+                    )
+                })
+                .map(|(idx, ty)| ResolvedSig {
+                    params: vec![OperandType::Val(ValType::Ref(RefType {
+                        heap_ty: HeapType::Type(idx),
+                        nullable: true,
+                    }))],
+                    results: vec![ty.unwrap_or(OperandType::Any)],
+                })
+                .unwrap_or_else(|| ResolvedSig {
+                    params: vec![],
+                    results: vec![OperandType::Any],
+                })
+        }
+        "struct.get_s" | "struct.get_u" => ResolvedSig {
+            params: instr
+                .immediates()
+                .next()
+                .and_then(|immediate| {
+                    shared
+                        .symbol_table
+                        .find_def(SymbolKey::new(immediate.syntax()))
+                })
+                .map(|symbol| {
+                    vec![OperandType::Val(ValType::Ref(RefType {
+                        heap_ty: HeapType::Type(symbol.idx),
+                        nullable: true,
+                    }))]
+                })
+                .unwrap_or_default(),
+            results: vec![OperandType::Val(ValType::I32)],
         },
+        "struct.set" => {
+            let mut immediates = instr.immediates();
+            immediates
+                .next()
+                .zip(immediates.next())
+                .and_then(|(struct_ref, field_ref)| {
+                    resolve_field_type_with_struct_idx(
+                        shared.service,
+                        shared.uri,
+                        &struct_ref,
+                        &field_ref,
+                    )
+                })
+                .map(|(idx, ty)| ResolvedSig {
+                    params: vec![
+                        OperandType::Val(ValType::Ref(RefType {
+                            heap_ty: HeapType::Type(idx),
+                            nullable: true,
+                        })),
+                        ty.unwrap_or(OperandType::Any),
+                    ],
+                    results: vec![],
+                })
+                .unwrap_or_else(|| ResolvedSig {
+                    params: vec![OperandType::Any],
+                    results: vec![],
+                })
+        }
         "array.new" => {
             let mut sig = instr
                 .immediates()
@@ -701,7 +769,7 @@ fn resolve_sig(
             })
             .unwrap_or_else(|| ResolvedSig {
                 params: vec![],
-                results: vec![OperandType::Any],
+                results: vec![OperandType::Val(ValType::I32)],
             }),
         "array.set" => instr
             .immediates()

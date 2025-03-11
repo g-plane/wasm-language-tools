@@ -124,3 +124,21 @@ pub(super) fn resolve_field_type(
         None
     }
 }
+
+pub(crate) fn resolve_field_type_with_struct_idx(
+    service: &LanguageService,
+    uri: InternUri,
+    struct_ref: &Immediate,
+    field_ref: &Immediate,
+) -> Option<(Idx, Option<OperandType>)> {
+    let symbol_table = service.symbol_table(uri);
+    let struct_def_symbol = symbol_table.find_def(SymbolKey::new(struct_ref.syntax()))?;
+    let ty = service
+        .resolve_field_type(
+            uri,
+            SymbolKey::new(field_ref.syntax()),
+            struct_def_symbol.key,
+        )
+        .map(|ty| ty.into());
+    Some((struct_def_symbol.idx, ty))
+}

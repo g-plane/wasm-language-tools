@@ -1,0 +1,43 @@
+---
+source: crates/service/tests/diagnostics/typeck/structs.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 18,
+          "character": 20
+        },
+        "end": {
+          "line": 18,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i64], found [i32] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 17,
+                "character": 4
+              },
+              "end": {
+                "line": 18,
+                "character": 20
+              }
+            }
+          },
+          "message": "expected type `i64`, found `i32`"
+        }
+      ]
+    }
+  ]
+}
