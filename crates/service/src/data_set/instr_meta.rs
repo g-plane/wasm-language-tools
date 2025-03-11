@@ -1438,7 +1438,10 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "ref.is_null",
         ResolvedSig {
-            params: vec![OperandType::Any],
+            params: vec![OperandType::Val(ValType::Ref(RefType {
+                heap_ty: HeapType::Any,
+                nullable: true,
+            }))],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
