@@ -10,7 +10,7 @@ pub(crate) use self::{
     def_type::{CompositeType, DefType},
     resolver::{resolve_array_type_with_idx, resolve_br_types, resolve_param_types},
     signature::{get_block_sig, ResolvedSig},
-    types::{HeapType, OperandType, RefType, ValType},
+    types::{Fields, HeapType, OperandType, RefType, ValType},
 };
 use crate::{
     binder::{SymbolKey, SymbolTablesCtx},

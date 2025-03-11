@@ -1,9 +1,9 @@
 use crate::{
     binder::{SymbolKey, SymbolKind, SymbolTablesCtx},
     data_set, helpers,
-    idx::Idx,
+    idx::{IdentsCtx, Idx},
     syntax_tree::SyntaxTreeCtx,
-    types_analyzer::{self, CompositeType, OperandType, TypesAnalyzerCtx, ValType},
+    types_analyzer::{self, CompositeType, Fields, OperandType, TypesAnalyzerCtx, ValType},
     uri::{InternUri, UrisCtx},
     LanguageService,
 };
@@ -480,9 +480,19 @@ fn add_cmp_ctx_for_immediates(
                 }
                 ctx.push(CmpCtx::MemArg);
             }
-            Some(("struct", _)) => {
+            Some(("struct", snd)) => {
                 if is_current_first_immediate {
                     ctx.push(CmpCtx::TypeDef(Some(PreferredType::Struct)));
+                }
+                if matches!(snd, "get" | "get_s" | "get_u" | "set") {
+                    let first_immediate = if node.kind() == SyntaxKind::IMMEDIATE {
+                        node.prev_sibling()
+                    } else {
+                        node.first_child()
+                    };
+                    if let Some(immediate) = first_immediate {
+                        ctx.push(CmpCtx::Field(SymbolKey::new(&immediate)));
+                    }
                 }
             }
             Some(("array", snd)) if snd != "len" => {
@@ -512,6 +522,7 @@ enum CmpCtx {
     Memory,
     Table,
     Block,
+    Field(SymbolKey),
     AbsHeapType,
     PackedType,
     KeywordModule,
@@ -914,6 +925,40 @@ fn get_cmp_list(
                                 }
                             }),
                     );
+                }
+                CmpCtx::Field(struct_ref_key) => {
+                    let def_types = service.def_types(uri);
+                    if let Some(CompositeType::Struct(Fields(fields))) = symbol_table
+                        .find_def(struct_ref_key)
+                        .and_then(|symbol| {
+                            def_types.iter().find(|def_type| def_type.key == symbol.key)
+                        })
+                        .map(|def_type| &def_type.comp)
+                    {
+                        items.extend(fields.iter().enumerate().map(|(i, (ty, ident))| {
+                            let label = if let Some(ident) = ident {
+                                service.lookup_ident(*ident).to_string()
+                            } else {
+                                i.to_string()
+                            };
+                            CompletionItem {
+                                label: label.clone(),
+                                kind: Some(CompletionItemKind::Field),
+                                text_edit: Some(Union2::A(TextEdit {
+                                    range: helpers::rowan_range_to_lsp_range(
+                                        line_index,
+                                        token.text_range(),
+                                    ),
+                                    new_text: label,
+                                })),
+                                label_details: Some(CompletionItemLabelDetails {
+                                    description: Some(ty.render(service).to_string()),
+                                    ..Default::default()
+                                }),
+                                ..Default::default()
+                            }
+                        }));
+                    }
                 }
                 CmpCtx::AbsHeapType => {
                     items.extend(

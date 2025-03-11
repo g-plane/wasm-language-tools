@@ -4,6 +4,7 @@ mod array;
 mod block;
 mod data;
 mod elem;
+mod field;
 mod func;
 mod func_type;
 mod global;

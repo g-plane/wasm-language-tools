@@ -1,0 +1,86 @@
+---
+source: crates/service/tests/completion/field.rs
+expression: response
+---
+[
+  {
+    "label": "$x",
+    "labelDetails": {
+      "description": "i32"
+    },
+    "kind": 5,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 17
+        },
+        "end": {
+          "line": 4,
+          "character": 19
+        }
+      },
+      "newText": "$x"
+    }
+  },
+  {
+    "label": "$y",
+    "labelDetails": {
+      "description": "(mut (ref 0))"
+    },
+    "kind": 5,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 17
+        },
+        "end": {
+          "line": 4,
+          "character": 19
+        }
+      },
+      "newText": "$y"
+    }
+  },
+  {
+    "label": "2",
+    "labelDetails": {
+      "description": "f32"
+    },
+    "kind": 5,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 17
+        },
+        "end": {
+          "line": 4,
+          "character": 19
+        }
+      },
+      "newText": "2"
+    }
+  },
+  {
+    "label": "3",
+    "labelDetails": {
+      "description": "f64"
+    },
+    "kind": 5,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 17
+        },
+        "end": {
+          "line": 4,
+          "character": 19
+        }
+      },
+      "newText": "3"
+    }
+  }
+]
