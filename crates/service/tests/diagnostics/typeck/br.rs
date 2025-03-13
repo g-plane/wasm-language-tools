@@ -434,3 +434,57 @@ fn br_table_correct() {
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
+
+#[test]
+fn br_on_null() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $vec (struct))
+  (func (param $v (ref $vec))
+    block $l (result i32)
+      local.get $v
+      i32.const 0
+      br_on_null $l
+    end)
+  (func (param $v (ref null $vec))
+    block $l (result i32)
+      i32.const 0
+      local.get $v
+      br_on_null $l
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn br_on_non_null() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $vec (struct))
+  (func (param $v (ref $vec))
+    block $l (result i32)
+      local.get $v
+      i32.const 0
+      br_on_non_null $l
+    end
+    drop)
+  (func (param $v (ref $vec))
+    block $l (result i32)
+      i32.const 0
+      local.get $v
+      br_on_non_null $l
+    end
+    drop))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

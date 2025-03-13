@@ -502,7 +502,9 @@ fn add_cmp_ctx_for_immediates(
             }
             None => match instr_name {
                 "call" | "return_call" => ctx.push(CmpCtx::Func),
-                "br" | "br_if" | "br_table" => ctx.push(CmpCtx::Block),
+                "br" | "br_if" | "br_table" | "br_on_null" | "br_on_non_null" => {
+                    ctx.push(CmpCtx::Block)
+                }
                 _ => {}
             },
             _ => {}

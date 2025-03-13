@@ -135,7 +135,10 @@ impl Checker<'_> {
                         }
                     }
                     let instr_name = instr_name.text();
-                    if matches!(instr_name, "br" | "br_if" | "br_table") {
+                    if matches!(
+                        instr_name,
+                        "br" | "br_if" | "br_table" | "br_on_null" | "br_on_non_null"
+                    ) {
                         plain
                             .immediates()
                             .filter_map(|immediate| {

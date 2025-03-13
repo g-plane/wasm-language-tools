@@ -1,0 +1,159 @@
+---
+source: crates/service/tests/diagnostics/typeck/br.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 6
+        },
+        "end": {
+          "line": 7,
+          "character": 19
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, (ref null any)], found [(ref $vec), i32]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 6,
+                "character": 6
+              },
+              "end": {
+                "line": 6,
+                "character": 17
+              }
+            }
+          },
+          "message": "expected type `(ref null any)`, found `i32`"
+        },
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 6
+              },
+              "end": {
+                "line": 5,
+                "character": 18
+              }
+            }
+          },
+          "message": "expected type `i32`, found `(ref $vec)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 4
+        },
+        "end": {
+          "line": 8,
+          "character": 7
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found [i32, (ref any)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 7,
+                "character": 6
+              },
+              "end": {
+                "line": 7,
+                "character": 19
+              }
+            }
+          },
+          "message": "expected type `i32`, found `(ref any)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 7
+        },
+        "end": {
+          "line": 8,
+          "character": 8
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 14,
+          "character": 4
+        },
+        "end": {
+          "line": 14,
+          "character": 7
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found [i32, (ref $vec)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 13,
+                "character": 6
+              },
+              "end": {
+                "line": 13,
+                "character": 19
+              }
+            }
+          },
+          "message": "expected type `i32`, found `(ref $vec)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 14,
+          "character": 7
+        },
+        "end": {
+          "line": 14,
+          "character": 8
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [i32] at the end"
+    }
+  ]
+}

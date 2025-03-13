@@ -502,6 +502,52 @@ fn resolve_sig(
                 results: vec![],
             }
         }
+        "br_on_null" => {
+            let heap_ty =
+                if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) =
+                    type_stack.stack.last()
+                {
+                    heap_ty.clone()
+                } else {
+                    HeapType::Any
+                };
+            let mut results = instr
+                .immediates()
+                .next()
+                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, &idx))
+                .unwrap_or_default();
+            let mut params = results.clone();
+            params.push(OperandType::Val(ValType::Ref(RefType {
+                heap_ty: heap_ty.clone(),
+                nullable: true,
+            })));
+            results.push(OperandType::Val(ValType::Ref(RefType {
+                heap_ty,
+                nullable: false,
+            })));
+            ResolvedSig { params, results }
+        }
+        "br_on_non_null" => {
+            let heap_ty =
+                if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) =
+                    type_stack.stack.last()
+                {
+                    heap_ty.clone()
+                } else {
+                    HeapType::Any
+                };
+            let results = instr
+                .immediates()
+                .next()
+                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, &idx))
+                .unwrap_or_default();
+            let mut params = results.clone();
+            params.push(OperandType::Val(ValType::Ref(RefType {
+                heap_ty,
+                nullable: true,
+            })));
+            ResolvedSig { params, results }
+        }
         "select" => {
             let ty = if let Some(ty) = instr
                 .immediates()

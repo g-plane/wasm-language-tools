@@ -53,6 +53,21 @@ fn simple_reachable() {
     else
       return
     end
+    nop)
+
+  (type $s (struct))
+  (func (param (ref $s))
+    block $l
+      local.get 0
+      br_on_null $l
+      drop
+    end
+    nop)
+  (func (param (ref null $s))
+    block $l
+      local.get 0
+      br_on_non_null $l
+    end
     nop))
 ";
     let mut service = LanguageService::default();
