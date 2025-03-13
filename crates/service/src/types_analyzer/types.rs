@@ -104,78 +104,8 @@ impl ValType {
                 for node_or_token in children {
                     match node_or_token {
                         NodeOrToken::Node(node) if node.kind() == SyntaxKind::HEAP_TYPE.into() => {
-                            return match node.children().next() {
-                                Some(NodeOrToken::Node(node))
-                                    if node.kind() == SyntaxKind::INDEX.into() =>
-                                {
-                                    let token = node.children().next()?.into_token()?;
-                                    match WatLanguage::kind_from_raw(token.kind()) {
-                                        SyntaxKind::UNSIGNED_INT => Some(ValType::Ref(RefType {
-                                            heap_ty: HeapType::Type(Idx {
-                                                num: token.text().parse().ok(),
-                                                name: None,
-                                            }),
-                                            nullable,
-                                        })),
-                                        SyntaxKind::IDENT => Some(ValType::Ref(RefType {
-                                            heap_ty: HeapType::Type(Idx {
-                                                num: None,
-                                                name: Some(db.ident(token.text().into())),
-                                            }),
-                                            nullable,
-                                        })),
-                                        _ => None,
-                                    }
-                                }
-                                Some(NodeOrToken::Token(token))
-                                    if token.kind() == SyntaxKind::TYPE_KEYWORD.into() =>
-                                {
-                                    match token.text() {
-                                        "any" => Some(ValType::Ref(RefType {
-                                            heap_ty: HeapType::Any,
-                                            nullable,
-                                        })),
-                                        "eq" => Some(ValType::Ref(RefType {
-                                            heap_ty: HeapType::Eq,
-                                            nullable,
-                                        })),
-                                        "i31" => Some(ValType::Ref(RefType {
-                                            heap_ty: HeapType::I31,
-                                            nullable,
-                                        })),
-                                        "struct" => Some(ValType::Ref(RefType {
-                                            heap_ty: HeapType::Struct,
-                                            nullable,
-                                        })),
-                                        "array" => Some(ValType::Ref(RefType {
-                                            heap_ty: HeapType::Array,
-                                            nullable,
-                                        })),
-                                        "none" => Some(ValType::Ref(RefType {
-                                            heap_ty: HeapType::None,
-                                            nullable,
-                                        })),
-                                        "func" => Some(ValType::Ref(RefType {
-                                            heap_ty: HeapType::Func,
-                                            nullable,
-                                        })),
-                                        "nofunc" => Some(ValType::Ref(RefType {
-                                            heap_ty: HeapType::NoFunc,
-                                            nullable,
-                                        })),
-                                        "extern" => Some(ValType::Ref(RefType {
-                                            heap_ty: HeapType::Extern,
-                                            nullable,
-                                        })),
-                                        "noextern" => Some(ValType::Ref(RefType {
-                                            heap_ty: HeapType::NoExtern,
-                                            nullable,
-                                        })),
-                                        _ => None,
-                                    }
-                                }
-                                _ => None,
-                            };
+                            return HeapType::from_green(node, db)
+                                .map(|heap_ty| ValType::Ref(RefType { heap_ty, nullable }));
                         }
                         NodeOrToken::Token(token)
                             if token.kind() == SyntaxKind::KEYWORD.into()
@@ -265,6 +195,41 @@ pub(crate) enum HeapType {
     Rec(u32), // internal use, not actually a valid heap type
 }
 impl HeapType {
+    pub(crate) fn from_green(node: &GreenNodeData, db: &dyn TypesAnalyzerCtx) -> Option<Self> {
+        match node.children().next() {
+            Some(NodeOrToken::Node(node)) if node.kind() == SyntaxKind::INDEX.into() => {
+                let token = node.children().next()?.into_token()?;
+                match WatLanguage::kind_from_raw(token.kind()) {
+                    SyntaxKind::UNSIGNED_INT => Some(HeapType::Type(Idx {
+                        num: token.text().parse().ok(),
+                        name: None,
+                    })),
+                    SyntaxKind::IDENT => Some(HeapType::Type(Idx {
+                        num: None,
+                        name: Some(db.ident(token.text().into())),
+                    })),
+                    _ => None,
+                }
+            }
+            Some(NodeOrToken::Token(token)) if token.kind() == SyntaxKind::TYPE_KEYWORD.into() => {
+                match token.text() {
+                    "any" => Some(HeapType::Any),
+                    "eq" => Some(HeapType::Eq),
+                    "i31" => Some(HeapType::I31),
+                    "struct" => Some(HeapType::Struct),
+                    "array" => Some(HeapType::Array),
+                    "none" => Some(HeapType::None),
+                    "func" => Some(HeapType::Func),
+                    "nofunc" => Some(HeapType::NoFunc),
+                    "extern" => Some(HeapType::Extern),
+                    "noextern" => Some(HeapType::NoExtern),
+                    _ => None,
+                }
+            }
+            _ => None,
+        }
+    }
+
     pub(crate) fn matches(
         &self,
         other: &Self,

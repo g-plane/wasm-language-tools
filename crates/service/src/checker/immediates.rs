@@ -283,7 +283,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
             check_immediate::<true>(
                 diags,
                 &mut immediates,
-                SyntaxKind::HEAP_TYPE,
+                [SyntaxKind::HEAP_TYPE, SyntaxKind::IDENT, SyntaxKind::INT],
                 "heap type",
                 &instr_name,
                 line_index,

@@ -15,6 +15,7 @@ mod local;
 mod mem_arg;
 mod memory;
 mod param;
+mod ref_instr;
 mod result;
 mod structs;
 mod table;

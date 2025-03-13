@@ -1,0 +1,111 @@
+---
+source: crates/service/tests/diagnostics/typeck/ref_instr.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 19
+        },
+        "end": {
+          "line": 4,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref struct)], found [(ref null struct)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 4
+              },
+              "end": {
+                "line": 4,
+                "character": 19
+              }
+            }
+          },
+          "message": "expected type `(ref struct)`, found `(ref null struct)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 14
+        },
+        "end": {
+          "line": 6,
+          "character": 15
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref 0)], found [(ref null 0)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 6,
+                "character": 4
+              },
+              "end": {
+                "line": 6,
+                "character": 14
+              }
+            }
+          },
+          "message": "expected type `(ref 0)`, found `(ref null 0)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 15
+        },
+        "end": {
+          "line": 8,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref $s)], found [(ref null $s)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 8,
+                "character": 4
+              },
+              "end": {
+                "line": 8,
+                "character": 15
+              }
+            }
+          },
+          "message": "expected type `(ref $s)`, found `(ref null $s)`"
+        }
+      ]
+    }
+  ]
+}

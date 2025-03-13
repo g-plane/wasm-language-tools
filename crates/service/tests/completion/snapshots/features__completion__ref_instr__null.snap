@@ -1,0 +1,63 @@
+---
+source: crates/service/tests/completion/ref_instr.rs
+expression: response
+---
+[
+  {
+    "label": "$s",
+    "kind": 8,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 17
+        },
+        "end": {
+          "line": 3,
+          "character": 18
+        }
+      },
+      "newText": "$s"
+    }
+  },
+  {
+    "label": "any",
+    "kind": 7
+  },
+  {
+    "label": "eq",
+    "kind": 7
+  },
+  {
+    "label": "i31",
+    "kind": 7
+  },
+  {
+    "label": "struct",
+    "kind": 7
+  },
+  {
+    "label": "array",
+    "kind": 7
+  },
+  {
+    "label": "none",
+    "kind": 7
+  },
+  {
+    "label": "func",
+    "kind": 7
+  },
+  {
+    "label": "nofunc",
+    "kind": 7
+  },
+  {
+    "label": "extern",
+    "kind": 7
+  },
+  {
+    "label": "noextern",
+    "kind": 7
+  }
+]

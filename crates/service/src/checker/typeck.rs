@@ -1,6 +1,7 @@
 use crate::{
     binder::{SymbolKey, SymbolTable},
     data_set, helpers,
+    idx::{IdentsCtx, Idx},
     types_analyzer::{
         get_block_sig, resolve_array_type_with_idx, resolve_br_types,
         resolve_field_type_with_struct_idx, CompositeType, HeapType, OperandType, RefType,
@@ -18,7 +19,7 @@ use rowan::{
 };
 use wat_syntax::{
     ast::{BlockInstr, Import, Instr, PlainInstr},
-    SyntaxKind, SyntaxNode, SyntaxNodePtr,
+    SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodePtr,
 };
 
 const DIAGNOSTIC_CODE: &str = "type-check";
@@ -901,6 +902,40 @@ fn resolve_sig(
                 results: vec![],
             })
             .unwrap_or_default(),
+        "ref.null" => {
+            let ty = instr
+                .immediates()
+                .next()
+                .and_then(|immediate| immediate.syntax().first_child_or_token())
+                .and_then(|element| match element {
+                    SyntaxElement::Node(node) if node.kind() == SyntaxKind::HEAP_TYPE => {
+                        HeapType::from_green(&node.green(), shared.service)
+                    }
+                    SyntaxElement::Token(token) if token.kind() == SyntaxKind::IDENT => {
+                        Some(HeapType::Type(Idx {
+                            num: None,
+                            name: Some(shared.service.ident(token.text().into())),
+                        }))
+                    }
+                    SyntaxElement::Token(token) if token.kind() == SyntaxKind::INT => {
+                        Some(HeapType::Type(Idx {
+                            num: token.text().parse().ok(),
+                            name: None,
+                        }))
+                    }
+                    _ => None,
+                })
+                .map_or(OperandType::Any, |heap_ty| {
+                    OperandType::Val(ValType::Ref(RefType {
+                        heap_ty,
+                        nullable: true,
+                    }))
+                });
+            ResolvedSig {
+                params: vec![],
+                results: vec![ty],
+            }
+        }
         _ => data_set::INSTR_SIG
             .get(instr_name)
             .cloned()

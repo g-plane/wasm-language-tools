@@ -500,10 +500,13 @@ fn add_cmp_ctx_for_immediates(
                     ctx.push(CmpCtx::TypeDef(Some(PreferredType::Array)));
                 }
             }
+            Some(("ref", "null")) => {
+                ctx.extend([CmpCtx::TypeDef(None), CmpCtx::AbsHeapType]);
+            }
             None => match instr_name {
                 "call" | "return_call" => ctx.push(CmpCtx::Func),
                 "br" | "br_if" | "br_table" | "br_on_null" | "br_on_non_null" => {
-                    ctx.push(CmpCtx::Block)
+                    ctx.push(CmpCtx::Block);
                 }
                 _ => {}
             },
