@@ -508,7 +508,7 @@ fn resolve_sig(
                 if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) =
                     type_stack.stack.last()
                 {
-                    heap_ty.clone()
+                    *heap_ty
                 } else {
                     HeapType::Any
                 };
@@ -519,7 +519,7 @@ fn resolve_sig(
                 .unwrap_or_default();
             let mut params = results.clone();
             params.push(OperandType::Val(ValType::Ref(RefType {
-                heap_ty: heap_ty.clone(),
+                heap_ty,
                 nullable: true,
             })));
             results.push(OperandType::Val(ValType::Ref(RefType {
@@ -533,7 +533,7 @@ fn resolve_sig(
                 if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) =
                     type_stack.stack.last()
                 {
-                    heap_ty.clone()
+                    *heap_ty
                 } else {
                     HeapType::Any
                 };
@@ -941,13 +941,13 @@ fn resolve_sig(
                 if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) =
                     type_stack.stack.last()
                 {
-                    heap_ty.clone()
+                    *heap_ty
                 } else {
                     HeapType::Any
                 };
             ResolvedSig {
                 params: vec![OperandType::Val(ValType::Ref(RefType {
-                    heap_ty: heap_ty.clone(),
+                    heap_ty,
                     nullable: true,
                 }))],
                 results: vec![OperandType::Val(ValType::Ref(RefType {
