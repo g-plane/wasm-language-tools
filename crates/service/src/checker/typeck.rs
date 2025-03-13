@@ -936,6 +936,26 @@ fn resolve_sig(
                 results: vec![ty],
             }
         }
+        "ref.as_non_null" => {
+            let heap_ty =
+                if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) =
+                    type_stack.stack.last()
+                {
+                    heap_ty.clone()
+                } else {
+                    HeapType::Any
+                };
+            ResolvedSig {
+                params: vec![OperandType::Val(ValType::Ref(RefType {
+                    heap_ty: heap_ty.clone(),
+                    nullable: true,
+                }))],
+                results: vec![OperandType::Val(ValType::Ref(RefType {
+                    heap_ty,
+                    nullable: false,
+                }))],
+            }
+        }
         _ => data_set::INSTR_SIG
             .get(instr_name)
             .cloned()
