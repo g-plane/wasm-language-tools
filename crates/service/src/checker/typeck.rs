@@ -448,6 +448,35 @@ fn resolve_sig(
                 .and_then(|symbol| shared.service.extract_type(symbol.green.clone()))
                 .map_or(OperandType::Any, OperandType::Val)],
         },
+        "local.set" => ResolvedSig {
+            params: vec![instr
+                .immediates()
+                .next()
+                .and_then(|idx| {
+                    shared
+                        .symbol_table
+                        .find_param_or_local_def(SymbolKey::new(idx.syntax()))
+                })
+                .and_then(|symbol| shared.service.extract_type(symbol.green.clone()))
+                .map_or(OperandType::Any, OperandType::Val)],
+            results: vec![],
+        },
+        "local.tee" => {
+            let ty = instr
+                .immediates()
+                .next()
+                .and_then(|idx| {
+                    shared
+                        .symbol_table
+                        .find_param_or_local_def(SymbolKey::new(idx.syntax()))
+                })
+                .and_then(|symbol| shared.service.extract_type(symbol.green.clone()))
+                .map_or(OperandType::Any, OperandType::Val);
+            ResolvedSig {
+                params: vec![ty.clone()],
+                results: vec![ty],
+            }
+        }
         "global.get" => ResolvedSig {
             params: vec![],
             results: vec![instr
