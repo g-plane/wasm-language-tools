@@ -9,6 +9,7 @@ mod block_loop;
 mod br;
 mod call_indirect;
 mod drop;
+mod global;
 mod local;
 mod ref_instr;
 mod returning;

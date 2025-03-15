@@ -486,6 +486,15 @@ fn resolve_sig(
                 .and_then(|symbol| shared.service.extract_global_type(symbol.green.clone()))
                 .map_or(OperandType::Any, OperandType::Val)],
         },
+        "global.set" => ResolvedSig {
+            params: vec![instr
+                .immediates()
+                .next()
+                .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+                .and_then(|symbol| shared.service.extract_global_type(symbol.green.clone()))
+                .map_or(OperandType::Any, OperandType::Val)],
+            results: vec![],
+        },
         "return" => ResolvedSig {
             params: instr
                 .syntax()
