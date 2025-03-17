@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/uninit.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 14
+        },
+        "end": {
+          "line": 3,
+          "character": 15
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find param or local `0` in this scope"
+    }
+  ]
+}

@@ -148,6 +148,13 @@ impl ValType {
             self == other
         }
     }
+
+    pub(crate) fn defaultable(&self) -> bool {
+        match self {
+            ValType::I32 | ValType::I64 | ValType::F32 | ValType::F64 | ValType::V128 => true,
+            ValType::Ref(RefType { nullable, .. }) => *nullable,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]

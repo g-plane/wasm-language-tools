@@ -18,6 +18,7 @@ mod subtyping;
 mod syntax;
 mod typeck;
 mod undef;
+mod uninit;
 mod unknown_instr;
 mod unreachable;
 mod unused;
@@ -57,6 +58,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                     &symbol_table,
                     &node,
                 );
+                uninit::check(service, &mut diagnostics, &line_index, &symbol_table, &node);
             }
             SyntaxKind::MODULE_FIELD_GLOBAL => {
                 typeck::check_global(

@@ -17,6 +17,7 @@ mod subtyping;
 mod syntax;
 mod typeck;
 mod undef;
+mod uninit;
 mod unknown_instr;
 mod unreachable;
 mod unused;

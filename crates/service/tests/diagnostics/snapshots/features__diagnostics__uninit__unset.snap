@@ -1,0 +1,41 @@
+---
+source: crates/service/tests/diagnostics/uninit.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 14
+        },
+        "end": {
+          "line": 3,
+          "character": 15
+        }
+      },
+      "severity": 1,
+      "code": "uninit",
+      "source": "wat",
+      "message": "local `0` is used before being initialized"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 19
+        },
+        "end": {
+          "line": 8,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "uninit",
+      "source": "wat",
+      "message": "local `1` is used before being initialized"
+    }
+  ]
+}
