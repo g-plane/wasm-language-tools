@@ -63,3 +63,32 @@ fn correct() {
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
+
+#[test]
+fn return_call_indirect() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table 0 funcref)
+  (type (func (param f32) (result f64)))
+  (func
+    i32.const 0
+    return_call_indirect (type 0))
+  (func
+    f32.const 0
+    return_call_indirect (type 0))
+  (func
+    i32.const 0
+    f32.const 0
+    return_call_indirect 0 (type 0))
+  (func
+    f32.const 0
+    i32.const 0
+    return_call_indirect 0 (type 0)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

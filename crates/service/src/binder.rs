@@ -352,7 +352,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                                 symbols.push(symbol);
                             });
                     }
-                    Some("call_indirect") => {
+                    Some("call_indirect" | "return_call_indirect") => {
                         if let Some(symbol) =
                             create_first_optional_ref_symbol(db, instr, SymbolKind::TableRef)
                         {

@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/typeck/mod.rs
+source: crates/service/tests/diagnostics/typeck/call.rs
 expression: response
 ---
 {
@@ -13,7 +13,7 @@ expression: response
         },
         "end": {
           "line": 3,
-          "character": 34
+          "character": 41
         }
       },
       "severity": 1,
@@ -27,11 +27,11 @@ expression: response
             "range": {
               "start": {
                 "line": 3,
-                "character": 20
+                "character": 27
               },
               "end": {
                 "line": 3,
-                "character": 33
+                "character": 40
               }
             }
           },

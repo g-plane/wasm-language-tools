@@ -437,7 +437,7 @@ fn add_cmp_ctx_for_immediates(
     if has_leading_l_paren {
         match instr_name {
             "select" => ctx.push(CmpCtx::KeywordResult),
-            "call_indirect" => {
+            "call_indirect" | "return_call_indirect" => {
                 ctx.extend([
                     CmpCtx::KeywordType,
                     CmpCtx::KeywordParam,
@@ -507,6 +507,13 @@ fn add_cmp_ctx_for_immediates(
                 "call" | "return_call" => ctx.push(CmpCtx::Func),
                 "br" | "br_if" | "br_table" | "br_on_null" | "br_on_non_null" => {
                     ctx.push(CmpCtx::Block);
+                }
+                "call_indirect" | "return_call_indirect" => {
+                    if is_current_first_immediate {
+                        ctx.push(CmpCtx::Table);
+                    } else {
+                        ctx.push(CmpCtx::TypeDef(Some(PreferredType::Func)));
+                    }
                 }
                 _ => {}
             },

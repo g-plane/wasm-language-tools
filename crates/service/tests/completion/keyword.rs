@@ -181,3 +181,59 @@ fn block_type_result_keyword_incomplete() {
     let response = service.completion(create_params(uri, 0, 23));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn call_indirect() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (call_indirect ())))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 3, 20));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn call_indirect_incomplete() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (call_indirect (p))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 3, 21));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn return_call_indirect() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (return_call_indirect ())))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 3, 27));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn return_call_indirect_incomplete() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (return_call_indirect (p))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 3, 28));
+    assert_json_snapshot!(response);
+}

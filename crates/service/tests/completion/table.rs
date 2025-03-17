@@ -178,3 +178,123 @@ fn export_following_int_index() {
     let response = service.completion(create_params(uri, 4, 21));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn call_indirect() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table 0 funcref)
+  (func
+    call_indirect ))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 4, 18));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn call_indirect_following_int_idx() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table 0 funcref)
+  (func
+    call_indirect 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 4, 19));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn call_indirect_following_dollar() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table $table 0 funcref)
+  (func
+    call_indirect $))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 4, 19));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn call_indirect_incomplete_ident() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table $table 0 funcref)
+  (func
+    call_indirect $t))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 4, 20));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn return_call_indirect() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table 0 funcref)
+  (func
+    return_call_indirect ))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 4, 25));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn return_call_indirect_following_int_idx() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table 0 funcref)
+  (func
+    return_call_indirect 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 4, 26));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn return_call_indirect_following_dollar() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table $table 0 funcref)
+  (func
+    return_call_indirect $))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 4, 26));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn return_call_indirect_incomplete_ident() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table $table 0 funcref)
+  (func
+    return_call_indirect $t))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 4, 27));
+    assert_json_snapshot!(response);
+}

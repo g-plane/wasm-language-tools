@@ -7,6 +7,7 @@ mod block;
 mod block_if;
 mod block_loop;
 mod br;
+mod call;
 mod call_indirect;
 mod drop;
 mod global;
@@ -130,22 +131,6 @@ fn global_type_mismatch() {
     (func (result i32)
         (i32.add (global.get 0) (i32.const 1))
     )
-)
-";
-    let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
-    let response = service.pull_diagnostics(create_params(uri));
-    assert_json_snapshot!(response);
-}
-
-#[test]
-fn call_type_mismatch() {
-    let uri = "untitled:test".to_string();
-    let source = "
-(module
-    (func $f1 (param f32))
-    (func (call $f1 (i32.const 0)))
 )
 ";
     let mut service = LanguageService::default();

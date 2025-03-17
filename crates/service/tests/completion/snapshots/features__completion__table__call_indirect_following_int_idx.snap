@@ -1,0 +1,23 @@
+---
+source: crates/service/tests/completion/table.rs
+expression: response
+---
+[
+  {
+    "label": "0",
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 18
+        },
+        "end": {
+          "line": 4,
+          "character": 19
+        }
+      },
+      "newText": "0"
+    }
+  }
+]

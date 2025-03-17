@@ -1,0 +1,42 @@
+---
+source: crates/service/tests/completion/func_type.rs
+expression: response
+---
+[
+  {
+    "label": "$a",
+    "kind": 8,
+    "sortText": "1",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 27
+        },
+        "end": {
+          "line": 5,
+          "character": 28
+        }
+      },
+      "newText": "$a"
+    }
+  },
+  {
+    "label": "$b",
+    "kind": 8,
+    "sortText": "0",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 27
+        },
+        "end": {
+          "line": 5,
+          "character": 28
+        }
+      },
+      "newText": "$b"
+    }
+  }
+]

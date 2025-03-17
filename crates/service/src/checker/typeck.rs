@@ -138,13 +138,13 @@ fn check_block_like(
             if let Some(diag) = type_stack.check(&sig.params, ReportRange::Instr(&instr)) {
                 diags.push(diag);
             }
-            type_stack
-                .stack
-                .extend(sig.results.into_iter().map(|ty| (ty, Some(instr.clone()))));
             if helpers::can_produce_never(instr_name) {
                 type_stack.has_never = true;
                 type_stack.stack.clear();
             }
+            type_stack
+                .stack
+                .extend(sig.results.into_iter().map(|ty| (ty, Some(instr.clone()))));
         }
         Instr::Block(block_instr) => {
             let node = block_instr.syntax();
@@ -424,7 +424,7 @@ fn resolve_sig(
     type_stack: &TypeStack,
 ) -> ResolvedSig {
     match instr_name {
-        "call" => instr
+        "call" | "return_call" => instr
             .immediates()
             .next()
             .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
@@ -609,7 +609,7 @@ fn resolve_sig(
                 results: vec![ty],
             }
         }
-        "call_indirect" => {
+        "call_indirect" | "return_call_indirect" => {
             let sig = instr
                 .immediates()
                 .find_map(|immediate| immediate.type_use())
