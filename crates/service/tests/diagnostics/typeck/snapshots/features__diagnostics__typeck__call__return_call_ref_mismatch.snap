@@ -1,0 +1,73 @@
+---
+source: crates/service/tests/diagnostics/typeck/call.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 4
+        },
+        "end": {
+          "line": 5,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [f32, (ref null 0)], found []"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 21
+        },
+        "end": {
+          "line": 5,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [f64] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 4
+        },
+        "end": {
+          "line": 8,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [f32, (ref null 0)], found [(ref 1)]"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 21
+        },
+        "end": {
+          "line": 8,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [f64] at the end"
+    }
+  ]
+}

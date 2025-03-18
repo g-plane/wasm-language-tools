@@ -994,7 +994,7 @@ fn resolve_sig(
                 }))],
             }
         }
-        "call_ref" => {
+        "call_ref" | "return_call_ref" => {
             let def_types = shared.service.def_types(shared.uri);
             instr
                 .immediates()

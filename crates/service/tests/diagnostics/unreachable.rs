@@ -565,3 +565,21 @@ fn folded_instr_with_loop() {
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
+
+#[test]
+fn return_call_ref() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (func))
+  (func (param (ref 0))
+    local.get 0
+    return_call_ref 0
+    nop))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

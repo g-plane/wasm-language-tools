@@ -515,7 +515,9 @@ fn add_cmp_ctx_for_immediates(
                         ctx.push(CmpCtx::TypeDef(Some(PreferredType::Func)));
                     }
                 }
-                "call_ref" => ctx.push(CmpCtx::TypeDef(Some(PreferredType::Func))),
+                "call_ref" | "return_call_ref" => {
+                    ctx.push(CmpCtx::TypeDef(Some(PreferredType::Func)));
+                }
                 _ => {}
             },
             _ => {}
