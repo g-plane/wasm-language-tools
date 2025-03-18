@@ -167,15 +167,42 @@ impl LanguageService {
             }
             SyntaxKind::INSTR_NAME => {
                 let name = token.text();
-                let key = if name == "select" {
-                    let parent = token.parent().and_then(PlainInstr::cast)?;
-                    if parent.immediates().count() > 0 {
-                        "select."
-                    } else {
-                        "select"
+                let key = match name {
+                    "select" => {
+                        let parent = token.parent().and_then(PlainInstr::cast)?;
+                        if parent.immediates().count() > 0 {
+                            "select."
+                        } else {
+                            "select"
+                        }
                     }
-                } else {
-                    name
+                    "ref.test" => {
+                        let parent = token.parent().and_then(PlainInstr::cast)?;
+                        if parent
+                            .immediates()
+                            .next()
+                            .and_then(|immediate| immediate.ref_type())
+                            .is_some_and(|ref_type| helpers::ast::is_nullable_ref_type(&ref_type))
+                        {
+                            "ref.test."
+                        } else {
+                            "ref.test"
+                        }
+                    }
+                    "ref.cast" => {
+                        let parent = token.parent().and_then(PlainInstr::cast)?;
+                        if parent
+                            .immediates()
+                            .next()
+                            .and_then(|immediate| immediate.ref_type())
+                            .is_some_and(|ref_type| helpers::ast::is_nullable_ref_type(&ref_type))
+                        {
+                            "ref.cast."
+                        } else {
+                            "ref.cast"
+                        }
+                    }
+                    name => name,
                 };
                 data_set::INSTR_OP_CODES.get(key).map(|code| Hover {
                     contents: Union3::A(MarkupContent {

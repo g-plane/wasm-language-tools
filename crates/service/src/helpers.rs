@@ -97,8 +97,11 @@ pub fn infer_type_def_symbol_detail(symbol: &Symbol, root: &SyntaxNode) -> Optio
 }
 
 pub(crate) mod ast {
-    use rowan::{ast::support, Direction, GreenNode, NodeOrToken, TextSize, TokenAtOffset};
-    use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
+    use rowan::{
+        ast::{support, AstNode},
+        Direction, GreenNode, NodeOrToken, TextSize, TokenAtOffset,
+    };
+    use wat_syntax::{ast::RefType, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
     pub fn find_func_type_of_type_def(green: &GreenNode) -> Option<GreenNode> {
         green
@@ -155,6 +158,20 @@ pub(crate) mod ast {
                     doc.insert_str(0, text.strip_prefix([' ', '\t']).unwrap_or(text));
                 }
                 doc
+            })
+    }
+
+    pub fn is_nullable_ref_type(ref_type: &RefType) -> bool {
+        ref_type
+            .syntax()
+            .children_with_tokens()
+            .any(|element| match element {
+                SyntaxElement::Token(token) => {
+                    let kind = token.kind();
+                    kind == SyntaxKind::TYPE_KEYWORD
+                        || kind == SyntaxKind::KEYWORD && token.text() == "null"
+                }
+                SyntaxElement::Node(_) => false,
             })
     }
 }

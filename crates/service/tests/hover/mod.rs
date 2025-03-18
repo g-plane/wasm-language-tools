@@ -532,6 +532,90 @@ fn select_with_result() {
 }
 
 #[test]
+fn ref_test_with_non_null_ref() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    ref.test (ref any)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 3, 8));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn ref_test_with_abbr_ref() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    ref.test anyref))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 3, 8));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn ref_test_with_null_ref() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    ref.test (ref null any)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 3, 8));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn ref_cast_with_non_null_ref() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    ref.cast (ref any)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 3, 8));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn ref_cast_with_abbr_ref() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    ref.cast anyref))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 3, 8));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn ref_cast_with_null_ref() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    ref.cast (ref null any)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 3, 8));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn block_int_idx() {
     let uri = "untitled:test".to_string();
     let source = "

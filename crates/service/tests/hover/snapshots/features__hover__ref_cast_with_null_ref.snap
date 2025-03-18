@@ -1,0 +1,20 @@
+---
+source: crates/service/tests/hover/mod.rs
+expression: response
+---
+{
+  "contents": {
+    "kind": "markdown",
+    "value": "```wat\nref.cast\n```\nBinary Opcode: 0xFB 0x17"
+  },
+  "range": {
+    "start": {
+      "line": 3,
+      "character": 4
+    },
+    "end": {
+      "line": 3,
+      "character": 12
+    }
+  }
+}
