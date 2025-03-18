@@ -444,6 +444,7 @@ fn add_cmp_ctx_for_immediates(
                     CmpCtx::KeywordResult,
                 ]);
             }
+            "ref.test" | "ref.cast" => ctx.push(CmpCtx::KeywordRef),
             _ => {}
         }
     } else {

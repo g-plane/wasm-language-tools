@@ -237,3 +237,31 @@ fn return_call_indirect_incomplete() {
     let response = service.completion(create_params(uri, 3, 28));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn ref_test() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (ref.test ())))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 3, 15));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn ref_cast() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (ref.cast ())))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 3, 15));
+    assert_json_snapshot!(response);
+}
