@@ -6,56 +6,17 @@ expression: response
   {
     "label": "$a",
     "kind": 8,
-    "sortText": "1",
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 6,
-          "character": 13
-        },
-        "end": {
-          "line": 6,
-          "character": 14
-        }
-      },
-      "newText": "$a"
-    }
+    "sortText": "1"
   },
   {
     "label": "1",
     "kind": 8,
-    "sortText": "0",
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 6,
-          "character": 13
-        },
-        "end": {
-          "line": 6,
-          "character": 14
-        }
-      },
-      "newText": "1"
-    }
+    "sortText": "0"
   },
   {
     "label": "$b",
     "kind": 8,
-    "sortText": "0",
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 6,
-          "character": 13
-        },
-        "end": {
-          "line": 6,
-          "character": 14
-        }
-      },
-      "newText": "$b"
-    }
+    "sortText": "0"
   },
   {
     "label": "unreachable",

@@ -29,7 +29,7 @@ fn module_field_start_following_dollar() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, 2, 11));
+    let response = service.completion(create_params(uri, 2, 12));
     assert_json_snapshot!(response);
 }
 

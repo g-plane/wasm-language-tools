@@ -13,19 +13,6 @@ expression: response
     "documentation": {
       "kind": "markdown",
       "value": ""
-    },
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 3,
-          "character": 24
-        },
-        "end": {
-          "line": 3,
-          "character": 25
-        }
-      },
-      "newText": "$f"
     }
   }
 ]

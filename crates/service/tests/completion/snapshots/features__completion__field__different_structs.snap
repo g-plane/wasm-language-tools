@@ -8,20 +8,7 @@ expression: response
     "labelDetails": {
       "description": "i64"
     },
-    "kind": 5,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 5,
-          "character": 16
-        },
-        "end": {
-          "line": 5,
-          "character": 17
-        }
-      },
-      "newText": "$x"
-    }
+    "kind": 5
   },
   {
     "label": "unreachable",

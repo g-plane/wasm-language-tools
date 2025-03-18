@@ -8,80 +8,28 @@ expression: response
     "labelDetails": {
       "description": "i32"
     },
-    "kind": 5,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 4,
-          "character": 16
-        },
-        "end": {
-          "line": 4,
-          "character": 17
-        }
-      },
-      "newText": "$x"
-    }
+    "kind": 5
   },
   {
     "label": "$y",
     "labelDetails": {
       "description": "(mut (ref 0))"
     },
-    "kind": 5,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 4,
-          "character": 16
-        },
-        "end": {
-          "line": 4,
-          "character": 17
-        }
-      },
-      "newText": "$y"
-    }
+    "kind": 5
   },
   {
     "label": "2",
     "labelDetails": {
       "description": "f32"
     },
-    "kind": 5,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 4,
-          "character": 16
-        },
-        "end": {
-          "line": 4,
-          "character": 17
-        }
-      },
-      "newText": "2"
-    }
+    "kind": 5
   },
   {
     "label": "3",
     "labelDetails": {
       "description": "f64"
     },
-    "kind": 5,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 4,
-          "character": 16
-        },
-        "end": {
-          "line": 4,
-          "character": 17
-        }
-      },
-      "newText": "3"
-    }
+    "kind": 5
   },
   {
     "label": "unreachable",

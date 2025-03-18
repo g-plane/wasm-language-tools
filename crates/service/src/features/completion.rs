@@ -667,13 +667,17 @@ fn get_cmp_list(
                                 CompletionItem {
                                     label: label.clone(),
                                     kind: Some(CompletionItemKind::Variable),
-                                    text_edit: Some(Union2::A(TextEdit {
-                                        range: helpers::rowan_range_to_lsp_range(
-                                            line_index,
-                                            token.text_range(),
-                                        ),
-                                        new_text: label,
-                                    })),
+                                    text_edit: if token.kind().is_trivia() {
+                                        None
+                                    } else {
+                                        Some(Union2::A(TextEdit {
+                                            range: helpers::rowan_range_to_lsp_range(
+                                                line_index,
+                                                token.text_range(),
+                                            ),
+                                            new_text: label,
+                                        }))
+                                    },
                                     label_details: ty.map(|ty| CompletionItemLabelDetails {
                                         description: Some(ty.render(service).to_string()),
                                         ..Default::default()
@@ -703,13 +707,17 @@ fn get_cmp_list(
                             CompletionItem {
                                 label: label.clone(),
                                 kind: Some(CompletionItemKind::Function),
-                                text_edit: Some(Union2::A(TextEdit {
-                                    range: helpers::rowan_range_to_lsp_range(
-                                        line_index,
-                                        token.text_range(),
-                                    ),
-                                    new_text: label,
-                                })),
+                                text_edit: if token.kind().is_trivia() {
+                                    None
+                                } else {
+                                    Some(Union2::A(TextEdit {
+                                        range: helpers::rowan_range_to_lsp_range(
+                                            line_index,
+                                            token.text_range(),
+                                        ),
+                                        new_text: label,
+                                    }))
+                                },
                                 detail: Some(service.render_func_header(
                                     symbol.idx.name,
                                     service.get_func_sig(uri, symbol.key, symbol.green.clone()),
@@ -747,13 +755,17 @@ fn get_cmp_list(
                             CompletionItem {
                                 label: label.clone(),
                                 kind: Some(CompletionItemKind::Interface),
-                                text_edit: Some(Union2::A(TextEdit {
-                                    range: helpers::rowan_range_to_lsp_range(
-                                        line_index,
-                                        token.text_range(),
-                                    ),
-                                    new_text: label,
-                                })),
+                                text_edit: if token.kind().is_trivia() {
+                                    None
+                                } else {
+                                    Some(Union2::A(TextEdit {
+                                        range: helpers::rowan_range_to_lsp_range(
+                                            line_index,
+                                            token.text_range(),
+                                        ),
+                                        new_text: label,
+                                    }))
+                                },
                                 sort_text: preferred_type.as_ref().and_then(|preferred_type| {
                                     def_types
                                         .iter()
@@ -797,13 +809,17 @@ fn get_cmp_list(
                                 CompletionItem {
                                     label: label.clone(),
                                     kind: Some(CompletionItemKind::Variable),
-                                    text_edit: Some(Union2::A(TextEdit {
-                                        range: helpers::rowan_range_to_lsp_range(
-                                            line_index,
-                                            token.text_range(),
-                                        ),
-                                        new_text: label,
-                                    })),
+                                    text_edit: if token.kind().is_trivia() {
+                                        None
+                                    } else {
+                                        Some(Union2::A(TextEdit {
+                                            range: helpers::rowan_range_to_lsp_range(
+                                                line_index,
+                                                token.text_range(),
+                                            ),
+                                            new_text: label,
+                                        }))
+                                    },
                                     label_details: ty.map(|ty| CompletionItemLabelDetails {
                                         description: Some(ty.render(service).to_string()),
                                         ..Default::default()
@@ -842,13 +858,17 @@ fn get_cmp_list(
                                 CompletionItem {
                                     label: label.clone(),
                                     kind: Some(CompletionItemKind::Variable),
-                                    text_edit: Some(Union2::A(TextEdit {
-                                        range: helpers::rowan_range_to_lsp_range(
-                                            line_index,
-                                            token.text_range(),
-                                        ),
-                                        new_text: label,
-                                    })),
+                                    text_edit: if token.kind().is_trivia() {
+                                        None
+                                    } else {
+                                        Some(Union2::A(TextEdit {
+                                            range: helpers::rowan_range_to_lsp_range(
+                                                line_index,
+                                                token.text_range(),
+                                            ),
+                                            new_text: label,
+                                        }))
+                                    },
                                     ..Default::default()
                                 }
                             }),
@@ -874,13 +894,17 @@ fn get_cmp_list(
                                 CompletionItem {
                                     label: label.clone(),
                                     kind: Some(CompletionItemKind::Variable),
-                                    text_edit: Some(Union2::A(TextEdit {
-                                        range: helpers::rowan_range_to_lsp_range(
-                                            line_index,
-                                            token.text_range(),
-                                        ),
-                                        new_text: label,
-                                    })),
+                                    text_edit: if token.kind().is_trivia() {
+                                        None
+                                    } else {
+                                        Some(Union2::A(TextEdit {
+                                            range: helpers::rowan_range_to_lsp_range(
+                                                line_index,
+                                                token.text_range(),
+                                            ),
+                                            new_text: label,
+                                        }))
+                                    },
                                     ..Default::default()
                                 }
                             }),
@@ -908,13 +932,17 @@ fn get_cmp_list(
                                 CompletionItem {
                                     label: label.clone(),
                                     kind: Some(CompletionItemKind::Variable),
-                                    text_edit: Some(Union2::A(TextEdit {
-                                        range: helpers::rowan_range_to_lsp_range(
-                                            line_index,
-                                            token.text_range(),
-                                        ),
-                                        new_text: label,
-                                    })),
+                                    text_edit: if token.kind().is_trivia() {
+                                        None
+                                    } else {
+                                        Some(Union2::A(TextEdit {
+                                            range: helpers::rowan_range_to_lsp_range(
+                                                line_index,
+                                                token.text_range(),
+                                            ),
+                                            new_text: label,
+                                        }))
+                                    },
                                     label_details: Some(CompletionItemLabelDetails {
                                         description: Some(format!(
                                             "[{}]",
@@ -952,13 +980,17 @@ fn get_cmp_list(
                             CompletionItem {
                                 label: label.clone(),
                                 kind: Some(CompletionItemKind::Field),
-                                text_edit: Some(Union2::A(TextEdit {
-                                    range: helpers::rowan_range_to_lsp_range(
-                                        line_index,
-                                        token.text_range(),
-                                    ),
-                                    new_text: label,
-                                })),
+                                text_edit: if token.kind().is_trivia() {
+                                    None
+                                } else {
+                                    Some(Union2::A(TextEdit {
+                                        range: helpers::rowan_range_to_lsp_range(
+                                            line_index,
+                                            token.text_range(),
+                                        ),
+                                        new_text: label,
+                                    }))
+                                },
                                 label_details: Some(CompletionItemLabelDetails {
                                     description: Some(ty.render(service).to_string()),
                                     ..Default::default()

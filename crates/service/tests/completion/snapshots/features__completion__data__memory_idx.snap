@@ -5,19 +5,6 @@ expression: response
 [
   {
     "label": "$m",
-    "kind": 6,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 2,
-          "character": 17
-        },
-        "end": {
-          "line": 2,
-          "character": 18
-        }
-      },
-      "newText": "$m"
-    }
+    "kind": 6
   }
 ]

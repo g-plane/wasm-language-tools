@@ -13,19 +13,6 @@ expression: response
     "documentation": {
       "kind": "markdown",
       "value": ""
-    },
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 2,
-          "character": 15
-        },
-        "end": {
-          "line": 2,
-          "character": 16
-        }
-      },
-      "newText": "0"
     }
   },
   {
@@ -38,19 +25,6 @@ expression: response
     "documentation": {
       "kind": "markdown",
       "value": ""
-    },
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 2,
-          "character": 15
-        },
-        "end": {
-          "line": 2,
-          "character": 16
-        }
-      },
-      "newText": "$f1"
     }
   },
   {
@@ -63,19 +37,6 @@ expression: response
     "documentation": {
       "kind": "markdown",
       "value": ""
-    },
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 2,
-          "character": 15
-        },
-        "end": {
-          "line": 2,
-          "character": 16
-        }
-      },
-      "newText": "$f2"
     }
   },
   {
@@ -88,19 +49,6 @@ expression: response
     "documentation": {
       "kind": "markdown",
       "value": ""
-    },
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 2,
-          "character": 15
-        },
-        "end": {
-          "line": 2,
-          "character": 16
-        }
-      },
-      "newText": "$f3"
     }
   },
   {
@@ -113,19 +61,6 @@ expression: response
     "documentation": {
       "kind": "markdown",
       "value": ""
-    },
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 2,
-          "character": 15
-        },
-        "end": {
-          "line": 2,
-          "character": 16
-        }
-      },
-      "newText": "$f4"
     }
   }
 ]

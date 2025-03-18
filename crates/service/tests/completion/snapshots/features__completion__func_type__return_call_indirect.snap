@@ -6,38 +6,12 @@ expression: response
   {
     "label": "0",
     "kind": 8,
-    "sortText": "1",
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 5,
-          "character": 26
-        },
-        "end": {
-          "line": 5,
-          "character": 27
-        }
-      },
-      "newText": "0"
-    }
+    "sortText": "1"
   },
   {
     "label": "1",
     "kind": 8,
-    "sortText": "0",
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 5,
-          "character": 26
-        },
-        "end": {
-          "line": 5,
-          "character": 27
-        }
-      },
-      "newText": "1"
-    }
+    "sortText": "0"
   },
   {
     "label": "unreachable",

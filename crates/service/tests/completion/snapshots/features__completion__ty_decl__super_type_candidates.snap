@@ -5,71 +5,19 @@ expression: response
 [
   {
     "label": "$a",
-    "kind": 8,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 5,
-          "character": 12
-        },
-        "end": {
-          "line": 5,
-          "character": 13
-        }
-      },
-      "newText": "$a"
-    }
+    "kind": 8
   },
   {
     "label": "$b",
-    "kind": 8,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 5,
-          "character": 12
-        },
-        "end": {
-          "line": 5,
-          "character": 13
-        }
-      },
-      "newText": "$b"
-    }
+    "kind": 8
   },
   {
     "label": "$c",
-    "kind": 8,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 5,
-          "character": 12
-        },
-        "end": {
-          "line": 5,
-          "character": 13
-        }
-      },
-      "newText": "$c"
-    }
+    "kind": 8
   },
   {
     "label": "3",
-    "kind": 8,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 5,
-          "character": 12
-        },
-        "end": {
-          "line": 5,
-          "character": 13
-        }
-      },
-      "newText": "3"
-    }
+    "kind": 8
   },
   {
     "label": "final",

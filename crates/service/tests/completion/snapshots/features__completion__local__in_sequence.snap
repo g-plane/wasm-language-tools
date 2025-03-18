@@ -8,120 +8,42 @@ expression: response
     "labelDetails": {
       "description": "i32"
     },
-    "kind": 6,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 3,
-          "character": 17
-        },
-        "end": {
-          "line": 3,
-          "character": 19
-        }
-      },
-      "newText": "$p"
-    }
+    "kind": 6
   },
   {
     "label": "1",
     "labelDetails": {
       "description": "f32"
     },
-    "kind": 6,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 3,
-          "character": 17
-        },
-        "end": {
-          "line": 3,
-          "character": 19
-        }
-      },
-      "newText": "1"
-    }
+    "kind": 6
   },
   {
     "label": "2",
     "labelDetails": {
       "description": "f64"
     },
-    "kind": 6,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 3,
-          "character": 17
-        },
-        "end": {
-          "line": 3,
-          "character": 19
-        }
-      },
-      "newText": "2"
-    }
+    "kind": 6
   },
   {
     "label": "$l",
     "labelDetails": {
       "description": "i32"
     },
-    "kind": 6,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 3,
-          "character": 17
-        },
-        "end": {
-          "line": 3,
-          "character": 19
-        }
-      },
-      "newText": "$l"
-    }
+    "kind": 6
   },
   {
     "label": "4",
     "labelDetails": {
       "description": "f32"
     },
-    "kind": 6,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 3,
-          "character": 17
-        },
-        "end": {
-          "line": 3,
-          "character": 19
-        }
-      },
-      "newText": "4"
-    }
+    "kind": 6
   },
   {
     "label": "5",
     "labelDetails": {
       "description": "f64"
     },
-    "kind": 6,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 3,
-          "character": 17
-        },
-        "end": {
-          "line": 3,
-          "character": 19
-        }
-      },
-      "newText": "5"
-    }
+    "kind": 6
   },
   {
     "label": "unreachable",

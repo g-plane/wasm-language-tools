@@ -9,20 +9,7 @@ expression: response
       "description": "i32"
     },
     "kind": 6,
-    "sortText": "1",
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 9,
-          "character": 17
-        },
-        "end": {
-          "line": 9,
-          "character": 18
-        }
-      },
-      "newText": "$a"
-    }
+    "sortText": "1"
   },
   {
     "label": "$b",
@@ -30,20 +17,7 @@ expression: response
       "description": "i64"
     },
     "kind": 6,
-    "sortText": "1",
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 9,
-          "character": 17
-        },
-        "end": {
-          "line": 9,
-          "character": 18
-        }
-      },
-      "newText": "$b"
-    }
+    "sortText": "1"
   },
   {
     "label": "$c",
@@ -51,20 +25,7 @@ expression: response
       "description": "f32"
     },
     "kind": 6,
-    "sortText": "1",
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 9,
-          "character": 17
-        },
-        "end": {
-          "line": 9,
-          "character": 18
-        }
-      },
-      "newText": "$c"
-    }
+    "sortText": "1"
   },
   {
     "label": "$d",
@@ -72,19 +33,6 @@ expression: response
       "description": "f64"
     },
     "kind": 6,
-    "sortText": "0",
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 9,
-          "character": 17
-        },
-        "end": {
-          "line": 9,
-          "character": 18
-        }
-      },
-      "newText": "$d"
-    }
+    "sortText": "0"
   }
 ]

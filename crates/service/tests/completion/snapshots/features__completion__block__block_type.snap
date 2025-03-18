@@ -9,20 +9,7 @@ expression: response
       "description": "[i32, i32]"
     },
     "kind": 6,
-    "detail": "(if $b (result i32) (result i32))",
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 9,
-          "character": 23
-        },
-        "end": {
-          "line": 9,
-          "character": 24
-        }
-      },
-      "newText": "$b"
-    }
+    "detail": "(if $b (result i32) (result i32))"
   },
   {
     "label": "1",
@@ -30,20 +17,7 @@ expression: response
       "description": "[]"
     },
     "kind": 6,
-    "detail": "(block)",
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 9,
-          "character": 23
-        },
-        "end": {
-          "line": 9,
-          "character": 24
-        }
-      },
-      "newText": "1"
-    }
+    "detail": "(block)"
   },
   {
     "label": "2",
@@ -51,20 +25,7 @@ expression: response
       "description": "[i32]"
     },
     "kind": 6,
-    "detail": "(block (param i32) (param i32) (result i32))",
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 9,
-          "character": 23
-        },
-        "end": {
-          "line": 9,
-          "character": 24
-        }
-      },
-      "newText": "2"
-    }
+    "detail": "(block (param i32) (param i32) (result i32))"
   },
   {
     "label": "$a",
@@ -72,20 +33,7 @@ expression: response
       "description": "[]"
     },
     "kind": 6,
-    "detail": "(block $a)",
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 9,
-          "character": 23
-        },
-        "end": {
-          "line": 9,
-          "character": 24
-        }
-      },
-      "newText": "$a"
-    }
+    "detail": "(block $a)"
   },
   {
     "label": "4",
@@ -93,19 +41,6 @@ expression: response
       "description": "[i32]"
     },
     "kind": 6,
-    "detail": "(loop (result i32))",
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 9,
-          "character": 23
-        },
-        "end": {
-          "line": 9,
-          "character": 24
-        }
-      },
-      "newText": "4"
-    }
+    "detail": "(loop (result i32))"
   }
 ]

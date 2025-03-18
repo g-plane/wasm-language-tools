@@ -5,36 +5,10 @@ expression: response
 [
   {
     "label": "0",
-    "kind": 6,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 4,
-          "character": 18
-        },
-        "end": {
-          "line": 4,
-          "character": 19
-        }
-      },
-      "newText": "0"
-    }
+    "kind": 6
   },
   {
     "label": "$memory",
-    "kind": 6,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 4,
-          "character": 18
-        },
-        "end": {
-          "line": 4,
-          "character": 19
-        }
-      },
-      "newText": "$memory"
-    }
+    "kind": 6
   }
 ]

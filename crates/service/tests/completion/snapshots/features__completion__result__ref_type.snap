@@ -5,20 +5,7 @@ expression: response
 [
   {
     "label": "0",
-    "kind": 8,
-    "textEdit": {
-      "range": {
-        "start": {
-          "line": 2,
-          "character": 20
-        },
-        "end": {
-          "line": 2,
-          "character": 21
-        }
-      },
-      "newText": "0"
-    }
+    "kind": 8
   },
   {
     "label": "null",
