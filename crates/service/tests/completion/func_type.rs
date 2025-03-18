@@ -209,3 +209,19 @@ fn return_call_indirect_incomplete_ident() {
     let response = service.completion(create_params(uri, 5, 29));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn call_ref() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct))
+  (type (func (param f32) (result f64)))
+  (func
+    call_ref ))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 5, 13));
+    assert_json_snapshot!(response);
+}

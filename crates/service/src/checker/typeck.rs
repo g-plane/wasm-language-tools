@@ -994,6 +994,31 @@ fn resolve_sig(
                 }))],
             }
         }
+        "call_ref" => {
+            let def_types = shared.service.def_types(shared.uri);
+            instr
+                .immediates()
+                .next()
+                .and_then(|immediate| {
+                    shared
+                        .symbol_table
+                        .find_def(SymbolKey::new(immediate.syntax()))
+                })
+                .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
+                .map(|def_type| {
+                    let mut sig = if let CompositeType::Func(sig) = &def_type.comp {
+                        ResolvedSig::from(sig.clone())
+                    } else {
+                        ResolvedSig::default()
+                    };
+                    sig.params.push(OperandType::Val(ValType::Ref(RefType {
+                        heap_ty: HeapType::Type(def_type.idx),
+                        nullable: true,
+                    })));
+                    sig
+                })
+                .unwrap_or_default()
+        }
         _ => data_set::INSTR_SIG
             .get(instr_name)
             .cloned()

@@ -33,3 +33,42 @@ fn return_call_mismatch() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn call_ref_match() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (func (param i32)))
+  (type (func (param i32)))
+  (func (param (ref 1))
+    i32.const 0
+    local.get 0
+    call_ref 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn call_ref_mismatch() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (func (param f32) (result f64)))
+  (type (func (param f32) (result f64)))
+  (func
+    call_ref 0)
+  (func (param (ref 1))
+    local.get 0
+    call_ref 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
