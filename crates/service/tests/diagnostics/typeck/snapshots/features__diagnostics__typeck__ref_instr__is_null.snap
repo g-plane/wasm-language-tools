@@ -1,0 +1,91 @@
+---
+source: crates/service/tests/diagnostics/typeck/ref_instr.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 4
+        },
+        "end": {
+          "line": 13,
+          "character": 17
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null any)], found []"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 17
+        },
+        "end": {
+          "line": 13,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 15,
+          "character": 4
+        },
+        "end": {
+          "line": 16,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null any)], found [i32]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 16,
+                "character": 6
+              },
+              "end": {
+                "line": 16,
+                "character": 19
+              }
+            }
+          },
+          "message": "expected type `(ref null any)`, found `i32`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 16,
+          "character": 20
+        },
+        "end": {
+          "line": 16,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [i32] at the end"
+    }
+  ]
+}

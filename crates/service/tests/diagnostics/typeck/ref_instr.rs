@@ -23,6 +23,34 @@ fn null() {
 }
 
 #[test]
+fn is_null() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $t (func))
+  (func (param $x funcref) (result i32)
+    (ref.is_null
+      (local.get $x)))
+  (func (param $x externref) (result i32)
+    (ref.is_null
+      (local.get $x)))
+  (func (param $x (ref null $t)) (result i32)
+    (ref.is_null
+      (local.get $x)))
+  (func
+    (ref.is_null))
+  (func (param i32)
+    (ref.is_null
+      (local.get 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn as_non_null() {
     let uri = "untitled:test".to_string();
     let source = "

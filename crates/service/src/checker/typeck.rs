@@ -974,6 +974,23 @@ fn resolve_sig(
                 results: vec![ty],
             }
         }
+        "ref.is_null" => {
+            let heap_ty =
+                if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) =
+                    type_stack.stack.last()
+                {
+                    *heap_ty
+                } else {
+                    HeapType::Any
+                };
+            ResolvedSig {
+                params: vec![OperandType::Val(ValType::Ref(RefType {
+                    heap_ty,
+                    nullable: true,
+                }))],
+                results: vec![OperandType::Val(ValType::I32)],
+            }
+        }
         "ref.as_non_null" => {
             let heap_ty =
                 if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) =
