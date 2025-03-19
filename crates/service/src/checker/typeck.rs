@@ -1016,6 +1016,30 @@ fn resolve_sig(
                 results: vec![OperandType::Val(ValType::I32)],
             }
         }
+        "ref.cast" => {
+            let ref_type = instr
+                .immediates()
+                .next()
+                .and_then(|immediate| immediate.ref_type())
+                .and_then(|ref_type| {
+                    RefType::from_green(&ref_type.syntax().green(), shared.service)
+                })
+                .unwrap_or_else(|| RefType {
+                    heap_ty: HeapType::Any,
+                    nullable: true,
+                });
+            let heap_ty = ref_type
+                .heap_ty
+                .to_top_type(shared.service, shared.uri, shared.module_id)
+                .unwrap_or(HeapType::Any);
+            ResolvedSig {
+                params: vec![OperandType::Val(ValType::Ref(RefType {
+                    heap_ty,
+                    nullable: true,
+                }))],
+                results: vec![OperandType::Val(ValType::Ref(ref_type))],
+            }
+        }
         "call_ref" | "return_call_ref" => {
             let def_types = shared.service.def_types(shared.uri);
             instr

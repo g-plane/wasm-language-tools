@@ -80,3 +80,46 @@ fn test() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn cast() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func (param (ref null any)) (result (ref null func))
+    local.get 0
+    ref.cast funcref)
+  (func (param anyref) (result funcref)
+    local.get 0
+    ref.cast (ref null func))
+  (func (param (ref null func))
+    local.get 0
+    ref.cast funcref)
+  (func (param (ref struct)) (result (ref any))
+    local.get 0
+    ref.cast anyref)
+  (func (param (ref struct)) (result (ref null any))
+    local.get 0
+    ref.cast (ref any))
+  (func (param (ref struct)) (result anyref)
+    local.get 0
+    ref.cast (ref null any))
+  (func (param (ref null struct)) (result (ref any))
+    local.get 0
+    ref.cast (ref any))
+  (func (param anyref) (result (ref struct))
+    local.get 0
+    ref.cast (ref struct))
+  (func (param nullfuncref) (result funcref)
+    local.get 0
+    ref.cast funcref)
+  (func (param funcref) (result (ref nofunc))
+    local.get 0
+    ref.cast (ref nofunc)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
