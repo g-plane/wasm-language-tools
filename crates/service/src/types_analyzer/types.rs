@@ -35,89 +35,7 @@ impl ValType {
                 _ => None,
             },
             SyntaxKind::VEC_TYPE => Some(ValType::V128),
-            SyntaxKind::REF_TYPE => {
-                let mut children = node.children();
-                match children.next().and_then(|child| child.into_token())?.text() {
-                    "anyref" => {
-                        return Some(ValType::Ref(RefType {
-                            heap_ty: HeapType::Any,
-                            nullable: true,
-                        }));
-                    }
-                    "eqref" => {
-                        return Some(ValType::Ref(RefType {
-                            heap_ty: HeapType::Eq,
-                            nullable: true,
-                        }));
-                    }
-                    "i31ref" => {
-                        return Some(ValType::Ref(RefType {
-                            heap_ty: HeapType::I31,
-                            nullable: true,
-                        }));
-                    }
-                    "structref" => {
-                        return Some(ValType::Ref(RefType {
-                            heap_ty: HeapType::Struct,
-                            nullable: true,
-                        }));
-                    }
-                    "arrayref" => {
-                        return Some(ValType::Ref(RefType {
-                            heap_ty: HeapType::Array,
-                            nullable: true,
-                        }));
-                    }
-                    "nullref" => {
-                        return Some(ValType::Ref(RefType {
-                            heap_ty: HeapType::None,
-                            nullable: true,
-                        }));
-                    }
-                    "funcref" => {
-                        return Some(ValType::Ref(RefType {
-                            heap_ty: HeapType::Func,
-                            nullable: true,
-                        }));
-                    }
-                    "nullfuncref" => {
-                        return Some(ValType::Ref(RefType {
-                            heap_ty: HeapType::NoFunc,
-                            nullable: true,
-                        }));
-                    }
-                    "externref" => {
-                        return Some(ValType::Ref(RefType {
-                            heap_ty: HeapType::Extern,
-                            nullable: true,
-                        }));
-                    }
-                    "nullexternref" => {
-                        return Some(ValType::Ref(RefType {
-                            heap_ty: HeapType::NoExtern,
-                            nullable: true,
-                        }));
-                    }
-                    _ => {}
-                }
-                let mut nullable = false;
-                for node_or_token in children {
-                    match node_or_token {
-                        NodeOrToken::Node(node) if node.kind() == SyntaxKind::HEAP_TYPE.into() => {
-                            return HeapType::from_green(node, db)
-                                .map(|heap_ty| ValType::Ref(RefType { heap_ty, nullable }));
-                        }
-                        NodeOrToken::Token(token)
-                            if token.kind() == SyntaxKind::KEYWORD.into()
-                                && token.text() == "null" =>
-                        {
-                            nullable = true;
-                        }
-                        _ => {}
-                    }
-                }
-                None
-            }
+            SyntaxKind::REF_TYPE => RefType::from_green(node, db).map(ValType::Ref),
             _ => None,
         }
     }
@@ -163,6 +81,71 @@ pub(crate) struct RefType {
     pub nullable: bool,
 }
 impl RefType {
+    pub(crate) fn from_green(node: &GreenNodeData, db: &dyn TypesAnalyzerCtx) -> Option<Self> {
+        let mut children = node.children();
+        match children.next().and_then(|child| child.into_token())?.text() {
+            "anyref" => Some(RefType {
+                heap_ty: HeapType::Any,
+                nullable: true,
+            }),
+            "eqref" => Some(RefType {
+                heap_ty: HeapType::Eq,
+                nullable: true,
+            }),
+            "i31ref" => Some(RefType {
+                heap_ty: HeapType::I31,
+                nullable: true,
+            }),
+            "structref" => Some(RefType {
+                heap_ty: HeapType::Struct,
+                nullable: true,
+            }),
+            "arrayref" => Some(RefType {
+                heap_ty: HeapType::Array,
+                nullable: true,
+            }),
+            "nullref" => Some(RefType {
+                heap_ty: HeapType::None,
+                nullable: true,
+            }),
+            "funcref" => Some(RefType {
+                heap_ty: HeapType::Func,
+                nullable: true,
+            }),
+            "nullfuncref" => Some(RefType {
+                heap_ty: HeapType::NoFunc,
+                nullable: true,
+            }),
+            "externref" => Some(RefType {
+                heap_ty: HeapType::Extern,
+                nullable: true,
+            }),
+            "nullexternref" => Some(RefType {
+                heap_ty: HeapType::NoExtern,
+                nullable: true,
+            }),
+            _ => {
+                let mut nullable = false;
+                for node_or_token in children {
+                    match node_or_token {
+                        NodeOrToken::Node(node) if node.kind() == SyntaxKind::HEAP_TYPE.into() => {
+                            return HeapType::from_green(node, db)
+                                .map(|heap_ty| RefType { heap_ty, nullable });
+                        }
+                        NodeOrToken::Token(token)
+                            if token.kind() == SyntaxKind::KEYWORD.into()
+                                && token.text() == "null" =>
+                        {
+                            nullable = true;
+                        }
+                        _ => {}
+                    }
+                }
+                None
+            }
+        }
+    }
+
     pub(crate) fn matches(
         &self,
         other: &Self,
@@ -371,6 +354,48 @@ impl HeapType {
                 })
         } else {
             self == other
+        }
+    }
+
+    pub(crate) fn to_top_type(
+        &self,
+        db: &dyn TypesAnalyzerCtx,
+        uri: InternUri,
+        module_id: u32,
+    ) -> Option<Self> {
+        match self {
+            HeapType::Any
+            | HeapType::None
+            | HeapType::Eq
+            | HeapType::Struct
+            | HeapType::Array
+            | HeapType::I31 => Some(HeapType::Any),
+            HeapType::Func | HeapType::NoFunc => Some(HeapType::Func),
+            HeapType::Extern | HeapType::NoExtern => Some(HeapType::Extern),
+            HeapType::Type(mut idx) => {
+                if idx.is_def() {
+                    idx.name = None;
+                }
+                let symbol_table = db.symbol_table(uri);
+                let module = symbol_table.find_module(module_id)?;
+                let def_types = db.def_types(uri);
+                symbol_table
+                    .symbols
+                    .iter()
+                    .find(|symbol| {
+                        symbol.kind == SymbolKind::Type
+                            && symbol.region == module.key
+                            && idx.is_defined_by(&symbol.idx)
+                    })
+                    .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
+                    .and_then(|def_type| match &def_type.comp {
+                        CompositeType::Struct(..) | CompositeType::Array(..) => {
+                            Some(HeapType::Struct)
+                        }
+                        CompositeType::Func(..) => Some(HeapType::Func),
+                    })
+            }
+            HeapType::Rec(..) => unreachable!(),
         }
     }
 }

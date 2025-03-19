@@ -40,3 +40,43 @@ fn as_non_null() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn test() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func (param (ref null any)) (result i32)
+    local.get 0
+    ref.test funcref)
+  (func (param anyref) (result i32)
+    local.get 0
+    ref.test (ref null func))
+  (func (param (ref null func))
+    local.get 0
+    ref.test funcref)
+  (func (param (ref struct)) (result i32)
+    local.get 0
+    ref.test anyref)
+  (func (param (ref struct)) (result i32)
+    local.get 0
+    ref.test (ref null any))
+  (func (param (ref null struct)) (result i32)
+    local.get 0
+    ref.test (ref any))
+  (func (param anyref) (result i32)
+    local.get 0
+    ref.test (ref struct))
+  (func (param nullfuncref) (result i32)
+    local.get 0
+    ref.test funcref)
+  (func (param funcref) (result i32)
+    local.get 0
+    ref.test (ref nofunc)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

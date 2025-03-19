@@ -994,6 +994,28 @@ fn resolve_sig(
                 }))],
             }
         }
+        "ref.test" => {
+            let heap_ty = instr
+                .immediates()
+                .next()
+                .and_then(|immediate| immediate.ref_type())
+                .and_then(|ref_type| {
+                    RefType::from_green(&ref_type.syntax().green(), shared.service)
+                })
+                .and_then(|ref_type| {
+                    ref_type
+                        .heap_ty
+                        .to_top_type(shared.service, shared.uri, shared.module_id)
+                })
+                .unwrap_or(HeapType::Any);
+            ResolvedSig {
+                params: vec![OperandType::Val(ValType::Ref(RefType {
+                    heap_ty,
+                    nullable: true,
+                }))],
+                results: vec![OperandType::Val(ValType::I32)],
+            }
+        }
         "call_ref" | "return_call_ref" => {
             let def_types = shared.service.def_types(shared.uri);
             instr

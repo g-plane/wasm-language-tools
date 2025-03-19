@@ -1,0 +1,93 @@
+---
+source: crates/service/tests/diagnostics/typeck/ref_instr.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 4
+        },
+        "end": {
+          "line": 4,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null func)], found [(ref null any)]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 4
+              },
+              "end": {
+                "line": 3,
+                "character": 15
+              }
+            }
+          },
+          "message": "expected type `(ref null func)`, found `(ref null any)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 4
+        },
+        "end": {
+          "line": 7,
+          "character": 28
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null func)], found [(ref null any)]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 6,
+                "character": 4
+              },
+              "end": {
+                "line": 6,
+                "character": 15
+              }
+            }
+          },
+          "message": "expected type `(ref null func)`, found `(ref null any)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 20
+        },
+        "end": {
+          "line": 10,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [i32] at the end"
+    }
+  ]
+}

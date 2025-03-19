@@ -509,12 +509,22 @@ fn ref_type() {
     let source = r#"
 (module
   (type (struct))
-  (func
+  (func (param (ref 0))
+    local.get 0
     ref.test anyref
+    drop
+    local.get 0
     ref.cast (ref 0)
+    drop
+    local.get 0
     ref.test (ref any)
+    drop
+    local.get 0
     ref.cast (ref null any)
-    ref.test 0))
+    drop
+    local.get 0
+    ref.test 0
+    drop))
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
