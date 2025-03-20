@@ -1041,7 +1041,7 @@ fn resolve_sig(
                 .and_then(|ref_type| {
                     RefType::from_green(&ref_type.syntax().green(), shared.service)
                 })
-                .unwrap_or_else(|| RefType {
+                .unwrap_or(RefType {
                     heap_ty: HeapType::Any,
                     nullable: true,
                 });

@@ -11,7 +11,6 @@ fn create_params(uri: String, range: Range, token_range: Range) -> CodeActionPar
             diagnostics: vec![Diagnostic {
                 range: token_range,
                 code: Some(Union2::B("needless-mut".into())),
-                message: "".into(),
                 ..Default::default()
             }],
             only: None,
@@ -119,7 +118,6 @@ fn unrelated_diagnostic() {
                     },
                 },
                 code: Some(Union2::B("global-mut".into())),
-                message: "".into(),
                 ..Default::default()
             }],
             only: None,

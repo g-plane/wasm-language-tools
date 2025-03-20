@@ -358,7 +358,7 @@ impl HeapType {
     }
 
     pub(crate) fn to_top_type(
-        &self,
+        self,
         db: &dyn TypesAnalyzerCtx,
         uri: InternUri,
         module_id: u32,
@@ -388,11 +388,9 @@ impl HeapType {
                             && idx.is_defined_by(&symbol.idx)
                     })
                     .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
-                    .and_then(|def_type| match &def_type.comp {
-                        CompositeType::Struct(..) | CompositeType::Array(..) => {
-                            Some(HeapType::Struct)
-                        }
-                        CompositeType::Func(..) => Some(HeapType::Func),
+                    .map(|def_type| match &def_type.comp {
+                        CompositeType::Struct(..) | CompositeType::Array(..) => HeapType::Struct,
+                        CompositeType::Func(..) => HeapType::Func,
                     })
             }
             HeapType::Rec(..) => unreachable!(),
