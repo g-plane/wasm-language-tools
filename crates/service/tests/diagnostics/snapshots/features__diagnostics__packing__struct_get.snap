@@ -1,0 +1,43 @@
+---
+source: crates/service/tests/diagnostics/packing.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 18
+        },
+        "end": {
+          "line": 5,
+          "character": 19
+        }
+      },
+      "severity": 1,
+      "code": "packing",
+      "source": "wat",
+      "message": "field `0` is packed",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 4
+              },
+              "end": {
+                "line": 5,
+                "character": 14
+              }
+            }
+          },
+          "message": "use `struct.get_s` or `struct.get_u` instead"
+        }
+      ]
+    }
+  ]
+}

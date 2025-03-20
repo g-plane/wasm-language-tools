@@ -1,0 +1,43 @@
+---
+source: crates/service/tests/diagnostics/packing.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 16
+        },
+        "end": {
+          "line": 6,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "packing",
+      "source": "wat",
+      "message": "array `$a` is unpacked",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 6,
+                "character": 4
+              },
+              "end": {
+                "line": 6,
+                "character": 15
+              }
+            }
+          },
+          "message": "use `array.get` instead"
+        }
+      ]
+    }
+  ]
+}

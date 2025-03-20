@@ -12,6 +12,7 @@ mod import_occur;
 mod multi_memories;
 mod multi_modules;
 mod needless_mut;
+mod packing;
 mod shadow;
 mod start;
 mod subtyping;

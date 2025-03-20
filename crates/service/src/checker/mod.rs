@@ -13,6 +13,7 @@ mod import_occur;
 mod multi_memories;
 mod multi_modules;
 mod needless_mut;
+mod packing;
 mod shadow;
 mod start;
 mod subtyping;
@@ -110,6 +111,14 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                 br_table_branches::check(
                     &mut diagnostics,
                     service,
+                    uri,
+                    &line_index,
+                    &symbol_table,
+                    &node,
+                );
+                packing::check(
+                    service,
+                    &mut diagnostics,
                     uri,
                     &line_index,
                     &symbol_table,

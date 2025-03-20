@@ -462,8 +462,8 @@ impl Fields {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct FieldType {
-    pub(super) storage: StorageType,
-    pub(super) mutable: bool,
+    pub(crate) storage: StorageType,
+    pub(crate) mutable: bool,
 }
 impl FieldType {
     pub(super) fn from_ast(node: &AstFieldType, db: &dyn TypesAnalyzerCtx) -> Option<Self> {
@@ -553,5 +553,9 @@ impl StorageType {
             (StorageType::PackedI16, StorageType::PackedI16) => true,
             _ => false,
         }
+    }
+
+    pub(crate) fn is_packed(&self) -> bool {
+        matches!(self, StorageType::PackedI8 | StorageType::PackedI16)
     }
 }

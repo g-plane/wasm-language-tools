@@ -4,7 +4,6 @@ use self::{
     renderer::{render_block_header, render_compact_sig, render_func_header, render_sig},
     resolver::resolve_field_type,
     signature::{get_func_sig, get_type_use_sig, Signature},
-    types::FieldType,
 };
 pub(crate) use self::{
     def_type::{CompositeType, DefType},
@@ -13,7 +12,7 @@ pub(crate) use self::{
         resolve_param_types,
     },
     signature::{get_block_sig, ResolvedSig},
-    types::{Fields, HeapType, OperandType, RefType, ValType},
+    types::{FieldType, Fields, HeapType, OperandType, RefType, StorageType, ValType},
 };
 use crate::{
     binder::{SymbolKey, SymbolTablesCtx},
