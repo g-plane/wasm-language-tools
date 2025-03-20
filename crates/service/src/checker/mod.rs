@@ -10,6 +10,7 @@ mod global_mut;
 mod immediates;
 mod implicit_module;
 mod import_occur;
+mod multi_memories;
 mod multi_modules;
 mod needless_mut;
 mod shadow;
@@ -41,6 +42,12 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
         implicit_module::check(
             &mut diagnostics,
             config.lint.implicit_module,
+            &line_index,
+            &module,
+        );
+        multi_memories::check(
+            &mut diagnostics,
+            config.lint.multi_memories,
             &line_index,
             &module,
         );

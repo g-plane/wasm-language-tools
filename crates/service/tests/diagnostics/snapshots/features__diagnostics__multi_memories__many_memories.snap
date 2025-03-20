@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/multi_memories.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 2
+        },
+        "end": {
+          "line": 3,
+          "character": 12
+        }
+      },
+      "severity": 1,
+      "code": "multiple-memories",
+      "source": "wat",
+      "message": "only one memory is allowed"
+    }
+  ]
+}

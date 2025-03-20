@@ -34,6 +34,10 @@ pub struct Lints {
     #[serde(alias = "needlessMut")]
     /// Lint for detecting mutable globals that are never mutated.
     pub needless_mut: LintLevel,
+
+    #[serde(alias = "multiMemories")]
+    /// Lint for detecting multiple memories in one module.
+    pub multi_memories: LintLevel,
 }
 
 impl Default for Lints {
@@ -45,6 +49,7 @@ impl Default for Lints {
             multi_modules: LintLevel::Deny,
             unreachable: LintLevel::Hint,
             needless_mut: LintLevel::Warn,
+            multi_memories: LintLevel::Allow,
         }
     }
 }
