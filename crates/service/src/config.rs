@@ -24,6 +24,10 @@ pub struct Lints {
     /// Lint for top-level module fields without declaring a module.
     pub implicit_module: LintLevel,
 
+    #[serde(alias = "multiModules")]
+    /// Lint for detecting multiple modules in a single file.
+    pub multi_modules: LintLevel,
+
     /// Lint for detecting unreachable code.
     pub unreachable: LintLevel,
 
@@ -38,6 +42,7 @@ impl Default for Lints {
             unused: LintLevel::Warn,
             shadow: LintLevel::Warn,
             implicit_module: LintLevel::Allow,
+            multi_modules: LintLevel::Deny,
             unreachable: LintLevel::Hint,
             needless_mut: LintLevel::Warn,
         }
