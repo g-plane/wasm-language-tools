@@ -1,0 +1,86 @@
+---
+source: crates/service/tests/code_action/fix_packing.rs
+expression: response
+---
+[
+  {
+    "title": "Replace instruction with `struct.get_s`",
+    "kind": "quickfix",
+    "diagnostics": [
+      {
+        "range": {
+          "start": {
+            "line": 5,
+            "character": 18
+          },
+          "end": {
+            "line": 5,
+            "character": 19
+          }
+        },
+        "code": "packing",
+        "message": ""
+      }
+    ],
+    "isPreferred": true,
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 4
+              },
+              "end": {
+                "line": 5,
+                "character": 14
+              }
+            },
+            "newText": "struct.get_s"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "title": "Replace instruction with `struct.get_u`",
+    "kind": "quickfix",
+    "diagnostics": [
+      {
+        "range": {
+          "start": {
+            "line": 5,
+            "character": 18
+          },
+          "end": {
+            "line": 5,
+            "character": 19
+          }
+        },
+        "code": "packing",
+        "message": ""
+      }
+    ],
+    "isPreferred": true,
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 4
+              },
+              "end": {
+                "line": 5,
+                "character": 14
+              }
+            },
+            "newText": "struct.get_u"
+          }
+        ]
+      }
+    }
+  }
+]

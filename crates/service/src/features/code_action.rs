@@ -139,7 +139,23 @@ impl LanguageService {
                         }
                     }
                 }
-                SyntaxKind::IMMEDIATE | SyntaxKind::INDEX => {
+                SyntaxKind::IMMEDIATE => {
+                    if quickfix {
+                        if let Some(mut action) =
+                            fix_packing::act(self, uri, &line_index, &it, &params.context)
+                        {
+                            actions.append(&mut action);
+                        }
+                    }
+                    if rewrite {
+                        if let Some(action) =
+                            idx_conversion::act(self, uri, &line_index, &symbol_table, &it)
+                        {
+                            actions.push(action);
+                        }
+                    }
+                }
+                SyntaxKind::INDEX => {
                     if rewrite {
                         if let Some(action) =
                             idx_conversion::act(self, uri, &line_index, &symbol_table, &it)

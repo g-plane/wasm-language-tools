@@ -1,0 +1,86 @@
+---
+source: crates/service/tests/code_action/fix_packing.rs
+expression: response
+---
+[
+  {
+    "title": "Replace instruction with `array.get_s`",
+    "kind": "quickfix",
+    "diagnostics": [
+      {
+        "range": {
+          "start": {
+            "line": 5,
+            "character": 14
+          },
+          "end": {
+            "line": 5,
+            "character": 15
+          }
+        },
+        "code": "packing",
+        "message": ""
+      }
+    ],
+    "isPreferred": true,
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 4
+              },
+              "end": {
+                "line": 5,
+                "character": 13
+              }
+            },
+            "newText": "array.get_s"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "title": "Replace instruction with `array.get_u`",
+    "kind": "quickfix",
+    "diagnostics": [
+      {
+        "range": {
+          "start": {
+            "line": 5,
+            "character": 14
+          },
+          "end": {
+            "line": 5,
+            "character": 15
+          }
+        },
+        "code": "packing",
+        "message": ""
+      }
+    ],
+    "isPreferred": true,
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 4
+              },
+              "end": {
+                "line": 5,
+                "character": 13
+              }
+            },
+            "newText": "array.get_u"
+          }
+        ]
+      }
+    }
+  }
+]
