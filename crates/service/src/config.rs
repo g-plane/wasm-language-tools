@@ -27,6 +27,7 @@ pub struct Lints {
     /// Lint for detecting unreachable code.
     pub unreachable: LintLevel,
 
+    #[serde(alias = "needlessMut")]
     /// Lint for detecting mutable globals that are never mutated.
     pub needless_mut: LintLevel,
 }
