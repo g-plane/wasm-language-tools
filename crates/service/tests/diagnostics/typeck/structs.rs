@@ -115,7 +115,13 @@ fn set() {
   (func (param $v (ref $vec)) (param $y f32)
     (struct.set $vec $y
       (local.get $v)
-      (local.get $y))))
+      (local.get $y)))
+
+  (type $i8 (struct (field i8)))
+  (func (param (ref $i8))
+    local.get 0
+    i32.const 0
+    struct.set $i8 0))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

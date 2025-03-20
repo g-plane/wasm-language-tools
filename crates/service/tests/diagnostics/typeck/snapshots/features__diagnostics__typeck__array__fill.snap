@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected types [(ref null $arr8_mut), i32, i8, i32], found [(ref $arr8_mut), i32, (ref null func), i32]",
+      "message": "expected types [(ref null $arr8_mut), i32, i32, i32], found [(ref $arr8_mut), i32, (ref null func), i32]",
       "relatedInformation": [
         {
           "location": {
@@ -35,7 +35,7 @@ expression: response
               }
             }
           },
-          "message": "expected type `i8`, found `(ref null func)`"
+          "message": "expected type `i32`, found `(ref null func)`"
         }
       ]
     },

@@ -105,8 +105,5 @@ fn operand_type_matches(
     match (sub, sup) {
         (OperandType::Val(sub), OperandType::Val(sup)) => sub.matches(&sup, db, uri, module_id),
         (OperandType::Any, _) | (_, OperandType::Any) => true,
-        (OperandType::PackedI8, OperandType::PackedI8) => true,
-        (OperandType::PackedI16, OperandType::PackedI16) => true,
-        _ => false,
     }
 }

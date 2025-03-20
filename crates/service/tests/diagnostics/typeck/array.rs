@@ -178,7 +178,14 @@ fn set() {
       (local.get $i)
       (array.new_default $mvec
         (i32.const 3))
-      (local.get $y))))
+      (local.get $y)))
+
+  (type $i8 (array (mut i8)))
+  (func (param (ref $i8))
+    local.get 0
+    i32.const 0
+    i32.const 0
+    array.set $i8))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
