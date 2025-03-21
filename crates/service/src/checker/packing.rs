@@ -1,5 +1,5 @@
 use crate::{
-    binder::{Symbol, SymbolKey, SymbolKind, SymbolTable},
+    binder::{Symbol, SymbolKey, SymbolTable},
     helpers,
     types_analyzer::{CompositeType, DefType, FieldType, Fields, StorageType, TypesAnalyzerCtx},
     uri::InternUri,
@@ -170,11 +170,7 @@ fn find_array<'a>(
         .symbols
         .iter()
         .find(|symbol| symbol.key == ref_key)?;
-    let def_symbol = symbol_table.symbols.iter().find(|symbol| {
-        symbol.region == ref_symbol.region
-            && symbol.kind == SymbolKind::Type
-            && ref_symbol.idx.is_defined_by(&symbol.idx)
-    })?;
+    let def_symbol = symbol_table.find_def_by_symbol(ref_symbol)?;
     if let Some(CompositeType::Array(Some(FieldType { storage, .. }))) = def_types
         .iter()
         .find(|def_type| def_type.key == def_symbol.key)

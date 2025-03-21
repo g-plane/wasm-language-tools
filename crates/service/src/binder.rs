@@ -660,6 +660,10 @@ impl SymbolTable {
         find_def(&self.symbols, key)
     }
 
+    pub fn find_def_by_symbol(&self, ref_symbol: &Symbol) -> Option<&Symbol> {
+        find_def_by_symbol(&self.symbols, ref_symbol)
+    }
+
     pub fn find_param_def(&self, key: SymbolKey) -> Option<&Symbol> {
         self.find_local_ref(key).and_then(|local| {
             self.symbols.iter().find(|symbol| {
@@ -748,22 +752,23 @@ fn find_def(symbols: &[Symbol], key: SymbolKey) -> Option<&Symbol> {
     symbols
         .iter()
         .find(|symbol| symbol.key == key)
-        .and_then(|ref_symbol| {
-            let kind = match ref_symbol.kind {
-                SymbolKind::Call => SymbolKind::Func,
-                SymbolKind::TypeUse => SymbolKind::Type,
-                SymbolKind::GlobalRef => SymbolKind::GlobalDef,
-                SymbolKind::MemoryRef => SymbolKind::MemoryDef,
-                SymbolKind::TableRef => SymbolKind::TableDef,
-                SymbolKind::FieldRef => SymbolKind::FieldDef,
-                _ => return None,
-            };
-            symbols.iter().find(move |symbol| {
-                symbol.region == ref_symbol.region
-                    && symbol.kind == kind
-                    && ref_symbol.idx.is_defined_by(&symbol.idx)
-            })
-        })
+        .and_then(|ref_symbol| find_def_by_symbol(symbols, ref_symbol))
+}
+fn find_def_by_symbol<'a>(symbols: &'a [Symbol], ref_symbol: &Symbol) -> Option<&'a Symbol> {
+    let kind = match ref_symbol.kind {
+        SymbolKind::Call => SymbolKind::Func,
+        SymbolKind::TypeUse => SymbolKind::Type,
+        SymbolKind::GlobalRef => SymbolKind::GlobalDef,
+        SymbolKind::MemoryRef => SymbolKind::MemoryDef,
+        SymbolKind::TableRef => SymbolKind::TableDef,
+        SymbolKind::FieldRef => SymbolKind::FieldDef,
+        _ => return None,
+    };
+    symbols.iter().find(move |symbol| {
+        symbol.region == ref_symbol.region
+            && symbol.kind == kind
+            && ref_symbol.idx.is_defined_by(&symbol.idx)
+    })
 }
 
 pub type SymbolKey = SyntaxNodePtr;
