@@ -19,7 +19,7 @@ expression: response
       "severity": 2,
       "code": "needless-mut",
       "source": "wat",
-      "message": "`$src` is unnecessarily mutable",
+      "message": "array `$src` is unnecessarily mutable",
       "tags": [
         1
       ]

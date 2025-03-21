@@ -1,5 +1,5 @@
 use crate::{
-    binder::SymbolTable,
+    binder::{SymbolKind, SymbolTable},
     config::LintLevel,
     helpers,
     mutability::{MutabilitiesCtx, MutationActionKind},
@@ -46,14 +46,25 @@ pub fn check(
                     .find(|symbol| symbol.key == *key)
                     .zip(mutability.mut_keyword)
             })
-            .map(|(symbol, keyword_range)| Diagnostic {
-                range: helpers::rowan_range_to_lsp_range(line_index, keyword_range),
-                severity: Some(severity),
-                source: Some("wat".into()),
-                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                message: format!("`{}` is unnecessarily mutable", symbol.idx.render(service)),
-                tags: Some(vec![DiagnosticTag::Unnecessary]),
-                ..Default::default()
+            .map(|(symbol, keyword_range)| {
+                let kind = match symbol.kind {
+                    SymbolKind::GlobalDef => "global",
+                    SymbolKind::Type => "array",
+                    SymbolKind::FieldDef => "field",
+                    _ => unreachable!(),
+                };
+                Diagnostic {
+                    range: helpers::rowan_range_to_lsp_range(line_index, keyword_range),
+                    severity: Some(severity),
+                    source: Some("wat".into()),
+                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                    message: format!(
+                        "{kind} `{}` is unnecessarily mutable",
+                        symbol.idx.render(service)
+                    ),
+                    tags: Some(vec![DiagnosticTag::Unnecessary]),
+                    ..Default::default()
+                }
             }),
     );
 }

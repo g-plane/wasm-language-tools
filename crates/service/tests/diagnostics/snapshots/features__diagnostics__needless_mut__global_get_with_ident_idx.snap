@@ -19,7 +19,7 @@ expression: response
       "severity": 2,
       "code": "needless-mut",
       "source": "wat",
-      "message": "`$global` is unnecessarily mutable",
+      "message": "global `$global` is unnecessarily mutable",
       "tags": [
         1
       ]
