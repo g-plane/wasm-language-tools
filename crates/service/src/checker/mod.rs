@@ -178,8 +178,8 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
         service,
         &mut diagnostics,
         config.lint.needless_mut,
+        uri,
         &line_index,
-        &root,
         &symbol_table,
     );
     subtyping::check(

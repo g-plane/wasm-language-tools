@@ -248,5 +248,5 @@ fn copy() {
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert_json_snapshot!(response);
+    assert!(response.items.is_empty());
 }

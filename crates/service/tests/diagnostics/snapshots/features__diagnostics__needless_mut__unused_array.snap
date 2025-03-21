@@ -9,17 +9,17 @@ expression: response
       "range": {
         "start": {
           "line": 2,
-          "character": 33
+          "character": 16
         },
         "end": {
           "line": 2,
-          "character": 36
+          "character": 19
         }
       },
       "severity": 2,
       "code": "needless-mut",
       "source": "wat",
-      "message": "`$global` is unnecessarily mutable",
+      "message": "`0` is unnecessarily mutable",
       "tags": [
         1
       ]

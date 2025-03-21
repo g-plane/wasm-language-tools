@@ -41,6 +41,7 @@ fn calm(service: &mut LanguageService, uri: String) {
             lint: Lints {
                 unused: LintLevel::Allow,
                 unreachable: LintLevel::Allow,
+                needless_mut: LintLevel::Allow,
                 ..Default::default()
             },
             ..Default::default()

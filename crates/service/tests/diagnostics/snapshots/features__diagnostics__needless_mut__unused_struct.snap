@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/typeck/array.rs
+source: crates/service/tests/diagnostics/needless_mut.rs
 expression: response
 ---
 {
@@ -8,18 +8,18 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 8,
-          "character": 11
+          "line": 2,
+          "character": 24
         },
         "end": {
-          "line": 8,
-          "character": 14
+          "line": 2,
+          "character": 27
         }
       },
       "severity": 2,
       "code": "needless-mut",
       "source": "wat",
-      "message": "`1` is unnecessarily mutable",
+      "message": "`0` is unnecessarily mutable",
       "tags": [
         1
       ]

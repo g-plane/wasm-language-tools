@@ -1,0 +1,28 @@
+---
+source: crates/service/tests/diagnostics/needless_mut.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 21
+        },
+        "end": {
+          "line": 3,
+          "character": 24
+        }
+      },
+      "severity": 2,
+      "code": "needless-mut",
+      "source": "wat",
+      "message": "`$src` is unnecessarily mutable",
+      "tags": [
+        1
+      ]
+    }
+  ]
+}

@@ -7,6 +7,7 @@ mod data_set;
 mod features;
 mod helpers;
 mod idx;
+mod mutability;
 mod refactorings;
 mod syntax_tree;
 mod types_analyzer;
@@ -17,6 +18,7 @@ pub use crate::config::*;
 use crate::{
     binder::SymbolTables,
     idx::Idents,
+    mutability::Mutabilities,
     syntax_tree::{SyntaxTree, SyntaxTreeCtx},
     types_analyzer::TypesAnalyzer,
     uri::{Uris, UrisCtx},
@@ -32,7 +34,7 @@ use lspt::{
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use salsa::{Database, ParallelDatabase, Snapshot};
 
-#[salsa::database(Uris, Idents, SyntaxTree, SymbolTables, TypesAnalyzer)]
+#[salsa::database(Uris, Idents, SyntaxTree, SymbolTables, TypesAnalyzer, Mutabilities)]
 #[derive(Default)]
 /// The language service comes with handlers for LSP requests.
 ///
