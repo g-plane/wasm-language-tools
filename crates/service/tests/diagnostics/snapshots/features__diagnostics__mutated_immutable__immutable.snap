@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/global_mut.rs
+source: crates/service/tests/diagnostics/mutated_immutable.rs
 expression: response
 ---
 {
@@ -9,15 +9,15 @@ expression: response
       "range": {
         "start": {
           "line": 5,
-          "character": 15
+          "character": 16
         },
         "end": {
           "line": 5,
-          "character": 22
+          "character": 17
         }
       },
       "severity": 1,
-      "code": "global-mutation",
+      "code": "mutated-immutable",
       "source": "wat",
       "message": "mutating an immutable global is not allowed",
       "relatedInformation": [
@@ -27,11 +27,11 @@ expression: response
             "range": {
               "start": {
                 "line": 2,
-                "character": 32
+                "character": 10
               },
               "end": {
                 "line": 2,
-                "character": 35
+                "character": 13
               }
             }
           },

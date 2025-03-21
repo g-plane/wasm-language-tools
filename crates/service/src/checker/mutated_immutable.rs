@@ -12,7 +12,7 @@ use wat_syntax::{
     SyntaxNode,
 };
 
-const DIAGNOSTIC_CODE: &str = "global-mutation";
+const DIAGNOSTIC_CODE: &str = "mutated-immutable";
 
 pub fn check(
     service: &LanguageService,

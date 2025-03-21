@@ -6,12 +6,12 @@ mod block_type;
 mod br_table_branches;
 mod dup_names;
 mod global_expr;
-mod global_mut;
 mod immediates;
 mod implicit_module;
 mod import_occur;
 mod multi_memories;
 mod multi_modules;
+mod mutated_immutable;
 mod needless_mut;
 mod packing;
 mod shadow;
@@ -99,7 +99,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
             SyntaxKind::PLAIN_INSTR => {
                 unknown_instr::check(&mut diagnostics, &line_index, &node);
                 immediates::check(&mut diagnostics, &line_index, &node);
-                global_mut::check(
+                mutated_immutable::check(
                     service,
                     &mut diagnostics,
                     uri,
