@@ -9,7 +9,7 @@ use wat_syntax::{ast::TypeDef, SyntaxNode};
 const DIAGNOSTIC_CODE: &str = "subtyping";
 
 pub fn check(
-    diags: &mut Vec<Diagnostic>,
+    diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
     uri: InternUri,
     line_index: &LineIndex,
@@ -17,7 +17,7 @@ pub fn check(
     symbol_table: &SymbolTable,
 ) {
     let def_types = service.def_types(uri);
-    diags.extend(
+    diagnostics.extend(
         def_types
             .iter()
             .filter_map(|sub_type| {

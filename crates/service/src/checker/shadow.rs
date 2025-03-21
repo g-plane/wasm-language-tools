@@ -15,7 +15,7 @@ const DIAGNOSTIC_CODE: &str = "shadow";
 
 pub fn check(
     service: &LanguageService,
-    diags: &mut Vec<Diagnostic>,
+    diagnostics: &mut Vec<Diagnostic>,
     lint_level: LintLevel,
     uri: InternUri,
     line_index: &LineIndex,
@@ -28,7 +28,7 @@ pub fn check(
         LintLevel::Warn => DiagnosticSeverity::Warning,
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
-    diags.extend(
+    diagnostics.extend(
         symbol_table
             .symbols
             .iter()

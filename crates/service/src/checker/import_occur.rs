@@ -5,12 +5,12 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "import-occurrence";
 
-pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxNode) {
+pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxNode) {
     if node
         .prev_sibling()
         .is_some_and(|prev| prev.kind() != SyntaxKind::MODULE_FIELD_IMPORT)
     {
-        diags.push(Diagnostic {
+        diagnostics.push(Diagnostic {
             range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
             severity: Some(DiagnosticSeverity::Error),
             source: Some("wat".into()),

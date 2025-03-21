@@ -10,31 +10,26 @@ use wat_syntax::{ast::PlainInstr, SyntaxNode};
 const DIAGNOSTIC_CODE: &str = "br-table-branches";
 
 pub fn check(
-    diags: &mut Vec<Diagnostic>,
+    diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
     uri: InternUri,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
-) {
-    let Some(instr) = PlainInstr::cast(node.clone()) else {
-        return;
-    };
+) -> Option<()> {
+    let instr = PlainInstr::cast(node.clone())?;
     if instr
         .instr_name()
         .is_none_or(|name| name.text() != "br_table")
     {
-        return;
+        return None;
     }
 
     let mut immediates = instr.immediates();
-    let Some(expected) = immediates
+    let expected = immediates
         .next()
-        .map(|immediate| resolve_br_types(service, uri, symbol_table, &immediate))
-    else {
-        return;
-    };
-    diags.extend(immediates.filter_map(|immediate| {
+        .map(|immediate| resolve_br_types(service, uri, symbol_table, &immediate))?;
+    diagnostics.extend(immediates.filter_map(|immediate| {
         let received = resolve_br_types(service, uri, symbol_table, &immediate);
         if received != expected {
             Some(Diagnostic {
@@ -56,4 +51,5 @@ pub fn check(
             None
         }
     }));
+    Some(())
 }

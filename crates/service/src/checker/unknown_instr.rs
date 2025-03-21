@@ -6,7 +6,7 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "unknown-instr";
 
-pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxNode) {
+pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxNode) {
     let Some(token) = support::token(node, SyntaxKind::INSTR_NAME) else {
         return;
     };
@@ -17,7 +17,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         } else {
             format!("unknown instruction `{instr_name}`")
         };
-        diags.push(Diagnostic {
+        diagnostics.push(Diagnostic {
             range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
             severity: Some(DiagnosticSeverity::Error),
             source: Some("wat".into()),

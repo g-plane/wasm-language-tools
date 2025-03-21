@@ -13,7 +13,7 @@ use wat_syntax::{ast::TypeUse, SyntaxNode};
 const DIAGNOSTIC_CODE: &str = "block-type";
 
 pub fn check(
-    diags: &mut Vec<Diagnostic>,
+    diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
     uri: InternUri,
     line_index: &LineIndex,
@@ -30,7 +30,7 @@ pub fn check(
         .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
         .is_some_and(|def_type| !matches!(def_type.comp, CompositeType::Func(..)))
     {
-        diags.push(Diagnostic {
+        diagnostics.push(Diagnostic {
             range: helpers::rowan_range_to_lsp_range(line_index, index.text_range()),
             severity: Some(DiagnosticSeverity::Error),
             source: Some("wat".into()),

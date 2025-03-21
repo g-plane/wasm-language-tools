@@ -6,8 +6,8 @@ use wat_syntax::{ast::Instr, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "global-expr";
 
-pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxNode) {
-    diags.extend(
+pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxNode) {
+    diagnostics.extend(
         support::children::<Instr>(node)
             .filter(|instr| match instr {
                 Instr::Plain(plain) => {

@@ -13,7 +13,7 @@ const DIAGNOSTIC_CODE: &str = "unused";
 
 pub fn check(
     service: &LanguageService,
-    diags: &mut Vec<Diagnostic>,
+    diagnostics: &mut Vec<Diagnostic>,
     lint_level: LintLevel,
     line_index: &LineIndex,
     root: &SyntaxNode,
@@ -25,7 +25,7 @@ pub fn check(
         LintLevel::Warn => DiagnosticSeverity::Warning,
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
-    diags.extend(symbol_table.symbols.iter().filter_map(|symbol| {
+    diagnostics.extend(symbol_table.symbols.iter().filter_map(|symbol| {
         match symbol.kind {
             SymbolKind::Func => {
                 if is_prefixed_with_underscore(service, symbol)

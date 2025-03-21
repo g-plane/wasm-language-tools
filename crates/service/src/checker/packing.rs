@@ -124,7 +124,7 @@ pub fn check(
         }
         _ => {}
     }
-    None
+    Some(())
 }
 
 fn find_struct_field<'a>(

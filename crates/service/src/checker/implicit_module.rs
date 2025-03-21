@@ -7,7 +7,7 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 const DIAGNOSTIC_CODE: &str = "implicit-module";
 
 pub fn check(
-    diags: &mut Vec<Diagnostic>,
+    diagnostics: &mut Vec<Diagnostic>,
     lint_level: LintLevel,
     line_index: &LineIndex,
     node: &SyntaxNode,
@@ -19,7 +19,7 @@ pub fn check(
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
     if support::token(node, SyntaxKind::L_PAREN).is_none() {
-        diags.push(Diagnostic {
+        diagnostics.push(Diagnostic {
             range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
             severity: Some(severity),
             source: Some("wat".into()),

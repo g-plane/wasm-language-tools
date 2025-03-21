@@ -8,12 +8,12 @@ const DIAGNOSTIC_CODE: &str = "syntax";
 
 pub fn check(
     service: &LanguageService,
-    diags: &mut Vec<Diagnostic>,
+    diagnostics: &mut Vec<Diagnostic>,
     uri: InternUri,
     line_index: &LineIndex,
     root: &SyntaxNode,
 ) {
-    diags.extend(service.parse(uri).1.iter().map(|error| {
+    diagnostics.extend(service.parse(uri).1.iter().map(|error| {
         let start = line_index.line_col(TextSize::new(error.start as u32));
         let end = line_index.line_col(TextSize::new(error.end as u32));
         Diagnostic {
@@ -41,7 +41,7 @@ pub fn check(
             ..Default::default()
         }
     }));
-    diags.extend(
+    diagnostics.extend(
         root.children_with_tokens()
             .filter_map(|element| match element {
                 SyntaxElement::Token(token) if token.kind() == SyntaxKind::ERROR => Some(token),

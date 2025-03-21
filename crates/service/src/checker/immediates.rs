@@ -9,7 +9,7 @@ const DIAGNOSTIC_CODE: &str = "immediates";
 
 const INDEX: [SyntaxKind; 2] = [SyntaxKind::IDENT, SyntaxKind::INT];
 
-pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxNode) {
+pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxNode) {
     let Some(instr_name) = token(node, SyntaxKind::INSTR_NAME) else {
         return;
     };
@@ -26,7 +26,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         | "array.set" | "array.fill" | "br_on_null" | "br_on_non_null" | "call_ref"
         | "return_call" | "return_call_ref" => {
             check_immediate::<true>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
@@ -36,7 +36,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         }
         "i32.const" | "i64.const" | "v128.const" => {
             check_immediate::<true>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 SyntaxKind::INT,
                 "integer",
@@ -46,7 +46,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         }
         "f32.const" | "f64.const" => {
             check_immediate::<true>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 [SyntaxKind::FLOAT, SyntaxKind::INT],
                 "floating-point number",
@@ -61,7 +61,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                     let Some(type_use) =
                         Immediate::cast(immediate).and_then(|immediate| immediate.type_use())
                     else {
-                        diags.push(Diagnostic {
+                        diagnostics.push(Diagnostic {
                             range: helpers::rowan_range_to_lsp_range(line_index, range),
                             severity: Some(DiagnosticSeverity::Error),
                             source: Some("wat".into()),
@@ -78,7 +78,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                     {
                         break 'a;
                     }
-                    diags.push(Diagnostic {
+                    diagnostics.push(Diagnostic {
                         range: helpers::rowan_range_to_lsp_range(line_index, range),
                         severity: Some(DiagnosticSeverity::Error),
                         source: Some("wat".into()),
@@ -91,14 +91,14 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         }
         "br_table" => {
             check_immediate::<true>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
                 &instr_name,
                 line_index,
             );
-            diags.extend(
+            diagnostics.extend(
                 immediates
                     .filter(|immediate| {
                         !immediate.first_token().is_some_and(|token| {
@@ -121,7 +121,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         }
         "call_indirect" | "return_call_indirect" => {
             check_immediate::<false>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
@@ -129,7 +129,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 line_index,
             );
             check_immediate::<false>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 SyntaxKind::TYPE_USE,
                 "type use",
@@ -141,7 +141,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         | "struct.set" | "array.new_data" | "array.new_elem" | "array.copy" | "array.init_data"
         | "array.init_elem" => {
             check_immediate::<true>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
@@ -149,7 +149,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 line_index,
             );
             check_immediate::<true>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
@@ -166,7 +166,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         | "v128.load8_splat" | "v128.load16_splat" | "v128.load32_splat" | "v128.load64_splat"
         | "v128.load32_zero" | "v128.load64_zero" | "v128.store" => {
             check_immediate::<false>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
@@ -174,7 +174,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 line_index,
             );
             check_immediate::<false>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 SyntaxKind::MEM_ARG,
                 "memory argument",
@@ -184,7 +184,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         }
         "memory.size" | "memory.grow" | "memory.fill" => {
             check_immediate::<false>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
@@ -194,7 +194,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         }
         "memory.copy" => {
             check_immediate::<false>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
@@ -202,7 +202,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 line_index,
             );
             check_immediate::<false>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
@@ -212,7 +212,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         }
         "memory.init" => {
             check_immediate::<true>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
@@ -220,7 +220,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 line_index,
             );
             check_immediate::<false>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
@@ -244,7 +244,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         | "f64x2.extract_lane"
         | "f64x2.replace_lane" => {
             check_immediate::<true>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
@@ -255,7 +255,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         "v128.load8_lane" | "v128.load16_lane" | "v128.load32_lane" | "v128.load64_lane"
         | "v128.store8_lane" | "v128.store16_lane" | "v128.store32_lane" | "v128.store64_lane" => {
             check_immediate::<false>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
@@ -263,7 +263,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 line_index,
             );
             check_immediate::<false>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 SyntaxKind::MEM_ARG,
                 "memory argument",
@@ -271,7 +271,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 line_index,
             );
             check_immediate::<false>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 SyntaxKind::INT,
                 "unsigned integer",
@@ -281,7 +281,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         }
         "ref.null" => {
             check_immediate::<true>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 [SyntaxKind::HEAP_TYPE, SyntaxKind::IDENT, SyntaxKind::INT],
                 "heap type",
@@ -291,7 +291,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         }
         "ref.test" | "ref.cast" => {
             check_immediate::<true>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 SyntaxKind::REF_TYPE,
                 "ref type",
@@ -301,7 +301,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         }
         "array.new_fixed" => {
             check_immediate::<true>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
@@ -309,7 +309,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 line_index,
             );
             check_immediate::<true>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 SyntaxKind::INT,
                 "unsigned integer",
@@ -319,7 +319,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         }
         "br_on_cast" | "br_on_cast_fail" => {
             check_immediate::<true>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
@@ -327,7 +327,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 line_index,
             );
             check_immediate::<true>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 SyntaxKind::REF_TYPE,
                 "ref type",
@@ -335,7 +335,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
                 line_index,
             );
             check_immediate::<true>(
-                diags,
+                diagnostics,
                 &mut immediates,
                 SyntaxKind::REF_TYPE,
                 "ref type",
@@ -345,7 +345,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
         }
         _ => {}
     }
-    diags.extend(immediates.map(|immediate| Diagnostic {
+    diagnostics.extend(immediates.map(|immediate| Diagnostic {
         range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
         severity: Some(DiagnosticSeverity::Error),
         source: Some("wat".into()),
@@ -356,7 +356,7 @@ pub fn check(diags: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxN
 }
 
 fn check_immediate<const REQUIRED: bool>(
-    diags: &mut Vec<Diagnostic>,
+    diagnostics: &mut Vec<Diagnostic>,
     immediates: &mut Peekable<impl Iterator<Item = SyntaxNode>>,
     expected: impl SyntaxKindCmp,
     description: &'static str,
@@ -370,7 +370,7 @@ fn check_immediate<const REQUIRED: bool>(
         if expected.cmp(immediate.kind()) {
             immediates.next();
         } else if REQUIRED {
-            diags.push(Diagnostic {
+            diagnostics.push(Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
                 severity: Some(DiagnosticSeverity::Error),
                 source: Some("wat".into()),
@@ -381,7 +381,7 @@ fn check_immediate<const REQUIRED: bool>(
             immediates.next();
         }
     } else if REQUIRED {
-        diags.push(Diagnostic {
+        diagnostics.push(Diagnostic {
             range: helpers::rowan_range_to_lsp_range(line_index, instr_name.text_range()),
             severity: Some(DiagnosticSeverity::Error),
             source: Some("wat".into()),

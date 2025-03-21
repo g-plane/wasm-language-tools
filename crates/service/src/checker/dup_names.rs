@@ -15,13 +15,13 @@ const DIAGNOSTIC_CODE: &str = "duplicated-names";
 
 pub fn check(
     service: &LanguageService,
-    diags: &mut Vec<Diagnostic>,
+    diagnostics: &mut Vec<Diagnostic>,
     uri: InternUri,
     line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
 ) {
-    diags.extend(
+    diagnostics.extend(
         symbol_table
             .symbols
             .iter()
@@ -96,7 +96,7 @@ pub fn check(
             }),
     );
 
-    diags.extend(
+    diagnostics.extend(
         symbol_table
             .exports
             .iter()

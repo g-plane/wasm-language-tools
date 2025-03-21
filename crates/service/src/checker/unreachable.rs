@@ -15,7 +15,7 @@ use wat_syntax::{
 const DIAGNOSTIC_CODE: &str = "unreachable";
 
 pub fn check(
-    diags: &mut Vec<Diagnostic>,
+    diagnostics: &mut Vec<Diagnostic>,
     lint_level: LintLevel,
     line_index: &LineIndex,
     root: &SyntaxNode,
@@ -23,7 +23,7 @@ pub fn check(
     node: &SyntaxNode,
 ) {
     Checker {
-        diags,
+        diagnostics,
         line_index,
         symbol_table,
         root,
@@ -41,7 +41,7 @@ pub fn check(
 }
 
 struct Checker<'a> {
-    diags: &'a mut Vec<Diagnostic>,
+    diagnostics: &'a mut Vec<Diagnostic>,
     line_index: &'a LineIndex,
     symbol_table: &'a SymbolTable,
     root: &'a SyntaxNode,
@@ -102,7 +102,7 @@ impl Checker<'_> {
                     let range = TextRange::new(instr_node.text_range().start(), end);
                     // avoid duplicate diagnostics
                     if !self.last_reported.contains_range(range) {
-                        self.diags.push(Diagnostic {
+                        self.diagnostics.push(Diagnostic {
                             range: helpers::rowan_range_to_lsp_range(self.line_index, range),
                             severity: Some(self.severity),
                             source: Some("wat".into()),
@@ -200,7 +200,7 @@ impl Checker<'_> {
     fn report_token(&mut self, token: &SyntaxToken) {
         // We don't update the last reported range for token here
         // because token is atomic and nothing can be smaller than it.
-        self.diags.push(Diagnostic {
+        self.diagnostics.push(Diagnostic {
             range: helpers::rowan_range_to_lsp_range(self.line_index, token.text_range()),
             severity: Some(self.severity),
             source: Some("wat".into()),

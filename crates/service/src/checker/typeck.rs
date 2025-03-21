@@ -25,7 +25,7 @@ use wat_syntax::{
 const DIAGNOSTIC_CODE: &str = "type-check";
 
 pub fn check_func(
-    diags: &mut Vec<Diagnostic>,
+    diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
     uri: InternUri,
     line_index: &LineIndex,
@@ -43,7 +43,7 @@ pub fn check_func(
         })
         .unwrap_or_default();
     check_block_like(
-        diags,
+        diagnostics,
         &Shared {
             service,
             uri,
@@ -58,7 +58,7 @@ pub fn check_func(
 }
 
 pub fn check_global(
-    diags: &mut Vec<Diagnostic>,
+    diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
     uri: InternUri,
     line_index: &LineIndex,
@@ -71,7 +71,7 @@ pub fn check_global(
         .map(OperandType::Val)
         .unwrap_or(OperandType::Any);
     check_block_like(
-        diags,
+        diagnostics,
         &Shared {
             service,
             uri,
@@ -109,7 +109,7 @@ struct Shared<'a> {
 }
 
 fn check_block_like(
-    diags: &mut Vec<Diagnostic>,
+    diagnostics: &mut Vec<Diagnostic>,
     shared: &Shared,
     node: &SyntaxNode,
     init_stack: Vec<(OperandType, Option<Instr>)>,
@@ -135,8 +135,8 @@ fn check_block_like(
             };
             let instr_name = instr_name.text();
             let sig = resolve_sig(shared, instr_name, plain_instr, &type_stack);
-            if let Some(diag) = type_stack.check(&sig.params, ReportRange::Instr(&instr)) {
-                diags.push(diag);
+            if let Some(diagnostic) = type_stack.check(&sig.params, ReportRange::Instr(&instr)) {
+                diagnostics.push(diagnostic);
             }
             if helpers::can_produce_never(instr_name) {
                 type_stack.has_never = true;
@@ -150,7 +150,7 @@ fn check_block_like(
             let node = block_instr.syntax();
             let signature = get_block_sig(shared.service, shared.uri, node);
             let params = signature.as_ref().map(|signature| &signature.params);
-            if let Some(diag) = params.and_then(|params| {
+            if let Some(diagnostic) = params.and_then(|params| {
                 type_stack.check(
                     &params
                         .iter()
@@ -159,7 +159,7 @@ fn check_block_like(
                     ReportRange::Instr(&instr),
                 )
             }) {
-                diags.push(diag);
+                diagnostics.push(diagnostic);
             };
             let init_stack = params
                 .map(|params| {
@@ -180,26 +180,28 @@ fn check_block_like(
                 .unwrap_or_default();
             match block_instr {
                 BlockInstr::Block(..) | BlockInstr::Loop(..) => {
-                    check_block_like(diags, shared, node, init_stack, &results);
+                    check_block_like(diagnostics, shared, node, init_stack, &results);
                 }
                 BlockInstr::If(block_if) => {
-                    if let Some(mut diag) = type_stack.check(
+                    if let Some(mut diagnostic) = type_stack.check(
                         &[OperandType::Val(ValType::I32)],
                         ReportRange::Keyword(node),
                     ) {
-                        diag.message.push_str(" for the condition of `if` block");
-                        diags.push(diag);
+                        diagnostic
+                            .message
+                            .push_str(" for the condition of `if` block");
+                        diagnostics.push(diagnostic);
                     }
                     if let Some(then_block) = block_if.then_block() {
                         check_block_like(
-                            diags,
+                            diagnostics,
                             shared,
                             then_block.syntax(),
                             init_stack.clone(),
                             &results,
                         );
                     } else {
-                        diags.push(Diagnostic {
+                        diagnostics.push(Diagnostic {
                             range: helpers::rowan_range_to_lsp_range(
                                 shared.line_index,
                                 node.text_range(),
@@ -218,9 +220,15 @@ fn check_block_like(
                         });
                     }
                     if let Some(else_block) = block_if.else_block() {
-                        check_block_like(diags, shared, else_block.syntax(), init_stack, &results);
+                        check_block_like(
+                            diagnostics,
+                            shared,
+                            else_block.syntax(),
+                            init_stack,
+                            &results,
+                        );
                     } else if !results.is_empty() {
-                        diags.push(Diagnostic {
+                        diagnostics.push(Diagnostic {
                             range: helpers::rowan_range_to_lsp_range(
                                 shared.line_index,
                                 node.text_range(),
@@ -245,8 +253,9 @@ fn check_block_like(
                 .extend(results.into_iter().map(|ty| (ty, Some(instr.clone()))));
         }
     });
-    if let Some(diag) = type_stack.check_to_bottom(expected_results, ReportRange::Last(node)) {
-        diags.push(diag);
+    if let Some(diagnostic) = type_stack.check_to_bottom(expected_results, ReportRange::Last(node))
+    {
+        diagnostics.push(diagnostic);
     }
 }
 

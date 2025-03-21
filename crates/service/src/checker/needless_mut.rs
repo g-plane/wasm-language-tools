@@ -15,7 +15,7 @@ const DIAGNOSTIC_CODE: &str = "needless-mut";
 
 pub fn check(
     service: &LanguageService,
-    diags: &mut Vec<Diagnostic>,
+    diagnostics: &mut Vec<Diagnostic>,
     lint_level: LintLevel,
     line_index: &LineIndex,
     root: &SyntaxNode,
@@ -71,7 +71,7 @@ pub fn check(
                 };
             }
         });
-    diags.extend(
+    diagnostics.extend(
         mutable_globals
             .into_iter()
             .filter(|(.., mutated)| !mutated)
