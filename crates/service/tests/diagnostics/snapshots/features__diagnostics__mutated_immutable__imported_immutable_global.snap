@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "mutated-immutable",
       "source": "wat",
-      "message": "mutating an immutable global is not allowed",
+      "message": "mutating the immutable global `$global` is not allowed",
       "relatedInformation": [
         {
           "location": {
@@ -35,7 +35,7 @@ expression: response
               }
             }
           },
-          "message": "immutable global"
+          "message": "immutable global defined here"
         }
       ]
     }

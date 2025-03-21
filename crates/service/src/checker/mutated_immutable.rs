@@ -28,16 +28,17 @@ pub fn check(
                     .target
                     .and_then(|target| mutabilities.get_key_value(&target))
                     .filter(|(_, mutability)| mutability.mut_keyword.is_none())
-                    .map(|(def_key, _)| {
-                        let kind = match symbol_table
+                    .zip(
+                        symbol_table
                             .symbols
                             .iter()
-                            .find(|symbol| symbol.key == *def_key)
-                            .map(|symbol| symbol.kind)
-                        {
-                            Some(SymbolKind::GlobalDef) => "global",
-                            Some(SymbolKind::Type) => "array",
-                            Some(SymbolKind::FieldDef) => "field",
+                            .find(|symbol| symbol.key == *key),
+                    )
+                    .map(|((def_key, _), ref_symbol)| {
+                        let kind = match ref_symbol.kind {
+                            SymbolKind::GlobalRef => "global",
+                            SymbolKind::TypeUse => "array",
+                            SymbolKind::FieldRef => "field",
                             _ => unreachable!(),
                         };
                         Diagnostic {
@@ -45,7 +46,10 @@ pub fn check(
                             severity: Some(DiagnosticSeverity::Error),
                             source: Some("wat".into()),
                             code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                            message: format!("mutating an immutable {kind} is not allowed"),
+                            message: format!(
+                                "mutating the immutable {kind} `{}` is not allowed",
+                                ref_symbol.idx.render(service)
+                            ),
                             related_information: Some(vec![DiagnosticRelatedInformation {
                                 location: Location {
                                     uri: service.lookup_uri(uri),
@@ -54,7 +58,7 @@ pub fn check(
                                         def_key.text_range(),
                                     ),
                                 },
-                                message: format!("immutable {kind}"),
+                                message: format!("immutable {kind} defined here"),
                             }]),
                             ..Default::default()
                         }

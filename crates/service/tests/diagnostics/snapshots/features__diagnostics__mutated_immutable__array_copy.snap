@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "mutated-immutable",
       "source": "wat",
-      "message": "mutating an immutable array is not allowed",
+      "message": "mutating the immutable array `$dst` is not allowed",
       "relatedInformation": [
         {
           "location": {
@@ -35,7 +35,7 @@ expression: response
               }
             }
           },
-          "message": "immutable array"
+          "message": "immutable array defined here"
         }
       ]
     }
