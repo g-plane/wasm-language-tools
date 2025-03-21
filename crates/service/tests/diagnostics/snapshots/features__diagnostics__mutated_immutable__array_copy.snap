@@ -8,18 +8,18 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 5,
-          "character": 16
+          "line": 10,
+          "character": 15
         },
         "end": {
-          "line": 5,
-          "character": 17
+          "line": 10,
+          "character": 19
         }
       },
       "severity": 1,
       "code": "mutated-immutable",
       "source": "wat",
-      "message": "mutating an immutable global is not allowed",
+      "message": "mutating an immutable array is not allowed",
       "relatedInformation": [
         {
           "location": {
@@ -27,15 +27,15 @@ expression: response
             "range": {
               "start": {
                 "line": 2,
-                "character": 10
+                "character": 2
               },
               "end": {
                 "line": 2,
-                "character": 13
+                "character": 25
               }
             }
           },
-          "message": "immutable global type"
+          "message": "immutable array"
         }
       ]
     }

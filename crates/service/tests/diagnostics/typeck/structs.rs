@@ -117,7 +117,7 @@ fn set() {
       (local.get $v)
       (local.get $y)))
 
-  (type $i8 (struct (field i8)))
+  (type $i8 (struct (field (mut i8))))
   (func (param (ref $i8))
     local.get 0
     i32.const 0

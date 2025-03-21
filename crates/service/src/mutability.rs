@@ -10,7 +10,7 @@ use rowan::{
 use rustc_hash::FxHashMap;
 use std::sync::Arc;
 use wat_syntax::{
-    ast::{CompType, FieldType, ModuleFieldGlobal, PlainInstr, TypeDef},
+    ast::{CompType, FieldType, ImportDescGlobalType, ModuleFieldGlobal, PlainInstr, TypeDef},
     SyntaxKind, SyntaxNode,
 };
 
@@ -36,18 +36,38 @@ fn create_mutabilities(
         .iter()
         .filter_map(|symbol| match symbol.kind {
             SymbolKind::GlobalDef => {
-                let global = ModuleFieldGlobal::cast(symbol.key.to_node(&root))?;
-                let range = global
-                    .global_type()
-                    .and_then(|global_type| global_type.mut_keyword())
-                    .map(|token| token.text_range());
-                Some((
-                    symbol.key,
-                    Mutability {
-                        mut_keyword: range,
-                        exported: global.export().is_some(),
-                    },
-                ))
+                let node = symbol.key.to_node(&root);
+                match node.kind() {
+                    SyntaxKind::MODULE_FIELD_GLOBAL => {
+                        let global = ModuleFieldGlobal::cast(node)?;
+                        let range = global
+                            .global_type()
+                            .and_then(|global_type| global_type.mut_keyword())
+                            .map(|token| token.text_range());
+                        Some((
+                            symbol.key,
+                            Mutability {
+                                mut_keyword: range,
+                                cross_module: global.export().is_some(),
+                            },
+                        ))
+                    }
+                    SyntaxKind::IMPORT_DESC_GLOBAL_TYPE => {
+                        let global = ImportDescGlobalType::cast(node)?;
+                        let range = global
+                            .global_type()
+                            .and_then(|global_type| global_type.mut_keyword())
+                            .map(|token| token.text_range());
+                        Some((
+                            symbol.key,
+                            Mutability {
+                                mut_keyword: range,
+                                cross_module: true,
+                            },
+                        ))
+                    }
+                    _ => None,
+                }
             }
             SymbolKind::Type => TypeDef::cast(symbol.key.to_node(&root))
                 .and_then(|type_def| type_def.sub_type())
@@ -65,7 +85,7 @@ fn create_mutabilities(
                         symbol.key,
                         Mutability {
                             mut_keyword: range,
-                            exported: false,
+                            cross_module: false,
                         },
                     )
                 }),
@@ -82,7 +102,7 @@ fn create_mutabilities(
                     symbol.key,
                     Mutability {
                         mut_keyword: range,
-                        exported: false,
+                        cross_module: false,
                     },
                 ))
             }
@@ -95,7 +115,7 @@ fn create_mutabilities(
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct Mutability {
     pub(crate) mut_keyword: Option<TextRange>,
-    pub(crate) exported: bool,
+    pub(crate) cross_module: bool,
 }
 
 fn create_mutation_actions(

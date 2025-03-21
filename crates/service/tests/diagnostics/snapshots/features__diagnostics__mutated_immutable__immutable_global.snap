@@ -9,11 +9,11 @@ expression: response
       "range": {
         "start": {
           "line": 5,
-          "character": 15
+          "character": 16
         },
         "end": {
           "line": 5,
-          "character": 22
+          "character": 17
         }
       },
       "severity": 1,
@@ -27,15 +27,15 @@ expression: response
             "range": {
               "start": {
                 "line": 2,
-                "character": 32
+                "character": 2
               },
               "end": {
-                "line": 2,
-                "character": 35
+                "line": 3,
+                "character": 16
               }
             }
           },
-          "message": "immutable global type"
+          "message": "immutable global"
         }
       ]
     }

@@ -33,7 +33,7 @@ pub fn check(
             .iter()
             .filter(|(key, mutability)| {
                 mutability.mut_keyword.is_some()
-                    && !mutability.exported
+                    && !mutability.cross_module
                     && mutation_actions
                         .values()
                         .filter(|action| action.target.is_some_and(|target| target == **key))

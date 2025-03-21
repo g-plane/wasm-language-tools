@@ -99,15 +99,6 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
             SyntaxKind::PLAIN_INSTR => {
                 unknown_instr::check(&mut diagnostics, &line_index, &node);
                 immediates::check(&mut diagnostics, &line_index, &node);
-                mutated_immutable::check(
-                    service,
-                    &mut diagnostics,
-                    uri,
-                    &line_index,
-                    &root,
-                    &symbol_table,
-                    &node,
-                );
                 br_table_branches::check(
                     &mut diagnostics,
                     service,
@@ -174,6 +165,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
         &root,
         &symbol_table,
     );
+    mutated_immutable::check(service, &mut diagnostics, uri, &line_index, &symbol_table);
     needless_mut::check(
         service,
         &mut diagnostics,

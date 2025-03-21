@@ -1,0 +1,77 @@
+---
+source: crates/service/tests/diagnostics/mutated_immutable.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 12,
+          "character": 25
+        },
+        "end": {
+          "line": 12,
+          "character": 38
+        }
+      },
+      "severity": 1,
+      "code": "mutated-immutable",
+      "source": "wat",
+      "message": "mutating an immutable field is not allowed",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 8,
+                "character": 26
+              },
+              "end": {
+                "line": 8,
+                "character": 50
+              }
+            }
+          },
+          "message": "immutable field"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 17
+        },
+        "end": {
+          "line": 6,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "mutated-immutable",
+      "source": "wat",
+      "message": "mutating an immutable field is not allowed",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 23
+              },
+              "end": {
+                "line": 2,
+                "character": 26
+              }
+            }
+          },
+          "message": "immutable field"
+        }
+      ]
+    }
+  ]
+}

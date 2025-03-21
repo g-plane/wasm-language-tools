@@ -1,0 +1,121 @@
+---
+source: crates/service/tests/diagnostics/mutated_immutable.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 15
+        },
+        "end": {
+          "line": 5,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found [(ref 0), i32, any] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 23
+        },
+        "end": {
+          "line": 13,
+          "character": 24
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [(ref $packed), i32, i32, (ref $packed), i32, i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 20
+        },
+        "end": {
+          "line": 2,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find type `0` in this scope"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 14
+        },
+        "end": {
+          "line": 5,
+          "character": 15
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find type `0` in this scope"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 20
+        },
+        "end": {
+          "line": 7,
+          "character": 27
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find type `$packed` in this scope"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 16
+        },
+        "end": {
+          "line": 10,
+          "character": 23
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find type `$packed` in this scope"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 16
+        },
+        "end": {
+          "line": 13,
+          "character": 23
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find type `$packed` in this scope"
+    }
+  ]
+}
