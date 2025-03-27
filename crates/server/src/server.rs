@@ -4,19 +4,25 @@ use crate::{
     stdio,
 };
 use lspt::{
-    CallHierarchyIncomingCallsRequest, CallHierarchyOutgoingCallsRequest,
-    CallHierarchyPrepareRequest, CodeActionRequest, CompletionRequest, ConfigurationItem,
-    ConfigurationParams, ConfigurationRequest, DeclarationRequest, DefinitionRequest,
-    DiagnosticRefreshRequest, DidChangeConfigurationNotification, DidChangeConfigurationParams,
-    DidChangeTextDocumentNotification, DidChangeTextDocumentParams,
-    DidOpenTextDocumentNotification, DidOpenTextDocumentParams, DocumentDiagnosticRequest,
-    DocumentFormattingRequest, DocumentHighlightRequest, DocumentRangeFormattingRequest,
-    DocumentSymbolRequest, ExitNotification, FoldingRangeRequest, HoverRequest, InitializeParams,
-    InlayHintRequest, Notification as _, PrepareRenameRequest, PublishDiagnosticsNotification,
-    ReferencesRequest, RegistrationRequest, RenameRequest, Request as _, SelectionRangeRequest,
-    SemanticTokensRangeRequest, SemanticTokensRequest, ShutdownRequest, SignatureHelpRequest,
-    TextDocumentContentChangeWholeDocument, TypeDefinitionRequest, TypeHierarchyPrepareRequest,
-    TypeHierarchySubtypesRequest, TypeHierarchySupertypesRequest, Union2,
+    notification::{
+        DidChangeConfigurationNotification, DidChangeTextDocumentNotification,
+        DidOpenTextDocumentNotification, ExitNotification, Notification as _,
+        PublishDiagnosticsNotification,
+    },
+    request::{
+        CallHierarchyIncomingCallsRequest, CallHierarchyOutgoingCallsRequest,
+        CallHierarchyPrepareRequest, CodeActionRequest, CompletionRequest, ConfigurationRequest,
+        DeclarationRequest, DefinitionRequest, DiagnosticRefreshRequest, DocumentDiagnosticRequest,
+        DocumentFormattingRequest, DocumentHighlightRequest, DocumentRangeFormattingRequest,
+        DocumentSymbolRequest, FoldingRangeRequest, HoverRequest, InlayHintRequest,
+        PrepareRenameRequest, ReferencesRequest, RegistrationRequest, RenameRequest, Request as _,
+        SelectionRangeRequest, SemanticTokensRangeRequest, SemanticTokensRequest, ShutdownRequest,
+        SignatureHelpRequest, TypeDefinitionRequest, TypeHierarchyPrepareRequest,
+        TypeHierarchySubtypesRequest, TypeHierarchySupertypesRequest,
+    },
+    ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams,
+    DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams,
+    TextDocumentContentChangeWholeDocument, Union2,
 };
 use std::ops::Deref;
 use wat_service::LanguageService;

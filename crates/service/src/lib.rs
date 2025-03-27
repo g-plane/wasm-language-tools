@@ -25,8 +25,8 @@ use crate::{
 };
 use indexmap::{IndexMap, IndexSet};
 use lspt::{
-    CodeActionKind, CodeActionOptions, CompletionOptions, DiagnosticOptions,
-    DidChangeConfigurationNotification, InitializeParams, InitializeResult, Registration,
+    notification::DidChangeConfigurationNotification, CodeActionKind, CodeActionOptions,
+    CompletionOptions, DiagnosticOptions, InitializeParams, InitializeResult, Registration,
     RegistrationParams, RenameOptions, SemanticTokensClientCapabilities, SemanticTokensLegend,
     SemanticTokensOptions, ServerCapabilities, ServerInfo, SignatureHelpOptions,
     TextDocumentClientCapabilities, TextDocumentSyncKind, TextDocumentSyncOptions, Union2, Union3,
@@ -220,7 +220,7 @@ impl LanguageService {
     #[inline]
     /// Get dynamically registered capabilities.
     pub fn dynamic_capabilities(&self) -> RegistrationParams {
-        use lspt::Notification;
+        use lspt::notification::Notification;
         RegistrationParams {
             registrations: vec![Registration {
                 id: DidChangeConfigurationNotification::METHOD.into(),

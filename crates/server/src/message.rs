@@ -81,7 +81,7 @@ pub fn try_cast_request<R>(
     params: Value,
 ) -> Result<Result<R::Params, serde_json::Error>, Value>
 where
-    R: lspt::Request,
+    R: lspt::request::Request,
     R::Params: serde::de::DeserializeOwned,
 {
     if method == R::METHOD {
@@ -96,7 +96,7 @@ pub fn try_cast_notification<N>(
     params: Value,
 ) -> Result<Result<N::Params, serde_json::Error>, Value>
 where
-    N: lspt::Notification,
+    N: lspt::notification::Notification,
     N::Params: serde::de::DeserializeOwned,
 {
     if method == N::METHOD {
