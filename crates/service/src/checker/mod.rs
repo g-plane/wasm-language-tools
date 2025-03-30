@@ -18,6 +18,7 @@ mod shadow;
 mod start;
 mod subtyping;
 mod syntax;
+mod type_misuse;
 mod typeck;
 mod undef;
 mod uninit;
@@ -113,6 +114,15 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                     uri,
                     &line_index,
                     &symbol_table,
+                    &node,
+                );
+                type_misuse::check(
+                    service,
+                    &mut diagnostics,
+                    uri,
+                    &line_index,
+                    &symbol_table,
+                    module_id as u32,
                     &node,
                 );
             }

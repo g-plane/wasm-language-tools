@@ -1,0 +1,145 @@
+---
+source: crates/service/tests/diagnostics/type_misuse.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 16,
+          "character": 4
+        },
+        "end": {
+          "line": 16,
+          "character": 19
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null $func), i32], found [(ref $array), i32]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 14,
+                "character": 4
+              },
+              "end": {
+                "line": 14,
+                "character": 15
+              }
+            }
+          },
+          "message": "expected type `(ref null $func)`, found `(ref $array)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 18,
+          "character": 4
+        },
+        "end": {
+          "line": 18,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null $struct), i32, any], found [(ref $array), any, i32]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 13,
+                "character": 4
+              },
+              "end": {
+                "line": 13,
+                "character": 15
+              }
+            }
+          },
+          "message": "expected type `(ref null $struct)`, found `(ref $array)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 16,
+          "character": 14
+        },
+        "end": {
+          "line": 16,
+          "character": 19
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "expected type is array, but type of `$func` is func",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 2
+              },
+              "end": {
+                "line": 2,
+                "character": 21
+              }
+            }
+          },
+          "message": "func type defined here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 18,
+          "character": 14
+        },
+        "end": {
+          "line": 18,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "expected type is array, but type of `$struct` is struct",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 2
+              },
+              "end": {
+                "line": 3,
+                "character": 37
+              }
+            }
+          },
+          "message": "struct type defined here"
+        }
+      ]
+    }
+  ]
+}

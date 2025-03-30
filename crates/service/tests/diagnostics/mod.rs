@@ -17,6 +17,7 @@ mod shadow;
 mod start;
 mod subtyping;
 mod syntax;
+mod type_misuse;
 mod typeck;
 mod undef;
 mod uninit;
