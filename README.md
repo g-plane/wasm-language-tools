@@ -130,6 +130,20 @@ WebAssembly GC is also supported.
   </picture>
 </details>
 
+<details>
+  <summary>Type Hierarchy</summary>
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/76c734b9-e6c8-49ad-b105-2044d8f1ee09">
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/ea4723b2-a1ce-4483-8c48-77e9762a9b3c">
+    <img src="https://github.com/user-attachments/assets/76c734b9-e6c8-49ad-b105-2044d8f1ee09">
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/6409039c-7def-4082-8e90-0dc929b54188">
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/a63f49d6-7099-415b-a9ec-1b74c122da9a">
+    <img src="https://github.com/user-attachments/assets/6409039c-7def-4082-8e90-0dc929b54188">
+  </picture>
+</details>
+
 ## 🍵 Usage
 
 We've provided pre-built binaries on [GitHub Releases](https://github.com/g-plane/wasm-language-tools/releases).
