@@ -1,6 +1,6 @@
 [package]
 name = "wat_syntax"
-version = "0.3.2"
+version = "0.4.0"
 description = "WebAssembly Text Format syntaxes."
 authors = ["Pig Fang <g-plane@hotmail.com>"]
 repository = "https://github.com/g-plane/wasm-language-tools"
