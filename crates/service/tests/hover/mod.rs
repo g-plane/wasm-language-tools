@@ -718,6 +718,20 @@ fn if_keyword() {
 }
 
 #[test]
+fn func_as_block() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func (result i64)
+    br 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 3, 7));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn ref_type() {
     let uri = "untitled:test".to_string();
     let source = "

@@ -155,6 +155,16 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                     SymbolKind::Func,
                     &module,
                 ));
+                symbols.push(Symbol {
+                    key: SymbolKey::new(&node),
+                    green: node.green().into(),
+                    region: SymbolKey::new(&module),
+                    kind: SymbolKind::BlockDef,
+                    idx: Idx {
+                        num: Some(0), // fake ID
+                        name: None,   // function name can't be the label
+                    },
+                });
                 let Some(func) = ModuleFieldFunc::cast(node.clone()) else {
                     return;
                 };
@@ -315,6 +325,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                                     SyntaxKind::BLOCK_BLOCK
                                         | SyntaxKind::BLOCK_LOOP
                                         | SyntaxKind::BLOCK_IF
+                                        | SyntaxKind::MODULE_FIELD_FUNC
                                 )
                             })
                             .map(|node| SymbolKey::new(&node))

@@ -147,4 +147,5 @@ pub(crate) fn get_block_sig(
             let node = type_use.syntax();
             service.get_type_use_sig(uri, SyntaxNodePtr::new(node), node.green().into())
         })
+        .or_else(|| get_func_sig(service, uri, SyntaxNodePtr::new(node), node.green().into()))
 }

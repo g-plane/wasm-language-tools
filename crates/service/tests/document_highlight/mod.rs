@@ -584,7 +584,7 @@ fn block_ref_undefined() {
     (block $a
       br_table 0
       (block $b
-        br_table 2))))
+        br_table 3))))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

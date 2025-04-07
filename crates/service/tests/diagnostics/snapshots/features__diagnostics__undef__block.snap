@@ -25,17 +25,17 @@ expression: response
       "range": {
         "start": {
           "line": 8,
-          "character": 26
+          "character": 28
         },
         "end": {
           "line": 8,
-          "character": 27
+          "character": 29
         }
       },
       "severity": 1,
       "code": "undef",
       "source": "wat",
-      "message": "cannot find label `3` in this scope"
+      "message": "cannot find label `4` in this scope"
     }
   ]
 }

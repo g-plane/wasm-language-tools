@@ -42,5 +42,13 @@ expression: response
     },
     "kind": 6,
     "detail": "(loop (result i32))"
+  },
+  {
+    "label": "5",
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(func)"
   }
 ]

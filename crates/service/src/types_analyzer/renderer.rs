@@ -75,6 +75,7 @@ pub(super) fn render_block_header(
         match kind {
             SyntaxKind::BLOCK_IF => "if",
             SyntaxKind::BLOCK_LOOP => "loop",
+            SyntaxKind::MODULE_FIELD_FUNC => "func",
             _ => "block",
         }
     );

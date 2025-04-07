@@ -593,7 +593,7 @@ fn block_not_defined() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-    (func (br_table 0 $block))
+    (func (br_table 1 $block))
 )
 ";
     let mut service = LanguageService::default();
@@ -633,5 +633,19 @@ fn block_ident_idx() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.goto_definition(create_params(uri, 4, 21));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn func_as_block() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    br 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, 3, 7));
     assert_json_snapshot!(response);
 }

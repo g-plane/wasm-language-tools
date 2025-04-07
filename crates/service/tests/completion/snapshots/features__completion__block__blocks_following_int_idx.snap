@@ -107,5 +107,26 @@ expression: response
       },
       "newText": "4"
     }
+  },
+  {
+    "label": "5",
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(func)",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 24
+        },
+        "end": {
+          "line": 8,
+          "character": 25
+        }
+      },
+      "newText": "5"
+    }
   }
 ]
