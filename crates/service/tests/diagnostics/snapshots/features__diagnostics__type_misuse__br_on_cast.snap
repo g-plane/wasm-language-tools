@@ -1,0 +1,145 @@
+---
+source: crates/service/tests/diagnostics/type_misuse.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 35
+        },
+        "end": {
+          "line": 5,
+          "character": 48
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "ref type `(ref null $t)` doesn't match the ref type `(ref $t)`",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 18
+              },
+              "end": {
+                "line": 5,
+                "character": 19
+              }
+            }
+          },
+          "message": "should match the last ref type in the result type of this label"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 30
+        },
+        "end": {
+          "line": 10,
+          "character": 43
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "ref type `(ref null $t)` doesn't match the ref type `(ref any)`",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 10,
+                "character": 20
+              },
+              "end": {
+                "line": 10,
+                "character": 29
+              }
+            }
+          },
+          "message": "should match this ref type"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 15,
+          "character": 24
+        },
+        "end": {
+          "line": 15,
+          "character": 30
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "ref type `(ref null any)` doesn't match the ref type `(ref null eq)`",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 15,
+                "character": 18
+              },
+              "end": {
+                "line": 15,
+                "character": 23
+              }
+            }
+          },
+          "message": "should match this ref type"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 18,
+          "character": 28
+        },
+        "end": {
+          "line": 18,
+          "character": 36
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "ref type `(ref null array)` doesn't match the ref type `(ref null struct)`",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 18,
+                "character": 18
+              },
+              "end": {
+                "line": 18,
+                "character": 27
+              }
+            }
+          },
+          "message": "should match this ref type"
+        }
+      ]
+    }
+  ]
+}

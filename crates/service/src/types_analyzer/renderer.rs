@@ -1,6 +1,6 @@
 use super::{
     signature::Signature,
-    types::{FieldType, Fields, HeapType, OperandType, StorageType, ValType},
+    types::{FieldType, Fields, HeapType, OperandType, RefType, StorageType, ValType},
     TypesAnalyzerCtx,
 };
 use crate::idx::InternIdent;
@@ -93,6 +93,45 @@ pub(super) fn render_block_header(
     content
 }
 
+impl RefType {
+    pub(crate) fn render<'a>(&'a self, db: &'a dyn TypesAnalyzerCtx) -> RefTypeRender<'a> {
+        RefTypeRender { ty: self, db }
+    }
+}
+pub(crate) struct RefTypeRender<'a> {
+    ty: &'a RefType,
+    db: &'a dyn TypesAnalyzerCtx,
+}
+impl Display for RefTypeRender<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "(ref ")?;
+        if self.ty.nullable {
+            write!(f, "null ")?;
+        }
+        match self.ty.heap_ty {
+            HeapType::Type(idx) => {
+                if let Some(name) = idx.name {
+                    write!(f, "{}", self.db.lookup_ident(name))?;
+                } else if let Some(num) = idx.num {
+                    write!(f, "{num}")?;
+                }
+            }
+            HeapType::Any => write!(f, "any")?,
+            HeapType::Eq => write!(f, "eq")?,
+            HeapType::I31 => write!(f, "i31")?,
+            HeapType::Struct => write!(f, "struct")?,
+            HeapType::Array => write!(f, "array")?,
+            HeapType::None => write!(f, "none")?,
+            HeapType::Func => write!(f, "func")?,
+            HeapType::NoFunc => write!(f, "nofunc")?,
+            HeapType::Extern => write!(f, "extern")?,
+            HeapType::NoExtern => write!(f, "noextern")?,
+            HeapType::Rec(..) => unreachable!("rec type is only for internal use"),
+        }
+        write!(f, ")")
+    }
+}
+
 impl ValType {
     pub(crate) fn render<'a>(&'a self, db: &'a dyn TypesAnalyzerCtx) -> ValTypeRender<'a> {
         ValTypeRender { ty: self, db }
@@ -110,33 +149,7 @@ impl Display for ValTypeRender<'_> {
             ValType::F32 => write!(f, "f32"),
             ValType::F64 => write!(f, "f64"),
             ValType::V128 => write!(f, "v128"),
-            ValType::Ref(ty) => {
-                write!(f, "(ref ")?;
-                if ty.nullable {
-                    write!(f, "null ")?;
-                }
-                match ty.heap_ty {
-                    HeapType::Type(idx) => {
-                        if let Some(name) = idx.name {
-                            write!(f, "{}", self.db.lookup_ident(name))?;
-                        } else if let Some(num) = idx.num {
-                            write!(f, "{num}")?;
-                        }
-                    }
-                    HeapType::Any => write!(f, "any")?,
-                    HeapType::Eq => write!(f, "eq")?,
-                    HeapType::I31 => write!(f, "i31")?,
-                    HeapType::Struct => write!(f, "struct")?,
-                    HeapType::Array => write!(f, "array")?,
-                    HeapType::None => write!(f, "none")?,
-                    HeapType::Func => write!(f, "func")?,
-                    HeapType::NoFunc => write!(f, "nofunc")?,
-                    HeapType::Extern => write!(f, "extern")?,
-                    HeapType::NoExtern => write!(f, "noextern")?,
-                    HeapType::Rec(..) => unreachable!("rec type is only for internal use"),
-                }
-                write!(f, ")")
-            }
+            ValType::Ref(ty) => ty.render(self.db).fmt(f),
         }
     }
 }

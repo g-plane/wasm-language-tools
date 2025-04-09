@@ -1,14 +1,17 @@
 use crate::{
     binder::{Symbol, SymbolKey, SymbolTable},
     helpers,
-    types_analyzer::{CompositeType, DefType, FieldType, TypesAnalyzerCtx},
+    types_analyzer::{
+        resolve_br_types, CompositeType, DefType, FieldType, OperandType, RefType,
+        TypesAnalyzerCtx, ValType,
+    },
     uri::InternUri,
     LanguageService, UrisCtx,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
-use rowan::ast::support;
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use rowan::ast::{support, AstNode};
+use wat_syntax::{ast::Immediate, SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "type-misuse";
 
@@ -139,8 +142,8 @@ pub fn check(
                 diagnostics.push(diagnostic);
             }
         }
-        _ => {
-            if matches!(instr_name, "call_ref" | "return_call_ref") {
+        _ => match instr_name {
+            "call_ref" | "return_call_ref" => {
                 if let Some(diagnostic) = check_type_matches(
                     "func",
                     &node.first_child()?,
@@ -153,7 +156,90 @@ pub fn check(
                     diagnostics.push(diagnostic);
                 }
             }
-        }
+            "br_on_cast" => {
+                let mut immediates = support::children::<Immediate>(node);
+                let label = immediates.next()?;
+                let label_types = resolve_br_types(service, uri, symbol_table, &label);
+                let rt_label =
+                    if let Some(OperandType::Val(ValType::Ref(rt_label))) = label_types.last() {
+                        rt_label
+                    } else {
+                        diagnostics.push(Diagnostic {
+                            range: helpers::rowan_range_to_lsp_range(
+                                line_index,
+                                label.syntax().text_range(),
+                            ),
+                            severity: Some(DiagnosticSeverity::Error),
+                            source: Some("wat".into()),
+                            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                            message: "the last type of this label must be a ref type".into(),
+                            ..Default::default()
+                        });
+                        return None;
+                    };
+                let rt1_node = immediates.next()?;
+                let rt1 = RefType::from_green(&rt1_node.ref_type()?.syntax().green(), service)?;
+                let rt2_node = immediates.next()?;
+                let rt2 = RefType::from_green(&rt2_node.ref_type()?.syntax().green(), service)?;
+                if !rt2.matches(&rt1, service, uri, module_id) {
+                    diagnostics.push(Diagnostic {
+                        range: helpers::rowan_range_to_lsp_range(
+                            line_index,
+                            rt2_node.syntax().text_range(),
+                        ),
+                        severity: Some(DiagnosticSeverity::Error),
+                        source: Some("wat".into()),
+                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        message: format!(
+                            "ref type `{}` doesn't match the ref type `{}`",
+                            rt2.render(service),
+                            rt1.render(service),
+                        ),
+                        related_information: Some(vec![DiagnosticRelatedInformation {
+                            location: Location {
+                                uri: service.lookup_uri(uri),
+                                range: helpers::rowan_range_to_lsp_range(
+                                    line_index,
+                                    rt1_node.syntax().text_range(),
+                                ),
+                            },
+                            message: "should match this ref type".into(),
+                        }]),
+                        ..Default::default()
+                    });
+                }
+                if !rt2.matches(rt_label, service, uri, module_id) {
+                    diagnostics.push(Diagnostic {
+                        range: helpers::rowan_range_to_lsp_range(
+                            line_index,
+                            rt2_node.syntax().text_range(),
+                        ),
+                        severity: Some(DiagnosticSeverity::Error),
+                        source: Some("wat".into()),
+                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        message: format!(
+                            "ref type `{}` doesn't match the ref type `{}`",
+                            rt2.render(service),
+                            rt_label.render(service),
+                        ),
+                        related_information: Some(vec![DiagnosticRelatedInformation {
+                            location: Location {
+                                uri: service.lookup_uri(uri),
+                                range: helpers::rowan_range_to_lsp_range(
+                                    line_index,
+                                    label.syntax().text_range(),
+                                ),
+                            },
+                            message:
+                                "should match the last ref type in the result type of this label"
+                                    .into(),
+                        }]),
+                        ..Default::default()
+                    });
+                }
+            }
+            _ => {}
+        },
     }
     Some(())
 }

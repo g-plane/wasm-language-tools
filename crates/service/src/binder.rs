@@ -316,7 +316,10 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                             )
                         }));
                     }
-                    Some("br" | "br_if" | "br_table" | "br_on_null" | "br_on_non_null") => {
+                    Some(
+                        "br" | "br_if" | "br_table" | "br_on_null" | "br_on_non_null"
+                        | "br_on_cast",
+                    ) => {
                         let Some(region) = node
                             .ancestors()
                             .find(|node| {

@@ -121,3 +121,34 @@ fn func() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn br_on_cast() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $t (struct))
+  (func (param (ref any)) (result (ref $t))
+    (block (result (ref any))
+      (br_on_cast 1 (ref null any) (ref null $t)
+        (local.get 0)))
+    (unreachable))
+  (func (param (ref any)) (result (ref null $t))
+    (block (result (ref any))
+      (br_on_cast 1 (ref any) (ref null $t)
+        (local.get 0)))
+    (unreachable))
+
+  (func (result anyref)
+    (br_on_cast 0 eqref anyref
+      (unreachable)))
+  (func (result anyref)
+    (br_on_cast 0 structref arrayref
+      (unreachable))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

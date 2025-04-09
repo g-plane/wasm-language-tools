@@ -167,6 +167,13 @@ impl RefType {
         self.nullable == other.nullable
             && self.heap_ty.type_equals(&other.heap_ty, db, uri, module_id)
     }
+
+    pub(crate) fn diff(&self, other: &Self) -> Self {
+        RefType {
+            heap_ty: self.heap_ty,
+            nullable: if other.nullable { false } else { self.nullable },
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]

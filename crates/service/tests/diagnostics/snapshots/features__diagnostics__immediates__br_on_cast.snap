@@ -136,6 +136,22 @@ expression: response
     {
       "range": {
         "start": {
+          "line": 7,
+          "character": 17
+        },
+        "end": {
+          "line": 7,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "the last type of this label must be a ref type"
+    },
+    {
+      "range": {
+        "start": {
           "line": 8,
           "character": 24
         },
@@ -180,6 +196,22 @@ expression: response
       "code": "immediates",
       "source": "wat",
       "message": "missing ref type"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 17
+        },
+        "end": {
+          "line": 9,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "the last type of this label must be a ref type"
     },
     {
       "range": {
