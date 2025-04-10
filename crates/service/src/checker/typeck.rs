@@ -623,6 +623,33 @@ fn resolve_sig(
             }
             ResolvedSig { params, results }
         }
+        "br_on_cast_fail" => {
+            let mut immediates = instr.immediates();
+            let mut types = immediates
+                .next()
+                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, &idx))
+                .unwrap_or_default();
+            types.pop();
+            let rt1 = immediates
+                .next()
+                .and_then(|immediate| immediate.ref_type())
+                .and_then(|ref_type| {
+                    RefType::from_green(&ref_type.syntax().green(), shared.service)
+                });
+            let rt2 = immediates
+                .next()
+                .and_then(|immediate| immediate.ref_type())
+                .and_then(|ref_type| {
+                    RefType::from_green(&ref_type.syntax().green(), shared.service)
+                });
+            let mut params = types.clone();
+            let mut results = types;
+            if let Some((rt1, rt2)) = rt1.zip(rt2) {
+                params.push(OperandType::Val(ValType::Ref(rt1)));
+                results.push(OperandType::Val(ValType::Ref(rt2)));
+            }
+            ResolvedSig { params, results }
+        }
         "select" => {
             let ty = if let Some(ty) = instr
                 .immediates()

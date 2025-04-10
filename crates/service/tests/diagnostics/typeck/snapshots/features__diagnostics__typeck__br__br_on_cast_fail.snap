@@ -1,0 +1,77 @@
+---
+source: crates/service/tests/diagnostics/typeck/br.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 22
+        },
+        "end": {
+          "line": 6,
+          "character": 23
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref $t)], found [(ref null $t)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 6
+              },
+              "end": {
+                "line": 6,
+                "character": 22
+              }
+            }
+          },
+          "message": "expected type `(ref $t)`, found `(ref null $t)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 16,
+          "character": 4
+        },
+        "end": {
+          "line": 16,
+          "character": 13
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null $f)], found [(ref null func)]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 14,
+                "character": 4
+              },
+              "end": {
+                "line": 14,
+                "character": 40
+              }
+            }
+          },
+          "message": "expected type `(ref null $f)`, found `(ref null func)`"
+        }
+      ]
+    }
+  ]
+}

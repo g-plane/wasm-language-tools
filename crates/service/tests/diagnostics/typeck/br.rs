@@ -518,3 +518,32 @@ fn br_on_cast() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn br_on_cast_fail() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $t (struct))
+  (func (param (ref any)) (result (ref any))
+    (block (result (ref $t))
+      (br_on_cast_fail 1 (ref null any) (ref null $t)
+        (local.get 0))))
+
+  (type $f (func))
+  (func $f (param (ref null $f)) (result funcref)
+    (local.get 0))
+  (func (param funcref) (result funcref funcref)
+    (ref.null $f)
+    (local.get 0)
+    (br_on_cast_fail 0 funcref (ref $f)) ;; only leaves two funcref's on the stack
+    (drop)
+    (call $f)
+    (local.get 0)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

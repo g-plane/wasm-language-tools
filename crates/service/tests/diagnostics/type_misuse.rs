@@ -168,3 +168,46 @@ fn br_on_cast() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn br_on_cast_fail() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $t (struct))
+  (func (param (ref any)) (result (ref any))
+    (block (result (ref null $t))
+      (br_on_cast_fail 1 (ref any) (ref null $t)
+        (local.get 0)))
+    (ref.as_non_null))
+  (func (param (ref null any)) (result (ref any))
+    (block (result (ref $t))
+      (br_on_cast_fail 1 (ref null any) (ref $t)
+        (local.get 0))))
+
+  (func (result anyref)
+    (br_on_cast_fail 0 eqref anyref
+      (unreachable)))
+  (func (result anyref)
+    (br_on_cast_fail 0 structref arrayref
+      (unreachable)))
+
+  (func (param (ref any)) (result (ref any))
+    (block (result (ref $t))
+      (br_on_cast_fail 1 (ref any) (ref $t)
+        (local.get 0))))
+  (func (param (ref null any)) (result (ref null any))
+    (block (result (ref $t))
+      (br_on_cast_fail 1 (ref null any) (ref $t)
+        (local.get 0))))
+  (func (param (ref null any)) (result (ref null any))
+    (block (result (ref null $t))
+      (br_on_cast_fail 1 (ref null any) (ref null $t)
+        (local.get 0)))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

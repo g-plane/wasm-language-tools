@@ -8,6 +8,38 @@ expression: response
     {
       "range": {
         "start": {
+          "line": 11,
+          "character": 6
+        },
+        "end": {
+          "line": 11,
+          "character": 39
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref $a)], found []"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 12,
+          "character": 4
+        },
+        "end": {
+          "line": 12,
+          "character": 7
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [(ref null any)] at the end"
+    },
+    {
+      "range": {
+        "start": {
           "line": 5,
           "character": 6
         },
@@ -104,6 +136,22 @@ expression: response
     {
       "range": {
         "start": {
+          "line": 6,
+          "character": 22
+        },
+        "end": {
+          "line": 6,
+          "character": 25
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "the last type of this label must be a ref type"
+    },
+    {
+      "range": {
+        "start": {
           "line": 7,
           "character": 6
         },
@@ -184,6 +232,22 @@ expression: response
     {
       "range": {
         "start": {
+          "line": 8,
+          "character": 22
+        },
+        "end": {
+          "line": 8,
+          "character": 23
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "the last type of this label must be a ref type"
+    },
+    {
+      "range": {
+        "start": {
           "line": 9,
           "character": 6
         },
@@ -228,6 +292,70 @@ expression: response
       "code": "immediates",
       "source": "wat",
       "message": "expected ref type"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 22
+        },
+        "end": {
+          "line": 10,
+          "character": 23
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "the last type of this label must be a ref type"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 11,
+          "character": 22
+        },
+        "end": {
+          "line": 11,
+          "character": 23
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "the last type of this label must be a ref type"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 24
+        },
+        "end": {
+          "line": 8,
+          "character": 26
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find label `$a` in this scope"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 33
+        },
+        "end": {
+          "line": 10,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find label `$a` in this scope"
     }
   ]
 }

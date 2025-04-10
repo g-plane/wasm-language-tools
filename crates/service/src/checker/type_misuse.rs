@@ -238,6 +238,84 @@ pub fn check(
                     });
                 }
             }
+            "br_on_cast_fail" => {
+                let mut immediates = support::children::<Immediate>(node);
+                let label = immediates.next()?;
+                let label_types = resolve_br_types(service, uri, symbol_table, &label);
+                let rt_label =
+                    if let Some(OperandType::Val(ValType::Ref(rt_label))) = label_types.last() {
+                        rt_label
+                    } else {
+                        diagnostics.push(Diagnostic {
+                            range: helpers::rowan_range_to_lsp_range(
+                                line_index,
+                                label.syntax().text_range(),
+                            ),
+                            severity: Some(DiagnosticSeverity::Error),
+                            source: Some("wat".into()),
+                            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                            message: "the last type of this label must be a ref type".into(),
+                            ..Default::default()
+                        });
+                        return None;
+                    };
+                let rt1_node = immediates.next()?;
+                let rt1 = RefType::from_green(&rt1_node.ref_type()?.syntax().green(), service)?;
+                let rt2_node = immediates.next()?;
+                let rt2 = RefType::from_green(&rt2_node.ref_type()?.syntax().green(), service)?;
+                if !rt2.matches(&rt1, service, uri, module_id) {
+                    diagnostics.push(Diagnostic {
+                        range: helpers::rowan_range_to_lsp_range(
+                            line_index,
+                            rt2_node.syntax().text_range(),
+                        ),
+                        severity: Some(DiagnosticSeverity::Error),
+                        source: Some("wat".into()),
+                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        message: format!(
+                            "ref type `{}` doesn't match the ref type `{}`",
+                            rt2.render(service),
+                            rt1.render(service),
+                        ),
+                        related_information: Some(vec![DiagnosticRelatedInformation {
+                            location: Location {
+                                uri: service.lookup_uri(uri),
+                                range: helpers::rowan_range_to_lsp_range(
+                                    line_index,
+                                    rt1_node.syntax().text_range(),
+                                ),
+                            },
+                            message: "should match this ref type".into(),
+                        }]),
+                        ..Default::default()
+                    });
+                }
+                let rt_diff = rt1.diff(&rt2);
+                if !rt_diff.matches(rt_label, service, uri, module_id) {
+                    diagnostics.push(Diagnostic {
+                        range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
+                        severity: Some(DiagnosticSeverity::Error),
+                        source: Some("wat".into()),
+                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        message: format!(
+                            "ref type `{}` doesn't match the ref type `{}`",
+                            rt_diff.render(service),
+                            rt_label.render(service),
+                        ),
+                        related_information: Some(vec![DiagnosticRelatedInformation {
+                            location: Location {
+                                uri: service.lookup_uri(uri),
+                                range: helpers::rowan_range_to_lsp_range(
+                                    line_index,
+                                    label.syntax().text_range(),
+                                ),
+                            },
+                            message: "the type difference between those two ref types should match the last ref type in the result type of this label".into(),
+                        }]),
+                        ..Default::default()
+                    });
+                }
+            }
             _ => {}
         },
     }
