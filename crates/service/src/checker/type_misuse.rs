@@ -298,7 +298,7 @@ pub fn check(
                         source: Some("wat".into()),
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                         message: format!(
-                            "ref type `{}` doesn't match the ref type `{}`",
+                            "type difference between given two ref types `{}` doesn't match the ref type `{}`",
                             rt_diff.render(service),
                             rt_label.render(service),
                         ),
@@ -310,7 +310,7 @@ pub fn check(
                                     label.syntax().text_range(),
                                 ),
                             },
-                            message: "the type difference between those two ref types should match the last ref type in the result type of this label".into(),
+                            message: "should match the last ref type in the result type of this label".into(),
                         }]),
                         ..Default::default()
                     });

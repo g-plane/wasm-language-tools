@@ -53,7 +53,7 @@ expression: response
       "severity": 1,
       "code": "type-misuse",
       "source": "wat",
-      "message": "ref type `(ref null any)` doesn't match the ref type `(ref any)`",
+      "message": "type difference between given two ref types `(ref null any)` doesn't match the ref type `(ref any)`",
       "relatedInformation": [
         {
           "location": {
@@ -69,7 +69,7 @@ expression: response
               }
             }
           },
-          "message": "the type difference between those two ref types should match the last ref type in the result type of this label"
+          "message": "should match the last ref type in the result type of this label"
         }
       ]
     },
