@@ -85,3 +85,33 @@ fn multi_after_other_fields() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn after_inline_import() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (func (import "a" "a"))
+  (import "a" "b" (func)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn after_type_def() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (type (func))
+  (import "a" "b" (func)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
