@@ -231,3 +231,54 @@ fn subsumption9() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn ref_func1() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (rec (type $f1 (sub (func))) (type $s1 (sub (struct (field (ref $f1))))))
+  (rec (type $f2 (sub (func))) (type $s2 (sub (struct (field (ref $f2))))))
+  (rec
+    (type $g1 (sub $f1 (func)))
+    (type
+      (sub $s1 (struct
+        (field (ref $f1) (ref $f1) (ref $f2) (ref $f2) (ref $g1))))))
+  (rec
+    (type $g2 (sub $f2 (func)))
+    (type
+      (sub $s2 (struct
+        (field (ref $f1) (ref $f2) (ref $f1) (ref $f2) (ref $g2))))))
+  (rec (type $h (sub $g2 (func))) (type (struct)))
+  (func $h (type $h))
+  (global (ref $f1)
+    (ref.func $h))
+  (global (ref $g1)
+    (ref.func $h)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn ref_func2() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (rec (type $f1 (sub (func))) (type (struct (field (ref $f1)))))
+  (rec (type $f2 (sub (func))) (type (struct (field (ref $f1)))))
+  (rec (type $g1 (sub $f1 (func))) (type (struct)))
+  (rec (type $g2 (sub $f2 (func))) (type (struct)))
+  (func $g (type $g2))
+  (global (ref $g1)
+    (ref.func $g)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

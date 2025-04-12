@@ -1,5 +1,10 @@
 use super::{def_type::CompositeType, TypesAnalyzerCtx};
-use crate::{binder::SymbolKind, idx::Idx, uri::InternUri};
+use crate::{
+    binder::SymbolKind,
+    idx::Idx,
+    types_analyzer::{get_func_sig, DefType},
+    uri::InternUri,
+};
 use rowan::{ast::AstNode, GreenNodeData, Language, NodeOrToken};
 use wat_syntax::{
     ast::{FieldType as AstFieldType, StorageType as AstStorageType, ValType as AstValType},
@@ -189,7 +194,8 @@ pub(crate) enum HeapType {
     NoFunc,
     Extern,
     NoExtern,
-    Rec(u32), // internal use, not actually a valid heap type
+    Rec(u32),     // internal use, not actually a valid heap type
+    DefFunc(Idx), // internal use
 }
 impl HeapType {
     pub(crate) fn from_green(node: &GreenNodeData, db: &dyn TypesAnalyzerCtx) -> Option<Self> {
@@ -314,6 +320,62 @@ impl HeapType {
                         _ => false,
                     })
             }
+            (HeapType::DefFunc(a), HeapType::Type(mut b)) => {
+                if b.is_def() {
+                    b.name = None;
+                }
+                let symbol_table = db.symbol_table(uri);
+                let Some(module) = symbol_table.find_module(module_id) else {
+                    return false;
+                };
+                let def_types = db.def_types(uri);
+                if let Some((
+                    a,
+                    DefType {
+                        comp: CompositeType::Func(b),
+                        ..
+                    },
+                )) = symbol_table
+                    .symbols
+                    .iter()
+                    .find(|symbol| {
+                        symbol.kind == SymbolKind::Func
+                            && symbol.region == module.key
+                            && a.is_defined_by(&symbol.idx)
+                    })
+                    .map(|symbol| {
+                        get_func_sig(db, uri, symbol.key, symbol.green.clone()).unwrap_or_default()
+                    })
+                    .zip(
+                        symbol_table
+                            .symbols
+                            .iter()
+                            .find(|symbol| {
+                                symbol.kind == SymbolKind::Type
+                                    && symbol.region == module.key
+                                    && b.is_defined_by(&symbol.idx)
+                            })
+                            .filter(|symbol| {
+                                db.rec_type_groups(uri)
+                                    .iter()
+                                    .find(|group| {
+                                        group
+                                            .type_defs
+                                            .iter()
+                                            .any(|type_def| *type_def == symbol.key)
+                                    })
+                                    .is_none_or(|group| group.type_defs.len() <= 1)
+                            })
+                            .and_then(|symbol| {
+                                def_types.iter().find(|def_type| def_type.key == symbol.key)
+                            }),
+                    )
+                {
+                    a.type_equals(b, db, uri, module_id)
+                } else {
+                    false
+                }
+            }
             (a, b) => a == b,
         }
     }
@@ -400,7 +462,7 @@ impl HeapType {
                         CompositeType::Func(..) => HeapType::Func,
                     })
             }
-            HeapType::Rec(..) => unreachable!(),
+            HeapType::Rec(..) | HeapType::DefFunc(..) => unreachable!(),
         }
     }
 }

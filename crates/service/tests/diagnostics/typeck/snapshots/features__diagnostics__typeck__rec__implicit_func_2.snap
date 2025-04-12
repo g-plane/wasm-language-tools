@@ -1,0 +1,43 @@
+---
+source: crates/service/tests/diagnostics/typeck/rec.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 17
+        },
+        "end": {
+          "line": 7,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref $t)], found [(func $f)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 7,
+                "character": 4
+              },
+              "end": {
+                "line": 7,
+                "character": 17
+              }
+            }
+          },
+          "message": "expected type `(ref $t)`, found `(func $f)`"
+        }
+      ]
+    }
+  ]
+}

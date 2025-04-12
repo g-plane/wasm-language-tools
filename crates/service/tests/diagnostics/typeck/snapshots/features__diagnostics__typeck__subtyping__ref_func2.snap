@@ -1,0 +1,43 @@
+---
+source: crates/service/tests/diagnostics/typeck/subtyping.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 17
+        },
+        "end": {
+          "line": 8,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref $g1)], found [(ref $g2)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 8,
+                "character": 4
+              },
+              "end": {
+                "line": 8,
+                "character": 17
+              }
+            }
+          },
+          "message": "expected type `(ref $g1)`, found `(ref $g2)`"
+        }
+      ]
+    }
+  ]
+}

@@ -8,7 +8,7 @@ use crate::{
         ResolvedSig, TypesAnalyzerCtx, ValType,
     },
     uri::{InternUri, UrisCtx},
-    LanguageService,
+    LanguageService, SyntaxTreeCtx,
 };
 use itertools::{EitherOrBoth, Itertools};
 use line_index::LineIndex;
@@ -18,7 +18,7 @@ use rowan::{
     TextRange,
 };
 use wat_syntax::{
-    ast::{BlockInstr, Import, Instr, PlainInstr},
+    ast::{BlockInstr, Import, Instr, ModuleFieldFunc, PlainInstr},
     SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodePtr,
 };
 
@@ -1118,6 +1118,46 @@ fn resolve_sig(
                     nullable: true,
                 }))],
                 results: vec![OperandType::Val(ValType::Ref(ref_type))],
+            }
+        }
+        "ref.func" => {
+            let immediate = instr.immediates().next();
+            let heap_ty = immediate
+                .as_ref()
+                .and_then(|immediate| {
+                    shared
+                        .symbol_table
+                        .find_def(SymbolKey::new(immediate.syntax()))
+                })
+                .and_then(|symbol| {
+                    let root = SyntaxNode::new_root(shared.service.root(shared.uri));
+                    ModuleFieldFunc::cast(symbol.key.to_node(&root))
+                })
+                .and_then(|func| func.type_use())
+                .and_then(|type_use| type_use.index())
+                .map(|index| {
+                    HeapType::Type(Idx {
+                        num: index
+                            .unsigned_int_token()
+                            .and_then(|int| int.text().parse().ok()),
+                        name: index
+                            .ident_token()
+                            .map(|ident| shared.service.ident(ident.text().into())),
+                    })
+                })
+                .or_else(|| {
+                    immediate.map(|immediate| {
+                        HeapType::DefFunc(Idx::from_immediate(&immediate, shared.service))
+                    })
+                });
+            ResolvedSig {
+                params: vec![],
+                results: vec![heap_ty.map_or(OperandType::Any, |heap_ty| {
+                    OperandType::Val(ValType::Ref(RefType {
+                        heap_ty,
+                        nullable: false,
+                    }))
+                })],
             }
         }
         "call_ref" | "return_call_ref" => {

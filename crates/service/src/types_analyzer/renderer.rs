@@ -104,12 +104,16 @@ pub(crate) struct RefTypeRender<'a> {
 }
 impl Display for RefTypeRender<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "(ref ")?;
+        if matches!(self.ty.heap_ty, HeapType::DefFunc(..)) {
+            write!(f, "(func ")?;
+        } else {
+            write!(f, "(ref ")?;
+        }
         if self.ty.nullable {
             write!(f, "null ")?;
         }
         match self.ty.heap_ty {
-            HeapType::Type(idx) => {
+            HeapType::Type(idx) | HeapType::DefFunc(idx) => {
                 if let Some(name) = idx.name {
                     write!(f, "{}", self.db.lookup_ident(name))?;
                 } else if let Some(num) = idx.num {

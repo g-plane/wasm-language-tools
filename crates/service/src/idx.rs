@@ -1,6 +1,7 @@
 use crate::LanguageService;
 use salsa::{InternId, InternKey};
 use std::{fmt, sync::Arc};
+use wat_syntax::ast::Immediate;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Idx {
@@ -9,6 +10,13 @@ pub struct Idx {
 }
 
 impl Idx {
+    pub fn from_immediate(immediate: &Immediate, db: &dyn IdentsCtx) -> Self {
+        Idx {
+            num: immediate.int().and_then(|int| int.text().parse().ok()),
+            name: immediate.ident().map(|ident| db.ident(ident.text().into())),
+        }
+    }
+
     pub fn is_def(&self) -> bool {
         matches!(self, Idx { num: Some(..), .. })
     }

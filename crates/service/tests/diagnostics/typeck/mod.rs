@@ -12,6 +12,7 @@ mod call_indirect;
 mod drop;
 mod global;
 mod local;
+mod rec;
 mod ref_instr;
 mod returning;
 mod select;
