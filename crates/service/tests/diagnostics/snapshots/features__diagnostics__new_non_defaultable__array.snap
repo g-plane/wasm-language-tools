@@ -1,0 +1,41 @@
+---
+source: crates/service/tests/diagnostics/new_non_defaultable.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 14
+        },
+        "end": {
+          "line": 2,
+          "character": 14
+        }
+      },
+      "severity": 1,
+      "code": "syntax/field-type",
+      "source": "wat",
+      "message": "syntax error: expected field type"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 22
+        },
+        "end": {
+          "line": 13,
+          "character": 25
+        }
+      },
+      "severity": 1,
+      "code": "new-non-defaultable",
+      "source": "wat",
+      "message": "array type `$a2` is not defaultable"
+    }
+  ]
+}

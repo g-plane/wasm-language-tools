@@ -12,6 +12,7 @@ mod multi_memories;
 mod multi_modules;
 mod mutated_immutable;
 mod needless_mut;
+mod new_non_defaultable;
 mod packing;
 mod shadow;
 mod start;

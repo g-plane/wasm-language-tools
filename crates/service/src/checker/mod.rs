@@ -13,6 +13,7 @@ mod multi_memories;
 mod multi_modules;
 mod mutated_immutable;
 mod needless_mut;
+mod new_non_defaultable;
 mod packing;
 mod shadow;
 mod start;
@@ -123,6 +124,14 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                     &line_index,
                     &symbol_table,
                     module_id as u32,
+                    &node,
+                );
+                new_non_defaultable::check(
+                    service,
+                    &mut diagnostics,
+                    uri,
+                    &line_index,
+                    &symbol_table,
                     &node,
                 );
             }

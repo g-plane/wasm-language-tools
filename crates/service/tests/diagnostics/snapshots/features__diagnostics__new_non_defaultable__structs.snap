@@ -1,0 +1,59 @@
+---
+source: crates/service/tests/diagnostics/new_non_defaultable.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 23
+        },
+        "end": {
+          "line": 10,
+          "character": 26
+        }
+      },
+      "severity": 1,
+      "code": "new-non-defaultable",
+      "source": "wat",
+      "message": "struct type `$s2` is not defaultable",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 27
+              },
+              "end": {
+                "line": 4,
+                "character": 36
+              }
+            }
+          },
+          "message": "field type `0` is not defaultable"
+        },
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 42
+              },
+              "end": {
+                "line": 4,
+                "character": 62
+              }
+            }
+          },
+          "message": "field type `$f` is not defaultable"
+        }
+      ]
+    }
+  ]
+}
