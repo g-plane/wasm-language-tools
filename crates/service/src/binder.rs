@@ -643,6 +643,15 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                     });
                 }
             }
+            SyntaxKind::ELEM_LIST => {
+                symbols.extend(
+                    node.children()
+                        .filter(|child| child.kind() == SyntaxKind::INDEX)
+                        .filter_map(|index| {
+                            create_ref_symbol(db, &index, SymbolKey::new(&module), SymbolKind::Call)
+                        }),
+                );
+            }
             _ => {}
         });
     });

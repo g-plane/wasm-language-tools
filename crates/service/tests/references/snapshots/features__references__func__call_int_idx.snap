@@ -41,5 +41,18 @@ expression: include_decl
         "character": 22
       }
     }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 6,
+        "character": 15
+      },
+      "end": {
+        "line": 6,
+        "character": 16
+      }
+    }
   }
 ]

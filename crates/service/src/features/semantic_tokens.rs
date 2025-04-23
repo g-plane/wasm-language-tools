@@ -125,7 +125,9 @@ impl LanguageService {
                     helpers::ast::is_call(grand)
                         || matches!(
                             grand.kind(),
-                            SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC
+                            SyntaxKind::MODULE_FIELD_START
+                                | SyntaxKind::EXPORT_DESC_FUNC
+                                | SyntaxKind::ELEM_LIST
                         )
                 }) {
                     token_kinds.get_index_of(&SemanticTokenKind::Func)
@@ -158,7 +160,9 @@ impl LanguageService {
                         helpers::ast::is_call(&grand)
                             || matches!(
                                 grand.kind(),
-                                SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC
+                                SyntaxKind::MODULE_FIELD_START
+                                    | SyntaxKind::EXPORT_DESC_FUNC
+                                    | SyntaxKind::ELEM_LIST
                             )
                     })
                     || parent

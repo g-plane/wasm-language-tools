@@ -10,6 +10,7 @@ fn func_int_idx() {
     (func
         (call 0)
     )
+    (elem func 0)
 )
 (module (func))
 ";
@@ -29,6 +30,7 @@ fn func_ident_idx() {
     (func $func
         (call 0) (call $func)
     )
+    (elem func $func)
 )
 (module (func $func))
 ";
@@ -64,6 +66,7 @@ fn call_int_idx() {
         (call 0)
     )
     (export \"\" (func 0))
+    (elem func 0)
 )
 (module (func))
 ";
@@ -84,6 +87,7 @@ fn call_ident_idx() {
         (call 0) (call $func)
     )
     (export \"\" (func $func))
+    (elem func $func)
 )
 (module (func $func))
 ";

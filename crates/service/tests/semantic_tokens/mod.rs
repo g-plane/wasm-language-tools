@@ -60,6 +60,7 @@ const SOURCE: &str = r#"
     (start 0)
     (export "" (func $func))
     (export "" (func 0))
+    (elem func $func)
 )
 (; block ;)
 ;; line
