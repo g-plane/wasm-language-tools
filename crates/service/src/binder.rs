@@ -571,7 +571,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                     symbols.push(symbol);
                 }
             }
-            SyntaxKind::EXPORT_DESC_TABLE => {
+            SyntaxKind::EXPORT_DESC_TABLE | SyntaxKind::TABLE_USE => {
                 if let Some(symbol) = node
                     .children()
                     .find(|child| child.kind() == SyntaxKind::INDEX)

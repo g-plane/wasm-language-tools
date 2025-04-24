@@ -347,7 +347,11 @@ fn table_used() {
       (i32.const 0))
     (drop))
   (table 0 funcref)
-  (table $table (export "table") 0 funcref))
+  (table $table2 (export "table") 0 funcref)
+
+  (table $table3 0 funcref)
+  (elem (table 2)
+    (i32.const 0) funcref))
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

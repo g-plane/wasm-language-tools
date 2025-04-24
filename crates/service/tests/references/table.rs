@@ -10,7 +10,8 @@ fn table_def_int_idx() {
   (table 0 funcref)
   (func
     (table.size 0)
-    (call_indirect)))
+    (call_indirect))
+  (elem (table 0)))
 (module
   (table))
 ";
@@ -30,7 +31,8 @@ fn table_def_ident_idx() {
   (table $table 0 funcref)
   (func
     (table.size $table)
-    (call_indirect $table)))
+    (call_indirect $table))
+  (elem (table $table)))
 (module
   (table $table))
 ";
@@ -50,7 +52,8 @@ fn table_ref_int_idx() {
   (table 0 funcref)
   (func
     (table.size 0)
-    (call_indirect)))
+    (call_indirect))
+  (elem (table 0)))
 (module
   (table))
 ";
@@ -70,7 +73,8 @@ fn table_ref_ident_idx() {
   (table $table 0 funcref)
   (func
     (table.size $table)
-    (call_indirect $table)))
+    (call_indirect $table))
+  (elem (table $table)))
 (module
   (table $table))
 ";

@@ -134,10 +134,14 @@ fn table_defined() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-  (table $table 0 funcref)
+  (table $table1 0 funcref)
   (func
-    (table.size $table)
-    (drop)))
+    (table.size $table1)
+    (drop))
+
+  (table $table2 0 funcref)
+  (elem (table $table2)
+    (i32.const 0) func))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
