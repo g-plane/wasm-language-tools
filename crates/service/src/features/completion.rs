@@ -294,21 +294,16 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         SyntaxKind::MODULE_FIELD_ELEM => {
             if find_leading_l_paren(token).is_some() {
-                if parent
+                if !parent
                     .children()
-                    .any(|child| child.kind() == SyntaxKind::OFFSET)
+                    .any(|child| child.kind() == SyntaxKind::TABLE_USE)
+                    && !token
+                        .siblings_with_tokens(Direction::Prev)
+                        .any(|element| element.kind() == SyntaxKind::OFFSET)
                 {
-                    ctx.push(CmpCtx::KeywordItem);
-                } else {
-                    if !parent
-                        .children()
-                        .any(|child| child.kind() == SyntaxKind::TABLE_USE)
-                    {
-                        ctx.push(CmpCtx::KeywordTable);
-                    }
-                    ctx.push(CmpCtx::KeywordOffset);
+                    ctx.push(CmpCtx::KeywordTable);
                 }
-                ctx.push(CmpCtx::Instr);
+                ctx.extend([CmpCtx::KeywordOffset, CmpCtx::KeywordItem, CmpCtx::Instr]);
             } else if parent
                 .children()
                 .find(|child| child.kind() == SyntaxKind::ELEM_LIST)

@@ -12,6 +12,10 @@ expression: response
     "kind": 14
   },
   {
+    "label": "item",
+    "kind": 14
+  },
+  {
     "label": "unreachable",
     "kind": 24
   },

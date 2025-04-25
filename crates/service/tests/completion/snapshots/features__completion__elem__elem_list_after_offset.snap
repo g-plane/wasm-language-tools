@@ -4,6 +4,10 @@ expression: response
 ---
 [
   {
+    "label": "offset",
+    "kind": 14
+  },
+  {
     "label": "item",
     "kind": 14
   },
