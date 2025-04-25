@@ -4,7 +4,7 @@ use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use rowan::ast::{support, AstNode};
 use wat_syntax::{ast::Instr, SyntaxNode};
 
-const DIAGNOSTIC_CODE: &str = "global-expr";
+const DIAGNOSTIC_CODE: &str = "const-expr";
 
 pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxNode) {
     diagnostics.extend(
@@ -38,7 +38,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 severity: Some(DiagnosticSeverity::Error),
                 source: Some("wat".into()),
                 code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                message: "expression must be constant in global".into(),
+                message: "expression must be constant".into(),
                 ..Default::default()
             }),
     );

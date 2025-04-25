@@ -4,8 +4,8 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 
 mod block_type;
 mod br_table_branches;
+mod const_expr;
 mod dup_names;
-mod global_expr;
 mod immediates;
 mod implicit_module;
 mod import_occur;
@@ -93,7 +93,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                     &symbol_table,
                     &node,
                 );
-                global_expr::check(&mut diagnostics, &line_index, &node);
+                const_expr::check(&mut diagnostics, &line_index, &node);
             }
             SyntaxKind::MODULE_FIELD_IMPORT => {
                 import_occur::check(&mut diagnostics, &line_index, &node);

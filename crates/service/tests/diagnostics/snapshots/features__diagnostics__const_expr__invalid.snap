@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/global_expr.rs
+source: crates/service/tests/diagnostics/const_expr.rs
 expression: response
 ---
 {
@@ -17,9 +17,9 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "global-expr",
+      "code": "const-expr",
       "source": "wat",
-      "message": "expression must be constant in global"
+      "message": "expression must be constant"
     },
     {
       "range": {
@@ -33,9 +33,9 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "global-expr",
+      "code": "const-expr",
       "source": "wat",
-      "message": "expression must be constant in global"
+      "message": "expression must be constant"
     },
     {
       "range": {
@@ -49,9 +49,9 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "global-expr",
+      "code": "const-expr",
       "source": "wat",
-      "message": "expression must be constant in global"
+      "message": "expression must be constant"
     },
     {
       "range": {
@@ -65,9 +65,9 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "global-expr",
+      "code": "const-expr",
       "source": "wat",
-      "message": "expression must be constant in global"
+      "message": "expression must be constant"
     },
     {
       "range": {
@@ -81,9 +81,9 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "global-expr",
+      "code": "const-expr",
       "source": "wat",
-      "message": "expression must be constant in global"
+      "message": "expression must be constant"
     }
   ]
 }

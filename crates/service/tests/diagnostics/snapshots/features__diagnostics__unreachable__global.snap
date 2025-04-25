@@ -36,9 +36,9 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "global-expr",
+      "code": "const-expr",
       "source": "wat",
-      "message": "expression must be constant in global"
+      "message": "expression must be constant"
     }
   ]
 }
