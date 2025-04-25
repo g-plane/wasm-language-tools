@@ -213,3 +213,33 @@ fn label_details() {
     let response = service.completion(create_params(uri, 2, 16));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn elem_list() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func $f)
+  (func $g)
+  (elem func ))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 4, 13));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn elem_list_following_dollar() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func $f)
+  (func $g)
+  (elem func $))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 4, 14));
+    assert_json_snapshot!(response);
+}

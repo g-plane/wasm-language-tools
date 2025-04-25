@@ -356,6 +356,16 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         SyntaxKind::ELEM_LIST => {
             if find_leading_l_paren(token).is_some() {
                 ctx.extend([CmpCtx::KeywordItem, CmpCtx::Instr]);
+            } else if token
+                .siblings_with_tokens(Direction::Prev)
+                .any(|element| match element {
+                    SyntaxElement::Token(token) => {
+                        token.kind() == SyntaxKind::KEYWORD && token.text() == "func"
+                    }
+                    _ => false,
+                })
+            {
+                ctx.push(CmpCtx::Func);
             }
         }
         SyntaxKind::TABLE_USE => ctx.push(CmpCtx::Table),

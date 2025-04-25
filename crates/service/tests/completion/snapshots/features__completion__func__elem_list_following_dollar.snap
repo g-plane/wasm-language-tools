@@ -1,0 +1,56 @@
+---
+source: crates/service/tests/completion/func.rs
+expression: response
+---
+[
+  {
+    "label": "$f",
+    "labelDetails": {
+      "description": "[] -> []"
+    },
+    "kind": 3,
+    "detail": "(func $f)",
+    "documentation": {
+      "kind": "markdown",
+      "value": ""
+    },
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 13
+        },
+        "end": {
+          "line": 4,
+          "character": 14
+        }
+      },
+      "newText": "$f"
+    }
+  },
+  {
+    "label": "$g",
+    "labelDetails": {
+      "description": "[] -> []"
+    },
+    "kind": 3,
+    "detail": "(func $g)",
+    "documentation": {
+      "kind": "markdown",
+      "value": ""
+    },
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 13
+        },
+        "end": {
+          "line": 4,
+          "character": 14
+        }
+      },
+      "newText": "$g"
+    }
+  }
+]
