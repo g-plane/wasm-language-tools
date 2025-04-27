@@ -15,7 +15,12 @@ fn invalid() {
     block
     end
     (loop)
-    unreachable))
+    unreachable)
+
+  (table 0 funcref
+    i32.const 0
+    i32.const 0
+    i32.add))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -32,7 +37,12 @@ fn valid() {
   (global i32
     i32.const 0)
   (global i32
-    global.get 0))
+    global.get 0)
+
+  (func)
+  (table 0 funcref)
+  (table 0 funcref
+    (ref.func 0)))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

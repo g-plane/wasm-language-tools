@@ -84,6 +84,22 @@ expression: response
       "code": "const-expr",
       "source": "wat",
       "message": "expression must be constant"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 15,
+          "character": 4
+        },
+        "end": {
+          "line": 15,
+          "character": 11
+        }
+      },
+      "severity": 1,
+      "code": "const-expr",
+      "source": "wat",
+      "message": "expression must be constant"
     }
   ]
 }

@@ -155,6 +155,9 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                     &node,
                 );
             }
+            SyntaxKind::MODULE_FIELD_TABLE => {
+                const_expr::check(&mut diagnostics, &line_index, &node);
+            }
             _ => {}
         });
     });
