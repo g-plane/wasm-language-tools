@@ -1080,6 +1080,19 @@ impl DocGen for ModuleFieldTable {
             docs.push(elem.doc(ctx));
             trivias = format_trivias_after_node(elem, ctx);
         }
+        docs.push(
+            Doc::list(self.instrs().fold(vec![], |mut docs, instr| {
+                if trivias.is_empty() {
+                    docs.push(Doc::hard_line());
+                } else {
+                    docs.append(&mut trivias);
+                }
+                docs.push(instr.doc(ctx));
+                trivias = format_trivias_after_node(instr, ctx);
+                docs
+            }))
+            .nest(ctx.indent_width),
+        );
         docs.append(&mut trivias);
         docs.push(Doc::text(")"));
         Doc::list(docs)

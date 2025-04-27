@@ -1608,6 +1608,10 @@ impl ModuleFieldTable {
         child(&self.syntax)
     }
     #[inline]
+    pub fn instrs(&self) -> AstChildren<Instr> {
+        children(&self.syntax)
+    }
+    #[inline]
     pub fn r_paren_token(&self) -> Option<SyntaxToken> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
