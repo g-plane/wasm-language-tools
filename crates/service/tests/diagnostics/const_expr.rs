@@ -39,10 +39,10 @@ fn valid() {
   (global i32
     global.get 0)
 
-  (func)
+  (type (func))
   (table 0 funcref)
   (table 0 funcref
-    (ref.func 0)))
+    (ref.null 0)))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

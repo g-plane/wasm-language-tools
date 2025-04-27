@@ -89,6 +89,40 @@ expression: response
       "range": {
         "start": {
           "line": 15,
+          "character": 11
+        },
+        "end": {
+          "line": 15,
+          "character": 12
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null func)], found [i32] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 15,
+                "character": 4
+              },
+              "end": {
+                "line": 15,
+                "character": 11
+              }
+            }
+          },
+          "message": "expected type `(ref null func)`, found `i32`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 15,
           "character": 4
         },
         "end": {

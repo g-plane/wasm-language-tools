@@ -18,7 +18,7 @@ use rowan::{
     TextRange,
 };
 use wat_syntax::{
-    ast::{BlockInstr, Import, Instr, ModuleFieldFunc, PlainInstr},
+    ast::{BlockInstr, Import, Instr, ModuleFieldFunc, ModuleFieldTable, PlainInstr},
     SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodePtr,
 };
 
@@ -70,6 +70,48 @@ pub fn check_global(
         .extract_global_type(node.green().into())
         .map(OperandType::Val)
         .unwrap_or(OperandType::Any);
+    check_block_like(
+        diagnostics,
+        &Shared {
+            service,
+            uri,
+            symbol_table,
+            line_index,
+            module_id,
+        },
+        node,
+        if support::child::<Import>(node).is_some() {
+            vec![(ty.clone(), None)]
+        } else {
+            Vec::with_capacity(1)
+        },
+        &[ty],
+    );
+}
+
+pub fn check_table(
+    diagnostics: &mut Vec<Diagnostic>,
+    service: &LanguageService,
+    uri: InternUri,
+    line_index: &LineIndex,
+    symbol_table: &SymbolTable,
+    module_id: u32,
+    node: &SyntaxNode,
+) {
+    let Some(ref_type) = ModuleFieldTable::cast(node.clone())
+        .filter(|table| table.instrs().count() > 0) // expr is required only since WasmGC proposal
+        .and_then(|table| {
+            table.ref_type().or_else(|| {
+                table
+                    .table_type()
+                    .and_then(|table_type| table_type.ref_type())
+            })
+        })
+        .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), service))
+    else {
+        return;
+    };
+    let ty = OperandType::Val(ValType::Ref(ref_type));
     check_block_like(
         diagnostics,
         &Shared {

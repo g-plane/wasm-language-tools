@@ -156,6 +156,15 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                 );
             }
             SyntaxKind::MODULE_FIELD_TABLE => {
+                typeck::check_table(
+                    &mut diagnostics,
+                    service,
+                    uri,
+                    &line_index,
+                    &symbol_table,
+                    module_id as u32,
+                    &node,
+                );
                 const_expr::check(&mut diagnostics, &line_index, &node);
             }
             _ => {}

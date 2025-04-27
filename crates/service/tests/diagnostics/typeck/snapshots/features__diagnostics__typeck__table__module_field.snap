@@ -1,0 +1,43 @@
+---
+source: crates/service/tests/diagnostics/typeck/table.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 15
+        },
+        "end": {
+          "line": 5,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null func)], found [i32] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 4
+              },
+              "end": {
+                "line": 5,
+                "character": 15
+              }
+            }
+          },
+          "message": "expected type `(ref null func)`, found `i32`"
+        }
+      ]
+    }
+  ]
+}

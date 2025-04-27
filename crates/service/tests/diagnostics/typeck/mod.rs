@@ -18,6 +18,7 @@ mod returning;
 mod select;
 mod structs;
 mod subtyping;
+mod table;
 
 #[test]
 fn less_operands() {
