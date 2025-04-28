@@ -45,6 +45,20 @@ fn table_type() {
 }
 
 #[test]
+fn ref_in_table_type() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+    (table 0 ()
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 2, 14));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn elem_without_parens() {
     let uri = "untitled:test".to_string();
     let source = "

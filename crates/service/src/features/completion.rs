@@ -335,7 +335,11 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         SyntaxKind::EXPORT_DESC_MEMORY | SyntaxKind::MEM_USE => ctx.push(CmpCtx::Memory),
         SyntaxKind::EXPORT_DESC_TABLE => ctx.push(CmpCtx::Table),
         SyntaxKind::TABLE_TYPE | SyntaxKind::IMPORT_DESC_TABLE_TYPE => {
-            ctx.push(CmpCtx::AbbrRefType);
+            if find_leading_l_paren(token).is_some() {
+                ctx.push(CmpCtx::KeywordRef);
+            } else {
+                ctx.push(CmpCtx::AbbrRefType);
+            }
         }
         SyntaxKind::IMPORT_DESC_TYPE_USE => {
             if find_leading_l_paren(token).is_some() {
