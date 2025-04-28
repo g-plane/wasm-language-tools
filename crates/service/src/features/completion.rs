@@ -18,7 +18,10 @@ use rowan::{
     Direction,
 };
 use smallvec::SmallVec;
-use wat_syntax::{ast::PlainInstr, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
+use wat_syntax::{
+    ast::{PlainInstr, TableType},
+    SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken,
+};
 
 impl LanguageService {
     /// Handler for `textDocument/completion` request.
@@ -274,7 +277,12 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             }
         }
         SyntaxKind::MODULE_FIELD_TABLE => {
-            if find_leading_l_paren(token).is_some() {
+            if support::child::<TableType>(&parent)
+                .and_then(|table_type| table_type.ref_type())
+                .is_some()
+            {
+                ctx.push(CmpCtx::Instr);
+            } else if find_leading_l_paren(token).is_some() {
                 ctx.extend([CmpCtx::KeywordImExport, CmpCtx::KeywordElem]);
             } else {
                 ctx.push(CmpCtx::AbbrRefType);

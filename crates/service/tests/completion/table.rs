@@ -298,3 +298,29 @@ fn return_call_indirect_incomplete_ident() {
     let response = service.completion(create_params(uri, 4, 27));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn instr() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table 0 funcref ))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 2, 19));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn instr_following_paren() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table 0 funcref ())
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 2, 20));
+    assert_json_snapshot!(response);
+}
