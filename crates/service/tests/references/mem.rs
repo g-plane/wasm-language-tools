@@ -17,6 +17,7 @@ fn memory_def_int_idx() {
         (memory.fill 0)
         (memory.copy 0 1)
         (memory.init 0 0))
+    (data (memory 0))
 )
 (module (memory))
 "#;
@@ -43,6 +44,7 @@ fn memory_def_ident_idx() {
         (memory.fill $memory)
         (memory.copy $memory 1)
         (memory.init $memory 0))
+    (data (memory $memory))
 )
 (module (memory $memory))
 "#;
@@ -69,6 +71,7 @@ fn memory_ref_int_idx() {
         (memory.fill 0)
         (memory.copy 0 1)
         (memory.init 0 0))
+    (data (memory 0))
 )
 (module (memory))
 "#;
@@ -95,6 +98,7 @@ fn memory_ref_ident_idx() {
         (memory.fill $memory)
         (memory.copy $memory 1)
         (memory.init $memory 0))
+    (data (memory $memory))
 )
 (module (memory $memory))
 "#;
