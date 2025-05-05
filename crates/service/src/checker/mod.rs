@@ -43,6 +43,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
         &root,
     );
     root.children().enumerate().for_each(|(module_id, module)| {
+        let module_id = module_id as u32;
         implicit_module::check(
             &mut diagnostics,
             config.lint.implicit_module,
@@ -63,7 +64,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                     uri,
                     &line_index,
                     &symbol_table,
-                    module_id as u32,
+                    module_id,
                     &node,
                 );
                 unreachable::check(
@@ -83,7 +84,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                     uri,
                     &line_index,
                     &symbol_table,
-                    module_id as u32,
+                    module_id,
                     &node,
                 );
                 unreachable::check(
@@ -124,7 +125,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                     uri,
                     &line_index,
                     &symbol_table,
-                    module_id as u32,
+                    module_id,
                     &node,
                 );
                 new_non_defaultable::check(
@@ -163,7 +164,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                     uri,
                     &line_index,
                     &symbol_table,
-                    module_id as u32,
+                    module_id,
                     &node,
                 );
                 const_expr::check(&mut diagnostics, &line_index, &node);
@@ -172,6 +173,15 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                 mem_type::check(&mut diagnostics, &line_index, &node);
             }
             SyntaxKind::OFFSET => {
+                typeck::check_offset(
+                    &mut diagnostics,
+                    service,
+                    uri,
+                    &line_index,
+                    &symbol_table,
+                    module_id,
+                    &node,
+                );
                 const_expr::check(&mut diagnostics, &line_index, &node);
             }
             _ => {}

@@ -131,6 +131,30 @@ pub fn check_table(
     );
 }
 
+pub fn check_offset(
+    diagnostics: &mut Vec<Diagnostic>,
+    service: &LanguageService,
+    uri: InternUri,
+    line_index: &LineIndex,
+    symbol_table: &SymbolTable,
+    module_id: u32,
+    node: &SyntaxNode,
+) {
+    check_block_like(
+        diagnostics,
+        &Shared {
+            service,
+            uri,
+            symbol_table,
+            line_index,
+            module_id,
+        },
+        node,
+        Vec::with_capacity(1),
+        &[OperandType::Val(ValType::I32)],
+    );
+}
+
 pub fn unfold(node: SyntaxNode, sequence: &mut Vec<Instr>) {
     if matches!(node.kind(), SyntaxKind::PLAIN_INSTR | SyntaxKind::BLOCK_IF) {
         node.children()

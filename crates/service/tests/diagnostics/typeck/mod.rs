@@ -13,6 +13,7 @@ mod drop;
 mod func;
 mod global;
 mod local;
+mod offset;
 mod rec;
 mod ref_instr;
 mod returning;
