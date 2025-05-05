@@ -9,6 +9,7 @@ mod dup_names;
 mod immediates;
 mod implicit_module;
 mod import_occur;
+mod mem_type;
 mod multi_memories;
 mod multi_modules;
 mod mutated_immutable;
@@ -166,6 +167,9 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                     &node,
                 );
                 const_expr::check(&mut diagnostics, &line_index, &node);
+            }
+            SyntaxKind::MEMORY_TYPE => {
+                mem_type::check(&mut diagnostics, &line_index, &node);
             }
             _ => {}
         });
