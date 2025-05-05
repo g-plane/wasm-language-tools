@@ -171,6 +171,9 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
             SyntaxKind::MEMORY_TYPE => {
                 mem_type::check(&mut diagnostics, &line_index, &node);
             }
+            SyntaxKind::OFFSET => {
+                const_expr::check(&mut diagnostics, &line_index, &node);
+            }
             _ => {}
         });
     });
