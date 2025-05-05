@@ -3,6 +3,26 @@ use insta::assert_json_snapshot;
 use wat_service::LanguageService;
 
 #[test]
+fn type_mismatch_from_func_results() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+    (func $getTwo (result i64 i32)
+        (i64.const 2) (i32.const 3)
+    )
+    (func $add (result i32)
+        (i32.add (call $getTwo))
+    )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn call_type_mismatch() {
     let uri = "untitled:test".to_string();
     let source = "

@@ -3,32 +3,14 @@ use insta::assert_json_snapshot;
 use wat_service::LanguageService;
 
 #[test]
-fn get() {
+fn param() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-    (global f32 f32.const 0)
-    (func (result i32)
-        (i32.add (global.get 0) (i32.const 1))
+    (func (param i64) (result i32)
+        (i32.add (local.get 0) (i32.const 1))
     )
 )
-";
-    let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
-    let response = service.pull_diagnostics(create_params(uri));
-    assert_json_snapshot!(response);
-}
-
-#[test]
-fn set() {
-    let uri = "untitled:test".to_string();
-    let source = "
-(module
-  (global (mut i32) i32.const 0)
-  (func
-    f32.const 0
-    global.set 0))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -42,12 +24,22 @@ fn results_incorrect() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-  (global i32)
-  (global i32
-    f32.const 0)
-  (global i32
+  (func (result i32 i32)
+    block (result i32)
+      unreachable
+    end)
+  (func (result i32 i32)
+    block (result i32 f32)
+      unreachable
+    end)
+  (func (result i32 i32)
+    block (result i32 i32 i32)
+      unreachable
+    end)
+  (func (result i32 i32)
     i32.const 0
-    i32.const 0))
+    i32.const 0
+    f32.const 0))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -59,15 +51,48 @@ fn results_incorrect() {
 #[test]
 fn results_correct() {
     let uri = "untitled:test".to_string();
-    let source = r#"
+    let source = "
 (module
-  (global i32
-    i32.const 0)
-  (global i32
+  (func (result i32 i32)
     unreachable)
-  (global (export "") (mut)
-    i32.const 0))
-"#;
+  (func (result i32 i32)
+    (f32.const 0)
+    (unreachable))
+  (func (result i32 i32)
+    (f32.const 0)
+    (f32.const 0)
+    (unreachable))
+  (func (result i32 i32)
+    block (result i32 i32)
+      unreachable
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn sequence_type_mismatch_from_func_params() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+    (func $swap (param i32 i32) (result i32 i32)
+        local.get 1
+        local.get 0)
+    (func (param f32 i32) (result i32)
+        local.get 0
+        local.get 1
+        call $swap
+        i32.sub)
+
+    (func (param f32 f64))
+    (func
+        i32.const 0
+        call 2))
+";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
@@ -76,15 +101,22 @@ fn results_correct() {
 }
 
 #[test]
-fn imported() {
+fn sequence_type_mismatch_from_func_results() {
     let uri = "untitled:test".to_string();
-    let source = r#"
+    let source = "
 (module
-  (global (import "" "") i32))
-"#;
+    (func $swap (param i32 i32) (result i32 f32)
+        local.get 1
+        local.get 0)
+    (func (param i32 i32) (result i32)
+        local.get 0
+        local.get 1
+        call $swap
+        i32.sub))
+";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
-    assert!(response.items.is_empty());
+    assert_json_snapshot!(response);
 }

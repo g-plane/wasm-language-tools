@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/typeck/mod.rs
+source: crates/service/tests/diagnostics/typeck/global.rs
 expression: response
 ---
 {
@@ -8,34 +8,34 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 3,
+          "line": 4,
           "character": 8
         },
         "end": {
-          "line": 3,
-          "character": 45
+          "line": 4,
+          "character": 46
         }
       },
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected types [i32, i32], found [i64, i32]",
+      "message": "expected types [i32, i32], found [f32, i32]",
       "relatedInformation": [
         {
           "location": {
             "uri": "untitled:test",
             "range": {
               "start": {
-                "line": 3,
+                "line": 4,
                 "character": 17
               },
               "end": {
-                "line": 3,
-                "character": 30
+                "line": 4,
+                "character": 31
               }
             }
           },
-          "message": "expected type `i32`, found `i64`"
+          "message": "expected type `i32`, found `f32`"
         }
       ]
     }

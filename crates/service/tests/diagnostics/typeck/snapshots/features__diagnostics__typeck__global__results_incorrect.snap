@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/typeck/mod.rs
+source: crates/service/tests/diagnostics/typeck/global.rs
 expression: response
 ---
 {
