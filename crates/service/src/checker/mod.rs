@@ -184,6 +184,9 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                 );
                 const_expr::check(&mut diagnostics, &line_index, &node);
             }
+            SyntaxKind::ELEM_EXPR => {
+                const_expr::check(&mut diagnostics, &line_index, &node);
+            }
             _ => {}
         });
     });

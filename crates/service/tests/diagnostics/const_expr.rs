@@ -26,6 +26,11 @@ fn invalid() {
       i32.const 0
       i32.const 0
       i32.add))
+  (elem funcref
+    (item
+      i32.const 0
+      i32.const 0
+      i32.add))
 
   (memory 1)
   (data (memory 0)
@@ -58,6 +63,8 @@ fn valid() {
   (elem (table 0)
     (offset
       i32.const 0))
+  (elem funcref
+    (i32.const 0))
 
   (memory 1)
   (data (memory 0)

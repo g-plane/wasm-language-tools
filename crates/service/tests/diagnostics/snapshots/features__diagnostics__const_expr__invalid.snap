@@ -154,11 +154,27 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 27,
+          "line": 25,
           "character": 6
         },
         "end": {
-          "line": 27,
+          "line": 25,
+          "character": 13
+        }
+      },
+      "severity": 1,
+      "code": "const-expr",
+      "source": "wat",
+      "message": "expression must be constant"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 32,
+          "character": 6
+        },
+        "end": {
+          "line": 32,
           "character": 13
         }
       },
