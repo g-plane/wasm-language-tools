@@ -2,7 +2,7 @@ use super::find_meaningful_token;
 use crate::{
     binder::{Symbol, SymbolKey, SymbolKind, SymbolTablesCtx},
     data_set, helpers,
-    idx::{IdentsCtx, Idx},
+    idx::IdentsCtx,
     syntax_tree::SyntaxTreeCtx,
     types_analyzer::{self, CompositeType, DefType, TypesAnalyzerCtx},
     uri::{InternUri, UrisCtx},
@@ -294,19 +294,15 @@ fn create_param_or_local_hover(service: &LanguageService, symbol: &Symbol) -> Ma
     match symbol.kind {
         SymbolKind::Param => {
             content.push_str("param");
-            if let Some(name) = symbol.idx.name {
-                content.push(' ');
-                content.push_str(&service.lookup_ident(name));
-            }
         }
         SymbolKind::Local => {
             content.push_str("local");
-            if let Some(name) = symbol.idx.name {
-                content.push(' ');
-                content.push_str(&service.lookup_ident(name));
-            }
         }
         _ => {}
+    }
+    if let Some(name) = symbol.idx.name {
+        content.push(' ');
+        content.push_str(&service.lookup_ident(name));
     }
     if let Some(ty) = service.extract_type(symbol.green.clone()) {
         content.push(' ');
@@ -324,13 +320,10 @@ fn create_global_def_hover(
     symbol: &Symbol,
     root: &SyntaxNode,
 ) -> MarkupContent {
-    let mut content = '('.to_string();
-    if symbol.kind == SymbolKind::GlobalDef {
-        content.push_str("global");
-        if let Some(name) = symbol.idx.name {
-            content.push(' ');
-            content.push_str(&service.lookup_ident(name));
-        }
+    let mut content = "(global".to_string();
+    if let Some(name) = symbol.idx.name {
+        content.push(' ');
+        content.push_str(&service.lookup_ident(name));
     }
     let node = symbol.key.to_node(root);
     if let Some(global_type) = child::<GlobalType>(&node) {
@@ -421,16 +414,9 @@ fn create_type_def_hover(
 ) -> MarkupContent {
     let def_types = service.def_types(uri);
     let mut content = "(type".to_string();
-    if let Symbol {
-        kind: SymbolKind::Type,
-        idx: Idx {
-            name: Some(name), ..
-        },
-        ..
-    } = symbol
-    {
+    if let Some(name) = symbol.idx.name {
         content.push(' ');
-        content.push_str(&service.lookup_ident(*name));
+        content.push_str(&service.lookup_ident(name));
     }
     if let Some(DefType { comp, .. }) = def_types.iter().find(|def_type| def_type.key == symbol.key)
     {
@@ -491,8 +477,7 @@ fn create_field_def_hover(
     symbol: &Symbol,
     uri: InternUri,
 ) -> MarkupContent {
-    let mut content = '('.to_string();
-    content.push_str("field");
+    let mut content = "(field".to_string();
     if let Some(name) = symbol.idx.name {
         content.push(' ');
         content.push_str(&service.lookup_ident(name));
