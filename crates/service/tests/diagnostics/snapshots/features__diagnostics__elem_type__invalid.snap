@@ -1,0 +1,43 @@
+---
+source: crates/service/tests/diagnostics/elem_type.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 18
+        },
+        "end": {
+          "line": 5,
+          "character": 31
+        }
+      },
+      "severity": 1,
+      "code": "elem-type",
+      "source": "wat",
+      "message": "ref type `(ref null $s)` doesn't match the table's ref type `(ref null func)`",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 11
+              },
+              "end": {
+                "line": 3,
+                "character": 18
+              }
+            }
+          },
+          "message": "table's ref type declared here"
+        }
+      ]
+    }
+  ]
+}

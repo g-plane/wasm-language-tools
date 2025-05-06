@@ -6,6 +6,7 @@ mod block_type;
 mod br_table_branches;
 mod const_expr;
 mod dup_names;
+mod elem_type;
 mod immediates;
 mod implicit_module;
 mod import_occur;
@@ -168,6 +169,18 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                     &node,
                 );
                 const_expr::check(&mut diagnostics, &line_index, &node);
+            }
+            SyntaxKind::MODULE_FIELD_ELEM => {
+                elem_type::check(
+                    &mut diagnostics,
+                    service,
+                    uri,
+                    &line_index,
+                    &root,
+                    &symbol_table,
+                    module_id,
+                    &node,
+                );
             }
             SyntaxKind::MEMORY_TYPE => {
                 mem_type::check(&mut diagnostics, &line_index, &node);

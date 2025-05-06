@@ -5,6 +5,7 @@ mod block_type;
 mod br_table_branches;
 mod const_expr;
 mod dup_names;
+mod elem_type;
 mod immediates;
 mod implicit_module;
 mod import_occur;
