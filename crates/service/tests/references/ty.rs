@@ -9,7 +9,8 @@ fn type_def_int_idx() {
 (module
     (type (func))
     (func (type 0))
-    (type (sub 0) (func (param (ref 0))))
+    (type (sub 0 (func (param (ref 0)))))
+    (func (ref.null 0))
 )
 (module (type (func)))
 ";
@@ -29,7 +30,8 @@ fn type_def_ident_idx() {
     (type $type (func))
     (func (type 0))
     (func (type $type))
-    (type (sub $type) (func (param (ref $type))))
+    (type (sub $type (func (param (ref $type)))))
+    (func (ref.null $type))
 )
 (module (type $type))
 ";
@@ -48,7 +50,8 @@ fn type_use_int_idx() {
 (module
     (type (func))
     (func (type 0))
-    (type (sub 0) (func (param (ref 0))))
+    (type (sub 0 (func (param (ref 0)))))
+    (func (ref.null 0))
 )
 (module (type (func)))
 ";
@@ -68,7 +71,8 @@ fn type_use_ident_idx() {
     (type $type (func))
     (func (type 0))
     (func (type $type))
-    (type (sub $type) (func (param (ref $type))))
+    (type (sub $type (func (param (ref $type)))))
+    (func (ref.null $type))
 )
 (module (type $type))
 ";

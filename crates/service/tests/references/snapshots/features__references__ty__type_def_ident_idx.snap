@@ -60,11 +60,24 @@ expression: include_decl
     "range": {
       "start": {
         "line": 5,
-        "character": 40
+        "character": 39
       },
       "end": {
         "line": 5,
-        "character": 45
+        "character": 44
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 6,
+        "character": 20
+      },
+      "end": {
+        "line": 6,
+        "character": 25
       }
     }
   }

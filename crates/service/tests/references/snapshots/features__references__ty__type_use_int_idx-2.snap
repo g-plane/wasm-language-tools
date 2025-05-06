@@ -34,11 +34,24 @@ expression: exclude_decl
     "range": {
       "start": {
         "line": 4,
-        "character": 36
+        "character": 35
       },
       "end": {
         "line": 4,
-        "character": 37
+        "character": 36
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 5,
+        "character": 20
+      },
+      "end": {
+        "line": 5,
+        "character": 21
       }
     }
   }
