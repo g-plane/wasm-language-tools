@@ -12,7 +12,7 @@ use lspt::{Hover, HoverParams, MarkupContent, MarkupKind, Union3};
 use rowan::ast::{support::child, AstNode};
 use std::fmt::Write;
 use wat_syntax::{
-    ast::{GlobalType, PlainInstr},
+    ast::{GlobalType, Limits, MemoryType, PlainInstr},
     SyntaxKind, SyntaxNode,
 };
 
@@ -72,6 +72,17 @@ impl LanguageService {
                                 SymbolKind::GlobalRef => {
                                     symbol_table.find_def(key).map(|symbol| Hover {
                                         contents: Union3::A(create_global_def_hover(
+                                            self, symbol, &root,
+                                        )),
+                                        range: Some(helpers::rowan_range_to_lsp_range(
+                                            &line_index,
+                                            token.text_range(),
+                                        )),
+                                    })
+                                }
+                                SymbolKind::MemoryRef => {
+                                    symbol_table.find_def(key).map(|symbol| Hover {
+                                        contents: Union3::A(create_memory_def_hover(
                                             self, symbol, &root,
                                         )),
                                         range: Some(helpers::rowan_range_to_lsp_range(
@@ -237,6 +248,7 @@ fn create_def_hover(
         }),
         SymbolKind::Type => Some(create_type_def_hover(service, uri, symbol)),
         SymbolKind::GlobalDef => Some(create_global_def_hover(service, symbol, root)),
+        SymbolKind::MemoryDef => Some(create_memory_def_hover(service, symbol, root)),
         SymbolKind::BlockDef => Some(create_block_hover(service, symbol, uri, root)),
         SymbolKind::FieldDef => Some(create_field_def_hover(service, symbol, uri)),
         _ => None,
@@ -321,6 +333,31 @@ fn create_global_def_hover(
         if mutable {
             content.push(')');
         }
+    }
+    content.push(')');
+    MarkupContent {
+        kind: MarkupKind::Markdown,
+        value: format!("```wat\n{content}\n```"),
+    }
+}
+
+fn create_memory_def_hover(
+    service: &LanguageService,
+    symbol: &Symbol,
+    root: &SyntaxNode,
+) -> MarkupContent {
+    let mut content = "(memory".to_string();
+    if let Some(name) = symbol.idx.name {
+        content.push(' ');
+        content.push_str(&service.lookup_ident(name));
+    }
+    let node = symbol.key.to_node(root);
+    if let Some(limits) = child::<MemoryType>(&node)
+        .and_then(|memory_type| memory_type.limits())
+        .and_then(|limits| render_limits(&limits))
+    {
+        content.push(' ');
+        content.push_str(&limits);
     }
     content.push(')');
     MarkupContent {
@@ -435,4 +472,14 @@ fn format_op_code(code: u32) -> String {
     } else {
         format!("0x{:02X}", code)
     }
+}
+
+fn render_limits(limits: &Limits) -> Option<String> {
+    let mut content = String::with_capacity(2);
+    content.push_str(limits.min()?.text());
+    if let Some(max) = limits.max() {
+        content.push(' ');
+        content.push_str(max.text());
+    }
+    Some(content)
 }

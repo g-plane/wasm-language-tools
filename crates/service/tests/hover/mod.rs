@@ -107,6 +107,34 @@ fn global_ident_idx() {
 }
 
 #[test]
+fn memory_int_idx() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory 0 1)
+  (data (memory 0)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 3, 17));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn memory_ident_idx() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory $x 0 1)
+  (data (memory $x)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 3, 18));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn func_int_idx() {
     let uri = "untitled:test".to_string();
     let source = "
@@ -414,6 +442,32 @@ fn global_keyword() {
 (module
     (global $global i64)
 )
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 2, 9));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn memory_decl() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory $x 0 1))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 2, 12));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn memory_keyword() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory $x 0 1))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
