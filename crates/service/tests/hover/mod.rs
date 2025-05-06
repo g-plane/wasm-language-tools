@@ -135,6 +135,34 @@ fn memory_ident_idx() {
 }
 
 #[test]
+fn table_int_idx() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table 1 funcref)
+  (elem (table 0)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 3, 15));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn table_ident_idx() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table $x 1 funcref)
+  (elem (table $x)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 3, 16));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn func_int_idx() {
     let uri = "untitled:test".to_string();
     let source = "
@@ -472,6 +500,32 @@ fn memory_keyword() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.hover(create_params(uri, 2, 9));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn table_decl() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table $x 1 funcref))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 2, 11));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn table_keyword() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table $x 1 funcref))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 2, 7));
     assert_json_snapshot!(response);
 }
 

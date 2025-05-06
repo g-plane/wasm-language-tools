@@ -12,7 +12,7 @@ use lspt::{Hover, HoverParams, MarkupContent, MarkupKind, Union3};
 use rowan::ast::{support::child, AstNode};
 use std::fmt::Write;
 use wat_syntax::{
-    ast::{GlobalType, Limits, MemoryType, PlainInstr},
+    ast::{GlobalType, Limits, MemoryType, PlainInstr, TableType},
     SyntaxKind, SyntaxNode,
 };
 
@@ -83,6 +83,17 @@ impl LanguageService {
                                 SymbolKind::MemoryRef => {
                                     symbol_table.find_def(key).map(|symbol| Hover {
                                         contents: Union3::A(create_memory_def_hover(
+                                            self, symbol, &root,
+                                        )),
+                                        range: Some(helpers::rowan_range_to_lsp_range(
+                                            &line_index,
+                                            token.text_range(),
+                                        )),
+                                    })
+                                }
+                                SymbolKind::TableRef => {
+                                    symbol_table.find_def(key).map(|symbol| Hover {
+                                        contents: Union3::A(create_table_def_hover(
                                             self, symbol, &root,
                                         )),
                                         range: Some(helpers::rowan_range_to_lsp_range(
@@ -249,6 +260,7 @@ fn create_def_hover(
         SymbolKind::Type => Some(create_type_def_hover(service, uri, symbol)),
         SymbolKind::GlobalDef => Some(create_global_def_hover(service, symbol, root)),
         SymbolKind::MemoryDef => Some(create_memory_def_hover(service, symbol, root)),
+        SymbolKind::TableDef => Some(create_table_def_hover(service, symbol, root)),
         SymbolKind::BlockDef => Some(create_block_hover(service, symbol, uri, root)),
         SymbolKind::FieldDef => Some(create_field_def_hover(service, symbol, uri)),
         _ => None,
@@ -358,6 +370,42 @@ fn create_memory_def_hover(
     {
         content.push(' ');
         content.push_str(&limits);
+    }
+    content.push(')');
+    MarkupContent {
+        kind: MarkupKind::Markdown,
+        value: format!("```wat\n{content}\n```"),
+    }
+}
+
+fn create_table_def_hover(
+    service: &LanguageService,
+    symbol: &Symbol,
+    root: &SyntaxNode,
+) -> MarkupContent {
+    use crate::types_analyzer::RefType;
+
+    let mut content = "(table".to_string();
+    if let Some(name) = symbol.idx.name {
+        content.push(' ');
+        content.push_str(&service.lookup_ident(name));
+    }
+    let node = symbol.key.to_node(root);
+    if let Some(table_type) = child::<TableType>(&node) {
+        if let Some(limits) = table_type
+            .limits()
+            .and_then(|limits| render_limits(&limits))
+        {
+            content.push(' ');
+            content.push_str(&limits);
+        }
+        if let Some(ref_type) = table_type
+            .ref_type()
+            .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), service))
+        {
+            content.push(' ');
+            let _ = write!(content, "{}", ref_type.render(service));
+        }
     }
     content.push(')');
     MarkupContent {
