@@ -64,7 +64,7 @@ fn valid() {
     (offset
       i32.const 0))
   (elem funcref
-    (i32.const 0))
+    (ref.null 0))
 
   (memory 1)
   (data (memory 0)

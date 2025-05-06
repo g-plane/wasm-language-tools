@@ -1,0 +1,77 @@
+---
+source: crates/service/tests/diagnostics/typeck/elem.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 18
+        },
+        "end": {
+          "line": 7,
+          "character": 19
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null $f1)], found [(ref null $f2)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 7,
+                "character": 6
+              },
+              "end": {
+                "line": 7,
+                "character": 18
+              }
+            }
+          },
+          "message": "expected type `(ref null $f1)`, found `(ref null $f2)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 18
+        },
+        "end": {
+          "line": 9,
+          "character": 19
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null $f1)], found [(ref null $f3)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 9,
+                "character": 6
+              },
+              "end": {
+                "line": 9,
+                "character": 18
+              }
+            }
+          },
+          "message": "expected type `(ref null $f1)`, found `(ref null $f3)`"
+        }
+      ]
+    }
+  ]
+}

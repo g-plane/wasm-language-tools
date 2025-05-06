@@ -184,6 +184,17 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
                 );
                 const_expr::check(&mut diagnostics, &line_index, &node);
             }
+            SyntaxKind::ELEM_LIST => {
+                typeck::check_elem_list(
+                    &mut diagnostics,
+                    service,
+                    uri,
+                    &line_index,
+                    &symbol_table,
+                    module_id,
+                    &node,
+                );
+            }
             SyntaxKind::ELEM_EXPR => {
                 const_expr::check(&mut diagnostics, &line_index, &node);
             }

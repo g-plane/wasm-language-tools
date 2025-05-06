@@ -10,6 +10,7 @@ mod br;
 mod call;
 mod call_indirect;
 mod drop;
+mod elem;
 mod func;
 mod global;
 mod local;

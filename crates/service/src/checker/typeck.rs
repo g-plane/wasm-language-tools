@@ -18,7 +18,7 @@ use rowan::{
     TextRange,
 };
 use wat_syntax::{
-    ast::{BlockInstr, Import, Instr, ModuleFieldFunc, ModuleFieldTable, PlainInstr},
+    ast::{BlockInstr, ElemList, Import, Instr, ModuleFieldFunc, ModuleFieldTable, PlainInstr},
     SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodePtr,
 };
 
@@ -153,6 +153,41 @@ pub fn check_offset(
         Vec::with_capacity(1),
         &[OperandType::Val(ValType::I32)],
     );
+}
+
+pub fn check_elem_list(
+    diagnostics: &mut Vec<Diagnostic>,
+    service: &LanguageService,
+    uri: InternUri,
+    line_index: &LineIndex,
+    symbol_table: &SymbolTable,
+    module_id: u32,
+    node: &SyntaxNode,
+) {
+    let Some(ref_type) = ElemList::cast(node.clone())
+        .and_then(|elem_list| elem_list.ref_type())
+        .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), service))
+    else {
+        return;
+    };
+    let ty = OperandType::Val(ValType::Ref(ref_type));
+    node.children()
+        .filter(|child| child.kind() == SyntaxKind::ELEM_EXPR)
+        .for_each(|child| {
+            check_block_like(
+                diagnostics,
+                &Shared {
+                    service,
+                    uri,
+                    symbol_table,
+                    line_index,
+                    module_id,
+                },
+                &child,
+                Vec::with_capacity(1),
+                &[ty.clone()],
+            );
+        });
 }
 
 pub fn unfold(node: SyntaxNode, sequence: &mut Vec<Instr>) {
