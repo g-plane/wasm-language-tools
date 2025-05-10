@@ -21,7 +21,7 @@ pub struct FormatOptions {
 pub struct LayoutOptions {
     #[cfg_attr(feature = "config_serde", serde(alias = "printWidth"))]
     /// The line width limitation that formatter should *(but not must)* avoid exceeding.
-    /// Malva will try its best to keep line width less than this value,
+    /// The formatter will try its best to keep line width less than this value,
     /// but it may exceed for some cases, for example, a very very long single word.
     ///
     /// Default: `80`
