@@ -5,7 +5,7 @@ hero:
   name: "WebAssembly Language Tools"
   tagline: "The set of tools that provides and improves the editing experience of WebAssembly Text Format."
   image:
-    src: /assets/logo.svg
+    src: /public/logo.svg
     alt: WebAssembly Language Tools
   actions:
     - theme: brand
