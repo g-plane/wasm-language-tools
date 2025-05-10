@@ -1,5 +1,9 @@
 /target
 .vscode
 
+node_modules/
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+
 # instant PoC
 /*.wat

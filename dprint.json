@@ -1,0 +1,7 @@
+{
+  "extends": "https://dprint.gplane.win/2024-10.json",
+  "excludes": [
+    "docs/.vitepress/cache",
+    "docs/.vitepress/dist"
+  ]
+}
