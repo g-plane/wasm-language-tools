@@ -5,12 +5,12 @@ export default defineConfig({
   description:
     'The set of tools that provides and improves the editing experience of WebAssembly Text Format.',
   head: [
-    ['link', { rel: 'icon', href: '/public/logo.svg' }],
+    ['link', { rel: 'icon', href: '/logo.svg' }],
   ],
   lastUpdated: true,
   themeConfig: {
     siteTitle: 'WASM Language Tools',
-    logo: '/public/logo.svg',
+    logo: '/logo.svg',
     nav: [
       { text: 'Guide', link: '/guide/introduction', activeMatch: '/guide/' },
       { text: 'Config', link: '/config/overview', activeMatch: '/config/' },
