@@ -29,3 +29,5 @@ features:
     title: WasmGC Support
     details: It can understand the syntaxes and semantics of the WebAssembly Garbage Collection proposal.
 ---
+
+![](https://github.com/user-attachments/assets/49b771fc-2416-4a5a-8b04-f37037cb9b54)
