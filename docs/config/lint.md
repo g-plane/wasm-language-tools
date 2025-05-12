@@ -43,7 +43,7 @@ So they won't be reported as unused.
 
 WebAssembly allows shadowing identifiers in block labels. For example:
 
-```wasm:line-numbers warning-3-12-3-18
+```wasm :line-numbers warning-3-12-3-18
 (module
   (func
     (block $label
