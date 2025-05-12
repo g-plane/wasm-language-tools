@@ -503,22 +503,24 @@ impl DocGen for Module {
             docs.push(Doc::text(ident.to_string()));
             trivias = format_trivias_after_token(ident, ctx);
         }
-        let module_fields =
-            Doc::list(self.module_fields().fold(vec![], |mut docs, module_field| {
-                if trivias.is_empty() && is_explicit_module {
-                    docs.push(Doc::hard_line());
+        let module_fields = Doc::list(self.module_fields().fold(
+            vec![],
+            |mut fields_docs, module_field| {
+                if trivias.is_empty() && (!docs.is_empty() || !fields_docs.is_empty()) {
+                    fields_docs.push(Doc::hard_line());
                 } else {
-                    docs.append(&mut trivias);
+                    fields_docs.append(&mut trivias);
                 }
                 let node = module_field.syntax();
                 if should_ignore(node, ctx) {
-                    reflow(&node.to_string(), &mut docs);
+                    reflow(&node.to_string(), &mut fields_docs);
                 } else {
-                    docs.push(module_field.doc(ctx));
+                    fields_docs.push(module_field.doc(ctx));
                 }
                 trivias = format_trivias_after_node(module_field, ctx);
-                docs
-            }));
+                fields_docs
+            },
+        ));
         if is_explicit_module {
             docs.push(module_fields.nest(ctx.indent_width));
         } else {

@@ -38,9 +38,14 @@ fn run_format_test(path: &Path, input: &str, options: &FormatOptions) -> String 
     let output = format(&Root::cast(tree).unwrap(), options);
 
     assert!(
+        !output.starts_with('\n'),
+        "'{}' has leading newline",
+        path.display(),
+    );
+    assert!(
         !output.contains(" \n"),
         "'{}' has trailing whitespaces",
-        path.display()
+        path.display(),
     );
 
     let (tree, errors) = wat_parser::parse(input);
