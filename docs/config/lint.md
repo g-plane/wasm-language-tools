@@ -16,13 +16,13 @@ For WasmGC, fields in struct type are also supported.
 
 Here is an example of unused functions and globals with or without identifiers:
 
-```wasm
+```wasm warning-2-4-2-8 warning-3-9-3-11 warning-4-4-4-10 warning-6-11-6-13
 (module
-  (func) ;; [!code warning]
-  (func $f) ;; [!code warning]
-  (global i32 ;; [!code warning]
+  (func)
+  (func $f)
+  (global i32
     i32.const 0)
-  (global $g i32 ;; [!code warning]
+  (global $g i32
     i32.const 0))
 ```
 
@@ -43,10 +43,10 @@ So they won't be reported as unused.
 
 WebAssembly allows shadowing identifiers in block labels. For example:
 
-```wasm:line-numbers
+```wasm:line-numbers warning-3-12-3-18
 (module
   (func
-    (block $label ;; [!code warning]
+    (block $label
       (block $label
         br $label))))
 ```
@@ -86,9 +86,9 @@ In such cases, you can set this lint to `"warning"` or `"deny"`.
 
 Most compilers (such as [WABT](https://github.com/WebAssembly/wabt)) only allow one module in a file.
 
-```wasm
+```wasm error-2-1-2-9
 (module)
-(module) ;; [!code error]
+(module)
 ```
 
 If this doesn't match your needs, you can set this lint to `"allow"`.
@@ -99,7 +99,7 @@ If this doesn't match your needs, you can set this lint to `"allow"`.
 
 This lint reports unreachable code, for example those code after `br`, `return` and `unreachable` instructions or infinite loops:
 
-```wasm{5,8}
+```wasm faded-5-5-5-8 faded-8-5-8-8
 (module
   (func
     (loop
@@ -116,9 +116,9 @@ This lint reports unreachable code, for example those code after `br`, `return` 
 
 This lint reports mutable items that are never mutated:
 
-```wasm
+```wasm warning-2-12-2-15
 (module
-  (global (mut i32) ;; [!code warning]
+  (global (mut i32)
     i32.const 0)
   (func (result i32)
     global.get 0))
@@ -126,10 +126,10 @@ This lint reports mutable items that are never mutated:
 
 For WasmGC, fields in struct type and array type is also supported:
 
-```wasm
+```wasm warning-2-24-2-27 warning-3-33-3-36
 (module
-  (type $array (array (mut i32))) ;; [!code warning]
-  (type $struct (struct (field (mut i32)))) ;; [!code warning]
+  (type $array (array (mut i32)))
+  (type $struct (struct (field (mut i32))))
   (func (param (ref $array) (ref $struct)) (result i32 i32)
     local.get 0
     i32.const 0

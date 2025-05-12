@@ -2,3 +2,20 @@
   --vp-c-brand-1: #654ff0;
   --vp-c-brand-2: #8777f3;
 }
+
+.severity {
+  padding-bottom: 4px;
+  background-repeat: repeat-x;
+  background-position: 0 100%;
+}
+.severity.severity__error {
+  /* image copied from ESLint website */
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' height='3' width='6'%3E%3Cg fill='%23f14c4c'%3E%3Cpath d='m5.5 0-3 3H1.1l3-3z'/%3E%3Cpath d='m4 0 2 2V.6L5.4 0zM0 2l1 1h1.4L0 .6z'/%3E%3C/g%3E%3C/svg%3E");
+}
+.severity.severity__warning {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' height='3' width='6'%3E%3Cg fill='%23ffa10b'%3E%3Cpath d='m5.5 0-3 3H1.1l3-3z'/%3E%3Cpath d='m4 0 2 2V.6L5.4 0zM0 2l1 1h1.4L0 .6z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.code-faded {
+  opacity: 0.4;
+}

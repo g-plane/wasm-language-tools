@@ -57,4 +57,48 @@ export default defineConfig({
       },
     },
   },
+  markdown: {
+    codeTransformers: [
+      {
+        preprocess(_, options) {
+          options.decorations = (options.decorations ?? []).concat(
+            options.meta?.__raw?.split(' ')
+              .map((it) => it.match(/^(error|warning)-(\d+)-(\d+)-(\d+)-(\d+)$/))
+              .filter((it) => !!it)
+              .map(([, severity, startLine, startChar, endLine, endChar]) => ({
+                start: {
+                  line: Number.parseInt(startLine) - 1,
+                  character: Number.parseInt(startChar) - 1,
+                },
+                end: {
+                  line: Number.parseInt(endLine) - 1,
+                  character: Number.parseInt(endChar) - 1,
+                },
+                properties: { class: `severity severity__${severity}` },
+              })) ?? []
+          )
+        },
+      },
+      {
+        preprocess(_, options) {
+          options.decorations = (options.decorations ?? []).concat(
+            options.meta?.__raw?.split(' ')
+              .map((it) => it.match(/^faded-(\d+)-(\d+)-(\d+)-(\d+)$/))
+              .filter((it) => !!it)
+              .map(([, startLine, startChar, endLine, endChar]) => ({
+                start: {
+                  line: Number.parseInt(startLine) - 1,
+                  character: Number.parseInt(startChar) - 1,
+                },
+                end: {
+                  line: Number.parseInt(endLine) - 1,
+                  character: Number.parseInt(endChar) - 1,
+                },
+                properties: { class: `code-faded` },
+              })) ?? []
+          )
+        },
+      },
+    ],
+  },
 })
