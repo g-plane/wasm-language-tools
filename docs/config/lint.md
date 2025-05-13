@@ -54,17 +54,6 @@ WebAssembly allows shadowing identifiers in block labels. For example:
 However, it's confusing that you may want to jump to the label at line 3 or line 4.
 This lint reports such cases when you accidentally give the same name to different block labels.
 
-Same name but not being as inner block is not reported, such as:
-
-```wasm
-(module
-  (func
-    (block $label
-      br $label)
-    (block $label
-      br $label)))
-```
-
 ## `implicitModule`
 
 > default: `"allow"`
