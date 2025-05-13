@@ -104,7 +104,7 @@ fn global_get_with_int_idx() {
     let source = "
 (module
   (func
-    global.get $global
+    global.get 0
     drop)
   (global $global (mut i32)
     i32.const 0))
