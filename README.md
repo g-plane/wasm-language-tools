@@ -166,23 +166,22 @@ cargo install wat_server
 - Visual Studio Code: Install the [WebAssembly Language Tools](https://marketplace.visualstudio.com/items?itemName=gplane.wasm-language-tools) extension.
 - Neovim: Built-in support in [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#wasm_language_tools):
   ```lua
-  require("lspconfig").wasm_language_tools.setup({
-    -- `settings` section is optional
-    settings = { format = {}, lint = {} },
-  })
+  require("lspconfig").wasm_language_tools.setup({})
   ```
 - Zed: Install the [WebAssembly Text Format](https://zed.dev/extensions?query=WebAssembly+Text+Format) extension.
 - Helix: Add the following lines to `<config_dir>/helix/languages.toml`:
   ```toml
   [language-server.wasm-language-tools]
-  command = "wat_server" # or the absolute path to the binary
-  args = []
-  config = { format = {}, lint = { unused = "warn" } } # this section is optional
+  command = "wat_server"
 
   [[language]]
   name = "wat"
   language-servers = ["wasm-language-tools"]
   ```
+
+## 📚 Documentation
+
+Please visit the [documentation website](https://wasm-language-tools.netlify.app/) for configuration and diagnostics explanation.
 
 ## 📜 License
 
