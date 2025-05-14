@@ -11,7 +11,7 @@ exclude = ["/tests"]
 
 [dependencies]
 fuzzy-matcher = "0.3"
-indexmap = "2.7"
+indexmap = "2.9"
 itertools = "0.14"
 line-index.workspace = true
 lspt.workspace = true
@@ -20,7 +20,7 @@ rustc-hash.workspace = true
 salsa = "0.16"
 serde.workspace = true
 serde_json.workspace = true
-smallvec = "1.13"
+smallvec = "1.15"
 wat_formatter = { path = "../formatter", version = "0.4", features = [
     "config_serde",
 ] }
