@@ -60,6 +60,7 @@ export default defineConfig({
           { text: 'Type Checking', link: '/diagnostics/type-check' },
           { text: 'Subtyping', link: '/diagnostics/subtyping' },
           { text: 'Type Misuse', link: '/diagnostics/type-misuse' },
+          { text: 'Packed Type', link: '/diagnostics/packing' },
           { text: 'Shadowing', link: '/diagnostics/shadow' },
           { text: 'Constant Expression', link: '/diagnostics/const-expr' },
           { text: 'Duplicated Names', link: '/diagnostics/duplicated-names' },
