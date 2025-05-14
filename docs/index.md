@@ -14,6 +14,9 @@ hero:
     - theme: alt
       text: Getting Started
       link: /guide/getting-started/editors
+    - theme: alt
+      text: GitHub
+      link: https://github.com/g-plane/wasm-language-tools
 
 features:
   - icon: 🎨
