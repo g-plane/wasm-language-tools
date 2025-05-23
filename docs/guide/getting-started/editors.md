@@ -39,6 +39,24 @@ require("lspconfig").wasm_language_tools.setup({
 })
 ```
 
+## coc.nvim
+
+> [!IMPORTANT]
+> You need to [install the server binary](./binary.md) manually and make sure it's in your `$PATH` (or specify the binary path manually).
+
+For the minimal setup, add the following lines to your `coc-settings.json`:
+
+```json
+{
+  "languageserver": {
+    "wasm-language-tools": {
+      "command": "wat_server", // or the absolute path to the binary
+      "filetypes": ["wat"]
+    }
+  }
+}
+```
+
 ## Helix
 
 > [!IMPORTANT]
