@@ -200,6 +200,28 @@ fn block() {
 }
 
 #[test]
+fn label_in_nested_if() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (loop $loop
+      (if
+        (i32.const 0)
+        (then
+          (if
+            (i32.const 0)
+            (then
+              (br $loop))))))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
 fn field_defined() {
     let uri = "untitled:test".to_string();
     let source = "

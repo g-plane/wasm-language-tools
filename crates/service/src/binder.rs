@@ -486,17 +486,30 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                 }
             }
             SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_IF | SyntaxKind::BLOCK_LOOP => {
-                if let Some(symbol) = node.parent().map(|parent| Symbol {
-                    key: SymbolKey::new(&node),
-                    green: node.green().into(),
-                    region: SymbolKey::new(&parent),
-                    kind: SymbolKind::BlockDef,
-                    idx: Idx {
-                        num: Some(0), // fake ID
-                        name: support::token(&node, SyntaxKind::IDENT)
-                            .map(|token| db.ident(token.text().into())),
-                    },
-                }) {
+                if let Some(symbol) = node
+                    .ancestors()
+                    .skip(1)
+                    .find(|node| {
+                        matches!(
+                            node.kind(),
+                            SyntaxKind::BLOCK_BLOCK
+                                | SyntaxKind::BLOCK_LOOP
+                                | SyntaxKind::BLOCK_IF
+                                | SyntaxKind::MODULE_FIELD_FUNC
+                        )
+                    })
+                    .map(|region| Symbol {
+                        key: SymbolKey::new(&node),
+                        green: node.green().into(),
+                        region: SymbolKey::new(&region),
+                        kind: SymbolKind::BlockDef,
+                        idx: Idx {
+                            num: Some(0), // fake ID
+                            name: support::token(&node, SyntaxKind::IDENT)
+                                .map(|token| db.ident(token.text().into())),
+                        },
+                    })
+                {
                     symbols.push(symbol);
                 }
             }
