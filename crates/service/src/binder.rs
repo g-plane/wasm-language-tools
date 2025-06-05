@@ -53,31 +53,26 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
         kind: SymbolKind,
     ) -> Option<Symbol> {
         support::token(node, SyntaxKind::IDENT)
-            .map(|ident| Symbol {
-                key: SymbolKey::new(node),
-                green: node.green().into(),
-                region,
-                kind,
-                idx: Idx {
-                    num: None,
-                    name: Some(db.ident(ident.text().into())),
-                },
+            .map(|ident| Idx {
+                num: None,
+                name: Some(db.ident(ident.text().into())),
             })
             .or_else(|| {
                 node.children_with_tokens()
                     .filter_map(|it| it.into_token())
                     .find(|it| matches!(it.kind(), SyntaxKind::UNSIGNED_INT | SyntaxKind::INT))
                     .and_then(|token| token.text().parse().ok())
-                    .map(|num| Symbol {
-                        green: node.green().into(),
-                        key: SymbolKey::new(node),
-                        region,
-                        kind,
-                        idx: Idx {
-                            num: Some(num),
-                            name: None,
-                        },
+                    .map(|num| Idx {
+                        num: Some(num),
+                        name: None,
                     })
+            })
+            .map(|idx| Symbol {
+                key: SymbolKey::new(node),
+                green: node.green().into(),
+                region,
+                kind,
+                idx,
             })
     }
     fn create_first_optional_ref_symbol(
@@ -342,13 +337,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                             .for_each(|symbol| {
                                 let mut current = &symbol;
                                 let mut levels = 0;
-                                while let Some(
-                                    parent @ Symbol {
-                                        key,
-                                        kind: SymbolKind::BlockDef,
-                                        ..
-                                    },
-                                ) = symbols.iter().find(|sym| {
+                                while let Some(parent) = symbols.iter().find(|sym| {
                                     sym.kind == SymbolKind::BlockDef && sym.key == current.region
                                 }) {
                                     let mut idx = parent.idx;
@@ -356,7 +345,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                                     if symbol.idx.is_defined_by(&idx) {
                                         blocks.push(BlockItem {
                                             ref_key: symbol.key,
-                                            def_key: *key,
+                                            def_key: parent.key,
                                             def_idx: idx,
                                         });
                                     }
