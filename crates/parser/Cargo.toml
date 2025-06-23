@@ -16,7 +16,7 @@ wat_syntax = { path = "../syntax", version = "0.5" }
 winnow = { version = "0.7", features = ["unstable-recover"] }
 
 [dev-dependencies]
-codespan-reporting = "0.11"
+codespan-reporting = "0.12"
 insta.workspace = true
 similar-asserts.workspace = true
 
