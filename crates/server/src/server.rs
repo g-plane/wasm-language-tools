@@ -24,7 +24,7 @@ use lspt::{
     DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams,
     TextDocumentContentChangeWholeDocument, Union2,
 };
-use std::ops::Deref;
+use std::{ops::Deref, thread};
 use wat_service::LanguageService;
 
 #[derive(Default)]
@@ -37,37 +37,35 @@ pub struct Server {
 }
 
 impl Server {
-    pub async fn run(&mut self) -> anyhow::Result<()> {
-        self.initialize().await?;
+    pub fn run(&mut self) -> anyhow::Result<()> {
+        self.initialize()?;
         stdio::write(Message::Request {
             id: self.sent_requests.next_id(),
             method: RegistrationRequest::METHOD.into(),
             params: serde_json::to_value(self.service.dynamic_capabilities())?,
-        })
-        .await?;
+        })?;
 
         loop {
-            let message = match stdio::read().await {
+            let message = match stdio::read() {
                 Ok(Some(message)) => message,
                 Ok(None) => return Ok(()),
                 _ => continue,
             };
             match message {
                 Message::Request { id, method, params } => {
-                    blocking::unblock({
+                    thread::spawn({
                         let service = self.service.fork();
-                        move || stdio::write_sync(Self::handle_request(service, id, method, params))
-                    })
-                    .detach();
+                        move || stdio::write(Self::handle_request(service, id, method, params))
+                    });
                 }
                 Message::OkResponse { id, result } => {
-                    self.handle_response(id, result).await?;
+                    self.handle_response(id, result)?;
                 }
                 Message::Notification { method, mut params } => {
                     match try_cast_notification::<DidOpenTextDocumentNotification>(&method, params)
                     {
                         Ok(Ok(params)) => {
-                            self.handle_did_open_text_document(params).await?;
+                            self.handle_did_open_text_document(params)?;
                             continue;
                         }
                         Ok(Err(..)) => continue,
@@ -77,7 +75,7 @@ impl Server {
                         &method, params,
                     ) {
                         Ok(Ok(params)) => {
-                            self.handle_did_change_text_document(params).await?;
+                            self.handle_did_change_text_document(params)?;
                             continue;
                         }
                         Ok(Err(..)) => continue,
@@ -87,7 +85,7 @@ impl Server {
                         &method, params,
                     ) {
                         Ok(Ok(params)) => {
-                            self.handle_did_change_configuration(params).await?;
+                            self.handle_did_change_configuration(params)?;
                             continue;
                         }
                         Ok(Err(..)) => continue,
@@ -102,8 +100,8 @@ impl Server {
         }
     }
 
-    async fn initialize(&mut self) -> anyhow::Result<()> {
-        let (id, params) = match stdio::read().await {
+    fn initialize(&mut self) -> anyhow::Result<()> {
+        let (id, params) = match stdio::read() {
             Ok(Some(Message::Request { id, method, params })) if method == "initialize" => {
                 (id, serde_json::from_value::<InitializeParams>(params)?)
             }
@@ -135,8 +133,7 @@ impl Server {
         stdio::write(Message::OkResponse {
             id,
             result: serde_json::to_value(self.service.initialize(params))?,
-        })
-        .await?;
+        })?;
         Ok(())
     }
 
@@ -394,7 +391,7 @@ impl Server {
             })
     }
 
-    async fn handle_response(&mut self, id: u32, result: serde_json::Value) -> anyhow::Result<()> {
+    fn handle_response(&mut self, id: u32, result: serde_json::Value) -> anyhow::Result<()> {
         if let Some((uris, configs)) = self
             .sent_requests
             .remove(id)
@@ -408,21 +405,20 @@ impl Server {
                     id: self.sent_requests.next_id(),
                     method: DiagnosticRefreshRequest::METHOD.into(),
                     params: serde_json::Value::Null,
-                })
-                .await?;
+                })?;
             }
         }
         Ok(())
     }
 
-    async fn handle_did_open_text_document(
+    fn handle_did_open_text_document(
         &mut self,
         params: DidOpenTextDocumentParams,
     ) -> anyhow::Result<()> {
         let uri = params.text_document.uri;
         self.service.commit(uri.clone(), params.text_document.text);
         if !self.support_pull_diagnostics {
-            self.publish_diagnostics(uri.clone()).await?;
+            self.publish_diagnostics(uri.clone())?;
         }
         if self.support_pull_config {
             stdio::write(self.sent_requests.add(
@@ -434,13 +430,12 @@ impl Server {
                     }],
                 })?,
                 vec![uri],
-            ))
-            .await?;
+            ))?;
         }
         Ok(())
     }
 
-    async fn handle_did_change_text_document(
+    fn handle_did_change_text_document(
         &mut self,
         params: DidChangeTextDocumentParams,
     ) -> anyhow::Result<()> {
@@ -450,13 +445,13 @@ impl Server {
             self.service
                 .commit(params.text_document.uri.clone(), text.clone());
             if !self.support_pull_diagnostics {
-                self.publish_diagnostics(params.text_document.uri).await?;
+                self.publish_diagnostics(params.text_document.uri)?;
             }
         }
         Ok(())
     }
 
-    async fn handle_did_change_configuration(
+    fn handle_did_change_configuration(
         &mut self,
         params: DidChangeConfigurationParams,
     ) -> anyhow::Result<()> {
@@ -480,8 +475,7 @@ impl Server {
                     })?,
                     uris,
                 ),
-            )
-            .await?;
+            )?;
         }
         match &params.settings {
             serde_json::Value::Object(object) if !object.is_empty() => {
@@ -494,11 +488,10 @@ impl Server {
         Ok(())
     }
 
-    async fn publish_diagnostics(&mut self, uri: String) -> anyhow::Result<()> {
+    fn publish_diagnostics(&mut self, uri: String) -> anyhow::Result<()> {
         stdio::write(Message::Notification {
             method: PublishDiagnosticsNotification::METHOD.into(),
             params: serde_json::to_value(self.service.publish_diagnostics(uri))?,
         })
-        .await
     }
 }

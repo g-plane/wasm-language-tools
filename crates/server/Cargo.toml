@@ -11,9 +11,6 @@ exclude = ["/tests"]
 
 [dependencies]
 anyhow = "1.0"
-async-task = "4.7"
-blocking = "1.6"
-futures-lite = "2.6"
 lspt.workspace = true
 rustc-hash.workspace = true
 serde.workspace = true
