@@ -358,12 +358,7 @@ impl HeapType {
                             .filter(|symbol| {
                                 db.rec_type_groups(uri)
                                     .iter()
-                                    .find(|group| {
-                                        group
-                                            .type_defs
-                                            .iter()
-                                            .any(|type_def| *type_def == symbol.key)
-                                    })
+                                    .find(|group| group.type_defs.contains(&symbol.key))
                                     .is_none_or(|group| group.type_defs.len() <= 1)
                             })
                             .and_then(|symbol| {

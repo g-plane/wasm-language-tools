@@ -119,7 +119,7 @@ impl Checker<'_> {
         }
         match instr {
             Instr::Plain(plain) => {
-                plain
+                let _ = plain
                     .instrs()
                     .try_for_each(|instr| self.check_instr(&instr, unreachable));
                 if let Some(instr_name) = plain.instr_name() {
@@ -177,7 +177,7 @@ impl Checker<'_> {
                 }
             }
             Instr::Block(BlockInstr::If(block_if)) => {
-                block_if
+                let _ = block_if
                     .instrs()
                     .try_for_each(|instr| self.check_instr(&instr, unreachable));
                 let if_branch = block_if
