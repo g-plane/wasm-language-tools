@@ -1,11 +1,10 @@
 use crate::message::Message;
 use anyhow::Result;
-use std::io::{BufRead, Read, Write};
+use std::io::{BufRead, Read, StdinLock, Write};
 use tracing::{event, Level};
 
-pub fn read() -> Result<Option<Message>> {
+pub fn read(stdin: &mut StdinLock) -> Result<Option<Message>> {
     let mut length = 0;
-    let mut stdin = std::io::stdin().lock();
     let mut buf = String::with_capacity(30);
     // when stdin closed, read size will be 0, so we exit;
     // otherwise caller will be trapped in an infinite loop

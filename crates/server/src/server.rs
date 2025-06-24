@@ -24,7 +24,7 @@ use lspt::{
     DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams,
     TextDocumentContentChangeWholeDocument, Union2,
 };
-use std::{ops::Deref, thread};
+use std::{io::StdinLock, ops::Deref, thread};
 use wat_service::LanguageService;
 
 #[derive(Default)]
@@ -38,7 +38,8 @@ pub struct Server {
 
 impl Server {
     pub fn run(&mut self) -> anyhow::Result<()> {
-        self.initialize()?;
+        let mut stdin = std::io::stdin().lock();
+        self.initialize(&mut stdin)?;
         stdio::write(Message::Request {
             id: self.sent_requests.next_id(),
             method: RegistrationRequest::METHOD.into(),
@@ -46,7 +47,7 @@ impl Server {
         })?;
 
         loop {
-            let message = match stdio::read() {
+            let message = match stdio::read(&mut stdin) {
                 Ok(Some(message)) => message,
                 Ok(None) => return Ok(()),
                 _ => continue,
@@ -100,8 +101,8 @@ impl Server {
         }
     }
 
-    fn initialize(&mut self) -> anyhow::Result<()> {
-        let (id, params) = match stdio::read() {
+    fn initialize(&mut self, stdin: &mut StdinLock) -> anyhow::Result<()> {
+        let (id, params) = match stdio::read(stdin) {
             Ok(Some(Message::Request { id, method, params })) if method == "initialize" => {
                 (id, serde_json::from_value::<InitializeParams>(params)?)
             }
