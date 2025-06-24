@@ -1,10 +1,11 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
 use lspt::{
     ClientCapabilities, CompletionContext, CompletionParams, CompletionTriggerKind,
     DocumentSymbolParams, InitializeParams, InlayHintParams, Position, Range,
     SemanticTokensClientCapabilities, SemanticTokensParams, TextDocumentClientCapabilities,
     TextDocumentIdentifier,
 };
+use std::hint::black_box;
 use wat_service::LanguageService;
 
 pub fn changed_text_bench(c: &mut Criterion) {
