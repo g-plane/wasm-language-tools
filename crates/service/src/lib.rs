@@ -21,7 +21,7 @@ use crate::{
     mutability::Mutabilities,
     syntax_tree::{SyntaxTree, SyntaxTreeCtx},
     types_analyzer::TypesAnalyzer,
-    uri::{Uris, UrisCtx},
+    uri::{InternUri, Uris, UrisCtx},
 };
 use indexmap::{IndexMap, IndexSet};
 use lspt::{
@@ -33,6 +33,7 @@ use lspt::{
 };
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use salsa::{Database, ParallelDatabase, Snapshot};
+use std::sync::Arc;
 
 #[salsa::database(Uris, Idents, SyntaxTree, SymbolTables, TypesAnalyzer, Mutabilities)]
 #[derive(Default)]
@@ -50,9 +51,9 @@ use salsa::{Database, ParallelDatabase, Snapshot};
 /// ​
 pub struct LanguageService {
     storage: salsa::Storage<Self>,
-    semantic_token_kinds: IndexSet<SemanticTokenKind, FxBuildHasher>,
-    configs: FxHashMap<crate::uri::InternUri, ServiceConfig>,
-    global_config: ServiceConfig,
+    semantic_token_kinds: Arc<IndexSet<SemanticTokenKind, FxBuildHasher>>,
+    configs: FxHashMap<InternUri, ServiceConfig>,
+    global_config: Arc<ServiceConfig>,
 }
 impl Database for LanguageService {}
 impl ParallelDatabase for LanguageService {
@@ -95,14 +96,14 @@ impl LanguageService {
                     Some((internal_kind, token_type.clone()))
                 })
                 .collect();
-            self.semantic_token_kinds = kinds_map.keys().cloned().collect();
+            self.semantic_token_kinds = Arc::new(kinds_map.keys().cloned().collect());
         }
 
         if let Some(config) = params
             .initialization_options
             .and_then(|config| serde_json::from_value(config).ok())
         {
-            self.global_config = config;
+            self.global_config = Arc::new(config);
         }
 
         InitializeResult {
@@ -192,7 +193,7 @@ impl LanguageService {
     }
 
     #[inline]
-    // This should be used internally.
+    #[doc(hidden)]
     fn get_config(&self, uri: crate::uri::InternUri) -> &ServiceConfig {
         self.configs.get(&uri).unwrap_or(&self.global_config)
     }
@@ -214,7 +215,7 @@ impl LanguageService {
     #[inline]
     /// Update global configuration.
     pub fn set_global_config(&mut self, config: ServiceConfig) {
-        self.global_config = config;
+        self.global_config = Arc::new(config);
     }
 
     #[inline]
