@@ -503,7 +503,7 @@ fn format_op_code(code: u32) -> String {
     } else if code >> 8 > 0 {
         format!("0x{:02X} 0x{:02X}", code >> 8, code & 0xFF)
     } else {
-        format!("0x{:02X}", code)
+        format!("0x{code:02X}")
     }
 }
 
