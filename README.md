@@ -169,15 +169,7 @@ cargo install wat_server
   require("lspconfig").wasm_language_tools.setup({})
   ```
 - Zed: Install the [WebAssembly Text Format](https://zed.dev/extensions?query=WebAssembly+Text+Format) extension.
-- Helix: Add the following lines to `<config_dir>/helix/languages.toml`:
-  ```toml
-  [language-server.wasm-language-tools]
-  command = "wat_server"
-
-  [[language]]
-  name = "wat"
-  language-servers = ["wasm-language-tools"]
-  ```
+- Helix: Built-in support.
 
 ## 📚 Documentation
 

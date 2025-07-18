@@ -26,7 +26,7 @@ For the minimal setup, add the following lines to your `init.lua`:
 require("lspconfig").wasm_language_tools.setup({})
 ```
 
-Additionally, you configure the language server like this:
+Additionally, you can configure the language server like this:
 
 ```lua
 require("lspconfig").wasm_language_tools.setup({
@@ -59,21 +59,12 @@ For the minimal setup, add the following lines to your `coc-settings.json`:
 
 ## Helix
 
+Helix has built-in support for WebAssembly Language Tools.
+
 > [!IMPORTANT]
 > You need to [install the server binary](./binary.md) manually and make sure it's in your `$PATH` (or specify the binary path manually).
 
-For the minimal setup, add the following lines to `<config_dir>/helix/languages.toml`:
-
-```toml
-[language-server.wasm-language-tools]
-command = "wat_server" # or the absolute path to the binary
-
-[[language]]
-name = "wat"
-language-servers = ["wasm-language-tools"]
-```
-
-Additionally, you configure the language server like this:
+Additionally, you can configure the language server like this:
 
 ```toml
 [language-server.wasm-language-tools]
