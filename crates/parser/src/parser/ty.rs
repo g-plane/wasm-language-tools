@@ -369,7 +369,10 @@ fn limits(input: &mut Input) -> GreenResult {
     (
         unsigned_int,
         opt(trivias_prefixed(unsigned_int)),
-        opt(trivias_prefixed(share)),
+        opt(trivias_prefixed(alt((
+            keyword("shared"),
+            keyword("unshared"),
+        )))),
     )
         .parse_next(input)
         .map(|(min, max, share)| {
@@ -383,10 +386,4 @@ fn limits(input: &mut Input) -> GreenResult {
             }
             node(LIMITS, children)
         })
-}
-
-fn share(input: &mut Input) -> GreenResult {
-    word.verify(|word: &str| word == "shared" || word == "unshared")
-        .parse_next(input)
-        .map(|text| tok(SHARE, text))
 }
