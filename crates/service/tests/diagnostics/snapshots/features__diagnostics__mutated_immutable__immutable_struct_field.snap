@@ -8,40 +8,6 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 12,
-          "character": 25
-        },
-        "end": {
-          "line": 12,
-          "character": 38
-        }
-      },
-      "severity": 1,
-      "code": "mutated-immutable",
-      "source": "wat",
-      "message": "mutating the immutable field `$packed_field` is not allowed",
-      "relatedInformation": [
-        {
-          "location": {
-            "uri": "untitled:test",
-            "range": {
-              "start": {
-                "line": 8,
-                "character": 26
-              },
-              "end": {
-                "line": 8,
-                "character": 50
-              }
-            }
-          },
-          "message": "immutable field defined here"
-        }
-      ]
-    },
-    {
-      "range": {
-        "start": {
           "line": 6,
           "character": 17
         },
@@ -66,6 +32,40 @@ expression: response
               "end": {
                 "line": 2,
                 "character": 26
+              }
+            }
+          },
+          "message": "immutable field defined here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 12,
+          "character": 25
+        },
+        "end": {
+          "line": 12,
+          "character": 38
+        }
+      },
+      "severity": 1,
+      "code": "mutated-immutable",
+      "source": "wat",
+      "message": "mutating the immutable field `$packed_field` is not allowed",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 8,
+                "character": 26
+              },
+              "end": {
+                "line": 8,
+                "character": 50
               }
             }
           },
