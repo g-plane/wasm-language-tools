@@ -366,23 +366,13 @@ pub(super) fn global_type(input: &mut Input) -> GreenResult {
 }
 
 fn limits(input: &mut Input) -> GreenResult {
-    (
-        unsigned_int,
-        opt(trivias_prefixed(unsigned_int)),
-        opt(trivias_prefixed(alt((
-            keyword("shared"),
-            keyword("unshared"),
-        )))),
-    )
+    (unsigned_int, opt(trivias_prefixed(unsigned_int)))
         .parse_next(input)
-        .map(|(min, max, share)| {
+        .map(|(min, max)| {
             let mut children = Vec::with_capacity(3);
             children.push(min);
             if let Some(mut max) = max {
                 children.append(&mut max);
-            }
-            if let Some(mut share) = share {
-                children.append(&mut share);
             }
             node(LIMITS, children)
         })
