@@ -11,7 +11,7 @@ use std::{env, fs};
 fn main() {
     let path = env::args().nth(1).unwrap();
     let input = fs::read_to_string(&path).unwrap();
-    let (tree, errors) = wat_parser::parse(&input);
+    let (tree, errors) = wat_parser::parse2(&input);
     println!("{tree:#?}");
 
     if !errors.is_empty() {
