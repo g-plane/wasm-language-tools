@@ -133,6 +133,13 @@ impl<'s> Parser<'s> {
         loop {
             let checkpoint = self.lexer.checkpoint();
             let trivias = self.parse_trivias_deferred();
+            if let Some(token) = self.lexer.next(SyntaxKind::R_PAREN) {
+                trivias.commit(children);
+                children.push(token.into());
+                return;
+            }
+
+            self.lexer.reset(checkpoint);
             if let Some(token) = self.lexer.peek(SyntaxKind::L_PAREN) {
                 trivias.rollback(&mut self.lexer);
                 // Unlike using `report_missing`,
@@ -145,13 +152,6 @@ impl<'s> Parser<'s> {
                 });
                 return;
             }
-            if let Some(node) = self.lexer.next(SyntaxKind::R_PAREN) {
-                trivias.commit(children);
-                children.push(node.into());
-                return;
-            }
-
-            self.lexer.reset(checkpoint);
             if let Some(mut tokens) = self.parse_errors() {
                 trivias.commit(children);
                 children.append(&mut tokens);
