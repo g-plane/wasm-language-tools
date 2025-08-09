@@ -78,6 +78,7 @@ impl<'s> Lexer<'s> {
     /// Preview next token without advancing the lexer.
     pub fn peek(&mut self, kind: SyntaxKind) -> Option<Token<'s>> {
         let checkpoint = self.input;
+        while self.trivia().is_some() {}
         let token = self.next(kind);
         self.input = checkpoint;
         token

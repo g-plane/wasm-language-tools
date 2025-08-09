@@ -4,6 +4,7 @@ use rowan::{GreenNode, GreenToken, NodeOrToken};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 mod helpers;
+mod instr;
 mod lexer;
 mod module;
 mod ty;
