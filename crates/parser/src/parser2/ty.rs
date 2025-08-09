@@ -64,24 +64,14 @@ impl Parser<'_> {
     }
 
     fn parse_func_type(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        while let Some(mut node_or_tokens) = self.try_parse(|parser| {
-            let mut children = Vec::with_capacity(2);
-            parser.parse_trivias(&mut children);
-            children.push(parser.parse_param()?.into());
-            Some(children)
-        }) {
-            children.append(&mut node_or_tokens);
+        while let Some((mut trivias, node)) = self.try_parse_with_trivias(Self::parse_param) {
+            children.append(&mut trivias);
+            children.push(node.into());
         }
-
-        while let Some(mut node_or_tokens) = self.try_parse(|parser| {
-            let mut children = Vec::with_capacity(2);
-            parser.parse_trivias(&mut children);
-            children.push(parser.parse_result()?.into());
-            Some(children)
-        }) {
-            children.append(&mut node_or_tokens);
+        while let Some((mut trivias, node)) = self.try_parse_with_trivias(Self::parse_result) {
+            children.append(&mut trivias);
+            children.push(node.into());
         }
-
         self.expect_right_paren(&mut children);
         Some(node(FUNC_TYPE, children))
     }
@@ -154,13 +144,11 @@ impl Parser<'_> {
         self.parse_trivias(&mut children);
         children.push(self.parse_keyword("ref")?);
 
-        if let Some(mut tokens) = self.try_parse(|parser| {
-            let mut children = Vec::with_capacity(2);
-            parser.parse_trivias(&mut children);
-            children.push(parser.parse_keyword("null")?);
-            Some(children)
-        }) {
-            children.append(&mut tokens);
+        if let Some((mut trivias, keyword)) =
+            self.try_parse_with_trivias(|parser| parser.parse_keyword("null"))
+        {
+            children.append(&mut trivias);
+            children.push(keyword);
         }
 
         if !self.recover(Self::parse_heap_type::<false>, &mut children) {
@@ -215,13 +203,11 @@ impl Parser<'_> {
             }
             "sub" => {
                 children.push(keyword.into());
-                if let Some(mut tokens) = self.try_parse(|parser| {
-                    let mut children = Vec::with_capacity(2);
-                    parser.parse_trivias(&mut children);
-                    children.push(parser.parse_keyword("final")?);
-                    Some(children)
-                }) {
-                    children.append(&mut tokens);
+                if let Some((mut trivias, keyword)) =
+                    self.try_parse_with_trivias(|parser| parser.parse_keyword("final"))
+                {
+                    children.append(&mut trivias);
+                    children.push(keyword);
                 }
                 while self.recover(Self::parse_index, &mut children) {}
                 if !self.recover(Self::parse_composite_type, &mut children) {
