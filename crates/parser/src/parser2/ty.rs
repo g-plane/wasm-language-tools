@@ -227,7 +227,7 @@ impl Parser<'_> {
         }
     }
 
-    fn parse_value_type(&mut self) -> Option<GreenElement> {
+    pub(super) fn parse_value_type(&mut self) -> Option<GreenElement> {
         if self.lexer.peek(L_PAREN).is_some() {
             self.parse_ref_type_detailed().map(GreenElement::from)
         } else {
