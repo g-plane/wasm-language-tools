@@ -147,30 +147,21 @@ impl<'s> Parser<'s> {
 
     pub(super) fn expect_right_paren(&mut self, children: &mut Vec<GreenElement>) {
         loop {
-            let checkpoint = self.lexer.checkpoint();
             let trivias = self.parse_trivias_deferred();
             if let Some(token) = self.lexer.next(SyntaxKind::R_PAREN) {
                 trivias.commit(children);
                 children.push(token.into());
                 return;
             }
-
-            self.lexer.reset(checkpoint);
             if let Some(token) = self.lexer.peek(SyntaxKind::L_PAREN) {
                 trivias.rollback(&mut self.lexer);
-                // Unlike using `report_missing`,
-                // we expect right paren immediately after rolling back, even there're trivias.
-                let start = token.text.as_ptr().addr() - self.source.as_ptr().addr();
-                self.errors.push(SyntaxError {
-                    start,
-                    end: start + 1,
-                    message: Message::Char(')'),
-                });
+                self.report_error_token(&token, Message::Char(')'));
                 return;
             }
-            if let Some(mut tokens) = self.parse_errors() {
+            if let Some(token) = self.lexer.eat(SyntaxKind::ERROR) {
                 trivias.commit(children);
-                children.append(&mut tokens);
+                self.report_error_token(&token, Message::Char(')'));
+                children.push(token.into());
             } else {
                 trivias.rollback(&mut self.lexer);
                 let start = self.source.len();
