@@ -4,11 +4,55 @@ use rowan::{GreenNode, Language, NodeOrToken};
 use wat_syntax::SyntaxKind::*;
 
 impl Parser<'_> {
+    fn parse_export(&mut self) -> Option<GreenNode> {
+        let mut children = Vec::with_capacity(5);
+        children.push(self.lexer.next(L_PAREN)?.into());
+        self.parse_trivias(&mut children);
+        children.push(self.parse_keyword("export")?);
+        if !self.recover(Self::parse_name, &mut children) {
+            self.report_missing(Message::Name("name"));
+        }
+        self.expect_right_paren(&mut children);
+        Some(node(EXPORT, children))
+    }
+
+    fn parse_import(&mut self) -> Option<GreenNode> {
+        let mut children = Vec::with_capacity(5);
+        children.push(self.lexer.next(L_PAREN)?.into());
+        self.parse_trivias(&mut children);
+        children.push(self.parse_keyword("import")?);
+        if !self.recover(Self::parse_module_name, &mut children) {
+            self.report_missing(Message::Name("module name"));
+        }
+        if !self.recover(Self::parse_name, &mut children) {
+            self.report_missing(Message::Name("name"));
+        }
+        self.expect_right_paren(&mut children);
+        Some(node(IMPORT, children))
+    }
+
     pub(super) fn parse_index(&mut self) -> Option<GreenNode> {
         self.lexer
             .eat(IDENT)
             .or_else(|| self.lexer.eat(UNSIGNED_INT))
             .map(|token| node(INDEX, [token.into()]))
+    }
+
+    fn parse_local(&mut self) -> Option<GreenNode> {
+        let mut children = Vec::with_capacity(6);
+        children.push(self.lexer.next(L_PAREN)?.into());
+        self.parse_trivias(&mut children);
+        children.push(self.parse_keyword("local")?);
+
+        if self.eat(IDENT, &mut children) {
+            if !self.recover(Self::parse_value_type, &mut children) {
+                self.report_missing(Message::Name("value type"));
+            }
+        } else {
+            while self.recover(Self::parse_value_type, &mut children) {}
+        }
+        self.expect_right_paren(&mut children);
+        Some(node(LOCAL, children))
     }
 
     pub(super) fn parse_module(&mut self) -> Option<GreenNode> {
@@ -43,14 +87,37 @@ impl Parser<'_> {
 
     fn parse_module_field_func(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
         self.eat(IDENT, &mut children);
-        self.parse_trivias(&mut children);
-        if let Some(type_use) = self.parse_type_use() {
+
+        if let Some((mut trivias, import)) = self.try_parse_with_trivias(Self::parse_import) {
+            children.append(&mut trivias);
+            children.push(import.into());
+        } else if let Some((mut trivias, export)) = self.try_parse_with_trivias(Self::parse_export)
+        {
+            children.append(&mut trivias);
+            children.push(export.into());
+        }
+
+        if let Some((mut trivias, type_use)) = self.try_parse_with_trivias(Self::parse_type_use) {
+            children.append(&mut trivias);
             children.push(type_use.into());
+        }
+        while let Some((mut trivias, node)) = self.try_parse_with_trivias(Self::parse_local) {
+            children.append(&mut trivias);
+            children.push(node.into());
         }
 
         while self.recover(Self::parse_instr, &mut children) {}
         self.expect_right_paren(&mut children);
         Some(node(MODULE_FIELD_FUNC, children))
+    }
+
+    fn parse_module_name(&mut self) -> Option<GreenNode> {
+        self.expect(STRING)
+            .map(|token| node(MODULE_NAME, [token.into()]))
+    }
+
+    fn parse_name(&mut self) -> Option<GreenNode> {
+        self.expect(STRING).map(|token| node(NAME, [token.into()]))
     }
 
     fn parse_rec_type(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
