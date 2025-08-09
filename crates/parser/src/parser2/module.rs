@@ -93,22 +93,13 @@ impl Parser<'_> {
             children.append(&mut node_or_tokens);
         }
 
-        while let Some(mut node_or_tokens) = self.try_parse(|parser| {
-            let mut children = Vec::with_capacity(2);
-            parser.parse_trivias(&mut children);
-            children.push(parser.parse_param()?.into());
-            Some(children)
-        }) {
-            children.append(&mut node_or_tokens);
+        while let Some((mut trivias, node)) = self.try_parse_with_trivias(Self::parse_param) {
+            children.append(&mut trivias);
+            children.push(node.into());
         }
-
-        while let Some(mut node_or_tokens) = self.try_parse(|parser| {
-            let mut children = Vec::with_capacity(2);
-            parser.parse_trivias(&mut children);
-            children.push(parser.parse_result()?.into());
-            Some(children)
-        }) {
-            children.append(&mut node_or_tokens);
+        while let Some((mut trivias, node)) = self.try_parse_with_trivias(Self::parse_result) {
+            children.append(&mut trivias);
+            children.push(node.into());
         }
 
         if children.iter().any(|node_or_token| match node_or_token {

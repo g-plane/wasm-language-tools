@@ -41,6 +41,22 @@ impl<'s> Parser<'s> {
         }
         result
     }
+    pub(super) fn try_parse_with_trivias<T>(
+        &mut self,
+        parser: impl FnOnce(&mut Self) -> Option<T>,
+    ) -> Option<(Vec<GreenElement>, T)> {
+        let trivias = self.parse_trivias_deferred();
+        match parser(self) {
+            Some(result) => Some((
+                trivias.tokens.into_iter().map(GreenElement::from).collect(),
+                result,
+            )),
+            None => {
+                trivias.rollback(&mut self.lexer);
+                None
+            }
+        }
+    }
 
     pub(super) fn expect(&mut self, kind: SyntaxKind) -> Option<Token<'s>> {
         match self.lexer.expect(kind) {

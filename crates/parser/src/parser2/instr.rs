@@ -6,13 +6,7 @@ use wat_syntax::SyntaxKind::{self, *};
 impl Parser<'_> {
     fn parse_block_if_folded(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
         self.eat(IDENT, &mut children);
-        if let Some((mut trivias, node)) = self.try_parse(|parser| {
-            let mut trivias = Vec::new();
-            parser.parse_trivias(&mut trivias);
-            parser
-                .parse_block_type()
-                .map(|block_type| (trivias, block_type))
-        }) {
+        if let Some((mut trivias, node)) = self.try_parse_with_trivias(Self::parse_block_type) {
             children.append(&mut trivias);
             children.push(node.into());
         }
@@ -23,14 +17,12 @@ impl Parser<'_> {
             self.report_missing(Message::Name("then block"));
         }
 
-        if let Some((mut trivias, mut else_children)) = self.try_parse(|parser| {
-            let mut trivias = Vec::with_capacity(2);
-            parser.parse_trivias(&mut trivias);
-            let mut else_children = Vec::with_capacity(2);
-            else_children.push(parser.lexer.next(L_PAREN)?.into());
-            parser.parse_trivias(&mut else_children);
-            else_children.push(parser.parse_keyword("else")?);
-            Some((trivias, else_children))
+        if let Some((mut trivias, mut else_children)) = self.try_parse_with_trivias(|parser| {
+            let mut children = Vec::with_capacity(2);
+            children.push(parser.lexer.next(L_PAREN)?.into());
+            parser.parse_trivias(&mut children);
+            children.push(parser.parse_keyword("else")?);
+            Some(children)
         }) {
             children.append(&mut trivias);
             self.eat(IDENT, &mut else_children);
@@ -45,13 +37,7 @@ impl Parser<'_> {
 
     fn parse_block_if_sequence(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
         self.eat(IDENT, &mut children);
-        if let Some((mut trivias, node)) = self.try_parse(|parser| {
-            let mut trivias = Vec::new();
-            parser.parse_trivias(&mut trivias);
-            parser
-                .parse_block_type()
-                .map(|block_type| (trivias, block_type))
-        }) {
+        if let Some((mut trivias, node)) = self.try_parse_with_trivias(Self::parse_block_type) {
             children.append(&mut trivias);
             children.push(node.into());
         }
@@ -66,14 +52,11 @@ impl Parser<'_> {
         {}
         children.push(node(BLOCK_IF_THEN, then_children).into());
 
-        if let Some((mut trivias, mut else_children)) = self.try_parse(|parser| {
-            let mut trivias = Vec::with_capacity(2);
-            parser.parse_trivias(&mut trivias);
-            let mut else_children = Vec::with_capacity(2);
-            else_children.push(parser.parse_keyword("else")?);
-            Some((trivias, else_children))
-        }) {
+        if let Some((mut trivias, else_keyword)) =
+            self.try_parse_with_trivias(|parser| parser.parse_keyword("else"))
+        {
             children.append(&mut trivias);
+            let mut else_children = vec![else_keyword];
             self.eat(IDENT, &mut else_children);
             while self
                 .lexer
@@ -98,13 +81,7 @@ impl Parser<'_> {
         mut children: Vec<GreenElement>,
     ) -> Option<GreenNode> {
         self.eat(IDENT, &mut children);
-        if let Some((mut trivias, node)) = self.try_parse(|parser| {
-            let mut trivias = Vec::new();
-            parser.parse_trivias(&mut trivias);
-            parser
-                .parse_block_type()
-                .map(|block_type| (trivias, block_type))
-        }) {
+        if let Some((mut trivias, node)) = self.try_parse_with_trivias(Self::parse_block_type) {
             children.append(&mut trivias);
             children.push(node.into());
         }
@@ -121,13 +98,7 @@ impl Parser<'_> {
         mut children: Vec<GreenElement>,
     ) -> Option<GreenNode> {
         self.eat(IDENT, &mut children);
-        if let Some((mut trivias, node)) = self.try_parse(|parser| {
-            let mut trivias = Vec::new();
-            parser.parse_trivias(&mut trivias);
-            parser
-                .parse_block_type()
-                .map(|block_type| (trivias, block_type))
-        }) {
+        if let Some((mut trivias, node)) = self.try_parse_with_trivias(Self::parse_block_type) {
             children.append(&mut trivias);
             children.push(node.into());
         }
@@ -233,20 +204,14 @@ impl Parser<'_> {
     }
 
     fn parse_plain_instr_folded(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        while let Some((mut trivias, node)) = self.try_parse(|parser| {
-            let mut trivias = Vec::new();
-            parser.parse_trivias(&mut trivias);
-            parser
-                .parse_immediate()
-                .or_else(|| {
-                    parser.lexer.eat(KEYWORD).map(|mut token| {
-                        token.kind = ERROR;
-                        parser
-                            .report_error_token(&token, Message::Description("invalid immediate"));
-                        node(IMMEDIATE, [token.into()])
-                    })
+        while let Some((mut trivias, node)) = self.try_parse_with_trivias(|parser| {
+            parser.parse_immediate().or_else(|| {
+                parser.lexer.eat(KEYWORD).map(|mut token| {
+                    token.kind = ERROR;
+                    parser.report_error_token(&token, Message::Description("invalid immediate"));
+                    node(IMMEDIATE, [token.into()])
                 })
-                .map(|immediate| (trivias, immediate))
+            })
         }) {
             children.append(&mut trivias);
             children.push(node.into());
@@ -258,19 +223,16 @@ impl Parser<'_> {
     }
 
     fn parse_plain_instr_sequence(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        while let Some((mut trivias, node)) = self.try_parse(|parser| {
-            let mut trivias = Vec::new();
-            parser.parse_trivias(&mut trivias);
+        while let Some((mut trivias, node)) = self.try_parse_with_trivias(|parser| {
             if parser
                 .lexer
                 .peek(KEYWORD)
                 .is_some_and(|token| matches!(token.text, "end" | "else"))
             {
-                return None;
+                None
+            } else {
+                parser.parse_immediate()
             }
-            parser
-                .parse_immediate()
-                .map(|immediate| (trivias, immediate))
         }) {
             children.append(&mut trivias);
             children.push(node.into());
