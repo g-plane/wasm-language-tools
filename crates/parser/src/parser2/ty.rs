@@ -86,21 +86,26 @@ impl Parser<'_> {
         Some(node(FUNC_TYPE, children))
     }
 
-    fn parse_heap_type(&mut self) -> Option<GreenElement> {
+    pub(super) fn parse_heap_type<const IMMEDIATE: bool>(&mut self) -> Option<GreenNode> {
         self.lexer
             .eat(TYPE_KEYWORD)
-            .map(|mut token| match token.text {
+            .and_then(|mut token| match token.text {
                 "any" | "eq" | "i31" | "struct" | "array" | "none" | "func" | "nofunc"
-                | "extern" | "noextern" => node(HEAP_TYPE, [token.into()]).into(),
+                | "extern" | "noextern" => Some(node(HEAP_TYPE, [token.into()])),
                 _ => {
-                    token.kind = ERROR;
-                    self.report_error_token(&token, Message::Description("invalid heap type"));
-                    token.into()
+                    if IMMEDIATE {
+                        // for better error reporting
+                        None
+                    } else {
+                        token.kind = ERROR;
+                        self.report_error_token(&token, Message::Description("invalid heap type"));
+                        Some(node(HEAP_TYPE, [token.into()]))
+                    }
                 }
             })
             .or_else(|| {
                 self.parse_index()
-                    .map(|index| node(HEAP_TYPE, [index.into()]).into())
+                    .map(|index| node(HEAP_TYPE, [index.into()]))
             })
     }
 
@@ -130,6 +135,19 @@ impl Parser<'_> {
         Some(node(PARAM, children))
     }
 
+    pub(super) fn parse_ref_type(&mut self) -> Option<GreenNode> {
+        self.lexer
+            .eat(TYPE_KEYWORD)
+            .and_then(|token| match token.text {
+                "anyref" | "eqref" | "i31ref" | "structref" | "arrayref" | "nullref"
+                | "funcref" | "nullfuncref" | "externref" | "nullexternref" => {
+                    Some(node(REF_TYPE, [token.into()]))
+                }
+                _ => None,
+            })
+            .or_else(|| self.parse_ref_type_detailed())
+    }
+
     fn parse_ref_type_detailed(&mut self) -> Option<GreenNode> {
         let mut children = Vec::with_capacity(7);
         children.push(self.lexer.next(L_PAREN)?.into());
@@ -145,7 +163,7 @@ impl Parser<'_> {
             children.append(&mut tokens);
         }
 
-        if !self.recover(Self::parse_heap_type, &mut children) {
+        if !self.recover(Self::parse_heap_type::<false>, &mut children) {
             self.report_missing(Message::Name("heap type"));
         }
         self.expect_right_paren(&mut children);

@@ -7,7 +7,7 @@ impl Parser<'_> {
     pub(super) fn parse_index(&mut self) -> Option<GreenNode> {
         self.lexer
             .eat(IDENT)
-            .or_else(|| self.expect(UNSIGNED_INT))
+            .or_else(|| self.lexer.eat(UNSIGNED_INT))
             .map(|token| node(INDEX, [token.into()]))
     }
 
@@ -47,6 +47,8 @@ impl Parser<'_> {
         if let Some(type_use) = self.parse_type_use() {
             children.push(type_use.into());
         }
+
+        while self.recover(Self::parse_instr, &mut children) {}
         self.expect_right_paren(&mut children);
         Some(node(MODULE_FIELD_FUNC, children))
     }
@@ -74,7 +76,7 @@ impl Parser<'_> {
         self.parse_type_def(children)
     }
 
-    fn parse_type_use(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_type_use(&mut self) -> Option<GreenNode> {
         let mut children = Vec::with_capacity(1);
         if let Some(mut node_or_tokens) = self.try_parse(|parser| {
             let mut children = Vec::with_capacity(2);
@@ -116,7 +118,6 @@ impl Parser<'_> {
                 WHITESPACE | LINE_COMMENT | BLOCK_COMMENT | ERROR
             ),
         }) {
-            self.expect_right_paren(&mut children);
             Some(node(TYPE_USE, children))
         } else {
             None
