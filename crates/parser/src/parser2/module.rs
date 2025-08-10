@@ -194,6 +194,11 @@ impl Parser<'_> {
                 while self.recover(Self::parse_module_field, &mut children) {}
                 Some(node(MODULE, children))
             }
+            "global" => {
+                let mut children = vec![self.parse_module_field_global(children)?.into()];
+                while self.recover(Self::parse_module_field, &mut children) {}
+                Some(node(MODULE, children))
+            }
             "export" => {
                 let mut children = vec![self.parse_module_field_export(children)?.into()];
                 while self.recover(Self::parse_module_field, &mut children) {}
@@ -219,11 +224,6 @@ impl Parser<'_> {
                 while self.recover(Self::parse_module_field, &mut children) {}
                 Some(node(MODULE, children))
             }
-            "global" => {
-                let mut children = vec![self.parse_module_field_global(children)?.into()];
-                while self.recover(Self::parse_module_field, &mut children) {}
-                Some(node(MODULE, children))
-            }
             "rec" => {
                 let mut children = vec![self.parse_rec_type(children)?.into()];
                 while self.recover(Self::parse_module_field, &mut children) {}
@@ -246,12 +246,12 @@ impl Parser<'_> {
         match keyword_text {
             "func" => self.parse_module_field_func(children),
             "type" => self.parse_type_def(children),
+            "global" => self.parse_module_field_global(children),
             "export" => self.parse_module_field_export(children),
             "import" => self.parse_module_field_import(children),
             "start" => self.parse_module_field_start(children),
             "data" => self.parse_module_field_data(children),
             "table" => self.parse_module_field_table(children),
-            "global" => self.parse_module_field_global(children),
             "rec" => self.parse_rec_type(children),
             _ => None,
         }
