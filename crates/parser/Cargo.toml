@@ -12,6 +12,7 @@ exclude = ["/tests"]
 
 [dependencies]
 rowan.workspace = true
+smallvec.workspace = true
 wat_syntax = { path = "../syntax", version = "0.5" }
 winnow = { version = "0.7", features = ["unstable-recover"] }
 

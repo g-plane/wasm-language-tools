@@ -3,6 +3,7 @@ use super::{
     GreenElement, Parser,
 };
 use crate::error::{Message, SyntaxError};
+use smallvec::SmallVec;
 use wat_syntax::SyntaxKind;
 
 impl<'s> Parser<'s> {
@@ -44,13 +45,10 @@ impl<'s> Parser<'s> {
     pub(super) fn try_parse_with_trivias<T>(
         &mut self,
         parser: impl FnOnce(&mut Self) -> Option<T>,
-    ) -> Option<(Vec<GreenElement>, T)> {
+    ) -> Option<(impl Iterator<Item = GreenElement> + 's, T)> {
         let trivias = self.parse_trivias_deferred();
         match parser(self) {
-            Some(result) => Some((
-                trivias.tokens.into_iter().map(GreenElement::from).collect(),
-                result,
-            )),
+            Some(result) => Some((trivias.tokens.into_iter().map(GreenElement::from), result)),
             None => {
                 trivias.rollback(&mut self.lexer);
                 None
@@ -138,7 +136,7 @@ impl<'s> Parser<'s> {
 
     fn parse_trivias_deferred(&mut self) -> Trivias<'s> {
         let checkpoint = self.lexer.checkpoint();
-        let mut tokens = Vec::new();
+        let mut tokens = SmallVec::new();
         while let Some(token) = self.lexer.trivia() {
             tokens.push(token);
         }
@@ -209,7 +207,7 @@ impl<'s> Parser<'s> {
 
 #[derive(Debug)]
 pub(super) struct Trivias<'s> {
-    tokens: Vec<Token<'s>>,
+    tokens: SmallVec<[Token<'s>; 3]>,
     checkpoint: Checkpoint<'s>,
 }
 impl<'s> Trivias<'s> {

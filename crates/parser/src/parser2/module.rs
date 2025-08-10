@@ -118,21 +118,20 @@ impl Parser<'_> {
     fn parse_module_field_func(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
         self.eat(IDENT, &mut children);
 
-        if let Some((mut trivias, import)) = self.try_parse_with_trivias(Self::parse_import) {
-            children.append(&mut trivias);
+        if let Some((trivias, import)) = self.try_parse_with_trivias(Self::parse_import) {
+            children.extend(trivias);
             children.push(import.into());
-        } else if let Some((mut trivias, export)) = self.try_parse_with_trivias(Self::parse_export)
-        {
-            children.append(&mut trivias);
+        } else if let Some((trivias, export)) = self.try_parse_with_trivias(Self::parse_export) {
+            children.extend(trivias);
             children.push(export.into());
         }
 
-        if let Some((mut trivias, type_use)) = self.try_parse_with_trivias(Self::parse_type_use) {
-            children.append(&mut trivias);
+        if let Some((trivias, type_use)) = self.try_parse_with_trivias(Self::parse_type_use) {
+            children.extend(trivias);
             children.push(type_use.into());
         }
-        while let Some((mut trivias, node)) = self.try_parse_with_trivias(Self::parse_local) {
-            children.append(&mut trivias);
+        while let Some((trivias, node)) = self.try_parse_with_trivias(Self::parse_local) {
+            children.extend(trivias);
             children.push(node.into());
         }
 
@@ -144,12 +143,11 @@ impl Parser<'_> {
     fn parse_module_field_global(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
         self.eat(IDENT, &mut children);
 
-        if let Some((mut trivias, import)) = self.try_parse_with_trivias(Self::parse_import) {
-            children.append(&mut trivias);
+        if let Some((trivias, import)) = self.try_parse_with_trivias(Self::parse_import) {
+            children.extend(trivias);
             children.push(import.into());
-        } else if let Some((mut trivias, export)) = self.try_parse_with_trivias(Self::parse_export)
-        {
-            children.append(&mut trivias);
+        } else if let Some((trivias, export)) = self.try_parse_with_trivias(Self::parse_export) {
+            children.extend(trivias);
             children.push(export.into());
         }
 
@@ -211,12 +209,12 @@ impl Parser<'_> {
             children.append(&mut node_or_tokens);
         }
 
-        while let Some((mut trivias, node)) = self.try_parse_with_trivias(Self::parse_param) {
-            children.append(&mut trivias);
+        while let Some((trivias, node)) = self.try_parse_with_trivias(Self::parse_param) {
+            children.extend(trivias);
             children.push(node.into());
         }
-        while let Some((mut trivias, node)) = self.try_parse_with_trivias(Self::parse_result) {
-            children.append(&mut trivias);
+        while let Some((trivias, node)) = self.try_parse_with_trivias(Self::parse_result) {
+            children.extend(trivias);
             children.push(node.into());
         }
 

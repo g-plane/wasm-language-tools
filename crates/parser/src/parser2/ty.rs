@@ -64,12 +64,12 @@ impl Parser<'_> {
     }
 
     fn parse_func_type(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        while let Some((mut trivias, node)) = self.try_parse_with_trivias(Self::parse_param) {
-            children.append(&mut trivias);
+        while let Some((trivias, node)) = self.try_parse_with_trivias(Self::parse_param) {
+            children.extend(trivias);
             children.push(node.into());
         }
-        while let Some((mut trivias, node)) = self.try_parse_with_trivias(Self::parse_result) {
-            children.append(&mut trivias);
+        while let Some((trivias, node)) = self.try_parse_with_trivias(Self::parse_result) {
+            children.extend(trivias);
             children.push(node.into());
         }
         self.expect_right_paren(&mut children);
@@ -164,10 +164,10 @@ impl Parser<'_> {
         self.parse_trivias(&mut children);
         children.push(self.parse_keyword("ref")?);
 
-        if let Some((mut trivias, keyword)) =
+        if let Some((trivias, keyword)) =
             self.try_parse_with_trivias(|parser| parser.parse_keyword("null"))
         {
-            children.append(&mut trivias);
+            children.extend(trivias);
             children.push(keyword);
         }
 
@@ -223,10 +223,10 @@ impl Parser<'_> {
             }
             "sub" => {
                 children.push(keyword.into());
-                if let Some((mut trivias, keyword)) =
+                if let Some((trivias, keyword)) =
                     self.try_parse_with_trivias(|parser| parser.parse_keyword("final"))
                 {
-                    children.append(&mut trivias);
+                    children.extend(trivias);
                     children.push(keyword);
                 }
                 while self.recover(Self::parse_index, &mut children) {}
