@@ -82,13 +82,6 @@ impl<'s> Parser<'s> {
         }
     }
 
-    pub(super) fn parse_keyword(&mut self, keyword: &'static str) -> Option<GreenElement> {
-        self.lexer
-            .next(SyntaxKind::KEYWORD)
-            .filter(|token| token.text == keyword)
-            .map(GreenElement::from)
-    }
-
     /// Accept error tokens with parens and trivias.
     fn parse_errors(&mut self) -> Option<Vec<GreenElement>> {
         if let Some(mut token) = self.lexer.eat(SyntaxKind::L_PAREN) {

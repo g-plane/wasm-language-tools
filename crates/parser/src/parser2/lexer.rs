@@ -105,6 +105,19 @@ impl<'s> Lexer<'s> {
         }
     }
 
+    pub fn keyword(&mut self, keyword: &'static str) -> Option<Token<'s>> {
+        debug_assert!(keyword.chars().all(|c| c.is_ascii_lowercase()));
+        if self.input.as_bytes().starts_with(keyword.as_bytes()) {
+            // SAFETY: `keyword` is a static ASCII string in UTF-8
+            Some(Token {
+                kind: SyntaxKind::KEYWORD,
+                text: unsafe { self.split_advance(keyword.len()) },
+            })
+        } else {
+            None
+        }
+    }
+
     fn ascii_char<const C: u8>(&mut self, kind: SyntaxKind) -> Option<Token<'s>> {
         if self.input.starts_with(C as char) {
             // SAFETY: `C` is an ASCII char

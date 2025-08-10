@@ -32,7 +32,7 @@ impl Parser<'_> {
         let mut children = Vec::with_capacity(6);
         children.push(self.lexer.next(L_PAREN)?.into());
         self.parse_trivias(&mut children);
-        children.push(self.parse_keyword("field")?);
+        children.push(self.lexer.keyword("field")?.into());
 
         if self.eat(IDENT, &mut children) {
             if !self.recover(Self::parse_field_type, &mut children) {
@@ -50,7 +50,7 @@ impl Parser<'_> {
             let mut children = Vec::with_capacity(5);
             children.push(parser.lexer.next(L_PAREN)?.into());
             parser.parse_trivias(&mut children);
-            children.push(parser.parse_keyword("mut")?);
+            children.push(parser.lexer.keyword("mut")?.into());
             if !parser.recover(Self::parse_storage_type, &mut children) {
                 parser.report_missing(Message::Name("storage type"));
             }
@@ -83,7 +83,7 @@ impl Parser<'_> {
                 let mut children = Vec::with_capacity(5);
                 children.push(l_paren.into());
                 self.parse_trivias(&mut children);
-                children.push(self.parse_keyword("mut")?);
+                children.push(self.lexer.keyword("mut")?.into());
                 if !self.recover(Self::parse_value_type, &mut children) {
                     self.report_missing(Message::Name("value type"));
                 }
@@ -143,7 +143,7 @@ impl Parser<'_> {
         let mut children = Vec::with_capacity(6);
         children.push(self.lexer.next(L_PAREN)?.into());
         self.parse_trivias(&mut children);
-        children.push(self.parse_keyword("param")?);
+        children.push(self.lexer.keyword("param")?.into());
 
         if self.eat(IDENT, &mut children) {
             if !self.recover(Self::parse_value_type, &mut children) {
@@ -173,13 +173,13 @@ impl Parser<'_> {
         let mut children = Vec::with_capacity(7);
         children.push(self.lexer.next(L_PAREN)?.into());
         self.parse_trivias(&mut children);
-        children.push(self.parse_keyword("ref")?);
+        children.push(self.lexer.keyword("ref")?.into());
 
         if let Some((trivias, keyword)) =
-            self.try_parse_with_trivias(|parser| parser.parse_keyword("null"))
+            self.try_parse_with_trivias(|parser| parser.lexer.keyword("null"))
         {
             children.extend(trivias);
-            children.push(keyword);
+            children.push(keyword.into());
         }
 
         if !self.recover(Self::parse_heap_type::<false>, &mut children) {
@@ -193,7 +193,7 @@ impl Parser<'_> {
         let mut children = Vec::with_capacity(6);
         children.push(self.lexer.next(L_PAREN)?.into());
         self.parse_trivias(&mut children);
-        children.push(self.parse_keyword("result")?);
+        children.push(self.lexer.keyword("result")?.into());
 
         while self.recover(Self::parse_value_type, &mut children) {}
         self.expect_right_paren(&mut children);
@@ -235,10 +235,10 @@ impl Parser<'_> {
             "sub" => {
                 children.push(keyword.into());
                 if let Some((trivias, keyword)) =
-                    self.try_parse_with_trivias(|parser| parser.parse_keyword("final"))
+                    self.try_parse_with_trivias(|parser| parser.lexer.keyword("final"))
                 {
                     children.extend(trivias);
-                    children.push(keyword);
+                    children.push(keyword.into());
                 }
                 while self.recover(Self::parse_index, &mut children) {}
                 if !self.recover(Self::parse_composite_type, &mut children) {

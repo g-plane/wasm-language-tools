@@ -7,7 +7,7 @@ impl Parser<'_> {
     fn parse_elem(&mut self) -> Option<GreenNode> {
         let mut children = vec![self.lexer.next(L_PAREN)?.into()];
         self.parse_trivias(&mut children);
-        children.push(self.parse_keyword("elem")?);
+        children.push(self.lexer.keyword("elem")?.into());
 
         if self.lexer.peek(L_PAREN).is_some() {
             while self.recover(Self::parse_elem_expr, &mut children) {}
@@ -23,7 +23,7 @@ impl Parser<'_> {
             let mut children = Vec::with_capacity(5);
             children.push(parser.lexer.next(L_PAREN)?.into());
             parser.parse_trivias(&mut children);
-            children.push(parser.parse_keyword("item")?);
+            children.push(parser.lexer.keyword("item")?.into());
             Some(children)
         }) {
             while self.recover(Self::parse_instr, &mut children) {}
@@ -41,7 +41,7 @@ impl Parser<'_> {
         let mut children = Vec::with_capacity(5);
         children.push(self.lexer.next(L_PAREN)?.into());
         self.parse_trivias(&mut children);
-        children.push(self.parse_keyword("export")?);
+        children.push(self.lexer.keyword("export")?.into());
         if !self.recover(Self::parse_name, &mut children) {
             self.report_missing(Message::Name("name"));
         }
@@ -74,7 +74,7 @@ impl Parser<'_> {
         let mut children = Vec::with_capacity(5);
         children.push(self.lexer.next(L_PAREN)?.into());
         self.parse_trivias(&mut children);
-        children.push(self.parse_keyword("import")?);
+        children.push(self.lexer.keyword("import")?.into());
         if !self.recover(Self::parse_module_name, &mut children) {
             self.report_missing(Message::Name("module name"));
         }
@@ -142,7 +142,7 @@ impl Parser<'_> {
         let mut children = Vec::with_capacity(6);
         children.push(self.lexer.next(L_PAREN)?.into());
         self.parse_trivias(&mut children);
-        children.push(self.parse_keyword("local")?);
+        children.push(self.lexer.keyword("local")?.into());
 
         if self.eat(IDENT, &mut children) {
             if !self.recover(Self::parse_value_type, &mut children) {
@@ -159,7 +159,7 @@ impl Parser<'_> {
         let mut children = Vec::with_capacity(5);
         children.push(self.lexer.next(L_PAREN)?.into());
         self.parse_trivias(&mut children);
-        children.push(self.parse_keyword("memory")?);
+        children.push(self.lexer.keyword("memory")?.into());
         if !self.recover(Self::parse_index, &mut children) {
             self.report_missing(Message::Name("index"));
         }
@@ -393,7 +393,7 @@ impl Parser<'_> {
             let mut children = Vec::with_capacity(5);
             children.push(parser.lexer.next(L_PAREN)?.into());
             parser.parse_trivias(&mut children);
-            children.push(parser.parse_keyword("offset")?);
+            children.push(parser.lexer.keyword("offset")?.into());
             Some(children)
         }) {
             while self.recover(Self::parse_instr, &mut children) {}
@@ -425,7 +425,7 @@ impl Parser<'_> {
         let mut children = Vec::with_capacity(5);
         children.push(self.lexer.next(L_PAREN)?.into());
         self.parse_trivias(&mut children);
-        children.push(self.parse_keyword("type")?);
+        children.push(self.lexer.keyword("type")?.into());
         self.parse_type_def(children)
     }
 
@@ -435,7 +435,7 @@ impl Parser<'_> {
             let mut children = Vec::with_capacity(2);
             children.push(parser.lexer.next(L_PAREN)?.into());
             parser.parse_trivias(&mut children);
-            children.push(parser.parse_keyword("type")?);
+            children.push(parser.lexer.keyword("type")?.into());
 
             if !parser.recover(Self::parse_index, &mut children) {
                 parser.report_missing(Message::Name("index"));

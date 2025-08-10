@@ -21,7 +21,7 @@ impl Parser<'_> {
             let mut children = Vec::with_capacity(2);
             children.push(parser.lexer.next(L_PAREN)?.into());
             parser.parse_trivias(&mut children);
-            children.push(parser.parse_keyword("else")?);
+            children.push(parser.lexer.keyword("else")?.into());
             Some(children)
         }) {
             children.extend(trivias);
@@ -53,10 +53,10 @@ impl Parser<'_> {
         children.push(node(BLOCK_IF_THEN, then_children).into());
 
         if let Some((trivias, else_keyword)) =
-            self.try_parse_with_trivias(|parser| parser.parse_keyword("else"))
+            self.try_parse_with_trivias(|parser| parser.lexer.keyword("else"))
         {
             children.extend(trivias);
-            let mut else_children = vec![else_keyword];
+            let mut else_children = vec![else_keyword.into()];
             self.eat(IDENT, &mut else_children);
             while self
                 .lexer
@@ -124,7 +124,7 @@ impl Parser<'_> {
     }
 
     fn parse_end_keyword(&mut self) -> Option<GreenElement> {
-        self.parse_keyword("end")
+        self.lexer.keyword("end").map(GreenElement::from)
     }
 
     fn parse_immediate(&mut self) -> Option<GreenNode> {
@@ -244,7 +244,7 @@ impl Parser<'_> {
         let mut children = Vec::with_capacity(2);
         children.push(self.lexer.next(L_PAREN)?.into());
         self.parse_trivias(&mut children);
-        children.push(self.parse_keyword("then")?);
+        children.push(self.lexer.keyword("then")?.into());
         while self.recover(Self::parse_instr, &mut children) {}
         self.expect_right_paren(&mut children);
         Some(node(BLOCK_IF_THEN, children))
