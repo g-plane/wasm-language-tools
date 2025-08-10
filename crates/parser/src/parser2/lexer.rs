@@ -212,9 +212,9 @@ impl<'s> Lexer<'s> {
                 .unwrap_or(self.input.len());
             // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
             let text = unsafe { self.split_advance(end) };
-            let mut chars = text.chars();
-            while let Some(c) = chars.next() {
-                if c == '_' && !chars.next().is_some_and(|c| c.is_ascii_digit()) {
+            let mut bytes = text.bytes();
+            while let Some(b) = bytes.next() {
+                if b == b'_' && !bytes.next().is_some_and(|b| b.is_ascii_digit()) {
                     return None;
                 }
             }
@@ -232,9 +232,9 @@ impl<'s> Lexer<'s> {
                 .unwrap_or(self.input.len());
             // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
             let text = unsafe { self.split_advance(end) };
-            let mut chars = text.chars();
-            while let Some(c) = chars.next() {
-                if c == '_' && !chars.next().is_some_and(|c| c.is_ascii_hexdigit()) {
+            let mut bytes = text.bytes();
+            while let Some(b) = bytes.next() {
+                if b == b'_' && !bytes.next().is_some_and(|b| b.is_ascii_hexdigit()) {
                     return None;
                 }
             }
