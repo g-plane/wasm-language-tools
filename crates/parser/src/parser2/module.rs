@@ -4,6 +4,15 @@ use rowan::{GreenNode, Language, NodeOrToken};
 use wat_syntax::SyntaxKind::*;
 
 impl Parser<'_> {
+    fn parse_data(&mut self) -> Option<GreenNode> {
+        let mut children = vec![self.lexer.next(L_PAREN)?.into()];
+        self.parse_trivias(&mut children);
+        children.push(self.lexer.keyword("data")?.into());
+        while self.eat(STRING, &mut children) {}
+        self.expect_right_paren(&mut children);
+        Some(node(DATA, children))
+    }
+
     fn parse_elem(&mut self) -> Option<GreenNode> {
         let mut children = vec![self.lexer.next(L_PAREN)?.into()];
         self.parse_trivias(&mut children);
@@ -34,6 +43,23 @@ impl Parser<'_> {
                 .map(|instr| node(ELEM_EXPR, [instr.into()]))
         } else {
             None
+        }
+    }
+
+    fn parse_elem_list(&mut self) -> Option<GreenNode> {
+        if let Some(node_or_token) = self
+            .lexer
+            .keyword("func")
+            .map(GreenElement::from)
+            .or_else(|| self.parse_index().map(GreenElement::from))
+        {
+            let mut children = vec![node_or_token];
+            while self.recover(Self::parse_index, &mut children) {}
+            Some(node(ELEM_LIST, children))
+        } else {
+            let mut children = vec![self.parse_ref_type()?.into()];
+            while self.recover(Self::parse_elem_expr, &mut children) {}
+            Some(node(ELEM_LIST, children))
         }
     }
 
@@ -224,6 +250,16 @@ impl Parser<'_> {
                 while self.recover(Self::parse_module_field, &mut children) {}
                 Some(node(MODULE, children))
             }
+            "memory" => {
+                let mut children = vec![self.parse_module_field_memory(children)?.into()];
+                while self.recover(Self::parse_module_field, &mut children) {}
+                Some(node(MODULE, children))
+            }
+            "elem" => {
+                let mut children = vec![self.parse_module_field_elem(children)?.into()];
+                while self.recover(Self::parse_module_field, &mut children) {}
+                Some(node(MODULE, children))
+            }
             "rec" => {
                 let mut children = vec![self.parse_rec_type(children)?.into()];
                 while self.recover(Self::parse_module_field, &mut children) {}
@@ -252,6 +288,8 @@ impl Parser<'_> {
             "start" => self.parse_module_field_start(children),
             "data" => self.parse_module_field_data(children),
             "table" => self.parse_module_field_table(children),
+            "memory" => self.parse_module_field_memory(children),
+            "elem" => self.parse_module_field_elem(children),
             "rec" => self.parse_rec_type(children),
             _ => None,
         }
@@ -270,6 +308,37 @@ impl Parser<'_> {
         while self.eat(STRING, &mut children) {}
         self.expect_right_paren(&mut children);
         Some(node(MODULE_FIELD_DATA, children))
+    }
+
+    fn parse_module_field_elem(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
+        self.eat(IDENT, &mut children);
+        if let Some((trivias, keyword)) =
+            self.try_parse_with_trivias(|parser| parser.lexer.keyword("declare"))
+        {
+            children.extend(trivias);
+            children.push(keyword.into());
+            if !self.recover(Self::parse_elem_list, &mut children) {
+                self.report_missing(Message::Name("elem list"));
+            }
+        } else if let Some((trivias, elem_list)) =
+            self.try_parse_with_trivias(Self::parse_elem_list)
+        {
+            children.extend(trivias);
+            children.push(elem_list.into());
+        } else {
+            if let Some((trivias, table_use)) = self.try_parse_with_trivias(Self::parse_table_use) {
+                children.extend(trivias);
+                children.push(table_use.into());
+            }
+            if !self.recover(Self::parse_offset, &mut children) {
+                self.report_missing(Message::Name("offset"));
+            }
+            if let Some((trivias, elem_list)) = self.try_parse_with_trivias(Self::parse_elem_list) {
+                children.extend(trivias);
+                children.push(elem_list.into());
+            }
+        }
+        Some(node(MODULE_FIELD_ELEM, children))
     }
 
     fn parse_module_field_export(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
@@ -342,6 +411,29 @@ impl Parser<'_> {
         Some(node(MODULE_FIELD_IMPORT, children))
     }
 
+    fn parse_module_field_memory(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
+        self.eat(IDENT, &mut children);
+
+        if let Some((trivias, import)) = self.try_parse_with_trivias(Self::parse_import) {
+            children.extend(trivias);
+            children.push(import.into());
+        } else if let Some((trivias, export)) = self.try_parse_with_trivias(Self::parse_export) {
+            children.extend(trivias);
+            children.push(export.into());
+        }
+
+        if self.lexer.peek(L_PAREN).is_some() {
+            if !self.recover(Self::parse_data, &mut children) {
+                self.report_missing(Message::Name("data"));
+            }
+        } else if !self.recover(Self::parse_memory_type, &mut children) {
+            self.report_missing(Message::Name("memory type"));
+        }
+
+        self.expect_right_paren(&mut children);
+        Some(node(MODULE_FIELD_MEMORY, children))
+    }
+
     fn parse_module_field_start(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
         if !self.recover(Self::parse_index, &mut children) {
             self.report_missing(Message::Name("index"));
@@ -410,6 +502,19 @@ impl Parser<'_> {
         while self.recover(Self::parse_type_def_in_rec_type, &mut children) {}
         self.expect_right_paren(&mut children);
         Some(node(REF_TYPE, children))
+    }
+
+    fn parse_table_use(&mut self) -> Option<GreenNode> {
+        let mut children = Vec::with_capacity(5);
+        children.push(self.lexer.next(L_PAREN)?.into());
+        self.parse_trivias(&mut children);
+        children.push(self.lexer.keyword("table")?.into());
+
+        if !self.recover(Self::parse_index, &mut children) {
+            self.report_missing(Message::Name("index"));
+        }
+        self.expect_right_paren(&mut children);
+        Some(node(TABLE_USE, children))
     }
 
     fn parse_type_def(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
