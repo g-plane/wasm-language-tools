@@ -59,14 +59,43 @@ impl Parser<'_> {
         let mut children = Vec::with_capacity(5);
         children.push(self.lexer.next(L_PAREN)?.into());
         self.parse_trivias(&mut children);
-        children.push(self.parse_keyword("module")?);
-        self.lexer.top_level = false;
-        self.eat(IDENT, &mut children);
+        let keyword = self.lexer.next(KEYWORD)?;
+        let keyword_text = keyword.text;
+        children.push(keyword.into());
 
-        while self.recover(Self::parse_module_field, &mut children) {}
-        self.expect_right_paren(&mut children);
+        self.lexer.top_level = false;
+        let node = match keyword_text {
+            "module" => {
+                self.eat(IDENT, &mut children);
+                while self.recover(Self::parse_module_field, &mut children) {}
+                self.expect_right_paren(&mut children);
+                Some(node(MODULE, children))
+            }
+            // wabt allows top-level module fields
+            "func" => {
+                let mut children = vec![self.parse_module_field_func(children)?.into()];
+                while self.recover(Self::parse_module_field, &mut children) {}
+                Some(node(MODULE, children))
+            }
+            "type" => {
+                let mut children = vec![self.parse_type_def(children)?.into()];
+                while self.recover(Self::parse_module_field, &mut children) {}
+                Some(node(MODULE, children))
+            }
+            "global" => {
+                let mut children = vec![self.parse_module_field_global(children)?.into()];
+                while self.recover(Self::parse_module_field, &mut children) {}
+                Some(node(MODULE, children))
+            }
+            "rec" => {
+                let mut children = vec![self.parse_rec_type(children)?.into()];
+                while self.recover(Self::parse_module_field, &mut children) {}
+                Some(node(MODULE, children))
+            }
+            _ => None,
+        };
         self.lexer.top_level = true;
-        Some(node(MODULE, children))
+        node
     }
 
     fn parse_module_field(&mut self) -> Option<GreenNode> {
