@@ -107,9 +107,11 @@ impl<'s> Lexer<'s> {
 
     fn ascii_char<const C: u8>(&mut self, kind: SyntaxKind) -> Option<Token<'s>> {
         if self.input.starts_with(C as char) {
-            let (text, rest) = self.input.split_at(1);
-            self.input = rest;
-            Some(Token { kind, text })
+            // SAFETY: `C` is an ASCII char
+            Some(Token {
+                kind,
+                text: unsafe { self.split_advance(1) },
+            })
         } else {
             None
         }
@@ -121,11 +123,10 @@ impl<'s> Lexer<'s> {
                 .input
                 .find(|c| !is_id_char(c))
                 .unwrap_or(self.input.len());
-            let (text, rest) = self.input.split_at(end);
-            self.input = rest;
+            // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
             Some(Token {
                 kind: SyntaxKind::IDENT,
-                text,
+                text: unsafe { self.split_advance(end) },
             })
         } else {
             None
@@ -138,9 +139,8 @@ impl<'s> Lexer<'s> {
                 .input
                 .find(|c| !is_id_char(c))
                 .unwrap_or(self.input.len());
-            let (text, rest) = self.input.split_at(end);
-            self.input = rest;
-            Some(text)
+            // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
+            Some(unsafe { self.split_advance(end) })
         } else {
             None
         }
@@ -200,7 +200,8 @@ impl<'s> Lexer<'s> {
         } else {
             self.unsigned_dec()?;
         }
-        checkpoint.get(..checkpoint.len() - self.input.len())
+        // SAFETY: the difference of two valid UTF-8 strings is valid
+        Some(unsafe { checkpoint.get_unchecked(..checkpoint.len() - self.input.len()) })
     }
 
     fn unsigned_dec(&mut self) -> Option<&'s str> {
@@ -209,14 +210,14 @@ impl<'s> Lexer<'s> {
                 .input
                 .find(|c: char| !c.is_ascii_digit() && c != '_')
                 .unwrap_or(self.input.len());
-            let (text, rest) = self.input.split_at(end);
+            // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
+            let text = unsafe { self.split_advance(end) };
             let mut chars = text.chars();
             while let Some(c) = chars.next() {
                 if c == '_' && !chars.next().is_some_and(|c| c.is_ascii_digit()) {
                     return None;
                 }
             }
-            self.input = rest;
             Some(text)
         } else {
             None
@@ -229,14 +230,14 @@ impl<'s> Lexer<'s> {
                 .input
                 .find(|c: char| !c.is_ascii_hexdigit() && c != '_')
                 .unwrap_or(self.input.len());
-            let (text, rest) = self.input.split_at(end);
+            // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
+            let text = unsafe { self.split_advance(end) };
             let mut chars = text.chars();
             while let Some(c) = chars.next() {
                 if c == '_' && !chars.next().is_some_and(|c| c.is_ascii_hexdigit()) {
                     return None;
                 }
             }
-            self.input = rest;
             Some(text)
         } else {
             None
@@ -317,9 +318,8 @@ impl<'s> Lexer<'s> {
                     .input
                     .find(|c| !is_id_char(c))
                     .unwrap_or(self.input.len());
-                let (text, rest) = self.input.split_at(end);
-                self.input = rest;
-                Some(text)
+                // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
+                Some(unsafe { self.split_advance(end) })
             }
             '"' => {
                 let checkpoint = self.input;
@@ -332,9 +332,8 @@ impl<'s> Lexer<'s> {
                 checkpoint.get(..checkpoint.len() - self.input.len())
             }
             c => {
-                let (text, rest) = self.input.split_at(c.len_utf8());
-                self.input = rest;
-                Some(text)
+                // SAFETY: using the length in UTF-8
+                Some(unsafe { self.split_advance(c.len_utf8()) })
             }
         }
     }
@@ -347,11 +346,10 @@ impl<'s> Lexer<'s> {
                     .input
                     .find(|c| !matches!(c, ' ' | '\n' | '\t' | '\r'))
                     .unwrap_or(self.input.len());
-                let (text, rest) = self.input.split_at(end);
-                self.input = rest;
+                // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
                 Some(Token {
                     kind: SyntaxKind::WHITESPACE,
-                    text,
+                    text: unsafe { self.split_advance(end) },
                 })
             }
             b'(' if matches!(bytes.get(1), Some(b';')) => {
@@ -386,15 +384,20 @@ impl<'s> Lexer<'s> {
             }
             b';' if matches!(bytes.get(1), Some(b';')) => {
                 let end = self.input.find('\n').unwrap_or(self.input.len());
-                let (text, rest) = self.input.split_at(end);
-                self.input = rest;
+                // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
                 Some(Token {
                     kind: SyntaxKind::LINE_COMMENT,
-                    text,
+                    text: unsafe { self.split_advance(end) },
                 })
             }
             _ => None,
         })
+    }
+
+    unsafe fn split_advance(&mut self, mid: usize) -> &'s str {
+        let left = self.input.get_unchecked(0..mid);
+        self.input = self.input.get_unchecked(mid..);
+        left
     }
 }
 
