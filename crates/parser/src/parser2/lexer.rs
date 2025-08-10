@@ -197,11 +197,11 @@ impl<'s> Lexer<'s> {
         if let Some(rest) = self.input.strip_prefix("0x") {
             self.input = rest;
             self.unsigned_hex()?;
+            // SAFETY: the difference of two valid UTF-8 strings is valid
+            Some(unsafe { checkpoint.get_unchecked(..checkpoint.len() - self.input.len()) })
         } else {
-            self.unsigned_dec()?;
+            self.unsigned_dec()
         }
-        // SAFETY: the difference of two valid UTF-8 strings is valid
-        Some(unsafe { checkpoint.get_unchecked(..checkpoint.len() - self.input.len()) })
     }
 
     fn unsigned_dec(&mut self) -> Option<&'s str> {
@@ -344,7 +344,8 @@ impl<'s> Lexer<'s> {
             b' ' | b'\n' | b'\t' | b'\r' => {
                 let end = self
                     .input
-                    .find(|c| !matches!(c, ' ' | '\n' | '\t' | '\r'))
+                    .bytes()
+                    .position(|b| !matches!(b, b' ' | b'\n' | b'\t' | b'\r'))
                     .unwrap_or(self.input.len());
                 // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
                 Some(Token {
