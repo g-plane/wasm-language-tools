@@ -40,28 +40,31 @@ impl<'s> Lexer<'s> {
     /// Move and advance the lexer for single token. If it doesn't match, raise a syntax error.
     pub fn expect(&mut self, kind: SyntaxKind) -> Result<Token<'s>, Option<SyntaxError>> {
         self.eat(kind).ok_or_else(|| {
-            self.error().map(|text| {
-                let message = match kind {
-                    SyntaxKind::L_PAREN => Message::Char('('),
-                    SyntaxKind::R_PAREN => Message::Char(')'),
-                    SyntaxKind::KEYWORD => Message::Name("keyword"),
-                    SyntaxKind::INSTR_NAME => Message::Name("instruction name"),
-                    SyntaxKind::TYPE_KEYWORD => Message::Name("type keyword"),
-                    SyntaxKind::IDENT => Message::Name("identifier"),
-                    SyntaxKind::STRING => Message::Name("string"),
-                    SyntaxKind::INT => Message::Name("integer"),
-                    SyntaxKind::UNSIGNED_INT => Message::Name("unsigned integer"),
-                    SyntaxKind::FLOAT => Message::Name("float"),
-                    SyntaxKind::MEM_ARG => Message::Name("memory argument"),
-                    _ => unreachable!(),
-                };
-                let origin = self.source.as_ptr().addr();
-                SyntaxError {
-                    start: text.as_ptr().addr() - origin,
-                    end: self.input.as_ptr().addr() - origin,
-                    message,
-                }
-            })
+            self.error()
+                .or_else(|| self.peek(SyntaxKind::L_PAREN).map(|token| token.text))
+                .or_else(|| self.peek(SyntaxKind::R_PAREN).map(|token| token.text))
+                .map(|text| {
+                    let message = match kind {
+                        SyntaxKind::L_PAREN => Message::Char('('),
+                        SyntaxKind::R_PAREN => Message::Char(')'),
+                        SyntaxKind::KEYWORD => Message::Name("keyword"),
+                        SyntaxKind::INSTR_NAME => Message::Name("instruction name"),
+                        SyntaxKind::TYPE_KEYWORD => Message::Name("type keyword"),
+                        SyntaxKind::IDENT => Message::Name("identifier"),
+                        SyntaxKind::STRING => Message::Name("string"),
+                        SyntaxKind::INT => Message::Name("integer"),
+                        SyntaxKind::UNSIGNED_INT => Message::Name("unsigned integer"),
+                        SyntaxKind::FLOAT => Message::Name("float"),
+                        SyntaxKind::MEM_ARG => Message::Name("memory argument"),
+                        _ => unreachable!(),
+                    };
+                    let origin = self.source.as_ptr().addr();
+                    SyntaxError {
+                        start: text.as_ptr().addr() - origin,
+                        end: self.input.as_ptr().addr() - origin,
+                        message,
+                    }
+                })
         })
     }
 

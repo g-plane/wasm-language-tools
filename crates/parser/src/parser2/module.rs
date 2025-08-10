@@ -16,6 +16,27 @@ impl Parser<'_> {
         Some(node(EXPORT, children))
     }
 
+    fn parse_export_desc(&mut self) -> Option<GreenNode> {
+        let mut children = Vec::with_capacity(3);
+        children.push(self.lexer.next(L_PAREN)?.into());
+        self.parse_trivias(&mut children);
+        let keyword = self.lexer.next(KEYWORD)?;
+        let kind = match keyword.text {
+            "func" => EXPORT_DESC_FUNC,
+            "table" => EXPORT_DESC_TABLE,
+            "memory" => EXPORT_DESC_MEMORY,
+            "global" => EXPORT_DESC_GLOBAL,
+            _ => return None,
+        };
+        children.push(keyword.into());
+
+        if !self.recover(Self::parse_index, &mut children) {
+            self.report_missing(Message::Name("index"));
+        }
+        self.expect_right_paren(&mut children);
+        Some(node(kind, children))
+    }
+
     fn parse_import(&mut self) -> Option<GreenNode> {
         let mut children = Vec::with_capacity(5);
         children.push(self.lexer.next(L_PAREN)?.into());
@@ -29,6 +50,52 @@ impl Parser<'_> {
         }
         self.expect_right_paren(&mut children);
         Some(node(IMPORT, children))
+    }
+
+    fn parse_import_desc(&mut self) -> Option<GreenNode> {
+        let mut children = Vec::with_capacity(5);
+        children.push(self.lexer.next(L_PAREN)?.into());
+        self.parse_trivias(&mut children);
+        let keyword = self.lexer.next(KEYWORD)?;
+        match keyword.text {
+            "func" => {
+                children.push(keyword.into());
+                self.eat(IDENT, &mut children);
+                if !self.recover(Self::parse_type_use, &mut children) {
+                    self.report_missing(Message::Name("type use"));
+                }
+                self.expect_right_paren(&mut children);
+                Some(node(IMPORT_DESC_TYPE_USE, children))
+            }
+            "global" => {
+                children.push(keyword.into());
+                self.eat(IDENT, &mut children);
+                if !self.recover(Self::parse_global_type, &mut children) {
+                    self.report_missing(Message::Name("global type"));
+                }
+                self.expect_right_paren(&mut children);
+                Some(node(IMPORT_DESC_GLOBAL_TYPE, children))
+            }
+            "memory" => {
+                children.push(keyword.into());
+                self.eat(IDENT, &mut children);
+                if !self.recover(Self::parse_memory_type, &mut children) {
+                    self.report_missing(Message::Name("memory type"));
+                }
+                self.expect_right_paren(&mut children);
+                Some(node(IMPORT_DESC_MEMORY_TYPE, children))
+            }
+            "table" => {
+                children.push(keyword.into());
+                self.eat(IDENT, &mut children);
+                if !self.recover(Self::parse_table_type, &mut children) {
+                    self.report_missing(Message::Name("table type"));
+                }
+                self.expect_right_paren(&mut children);
+                Some(node(IMPORT_DESC_TABLE_TYPE, children))
+            }
+            _ => None,
+        }
     }
 
     pub(super) fn parse_index(&mut self) -> Option<GreenNode> {
@@ -82,6 +149,16 @@ impl Parser<'_> {
                 while self.recover(Self::parse_module_field, &mut children) {}
                 Some(node(MODULE, children))
             }
+            "export" => {
+                let mut children = vec![self.parse_module_field_export(children)?.into()];
+                while self.recover(Self::parse_module_field, &mut children) {}
+                Some(node(MODULE, children))
+            }
+            "import" => {
+                let mut children = vec![self.parse_module_field_import(children)?.into()];
+                while self.recover(Self::parse_module_field, &mut children) {}
+                Some(node(MODULE, children))
+            }
             "global" => {
                 let mut children = vec![self.parse_module_field_global(children)?.into()];
                 while self.recover(Self::parse_module_field, &mut children) {}
@@ -109,10 +186,23 @@ impl Parser<'_> {
         match keyword_text {
             "func" => self.parse_module_field_func(children),
             "type" => self.parse_type_def(children),
+            "export" => self.parse_module_field_export(children),
+            "import" => self.parse_module_field_import(children),
             "global" => self.parse_module_field_global(children),
             "rec" => self.parse_rec_type(children),
             _ => None,
         }
+    }
+
+    fn parse_module_field_export(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
+        if let Some(name) = self.parse_name() {
+            children.push(name.into());
+        }
+        if !self.recover(Self::parse_export_desc, &mut children) {
+            self.report_missing(Message::Name("export descriptor"));
+        }
+        self.expect_right_paren(&mut children);
+        Some(node(MODULE_FIELD_EXPORT, children))
     }
 
     fn parse_module_field_func(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
@@ -158,6 +248,20 @@ impl Parser<'_> {
         while self.recover(Self::parse_instr, &mut children) {}
         self.expect_right_paren(&mut children);
         Some(node(MODULE_FIELD_GLOBAL, children))
+    }
+
+    fn parse_module_field_import(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
+        if let Some(module_name) = self.parse_module_name() {
+            children.push(module_name.into());
+        }
+        if let Some(name) = self.parse_name() {
+            children.push(name.into());
+        }
+        if !self.recover(Self::parse_import_desc, &mut children) {
+            self.report_missing(Message::Name("import descriptor"));
+        }
+        self.expect_right_paren(&mut children);
+        Some(node(MODULE_FIELD_IMPORT, children))
     }
 
     fn parse_module_name(&mut self) -> Option<GreenNode> {

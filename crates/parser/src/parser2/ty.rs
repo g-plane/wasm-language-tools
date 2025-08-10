@@ -119,6 +119,17 @@ impl Parser<'_> {
             })
     }
 
+    fn parse_limits(&mut self) -> Option<GreenNode> {
+        let mut children = vec![self.expect(UNSIGNED_INT)?.into()];
+        self.eat(UNSIGNED_INT, &mut children);
+        Some(node(LIMITS, children))
+    }
+
+    pub(super) fn parse_memory_type(&mut self) -> Option<GreenNode> {
+        self.parse_limits()
+            .map(|limits| node(MEMORY_TYPE, [limits.into()]))
+    }
+
     fn parse_packed_type(&mut self) -> Option<GreenElement> {
         self.lexer
             .next(TYPE_KEYWORD)
@@ -245,6 +256,14 @@ impl Parser<'_> {
                 Some(node(SUB_TYPE, children))
             }
         }
+    }
+
+    pub(super) fn parse_table_type(&mut self) -> Option<GreenNode> {
+        let mut children = vec![self.parse_limits()?.into()];
+        if !self.recover(Self::parse_ref_type, &mut children) {
+            self.report_missing(Message::Name("ref type"));
+        }
+        Some(node(TABLE_TYPE, children))
     }
 
     pub(super) fn parse_value_type(&mut self) -> Option<GreenElement> {
