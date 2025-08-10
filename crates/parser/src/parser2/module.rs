@@ -80,6 +80,7 @@ impl Parser<'_> {
         match keyword_text {
             "func" => self.parse_module_field_func(children),
             "type" => self.parse_type_def(children),
+            "global" => self.parse_module_field_global(children),
             "rec" => self.parse_rec_type(children),
             _ => None,
         }
@@ -109,6 +110,27 @@ impl Parser<'_> {
         while self.recover(Self::parse_instr, &mut children) {}
         self.expect_right_paren(&mut children);
         Some(node(MODULE_FIELD_FUNC, children))
+    }
+
+    fn parse_module_field_global(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
+        self.eat(IDENT, &mut children);
+
+        if let Some((mut trivias, import)) = self.try_parse_with_trivias(Self::parse_import) {
+            children.append(&mut trivias);
+            children.push(import.into());
+        } else if let Some((mut trivias, export)) = self.try_parse_with_trivias(Self::parse_export)
+        {
+            children.append(&mut trivias);
+            children.push(export.into());
+        }
+
+        if !self.recover(Self::parse_global_type, &mut children) {
+            self.report_missing(Message::Name("global type"));
+        }
+
+        while self.recover(Self::parse_instr, &mut children) {}
+        self.expect_right_paren(&mut children);
+        Some(node(MODULE_FIELD_GLOBAL, children))
     }
 
     fn parse_module_name(&mut self) -> Option<GreenNode> {

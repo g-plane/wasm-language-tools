@@ -76,6 +76,26 @@ impl Parser<'_> {
         Some(node(FUNC_TYPE, children))
     }
 
+    pub(super) fn parse_global_type(&mut self) -> Option<GreenNode> {
+        self.lexer
+            .eat(L_PAREN)
+            .and_then(|l_paren| {
+                let mut children = Vec::with_capacity(5);
+                children.push(l_paren.into());
+                self.parse_trivias(&mut children);
+                children.push(self.parse_keyword("mut")?);
+                if !self.recover(Self::parse_value_type, &mut children) {
+                    self.report_missing(Message::Name("value type"));
+                }
+                self.expect_right_paren(&mut children);
+                Some(node(GLOBAL_TYPE, children))
+            })
+            .or_else(|| {
+                self.parse_value_type()
+                    .map(|value_type| node(GLOBAL_TYPE, [value_type]))
+            })
+    }
+
     pub(super) fn parse_heap_type<const IMMEDIATE: bool>(&mut self) -> Option<GreenNode> {
         self.lexer
             .eat(TYPE_KEYWORD)
