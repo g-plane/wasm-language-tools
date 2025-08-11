@@ -130,10 +130,18 @@ impl Parser<'_> {
     fn parse_immediate(&mut self) -> Option<GreenNode> {
         self.lexer
             .eat(INT)
-            .or_else(|| self.lexer.eat(FLOAT))
+            .or_else(|| {
+                self.lexer.eat(FLOAT).inspect(|token| {
+                    if token.kind == ERROR {
+                        self.report_error_token(
+                            token,
+                            Message::Description("invalid float literal"),
+                        );
+                    }
+                })
+            })
             .or_else(|| self.lexer.eat(IDENT))
             .or_else(|| self.lexer.eat(STRING))
-            .or_else(|| self.lexer.eat(UNSIGNED_INT))
             .or_else(|| self.lexer.eat(MEM_ARG))
             .map(|token| node(IMMEDIATE, [token.into()]))
             .or_else(|| {
@@ -205,13 +213,16 @@ impl Parser<'_> {
 
     fn parse_plain_instr_folded(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
         while let Some((trivias, node)) = self.try_parse_with_trivias(|parser| {
-            parser.parse_immediate().or_else(|| {
-                parser.lexer.eat(KEYWORD).map(|mut token| {
-                    token.kind = ERROR;
-                    parser.report_error_token(&token, Message::Description("invalid immediate"));
-                    node(IMMEDIATE, [token.into()])
+            parser
+                .parse_immediate()
+                .map(GreenElement::from)
+                .or_else(|| {
+                    parser.lexer.eat(ERROR).map(|token| {
+                        parser
+                            .report_error_token(&token, Message::Description("invalid immediate"));
+                        token.into()
+                    })
                 })
-            })
         }) {
             children.extend(trivias);
             children.push(node.into());

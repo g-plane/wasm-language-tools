@@ -141,11 +141,16 @@ impl<'s> Lexer<'s> {
                 .input
                 .find(|c| !is_id_char(c))
                 .unwrap_or(self.input.len());
-            // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
-            Some(Token {
-                kind: SyntaxKind::IDENT,
-                text: unsafe { self.split_advance(end) },
-            })
+            if end == 1 {
+                // identifier can't be only `$`
+                None
+            } else {
+                // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
+                Some(Token {
+                    kind: SyntaxKind::IDENT,
+                    text: unsafe { self.split_advance(end) },
+                })
+            }
         } else {
             None
         }
@@ -212,17 +217,22 @@ impl<'s> Lexer<'s> {
 
     fn unsigned_int_raw(&mut self) -> Option<&'s str> {
         let checkpoint = self.input;
-        if let Some(rest) = self.input.strip_prefix("0x") {
+        let text = if let Some(rest) = self.input.strip_prefix("0x") {
             self.input = rest;
-            self.unsigned_hex()?;
+            self.unsigned_hex::<true>()?;
             // SAFETY: the difference of two valid UTF-8 strings is valid
             Some(unsafe { checkpoint.get_unchecked(..checkpoint.len() - self.input.len()) })
         } else {
-            self.unsigned_dec()
+            self.unsigned_dec::<true>()
+        };
+        if self.input.starts_with(is_id_char) {
+            None
+        } else {
+            text
         }
     }
 
-    fn unsigned_dec(&mut self) -> Option<&'s str> {
+    fn unsigned_dec<const VALIDATE: bool>(&mut self) -> Option<&'s str> {
         if self.input.starts_with(|c: char| c.is_ascii_digit()) {
             let end = self
                 .input
@@ -230,10 +240,12 @@ impl<'s> Lexer<'s> {
                 .unwrap_or(self.input.len());
             // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
             let text = unsafe { self.split_advance(end) };
-            let mut bytes = text.bytes();
-            while let Some(b) = bytes.next() {
-                if b == b'_' && !bytes.next().is_some_and(|b| b.is_ascii_digit()) {
-                    return None;
+            if VALIDATE {
+                let mut bytes = text.bytes();
+                while let Some(b) = bytes.next() {
+                    if b == b'_' && !bytes.next().is_some_and(|b| b.is_ascii_digit()) {
+                        return None;
+                    }
                 }
             }
             Some(text)
@@ -242,7 +254,7 @@ impl<'s> Lexer<'s> {
         }
     }
 
-    fn unsigned_hex(&mut self) -> Option<&'s str> {
+    fn unsigned_hex<const VALIDATE: bool>(&mut self) -> Option<&'s str> {
         if self.input.starts_with(|c: char| c.is_ascii_hexdigit()) {
             let end = self
                 .input
@@ -250,10 +262,12 @@ impl<'s> Lexer<'s> {
                 .unwrap_or(self.input.len());
             // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
             let text = unsafe { self.split_advance(end) };
-            let mut bytes = text.bytes();
-            while let Some(b) = bytes.next() {
-                if b == b'_' && !bytes.next().is_some_and(|b| b.is_ascii_hexdigit()) {
-                    return None;
+            if VALIDATE {
+                let mut bytes = text.bytes();
+                while let Some(b) = bytes.next() {
+                    if b == b'_' && !bytes.next().is_some_and(|b| b.is_ascii_hexdigit()) {
+                        return None;
+                    }
                 }
             }
             Some(text)
@@ -263,30 +277,38 @@ impl<'s> Lexer<'s> {
     }
 
     fn float(&mut self) -> Option<Token<'s>> {
+        let mut valid = true;
         let checkpoint = self.input;
         if let Some(rest) = self.input.strip_prefix(['-', '+']) {
             self.input = rest;
         }
         if let Some(rest) = self.input.strip_prefix("0x") {
             self.input = rest;
-            self.unsigned_hex()?;
+            valid &= self.unsigned_hex::<true>().is_some();
             if let Some(rest) = self.input.strip_prefix('.') {
                 self.input = rest;
-                self.unsigned_hex()?;
+                if rest.starts_with(|c: char| c.is_ascii_hexdigit()) {
+                    valid &= self.unsigned_hex::<true>().is_some();
+                }
             }
             if let Some(rest) = self.input.strip_prefix(['p', 'P']) {
                 self.input = rest.strip_prefix(['-', '+']).unwrap_or(rest);
-                self.unsigned_dec()?;
+                valid &= self
+                    .unsigned_hex::<true>()
+                    .filter(|text| text.bytes().all(|b| b.is_ascii_digit() || b == b'_'))
+                    .is_some();
             }
         } else if self.input.starts_with(|c: char| c.is_ascii_digit()) {
-            self.unsigned_dec()?;
+            valid &= self.unsigned_dec::<true>().is_some();
             if let Some(rest) = self.input.strip_prefix('.') {
                 self.input = rest;
-                self.unsigned_dec()?;
+                if rest.starts_with(|c: char| c.is_ascii_digit()) {
+                    valid &= self.unsigned_dec::<true>().is_some();
+                }
             }
             if let Some(rest) = self.input.strip_prefix(['e', 'E']) {
                 self.input = rest.strip_prefix(['-', '+']).unwrap_or(rest);
-                self.unsigned_dec()?;
+                valid &= self.unsigned_dec::<true>().is_some();
             }
         } else if let Some(rest) = self
             .input
@@ -302,17 +324,25 @@ impl<'s> Lexer<'s> {
             self.input = rest;
             if let Some(rest) = rest.strip_prefix(":0x") {
                 self.input = rest;
-                self.unsigned_hex()?;
+                valid &= self.unsigned_hex::<true>().is_some();
             }
         } else {
             return None;
         }
-        checkpoint
-            .get(..checkpoint.len() - self.input.len())
-            .map(|text| Token {
-                kind: SyntaxKind::FLOAT,
-                text,
-            })
+        if self.input.starts_with(is_id_char) {
+            None
+        } else {
+            checkpoint
+                .get(..checkpoint.len() - self.input.len())
+                .map(|text| Token {
+                    kind: if valid {
+                        SyntaxKind::FLOAT
+                    } else {
+                        SyntaxKind::ERROR
+                    },
+                    text,
+                })
+        }
     }
 
     fn mem_arg(&mut self) -> Option<Token<'s>> {
@@ -336,7 +366,7 @@ impl<'s> Lexer<'s> {
             ' ' | '\n' | '\t' | '\r' | '(' => None,
             ';' if matches!(chars.peek(), Some(';')) => None,
             ')' if !self.top_level => None,
-            'a'..='z' | 'A'..='Z' | '_' | '$' => {
+            'a'..='z' | 'A'..='Z' | '_' | '$' | '0'..='9' | '.' | '-' | '+' => {
                 let end = self
                     .input
                     .find(|c| !is_id_char(c))
@@ -347,11 +377,6 @@ impl<'s> Lexer<'s> {
             '"' => {
                 let checkpoint = self.input;
                 let _ = self.string();
-                checkpoint.get(..checkpoint.len() - self.input.len())
-            }
-            '0'..='9' | '-' | '+' => {
-                let checkpoint = self.input;
-                let _ = self.float();
                 checkpoint.get(..checkpoint.len() - self.input.len())
             }
             c => {
