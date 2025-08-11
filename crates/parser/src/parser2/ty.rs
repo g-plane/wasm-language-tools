@@ -77,23 +77,22 @@ impl Parser<'_> {
     }
 
     pub(super) fn parse_global_type(&mut self) -> Option<GreenNode> {
-        self.lexer
-            .eat(L_PAREN)
-            .and_then(|l_paren| {
-                let mut children = Vec::with_capacity(5);
-                children.push(l_paren.into());
-                self.parse_trivias(&mut children);
-                children.push(self.lexer.keyword("mut")?.into());
-                if !self.recover(Self::parse_value_type, &mut children) {
-                    self.report_missing(Message::Name("value type"));
-                }
-                self.expect_right_paren(&mut children);
-                Some(node(GLOBAL_TYPE, children))
-            })
-            .or_else(|| {
-                self.parse_value_type()
-                    .map(|value_type| node(GLOBAL_TYPE, [value_type]))
-            })
+        if let Some(mut children) = self.try_parse(|parser| {
+            let mut children = Vec::with_capacity(2);
+            children.push(parser.lexer.next(L_PAREN)?.into());
+            parser.parse_trivias(&mut children);
+            children.push(parser.lexer.keyword("mut")?.into());
+            Some(children)
+        }) {
+            if !self.recover(Self::parse_value_type, &mut children) {
+                self.report_missing(Message::Name("value type"));
+            }
+            self.expect_right_paren(&mut children);
+            Some(node(GLOBAL_TYPE, children))
+        } else {
+            self.parse_value_type()
+                .map(|value_type| node(GLOBAL_TYPE, [value_type]))
+        }
     }
 
     pub(super) fn parse_heap_type<const IMMEDIATE: bool>(&mut self) -> Option<GreenNode> {
