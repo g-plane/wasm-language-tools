@@ -31,6 +31,31 @@ impl<'s> Parser<'s> {
         }
     }
 
+    pub(super) fn retry<T: Into<GreenElement>>(
+        &mut self,
+        parser: fn(&mut Self) -> Option<T>,
+        children: &mut Vec<GreenElement>,
+    ) -> bool {
+        loop {
+            let trivias = self.parse_trivias_deferred();
+            let checkpoint = self.lexer.checkpoint();
+            if let Some(node_or_token) = parser(self) {
+                trivias.commit(children);
+                children.push(node_or_token.into());
+                return true;
+            }
+            self.lexer.reset(checkpoint);
+            if let Some(token) = self.lexer.eat(SyntaxKind::ERROR) {
+                trivias.commit(children);
+                self.report_error_token(&token, Message::Description("unexpected token"));
+                children.push(token.into());
+            } else {
+                trivias.rollback(&mut self.lexer);
+                return false;
+            }
+        }
+    }
+
     pub(super) fn try_parse<T>(
         &mut self,
         parser: impl FnOnce(&mut Self) -> Option<T>,
@@ -93,11 +118,13 @@ impl<'s> Parser<'s> {
                 if let Some(mut token) = self.lexer.eat(SyntaxKind::L_PAREN) {
                     trivias.commit(&mut tokens);
                     token.kind = SyntaxKind::ERROR;
+                    self.report_error_token(&token, Message::Description("unexpected token"));
                     tokens.push(token.into());
                     stack += 1;
                 } else if let Some(mut token) = self.lexer.eat(SyntaxKind::R_PAREN) {
                     trivias.commit(&mut tokens);
                     token.kind = SyntaxKind::ERROR;
+                    self.report_error_token(&token, Message::Description("unexpected token"));
                     tokens.push(token.into());
                     stack -= 1;
                     if stack == 0 {
@@ -145,14 +172,17 @@ impl<'s> Parser<'s> {
                 return;
             }
             if let Some(token) = self.lexer.peek(SyntaxKind::L_PAREN) {
-                trivias.rollback(&mut self.lexer);
-                self.report_error_token(&token, Message::Char(')'));
-                return;
+                // a trick:
+                // if there're newlines before next left paren, we should exit from current parsing node
+                if trivias.tokens.iter().any(|token| token.text.contains('\n')) {
+                    trivias.rollback(&mut self.lexer);
+                    self.report_error_token(&token, Message::Char(')'));
+                    return;
+                }
             }
-            if let Some(token) = self.lexer.eat(SyntaxKind::ERROR) {
+            if let Some(mut tokens) = self.parse_errors() {
                 trivias.commit(children);
-                self.report_error_token(&token, Message::Char(')'));
-                children.push(token.into());
+                children.append(&mut tokens);
             } else {
                 trivias.rollback(&mut self.lexer);
                 let start = self.source.len();

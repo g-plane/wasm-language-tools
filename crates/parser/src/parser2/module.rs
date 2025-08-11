@@ -64,7 +64,7 @@ impl Parser<'_> {
     }
 
     fn parse_export(&mut self, mut children: Vec<GreenElement>) -> GreenNode {
-        if !self.recover(Self::parse_name, &mut children) {
+        if !self.retry(Self::parse_name, &mut children) {
             self.report_missing(Message::Name("export name"));
         }
         self.expect_right_paren(&mut children);
@@ -93,10 +93,10 @@ impl Parser<'_> {
     }
 
     fn parse_import(&mut self, mut children: Vec<GreenElement>) -> GreenNode {
-        if !self.recover(Self::parse_module_name, &mut children) {
+        if !self.retry(Self::parse_module_name, &mut children) {
             self.report_missing(Message::Name("import module name"));
         }
-        if !self.recover(Self::parse_name, &mut children) {
+        if !self.retry(Self::parse_name, &mut children) {
             self.report_missing(Message::Name("import name"));
         }
         self.expect_right_paren(&mut children);
@@ -364,10 +364,10 @@ impl Parser<'_> {
     }
 
     fn parse_module_field_export(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        if !self.recover(Self::parse_name, &mut children) {
+        if !self.retry(Self::parse_name, &mut children) {
             self.report_missing(Message::Name("export name"));
         }
-        if !self.recover(Self::parse_export_desc, &mut children) {
+        if !self.retry(Self::parse_export_desc, &mut children) {
             self.report_missing(Message::Name("export descriptor"));
         }
         self.expect_right_paren(&mut children);
@@ -406,13 +406,13 @@ impl Parser<'_> {
     }
 
     fn parse_module_field_import(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        if !self.recover(Self::parse_module_name, &mut children) {
+        if !self.retry(Self::parse_module_name, &mut children) {
             self.report_missing(Message::Name("import module name"));
         }
-        if !self.recover(Self::parse_name, &mut children) {
+        if !self.retry(Self::parse_name, &mut children) {
             self.report_missing(Message::Name("import name"));
         }
-        if !self.recover(Self::parse_import_desc, &mut children) {
+        if !self.retry(Self::parse_import_desc, &mut children) {
             self.report_missing(Message::Name("import descriptor"));
         }
         self.expect_right_paren(&mut children);

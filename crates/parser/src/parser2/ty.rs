@@ -215,7 +215,7 @@ impl Parser<'_> {
         let mut children = Vec::with_capacity(3);
         children.push(self.lexer.next(L_PAREN)?.into());
         self.parse_trivias(&mut children);
-        let mut keyword = self.lexer.next(KEYWORD)?;
+        let keyword = self.lexer.next(KEYWORD)?;
         match keyword.text {
             "func" => {
                 children.push(keyword.into());
@@ -246,20 +246,13 @@ impl Parser<'_> {
                     children.push(index.into());
                 }
 
-                if !self.recover(Self::parse_composite_type, &mut children) {
+                if !self.retry(Self::parse_composite_type, &mut children) {
                     self.report_missing(Message::Name("composite type"));
                 }
                 self.expect_right_paren(&mut children);
                 Some(node(SUB_TYPE, children))
             }
-            _ => {
-                keyword.kind = ERROR;
-                self.report_error_token(&keyword, Message::Description("invalid sub type"));
-                children.push(keyword.into());
-                while self.eat(ERROR, &mut children) {}
-                self.eat(R_PAREN, &mut children);
-                Some(node(SUB_TYPE, children))
-            }
+            _ => None,
         }
     }
 
