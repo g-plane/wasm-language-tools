@@ -366,7 +366,7 @@ impl<'s> Lexer<'s> {
             ' ' | '\n' | '\t' | '\r' | '(' => None,
             ';' if matches!(chars.peek(), Some(';')) => None,
             ')' if !self.top_level => None,
-            'a'..='z' | 'A'..='Z' | '_' | '$' | '0'..='9' | '.' | '-' | '+' => {
+            c if is_id_char(c) => {
                 let end = self
                     .input
                     .find(|c| !is_id_char(c))
