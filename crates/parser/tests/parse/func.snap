@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..1882
-  MODULE@0..1881
+ROOT@0..1930
+  MODULE@0..1929
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -1060,6 +1060,31 @@ ROOT@0..1882
             R_PAREN@1876..1877 ")"
           R_PAREN@1877..1878 ")"
       R_PAREN@1878..1879 ")"
-    WHITESPACE@1879..1880 "\n"
-    R_PAREN@1880..1881 ")"
-  WHITESPACE@1881..1882 "\n"
+    WHITESPACE@1879..1883 "\n\n  "
+    MODULE_FIELD_FUNC@1883..1927
+      L_PAREN@1883..1884 "("
+      KEYWORD@1884..1888 "func"
+      WHITESPACE@1888..1889 " "
+      TYPE_USE@1889..1900
+        PARAM@1889..1900
+          L_PAREN@1889..1890 "("
+          KEYWORD@1890..1895 "param"
+          WHITESPACE@1895..1896 " "
+          NUM_TYPE@1896..1899
+            TYPE_KEYWORD@1896..1899 "i32"
+          R_PAREN@1899..1900 ")"
+      WHITESPACE@1900..1905 "\n    "
+      PLAIN_INSTR@1905..1923
+        L_PAREN@1905..1906 "("
+        WHITESPACE@1906..1907 " "
+        INSTR_NAME@1907..1916 "local.get"
+        WHITESPACE@1916..1920 "    "
+        IMMEDIATE@1920..1921
+          INT@1920..1921 "0"
+        WHITESPACE@1921..1922 " "
+        R_PAREN@1922..1923 ")"
+      WHITESPACE@1923..1926 "\n  "
+      R_PAREN@1926..1927 ")"
+    WHITESPACE@1927..1928 "\n"
+    R_PAREN@1928..1929 ")"
+  WHITESPACE@1929..1930 "\n"

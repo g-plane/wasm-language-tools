@@ -61,4 +61,8 @@
 
   (func (param (ref 0)))
   (func (result (ref 0)))
+
+  (func (param i32)
+    ( local.get    0 )
+  )
 )

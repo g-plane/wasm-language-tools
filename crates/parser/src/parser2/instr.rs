@@ -162,6 +162,7 @@ impl Parser<'_> {
         if let Some(token) = self.lexer.eat(L_PAREN) {
             let mut children = Vec::with_capacity(4);
             children.push(token.into());
+            self.parse_trivias(&mut children);
             let mut token = self.expect(INSTR_NAME)?;
             match token.text {
                 "if" => {
