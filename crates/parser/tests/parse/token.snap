@@ -18,7 +18,13 @@ ROOT@0..25
     R_PAREN@23..24 ")"
   WHITESPACE@24..25 "\n"
 
-error: invalid instruction name
+error: expected instruction name
+  ┌─ token.wat:1:18
+  │
+1 │ (module (func br 0drop))
+  │                  ^^^^^
+
+error: unexpected token
   ┌─ token.wat:1:18
   │
 1 │ (module (func br 0drop))

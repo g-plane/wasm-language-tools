@@ -68,25 +68,43 @@ ROOT@0..104
     R_PAREN@102..103 ")"
   WHITESPACE@103..104 "\n"
 
-error: expected `result`
+error: unexpected token
   ┌─ type-malformed.wat:2:29
   │
 2 │   (type (func (result i32) (param i32)))
-  │                             ^^^^^^^^^^
+  │                             ^^^^^
 
-error: expected value type
+error: unexpected token
+  ┌─ type-malformed.wat:2:35
+  │
+2 │   (type (func (result i32) (param i32)))
+  │                                   ^^^
+
+error: unexpected token
+  ┌─ type-malformed.wat:2:38
+  │
+2 │   (type (func (result i32) (param i32)))
+  │                                      ^
+
+error: expected type keyword
   ┌─ type-malformed.wat:3:23
   │
 3 │   (type (func (result $x i32)))
   │                       ^^
 
-error: expected `(`
+error: unexpected token
+  ┌─ type-malformed.wat:3:23
+  │
+3 │   (type (func (result $x i32)))
+  │                       ^^
+
+error: expected sub type
   ┌─ type-malformed.wat:4:8
   │
 4 │   (type)
   │        ^
 
-error: expected `sub`
+error: unexpected token
   ┌─ type-malformed.wat:5:10
   │
 5 │   (type ())

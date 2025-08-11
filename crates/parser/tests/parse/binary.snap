@@ -47,61 +47,61 @@ ROOT@0..162
     R_PAREN@160..161 ")"
   WHITESPACE@161..162 "\n"
 
-error: expected module field
+error: unexpected token
   ┌─ binary.wat:1:9
   │
 1 │ (module binary "\00asm\01\00\00\00")
   │         ^^^^^^
 
-error: expected module field
+error: unexpected token
   ┌─ binary.wat:1:16
   │
 1 │ (module binary "\00asm\01\00\00\00")
   │                ^^^^^^^^^^^^^^^^^^^^
 
-error: expected module field
+error: unexpected token
   ┌─ binary.wat:2:9
   │
 2 │ (module binary "\00asm" "\01\00\00\00")
   │         ^^^^^^
 
-error: expected module field
+error: unexpected token
   ┌─ binary.wat:2:16
   │
 2 │ (module binary "\00asm" "\01\00\00\00")
   │                ^^^^^^^^
 
-error: expected module field
+error: unexpected token
   ┌─ binary.wat:2:25
   │
 2 │ (module binary "\00asm" "\01\00\00\00")
   │                         ^^^^^^^^^^^^^^
 
-error: expected module field
+error: unexpected token
   ┌─ binary.wat:3:13
   │
 3 │ (module $M1 binary "\00asm\01\00\00\00")
   │             ^^^^^^
 
-error: expected module field
+error: unexpected token
   ┌─ binary.wat:3:20
   │
 3 │ (module $M1 binary "\00asm\01\00\00\00")
   │                    ^^^^^^^^^^^^^^^^^^^^
 
-error: expected module field
+error: unexpected token
   ┌─ binary.wat:4:13
   │
 4 │ (module $M2 binary "\00asm" "\01\00\00\00")
   │             ^^^^^^
 
-error: expected module field
+error: unexpected token
   ┌─ binary.wat:4:20
   │
 4 │ (module $M2 binary "\00asm" "\01\00\00\00")
   │                    ^^^^^^^^
 
-error: expected module field
+error: unexpected token
   ┌─ binary.wat:4:29
   │
 4 │ (module $M2 binary "\00asm" "\01\00\00\00")

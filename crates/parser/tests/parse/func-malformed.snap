@@ -391,79 +391,79 @@ ROOT@0..631
     R_PAREN@629..630 ")"
   WHITESPACE@630..631 "\n"
 
-error: expected instruction
+error: invalid immediate
   ┌─ func-malformed.wat:2:41
   │
 2 │   (func (type $sig) (result i32) (param i32) (i32.const 0))
   │                                         ^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ func-malformed.wat:3:41
   │
 3 │   (func (param i32) (type $sig) (result i32) (i32.const 0))
   │                                         ^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ func-malformed.wat:5:41
   │
 5 │   (func (result i32) (type $sig) (param i32) (i32.const 0))
   │                                         ^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ func-malformed.wat:6:29
   │
 6 │   (func (result i32) (param i32) (type $sig) (i32.const 0))
   │                             ^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ func-malformed.wat:7:29
   │
 7 │   (func (result i32) (param i32) (i32.const 0))
   │                             ^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ func-malformed.wat:9:22
   │
 9 │   (func (nop) (local i32))
   │                      ^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ func-malformed.wat:10:22
    │
 10 │   (func (nop) (param i32))
    │                      ^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ func-malformed.wat:11:23
    │
 11 │   (func (nop) (result i32))
    │                       ^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ func-malformed.wat:12:28
    │
 12 │   (func (local i32) (param i32))
    │                            ^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ func-malformed.wat:13:29
    │
 13 │   (func (local i32) (result i32) (local.get 0))
    │                             ^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ func-malformed.wat:14:29
    │
 14 │   (func (result i32) (param i32) (local.get 0))
    │                             ^^^
 
-error: expected value type
+error: invalid value type
    ┌─ func-malformed.wat:16:19
    │
 16 │   (func (param $p i))
    │                   ^
 
-error: expected idx
+error: unexpected token
    ┌─ func-malformed.wat:17:15
    │
 17 │   (func (type $))

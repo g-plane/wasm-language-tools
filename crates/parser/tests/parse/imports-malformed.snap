@@ -152,25 +152,31 @@ ROOT@0..236
     R_PAREN@234..235 ")"
   WHITESPACE@235..236 "\n"
 
-error: expected string literal
+error: expected import module name
   ┌─ imports-malformed.wat:2:11
   │
 2 │   (import ())
-  │           ^^
+  │           ^
 
-error: expected string literal
-  ┌─ imports-malformed.wat:2:13
+error: expected import name
+  ┌─ imports-malformed.wat:2:11
   │
 2 │   (import ())
-  │             ^
+  │           ^
 
 error: expected import descriptor
-  ┌─ imports-malformed.wat:2:13
+  ┌─ imports-malformed.wat:2:11
   │
 2 │   (import ())
-  │             ^
+  │           ^
 
-error: expected string literal
+error: unexpected token
+  ┌─ imports-malformed.wat:2:12
+  │
+2 │   (import ())
+  │            ^
+
+error: expected import name
   ┌─ imports-malformed.wat:3:13
   │
 3 │   (import "")
@@ -188,23 +194,41 @@ error: expected import descriptor
 4 │   (import "" "")
   │                ^
 
-error: expected string literal
+error: expected import name
   ┌─ imports-malformed.wat:5:14
   │
 5 │   (import "" ())
-  │              ^^
+  │              ^
 
 error: expected import descriptor
-  ┌─ imports-malformed.wat:5:16
+  ┌─ imports-malformed.wat:5:14
   │
 5 │   (import "" ())
-  │                ^
+  │              ^
+
+error: unexpected token
+  ┌─ imports-malformed.wat:5:15
+  │
+5 │   (import "" ())
+  │               ^
 
 error: expected import descriptor
   ┌─ imports-malformed.wat:6:17
   │
 6 │   (import "" "" ())
-  │                 ^^
+  │                 ^
+
+error: unexpected token
+  ┌─ imports-malformed.wat:6:18
+  │
+6 │   (import "" "" ())
+  │                  ^
+
+error: expected type use
+  ┌─ imports-malformed.wat:7:23
+  │
+7 │   (import "" "" (func ))
+  │                       ^
 
 error: expected table type
   ┌─ imports-malformed.wat:8:24
@@ -218,25 +242,25 @@ error: expected memory type
 9 │   (import "" "" (memory ))
   │                         ^
 
-error: expected `(`
+error: expected global type
    ┌─ imports-malformed.wat:10:25
    │
 10 │   (import "" "" (global ))
    │                         ^
 
-error: expected string literal
+error: expected import module name
    ┌─ imports-malformed.wat:11:16
    │
 11 │   (func (import))
    │                ^
 
-error: expected string literal
+error: expected import name
    ┌─ imports-malformed.wat:11:16
    │
 11 │   (func (import))
    │                ^
 
-error: expected string literal
+error: expected import name
    ┌─ imports-malformed.wat:12:19
    │
 12 │   (func (import ""))

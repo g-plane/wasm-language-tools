@@ -66,7 +66,8 @@ ROOT@0..1361
         L_PAREN@120..121 "("
         INSTR_NAME@121..130 "f32.const"
         WHITESPACE@130..131 " "
-        ERROR@131..134 "99_"
+        IMMEDIATE@131..134
+          ERROR@131..134 "99_"
         R_PAREN@134..135 ")"
       R_PAREN@135..136 ")"
     WHITESPACE@136..139 "\n  "
@@ -98,7 +99,8 @@ ROOT@0..1361
         L_PAREN@183..184 "("
         INSTR_NAME@184..193 "f32.const"
         WHITESPACE@193..194 " "
-        ERROR@194..198 "1.0_"
+        IMMEDIATE@194..198
+          ERROR@194..198 "1.0_"
         R_PAREN@198..199 ")"
       R_PAREN@199..200 ")"
     WHITESPACE@200..203 "\n  "
@@ -114,7 +116,8 @@ ROOT@0..1361
         L_PAREN@215..216 "("
         INSTR_NAME@216..225 "f32.const"
         WHITESPACE@225..226 " "
-        ERROR@226..230 "1_.0"
+        IMMEDIATE@226..230
+          ERROR@226..230 "1_.0"
         R_PAREN@230..231 ")"
       R_PAREN@231..232 ")"
     WHITESPACE@232..235 "\n  "
@@ -162,7 +165,8 @@ ROOT@0..1361
         L_PAREN@311..312 "("
         INSTR_NAME@312..321 "f32.const"
         WHITESPACE@321..322 " "
-        ERROR@322..326 "1e1_"
+        IMMEDIATE@322..326
+          ERROR@322..326 "1e1_"
         R_PAREN@326..327 ")"
       R_PAREN@327..328 ")"
     WHITESPACE@328..331 "\n  "
@@ -178,7 +182,8 @@ ROOT@0..1361
         L_PAREN@343..344 "("
         INSTR_NAME@344..353 "f32.const"
         WHITESPACE@353..354 " "
-        ERROR@354..358 "1_e1"
+        IMMEDIATE@354..358
+          ERROR@354..358 "1_e1"
         R_PAREN@358..359 ")"
       R_PAREN@359..360 ")"
     WHITESPACE@360..363 "\n  "
@@ -226,7 +231,8 @@ ROOT@0..1361
         L_PAREN@441..442 "("
         INSTR_NAME@442..451 "f32.const"
         WHITESPACE@451..452 " "
-        ERROR@452..458 "1.0e1_"
+        IMMEDIATE@452..458
+          ERROR@452..458 "1.0e1_"
         R_PAREN@458..459 ")"
       R_PAREN@459..460 ")"
     WHITESPACE@460..463 "\n  "
@@ -242,7 +248,8 @@ ROOT@0..1361
         L_PAREN@475..476 "("
         INSTR_NAME@476..485 "f32.const"
         WHITESPACE@485..486 " "
-        ERROR@486..492 "1.0_e1"
+        IMMEDIATE@486..492
+          ERROR@486..492 "1.0_e1"
         R_PAREN@492..493 ")"
       R_PAREN@493..494 ")"
     WHITESPACE@494..497 "\n  "
@@ -354,7 +361,8 @@ ROOT@0..1361
         L_PAREN@715..716 "("
         INSTR_NAME@716..725 "f32.const"
         WHITESPACE@725..726 " "
-        ERROR@726..731 "0x00_"
+        IMMEDIATE@726..731
+          ERROR@726..731 "0x00_"
         R_PAREN@731..732 ")"
       R_PAREN@732..733 ")"
     WHITESPACE@733..736 "\n  "
@@ -371,7 +379,7 @@ ROOT@0..1361
         INSTR_NAME@749..758 "f32.const"
         WHITESPACE@758..759 " "
         IMMEDIATE@759..769
-          INT@759..769 "0xff__ffff"
+          ERROR@759..769 "0xff__ffff"
         R_PAREN@769..770 ")"
       R_PAREN@770..771 ")"
     WHITESPACE@771..774 "\n  "
@@ -403,7 +411,8 @@ ROOT@0..1361
         L_PAREN@820..821 "("
         INSTR_NAME@821..830 "f32.const"
         WHITESPACE@830..831 " "
-        ERROR@831..837 "0x1.0_"
+        IMMEDIATE@831..837
+          ERROR@831..837 "0x1.0_"
         R_PAREN@837..838 ")"
       R_PAREN@838..839 ")"
     WHITESPACE@839..842 "\n  "
@@ -419,7 +428,8 @@ ROOT@0..1361
         L_PAREN@854..855 "("
         INSTR_NAME@855..864 "f32.const"
         WHITESPACE@864..865 " "
-        ERROR@865..871 "0x1_.0"
+        IMMEDIATE@865..871
+          ERROR@865..871 "0x1_.0"
         R_PAREN@871..872 ")"
       R_PAREN@872..873 ")"
     WHITESPACE@873..876 "\n  "
@@ -467,7 +477,8 @@ ROOT@0..1361
         L_PAREN@956..957 "("
         INSTR_NAME@957..966 "f32.const"
         WHITESPACE@966..967 " "
-        ERROR@967..973 "0x1p1_"
+        IMMEDIATE@967..973
+          ERROR@967..973 "0x1p1_"
         R_PAREN@973..974 ")"
       R_PAREN@974..975 ")"
     WHITESPACE@975..978 "\n  "
@@ -483,7 +494,8 @@ ROOT@0..1361
         L_PAREN@990..991 "("
         INSTR_NAME@991..1000 "f32.const"
         WHITESPACE@1000..1001 " "
-        ERROR@1001..1007 "0x1_p1"
+        IMMEDIATE@1001..1007
+          ERROR@1001..1007 "0x1_p1"
         R_PAREN@1007..1008 ")"
       R_PAREN@1008..1009 ")"
     WHITESPACE@1009..1012 "\n  "
@@ -531,7 +543,8 @@ ROOT@0..1361
         L_PAREN@1094..1095 "("
         INSTR_NAME@1095..1104 "f32.const"
         WHITESPACE@1104..1105 " "
-        ERROR@1105..1113 "0x1.0p1_"
+        IMMEDIATE@1105..1113
+          ERROR@1105..1113 "0x1.0p1_"
         R_PAREN@1113..1114 ")"
       R_PAREN@1114..1115 ")"
     WHITESPACE@1115..1118 "\n  "
@@ -547,7 +560,8 @@ ROOT@0..1361
         L_PAREN@1130..1131 "("
         INSTR_NAME@1131..1140 "f32.const"
         WHITESPACE@1140..1141 " "
-        ERROR@1141..1149 "0x1.0_p1"
+        IMMEDIATE@1141..1149
+          ERROR@1141..1149 "0x1.0_p1"
         R_PAREN@1149..1150 ")"
       R_PAREN@1150..1151 ")"
     WHITESPACE@1151..1154 "\n  "
@@ -644,229 +658,235 @@ ROOT@0..1361
     R_PAREN@1359..1360 ")"
   WHITESPACE@1360..1361 "\n"
 
-error: expected instruction
+error: invalid immediate
   ┌─ float-literals-malformed.wat:2:26
   │
 2 │   (global f32 (f32.const _100))
   │                          ^^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ float-literals-malformed.wat:3:26
   │
 3 │   (global f32 (f32.const +_100))
   │                          ^^^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ float-literals-malformed.wat:4:26
   │
 4 │   (global f32 (f32.const -_100))
   │                          ^^^^^
 
-error: expected instruction
+error: invalid float literal
   ┌─ float-literals-malformed.wat:5:26
   │
 5 │   (global f32 (f32.const 99_))
   │                          ^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ float-literals-malformed.wat:6:26
   │
 6 │   (global f32 (f32.const _1.0))
   │                          ^^^^
 
-error: expected instruction
+error: invalid float literal
   ┌─ float-literals-malformed.wat:7:26
   │
 7 │   (global f32 (f32.const 1.0_))
   │                          ^^^^
 
-error: expected instruction
+error: invalid float literal
   ┌─ float-literals-malformed.wat:8:26
   │
 8 │   (global f32 (f32.const 1_.0))
   │                          ^^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ float-literals-malformed.wat:9:26
   │
 9 │   (global f32 (f32.const 1._0))
   │                          ^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:10:26
    │
 10 │   (global f32 (f32.const _1e1))
    │                          ^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ float-literals-malformed.wat:11:26
    │
 11 │   (global f32 (f32.const 1e1_))
    │                          ^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ float-literals-malformed.wat:12:26
    │
 12 │   (global f32 (f32.const 1_e1))
    │                          ^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:13:26
    │
 13 │   (global f32 (f32.const 1e_1))
    │                          ^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:14:26
    │
 14 │   (global f32 (f32.const _1.0e1))
    │                          ^^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ float-literals-malformed.wat:15:26
    │
 15 │   (global f32 (f32.const 1.0e1_))
    │                          ^^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ float-literals-malformed.wat:16:26
    │
 16 │   (global f32 (f32.const 1.0_e1))
    │                          ^^^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:17:26
    │
 17 │   (global f32 (f32.const 1.0e_1))
    │                          ^^^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:18:26
    │
 18 │   (global f32 (f32.const 1.0e+_1))
    │                          ^^^^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:19:26
    │
 19 │   (global f32 (f32.const 1.0e_+1))
    │                          ^^^^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:20:26
    │
 20 │   (global f32 (f32.const _0x100))
    │                          ^^^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:21:26
    │
 21 │   (global f32 (f32.const 0_x100))
    │                          ^^^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:22:26
    │
 22 │   (global f32 (f32.const 0x_100))
    │                          ^^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ float-literals-malformed.wat:23:26
    │
 23 │   (global f32 (f32.const 0x00_))
    │                          ^^^^^
 
-error: expected instruction
+error: invalid float literal
+   ┌─ float-literals-malformed.wat:24:26
+   │
+24 │   (global f32 (f32.const 0xff__ffff))
+   │                          ^^^^^^^^^^
+
+error: invalid immediate
    ┌─ float-literals-malformed.wat:25:26
    │
 25 │   (global f32 (f32.const 0x_1.0))
    │                          ^^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ float-literals-malformed.wat:26:26
    │
 26 │   (global f32 (f32.const 0x1.0_))
    │                          ^^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ float-literals-malformed.wat:27:26
    │
 27 │   (global f32 (f32.const 0x1_.0))
    │                          ^^^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:28:26
    │
 28 │   (global f32 (f32.const 0x1._0))
    │                          ^^^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:29:26
    │
 29 │   (global f32 (f32.const 0x_1p1))
    │                          ^^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ float-literals-malformed.wat:30:26
    │
 30 │   (global f32 (f32.const 0x1p1_))
    │                          ^^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ float-literals-malformed.wat:31:26
    │
 31 │   (global f32 (f32.const 0x1_p1))
    │                          ^^^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:32:26
    │
 32 │   (global f32 (f32.const 0x1p_1))
    │                          ^^^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:33:26
    │
 33 │   (global f32 (f32.const 0x_1.0p1))
    │                          ^^^^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ float-literals-malformed.wat:34:26
    │
 34 │   (global f32 (f32.const 0x1.0p1_))
    │                          ^^^^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ float-literals-malformed.wat:35:26
    │
 35 │   (global f32 (f32.const 0x1.0_p1))
    │                          ^^^^^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:36:26
    │
 36 │   (global f32 (f32.const 0x1.0p_1))
    │                          ^^^^^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:37:26
    │
 37 │   (global f32 (f32.const 0x1.0p+_1))
    │                          ^^^^^^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:38:26
    │
 38 │   (global f32 (f32.const 0x1.0p_+1))
    │                          ^^^^^^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:39:33
    │
 39 │   (func (result i32) (i32.const nan:arithmetic))
    │                                 ^^^^^^^^^^^^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ float-literals-malformed.wat:40:33
    │
 40 │   (func (result i32) (i32.const nan:canonical))

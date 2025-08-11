@@ -61,25 +61,37 @@ ROOT@0..89
     R_PAREN@87..88 ")"
   WHITESPACE@88..89 "\n"
 
-error: expected `sub`
+error: unexpected token
   ┌─ subtyping-malformed.wat:2:10
   │
 2 │   (type (su))
-  │          ^^^
+  │          ^^
 
-error: expected `(`
+error: unexpected token
+  ┌─ subtyping-malformed.wat:2:12
+  │
+2 │   (type (su))
+  │            ^
+
+error: expected composite type
   ┌─ subtyping-malformed.wat:3:13
   │
 3 │   (type (sub))
   │             ^
 
-error: expected `array`
+error: expected composite type
+  ┌─ subtyping-malformed.wat:4:14
+  │
+4 │   (type (sub ()))
+  │              ^
+
+error: unexpected token
   ┌─ subtyping-malformed.wat:4:15
   │
 4 │   (type (sub ()))
   │               ^
 
-error: expected `(`
+error: unexpected token
   ┌─ subtyping-malformed.wat:5:16
   │
 5 │   (type (sub 0 final (struct)))

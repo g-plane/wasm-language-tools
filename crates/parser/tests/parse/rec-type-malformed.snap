@@ -25,14 +25,20 @@ ROOT@0..38
     R_PAREN@36..37 ")"
   WHITESPACE@37..38 "\n"
 
-error: expected `(`
+error: unexpected token
   ┌─ rec-type-malformed.wat:2:8
   │
 2 │   (rec type)
   │        ^^^^
 
-error: expected `type`
+error: unexpected token
   ┌─ rec-type-malformed.wat:3:9
   │
 3 │   (rec (func))
-  │         ^^^^^
+  │         ^^^^
+
+error: unexpected token
+  ┌─ rec-type-malformed.wat:3:13
+  │
+3 │   (rec (func))
+  │             ^

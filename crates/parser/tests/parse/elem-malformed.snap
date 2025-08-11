@@ -122,43 +122,43 @@ ROOT@0..202
     R_PAREN@200..201 ")"
   WHITESPACE@201..202 "\n"
 
-error: expected offset
-  ┌─ elem-malformed.wat:2:9
+error: unexpected token
+  ┌─ elem-malformed.wat:2:10
   │
 2 │   (elem ())
-  │         ^^
+  │          ^
 
-error: expected offset
+error: unexpected token
   ┌─ elem-malformed.wat:3:9
   │
 3 │   (elem dec)
   │         ^^^
 
-error: expected ref type
+error: expected elem list
   ┌─ elem-malformed.wat:4:16
   │
 4 │   (elem declare)
   │                ^
 
-error: expected ref type
+error: unexpected token
   ┌─ elem-malformed.wat:5:18
   │
 5 │   (elem declare ())
   │                  ^
 
-error: invalid instruction name
-  ┌─ elem-malformed.wat:6:17
+error: unexpected token
+  ┌─ elem-malformed.wat:6:18
   │
 6 │   (elem funcref ())
-  │                 ^^
+  │                  ^
 
-error: expected idx
-  ┌─ elem-malformed.wat:8:14
+error: unexpected token
+  ┌─ elem-malformed.wat:8:15
   │
 8 │   (elem func ())
-  │              ^^
+  │               ^
 
-error: expected idx
+error: expected index
   ┌─ elem-malformed.wat:9:15
   │
 9 │   (elem (table))
@@ -170,13 +170,13 @@ error: expected offset
 9 │   (elem (table))
   │                ^
 
-error: invalid instruction name
-   ┌─ elem-malformed.wat:10:27
+error: unexpected token
+   ┌─ elem-malformed.wat:10:28
    │
 10 │   (elem (table 0) (offset ()))
-   │                           ^^
+   │                            ^
 
-error: expected ref type
+error: unexpected token
    ┌─ elem-malformed.wat:11:19
    │
 11 │   (elem (offset) ())

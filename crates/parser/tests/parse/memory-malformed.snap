@@ -35,13 +35,19 @@ error: expected memory type
 2 │   (memory)
   │          ^
 
-error: expected memory type
+error: expected unsigned integer
   ┌─ memory-malformed.wat:3:11
   │
 3 │   (memory "")
   │           ^^
 
-error: expected `data`
+error: unexpected token
+  ┌─ memory-malformed.wat:3:11
+  │
+3 │   (memory "")
+  │           ^^
+
+error: unexpected token
   ┌─ memory-malformed.wat:4:12
   │
 4 │   (memory ())

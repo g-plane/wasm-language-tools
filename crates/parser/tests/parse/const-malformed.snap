@@ -14,7 +14,8 @@ ROOT@0..570
         L_PAREN@16..17 "("
         INSTR_NAME@17..26 "i32.const"
         WHITESPACE@26..27 " "
-        ERROR@27..29 "0x"
+        IMMEDIATE@27..29
+          ERROR@27..29 "0x"
         R_PAREN@29..30 ")"
       WHITESPACE@30..31 " "
       PLAIN_INSTR@31..35
@@ -89,7 +90,8 @@ ROOT@0..570
         L_PAREN@164..165 "("
         INSTR_NAME@165..174 "f32.const"
         WHITESPACE@174..175 " "
-        ERROR@175..177 "0e"
+        IMMEDIATE@175..177
+          ERROR@175..177 "0e"
         R_PAREN@177..178 ")"
       WHITESPACE@178..179 " "
       PLAIN_INSTR@179..183
@@ -104,7 +106,8 @@ ROOT@0..570
         L_PAREN@193..194 "("
         INSTR_NAME@194..203 "f32.const"
         WHITESPACE@203..204 " "
-        ERROR@204..207 "0e+"
+        IMMEDIATE@204..207
+          ERROR@204..207 "0e+"
         R_PAREN@207..208 ")"
       WHITESPACE@208..209 " "
       PLAIN_INSTR@209..213
@@ -119,7 +122,8 @@ ROOT@0..570
         L_PAREN@223..224 "("
         INSTR_NAME@224..233 "f32.const"
         WHITESPACE@233..234 " "
-        ERROR@234..238 "0.0e"
+        IMMEDIATE@234..238
+          ERROR@234..238 "0.0e"
         R_PAREN@238..239 ")"
       WHITESPACE@239..240 " "
       PLAIN_INSTR@240..244
@@ -134,7 +138,8 @@ ROOT@0..570
         L_PAREN@254..255 "("
         INSTR_NAME@255..264 "f32.const"
         WHITESPACE@264..265 " "
-        ERROR@265..270 "0.0e-"
+        IMMEDIATE@265..270
+          ERROR@265..270 "0.0e-"
         R_PAREN@270..271 ")"
       WHITESPACE@271..272 " "
       PLAIN_INSTR@272..276
@@ -149,7 +154,8 @@ ROOT@0..570
         L_PAREN@286..287 "("
         INSTR_NAME@287..296 "f32.const"
         WHITESPACE@296..297 " "
-        ERROR@297..300 "0x."
+        IMMEDIATE@297..300
+          ERROR@297..300 "0x."
         R_PAREN@300..301 ")"
       WHITESPACE@301..302 " "
       PLAIN_INSTR@302..306
@@ -179,7 +185,8 @@ ROOT@0..570
         L_PAREN@348..349 "("
         INSTR_NAME@349..358 "f32.const"
         WHITESPACE@358..359 " "
-        ERROR@359..363 "0x0p"
+        IMMEDIATE@359..363
+          ERROR@359..363 "0x0p"
         R_PAREN@363..364 ")"
       WHITESPACE@364..365 " "
       PLAIN_INSTR@365..369
@@ -194,7 +201,8 @@ ROOT@0..570
         L_PAREN@379..380 "("
         INSTR_NAME@380..389 "f32.const"
         WHITESPACE@389..390 " "
-        ERROR@390..395 "0x0p+"
+        IMMEDIATE@390..395
+          ERROR@390..395 "0x0p+"
         R_PAREN@395..396 ")"
       WHITESPACE@396..397 " "
       PLAIN_INSTR@397..401
@@ -209,7 +217,8 @@ ROOT@0..570
         L_PAREN@411..412 "("
         INSTR_NAME@412..421 "f32.const"
         WHITESPACE@421..422 " "
-        ERROR@422..427 "0x0p-"
+        IMMEDIATE@422..427
+          ERROR@422..427 "0x0p-"
         R_PAREN@427..428 ")"
       WHITESPACE@428..429 " "
       PLAIN_INSTR@429..433
@@ -224,7 +233,8 @@ ROOT@0..570
         L_PAREN@443..444 "("
         INSTR_NAME@444..453 "f32.const"
         WHITESPACE@453..454 " "
-        ERROR@454..460 "0x0.0p"
+        IMMEDIATE@454..460
+          ERROR@454..460 "0x0.0p"
         R_PAREN@460..461 ")"
       WHITESPACE@461..462 " "
       PLAIN_INSTR@462..466
@@ -239,7 +249,8 @@ ROOT@0..570
         L_PAREN@476..477 "("
         INSTR_NAME@477..486 "f32.const"
         WHITESPACE@486..487 " "
-        ERROR@487..494 "0x0.0p+"
+        IMMEDIATE@487..494
+          ERROR@487..494 "0x0.0p+"
         R_PAREN@494..495 ")"
       WHITESPACE@495..496 " "
       PLAIN_INSTR@496..500
@@ -254,7 +265,8 @@ ROOT@0..570
         L_PAREN@510..511 "("
         INSTR_NAME@511..520 "f32.const"
         WHITESPACE@520..521 " "
-        ERROR@521..528 "0x0.0p-"
+        IMMEDIATE@521..528
+          ERROR@521..528 "0x0.0p-"
         R_PAREN@528..529 ")"
       WHITESPACE@529..530 " "
       PLAIN_INSTR@530..534
@@ -269,7 +281,8 @@ ROOT@0..570
         L_PAREN@544..545 "("
         INSTR_NAME@545..554 "f32.const"
         WHITESPACE@554..555 " "
-        ERROR@555..560 "0x0pA"
+        IMMEDIATE@555..560
+          ERROR@555..560 "0x0pA"
         R_PAREN@560..561 ")"
       WHITESPACE@561..562 " "
       PLAIN_INSTR@562..566
@@ -279,109 +292,109 @@ ROOT@0..570
     R_PAREN@568..569 ")"
   WHITESPACE@569..570 "\n"
 
-error: expected instruction
+error: invalid float literal
   ┌─ const-malformed.wat:2:20
   │
 2 │   (func (i32.const 0x) drop)
   │                    ^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ const-malformed.wat:3:20
   │
 3 │   (func (i32.const 1x) drop)
   │                    ^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ const-malformed.wat:4:20
   │
 4 │   (func (i32.const 0xg) drop)
   │                    ^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ const-malformed.wat:5:20
   │
 5 │   (func (f32.const .0) drop)
   │                    ^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ const-malformed.wat:6:20
   │
 6 │   (func (f32.const .0e0) drop)
   │                    ^^^^
 
-error: expected instruction
+error: invalid float literal
   ┌─ const-malformed.wat:7:20
   │
 7 │   (func (f32.const 0e) drop)
   │                    ^^
 
-error: expected instruction
+error: invalid float literal
   ┌─ const-malformed.wat:8:20
   │
 8 │   (func (f32.const 0e+) drop)
   │                    ^^^
 
-error: expected instruction
+error: invalid float literal
   ┌─ const-malformed.wat:9:20
   │
 9 │   (func (f32.const 0.0e) drop)
   │                    ^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ const-malformed.wat:10:20
    │
 10 │   (func (f32.const 0.0e-) drop)
    │                    ^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ const-malformed.wat:11:20
    │
 11 │   (func (f32.const 0x.) drop)
    │                    ^^^
 
-error: expected instruction
+error: invalid immediate
    ┌─ const-malformed.wat:12:20
    │
 12 │   (func (f32.const 0x0.g) drop)
    │                    ^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ const-malformed.wat:13:20
    │
 13 │   (func (f32.const 0x0p) drop)
    │                    ^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ const-malformed.wat:14:20
    │
 14 │   (func (f32.const 0x0p+) drop)
    │                    ^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ const-malformed.wat:15:20
    │
 15 │   (func (f32.const 0x0p-) drop)
    │                    ^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ const-malformed.wat:16:20
    │
 16 │   (func (f32.const 0x0.0p) drop)
    │                    ^^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ const-malformed.wat:17:20
    │
 17 │   (func (f32.const 0x0.0p+) drop)
    │                    ^^^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ const-malformed.wat:18:20
    │
 18 │   (func (f32.const 0x0.0p-) drop)
    │                    ^^^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ const-malformed.wat:19:20
    │
 19 │   (func (f32.const 0x0pA) drop)

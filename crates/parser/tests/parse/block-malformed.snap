@@ -267,31 +267,31 @@ ROOT@0..421
     R_PAREN@419..420 ")"
   WHITESPACE@420..421 "\n"
 
-error: expected instruction
+error: invalid immediate
   ┌─ block-malformed.wat:2:62
   │
 2 │   (func (i32.const 0) (block (type $sig) (result i32) (param i32)))
   │                                                              ^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ block-malformed.wat:3:62
   │
 3 │   (func (i32.const 0) (block (param i32) (type $sig) (result i32)))
   │                                                              ^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ block-malformed.wat:5:62
   │
 5 │   (func (i32.const 0) (block (result i32) (type $sig) (param i32)))
   │                                                              ^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ block-malformed.wat:6:50
   │
 6 │   (func (i32.const 0) (block (result i32) (param i32) (type $sig)))
   │                                                  ^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ block-malformed.wat:7:50
   │
 7 │   (func (i32.const 0) (block (result i32) (param i32)))

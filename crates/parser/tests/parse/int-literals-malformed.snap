@@ -66,7 +66,8 @@ ROOT@0..346
         L_PAREN@120..121 "("
         INSTR_NAME@121..130 "i32.const"
         WHITESPACE@130..131 " "
-        ERROR@131..134 "99_"
+        IMMEDIATE@131..134
+          ERROR@131..134 "99_"
         R_PAREN@134..135 ")"
       R_PAREN@135..136 ")"
     WHITESPACE@136..139 "\n  "
@@ -83,7 +84,7 @@ ROOT@0..346
         INSTR_NAME@152..161 "i32.const"
         WHITESPACE@161..162 " "
         IMMEDIATE@162..168
-          INT@162..168 "1__000"
+          ERROR@162..168 "1__000"
         R_PAREN@168..169 ")"
       R_PAREN@169..170 ")"
     WHITESPACE@170..173 "\n  "
@@ -147,7 +148,8 @@ ROOT@0..346
         L_PAREN@287..288 "("
         INSTR_NAME@288..297 "i32.const"
         WHITESPACE@297..298 " "
-        ERROR@298..303 "0x00_"
+        IMMEDIATE@298..303
+          ERROR@298..303 "0x00_"
         R_PAREN@303..304 ")"
       R_PAREN@304..305 ")"
     WHITESPACE@305..308 "\n  "
@@ -164,57 +166,69 @@ ROOT@0..346
         INSTR_NAME@321..330 "i32.const"
         WHITESPACE@330..331 " "
         IMMEDIATE@331..341
-          INT@331..341 "0xff__ffff"
+          ERROR@331..341 "0xff__ffff"
         R_PAREN@341..342 ")"
       R_PAREN@342..343 ")"
     WHITESPACE@343..344 "\n"
     R_PAREN@344..345 ")"
   WHITESPACE@345..346 "\n"
 
-error: expected instruction
+error: invalid immediate
   ┌─ int-literals-malformed.wat:2:26
   │
 2 │   (global i32 (i32.const _100))
   │                          ^^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ int-literals-malformed.wat:3:26
   │
 3 │   (global i32 (i32.const +_100))
   │                          ^^^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ int-literals-malformed.wat:4:26
   │
 4 │   (global i32 (i32.const -_100))
   │                          ^^^^^
 
-error: expected instruction
+error: invalid float literal
   ┌─ int-literals-malformed.wat:5:26
   │
 5 │   (global i32 (i32.const 99_))
   │                          ^^^
 
-error: expected instruction
+error: invalid float literal
+  ┌─ int-literals-malformed.wat:6:26
+  │
+6 │   (global i32 (i32.const 1__000))
+  │                          ^^^^^^
+
+error: invalid immediate
   ┌─ int-literals-malformed.wat:7:26
   │
 7 │   (global i32 (i32.const _0x100))
   │                          ^^^^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ int-literals-malformed.wat:8:26
   │
 8 │   (global i32 (i32.const 0_x100))
   │                          ^^^^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ int-literals-malformed.wat:9:26
   │
 9 │   (global i32 (i32.const 0x_100))
   │                          ^^^^^^
 
-error: expected instruction
+error: invalid float literal
    ┌─ int-literals-malformed.wat:10:26
    │
 10 │   (global i32 (i32.const 0x00_))
    │                          ^^^^^
+
+error: invalid float literal
+   ┌─ int-literals-malformed.wat:11:26
+   │
+11 │   (global i32 (i32.const 0xff__ffff))
+   │                          ^^^^^^^^^^

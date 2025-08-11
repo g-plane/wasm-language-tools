@@ -347,31 +347,31 @@ ROOT@0..531
     R_PAREN@529..530 ")"
   WHITESPACE@530..531 "\n"
 
-error: expected instruction
+error: invalid immediate
   ┌─ if-malformed.wat:3:41
   │
 3 │     (if (type $sig) (result i32) (param i32) (i32.const 1) (then))
   │                                         ^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ if-malformed.wat:4:41
   │
 4 │     (if (param i32) (type $sig) (result i32) (i32.const 1) (then))
   │                                         ^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ if-malformed.wat:6:41
   │
 6 │     (if (result i32) (type $sig) (param i32) (i32.const 1) (then))
   │                                         ^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ if-malformed.wat:7:29
   │
 7 │     (if (result i32) (param i32) (type $sig) (i32.const 1) (then))
   │                             ^^^
 
-error: expected instruction
+error: invalid immediate
   ┌─ if-malformed.wat:8:29
   │
 8 │     (if (result i32) (param i32) (i32.const 1) (then))
@@ -383,7 +383,7 @@ error: expected `end`
 11 │   (func if)
    │           ^
 
-error: expected `(`
+error: expected then block
    ┌─ if-malformed.wat:12:39
    │
 12 │   (func (if (result i32) (i32.const 1)))

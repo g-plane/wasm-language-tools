@@ -27,19 +27,19 @@ ROOT@0..43
     R_PAREN@41..42 ")"
   WHITESPACE@42..43 "\n"
 
-error: expected idx
+error: expected index
   ┌─ start-malformed.wat:2:9
   │
 2 │   (start)
   │         ^
 
-error: expected idx
+error: expected index
   ┌─ start-malformed.wat:3:10
   │
 3 │   (start )
   │          ^
 
-error: expected idx
+error: unexpected token
   ┌─ start-malformed.wat:4:10
   │
 4 │   (start $)

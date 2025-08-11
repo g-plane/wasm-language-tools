@@ -107,29 +107,41 @@ ROOT@0..166
     R_PAREN@164..165 ")"
   WHITESPACE@165..166 "\n"
 
-error: expected `sub`
+error: unexpected token
   ┌─ struct-malformed.wat:2:10
   │
 2 │   (type (st))
-  │          ^^^
+  │          ^^
 
-error: expected `field`
+error: unexpected token
+  ┌─ struct-malformed.wat:2:12
+  │
+2 │   (type (st))
+  │            ^
+
+error: unexpected token
   ┌─ struct-malformed.wat:3:18
   │
 3 │   (type (struct ()))
   │                  ^
 
-error: expected `(`
+error: unexpected token
   ┌─ struct-malformed.wat:4:17
   │
 4 │   (type (struct field))
   │                 ^^^^^
 
-error: expected field type
-  ┌─ struct-malformed.wat:5:24
+error: unexpected token
+  ┌─ struct-malformed.wat:5:25
   │
 5 │   (type (struct (field (field)))
-  │                        ^^^^^^^
+  │                         ^^^^^
+
+error: unexpected token
+  ┌─ struct-malformed.wat:5:30
+  │
+5 │   (type (struct (field (field)))
+  │                              ^
 
 error: expected `)`
   ┌─ struct-malformed.wat:6:3

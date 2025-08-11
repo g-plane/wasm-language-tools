@@ -23,8 +23,14 @@ ROOT@0..34
     R_PAREN@32..33 ")"
   WHITESPACE@33..34 "\n"
 
-error: expected module field
-  ┌─ module-malformed.wat:3:3
+error: unexpected token
+  ┌─ module-malformed.wat:3:4
   │
 3 │   (f)
-  │   ^^^
+  │    ^
+
+error: unexpected token
+  ┌─ module-malformed.wat:3:5
+  │
+3 │   (f)
+  │     ^

@@ -60,25 +60,25 @@ ROOT@0..94
     R_PAREN@92..93 ")"
   WHITESPACE@93..94 "\n"
 
-error: expected `mut`
+error: unexpected token
   ┌─ global-malformed.wat:2:12
   │
 2 │   (global ())
   │            ^
 
-error: invalid instruction name
-  ┌─ global-malformed.wat:3:15
+error: unexpected token
+  ┌─ global-malformed.wat:3:16
   │
 3 │   (global i32 ())
-  │               ^^
+  │                ^
 
-error: invalid instruction name
-  ┌─ global-malformed.wat:4:21
+error: unexpected token
+  ┌─ global-malformed.wat:4:22
   │
 4 │   (global (mut i32) ())
-  │                     ^^
+  │                      ^
 
-error: expected `(`
+error: expected global type
   ┌─ global-malformed.wat:5:10
   │
 5 │   (global)
