@@ -1,4 +1,4 @@
-use super::{lexer::Token, node, GreenElement, Parser};
+use super::{green, lexer::Token, node, GreenElement, Parser};
 use crate::error::Message;
 use rowan::GreenNode;
 use wat_syntax::SyntaxKind::{self, *};
@@ -19,9 +19,11 @@ impl Parser<'_> {
 
         if let Some((trivias, mut else_children)) = self.try_parse_with_trivias(|parser| {
             let mut children = Vec::with_capacity(2);
-            children.push(parser.lexer.next(L_PAREN)?.into());
+            parser.lexer.next(L_PAREN)?;
+            children.push(green::L_PAREN.clone());
             parser.parse_trivias(&mut children);
-            children.push(parser.lexer.keyword("else")?.into());
+            parser.lexer.keyword("else")?;
+            children.push(green::KW_ELSE.clone());
             Some(children)
         }) {
             children.extend(trivias);
@@ -52,11 +54,11 @@ impl Parser<'_> {
         {}
         children.push(node(BLOCK_IF_THEN, then_children).into());
 
-        if let Some((trivias, else_keyword)) =
+        if let Some((trivias, _)) =
             self.try_parse_with_trivias(|parser| parser.lexer.keyword("else"))
         {
             children.extend(trivias);
-            let mut else_children = vec![else_keyword.into()];
+            let mut else_children = vec![green::KW_ELSE.clone()];
             self.eat(IDENT, &mut else_children);
             while self
                 .lexer
@@ -124,7 +126,7 @@ impl Parser<'_> {
     }
 
     fn parse_end_keyword(&mut self) -> Option<GreenElement> {
-        self.lexer.keyword("end").map(GreenElement::from)
+        self.lexer.keyword("end").map(|_| green::KW_END.clone())
     }
 
     fn parse_immediate(&mut self) -> Option<GreenNode> {
@@ -159,25 +161,22 @@ impl Parser<'_> {
     }
 
     pub(super) fn parse_instr(&mut self) -> Option<GreenNode> {
-        if let Some(token) = self.lexer.eat(L_PAREN) {
+        if self.lexer.eat(L_PAREN).is_some() {
             let mut children = Vec::with_capacity(4);
-            children.push(token.into());
+            children.push(green::L_PAREN.clone());
             self.parse_trivias(&mut children);
-            let mut token = self.expect(INSTR_NAME)?;
+            let token = self.expect(INSTR_NAME)?;
             match token.text {
                 "if" => {
-                    token.kind = KEYWORD;
-                    children.push(token.into());
+                    children.push(green::KW_IF.clone());
                     self.parse_block_if_folded(children)
                 }
                 "loop" => {
-                    token.kind = KEYWORD;
-                    children.push(token.into());
+                    children.push(green::KW_LOOP.clone());
                     self.parse_block_like_folded(BLOCK_LOOP, children)
                 }
                 "block" => {
-                    token.kind = KEYWORD;
-                    children.push(token.into());
+                    children.push(green::KW_BLOCK.clone());
                     self.parse_block_like_folded(BLOCK_BLOCK, children)
                 }
                 _ => {
@@ -187,21 +186,18 @@ impl Parser<'_> {
             }
         } else {
             let mut children = Vec::with_capacity(2);
-            let mut token = self.expect(INSTR_NAME)?;
+            let token = self.expect(INSTR_NAME)?;
             match token.text {
                 "if" => {
-                    token.kind = KEYWORD;
-                    children.push(token.into());
+                    children.push(green::KW_IF.clone());
                     self.parse_block_if_sequence(children)
                 }
                 "loop" => {
-                    token.kind = KEYWORD;
-                    children.push(token.into());
+                    children.push(green::KW_LOOP.clone());
                     self.parse_block_like_sequence(BLOCK_LOOP, children)
                 }
                 "block" => {
-                    token.kind = KEYWORD;
-                    children.push(token.into());
+                    children.push(green::KW_BLOCK.clone());
                     self.parse_block_like_sequence(BLOCK_BLOCK, children)
                 }
                 _ => {
@@ -254,9 +250,11 @@ impl Parser<'_> {
 
     fn parse_then_block(&mut self) -> Option<GreenNode> {
         let mut children = Vec::with_capacity(2);
-        children.push(self.lexer.next(L_PAREN)?.into());
+        self.lexer.next(L_PAREN)?;
+        children.push(green::L_PAREN.clone());
         self.parse_trivias(&mut children);
-        children.push(self.lexer.keyword("then")?.into());
+        self.lexer.keyword("then")?;
+        children.push(green::KW_THEN.clone());
         while self.recover(Self::parse_instr, &mut children) {}
         self.expect_right_paren(&mut children);
         Some(node(BLOCK_IF_THEN, children))

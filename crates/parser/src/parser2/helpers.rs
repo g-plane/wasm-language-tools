@@ -1,4 +1,5 @@
 use super::{
+    green,
     lexer::{Checkpoint, Lexer, Token},
     GreenElement, Parser,
 };
@@ -150,7 +151,11 @@ impl<'s> Parser<'s> {
 
     pub(super) fn parse_trivias(&mut self, children: &mut Vec<GreenElement>) {
         while let Some(token) = self.lexer.trivia() {
-            children.push(token.into());
+            if token.kind == SyntaxKind::WHITESPACE && token.text.as_bytes() == [b' '] {
+                children.push(green::SINGLE_SPACE.clone());
+            } else {
+                children.push(token.into());
+            }
         }
     }
 
@@ -166,9 +171,9 @@ impl<'s> Parser<'s> {
     pub(super) fn expect_right_paren(&mut self, children: &mut Vec<GreenElement>) {
         loop {
             let trivias = self.parse_trivias_deferred();
-            if let Some(token) = self.lexer.next(SyntaxKind::R_PAREN) {
+            if self.lexer.next(SyntaxKind::R_PAREN).is_some() {
                 trivias.commit(children);
-                children.push(token.into());
+                children.push(green::R_PAREN.clone());
                 return;
             }
             if let Some(token) = self.lexer.peek(SyntaxKind::L_PAREN) {
@@ -236,7 +241,13 @@ pub(super) struct Trivias<'s> {
 impl<'s> Trivias<'s> {
     pub(super) fn commit(self, children: &mut Vec<GreenElement>) {
         children.reserve(self.tokens.len() + 1);
-        children.extend(self.tokens.into_iter().map(GreenElement::from));
+        children.extend(self.tokens.into_iter().map(|token| {
+            if token.kind == SyntaxKind::WHITESPACE && token.text.as_bytes() == [b' '] {
+                green::SINGLE_SPACE.clone()
+            } else {
+                token.into()
+            }
+        }));
     }
     pub(super) fn rollback(self, lexer: &mut Lexer<'s>) {
         lexer.reset(self.checkpoint);

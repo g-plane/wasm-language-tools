@@ -3,6 +3,7 @@ use crate::error::SyntaxError;
 use rowan::{GreenNode, GreenToken, NodeOrToken};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
+mod green;
 mod helpers;
 mod instr;
 mod lexer;
