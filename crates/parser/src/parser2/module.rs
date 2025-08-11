@@ -141,8 +141,10 @@ impl Parser<'_> {
             "func" => {
                 children.push(keyword.into());
                 self.eat(IDENT, &mut children);
-                if !self.recover(Self::parse_type_use, &mut children) {
-                    self.report_missing(Message::Name("type use"));
+                if let Some((trivias, type_use)) = self.try_parse_with_trivias(Self::parse_type_use)
+                {
+                    children.extend(trivias);
+                    children.push(type_use.into());
                 }
                 self.expect_right_paren(&mut children);
                 Some(node(IMPORT_DESC_TYPE_USE, children))

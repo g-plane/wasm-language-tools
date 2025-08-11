@@ -224,12 +224,6 @@ error: unexpected token
 6 │   (import "" "" ())
   │                  ^
 
-error: expected type use
-  ┌─ imports-malformed.wat:7:23
-  │
-7 │   (import "" "" (func ))
-  │                       ^
-
 error: expected table type
   ┌─ imports-malformed.wat:8:24
   │
