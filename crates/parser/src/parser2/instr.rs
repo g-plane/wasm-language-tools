@@ -222,7 +222,7 @@ impl Parser<'_> {
                 })
         }) {
             children.extend(trivias);
-            children.push(node.into());
+            children.push(node);
         }
         while self.lexer.peek(L_PAREN).is_some() && self.recover(Self::parse_instr, &mut children) {
         }

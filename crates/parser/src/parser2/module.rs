@@ -120,31 +120,27 @@ impl Parser<'_> {
     }
 
     fn parse_imports_and_exports(&mut self, children: &mut Vec<GreenElement>) {
-        loop {
-            if let Some((trivias, (node_or_tokens, is_import))) =
-                self.try_parse_with_trivias(|parser| {
-                    let mut children = Vec::with_capacity(2);
-                    parser.lexer.next(L_PAREN)?;
-                    children.push(green::L_PAREN.clone());
-                    parser.parse_trivias(&mut children);
-                    let keyword = parser.lexer.next(KEYWORD)?;
-                    let is_import = keyword.text == "import";
-                    if is_import || keyword.text == "export" {
-                        children.push(keyword.into());
-                        Some((children, is_import))
-                    } else {
-                        None
-                    }
-                })
-            {
-                children.extend(trivias);
-                if is_import {
-                    children.push(self.parse_import(node_or_tokens).into());
+        while let Some((trivias, (node_or_tokens, is_import))) =
+            self.try_parse_with_trivias(|parser| {
+                let mut children = Vec::with_capacity(2);
+                parser.lexer.next(L_PAREN)?;
+                children.push(green::L_PAREN.clone());
+                parser.parse_trivias(&mut children);
+                let keyword = parser.lexer.next(KEYWORD)?;
+                let is_import = keyword.text == "import";
+                if is_import || keyword.text == "export" {
+                    children.push(keyword.into());
+                    Some((children, is_import))
                 } else {
-                    children.push(self.parse_export(node_or_tokens).into());
+                    None
                 }
+            })
+        {
+            children.extend(trivias);
+            if is_import {
+                children.push(self.parse_import(node_or_tokens).into());
             } else {
-                break;
+                children.push(self.parse_export(node_or_tokens).into());
             }
         }
     }
@@ -607,14 +603,13 @@ impl Parser<'_> {
             parser.parse_trivias(&mut children);
             parser.lexer.keyword("type")?;
             children.push(green::KW_TYPE.clone());
-
-            if !parser.recover(Self::parse_index, &mut children) {
-                parser.report_missing(Message::Name("index"));
-            }
-            parser.expect_right_paren(&mut children);
             Some(children)
         }) {
             children.append(&mut node_or_tokens);
+            if !self.recover(Self::parse_index, &mut children) {
+                self.report_missing(Message::Name("index"));
+            }
+            self.expect_right_paren(&mut children);
         }
 
         while let Some((trivias, node)) = self.try_parse_with_trivias(Self::parse_param) {
