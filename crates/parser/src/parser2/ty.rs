@@ -95,12 +95,12 @@ impl Parser<'_> {
         }
     }
 
-    pub(super) fn parse_heap_type<const IMMEDIATE: bool>(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_heap_type<const IMMEDIATE: bool>(&mut self) -> Option<GreenElement> {
         self.lexer
             .eat(TYPE_KEYWORD)
             .and_then(|mut token| match token.text {
                 "any" | "eq" | "i31" | "struct" | "array" | "none" | "func" | "nofunc"
-                | "extern" | "noextern" => Some(node(HEAP_TYPE, [token.into()])),
+                | "extern" | "noextern" => Some(node(HEAP_TYPE, [token.into()]).into()),
                 _ => {
                     if IMMEDIATE {
                         // for better error reporting
@@ -108,13 +108,13 @@ impl Parser<'_> {
                     } else {
                         token.kind = ERROR;
                         self.report_error_token(&token, Message::Description("invalid heap type"));
-                        Some(node(HEAP_TYPE, [token.into()]))
+                        Some(token.into())
                     }
                 }
             })
             .or_else(|| {
                 self.parse_index()
-                    .map(|index| node(HEAP_TYPE, [index.into()]))
+                    .map(|index| node(HEAP_TYPE, [index.into()]).into())
             })
     }
 

@@ -154,7 +154,7 @@ impl Parser<'_> {
             })
             .or_else(|| {
                 self.try_parse(Self::parse_heap_type::<true>)
-                    .map(|child| node(IMMEDIATE, [child.into()]))
+                    .map(|child| node(IMMEDIATE, [child]))
             })
     }
 
