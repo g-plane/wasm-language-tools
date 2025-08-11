@@ -63,16 +63,12 @@ impl Parser<'_> {
         }
     }
 
-    fn parse_export(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(5);
-        children.push(self.lexer.next(L_PAREN)?.into());
-        self.parse_trivias(&mut children);
-        children.push(self.lexer.keyword("export")?.into());
+    fn parse_export(&mut self, mut children: Vec<GreenElement>) -> GreenNode {
         if !self.recover(Self::parse_name, &mut children) {
             self.report_missing(Message::Name("name"));
         }
         self.expect_right_paren(&mut children);
-        Some(node(EXPORT, children))
+        node(EXPORT, children)
     }
 
     fn parse_export_desc(&mut self) -> Option<GreenNode> {
@@ -96,11 +92,7 @@ impl Parser<'_> {
         Some(node(kind, children))
     }
 
-    fn parse_import(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(5);
-        children.push(self.lexer.next(L_PAREN)?.into());
-        self.parse_trivias(&mut children);
-        children.push(self.lexer.keyword("import")?.into());
+    fn parse_import(&mut self, mut children: Vec<GreenElement>) -> GreenNode {
         if !self.recover(Self::parse_module_name, &mut children) {
             self.report_missing(Message::Name("module name"));
         }
@@ -108,7 +100,36 @@ impl Parser<'_> {
             self.report_missing(Message::Name("name"));
         }
         self.expect_right_paren(&mut children);
-        Some(node(IMPORT, children))
+        node(IMPORT, children)
+    }
+
+    fn parse_imports_and_exports(&mut self, children: &mut Vec<GreenElement>) {
+        loop {
+            if let Some((trivias, (node_or_tokens, is_import))) =
+                self.try_parse_with_trivias(|parser| {
+                    let mut children = Vec::with_capacity(2);
+                    children.push(parser.lexer.next(L_PAREN)?.into());
+                    parser.parse_trivias(&mut children);
+                    let keyword = parser.lexer.next(KEYWORD)?;
+                    let is_import = keyword.text == "import";
+                    if is_import || keyword.text == "export" {
+                        children.push(keyword.into());
+                        Some((children, is_import))
+                    } else {
+                        None
+                    }
+                })
+            {
+                children.extend(trivias);
+                if is_import {
+                    children.push(self.parse_import(node_or_tokens).into());
+                } else {
+                    children.push(self.parse_export(node_or_tokens).into());
+                }
+            } else {
+                break;
+            }
+        }
     }
 
     fn parse_import_desc(&mut self) -> Option<GreenNode> {
@@ -338,12 +359,13 @@ impl Parser<'_> {
                 children.push(elem_list.into());
             }
         }
+        self.expect_right_paren(&mut children);
         Some(node(MODULE_FIELD_ELEM, children))
     }
 
     fn parse_module_field_export(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        if let Some(name) = self.parse_name() {
-            children.push(name.into());
+        if !self.recover(Self::parse_name, &mut children) {
+            self.report_missing(Message::Name("export name"));
         }
         if !self.recover(Self::parse_export_desc, &mut children) {
             self.report_missing(Message::Name("export descriptor"));
@@ -354,14 +376,7 @@ impl Parser<'_> {
 
     fn parse_module_field_func(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
         self.eat(IDENT, &mut children);
-
-        if let Some((trivias, import)) = self.try_parse_with_trivias(Self::parse_import) {
-            children.extend(trivias);
-            children.push(import.into());
-        } else if let Some((trivias, export)) = self.try_parse_with_trivias(Self::parse_export) {
-            children.extend(trivias);
-            children.push(export.into());
-        }
+        self.parse_imports_and_exports(&mut children);
 
         if let Some((trivias, type_use)) = self.try_parse_with_trivias(Self::parse_type_use) {
             children.extend(trivias);
@@ -379,14 +394,7 @@ impl Parser<'_> {
 
     fn parse_module_field_global(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
         self.eat(IDENT, &mut children);
-
-        if let Some((trivias, import)) = self.try_parse_with_trivias(Self::parse_import) {
-            children.extend(trivias);
-            children.push(import.into());
-        } else if let Some((trivias, export)) = self.try_parse_with_trivias(Self::parse_export) {
-            children.extend(trivias);
-            children.push(export.into());
-        }
+        self.parse_imports_and_exports(&mut children);
 
         if !self.recover(Self::parse_global_type, &mut children) {
             self.report_missing(Message::Name("global type"));
@@ -398,11 +406,11 @@ impl Parser<'_> {
     }
 
     fn parse_module_field_import(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        if let Some(module_name) = self.parse_module_name() {
-            children.push(module_name.into());
+        if !self.recover(Self::parse_module_name, &mut children) {
+            self.report_missing(Message::Name("import module name"));
         }
-        if let Some(name) = self.parse_name() {
-            children.push(name.into());
+        if !self.recover(Self::parse_name, &mut children) {
+            self.report_missing(Message::Name("import name"));
         }
         if !self.recover(Self::parse_import_desc, &mut children) {
             self.report_missing(Message::Name("import descriptor"));
@@ -413,14 +421,7 @@ impl Parser<'_> {
 
     fn parse_module_field_memory(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
         self.eat(IDENT, &mut children);
-
-        if let Some((trivias, import)) = self.try_parse_with_trivias(Self::parse_import) {
-            children.extend(trivias);
-            children.push(import.into());
-        } else if let Some((trivias, export)) = self.try_parse_with_trivias(Self::parse_export) {
-            children.extend(trivias);
-            children.push(export.into());
-        }
+        self.parse_imports_and_exports(&mut children);
 
         if self.lexer.peek(L_PAREN).is_some() {
             if !self.recover(Self::parse_data, &mut children) {
@@ -444,14 +445,7 @@ impl Parser<'_> {
 
     fn parse_module_field_table(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
         self.eat(IDENT, &mut children);
-
-        if let Some((trivias, import)) = self.try_parse_with_trivias(Self::parse_import) {
-            children.extend(trivias);
-            children.push(import.into());
-        } else if let Some((trivias, export)) = self.try_parse_with_trivias(Self::parse_export) {
-            children.extend(trivias);
-            children.push(export.into());
-        }
+        self.parse_imports_and_exports(&mut children);
 
         if self.lexer.peek(UNSIGNED_INT).is_some() {
             if !self.recover(Self::parse_table_type, &mut children) {
@@ -501,7 +495,7 @@ impl Parser<'_> {
     fn parse_rec_type(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
         while self.recover(Self::parse_type_def_in_rec_type, &mut children) {}
         self.expect_right_paren(&mut children);
-        Some(node(REF_TYPE, children))
+        Some(node(REC_TYPE, children))
     }
 
     fn parse_table_use(&mut self) -> Option<GreenNode> {

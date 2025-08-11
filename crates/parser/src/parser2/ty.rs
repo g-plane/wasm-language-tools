@@ -240,7 +240,12 @@ impl Parser<'_> {
                     children.extend(trivias);
                     children.push(keyword.into());
                 }
-                while self.recover(Self::parse_index, &mut children) {}
+
+                while let Some((trivias, index)) = self.try_parse_with_trivias(Self::parse_index) {
+                    children.extend(trivias);
+                    children.push(index.into());
+                }
+
                 if !self.recover(Self::parse_composite_type, &mut children) {
                     self.report_missing(Message::Name("composite type"));
                 }

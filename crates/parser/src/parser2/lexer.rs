@@ -107,7 +107,12 @@ impl<'s> Lexer<'s> {
 
     pub fn keyword(&mut self, keyword: &'static str) -> Option<Token<'s>> {
         debug_assert!(keyword.chars().all(|c| c.is_ascii_lowercase()));
-        if self.input.as_bytes().starts_with(keyword.as_bytes()) {
+        let bytes = self.input.as_bytes();
+        if bytes.starts_with(keyword.as_bytes())
+            && bytes
+                .get(keyword.len())
+                .is_none_or(|b| !is_id_char(*b as char))
+        {
             // SAFETY: `keyword` is a static ASCII string in UTF-8
             Some(Token {
                 kind: SyntaxKind::KEYWORD,
@@ -289,7 +294,12 @@ impl<'s> Lexer<'s> {
             .filter(|rest| !rest.starts_with(is_id_char))
         {
             self.input = rest;
-        } else if let Some(rest) = self.input.strip_prefix("nan") {
+        } else if let Some(rest) = self
+            .input
+            .strip_prefix("nan")
+            .filter(|rest| rest.starts_with(":0x") || !rest.starts_with(is_id_char))
+        {
+            self.input = rest;
             if let Some(rest) = rest.strip_prefix(":0x") {
                 self.input = rest;
                 self.unsigned_hex()?;
