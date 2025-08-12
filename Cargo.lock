@@ -1070,6 +1070,7 @@ name = "wat_parser"
 version = "0.5.0"
 dependencies = [
  "codespan-reporting",
+ "criterion",
  "insta",
  "rowan",
  "similar-asserts",

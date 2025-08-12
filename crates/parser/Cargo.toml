@@ -18,8 +18,13 @@ winnow = { version = "0.7", features = ["unstable-recover"] }
 
 [dev-dependencies]
 codespan-reporting = "0.12"
+criterion.workspace = true
 insta.workspace = true
 similar-asserts.workspace = true
+
+[[bench]]
+name = "parser"
+harness = false
 
 [lints.clippy]
 dbg_macro = "warn"
