@@ -126,13 +126,16 @@ impl Parser<'_> {
                 parser.lexer.next(L_PAREN)?;
                 children.push(green::L_PAREN.clone());
                 parser.parse_trivias(&mut children);
-                let keyword = parser.lexer.next(KEYWORD)?;
-                let is_import = keyword.text == "import";
-                if is_import || keyword.text == "export" {
-                    children.push(keyword.into());
-                    Some((children, is_import))
-                } else {
-                    None
+                match parser.lexer.next(KEYWORD)?.text {
+                    "import" => {
+                        children.push(green::KW_IMPORT.clone());
+                        Some((children, true))
+                    }
+                    "export" => {
+                        children.push(green::KW_EXPORT.clone());
+                        Some((children, false))
+                    }
+                    _ => None,
                 }
             })
         {

@@ -175,11 +175,10 @@ impl<'s> Lexer<'s> {
             loop {
                 match bytes.next() {
                     Some((end, b'"')) => {
-                        let (text, rest) = self.input.split_at(end + 2);
-                        self.input = rest;
+                        // SAFETY: `"` is ASCII char, and `+ 2` means it contains the quotes
                         return Some(Token {
                             kind: SyntaxKind::STRING,
-                            text,
+                            text: unsafe { self.split_advance(end + 2) },
                         });
                     }
                     Some((_, b'\\')) => {
@@ -200,12 +199,11 @@ impl<'s> Lexer<'s> {
             self.input = rest;
         }
         self.unsigned_int_raw()?;
-        checkpoint
-            .get(..checkpoint.len() - self.input.len())
-            .map(|text| Token {
-                kind: SyntaxKind::INT,
-                text,
-            })
+        // SAFETY: the difference of two valid UTF-8 strings is valid
+        Some(Token {
+            kind: SyntaxKind::INT,
+            text: unsafe { checkpoint.get_unchecked(..checkpoint.len() - self.input.len()) },
+        })
     }
 
     fn unsigned_int(&mut self) -> Option<Token<'s>> {
@@ -332,16 +330,16 @@ impl<'s> Lexer<'s> {
         if self.input.starts_with(is_id_char) {
             None
         } else {
-            checkpoint
-                .get(..checkpoint.len() - self.input.len())
-                .map(|text| Token {
-                    kind: if valid {
-                        SyntaxKind::FLOAT
-                    } else {
-                        SyntaxKind::ERROR
-                    },
-                    text,
-                })
+            // SAFETY: the difference of two valid UTF-8 strings is valid
+            let text = unsafe { checkpoint.get_unchecked(..checkpoint.len() - self.input.len()) };
+            Some(Token {
+                kind: if valid {
+                    SyntaxKind::FLOAT
+                } else {
+                    SyntaxKind::ERROR
+                },
+                text,
+            })
         }
     }
 
