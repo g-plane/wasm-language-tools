@@ -53,23 +53,24 @@ impl Parser<'_> {
     }
 
     fn parse_field_type(&mut self) -> Option<GreenNode> {
-        self.try_parse(|parser| {
+        if let Some(mut children) = self.try_parse(|parser| {
             let mut children = Vec::with_capacity(5);
             parser.lexer.next(L_PAREN)?;
             children.push(green::L_PAREN.clone());
             parser.parse_trivias(&mut children);
             parser.lexer.keyword("mut")?;
             children.push(green::KW_MUT.clone());
-            if !parser.recover(Self::parse_storage_type, &mut children) {
-                parser.report_missing(Message::Name("storage type"));
+            Some(children)
+        }) {
+            if !self.recover(Self::parse_storage_type, &mut children) {
+                self.report_missing(Message::Name("storage type"));
             }
-            parser.expect_right_paren(&mut children);
+            self.expect_right_paren(&mut children);
             Some(node(FIELD_TYPE, children))
-        })
-        .or_else(|| {
+        } else {
             self.parse_storage_type()
                 .map(|storage_type| node(FIELD_TYPE, [storage_type]))
-        })
+        }
     }
 
     fn parse_func_type(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {

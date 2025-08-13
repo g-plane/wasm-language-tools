@@ -37,7 +37,8 @@ impl Parser<'_> {
             parser.lexer.next(L_PAREN)?;
             children.push(green::L_PAREN.clone());
             parser.parse_trivias(&mut children);
-            children.push(parser.lexer.keyword("item")?.into());
+            parser.lexer.keyword("item")?;
+            children.push(green::KW_ITEM.clone());
             Some(children)
         }) {
             while self.recover(Self::parse_instr, &mut children) {}
@@ -544,7 +545,8 @@ impl Parser<'_> {
             parser.lexer.next(L_PAREN)?;
             children.push(green::L_PAREN.clone());
             parser.parse_trivias(&mut children);
-            children.push(parser.lexer.keyword("offset")?.into());
+            parser.lexer.keyword("offset")?;
+            children.push(green::KW_OFFSET.clone());
             Some(children)
         }) {
             while self.recover(Self::parse_instr, &mut children) {}
