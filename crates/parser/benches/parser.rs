@@ -29,18 +29,11 @@ static CODE: &str = r#"(module
 "#;
 
 fn bench_parser(c: &mut Criterion) {
-    let mut group = c.benchmark_group("parser");
-    group.bench_function("old", |b| {
+    c.bench_function("parser", |b| {
         b.iter(|| {
             let _ = wat_parser::parse_to_green(CODE);
         });
     });
-    group.bench_function("new", |b| {
-        b.iter(|| {
-            let _ = wat_parser::parse_to_green2(CODE);
-        });
-    });
-    group.finish();
 }
 
 criterion_group!(benches, bench_parser);

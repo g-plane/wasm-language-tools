@@ -4,7 +4,7 @@ use wat_syntax::ast::Root;
 
 #[test]
 fn new_line() {
-    let (tree, _) = wat_parser::parse2("\n");
+    let (tree, _) = wat_parser::parse("\n");
     let output = format(&Root::cast(tree).unwrap(), &Default::default());
     assert_eq!(output, "\n");
 }

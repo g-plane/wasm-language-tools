@@ -10,7 +10,7 @@ use std::{fs, path::Path};
 fn parser_snapshot() {
     glob!("parse/**/*.wat", |path| {
         let input = fs::read_to_string(path).unwrap();
-        let (tree, errors) = wat_parser::parse2(&input);
+        let (tree, errors) = wat_parser::parse(&input);
         similar_asserts::assert_eq!(
             tree.to_string(),
             input,

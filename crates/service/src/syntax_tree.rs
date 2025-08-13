@@ -2,7 +2,7 @@ use crate::uri::InternUri;
 use line_index::LineIndex;
 use rowan::GreenNode;
 use std::sync::Arc;
-use wat_parser::{parse_to_green2, SyntaxError};
+use wat_parser::{parse_to_green, SyntaxError};
 
 #[salsa::query_group(SyntaxTree)]
 pub(crate) trait SyntaxTreeCtx: salsa::Database {
@@ -26,7 +26,7 @@ fn get_line_index(db: &dyn SyntaxTreeCtx, uri: InternUri) -> Arc<LineIndex> {
 
 fn parse(db: &dyn SyntaxTreeCtx, uri: InternUri) -> (GreenNode, Arc<Vec<SyntaxError>>) {
     let source = db.source(uri);
-    let (green, errors) = parse_to_green2(&source);
+    let (green, errors) = parse_to_green(&source);
     (green, Arc::new(errors))
 }
 

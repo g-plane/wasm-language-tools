@@ -1076,7 +1076,6 @@ dependencies = [
  "similar-asserts",
  "smallvec",
  "wat_syntax",
- "winnow",
 ]
 
 [[package]]
@@ -1237,12 +1236,3 @@ name = "windows_x86_64_msvc"
 version = "0.52.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
-
-[[package]]
-name = "winnow"
-version = "0.7.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74c7b26e3480b707944fc872477815d29a8e429d2f93a1ce000f5fa84a15cbcd"
-dependencies = [
- "memchr",
-]

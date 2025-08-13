@@ -17,7 +17,7 @@ fn parser_fixture_snapshot() {
 }
 
 fn run_format_test(path: &Path, input: &str, options: &FormatOptions) -> String {
-    let (tree, _) = wat_parser::parse2(input);
+    let (tree, _) = wat_parser::parse(input);
     let output = format(&Root::cast(tree).unwrap(), options);
 
     similar_asserts::assert_eq!(
@@ -27,7 +27,7 @@ fn run_format_test(path: &Path, input: &str, options: &FormatOptions) -> String 
         path.display()
     );
 
-    let (tree, _) = wat_parser::parse2(input);
+    let (tree, _) = wat_parser::parse(input);
     let regression_format = format(&Root::cast(tree).unwrap(), options);
     similar_asserts::assert_eq!(
         output,
