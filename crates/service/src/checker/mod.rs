@@ -36,7 +36,7 @@ pub fn check(service: &LanguageService, uri: InternUri) -> Vec<Diagnostic> {
     let config = &service.get_config(uri);
 
     let mut diagnostics = Vec::with_capacity(4);
-    syntax::check(service, &mut diagnostics, uri, &line_index, &root);
+    syntax::check(service, &mut diagnostics, uri, &line_index);
     multi_modules::check(
         &mut diagnostics,
         config.lint.multi_modules,

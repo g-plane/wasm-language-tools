@@ -119,6 +119,13 @@ fn check_after_eq(children: &mut SyntaxElementChildren<WatLanguage>) -> Option<T
     });
     match children.next() {
         Some(SyntaxElement::Token(token)) if token.kind() == SyntaxKind::ERROR => range,
+        Some(SyntaxElement::Node(node))
+            if node
+                .first_token()
+                .is_some_and(|token| token.kind() == SyntaxKind::INT) =>
+        {
+            range
+        }
         _ => None,
     }
 }

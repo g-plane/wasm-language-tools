@@ -9,7 +9,23 @@ expression: response
       "range": {
         "start": {
           "line": 2,
-          "character": 2
+          "character": 3
+        },
+        "end": {
+          "line": 2,
+          "character": 7
+        }
+      },
+      "severity": 1,
+      "code": "syntax",
+      "source": "wat",
+      "message": "syntax error: unexpected token"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 7
         },
         "end": {
           "line": 2,
@@ -17,9 +33,9 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "syntax/module-field",
+      "code": "syntax",
       "source": "wat",
-      "message": "syntax error: expected module field"
+      "message": "syntax error: unexpected token"
     }
   ]
 }

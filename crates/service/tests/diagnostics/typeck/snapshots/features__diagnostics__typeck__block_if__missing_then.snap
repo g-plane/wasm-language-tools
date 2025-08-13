@@ -13,19 +13,35 @@ expression: response
         },
         "end": {
           "line": 4,
-          "character": 19
+          "character": 20
         }
       },
       "severity": 1,
-      "code": "syntax",
+      "code": "syntax/then-block",
       "source": "wat",
-      "message": "syntax error: expected `(`"
+      "message": "syntax error: expected then block"
     },
     {
       "range": {
         "start": {
           "line": 7,
-          "character": 12
+          "character": 7
+        },
+        "end": {
+          "line": 7,
+          "character": 11
+        }
+      },
+      "severity": 1,
+      "code": "syntax",
+      "source": "wat",
+      "message": "syntax error: unexpected token"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 11
         },
         "end": {
           "line": 7,
@@ -35,7 +51,7 @@ expression: response
       "severity": 1,
       "code": "syntax",
       "source": "wat",
-      "message": "syntax error: expected `(`"
+      "message": "syntax error: unexpected token"
     },
     {
       "range": {
