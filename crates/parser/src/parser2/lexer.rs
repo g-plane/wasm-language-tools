@@ -114,10 +114,12 @@ impl<'s> Lexer<'s> {
                 .is_none_or(|b| !is_id_char(*b as char))
         {
             // SAFETY: `keyword` is a static ASCII string in UTF-8
-            Some(Token {
-                kind: SyntaxKind::KEYWORD,
-                text: unsafe { self.split_advance(keyword.len()) },
-            })
+            unsafe {
+                Some(Token {
+                    kind: SyntaxKind::KEYWORD,
+                    text: self.split_advance(keyword.len()),
+                })
+            }
         } else {
             None
         }
@@ -126,10 +128,12 @@ impl<'s> Lexer<'s> {
     fn ascii_char<const C: u8>(&mut self, kind: SyntaxKind) -> Option<Token<'s>> {
         if self.input.starts_with(C as char) {
             // SAFETY: `C` is an ASCII char
-            Some(Token {
-                kind,
-                text: unsafe { self.split_advance(1) },
-            })
+            unsafe {
+                Some(Token {
+                    kind,
+                    text: self.split_advance(1),
+                })
+            }
         } else {
             None
         }
@@ -146,10 +150,12 @@ impl<'s> Lexer<'s> {
                 None
             } else {
                 // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
-                Some(Token {
-                    kind: SyntaxKind::IDENT,
-                    text: unsafe { self.split_advance(end) },
-                })
+                unsafe {
+                    Some(Token {
+                        kind: SyntaxKind::IDENT,
+                        text: self.split_advance(end),
+                    })
+                }
             }
         } else {
             None
@@ -163,7 +169,7 @@ impl<'s> Lexer<'s> {
                 .find(|c| !is_id_char(c))
                 .unwrap_or(self.input.len());
             // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
-            Some(unsafe { self.split_advance(end) })
+            unsafe { Some(self.split_advance(end)) }
         } else {
             None
         }
@@ -176,10 +182,12 @@ impl<'s> Lexer<'s> {
                 match bytes.next() {
                     Some((end, b'"')) => {
                         // SAFETY: `"` is ASCII char, and `+ 2` means it contains the quotes
-                        return Some(Token {
-                            kind: SyntaxKind::STRING,
-                            text: unsafe { self.split_advance(end + 2) },
-                        });
+                        unsafe {
+                            return Some(Token {
+                                kind: SyntaxKind::STRING,
+                                text: self.split_advance(end + 2),
+                            });
+                        }
                     }
                     Some((_, b'\\')) => {
                         bytes.next();
@@ -200,10 +208,12 @@ impl<'s> Lexer<'s> {
         }
         self.unsigned_int_raw()?;
         // SAFETY: the difference of two valid UTF-8 strings is valid
-        Some(Token {
-            kind: SyntaxKind::INT,
-            text: unsafe { checkpoint.get_unchecked(..checkpoint.len() - self.input.len()) },
-        })
+        unsafe {
+            Some(Token {
+                kind: SyntaxKind::INT,
+                text: checkpoint.get_unchecked(..checkpoint.len() - self.input.len()),
+            })
+        }
     }
 
     fn unsigned_int(&mut self) -> Option<Token<'s>> {
@@ -219,7 +229,7 @@ impl<'s> Lexer<'s> {
             self.input = rest;
             self.unsigned_hex::<true>()?;
             // SAFETY: the difference of two valid UTF-8 strings is valid
-            Some(unsafe { checkpoint.get_unchecked(..checkpoint.len() - self.input.len()) })
+            unsafe { Some(checkpoint.get_unchecked(..checkpoint.len() - self.input.len())) }
         } else {
             self.unsigned_dec::<true>()
         };
@@ -370,7 +380,7 @@ impl<'s> Lexer<'s> {
                     .find(|c| !is_id_char(c))
                     .unwrap_or(self.input.len());
                 // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
-                Some(unsafe { self.split_advance(end) })
+                unsafe { Some(self.split_advance(end)) }
             }
             '"' => {
                 let checkpoint = self.input;
@@ -379,7 +389,7 @@ impl<'s> Lexer<'s> {
             }
             c => {
                 // SAFETY: using the length in UTF-8
-                Some(unsafe { self.split_advance(c.len_utf8()) })
+                unsafe { Some(self.split_advance(c.len_utf8())) }
             }
         }
     }
@@ -394,10 +404,12 @@ impl<'s> Lexer<'s> {
                     .position(|b| !matches!(b, b' ' | b'\n' | b'\t' | b'\r'))
                     .unwrap_or(self.input.len());
                 // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
-                Some(Token {
-                    kind: SyntaxKind::WHITESPACE,
-                    text: unsafe { self.split_advance(end) },
-                })
+                unsafe {
+                    Some(Token {
+                        kind: SyntaxKind::WHITESPACE,
+                        text: self.split_advance(end),
+                    })
+                }
             }
             b'(' if matches!(bytes.get(1), Some(b';')) => {
                 let checkpoint = self.input;
@@ -432,10 +444,12 @@ impl<'s> Lexer<'s> {
             b';' if matches!(bytes.get(1), Some(b';')) => {
                 let end = self.input.find('\n').unwrap_or(self.input.len());
                 // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
-                Some(Token {
-                    kind: SyntaxKind::LINE_COMMENT,
-                    text: unsafe { self.split_advance(end) },
-                })
+                unsafe {
+                    Some(Token {
+                        kind: SyntaxKind::LINE_COMMENT,
+                        text: self.split_advance(end),
+                    })
+                }
             }
             _ => None,
         })
