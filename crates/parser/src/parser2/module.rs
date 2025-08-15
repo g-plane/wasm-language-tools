@@ -1,49 +1,51 @@
-use super::{green, node, GreenElement, Parser};
+use super::{builder::NodeMark, green, node, GreenElement, Parser};
 use crate::error::Message;
-use rowan::{GreenNode, Language, NodeOrToken};
+use rowan::GreenNode;
 use wat_syntax::SyntaxKind::*;
 
 impl Parser<'_> {
     fn parse_data(&mut self) -> Option<GreenNode> {
+        let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
-        let mut children = vec![green::L_PAREN.clone()];
-        self.parse_trivias(&mut children);
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
         self.lexer.keyword("data")?;
-        children.push(green::KW_DATA.clone());
-        while self.eat(STRING, &mut children) {}
-        self.expect_right_paren(&mut children);
-        Some(node(DATA, children))
+        self.add_child(green::KW_DATA.clone());
+        while self.eat(STRING) {}
+        self.expect_right_paren();
+        Some(self.finish_node(DATA, mark))
     }
 
     fn parse_elem(&mut self) -> Option<GreenNode> {
+        let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
-        let mut children = vec![green::L_PAREN.clone()];
-        self.parse_trivias(&mut children);
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
         self.lexer.keyword("elem")?;
-        children.push(green::KW_ELEM.clone());
+        self.add_child(green::KW_ELEM.clone());
 
         if self.lexer.peek(L_PAREN).is_some() {
-            while self.recover(Self::parse_elem_expr, &mut children) {}
+            while self.recover(Self::parse_elem_expr) {}
         } else {
-            while self.recover(Self::parse_index, &mut children) {}
+            while self.recover(Self::parse_index) {}
         }
-        self.expect_right_paren(&mut children);
-        Some(node(ELEM, children))
+        self.expect_right_paren();
+        Some(self.finish_node(ELEM, mark))
     }
 
     fn parse_elem_expr(&mut self) -> Option<GreenNode> {
-        if let Some(mut children) = self.try_parse(|parser| {
-            let mut children = Vec::with_capacity(2);
+        if let Some(mark) = self.try_parse(|parser| {
+            let mark = parser.start_node();
             parser.lexer.next(L_PAREN)?;
-            children.push(green::L_PAREN.clone());
-            parser.parse_trivias(&mut children);
+            parser.add_child(green::L_PAREN.clone());
+            parser.parse_trivias();
             parser.lexer.keyword("item")?;
-            children.push(green::KW_ITEM.clone());
-            Some(children)
+            parser.add_child(green::KW_ITEM.clone());
+            Some(mark)
         }) {
-            while self.recover(Self::parse_instr, &mut children) {}
-            self.expect_right_paren(&mut children);
-            Some(node(ELEM_EXPR, children))
+            while self.recover(Self::parse_instr) {}
+            self.expect_right_paren();
+            Some(self.finish_node(ELEM_EXPR, mark))
         } else if self.lexer.peek(L_PAREN).is_some() {
             self.parse_instr()
                 .map(|instr| node(ELEM_EXPR, [instr.into()]))
@@ -59,139 +61,135 @@ impl Parser<'_> {
             .map(GreenElement::from)
             .or_else(|| self.parse_index().map(GreenElement::from))
         {
-            let mut children = vec![node_or_token];
-            while self.recover(Self::parse_index, &mut children) {}
-            Some(node(ELEM_LIST, children))
+            let mark = self.start_node();
+            self.add_child(node_or_token);
+            while self.recover(Self::parse_index) {}
+            Some(self.finish_node(ELEM_LIST, mark))
         } else {
-            let mut children = vec![self.parse_ref_type()?.into()];
-            while self.recover(Self::parse_elem_expr, &mut children) {}
-            Some(node(ELEM_LIST, children))
+            let mark = self.start_node();
+            let ref_type = self.parse_ref_type()?;
+            self.add_child(ref_type);
+            while self.recover(Self::parse_elem_expr) {}
+            Some(self.finish_node(ELEM_LIST, mark))
         }
     }
 
-    fn parse_export(&mut self, mut children: Vec<GreenElement>) -> GreenNode {
-        if !self.retry(Self::parse_name, &mut children) {
+    fn parse_export(&mut self, mark: NodeMark) -> GreenNode {
+        if !self.retry(Self::parse_name) {
             self.report_missing(Message::Name("export name"));
         }
-        self.expect_right_paren(&mut children);
-        node(EXPORT, children)
+        self.expect_right_paren();
+        self.finish_node(EXPORT, mark)
     }
 
     fn parse_export_desc(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(3);
+        let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
-        children.push(green::L_PAREN.clone());
-        self.parse_trivias(&mut children);
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
         let kind = match self.lexer.next(KEYWORD)?.text {
             "func" => {
-                children.push(green::KW_FUNC.clone());
+                self.add_child(green::KW_FUNC.clone());
                 EXPORT_DESC_FUNC
             }
             "table" => {
-                children.push(green::KW_TABLE.clone());
+                self.add_child(green::KW_TABLE.clone());
                 EXPORT_DESC_TABLE
             }
             "memory" => {
-                children.push(green::KW_MEMORY.clone());
+                self.add_child(green::KW_MEMORY.clone());
                 EXPORT_DESC_MEMORY
             }
             "global" => {
-                children.push(green::KW_GLOBAL.clone());
+                self.add_child(green::KW_GLOBAL.clone());
                 EXPORT_DESC_GLOBAL
             }
             _ => return None,
         };
 
-        if !self.recover(Self::parse_index, &mut children) {
+        if !self.recover(Self::parse_index) {
             self.report_missing(Message::Name("index"));
         }
-        self.expect_right_paren(&mut children);
-        Some(node(kind, children))
+        self.expect_right_paren();
+        Some(self.finish_node(kind, mark))
     }
 
-    fn parse_import(&mut self, mut children: Vec<GreenElement>) -> GreenNode {
-        if !self.retry(Self::parse_module_name, &mut children) {
+    fn parse_import(&mut self, mark: NodeMark) -> GreenNode {
+        if !self.retry(Self::parse_module_name) {
             self.report_missing(Message::Name("import module name"));
         }
-        if !self.retry(Self::parse_name, &mut children) {
+        if !self.retry(Self::parse_name) {
             self.report_missing(Message::Name("import name"));
         }
-        self.expect_right_paren(&mut children);
-        node(IMPORT, children)
+        self.expect_right_paren();
+        self.finish_node(IMPORT, mark)
     }
 
-    fn parse_imports_and_exports(&mut self, children: &mut Vec<GreenElement>) {
-        while let Some((trivias, (node_or_tokens, is_import))) =
-            self.try_parse_with_trivias(|parser| {
-                let mut children = Vec::with_capacity(2);
-                parser.lexer.next(L_PAREN)?;
-                children.push(green::L_PAREN.clone());
-                parser.parse_trivias(&mut children);
-                match parser.lexer.next(KEYWORD)?.text {
-                    "import" => {
-                        children.push(green::KW_IMPORT.clone());
-                        Some((children, true))
-                    }
-                    "export" => {
-                        children.push(green::KW_EXPORT.clone());
-                        Some((children, false))
-                    }
-                    _ => None,
-                }
-            })
-        {
-            children.extend(trivias);
+    fn parse_imports_and_exports(&mut self) {
+        while let Some((mark, is_import)) = self.try_parse_with_trivias(|parser| {
+            let mark = parser.start_node();
+            parser.lexer.next(L_PAREN)?;
+            parser.add_child(green::L_PAREN.clone());
+            parser.parse_trivias();
+            match parser.lexer.next(KEYWORD)?.text {
+                "import" => Some((mark, true)),
+                "export" => Some((mark, false)),
+                _ => None,
+            }
+        }) {
             if is_import {
-                children.push(self.parse_import(node_or_tokens).into());
+                self.add_child(green::KW_IMPORT.clone());
+                let import = self.parse_import(mark);
+                self.add_child(import);
             } else {
-                children.push(self.parse_export(node_or_tokens).into());
+                self.add_child(green::KW_EXPORT.clone());
+                let export = self.parse_export(mark);
+                self.add_child(export);
             }
         }
     }
 
     fn parse_import_desc(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(5);
+        let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
-        children.push(green::L_PAREN.clone());
-        self.parse_trivias(&mut children);
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
         match self.lexer.next(KEYWORD)?.text {
             "func" => {
-                children.push(green::KW_FUNC.clone());
-                self.eat(IDENT, &mut children);
-                if let Some((trivias, type_use)) = self.try_parse_with_trivias(Self::parse_type_use)
-                {
-                    children.extend(trivias);
-                    children.push(type_use.into());
+                self.add_child(green::KW_FUNC.clone());
+                self.eat(IDENT);
+                if let Some(type_use) = self.try_parse_with_trivias(Self::parse_type_use) {
+                    self.add_child(type_use);
                 }
-                self.expect_right_paren(&mut children);
-                Some(node(IMPORT_DESC_TYPE_USE, children))
+                self.expect_right_paren();
+                Some(self.finish_node(IMPORT_DESC_TYPE_USE, mark))
             }
             "global" => {
-                children.push(green::KW_GLOBAL.clone());
-                self.eat(IDENT, &mut children);
-                if !self.recover(Self::parse_global_type, &mut children) {
+                self.add_child(green::KW_GLOBAL.clone());
+                self.eat(IDENT);
+                if !self.recover(Self::parse_global_type) {
                     self.report_missing(Message::Name("global type"));
                 }
-                self.expect_right_paren(&mut children);
-                Some(node(IMPORT_DESC_GLOBAL_TYPE, children))
+                self.expect_right_paren();
+                Some(self.finish_node(IMPORT_DESC_GLOBAL_TYPE, mark))
             }
             "memory" => {
-                children.push(green::KW_MEMORY.clone());
-                self.eat(IDENT, &mut children);
-                if !self.recover(Self::parse_memory_type, &mut children) {
+                self.add_child(green::KW_MEMORY.clone());
+                self.eat(IDENT);
+                if !self.recover(Self::parse_memory_type) {
                     self.report_missing(Message::Name("memory type"));
                 }
-                self.expect_right_paren(&mut children);
-                Some(node(IMPORT_DESC_MEMORY_TYPE, children))
+                self.expect_right_paren();
+                Some(self.finish_node(IMPORT_DESC_MEMORY_TYPE, mark))
             }
             "table" => {
-                children.push(green::KW_TABLE.clone());
-                self.eat(IDENT, &mut children);
-                if !self.recover(Self::parse_table_type, &mut children) {
+                self.add_child(green::KW_TABLE.clone());
+                self.eat(IDENT);
+                if !self.recover(Self::parse_table_type) {
                     self.report_missing(Message::Name("table type"));
                 }
-                self.expect_right_paren(&mut children);
-                Some(node(IMPORT_DESC_TABLE_TYPE, children))
+                self.expect_right_paren();
+                Some(self.finish_node(IMPORT_DESC_TABLE_TYPE, mark))
             }
             _ => None,
         }
@@ -205,120 +203,142 @@ impl Parser<'_> {
     }
 
     fn parse_local(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(6);
+        let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
-        children.push(green::L_PAREN.clone());
-        self.parse_trivias(&mut children);
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
         self.lexer.keyword("local")?;
-        children.push(green::KW_LOCAL.clone());
+        self.add_child(green::KW_LOCAL.clone());
 
-        if self.eat(IDENT, &mut children) {
-            if !self.recover(Self::parse_value_type, &mut children) {
+        if self.eat(IDENT) {
+            if !self.recover(Self::parse_value_type) {
                 self.report_missing(Message::Name("value type"));
             }
         } else {
-            while self.recover(Self::parse_value_type, &mut children) {}
+            while self.recover(Self::parse_value_type) {}
         }
-        self.expect_right_paren(&mut children);
-        Some(node(LOCAL, children))
+        self.expect_right_paren();
+        Some(self.finish_node(LOCAL, mark))
     }
 
     fn parse_mem_use(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(5);
+        let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
-        children.push(green::L_PAREN.clone());
-        self.parse_trivias(&mut children);
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
         self.lexer.keyword("memory")?;
-        children.push(green::KW_MEMORY.clone());
-        if !self.recover(Self::parse_index, &mut children) {
+        self.add_child(green::KW_MEMORY.clone());
+        if !self.recover(Self::parse_index) {
             self.report_missing(Message::Name("index"));
         }
-        self.expect_right_paren(&mut children);
-        Some(node(MEM_USE, children))
+        self.expect_right_paren();
+        Some(self.finish_node(MEM_USE, mark))
     }
 
     pub(super) fn parse_module(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(5);
+        let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
-        children.push(green::L_PAREN.clone());
-        self.parse_trivias(&mut children);
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
         let keyword = self.lexer.next(KEYWORD)?;
 
         self.lexer.top_level = false;
         let node = match keyword.text {
             "module" => {
-                children.push(keyword.into());
-                self.eat(IDENT, &mut children);
-                while self.recover(Self::parse_module_field, &mut children) {}
-                self.expect_right_paren(&mut children);
-                Some(node(MODULE, children))
+                self.add_child(keyword);
+                self.eat(IDENT);
+                while self.recover(Self::parse_module_field) {}
+                self.expect_right_paren();
+                Some(self.finish_node(MODULE, mark))
             }
             // wabt allows top-level module fields
             "func" => {
-                children.push(green::KW_FUNC.clone());
-                let mut children = vec![self.parse_module_field_func(children)?.into()];
-                while self.recover(Self::parse_module_field, &mut children) {}
-                Some(node(MODULE, children))
+                self.add_child(green::KW_FUNC.clone());
+                let module_field = self.parse_module_field_func(mark);
+                let mark = self.start_node();
+                self.add_child(module_field);
+                while self.recover(Self::parse_module_field) {}
+                Some(self.finish_node(MODULE, mark))
             }
             "type" => {
-                children.push(green::KW_TYPE.clone());
-                let mut children = vec![self.parse_type_def(children)?.into()];
-                while self.recover(Self::parse_module_field, &mut children) {}
-                Some(node(MODULE, children))
+                self.add_child(green::KW_TYPE.clone());
+                let module_field = self.parse_type_def(mark);
+                let mark = self.start_node();
+                self.add_child(module_field);
+                while self.recover(Self::parse_module_field) {}
+                Some(self.finish_node(MODULE, mark))
             }
             "global" => {
-                children.push(green::KW_GLOBAL.clone());
-                let mut children = vec![self.parse_module_field_global(children)?.into()];
-                while self.recover(Self::parse_module_field, &mut children) {}
-                Some(node(MODULE, children))
+                self.add_child(green::KW_GLOBAL.clone());
+                let module_field = self.parse_module_field_global(mark);
+                let mark = self.start_node();
+                self.add_child(module_field);
+                while self.recover(Self::parse_module_field) {}
+                Some(self.finish_node(MODULE, mark))
             }
             "export" => {
-                children.push(green::KW_EXPORT.clone());
-                let mut children = vec![self.parse_module_field_export(children)?.into()];
-                while self.recover(Self::parse_module_field, &mut children) {}
-                Some(node(MODULE, children))
+                self.add_child(green::KW_EXPORT.clone());
+                let module_field = self.parse_module_field_export(mark);
+                let mark = self.start_node();
+                self.add_child(module_field);
+                while self.recover(Self::parse_module_field) {}
+                Some(self.finish_node(MODULE, mark))
             }
             "import" => {
-                children.push(green::KW_IMPORT.clone());
-                let mut children = vec![self.parse_module_field_import(children)?.into()];
-                while self.recover(Self::parse_module_field, &mut children) {}
-                Some(node(MODULE, children))
+                self.add_child(green::KW_IMPORT.clone());
+                let module_field = self.parse_module_field_import(mark);
+                let mark = self.start_node();
+                self.add_child(module_field);
+                while self.recover(Self::parse_module_field) {}
+                Some(self.finish_node(MODULE, mark))
             }
             "start" => {
-                children.push(keyword.into());
-                let mut children = vec![self.parse_module_field_start(children)?.into()];
-                while self.recover(Self::parse_module_field, &mut children) {}
-                Some(node(MODULE, children))
+                self.add_child(keyword);
+                let module_field = self.parse_module_field_start(mark);
+                let mark = self.start_node();
+                self.add_child(module_field);
+                while self.recover(Self::parse_module_field) {}
+                Some(self.finish_node(MODULE, mark))
             }
             "data" => {
-                children.push(green::KW_DATA.clone());
-                let mut children = vec![self.parse_module_field_data(children)?.into()];
-                while self.recover(Self::parse_module_field, &mut children) {}
-                Some(node(MODULE, children))
+                self.add_child(green::KW_DATA.clone());
+                let module_field = self.parse_module_field_data(mark);
+                let mark = self.start_node();
+                self.add_child(module_field);
+                while self.recover(Self::parse_module_field) {}
+                Some(self.finish_node(MODULE, mark))
             }
             "table" => {
-                children.push(green::KW_TABLE.clone());
-                let mut children = vec![self.parse_module_field_table(children)?.into()];
-                while self.recover(Self::parse_module_field, &mut children) {}
-                Some(node(MODULE, children))
+                self.add_child(green::KW_TABLE.clone());
+                let module_field = self.parse_module_field_table(mark);
+                let mark = self.start_node();
+                self.add_child(module_field);
+                while self.recover(Self::parse_module_field) {}
+                Some(self.finish_node(MODULE, mark))
             }
             "memory" => {
-                children.push(green::KW_MEMORY.clone());
-                let mut children = vec![self.parse_module_field_memory(children)?.into()];
-                while self.recover(Self::parse_module_field, &mut children) {}
-                Some(node(MODULE, children))
+                self.add_child(green::KW_MEMORY.clone());
+                let module_field = self.parse_module_field_memory(mark);
+                let mark = self.start_node();
+                self.add_child(module_field);
+                while self.recover(Self::parse_module_field) {}
+                Some(self.finish_node(MODULE, mark))
             }
             "elem" => {
-                children.push(green::KW_ELEM.clone());
-                let mut children = vec![self.parse_module_field_elem(children)?.into()];
-                while self.recover(Self::parse_module_field, &mut children) {}
-                Some(node(MODULE, children))
+                self.add_child(green::KW_ELEM.clone());
+                let module_field = self.parse_module_field_elem(mark);
+                let mark = self.start_node();
+                self.add_child(module_field);
+                while self.recover(Self::parse_module_field) {}
+                Some(self.finish_node(MODULE, mark))
             }
             "rec" => {
-                children.push(green::KW_REC.clone());
-                let mut children = vec![self.parse_rec_type(children)?.into()];
-                while self.recover(Self::parse_module_field, &mut children) {}
-                Some(node(MODULE, children))
+                self.add_child(green::KW_REC.clone());
+                let module_field = self.parse_rec_type(mark);
+                let mark = self.start_node();
+                self.add_child(module_field);
+                while self.recover(Self::parse_module_field) {}
+                Some(self.finish_node(MODULE, mark))
             }
             _ => None,
         };
@@ -327,207 +347,196 @@ impl Parser<'_> {
     }
 
     fn parse_module_field(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(3);
+        let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
-        children.push(green::L_PAREN.clone());
-        self.parse_trivias(&mut children);
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
         let keyword = self.lexer.next(KEYWORD)?;
         match keyword.text {
             "func" => {
-                children.push(green::KW_FUNC.clone());
-                self.parse_module_field_func(children)
+                self.add_child(green::KW_FUNC.clone());
+                Some(self.parse_module_field_func(mark))
             }
             "type" => {
-                children.push(green::KW_TYPE.clone());
-                self.parse_type_def(children)
+                self.add_child(green::KW_TYPE.clone());
+                Some(self.parse_type_def(mark))
             }
             "global" => {
-                children.push(green::KW_GLOBAL.clone());
-                self.parse_module_field_global(children)
+                self.add_child(green::KW_GLOBAL.clone());
+                Some(self.parse_module_field_global(mark))
             }
             "export" => {
-                children.push(green::KW_EXPORT.clone());
-                self.parse_module_field_export(children)
+                self.add_child(green::KW_EXPORT.clone());
+                Some(self.parse_module_field_export(mark))
             }
             "import" => {
-                children.push(green::KW_IMPORT.clone());
-                self.parse_module_field_import(children)
+                self.add_child(green::KW_IMPORT.clone());
+                Some(self.parse_module_field_import(mark))
             }
             "start" => {
-                children.push(keyword.into());
-                self.parse_module_field_start(children)
+                self.add_child(keyword);
+                Some(self.parse_module_field_start(mark))
             }
             "data" => {
-                children.push(green::KW_DATA.clone());
-                self.parse_module_field_data(children)
+                self.add_child(green::KW_DATA.clone());
+                Some(self.parse_module_field_data(mark))
             }
             "table" => {
-                children.push(green::KW_TABLE.clone());
-                self.parse_module_field_table(children)
+                self.add_child(green::KW_TABLE.clone());
+                Some(self.parse_module_field_table(mark))
             }
             "memory" => {
-                children.push(green::KW_MEMORY.clone());
-                self.parse_module_field_memory(children)
+                self.add_child(green::KW_MEMORY.clone());
+                Some(self.parse_module_field_memory(mark))
             }
             "elem" => {
-                children.push(green::KW_ELEM.clone());
-                self.parse_module_field_elem(children)
+                self.add_child(green::KW_ELEM.clone());
+                Some(self.parse_module_field_elem(mark))
             }
             "rec" => {
-                children.push(green::KW_REC.clone());
-                self.parse_rec_type(children)
+                self.add_child(green::KW_REC.clone());
+                Some(self.parse_rec_type(mark))
             }
             _ => None,
         }
     }
 
-    fn parse_module_field_data(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        self.eat(IDENT, &mut children);
-        if let Some((trivias, mem_use)) = self.try_parse_with_trivias(Self::parse_mem_use) {
-            children.extend(trivias);
-            children.push(mem_use.into());
+    fn parse_module_field_data(&mut self, mark: NodeMark) -> GreenNode {
+        self.eat(IDENT);
+        if let Some(mem_use) = self.try_parse_with_trivias(Self::parse_mem_use) {
+            self.add_child(mem_use);
         }
-        if let Some((trivias, offset)) = self.try_parse_with_trivias(Self::parse_offset) {
-            children.extend(trivias);
-            children.push(offset.into());
+        if let Some(offset) = self.try_parse_with_trivias(Self::parse_offset) {
+            self.add_child(offset);
         }
-        while self.eat(STRING, &mut children) {}
-        self.expect_right_paren(&mut children);
-        Some(node(MODULE_FIELD_DATA, children))
+        while self.eat(STRING) {}
+        self.expect_right_paren();
+        self.finish_node(MODULE_FIELD_DATA, mark)
     }
 
-    fn parse_module_field_elem(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        self.eat(IDENT, &mut children);
-        if let Some((trivias, keyword)) =
-            self.try_parse_with_trivias(|parser| parser.lexer.keyword("declare"))
+    fn parse_module_field_elem(&mut self, mark: NodeMark) -> GreenNode {
+        self.eat(IDENT);
+        if let Some(keyword) = self.try_parse_with_trivias(|parser| parser.lexer.keyword("declare"))
         {
-            children.extend(trivias);
-            children.push(keyword.into());
-            if !self.recover(Self::parse_elem_list, &mut children) {
+            self.add_child(keyword);
+            if !self.recover(Self::parse_elem_list) {
                 self.report_missing(Message::Name("elem list"));
             }
-        } else if let Some((trivias, elem_list)) =
-            self.try_parse_with_trivias(Self::parse_elem_list)
-        {
-            children.extend(trivias);
-            children.push(elem_list.into());
+        } else if let Some(elem_list) = self.try_parse_with_trivias(Self::parse_elem_list) {
+            self.add_child(elem_list);
         } else {
-            if let Some((trivias, table_use)) = self.try_parse_with_trivias(Self::parse_table_use) {
-                children.extend(trivias);
-                children.push(table_use.into());
+            if let Some(table_use) = self.try_parse_with_trivias(Self::parse_table_use) {
+                self.add_child(table_use);
             }
-            if !self.recover(Self::parse_offset, &mut children) {
+            if !self.recover(Self::parse_offset) {
                 self.report_missing(Message::Name("offset"));
             }
-            if let Some((trivias, elem_list)) = self.try_parse_with_trivias(Self::parse_elem_list) {
-                children.extend(trivias);
-                children.push(elem_list.into());
+            if let Some(elem_list) = self.try_parse_with_trivias(Self::parse_elem_list) {
+                self.add_child(elem_list);
             }
         }
-        self.expect_right_paren(&mut children);
-        Some(node(MODULE_FIELD_ELEM, children))
+        self.expect_right_paren();
+        self.finish_node(MODULE_FIELD_ELEM, mark)
     }
 
-    fn parse_module_field_export(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        if !self.retry(Self::parse_name, &mut children) {
+    fn parse_module_field_export(&mut self, mark: NodeMark) -> GreenNode {
+        if !self.retry(Self::parse_name) {
             self.report_missing(Message::Name("export name"));
         }
-        if !self.retry(Self::parse_export_desc, &mut children) {
+        if !self.retry(Self::parse_export_desc) {
             self.report_missing(Message::Name("export descriptor"));
         }
-        self.expect_right_paren(&mut children);
-        Some(node(MODULE_FIELD_EXPORT, children))
+        self.expect_right_paren();
+        self.finish_node(MODULE_FIELD_EXPORT, mark)
     }
 
-    fn parse_module_field_func(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        self.eat(IDENT, &mut children);
-        self.parse_imports_and_exports(&mut children);
+    fn parse_module_field_func(&mut self, mark: NodeMark) -> GreenNode {
+        self.eat(IDENT);
+        self.parse_imports_and_exports();
 
-        if let Some((trivias, type_use)) = self.try_parse_with_trivias(Self::parse_type_use) {
-            children.extend(trivias);
-            children.push(type_use.into());
+        if let Some(type_use) = self.try_parse_with_trivias(Self::parse_type_use) {
+            self.add_child(type_use);
         }
-        while let Some((trivias, node)) = self.try_parse_with_trivias(Self::parse_local) {
-            children.extend(trivias);
-            children.push(node.into());
+        while let Some(local) = self.try_parse_with_trivias(Self::parse_local) {
+            self.add_child(local);
         }
 
-        while self.recover(Self::parse_instr, &mut children) {}
-        self.expect_right_paren(&mut children);
-        Some(node(MODULE_FIELD_FUNC, children))
+        while self.recover(Self::parse_instr) {}
+        self.expect_right_paren();
+        self.finish_node(MODULE_FIELD_FUNC, mark)
     }
 
-    fn parse_module_field_global(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        self.eat(IDENT, &mut children);
-        self.parse_imports_and_exports(&mut children);
+    fn parse_module_field_global(&mut self, mark: NodeMark) -> GreenNode {
+        self.eat(IDENT);
+        self.parse_imports_and_exports();
 
-        if !self.recover(Self::parse_global_type, &mut children) {
+        if !self.recover(Self::parse_global_type) {
             self.report_missing(Message::Name("global type"));
         }
 
-        while self.recover(Self::parse_instr, &mut children) {}
-        self.expect_right_paren(&mut children);
-        Some(node(MODULE_FIELD_GLOBAL, children))
+        while self.recover(Self::parse_instr) {}
+        self.expect_right_paren();
+        self.finish_node(MODULE_FIELD_GLOBAL, mark)
     }
 
-    fn parse_module_field_import(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        if !self.retry(Self::parse_module_name, &mut children) {
+    fn parse_module_field_import(&mut self, mark: NodeMark) -> GreenNode {
+        if !self.retry(Self::parse_module_name) {
             self.report_missing(Message::Name("import module name"));
         }
-        if !self.retry(Self::parse_name, &mut children) {
+        if !self.retry(Self::parse_name) {
             self.report_missing(Message::Name("import name"));
         }
-        if !self.retry(Self::parse_import_desc, &mut children) {
+        if !self.retry(Self::parse_import_desc) {
             self.report_missing(Message::Name("import descriptor"));
         }
-        self.expect_right_paren(&mut children);
-        Some(node(MODULE_FIELD_IMPORT, children))
+        self.expect_right_paren();
+        self.finish_node(MODULE_FIELD_IMPORT, mark)
     }
 
-    fn parse_module_field_memory(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        self.eat(IDENT, &mut children);
-        self.parse_imports_and_exports(&mut children);
+    fn parse_module_field_memory(&mut self, mark: NodeMark) -> GreenNode {
+        self.eat(IDENT);
+        self.parse_imports_and_exports();
 
         if self.lexer.peek(L_PAREN).is_some() {
-            if !self.recover(Self::parse_data, &mut children) {
+            if !self.recover(Self::parse_data) {
                 self.report_missing(Message::Name("data"));
             }
-        } else if !self.recover(Self::parse_memory_type, &mut children) {
+        } else if !self.recover(Self::parse_memory_type) {
             self.report_missing(Message::Name("memory type"));
         }
 
-        self.expect_right_paren(&mut children);
-        Some(node(MODULE_FIELD_MEMORY, children))
+        self.expect_right_paren();
+        self.finish_node(MODULE_FIELD_MEMORY, mark)
     }
 
-    fn parse_module_field_start(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        if !self.recover(Self::parse_index, &mut children) {
+    fn parse_module_field_start(&mut self, mark: NodeMark) -> GreenNode {
+        if !self.recover(Self::parse_index) {
             self.report_missing(Message::Name("index"));
         }
-        self.expect_right_paren(&mut children);
-        Some(node(MODULE_FIELD_START, children))
+        self.expect_right_paren();
+        self.finish_node(MODULE_FIELD_START, mark)
     }
 
-    fn parse_module_field_table(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        self.eat(IDENT, &mut children);
-        self.parse_imports_and_exports(&mut children);
+    fn parse_module_field_table(&mut self, mark: NodeMark) -> GreenNode {
+        self.eat(IDENT);
+        self.parse_imports_and_exports();
 
         if self.lexer.peek(UNSIGNED_INT).is_some() {
-            if !self.recover(Self::parse_table_type, &mut children) {
+            if !self.recover(Self::parse_table_type) {
                 self.report_missing(Message::Name("table type"));
             }
-            while self.recover(Self::parse_instr, &mut children) {}
+            while self.recover(Self::parse_instr) {}
         } else {
-            if !self.recover(Self::parse_ref_type, &mut children) {
+            if !self.recover(Self::parse_ref_type) {
                 self.report_missing(Message::Name("ref type"));
             }
-            if !self.recover(Self::parse_elem, &mut children) {
+            if !self.recover(Self::parse_elem) {
                 self.report_missing(Message::Name("elem"));
             }
         }
 
-        self.expect_right_paren(&mut children);
-        Some(node(MODULE_FIELD_TABLE, children))
+        self.expect_right_paren();
+        self.finish_node(MODULE_FIELD_TABLE, mark)
     }
 
     fn parse_module_name(&mut self) -> Option<GreenNode> {
@@ -540,18 +549,18 @@ impl Parser<'_> {
     }
 
     fn parse_offset(&mut self) -> Option<GreenNode> {
-        if let Some(mut children) = self.try_parse(|parser| {
-            let mut children = Vec::with_capacity(5);
+        if let Some(mark) = self.try_parse(|parser| {
+            let mark = parser.start_node();
             parser.lexer.next(L_PAREN)?;
-            children.push(green::L_PAREN.clone());
-            parser.parse_trivias(&mut children);
+            parser.add_child(green::L_PAREN.clone());
+            parser.parse_trivias();
             parser.lexer.keyword("offset")?;
-            children.push(green::KW_OFFSET.clone());
-            Some(children)
+            parser.add_child(green::KW_OFFSET.clone());
+            Some(mark)
         }) {
-            while self.recover(Self::parse_instr, &mut children) {}
-            self.expect_right_paren(&mut children);
-            Some(node(OFFSET, children))
+            while self.recover(Self::parse_instr) {}
+            self.expect_right_paren();
+            Some(self.finish_node(OFFSET, mark))
         } else if self.lexer.peek(L_PAREN).is_some() {
             self.parse_instr().map(|instr| node(OFFSET, [instr.into()]))
         } else {
@@ -559,83 +568,84 @@ impl Parser<'_> {
         }
     }
 
-    fn parse_rec_type(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        while self.recover(Self::parse_type_def_in_rec_type, &mut children) {}
-        self.expect_right_paren(&mut children);
-        Some(node(REC_TYPE, children))
+    fn parse_rec_type(&mut self, mark: NodeMark) -> GreenNode {
+        while self.recover(Self::parse_type_def_in_rec_type) {}
+        self.expect_right_paren();
+        self.finish_node(REC_TYPE, mark)
     }
 
     fn parse_table_use(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(5);
+        let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
-        children.push(green::L_PAREN.clone());
-        self.parse_trivias(&mut children);
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
         self.lexer.keyword("table")?;
-        children.push(green::KW_TABLE.clone());
+        self.add_child(green::KW_TABLE.clone());
 
-        if !self.recover(Self::parse_index, &mut children) {
+        if !self.recover(Self::parse_index) {
             self.report_missing(Message::Name("index"));
         }
-        self.expect_right_paren(&mut children);
-        Some(node(TABLE_USE, children))
+        self.expect_right_paren();
+        Some(self.finish_node(TABLE_USE, mark))
     }
 
-    fn parse_type_def(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        self.eat(IDENT, &mut children);
-        if !self.recover(Self::parse_sub_type, &mut children) {
+    fn parse_type_def(&mut self, mark: NodeMark) -> GreenNode {
+        self.eat(IDENT);
+        if !self.recover(Self::parse_sub_type) {
             self.report_missing(Message::Name("sub type"));
         }
-        self.expect_right_paren(&mut children);
-        Some(node(TYPE_DEF, children))
+        self.expect_right_paren();
+        self.finish_node(TYPE_DEF, mark)
     }
 
     fn parse_type_def_in_rec_type(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(5);
+        let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
-        children.push(green::L_PAREN.clone());
-        self.parse_trivias(&mut children);
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
         self.lexer.keyword("type")?;
-        children.push(green::KW_TYPE.clone());
-        self.parse_type_def(children)
+        self.add_child(green::KW_TYPE.clone());
+        Some(self.parse_type_def(mark))
     }
 
     pub(super) fn parse_type_use(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(1);
-        if let Some(mut node_or_tokens) = self.try_parse(|parser| {
-            let mut children = Vec::with_capacity(2);
-            parser.lexer.next(L_PAREN)?;
-            children.push(green::L_PAREN.clone());
-            parser.parse_trivias(&mut children);
-            parser.lexer.keyword("type")?;
-            children.push(green::KW_TYPE.clone());
-            Some(children)
-        }) {
-            children.append(&mut node_or_tokens);
-            if !self.recover(Self::parse_index, &mut children) {
+        const HAS_TYPE: u8 = 1 << 0;
+        const HAS_PARAM: u8 = 1 << 1;
+        const HAS_RESULT: u8 = 1 << 2;
+        let mut state = 0u8;
+
+        let mark = self.start_node();
+        if self
+            .try_parse(|parser| {
+                parser.lexer.next(L_PAREN)?;
+                parser.add_child(green::L_PAREN.clone());
+                parser.parse_trivias();
+                parser.lexer.keyword("type")?;
+                parser.add_child(green::KW_TYPE.clone());
+                Some(())
+            })
+            .is_some()
+        {
+            state |= HAS_TYPE;
+            if !self.recover(Self::parse_index) {
                 self.report_missing(Message::Name("index"));
             }
-            self.expect_right_paren(&mut children);
+            self.expect_right_paren();
         }
 
-        while let Some((trivias, node)) = self.try_parse_with_trivias(Self::parse_param) {
-            children.extend(trivias);
-            children.push(node.into());
+        while let Some(param) = self.try_parse_with_trivias(Self::parse_param) {
+            state |= HAS_PARAM;
+            self.add_child(param);
         }
-        while let Some((trivias, node)) = self.try_parse_with_trivias(Self::parse_result) {
-            children.extend(trivias);
-            children.push(node.into());
+        while let Some(result) = self.try_parse_with_trivias(Self::parse_result) {
+            state |= HAS_RESULT;
+            self.add_child(result);
         }
 
-        if children.iter().any(|node_or_token| match node_or_token {
-            NodeOrToken::Node(..) => true,
-            NodeOrToken::Token(token) => !matches!(
-                wat_syntax::WatLanguage::kind_from_raw(token.kind()),
-                WHITESPACE | LINE_COMMENT | BLOCK_COMMENT | ERROR
-            ),
-        }) {
-            Some(node(TYPE_USE, children))
-        } else {
+        if state == 0 {
             None
+        } else {
+            Some(self.finish_node(TYPE_USE, mark))
         }
     }
 }

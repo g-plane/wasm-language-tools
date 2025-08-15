@@ -3,6 +3,7 @@ use crate::error::SyntaxError;
 use rowan::{GreenNode, GreenToken, NodeOrToken};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
+mod builder;
 mod green;
 mod helpers;
 mod instr;
@@ -58,6 +59,7 @@ struct Parser<'s> {
     source: &'s str,
     lexer: Lexer<'s>,
     errors: Vec<SyntaxError>,
+    elements: Vec<GreenElement>,
 }
 
 impl<'s> Parser<'s> {
@@ -66,13 +68,14 @@ impl<'s> Parser<'s> {
             source,
             lexer: Lexer::new(source),
             errors: Vec::new(),
+            elements: Vec::new(),
         }
     }
 
     fn parse_root(&mut self) -> GreenNode {
-        let mut children = Vec::with_capacity(2);
-        while self.recover(Self::parse_module, &mut children) {}
-        self.parse_trivias(&mut children);
-        node(SyntaxKind::ROOT, children)
+        let mark = self.start_node();
+        while self.recover(Self::parse_module) {}
+        self.parse_trivias();
+        self.finish_node(SyntaxKind::ROOT, mark)
     }
 }

@@ -45,6 +45,8 @@ pub static KW_STRUCT: LazyLock<GreenElement> =
     LazyLock::new(|| GreenToken::new(SyntaxKind::KEYWORD.into(), "struct").into());
 pub static KW_ARRAY: LazyLock<GreenElement> =
     LazyLock::new(|| GreenToken::new(SyntaxKind::KEYWORD.into(), "array").into());
+pub static KW_FIELD: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::KEYWORD.into(), "field").into());
 pub static KW_REF: LazyLock<GreenElement> =
     LazyLock::new(|| GreenToken::new(SyntaxKind::KEYWORD.into(), "ref").into());
 pub static KW_ITEM: LazyLock<GreenElement> =

@@ -12,7 +12,6 @@ exclude = ["/tests"]
 
 [dependencies]
 rowan.workspace = true
-smallvec.workspace = true
 wat_syntax = { path = "../syntax", version = "0.5" }
 
 [dev-dependencies]

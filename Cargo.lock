@@ -1074,7 +1074,6 @@ dependencies = [
  "insta",
  "rowan",
  "similar-asserts",
- "smallvec",
  "wat_syntax",
 ]
 

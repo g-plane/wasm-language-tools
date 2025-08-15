@@ -1,10 +1,5 @@
-use super::{
-    green,
-    lexer::{Checkpoint, Lexer, Token},
-    GreenElement, Parser,
-};
+use super::{green, lexer::Token, GreenElement, Parser};
 use crate::error::{Message, SyntaxError};
-use smallvec::SmallVec;
 use wat_syntax::SyntaxKind;
 
 impl<'s> Parser<'s> {
@@ -12,22 +7,19 @@ impl<'s> Parser<'s> {
     pub(super) fn recover<T: Into<GreenElement>>(
         &mut self,
         parser: fn(&mut Self) -> Option<T>,
-        children: &mut Vec<GreenElement>,
     ) -> bool {
-        let trivias = self.parse_trivias_deferred();
-        let checkpoint = self.lexer.checkpoint();
+        let checkpoint_before_trivias = self.checkpoint();
+        self.parse_trivias();
+        let checkpoint_after_trivias = self.checkpoint();
         if let Some(node_or_token) = parser(self) {
-            trivias.commit(children);
-            children.push(node_or_token.into());
+            self.add_child(node_or_token);
             return true;
         }
-        self.lexer.reset(checkpoint);
-        if let Some(mut tokens) = self.parse_errors() {
-            trivias.commit(children);
-            children.append(&mut tokens);
+        self.reset(checkpoint_after_trivias);
+        if self.parse_errors() {
             true
         } else {
-            trivias.rollback(&mut self.lexer);
+            self.reset(checkpoint_before_trivias);
             false
         }
     }
@@ -35,23 +27,21 @@ impl<'s> Parser<'s> {
     pub(super) fn retry<T: Into<GreenElement>>(
         &mut self,
         parser: fn(&mut Self) -> Option<T>,
-        children: &mut Vec<GreenElement>,
     ) -> bool {
         loop {
-            let trivias = self.parse_trivias_deferred();
-            let checkpoint = self.lexer.checkpoint();
+            let checkpoint_before_trivias = self.checkpoint();
+            self.parse_trivias();
+            let checkpoint_after_trivias = self.checkpoint();
             if let Some(node_or_token) = parser(self) {
-                trivias.commit(children);
-                children.push(node_or_token.into());
+                self.add_child(node_or_token);
                 return true;
             }
-            self.lexer.reset(checkpoint);
+            self.reset(checkpoint_after_trivias);
             if let Some(token) = self.lexer.eat(SyntaxKind::ERROR) {
-                trivias.commit(children);
                 self.report_error_token(&token, Message::Description("unexpected token"));
-                children.push(token.into());
+                self.add_child(token);
             } else {
-                trivias.rollback(&mut self.lexer);
+                self.reset(checkpoint_before_trivias);
                 return false;
             }
         }
@@ -61,22 +51,23 @@ impl<'s> Parser<'s> {
         &mut self,
         parser: impl FnOnce(&mut Self) -> Option<T>,
     ) -> Option<T> {
-        let checkpoint = self.lexer.checkpoint();
+        let checkpoint = self.checkpoint();
         let result = parser(self);
         if result.is_none() {
-            self.lexer.reset(checkpoint);
+            self.reset(checkpoint);
         }
         result
     }
     pub(super) fn try_parse_with_trivias<T>(
         &mut self,
         parser: impl FnOnce(&mut Self) -> Option<T>,
-    ) -> Option<(impl Iterator<Item = GreenElement> + 's, T)> {
-        let trivias = self.parse_trivias_deferred();
+    ) -> Option<T> {
+        let checkpoint = self.checkpoint();
+        self.parse_trivias();
         match parser(self) {
-            Some(result) => Some((trivias.tokens.into_iter().map(GreenElement::from), result)),
+            Some(result) => Some(result),
             None => {
-                trivias.rollback(&mut self.lexer);
+                self.reset(checkpoint);
                 None
             }
         }
@@ -96,100 +87,99 @@ impl<'s> Parser<'s> {
 
     /// "Eat" a token with processing the trivias before the token.
     /// After parsed, trivias and token will be added to `children`.
-    pub(super) fn eat(&mut self, kind: SyntaxKind, children: &mut Vec<GreenElement>) -> bool {
-        let trivias = self.parse_trivias_deferred();
+    pub(super) fn eat(&mut self, kind: SyntaxKind) -> bool {
+        let checkpoint = self.checkpoint();
+        self.parse_trivias();
         if let Some(token) = self.lexer.eat(kind) {
-            trivias.commit(children);
-            children.push(token.into());
+            self.add_child(token);
             true
         } else {
-            trivias.rollback(&mut self.lexer);
+            self.reset(checkpoint);
             false
         }
     }
 
     /// Accept error tokens with parens and trivias.
-    fn parse_errors(&mut self) -> Option<Vec<GreenElement>> {
+    fn parse_errors(&mut self) -> bool {
         if let Some(mut token) = self.lexer.eat(SyntaxKind::L_PAREN) {
             token.kind = SyntaxKind::ERROR;
-            let mut tokens = vec![token.into()];
+            self.add_child(token);
             let mut stack = 1u16;
             loop {
-                let trivias = self.parse_trivias_deferred();
+                let checkpoint = self.checkpoint();
+                self.parse_trivias();
                 if let Some(mut token) = self.lexer.eat(SyntaxKind::L_PAREN) {
-                    trivias.commit(&mut tokens);
                     token.kind = SyntaxKind::ERROR;
                     self.report_error_token(&token, Message::Description("unexpected token"));
-                    tokens.push(token.into());
+                    self.add_child(token);
                     stack += 1;
                 } else if let Some(mut token) = self.lexer.eat(SyntaxKind::R_PAREN) {
-                    trivias.commit(&mut tokens);
                     token.kind = SyntaxKind::ERROR;
                     self.report_error_token(&token, Message::Description("unexpected token"));
-                    tokens.push(token.into());
+                    self.add_child(token);
                     stack -= 1;
                     if stack == 0 {
                         break;
                     }
                 } else if let Some(token) = self.lexer.eat(SyntaxKind::ERROR) {
-                    trivias.commit(&mut tokens);
                     self.report_error_token(&token, Message::Description("unexpected token"));
-                    tokens.push(token.into());
+                    self.add_child(token);
                 } else {
-                    trivias.rollback(&mut self.lexer);
+                    self.reset(checkpoint);
                     break;
                 }
             }
-            Some(tokens)
+            true
+        } else if let Some(token) = self.lexer.eat(SyntaxKind::ERROR) {
+            self.report_error_token(&token, Message::Description("unexpected token"));
+            self.add_child(token);
+            true
         } else {
-            self.lexer.eat(SyntaxKind::ERROR).map(|token| {
-                self.report_error_token(&token, Message::Description("unexpected token"));
-                vec![token.into()]
-            })
+            false
         }
     }
 
-    pub(super) fn parse_trivias(&mut self, children: &mut Vec<GreenElement>) {
+    pub(super) fn parse_trivias(&mut self) {
         while let Some(token) = self.lexer.trivia() {
             if token.kind == SyntaxKind::WHITESPACE && token.text.as_bytes() == [b' '] {
-                children.push(green::SINGLE_SPACE.clone());
+                self.add_child(green::SINGLE_SPACE.clone());
             } else {
-                children.push(token.into());
+                self.add_child(token);
             }
         }
     }
 
-    fn parse_trivias_deferred(&mut self) -> Trivias<'s> {
-        let checkpoint = self.lexer.checkpoint();
-        let mut tokens = SmallVec::new();
-        while let Some(token) = self.lexer.trivia() {
-            tokens.push(token);
-        }
-        Trivias { tokens, checkpoint }
-    }
-
-    pub(super) fn expect_right_paren(&mut self, children: &mut Vec<GreenElement>) {
+    pub(super) fn expect_right_paren(&mut self) {
         loop {
-            let trivias = self.parse_trivias_deferred();
+            let checkpoint = self.checkpoint();
+            self.parse_trivias();
             if self.lexer.next(SyntaxKind::R_PAREN).is_some() {
-                trivias.commit(children);
-                children.push(green::R_PAREN.clone());
+                self.add_child(green::R_PAREN.clone());
                 return;
             }
             if let Some(token) = self.lexer.peek(SyntaxKind::L_PAREN) {
                 // a trick:
                 // if there're newlines before next left paren, we should exit from current parsing node
-                if trivias.tokens.iter().any(|token| token.text.contains('\n')) {
-                    trivias.rollback(&mut self.lexer);
+                if self
+                    .elements
+                    .get(checkpoint.elements..)
+                    .into_iter()
+                    .flat_map(|slice| slice.iter())
+                    .any(|node_or_token| {
+                        if let GreenElement::Token(token) = node_or_token {
+                            token.text().contains('\n')
+                        } else {
+                            false
+                        }
+                    })
+                {
+                    self.reset(checkpoint);
                     self.report_error_token(&token, Message::Char(')'));
                     return;
                 }
             }
-            if let Some(mut tokens) = self.parse_errors() {
-                trivias.commit(children);
-                children.append(&mut tokens);
-            } else {
-                trivias.rollback(&mut self.lexer);
+            if !self.parse_errors() {
+                self.reset(checkpoint);
                 let start = self.source.len();
                 self.errors.push(SyntaxError {
                     start,
@@ -230,26 +220,5 @@ impl<'s> Parser<'s> {
             end: start + token.text.len(),
             message,
         });
-    }
-}
-
-#[derive(Debug)]
-pub(super) struct Trivias<'s> {
-    tokens: SmallVec<[Token<'s>; 3]>,
-    checkpoint: Checkpoint<'s>,
-}
-impl<'s> Trivias<'s> {
-    pub(super) fn commit(self, children: &mut Vec<GreenElement>) {
-        children.reserve(self.tokens.len() + 1);
-        children.extend(self.tokens.into_iter().map(|token| {
-            if token.kind == SyntaxKind::WHITESPACE && token.text.as_bytes() == [b' '] {
-                green::SINGLE_SPACE.clone()
-            } else {
-                token.into()
-            }
-        }));
-    }
-    pub(super) fn rollback(self, lexer: &mut Lexer<'s>) {
-        lexer.reset(self.checkpoint);
     }
 }

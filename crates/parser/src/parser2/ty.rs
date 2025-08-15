@@ -1,106 +1,105 @@
-use super::{green, node, GreenElement, Parser};
+use super::{builder::NodeMark, green, node, GreenElement, Parser};
 use crate::error::Message;
 use rowan::GreenNode;
 use wat_syntax::SyntaxKind::*;
 
 impl Parser<'_> {
-    fn parse_array_type(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        if !self.recover(Self::parse_field_type, &mut children) {
+    fn parse_array_type(&mut self, mark: NodeMark) -> Option<GreenNode> {
+        if !self.recover(Self::parse_field_type) {
             self.report_missing(Message::Name("field type"));
         }
-        self.expect_right_paren(&mut children);
-        Some(node(ARRAY_TYPE, children))
+        self.expect_right_paren();
+        Some(self.finish_node(ARRAY_TYPE, mark))
     }
 
     fn parse_composite_type(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(3);
+        let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
-        children.push(green::L_PAREN.clone());
-        self.parse_trivias(&mut children);
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
         match self.lexer.next(KEYWORD)?.text {
             "func" => {
-                children.push(green::KW_FUNC.clone());
-                self.parse_func_type(children)
+                self.add_child(green::KW_FUNC.clone());
+                self.parse_func_type(mark)
             }
             "struct" => {
-                children.push(green::KW_STRUCT.clone());
-                self.parse_struct_type(children)
+                self.add_child(green::KW_STRUCT.clone());
+                self.parse_struct_type(mark)
             }
             "array" => {
-                children.push(green::KW_ARRAY.clone());
-                self.parse_array_type(children)
+                self.add_child(green::KW_ARRAY.clone());
+                self.parse_array_type(mark)
             }
             _ => None,
         }
     }
 
     fn parse_field(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(6);
+        let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
-        children.push(green::L_PAREN.clone());
-        self.parse_trivias(&mut children);
-        children.push(self.lexer.keyword("field")?.into());
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
+        self.lexer.keyword("field")?;
+        self.add_child(green::KW_FIELD.clone());
 
-        if self.eat(IDENT, &mut children) {
-            if !self.recover(Self::parse_field_type, &mut children) {
+        if self.eat(IDENT) {
+            if !self.recover(Self::parse_field_type) {
                 self.report_missing(Message::Name("field type"));
             }
         } else {
-            while self.recover(Self::parse_field_type, &mut children) {}
+            while self.recover(Self::parse_field_type) {}
         }
-        self.expect_right_paren(&mut children);
-        Some(node(FIELD, children))
+        self.expect_right_paren();
+        Some(self.finish_node(FIELD, mark))
     }
 
     fn parse_field_type(&mut self) -> Option<GreenNode> {
-        if let Some(mut children) = self.try_parse(|parser| {
-            let mut children = Vec::with_capacity(5);
+        if let Some(mark) = self.try_parse(|parser| {
+            let mark = parser.start_node();
             parser.lexer.next(L_PAREN)?;
-            children.push(green::L_PAREN.clone());
-            parser.parse_trivias(&mut children);
+            parser.add_child(green::L_PAREN.clone());
+            parser.parse_trivias();
             parser.lexer.keyword("mut")?;
-            children.push(green::KW_MUT.clone());
-            Some(children)
+            parser.add_child(green::KW_MUT.clone());
+            Some(mark)
         }) {
-            if !self.recover(Self::parse_storage_type, &mut children) {
+            if !self.recover(Self::parse_storage_type) {
                 self.report_missing(Message::Name("storage type"));
             }
-            self.expect_right_paren(&mut children);
-            Some(node(FIELD_TYPE, children))
+            self.expect_right_paren();
+            Some(self.finish_node(FIELD_TYPE, mark))
         } else {
             self.parse_storage_type()
                 .map(|storage_type| node(FIELD_TYPE, [storage_type]))
         }
     }
 
-    fn parse_func_type(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        while let Some((trivias, node)) = self.try_parse_with_trivias(Self::parse_param) {
-            children.extend(trivias);
-            children.push(node.into());
+    fn parse_func_type(&mut self, mark: NodeMark) -> Option<GreenNode> {
+        while let Some(node) = self.try_parse_with_trivias(Self::parse_param) {
+            self.add_child(node);
         }
-        while let Some((trivias, node)) = self.try_parse_with_trivias(Self::parse_result) {
-            children.extend(trivias);
-            children.push(node.into());
+        while let Some(node) = self.try_parse_with_trivias(Self::parse_result) {
+            self.add_child(node);
         }
-        self.expect_right_paren(&mut children);
-        Some(node(FUNC_TYPE, children))
+        self.expect_right_paren();
+        Some(self.finish_node(FUNC_TYPE, mark))
     }
 
     pub(super) fn parse_global_type(&mut self) -> Option<GreenNode> {
-        if let Some(mut children) = self.try_parse(|parser| {
-            let mut children = Vec::with_capacity(2);
+        if let Some(mark) = self.try_parse(|parser| {
+            let mark = parser.start_node();
             parser.lexer.next(L_PAREN)?;
-            children.push(green::L_PAREN.clone());
-            parser.parse_trivias(&mut children);
+            parser.add_child(green::L_PAREN.clone());
+            parser.parse_trivias();
             parser.lexer.keyword("mut")?;
-            children.push(green::KW_MUT.clone());
-            Some(children)
+            parser.add_child(green::KW_MUT.clone());
+            Some(mark)
         }) {
-            if !self.recover(Self::parse_value_type, &mut children) {
+            if !self.recover(Self::parse_value_type) {
                 self.report_missing(Message::Name("value type"));
             }
-            self.expect_right_paren(&mut children);
-            Some(node(GLOBAL_TYPE, children))
+            self.expect_right_paren();
+            Some(self.finish_node(GLOBAL_TYPE, mark))
         } else {
             self.parse_value_type()
                 .map(|value_type| node(GLOBAL_TYPE, [value_type]))
@@ -131,9 +130,11 @@ impl Parser<'_> {
     }
 
     fn parse_limits(&mut self) -> Option<GreenNode> {
-        let mut children = vec![self.expect(UNSIGNED_INT)?.into()];
-        self.eat(UNSIGNED_INT, &mut children);
-        Some(node(LIMITS, children))
+        let mark = self.start_node();
+        let min = self.expect(UNSIGNED_INT)?;
+        self.add_child(min);
+        self.eat(UNSIGNED_INT);
+        Some(self.finish_node(LIMITS, mark))
     }
 
     pub(super) fn parse_memory_type(&mut self) -> Option<GreenNode> {
@@ -151,22 +152,22 @@ impl Parser<'_> {
     }
 
     pub(super) fn parse_param(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(6);
+        let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
-        children.push(green::L_PAREN.clone());
-        self.parse_trivias(&mut children);
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
         self.lexer.keyword("param")?;
-        children.push(green::KW_PARAM.clone());
+        self.add_child(green::KW_PARAM.clone());
 
-        if self.eat(IDENT, &mut children) {
-            if !self.recover(Self::parse_value_type, &mut children) {
+        if self.eat(IDENT) {
+            if !self.recover(Self::parse_value_type) {
                 self.report_missing(Message::Name("value type"));
             }
         } else {
-            while self.recover(Self::parse_value_type, &mut children) {}
+            while self.recover(Self::parse_value_type) {}
         }
-        self.expect_right_paren(&mut children);
-        Some(node(PARAM, children))
+        self.expect_right_paren();
+        Some(self.finish_node(PARAM, mark))
     }
 
     pub(super) fn parse_ref_type(&mut self) -> Option<GreenNode> {
@@ -183,38 +184,35 @@ impl Parser<'_> {
     }
 
     fn parse_ref_type_detailed(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(7);
+        let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
-        children.push(green::L_PAREN.clone());
-        self.parse_trivias(&mut children);
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
         self.lexer.keyword("ref")?;
-        children.push(green::KW_REF.clone());
+        self.add_child(green::KW_REF.clone());
 
-        if let Some((trivias, keyword)) =
-            self.try_parse_with_trivias(|parser| parser.lexer.keyword("null"))
-        {
-            children.extend(trivias);
-            children.push(keyword.into());
+        if let Some(keyword) = self.try_parse_with_trivias(|parser| parser.lexer.keyword("null")) {
+            self.add_child(keyword);
         }
 
-        if !self.recover(Self::parse_heap_type::<false>, &mut children) {
+        if !self.recover(Self::parse_heap_type::<false>) {
             self.report_missing(Message::Name("heap type"));
         }
-        self.expect_right_paren(&mut children);
-        Some(node(REF_TYPE, children))
+        self.expect_right_paren();
+        Some(self.finish_node(REF_TYPE, mark))
     }
 
     pub(super) fn parse_result(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(6);
+        let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
-        children.push(green::L_PAREN.clone());
-        self.parse_trivias(&mut children);
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
         self.lexer.keyword("result")?;
-        children.push(green::KW_RESULT.clone());
+        self.add_child(green::KW_RESULT.clone());
 
-        while self.recover(Self::parse_value_type, &mut children) {}
-        self.expect_right_paren(&mut children);
-        Some(node(RESULT, children))
+        while self.recover(Self::parse_value_type) {}
+        self.expect_right_paren();
+        Some(self.finish_node(RESULT, mark))
     }
 
     fn parse_storage_type(&mut self) -> Option<GreenElement> {
@@ -222,63 +220,63 @@ impl Parser<'_> {
             .or_else(|| self.parse_value_type())
     }
 
-    fn parse_struct_type(&mut self, mut children: Vec<GreenElement>) -> Option<GreenNode> {
-        while self.recover(Self::parse_field, &mut children) {}
-        self.expect_right_paren(&mut children);
-        Some(node(STRUCT_TYPE, children))
+    fn parse_struct_type(&mut self, mark: NodeMark) -> Option<GreenNode> {
+        while self.recover(Self::parse_field) {}
+        self.expect_right_paren();
+        Some(self.finish_node(STRUCT_TYPE, mark))
     }
 
     pub(super) fn parse_sub_type(&mut self) -> Option<GreenNode> {
-        let mut children = Vec::with_capacity(3);
+        let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
-        children.push(green::L_PAREN.clone());
-        self.parse_trivias(&mut children);
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
         match self.lexer.next(KEYWORD)?.text {
             "func" => {
-                children.push(green::KW_FUNC.clone());
-                self.parse_func_type(children)
+                self.add_child(green::KW_FUNC.clone());
+                self.parse_func_type(mark)
                     .map(|ty| node(SUB_TYPE, [ty.into()]))
             }
             "struct" => {
-                children.push(green::KW_STRUCT.clone());
-                self.parse_struct_type(children)
+                self.add_child(green::KW_STRUCT.clone());
+                self.parse_struct_type(mark)
                     .map(|ty| node(SUB_TYPE, [ty.into()]))
             }
             "array" => {
-                children.push(green::KW_ARRAY.clone());
-                self.parse_array_type(children)
+                self.add_child(green::KW_ARRAY.clone());
+                self.parse_array_type(mark)
                     .map(|ty| node(SUB_TYPE, [ty.into()]))
             }
             "sub" => {
-                children.push(green::KW_SUB.clone());
-                if let Some((trivias, keyword)) =
+                self.add_child(green::KW_SUB.clone());
+                if let Some(keyword) =
                     self.try_parse_with_trivias(|parser| parser.lexer.keyword("final"))
                 {
-                    children.extend(trivias);
-                    children.push(keyword.into());
+                    self.add_child(keyword);
                 }
 
-                while let Some((trivias, index)) = self.try_parse_with_trivias(Self::parse_index) {
-                    children.extend(trivias);
-                    children.push(index.into());
+                while let Some(index) = self.try_parse_with_trivias(Self::parse_index) {
+                    self.add_child(index);
                 }
 
-                if !self.retry(Self::parse_composite_type, &mut children) {
+                if !self.retry(Self::parse_composite_type) {
                     self.report_missing(Message::Name("composite type"));
                 }
-                self.expect_right_paren(&mut children);
-                Some(node(SUB_TYPE, children))
+                self.expect_right_paren();
+                Some(self.finish_node(SUB_TYPE, mark))
             }
             _ => None,
         }
     }
 
     pub(super) fn parse_table_type(&mut self) -> Option<GreenNode> {
-        let mut children = vec![self.parse_limits()?.into()];
-        if !self.recover(Self::parse_ref_type, &mut children) {
+        let mark = self.start_node();
+        let limits = self.parse_limits()?;
+        self.add_child(limits);
+        if !self.recover(Self::parse_ref_type) {
             self.report_missing(Message::Name("ref type"));
         }
-        Some(node(TABLE_TYPE, children))
+        Some(self.finish_node(TABLE_TYPE, mark))
     }
 
     pub(super) fn parse_value_type(&mut self) -> Option<GreenElement> {
