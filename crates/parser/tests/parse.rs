@@ -26,7 +26,10 @@ fn parser_snapshot() {
             .map(|error| {
                 Diagnostic::error()
                     .with_message(error.message.to_string())
-                    .with_labels(vec![Label::primary((), error.start..error.end)])
+                    .with_labels(vec![Label::primary(
+                        (),
+                        error.range.start().into()..error.range.end().into(),
+                    )])
             })
             .for_each(|diagnostic| {
                 term::emit(&mut buffer, &config, &file, &diagnostic).unwrap();

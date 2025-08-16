@@ -21,7 +21,10 @@ fn main() {
         errors.into_iter().for_each(|error| {
             let diagnostic = Diagnostic::error()
                 .with_message(error.message.to_string())
-                .with_labels(vec![Label::primary((), error.start..error.end)]);
+                .with_labels(vec![Label::primary(
+                    (),
+                    error.range.start().into()..error.range.end().into(),
+                )]);
             term::emit(&mut writer.lock(), &config, &file, &diagnostic).unwrap();
         });
     }

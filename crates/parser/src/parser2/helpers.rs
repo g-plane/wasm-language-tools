@@ -1,5 +1,6 @@
 use super::{green, lexer::Token, GreenElement, Parser};
 use crate::error::{Message, SyntaxError};
+use rowan::{TextRange, TextSize};
 use wat_syntax::SyntaxKind;
 
 impl<'s> Parser<'s> {
@@ -182,8 +183,7 @@ impl<'s> Parser<'s> {
                 self.reset(checkpoint);
                 let start = self.source.len();
                 self.errors.push(SyntaxError {
-                    start,
-                    end: start,
+                    range: TextRange::new(TextSize::new(start as u32), TextSize::new(start as u32)),
                     message: Message::Char(')'),
                 });
                 return;
@@ -205,8 +205,7 @@ impl<'s> Parser<'s> {
         } else {
             let start = self.source.len();
             self.errors.push(SyntaxError {
-                start,
-                end: start,
+                range: TextRange::new(TextSize::new(start as u32), TextSize::new(start as u32)),
                 message,
             });
         }
@@ -216,8 +215,10 @@ impl<'s> Parser<'s> {
     pub(super) fn report_error_token(&mut self, token: &Token<'s>, message: Message) {
         let start = token.text.as_ptr().addr() - self.source.as_ptr().addr();
         self.errors.push(SyntaxError {
-            start,
-            end: start + token.text.len(),
+            range: TextRange::new(
+                TextSize::new(start as u32),
+                TextSize::new((start + token.text.len()) as u32),
+            ),
             message,
         });
     }

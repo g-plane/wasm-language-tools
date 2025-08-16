@@ -1,6 +1,6 @@
 use super::{is_id_char, GreenElement};
 use crate::error::{Message, SyntaxError};
-use rowan::GreenToken;
+use rowan::{GreenToken, TextRange, TextSize};
 use wat_syntax::SyntaxKind;
 
 #[derive(Clone, Debug)]
@@ -57,8 +57,10 @@ impl<'s> Lexer<'s> {
                 };
                 let origin = self.source.as_ptr().addr();
                 SyntaxError {
-                    start: text.as_ptr().addr() - origin,
-                    end: self.input.as_ptr().addr() - origin,
+                    range: TextRange::new(
+                        TextSize::new((text.as_ptr().addr() - origin) as u32),
+                        TextSize::new((self.input.as_ptr().addr() - origin) as u32),
+                    ),
                     message,
                 }
             })

@@ -1,10 +1,10 @@
+use rowan::TextRange;
 use std::fmt;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 /// The syntax error comes with location and message.
 pub struct SyntaxError {
-    pub start: usize,
-    pub end: usize,
+    pub range: TextRange,
     pub message: Message,
 }
 
