@@ -1,7 +1,8 @@
 {
-  "extends": "https://dprint.gplane.win/2024-10.json",
+  "extends": "https://dprint.gplane.win/2025-07.json",
   "excludes": [
     "docs/.vitepress/cache",
-    "docs/.vitepress/dist"
+    "docs/.vitepress/dist",
+    "*.svg"
   ]
 }

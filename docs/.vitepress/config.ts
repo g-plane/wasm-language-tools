@@ -99,7 +99,7 @@ export default defineConfig({
                   character: Number.parseInt(endChar) - 1,
                 },
                 properties: { class: `severity severity__${severity}` },
-              })) ?? []
+              })) ?? [],
           )
         },
       },
@@ -119,7 +119,7 @@ export default defineConfig({
                   character: Number.parseInt(endChar) - 1,
                 },
                 properties: { class: `code-faded` },
-              })) ?? []
+              })) ?? [],
           )
         },
       },
