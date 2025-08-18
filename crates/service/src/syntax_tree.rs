@@ -1,4 +1,7 @@
-use crate::uri::InternUri;
+use crate::{
+    uri::{InternUri, UrisCtx},
+    LanguageService,
+};
 use line_index::LineIndex;
 use rowan::GreenNode;
 use std::sync::Arc;
@@ -7,29 +10,24 @@ use wat_parser::{parse_to_green, SyntaxError};
 #[salsa::query_group(SyntaxTree)]
 pub(crate) trait SyntaxTreeCtx: salsa::Database {
     #[salsa::input]
-    fn source(&self, uri: InternUri) -> String;
-
-    #[salsa::memoized]
-    #[salsa::invoke(get_line_index)]
     fn line_index(&self, uri: InternUri) -> Arc<LineIndex>;
 
-    #[salsa::memoized]
-    fn parse(&self, uri: InternUri) -> (GreenNode, Arc<Vec<SyntaxError>>);
-
-    #[salsa::memoized]
+    #[salsa::input]
     fn root(&self, uri: InternUri) -> GreenNode;
+
+    #[salsa::input]
+    fn syntax_errors(&self, uri: InternUri) -> Arc<Vec<SyntaxError>>;
 }
 
-fn get_line_index(db: &dyn SyntaxTreeCtx, uri: InternUri) -> Arc<LineIndex> {
-    Arc::new(LineIndex::new(&db.source(uri)))
-}
-
-fn parse(db: &dyn SyntaxTreeCtx, uri: InternUri) -> (GreenNode, Arc<Vec<SyntaxError>>) {
-    let source = db.source(uri);
-    let (green, errors) = parse_to_green(&source);
-    (green, Arc::new(errors))
-}
-
-fn root(db: &dyn SyntaxTreeCtx, uri: InternUri) -> GreenNode {
-    db.parse(uri).0
+impl LanguageService {
+    #[inline]
+    /// Commit a document to the service, usually called when handling `textDocument/didOpen` or
+    /// `textDocument/didChange` notifications.
+    pub fn commit(&mut self, uri: String, source: String) {
+        let uri = self.uri(uri);
+        self.set_line_index(uri, Arc::new(LineIndex::new(&source)));
+        let (green, errors) = parse_to_green(&source);
+        self.set_root(uri, green);
+        self.set_syntax_errors(uri, Arc::new(errors));
+    }
 }

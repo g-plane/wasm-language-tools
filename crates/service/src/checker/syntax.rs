@@ -11,7 +11,7 @@ pub fn check(
     uri: InternUri,
     line_index: &LineIndex,
 ) {
-    diagnostics.extend(service.parse(uri).1.iter().map(|error| Diagnostic {
+    diagnostics.extend(service.syntax_errors(uri).iter().map(|error| Diagnostic {
         range: helpers::rowan_range_to_lsp_range(line_index, error.range),
         severity: Some(DiagnosticSeverity::Error),
         source: Some("wat".into()),

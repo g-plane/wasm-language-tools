@@ -184,14 +184,6 @@ impl LanguageService {
     }
 
     #[inline]
-    /// Commit a document to the service, usually called when handling `textDocument/didOpen` or
-    /// `textDocument/didChange` notifications.
-    pub fn commit(&mut self, uri: String, source: String) {
-        let uri = self.uri(uri);
-        self.set_source(uri, source);
-    }
-
-    #[inline]
     // This should be used internally.
     fn get_config(&self, uri: crate::uri::InternUri) -> &ServiceConfig {
         self.configs.get(&uri).unwrap_or(&self.global_config)
