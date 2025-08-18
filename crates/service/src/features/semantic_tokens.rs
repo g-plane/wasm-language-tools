@@ -72,41 +72,49 @@ impl LanguageService {
         let line_index = self.line_index(uri);
         tokens
             .filter_map(|token| {
-                if token.kind() == SyntaxKind::WHITESPACE {
-                    let lines = token.text().chars().filter(|c| *c == '\n').count() as u32;
-                    if lines > 0 {
-                        *delta_line += lines;
-                        *prev_start = 0;
+                match token.kind() {
+                    SyntaxKind::WHITESPACE => {
+                        let lines = token.text().chars().filter(|c| *c == '\n').count() as u32;
+                        if lines > 0 {
+                            *delta_line += lines;
+                            *prev_start = 0;
+                        }
+                        return None;
                     }
-                    return None;
-                }
-                let token_type = self.token_type(uri, &token)?;
-                let block_comment_lines = if token.kind() == SyntaxKind::BLOCK_COMMENT {
-                    Some(token.text().chars().filter(|c| *c == '\n').count() as u32)
-                } else {
-                    None
-                };
-                let range = token.text_range();
-                let col = line_index.line_col(range.start()).col;
-                Some([
-                    // delta line
-                    mem::replace(delta_line, block_comment_lines.unwrap_or_default()),
-                    // delta start
-                    col - mem::replace(
-                        prev_start,
-                        if block_comment_lines.is_some_and(|lines| lines > 0) {
-                            0
+                    SyntaxKind::ERROR => {
+                        *prev_start = line_index.line_col(token.text_range().start()).col;
+                        return None;
+                    }
+                    _ => {
+                        let token_type = self.token_type(uri, &token)?;
+                        let block_comment_lines = if token.kind() == SyntaxKind::BLOCK_COMMENT {
+                            Some(token.text().chars().filter(|c| *c == '\n').count() as u32)
                         } else {
-                            col
-                        },
-                    ),
-                    // length
-                    range.len().into(),
-                    // token type
-                    token_type,
-                    // token modifiers bitset
-                    0,
-                ])
+                            None
+                        };
+                        let range = token.text_range();
+                        let col = line_index.line_col(range.start()).col;
+                        Some([
+                            // delta line
+                            mem::replace(delta_line, block_comment_lines.unwrap_or_default()),
+                            // delta start
+                            col - mem::replace(
+                                prev_start,
+                                if block_comment_lines.is_some_and(|lines| lines > 0) {
+                                    0
+                                } else {
+                                    col
+                                },
+                            ),
+                            // length
+                            range.len().into(),
+                            // token type
+                            token_type,
+                            // token modifiers bitset
+                            0,
+                        ])
+                    }
+                }
             })
             .flatten()
             .collect()
