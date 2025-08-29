@@ -48,7 +48,7 @@ fn run_format_test(path: &Path, input: &str, options: &FormatOptions) -> String 
         path.display(),
     );
 
-    let (tree, errors) = wat_parser::parse(input);
+    let (tree, errors) = wat_parser::parse(&output);
     assert!(
         errors.is_empty(),
         "syntax error in stability test '{}': {:?}",
