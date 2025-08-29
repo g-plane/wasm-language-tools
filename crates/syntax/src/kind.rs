@@ -17,7 +17,8 @@ pub enum SyntaxKind {
     UNSIGNED_INT,
     FLOAT,
     TYPE_KEYWORD,
-    MEM_ARG,
+    EQ,
+    MEM_ARG_KEYWORD,
     ERROR,
 
     // SyntaxNode
@@ -46,6 +47,7 @@ pub enum SyntaxKind {
     BLOCK_IF,
     BLOCK_IF_THEN,
     BLOCK_IF_ELSE,
+    MEM_ARG,
     IMMEDIATE,
     TYPE_USE,
     LIMITS,

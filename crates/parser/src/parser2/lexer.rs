@@ -52,7 +52,8 @@ impl<'s> Lexer<'s> {
                     SyntaxKind::INT => Message::Name("integer"),
                     SyntaxKind::UNSIGNED_INT => Message::Name("unsigned integer"),
                     SyntaxKind::FLOAT => Message::Name("float"),
-                    SyntaxKind::MEM_ARG => Message::Name("memory argument"),
+                    SyntaxKind::EQ => Message::Char('='),
+                    SyntaxKind::MEM_ARG_KEYWORD => Message::Name("memory argument keyword"),
                     _ => unreachable!(),
                 };
                 let origin = self.source.as_ptr().addr();
@@ -98,7 +99,8 @@ impl<'s> Lexer<'s> {
             SyntaxKind::INT => self.int(),
             SyntaxKind::UNSIGNED_INT => self.unsigned_int(),
             SyntaxKind::FLOAT => self.float(),
-            SyntaxKind::MEM_ARG => self.mem_arg(),
+            SyntaxKind::EQ => self.ascii_char::<b'='>(SyntaxKind::EQ),
+            SyntaxKind::MEM_ARG_KEYWORD => self.mem_arg_keyword(),
             SyntaxKind::ERROR => self.error().map(|text| Token {
                 kind: SyntaxKind::ERROR,
                 text,
@@ -355,19 +357,22 @@ impl<'s> Lexer<'s> {
         }
     }
 
-    fn mem_arg(&mut self) -> Option<Token<'s>> {
+    fn mem_arg_keyword(&mut self) -> Option<Token<'s>> {
         let checkpoint = self.input;
         self.input = self
             .input
-            .strip_prefix("offset=")
-            .or_else(|| self.input.strip_prefix("align="))?;
-        self.unsigned_int_raw()?;
-        checkpoint
-            .get(..checkpoint.len() - self.input.len())
-            .map(|text| Token {
-                kind: SyntaxKind::MEM_ARG,
-                text,
-            })
+            .strip_prefix("offset")
+            .or_else(|| self.input.strip_prefix("align"))?;
+        if self.input.starts_with(|c: char| c.is_ascii_alphabetic()) {
+            None
+        } else {
+            checkpoint
+                .get(..checkpoint.len() - self.input.len())
+                .map(|text| Token {
+                    kind: SyntaxKind::MEM_ARG_KEYWORD,
+                    text,
+                })
+        }
     }
 
     fn error(&mut self) -> Option<&'s str> {
@@ -466,3 +471,8 @@ impl<'s> Lexer<'s> {
 
 #[derive(Debug, Clone, Copy)]
 pub(super) struct Checkpoint<'s>(&'s str);
+impl<'s> Checkpoint<'s> {
+    pub fn at(&self, source: &'s str) -> TextSize {
+        TextSize::new((self.0.as_ptr().addr() - source.as_ptr().addr()) as u32)
+    }
+}

@@ -337,6 +337,8 @@ impl DocGen for Immediate {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         if let Some(type_use) = self.type_use() {
             type_use.doc(ctx)
+        } else if let Some(mem_arg) = self.mem_arg() {
+            mem_arg.doc(ctx)
         } else if let Some(heap_type) = self.heap_type() {
             heap_type.doc(ctx)
         } else if let Some(ref_type) = self.ref_type() {
@@ -355,6 +357,20 @@ impl DocGen for Instr {
             Instr::Block(block_instr) => block_instr.doc(ctx),
             Instr::Plain(plain_instr) => plain_instr.doc(ctx),
         }
+    }
+}
+
+impl DocGen for MemArg {
+    fn doc(&self, _: &Ctx) -> Doc<'static> {
+        let mut docs = Vec::with_capacity(3);
+        if let Some(keyword) = self.mem_arg_keyword() {
+            docs.push(Doc::text(keyword.to_string()));
+        }
+        docs.push(Doc::text("="));
+        if let Some(unsigned_int) = self.unsigned_int() {
+            docs.push(Doc::text(unsigned_int.to_string()));
+        }
+        Doc::list(docs)
     }
 }
 

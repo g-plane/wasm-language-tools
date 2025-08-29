@@ -486,8 +486,8 @@ impl Immediate {
         child(&self.syntax)
     }
     #[inline]
-    pub fn mem_arg(&self) -> Option<SyntaxToken> {
-        token(&self.syntax, SyntaxKind::MEM_ARG)
+    pub fn mem_arg(&self) -> Option<MemArg> {
+        child(&self.syntax)
     }
     #[inline]
     pub fn heap_type(&self) -> Option<HeapType> {
@@ -514,6 +514,50 @@ impl AstNode for Immediate {
     {
         if Self::can_cast(syntax.kind()) {
             Some(Immediate { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct MemArg {
+    syntax: SyntaxNode,
+}
+impl MemArg {
+    #[inline]
+    pub fn mem_arg_keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::MEM_ARG_KEYWORD)
+    }
+    #[inline]
+    pub fn eq_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::EQ)
+    }
+    #[inline]
+    pub fn unsigned_int(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::UNSIGNED_INT)
+    }
+}
+impl AstNode for MemArg {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::MEM_ARG
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(MemArg { syntax })
         } else {
             None
         }

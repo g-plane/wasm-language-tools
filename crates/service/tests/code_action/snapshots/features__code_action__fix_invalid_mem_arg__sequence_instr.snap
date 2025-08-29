@@ -6,22 +6,7 @@ expression: response
   {
     "title": "Fix invalid memory argument",
     "kind": "quickfix",
-    "diagnostics": [
-      {
-        "range": {
-          "start": {
-            "line": 0,
-            "character": 0
-          },
-          "end": {
-            "line": 0,
-            "character": 0
-          }
-        },
-        "code": "syntax",
-        "message": "syntax error: whitespaces or comments are not allowed inside memory argument"
-      }
-    ],
+    "diagnostics": [],
     "isPreferred": true,
     "edit": {
       "changes": {
@@ -30,11 +15,24 @@ expression: response
             "range": {
               "start": {
                 "line": 2,
-                "character": 25
+                "character": 24
               },
               "end": {
                 "line": 2,
+                "character": 25
+              }
+            },
+            "newText": ""
+          },
+          {
+            "range": {
+              "start": {
+                "line": 2,
                 "character": 26
+              },
+              "end": {
+                "line": 2,
+                "character": 27
               }
             },
             "newText": ""

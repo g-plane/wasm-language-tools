@@ -5,10 +5,9 @@ use crate::{
 };
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionContext, CodeActionKind, TextEdit, Union2, WorkspaceEdit};
-use rowan::{SyntaxElementChildren, TextRange};
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
-use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, WatLanguage};
+use wat_syntax::{SyntaxElement, SyntaxNode};
 
 pub fn act(
     service: &LanguageService,
@@ -17,67 +16,17 @@ pub fn act(
     node: &SyntaxNode,
     context: &CodeActionContext,
 ) -> Option<CodeAction> {
-    let mut text_edits = vec![];
-
-    let mut children = node.children_with_tokens();
-    while let Some(element) = children.next() {
-        if let SyntaxElement::Token(token) = element {
-            if token.kind() != SyntaxKind::ERROR {
-                continue;
-            }
-            let text = token.text();
-            let rest = text
-                .strip_prefix("offset")
-                .or_else(|| text.strip_prefix("align"));
-            match rest {
-                Some("") => {
-                    let range = children.next().and_then(|element| match element {
-                        SyntaxElement::Token(token) if token.kind() == SyntaxKind::WHITESPACE => {
-                            Some(token.text_range())
-                        }
-                        _ => None,
-                    });
-                    if let Some(range) = children
-                        .next()
-                        .filter(|element| {
-                            if let SyntaxElement::Token(token) = element {
-                                token.kind() == SyntaxKind::ERROR
-                                    && token.text().strip_prefix('=').is_some_and(|rest| {
-                                        rest.chars().all(|c| c.is_ascii_digit())
-                                    })
-                            } else {
-                                false
-                            }
-                        })
-                        .and(range)
-                    {
-                        text_edits.push(TextEdit {
-                            range: helpers::rowan_range_to_lsp_range(line_index, range),
-                            new_text: String::new(),
-                        });
-                        if let Some(range) = check_after_eq(&mut children) {
-                            text_edits.push(TextEdit {
-                                range: helpers::rowan_range_to_lsp_range(line_index, range),
-                                new_text: String::new(),
-                            });
-                        }
-                        break;
-                    }
-                }
-                Some("=") => {
-                    if let Some(range) = check_after_eq(&mut children) {
-                        text_edits.push(TextEdit {
-                            range: helpers::rowan_range_to_lsp_range(line_index, range),
-                            new_text: String::new(),
-                        });
-                        break;
-                    }
-                }
-                _ => {}
-            }
-        }
-    }
-
+    let text_edits = node
+        .children_with_tokens()
+        .filter_map(|node_or_token| match node_or_token {
+            SyntaxElement::Token(token) if token.kind().is_trivia() => Some(token.text_range()),
+            _ => None,
+        })
+        .map(|range| TextEdit {
+            range: helpers::rowan_range_to_lsp_range(line_index, range),
+            new_text: String::new(),
+        })
+        .collect::<Vec<_>>();
     if text_edits.is_empty() {
         None
     } else {
@@ -97,7 +46,8 @@ pub fn act(
                     .iter()
                     .filter(|diagnostic| {
                         if let Some(Union2::B(s)) = &diagnostic.code {
-                            s.starts_with("syntax/")
+                            s.starts_with("syntax")
+                                && diagnostic.message.contains("memory argument")
                         } else {
                             false
                         }
@@ -107,25 +57,5 @@ pub fn act(
             ),
             ..Default::default()
         })
-    }
-}
-
-fn check_after_eq(children: &mut SyntaxElementChildren<WatLanguage>) -> Option<TextRange> {
-    let range = children.next().and_then(|element| match element {
-        SyntaxElement::Token(token) if token.kind() == SyntaxKind::WHITESPACE => {
-            Some(token.text_range())
-        }
-        _ => None,
-    });
-    match children.next() {
-        Some(SyntaxElement::Token(token)) if token.kind() == SyntaxKind::ERROR => range,
-        Some(SyntaxElement::Node(node))
-            if node
-                .first_token()
-                .is_some_and(|token| token.kind() == SyntaxKind::INT) =>
-        {
-            range
-        }
-        _ => None,
     }
 }

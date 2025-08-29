@@ -1,6 +1,6 @@
 use super::{builder::NodeMark, green, lexer::Token, node, GreenElement, Parser};
-use crate::error::Message;
-use rowan::GreenNode;
+use crate::error::{Message, SyntaxError};
+use rowan::{GreenNode, TextRange};
 use wat_syntax::SyntaxKind::{self, *};
 
 impl Parser<'_> {
@@ -135,7 +135,6 @@ impl Parser<'_> {
             })
             .or_else(|| self.lexer.eat(IDENT))
             .or_else(|| self.lexer.eat(STRING))
-            .or_else(|| self.lexer.eat(MEM_ARG))
             .map(|token| node(IMMEDIATE, [token.into()]))
             .or_else(|| {
                 self.try_parse(Self::parse_ref_type)
@@ -143,6 +142,10 @@ impl Parser<'_> {
             })
             .or_else(|| {
                 self.try_parse(Self::parse_type_use)
+                    .map(|child| node(IMMEDIATE, [child.into()]))
+            })
+            .or_else(|| {
+                self.try_parse(Self::parse_mem_arg)
                     .map(|child| node(IMMEDIATE, [child.into()]))
             })
             .or_else(|| {
@@ -197,6 +200,51 @@ impl Parser<'_> {
                 }
             }
         }
+    }
+
+    fn parse_mem_arg(&mut self) -> Option<GreenNode> {
+        let mark = self.start_node();
+        let keyword = self.lexer.next(MEM_ARG_KEYWORD)?;
+        self.add_child(keyword);
+
+        const MSG: &str = "whitespaces or comments are not allowed inside memory argument";
+
+        let before_trivias = self.lexer.checkpoint().at(self.source);
+        if let Some((after_trivias, eq)) = self.try_parse_with_trivias(|parser| {
+            let after_trivias = parser.lexer.checkpoint().at(parser.source);
+            parser.lexer.next(EQ).map(|eq| (after_trivias, eq))
+        }) {
+            self.add_child(eq);
+            if after_trivias > before_trivias {
+                self.errors.push(SyntaxError {
+                    range: TextRange::new(before_trivias, after_trivias),
+                    message: Message::Description(MSG),
+                });
+            }
+        } else {
+            self.report_missing(Message::Char('='));
+        }
+
+        let before_trivias = self.lexer.checkpoint().at(self.source);
+        if let Some((after_trivias, unsigned_int)) = self.try_parse_with_trivias(|parser| {
+            let after_trivias = parser.lexer.checkpoint().at(parser.source);
+            parser
+                .lexer
+                .next(UNSIGNED_INT)
+                .map(|unsigned_int| (after_trivias, unsigned_int))
+        }) {
+            self.add_child(unsigned_int);
+            if after_trivias > before_trivias {
+                self.errors.push(SyntaxError {
+                    range: TextRange::new(before_trivias, after_trivias),
+                    message: Message::Description(MSG),
+                });
+            }
+        } else {
+            self.report_missing(Message::Name("unsigned int"));
+        }
+
+        Some(self.finish_node(MEM_ARG, mark))
     }
 
     fn parse_plain_instr_folded(&mut self, mark: NodeMark) -> Option<GreenNode> {

@@ -1,0 +1,162 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..200
+  MODULE@0..199
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_FUNC@10..197
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "func"
+      WHITESPACE@15..20 "\n    "
+      PLAIN_INSTR@20..38
+        L_PAREN@20..21 "("
+        INSTR_NAME@21..29 "i32.load"
+        WHITESPACE@29..30 " "
+        IMMEDIATE@30..36
+          MEM_ARG@30..36
+            MEM_ARG_KEYWORD@30..36 "offset"
+        WHITESPACE@36..37 " "
+        R_PAREN@37..38 ")"
+      WHITESPACE@38..43 "\n    "
+      PLAIN_INSTR@43..61
+        L_PAREN@43..44 "("
+        INSTR_NAME@44..52 "i32.load"
+        WHITESPACE@52..53 " "
+        IMMEDIATE@53..59
+          MEM_ARG@53..59
+            MEM_ARG_KEYWORD@53..58 "align"
+            EQ@58..59 "="
+        WHITESPACE@59..60 " "
+        R_PAREN@60..61 ")"
+      WHITESPACE@61..66 "\n    "
+      PLAIN_INSTR@66..85
+        L_PAREN@66..67 "("
+        INSTR_NAME@67..75 "i32.load"
+        WHITESPACE@75..76 " "
+        IMMEDIATE@76..83
+          MEM_ARG@76..83
+            MEM_ARG_KEYWORD@76..82 "offset"
+            UNSIGNED_INT@82..83 "2"
+        WHITESPACE@83..84 " "
+        R_PAREN@84..85 ")"
+      WHITESPACE@85..90 "\n    "
+      PLAIN_INSTR@90..110
+        L_PAREN@90..91 "("
+        INSTR_NAME@91..99 "i32.load"
+        WHITESPACE@99..100 " "
+        IMMEDIATE@100..108
+          MEM_ARG@100..108
+            MEM_ARG_KEYWORD@100..105 "align"
+            EQ@105..106 "="
+            WHITESPACE@106..107 " "
+            UNSIGNED_INT@107..108 "2"
+        WHITESPACE@108..109 " "
+        R_PAREN@109..110 ")"
+      WHITESPACE@110..115 "\n    "
+      PLAIN_INSTR@115..135
+        L_PAREN@115..116 "("
+        INSTR_NAME@116..124 "i32.load"
+        WHITESPACE@124..125 " "
+        IMMEDIATE@125..133
+          MEM_ARG@125..133
+            MEM_ARG_KEYWORD@125..130 "align"
+            WHITESPACE@130..131 " "
+            EQ@131..132 "="
+            UNSIGNED_INT@132..133 "2"
+        WHITESPACE@133..134 " "
+        R_PAREN@134..135 ")"
+      WHITESPACE@135..140 "\n    "
+      PLAIN_INSTR@140..161
+        L_PAREN@140..141 "("
+        INSTR_NAME@141..149 "i32.load"
+        WHITESPACE@149..150 " "
+        IMMEDIATE@150..159
+          MEM_ARG@150..159
+            MEM_ARG_KEYWORD@150..155 "align"
+            WHITESPACE@155..156 " "
+            EQ@156..157 "="
+            WHITESPACE@157..158 " "
+            UNSIGNED_INT@158..159 "2"
+        WHITESPACE@159..160 " "
+        R_PAREN@160..161 ")"
+      WHITESPACE@161..166 "\n    "
+      PLAIN_INSTR@166..193
+        L_PAREN@166..167 "("
+        INSTR_NAME@167..175 "i32.load"
+        WHITESPACE@175..176 " "
+        IMMEDIATE@176..191
+          MEM_ARG@176..191
+            MEM_ARG_KEYWORD@176..181 "align"
+            BLOCK_COMMENT@181..185 "(;;)"
+            EQ@185..186 "="
+            BLOCK_COMMENT@186..190 "(;;)"
+            UNSIGNED_INT@190..191 "2"
+        WHITESPACE@191..192 " "
+        R_PAREN@192..193 ")"
+      WHITESPACE@193..196 "\n  "
+      R_PAREN@196..197 ")"
+    WHITESPACE@197..198 "\n"
+    R_PAREN@198..199 ")"
+  WHITESPACE@199..200 "\n"
+
+error: expected `=`
+  ┌─ address-malformed.wat:3:22
+  │
+3 │     (i32.load offset )
+  │                      ^
+
+error: expected unsigned int
+  ┌─ address-malformed.wat:3:22
+  │
+3 │     (i32.load offset )
+  │                      ^
+
+error: expected unsigned int
+  ┌─ address-malformed.wat:4:22
+  │
+4 │     (i32.load align= )
+  │                      ^
+
+error: expected `=`
+  ┌─ address-malformed.wat:5:21
+  │
+5 │     (i32.load offset2 )
+  │                     ^
+
+error: whitespaces or comments are not allowed inside memory argument
+  ┌─ address-malformed.wat:6:21
+  │
+6 │     (i32.load align= 2 )
+  │                     ^
+
+error: whitespaces or comments are not allowed inside memory argument
+  ┌─ address-malformed.wat:7:20
+  │
+7 │     (i32.load align =2 )
+  │                    ^
+
+error: whitespaces or comments are not allowed inside memory argument
+  ┌─ address-malformed.wat:8:20
+  │
+8 │     (i32.load align = 2 )
+  │                    ^
+
+error: whitespaces or comments are not allowed inside memory argument
+  ┌─ address-malformed.wat:8:22
+  │
+8 │     (i32.load align = 2 )
+  │                      ^
+
+error: whitespaces or comments are not allowed inside memory argument
+  ┌─ address-malformed.wat:9:20
+  │
+9 │     (i32.load align(;;)=(;;)2 )
+  │                    ^^^^
+
+error: whitespaces or comments are not allowed inside memory argument
+  ┌─ address-malformed.wat:9:25
+  │
+9 │     (i32.load align(;;)=(;;)2 )
+  │                         ^^^^

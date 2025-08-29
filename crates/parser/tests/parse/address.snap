@@ -67,7 +67,10 @@ ROOT@0..566
         INSTR_NAME@135..146 "i32.load8_u"
         WHITESPACE@146..147 " "
         IMMEDIATE@147..155
-          MEM_ARG@147..155 "offset=0"
+          MEM_ARG@147..155
+            MEM_ARG_KEYWORD@147..153 "offset"
+            EQ@153..154 "="
+            UNSIGNED_INT@154..155 "0"
         WHITESPACE@155..156 " "
         PLAIN_INSTR@156..170
           L_PAREN@156..157 "("
@@ -118,7 +121,10 @@ ROOT@0..566
         INSTR_NAME@265..276 "i32.load8_u"
         WHITESPACE@276..277 " "
         IMMEDIATE@277..284
-          MEM_ARG@277..284 "align=1"
+          MEM_ARG@277..284
+            MEM_ARG_KEYWORD@277..282 "align"
+            EQ@282..283 "="
+            UNSIGNED_INT@283..284 "1"
         WHITESPACE@284..285 " "
         PLAIN_INSTR@285..299
           L_PAREN@285..286 "("
@@ -169,10 +175,16 @@ ROOT@0..566
         INSTR_NAME@395..406 "i32.load8_u"
         WHITESPACE@406..407 " "
         IMMEDIATE@407..415
-          MEM_ARG@407..415 "offset=1"
+          MEM_ARG@407..415
+            MEM_ARG_KEYWORD@407..413 "offset"
+            EQ@413..414 "="
+            UNSIGNED_INT@414..415 "1"
         WHITESPACE@415..416 " "
         IMMEDIATE@416..423
-          MEM_ARG@416..423 "align=1"
+          MEM_ARG@416..423
+            MEM_ARG_KEYWORD@416..421 "align"
+            EQ@421..422 "="
+            UNSIGNED_INT@422..423 "1"
         WHITESPACE@423..424 " "
         PLAIN_INSTR@424..438
           L_PAREN@424..425 "("
@@ -219,7 +231,10 @@ ROOT@0..566
           INSTR_NAME@516..524 "i32.load"
           WHITESPACE@524..525 " "
           IMMEDIATE@525..542
-            MEM_ARG@525..542 "offset=4294967295"
+            MEM_ARG@525..542
+              MEM_ARG_KEYWORD@525..531 "offset"
+              EQ@531..532 "="
+              UNSIGNED_INT@532..542 "4294967295"
           WHITESPACE@542..543 " "
           PLAIN_INSTR@543..557
             L_PAREN@543..544 "("

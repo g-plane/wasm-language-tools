@@ -52,13 +52,6 @@ impl LanguageService {
                     }
                 }
                 SyntaxKind::PLAIN_INSTR => {
-                    if quickfix {
-                        if let Some(action) =
-                            fix_invalid_mem_arg::act(self, uri, &line_index, &it, &params.context)
-                        {
-                            actions.push(action);
-                        }
-                    }
                     if rewrite {
                         if let Some(action) = br_if_to_if_br::act(self, uri, &line_index, &it) {
                             actions.push(action);
@@ -159,6 +152,15 @@ impl LanguageService {
                     if rewrite {
                         if let Some(action) =
                             idx_conversion::act(self, uri, &line_index, &symbol_table, &it)
+                        {
+                            actions.push(action);
+                        }
+                    }
+                }
+                SyntaxKind::MEM_ARG => {
+                    if quickfix {
+                        if let Some(action) =
+                            fix_invalid_mem_arg::act(self, uri, &line_index, &it, &params.context)
                         {
                             actions.push(action);
                         }
