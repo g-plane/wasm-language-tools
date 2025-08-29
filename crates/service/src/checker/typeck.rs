@@ -185,7 +185,7 @@ pub fn check_elem_list(
                 },
                 &child,
                 Vec::with_capacity(1),
-                &[ty.clone()],
+                std::slice::from_ref(&ty),
             );
         });
 }

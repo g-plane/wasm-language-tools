@@ -79,11 +79,11 @@ impl LanguageService {
                             *delta_line += lines;
                             *prev_start = 0;
                         }
-                        return None;
+                        None
                     }
                     SyntaxKind::ERROR => {
                         *prev_start = line_index.line_col(token.text_range().start()).col;
-                        return None;
+                        None
                     }
                     _ => {
                         let token_type = self.token_type(uri, &token)?;

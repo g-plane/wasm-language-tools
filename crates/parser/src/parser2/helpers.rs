@@ -192,9 +192,6 @@ impl<'s> Parser<'s> {
     }
 
     pub(super) fn report_missing(&mut self, message: Message) {
-        let checkpoint = self.lexer.checkpoint();
-        while self.lexer.trivia().is_some() {}
-
         if let Some(token) = self
             .lexer
             .peek(SyntaxKind::R_PAREN)
@@ -209,7 +206,6 @@ impl<'s> Parser<'s> {
                 message,
             });
         }
-        self.lexer.reset(checkpoint);
     }
 
     pub(super) fn report_error_token(&mut self, token: &Token<'s>, message: Message) {
