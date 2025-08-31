@@ -38,51 +38,48 @@ impl LanguageService {
         while let Some(SyntaxElement::Node(it)) = node.child_or_token_at_range(range) {
             match it.kind() {
                 SyntaxKind::MODULE_FIELD_FUNC => {
-                    if rewrite {
-                        if let Some(action) = func_header_join::act(
+                    if rewrite
+                        && let Some(action) = func_header_join::act(
                             self,
                             uri,
                             &line_index,
                             &it,
                             SyntaxKind::LOCAL,
                             range,
-                        ) {
-                            actions.push(action);
-                        }
+                        )
+                    {
+                        actions.push(action);
                     }
                 }
                 SyntaxKind::PLAIN_INSTR => {
-                    if rewrite {
-                        if let Some(action) = br_if_to_if_br::act(self, uri, &line_index, &it) {
-                            actions.push(action);
-                        }
+                    if rewrite
+                        && let Some(action) = br_if_to_if_br::act(self, uri, &line_index, &it)
+                    {
+                        actions.push(action);
                     }
                 }
                 SyntaxKind::PARAM => {
-                    if rewrite {
-                        if let Some(action) =
+                    if rewrite
+                        && let Some(action) =
                             func_header_split::act(self, uri, &line_index, &it, SyntaxKind::PARAM)
-                        {
-                            actions.push(action);
-                        }
+                    {
+                        actions.push(action);
                     }
                 }
                 SyntaxKind::RESULT => {
-                    if rewrite {
-                        if let Some(action) =
+                    if rewrite
+                        && let Some(action) =
                             func_header_split::act(self, uri, &line_index, &it, SyntaxKind::RESULT)
-                        {
-                            actions.push(action);
-                        }
+                    {
+                        actions.push(action);
                     }
                 }
                 SyntaxKind::LOCAL => {
-                    if rewrite {
-                        if let Some(action) =
+                    if rewrite
+                        && let Some(action) =
                             func_header_split::act(self, uri, &line_index, &it, SyntaxKind::LOCAL)
-                        {
-                            actions.push(action);
-                        }
+                    {
+                        actions.push(action);
                     }
                 }
                 SyntaxKind::TYPE_USE | SyntaxKind::FUNC_TYPE => {
@@ -108,62 +105,56 @@ impl LanguageService {
                             actions.push(action);
                         }
                     }
-                    if inline {
-                        if let Some(action) =
+                    if inline
+                        && let Some(action) =
                             inline_func_type::act(self, uri, &line_index, &root, &symbol_table, &it)
-                        {
-                            actions.push(action);
-                        }
+                    {
+                        actions.push(action);
                     }
                 }
                 SyntaxKind::BLOCK_IF => {
-                    if rewrite {
-                        if let Some(action) = if_br_to_br_if::act(self, uri, &line_index, &it) {
-                            actions.push(action);
-                        }
+                    if rewrite
+                        && let Some(action) = if_br_to_br_if::act(self, uri, &line_index, &it)
+                    {
+                        actions.push(action);
                     }
                 }
                 SyntaxKind::GLOBAL_TYPE => {
-                    if quickfix {
-                        if let Some(action) =
+                    if quickfix
+                        && let Some(action) =
                             remove_mut::act(self, uri, &line_index, &it, &params.context)
-                        {
-                            actions.push(action);
-                        }
+                    {
+                        actions.push(action);
                     }
                 }
                 SyntaxKind::IMMEDIATE => {
-                    if quickfix {
-                        if let Some(mut action) =
+                    if quickfix
+                        && let Some(mut action) =
                             fix_packing::act(self, uri, &line_index, &it, &params.context)
-                        {
-                            actions.append(&mut action);
-                        }
+                    {
+                        actions.append(&mut action);
                     }
-                    if rewrite {
-                        if let Some(action) =
+                    if rewrite
+                        && let Some(action) =
                             idx_conversion::act(self, uri, &line_index, &symbol_table, &it)
-                        {
-                            actions.push(action);
-                        }
+                    {
+                        actions.push(action);
                     }
                 }
                 SyntaxKind::INDEX => {
-                    if rewrite {
-                        if let Some(action) =
+                    if rewrite
+                        && let Some(action) =
                             idx_conversion::act(self, uri, &line_index, &symbol_table, &it)
-                        {
-                            actions.push(action);
-                        }
+                    {
+                        actions.push(action);
                     }
                 }
                 SyntaxKind::MEM_ARG => {
-                    if quickfix {
-                        if let Some(action) =
+                    if quickfix
+                        && let Some(action) =
                             fix_invalid_mem_arg::act(self, uri, &line_index, &it, &params.context)
-                        {
-                            actions.push(action);
-                        }
+                    {
+                        actions.push(action);
                     }
                 }
                 _ => {}

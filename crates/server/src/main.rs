@@ -14,10 +14,10 @@ fn main() -> anyhow::Result<()> {
         return Ok(());
     }
 
-    if env::args().any(|arg| arg == "--debug") {
-        if let Ok(layer) = tracing_journald::layer() {
-            tracing_subscriber::registry().with(layer).init();
-        }
+    if env::args().any(|arg| arg == "--debug")
+        && let Ok(layer) = tracing_journald::layer()
+    {
+        tracing_subscriber::registry().with(layer).init();
     }
 
     let span = tracing::span!(Level::TRACE, "wat_server");

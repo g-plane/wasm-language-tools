@@ -463,8 +463,8 @@ impl<'s> Lexer<'s> {
     }
 
     unsafe fn split_advance(&mut self, mid: usize) -> &'s str {
-        let left = self.input.get_unchecked(0..mid);
-        self.input = self.input.get_unchecked(mid..);
+        let left = unsafe { self.input.get_unchecked(0..mid) };
+        self.input = unsafe { self.input.get_unchecked(mid..) };
         left
     }
 }

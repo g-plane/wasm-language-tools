@@ -54,11 +54,11 @@ pub(super) fn render_func_header(
         content.push(' ');
         content.push_str(&db.lookup_ident(name));
     }
-    if let Some(sig) = signature {
-        if !sig.params.is_empty() || !sig.results.is_empty() {
-            content.push(' ');
-            content.push_str(&db.render_sig(sig));
-        }
+    if let Some(sig) = signature
+        && (!sig.params.is_empty() || !sig.results.is_empty())
+    {
+        content.push(' ');
+        content.push_str(&db.render_sig(sig));
     }
     content.push(')');
     content
@@ -83,11 +83,11 @@ pub(super) fn render_block_header(
         content.push(' ');
         content.push_str(&db.lookup_ident(name));
     }
-    if let Some(sig) = signature {
-        if !sig.params.is_empty() || !sig.results.is_empty() {
-            content.push(' ');
-            content.push_str(&db.render_sig(sig));
-        }
+    if let Some(sig) = signature
+        && (!sig.params.is_empty() || !sig.results.is_empty())
+    {
+        content.push(' ');
+        content.push_str(&db.render_sig(sig));
     }
     content.push(')');
     content

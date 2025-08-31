@@ -73,15 +73,14 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             } else if let Some(node) = prev_node.as_ref().and_then(|prev| match prev {
                 SyntaxElement::Node(node) if node.kind() == SyntaxKind::PLAIN_INSTR => Some(node),
                 _ => None,
-            }) {
-                if let Some(instr_name) = support::token(node, SyntaxKind::INSTR_NAME) {
-                    add_cmp_ctx_for_immediates(
-                        instr_name.text(),
-                        node,
-                        find_leading_l_paren(token).is_some(),
-                        &mut ctx,
-                    );
-                }
+            }) && let Some(instr_name) = support::token(node, SyntaxKind::INSTR_NAME)
+            {
+                add_cmp_ctx_for_immediates(
+                    instr_name.text(),
+                    node,
+                    find_leading_l_paren(token).is_some(),
+                    &mut ctx,
+                );
             }
             if !token.text().starts_with('$')
                 && matches!(
@@ -439,11 +438,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         _ => {}
     }
-    if ctx.is_empty() {
-        None
-    } else {
-        Some(ctx)
-    }
+    if ctx.is_empty() { None } else { Some(ctx) }
 }
 fn add_cmp_ctx_for_immediates(
     instr_name: &str,

@@ -345,23 +345,23 @@ fn substitute_heap_type(
     module: SymbolKey,
     rec_group: &RecTypeGroup,
 ) -> Result<(), ()> {
-    if let HeapType::Type(idx) = heap_type {
-        if let Some(symbol) = symbol_table.symbols.iter().find(|symbol| {
+    if let HeapType::Type(idx) = heap_type
+        && let Some(symbol) = symbol_table.symbols.iter().find(|symbol| {
             symbol.kind == SymbolKind::Type
                 && symbol.region == module
                 && idx.is_defined_by(&symbol.idx)
-        }) {
-            if let Some(i) = rec_group
-                .type_defs
-                .iter()
-                .position(|key| *key == symbol.key)
-            {
-                *heap_type = HeapType::Rec(i as u32);
-            } else if symbol.key.text_range().start() > rec_group.range.end() {
-                return Err(());
-            } else {
-                *heap_type = HeapType::Type(symbol.idx);
-            }
+        })
+    {
+        if let Some(i) = rec_group
+            .type_defs
+            .iter()
+            .position(|key| *key == symbol.key)
+        {
+            *heap_type = HeapType::Rec(i as u32);
+        } else if symbol.key.text_range().start() > rec_group.range.end() {
+            return Err(());
+        } else {
+            *heap_type = HeapType::Type(symbol.idx);
         }
     }
     Ok(())

@@ -249,7 +249,7 @@ impl HeapType {
             (HeapType::None, other) => other.matches(&HeapType::Any, db, uri, module_id),
             (HeapType::NoFunc, other) => other.matches(&HeapType::Func, db, uri, module_id),
             (HeapType::NoExtern, other) => other.matches(&HeapType::Extern, db, uri, module_id),
-            (heap_ty_a @ HeapType::Type(mut a), heap_ty_b @ HeapType::Type(mut b)) => {
+            (heap_ty_a @ &HeapType::Type(mut a), heap_ty_b @ &HeapType::Type(mut b)) => {
                 if a.is_def() {
                     a.name = None;
                 }
@@ -288,7 +288,7 @@ impl HeapType {
                                 })
                     })
             }
-            (HeapType::Type(mut a), b) => {
+            (&HeapType::Type(mut a), b) => {
                 if a.is_def() {
                     a.name = None;
                 }
@@ -320,7 +320,7 @@ impl HeapType {
                         _ => false,
                     })
             }
-            (HeapType::DefFunc(a), HeapType::Type(mut b)) => {
+            (HeapType::DefFunc(a), &HeapType::Type(mut b)) => {
                 if b.is_def() {
                     b.name = None;
                 }
@@ -382,7 +382,7 @@ impl HeapType {
         uri: InternUri,
         module_id: u32,
     ) -> bool {
-        if let (HeapType::Type(mut a), HeapType::Type(mut b)) = (self, other) {
+        if let (&HeapType::Type(mut a), &HeapType::Type(mut b)) = (self, other) {
             if a.is_def() {
                 a.name = None;
             }
