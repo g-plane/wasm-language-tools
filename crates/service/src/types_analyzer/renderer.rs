@@ -3,47 +3,72 @@ use super::{
     types::{FieldType, Fields, HeapType, OperandType, RefType, StorageType, ValType},
 };
 use crate::{helpers::RenderWithDb, idx::InternIdent};
-use itertools::Itertools;
-use std::fmt::{self, Display};
+use std::fmt::{self, Display, Write};
 use wat_syntax::SyntaxKind;
 
-pub(crate) fn render_sig<'db>(db: &'db dyn salsa::Database, signature: Signature<'db>) -> String {
-    let mut ret = String::with_capacity(signature.params.len() * 9 + signature.results.len() * 10);
-    let params = signature
-        .params
-        .iter()
-        .map(|(ty, name)| {
-            if let Some(name) = name {
-                format!("(param {} {})", name.ident(db), ty.render(db))
-            } else {
-                format!("(param {})", ty.render(db))
-            }
-        })
-        .join(" ");
-    ret.push_str(&params);
-    let results = signature
-        .results
-        .iter()
-        .map(|ty| format!("(result {})", ty.render(db)))
-        .join(" ");
-    if !params.is_empty() && !results.is_empty() {
-        ret.push(' ');
+impl<'db> Signature<'db> {
+    pub(crate) fn render(&self, db: &'db dyn salsa::Database) -> RenderWithDb<'db, (&Self, bool)> {
+        RenderWithDb {
+            value: (self, false),
+            db,
+        }
     }
-    ret.push_str(&results);
-    ret
+    pub(crate) fn render_compact(
+        &self,
+        db: &'db dyn salsa::Database,
+    ) -> RenderWithDb<'db, (&Self, bool)> {
+        RenderWithDb {
+            value: (self, true),
+            db,
+        }
+    }
 }
-
-pub(crate) fn render_compact_sig<'db>(
-    db: &'db dyn salsa::Database,
-    signature: Signature<'db>,
-) -> String {
-    let params = signature
-        .params
-        .iter()
-        .map(|(ty, _)| ty.render(db))
-        .join(", ");
-    let results = signature.results.iter().map(|ty| ty.render(db)).join(", ");
-    format!("[{params}] -> [{results}]")
+impl Display for RenderWithDb<'_, (&Signature<'_>, bool)> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.value.1 {
+            write!(f, "[")?;
+            let mut params = self.value.0.params.iter();
+            if let Some((ty, _)) = params.next() {
+                write!(f, "{}", ty.render(self.db))?;
+                params.try_for_each(|(ty, _)| write!(f, ", {}", ty.render(self.db)))?;
+            }
+            write!(f, "] -> [")?;
+            let mut results = self.value.0.results.iter();
+            if let Some(ty) = results.next() {
+                write!(f, "{}", ty.render(self.db))?;
+                results.try_for_each(|ty| write!(f, ", {}", ty.render(self.db)))?;
+            }
+            write!(f, "]")
+        } else {
+            let mut has_params = false;
+            let mut params = self.value.0.params.iter();
+            if let Some((ty, name)) = params.next() {
+                has_params = true;
+                if let Some(name) = name {
+                    write!(f, "(param {} {})", name.ident(self.db), ty.render(self.db))?;
+                } else {
+                    write!(f, "(param {})", ty.render(self.db))?;
+                }
+                params.try_for_each(|(ty, name)| {
+                    if let Some(name) = name {
+                        write!(f, " (param {} {})", name.ident(self.db), ty.render(self.db))
+                    } else {
+                        write!(f, " (param {})", ty.render(self.db))
+                    }
+                })?;
+            }
+            let mut results = self.value.0.results.iter();
+            if let Some(ty) = results.next() {
+                if has_params {
+                    write!(f, " ")?;
+                }
+                write!(f, "(result {})", ty.render(self.db))?;
+                results.try_for_each(|ty| write!(f, " (result {})", ty.render(self.db)))
+            } else {
+                Ok(())
+            }
+        }
+    }
 }
 
 #[salsa::tracked]
@@ -59,7 +84,7 @@ pub(crate) fn render_func_header<'db>(
     }
     if !signature.params.is_empty() || !signature.results.is_empty() {
         content.push(' ');
-        content.push_str(&render_sig(db, signature));
+        let _ = write!(content, "{}", signature.render(db));
     }
     content.push(')');
     content
@@ -87,7 +112,7 @@ pub(crate) fn render_block_header<'db>(
     }
     if !signature.params.is_empty() || !signature.results.is_empty() {
         content.push(' ');
-        content.push_str(&render_sig(db, signature));
+        let _ = write!(content, "{}", signature.render(db));
     }
     content.push(')');
     content

@@ -752,15 +752,16 @@ fn get_cmp_list(
                                     ),
                                 )),
                                 label_details: Some(CompletionItemLabelDetails {
-                                    description: Some(types_analyzer::render_compact_sig(
-                                        service,
+                                    description: Some(
                                         types_analyzer::get_func_sig(
                                             service,
                                             document,
                                             symbol.key,
                                             symbol.green.clone(),
-                                        ),
-                                    )),
+                                        )
+                                        .render_compact(service)
+                                        .to_string(),
+                                    ),
                                     ..Default::default()
                                 }),
                                 documentation: Some(Union2::B(MarkupContent {

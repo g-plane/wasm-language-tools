@@ -425,7 +425,7 @@ fn create_type_def_hover(
                 content.push_str("(func");
                 if !sig.params.is_empty() || !sig.results.is_empty() {
                     content.push(' ');
-                    content.push_str(&types_analyzer::render_sig(service, sig.clone()));
+                    let _ = write!(content, "{}", sig.render(service));
                 }
                 content.push(')');
             }
