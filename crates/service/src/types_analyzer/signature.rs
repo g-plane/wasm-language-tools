@@ -102,7 +102,7 @@ pub(crate) fn get_func_sig<'db>(
                 let kind = child.kind();
                 kind == SyntaxKind::PARAM.into() || kind == SyntaxKind::RESULT.into()
             }) {
-                Some(extract_sig(db, type_use.to_owned()))
+                Some(extract_sig(db, type_use))
             } else {
                 let node = ptr.to_node(&document.root_tree(db));
                 let symbol_table = SymbolTable::of(db, document);
@@ -110,7 +110,7 @@ pub(crate) fn get_func_sig<'db>(
                     .and_then(|type_use| type_use.index())
                     .and_then(|idx| symbol_table.find_def(SymbolKey::new(idx.syntax())))
                     .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.green))
-                    .map(|func_type| extract_sig(db, func_type))
+                    .map(|func_type| extract_sig(db, &func_type))
             }
         })
         .unwrap_or_default()
@@ -126,14 +126,14 @@ pub(crate) fn get_type_use_sig<'db>(
         let kind = child.kind();
         kind == SyntaxKind::PARAM.into() || kind == SyntaxKind::RESULT.into()
     }) {
-        extract_sig(db, type_use.to_owned())
+        extract_sig(db, type_use)
     } else {
         let symbol_table = SymbolTable::of(db, document);
         TypeUse::cast(ptr.to_node(&document.root_tree(db)))
             .and_then(|type_use| type_use.index())
             .and_then(|idx| symbol_table.find_def(SymbolKey::new(idx.syntax())))
             .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.green))
-            .map(|func_type| extract_sig(db, func_type))
+            .map(|func_type| extract_sig(db, &func_type))
             .unwrap_or_default()
     }
 }

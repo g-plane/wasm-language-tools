@@ -44,7 +44,7 @@ pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Vec
             }
             let comp = match node.sub_type()?.comp_type()? {
                 CompType::Func(func_type) => {
-                    CompositeType::Func(extract_sig(db, func_type.syntax().green().into()))
+                    CompositeType::Func(extract_sig(db, &func_type.syntax().green()))
                 }
                 CompType::Struct(struct_type) => {
                     CompositeType::Struct(extract_fields(db, &struct_type))
