@@ -2,7 +2,7 @@ use super::{
     signature::Signature,
     types::{FieldType, Fields, HeapType, OperandType, RefType, StorageType, ValType},
 };
-use crate::idx::InternIdent;
+use crate::{helpers::RenderWithDb, idx::InternIdent};
 use itertools::Itertools;
 use std::fmt::{self, Display};
 use wat_syntax::SyntaxKind;
@@ -94,25 +94,21 @@ pub(crate) fn render_block_header<'db>(
 }
 
 impl<'db> RefType<'db> {
-    pub(crate) fn render<'a>(&'a self, db: &'db dyn salsa::Database) -> RefTypeRender<'a, 'db> {
-        RefTypeRender { ty: self, db }
+    pub(crate) fn render(&self, db: &'db dyn salsa::Database) -> RenderWithDb<'db, &Self> {
+        RenderWithDb { value: self, db }
     }
 }
-pub(crate) struct RefTypeRender<'a, 'db> {
-    ty: &'a RefType<'db>,
-    db: &'db dyn salsa::Database,
-}
-impl Display for RefTypeRender<'_, '_> {
+impl Display for RenderWithDb<'_, &RefType<'_>> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if matches!(self.ty.heap_ty, HeapType::DefFunc(..)) {
+        if matches!(self.value.heap_ty, HeapType::DefFunc(..)) {
             write!(f, "(func ")?;
         } else {
             write!(f, "(ref ")?;
         }
-        if self.ty.nullable {
+        if self.value.nullable {
             write!(f, "null ")?;
         }
-        match self.ty.heap_ty {
+        match self.value.heap_ty {
             HeapType::Type(idx) | HeapType::DefFunc(idx) => {
                 if let Some(name) = idx.name {
                     write!(f, "{}", name.ident(self.db))?;
@@ -137,17 +133,13 @@ impl Display for RefTypeRender<'_, '_> {
 }
 
 impl<'db> ValType<'db> {
-    pub(crate) fn render<'a>(&'a self, db: &'db dyn salsa::Database) -> ValTypeRender<'a, 'db> {
-        ValTypeRender { ty: self, db }
+    pub(crate) fn render(&self, db: &'db dyn salsa::Database) -> RenderWithDb<'db, &Self> {
+        RenderWithDb { value: self, db }
     }
 }
-pub(crate) struct ValTypeRender<'a, 'db> {
-    ty: &'a ValType<'db>,
-    db: &'db dyn salsa::Database,
-}
-impl Display for ValTypeRender<'_, '_> {
+impl Display for RenderWithDb<'_, &ValType<'_>> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match &self.ty {
+        match &self.value {
             ValType::I32 => write!(f, "i32"),
             ValType::I64 => write!(f, "i64"),
             ValType::F32 => write!(f, "f32"),
@@ -159,17 +151,13 @@ impl Display for ValTypeRender<'_, '_> {
 }
 
 impl<'db> OperandType<'db> {
-    pub(crate) fn render<'a>(&'a self, db: &'db dyn salsa::Database) -> OperandTypeRender<'a, 'db> {
-        OperandTypeRender { ty: self, db }
+    pub(crate) fn render(&self, db: &'db dyn salsa::Database) -> RenderWithDb<'db, &Self> {
+        RenderWithDb { value: self, db }
     }
 }
-pub(crate) struct OperandTypeRender<'a, 'db> {
-    ty: &'a OperandType<'db>,
-    db: &'db dyn salsa::Database,
-}
-impl Display for OperandTypeRender<'_, '_> {
+impl Display for RenderWithDb<'_, &OperandType<'_>> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.ty {
+        match self.value {
             OperandType::Val(ty) => write!(f, "{}", ty.render(self.db)),
             OperandType::Any => write!(f, "any"),
         }
@@ -177,25 +165,21 @@ impl Display for OperandTypeRender<'_, '_> {
 }
 
 impl<'db> FieldType<'db> {
-    pub(crate) fn render<'a>(&'a self, db: &'db dyn salsa::Database) -> FieldTypeRender<'a, 'db> {
-        FieldTypeRender { ty: self, db }
+    pub(crate) fn render(&self, db: &'db dyn salsa::Database) -> RenderWithDb<'db, &Self> {
+        RenderWithDb { value: self, db }
     }
 }
-pub(crate) struct FieldTypeRender<'a, 'db> {
-    ty: &'a FieldType<'db>,
-    db: &'db dyn salsa::Database,
-}
-impl Display for FieldTypeRender<'_, '_> {
+impl Display for RenderWithDb<'_, &FieldType<'_>> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.ty.mutable {
+        if self.value.mutable {
             write!(f, "(mut ")?;
         }
-        match &self.ty.storage {
+        match &self.value.storage {
             StorageType::Val(ty) => write!(f, "{}", ty.render(self.db))?,
             StorageType::PackedI8 => write!(f, "i8")?,
             StorageType::PackedI16 => write!(f, "i16")?,
         }
-        if self.ty.mutable {
+        if self.value.mutable {
             write!(f, ")")?;
         }
         Ok(())
@@ -203,17 +187,13 @@ impl Display for FieldTypeRender<'_, '_> {
 }
 
 impl<'db> Fields<'db> {
-    pub(crate) fn render<'a>(&'a self, db: &'db dyn salsa::Database) -> FieldsRender<'a, 'db> {
-        FieldsRender { fields: self, db }
+    pub(crate) fn render(&self, db: &'db dyn salsa::Database) -> RenderWithDb<'db, &Self> {
+        RenderWithDb { value: self, db }
     }
 }
-pub(crate) struct FieldsRender<'a, 'db> {
-    fields: &'a Fields<'db>,
-    db: &'db dyn salsa::Database,
-}
-impl Display for FieldsRender<'_, '_> {
+impl Display for RenderWithDb<'_, &Fields<'_>> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.fields.0.iter().try_fold(true, |first, field| {
+        self.value.0.iter().try_fold(true, |first, field| {
             if !first {
                 write!(f, " ")?;
             }

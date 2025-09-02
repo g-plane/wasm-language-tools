@@ -96,6 +96,11 @@ pub fn infer_type_def_symbol_detail(symbol: &Symbol, root: &SyntaxNode) -> Optio
         })
 }
 
+pub(crate) struct RenderWithDb<'db, T> {
+    pub value: T,
+    pub db: &'db dyn salsa::Database,
+}
+
 pub(crate) mod ast {
     use rowan::{
         Direction, GreenNode, NodeOrToken, TextSize, TokenAtOffset,

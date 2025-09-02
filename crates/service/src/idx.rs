@@ -1,3 +1,4 @@
+use crate::helpers::RenderWithDb;
 use std::fmt;
 use wat_syntax::ast::Immediate;
 
@@ -53,23 +54,16 @@ impl<'db> Idx<'db> {
         }
     }
 
-    pub fn render(&self, service: &'db dyn salsa::Database) -> IdxRender<'db> {
-        IdxRender {
-            idx: *self,
-            service,
-        }
+    pub fn render(&self, db: &'db dyn salsa::Database) -> RenderWithDb<'db, &Self> {
+        RenderWithDb { value: self, db }
     }
 }
 
-pub(crate) struct IdxRender<'db> {
-    pub idx: Idx<'db>,
-    pub service: &'db dyn salsa::Database,
-}
-impl fmt::Display for IdxRender<'_> {
+impl fmt::Display for RenderWithDb<'_, &Idx<'_>> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Some(name) = &self.idx.name {
-            name.ident(self.service).fmt(f)
-        } else if let Some(num) = self.idx.num {
+        if let Some(name) = &self.value.name {
+            name.ident(self.db).fmt(f)
+        } else if let Some(num) = self.value.num {
             num.fmt(f)
         } else {
             Ok(())
