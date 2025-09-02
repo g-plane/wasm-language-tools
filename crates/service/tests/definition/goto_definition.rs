@@ -24,24 +24,36 @@ fn ignored_tokens() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 1, 4))
-        .is_none());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 2, 29))
-        .is_none());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 3, 7))
-        .is_none());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 3, 25))
-        .is_none());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 4, 14))
-        .is_none());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 4, 23))
-        .is_none());
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 1, 4))
+            .is_none()
+    );
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 2, 29))
+            .is_none()
+    );
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 3, 7))
+            .is_none()
+    );
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 3, 25))
+            .is_none()
+    );
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 4, 14))
+            .is_none()
+    );
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 4, 23))
+            .is_none()
+    );
 }
 
 #[test]
@@ -56,12 +68,16 @@ fn func_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 3, 15))
-        .is_none());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 3, 25))
-        .is_none());
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 3, 15))
+            .is_none()
+    );
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 3, 25))
+            .is_none()
+    );
 }
 
 #[test]
@@ -160,12 +176,16 @@ fn param_or_local_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 4, 20))
-        .is_none());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 4, 37))
-        .is_none());
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 4, 20))
+            .is_none()
+    );
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 4, 37))
+            .is_none()
+    );
     assert!(service.goto_definition(create_params(uri, 4, 57)).is_none());
 }
 
@@ -262,12 +282,16 @@ fn type_use_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 2, 17))
-        .is_none());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 3, 18))
-        .is_none());
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 2, 17))
+            .is_none()
+    );
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 3, 18))
+            .is_none()
+    );
 }
 
 #[test]
@@ -314,12 +338,16 @@ fn global_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 3, 21))
-        .is_none());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 3, 40))
-        .is_none());
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 3, 21))
+            .is_none()
+    );
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 3, 40))
+            .is_none()
+    );
 }
 
 #[test]
@@ -436,9 +464,11 @@ fn memory_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 2, 27))
-        .is_none());
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 2, 27))
+            .is_none()
+    );
 }
 
 #[test]
@@ -515,9 +545,11 @@ fn table_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 3, 21))
-        .is_none());
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 3, 21))
+            .is_none()
+    );
 }
 
 #[test]
@@ -598,12 +630,16 @@ fn block_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 2, 20))
-        .is_none());
-    assert!(service
-        .goto_definition(create_params(uri.clone(), 2, 27))
-        .is_none());
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 2, 20))
+            .is_none()
+    );
+    assert!(
+        service
+            .goto_definition(create_params(uri.clone(), 2, 27))
+            .is_none()
+    );
 }
 
 #[test]

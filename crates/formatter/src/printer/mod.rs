@@ -1,7 +1,7 @@
 use crate::config::{FormatOptions, LanguageOptions};
-use rowan::{ast::AstNode, Direction};
+use rowan::{Direction, ast::AstNode};
 use tiny_pretty::Doc;
-use wat_syntax::{ast::*, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage};
+use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage, ast::*};
 
 mod instr;
 mod module;

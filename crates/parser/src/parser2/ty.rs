@@ -1,4 +1,4 @@
-use super::{builder::NodeMark, green, node, GreenElement, Parser};
+use super::{GreenElement, Parser, builder::NodeMark, green, node};
 use crate::error::Message;
 use rowan::GreenNode;
 use wat_syntax::SyntaxKind::*;

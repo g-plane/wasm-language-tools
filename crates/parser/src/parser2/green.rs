@@ -1,4 +1,4 @@
-use super::{node, GreenElement};
+use super::{GreenElement, node};
 use rowan::GreenToken;
 use std::sync::LazyLock;
 use wat_syntax::SyntaxKind;

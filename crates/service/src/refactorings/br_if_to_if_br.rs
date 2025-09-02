@@ -1,11 +1,11 @@
-use crate::{helpers, uri::InternUri, LanguageService};
+use crate::{LanguageService, helpers, uri::InternUri};
 use itertools::Itertools;
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rowan::ast::AstNode;
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
-use wat_syntax::{ast::PlainInstr, SyntaxNode};
+use wat_syntax::{SyntaxNode, ast::PlainInstr};
 
 pub fn act(
     service: &LanguageService,

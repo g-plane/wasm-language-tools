@@ -40,22 +40,34 @@ fn ignored_tokens() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(service
-        .find_references(create_params(uri.clone(), 1, 4, true))
-        .is_none());
-    assert!(service
-        .find_references(create_params(uri.clone(), 2, 29, true))
-        .is_none());
-    assert!(service
-        .find_references(create_params(uri.clone(), 3, 7, true))
-        .is_none());
-    assert!(service
-        .find_references(create_params(uri.clone(), 3, 25, true))
-        .is_none());
-    assert!(service
-        .find_references(create_params(uri.clone(), 4, 14, true))
-        .is_none());
-    assert!(service
-        .find_references(create_params(uri.clone(), 4, 23, true))
-        .is_none());
+    assert!(
+        service
+            .find_references(create_params(uri.clone(), 1, 4, true))
+            .is_none()
+    );
+    assert!(
+        service
+            .find_references(create_params(uri.clone(), 2, 29, true))
+            .is_none()
+    );
+    assert!(
+        service
+            .find_references(create_params(uri.clone(), 3, 7, true))
+            .is_none()
+    );
+    assert!(
+        service
+            .find_references(create_params(uri.clone(), 3, 25, true))
+            .is_none()
+    );
+    assert!(
+        service
+            .find_references(create_params(uri.clone(), 4, 14, true))
+            .is_none()
+    );
+    assert!(
+        service
+            .find_references(create_params(uri.clone(), 4, 23, true))
+            .is_none()
+    );
 }

@@ -1,7 +1,7 @@
 use crate::message::Message;
 use anyhow::Result;
 use std::io::{BufRead, Read, StdinLock, Write};
-use tracing::{event, Level};
+use tracing::{Level, event};
 
 pub fn read(stdin: &mut StdinLock) -> Result<Option<Message>> {
     let mut length = 0;

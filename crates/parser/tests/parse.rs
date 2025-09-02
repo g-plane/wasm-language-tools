@@ -3,7 +3,7 @@ use codespan_reporting::{
     files::SimpleFile,
     term::{self, termcolor::Buffer},
 };
-use insta::{assert_snapshot, glob, Settings};
+use insta::{Settings, assert_snapshot, glob};
 use std::{fs, path::Path};
 
 #[test]

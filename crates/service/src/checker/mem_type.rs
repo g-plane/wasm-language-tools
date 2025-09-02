@@ -3,7 +3,7 @@ use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use rowan::ast::support;
 use std::num::{IntErrorKind, ParseIntError};
-use wat_syntax::{ast::Limits, SyntaxNode, SyntaxToken};
+use wat_syntax::{SyntaxNode, SyntaxToken, ast::Limits};
 
 const DIAGNOSTIC_CODE: &str = "mem-type";
 

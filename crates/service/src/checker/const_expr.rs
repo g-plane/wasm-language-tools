@@ -1,8 +1,8 @@
 use crate::helpers;
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, Union2};
-use rowan::ast::{support, AstNode};
-use wat_syntax::{ast::Instr, SyntaxNode};
+use rowan::ast::{AstNode, support};
+use wat_syntax::{SyntaxNode, ast::Instr};
 
 const DIAGNOSTIC_CODE: &str = "const-expr";
 

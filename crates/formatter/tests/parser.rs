@@ -1,4 +1,4 @@
-use insta::{assert_snapshot, glob, Settings};
+use insta::{Settings, assert_snapshot, glob};
 use rowan::ast::AstNode;
 use std::{fs, path::Path};
 use wat_formatter::{config::FormatOptions, format};

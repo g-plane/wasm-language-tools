@@ -23,24 +23,36 @@ fn ignored_tokens() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(service
-        .prepare_rename(create_params(uri.clone(), 1, 4))
-        .is_none());
-    assert!(service
-        .prepare_rename(create_params(uri.clone(), 2, 29))
-        .is_none());
-    assert!(service
-        .prepare_rename(create_params(uri.clone(), 3, 7))
-        .is_none());
-    assert!(service
-        .prepare_rename(create_params(uri.clone(), 3, 18))
-        .is_none());
-    assert!(service
-        .prepare_rename(create_params(uri.clone(), 4, 15))
-        .is_none());
-    assert!(service
-        .prepare_rename(create_params(uri.clone(), 4, 23))
-        .is_none());
+    assert!(
+        service
+            .prepare_rename(create_params(uri.clone(), 1, 4))
+            .is_none()
+    );
+    assert!(
+        service
+            .prepare_rename(create_params(uri.clone(), 2, 29))
+            .is_none()
+    );
+    assert!(
+        service
+            .prepare_rename(create_params(uri.clone(), 3, 7))
+            .is_none()
+    );
+    assert!(
+        service
+            .prepare_rename(create_params(uri.clone(), 3, 18))
+            .is_none()
+    );
+    assert!(
+        service
+            .prepare_rename(create_params(uri.clone(), 4, 15))
+            .is_none()
+    );
+    assert!(
+        service
+            .prepare_rename(create_params(uri.clone(), 4, 23))
+            .is_none()
+    );
 }
 
 #[test]

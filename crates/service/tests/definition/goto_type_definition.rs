@@ -24,24 +24,36 @@ fn ignored_tokens() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(service
-        .goto_type_definition(create_params(uri.clone(), 1, 4))
-        .is_none());
-    assert!(service
-        .goto_type_definition(create_params(uri.clone(), 2, 29))
-        .is_none());
-    assert!(service
-        .goto_type_definition(create_params(uri.clone(), 3, 7))
-        .is_none());
-    assert!(service
-        .goto_type_definition(create_params(uri.clone(), 3, 25))
-        .is_none());
-    assert!(service
-        .goto_type_definition(create_params(uri.clone(), 4, 14))
-        .is_none());
-    assert!(service
-        .goto_type_definition(create_params(uri.clone(), 4, 23))
-        .is_none());
+    assert!(
+        service
+            .goto_type_definition(create_params(uri.clone(), 1, 4))
+            .is_none()
+    );
+    assert!(
+        service
+            .goto_type_definition(create_params(uri.clone(), 2, 29))
+            .is_none()
+    );
+    assert!(
+        service
+            .goto_type_definition(create_params(uri.clone(), 3, 7))
+            .is_none()
+    );
+    assert!(
+        service
+            .goto_type_definition(create_params(uri.clone(), 3, 25))
+            .is_none()
+    );
+    assert!(
+        service
+            .goto_type_definition(create_params(uri.clone(), 4, 14))
+            .is_none()
+    );
+    assert!(
+        service
+            .goto_type_definition(create_params(uri.clone(), 4, 23))
+            .is_none()
+    );
 }
 
 #[test]
@@ -56,9 +68,11 @@ fn func_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(service
-        .goto_type_definition(create_params(uri.clone(), 3, 15))
-        .is_none());
+    assert!(
+        service
+            .goto_type_definition(create_params(uri.clone(), 3, 15))
+            .is_none()
+    );
 }
 
 #[test]
@@ -73,9 +87,11 @@ fn type_use_not_defined() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    assert!(service
-        .goto_type_definition(create_params(uri.clone(), 3, 15))
-        .is_none());
+    assert!(
+        service
+            .goto_type_definition(create_params(uri.clone(), 3, 15))
+            .is_none()
+    );
 }
 
 #[test]

@@ -1,4 +1,4 @@
-use super::{builder::NodeMark, green, lexer::Token, node, GreenElement, Parser};
+use super::{GreenElement, Parser, builder::NodeMark, green, lexer::Token, node};
 use crate::error::{Message, SyntaxError};
 use rowan::{GreenNode, TextRange};
 use wat_syntax::SyntaxKind::{self, *};

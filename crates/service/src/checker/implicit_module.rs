@@ -1,4 +1,4 @@
-use crate::{helpers, LintLevel};
+use crate::{LintLevel, helpers};
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use rowan::ast::support;

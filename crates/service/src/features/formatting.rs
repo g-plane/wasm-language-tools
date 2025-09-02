@@ -1,4 +1,4 @@
-use crate::{helpers, LanguageService};
+use crate::{LanguageService, helpers};
 use lspt::{DocumentFormattingParams, DocumentRangeFormattingParams, FormattingOptions, TextEdit};
 use rowan::ast::AstNode;
 use wat_formatter::config::{FormatOptions, LanguageOptions, LayoutOptions};

@@ -2,7 +2,7 @@
 
 pub use self::{instr::*, module::*, ty::*};
 use super::{SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage};
-use rowan::ast::{support::children, AstChildren, AstNode};
+use rowan::ast::{AstChildren, AstNode, support::children};
 
 mod instr;
 mod module;

@@ -1,4 +1,4 @@
-use super::{lexer, GreenElement, Parser};
+use super::{GreenElement, Parser, lexer};
 use rowan::GreenNode;
 use wat_syntax::SyntaxKind;
 

@@ -1,4 +1,4 @@
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, criterion_group, criterion_main};
 
 static CODE: &str = r#"(module
     (func $f1 (param $p1 i32) (param $p2 i32) (result i32)

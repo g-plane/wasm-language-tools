@@ -1,4 +1,4 @@
-use super::{green, lexer::Token, GreenElement, Parser};
+use super::{GreenElement, Parser, green, lexer::Token};
 use crate::error::{Message, SyntaxError};
 use rowan::{TextRange, TextSize};
 use wat_syntax::SyntaxKind;

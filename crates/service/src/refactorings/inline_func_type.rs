@@ -1,8 +1,8 @@
 use crate::{
+    LanguageService,
     binder::{SymbolKey, SymbolTable},
     helpers,
     uri::InternUri,
-    LanguageService,
 };
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, Range, TextEdit, WorkspaceEdit};
@@ -10,8 +10,8 @@ use rowan::ast::AstNode;
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_syntax::{
-    ast::{CompType, TypeDef, TypeUse},
     SyntaxNode,
+    ast::{CompType, TypeDef, TypeUse},
 };
 
 pub fn act(

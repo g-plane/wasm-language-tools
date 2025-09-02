@@ -1,14 +1,14 @@
 use super::{
+    SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage,
     instr::Instr,
     ty::{GlobalType, MemoryType, Param, RefType, Result, SubType, TableType, ValType},
-    SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage,
 };
 use rowan::{
-    ast::{
-        support::{child, children, token},
-        AstChildren, AstNode,
-    },
     NodeOrToken,
+    ast::{
+        AstChildren, AstNode,
+        support::{child, children, token},
+    },
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

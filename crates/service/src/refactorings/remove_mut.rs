@@ -1,4 +1,4 @@
-use crate::{helpers, uri::InternUri, LanguageService};
+use crate::{LanguageService, helpers, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionContext, CodeActionKind, TextEdit, Union2, WorkspaceEdit};
 use rowan::ast::support;

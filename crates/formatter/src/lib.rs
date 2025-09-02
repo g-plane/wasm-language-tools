@@ -2,12 +2,12 @@
 
 use self::{
     config::FormatOptions,
-    printer::{format_node, Ctx, DocGen},
+    printer::{Ctx, DocGen, format_node},
 };
 use line_index::LineIndex;
-use rowan::{ast::AstNode, TextRange};
+use rowan::{TextRange, ast::AstNode};
 use tiny_pretty::{IndentKind, PrintOptions};
-use wat_syntax::{ast::Root, SyntaxElement};
+use wat_syntax::{SyntaxElement, ast::Root};
 
 pub mod config;
 mod printer;

@@ -1,4 +1,4 @@
-use super::{is_id_char, GreenElement};
+use super::{GreenElement, is_id_char};
 use crate::error::{Message, SyntaxError};
 use rowan::{GreenToken, TextRange, TextSize};
 use wat_syntax::SyntaxKind;

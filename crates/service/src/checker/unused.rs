@@ -1,10 +1,11 @@
 use crate::{
+    LanguageService, LintLevel,
     binder::{Symbol, SymbolKind, SymbolTable},
-    helpers, LanguageService, LintLevel,
+    helpers,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, DiagnosticTag, Union2};
-use rowan::{ast::support, Direction, TextRange};
+use rowan::{Direction, TextRange, ast::support};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "unused";

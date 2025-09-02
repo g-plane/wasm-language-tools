@@ -1,6 +1,8 @@
 use crate::{
+    LanguageService,
     binder::{SymbolKey, SymbolTable},
-    helpers, document::Document, LanguageService,
+    document::Document,
+    helpers,
 };
 use line_index::LineCol;
 use lspt::{SemanticTokens, SemanticTokensParams, SemanticTokensRangeParams};

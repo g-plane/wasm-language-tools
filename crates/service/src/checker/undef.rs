@@ -1,6 +1,7 @@
 use crate::{
+    LanguageService,
     binder::{SymbolKind, SymbolTable},
-    helpers, LanguageService,
+    helpers,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, Union2};

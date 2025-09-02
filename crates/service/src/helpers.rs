@@ -2,12 +2,12 @@ use crate::binder::Symbol;
 use line_index::{LineCol, LineIndex};
 use lspt::{Position, Range};
 use rowan::{
-    ast::{support, AstNode},
     TextRange, TextSize,
+    ast::{AstNode, support},
 };
 use wat_syntax::{
-    ast::{CompType, TypeDef},
     SyntaxKind, SyntaxNode,
+    ast::{CompType, TypeDef},
 };
 
 pub fn rowan_pos_to_lsp_pos(line_index: &LineIndex, pos: TextSize) -> Position {
@@ -49,7 +49,7 @@ pub fn fuzzy_search<S>(haystack: impl IntoIterator<Item = S>, needle: &str) -> O
 where
     S: AsRef<str>,
 {
-    use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
+    use fuzzy_matcher::{FuzzyMatcher, skim::SkimMatcherV2};
 
     let matcher = SkimMatcherV2::default();
     haystack
@@ -98,10 +98,10 @@ pub fn infer_type_def_symbol_detail(symbol: &Symbol, root: &SyntaxNode) -> Optio
 
 pub(crate) mod ast {
     use rowan::{
-        ast::{support, AstNode},
         Direction, GreenNode, NodeOrToken, TextSize, TokenAtOffset,
+        ast::{AstNode, support},
     };
-    use wat_syntax::{ast::RefType, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
+    use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, ast::RefType};
 
     pub fn find_func_type_of_type_def(green: &GreenNode) -> Option<GreenNode> {
         green

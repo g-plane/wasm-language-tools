@@ -1,4 +1,4 @@
-use crate::{helpers, LanguageService};
+use crate::{LanguageService, helpers};
 use lspt::{FoldingRange, FoldingRangeKind, FoldingRangeParams};
 use rowan::ast::support::token;
 use wat_syntax::SyntaxKind;

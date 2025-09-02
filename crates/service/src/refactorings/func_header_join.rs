@@ -1,4 +1,4 @@
-use crate::{helpers, uri::InternUri, LanguageService};
+use crate::{LanguageService, helpers, uri::InternUri};
 use itertools::Itertools;
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};

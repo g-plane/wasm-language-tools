@@ -1,6 +1,6 @@
 use crate::server::Server;
 use std::env;
-use tracing::{event, Level};
+use tracing::{Level, event};
 use tracing_subscriber::prelude::*;
 
 mod message;

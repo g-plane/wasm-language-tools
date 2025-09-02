@@ -1,11 +1,11 @@
-use super::{module::Index, SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage};
+use super::{SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage, module::Index};
 use crate::SyntaxElement;
 use rowan::{
-    ast::{
-        support::{child, children, token},
-        AstChildren, AstNode,
-    },
     NodeOrToken,
+    ast::{
+        AstChildren, AstNode,
+        support::{child, children, token},
+    },
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

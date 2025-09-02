@@ -1,9 +1,9 @@
 use crate::helpers;
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, Union2};
-use rowan::ast::{support::token, AstNode};
+use rowan::ast::{AstNode, support::token};
 use std::iter::Peekable;
-use wat_syntax::{ast::Immediate, SyntaxKind, SyntaxNode, SyntaxToken};
+use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxToken, ast::Immediate};
 
 const DIAGNOSTIC_CODE: &str = "immediates";
 
