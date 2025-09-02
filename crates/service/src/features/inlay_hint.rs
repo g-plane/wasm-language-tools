@@ -24,7 +24,7 @@ impl LanguageService {
                         return None;
                     }
                     let param_or_local = symbol_table.find_param_or_local_def(symbol.key)?;
-                    let ty = types_analyzer::extract_type(self, param_or_local.green.clone())?;
+                    let ty = types_analyzer::extract_type(self, &param_or_local.green)?;
                     Some(InlayHint {
                         position: helpers::rowan_pos_to_lsp_pos(
                             line_index,
@@ -44,7 +44,7 @@ impl LanguageService {
                         return None;
                     }
                     let global = symbol_table.find_def(symbol.key)?;
-                    let ty = types_analyzer::extract_global_type(self, global.green.clone())?;
+                    let ty = types_analyzer::extract_global_type(self, &global.green)?;
                     Some(InlayHint {
                         position: helpers::rowan_pos_to_lsp_pos(
                             line_index,

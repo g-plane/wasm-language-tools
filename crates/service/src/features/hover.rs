@@ -278,7 +278,7 @@ fn create_func_hover(
         types_analyzer::render_func_header(
             service,
             symbol.idx.name,
-            types_analyzer::get_func_sig(service, document, symbol.key, symbol.green)
+            types_analyzer::get_func_sig(service, document, symbol.key, &symbol.green)
         )
     );
     if !doc.is_empty() {
@@ -303,7 +303,7 @@ fn create_param_or_local_hover(service: &LanguageService, symbol: &Symbol) -> Ma
         content.push(' ');
         content.push_str(name.ident(service));
     }
-    if let Some(ty) = types_analyzer::extract_type(service, symbol.green.clone()) {
+    if let Some(ty) = types_analyzer::extract_type(service, &symbol.green) {
         content.push(' ');
         let _ = write!(content, "{}", ty.render(service));
     }

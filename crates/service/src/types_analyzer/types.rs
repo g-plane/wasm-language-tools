@@ -349,7 +349,7 @@ impl<'db> HeapType<'db> {
                             && a.is_defined_by(&symbol.idx)
                     })
                     .map(|symbol| {
-                        types_analyzer::get_func_sig(db, document, symbol.key, symbol.green.clone())
+                        types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green)
                     })
                     .zip(
                         symbol_table

@@ -9,7 +9,7 @@ use crate::{
     idx::InternIdent,
 };
 use rowan::{
-    GreenNode, NodeOrToken,
+    GreenNodeData, NodeOrToken,
     ast::{AstNode, support},
 };
 use wat_syntax::{
@@ -89,7 +89,7 @@ pub(crate) fn get_func_sig<'db>(
     db: &'db dyn salsa::Database,
     document: Document,
     ptr: SyntaxNodePtr,
-    green: GreenNode,
+    green: &GreenNodeData,
 ) -> Signature<'db> {
     green
         .children()
@@ -120,7 +120,7 @@ pub(crate) fn get_type_use_sig<'db>(
     db: &'db dyn salsa::Database,
     document: Document,
     ptr: SyntaxNodePtr,
-    type_use: GreenNode,
+    type_use: &GreenNodeData,
 ) -> Signature<'db> {
     if type_use.children().any(|child| {
         let kind = child.kind();
@@ -147,19 +147,7 @@ pub(crate) fn get_block_sig<'db>(
         .and_then(|block_type| block_type.type_use())
         .map(|type_use| {
             let node = type_use.syntax();
-            get_type_use_sig(
-                service,
-                document,
-                SyntaxNodePtr::new(node),
-                node.green().into(),
-            )
+            get_type_use_sig(service, document, SyntaxNodePtr::new(node), &node.green())
         })
-        .unwrap_or_else(|| {
-            get_func_sig(
-                service,
-                document,
-                SyntaxNodePtr::new(node),
-                node.green().into(),
-            )
-        })
+        .unwrap_or_else(|| get_func_sig(service, document, SyntaxNodePtr::new(node), &node.green()))
 }

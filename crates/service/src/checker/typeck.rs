@@ -35,16 +35,11 @@ pub fn check_func(
     module_id: u32,
     node: &SyntaxNode,
 ) {
-    let results = get_func_sig(
-        service,
-        document,
-        SyntaxNodePtr::new(node),
-        node.green().into(),
-    )
-    .results
-    .into_iter()
-    .map(OperandType::Val)
-    .collect::<Vec<_>>();
+    let results = get_func_sig(service, document, SyntaxNodePtr::new(node), &node.green())
+        .results
+        .into_iter()
+        .map(OperandType::Val)
+        .collect::<Vec<_>>();
     check_block_like(
         diagnostics,
         &Shared {
@@ -69,7 +64,7 @@ pub fn check_global(
     module_id: u32,
     node: &SyntaxNode,
 ) {
-    let ty = extract_global_type(service, node.green().into())
+    let ty = extract_global_type(service, &node.green())
         .map(OperandType::Val)
         .unwrap_or(OperandType::Any);
     check_block_like(
@@ -542,7 +537,7 @@ fn resolve_sig<'db>(
                     shared.service,
                     shared.document,
                     func.key,
-                    func.green.clone(),
+                    &func.green,
                 ))
             })
             .unwrap_or_default(),
@@ -557,7 +552,7 @@ fn resolve_sig<'db>(
                             .symbol_table
                             .find_param_or_local_def(SymbolKey::new(idx.syntax()))
                     })
-                    .and_then(|symbol| extract_type(shared.service, symbol.green.clone()))
+                    .and_then(|symbol| extract_type(shared.service, &symbol.green))
                     .map_or(OperandType::Any, OperandType::Val),
             ],
         },
@@ -571,7 +566,7 @@ fn resolve_sig<'db>(
                             .symbol_table
                             .find_param_or_local_def(SymbolKey::new(idx.syntax()))
                     })
-                    .and_then(|symbol| extract_type(shared.service, symbol.green.clone()))
+                    .and_then(|symbol| extract_type(shared.service, &symbol.green))
                     .map_or(OperandType::Any, OperandType::Val),
             ],
             results: vec![],
@@ -585,7 +580,7 @@ fn resolve_sig<'db>(
                         .symbol_table
                         .find_param_or_local_def(SymbolKey::new(idx.syntax()))
                 })
-                .and_then(|symbol| extract_type(shared.service, symbol.green.clone()))
+                .and_then(|symbol| extract_type(shared.service, &symbol.green))
                 .map_or(OperandType::Any, OperandType::Val);
             ResolvedSig {
                 params: vec![ty.clone()],
@@ -599,7 +594,7 @@ fn resolve_sig<'db>(
                     .immediates()
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                    .and_then(|symbol| extract_global_type(shared.service, symbol.green.clone()))
+                    .and_then(|symbol| extract_global_type(shared.service, &symbol.green))
                     .map_or(OperandType::Any, OperandType::Val),
             ],
         },
@@ -609,7 +604,7 @@ fn resolve_sig<'db>(
                     .immediates()
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                    .and_then(|symbol| extract_global_type(shared.service, symbol.green.clone()))
+                    .and_then(|symbol| extract_global_type(shared.service, &symbol.green))
                     .map_or(OperandType::Any, OperandType::Val),
             ],
             results: vec![],
@@ -624,7 +619,7 @@ fn resolve_sig<'db>(
                         shared.service,
                         shared.document,
                         SyntaxNodePtr::new(&func),
-                        func.green().into(),
+                        &func.green(),
                     )
                     .results
                     .into_iter()
@@ -810,7 +805,7 @@ fn resolve_sig<'db>(
                         shared.service,
                         shared.document,
                         SyntaxNodePtr::new(node),
-                        node.green().into(),
+                        &node.green(),
                     ))
                 })
                 .unwrap_or_default();

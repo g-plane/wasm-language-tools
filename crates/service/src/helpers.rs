@@ -103,12 +103,12 @@ pub(crate) struct RenderWithDb<'db, T> {
 
 pub(crate) mod ast {
     use rowan::{
-        Direction, GreenNode, NodeOrToken, TextSize, TokenAtOffset,
+        Direction, GreenNode, GreenNodeData, NodeOrToken, TextSize, TokenAtOffset,
         ast::{AstNode, support},
     };
     use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, ast::RefType};
 
-    pub fn find_func_type_of_type_def(green: &GreenNode) -> Option<GreenNode> {
+    pub fn find_func_type_of_type_def(green: &GreenNodeData) -> Option<GreenNode> {
         green
             .children()
             .find_map(|child| match child {

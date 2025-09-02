@@ -25,7 +25,7 @@ pub fn check(
     let index = index.syntax();
     if symbol_table
         .find_def(SymbolKey::new(index))
-        .map(|func| types_analyzer::get_func_sig(service, document, func.key, func.green.clone()))
+        .map(|func| types_analyzer::get_func_sig(service, document, func.key, &func.green))
         .is_some_and(|sig| !sig.params.is_empty() || !sig.results.is_empty())
     {
         diagnostics.push(Diagnostic {

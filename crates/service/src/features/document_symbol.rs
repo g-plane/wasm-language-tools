@@ -64,7 +64,7 @@ impl LanguageService {
                         symbol.key,
                         DocumentSymbol {
                             name: render_symbol_name(symbol, self),
-                            detail: types_analyzer::extract_type(self, symbol.green.clone())
+                            detail: types_analyzer::extract_type(self, &symbol.green)
                                 .map(|ty| ty.render(self).to_string()),
                             kind: LspSymbolKind::Variable,
                             tags: None,
@@ -103,7 +103,7 @@ impl LanguageService {
                         symbol.key,
                         DocumentSymbol {
                             name: render_symbol_name(symbol, self),
-                            detail: types_analyzer::extract_global_type(self, symbol.green.clone())
+                            detail: types_analyzer::extract_global_type(self, &symbol.green)
                                 .map(|ty| {
                                     if ModuleFieldGlobal::cast(symbol.key.to_node(&root))
                                         .and_then(|global| global.global_type())

@@ -30,7 +30,7 @@ pub fn check(
         .iter()
         .filter(|symbol| symbol.kind == SymbolKind::Local && symbol.region == region)
         .map(|symbol| {
-            let ty = types_analyzer::extract_type(service, symbol.green.clone());
+            let ty = types_analyzer::extract_type(service, &symbol.green);
             (
                 symbol.key,
                 if let Some(false) = ty.map(|ty| ty.defaultable()) {

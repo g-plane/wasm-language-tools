@@ -27,7 +27,7 @@ pub(crate) fn resolve_param_types<'db>(
             .find(|child| child.kind() == SyntaxKind::IMMEDIATE)?;
         let func = symbol_table.find_def(SymbolKey::new(&idx))?;
         Some(
-            get_func_sig(service, document, func.key, func.green.clone())
+            get_func_sig(service, document, func.key, &func.green)
                 .params
                 .into_iter()
                 .map(|(ty, ..)| OperandType::Val(ty))

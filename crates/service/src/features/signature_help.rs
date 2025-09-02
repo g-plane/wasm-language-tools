@@ -50,7 +50,7 @@ impl LanguageService {
                 let first_immediate = parent_instr.immediates().next()?;
                 let func = symbol_table.find_def(SymbolKey::new(first_immediate.syntax()))?;
                 (
-                    types_analyzer::get_func_sig(self, document, func.key, func.green.clone()),
+                    types_analyzer::get_func_sig(self, document, func.key, &func.green),
                     Some(func),
                 )
             }
@@ -63,7 +63,7 @@ impl LanguageService {
                     self,
                     document,
                     SyntaxNodePtr::new(type_use),
-                    type_use.green().into(),
+                    &type_use.green(),
                 );
                 sig.params.push((ValType::I32, None));
                 (sig, None)

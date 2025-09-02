@@ -4,7 +4,7 @@ use super::{
 };
 use crate::idx::{Idx, IdxGen, InternIdent};
 use rowan::{
-    GreenNode, Language, NodeOrToken,
+    GreenNode, GreenNodeData, Language, NodeOrToken,
     ast::{AstNode, support},
 };
 use wat_syntax::{
@@ -14,9 +14,9 @@ use wat_syntax::{
 
 pub(crate) fn extract_type<'db>(
     db: &'db dyn salsa::Database,
-    node: GreenNode,
+    node: &GreenNodeData,
 ) -> Option<ValType<'db>> {
-    ValType::from_green(&node, db).or_else(|| {
+    ValType::from_green(node, db).or_else(|| {
         node.children().find_map(|child| match child {
             NodeOrToken::Node(node)
                 if AstValType::can_cast(WatLanguage::kind_from_raw(node.kind())) =>
@@ -30,14 +30,14 @@ pub(crate) fn extract_type<'db>(
 
 pub(crate) fn extract_global_type<'db>(
     db: &'db dyn salsa::Database,
-    node: GreenNode,
+    node: &GreenNodeData,
 ) -> Option<ValType<'db>> {
     node.children()
         .find_map(|child| match child {
             NodeOrToken::Node(node) if node.kind() == SyntaxKind::GLOBAL_TYPE.into() => Some(node),
             _ => None,
         })
-        .and_then(|global_type| extract_type(db, global_type.to_owned()))
+        .and_then(|global_type| extract_type(db, global_type))
 }
 
 pub(crate) fn extract_sig<'db>(db: &'db dyn salsa::Database, node: GreenNode) -> Signature<'db> {

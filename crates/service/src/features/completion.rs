@@ -682,7 +682,7 @@ fn get_cmp_list(
                             .map(|symbol| {
                                 let label = symbol.idx.render(service).to_string();
                                 let ty =
-                                    types_analyzer::extract_type(service, symbol.green.clone());
+                                    types_analyzer::extract_type(service, &symbol.green);
                                 CompletionItem {
                                     label: label.clone(),
                                     kind: Some(CompletionItemKind::Variable),
@@ -748,7 +748,7 @@ fn get_cmp_list(
                                         service,
                                         document,
                                         symbol.key,
-                                        symbol.green.clone(),
+                                        &symbol.green,
                                     ),
                                 )),
                                 label_details: Some(CompletionItemLabelDetails {
@@ -757,7 +757,7 @@ fn get_cmp_list(
                                             service,
                                             document,
                                             symbol.key,
-                                            symbol.green.clone(),
+                                            &symbol.green,
                                         )
                                         .render_compact(service)
                                         .to_string(),
@@ -839,7 +839,7 @@ fn get_cmp_list(
                                 let label = symbol.idx.render(service).to_string();
                                 let ty = types_analyzer::extract_global_type(
                                     service,
-                                    symbol.green.clone(),
+                                    &symbol.green,
                                 );
                                 CompletionItem {
                                     label: label.clone(),
