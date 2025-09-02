@@ -10,7 +10,7 @@ mod stdio;
 
 fn main() -> anyhow::Result<()> {
     if env::args().any(|arg| arg == "-v" || arg == "-V" || arg == "--version") {
-        println!("wat_server v{}", env!("CARGO_PKG_VERSION"));
+        eprintln!("wat_server v{}", env!("CARGO_PKG_VERSION"));
         return Ok(());
     }
 
