@@ -1,5 +1,3 @@
-#![allow(clippy::too_many_arguments)]
-
 use crate::{LanguageService, binder::SymbolTable, document::Document};
 use lspt::Diagnostic;
 use wat_syntax::SyntaxKind;
@@ -127,7 +125,6 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                 type_misuse::check(
                     service,
                     &mut diagnostics,
-                    uri,
                     document,
                     line_index,
                     symbol_table,

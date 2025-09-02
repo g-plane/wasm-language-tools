@@ -7,7 +7,6 @@ use crate::{
         CompositeType, DefType, FieldType, OperandType, RefType, ValType, get_def_types,
         resolve_br_types,
     },
-    uri::InternUri,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
@@ -19,7 +18,6 @@ const DIAGNOSTIC_CODE: &str = "type-misuse";
 pub fn check(
     service: &LanguageService,
     diagnostics: &mut Vec<Diagnostic>,
-    uri: InternUri,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
@@ -35,7 +33,7 @@ pub fn check(
                 "struct",
                 &node.first_child()?,
                 service,
-                uri,
+                document,
                 line_index,
                 symbol_table,
                 def_types,
@@ -54,13 +52,13 @@ pub fn check(
             {
                 CompositeType::Func(..) => {
                     diagnostics.push(build_diagnostic(
-                        "array", "func", &dst, dst_symbol, service, uri, line_index,
+                        "array", "func", &dst, dst_symbol, service, document, line_index,
                     ));
                     None
                 }
                 CompositeType::Struct(..) => {
                     diagnostics.push(build_diagnostic(
-                        "array", "struct", &dst, dst_symbol, service, uri, line_index,
+                        "array", "struct", &dst, dst_symbol, service, document, line_index,
                     ));
                     None
                 }
@@ -76,13 +74,13 @@ pub fn check(
             {
                 CompositeType::Func(..) => {
                     diagnostics.push(build_diagnostic(
-                        "array", "func", &src, src_symbol, service, uri, line_index,
+                        "array", "func", &src, src_symbol, service, document, line_index,
                     ));
                     None
                 }
                 CompositeType::Struct(..) => {
                     diagnostics.push(build_diagnostic(
-                        "array", "struct", &src, src_symbol, service, uri, line_index,
+                        "array", "struct", &src, src_symbol, service, document, line_index,
                     ));
                     None
                 }
@@ -106,7 +104,7 @@ pub fn check(
                         related_information: Some(vec![
                             DiagnosticRelatedInformation {
                                 location: Location {
-                                    uri: uri.raw(service),
+                                    uri: document.uri(service).raw(service),
                                     range: helpers::rowan_range_to_lsp_range(
                                         line_index,
                                         dst_symbol.key.text_range(),
@@ -116,7 +114,7 @@ pub fn check(
                             },
                             DiagnosticRelatedInformation {
                                 location: Location {
-                                    uri: uri.raw(service),
+                                    uri: document.uri(service).raw(service),
                                     range: helpers::rowan_range_to_lsp_range(
                                         line_index,
                                         src_symbol.key.text_range(),
@@ -136,7 +134,7 @@ pub fn check(
                 "array",
                 &node.first_child()?,
                 service,
-                uri,
+                document,
                 line_index,
                 symbol_table,
                 def_types,
@@ -150,7 +148,7 @@ pub fn check(
                     "func",
                     &node.first_child()?,
                     service,
-                    uri,
+                    document,
                     line_index,
                     symbol_table,
                     def_types,
@@ -199,7 +197,7 @@ pub fn check(
                         ),
                         related_information: Some(vec![DiagnosticRelatedInformation {
                             location: Location {
-                                uri: uri.raw(service),
+                                uri: document.uri(service).raw(service),
                                 range: helpers::rowan_range_to_lsp_range(
                                     line_index,
                                     rt1_node.syntax().text_range(),
@@ -226,7 +224,7 @@ pub fn check(
                         ),
                         related_information: Some(vec![DiagnosticRelatedInformation {
                             location: Location {
-                                uri: uri.raw(service),
+                                uri: document.uri(service).raw(service),
                                 range: helpers::rowan_range_to_lsp_range(
                                     line_index,
                                     label.syntax().text_range(),
@@ -281,7 +279,7 @@ pub fn check(
                         ),
                         related_information: Some(vec![DiagnosticRelatedInformation {
                             location: Location {
-                                uri: uri.raw(service),
+                                uri: document.uri(service).raw(service),
                                 range: helpers::rowan_range_to_lsp_range(
                                     line_index,
                                     rt1_node.syntax().text_range(),
@@ -306,7 +304,7 @@ pub fn check(
                         ),
                         related_information: Some(vec![DiagnosticRelatedInformation {
                             location: Location {
-                                uri: uri.raw(service),
+                                uri: document.uri(service).raw(service),
                                 range: helpers::rowan_range_to_lsp_range(
                                     line_index,
                                     label.syntax().text_range(),
@@ -328,7 +326,7 @@ fn check_type_matches(
     expected_kind: &'static str,
     ref_node: &SyntaxNode,
     service: &LanguageService,
-    uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     def_types: &[DefType],
@@ -351,7 +349,7 @@ fn check_type_matches(
             ref_node,
             def_symbol,
             service,
-            uri,
+            document,
             line_index,
         ))
     }
@@ -363,7 +361,7 @@ fn build_diagnostic(
     ref_node: &SyntaxNode,
     def_symbol: &Symbol,
     service: &LanguageService,
-    uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
 ) -> Diagnostic {
     debug_assert!(matches!(expected_kind, "func" | "struct" | "array"));
@@ -379,7 +377,7 @@ fn build_diagnostic(
         ),
         related_information: Some(vec![DiagnosticRelatedInformation {
             location: Location {
-                uri: uri.raw(service),
+                uri: document.uri(service).raw(service),
                 range: helpers::rowan_range_to_lsp_range(line_index, def_symbol.key.text_range()),
             },
             message: format!("{actual_kind} type defined here"),
