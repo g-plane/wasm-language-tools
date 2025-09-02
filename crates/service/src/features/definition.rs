@@ -1,10 +1,7 @@
-use super::find_meaningful_token;
 use crate::{
-    binder::{Symbol, SymbolKey, SymbolTablesCtx},
-    helpers,
-    syntax_tree::SyntaxTreeCtx,
-    uri::UrisCtx,
     LanguageService,
+    binder::{Symbol, SymbolKey, SymbolTable},
+    helpers,
 };
 use line_index::LineIndex;
 use lspt::{
@@ -12,32 +9,32 @@ use lspt::{
     Union2,
 };
 use rowan::ast::{
-    support::{child, token},
     AstNode,
+    support::{child, token},
 };
-use wat_syntax::{ast::TypeUse, SyntaxKind, SyntaxNode};
+use wat_syntax::{SyntaxKind, SyntaxNode, ast::TypeUse};
 
 impl LanguageService {
     /// Handler for `textDocument/definition` request.
     pub fn goto_definition(&self, params: DefinitionParams) -> Option<Definition> {
-        let uri = self.uri(params.text_document.uri.clone());
-        let root = SyntaxNode::new_root(self.root(uri));
-        let token = find_meaningful_token(self, uri, &root, params.position)?;
+        let document = self.get_document(&params.text_document.uri)?;
+        let root = document.root_tree(self);
+        let token = super::find_meaningful_token(self, document, &root, params.position)?;
 
         let parent = token.parent()?;
         if !matches!(parent.kind(), SyntaxKind::IMMEDIATE | SyntaxKind::INDEX) {
             return None;
         }
 
-        let line_index = self.line_index(uri);
-        let symbol_table = self.symbol_table(uri);
+        let line_index = document.line_index(self);
+        let symbol_table = SymbolTable::of(self, document);
         let key = SymbolKey::new(&parent);
         symbol_table
             .find_param_or_local_def(key)
             .map(|symbol| {
                 Union2::A(create_location_by_symbol(
                     params.text_document.uri.clone(),
-                    &line_index,
+                    line_index,
                     symbol,
                     &root,
                 ))
@@ -46,7 +43,7 @@ impl LanguageService {
                 symbol_table.find_def(key).map(|symbol| {
                     Union2::A(create_location_by_symbol(
                         params.text_document.uri.clone(),
-                        &line_index,
+                        line_index,
                         symbol,
                         &root,
                     ))
@@ -59,7 +56,7 @@ impl LanguageService {
                     .map(|symbol| {
                         Union2::A(create_location_by_symbol(
                             params.text_document.uri.clone(),
-                            &line_index,
+                            line_index,
                             symbol,
                             &root,
                         ))
@@ -69,11 +66,11 @@ impl LanguageService {
 
     /// Handler for `textDocument/typeDefinition` request.
     pub fn goto_type_definition(&self, params: TypeDefinitionParams) -> Option<Definition> {
-        let uri = self.uri(params.text_document.uri.clone());
-        let line_index = self.line_index(uri);
-        let root = SyntaxNode::new_root(self.root(uri));
-        let symbol_table = self.symbol_table(uri);
-        let token = find_meaningful_token(self, uri, &root, params.position)?;
+        let document = self.get_document(&params.text_document.uri)?;
+        let line_index = document.line_index(self);
+        let root = document.root_tree(self);
+        let symbol_table = SymbolTable::of(self, document);
+        let token = super::find_meaningful_token(self, document, &root, params.position)?;
 
         let parent = token.parent()?;
         if !matches!(parent.kind(), SyntaxKind::IMMEDIATE | SyntaxKind::INDEX) {
@@ -94,7 +91,7 @@ impl LanguageService {
                 .map(|symbol| {
                     Union2::A(create_location_by_symbol(
                         params.text_document.uri.clone(),
-                        &line_index,
+                        line_index,
                         symbol,
                         &root,
                     ))
@@ -107,11 +104,11 @@ impl LanguageService {
     ///
     /// Only available for function calls currently. This behaves same as "Goto Definition".
     pub fn goto_declaration(&self, params: DeclarationParams) -> Option<Declaration> {
-        let uri = self.uri(params.text_document.uri.clone());
-        let line_index = self.line_index(uri);
-        let root = SyntaxNode::new_root(self.root(uri));
-        let symbol_table = self.symbol_table(uri);
-        let token = find_meaningful_token(self, uri, &root, params.position)?;
+        let document = self.get_document(&params.text_document.uri)?;
+        let line_index = document.line_index(self);
+        let root = document.root_tree(self);
+        let symbol_table = SymbolTable::of(self, document);
+        let token = super::find_meaningful_token(self, document, &root, params.position)?;
         let parent = token.parent()?;
         if parent.kind() == SyntaxKind::IMMEDIATE {
             symbol_table
@@ -119,7 +116,7 @@ impl LanguageService {
                 .map(|symbol| {
                     Union2::A(create_location_by_symbol(
                         params.text_document.uri.clone(),
-                        &line_index,
+                        line_index,
                         symbol,
                         &root,
                     ))

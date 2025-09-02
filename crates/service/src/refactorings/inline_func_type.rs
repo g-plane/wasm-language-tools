@@ -1,7 +1,7 @@
 use crate::{
     binder::{SymbolKey, SymbolTable},
     helpers,
-    uri::{InternUri, UrisCtx},
+    uri::InternUri,
     LanguageService,
 };
 use line_index::LineIndex;
@@ -46,7 +46,7 @@ pub fn act(
     let end = helpers::rowan_pos_to_lsp_pos(line_index, node.text_range().end());
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
-        service.lookup_uri(uri),
+        uri.raw(service),
         vec![TextEdit {
             range: Range { start: end, end },
             new_text,

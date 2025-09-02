@@ -1,9 +1,9 @@
 use crate::{
-    binder::{SymbolKind, SymbolTable},
-    helpers,
-    mutability::{MutabilitiesCtx, MutationActionKind},
-    uri::{InternUri, UrisCtx},
     LanguageService,
+    binder::{SymbolKind, SymbolTable},
+    document::Document,
+    helpers, mutability,
+    uri::InternUri,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
@@ -14,15 +14,16 @@ pub fn check(
     service: &LanguageService,
     diagnostics: &mut Vec<Diagnostic>,
     uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
 ) {
-    let mutabilities = service.mutabilities(uri);
-    let mutation_actions = service.mutation_actions(uri);
+    let mutabilities = mutability::get_mutabilities(service, document);
+    let mutation_actions = mutability::get_mutation_actions(service, document);
     diagnostics.extend(
         mutation_actions
             .iter()
-            .filter(|(_, action)| action.kind == MutationActionKind::Set)
+            .filter(|(_, action)| action.kind == mutability::MutationActionKind::Set)
             .filter_map(|(key, action)| {
                 action
                     .target
@@ -52,7 +53,7 @@ pub fn check(
                             ),
                             related_information: Some(vec![DiagnosticRelatedInformation {
                                 location: Location {
-                                    uri: service.lookup_uri(uri),
+                                    uri: uri.raw(service),
                                     range: helpers::rowan_range_to_lsp_range(
                                         line_index,
                                         def_key.text_range(),

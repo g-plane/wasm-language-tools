@@ -1,21 +1,21 @@
 use crate::{
-    binder::{SymbolKey, SymbolTable},
-    helpers,
-    types_analyzer::{CompositeType, TypesAnalyzerCtx},
-    uri::InternUri,
     LanguageService,
+    binder::{SymbolKey, SymbolTable},
+    document::Document,
+    helpers,
+    types_analyzer::{self, CompositeType},
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, Union2};
-use rowan::ast::{support, AstNode};
-use wat_syntax::{ast::TypeUse, SyntaxNode};
+use rowan::ast::{AstNode, support};
+use wat_syntax::{SyntaxNode, ast::TypeUse};
 
 const DIAGNOSTIC_CODE: &str = "block-type";
 
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
-    uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
@@ -24,7 +24,7 @@ pub fn check(
         return;
     };
     let index = index.syntax();
-    let def_types = service.def_types(uri);
+    let def_types = types_analyzer::get_def_types(service, document);
     if symbol_table
         .find_def(SymbolKey::new(index))
         .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))

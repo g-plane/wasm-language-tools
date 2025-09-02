@@ -1,28 +1,33 @@
 use super::{
+    extractor::extract_sig,
     types::{OperandType, ValType},
-    TypesAnalyzerCtx,
 };
-use crate::{binder::SymbolKey, helpers, idx::InternIdent, uri::InternUri, LanguageService};
+use crate::{
+    binder::{SymbolKey, SymbolTable},
+    document::Document,
+    helpers,
+    idx::InternIdent,
+};
 use rowan::{
-    ast::{support, AstNode},
     GreenNode, NodeOrToken,
+    ast::{AstNode, support},
 };
 use wat_syntax::{
-    ast::{BlockType, TypeUse},
     SyntaxKind, SyntaxNode, SyntaxNodePtr,
+    ast::{BlockType, TypeUse},
 };
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
-pub(crate) struct Signature {
-    pub(crate) params: Vec<(ValType, Option<InternIdent>)>,
-    pub(crate) results: Vec<ValType>,
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, salsa::Update)]
+pub(crate) struct Signature<'db> {
+    pub(crate) params: Vec<(ValType<'db>, Option<InternIdent<'db>>)>,
+    pub(crate) results: Vec<ValType<'db>>,
 }
-impl Signature {
+impl<'db> Signature<'db> {
     pub(crate) fn matches(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
         self.params.len() == other.params.len()
@@ -31,19 +36,19 @@ impl Signature {
                 .params
                 .iter()
                 .zip(&self.params)
-                .all(|((a, _), (b, _))| a.matches(b, db, uri, module_id))
+                .all(|((a, _), (b, _))| a.matches(b, db, document, module_id))
             && self
                 .results
                 .iter()
                 .zip(&other.results)
-                .all(|(a, b)| a.matches(b, db, uri, module_id))
+                .all(|(a, b)| a.matches(b, db, document, module_id))
     }
 
     pub(crate) fn type_equals(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
         self.params.len() == other.params.len()
@@ -52,23 +57,23 @@ impl Signature {
                 .params
                 .iter()
                 .zip(&other.params)
-                .all(|((a, _), (b, _))| a.type_equals(b, db, uri, module_id))
+                .all(|((a, _), (b, _))| a.type_equals(b, db, document, module_id))
             && self
                 .results
                 .iter()
                 .zip(&other.results)
-                .all(|(a, b)| a.type_equals(b, db, uri, module_id))
+                .all(|(a, b)| a.type_equals(b, db, document, module_id))
     }
 }
 
 #[derive(Clone, Debug, Default)]
-pub(crate) struct ResolvedSig {
-    pub(crate) params: Vec<OperandType>,
-    pub(crate) results: Vec<OperandType>,
+pub(crate) struct ResolvedSig<'db> {
+    pub(crate) params: Vec<OperandType<'db>>,
+    pub(crate) results: Vec<OperandType<'db>>,
 }
 
-impl From<Signature> for ResolvedSig {
-    fn from(sig: Signature) -> Self {
+impl<'db> From<Signature<'db>> for ResolvedSig<'db> {
+    fn from(sig: Signature<'db>) -> Self {
         ResolvedSig {
             params: sig
                 .params
@@ -80,12 +85,12 @@ impl From<Signature> for ResolvedSig {
     }
 }
 
-pub(super) fn get_func_sig(
-    db: &dyn TypesAnalyzerCtx,
-    uri: InternUri,
+pub(crate) fn get_func_sig<'db>(
+    db: &'db dyn salsa::Database,
+    document: Document,
     ptr: SyntaxNodePtr,
     green: GreenNode,
-) -> Option<Signature> {
+) -> Signature<'db> {
     green
         .children()
         .find_map(|child| match child {
@@ -97,55 +102,64 @@ pub(super) fn get_func_sig(
                 let kind = child.kind();
                 kind == SyntaxKind::PARAM.into() || kind == SyntaxKind::RESULT.into()
             }) {
-                Some(db.extract_sig(type_use.to_owned()))
+                Some(extract_sig(db, type_use.to_owned()))
             } else {
-                let node = ptr.to_node(&SyntaxNode::new_root(db.root(uri)));
-                let symbol_table = db.symbol_table(uri);
+                let node = ptr.to_node(&document.root_tree(db));
+                let symbol_table = SymbolTable::of(db, document);
                 support::child::<TypeUse>(&node)
                     .and_then(|type_use| type_use.index())
                     .and_then(|idx| symbol_table.find_def(SymbolKey::new(idx.syntax())))
                     .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.green))
-                    .map(|func_type| db.extract_sig(func_type))
+                    .map(|func_type| extract_sig(db, func_type))
             }
         })
+        .unwrap_or_default()
 }
 
-pub(super) fn get_type_use_sig(
-    db: &dyn TypesAnalyzerCtx,
-    uri: InternUri,
+pub(crate) fn get_type_use_sig<'db>(
+    db: &'db dyn salsa::Database,
+    document: Document,
     ptr: SyntaxNodePtr,
     type_use: GreenNode,
-) -> Option<Signature> {
+) -> Signature<'db> {
     if type_use.children().any(|child| {
         let kind = child.kind();
         kind == SyntaxKind::PARAM.into() || kind == SyntaxKind::RESULT.into()
     }) {
-        Some(db.extract_sig(type_use.to_owned()))
+        extract_sig(db, type_use.to_owned())
     } else {
-        let symbol_table = db.symbol_table(uri);
-        TypeUse::cast(ptr.to_node(&SyntaxNode::new_root(db.root(uri))))
+        let symbol_table = SymbolTable::of(db, document);
+        TypeUse::cast(ptr.to_node(&document.root_tree(db)))
             .and_then(|type_use| type_use.index())
             .and_then(|idx| symbol_table.find_def(SymbolKey::new(idx.syntax())))
             .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.green))
-            .map(|func_type| db.extract_sig(func_type))
+            .map(|func_type| extract_sig(db, func_type))
+            .unwrap_or_default()
     }
 }
 
-// The reason why we don't put this function to Salsa is because
-// the block node comes with block body and can be huge.
-// Once the body changed (even block type is unchanged), memoization will be skipped.
-// Also, Salsa requires the ownership of GreenNode,
-// which means we must clone the whole huge block green node.
-pub(crate) fn get_block_sig(
-    service: &LanguageService,
-    uri: InternUri,
+pub(crate) fn get_block_sig<'db>(
+    service: &'db dyn salsa::Database,
+    document: Document,
     node: &SyntaxNode,
-) -> Option<Signature> {
+) -> Signature<'db> {
     support::child::<BlockType>(node)
         .and_then(|block_type| block_type.type_use())
-        .and_then(|type_use| {
+        .map(|type_use| {
             let node = type_use.syntax();
-            service.get_type_use_sig(uri, SyntaxNodePtr::new(node), node.green().into())
+            get_type_use_sig(
+                service,
+                document,
+                SyntaxNodePtr::new(node),
+                node.green().into(),
+            )
         })
-        .or_else(|| get_func_sig(service, uri, SyntaxNodePtr::new(node), node.green().into()))
+        .unwrap_or_else(|| {
+            get_func_sig(
+                service,
+                document,
+                SyntaxNodePtr::new(node),
+                node.green().into(),
+            )
+        })
 }

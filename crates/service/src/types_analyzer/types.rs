@@ -1,31 +1,31 @@
-use super::{def_type::CompositeType, TypesAnalyzerCtx};
+use super::def_type::{CompositeType, get_def_types};
 use crate::{
-    binder::SymbolKind,
-    idx::Idx,
-    types_analyzer::{get_func_sig, DefType},
-    uri::InternUri,
+    binder::{SymbolKind, SymbolTable},
+    document::Document,
+    idx::{Idx, InternIdent},
+    types_analyzer::{self, DefType},
 };
-use rowan::{ast::AstNode, GreenNodeData, Language, NodeOrToken};
+use rowan::{GreenNodeData, Language, NodeOrToken, ast::AstNode};
 use wat_syntax::{
-    ast::{FieldType as AstFieldType, StorageType as AstStorageType, ValType as AstValType},
     SyntaxKind, WatLanguage,
+    ast::{FieldType as AstFieldType, StorageType as AstStorageType, ValType as AstValType},
 };
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub(crate) enum ValType {
+#[derive(Clone, Debug, PartialEq, Eq, Hash, salsa::Update)]
+pub(crate) enum ValType<'db> {
     I32,
     I64,
     F32,
     F64,
     V128,
-    Ref(RefType),
+    Ref(RefType<'db>),
 }
-impl ValType {
-    pub(crate) fn from_ast(node: &AstValType, db: &dyn TypesAnalyzerCtx) -> Option<Self> {
+impl<'db> ValType<'db> {
+    pub(crate) fn from_ast(node: &AstValType, db: &'db dyn salsa::Database) -> Option<Self> {
         Self::from_green(&node.syntax().green(), db)
     }
 
-    pub(crate) fn from_green(node: &GreenNodeData, db: &dyn TypesAnalyzerCtx) -> Option<Self> {
+    pub(crate) fn from_green(node: &GreenNodeData, db: &'db dyn salsa::Database) -> Option<Self> {
         match WatLanguage::kind_from_raw(node.kind()) {
             SyntaxKind::NUM_TYPE => match node
                 .children()
@@ -48,12 +48,12 @@ impl ValType {
     pub(crate) fn matches(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
         match (self, other) {
-            (ValType::Ref(a), ValType::Ref(b)) => a.matches(b, db, uri, module_id),
+            (ValType::Ref(a), ValType::Ref(b)) => a.matches(b, db, document, module_id),
             _ => self == other,
         }
     }
@@ -61,12 +61,12 @@ impl ValType {
     pub(crate) fn type_equals(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
         if let (ValType::Ref(a), ValType::Ref(b)) = (self, other) {
-            a.type_equals(b, db, uri, module_id)
+            a.type_equals(b, db, document, module_id)
         } else {
             self == other
         }
@@ -80,13 +80,13 @@ impl ValType {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub(crate) struct RefType {
-    pub heap_ty: HeapType,
+#[derive(Clone, Debug, PartialEq, Eq, Hash, salsa::Update)]
+pub(crate) struct RefType<'db> {
+    pub heap_ty: HeapType<'db>,
     pub nullable: bool,
 }
-impl RefType {
-    pub(crate) fn from_green(node: &GreenNodeData, db: &dyn TypesAnalyzerCtx) -> Option<Self> {
+impl<'db> RefType<'db> {
+    pub(crate) fn from_green(node: &GreenNodeData, db: &'db dyn salsa::Database) -> Option<Self> {
         let mut children = node.children();
         match children.next().and_then(|child| child.into_token())?.text() {
             "anyref" => Some(RefType {
@@ -154,36 +154,39 @@ impl RefType {
     pub(crate) fn matches(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
-        self.heap_ty.matches(&other.heap_ty, db, uri, module_id)
+        self.heap_ty
+            .matches(&other.heap_ty, db, document, module_id)
             && (!self.nullable || other.nullable)
     }
 
     pub(crate) fn type_equals(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
         self.nullable == other.nullable
-            && self.heap_ty.type_equals(&other.heap_ty, db, uri, module_id)
+            && self
+                .heap_ty
+                .type_equals(&other.heap_ty, db, document, module_id)
     }
 
     pub(crate) fn diff(&self, other: &Self) -> Self {
         RefType {
-            heap_ty: self.heap_ty,
+            heap_ty: self.heap_ty.clone(),
             nullable: if other.nullable { false } else { self.nullable },
         }
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub(crate) enum HeapType {
-    Type(Idx),
+#[derive(Clone, Debug, PartialEq, Eq, Hash, salsa::Update)]
+pub(crate) enum HeapType<'db> {
+    Type(Idx<'db>),
     Any,
     Eq,
     I31,
@@ -194,11 +197,11 @@ pub(crate) enum HeapType {
     NoFunc,
     Extern,
     NoExtern,
-    Rec(u32),     // internal use, not actually a valid heap type
-    DefFunc(Idx), // internal use
+    Rec(u32),          // internal use, not actually a valid heap type
+    DefFunc(Idx<'db>), // internal use
 }
-impl HeapType {
-    pub(crate) fn from_green(node: &GreenNodeData, db: &dyn TypesAnalyzerCtx) -> Option<Self> {
+impl<'db> HeapType<'db> {
+    pub(crate) fn from_green(node: &GreenNodeData, db: &'db dyn salsa::Database) -> Option<Self> {
         match node.children().next() {
             Some(NodeOrToken::Node(node)) if node.kind() == SyntaxKind::INDEX.into() => {
                 let token = node.children().next()?.into_token()?;
@@ -209,7 +212,7 @@ impl HeapType {
                     })),
                     SyntaxKind::IDENT => Some(HeapType::Type(Idx {
                         num: None,
-                        name: Some(db.ident(token.text().into())),
+                        name: Some(InternIdent::new(db, token.text())),
                     })),
                     _ => None,
                 }
@@ -236,8 +239,8 @@ impl HeapType {
     pub(crate) fn matches(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
         match (self, other) {
@@ -246,9 +249,11 @@ impl HeapType {
                 HeapType::Any,
             )
             | (HeapType::I31 | HeapType::Struct | HeapType::Array, HeapType::Eq) => true,
-            (HeapType::None, other) => other.matches(&HeapType::Any, db, uri, module_id),
-            (HeapType::NoFunc, other) => other.matches(&HeapType::Func, db, uri, module_id),
-            (HeapType::NoExtern, other) => other.matches(&HeapType::Extern, db, uri, module_id),
+            (HeapType::None, other) => other.matches(&HeapType::Any, db, document, module_id),
+            (HeapType::NoFunc, other) => other.matches(&HeapType::Func, db, document, module_id),
+            (HeapType::NoExtern, other) => {
+                other.matches(&HeapType::Extern, db, document, module_id)
+            }
             (heap_ty_a @ &HeapType::Type(mut a), heap_ty_b @ &HeapType::Type(mut b)) => {
                 if a.is_def() {
                     a.name = None;
@@ -256,11 +261,11 @@ impl HeapType {
                 if b.is_def() {
                     b.name = None;
                 }
-                let symbol_table = db.symbol_table(uri);
+                let symbol_table = SymbolTable::of(db, document);
                 let Some(module) = symbol_table.find_module(module_id) else {
                     return false;
                 };
-                let def_types = db.def_types(uri);
+                let def_types = get_def_types(db, document);
                 symbol_table
                     .symbols
                     .iter()
@@ -277,14 +282,14 @@ impl HeapType {
                     .map(|(a, b)| (a.key, b.key))
                     .is_some_and(|(a, b)| {
                         a == b
-                            || heap_ty_a.type_equals(heap_ty_b, db, uri, module_id)
+                            || heap_ty_a.type_equals(heap_ty_b, db, document, module_id)
                             || def_types
                                 .iter()
                                 .find(|def_type| def_type.key == a)
                                 .and_then(|def_type| def_type.inherits.as_ref())
                                 .is_some_and(|inherits| {
                                     HeapType::Type(inherits.idx)
-                                        .matches(heap_ty_b, db, uri, module_id)
+                                        .matches(heap_ty_b, db, document, module_id)
                                 })
                     })
             }
@@ -292,11 +297,11 @@ impl HeapType {
                 if a.is_def() {
                     a.name = None;
                 }
-                let symbol_table = db.symbol_table(uri);
+                let symbol_table = SymbolTable::of(db, document);
                 let Some(module) = symbol_table.find_module(module_id) else {
                     return false;
                 };
-                let def_types = db.def_types(uri);
+                let def_types = get_def_types(db, document);
                 #[expect(clippy::match_like_matches_macro)]
                 symbol_table
                     .symbols
@@ -324,11 +329,11 @@ impl HeapType {
                 if b.is_def() {
                     b.name = None;
                 }
-                let symbol_table = db.symbol_table(uri);
+                let symbol_table = SymbolTable::of(db, document);
                 let Some(module) = symbol_table.find_module(module_id) else {
                     return false;
                 };
-                let def_types = db.def_types(uri);
+                let def_types = get_def_types(db, document);
                 if let Some((
                     a,
                     DefType {
@@ -344,7 +349,7 @@ impl HeapType {
                             && a.is_defined_by(&symbol.idx)
                     })
                     .map(|symbol| {
-                        get_func_sig(db, uri, symbol.key, symbol.green.clone()).unwrap_or_default()
+                        types_analyzer::get_func_sig(db, document, symbol.key, symbol.green.clone())
                     })
                     .zip(
                         symbol_table
@@ -356,7 +361,7 @@ impl HeapType {
                                     && b.is_defined_by(&symbol.idx)
                             })
                             .filter(|symbol| {
-                                db.rec_type_groups(uri)
+                                types_analyzer::get_rec_type_groups(db, document)
                                     .iter()
                                     .find(|group| group.type_defs.contains(&symbol.key))
                                     .is_none_or(|group| group.type_defs.len() <= 1)
@@ -366,7 +371,7 @@ impl HeapType {
                             }),
                     )
                 {
-                    a.type_equals(b, db, uri, module_id)
+                    a.type_equals(b, db, document, module_id)
                 } else {
                     false
                 }
@@ -378,8 +383,8 @@ impl HeapType {
     pub(crate) fn type_equals(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
         if let (&HeapType::Type(mut a), &HeapType::Type(mut b)) = (self, other) {
@@ -389,11 +394,11 @@ impl HeapType {
             if b.is_def() {
                 b.name = None;
             }
-            let symbol_table = db.symbol_table(uri);
+            let symbol_table = SymbolTable::of(db, document);
             let Some(module) = symbol_table.find_module(module_id) else {
                 return false;
             };
-            let def_types = db.def_types(uri);
+            let def_types = get_def_types(db, document);
             symbol_table
                 .symbols
                 .iter()
@@ -414,7 +419,7 @@ impl HeapType {
                             .iter()
                             .find(|def_type| def_type.key == a)
                             .zip(def_types.iter().find(|def_type| def_type.key == b))
-                            .is_some_and(|(a, b)| a.type_equals(b, db, uri, module_id))
+                            .is_some_and(|(a, b)| a.type_equals(b, db, document, module_id))
                 })
         } else {
             self == other
@@ -422,9 +427,9 @@ impl HeapType {
     }
 
     pub(crate) fn to_top_type(
-        self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        &self,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> Option<Self> {
         match self {
@@ -436,13 +441,14 @@ impl HeapType {
             | HeapType::I31 => Some(HeapType::Any),
             HeapType::Func | HeapType::NoFunc => Some(HeapType::Func),
             HeapType::Extern | HeapType::NoExtern => Some(HeapType::Extern),
-            HeapType::Type(mut idx) => {
+            HeapType::Type(idx) => {
+                let mut idx = *idx;
                 if idx.is_def() {
                     idx.name = None;
                 }
-                let symbol_table = db.symbol_table(uri);
+                let symbol_table = SymbolTable::of(db, document);
                 let module = symbol_table.find_module(module_id)?;
-                let def_types = db.def_types(uri);
+                let def_types = get_def_types(db, document);
                 symbol_table
                     .symbols
                     .iter()
@@ -462,33 +468,48 @@ impl HeapType {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub(crate) enum OperandType {
-    Val(ValType),
+#[derive(Clone, Debug, PartialEq, Eq, Hash, salsa::Update)]
+pub(crate) enum OperandType<'db> {
+    Val(ValType<'db>),
     Any,
 }
-impl From<StorageType> for OperandType {
-    fn from(value: StorageType) -> Self {
+impl<'db> From<StorageType<'db>> for OperandType<'db> {
+    fn from(value: StorageType<'db>) -> Self {
         match value {
             StorageType::Val(ty) => OperandType::Val(ty),
             StorageType::PackedI8 | StorageType::PackedI16 => OperandType::Val(ValType::I32),
         }
     }
 }
-impl From<FieldType> for OperandType {
-    fn from(value: FieldType) -> Self {
+impl<'db> From<FieldType<'db>> for OperandType<'db> {
+    fn from(value: FieldType<'db>) -> Self {
         value.storage.into()
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct Fields(pub Vec<(FieldType, Idx)>);
-impl Fields {
+pub(crate) fn operand_type_matches<'db>(
+    db: &'db dyn salsa::Database,
+    document: Document,
+    module_id: u32,
+    sub: OperandType<'db>,
+    sup: OperandType<'db>,
+) -> bool {
+    match (sub, sup) {
+        (OperandType::Val(sub), OperandType::Val(sup)) => {
+            sub.matches(&sup, db, document, module_id)
+        }
+        (OperandType::Any, _) | (_, OperandType::Any) => true,
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
+pub(crate) struct Fields<'db>(pub Vec<(FieldType<'db>, Idx<'db>)>);
+impl<'db> Fields<'db> {
     pub(crate) fn matches(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
         self.0.len() >= other.0.len()
@@ -496,14 +517,14 @@ impl Fields {
                 .0
                 .iter()
                 .zip(&other.0)
-                .all(|((a, _), (b, _))| a.matches(b, db, uri, module_id))
+                .all(|((a, _), (b, _))| a.matches(b, db, document, module_id))
     }
 
     pub(crate) fn type_equals(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
         self.0.len() == other.0.len()
@@ -511,10 +532,10 @@ impl Fields {
                 .0
                 .iter()
                 .zip(&other.0)
-                .all(|((a, _), (b, _))| a.type_equals(b, db, uri, module_id))
+                .all(|((a, _), (b, _))| a.type_equals(b, db, document, module_id))
     }
 
-    pub(crate) fn to_operand_types(&self) -> Vec<OperandType> {
+    pub(crate) fn to_operand_types(&self) -> Vec<OperandType<'db>> {
         self.0
             .iter()
             .map(|(field, _)| field.storage.clone().into())
@@ -522,13 +543,13 @@ impl Fields {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct FieldType {
-    pub(crate) storage: StorageType,
+#[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
+pub(crate) struct FieldType<'db> {
+    pub(crate) storage: StorageType<'db>,
     pub(crate) mutable: bool,
 }
-impl FieldType {
-    pub(super) fn from_ast(node: &AstFieldType, db: &dyn TypesAnalyzerCtx) -> Option<Self> {
+impl<'db> FieldType<'db> {
+    pub(super) fn from_ast(node: &AstFieldType, db: &'db dyn salsa::Database) -> Option<Self> {
         node.storage_type()
             .and_then(|storage_type| StorageType::from_ast(&storage_type, db))
             .map(|storage| FieldType {
@@ -540,16 +561,21 @@ impl FieldType {
     pub(crate) fn matches(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
         match (self.mutable, other.mutable) {
             (true, true) => {
-                self.storage.matches(&other.storage, db, uri, module_id)
-                    && other.storage.matches(&self.storage, db, uri, module_id)
+                self.storage
+                    .matches(&other.storage, db, document, module_id)
+                    && other
+                        .storage
+                        .matches(&self.storage, db, document, module_id)
             }
-            (false, false) => self.storage.matches(&other.storage, db, uri, module_id),
+            (false, false) => self
+                .storage
+                .matches(&other.storage, db, document, module_id),
             _ => false,
         }
     }
@@ -557,23 +583,25 @@ impl FieldType {
     pub(crate) fn type_equals(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
         self.mutable == other.mutable
-            && self.storage.type_equals(&other.storage, db, uri, module_id)
+            && self
+                .storage
+                .type_equals(&other.storage, db, document, module_id)
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) enum StorageType {
-    Val(ValType),
+#[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
+pub(crate) enum StorageType<'db> {
+    Val(ValType<'db>),
     PackedI8,
     PackedI16,
 }
-impl StorageType {
-    fn from_ast(node: &AstStorageType, db: &dyn TypesAnalyzerCtx) -> Option<Self> {
+impl<'db> StorageType<'db> {
+    fn from_ast(node: &AstStorageType, db: &'db dyn salsa::Database) -> Option<Self> {
         match node {
             AstStorageType::Val(ty) => ValType::from_ast(ty, db).map(StorageType::Val),
             AstStorageType::Packed(ty) => {
@@ -590,12 +618,12 @@ impl StorageType {
     pub(crate) fn matches(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
         match (self, other) {
-            (StorageType::Val(a), StorageType::Val(b)) => a.matches(b, db, uri, module_id),
+            (StorageType::Val(a), StorageType::Val(b)) => a.matches(b, db, document, module_id),
             (StorageType::PackedI8, StorageType::PackedI8) => true,
             (StorageType::PackedI16, StorageType::PackedI16) => true,
             _ => false,
@@ -605,12 +633,12 @@ impl StorageType {
     pub(crate) fn type_equals(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
         match (self, other) {
-            (StorageType::Val(a), StorageType::Val(b)) => a.type_equals(b, db, uri, module_id),
+            (StorageType::Val(a), StorageType::Val(b)) => a.type_equals(b, db, document, module_id),
             (StorageType::PackedI8, StorageType::PackedI8) => true,
             (StorageType::PackedI16, StorageType::PackedI16) => true,
             _ => false,

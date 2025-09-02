@@ -1,17 +1,14 @@
 use crate::{
-    binder::{SymbolKey, SymbolKind, SymbolTablesCtx},
-    helpers,
-    syntax_tree::SyntaxTreeCtx,
-    types_analyzer::TypesAnalyzerCtx,
-    uri::UrisCtx,
     LanguageService,
+    binder::{SymbolKey, SymbolKind, SymbolTable},
+    helpers, types_analyzer,
 };
 use lspt::{
     CallHierarchyIncomingCall, CallHierarchyIncomingCallsParams, CallHierarchyItem,
     CallHierarchyOutgoingCall, CallHierarchyOutgoingCallsParams, CallHierarchyPrepareParams,
     SymbolKind as LspSymbolKind,
 };
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::SyntaxKind;
 
 impl LanguageService {
     /// Handler for `textDocument/prepareCallHierarchy` request.
@@ -19,12 +16,12 @@ impl LanguageService {
         &self,
         params: CallHierarchyPrepareParams,
     ) -> Option<Vec<CallHierarchyItem>> {
-        let uri = self.uri(params.text_document.uri.clone());
-        let line_index = self.line_index(uri);
-        let root = SyntaxNode::new_root(self.root(uri));
-        let symbol_table = self.symbol_table(uri);
+        let document = self.get_document(&params.text_document.uri)?;
+        let line_index = document.line_index(self);
+        let root = document.root_tree(self);
+        let symbol_table = SymbolTable::of(self, document);
 
-        let token = super::find_meaningful_token(self, uri, &root, params.position)?;
+        let token = super::find_meaningful_token(self, document, &root, params.position)?;
         let parent_range = token.parent()?.text_range();
 
         symbol_table
@@ -36,20 +33,22 @@ impl LanguageService {
                         name: symbol.idx.render(self).to_string(),
                         kind: LspSymbolKind::Function,
                         tags: None,
-                        detail: Some(self.render_func_header(
+                        detail: Some(types_analyzer::render_func_header(
+                            self,
                             symbol.idx.name,
-                            self.get_func_sig(uri, symbol.key, symbol.green.clone()),
+                            types_analyzer::get_func_sig(
+                                self,
+                                document,
+                                symbol.key,
+                                symbol.green.clone(),
+                            ),
                         )),
                         uri: params.text_document.uri.clone(),
                         range: helpers::rowan_range_to_lsp_range(
-                            &line_index,
+                            line_index,
                             symbol.key.text_range(),
                         ),
-                        selection_range: helpers::create_selection_range(
-                            symbol,
-                            &root,
-                            &line_index,
-                        ),
+                        selection_range: helpers::create_selection_range(symbol, &root, line_index),
                         data: None,
                     }])
                 }
@@ -59,19 +58,23 @@ impl LanguageService {
                             name: symbol.idx.render(self).to_string(),
                             kind: LspSymbolKind::Function,
                             tags: None,
-                            detail: Some(self.render_func_header(
+                            detail: Some(types_analyzer::render_func_header(
+                                self,
                                 symbol.idx.name,
-                                self.get_func_sig(uri, symbol.key, symbol.green.clone()),
+                                types_analyzer::get_func_sig(
+                                    self,
+                                    document,
+                                    symbol.key,
+                                    symbol.green.clone(),
+                                ),
                             )),
                             uri: params.text_document.uri.clone(),
                             range: helpers::rowan_range_to_lsp_range(
-                                &line_index,
+                                line_index,
                                 symbol.key.text_range(),
                             ),
                             selection_range: helpers::create_selection_range(
-                                symbol,
-                                &root,
-                                &line_index,
+                                symbol, &root, line_index,
                             ),
                             data: None,
                         }]
@@ -86,12 +89,12 @@ impl LanguageService {
         &self,
         params: CallHierarchyIncomingCallsParams,
     ) -> Option<Vec<CallHierarchyIncomingCall>> {
-        let uri = self.uri(params.item.uri.clone());
-        let root = SyntaxNode::new_root(self.root(uri));
-        let symbol_table = self.symbol_table(uri);
+        let document = self.get_document(&params.item.uri)?;
+        let root = document.root_tree(self);
+        let symbol_table = SymbolTable::of(self, document);
 
-        let line_index = self.line_index(uri);
-        let callee_def_range = helpers::lsp_range_to_rowan_range(&line_index, params.item.range)?;
+        let line_index = document.line_index(self);
+        let callee_def_range = helpers::lsp_range_to_rowan_range(line_index, params.item.range)?;
         let callee_def = symbol_table
             .symbols
             .iter()
@@ -121,26 +124,32 @@ impl LanguageService {
             .map(|(call_symbol, func_symbol)| {
                 let plain_instr_range =
                     call_symbol.key.to_node(&root).parent().map(|call| {
-                        helpers::rowan_range_to_lsp_range(&line_index, call.text_range())
+                        helpers::rowan_range_to_lsp_range(line_index, call.text_range())
                     });
                 CallHierarchyIncomingCall {
                     from: CallHierarchyItem {
                         name: func_symbol.idx.render(self).to_string(),
                         kind: LspSymbolKind::Function,
                         tags: None,
-                        detail: Some(self.render_func_header(
+                        detail: Some(types_analyzer::render_func_header(
+                            self,
                             func_symbol.idx.name,
-                            self.get_func_sig(uri, func_symbol.key, func_symbol.green.clone()),
+                            types_analyzer::get_func_sig(
+                                self,
+                                document,
+                                func_symbol.key,
+                                func_symbol.green.clone(),
+                            ),
                         )),
                         uri: params.item.uri.clone(),
                         range: helpers::rowan_range_to_lsp_range(
-                            &line_index,
+                            line_index,
                             func_symbol.key.text_range(),
                         ),
                         selection_range: helpers::create_selection_range(
                             func_symbol,
                             &root,
-                            &line_index,
+                            line_index,
                         ),
                         data: None,
                     },
@@ -156,56 +165,56 @@ impl LanguageService {
         &self,
         params: CallHierarchyOutgoingCallsParams,
     ) -> Option<Vec<CallHierarchyOutgoingCall>> {
-        let uri = self.uri(params.item.uri.clone());
-        let root = SyntaxNode::new_root(self.root(uri));
-        let symbol_table = self.symbol_table(uri);
+        let document = self.get_document(&params.item.uri)?;
+        let root = &document.root_tree(self);
+        let symbol_table = SymbolTable::of(self, document);
 
-        let line_index = self.line_index(uri);
-        let call_def_range = helpers::lsp_range_to_rowan_range(&line_index, params.item.range)?;
+        let line_index = document.line_index(self);
+        let call_def_range = helpers::lsp_range_to_rowan_range(line_index, params.item.range)?;
         let call_def_symbol = symbol_table
             .symbols
             .iter()
             .find(|symbol| symbol.key.text_range() == call_def_range)?;
-        let func = call_def_symbol.key.to_node(&root);
+        let func = call_def_symbol.key.to_node(root);
         let items = func
             .descendants()
             .filter(|node| node.kind() == SyntaxKind::PLAIN_INSTR && helpers::ast::is_call(node))
             .flat_map(|node| {
                 let plain_instr_range =
-                    helpers::rowan_range_to_lsp_range(&line_index, node.text_range());
+                    helpers::rowan_range_to_lsp_range(line_index, node.text_range());
+                let uri = &params.item.uri;
                 node.children()
                     .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
                     .filter_map(|immediate| symbol_table.find_def(SymbolKey::new(&immediate)))
                     .filter(|symbol| symbol.kind == SymbolKind::Func)
-                    .map(move |func_symbol| {
-                        let line_index = self.line_index(uri);
-                        CallHierarchyOutgoingCall {
-                            to: CallHierarchyItem {
-                                name: func_symbol.idx.render(self).to_string(),
-                                kind: LspSymbolKind::Function,
-                                tags: None,
-                                detail: Some(self.render_func_header(
-                                    func_symbol.idx.name,
-                                    self.get_func_sig(
-                                        uri,
-                                        func_symbol.key,
-                                        func_symbol.green.clone(),
-                                    ),
-                                )),
-                                uri: self.lookup_uri(uri),
-                                range: helpers::rowan_range_to_lsp_range(
-                                    &line_index,
-                                    func_symbol.key.text_range(),
+                    .map(move |func_symbol| CallHierarchyOutgoingCall {
+                        to: CallHierarchyItem {
+                            name: func_symbol.idx.render(self).to_string(),
+                            kind: LspSymbolKind::Function,
+                            tags: None,
+                            detail: Some(types_analyzer::render_func_header(
+                                self,
+                                func_symbol.idx.name,
+                                types_analyzer::get_func_sig(
+                                    self,
+                                    document,
+                                    func_symbol.key,
+                                    func_symbol.green.clone(),
                                 ),
-                                selection_range: helpers::create_selection_range(
-                                    func_symbol,
-                                    &SyntaxNode::new_root(self.root(uri)),
-                                    &line_index,
-                                ),
-                                data: None,
-                            },
-                            from_ranges: vec![plain_instr_range],
-                        }
+                            )),
+                            uri: uri.clone(),
+                            range: helpers::rowan_range_to_lsp_range(
+                                line_index,
+                                func_symbol.key.text_range(),
+                            ),
+                            selection_range: helpers::create_selection_range(
+                                func_symbol,
+                                root,
+                                line_index,
+                            ),
+                            data: None,
+                        },
+                        from_ranges: vec![plain_instr_range],
                     })
             })
             .collect();

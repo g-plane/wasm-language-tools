@@ -1,12 +1,6 @@
-use crate::{
-    helpers,
-    uri::{InternUri, UrisCtx},
-    LanguageService,
-};
+use crate::{helpers, uri::InternUri, LanguageService};
 use line_index::LineIndex;
-use lspt::{
-    CodeAction, CodeActionContext, CodeActionKind, Diagnostic, TextEdit, Union2, WorkspaceEdit,
-};
+use lspt::{CodeAction, CodeActionContext, CodeActionKind, Diagnostic, TextEdit, Union2, WorkspaceEdit};
 use rowan::{Direction, TextRange};
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
@@ -83,7 +77,7 @@ fn build_action(
         new_text: new_text.into(),
     }];
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
-    changes.insert(service.lookup_uri(uri), text_edits);
+    changes.insert(uri.raw(service), text_edits);
     CodeAction {
         title: format!("Replace instruction with `{new_text}`"),
         kind: Some(CodeActionKind::QuickFix),

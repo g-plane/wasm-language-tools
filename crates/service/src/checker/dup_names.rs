@@ -1,13 +1,12 @@
 use crate::{
+    LanguageService,
     binder::{Symbol, SymbolKind, SymbolTable},
     helpers,
-    idx::IdentsCtx,
-    uri::{InternUri, UrisCtx},
-    LanguageService,
+    uri::InternUri,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
-use rowan::{ast::support::token, TextRange};
+use rowan::{TextRange, ast::support::token};
 use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
@@ -65,7 +64,7 @@ pub fn check(
                     SymbolKind::FieldDef => "field",
                     _ => unreachable!(),
                 };
-                let name = service.lookup_ident(*name);
+                let name = name.ident(service);
                 symbols.iter().map(move |symbol| Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(
                         line_index,
@@ -81,7 +80,7 @@ pub fn check(
                             .filter(|other| *other != symbol)
                             .map(|symbol| DiagnosticRelatedInformation {
                                 location: Location {
-                                    uri: service.lookup_uri(uri),
+                                    uri: uri.raw(service),
                                     range: helpers::rowan_range_to_lsp_range(
                                         line_index,
                                         get_ident_range(symbol, root),
@@ -122,7 +121,7 @@ pub fn check(
                             .filter(|other| *other != range)
                             .map(|range| DiagnosticRelatedInformation {
                                 location: Location {
-                                    uri: service.lookup_uri(uri),
+                                    uri: uri.raw(service),
                                     range: helpers::rowan_range_to_lsp_range(line_index, *range),
                                 },
                                 message: format!("already exported here as `{name}`"),

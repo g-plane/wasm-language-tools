@@ -1,10 +1,9 @@
 use crate::{
+    LanguageService,
     binder::{SymbolKind, SymbolTable},
     config::LintLevel,
-    helpers,
-    mutability::{MutabilitiesCtx, MutationActionKind},
-    uri::InternUri,
-    LanguageService,
+    document::Document,
+    helpers, mutability,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, DiagnosticTag, Union2};
@@ -15,7 +14,7 @@ pub fn check(
     service: &LanguageService,
     diagnostics: &mut Vec<Diagnostic>,
     lint_level: LintLevel,
-    uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
 ) {
@@ -26,10 +25,9 @@ pub fn check(
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
 
-    let mutation_actions = service.mutation_actions(uri);
+    let mutation_actions = mutability::get_mutation_actions(service, document);
     diagnostics.extend(
-        service
-            .mutabilities(uri)
+        mutability::get_mutabilities(service, document)
             .iter()
             .filter(|(key, mutability)| {
                 mutability.mut_keyword.is_some()
@@ -37,7 +35,7 @@ pub fn check(
                     && mutation_actions
                         .values()
                         .filter(|action| action.target.is_some_and(|target| target == **key))
-                        .all(|action| action.kind == MutationActionKind::Get)
+                        .all(|action| action.kind == mutability::MutationActionKind::Get)
             })
             .filter_map(|(key, mutability)| {
                 symbol_table

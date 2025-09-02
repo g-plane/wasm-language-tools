@@ -1,24 +1,20 @@
 use crate::{
-    binder::{SymbolKind, SymbolTablesCtx},
-    helpers,
-    idx::IdentsCtx,
-    syntax_tree::SyntaxTreeCtx,
-    types_analyzer::TypesAnalyzerCtx,
-    uri::UrisCtx,
     LanguageService,
+    binder::{SymbolKind, SymbolTable},
+    helpers, types_analyzer,
 };
 use lspt::{InlayHint, InlayHintKind, InlayHintParams, Union2};
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::SyntaxKind;
 
 impl LanguageService {
     /// Handler for `textDocument/inlayHint` request.
     pub fn inlay_hint(&self, params: InlayHintParams) -> Option<Vec<InlayHint>> {
-        let uri = self.uri(params.text_document.uri);
-        let line_index = self.line_index(uri);
-        let root = SyntaxNode::new_root(self.root(uri));
-        let symbol_table = self.symbol_table(uri);
+        let document = self.get_document(params.text_document.uri)?;
+        let line_index = document.line_index(self);
+        let root = document.root_tree(self);
+        let symbol_table = SymbolTable::of(self, document);
 
-        let range = helpers::lsp_range_to_rowan_range(&line_index, params.range)?;
+        let range = helpers::lsp_range_to_rowan_range(line_index, params.range)?;
         let inlay_hints = symbol_table
             .symbols
             .iter()
@@ -28,10 +24,10 @@ impl LanguageService {
                         return None;
                     }
                     let param_or_local = symbol_table.find_param_or_local_def(symbol.key)?;
-                    let ty = self.extract_type(param_or_local.green.clone())?;
+                    let ty = types_analyzer::extract_type(self, param_or_local.green.clone())?;
                     Some(InlayHint {
                         position: helpers::rowan_pos_to_lsp_pos(
-                            &line_index,
+                            line_index,
                             symbol.key.text_range().end(),
                         ),
                         label: Union2::A(ty.render(self).to_string()),
@@ -48,10 +44,10 @@ impl LanguageService {
                         return None;
                     }
                     let global = symbol_table.find_def(symbol.key)?;
-                    let ty = self.extract_global_type(global.green.clone())?;
+                    let ty = types_analyzer::extract_global_type(self, global.green.clone())?;
                     Some(InlayHint {
                         position: helpers::rowan_pos_to_lsp_pos(
-                            &line_index,
+                            line_index,
                             symbol.key.text_range().end(),
                         ),
                         label: Union2::A(ty.render(self).to_string()),
@@ -70,8 +66,8 @@ impl LanguageService {
                         .filter(|last| range.contains_range(*last))
                         .zip(symbol.idx.name)
                         .map(|(last, name)| InlayHint {
-                            position: helpers::rowan_pos_to_lsp_pos(&line_index, last.end()),
-                            label: Union2::A(format!("(func {})", self.lookup_ident(name))),
+                            position: helpers::rowan_pos_to_lsp_pos(line_index, last.end()),
+                            label: Union2::A(format!("(func {})", name.ident(self))),
                             kind: None,
                             text_edits: None,
                             tooltip: None,
@@ -88,7 +84,7 @@ impl LanguageService {
                         .filter(|last| range.contains_range(*last))
                         .zip(symbol.idx.name)
                         .map(|(last, name)| InlayHint {
-                            position: helpers::rowan_pos_to_lsp_pos(&line_index, last.end()),
+                            position: helpers::rowan_pos_to_lsp_pos(line_index, last.end()),
                             label: Union2::A(format!(
                                 "({} {})",
                                 match symbol.key.kind() {
@@ -96,7 +92,7 @@ impl LanguageService {
                                     SyntaxKind::BLOCK_LOOP => "loop",
                                     _ => "block",
                                 },
-                                self.lookup_ident(name)
+                                name.ident(self),
                             )),
                             kind: None,
                             text_edits: None,
@@ -110,10 +106,10 @@ impl LanguageService {
                     if !range.contains_range(symbol.key.text_range()) {
                         return None;
                     }
-                    self.resolve_field_type(uri, symbol.key, symbol.region)
+                    types_analyzer::resolve_field_type(self, document, symbol.key, symbol.region)
                         .map(|ty| InlayHint {
                             position: helpers::rowan_pos_to_lsp_pos(
-                                &line_index,
+                                line_index,
                                 symbol.key.text_range().end(),
                             ),
                             label: Union2::A(ty.render(self).to_string()),

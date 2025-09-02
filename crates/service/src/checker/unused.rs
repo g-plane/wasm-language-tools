@@ -1,8 +1,6 @@
 use crate::{
     binder::{Symbol, SymbolKind, SymbolTable},
-    helpers,
-    idx::IdentsCtx,
-    LanguageService, LintLevel,
+    helpers, LanguageService, LintLevel,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, DiagnosticTag, Union2};
@@ -132,7 +130,7 @@ fn is_prefixed_with_underscore(service: &LanguageService, symbol: &Symbol) -> bo
     symbol
         .idx
         .name
-        .is_some_and(|name| service.lookup_ident(name).starts_with("$_"))
+        .is_some_and(|name| name.ident(service).starts_with("$_"))
 }
 
 fn is_used(symbol_table: &SymbolTable, def_symbol: &Symbol, ref_kind: SymbolKind) -> bool {

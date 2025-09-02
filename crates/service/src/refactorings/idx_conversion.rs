@@ -1,9 +1,8 @@
 use crate::{
+    LanguageService,
     binder::{SymbolKey, SymbolTable},
     helpers,
-    idx::IdentsCtx,
-    uri::{InternUri, UrisCtx},
-    LanguageService,
+    uri::InternUri,
 };
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
@@ -19,7 +18,7 @@ pub fn act(
     node: &SyntaxNode,
 ) -> Option<CodeAction> {
     let ref_key = SymbolKey::new(node);
-    let ref_idx = &symbol_table
+    let ref_idx = symbol_table
         .symbols
         .iter()
         .find(|symbol| symbol.key == ref_key)?
@@ -44,14 +43,14 @@ pub fn act(
         )
     } else {
         (
-            service.lookup_ident(def_name).to_string(),
+            def_name.ident(service).to_string(),
             "Convert numeric idx to identifier".into(),
         )
     };
 
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
-        service.lookup_uri(uri),
+        uri.raw(service),
         vec![TextEdit {
             range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
             new_text,

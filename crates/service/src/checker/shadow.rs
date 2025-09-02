@@ -1,13 +1,13 @@
 use crate::{
+    LanguageService, LintLevel,
     binder::{Symbol, SymbolKind, SymbolTable},
     helpers,
-    idx::{IdentsCtx, Idx},
-    uri::{InternUri, UrisCtx},
-    LanguageService, LintLevel,
+    idx::Idx,
+    uri::InternUri,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
-use rowan::{ast::support::token, TextRange};
+use rowan::{TextRange, ast::support::token};
 use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
@@ -63,7 +63,7 @@ pub fn check(
             .into_iter()
             .filter(|(_, ranges)| !ranges.is_empty())
             .map(|((symbol, name), ranges)| {
-                let name = service.lookup_ident(name);
+                let name = name.ident(service);
                 Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(
                         line_index,
@@ -78,7 +78,7 @@ pub fn check(
                             .into_iter()
                             .map(|range| DiagnosticRelatedInformation {
                                 location: Location {
-                                    uri: service.lookup_uri(uri),
+                                    uri: uri.raw(service),
                                     range: helpers::rowan_range_to_lsp_range(line_index, range),
                                 },
                                 message: format!("`{name}` shadowing occurs here"),

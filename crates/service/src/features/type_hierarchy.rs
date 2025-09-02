@@ -1,16 +1,12 @@
 use crate::{
-    binder::{SymbolKind, SymbolTablesCtx},
-    helpers,
-    syntax_tree::SyntaxTreeCtx,
-    types_analyzer::TypesAnalyzerCtx,
-    uri::UrisCtx,
     LanguageService,
+    binder::{SymbolKind, SymbolTable},
+    helpers, types_analyzer,
 };
 use lspt::{
     SymbolKind as LspSymbolKind, TypeHierarchyItem, TypeHierarchyPrepareParams,
     TypeHierarchySubtypesParams, TypeHierarchySupertypesParams,
 };
-use wat_syntax::SyntaxNode;
 
 impl LanguageService {
     /// Handler for `textDocument/prepareTypeHierarchy` request.
@@ -18,12 +14,12 @@ impl LanguageService {
         &self,
         params: TypeHierarchyPrepareParams,
     ) -> Option<Vec<TypeHierarchyItem>> {
-        let uri = self.uri(params.text_document.uri.clone());
-        let line_index = self.line_index(uri);
-        let root = SyntaxNode::new_root(self.root(uri));
-        let symbol_table = self.symbol_table(uri);
+        let document = self.get_document(&params.text_document.uri)?;
+        let line_index = document.line_index(self);
+        let root = document.root_tree(self);
+        let symbol_table = SymbolTable::of(self, document);
 
-        let token = super::find_meaningful_token(self, uri, &root, params.position)?;
+        let token = super::find_meaningful_token(self, document, &root, params.position)?;
         let parent_range = token.parent()?.text_range();
 
         symbol_table
@@ -38,14 +34,10 @@ impl LanguageService {
                         detail: helpers::infer_type_def_symbol_detail(symbol, &root),
                         uri: params.text_document.uri.clone(),
                         range: helpers::rowan_range_to_lsp_range(
-                            &line_index,
+                            line_index,
                             symbol.key.text_range(),
                         ),
-                        selection_range: helpers::create_selection_range(
-                            symbol,
-                            &root,
-                            &line_index,
-                        ),
+                        selection_range: helpers::create_selection_range(symbol, &root, line_index),
                         data: None,
                     }])
                 }
@@ -58,13 +50,11 @@ impl LanguageService {
                             detail: helpers::infer_type_def_symbol_detail(symbol, &root),
                             uri: params.text_document.uri.clone(),
                             range: helpers::rowan_range_to_lsp_range(
-                                &line_index,
+                                line_index,
                                 symbol.key.text_range(),
                             ),
                             selection_range: helpers::create_selection_range(
-                                symbol,
-                                &root,
-                                &line_index,
+                                symbol, &root, line_index,
                             ),
                             data: None,
                         }]
@@ -79,13 +69,13 @@ impl LanguageService {
         &self,
         params: TypeHierarchySupertypesParams,
     ) -> Option<Vec<TypeHierarchyItem>> {
-        let uri = self.uri(params.item.uri.clone());
-        let root = SyntaxNode::new_root(self.root(uri));
-        let symbol_table = self.symbol_table(uri);
-        let def_types = self.def_types(uri);
+        let document = self.get_document(&params.item.uri)?;
+        let root = document.root_tree(self);
+        let symbol_table = SymbolTable::of(self, document);
+        let def_types = types_analyzer::get_def_types(self, document);
 
-        let line_index = self.line_index(uri);
-        let type_def_range = helpers::lsp_range_to_rowan_range(&line_index, params.item.range)?;
+        let line_index = document.line_index(self);
+        let type_def_range = helpers::lsp_range_to_rowan_range(line_index, params.item.range)?;
         let type_def = symbol_table
             .symbols
             .iter()
@@ -108,8 +98,8 @@ impl LanguageService {
                     tags: None,
                     detail: helpers::infer_type_def_symbol_detail(symbol, &root),
                     uri: params.item.uri,
-                    range: helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range()),
-                    selection_range: helpers::create_selection_range(symbol, &root, &line_index),
+                    range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
+                    selection_range: helpers::create_selection_range(symbol, &root, line_index),
                     data: None,
                 }]
             })
@@ -120,13 +110,13 @@ impl LanguageService {
         &self,
         params: TypeHierarchySubtypesParams,
     ) -> Option<Vec<TypeHierarchyItem>> {
-        let uri = self.uri(params.item.uri.clone());
-        let root = SyntaxNode::new_root(self.root(uri));
-        let symbol_table = self.symbol_table(uri);
-        let def_types = self.def_types(uri);
+        let document = self.get_document(&params.item.uri)?;
+        let root = document.root_tree(self);
+        let symbol_table = SymbolTable::of(self, document);
+        let def_types = types_analyzer::get_def_types(self, document);
 
-        let line_index = self.line_index(uri);
-        let type_def_range = helpers::lsp_range_to_rowan_range(&line_index, params.item.range)?;
+        let line_index = document.line_index(self);
+        let type_def_range = helpers::lsp_range_to_rowan_range(line_index, params.item.range)?;
         let key = symbol_table
             .symbols
             .iter()
@@ -154,8 +144,8 @@ impl LanguageService {
                     tags: None,
                     detail: helpers::infer_type_def_symbol_detail(symbol, &root),
                     uri: params.item.uri.clone(),
-                    range: helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range()),
-                    selection_range: helpers::create_selection_range(symbol, &root, &line_index),
+                    range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
+                    selection_range: helpers::create_selection_range(symbol, &root, line_index),
                     data: None,
                 })
                 .collect(),

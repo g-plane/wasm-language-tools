@@ -1,8 +1,4 @@
-use crate::{
-    helpers,
-    uri::{InternUri, UrisCtx},
-    LanguageService,
-};
+use crate::{helpers, uri::InternUri, LanguageService};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionContext, CodeActionKind, TextEdit, Union2, WorkspaceEdit};
 use rowan::ast::support;
@@ -59,7 +55,7 @@ pub fn act(
         None
     } else {
         let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
-        changes.insert(service.lookup_uri(uri), text_edits);
+        changes.insert(uri.raw(service), text_edits);
         Some(CodeAction {
             title: "Remove `mut`".into(),
             kind: Some(CodeActionKind::QuickFix),

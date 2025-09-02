@@ -1,24 +1,20 @@
 use crate::{
-    binder::{Symbol, SymbolKind, SymbolTablesCtx},
-    helpers,
-    idx::IdentsCtx,
-    syntax_tree::SyntaxTreeCtx,
-    types_analyzer::TypesAnalyzerCtx,
-    uri::UrisCtx,
     LanguageService,
+    binder::{Symbol, SymbolKind, SymbolTable},
+    helpers, types_analyzer,
 };
 use lspt::{DocumentSymbol, DocumentSymbolParams, SymbolKind as LspSymbolKind};
 use rowan::ast::AstNode;
 use rustc_hash::FxHashMap;
-use wat_syntax::{ast::ModuleFieldGlobal, SyntaxKind, SyntaxNode};
+use wat_syntax::{SyntaxKind, ast::ModuleFieldGlobal};
 
 impl LanguageService {
     /// Handler for `textDocument/documentSymbol` request.
     pub fn document_symbol(&self, params: DocumentSymbolParams) -> Option<Vec<DocumentSymbol>> {
-        let uri = self.uri(params.text_document.uri);
-        let line_index = self.line_index(uri);
-        let root = SyntaxNode::new_root(self.root(uri));
-        let symbol_table = self.symbol_table(uri);
+        let document = self.get_document(params.text_document.uri)?;
+        let line_index = document.line_index(self);
+        let root = document.root_tree(self);
+        let symbol_table = SymbolTable::of(self, document);
 
         #[expect(deprecated)]
         let mut symbols_map = symbol_table
@@ -27,7 +23,7 @@ impl LanguageService {
             .filter_map(|symbol| match symbol.kind {
                 SymbolKind::Module => {
                     let module_range =
-                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());
+                        helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
                     Some((
                         symbol.key,
                         DocumentSymbol {
@@ -44,7 +40,7 @@ impl LanguageService {
                 }
                 SymbolKind::Func => {
                     let range =
-                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());
+                        helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
                     Some((
                         symbol.key,
                         DocumentSymbol {
@@ -55,9 +51,7 @@ impl LanguageService {
                             deprecated: None,
                             range,
                             selection_range: helpers::create_selection_range(
-                                symbol,
-                                &root,
-                                &line_index,
+                                symbol, &root, line_index,
                             ),
                             children: None,
                         },
@@ -65,22 +59,19 @@ impl LanguageService {
                 }
                 SymbolKind::Local => {
                     let range =
-                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());
+                        helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
                     Some((
                         symbol.key,
                         DocumentSymbol {
                             name: render_symbol_name(symbol, self),
-                            detail: self
-                                .extract_type(symbol.green.clone())
+                            detail: types_analyzer::extract_type(self, symbol.green.clone())
                                 .map(|ty| ty.render(self).to_string()),
                             kind: LspSymbolKind::Variable,
                             tags: None,
                             deprecated: None,
                             range,
                             selection_range: helpers::create_selection_range(
-                                symbol,
-                                &root,
-                                &line_index,
+                                symbol, &root, line_index,
                             ),
                             children: None,
                         },
@@ -88,7 +79,7 @@ impl LanguageService {
                 }
                 SymbolKind::Type => {
                     let range =
-                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());
+                        helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
                     Some((
                         symbol.key,
                         DocumentSymbol {
@@ -99,9 +90,7 @@ impl LanguageService {
                             deprecated: None,
                             range,
                             selection_range: helpers::create_selection_range(
-                                symbol,
-                                &root,
-                                &line_index,
+                                symbol, &root, line_index,
                             ),
                             children: None,
                         },
@@ -109,30 +98,29 @@ impl LanguageService {
                 }
                 SymbolKind::GlobalDef => {
                     let range =
-                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());
+                        helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
                     Some((
                         symbol.key,
                         DocumentSymbol {
                             name: render_symbol_name(symbol, self),
-                            detail: self.extract_global_type(symbol.green.clone()).map(|ty| {
-                                if ModuleFieldGlobal::cast(symbol.key.to_node(&root))
-                                    .and_then(|global| global.global_type())
-                                    .and_then(|global_type| global_type.mut_keyword())
-                                    .is_some()
-                                {
-                                    format!("(mut {})", ty.render(self))
-                                } else {
-                                    ty.render(self).to_string()
-                                }
-                            }),
+                            detail: types_analyzer::extract_global_type(self, symbol.green.clone())
+                                .map(|ty| {
+                                    if ModuleFieldGlobal::cast(symbol.key.to_node(&root))
+                                        .and_then(|global| global.global_type())
+                                        .and_then(|global_type| global_type.mut_keyword())
+                                        .is_some()
+                                    {
+                                        format!("(mut {})", ty.render(self))
+                                    } else {
+                                        ty.render(self).to_string()
+                                    }
+                                }),
                             kind: LspSymbolKind::Variable,
                             tags: None,
                             deprecated: None,
                             range,
                             selection_range: helpers::create_selection_range(
-                                symbol,
-                                &root,
-                                &line_index,
+                                symbol, &root, line_index,
                             ),
                             children: None,
                         },
@@ -140,7 +128,7 @@ impl LanguageService {
                 }
                 SymbolKind::MemoryDef | SymbolKind::TableDef => {
                     let range =
-                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());
+                        helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
                     Some((
                         symbol.key,
                         DocumentSymbol {
@@ -151,9 +139,7 @@ impl LanguageService {
                             deprecated: None,
                             range,
                             selection_range: helpers::create_selection_range(
-                                symbol,
-                                &root,
-                                &line_index,
+                                symbol, &root, line_index,
                             ),
                             children: None,
                         },
@@ -161,22 +147,24 @@ impl LanguageService {
                 }
                 SymbolKind::FieldDef => {
                     let range =
-                        helpers::rowan_range_to_lsp_range(&line_index, symbol.key.text_range());
+                        helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
                     Some((
                         symbol.key,
                         DocumentSymbol {
                             name: render_symbol_name(symbol, self),
-                            detail: self
-                                .resolve_field_type(uri, symbol.key, symbol.region)
-                                .map(|ty| ty.render(self).to_string()),
+                            detail: types_analyzer::resolve_field_type(
+                                self,
+                                document,
+                                symbol.key,
+                                symbol.region,
+                            )
+                            .map(|ty| ty.render(self).to_string()),
                             kind: LspSymbolKind::Field,
                             tags: None,
                             deprecated: None,
                             range,
                             selection_range: helpers::create_selection_range(
-                                symbol,
-                                &root,
-                                &line_index,
+                                symbol, &root, line_index,
                             ),
                             children: None,
                         },
@@ -231,7 +219,7 @@ impl LanguageService {
 
 fn render_symbol_name(symbol: &Symbol, service: &LanguageService) -> String {
     if let Some(name) = symbol.idx.name {
-        service.lookup_ident(name).to_string()
+        name.ident(service).to_string()
     } else if let Some(num) = symbol.idx.num {
         let kind = match symbol.kind {
             SymbolKind::Func => "func",

@@ -1,19 +1,21 @@
 use super::{
     signature::Signature,
     types::{FieldType, Fields, ValType},
-    TypesAnalyzerCtx,
 };
-use crate::idx::{Idx, IdxGen};
+use crate::idx::{Idx, IdxGen, InternIdent};
 use rowan::{
-    ast::{support, AstNode},
     GreenNode, Language, NodeOrToken,
+    ast::{AstNode, support},
 };
 use wat_syntax::{
-    ast::{Param, Result, StructType, ValType as AstValType},
     SyntaxKind, SyntaxNode, WatLanguage,
+    ast::{Param, Result, StructType, ValType as AstValType},
 };
 
-pub(super) fn extract_type(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<ValType> {
+pub(crate) fn extract_type<'db>(
+    db: &'db dyn salsa::Database,
+    node: GreenNode,
+) -> Option<ValType<'db>> {
     ValType::from_green(&node, db).or_else(|| {
         node.children().find_map(|child| match child {
             NodeOrToken::Node(node)
@@ -26,16 +28,19 @@ pub(super) fn extract_type(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option
     })
 }
 
-pub(super) fn extract_global_type(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Option<ValType> {
+pub(crate) fn extract_global_type<'db>(
+    db: &'db dyn salsa::Database,
+    node: GreenNode,
+) -> Option<ValType<'db>> {
     node.children()
         .find_map(|child| match child {
             NodeOrToken::Node(node) if node.kind() == SyntaxKind::GLOBAL_TYPE.into() => Some(node),
             _ => None,
         })
-        .and_then(|global_type| db.extract_type(global_type.to_owned()))
+        .and_then(|global_type| extract_type(db, global_type.to_owned()))
 }
 
-pub(super) fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Signature {
+pub(crate) fn extract_sig<'db>(db: &'db dyn salsa::Database, node: GreenNode) -> Signature<'db> {
     let root = SyntaxNode::new_root(node);
     let params = support::children::<Param>(&root).fold(vec![], |mut acc, param| {
         if let Some((ty, ident)) = param
@@ -44,7 +49,7 @@ pub(super) fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Signatu
             .and_then(|ty| ValType::from_ast(&ty, db))
             .zip(param.ident_token())
         {
-            acc.push((ty, Some(db.ident(ident.text().into()))));
+            acc.push((ty, Some(InternIdent::new(db, ident.text()))));
         } else {
             acc.extend(
                 param
@@ -62,7 +67,10 @@ pub(super) fn extract_sig(db: &dyn TypesAnalyzerCtx, node: GreenNode) -> Signatu
     Signature { params, results }
 }
 
-pub(super) fn extract_fields(db: &dyn TypesAnalyzerCtx, struct_ty: &StructType) -> Fields {
+pub(super) fn extract_fields<'db>(
+    db: &'db dyn salsa::Database,
+    struct_ty: &StructType,
+) -> Fields<'db> {
     let mut field_idx_gen = IdxGen::default();
     Fields(struct_ty.fields().fold(vec![], |mut acc, field| {
         if let Some((ty, ident)) = field
@@ -75,7 +83,7 @@ pub(super) fn extract_fields(db: &dyn TypesAnalyzerCtx, struct_ty: &StructType) 
                 ty,
                 Idx {
                     num: Some(field_idx_gen.pull()),
-                    name: Some(db.ident(ident.text().into())),
+                    name: Some(InternIdent::new(db, ident.text())),
                 },
             ));
         } else {

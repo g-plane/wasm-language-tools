@@ -1,19 +1,19 @@
-use crate::LanguageService;
-use salsa::{InternId, InternKey};
-use std::{fmt, sync::Arc};
+use std::fmt;
 use wat_syntax::ast::Immediate;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct Idx {
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, salsa::Update)]
+pub struct Idx<'db> {
     pub num: Option<u32>,
-    pub name: Option<InternIdent>,
+    pub name: Option<InternIdent<'db>>,
 }
 
-impl Idx {
-    pub fn from_immediate(immediate: &Immediate, db: &dyn IdentsCtx) -> Self {
+impl<'db> Idx<'db> {
+    pub fn from_immediate(immediate: &Immediate, db: &'db dyn salsa::Database) -> Self {
         Idx {
             num: immediate.int().and_then(|int| int.text().parse().ok()),
-            name: immediate.ident().map(|ident| db.ident(ident.text().into())),
+            name: immediate
+                .ident()
+                .map(|ident| InternIdent::new(db, ident.text())),
         }
     }
 
@@ -53,19 +53,22 @@ impl Idx {
         }
     }
 
-    pub fn render<'a>(&'a self, service: &'a LanguageService) -> IdxRender<'a> {
-        IdxRender { idx: self, service }
+    pub fn render(&self, service: &'db dyn salsa::Database) -> IdxRender<'db> {
+        IdxRender {
+            idx: *self,
+            service,
+        }
     }
 }
 
-pub(crate) struct IdxRender<'a> {
-    pub idx: &'a Idx,
-    pub service: &'a LanguageService,
+pub(crate) struct IdxRender<'db> {
+    pub idx: Idx<'db>,
+    pub service: &'db dyn salsa::Database,
 }
 impl fmt::Display for IdxRender<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(name) = &self.idx.name {
-            self.service.lookup_ident(*name).fmt(f)
+            name.ident(self.service).fmt(f)
         } else if let Some(num) = self.idx.num {
             num.fmt(f)
         } else {
@@ -74,21 +77,10 @@ impl fmt::Display for IdxRender<'_> {
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-pub(crate) struct InternIdent(InternId);
-impl InternKey for InternIdent {
-    fn from_intern_id(v: salsa::InternId) -> Self {
-        InternIdent(v)
-    }
-    fn as_intern_id(&self) -> InternId {
-        self.0
-    }
-}
-
-#[salsa::query_group(Idents)]
-pub(crate) trait IdentsCtx {
-    #[salsa::interned]
-    fn ident(&self, ident: Arc<str>) -> InternIdent;
+#[salsa::interned(debug)]
+pub(crate) struct InternIdent<'db> {
+    #[returns(ref)]
+    pub(crate) ident: String,
 }
 
 #[derive(Default)]

@@ -1,22 +1,20 @@
-use crate::{
-    binder::SymbolTable, helpers, types_analyzer::TypesAnalyzerCtx, uri::InternUri, LanguageService,
-};
+use crate::{LanguageService, binder::SymbolTable, document::Document, helpers, types_analyzer};
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use rowan::ast::AstNode;
-use wat_syntax::{ast::TypeDef, SyntaxNode};
+use wat_syntax::{SyntaxNode, ast::TypeDef};
 
 const DIAGNOSTIC_CODE: &str = "subtyping";
 
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
-    uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
 ) {
-    let def_types = service.def_types(uri);
+    let def_types = types_analyzer::get_def_types(service, document);
     diagnostics.extend(
         def_types
             .iter()
@@ -58,7 +56,7 @@ pub fn check(
                     ))
                 } else if !sub_type
                     .comp
-                    .matches(&super_type.comp, service, uri, module_id)
+                    .matches(&super_type.comp, service, document, module_id)
                 {
                     Some((
                         sub_type.key,

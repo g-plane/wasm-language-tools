@@ -1,9 +1,10 @@
 use crate::{
+    LanguageService,
     binder::{Symbol, SymbolKey, SymbolTable},
+    document::Document,
     helpers,
-    types_analyzer::{CompositeType, DefType, FieldType, Fields, StorageType, TypesAnalyzerCtx},
+    types_analyzer::{self, CompositeType, DefType, FieldType, Fields, StorageType},
     uri::InternUri,
-    LanguageService, UrisCtx,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
@@ -16,6 +17,7 @@ pub fn check(
     service: &LanguageService,
     diagnostics: &mut Vec<Diagnostic>,
     uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
@@ -23,9 +25,9 @@ pub fn check(
     let instr_name = support::token(node, SyntaxKind::INSTR_NAME)?;
     match instr_name.text() {
         "struct.get" => {
-            let def_types = service.def_types(uri);
+            let def_types = types_analyzer::get_def_types(service, document);
             if let Some((_, symbol)) =
-                find_struct_field(symbol_table, &def_types, node).filter(|(ty, _)| ty.is_packed())
+                find_struct_field(symbol_table, def_types, node).filter(|(ty, _)| ty.is_packed())
             {
                 diagnostics.push(Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
@@ -35,7 +37,7 @@ pub fn check(
                     message: format!("field `{}` is packed", symbol.idx.render(service)),
                     related_information: Some(vec![DiagnosticRelatedInformation {
                         location: Location {
-                            uri: service.lookup_uri(uri),
+                            uri: uri.raw(service),
                             range: helpers::rowan_range_to_lsp_range(
                                 line_index,
                                 instr_name.text_range(),
@@ -48,9 +50,9 @@ pub fn check(
             }
         }
         "struct.get_s" | "struct.get_u" => {
-            let def_types = service.def_types(uri);
+            let def_types = types_analyzer::get_def_types(service, document);
             if let Some((_, symbol)) =
-                find_struct_field(symbol_table, &def_types, node).filter(|(ty, _)| !ty.is_packed())
+                find_struct_field(symbol_table, def_types, node).filter(|(ty, _)| !ty.is_packed())
             {
                 diagnostics.push(Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
@@ -60,7 +62,7 @@ pub fn check(
                     message: format!("field `{}` is unpacked", symbol.idx.render(service)),
                     related_information: Some(vec![DiagnosticRelatedInformation {
                         location: Location {
-                            uri: service.lookup_uri(uri),
+                            uri: uri.raw(service),
                             range: helpers::rowan_range_to_lsp_range(
                                 line_index,
                                 instr_name.text_range(),
@@ -73,9 +75,9 @@ pub fn check(
             }
         }
         "array.get" => {
-            let def_types = service.def_types(uri);
+            let def_types = types_analyzer::get_def_types(service, document);
             if let Some((_, symbol)) =
-                find_array(symbol_table, &def_types, node).filter(|(ty, _)| ty.is_packed())
+                find_array(symbol_table, def_types, node).filter(|(ty, _)| ty.is_packed())
             {
                 diagnostics.push(Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
@@ -85,7 +87,7 @@ pub fn check(
                     message: format!("array `{}` is packed", symbol.idx.render(service)),
                     related_information: Some(vec![DiagnosticRelatedInformation {
                         location: Location {
-                            uri: service.lookup_uri(uri),
+                            uri: uri.raw(service),
                             range: helpers::rowan_range_to_lsp_range(
                                 line_index,
                                 instr_name.text_range(),
@@ -98,9 +100,9 @@ pub fn check(
             }
         }
         "array.get_s" | "array.get_u" => {
-            let def_types = service.def_types(uri);
+            let def_types = types_analyzer::get_def_types(service, document);
             if let Some((_, symbol)) =
-                find_array(symbol_table, &def_types, node).filter(|(ty, _)| !ty.is_packed())
+                find_array(symbol_table, def_types, node).filter(|(ty, _)| !ty.is_packed())
             {
                 diagnostics.push(Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
@@ -110,7 +112,7 @@ pub fn check(
                     message: format!("array `{}` is unpacked", symbol.idx.render(service)),
                     related_information: Some(vec![DiagnosticRelatedInformation {
                         location: Location {
-                            uri: service.lookup_uri(uri),
+                            uri: uri.raw(service),
                             range: helpers::rowan_range_to_lsp_range(
                                 line_index,
                                 instr_name.text_range(),
@@ -127,11 +129,11 @@ pub fn check(
     Some(())
 }
 
-fn find_struct_field<'a>(
-    symbol_table: &'a SymbolTable,
-    def_types: &'a [DefType],
+fn find_struct_field<'a, 'db>(
+    symbol_table: &'a SymbolTable<'db>,
+    def_types: &'a [DefType<'db>],
     node: &SyntaxNode,
-) -> Option<(&'a StorageType, &'a Symbol)> {
+) -> Option<(&'a StorageType<'db>, &'a Symbol<'db>)> {
     let mut immediates = node
         .children()
         .filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
@@ -156,11 +158,11 @@ fn find_struct_field<'a>(
     }
 }
 
-fn find_array<'a>(
-    symbol_table: &'a SymbolTable,
-    def_types: &'a [DefType],
+fn find_array<'a, 'db>(
+    symbol_table: &'a SymbolTable<'db>,
+    def_types: &'a [DefType<'db>],
     node: &SyntaxNode,
-) -> Option<(&'a StorageType, &'a Symbol)> {
+) -> Option<(&'a StorageType<'db>, &'a Symbol<'db>)> {
     let ref_key = SymbolKey::new(
         &node
             .children()

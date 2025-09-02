@@ -1,19 +1,19 @@
-use crate::{helpers, syntax_tree::SyntaxTreeCtx, uri::UrisCtx, LanguageService};
+use crate::{helpers, LanguageService};
 use lspt::{FoldingRange, FoldingRangeKind, FoldingRangeParams};
 use rowan::ast::support::token;
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::SyntaxKind;
 
 impl LanguageService {
     /// Handler for `textDocument/foldingRange` request.
     pub fn folding_range(&self, params: FoldingRangeParams) -> Option<Vec<FoldingRange>> {
-        let uri = self.uri(params.text_document.uri);
-        let line_index = self.line_index(uri);
-        let root = SyntaxNode::new_root(self.root(uri));
+        let document = self.get_document(params.text_document.uri)?;
+        let line_index = document.line_index(self);
+        let root = document.root_tree(self);
         let folding_ranges = root
             .descendants()
             .filter_map(|node| {
                 token(&node, SyntaxKind::KEYWORD).or_else(|| token(&node, SyntaxKind::L_PAREN))?;
-                let range = helpers::rowan_range_to_lsp_range(&line_index, node.text_range());
+                let range = helpers::rowan_range_to_lsp_range(line_index, node.text_range());
                 if range.start.line == range.end.line {
                     None
                 } else {

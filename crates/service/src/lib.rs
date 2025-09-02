@@ -4,38 +4,31 @@ mod binder;
 mod checker;
 mod config;
 mod data_set;
+mod document;
 mod features;
 mod helpers;
 mod idx;
 mod mutability;
 mod refactorings;
-mod syntax_tree;
 mod types_analyzer;
 mod uri;
 
-use self::features::SemanticTokenKind;
 pub use crate::config::*;
-use crate::{
-    binder::SymbolTables,
-    idx::Idents,
-    mutability::Mutabilities,
-    syntax_tree::{SyntaxTree, SyntaxTreeCtx},
-    types_analyzer::TypesAnalyzer,
-    uri::{Uris, UrisCtx},
-};
+use crate::{document::Document, features::SemanticTokenKind, uri::InternUri};
 use indexmap::{IndexMap, IndexSet};
 use lspt::{
-    notification::DidChangeConfigurationNotification, CodeActionKind, CodeActionOptions,
-    CompletionOptions, DiagnosticOptions, InitializeParams, InitializeResult, Registration,
-    RegistrationParams, RenameOptions, SemanticTokensClientCapabilities, SemanticTokensLegend,
-    SemanticTokensOptions, ServerCapabilities, ServerInfo, SignatureHelpOptions,
-    TextDocumentClientCapabilities, TextDocumentSyncKind, TextDocumentSyncOptions, Union2, Union3,
+    CodeActionKind, CodeActionOptions, CompletionOptions, DiagnosticOptions, InitializeParams,
+    InitializeResult, Registration, RegistrationParams, RenameOptions,
+    SemanticTokensClientCapabilities, SemanticTokensLegend, SemanticTokensOptions,
+    ServerCapabilities, ServerInfo, SignatureHelpOptions, TextDocumentClientCapabilities,
+    TextDocumentSyncKind, TextDocumentSyncOptions, Union2, Union3,
+    notification::DidChangeConfigurationNotification,
 };
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use salsa::{Database, ParallelDatabase, Snapshot};
+use salsa::{Database, Setter};
 
-#[salsa::database(Uris, Idents, SyntaxTree, SymbolTables, TypesAnalyzer, Mutabilities)]
-#[derive(Default)]
+#[salsa::db]
+#[derive(Clone, Default)]
 /// The language service comes with handlers for LSP requests.
 ///
 /// The language service only does computation.
@@ -46,25 +39,14 @@ use salsa::{Database, ParallelDatabase, Snapshot};
 ///
 /// To create a language service instance, you should call `LanguageService::default()`,
 /// not the `initialize` method.
-///
-/// ​
 pub struct LanguageService {
     storage: salsa::Storage<Self>,
     semantic_token_kinds: IndexSet<SemanticTokenKind, FxBuildHasher>,
-    configs: FxHashMap<crate::uri::InternUri, ServiceConfig>,
+    documents: FxHashMap<InternUri, Document>,
     global_config: ServiceConfig,
 }
+#[salsa::db]
 impl Database for LanguageService {}
-impl ParallelDatabase for LanguageService {
-    fn snapshot(&self) -> Snapshot<Self> {
-        Snapshot::new(LanguageService {
-            storage: self.storage.snapshot(),
-            semantic_token_kinds: self.semantic_token_kinds.clone(),
-            configs: self.configs.clone(),
-            global_config: self.global_config.clone(),
-        })
-    }
-}
 
 impl LanguageService {
     /// This method isn't used to create language service instance.
@@ -185,22 +167,24 @@ impl LanguageService {
 
     #[inline]
     // This should be used internally.
-    fn get_config(&self, uri: crate::uri::InternUri) -> &ServiceConfig {
-        self.configs.get(&uri).unwrap_or(&self.global_config)
+    fn get_config(&self, document: Document) -> &ServiceConfig {
+        document.config(self).unwrap_or(&self.global_config)
     }
 
     #[inline]
     /// Get configurations of all opened documents.
     pub fn get_configs(&self) -> impl Iterator<Item = (String, &ServiceConfig)> {
-        self.configs
-            .iter()
-            .map(|(uri, config)| (self.lookup_uri(*uri), config))
+        self.documents.iter().filter_map(|(uri, document)| {
+            document.config(self).map(|config| (uri.raw(self), config))
+        })
     }
 
     #[inline]
     /// Update or insert configuration of a specific document.
     pub fn set_config(&mut self, uri: String, config: ServiceConfig) {
-        self.configs.insert(self.uri(uri), config);
+        if let Some(document) = self.get_document(uri) {
+            document.set_config(self).to(Some(config));
+        }
     }
 
     #[inline]
@@ -225,14 +209,7 @@ impl LanguageService {
     #[inline]
     /// Check if the current request is cancelled.
     pub fn is_cancelled(&self) -> bool {
-        self.storage.salsa_runtime().is_current_revision_canceled()
-    }
-
-    #[inline]
-    /// Fork to create a read-only language service snapshot
-    /// which can be used in a different thread or async context.
-    pub fn fork(&self) -> Snapshot<Self> {
-        self.snapshot()
+        false
     }
 }
 
@@ -246,6 +223,7 @@ mod tests {
         assert_eq!(service.get_configs().count(), 0);
 
         let uri = "untitled://test".to_string();
+        service.commit(uri.clone(), "".into());
         service.set_config(uri.clone(), ServiceConfig::default());
         assert_eq!(service.get_configs().next().unwrap().0, uri);
     }

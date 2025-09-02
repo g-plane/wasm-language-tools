@@ -1,17 +1,18 @@
 use crate::{
+    LanguageService,
     binder::{Symbol, SymbolKey, SymbolTable},
+    document::Document,
     helpers,
     types_analyzer::{
-        resolve_br_types, CompositeType, DefType, FieldType, OperandType, RefType,
-        TypesAnalyzerCtx, ValType,
+        CompositeType, DefType, FieldType, OperandType, RefType, ValType, get_def_types,
+        resolve_br_types,
     },
     uri::InternUri,
-    LanguageService, UrisCtx,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
-use rowan::ast::{support, AstNode};
-use wat_syntax::{ast::Immediate, SyntaxKind, SyntaxNode};
+use rowan::ast::{AstNode, support};
+use wat_syntax::{SyntaxKind, SyntaxNode, ast::Immediate};
 
 const DIAGNOSTIC_CODE: &str = "type-misuse";
 
@@ -19,12 +20,13 @@ pub fn check(
     service: &LanguageService,
     diagnostics: &mut Vec<Diagnostic>,
     uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
 ) -> Option<()> {
-    let def_types = service.def_types(uri);
+    let def_types = get_def_types(service, document);
     let instr_name = support::token(node, SyntaxKind::INSTR_NAME)?;
     let instr_name = instr_name.text();
     match instr_name.split_once('.') {
@@ -36,7 +38,7 @@ pub fn check(
                 uri,
                 line_index,
                 symbol_table,
-                &def_types,
+                def_types,
             ) {
                 diagnostics.push(diagnostic);
             }
@@ -89,7 +91,7 @@ pub fn check(
 
             match (dst_type, src_type) {
                 (Some(FieldType { storage: dst, .. }), Some(FieldType { storage: src, .. }))
-                    if !src.matches(dst, service, uri, module_id) =>
+                    if !src.matches(dst, service, document, module_id) =>
                 {
                     diagnostics.push(Diagnostic {
                         range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
@@ -104,7 +106,7 @@ pub fn check(
                         related_information: Some(vec![
                             DiagnosticRelatedInformation {
                                 location: Location {
-                                    uri: service.lookup_uri(uri),
+                                    uri: uri.raw(service),
                                     range: helpers::rowan_range_to_lsp_range(
                                         line_index,
                                         dst_symbol.key.text_range(),
@@ -114,7 +116,7 @@ pub fn check(
                             },
                             DiagnosticRelatedInformation {
                                 location: Location {
-                                    uri: service.lookup_uri(uri),
+                                    uri: uri.raw(service),
                                     range: helpers::rowan_range_to_lsp_range(
                                         line_index,
                                         src_symbol.key.text_range(),
@@ -137,7 +139,7 @@ pub fn check(
                 uri,
                 line_index,
                 symbol_table,
-                &def_types,
+                def_types,
             ) {
                 diagnostics.push(diagnostic);
             }
@@ -151,7 +153,7 @@ pub fn check(
                     uri,
                     line_index,
                     symbol_table,
-                    &def_types,
+                    def_types,
                 ) {
                     diagnostics.push(diagnostic);
                 }
@@ -159,7 +161,7 @@ pub fn check(
             "br_on_cast" => {
                 let mut immediates = support::children::<Immediate>(node);
                 let label = immediates.next()?;
-                let label_types = resolve_br_types(service, uri, symbol_table, &label);
+                let label_types = resolve_br_types(service, document, symbol_table, &label);
                 let rt_label =
                     if let Some(OperandType::Val(ValType::Ref(rt_label))) = label_types.last() {
                         rt_label
@@ -181,7 +183,7 @@ pub fn check(
                 let rt1 = RefType::from_green(&rt1_node.ref_type()?.syntax().green(), service)?;
                 let rt2_node = immediates.next()?;
                 let rt2 = RefType::from_green(&rt2_node.ref_type()?.syntax().green(), service)?;
-                if !rt2.matches(&rt1, service, uri, module_id) {
+                if !rt2.matches(&rt1, service, document, module_id) {
                     diagnostics.push(Diagnostic {
                         range: helpers::rowan_range_to_lsp_range(
                             line_index,
@@ -197,7 +199,7 @@ pub fn check(
                         ),
                         related_information: Some(vec![DiagnosticRelatedInformation {
                             location: Location {
-                                uri: service.lookup_uri(uri),
+                                uri: uri.raw(service),
                                 range: helpers::rowan_range_to_lsp_range(
                                     line_index,
                                     rt1_node.syntax().text_range(),
@@ -208,7 +210,7 @@ pub fn check(
                         ..Default::default()
                     });
                 }
-                if !rt2.matches(rt_label, service, uri, module_id) {
+                if !rt2.matches(rt_label, service, document, module_id) {
                     diagnostics.push(Diagnostic {
                         range: helpers::rowan_range_to_lsp_range(
                             line_index,
@@ -224,7 +226,7 @@ pub fn check(
                         ),
                         related_information: Some(vec![DiagnosticRelatedInformation {
                             location: Location {
-                                uri: service.lookup_uri(uri),
+                                uri: uri.raw(service),
                                 range: helpers::rowan_range_to_lsp_range(
                                     line_index,
                                     label.syntax().text_range(),
@@ -241,7 +243,7 @@ pub fn check(
             "br_on_cast_fail" => {
                 let mut immediates = support::children::<Immediate>(node);
                 let label = immediates.next()?;
-                let label_types = resolve_br_types(service, uri, symbol_table, &label);
+                let label_types = resolve_br_types(service, document, symbol_table, &label);
                 let rt_label =
                     if let Some(OperandType::Val(ValType::Ref(rt_label))) = label_types.last() {
                         rt_label
@@ -263,7 +265,7 @@ pub fn check(
                 let rt1 = RefType::from_green(&rt1_node.ref_type()?.syntax().green(), service)?;
                 let rt2_node = immediates.next()?;
                 let rt2 = RefType::from_green(&rt2_node.ref_type()?.syntax().green(), service)?;
-                if !rt2.matches(&rt1, service, uri, module_id) {
+                if !rt2.matches(&rt1, service, document, module_id) {
                     diagnostics.push(Diagnostic {
                         range: helpers::rowan_range_to_lsp_range(
                             line_index,
@@ -279,7 +281,7 @@ pub fn check(
                         ),
                         related_information: Some(vec![DiagnosticRelatedInformation {
                             location: Location {
-                                uri: service.lookup_uri(uri),
+                                uri: uri.raw(service),
                                 range: helpers::rowan_range_to_lsp_range(
                                     line_index,
                                     rt1_node.syntax().text_range(),
@@ -291,7 +293,7 @@ pub fn check(
                     });
                 }
                 let rt_diff = rt1.diff(&rt2);
-                if !rt_diff.matches(rt_label, service, uri, module_id) {
+                if !rt_diff.matches(rt_label, service, document, module_id) {
                     diagnostics.push(Diagnostic {
                         range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
                         severity: Some(DiagnosticSeverity::Error),
@@ -304,7 +306,7 @@ pub fn check(
                         ),
                         related_information: Some(vec![DiagnosticRelatedInformation {
                             location: Location {
-                                uri: service.lookup_uri(uri),
+                                uri: uri.raw(service),
                                 range: helpers::rowan_range_to_lsp_range(
                                     line_index,
                                     label.syntax().text_range(),
@@ -377,7 +379,7 @@ fn build_diagnostic(
         ),
         related_information: Some(vec![DiagnosticRelatedInformation {
             location: Location {
-                uri: service.lookup_uri(uri),
+                uri: uri.raw(service),
                 range: helpers::rowan_range_to_lsp_range(line_index, def_symbol.key.text_range()),
             },
             message: format!("{actual_kind} type defined here"),

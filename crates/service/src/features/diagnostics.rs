@@ -1,4 +1,4 @@
-use crate::{checker, uri::UrisCtx, LanguageService};
+use crate::{LanguageService, checker};
 use lspt::{
     DocumentDiagnosticParams, PublishDiagnosticsParams, RelatedFullDocumentDiagnosticReport,
 };
@@ -9,7 +9,10 @@ impl LanguageService {
         &self,
         params: DocumentDiagnosticParams,
     ) -> RelatedFullDocumentDiagnosticReport {
-        let diagnostics = checker::check(self, self.uri(params.text_document.uri));
+        let diagnostics = self
+            .get_document(params.text_document.uri)
+            .map(|document| checker::check(self, document))
+            .unwrap_or_default();
         RelatedFullDocumentDiagnosticReport {
             kind: "full".into(),
             result_id: None,
@@ -20,9 +23,13 @@ impl LanguageService {
 
     /// Handler for `textDocument/publishDiagnostics` notification.
     pub fn publish_diagnostics(&self, uri: String) -> PublishDiagnosticsParams {
+        let diagnostics = self
+            .get_document(&uri)
+            .map(|document| checker::check(self, document))
+            .unwrap_or_default();
         PublishDiagnosticsParams {
-            uri: uri.clone(),
-            diagnostics: checker::check(self, self.uri(uri)),
+            uri,
+            diagnostics,
             version: None,
         }
     }

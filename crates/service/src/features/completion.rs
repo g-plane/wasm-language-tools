@@ -1,11 +1,11 @@
 use crate::{
-    binder::{SymbolKey, SymbolKind, SymbolTablesCtx},
-    data_set, helpers,
-    idx::Idx,
-    syntax_tree::SyntaxTreeCtx,
-    types_analyzer::{self, CompositeType, Fields, OperandType, TypesAnalyzerCtx, ValType},
-    uri::{InternUri, UrisCtx},
     LanguageService,
+    binder::{SymbolKey, SymbolKind, SymbolTable},
+    data_set,
+    document::Document,
+    helpers,
+    idx::Idx,
+    types_analyzer::{self, CompositeType, Fields, OperandType, ValType},
 };
 use itertools::Itertools;
 use line_index::LineIndex;
@@ -14,28 +14,30 @@ use lspt::{
     MarkupContent, MarkupKind, TextEdit, Union2,
 };
 use rowan::{
-    ast::{support, AstNode},
     Direction,
+    ast::{AstNode, support},
 };
 use smallvec::SmallVec;
 use wat_syntax::{
-    ast::{PlainInstr, TableType},
     SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken,
+    ast::{PlainInstr, TableType},
 };
 
 impl LanguageService {
     /// Handler for `textDocument/completion` request.
     pub fn completion(&self, params: CompletionParams) -> Option<Vec<CompletionItem>> {
-        let uri = self.uri(params.text_document.uri);
-        let line_index = self.line_index(uri);
-        let root = SyntaxNode::new_root(self.root(uri));
+        let document = self.get_document(params.text_document.uri)?;
+        let line_index = document.line_index(self);
+        let root = document.root_tree(self);
         let token = helpers::ast::find_token(
             &root,
-            helpers::lsp_pos_to_rowan_pos(&line_index, params.position)?,
+            helpers::lsp_pos_to_rowan_pos(line_index, params.position)?,
         )?;
 
         let cmp_ctx = get_cmp_ctx(&token)?;
-        Some(get_cmp_list(self, cmp_ctx, &token, uri, &line_index, &root))
+        Some(get_cmp_list(
+            self, cmp_ctx, &token, document, line_index, &root,
+        ))
     }
 }
 
@@ -587,11 +589,11 @@ fn get_cmp_list(
     service: &LanguageService,
     ctx: SmallVec<[CmpCtx; 4]>,
     token: &SyntaxToken,
-    uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     root: &SyntaxNode,
 ) -> Vec<CompletionItem> {
-    let symbol_table = service.symbol_table(uri);
+    let symbol_table = SymbolTable::of(service, document);
     ctx.into_iter()
         .fold(Vec::with_capacity(2), |mut items, ctx| {
             match ctx {
@@ -668,7 +670,7 @@ fn get_cmp_list(
                         return items;
                     };
                     let func = SymbolKey::new(&func);
-                    let preferred_type = guess_preferred_type(service, uri, token);
+                    let preferred_type = guess_preferred_type(service, document, token);
                     items.extend(
                         symbol_table
                             .symbols
@@ -679,7 +681,8 @@ fn get_cmp_list(
                             })
                             .map(|symbol| {
                                 let label = symbol.idx.render(service).to_string();
-                                let ty = service.extract_type(symbol.green.clone());
+                                let ty =
+                                    types_analyzer::extract_type(service, symbol.green.clone());
                                 CompletionItem {
                                     label: label.clone(),
                                     kind: Some(CompletionItemKind::Variable),
@@ -694,17 +697,21 @@ fn get_cmp_list(
                                             new_text: label,
                                         }))
                                     },
-                                    label_details: ty.map(|ty| CompletionItemLabelDetails {
-                                        description: Some(ty.render(service).to_string()),
-                                        ..Default::default()
-                                    }),
-                                    sort_text: preferred_type.zip(ty).map(|(expected, it)| {
-                                        if expected == it {
-                                            "0".into()
-                                        } else {
-                                            "1".into()
+                                    label_details: ty.as_ref().map(|ty| {
+                                        CompletionItemLabelDetails {
+                                            description: Some(ty.render(service).to_string()),
+                                            ..Default::default()
                                         }
                                     }),
+                                    sort_text: preferred_type.as_ref().zip(ty.as_ref()).map(
+                                        |(expected, it)| {
+                                            if expected == it {
+                                                "0".into()
+                                            } else {
+                                                "1".into()
+                                            }
+                                        },
+                                    ),
                                     ..Default::default()
                                 }
                             }),
@@ -734,18 +741,26 @@ fn get_cmp_list(
                                         new_text: label,
                                     }))
                                 },
-                                detail: Some(service.render_func_header(
+                                detail: Some(types_analyzer::render_func_header(
+                                    service,
                                     symbol.idx.name,
-                                    service.get_func_sig(uri, symbol.key, symbol.green.clone()),
+                                    types_analyzer::get_func_sig(
+                                        service,
+                                        document,
+                                        symbol.key,
+                                        symbol.green.clone(),
+                                    ),
                                 )),
                                 label_details: Some(CompletionItemLabelDetails {
-                                    description: Some(
-                                        service.render_compact_sig(
-                                            service
-                                                .get_func_sig(uri, symbol.key, symbol.green.clone())
-                                                .unwrap_or_default(),
+                                    description: Some(types_analyzer::render_compact_sig(
+                                        service,
+                                        types_analyzer::get_func_sig(
+                                            service,
+                                            document,
+                                            symbol.key,
+                                            symbol.green.clone(),
                                         ),
-                                    ),
+                                    )),
                                     ..Default::default()
                                 }),
                                 documentation: Some(Union2::B(MarkupContent {
@@ -764,7 +779,7 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
-                    let def_types = service.def_types(uri);
+                    let def_types = types_analyzer::get_def_types(service, document);
                     items.extend(symbol_table.get_declared(module, SymbolKind::Type).map(
                         |symbol| {
                             let label = symbol.idx.render(service).to_string();
@@ -815,13 +830,16 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
-                    let preferred_type = guess_preferred_type(service, uri, token);
+                    let preferred_type = guess_preferred_type(service, document, token);
                     items.extend(
                         symbol_table
                             .get_declared(module, SymbolKind::GlobalDef)
                             .map(|symbol| {
                                 let label = symbol.idx.render(service).to_string();
-                                let ty = service.extract_global_type(symbol.green.clone());
+                                let ty = types_analyzer::extract_global_type(
+                                    service,
+                                    symbol.green.clone(),
+                                );
                                 CompletionItem {
                                     label: label.clone(),
                                     kind: Some(CompletionItemKind::Variable),
@@ -836,17 +854,21 @@ fn get_cmp_list(
                                             new_text: label,
                                         }))
                                     },
-                                    label_details: ty.map(|ty| CompletionItemLabelDetails {
-                                        description: Some(ty.render(service).to_string()),
-                                        ..Default::default()
-                                    }),
-                                    sort_text: preferred_type.zip(ty).map(|(expected, it)| {
-                                        if expected == it {
-                                            "0".into()
-                                        } else {
-                                            "1".into()
+                                    label_details: ty.as_ref().map(|ty| {
+                                        CompletionItemLabelDetails {
+                                            description: Some(ty.render(service).to_string()),
+                                            ..Default::default()
                                         }
                                     }),
+                                    sort_text: preferred_type.as_ref().zip(ty.as_ref()).map(
+                                        |(expected, it)| {
+                                            if expected == it {
+                                                "0".into()
+                                            } else {
+                                                "1".into()
+                                            }
+                                        },
+                                    ),
                                     ..Default::default()
                                 }
                             }),
@@ -944,7 +966,8 @@ fn get_cmp_list(
                                 };
                                 let label = idx.render(service).to_string();
                                 let block_node = symbol.key.to_node(root);
-                                let sig = types_analyzer::get_block_sig(service, uri, &block_node);
+                                let sig =
+                                    types_analyzer::get_block_sig(service, document, &block_node);
                                 CompletionItem {
                                     label: label.clone(),
                                     kind: Some(CompletionItemKind::Variable),
@@ -962,17 +985,15 @@ fn get_cmp_list(
                                     label_details: Some(CompletionItemLabelDetails {
                                         description: Some(format!(
                                             "[{}]",
-                                            sig.as_ref()
-                                                .map(|sig| sig
-                                                    .results
-                                                    .iter()
-                                                    .map(|result| result.render(service))
-                                                    .join(", "))
-                                                .unwrap_or_default()
+                                            sig.results
+                                                .iter()
+                                                .map(|result| result.render(service))
+                                                .join(", ")
                                         )),
                                         ..Default::default()
                                     }),
-                                    detail: Some(service.render_block_header(
+                                    detail: Some(types_analyzer::render_block_header(
+                                        service,
                                         symbol.key.kind(),
                                         idx.name,
                                         sig,
@@ -983,7 +1004,7 @@ fn get_cmp_list(
                     );
                 }
                 CmpCtx::Field(struct_ref_key) => {
-                    let def_types = service.def_types(uri);
+                    let def_types = types_analyzer::get_def_types(service, document);
                     if let Some(CompositeType::Struct(Fields(fields))) = symbol_table
                         .find_def(struct_ref_key)
                         .and_then(|symbol| {
@@ -1184,11 +1205,11 @@ fn is_l_paren(token: &SyntaxToken) -> bool {
     kind == SyntaxKind::L_PAREN || kind == SyntaxKind::ERROR && token.text() == "("
 }
 
-fn guess_preferred_type(
-    service: &LanguageService,
-    uri: InternUri,
+fn guess_preferred_type<'db>(
+    service: &'db dyn salsa::Database,
+    document: Document,
     token: &SyntaxToken,
-) -> Option<ValType> {
+) -> Option<ValType<'db>> {
     token
         .parent_ancestors()
         .find(|node| node.kind() == SyntaxKind::PLAIN_INSTR)
@@ -1201,9 +1222,9 @@ fn guess_preferred_type(
                 .children()
                 .filter(|child| child.kind() == SyntaxKind::PLAIN_INSTR)
                 .position(|instr| instr == parent_instr)?;
-            let types = types_analyzer::resolve_param_types(service, uri, &grand_instr)?;
+            let types = types_analyzer::resolve_param_types(service, document, &grand_instr)?;
             if let Some(OperandType::Val(val_type)) = types.get(index) {
-                Some(*val_type)
+                Some(val_type.clone())
             } else {
                 None
             }

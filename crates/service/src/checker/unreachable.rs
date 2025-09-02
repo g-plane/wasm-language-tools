@@ -1,15 +1,16 @@
 use crate::{
+    LintLevel,
     binder::{SymbolKey, SymbolTable},
-    helpers, LintLevel,
+    helpers,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, DiagnosticTag, Union2};
-use rowan::{ast::AstNode, TextRange};
+use rowan::{TextRange, ast::AstNode};
 use rustc_hash::FxHashSet;
 use std::ops::ControlFlow;
 use wat_syntax::{
-    ast::{BlockInstr, Instr},
     SyntaxKind, SyntaxNode, SyntaxToken,
+    ast::{BlockInstr, Instr},
 };
 
 const DIAGNOSTIC_CODE: &str = "unreachable";
@@ -40,17 +41,17 @@ pub fn check(
     .check_block_like(node);
 }
 
-struct Checker<'a> {
+struct Checker<'a, 'db> {
     diagnostics: &'a mut Vec<Diagnostic>,
-    line_index: &'a LineIndex,
-    symbol_table: &'a SymbolTable,
+    line_index: &'db LineIndex,
+    symbol_table: &'db SymbolTable<'db>,
     root: &'a SyntaxNode,
     severity: DiagnosticSeverity,
     start_jumps: FxHashSet<SyntaxNode>,
     end_jumps: FxHashSet<SyntaxNode>,
     last_reported: TextRange,
 }
-impl Checker<'_> {
+impl Checker<'_, '_> {
     fn check_block_like(&mut self, node: &SyntaxNode) -> bool {
         let mut unreachable = false;
         let result = node

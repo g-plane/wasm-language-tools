@@ -1,34 +1,32 @@
 use crate::{
-    binder::{Symbol, SymbolKey, SymbolTablesCtx},
-    helpers,
-    idx::{IdentsCtx, Idx},
-    syntax_tree::SyntaxTreeCtx,
-    types_analyzer::{TypesAnalyzerCtx, ValType},
-    uri::UrisCtx,
     LanguageService,
+    binder::{Symbol, SymbolKey, SymbolTable},
+    helpers,
+    idx::Idx,
+    types_analyzer::{self, ValType},
 };
 use lspt::{
     MarkupContent, MarkupKind, ParameterInformation, SignatureHelp, SignatureHelpParams,
     SignatureInformation, Union2,
 };
-use rowan::{ast::AstNode, Direction};
+use rowan::{Direction, ast::AstNode};
 use std::fmt::Write;
 use wat_syntax::{
+    SyntaxElement, SyntaxKind, SyntaxNodePtr,
     ast::{Instr, PlainInstr},
-    SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodePtr,
 };
 
 impl LanguageService {
     /// Handler for `textDocument/signatureHelp` request.
     pub fn signature_help(&self, params: SignatureHelpParams) -> Option<SignatureHelp> {
-        let uri = self.uri(params.text_document.uri);
-        let line_index = self.line_index(uri);
-        let root = SyntaxNode::new_root(self.root(uri));
-        let symbol_table = self.symbol_table(uri);
+        let document = self.get_document(params.text_document.uri)?;
+        let line_index = document.line_index(self);
+        let root = document.root_tree(self);
+        let symbol_table = SymbolTable::of(self, document);
 
         let token = helpers::ast::find_token(
             &root,
-            helpers::lsp_pos_to_rowan_pos(&line_index, params.position)?,
+            helpers::lsp_pos_to_rowan_pos(line_index, params.position)?,
         )?;
         let (node, instr, is_next) = if token.kind() == SyntaxKind::ERROR {
             (
@@ -52,8 +50,7 @@ impl LanguageService {
                 let first_immediate = parent_instr.immediates().next()?;
                 let func = symbol_table.find_def(SymbolKey::new(first_immediate.syntax()))?;
                 (
-                    self.get_func_sig(uri, func.key, func.green.clone())
-                        .unwrap_or_default(),
+                    types_analyzer::get_func_sig(self, document, func.key, func.green.clone()),
                     Some(func),
                 )
             }
@@ -62,9 +59,12 @@ impl LanguageService {
                     .immediates()
                     .find_map(|immediate| immediate.type_use())?;
                 let type_use = type_use.syntax();
-                let mut sig = self
-                    .get_type_use_sig(uri, SyntaxNodePtr::new(type_use), type_use.green().into())
-                    .unwrap_or_default();
+                let mut sig = types_analyzer::get_type_use_sig(
+                    self,
+                    document,
+                    SyntaxNodePtr::new(type_use),
+                    type_use.green().into(),
+                );
                 sig.params.push((ValType::I32, None));
                 (sig, None)
             }
@@ -81,7 +81,7 @@ impl LanguageService {
         }) = func
         {
             label.push(' ');
-            label.push_str(&self.lookup_ident(*name));
+            label.push_str(name.ident(self));
         }
         if !signature.params.is_empty() || !signature.results.is_empty() {
             label.push(' ');
@@ -94,7 +94,7 @@ impl LanguageService {
                 label.push_str("(param");
                 if let Some(name) = param.1 {
                     label.push(' ');
-                    label.push_str(&self.lookup_ident(name));
+                    label.push_str(name.ident(self));
                 }
                 label.push(' ');
                 let _ = write!(label, "{}", param.0.render(self));

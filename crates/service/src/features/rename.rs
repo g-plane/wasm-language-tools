@@ -1,18 +1,16 @@
-use super::find_meaningful_token;
 use crate::{
-    binder::{SymbolKey, SymbolKind, SymbolTablesCtx},
-    helpers,
-    idx::IdentsCtx,
-    syntax_tree::SyntaxTreeCtx,
-    uri::UrisCtx,
     LanguageService,
+    binder::{SymbolKey, SymbolKind, SymbolTable},
+    document::Document,
+    helpers,
+    idx::InternIdent,
 };
 use lspt::{PrepareRenameParams, PrepareRenameResult, RenameParams, TextEdit, WorkspaceEdit};
 use rowan::ast::support;
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_parser::is_id_char;
-use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
+use wat_syntax::{SyntaxKind, SyntaxToken};
 
 const ERR_INVALID_IDENTIFIER: &str = "not a valid identifier";
 const ERR_CANT_BE_RENAMED: &str = "This can't be renamed.";
@@ -20,12 +18,12 @@ const ERR_CANT_BE_RENAMED: &str = "This can't be renamed.";
 impl LanguageService {
     /// Handler for `textDocument/prepareRename` request.
     pub fn prepare_rename(&self, params: PrepareRenameParams) -> Option<PrepareRenameResult> {
-        let uri = self.uri(params.text_document.uri);
-        let line_index = self.line_index(uri);
-        let root = SyntaxNode::new_root(self.root(uri));
-        let token = find_meaningful_token(self, uri, &root, params.position)
+        let document = self.get_document(params.text_document.uri)?;
+        let line_index = document.line_index(self);
+        let root = document.root_tree(self);
+        let token = super::find_meaningful_token(self, document, &root, params.position)
             .filter(|token| token.kind() == SyntaxKind::IDENT)?;
-        let range = helpers::rowan_range_to_lsp_range(&line_index, token.text_range());
+        let range = helpers::rowan_range_to_lsp_range(line_index, token.text_range());
         Some(PrepareRenameResult::A(range))
     }
 
@@ -42,26 +40,32 @@ impl LanguageService {
             ));
         }
 
-        let uri = self.uri(params.text_document.uri.clone());
+        let Some(document) = self.get_document(&params.text_document.uri) else {
+            return Ok(None);
+        };
         // We can't assume client supports "prepareRename" so we need to check the token again.
-        let token = find_meaningful_token(
+        let token = super::find_meaningful_token(
             self,
-            uri,
-            &SyntaxNode::new_root(self.root(uri)),
+            document,
+            &document.root_tree(self),
             params.position,
         )
         .filter(|token| token.kind() == SyntaxKind::IDENT)
         .ok_or_else(|| ERR_CANT_BE_RENAMED.to_owned())?;
-        Ok(self.rename_impl(params, token))
+        Ok(self.rename_impl(params, document, token))
     }
 
-    fn rename_impl(&self, params: RenameParams, ident_token: SyntaxToken) -> Option<WorkspaceEdit> {
-        let uri = self.uri(params.text_document.uri.clone());
-        let line_index = self.line_index(uri);
-        let root = SyntaxNode::new_root(self.root(uri));
-        let symbol_table = self.symbol_table(uri);
+    fn rename_impl(
+        &self,
+        params: RenameParams,
+        document: Document,
+        ident_token: SyntaxToken,
+    ) -> Option<WorkspaceEdit> {
+        let line_index = document.line_index(self);
+        let root = document.root_tree(self);
+        let symbol_table = SymbolTable::of(self, document);
 
-        let old_name = self.ident(ident_token.text().into());
+        let old_name = InternIdent::new(self, ident_token.text());
         let symbol_key = SymbolKey::new(&ident_token.parent()?);
         let symbol = symbol_table
             .symbols
@@ -113,7 +117,7 @@ impl LanguageService {
             })
             .filter_map(|sym| support::token(&sym.key.to_node(&root), SyntaxKind::IDENT))
             .map(|token| TextEdit {
-                range: helpers::rowan_range_to_lsp_range(&line_index, token.text_range()),
+                range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
                 new_text: params.new_name.clone(),
             })
             .collect();

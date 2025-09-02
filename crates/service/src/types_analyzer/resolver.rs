@@ -1,76 +1,73 @@
 use super::{
-    def_type::{CompositeType, DefType},
-    signature::get_block_sig,
+    def_type::{CompositeType, DefType, get_def_types},
+    signature::{get_block_sig, get_func_sig},
     types::{FieldType, Fields, OperandType},
-    TypesAnalyzerCtx,
 };
 use crate::{
-    binder::{SymbolKey, SymbolKind, SymbolTable, SymbolTablesCtx},
+    binder::{SymbolKey, SymbolKind, SymbolTable},
     data_set::INSTR_SIG,
+    document::Document,
     idx::Idx,
-    syntax_tree::SyntaxTreeCtx,
-    uri::InternUri,
-    LanguageService,
 };
-use rowan::ast::{support, AstNode};
-use wat_syntax::{ast::Immediate, SyntaxKind, SyntaxNode};
+use rowan::ast::{AstNode, support};
+use wat_syntax::{SyntaxKind, SyntaxNode, ast::Immediate};
 
-pub(crate) fn resolve_param_types(
-    service: &LanguageService,
-    uri: InternUri,
+pub(crate) fn resolve_param_types<'db>(
+    service: &'db dyn salsa::Database,
+    document: Document,
     instr: &SyntaxNode,
-) -> Option<Vec<OperandType>> {
+) -> Option<Vec<OperandType<'db>>> {
     debug_assert!(instr.kind() == SyntaxKind::PLAIN_INSTR);
     let instr_name = support::token(instr, SyntaxKind::INSTR_NAME)?;
     let instr_name = instr_name.text();
     if matches!(instr_name, "call" | "return_call") {
-        let symbol_table = service.symbol_table(uri);
+        let symbol_table = SymbolTable::of(service, document);
         let idx = instr
             .children()
             .find(|child| child.kind() == SyntaxKind::IMMEDIATE)?;
         let func = symbol_table.find_def(SymbolKey::new(&idx))?;
-        service
-            .get_func_sig(uri, func.key, func.green.clone())
-            .map(|sig| {
-                sig.params
-                    .iter()
-                    .map(|(ty, ..)| OperandType::Val(*ty))
-                    .collect()
-            })
+        Some(
+            get_func_sig(service, document, func.key, func.green.clone())
+                .params
+                .into_iter()
+                .map(|(ty, ..)| OperandType::Val(ty))
+                .collect(),
+        )
     } else {
         INSTR_SIG.get(instr_name).map(|sig| sig.params.clone())
     }
 }
 
-pub(crate) fn resolve_br_types(
-    service: &LanguageService,
-    uri: InternUri,
-    symbol_table: &SymbolTable,
+pub(crate) fn resolve_br_types<'db>(
+    service: &'db dyn salsa::Database,
+    document: Document,
+    symbol_table: &'db SymbolTable<'db>,
     immediate: &Immediate,
-) -> Vec<OperandType> {
+) -> Vec<OperandType<'db>> {
     let key = SymbolKey::new(immediate.syntax());
     symbol_table
         .blocks
         .iter()
         .find(|block| block.ref_key == key)
-        .and_then(|block| {
+        .map(|block| {
             get_block_sig(
                 service,
-                uri,
-                &block
-                    .def_key
-                    .to_node(&SyntaxNode::new_root(service.root(uri))),
+                document,
+                &block.def_key.to_node(&document.root_tree(service)),
             )
+            .results
+            .into_iter()
+            .map(OperandType::Val)
+            .collect()
         })
-        .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
         .unwrap_or_default()
 }
 
-pub(crate) fn resolve_array_type_with_idx(
+pub(crate) fn resolve_array_type_with_idx<'db>(
     symbol_table: &SymbolTable,
-    def_types: &[DefType],
+    def_types: &[DefType<'db>],
     immediate: &Immediate,
-) -> Option<(Idx, Option<OperandType>)> {
+) -> Option<(Idx<'db>, Option<OperandType<'db>>)> {
     symbol_table
         .find_def(SymbolKey::new(immediate.syntax()))
         .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
@@ -86,14 +83,14 @@ pub(crate) fn resolve_array_type_with_idx(
         })
 }
 
-pub(super) fn resolve_field_type(
-    db: &dyn TypesAnalyzerCtx,
-    uri: InternUri,
+pub(crate) fn resolve_field_type<'db>(
+    db: &'db dyn salsa::Database,
+    document: Document,
     key: SymbolKey,
     region: SymbolKey,
-) -> Option<FieldType> {
-    let symbol_table = db.symbol_table(uri);
-    let def_types = db.def_types(uri);
+) -> Option<FieldType<'db>> {
+    let symbol_table = SymbolTable::of(db, document);
+    let def_types = get_def_types(db, document);
     let symbol = symbol_table
         .symbols
         .iter()
@@ -125,20 +122,20 @@ pub(super) fn resolve_field_type(
     }
 }
 
-pub(crate) fn resolve_field_type_with_struct_idx(
-    service: &LanguageService,
-    uri: InternUri,
+pub(crate) fn resolve_field_type_with_struct_idx<'db>(
+    service: &'db dyn salsa::Database,
+    document: Document,
     struct_ref: &Immediate,
     field_ref: &Immediate,
-) -> Option<(Idx, Option<OperandType>)> {
-    let symbol_table = service.symbol_table(uri);
+) -> Option<(Idx<'db>, Option<OperandType<'db>>)> {
+    let symbol_table = SymbolTable::of(service, document);
     let struct_def_symbol = symbol_table.find_def(SymbolKey::new(struct_ref.syntax()))?;
-    let ty = service
-        .resolve_field_type(
-            uri,
-            SymbolKey::new(field_ref.syntax()),
-            struct_def_symbol.key,
-        )
-        .map(|ty| ty.into());
+    let ty = resolve_field_type(
+        service,
+        document,
+        SymbolKey::new(field_ref.syntax()),
+        struct_def_symbol.key,
+    )
+    .map(|ty| ty.into());
     Some((struct_def_symbol.idx, ty))
 }

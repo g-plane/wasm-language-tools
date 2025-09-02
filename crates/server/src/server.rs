@@ -1,9 +1,12 @@
 use crate::{
-    message::{try_cast_notification, try_cast_request, Message, ResponseError},
+    message::{Message, ResponseError, try_cast_notification, try_cast_request},
     sent::SentRequests,
     stdio,
 };
 use lspt::{
+    ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams,
+    DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams,
+    TextDocumentContentChangeWholeDocument, Union2,
     notification::{
         DidChangeConfigurationNotification, DidChangeTextDocumentNotification,
         DidOpenTextDocumentNotification, ExitNotification, Notification as _,
@@ -20,11 +23,8 @@ use lspt::{
         SignatureHelpRequest, TypeDefinitionRequest, TypeHierarchyPrepareRequest,
         TypeHierarchySubtypesRequest, TypeHierarchySupertypesRequest,
     },
-    ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams,
-    DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams,
-    TextDocumentContentChangeWholeDocument, Union2,
 };
-use std::{io::StdinLock, ops::Deref, thread};
+use std::{io::StdinLock, thread};
 use wat_service::LanguageService;
 
 #[derive(Default)]
@@ -55,7 +55,7 @@ impl Server {
             match message {
                 Message::Request { id, method, params } => {
                     thread::spawn({
-                        let service = self.service.fork();
+                        let service = self.service.clone();
                         move || stdio::write(Self::handle_request(service, id, method, params))
                     });
                 }
@@ -139,7 +139,7 @@ impl Server {
     }
 
     fn handle_request(
-        service: impl Deref<Target = LanguageService>,
+        service: LanguageService,
         id: u32,
         method: String,
         params: serde_json::Value,

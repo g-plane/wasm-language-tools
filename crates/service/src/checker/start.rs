@@ -1,21 +1,20 @@
 use crate::{
-    binder::{SymbolKey, SymbolTable},
-    helpers,
-    types_analyzer::TypesAnalyzerCtx,
-    uri::InternUri,
     LanguageService,
+    binder::{SymbolKey, SymbolTable},
+    document::Document,
+    helpers, types_analyzer,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, Union2};
-use rowan::ast::{support, AstNode};
-use wat_syntax::{ast::Index, SyntaxNode};
+use rowan::ast::{AstNode, support};
+use wat_syntax::{SyntaxNode, ast::Index};
 
 const DIAGNOSTIC_CODE: &str = "start";
 
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
-    uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
@@ -26,7 +25,7 @@ pub fn check(
     let index = index.syntax();
     if symbol_table
         .find_def(SymbolKey::new(index))
-        .and_then(|func| service.get_func_sig(uri, func.key, func.green.clone()))
+        .map(|func| types_analyzer::get_func_sig(service, document, func.key, func.green.clone()))
         .is_some_and(|sig| !sig.params.is_empty() || !sig.results.is_empty())
     {
         diagnostics.push(Diagnostic {

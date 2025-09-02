@@ -1,25 +1,21 @@
 use super::{
-    extractor::extract_fields,
+    extractor::{extract_fields, extract_sig},
     signature::Signature,
     types::{FieldType, Fields, HeapType, RefType, StorageType, ValType},
-    TypesAnalyzerCtx,
 };
 use crate::{
     binder::{SymbolKey, SymbolKind, SymbolTable},
-    idx::Idx,
-    uri::InternUri,
+    document::Document,
+    idx::{Idx, InternIdent},
 };
-use rowan::{ast::AstNode, TextRange};
-use std::sync::Arc;
-use wat_syntax::{
-    ast::{CompType, ModuleField, Root, TypeDef},
-    SyntaxNode,
-};
+use rowan::{TextRange, ast::AstNode};
+use wat_syntax::ast::{CompType, ModuleField, Root, TypeDef};
 
-pub(super) fn create_def_types(db: &dyn TypesAnalyzerCtx, uri: InternUri) -> Arc<Vec<DefType>> {
-    let root = SyntaxNode::new_root(db.root(uri));
-    let symbol_table = db.symbol_table(uri);
-    let types = symbol_table
+#[salsa::tracked(returns(ref))]
+pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Vec<DefType<'_>> {
+    let root = document.root_tree(db);
+    let symbol_table = SymbolTable::of(db, document);
+    symbol_table
         .symbols
         .iter()
         .filter(|symbol| symbol.kind == SymbolKind::Type)
@@ -41,14 +37,14 @@ pub(super) fn create_def_types(db: &dyn TypesAnalyzerCtx, uri: InternUri) -> Arc
                                         .and_then(|int| int.text().parse().ok()),
                                     name: index
                                         .ident_token()
-                                        .map(|ident| db.ident(ident.text().into())),
+                                        .map(|ident| InternIdent::new(db, ident.text())),
                                 },
                             });
                 }
             }
             let comp = match node.sub_type()?.comp_type()? {
                 CompType::Func(func_type) => {
-                    CompositeType::Func(db.extract_sig(func_type.syntax().green().into()))
+                    CompositeType::Func(extract_sig(db, func_type.syntax().green().into()))
                 }
                 CompType::Struct(struct_type) => {
                     CompositeType::Struct(extract_fields(db, &struct_type))
@@ -67,33 +63,32 @@ pub(super) fn create_def_types(db: &dyn TypesAnalyzerCtx, uri: InternUri) -> Arc
                 comp,
             })
         })
-        .collect();
-    Arc::new(types)
+        .collect()
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct DefType {
+#[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
+pub(crate) struct DefType<'db> {
     pub key: SymbolKey,
-    pub idx: Idx,
+    pub idx: Idx<'db>,
     pub is_final: bool,
-    pub inherits: Option<Inherits>,
-    pub comp: CompositeType,
+    pub inherits: Option<Inherits<'db>>,
+    pub comp: CompositeType<'db>,
 }
-impl DefType {
+impl<'db> DefType<'db> {
     pub(crate) fn type_equals(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
-        if !self.comp.type_equals(&other.comp, db, uri, module_id) {
+        if !self.comp.type_equals(&other.comp, db, document, module_id) {
             return false;
         }
         if self.is_final != other.is_final {
             return false;
         }
-        let def_types = db.def_types(uri);
+        let def_types = get_def_types(db, document);
         match (
             self.inherits
                 .as_ref()
@@ -104,14 +99,14 @@ impl DefType {
                 .and_then(|b| def_types.iter().find(|def_type| def_type.key == b.symbol)),
         ) {
             (Some(a), Some(b)) => {
-                if !a.type_equals(b, db, uri, module_id) {
+                if !a.type_equals(b, db, document, module_id) {
                     return false;
                 }
             }
             (None, None) => {}
             _ => return false,
         }
-        let rec_type_groups = db.rec_type_groups(uri);
+        let rec_type_groups = get_rec_type_groups(db, document);
         if let Some(((a_group, a_index), (b_group, b_index))) = rec_type_groups
             .iter()
             .find_map(|group| {
@@ -129,40 +124,42 @@ impl DefType {
                     .map(|i| (group, i))
             }))
         {
-            a_index == b_index && a_group.type_equals(b_group, db, uri, module_id)
+            a_index == b_index && a_group.type_equals(b_group, db, document, module_id)
         } else {
             false
         }
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct Inherits {
+#[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
+pub(crate) struct Inherits<'db> {
     pub(crate) symbol: SymbolKey,
-    pub(crate) idx: Idx,
+    pub(crate) idx: Idx<'db>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) enum CompositeType {
-    Func(Signature),
-    Struct(Fields),
-    Array(Option<FieldType>),
+#[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
+pub(crate) enum CompositeType<'db> {
+    Func(Signature<'db>),
+    Struct(Fields<'db>),
+    Array(Option<FieldType<'db>>),
 }
-impl CompositeType {
+impl<'db> CompositeType<'db> {
     pub(crate) fn matches(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
         match (self, other) {
-            (CompositeType::Func(a), CompositeType::Func(b)) => a.matches(b, db, uri, module_id),
+            (CompositeType::Func(a), CompositeType::Func(b)) => {
+                a.matches(b, db, document, module_id)
+            }
             (CompositeType::Struct(a), CompositeType::Struct(b)) => {
-                a.matches(b, db, uri, module_id)
+                a.matches(b, db, document, module_id)
             }
             (CompositeType::Array(Some(a)), CompositeType::Array(Some(b))) => {
-                a.matches(b, db, uri, module_id)
+                a.matches(b, db, document, module_id)
             }
             _ => false,
         }
@@ -171,33 +168,33 @@ impl CompositeType {
     pub(crate) fn type_equals(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &'db dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
         match (self, other) {
             (CompositeType::Func(a), CompositeType::Func(b)) => {
-                a.type_equals(b, db, uri, module_id)
+                a.type_equals(b, db, document, module_id)
             }
             (CompositeType::Struct(a), CompositeType::Struct(b)) => {
-                a.type_equals(b, db, uri, module_id)
+                a.type_equals(b, db, document, module_id)
             }
             (CompositeType::Array(Some(a)), CompositeType::Array(Some(b))) => {
-                a.type_equals(b, db, uri, module_id)
+                a.type_equals(b, db, document, module_id)
             }
             _ => false,
         }
     }
 }
 
-pub(super) fn create_recursive_types(
-    db: &dyn TypesAnalyzerCtx,
-    uri: InternUri,
-) -> Arc<Vec<RecTypeGroup>> {
-    let root = Root::cast(SyntaxNode::new_root(db.root(uri))).expect("expected root tree");
-    let symbol_table = db.symbol_table(uri);
-    let recursive_types = root
-        .modules()
+#[salsa::tracked(returns(ref))]
+pub(crate) fn get_rec_type_groups<'db>(
+    db: &'db dyn salsa::Database,
+    document: Document,
+) -> Vec<RecTypeGroup> {
+    let root = Root::cast(document.root_tree(db)).expect("expected root tree");
+    let symbol_table = SymbolTable::of(db, document);
+    root.modules()
         .flat_map(|module| module.module_fields())
         .filter_map(|module_field| match module_field {
             ModuleField::Type(type_def) => {
@@ -224,8 +221,7 @@ pub(super) fn create_recursive_types(
             }
             _ => None,
         })
-        .collect();
-    Arc::new(recursive_types)
+        .collect()
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -237,12 +233,12 @@ impl RecTypeGroup {
     pub(crate) fn type_equals(
         &self,
         other: &Self,
-        db: &dyn TypesAnalyzerCtx,
-        uri: InternUri,
+        db: &dyn salsa::Database,
+        document: Document,
         module_id: u32,
     ) -> bool {
-        let symbol_table = db.symbol_table(uri);
-        let def_types = db.def_types(uri);
+        let symbol_table = SymbolTable::of(db, document);
+        let def_types = get_def_types(db, document);
         self.type_defs
             .iter()
             .map(|key| def_types.iter().find(|def_type| def_type.key == *key))
@@ -261,11 +257,10 @@ impl RecTypeGroup {
                         (Some(Inherits { idx: a, .. }), Some(Inherits { idx: b, .. })) => {
                             let mut a = HeapType::Type(*a);
                             let mut b = HeapType::Type(*b);
-                            if substitute_heap_type(&mut a, &symbol_table, module.key, self)
-                                .is_err()
-                                || substitute_heap_type(&mut b, &symbol_table, module.key, other)
+                            if substitute_heap_type(&mut a, symbol_table, module.key, self).is_err()
+                                || substitute_heap_type(&mut b, symbol_table, module.key, other)
                                     .is_err()
-                                || !a.type_equals(&b, db, uri, module_id)
+                                || !a.type_equals(&b, db, document, module_id)
                             {
                                 return false;
                             }
@@ -276,9 +271,9 @@ impl RecTypeGroup {
                     // check whether their composite types equal or not
                     let mut a = a.clone();
                     let mut b = b.clone();
-                    substitute_def_type(&mut a, &symbol_table, module.key, self).is_ok()
-                        && substitute_def_type(&mut b, &symbol_table, module.key, other).is_ok()
-                        && a.comp.type_equals(&b.comp, db, uri, module_id)
+                    substitute_def_type(&mut a, symbol_table, module.key, self).is_ok()
+                        && substitute_def_type(&mut b, symbol_table, module.key, other).is_ok()
+                        && a.comp.type_equals(&b.comp, db, document, module_id)
                 } else {
                     false
                 }
@@ -294,9 +289,9 @@ impl RecTypeGroup {
 /// This case is invalid according to WasmGC spec so this behaivor makes sense.
 /// Additionally, this will prevent typeidx resolution infinite loop,
 /// because this ensures that resolution is backward only.
-fn substitute_def_type(
-    def_type: &mut DefType,
-    symbol_table: &SymbolTable,
+fn substitute_def_type<'db>(
+    def_type: &mut DefType<'db>,
+    symbol_table: &SymbolTable<'db>,
     module: SymbolKey,
     rec_group: &RecTypeGroup,
 ) -> Result<(), ()> {
@@ -339,9 +334,9 @@ fn substitute_def_type(
         }
     }
 }
-fn substitute_heap_type(
-    heap_type: &mut HeapType,
-    symbol_table: &SymbolTable,
+fn substitute_heap_type<'db>(
+    heap_type: &mut HeapType<'db>,
+    symbol_table: &SymbolTable<'db>,
     module: SymbolKey,
     rec_group: &RecTypeGroup,
 ) -> Result<(), ()> {

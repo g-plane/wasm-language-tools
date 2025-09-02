@@ -1,18 +1,19 @@
 use crate::{
-    binder::SymbolTable, helpers, types_analyzer::resolve_br_types, uri::InternUri, LanguageService,
+    LanguageService, binder::SymbolTable, document::Document, helpers,
+    types_analyzer::resolve_br_types,
 };
 use itertools::Itertools;
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use rowan::ast::AstNode;
-use wat_syntax::{ast::PlainInstr, SyntaxNode};
+use wat_syntax::{SyntaxNode, ast::PlainInstr};
 
 const DIAGNOSTIC_CODE: &str = "br-table-branches";
 
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
-    uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
@@ -28,9 +29,9 @@ pub fn check(
     let mut immediates = instr.immediates();
     let expected = immediates
         .next()
-        .map(|immediate| resolve_br_types(service, uri, symbol_table, &immediate))?;
+        .map(|immediate| resolve_br_types(service, document, symbol_table, &immediate))?;
     diagnostics.extend(immediates.filter_map(|immediate| {
-        let received = resolve_br_types(service, uri, symbol_table, &immediate);
+        let received = resolve_br_types(service, document, symbol_table, &immediate);
         if received != expected {
             Some(Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(

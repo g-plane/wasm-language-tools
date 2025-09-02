@@ -17,18 +17,18 @@ mod signature_help;
 mod type_hierarchy;
 
 pub(crate) use self::semantic_tokens::SemanticTokenKind;
-use crate::{helpers, syntax_tree::SyntaxTreeCtx, uri::InternUri, LanguageService};
+use crate::{helpers, document::Document, LanguageService};
 use lspt::Position;
 use rowan::TokenAtOffset;
 use wat_syntax::{SyntaxNode, SyntaxToken};
 
 fn find_meaningful_token(
     service: &LanguageService,
-    uri: InternUri,
+    document: Document,
     root: &SyntaxNode,
     position: Position,
 ) -> Option<SyntaxToken> {
-    let offset = helpers::lsp_pos_to_rowan_pos(&service.line_index(uri), position)?;
+    let offset = helpers::lsp_pos_to_rowan_pos(document.line_index(service), position)?;
 
     match root.token_at_offset(offset) {
         TokenAtOffset::None => None,

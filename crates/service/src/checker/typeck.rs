@@ -1,25 +1,27 @@
 use crate::{
+    LanguageService,
     binder::{SymbolKey, SymbolTable},
-    data_set, helpers,
-    idx::{IdentsCtx, Idx},
+    data_set,
+    document::Document,
+    helpers,
+    idx::{Idx, InternIdent},
     types_analyzer::{
-        get_block_sig, resolve_array_type_with_idx, resolve_br_types,
-        resolve_field_type_with_struct_idx, CompositeType, HeapType, OperandType, RefType,
-        ResolvedSig, TypesAnalyzerCtx, ValType,
+        CompositeType, HeapType, OperandType, RefType, ResolvedSig, ValType, extract_global_type,
+        extract_type, get_block_sig, get_def_types, get_func_sig, get_type_use_sig,
+        operand_type_matches, resolve_array_type_with_idx, resolve_br_types,
+        resolve_field_type_with_struct_idx,
     },
-    uri::{InternUri, UrisCtx},
-    LanguageService, SyntaxTreeCtx,
 };
 use itertools::{EitherOrBoth, Itertools};
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
 use rowan::{
-    ast::{support, AstNode},
     TextRange,
+    ast::{AstNode, support},
 };
 use wat_syntax::{
-    ast::{BlockInstr, ElemList, Import, Instr, ModuleFieldFunc, ModuleFieldTable, PlainInstr},
     SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodePtr,
+    ast::{BlockInstr, ElemList, Import, Instr, ModuleFieldFunc, ModuleFieldTable, PlainInstr},
 };
 
 const DIAGNOSTIC_CODE: &str = "type-check";
@@ -27,26 +29,27 @@ const DIAGNOSTIC_CODE: &str = "type-check";
 pub fn check_func(
     diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
-    uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
 ) {
-    let results = service
-        .get_func_sig(uri, SyntaxNodePtr::new(node), node.green().into())
-        .map(|sig| {
-            sig.results
-                .into_iter()
-                .map(OperandType::Val)
-                .collect::<Vec<_>>()
-        })
-        .unwrap_or_default();
+    let results = get_func_sig(
+        service,
+        document,
+        SyntaxNodePtr::new(node),
+        node.green().into(),
+    )
+    .results
+    .into_iter()
+    .map(OperandType::Val)
+    .collect::<Vec<_>>();
     check_block_like(
         diagnostics,
         &Shared {
             service,
-            uri,
+            document,
             symbol_table,
             line_index,
             module_id,
@@ -60,21 +63,20 @@ pub fn check_func(
 pub fn check_global(
     diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
-    uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
 ) {
-    let ty = service
-        .extract_global_type(node.green().into())
+    let ty = extract_global_type(service, node.green().into())
         .map(OperandType::Val)
         .unwrap_or(OperandType::Any);
     check_block_like(
         diagnostics,
         &Shared {
             service,
-            uri,
+            document,
             symbol_table,
             line_index,
             module_id,
@@ -92,7 +94,7 @@ pub fn check_global(
 pub fn check_table(
     diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
-    uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     module_id: u32,
@@ -116,7 +118,7 @@ pub fn check_table(
         diagnostics,
         &Shared {
             service,
-            uri,
+            document,
             symbol_table,
             line_index,
             module_id,
@@ -134,7 +136,7 @@ pub fn check_table(
 pub fn check_offset(
     diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
-    uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     module_id: u32,
@@ -144,7 +146,7 @@ pub fn check_offset(
         diagnostics,
         &Shared {
             service,
-            uri,
+            document,
             symbol_table,
             line_index,
             module_id,
@@ -158,7 +160,7 @@ pub fn check_offset(
 pub fn check_elem_list(
     diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
-    uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     module_id: u32,
@@ -178,7 +180,7 @@ pub fn check_elem_list(
                 diagnostics,
                 &Shared {
                     service,
-                    uri,
+                    document,
                     symbol_table,
                     line_index,
                     module_id,
@@ -201,11 +203,11 @@ pub fn unfold(node: SyntaxNode, sequence: &mut Vec<Instr>) {
     }
 }
 
-struct Shared<'a> {
-    service: &'a LanguageService,
-    uri: InternUri,
-    symbol_table: &'a SymbolTable,
-    line_index: &'a LineIndex,
+struct Shared<'db> {
+    service: &'db dyn salsa::Database,
+    document: Document,
+    symbol_table: &'db SymbolTable<'db>,
+    line_index: &'db LineIndex,
     module_id: u32,
 }
 
@@ -217,7 +219,7 @@ fn check_block_like(
     expected_results: &[OperandType],
 ) {
     let mut type_stack = TypeStack {
-        uri: shared.uri,
+        document: shared.document,
         service: shared.service,
         line_index: shared.line_index,
         module_id: shared.module_id,
@@ -249,36 +251,27 @@ fn check_block_like(
         }
         Instr::Block(block_instr) => {
             let node = block_instr.syntax();
-            let signature = get_block_sig(shared.service, shared.uri, node);
-            let params = signature.as_ref().map(|signature| &signature.params);
-            if let Some(diagnostic) = params.and_then(|params| {
-                type_stack.check(
-                    &params
-                        .iter()
-                        .map(|(ty, _)| OperandType::Val(*ty))
-                        .collect::<Vec<_>>(),
-                    ReportRange::Instr(&instr),
-                )
-            }) {
+            let signature = get_block_sig(shared.service, shared.document, node);
+            if let Some(diagnostic) = type_stack.check(
+                &signature
+                    .params
+                    .iter()
+                    .map(|(ty, _)| OperandType::Val(ty.clone()))
+                    .collect::<Vec<_>>(),
+                ReportRange::Instr(&instr),
+            ) {
                 diagnostics.push(diagnostic);
             };
-            let init_stack = params
-                .map(|params| {
-                    params
-                        .iter()
-                        .map(|(ty, ..)| (OperandType::Val(*ty), Some(instr.clone())))
-                        .collect()
-                })
-                .unwrap_or_default();
+            let init_stack = signature
+                .params
+                .into_iter()
+                .map(|(ty, ..)| (OperandType::Val(ty), Some(instr.clone())))
+                .collect();
             let results = signature
-                .map(|signature| {
-                    signature
-                        .results
-                        .into_iter()
-                        .map(OperandType::Val)
-                        .collect::<Vec<_>>()
-                })
-                .unwrap_or_default();
+                .results
+                .into_iter()
+                .map(OperandType::Val)
+                .collect::<Vec<_>>();
             match block_instr {
                 BlockInstr::Block(..) | BlockInstr::Loop(..) => {
                     check_block_like(diagnostics, shared, node, init_stack, &results);
@@ -360,17 +353,20 @@ fn check_block_like(
     }
 }
 
-struct TypeStack<'a> {
-    uri: InternUri,
-    service: &'a LanguageService,
-    line_index: &'a LineIndex,
+struct TypeStack<'db> {
+    document: Document,
+    service: &'db dyn salsa::Database,
+    line_index: &'db LineIndex,
     module_id: u32,
-    stack: Vec<(OperandType, Option<Instr>)>,
+    stack: Vec<(OperandType<'db>, Option<Instr>)>,
     has_never: bool,
 }
-impl TypeStack<'_> {
-    fn check(&mut self, expected: &[OperandType], report_range: ReportRange) -> Option<Diagnostic> {
-        let service = self.service;
+impl<'db> TypeStack<'db> {
+    fn check(
+        &mut self,
+        expected: &[OperandType<'db>],
+        report_range: ReportRange,
+    ) -> Option<Diagnostic> {
         let mut diagnostic = None;
         let rest_len = self.stack.len().saturating_sub(expected.len());
         let pops = self.stack.get(rest_len..).unwrap_or(&*self.stack);
@@ -382,8 +378,9 @@ impl TypeStack<'_> {
             .zip_longest(pops.iter().rev())
             .for_each(|pair| match pair {
                 EitherOrBoth::Both(expected, (received, related_instr)) => {
-                    if service.operand_type_matches(
-                        self.uri,
+                    if operand_type_matches(
+                        self.service,
+                        self.document,
                         self.module_id,
                         received.clone(),
                         expected.clone(),
@@ -394,7 +391,7 @@ impl TypeStack<'_> {
                     if let Some(related_instr) = related_instr {
                         related_information.push(DiagnosticRelatedInformation {
                             location: Location {
-                                uri: service.lookup_uri(self.uri),
+                                uri: self.document.uri(self.service).raw(self.service),
                                 range: helpers::rowan_range_to_lsp_range(
                                     self.line_index,
                                     ReportRange::Instr(related_instr).pick(),
@@ -402,8 +399,8 @@ impl TypeStack<'_> {
                             },
                             message: format!(
                                 "expected type `{}`, found `{}`",
-                                expected.render(service),
-                                received.render(service),
+                                expected.render(self.service),
+                                received.render(self.service),
                             ),
                         });
                     }
@@ -416,11 +413,13 @@ impl TypeStack<'_> {
         if mismatch {
             let expected_types = format!(
                 "[{}]",
-                expected.iter().map(|ty| ty.render(service)).join(", ")
+                expected.iter().map(|ty| ty.render(self.service)).join(", ")
             );
             let received_types = format!(
                 "[{}]",
-                pops.iter().map(|(ty, _)| ty.render(service)).join(", ")
+                pops.iter()
+                    .map(|(ty, _)| ty.render(self.service))
+                    .join(", ")
             );
             diagnostic = Some(Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(self.line_index, report_range.pick()),
@@ -442,21 +441,21 @@ impl TypeStack<'_> {
 
     fn check_to_bottom(
         &mut self,
-        expected: &[OperandType],
+        expected: &[OperandType<'db>],
         report_range: ReportRange,
     ) -> Option<Diagnostic> {
         let mut diagnostic = None;
         let mut mismatch = false;
         let mut related_information = vec![];
-        let service = self.service;
         expected
             .iter()
             .rev()
             .zip_longest(self.stack.iter().rev())
             .for_each(|pair| match pair {
                 EitherOrBoth::Both(expected, (received, related_instr)) => {
-                    if service.operand_type_matches(
-                        self.uri,
+                    if operand_type_matches(
+                        self.service,
+                        self.document,
                         self.module_id,
                         received.clone(),
                         expected.clone(),
@@ -467,7 +466,7 @@ impl TypeStack<'_> {
                     if let Some(related_instr) = related_instr {
                         related_information.push(DiagnosticRelatedInformation {
                             location: Location {
-                                uri: service.lookup_uri(self.uri),
+                                uri: self.document.uri(self.service).raw(self.service),
                                 range: helpers::rowan_range_to_lsp_range(
                                     self.line_index,
                                     ReportRange::Instr(related_instr).pick(),
@@ -475,8 +474,8 @@ impl TypeStack<'_> {
                             },
                             message: format!(
                                 "expected type `{}`, found `{}`",
-                                expected.render(service),
-                                received.render(service),
+                                expected.render(self.service),
+                                received.render(self.service),
                             ),
                         });
                     }
@@ -492,13 +491,13 @@ impl TypeStack<'_> {
         if mismatch {
             let expected_types = format!(
                 "[{}]",
-                expected.iter().map(|ty| ty.render(service)).join(", ")
+                expected.iter().map(|ty| ty.render(self.service)).join(", ")
             );
             let received_types = format!(
                 "[{}]",
                 self.stack
                     .iter()
-                    .map(|(ty, _)| ty.render(service))
+                    .map(|(ty, _)| ty.render(self.service))
                     .join(", ")
             );
             diagnostic = Some(Diagnostic {
@@ -527,48 +526,54 @@ impl TypeStack<'_> {
     }
 }
 
-fn resolve_sig(
-    shared: &Shared,
+fn resolve_sig<'db>(
+    shared: &Shared<'db>,
     instr_name: &str,
     instr: &PlainInstr,
-    type_stack: &TypeStack,
-) -> ResolvedSig {
+    type_stack: &TypeStack<'db>,
+) -> ResolvedSig<'db> {
     match instr_name {
         "call" | "return_call" => instr
             .immediates()
             .next()
             .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-            .and_then(|func| {
-                shared
-                    .service
-                    .get_func_sig(shared.uri, func.key, func.green.clone())
+            .map(|func| {
+                ResolvedSig::from(get_func_sig(
+                    shared.service,
+                    shared.document,
+                    func.key,
+                    func.green.clone(),
+                ))
             })
-            .map(ResolvedSig::from)
             .unwrap_or_default(),
         "local.get" => ResolvedSig {
             params: vec![],
-            results: vec![instr
-                .immediates()
-                .next()
-                .and_then(|idx| {
-                    shared
-                        .symbol_table
-                        .find_param_or_local_def(SymbolKey::new(idx.syntax()))
-                })
-                .and_then(|symbol| shared.service.extract_type(symbol.green.clone()))
-                .map_or(OperandType::Any, OperandType::Val)],
+            results: vec![
+                instr
+                    .immediates()
+                    .next()
+                    .and_then(|idx| {
+                        shared
+                            .symbol_table
+                            .find_param_or_local_def(SymbolKey::new(idx.syntax()))
+                    })
+                    .and_then(|symbol| extract_type(shared.service, symbol.green.clone()))
+                    .map_or(OperandType::Any, OperandType::Val),
+            ],
         },
         "local.set" => ResolvedSig {
-            params: vec![instr
-                .immediates()
-                .next()
-                .and_then(|idx| {
-                    shared
-                        .symbol_table
-                        .find_param_or_local_def(SymbolKey::new(idx.syntax()))
-                })
-                .and_then(|symbol| shared.service.extract_type(symbol.green.clone()))
-                .map_or(OperandType::Any, OperandType::Val)],
+            params: vec![
+                instr
+                    .immediates()
+                    .next()
+                    .and_then(|idx| {
+                        shared
+                            .symbol_table
+                            .find_param_or_local_def(SymbolKey::new(idx.syntax()))
+                    })
+                    .and_then(|symbol| extract_type(shared.service, symbol.green.clone()))
+                    .map_or(OperandType::Any, OperandType::Val),
+            ],
             results: vec![],
         },
         "local.tee" => {
@@ -580,7 +585,7 @@ fn resolve_sig(
                         .symbol_table
                         .find_param_or_local_def(SymbolKey::new(idx.syntax()))
                 })
-                .and_then(|symbol| shared.service.extract_type(symbol.green.clone()))
+                .and_then(|symbol| extract_type(shared.service, symbol.green.clone()))
                 .map_or(OperandType::Any, OperandType::Val);
             ResolvedSig {
                 params: vec![ty.clone()],
@@ -589,20 +594,24 @@ fn resolve_sig(
         }
         "global.get" => ResolvedSig {
             params: vec![],
-            results: vec![instr
-                .immediates()
-                .next()
-                .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                .and_then(|symbol| shared.service.extract_global_type(symbol.green.clone()))
-                .map_or(OperandType::Any, OperandType::Val)],
+            results: vec![
+                instr
+                    .immediates()
+                    .next()
+                    .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+                    .and_then(|symbol| extract_global_type(shared.service, symbol.green.clone()))
+                    .map_or(OperandType::Any, OperandType::Val),
+            ],
         },
         "global.set" => ResolvedSig {
-            params: vec![instr
-                .immediates()
-                .next()
-                .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                .and_then(|symbol| shared.service.extract_global_type(symbol.green.clone()))
-                .map_or(OperandType::Any, OperandType::Val)],
+            params: vec![
+                instr
+                    .immediates()
+                    .next()
+                    .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+                    .and_then(|symbol| extract_global_type(shared.service, symbol.green.clone()))
+                    .map_or(OperandType::Any, OperandType::Val),
+            ],
             results: vec![],
         },
         "return" => ResolvedSig {
@@ -610,14 +619,18 @@ fn resolve_sig(
                 .syntax()
                 .ancestors()
                 .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
-                .and_then(|func| {
-                    shared.service.get_func_sig(
-                        shared.uri,
+                .map(|func| {
+                    get_func_sig(
+                        shared.service,
+                        shared.document,
                         SyntaxNodePtr::new(&func),
                         func.green().into(),
                     )
+                    .results
+                    .into_iter()
+                    .map(OperandType::Val)
+                    .collect()
                 })
-                .map(|sig| sig.results.into_iter().map(OperandType::Val).collect())
                 .unwrap_or_default(),
             results: vec![],
         },
@@ -625,7 +638,9 @@ fn resolve_sig(
             params: instr
                 .immediates()
                 .next()
-                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, &idx))
+                .map(|idx| {
+                    resolve_br_types(shared.service, shared.document, shared.symbol_table, &idx)
+                })
                 .unwrap_or_default(),
             results: vec![],
         },
@@ -633,7 +648,9 @@ fn resolve_sig(
             let results = instr
                 .immediates()
                 .next()
-                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, &idx))
+                .map(|idx| {
+                    resolve_br_types(shared.service, shared.document, shared.symbol_table, &idx)
+                })
                 .unwrap_or_default();
             let mut params = results.clone();
             params.push(OperandType::Val(ValType::I32));
@@ -643,7 +660,9 @@ fn resolve_sig(
             let mut params = instr
                 .immediates()
                 .next()
-                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, &idx))
+                .map(|idx| {
+                    resolve_br_types(shared.service, shared.document, shared.symbol_table, &idx)
+                })
                 .unwrap_or_default();
             params.push(OperandType::Val(ValType::I32));
             ResolvedSig {
@@ -656,22 +675,24 @@ fn resolve_sig(
                 if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) =
                     type_stack.stack.last()
                 {
-                    *heap_ty
+                    heap_ty.clone()
                 } else {
                     HeapType::Any
                 };
             let mut results = instr
                 .immediates()
                 .next()
-                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, &idx))
+                .map(|idx| {
+                    resolve_br_types(shared.service, shared.document, shared.symbol_table, &idx)
+                })
                 .unwrap_or_default();
             let mut params = results.clone();
             params.push(OperandType::Val(ValType::Ref(RefType {
-                heap_ty,
+                heap_ty: heap_ty.clone(),
                 nullable: true,
             })));
             results.push(OperandType::Val(ValType::Ref(RefType {
-                heap_ty,
+                heap_ty: heap_ty.clone(),
                 nullable: false,
             })));
             ResolvedSig { params, results }
@@ -681,14 +702,16 @@ fn resolve_sig(
                 if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) =
                     type_stack.stack.last()
                 {
-                    *heap_ty
+                    heap_ty.clone()
                 } else {
                     HeapType::Any
                 };
             let results = instr
                 .immediates()
                 .next()
-                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, &idx))
+                .map(|idx| {
+                    resolve_br_types(shared.service, shared.document, shared.symbol_table, &idx)
+                })
                 .unwrap_or_default();
             let mut params = results.clone();
             params.push(OperandType::Val(ValType::Ref(RefType {
@@ -701,7 +724,9 @@ fn resolve_sig(
             let mut immediates = instr.immediates();
             let mut types = immediates
                 .next()
-                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, &idx))
+                .map(|idx| {
+                    resolve_br_types(shared.service, shared.document, shared.symbol_table, &idx)
+                })
                 .unwrap_or_default();
             types.pop();
             let rt1 = immediates
@@ -719,7 +744,7 @@ fn resolve_sig(
             let mut params = types.clone();
             let mut results = types;
             if let Some((rt1, rt2)) = rt1.zip(rt2) {
-                params.push(OperandType::Val(ValType::Ref(rt1)));
+                params.push(OperandType::Val(ValType::Ref(rt1.clone())));
                 results.push(OperandType::Val(ValType::Ref(rt1.diff(&rt2))));
             }
             ResolvedSig { params, results }
@@ -728,7 +753,9 @@ fn resolve_sig(
             let mut immediates = instr.immediates();
             let mut types = immediates
                 .next()
-                .map(|idx| resolve_br_types(shared.service, shared.uri, shared.symbol_table, &idx))
+                .map(|idx| {
+                    resolve_br_types(shared.service, shared.document, shared.symbol_table, &idx)
+                })
                 .unwrap_or_default();
             types.pop();
             let rt1 = immediates
@@ -774,24 +801,24 @@ fn resolve_sig(
             }
         }
         "call_indirect" | "return_call_indirect" => {
-            let sig = instr
+            let mut sig = instr
                 .immediates()
                 .find_map(|immediate| immediate.type_use())
-                .and_then(|type_use| {
+                .map(|type_use| {
                     let node = type_use.syntax();
-                    shared.service.get_type_use_sig(
-                        shared.uri,
+                    ResolvedSig::from(get_type_use_sig(
+                        shared.service,
+                        shared.document,
                         SyntaxNodePtr::new(node),
                         node.green().into(),
-                    )
+                    ))
                 })
                 .unwrap_or_default();
-            let mut sig = ResolvedSig::from(sig);
             sig.params.push(OperandType::Val(ValType::I32));
             sig
         }
         "struct.new" => {
-            let def_types = shared.service.def_types(shared.uri);
+            let def_types = get_def_types(shared.service, shared.document);
             instr
                 .immediates()
                 .next()
@@ -839,7 +866,7 @@ fn resolve_sig(
                 .and_then(|(struct_ref, field_ref)| {
                     resolve_field_type_with_struct_idx(
                         shared.service,
-                        shared.uri,
+                        shared.document,
                         &struct_ref,
                         &field_ref,
                     )
@@ -882,7 +909,7 @@ fn resolve_sig(
                 .and_then(|(struct_ref, field_ref)| {
                     resolve_field_type_with_struct_idx(
                         shared.service,
-                        shared.uri,
+                        shared.document,
                         &struct_ref,
                         &field_ref,
                     )
@@ -907,8 +934,8 @@ fn resolve_sig(
                 .immediates()
                 .next()
                 .and_then(|immediate| {
-                    let def_types = shared.service.def_types(shared.uri);
-                    resolve_array_type_with_idx(shared.symbol_table, &def_types, &immediate)
+                    let def_types = get_def_types(shared.service, shared.document);
+                    resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
                 })
                 .map(|(idx, ty)| ResolvedSig {
                     params: vec![ty.unwrap_or(OperandType::Any)],
@@ -944,8 +971,8 @@ fn resolve_sig(
             immediates
                 .next()
                 .and_then(|immediate| {
-                    let def_types = shared.service.def_types(shared.uri);
-                    resolve_array_type_with_idx(shared.symbol_table, &def_types, &immediate)
+                    let def_types = get_def_types(shared.service, shared.document);
+                    resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
                 })
                 .map(|(idx, ty)| {
                     let count = immediates
@@ -985,8 +1012,8 @@ fn resolve_sig(
             .immediates()
             .next()
             .and_then(|immediate| {
-                let def_types = shared.service.def_types(shared.uri);
-                resolve_array_type_with_idx(shared.symbol_table, &def_types, &immediate)
+                let def_types = get_def_types(shared.service, shared.document);
+                resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
             })
             .map(|(idx, ty)| ResolvedSig {
                 params: vec![
@@ -1024,8 +1051,8 @@ fn resolve_sig(
             .immediates()
             .next()
             .and_then(|immediate| {
-                let def_types = shared.service.def_types(shared.uri);
-                resolve_array_type_with_idx(shared.symbol_table, &def_types, &immediate)
+                let def_types = get_def_types(shared.service, shared.document);
+                resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
             })
             .map(|(idx, ty)| ResolvedSig {
                 params: vec![
@@ -1043,8 +1070,8 @@ fn resolve_sig(
             .immediates()
             .next()
             .and_then(|immediate| {
-                let def_types = shared.service.def_types(shared.uri);
-                resolve_array_type_with_idx(shared.symbol_table, &def_types, &immediate)
+                let def_types = get_def_types(shared.service, shared.document);
+                resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
             })
             .map(|(idx, ty)| ResolvedSig {
                 params: vec![
@@ -1116,7 +1143,7 @@ fn resolve_sig(
                     SyntaxElement::Token(token) if token.kind() == SyntaxKind::IDENT => {
                         Some(HeapType::Type(Idx {
                             num: None,
-                            name: Some(shared.service.ident(token.text().into())),
+                            name: Some(InternIdent::new(shared.service, token.text())),
                         }))
                     }
                     SyntaxElement::Token(token) if token.kind() == SyntaxKind::INT => {
@@ -1143,7 +1170,7 @@ fn resolve_sig(
                 if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) =
                     type_stack.stack.last()
                 {
-                    *heap_ty
+                    heap_ty.clone()
                 } else {
                     HeapType::Any
                 };
@@ -1160,17 +1187,17 @@ fn resolve_sig(
                 if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) =
                     type_stack.stack.last()
                 {
-                    *heap_ty
+                    heap_ty.clone()
                 } else {
                     HeapType::Any
                 };
             ResolvedSig {
                 params: vec![OperandType::Val(ValType::Ref(RefType {
-                    heap_ty,
+                    heap_ty: heap_ty.clone(),
                     nullable: true,
                 }))],
                 results: vec![OperandType::Val(ValType::Ref(RefType {
-                    heap_ty,
+                    heap_ty: heap_ty.clone(),
                     nullable: false,
                 }))],
             }
@@ -1186,7 +1213,7 @@ fn resolve_sig(
                 .and_then(|ref_type| {
                     ref_type
                         .heap_ty
-                        .to_top_type(shared.service, shared.uri, shared.module_id)
+                        .to_top_type(shared.service, shared.document, shared.module_id)
                 })
                 .unwrap_or(HeapType::Any);
             ResolvedSig {
@@ -1211,7 +1238,7 @@ fn resolve_sig(
                 });
             let heap_ty = ref_type
                 .heap_ty
-                .to_top_type(shared.service, shared.uri, shared.module_id)
+                .to_top_type(shared.service, shared.document, shared.module_id)
                 .unwrap_or(HeapType::Any);
             ResolvedSig {
                 params: vec![OperandType::Val(ValType::Ref(RefType {
@@ -1231,7 +1258,7 @@ fn resolve_sig(
                         .find_def(SymbolKey::new(immediate.syntax()))
                 })
                 .and_then(|symbol| {
-                    let root = SyntaxNode::new_root(shared.service.root(shared.uri));
+                    let root = shared.document.root_tree(shared.service);
                     ModuleFieldFunc::cast(symbol.key.to_node(&root))
                 })
                 .and_then(|func| func.type_use())
@@ -1243,7 +1270,7 @@ fn resolve_sig(
                             .and_then(|int| int.text().parse().ok()),
                         name: index
                             .ident_token()
-                            .map(|ident| shared.service.ident(ident.text().into())),
+                            .map(|ident| InternIdent::new(shared.service, ident.text())),
                     })
                 })
                 .or_else(|| {
@@ -1262,7 +1289,7 @@ fn resolve_sig(
             }
         }
         "call_ref" | "return_call_ref" => {
-            let def_types = shared.service.def_types(shared.uri);
+            let def_types = get_def_types(shared.service, shared.document);
             instr
                 .immediates()
                 .next()

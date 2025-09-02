@@ -1,14 +1,12 @@
 use crate::{
-    binder::{Symbol, SymbolKey, SymbolKind, SymbolTablesCtx},
-    helpers,
-    syntax_tree::SyntaxTreeCtx,
-    uri::UrisCtx,
     LanguageService,
+    binder::{Symbol, SymbolKey, SymbolKind, SymbolTable},
+    helpers,
 };
 use line_index::LineIndex;
 use lspt::{DocumentHighlight, DocumentHighlightKind, DocumentHighlightParams};
-use rowan::{ast::AstNode, Direction};
-use wat_syntax::{ast::PlainInstr, SyntaxElement, SyntaxKind, SyntaxNode};
+use rowan::{Direction, ast::AstNode};
+use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, ast::PlainInstr};
 
 impl LanguageService {
     /// Handler for `textDocument/documentHighlight` request.
@@ -16,10 +14,10 @@ impl LanguageService {
         &self,
         params: DocumentHighlightParams,
     ) -> Option<Vec<DocumentHighlight>> {
-        let uri = self.uri(params.text_document.uri);
-        let line_index = self.line_index(uri);
-        let root = SyntaxNode::new_root(self.root(uri));
-        let token = super::find_meaningful_token(self, uri, &root, params.position)?;
+        let document = self.get_document(params.text_document.uri)?;
+        let line_index = document.line_index(self);
+        let root = document.root_tree(self);
+        let token = super::find_meaningful_token(self, document, &root, params.position)?;
         let kind = token.kind();
         match kind {
             SyntaxKind::KEYWORD
@@ -36,7 +34,7 @@ impl LanguageService {
                             {
                                 Some(DocumentHighlight {
                                     range: helpers::rowan_range_to_lsp_range(
-                                        &line_index,
+                                        line_index,
                                         other.text_range(),
                                     ),
                                     kind: Some(DocumentHighlightKind::Text),
@@ -48,7 +46,7 @@ impl LanguageService {
                 )
             }
             SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
-                let symbol_table = self.symbol_table(uri);
+                let symbol_table = SymbolTable::of(self, document);
                 let key = SymbolKey::new(&token.parent()?);
                 if let Some(current_symbol) =
                     symbol_table.symbols.iter().find(|symbol| symbol.key == key)
@@ -89,7 +87,7 @@ impl LanguageService {
                                         }
                                     })
                                     .filter_map(|symbol| {
-                                        create_symbol_highlight(symbol, &root, &line_index)
+                                        create_symbol_highlight(symbol, &root, line_index)
                                     })
                                     .collect(),
                             )
@@ -126,7 +124,7 @@ impl LanguageService {
                                         }
                                     })
                                     .filter_map(|symbol| {
-                                        create_symbol_highlight(symbol, &root, &line_index)
+                                        create_symbol_highlight(symbol, &root, line_index)
                                     })
                                     .collect(),
                             )
@@ -150,7 +148,7 @@ impl LanguageService {
                                         _ => false,
                                     })
                                     .filter_map(|symbol| {
-                                        create_symbol_highlight(symbol, &root, &line_index)
+                                        create_symbol_highlight(symbol, &root, line_index)
                                     })
                                     .collect(),
                             )
@@ -159,7 +157,7 @@ impl LanguageService {
                             symbol_table
                                 .find_block_references(current_symbol.key, true)
                                 .filter_map(|symbol| {
-                                    create_symbol_highlight(symbol, &root, &line_index)
+                                    create_symbol_highlight(symbol, &root, line_index)
                                 })
                                 .collect(),
                         ),
@@ -169,7 +167,7 @@ impl LanguageService {
                                 symbol_table
                                     .find_block_references(def_key, true)
                                     .filter_map(|symbol| {
-                                        create_symbol_highlight(symbol, &root, &line_index)
+                                        create_symbol_highlight(symbol, &root, line_index)
                                     })
                                     .collect(),
                             )
@@ -194,7 +192,7 @@ impl LanguageService {
                                 {
                                     Some(DocumentHighlight {
                                         range: helpers::rowan_range_to_lsp_range(
-                                            &line_index,
+                                            line_index,
                                             other.text_range(),
                                         ),
                                         kind: Some(DocumentHighlightKind::Text),

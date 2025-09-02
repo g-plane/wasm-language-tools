@@ -1,16 +1,16 @@
 use crate::{
+    LanguageService,
     binder::{SymbolKey, SymbolTable},
+    document::Document,
     helpers,
     types_analyzer::RefType,
-    uri::InternUri,
-    LanguageService, UrisCtx,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
 use rowan::ast::AstNode;
 use wat_syntax::{
-    ast::{ModuleFieldElem, ModuleFieldTable},
     SyntaxNode,
+    ast::{ModuleFieldElem, ModuleFieldTable},
 };
 
 const DIAGNOSTIC_CODE: &str = "elem-type";
@@ -19,7 +19,7 @@ const DIAGNOSTIC_CODE: &str = "elem-type";
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
-    uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
@@ -37,7 +37,7 @@ pub fn check(
     let table_ref_type = RefType::from_green(&table_ref_type_node.syntax().green(), service)?;
     let elem_ref_type_node = elem.elem_list()?.ref_type()?;
     let elem_ref_type = RefType::from_green(&elem_ref_type_node.syntax().green(), service)?;
-    if !elem_ref_type.matches(&table_ref_type, service, uri, module_id) {
+    if !elem_ref_type.matches(&table_ref_type, service, document, module_id) {
         diagnostics.push(Diagnostic {
             range: helpers::rowan_range_to_lsp_range(
                 line_index,
@@ -53,7 +53,7 @@ pub fn check(
             ),
             related_information: Some(vec![DiagnosticRelatedInformation {
                 location: Location {
-                    uri: service.lookup_uri(uri),
+                    uri: document.uri(service).raw(service),
                     range: helpers::rowan_range_to_lsp_range(
                         line_index,
                         table_ref_type_node.syntax().text_range(),

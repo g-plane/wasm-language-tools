@@ -1,8 +1,4 @@
-use crate::{
-    helpers,
-    uri::{InternUri, UrisCtx},
-    LanguageService,
-};
+use crate::{helpers, uri::InternUri, LanguageService};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rowan::{ast::AstNode, GreenToken, NodeOrToken};
@@ -63,7 +59,7 @@ pub fn act(
 
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
-        service.lookup_uri(uri),
+        uri.raw(service),
         vec![TextEdit {
             range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
             new_text,

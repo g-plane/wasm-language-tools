@@ -1,21 +1,20 @@
 use super::{
     signature::Signature,
     types::{FieldType, Fields, HeapType, OperandType, RefType, StorageType, ValType},
-    TypesAnalyzerCtx,
 };
 use crate::idx::InternIdent;
 use itertools::Itertools;
 use std::fmt::{self, Display};
 use wat_syntax::SyntaxKind;
 
-pub(super) fn render_sig(db: &dyn TypesAnalyzerCtx, signature: Signature) -> String {
+pub(crate) fn render_sig<'db>(db: &'db dyn salsa::Database, signature: Signature<'db>) -> String {
     let mut ret = String::with_capacity(signature.params.len() * 9 + signature.results.len() * 10);
     let params = signature
         .params
-        .into_iter()
+        .iter()
         .map(|(ty, name)| {
             if let Some(name) = name {
-                format!("(param {} {})", db.lookup_ident(name), ty.render(db))
+                format!("(param {} {})", name.ident(db), ty.render(db))
             } else {
                 format!("(param {})", ty.render(db))
             }
@@ -24,7 +23,7 @@ pub(super) fn render_sig(db: &dyn TypesAnalyzerCtx, signature: Signature) -> Str
     ret.push_str(&params);
     let results = signature
         .results
-        .into_iter()
+        .iter()
         .map(|ty| format!("(result {})", ty.render(db)))
         .join(" ");
     if !params.is_empty() && !results.is_empty() {
@@ -34,7 +33,10 @@ pub(super) fn render_sig(db: &dyn TypesAnalyzerCtx, signature: Signature) -> Str
     ret
 }
 
-pub(super) fn render_compact_sig(db: &dyn TypesAnalyzerCtx, signature: Signature) -> String {
+pub(crate) fn render_compact_sig<'db>(
+    db: &'db dyn salsa::Database,
+    signature: Signature<'db>,
+) -> String {
     let params = signature
         .params
         .iter()
@@ -44,31 +46,31 @@ pub(super) fn render_compact_sig(db: &dyn TypesAnalyzerCtx, signature: Signature
     format!("[{params}] -> [{results}]")
 }
 
-pub(super) fn render_func_header(
-    db: &dyn TypesAnalyzerCtx,
-    name: Option<InternIdent>,
-    signature: Option<Signature>,
+#[salsa::tracked]
+pub(crate) fn render_func_header<'db>(
+    db: &'db dyn salsa::Database,
+    name: Option<InternIdent<'db>>,
+    signature: Signature<'db>,
 ) -> String {
     let mut content = "(func".to_string();
     if let Some(name) = name {
         content.push(' ');
-        content.push_str(&db.lookup_ident(name));
+        content.push_str(name.ident(db));
     }
-    if let Some(sig) = signature
-        && (!sig.params.is_empty() || !sig.results.is_empty())
-    {
+    if !signature.params.is_empty() || !signature.results.is_empty() {
         content.push(' ');
-        content.push_str(&db.render_sig(sig));
+        content.push_str(&render_sig(db, signature));
     }
     content.push(')');
     content
 }
 
-pub(super) fn render_block_header(
-    db: &dyn TypesAnalyzerCtx,
+#[salsa::tracked]
+pub(crate) fn render_block_header<'db>(
+    db: &'db dyn salsa::Database,
     kind: SyntaxKind,
-    name: Option<InternIdent>,
-    signature: Option<Signature>,
+    name: Option<InternIdent<'db>>,
+    signature: Signature<'db>,
 ) -> String {
     let mut content = format!(
         "({}",
@@ -81,28 +83,26 @@ pub(super) fn render_block_header(
     );
     if let Some(name) = name {
         content.push(' ');
-        content.push_str(&db.lookup_ident(name));
+        content.push_str(name.ident(db));
     }
-    if let Some(sig) = signature
-        && (!sig.params.is_empty() || !sig.results.is_empty())
-    {
+    if !signature.params.is_empty() || !signature.results.is_empty() {
         content.push(' ');
-        content.push_str(&db.render_sig(sig));
+        content.push_str(&render_sig(db, signature));
     }
     content.push(')');
     content
 }
 
-impl RefType {
-    pub(crate) fn render<'a>(&'a self, db: &'a dyn TypesAnalyzerCtx) -> RefTypeRender<'a> {
+impl<'db> RefType<'db> {
+    pub(crate) fn render<'a>(&'a self, db: &'db dyn salsa::Database) -> RefTypeRender<'a, 'db> {
         RefTypeRender { ty: self, db }
     }
 }
-pub(crate) struct RefTypeRender<'a> {
-    ty: &'a RefType,
-    db: &'a dyn TypesAnalyzerCtx,
+pub(crate) struct RefTypeRender<'a, 'db> {
+    ty: &'a RefType<'db>,
+    db: &'db dyn salsa::Database,
 }
-impl Display for RefTypeRender<'_> {
+impl Display for RefTypeRender<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if matches!(self.ty.heap_ty, HeapType::DefFunc(..)) {
             write!(f, "(func ")?;
@@ -115,7 +115,7 @@ impl Display for RefTypeRender<'_> {
         match self.ty.heap_ty {
             HeapType::Type(idx) | HeapType::DefFunc(idx) => {
                 if let Some(name) = idx.name {
-                    write!(f, "{}", self.db.lookup_ident(name))?;
+                    write!(f, "{}", name.ident(self.db))?;
                 } else if let Some(num) = idx.num {
                     write!(f, "{num}")?;
                 }
@@ -136,18 +136,18 @@ impl Display for RefTypeRender<'_> {
     }
 }
 
-impl ValType {
-    pub(crate) fn render<'a>(&'a self, db: &'a dyn TypesAnalyzerCtx) -> ValTypeRender<'a> {
+impl<'db> ValType<'db> {
+    pub(crate) fn render<'a>(&'a self, db: &'db dyn salsa::Database) -> ValTypeRender<'a, 'db> {
         ValTypeRender { ty: self, db }
     }
 }
-pub(crate) struct ValTypeRender<'a> {
-    ty: &'a ValType,
-    db: &'a dyn TypesAnalyzerCtx,
+pub(crate) struct ValTypeRender<'a, 'db> {
+    ty: &'a ValType<'db>,
+    db: &'db dyn salsa::Database,
 }
-impl Display for ValTypeRender<'_> {
+impl Display for ValTypeRender<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.ty {
+        match &self.ty {
             ValType::I32 => write!(f, "i32"),
             ValType::I64 => write!(f, "i64"),
             ValType::F32 => write!(f, "f32"),
@@ -158,16 +158,16 @@ impl Display for ValTypeRender<'_> {
     }
 }
 
-impl OperandType {
-    pub(crate) fn render<'a>(&'a self, db: &'a dyn TypesAnalyzerCtx) -> OperandTypeRender<'a> {
+impl<'db> OperandType<'db> {
+    pub(crate) fn render<'a>(&'a self, db: &'db dyn salsa::Database) -> OperandTypeRender<'a, 'db> {
         OperandTypeRender { ty: self, db }
     }
 }
-pub(crate) struct OperandTypeRender<'a> {
-    ty: &'a OperandType,
-    db: &'a dyn TypesAnalyzerCtx,
+pub(crate) struct OperandTypeRender<'a, 'db> {
+    ty: &'a OperandType<'db>,
+    db: &'db dyn salsa::Database,
 }
-impl Display for OperandTypeRender<'_> {
+impl Display for OperandTypeRender<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.ty {
             OperandType::Val(ty) => write!(f, "{}", ty.render(self.db)),
@@ -176,21 +176,21 @@ impl Display for OperandTypeRender<'_> {
     }
 }
 
-impl FieldType {
-    pub(crate) fn render<'a>(&'a self, db: &'a dyn TypesAnalyzerCtx) -> FieldTypeRender<'a> {
+impl<'db> FieldType<'db> {
+    pub(crate) fn render<'a>(&'a self, db: &'db dyn salsa::Database) -> FieldTypeRender<'a, 'db> {
         FieldTypeRender { ty: self, db }
     }
 }
-pub(crate) struct FieldTypeRender<'a> {
-    ty: &'a FieldType,
-    db: &'a dyn TypesAnalyzerCtx,
+pub(crate) struct FieldTypeRender<'a, 'db> {
+    ty: &'a FieldType<'db>,
+    db: &'db dyn salsa::Database,
 }
-impl Display for FieldTypeRender<'_> {
+impl Display for FieldTypeRender<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.ty.mutable {
             write!(f, "(mut ")?;
         }
-        match self.ty.storage {
+        match &self.ty.storage {
             StorageType::Val(ty) => write!(f, "{}", ty.render(self.db))?,
             StorageType::PackedI8 => write!(f, "i8")?,
             StorageType::PackedI16 => write!(f, "i16")?,
@@ -202,16 +202,16 @@ impl Display for FieldTypeRender<'_> {
     }
 }
 
-impl Fields {
-    pub(crate) fn render<'a>(&'a self, db: &'a dyn TypesAnalyzerCtx) -> FieldsRender<'a> {
+impl<'db> Fields<'db> {
+    pub(crate) fn render<'a>(&'a self, db: &'db dyn salsa::Database) -> FieldsRender<'a, 'db> {
         FieldsRender { fields: self, db }
     }
 }
-pub(crate) struct FieldsRender<'a> {
-    fields: &'a Fields,
-    db: &'a dyn TypesAnalyzerCtx,
+pub(crate) struct FieldsRender<'a, 'db> {
+    fields: &'a Fields<'db>,
+    db: &'db dyn salsa::Database,
 }
-impl Display for FieldsRender<'_> {
+impl Display for FieldsRender<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.fields.0.iter().try_fold(true, |first, field| {
             if !first {
@@ -219,7 +219,7 @@ impl Display for FieldsRender<'_> {
             }
             write!(f, "(field ")?;
             if let Some(name) = field.1.name {
-                write!(f, "{} ", self.db.lookup_ident(name))?;
+                write!(f, "{} ", name.ident(self.db))?;
             }
             write!(f, "{}", field.0.render(self.db))?;
             write!(f, ")")?;

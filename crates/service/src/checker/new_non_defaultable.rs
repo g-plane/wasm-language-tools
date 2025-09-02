@@ -1,9 +1,9 @@
 use crate::{
+    LanguageService,
     binder::{SymbolKey, SymbolKind, SymbolTable},
+    document::Document,
     helpers,
-    types_analyzer::{CompositeType, FieldType, Fields, StorageType, TypesAnalyzerCtx},
-    uri::InternUri,
-    LanguageService, UrisCtx,
+    types_analyzer::{self, CompositeType, FieldType, Fields, StorageType},
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
@@ -15,12 +15,12 @@ const DIAGNOSTIC_CODE: &str = "new-non-defaultable";
 pub fn check(
     service: &LanguageService,
     diagnostics: &mut Vec<Diagnostic>,
-    uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) -> Option<()> {
-    let def_types = service.def_types(uri);
+    let def_types = types_analyzer::get_def_types(service, document);
     let immediate = node.first_child()?;
     let instr_name = support::token(node, SyntaxKind::INSTR_NAME)?;
     if !instr_name.text().ends_with(".new_default") {
@@ -70,7 +70,7 @@ pub fn check(
                                     })
                                     .map(|symbol| DiagnosticRelatedInformation {
                                         location: Location {
-                                            uri: service.lookup_uri(uri),
+                                            uri: document.uri(service).raw(service),
                                             range: helpers::rowan_range_to_lsp_range(
                                                 line_index,
                                                 symbol.key.text_range(),

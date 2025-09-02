@@ -1,19 +1,18 @@
 use crate::{
-    binder::{SymbolKey, SymbolKind, SymbolTable},
-    helpers,
-    types_analyzer::TypesAnalyzerCtx,
     LanguageService,
+    binder::{SymbolKey, SymbolKind, SymbolTable},
+    helpers, types_analyzer,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use rowan::{
-    ast::{support, AstNode},
     TextRange,
+    ast::{AstNode, support},
 };
 use rustc_hash::FxHashMap;
 use wat_syntax::{
-    ast::{BlockInstr, Instr},
     SyntaxKind, SyntaxNode,
+    ast::{BlockInstr, Instr},
 };
 
 const DIAGNOSTIC_CODE: &str = "uninit";
@@ -31,7 +30,7 @@ pub fn check(
         .iter()
         .filter(|symbol| symbol.kind == SymbolKind::Local && symbol.region == region)
         .map(|symbol| {
-            let ty = service.extract_type(symbol.green.clone());
+            let ty = types_analyzer::extract_type(service, symbol.green.clone());
             (
                 symbol.key,
                 if let Some(false) = ty.map(|ty| ty.defaultable()) {
@@ -52,14 +51,14 @@ pub fn check(
     .check(node);
 }
 
-struct Checker<'a> {
+struct Checker<'a, 'db> {
     service: &'a LanguageService,
     diagnostics: &'a mut Vec<Diagnostic>,
     line_index: &'a LineIndex,
-    symbol_table: &'a SymbolTable,
+    symbol_table: &'a SymbolTable<'db>,
     locals: FxHashMap<SymbolKey, Init>,
 }
-impl Checker<'_> {
+impl Checker<'_, '_> {
     fn check(&mut self, node: &SyntaxNode) {
         let conditional = matches!(
             node.kind(),

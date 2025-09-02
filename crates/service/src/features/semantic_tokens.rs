@@ -1,25 +1,23 @@
 use crate::{
-    binder::{SymbolKey, SymbolTablesCtx},
-    helpers,
-    syntax_tree::SyntaxTreeCtx,
-    uri::{InternUri, UrisCtx},
-    LanguageService,
+    binder::{SymbolKey, SymbolTable},
+    helpers, document::Document, LanguageService,
 };
 use line_index::LineCol;
 use lspt::{SemanticTokens, SemanticTokensParams, SemanticTokensRangeParams};
 use rowan::ast::support;
 use std::mem;
-use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
+use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxToken};
 
 impl LanguageService {
     /// Handler for `textDocument/semanticTokens/full` request.
     pub fn semantic_tokens_full(&self, params: SemanticTokensParams) -> Option<SemanticTokens> {
-        let uri = self.uri(params.text_document.uri);
+        let document = self.get_document(params.text_document.uri)?;
         let mut delta_line = 0;
         let mut prev_start = 0;
         let tokens = self.build_tokens(
-            uri,
-            SyntaxNode::new_root(self.root(uri))
+            document,
+            document
+                .root_tree(self)
                 .descendants_with_tokens()
                 .filter_map(SyntaxElement::into_token),
             &mut delta_line,
@@ -36,14 +34,15 @@ impl LanguageService {
         &self,
         params: SemanticTokensRangeParams,
     ) -> Option<SemanticTokens> {
-        let uri = self.uri(params.text_document.uri);
-        let line_index = self.line_index(uri);
-        let start = helpers::lsp_pos_to_rowan_pos(&line_index, params.range.start)?;
-        let end = helpers::lsp_pos_to_rowan_pos(&line_index, params.range.end)?;
+        let document = self.get_document(params.text_document.uri)?;
+        let line_index = document.line_index(self);
+        let start = helpers::lsp_pos_to_rowan_pos(line_index, params.range.start)?;
+        let end = helpers::lsp_pos_to_rowan_pos(line_index, params.range.end)?;
 
         let mut delta_line = 0;
         let mut prev_start = 0;
-        let mut tokens = SyntaxNode::new_root(self.root(uri))
+        let mut tokens = document
+            .root_tree(self)
             .descendants_with_tokens()
             .filter_map(SyntaxElement::into_token)
             .skip_while(|token| token.text_range().end() <= start)
@@ -55,7 +54,7 @@ impl LanguageService {
                 col: prev_start,
             } = line_index.line_col(token.text_range().start());
         }
-        let tokens = self.build_tokens(uri, tokens, &mut delta_line, &mut prev_start);
+        let tokens = self.build_tokens(document, tokens, &mut delta_line, &mut prev_start);
         Some(SemanticTokens {
             result_id: None,
             data: tokens,
@@ -64,12 +63,12 @@ impl LanguageService {
 
     fn build_tokens(
         &self,
-        uri: InternUri,
+        document: Document,
         tokens: impl Iterator<Item = SyntaxToken>,
         delta_line: &mut u32,
         prev_start: &mut u32,
     ) -> Vec<u32> {
-        let line_index = self.line_index(uri);
+        let line_index = document.line_index(self);
         tokens
             .filter_map(|token| {
                 match token.kind() {
@@ -86,7 +85,7 @@ impl LanguageService {
                         None
                     }
                     _ => {
-                        let token_type = self.token_type(uri, &token)?;
+                        let token_type = self.token_type(document, &token)?;
                         let block_comment_lines = if token.kind() == SyntaxKind::BLOCK_COMMENT {
                             Some(token.text().chars().filter(|c| *c == '\n').count() as u32)
                         } else {
@@ -120,8 +119,8 @@ impl LanguageService {
             .collect()
     }
 
-    fn token_type(&self, uri: InternUri, token: &SyntaxToken) -> Option<u32> {
-        let symbol_table = self.symbol_table(uri);
+    fn token_type(&self, document: Document, token: &SyntaxToken) -> Option<u32> {
+        let symbol_table = SymbolTable::of(self, document);
         let token_kinds = &self.semantic_token_kinds;
         match token.kind() {
             SyntaxKind::TYPE_KEYWORD => token_kinds.get_index_of(&SemanticTokenKind::Type),

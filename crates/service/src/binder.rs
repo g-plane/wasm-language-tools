@@ -1,39 +1,31 @@
 use crate::{
-    idx::{IdentsCtx, Idx, IdxGen},
-    syntax_tree::SyntaxTreeCtx,
-    uri::InternUri,
+    document::Document,
+    idx::{Idx, IdxGen, InternIdent},
 };
 use rowan::{
-    ast::{support, AstNode},
     GreenNode, TextRange,
+    ast::{AstNode, support},
 };
-use std::{hash::Hash, sync::Arc};
+use std::hash::Hash;
 use wat_syntax::{
-    ast::{CompType, ModuleFieldFunc, PlainInstr, SubType},
     SyntaxKind, SyntaxNode, SyntaxNodePtr,
+    ast::{CompType, ModuleFieldFunc, PlainInstr, SubType},
 };
 
-#[salsa::query_group(SymbolTables)]
-pub(crate) trait SymbolTablesCtx: SyntaxTreeCtx + IdentsCtx {
-    #[salsa::memoized]
-    #[salsa::invoke(create_symbol_table)]
-    fn symbol_table(&self, uri: InternUri) -> Arc<SymbolTable>;
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct SymbolTable {
-    pub symbols: Vec<Symbol>,
-    pub blocks: Vec<BlockItem>,
+#[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
+pub(crate) struct SymbolTable<'db> {
+    pub symbols: Vec<Symbol<'db>>,
+    pub blocks: Vec<BlockItem<'db>>,
     pub exports: Vec<ExportItem>,
 }
-fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTable> {
-    fn create_module_level_symbol(
-        db: &dyn SymbolTablesCtx,
+fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) -> SymbolTable<'db> {
+    fn create_module_level_symbol<'db>(
+        db: &'db dyn salsa::Database,
         node: SyntaxNode,
         id: u32,
         kind: SymbolKind,
         module: &SyntaxNode,
-    ) -> Symbol {
+    ) -> Symbol<'db> {
         Symbol {
             key: SymbolKey::new(&node),
             green: node.green().into(),
@@ -42,20 +34,20 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
             idx: Idx {
                 num: Some(id),
                 name: support::token(&node, SyntaxKind::IDENT)
-                    .map(|token| db.ident(token.text().into())),
+                    .map(|token| InternIdent::new(db, token.text())),
             },
         }
     }
-    fn create_ref_symbol(
-        db: &dyn SymbolTablesCtx,
+    fn create_ref_symbol<'db>(
+        db: &'db dyn salsa::Database,
         node: &SyntaxNode,
         region: SymbolKey,
         kind: SymbolKind,
-    ) -> Option<Symbol> {
+    ) -> Option<Symbol<'db>> {
         support::token(node, SyntaxKind::IDENT)
             .map(|ident| Idx {
                 num: None,
-                name: Some(db.ident(ident.text().into())),
+                name: Some(InternIdent::new(db, ident.text())),
             })
             .or_else(|| {
                 node.children_with_tokens()
@@ -75,11 +67,11 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                 idx,
             })
     }
-    fn create_first_optional_ref_symbol(
-        db: &dyn SymbolTablesCtx,
+    fn create_first_optional_ref_symbol<'db>(
+        db: &'db dyn salsa::Database,
         instr: PlainInstr,
         kind: SymbolKind,
-    ) -> Option<Symbol> {
+    ) -> Option<Symbol<'db>> {
         let node = instr.syntax();
         node.ancestors()
             .find(|node| node.kind() == SyntaxKind::MODULE)
@@ -101,13 +93,13 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                     })
             })
     }
-    fn create_import_desc_symbol(
-        db: &dyn SymbolTablesCtx,
+    fn create_import_desc_symbol<'db>(
+        db: &'db dyn salsa::Database,
         node: &SyntaxNode,
         id: u32,
         kind: SymbolKind,
         module: &SyntaxNode,
-    ) -> Symbol {
+    ) -> Symbol<'db> {
         Symbol {
             key: SymbolKey::new(node),
             green: node.green().into(),
@@ -116,12 +108,12 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
             idx: Idx {
                 num: Some(id),
                 name: support::token(node, SyntaxKind::IDENT)
-                    .map(|token| db.ident(token.text().into())),
+                    .map(|token| InternIdent::new(db, token.text())),
             },
         }
     }
 
-    let root = SyntaxNode::new_root(db.root(uri));
+    let root = document.root_tree(db);
     let mut symbols = Vec::with_capacity(2);
     let mut blocks = vec![];
     let mut exports = vec![];
@@ -177,7 +169,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                                 kind: SymbolKind::Param,
                                 idx: Idx {
                                     num: Some(local_idx_gen.pull()),
-                                    name: Some(db.ident(ident.text().into())),
+                                    name: Some(InternIdent::new(db, ident.text())),
                                 },
                             });
                         } else {
@@ -206,7 +198,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                             kind: SymbolKind::Local,
                             idx: Idx {
                                 num: Some(local_idx_gen.pull()),
-                                name: Some(db.ident(ident.text().into())),
+                                name: Some(InternIdent::new(db, ident.text())),
                             },
                         });
                     } else {
@@ -248,7 +240,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                                 kind: SymbolKind::FieldDef,
                                 idx: Idx {
                                     num: Some(field_idx_gen.pull()),
-                                    name: Some(db.ident(ident.text().into())),
+                                    name: Some(InternIdent::new(db, ident.text())),
                                 },
                             });
                         } else {
@@ -495,7 +487,7 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
                         idx: Idx {
                             num: Some(0), // fake ID
                             name: support::token(&node, SyntaxKind::IDENT)
-                                .map(|token| db.ident(token.text().into())),
+                                .map(|token| InternIdent::new(db, token.text())),
                         },
                     })
                 {
@@ -674,23 +666,23 @@ fn create_symbol_table(db: &dyn SymbolTablesCtx, uri: InternUri) -> Arc<SymbolTa
             }
         });
 
-    Arc::new(SymbolTable {
+    SymbolTable {
         symbols,
         blocks,
         exports,
-    })
+    }
 }
 
-impl SymbolTable {
-    pub fn find_def(&self, key: SymbolKey) -> Option<&Symbol> {
+impl<'db> SymbolTable<'db> {
+    pub fn find_def(&'db self, key: SymbolKey) -> Option<&'db Symbol<'db>> {
         find_def(&self.symbols, key)
     }
 
-    pub fn find_def_by_symbol(&self, ref_symbol: &Symbol) -> Option<&Symbol> {
+    pub fn find_def_by_symbol(&'db self, ref_symbol: &'db Symbol<'db>) -> Option<&'db Symbol<'db>> {
         find_def_by_symbol(&self.symbols, ref_symbol)
     }
 
-    pub fn find_param_def(&self, key: SymbolKey) -> Option<&Symbol> {
+    pub fn find_param_def(&self, key: SymbolKey) -> Option<&Symbol<'db>> {
         self.find_local_ref(key).and_then(|local| {
             self.symbols.iter().find(|symbol| {
                 symbol.region == local.region
@@ -700,7 +692,7 @@ impl SymbolTable {
         })
     }
 
-    pub fn find_param_or_local_def(&self, key: SymbolKey) -> Option<&Symbol> {
+    pub fn find_param_or_local_def(&self, key: SymbolKey) -> Option<&Symbol<'db>> {
         self.find_local_ref(key).and_then(|local| {
             self.symbols.iter().find(|symbol| {
                 symbol.region == local.region
@@ -710,7 +702,7 @@ impl SymbolTable {
         })
     }
 
-    fn find_local_ref(&self, key: SymbolKey) -> Option<&Symbol> {
+    fn find_local_ref(&self, key: SymbolKey) -> Option<&Symbol<'db>> {
         self.symbols
             .iter()
             .find(|symbol| symbol.kind == SymbolKind::LocalRef && symbol.key == key)
@@ -727,7 +719,7 @@ impl SymbolTable {
         }
     }
 
-    pub fn find_block_ref(&self, key: SymbolKey) -> Option<&Symbol> {
+    pub fn find_block_ref(&self, key: SymbolKey) -> Option<&Symbol<'db>> {
         self.symbols
             .iter()
             .find(|symbol| symbol.kind == SymbolKind::BlockRef && symbol.key == key)
@@ -737,7 +729,7 @@ impl SymbolTable {
         &self,
         node: SyntaxNode,
         kind: SymbolKind,
-    ) -> impl Iterator<Item = &Symbol> {
+    ) -> impl Iterator<Item = &Symbol<'db>> {
         let key = SymbolKey::new(&node);
         self.symbols
             .iter()
@@ -748,7 +740,7 @@ impl SymbolTable {
         &self,
         def_key: SymbolKey,
         with_decl: bool,
-    ) -> impl Iterator<Item = &Symbol> {
+    ) -> impl Iterator<Item = &Symbol<'db>> {
         if with_decl {
             self.symbols.iter().find(|symbol| symbol.key == def_key)
         } else {
@@ -767,20 +759,30 @@ impl SymbolTable {
         )
     }
 
-    pub fn find_module(&self, module_id: u32) -> Option<&Symbol> {
+    pub fn find_module(&self, module_id: u32) -> Option<&Symbol<'db>> {
         self.symbols
             .iter()
             .find(|symbol| symbol.kind == SymbolKind::Module && symbol.idx.num == Some(module_id))
     }
 }
+#[salsa::tracked]
+impl<'db> SymbolTable<'db> {
+    #[salsa::tracked(returns(ref))]
+    pub(crate) fn of(db: &'db dyn salsa::Database, document: Document) -> Self {
+        create_symbol_table(db, document)
+    }
+}
 
-fn find_def(symbols: &[Symbol], key: SymbolKey) -> Option<&Symbol> {
+fn find_def<'db>(symbols: &'db [Symbol<'db>], key: SymbolKey) -> Option<&'db Symbol<'db>> {
     symbols
         .iter()
         .find(|symbol| symbol.key == key)
         .and_then(|ref_symbol| find_def_by_symbol(symbols, ref_symbol))
 }
-fn find_def_by_symbol<'a>(symbols: &'a [Symbol], ref_symbol: &Symbol) -> Option<&'a Symbol> {
+fn find_def_by_symbol<'db>(
+    symbols: &'db [Symbol<'db>],
+    ref_symbol: &'db Symbol<'db>,
+) -> Option<&'db Symbol<'db>> {
     let kind = match ref_symbol.kind {
         SymbolKind::Call => SymbolKind::Func,
         SymbolKind::TypeUse => SymbolKind::Type,
@@ -799,21 +801,21 @@ fn find_def_by_symbol<'a>(symbols: &'a [Symbol], ref_symbol: &Symbol) -> Option<
 
 pub type SymbolKey = SyntaxNodePtr;
 
-#[derive(Clone, Debug)]
-pub struct Symbol {
+#[derive(Clone, Debug, salsa::Update)]
+pub struct Symbol<'db> {
     pub key: SymbolKey,
     pub green: GreenNode,
     pub region: SymbolKey,
     pub kind: SymbolKind,
-    pub idx: Idx,
+    pub idx: Idx<'db>,
 }
-impl PartialEq for Symbol {
+impl PartialEq for Symbol<'_> {
     fn eq(&self, other: &Self) -> bool {
         self.key == other.key && self.kind == other.kind
     }
 }
-impl Eq for Symbol {}
-impl Hash for Symbol {
+impl Eq for Symbol<'_> {}
+impl Hash for Symbol<'_> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.key.hash(state);
         self.kind.hash(state);
@@ -842,11 +844,11 @@ pub enum SymbolKind {
     FieldRef,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct BlockItem {
+#[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
+pub(crate) struct BlockItem<'db> {
     pub ref_key: SymbolKey,
     pub def_key: SymbolKey,
-    pub def_idx: Idx,
+    pub def_idx: Idx<'db>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

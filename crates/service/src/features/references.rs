@@ -1,10 +1,7 @@
-use super::find_meaningful_token;
 use crate::{
-    binder::{Symbol, SymbolKey, SymbolKind, SymbolTablesCtx},
-    helpers,
-    syntax_tree::SyntaxTreeCtx,
-    uri::UrisCtx,
     LanguageService,
+    binder::{Symbol, SymbolKey, SymbolKind, SymbolTable},
+    helpers,
 };
 use line_index::LineIndex;
 use lspt::{Location, ReferenceParams};
@@ -14,9 +11,9 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 impl LanguageService {
     /// Handler for `textDocument/references` request.
     pub fn find_references(&self, params: ReferenceParams) -> Option<Vec<Location>> {
-        let uri = self.uri(params.text_document.uri.clone());
-        let root = SyntaxNode::new_root(self.root(uri));
-        let token = find_meaningful_token(self, uri, &root, params.position)?;
+        let document = self.get_document(&params.text_document.uri)?;
+        let root = document.root_tree(self);
+        let token = super::find_meaningful_token(self, document, &root, params.position)?;
         if !matches!(
             token.kind(),
             SyntaxKind::IDENT
@@ -34,8 +31,8 @@ impl LanguageService {
             _ => parent,
         };
 
-        let line_index = self.line_index(uri);
-        let symbol_table = self.symbol_table(uri);
+        let line_index = document.line_index(self);
+        let symbol_table = SymbolTable::of(self, document);
 
         let key = SymbolKey::new(&current_node);
         let current_symbol = symbol_table
@@ -78,9 +75,7 @@ impl LanguageService {
                                 false
                             }
                         })
-                        .map(|symbol| {
-                            create_location_by_symbol(&params, &line_index, symbol, &root)
-                        })
+                        .map(|symbol| create_location_by_symbol(&params, line_index, symbol, &root))
                         .collect(),
                 )
             }
@@ -116,9 +111,7 @@ impl LanguageService {
                                 false
                             }
                         })
-                        .map(|symbol| {
-                            create_location_by_symbol(&params, &line_index, symbol, &root)
-                        })
+                        .map(|symbol| create_location_by_symbol(&params, line_index, symbol, &root))
                         .collect(),
                 )
             }
@@ -140,16 +133,14 @@ impl LanguageService {
                             }
                             _ => false,
                         })
-                        .map(|symbol| {
-                            create_location_by_symbol(&params, &line_index, symbol, &root)
-                        })
+                        .map(|symbol| create_location_by_symbol(&params, line_index, symbol, &root))
                         .collect(),
                 )
             }
             SymbolKind::BlockDef => Some(
                 symbol_table
                     .find_block_references(current_symbol.key, params.context.include_declaration)
-                    .map(|symbol| create_location_by_symbol(&params, &line_index, symbol, &root))
+                    .map(|symbol| create_location_by_symbol(&params, line_index, symbol, &root))
                     .collect(),
             ),
             SymbolKind::BlockRef => {
@@ -157,9 +148,7 @@ impl LanguageService {
                 Some(
                     symbol_table
                         .find_block_references(def_key, params.context.include_declaration)
-                        .map(|symbol| {
-                            create_location_by_symbol(&params, &line_index, symbol, &root)
-                        })
+                        .map(|symbol| create_location_by_symbol(&params, line_index, symbol, &root))
                         .collect(),
                 )
             }
