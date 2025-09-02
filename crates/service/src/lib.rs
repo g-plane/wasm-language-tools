@@ -15,6 +15,7 @@ mod uri;
 
 pub use crate::config::*;
 use crate::{document::Document, features::SemanticTokenKind, uri::InternUri};
+use dashmap::DashMap;
 use indexmap::{IndexMap, IndexSet};
 use lspt::{
     CodeActionKind, CodeActionOptions, CompletionOptions, DiagnosticOptions, InitializeParams,
@@ -24,8 +25,9 @@ use lspt::{
     TextDocumentSyncKind, TextDocumentSyncOptions, Union2, Union3,
     notification::DidChangeConfigurationNotification,
 };
-use rustc_hash::{FxBuildHasher, FxHashMap};
+use rustc_hash::FxBuildHasher;
 use salsa::{Database, Setter};
+use std::sync::Arc;
 
 #[salsa::db]
 #[derive(Clone, Default)]
@@ -41,9 +43,9 @@ use salsa::{Database, Setter};
 /// not the `initialize` method.
 pub struct LanguageService {
     storage: salsa::Storage<Self>,
-    semantic_token_kinds: IndexSet<SemanticTokenKind, FxBuildHasher>,
-    documents: FxHashMap<InternUri, Document>,
-    global_config: ServiceConfig,
+    semantic_token_kinds: Arc<IndexSet<SemanticTokenKind, FxBuildHasher>>,
+    documents: Arc<DashMap<InternUri, Document, FxBuildHasher>>,
+    global_config: Arc<ServiceConfig>,
 }
 #[salsa::db]
 impl Database for LanguageService {}
@@ -77,14 +79,14 @@ impl LanguageService {
                     Some((internal_kind, token_type.clone()))
                 })
                 .collect();
-            self.semantic_token_kinds = kinds_map.keys().cloned().collect();
+            self.semantic_token_kinds = Arc::new(kinds_map.keys().cloned().collect());
         }
 
         if let Some(config) = params
             .initialization_options
             .and_then(|config| serde_json::from_value(config).ok())
         {
-            self.global_config = config;
+            self.global_config = Arc::new(config);
         }
 
         InitializeResult {
@@ -174,8 +176,10 @@ impl LanguageService {
     #[inline]
     /// Get configurations of all opened documents.
     pub fn get_configs(&self) -> impl Iterator<Item = (String, &ServiceConfig)> {
-        self.documents.iter().filter_map(|(uri, document)| {
-            document.config(self).map(|config| (uri.raw(self), config))
+        self.documents.iter().filter_map(|pair| {
+            pair.value()
+                .config(self)
+                .map(|config| (pair.key().raw(self), config))
         })
     }
 
@@ -190,7 +194,7 @@ impl LanguageService {
     #[inline]
     /// Update global configuration.
     pub fn set_global_config(&mut self, config: ServiceConfig) {
-        self.global_config = config;
+        self.global_config = Arc::new(config);
     }
 
     #[inline]

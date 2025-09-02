@@ -10,6 +10,7 @@ keywords = ["wasm"]
 exclude = ["/tests"]
 
 [dependencies]
+dashmap = "6.1"
 fuzzy-matcher = "0.3"
 indexmap = "2.9"
 itertools = "0.14"

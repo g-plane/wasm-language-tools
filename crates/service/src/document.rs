@@ -30,7 +30,7 @@ impl LanguageService {
         let uri = InternUri::new(self, uri);
         let line_index = LineIndex::new(&source);
         let (green, errors) = wat_parser::parse_to_green(&source);
-        if let Some(document) = self.documents.get(&uri).copied() {
+        if let Some(document) = self.documents.get(&uri).map(|r| *r.value()) {
             document.set_line_index(self).to(line_index);
             document.set_root(self).to(green);
             document.set_syntax_errors(self).to(errors);
@@ -45,6 +45,6 @@ impl LanguageService {
     pub(crate) fn get_document(&self, uri: impl AsRef<str>) -> Option<Document> {
         self.documents
             .get(&InternUri::new(self, uri.as_ref()))
-            .copied()
+            .map(|r| *r.value())
     }
 }
