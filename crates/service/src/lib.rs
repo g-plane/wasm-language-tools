@@ -209,12 +209,6 @@ impl LanguageService {
             }],
         }
     }
-
-    #[inline]
-    /// Check if the current request is cancelled.
-    pub fn is_cancelled(&self) -> bool {
-        false
-    }
 }
 
 #[cfg(test)]

@@ -144,16 +144,6 @@ impl Server {
         method: String,
         params: serde_json::Value,
     ) -> Message {
-        if service.is_cancelled() {
-            return Message::ErrResponse {
-                id,
-                error: ResponseError {
-                    code: -32802,
-                    message: "This request is cancelled by server.".into(),
-                    data: None,
-                },
-            };
-        }
         try_cast_request::<CallHierarchyPrepareRequest>(&method, params)
             .map(|params| {
                 params
