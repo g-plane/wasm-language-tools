@@ -140,7 +140,7 @@ impl LanguageService {
                 semantic_tokens_provider: Some(Union2::A(SemanticTokensOptions {
                     legend: SemanticTokensLegend {
                         token_types: kinds_map.into_values().collect(),
-                        token_modifiers: vec![],
+                        token_modifiers: vec!["mutable".into()],
                     },
                     range: Some(Union2::A(true)),
                     full: Some(Union2::A(true)),

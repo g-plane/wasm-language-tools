@@ -61,6 +61,13 @@ const SOURCE: &str = r#"
     (export "" (func $func))
     (export "" (func 0))
     (elem func $func)
+    (global $g (mut))
+    (type $arr (array (mut)))
+    (type $struct (struct (field (mut))))
+    (func
+        global.get $g
+        array.get $arr
+        struct.get $struct 0)
 )
 (; block ;)
 ;; line

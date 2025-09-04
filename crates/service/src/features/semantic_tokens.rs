@@ -1,8 +1,8 @@
 use crate::{
     LanguageService,
-    binder::{SymbolKey, SymbolTable},
+    binder::{SymbolKey, SymbolKind, SymbolTable},
     document::Document,
-    helpers,
+    helpers, mutability,
 };
 use line_index::LineCol;
 use lspt::{SemanticTokens, SemanticTokensParams, SemanticTokensRangeParams};
@@ -71,6 +71,7 @@ impl LanguageService {
         prev_start: &mut u32,
     ) -> Vec<u32> {
         let line_index = document.line_index(self);
+        let symbol_table = SymbolTable::of(self, document);
         tokens
             .filter_map(|token| {
                 match token.kind() {
@@ -112,7 +113,7 @@ impl LanguageService {
                             // token type
                             token_type,
                             // token modifiers bitset
-                            0,
+                            compute_token_modifier(self, document, symbol_table, &token),
                         ])
                     }
                 }
@@ -200,6 +201,39 @@ impl LanguageService {
             _ => None,
         }
         .map(|v| v as u32)
+    }
+}
+
+fn compute_token_modifier(
+    service: &LanguageService,
+    document: Document,
+    symbol_table: &SymbolTable,
+    token: &SyntaxToken,
+) -> u32 {
+    if matches!(
+        token.kind(),
+        SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT
+    ) && let Some(symbol) = token
+        .parent()
+        .map(|node| SymbolKey::new(&node))
+        .and_then(|key| symbol_table.symbols.iter().find(|symbol| symbol.key == key))
+    {
+        match symbol.kind {
+            SymbolKind::GlobalDef | SymbolKind::Type | SymbolKind::FieldDef => {
+                mutability::get_mutabilities(service, document)
+                    .get(&symbol.key)
+                    .and_then(|mutability| mutability.mut_keyword)
+                    .map_or(0, |_| 1)
+            }
+            SymbolKind::GlobalRef | SymbolKind::TypeUse | SymbolKind::FieldRef => symbol_table
+                .find_def_by_symbol(symbol)
+                .and_then(|symbol| mutability::get_mutabilities(service, document).get(&symbol.key))
+                .and_then(|mutability| mutability.mut_keyword)
+                .map_or(0, |_| 1),
+            _ => 0,
+        }
+    } else {
+        0
     }
 }
 
