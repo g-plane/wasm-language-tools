@@ -1,9 +1,10 @@
 use criterion::{Criterion, criterion_group, criterion_main};
 use lspt::{
     ClientCapabilities, CompletionContext, CompletionParams, CompletionTriggerKind,
-    DocumentSymbolParams, InitializeParams, InlayHintParams, Position, Range,
-    SemanticTokensClientCapabilities, SemanticTokensParams, TextDocumentClientCapabilities,
-    TextDocumentIdentifier,
+    DidChangeTextDocumentParams, DocumentSymbolParams, InitializeParams, InlayHintParams, Position,
+    Range, SemanticTokensClientCapabilities, SemanticTokensParams, TextDocumentClientCapabilities,
+    TextDocumentContentChangeEvent, TextDocumentContentChangePartial, TextDocumentIdentifier,
+    VersionedTextDocumentIdentifier,
 };
 use std::hint::black_box;
 use wat_service::LanguageService;
@@ -12,7 +13,7 @@ pub fn changed_text_bench(c: &mut Criterion) {
     let uri = "untitled:test".to_string();
     c.bench_function("changed text", |b| {
         b.iter(|| {
-            let mut source = "
+            let source = "
 (module
     (func $f1 (param $p1 i32) (param $p2 i32) (result i32)
         (i32.add (local.get) (local.get $p2))
@@ -68,9 +69,29 @@ pub fn changed_text_bench(c: &mut Criterion) {
             service.commit(uri.clone(), source.clone());
             requests_on_changed(&mut service, &uri);
 
-            let mut insert_char = |offset, char, line, col| {
-                source.insert(offset, char);
-                service.commit(uri.clone(), source.clone());
+            let mut insert_char = |char: char, line, col| {
+                service.did_change(DidChangeTextDocumentParams {
+                    text_document: VersionedTextDocumentIdentifier {
+                        uri: uri.clone(),
+                        version: 0,
+                    },
+                    content_changes: vec![TextDocumentContentChangeEvent::A(
+                        TextDocumentContentChangePartial {
+                            range: Range {
+                                start: Position {
+                                    line,
+                                    character: col,
+                                },
+                                end: Position {
+                                    line,
+                                    character: col,
+                                },
+                            },
+                            text: char.to_string(),
+                            ..Default::default()
+                        },
+                    )],
+                });
                 let completions = service.completion(black_box(CompletionParams {
                     context: Some(CompletionContext {
                         trigger_character: Some(char.to_string()),
@@ -87,12 +108,12 @@ pub fn changed_text_bench(c: &mut Criterion) {
                 black_box(completions);
                 requests_on_changed(&mut service, &uri);
             };
-            insert_char(95, ' ', 3, 27);
-            insert_char(96, '$', 3, 28);
-            insert_char(97, 'p', 3, 29);
-            insert_char(287, ' ', 11, 13);
-            insert_char(288, '$', 11, 14);
-            insert_char(289, 'f', 11, 15);
+            insert_char(' ', 3, 27);
+            insert_char('$', 3, 28);
+            insert_char('p', 3, 29);
+            insert_char(' ', 11, 13);
+            insert_char('$', 11, 14);
+            insert_char('f', 11, 15);
         })
     });
 }

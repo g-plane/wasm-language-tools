@@ -24,6 +24,28 @@ pub fn parse_to_green(source: &str) -> (GreenNode, Vec<SyntaxError>) {
 }
 
 #[inline]
+/// Parse a snippet of module field starting from the specific offset.
+///
+/// It will return `None` if it isn't a module field.
+///
+/// Note that there can't be leading whitespaces or comments after that offset.
+///
+/// ## Examples
+///
+/// ```
+/// # use wat_parser::parse_partial;
+/// assert!(parse_partial("(module (fun))", 8).is_none());
+/// assert!(parse_partial("(module (func))", 7).is_none());
+/// assert!(!parse_partial("(module (func ()))", 8).unwrap().1.is_empty());
+/// ```
+pub fn parse_partial(source: &str, from: usize) -> Option<(GreenNode, Vec<SyntaxError>)> {
+    let mut parser = Parser::offset_from(source, from);
+    parser
+        .parse_module_field()
+        .map(|green| (green, parser.errors))
+}
+
+#[inline]
 /// Checks if a character is a valid identifier character.
 ///
 /// ## Examples
@@ -67,6 +89,15 @@ impl<'s> Parser<'s> {
         Parser {
             source,
             lexer: Lexer::new(source),
+            errors: Vec::new(),
+            elements: Vec::new(),
+        }
+    }
+
+    fn offset_from(source: &'s str, offset: usize) -> Self {
+        Parser {
+            source,
+            lexer: Lexer::offset_from(source, offset),
             errors: Vec::new(),
             elements: Vec::new(),
         }

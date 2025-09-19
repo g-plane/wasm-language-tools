@@ -346,7 +346,7 @@ impl Parser<'_> {
         node
     }
 
-    fn parse_module_field(&mut self) -> Option<GreenNode> {
+    pub(crate) fn parse_module_field(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());

@@ -6,7 +6,6 @@ use crate::{
 use lspt::{
     ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams,
     DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams,
-    TextDocumentContentChangeWholeDocument, Union2,
     notification::{
         DidChangeConfigurationNotification, DidChangeTextDocumentNotification,
         DidOpenTextDocumentNotification, ExitNotification, Notification as _,
@@ -430,14 +429,10 @@ impl Server {
         &mut self,
         params: DidChangeTextDocumentParams,
     ) -> anyhow::Result<()> {
-        if let Some(Union2::B(TextDocumentContentChangeWholeDocument { text })) =
-            params.content_changes.first()
-        {
-            self.service
-                .commit(params.text_document.uri.clone(), text.clone());
-            if !self.support_pull_diagnostics {
-                self.publish_diagnostics(params.text_document.uri)?;
-            }
+        let uri = params.text_document.uri.clone();
+        self.service.did_change(params);
+        if !self.support_pull_diagnostics {
+            self.publish_diagnostics(uri)?;
         }
         Ok(())
     }

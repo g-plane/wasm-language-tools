@@ -153,7 +153,7 @@ impl LanguageService {
                 type_hierarchy_provider: Some(Union3::A(true)),
                 text_document_sync: Some(Union2::A(TextDocumentSyncOptions {
                     open_close: Some(true),
-                    change: Some(TextDocumentSyncKind::Full),
+                    change: Some(TextDocumentSyncKind::Incremental),
                     will_save: Some(false),
                     will_save_wait_until: Some(false),
                     save: Some(Union2::A(false)),
