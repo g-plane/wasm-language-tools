@@ -8,8 +8,8 @@ use lspt::{
     DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams,
     notification::{
         DidChangeConfigurationNotification, DidChangeTextDocumentNotification,
-        DidOpenTextDocumentNotification, ExitNotification, Notification as _,
-        PublishDiagnosticsNotification,
+        DidCloseTextDocumentNotification, DidOpenTextDocumentNotification, ExitNotification,
+        Notification as _, PublishDiagnosticsNotification,
     },
     request::{
         CallHierarchyIncomingCallsRequest, CallHierarchyOutgoingCallsRequest,
@@ -76,6 +76,15 @@ impl Server {
                     ) {
                         Ok(Ok(params)) => {
                             self.handle_did_change_text_document(params)?;
+                            continue;
+                        }
+                        Ok(Err(..)) => continue,
+                        Err(p) => params = p,
+                    }
+                    match try_cast_notification::<DidCloseTextDocumentNotification>(&method, params)
+                    {
+                        Ok(Ok(params)) => {
+                            self.service.did_close(params);
                             continue;
                         }
                         Ok(Err(..)) => continue,
@@ -405,8 +414,8 @@ impl Server {
         &mut self,
         params: DidOpenTextDocumentParams,
     ) -> anyhow::Result<()> {
-        let uri = params.text_document.uri;
-        self.service.commit(uri.clone(), params.text_document.text);
+        let uri = params.text_document.uri.clone();
+        self.service.did_open(params);
         if !self.support_pull_diagnostics {
             self.publish_diagnostics(uri.clone())?;
         }

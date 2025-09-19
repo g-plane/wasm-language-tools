@@ -1,6 +1,9 @@
 use crate::{LanguageService, config::ServiceConfig, helpers, uri::InternUri};
 use line_index::LineIndex;
-use lspt::{DidChangeTextDocumentParams, TextDocumentContentChangeEvent};
+use lspt::{
+    DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
+    TextDocumentContentChangeEvent,
+};
 use rowan::{GreenNode, TextSize};
 use salsa::Setter;
 use std::{cmp::Ordering, ops::Range};
@@ -27,7 +30,7 @@ impl Document {
 
 impl LanguageService {
     #[inline]
-    /// Commit a document to the service, can be used when handling `textDocument/didOpen` notifications.
+    /// Commit a document to the service.
     pub fn commit(&mut self, uri: String, text: String) {
         let uri = InternUri::new(self, uri);
         let line_index = LineIndex::new(&text);
@@ -43,6 +46,25 @@ impl LanguageService {
                 Document::new(self, uri, text, line_index, green, errors, None),
             );
         };
+    }
+
+    /// Handler for `textDocument/didOpen` notification.
+    pub fn did_open(&mut self, params: DidOpenTextDocumentParams) {
+        let uri = InternUri::new(self, params.text_document.uri);
+        let line_index = LineIndex::new(&params.text_document.text);
+        let (green, errors) = wat_parser::parse_to_green(&params.text_document.text);
+        self.documents.insert(
+            uri,
+            Document::new(
+                self,
+                uri,
+                params.text_document.text,
+                line_index,
+                green,
+                errors,
+                None,
+            ),
+        );
     }
 
     /// Handler for `textDocument/didChange` notification.
@@ -161,6 +183,12 @@ impl LanguageService {
         document.set_line_index(self).to(line_index);
         document.set_root(self).to(green);
         document.set_syntax_errors(self).to(errors);
+    }
+
+    /// Handler for `textDocument/didClose` notification.
+    pub fn did_close(&mut self, params: DidCloseTextDocumentParams) {
+        self.documents
+            .remove(&InternUri::new(self, params.text_document.uri));
     }
 
     pub(crate) fn get_document(&self, uri: impl AsRef<str>) -> Option<Document> {
