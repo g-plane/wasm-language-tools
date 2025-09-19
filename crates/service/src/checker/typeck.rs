@@ -316,24 +316,37 @@ fn check_block_like(
                             init_stack,
                             &results,
                         );
-                    } else if !results.is_empty() {
-                        diagnostics.push(Diagnostic {
-                            range: helpers::rowan_range_to_lsp_range(
-                                shared.line_index,
-                                node.text_range(),
-                            ),
-                            severity: Some(DiagnosticSeverity::Error),
-                            source: Some("wat".into()),
-                            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                            message: format!(
-                                "missing `else` branch with expected types [{}]",
-                                results
-                                    .iter()
-                                    .map(|ty| ty.render(shared.service))
-                                    .join(", ")
-                            ),
-                            ..Default::default()
-                        });
+                    } else {
+                        let mut type_stack = TypeStack {
+                            document: shared.document,
+                            service: shared.service,
+                            line_index: shared.line_index,
+                            module_id: shared.module_id,
+                            stack: init_stack,
+                            has_never: false,
+                        };
+                        if type_stack
+                            .check_to_bottom(&results, ReportRange::Instr(&instr))
+                            .is_some()
+                        {
+                            diagnostics.push(Diagnostic {
+                                range: helpers::rowan_range_to_lsp_range(
+                                    shared.line_index,
+                                    node.text_range(),
+                                ),
+                                severity: Some(DiagnosticSeverity::Error),
+                                source: Some("wat".into()),
+                                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                                message: format!(
+                                    "missing `else` branch with expected types [{}]",
+                                    results
+                                        .iter()
+                                        .map(|ty| ty.render(shared.service))
+                                        .join(", ")
+                                ),
+                                ..Default::default()
+                            });
+                        }
                     }
                 }
             }

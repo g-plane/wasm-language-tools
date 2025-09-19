@@ -470,7 +470,14 @@ fn missing_else() {
   (func
     i32.const 1
     if
-     ;; missing else is allowed since both branches return nothing
+    end)
+  (func (result i32)
+    i32.const 1
+    i32.const 0
+    if (param i32) (result i32)
+      i32.const -1
+      i32.mul
+      ;; missing else is allowed since param types match result types
     end))
 ";
     let mut service = LanguageService::default();
