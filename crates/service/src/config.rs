@@ -1,4 +1,7 @@
+use crate::{LanguageService, document::Document};
+use salsa::Setter;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(default)]
@@ -65,4 +68,52 @@ pub enum LintLevel {
     Warn,
     #[serde(alias = "deny")]
     Deny,
+}
+
+impl LanguageService {
+    #[inline]
+    // This should be used internally.
+    pub(crate) fn get_config(&self, document: Document) -> &ServiceConfig {
+        document.config(self).unwrap_or(&self.global_config)
+    }
+
+    #[inline]
+    /// Get configurations of all opened documents.
+    pub fn get_configs(&self) -> impl Iterator<Item = (String, &ServiceConfig)> {
+        self.documents.iter().filter_map(|pair| {
+            pair.value()
+                .config(self)
+                .map(|config| (pair.key().raw(self), config))
+        })
+    }
+
+    #[inline]
+    /// Update or insert configuration of a specific document.
+    pub fn set_config(&mut self, uri: String, config: ServiceConfig) {
+        if let Some(document) = self.get_document(uri) {
+            document.set_config(self).to(Some(config));
+        }
+    }
+
+    #[inline]
+    /// Update global configuration.
+    pub fn set_global_config(&mut self, config: ServiceConfig) {
+        self.global_config = Arc::new(config);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_and_set_configs() {
+        let mut service = LanguageService::default();
+        assert_eq!(service.get_configs().count(), 0);
+
+        let uri = "untitled://test".to_string();
+        service.commit(uri.clone(), "".into());
+        service.set_config(uri.clone(), ServiceConfig::default());
+        assert_eq!(service.get_configs().next().unwrap().0, uri);
+    }
 }

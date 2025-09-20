@@ -26,7 +26,7 @@ use lspt::{
     notification::DidChangeConfigurationNotification,
 };
 use rustc_hash::FxBuildHasher;
-use salsa::{Database, Setter};
+use salsa::Database;
 use std::sync::Arc;
 
 #[salsa::db]
@@ -168,36 +168,6 @@ impl LanguageService {
     }
 
     #[inline]
-    // This should be used internally.
-    fn get_config(&self, document: Document) -> &ServiceConfig {
-        document.config(self).unwrap_or(&self.global_config)
-    }
-
-    #[inline]
-    /// Get configurations of all opened documents.
-    pub fn get_configs(&self) -> impl Iterator<Item = (String, &ServiceConfig)> {
-        self.documents.iter().filter_map(|pair| {
-            pair.value()
-                .config(self)
-                .map(|config| (pair.key().raw(self), config))
-        })
-    }
-
-    #[inline]
-    /// Update or insert configuration of a specific document.
-    pub fn set_config(&mut self, uri: String, config: ServiceConfig) {
-        if let Some(document) = self.get_document(uri) {
-            document.set_config(self).to(Some(config));
-        }
-    }
-
-    #[inline]
-    /// Update global configuration.
-    pub fn set_global_config(&mut self, config: ServiceConfig) {
-        self.global_config = Arc::new(config);
-    }
-
-    #[inline]
     /// Get dynamically registered capabilities.
     pub fn dynamic_capabilities(&self) -> RegistrationParams {
         use lspt::notification::Notification;
@@ -208,21 +178,5 @@ impl LanguageService {
                 register_options: None,
             }],
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn get_and_set_configs() {
-        let mut service = LanguageService::default();
-        assert_eq!(service.get_configs().count(), 0);
-
-        let uri = "untitled://test".to_string();
-        service.commit(uri.clone(), "".into());
-        service.set_config(uri.clone(), ServiceConfig::default());
-        assert_eq!(service.get_configs().next().unwrap().0, uri);
     }
 }
