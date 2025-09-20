@@ -1,7 +1,7 @@
 use crate::message::Message;
 use anyhow::Result;
+use log::debug;
 use std::io::{BufRead, Read, StdinLock, Write};
-use tracing::{Level, event};
 
 pub fn read(stdin: &mut StdinLock) -> Result<Option<Message>> {
     let mut length = 0;
@@ -20,19 +20,19 @@ pub fn read(stdin: &mut StdinLock) -> Result<Option<Message>> {
     }
     serde_json::from_reader(stdin.take(length))
         .inspect(|message| {
-            event!(Level::DEBUG, "client → server:\n{message:#?}");
+            debug!("client → server:\n{message:#?}");
         })
         .map(Some)
         .map_err(anyhow::Error::from)
 }
 
 pub fn write(message: Message) -> Result<()> {
-    event!(Level::DEBUG, "server → client:\n{message:#?}");
+    debug!("server → client:\n{message:#?}");
     let json = serde_json::to_string(&message)?;
     let mut stdout = std::io::stdout().lock();
     write!(stdout, "Content-Length: {}\r\n\r\n", json.len())?;
     stdout.write_all(json.as_bytes())?;
     stdout.flush()?;
-    event!(Level::DEBUG, "stdout: {json}");
+    debug!("stdout: {json}");
     Ok(())
 }

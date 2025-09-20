@@ -1,7 +1,5 @@
 use crate::server::Server;
-use std::env;
-use tracing::{Level, event};
-use tracing_subscriber::prelude::*;
+use std::{env, time::SystemTime};
 
 mod message;
 mod sent;
@@ -15,15 +13,25 @@ fn main() -> anyhow::Result<()> {
     }
 
     if env::args().any(|arg| arg == "--debug")
-        && let Ok(layer) = tracing_journald::layer()
+        && let Ok(log_file) = fern::log_file(format!(
+            "wat_server-{}.log",
+            humantime::format_rfc3339_seconds(SystemTime::now()),
+        ))
     {
-        tracing_subscriber::registry().with(layer).init();
+        let _ = fern::Dispatch::new()
+            .format(|out, message, record| {
+                out.finish(format_args!(
+                    "[{} {} {}] {message}",
+                    humantime::format_rfc3339_seconds(SystemTime::now()),
+                    record.level(),
+                    record.target(),
+                ))
+            })
+            .level(log::LevelFilter::Debug)
+            .chain(log_file)
+            .apply();
     }
 
-    let span = tracing::span!(Level::TRACE, "wat_server");
-    let _enter = span.enter();
-
-    event!(Level::INFO, "wat_server starting");
     Server::default().run()?;
     Ok(())
 }
