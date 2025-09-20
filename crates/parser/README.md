@@ -14,7 +14,7 @@ use wat_syntax::SyntaxKind;
 
 let input = "(module)";
 let (tree, errors) = wat_parser::parse(input);
-assert_eq!(tree.kind(), SyntaxKind::ROOT);
+assert_eq!(tree.kind(), SyntaxKind::ROOT.into());
 ```
 
 Any syntax errors won't prevent the parser from parsing the rest of the input,

@@ -34,7 +34,7 @@ impl LanguageService {
     pub fn commit(&mut self, uri: String, text: String) {
         let uri = InternUri::new(self, uri);
         let line_index = LineIndex::new(&text);
-        let (green, errors) = wat_parser::parse_to_green(&text);
+        let (green, errors) = wat_parser::parse(&text);
         if let Some(document) = self.documents.get(&uri).map(|r| *r.value()) {
             document.set_text(self).to(text);
             document.set_line_index(self).to(line_index);
@@ -52,7 +52,7 @@ impl LanguageService {
     pub fn did_open(&mut self, params: DidOpenTextDocumentParams) {
         let uri = InternUri::new(self, params.text_document.uri);
         let line_index = LineIndex::new(&params.text_document.text);
-        let (green, errors) = wat_parser::parse_to_green(&params.text_document.text);
+        let (green, errors) = wat_parser::parse(&params.text_document.text);
         self.documents.insert(
             uri,
             Document::new(
@@ -141,7 +141,7 @@ impl LanguageService {
                         document.set_syntax_errors(self).to(all_errors);
                     }
                     [TextDocumentContentChangeEvent::B(whole)] => {
-                        let (green, errors) = wat_parser::parse_to_green(&whole.text);
+                        let (green, errors) = wat_parser::parse(&whole.text);
                         document.set_text(self).to(whole.text.clone());
                         document
                             .set_line_index(self)
@@ -178,7 +178,7 @@ impl LanguageService {
                 }
             });
 
-        let (green, errors) = wat_parser::parse_to_green(&text);
+        let (green, errors) = wat_parser::parse(&text);
         document.set_text(self).to(text);
         document.set_line_index(self).to(line_index);
         document.set_root(self).to(green);

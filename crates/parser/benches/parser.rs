@@ -31,7 +31,7 @@ static CODE: &str = r#"(module
 fn bench_parser(c: &mut Criterion) {
     c.bench_function("parser", |b| {
         b.iter(|| {
-            let _ = wat_parser::parse_to_green(CODE);
+            let _ = wat_parser::parse(CODE);
         });
     });
 }

@@ -1,7 +1,7 @@
 use self::lexer::Lexer;
 use crate::error::SyntaxError;
 use rowan::{GreenNode, GreenToken, NodeOrToken};
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::SyntaxKind;
 
 mod builder;
 mod green;
@@ -11,14 +11,8 @@ mod lexer;
 mod module;
 mod ty;
 
-/// Parse the code into a rowan syntax node.
-pub fn parse(source: &str) -> (SyntaxNode, Vec<SyntaxError>) {
-    let (green, errors) = parse_to_green(source);
-    (SyntaxNode::new_root(green), errors)
-}
-
 /// Parse the code into a rowan green node.
-pub fn parse_to_green(source: &str) -> (GreenNode, Vec<SyntaxError>) {
+pub fn parse(source: &str) -> (GreenNode, Vec<SyntaxError>) {
     let mut parser = Parser::new(source);
     (parser.parse_root(), parser.errors)
 }

@@ -5,6 +5,7 @@ use codespan_reporting::{
 };
 use insta::{Settings, assert_snapshot, glob};
 use std::{fs, path::Path};
+use wat_syntax::SyntaxNode;
 
 #[test]
 fn parser_snapshot() {
@@ -40,7 +41,8 @@ fn parser_snapshot() {
             assert_snapshot!(
                 name,
                 format!(
-                    "{tree:#?}\n{}",
+                    "{:#?}\n{}",
+                    SyntaxNode::new_root(tree),
                     String::from_utf8(buffer.into_inner()).unwrap()
                 )
             );

@@ -12,11 +12,11 @@ so you should use the parser to parse source code first.
 ```rust
 use rowan::ast::AstNode;
 use wat_formatter::format;
-use wat_syntax::ast::Root;
+use wat_syntax::{SyntaxNode, ast::Root};
 
 let input = "( module )";
 let (tree, _) = wat_parser::parse(input);
-let root = Root::cast(tree).unwrap();
+let root = Root::cast(SyntaxNode::new_root(tree)).unwrap();
 assert_eq!("(module)\n", format(&root, &Default::default()));
 ```
 
@@ -40,12 +40,12 @@ Notes:
 use line_index::LineIndex;
 use rowan::{ast::AstNode, TextRange, TextSize};
 use wat_formatter::format_range;
-use wat_syntax::ast::Root;
+use wat_syntax::{SyntaxNode, ast::Root};
 
 let input = "( module ( func ) )";
 let line_index = LineIndex::new(input);
 let (tree, _) = wat_parser::parse(input);
-let root = Root::cast(tree).unwrap();
+let root = Root::cast(SyntaxNode::new_root(tree)).unwrap();
 let (formatted, range) = format_range(
     &root,
     &Default::default(),

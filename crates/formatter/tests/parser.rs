@@ -2,7 +2,7 @@ use insta::{Settings, assert_snapshot, glob};
 use rowan::ast::AstNode;
 use std::{fs, path::Path};
 use wat_formatter::{config::FormatOptions, format};
-use wat_syntax::ast::Root;
+use wat_syntax::{SyntaxNode, ast::Root};
 
 #[test]
 fn parser_fixture_snapshot() {
@@ -18,7 +18,7 @@ fn parser_fixture_snapshot() {
 
 fn run_format_test(path: &Path, input: &str, options: &FormatOptions) -> String {
     let (tree, _) = wat_parser::parse(input);
-    let output = format(&Root::cast(tree).unwrap(), options);
+    let output = format(&Root::cast(SyntaxNode::new_root(tree)).unwrap(), options);
 
     similar_asserts::assert_eq!(
         output.replace(" \n", "\n"),
@@ -28,7 +28,7 @@ fn run_format_test(path: &Path, input: &str, options: &FormatOptions) -> String 
     );
 
     let (tree, _) = wat_parser::parse(input);
-    let regression_format = format(&Root::cast(tree).unwrap(), options);
+    let regression_format = format(&Root::cast(SyntaxNode::new_root(tree)).unwrap(), options);
     similar_asserts::assert_eq!(
         output,
         regression_format,
