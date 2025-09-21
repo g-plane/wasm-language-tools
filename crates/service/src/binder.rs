@@ -142,16 +142,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     SymbolKind::Func,
                     &module,
                 ));
-                symbols.push(Symbol {
-                    key: SymbolKey::new(&node),
-                    green: node.green().into(),
-                    region: SymbolKey::new(&module),
-                    kind: SymbolKind::BlockDef,
-                    idx: Idx {
-                        num: Some(0), // fake ID
-                        name: None,   // function name can't be the label
-                    },
-                });
                 let Some(func) = ModuleFieldFunc::cast(node.clone()) else {
                     return;
                 };
@@ -343,6 +333,22 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                     }
                                     current = parent;
                                     levels += 1;
+                                }
+                                let func_block_idx = Idx {
+                                    num: Some(levels),
+                                    name: None,
+                                };
+                                if symbol.idx.is_defined_by(&func_block_idx)
+                                    && let Some(func_symbol) = symbols.iter().find(|symbol| {
+                                        symbol.kind == SymbolKind::Func
+                                            && symbol.key == current.region
+                                    })
+                                {
+                                    blocks.push(BlockItem {
+                                        ref_key: symbol.key,
+                                        def_key: func_symbol.key,
+                                        def_idx: func_block_idx,
+                                    });
                                 }
                                 symbols.push(symbol);
                             });
