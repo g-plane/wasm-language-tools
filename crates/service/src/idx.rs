@@ -23,11 +23,16 @@ impl<'db> Idx<'db> {
     }
 
     pub fn is_ref(&self) -> bool {
-        if self.name.is_some() {
-            self.num.is_none()
-        } else {
-            self.num.is_some()
-        }
+        matches!(
+            self,
+            Idx {
+                num: None,
+                name: Some(..),
+            } | Idx {
+                num: Some(..),
+                name: None,
+            }
+        )
     }
 
     pub fn is_defined_by(&self, other: &Self) -> bool {
