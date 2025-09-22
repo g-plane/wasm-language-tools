@@ -793,14 +793,13 @@ pub struct Symbol<'db> {
 }
 impl PartialEq for Symbol<'_> {
     fn eq(&self, other: &Self) -> bool {
-        self.key == other.key && self.kind == other.kind
+        self.key == other.key
     }
 }
 impl Eq for Symbol<'_> {}
 impl Hash for Symbol<'_> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.key.hash(state);
-        self.kind.hash(state);
     }
 }
 

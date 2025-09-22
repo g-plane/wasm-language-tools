@@ -8,40 +8,6 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 5,
-          "character": 15
-        },
-        "end": {
-          "line": 5,
-          "character": 17
-        }
-      },
-      "severity": 2,
-      "code": "shadow",
-      "source": "wat",
-      "message": "`$b` is shadowed",
-      "relatedInformation": [
-        {
-          "location": {
-            "uri": "untitled:test",
-            "range": {
-              "start": {
-                "line": 7,
-                "character": 19
-              },
-              "end": {
-                "line": 7,
-                "character": 21
-              }
-            }
-          },
-          "message": "`$b` shadowing occurs here"
-        }
-      ]
-    },
-    {
-      "range": {
-        "start": {
           "line": 3,
           "character": 11
         },
@@ -71,6 +37,40 @@ expression: response
           },
           "message": "`$b` shadowing occurs here"
         },
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 7,
+                "character": 19
+              },
+              "end": {
+                "line": 7,
+                "character": 21
+              }
+            }
+          },
+          "message": "`$b` shadowing occurs here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 15
+        },
+        "end": {
+          "line": 5,
+          "character": 17
+        }
+      },
+      "severity": 2,
+      "code": "shadow",
+      "source": "wat",
+      "message": "`$b` is shadowed",
+      "relatedInformation": [
         {
           "location": {
             "uri": "untitled:test",
