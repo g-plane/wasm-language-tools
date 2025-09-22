@@ -27,7 +27,7 @@ pub fn check(
     let region = SymbolKey::new(node);
     let locals = symbol_table
         .symbols
-        .iter()
+        .values()
         .filter(|symbol| symbol.kind == SymbolKind::Local && symbol.region == region)
         .map(|symbol| {
             let ty = types_analyzer::extract_type(service, &symbol.green);

@@ -18,11 +18,7 @@ pub fn act(
     node: &SyntaxNode,
 ) -> Option<CodeAction> {
     let ref_key = SymbolKey::new(node);
-    let ref_idx = symbol_table
-        .symbols
-        .iter()
-        .find(|symbol| symbol.key == ref_key)?
-        .idx;
+    let ref_idx = symbol_table.symbols.get(&ref_key)?.idx;
     let def_idx = symbol_table
         .find_def(ref_key)
         .or_else(|| symbol_table.find_param_or_local_def(ref_key))

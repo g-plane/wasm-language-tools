@@ -674,7 +674,7 @@ fn get_cmp_list(
                     items.extend(
                         symbol_table
                             .symbols
-                            .iter()
+                            .values()
                             .filter(|symbol| {
                                 matches!(symbol.kind, SymbolKind::Param | SymbolKind::Local)
                                     && symbol.region == func
@@ -746,7 +746,7 @@ fn get_cmp_list(
                                     types_analyzer::get_func_sig(
                                         service,
                                         document,
-                                        symbol.key,
+                                        *symbol.key,
                                         &symbol.green,
                                     ),
                                 )),
@@ -755,7 +755,7 @@ fn get_cmp_list(
                                         types_analyzer::get_func_sig(
                                             service,
                                             document,
-                                            symbol.key,
+                                            *symbol.key,
                                             &symbol.green,
                                         )
                                         .render_compact(service)
@@ -921,7 +921,7 @@ fn get_cmp_list(
                     items.extend(
                         symbol_table
                             .symbols
-                            .iter()
+                            .values()
                             .filter(|symbol| {
                                 symbol.kind == SymbolKind::TableDef && symbol.region == module
                             })
@@ -950,7 +950,7 @@ fn get_cmp_list(
                     items.extend(
                         symbol_table
                             .symbols
-                            .iter()
+                            .values()
                             .filter(|symbol| {
                                 matches!(symbol.kind, SymbolKind::BlockDef | SymbolKind::Func)
                                     && symbol.key.text_range().contains_range(token.text_range())

@@ -17,7 +17,7 @@ pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Vec
     let symbol_table = SymbolTable::of(db, document);
     symbol_table
         .symbols
-        .iter()
+        .values()
         .filter(|symbol| symbol.kind == SymbolKind::Type)
         .filter_map(|symbol| {
             let node = TypeDef::cast(symbol.key.to_node(&root))?;
@@ -209,7 +209,7 @@ pub(crate) fn get_rec_type_groups<'db>(
                 Some(RecTypeGroup {
                     type_defs: symbol_table
                         .symbols
-                        .iter()
+                        .values()
                         .filter(|symbol| {
                             symbol.kind == SymbolKind::Type
                                 && rec_range.contains_range(symbol.key.text_range())
@@ -341,7 +341,7 @@ fn substitute_heap_type<'db>(
     rec_group: &RecTypeGroup,
 ) -> Result<(), ()> {
     if let HeapType::Type(idx) = heap_type
-        && let Some(symbol) = symbol_table.symbols.iter().find(|symbol| {
+        && let Some(symbol) = symbol_table.symbols.values().find(|symbol| {
             symbol.kind == SymbolKind::Type
                 && symbol.region == module
                 && idx.is_defined_by(&symbol.idx)

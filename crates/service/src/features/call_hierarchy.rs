@@ -26,7 +26,7 @@ impl LanguageService {
 
         symbol_table
             .symbols
-            .iter()
+            .values()
             .find_map(|symbol| match symbol.kind {
                 SymbolKind::Func if symbol.key.text_range() == parent_range => {
                     Some(vec![CallHierarchyItem {
@@ -36,7 +36,12 @@ impl LanguageService {
                         detail: Some(types_analyzer::render_func_header(
                             self,
                             symbol.idx.name,
-                            types_analyzer::get_func_sig(self, document, symbol.key, &symbol.green),
+                            types_analyzer::get_func_sig(
+                                self,
+                                document,
+                                *symbol.key,
+                                &symbol.green,
+                            ),
                         )),
                         uri: params.text_document.uri.clone(),
                         range: helpers::rowan_range_to_lsp_range(
@@ -59,7 +64,7 @@ impl LanguageService {
                                 types_analyzer::get_func_sig(
                                     self,
                                     document,
-                                    symbol.key,
+                                    *symbol.key,
                                     &symbol.green,
                                 ),
                             )),
@@ -92,11 +97,11 @@ impl LanguageService {
         let callee_def_range = helpers::lsp_range_to_rowan_range(line_index, params.item.range)?;
         let callee_def = symbol_table
             .symbols
-            .iter()
+            .values()
             .find(|symbol| symbol.key.text_range() == callee_def_range)?;
         let items = symbol_table
             .symbols
-            .iter()
+            .values()
             .filter(|symbol| {
                 symbol.kind == SymbolKind::Call
                     && symbol.idx.is_defined_by(&callee_def.idx)
@@ -108,13 +113,8 @@ impl LanguageService {
                     .to_node(&root)
                     .ancestors()
                     .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
-                    .and_then(|node| {
-                        let key = SymbolKey::new(&node);
-                        symbol_table.symbols.iter().find_map(move |symbol| {
-                            (symbol.kind == SymbolKind::Func && symbol.key == key)
-                                .then_some((call_symbol, symbol))
-                        })
-                    })
+                    .and_then(|node| symbol_table.symbols.get(&SymbolKey::new(&node)))
+                    .map(|symbol| (call_symbol, symbol))
             })
             .map(|(call_symbol, func_symbol)| {
                 let plain_instr_range =
@@ -132,7 +132,7 @@ impl LanguageService {
                             types_analyzer::get_func_sig(
                                 self,
                                 document,
-                                func_symbol.key,
+                                *func_symbol.key,
                                 &func_symbol.green,
                             ),
                         )),
@@ -168,7 +168,7 @@ impl LanguageService {
         let call_def_range = helpers::lsp_range_to_rowan_range(line_index, params.item.range)?;
         let call_def_symbol = symbol_table
             .symbols
-            .iter()
+            .values()
             .find(|symbol| symbol.key.text_range() == call_def_range)?;
         let func = call_def_symbol.key.to_node(root);
         let items = func
@@ -193,7 +193,7 @@ impl LanguageService {
                                 types_analyzer::get_func_sig(
                                     self,
                                     document,
-                                    func_symbol.key,
+                                    *func_symbol.key,
                                     &func_symbol.green,
                                 ),
                             )),

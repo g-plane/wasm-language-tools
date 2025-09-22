@@ -137,13 +137,10 @@ fn find_struct_field<'a, 'db>(
     let mut immediates = node
         .children()
         .filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
-    let struct_ref_key = SymbolKey::new(&immediates.next()?);
-    let struct_def_symbol = symbol_table.find_def(struct_ref_key)?;
-    let field_ref_key = SymbolKey::new(&immediates.next()?);
+    let struct_def_symbol = symbol_table.find_def(SymbolKey::new(&immediates.next()?))?;
     let field_ref_symbol = symbol_table
         .symbols
-        .iter()
-        .find(|symbol| symbol.key == field_ref_key)?;
+        .get(&SymbolKey::new(&immediates.next()?))?;
     if let Some(CompositeType::Struct(Fields(fields))) = def_types
         .iter()
         .find(|def_type| def_type.key == struct_def_symbol.key)
@@ -168,10 +165,7 @@ fn find_array<'a, 'db>(
             .children()
             .find(|child| child.kind() == SyntaxKind::IMMEDIATE)?,
     );
-    let ref_symbol = symbol_table
-        .symbols
-        .iter()
-        .find(|symbol| symbol.key == ref_key)?;
+    let ref_symbol = symbol_table.symbols.get(&ref_key)?;
     let def_symbol = symbol_table.find_def_by_symbol(ref_symbol)?;
     if let Some(CompositeType::Array(Some(FieldType { storage, .. }))) = def_types
         .iter()

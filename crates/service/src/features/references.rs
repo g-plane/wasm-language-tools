@@ -35,10 +35,7 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
 
         let key = SymbolKey::new(&current_node);
-        let current_symbol = symbol_table
-            .symbols
-            .iter()
-            .find(|symbol| symbol.key == key)?;
+        let current_symbol = symbol_table.symbols.get(&key)?;
         match &current_symbol.kind {
             SymbolKind::Module => None,
             SymbolKind::Func
@@ -62,7 +59,7 @@ impl LanguageService {
                 Some(
                     symbol_table
                         .symbols
-                        .iter()
+                        .values()
                         .filter(|symbol| {
                             if symbol.kind == current_symbol.kind {
                                 params.context.include_declaration
@@ -98,7 +95,7 @@ impl LanguageService {
                 Some(
                     symbol_table
                         .symbols
-                        .iter()
+                        .values()
                         .filter(|symbol| {
                             if symbol.kind == def_kind {
                                 params.context.include_declaration
@@ -120,7 +117,7 @@ impl LanguageService {
                 Some(
                     symbol_table
                         .symbols
-                        .iter()
+                        .values()
                         .filter(|symbol| match symbol.kind {
                             SymbolKind::Param | SymbolKind::Local => {
                                 params.context.include_declaration

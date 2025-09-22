@@ -50,7 +50,7 @@ impl LanguageService {
                 let first_immediate = parent_instr.immediates().next()?;
                 let func = symbol_table.find_def(SymbolKey::new(first_immediate.syntax()))?;
                 (
-                    types_analyzer::get_func_sig(self, document, func.key, &func.green),
+                    types_analyzer::get_func_sig(self, document, *func.key, &func.green),
                     Some(func),
                 )
             }

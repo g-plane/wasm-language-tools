@@ -62,7 +62,7 @@ pub fn check(
                             .filter_map(|idx| {
                                 symbol_table
                                     .symbols
-                                    .iter()
+                                    .values()
                                     .find(|symbol| {
                                         symbol.kind == SymbolKind::FieldDef
                                             && symbol.region == def_symbol.key

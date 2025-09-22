@@ -29,12 +29,7 @@ pub fn check(
                     .target
                     .and_then(|target| mutabilities.get_key_value(&target))
                     .filter(|(_, mutability)| mutability.mut_keyword.is_none())
-                    .zip(
-                        symbol_table
-                            .symbols
-                            .iter()
-                            .find(|symbol| symbol.key == *key),
-                    )
+                    .zip(symbol_table.symbols.get(key))
                     .map(|((def_key, _), ref_symbol)| {
                         let kind = match ref_symbol.kind {
                             SymbolKind::GlobalRef => "global",

@@ -19,7 +19,7 @@ impl LanguageService {
         #[expect(deprecated)]
         let mut symbols_map = symbol_table
             .symbols
-            .iter()
+            .values()
             .filter_map(|symbol| match symbol.kind {
                 SymbolKind::Module => {
                     let module_range =
@@ -103,8 +103,8 @@ impl LanguageService {
                         symbol.key,
                         DocumentSymbol {
                             name: render_symbol_name(symbol, self),
-                            detail: types_analyzer::extract_global_type(self, &symbol.green)
-                                .map(|ty| {
+                            detail: types_analyzer::extract_global_type(self, &symbol.green).map(
+                                |ty| {
                                     if ModuleFieldGlobal::cast(symbol.key.to_node(&root))
                                         .and_then(|global| global.global_type())
                                         .and_then(|global_type| global_type.mut_keyword())
@@ -114,7 +114,8 @@ impl LanguageService {
                                     } else {
                                         ty.render(self).to_string()
                                     }
-                                }),
+                                },
+                            ),
                             kind: LspSymbolKind::Variable,
                             tags: None,
                             deprecated: None,
@@ -184,7 +185,7 @@ impl LanguageService {
             .collect::<FxHashMap<_, _>>();
         symbol_table
             .symbols
-            .iter()
+            .values()
             .filter(|symbol| symbol.region.kind() != SyntaxKind::ROOT)
             .rev()
             .for_each(|symbol| {

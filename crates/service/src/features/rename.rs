@@ -67,13 +67,10 @@ impl LanguageService {
 
         let old_name = InternIdent::new(self, ident_token.text());
         let symbol_key = SymbolKey::new(&ident_token.parent()?);
-        let symbol = symbol_table
-            .symbols
-            .iter()
-            .find(|symbol| symbol.key == symbol_key)?;
+        let symbol = symbol_table.symbols.get(&symbol_key)?;
         let text_edits = symbol_table
             .symbols
-            .iter()
+            .values()
             .filter(|sym| match &sym.kind {
                 SymbolKind::Func
                 | SymbolKind::Call

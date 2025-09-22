@@ -52,7 +52,7 @@ impl LanguageService {
             .or_else(|| {
                 symbol_table
                     .find_block_def(key)
-                    .and_then(|key| symbol_table.symbols.iter().find(|symbol| symbol.key == key))
+                    .and_then(|key| symbol_table.symbols.get(&key))
                     .map(|symbol| {
                         Union2::A(create_location_by_symbol(
                             params.text_document.uri.clone(),

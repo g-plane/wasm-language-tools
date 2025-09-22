@@ -24,7 +24,7 @@ impl LanguageService {
 
         symbol_table
             .symbols
-            .iter()
+            .values()
             .find_map(|symbol| match symbol.kind {
                 SymbolKind::Type if symbol.key.text_range() == parent_range => {
                     Some(vec![TypeHierarchyItem {
@@ -78,19 +78,14 @@ impl LanguageService {
         let type_def_range = helpers::lsp_range_to_rowan_range(line_index, params.item.range)?;
         let type_def = symbol_table
             .symbols
-            .iter()
+            .values()
             .find(|symbol| symbol.key.text_range() == type_def_range)?;
 
         def_types
             .iter()
             .find(|def_type| def_type.key == type_def.key)
             .and_then(|def_type| def_type.inherits.as_ref())
-            .and_then(|inherits| {
-                symbol_table
-                    .symbols
-                    .iter()
-                    .find(|symbol| symbol.key == inherits.symbol)
-            })
+            .and_then(|inherits| symbol_table.symbols.get(&inherits.symbol))
             .map(|symbol| {
                 vec![TypeHierarchyItem {
                     name: symbol.idx.render(self).to_string(),
@@ -119,7 +114,7 @@ impl LanguageService {
         let type_def_range = helpers::lsp_range_to_rowan_range(line_index, params.item.range)?;
         let key = symbol_table
             .symbols
-            .iter()
+            .values()
             .find(|symbol| symbol.key.text_range() == type_def_range)?
             .key;
 
@@ -132,12 +127,7 @@ impl LanguageService {
                         .as_ref()
                         .is_some_and(|inherits| inherits.symbol == key)
                 })
-                .filter_map(|def_type| {
-                    symbol_table
-                        .symbols
-                        .iter()
-                        .find(|symbol| symbol.key == def_type.key)
-                })
+                .filter_map(|def_type| symbol_table.symbols.get(&def_type.key))
                 .map(|symbol| TypeHierarchyItem {
                     name: symbol.idx.render(self).to_string(),
                     kind: LspSymbolKind::Class,

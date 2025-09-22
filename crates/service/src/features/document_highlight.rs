@@ -48,9 +48,7 @@ impl LanguageService {
             SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
                 let symbol_table = SymbolTable::of(self, document);
                 let key = SymbolKey::new(&token.parent()?);
-                if let Some(current_symbol) =
-                    symbol_table.symbols.iter().find(|symbol| symbol.key == key)
-                {
+                if let Some(current_symbol) = symbol_table.symbols.get(&key) {
                     match &current_symbol.kind {
                         SymbolKind::Module => None,
                         SymbolKind::Func
@@ -74,7 +72,7 @@ impl LanguageService {
                             Some(
                                 symbol_table
                                     .symbols
-                                    .iter()
+                                    .values()
                                     .filter(|symbol| {
                                         if symbol.kind == current_symbol.kind {
                                             current_symbol.idx == symbol.idx
@@ -111,7 +109,7 @@ impl LanguageService {
                             Some(
                                 symbol_table
                                     .symbols
-                                    .iter()
+                                    .values()
                                     .filter(|symbol| {
                                         if symbol.kind == def_kind {
                                             current_symbol.idx.is_defined_by(&symbol.idx)
@@ -135,7 +133,7 @@ impl LanguageService {
                             Some(
                                 symbol_table
                                     .symbols
-                                    .iter()
+                                    .values()
                                     .filter(|symbol| match symbol.kind {
                                         SymbolKind::Param | SymbolKind::Local => {
                                             current_symbol.idx.is_defined_by(&symbol.idx)

@@ -17,7 +17,7 @@ impl LanguageService {
         let range = helpers::lsp_range_to_rowan_range(line_index, params.range)?;
         let inlay_hints = symbol_table
             .symbols
-            .iter()
+            .values()
             .filter_map(|symbol| match symbol.kind {
                 SymbolKind::LocalRef => {
                     if !range.contains_range(symbol.key.text_range()) {

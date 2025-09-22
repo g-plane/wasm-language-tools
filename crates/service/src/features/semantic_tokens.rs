@@ -215,8 +215,7 @@ fn compute_token_modifier(
         SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT
     ) && let Some(symbol) = token
         .parent()
-        .map(|node| SymbolKey::new(&node))
-        .and_then(|key| symbol_table.symbols.iter().find(|symbol| symbol.key == key))
+        .and_then(|node| symbol_table.symbols.get(&SymbolKey::new(&node)))
     {
         match symbol.kind {
             SymbolKind::GlobalDef | SymbolKind::Type | SymbolKind::FieldDef => {

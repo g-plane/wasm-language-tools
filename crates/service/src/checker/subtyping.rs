@@ -23,17 +23,8 @@ pub fn check(
                 let super_type = def_types
                     .iter()
                     .find(|def_type| def_type.key == inherits.symbol)?;
-                let module_key = symbol_table
-                    .symbols
-                    .iter()
-                    .find(|symbol| symbol.key == sub_type.key)?
-                    .region;
-                let module_id = symbol_table
-                    .symbols
-                    .iter()
-                    .find(|symbol| symbol.key == module_key)?
-                    .idx
-                    .num?;
+                let module_key = symbol_table.symbols.get(&sub_type.key)?.region;
+                let module_id = symbol_table.symbols.get(&module_key)?.idx.num?;
 
                 if super_type
                     .idx

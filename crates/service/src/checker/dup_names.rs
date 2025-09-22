@@ -23,7 +23,7 @@ pub fn check(
     diagnostics.extend(
         symbol_table
             .symbols
-            .iter()
+            .values()
             .filter(|symbol| {
                 matches!(
                     symbol.kind,

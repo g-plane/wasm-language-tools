@@ -24,7 +24,7 @@ pub fn check(
         LintLevel::Warn => DiagnosticSeverity::Warning,
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
-    diagnostics.extend(symbol_table.symbols.iter().filter_map(|symbol| {
+    diagnostics.extend(symbol_table.symbols.values().filter_map(|symbol| {
         match symbol.kind {
             SymbolKind::Func => {
                 if is_prefixed_with_underscore(service, symbol)
@@ -135,7 +135,7 @@ fn is_prefixed_with_underscore(service: &LanguageService, symbol: &Symbol) -> bo
 }
 
 fn is_used(symbol_table: &SymbolTable, def_symbol: &Symbol, ref_kind: SymbolKind) -> bool {
-    symbol_table.symbols.iter().any(|other| {
+    symbol_table.symbols.values().any(|other| {
         other.kind == ref_kind
             && other.idx.is_defined_by(&def_symbol.idx)
             && other.region == def_symbol.region

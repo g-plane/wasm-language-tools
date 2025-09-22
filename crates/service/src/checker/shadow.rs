@@ -31,7 +31,7 @@ pub fn check(
     diagnostics.extend(
         symbol_table
             .symbols
-            .iter()
+            .values()
             .fold(FxHashMap::<_, Vec<_>>::default(), |mut map, symbol| {
                 if let Symbol {
                     kind: SymbolKind::BlockDef,
@@ -45,7 +45,7 @@ pub fn check(
                     map.entry((symbol, name)).or_default().extend(
                         symbol_table
                             .symbols
-                            .iter()
+                            .values()
                             .filter(|other| {
                                 *other != symbol
                                     && other.kind == SymbolKind::BlockDef

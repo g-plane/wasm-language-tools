@@ -38,11 +38,7 @@ pub fn check(
                         .all(|action| action.kind == mutability::MutationActionKind::Get)
             })
             .filter_map(|(key, mutability)| {
-                symbol_table
-                    .symbols
-                    .iter()
-                    .find(|symbol| symbol.key == *key)
-                    .zip(mutability.mut_keyword)
+                symbol_table.symbols.get(key).zip(mutability.mut_keyword)
             })
             .map(|(symbol, keyword_range)| {
                 let kind = match symbol.kind {

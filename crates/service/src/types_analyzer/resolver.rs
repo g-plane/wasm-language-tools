@@ -27,7 +27,7 @@ pub(crate) fn resolve_param_types<'db>(
             .find(|child| child.kind() == SyntaxKind::IMMEDIATE)?;
         let func = symbol_table.find_def(SymbolKey::new(&idx))?;
         Some(
-            get_func_sig(service, document, func.key, &func.green)
+            get_func_sig(service, document, *func.key, &func.green)
                 .params
                 .into_iter()
                 .map(|(ty, ..)| OperandType::Val(ty))
@@ -91,13 +91,10 @@ pub(crate) fn resolve_field_type<'db>(
 ) -> Option<FieldType<'db>> {
     let symbol_table = SymbolTable::of(db, document);
     let def_types = get_def_types(db, document);
-    let symbol = symbol_table
-        .symbols
-        .iter()
-        .find(|symbol| symbol.key == key)?;
+    let symbol = symbol_table.symbols.get(&key)?;
     let field_def_symbol = match symbol.kind {
         SymbolKind::FieldDef => symbol,
-        SymbolKind::FieldRef => symbol_table.symbols.iter().find(|other| {
+        SymbolKind::FieldRef => symbol_table.symbols.values().find(|other| {
             other.kind == SymbolKind::FieldDef
                 && other.region == region
                 && symbol.idx.is_defined_by(&other.idx)

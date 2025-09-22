@@ -268,13 +268,13 @@ impl<'db> HeapType<'db> {
                 let def_types = get_def_types(db, document);
                 symbol_table
                     .symbols
-                    .iter()
+                    .values()
                     .find(|symbol| {
                         symbol.kind == SymbolKind::Type
                             && symbol.region == module.key
                             && a.is_defined_by(&symbol.idx)
                     })
-                    .zip(symbol_table.symbols.iter().find(|symbol| {
+                    .zip(symbol_table.symbols.values().find(|symbol| {
                         symbol.kind == SymbolKind::Type
                             && symbol.region == module.key
                             && b.is_defined_by(&symbol.idx)
@@ -305,7 +305,7 @@ impl<'db> HeapType<'db> {
                 #[expect(clippy::match_like_matches_macro)]
                 symbol_table
                     .symbols
-                    .iter()
+                    .values()
                     .find(|symbol| {
                         symbol.kind == SymbolKind::Type
                             && symbol.region == module.key
@@ -342,19 +342,19 @@ impl<'db> HeapType<'db> {
                     },
                 )) = symbol_table
                     .symbols
-                    .iter()
+                    .values()
                     .find(|symbol| {
                         symbol.kind == SymbolKind::Func
                             && symbol.region == module.key
                             && a.is_defined_by(&symbol.idx)
                     })
                     .map(|symbol| {
-                        types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green)
+                        types_analyzer::get_func_sig(db, document, *symbol.key, &symbol.green)
                     })
                     .zip(
                         symbol_table
                             .symbols
-                            .iter()
+                            .values()
                             .find(|symbol| {
                                 symbol.kind == SymbolKind::Type
                                     && symbol.region == module.key
@@ -401,13 +401,13 @@ impl<'db> HeapType<'db> {
             let def_types = get_def_types(db, document);
             symbol_table
                 .symbols
-                .iter()
+                .values()
                 .find(|symbol| {
                     symbol.kind == SymbolKind::Type
                         && symbol.region == module.key
                         && a.is_defined_by(&symbol.idx)
                 })
-                .zip(symbol_table.symbols.iter().find(|symbol| {
+                .zip(symbol_table.symbols.values().find(|symbol| {
                     symbol.kind == SymbolKind::Type
                         && symbol.region == module.key
                         && b.is_defined_by(&symbol.idx)
@@ -451,7 +451,7 @@ impl<'db> HeapType<'db> {
                 let def_types = get_def_types(db, document);
                 symbol_table
                     .symbols
-                    .iter()
+                    .values()
                     .find(|symbol| {
                         symbol.kind == SymbolKind::Type
                             && symbol.region == module.key

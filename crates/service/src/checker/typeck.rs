@@ -549,7 +549,7 @@ fn resolve_sig<'db>(
                 ResolvedSig::from(get_func_sig(
                     shared.service,
                     shared.document,
-                    func.key,
+                    *func.key,
                     &func.green,
                 ))
             })

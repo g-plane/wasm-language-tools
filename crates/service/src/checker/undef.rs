@@ -17,7 +17,7 @@ pub fn check(
     diagnostics.extend(
         symbol_table
             .symbols
-            .iter()
+            .values()
             .filter(|symbol| match symbol.kind {
                 SymbolKind::Module
                 | SymbolKind::Func

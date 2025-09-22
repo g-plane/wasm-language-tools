@@ -39,8 +39,7 @@ impl LanguageService {
                     .or_else(|| {
                         symbol_table
                             .symbols
-                            .iter()
-                            .find(|symbol| symbol.key == key)
+                            .get(&key)
                             .and_then(|symbol| match symbol.kind {
                                 SymbolKind::Call => symbol_table.find_def(key).map(|symbol| {
                                     let contents =
@@ -102,12 +101,7 @@ impl LanguageService {
                                 }
                                 SymbolKind::BlockRef => symbol_table
                                     .find_block_def(key)
-                                    .and_then(|def_key| {
-                                        symbol_table
-                                            .symbols
-                                            .iter()
-                                            .find(|symbol| symbol.key == def_key)
-                                    })
+                                    .and_then(|def_key| symbol_table.symbols.get(&def_key))
                                     .map(|block| Hover {
                                         contents: Union3::A(create_block_hover(
                                             self, block, document, &root,
@@ -134,8 +128,7 @@ impl LanguageService {
                     .or_else(|| {
                         symbol_table
                             .symbols
-                            .iter()
-                            .find(|symbol| symbol.key == key)
+                            .get(&key)
                             .and_then(|symbol| create_def_hover(self, document, &root, symbol))
                             .map(|contents| Hover {
                                 contents: Union3::A(contents),
@@ -170,8 +163,7 @@ impl LanguageService {
 
                 symbol_table
                     .symbols
-                    .iter()
-                    .find(|symbol| symbol.key == key)
+                    .get(&key)
                     .and_then(|symbol| create_def_hover(self, document, &root, symbol))
                     .map(|contents| Hover {
                         contents: Union3::A(contents),
@@ -278,7 +270,7 @@ fn create_func_hover(
         types_analyzer::render_func_header(
             service,
             symbol.idx.name,
-            types_analyzer::get_func_sig(service, document, symbol.key, &symbol.green)
+            types_analyzer::get_func_sig(service, document, *symbol.key, &symbol.green)
         )
     );
     if !doc.is_empty() {
