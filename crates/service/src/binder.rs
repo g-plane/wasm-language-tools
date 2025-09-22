@@ -4,7 +4,7 @@ use crate::{
 };
 use indexmap::IndexMap;
 use rowan::{
-    GreenNode, TextRange,
+    GreenNode,
     ast::{AstNode, support},
 };
 use rustc_hash::FxBuildHasher;
@@ -18,7 +18,6 @@ use wat_syntax::{
 pub(crate) struct SymbolTable<'db> {
     pub symbols: Symbols<'db>,
     pub blocks: Vec<BlockItem<'db>>,
-    pub exports: Vec<ExportItem>,
 }
 fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) -> SymbolTable<'db> {
     fn create_module_level_symbol<'db>(
@@ -122,7 +121,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
     let root = document.root_tree(db);
     let mut symbols = Symbols::with_capacity_and_hasher(8, FxBuildHasher);
     let mut blocks = vec![];
-    let mut exports = vec![];
     root.children().enumerate().for_each(|(module_id, module)| {
         let module_key = SymbolKey::new(&module);
         symbols.insert(
@@ -641,15 +639,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     symbols.insert(symbol.key, symbol);
                 }
             }
-            SyntaxKind::MODULE_FIELD_EXPORT | SyntaxKind::EXPORT => {
-                if let Some(name) = node.children().find(|node| node.kind() == SyntaxKind::NAME) {
-                    exports.push(ExportItem {
-                        name: name.to_string(),
-                        range: name.text_range(),
-                        module: module_key,
-                    });
-                }
-            }
             SyntaxKind::ELEM_LIST => {
                 symbols.extend(
                     node.children()
@@ -679,11 +668,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             }
         });
 
-    SymbolTable {
-        symbols,
-        blocks,
-        exports,
-    }
+    SymbolTable { symbols, blocks }
 }
 
 impl<'db> SymbolTable<'db> {
@@ -876,11 +861,4 @@ pub(crate) struct BlockItem<'db> {
     pub ref_key: SymbolKey,
     pub def_key: SymbolKey,
     pub def_idx: Idx<'db>,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct ExportItem {
-    pub name: String, // with double quotes
-    pub range: TextRange,
-    pub module: SymbolKey,
 }

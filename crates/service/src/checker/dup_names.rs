@@ -1,7 +1,8 @@
 use crate::{
     LanguageService,
     binder::{IdxKind, Symbol, SymbolKind, SymbolTable},
-    helpers,
+    document::Document,
+    exports, helpers,
     uri::InternUri,
 };
 use line_index::LineIndex;
@@ -16,6 +17,7 @@ pub fn check(
     service: &LanguageService,
     diagnostics: &mut Vec<Diagnostic>,
     uri: InternUri,
+    document: Document,
     line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
@@ -89,43 +91,48 @@ pub fn check(
             }),
     );
 
-    diagnostics.extend(
-        symbol_table
-            .exports
-            .iter()
-            .fold(FxHashMap::default(), |mut map, export| {
-                map.entry((&export.name, export.module))
-                    .or_insert_with(|| Vec::with_capacity(1))
-                    .push(export.range);
-                map
-            })
-            .iter()
-            .filter(|(_, ranges)| ranges.len() > 1)
-            .flat_map(|((name, _), ranges)| {
-                let name = &name[1..name.len() - 1];
-                ranges.iter().map(move |range| Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(line_index, *range),
-                    severity: Some(DiagnosticSeverity::Error),
-                    source: Some("wat".into()),
-                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                    message: format!("duplicated export `{name}` in this module"),
-                    related_information: Some(
-                        ranges
-                            .iter()
-                            .filter(|other| *other != range)
-                            .map(|range| DiagnosticRelatedInformation {
-                                location: Location {
-                                    uri: uri.raw(service),
-                                    range: helpers::rowan_range_to_lsp_range(line_index, *range),
-                                },
-                                message: format!("already exported here as `{name}`"),
-                            })
-                            .collect(),
-                    ),
-                    ..Default::default()
-                })
-            }),
-    );
+    exports::get_exports(service, document)
+        .iter()
+        .for_each(|exports| {
+            diagnostics.extend(
+                exports
+                    .iter()
+                    .fold(FxHashMap::default(), |mut map, export| {
+                        map.entry(&export.name)
+                            .or_insert_with(|| Vec::with_capacity(1))
+                            .push(export.range);
+                        map
+                    })
+                    .iter()
+                    .filter(|(_, ranges)| ranges.len() > 1)
+                    .flat_map(|(name, ranges)| {
+                        let name = &name[1..name.len() - 1];
+                        ranges.iter().map(move |range| Diagnostic {
+                            range: helpers::rowan_range_to_lsp_range(line_index, *range),
+                            severity: Some(DiagnosticSeverity::Error),
+                            source: Some("wat".into()),
+                            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                            message: format!("duplicated export `{name}` in this module"),
+                            related_information: Some(
+                                ranges
+                                    .iter()
+                                    .filter(|other| *other != range)
+                                    .map(|range| DiagnosticRelatedInformation {
+                                        location: Location {
+                                            uri: uri.raw(service),
+                                            range: helpers::rowan_range_to_lsp_range(
+                                                line_index, *range,
+                                            ),
+                                        },
+                                        message: format!("already exported here as `{name}`"),
+                                    })
+                                    .collect(),
+                            ),
+                            ..Default::default()
+                        })
+                    }),
+            );
+        });
 }
 
 fn get_ident_range(symbol: &Symbol, root: &SyntaxNode) -> TextRange {

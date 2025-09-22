@@ -221,6 +221,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
         service,
         &mut diagnostics,
         uri,
+        document,
         line_index,
         &root,
         symbol_table,

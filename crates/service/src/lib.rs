@@ -5,6 +5,7 @@ mod checker;
 mod config;
 mod data_set;
 mod document;
+mod exports;
 mod features;
 mod helpers;
 mod idx;
