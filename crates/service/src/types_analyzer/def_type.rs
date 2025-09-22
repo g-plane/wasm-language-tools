@@ -9,10 +9,11 @@ use crate::{
     idx::{Idx, InternIdent},
 };
 use rowan::{TextRange, ast::AstNode};
+use rustc_hash::FxHashMap;
 use wat_syntax::ast::{CompType, ModuleField, Root, TypeDef};
 
 #[salsa::tracked(returns(ref))]
-pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Vec<DefType<'_>> {
+pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> DefTypes<'_> {
     let root = document.root_tree(db);
     let symbol_table = SymbolTable::of(db, document);
     symbol_table
@@ -55,16 +56,21 @@ pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Vec
                         .and_then(|node| FieldType::from_ast(&node, db)),
                 ),
             };
-            Some(DefType {
-                key: symbol.key,
-                idx: symbol.idx,
-                is_final,
-                inherits,
-                comp,
-            })
+            Some((
+                symbol.key,
+                DefType {
+                    key: symbol.key,
+                    idx: symbol.idx,
+                    is_final,
+                    inherits,
+                    comp,
+                },
+            ))
         })
         .collect()
 }
+
+pub(crate) type DefTypes<'db> = FxHashMap<SymbolKey, DefType<'db>>;
 
 #[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
 pub(crate) struct DefType<'db> {
@@ -92,11 +98,11 @@ impl<'db> DefType<'db> {
         match (
             self.inherits
                 .as_ref()
-                .and_then(|a| def_types.iter().find(|def_type| def_type.key == a.symbol)),
+                .and_then(|a| def_types.get(&a.symbol)),
             other
                 .inherits
                 .as_ref()
-                .and_then(|b| def_types.iter().find(|def_type| def_type.key == b.symbol)),
+                .and_then(|b| def_types.get(&b.symbol)),
         ) {
             (Some(a), Some(b)) => {
                 if !a.type_equals(b, db, document, module_id) {
@@ -241,13 +247,8 @@ impl RecTypeGroup {
         let def_types = get_def_types(db, document);
         self.type_defs
             .iter()
-            .map(|key| def_types.iter().find(|def_type| def_type.key == *key))
-            .zip(
-                other
-                    .type_defs
-                    .iter()
-                    .map(|key| def_types.iter().find(|def_type| def_type.key == *key)),
-            )
+            .map(|key| def_types.get(key))
+            .zip(other.type_defs.iter().map(|key| def_types.get(key)))
             .all(|(a, b)| {
                 if let (Some(a), Some(b), Some(module)) =
                     (a, b, symbol_table.find_module(module_id))

@@ -798,25 +798,17 @@ fn get_cmp_list(
                                     }))
                                 },
                                 sort_text: preferred_type.as_ref().and_then(|preferred_type| {
-                                    def_types
-                                        .iter()
-                                        .find(|def_type| def_type.key == symbol.key)
-                                        .map(|def_type| {
-                                            if let (CompositeType::Func(..), PreferredType::Func)
-                                            | (
-                                                CompositeType::Array(..),
-                                                PreferredType::Array,
-                                            )
-                                            | (
-                                                CompositeType::Struct(..),
-                                                PreferredType::Struct,
-                                            ) = (&def_type.comp, preferred_type)
-                                            {
-                                                "0".into()
-                                            } else {
-                                                "1".into()
-                                            }
-                                        })
+                                    def_types.get(&symbol.key).map(|def_type| {
+                                        if let (CompositeType::Func(..), PreferredType::Func)
+                                        | (CompositeType::Array(..), PreferredType::Array)
+                                        | (CompositeType::Struct(..), PreferredType::Struct) =
+                                            (&def_type.comp, preferred_type)
+                                        {
+                                            "0".into()
+                                        } else {
+                                            "1".into()
+                                        }
+                                    })
                                 }),
                                 ..Default::default()
                             }
@@ -1005,9 +997,7 @@ fn get_cmp_list(
                     let def_types = types_analyzer::get_def_types(service, document);
                     if let Some(CompositeType::Struct(Fields(fields))) = symbol_table
                         .find_def(struct_ref_key)
-                        .and_then(|symbol| {
-                            def_types.iter().find(|def_type| def_type.key == symbol.key)
-                        })
+                        .and_then(|symbol| def_types.get(&symbol.key))
                         .map(|def_type| &def_type.comp)
                     {
                         items.extend(fields.iter().map(|(ty, idx)| {

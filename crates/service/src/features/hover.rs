@@ -384,8 +384,7 @@ fn create_type_def_hover(
         content.push(' ');
         content.push_str(name.ident(service));
     }
-    if let Some(DefType { comp, .. }) = def_types.iter().find(|def_type| def_type.key == symbol.key)
-    {
+    if let Some(DefType { comp, .. }) = def_types.get(&symbol.key) {
         content.push(' ');
         match comp {
             CompositeType::Func(sig) => {

@@ -27,7 +27,7 @@ pub fn check(
     let def_types = types_analyzer::get_def_types(service, document);
     if symbol_table
         .find_def(SymbolKey::new(index))
-        .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
+        .and_then(|symbol| def_types.get(&symbol.key))
         .is_some_and(|def_type| !matches!(def_type.comp, CompositeType::Func(..)))
     {
         diagnostics.push(Diagnostic {

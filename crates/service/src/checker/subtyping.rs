@@ -18,12 +18,10 @@ pub fn check(
     diagnostics.extend(
         def_types
             .iter()
-            .filter_map(|sub_type| {
+            .filter_map(|(key, sub_type)| {
                 let inherits = sub_type.inherits.as_ref()?;
-                let super_type = def_types
-                    .iter()
-                    .find(|def_type| def_type.key == inherits.symbol)?;
-                let module_key = symbol_table.symbols.get(&sub_type.key)?.region;
+                let super_type = def_types.get(&inherits.symbol)?;
+                let module_key = symbol_table.symbols.get(key)?.region;
                 let module_id = symbol_table.symbols.get(&module_key)?.idx.num?;
 
                 if super_type
@@ -33,7 +31,7 @@ pub fn check(
                     .is_some_and(|(sup, sub)| sup >= sub)
                 {
                     Some((
-                        sub_type.key,
+                        key,
                         format!(
                             "typeidx of super type `{}` must be smaller than type `{}`",
                             super_type.idx.render(service),
@@ -42,7 +40,7 @@ pub fn check(
                     ))
                 } else if super_type.is_final {
                     Some((
-                        sub_type.key,
+                        key,
                         format!("type `{}` is final", super_type.idx.render(service)),
                     ))
                 } else if !sub_type
@@ -50,7 +48,7 @@ pub fn check(
                     .matches(&super_type.comp, service, document, module_id)
                 {
                     Some((
-                        sub_type.key,
+                        key,
                         format!(
                             "type of `{}` doesn't match its super type `{}`",
                             sub_type.idx.render(service),

@@ -4,7 +4,7 @@ use crate::{
     document::Document,
     helpers,
     types_analyzer::{
-        CompositeType, DefType, FieldType, OperandType, RefType, ValType, get_def_types,
+        CompositeType, DefTypes, FieldType, OperandType, RefType, ValType, get_def_types,
         resolve_br_types,
     },
 };
@@ -45,11 +45,7 @@ pub fn check(
             let mut children = node.children();
             let dst = children.next()?;
             let dst_symbol = symbol_table.find_def(SymbolKey::new(&dst))?;
-            let dst_type = match &def_types
-                .iter()
-                .find(|def_type| def_type.key == dst_symbol.key)?
-                .comp
-            {
+            let dst_type = match &def_types.get(&dst_symbol.key)?.comp {
                 CompositeType::Func(..) => {
                     diagnostics.push(build_diagnostic(
                         "array", "func", &dst, dst_symbol, service, document, line_index,
@@ -67,11 +63,7 @@ pub fn check(
 
             let src = children.next()?;
             let src_symbol = symbol_table.find_def(SymbolKey::new(&src))?;
-            let src_type = match &def_types
-                .iter()
-                .find(|def_type| def_type.key == src_symbol.key)?
-                .comp
-            {
+            let src_type = match &def_types.get(&src_symbol.key)?.comp {
                 CompositeType::Func(..) => {
                     diagnostics.push(build_diagnostic(
                         "array", "func", &src, src_symbol, service, document, line_index,
@@ -329,12 +321,10 @@ fn check_type_matches(
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
-    def_types: &[DefType],
+    def_types: &DefTypes,
 ) -> Option<Diagnostic> {
     let def_symbol = symbol_table.find_def(SymbolKey::new(ref_node))?;
-    let def_type = def_types
-        .iter()
-        .find(|def_type| def_type.key == def_symbol.key)?;
+    let def_type = def_types.get(&def_symbol.key)?;
     let kind = match def_type.comp {
         CompositeType::Func(..) => "func",
         CompositeType::Struct(..) => "struct",

@@ -284,8 +284,7 @@ impl<'db> HeapType<'db> {
                         a == b
                             || heap_ty_a.type_equals(heap_ty_b, db, document, module_id)
                             || def_types
-                                .iter()
-                                .find(|def_type| def_type.key == a)
+                                .get(&a)
                                 .and_then(|def_type| def_type.inherits.as_ref())
                                 .is_some_and(|inherits| {
                                     HeapType::Type(inherits.idx)
@@ -311,7 +310,7 @@ impl<'db> HeapType<'db> {
                             && symbol.region == module.key
                             && a.is_defined_by(&symbol.idx)
                     })
-                    .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
+                    .and_then(|symbol| def_types.get(&symbol.key))
                     .is_some_and(|def_type| match (&def_type.comp, b) {
                         (
                             CompositeType::Struct(..),
@@ -366,9 +365,7 @@ impl<'db> HeapType<'db> {
                                     .find(|group| group.type_defs.contains(&symbol.key))
                                     .is_none_or(|group| group.type_defs.len() <= 1)
                             })
-                            .and_then(|symbol| {
-                                def_types.iter().find(|def_type| def_type.key == symbol.key)
-                            }),
+                            .and_then(|symbol| def_types.get(&symbol.key)),
                     )
                 {
                     a.type_equals(b, db, document, module_id)
@@ -416,9 +413,8 @@ impl<'db> HeapType<'db> {
                 .is_some_and(|(a, b)| {
                     a == b
                         || def_types
-                            .iter()
-                            .find(|def_type| def_type.key == a)
-                            .zip(def_types.iter().find(|def_type| def_type.key == b))
+                            .get(&a)
+                            .zip(def_types.get(&b))
                             .is_some_and(|(a, b)| a.type_equals(b, db, document, module_id))
                 })
         } else {
@@ -457,7 +453,7 @@ impl<'db> HeapType<'db> {
                             && symbol.region == module.key
                             && idx.is_defined_by(&symbol.idx)
                     })
-                    .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
+                    .and_then(|symbol| def_types.get(&symbol.key))
                     .map(|def_type| match &def_type.comp {
                         CompositeType::Struct(..) | CompositeType::Array(..) => HeapType::Struct,
                         CompositeType::Func(..) => HeapType::Func,

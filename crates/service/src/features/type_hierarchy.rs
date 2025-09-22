@@ -82,8 +82,7 @@ impl LanguageService {
             .find(|symbol| symbol.key.text_range() == type_def_range)?;
 
         def_types
-            .iter()
-            .find(|def_type| def_type.key == type_def.key)
+            .get(&type_def.key)
             .and_then(|def_type| def_type.inherits.as_ref())
             .and_then(|inherits| symbol_table.symbols.get(&inherits.symbol))
             .map(|symbol| {
@@ -121,13 +120,13 @@ impl LanguageService {
         Some(
             def_types
                 .iter()
-                .filter(|def_type| {
+                .filter(|(_, def_type)| {
                     def_type
                         .inherits
                         .as_ref()
                         .is_some_and(|inherits| inherits.symbol == key)
                 })
-                .filter_map(|def_type| symbol_table.symbols.get(&def_type.key))
+                .filter_map(|(key, _)| symbol_table.symbols.get(key))
                 .map(|symbol| TypeHierarchyItem {
                     name: symbol.idx.render(self).to_string(),
                     kind: LspSymbolKind::Class,

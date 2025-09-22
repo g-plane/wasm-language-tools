@@ -3,7 +3,7 @@ use crate::{
     binder::{Symbol, SymbolKey, SymbolTable},
     document::Document,
     helpers,
-    types_analyzer::{self, CompositeType, DefType, FieldType, Fields, StorageType},
+    types_analyzer::{self, CompositeType, DefTypes, FieldType, Fields, StorageType},
     uri::InternUri,
 };
 use line_index::LineIndex;
@@ -129,11 +129,11 @@ pub fn check(
     Some(())
 }
 
-fn find_struct_field<'a, 'db>(
-    symbol_table: &'a SymbolTable<'db>,
-    def_types: &'a [DefType<'db>],
+fn find_struct_field<'db>(
+    symbol_table: &'db SymbolTable<'db>,
+    def_types: &'db DefTypes<'db>,
     node: &SyntaxNode,
-) -> Option<(&'a StorageType<'db>, &'a Symbol<'db>)> {
+) -> Option<(&'db StorageType<'db>, &'db Symbol<'db>)> {
     let mut immediates = node
         .children()
         .filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
@@ -142,8 +142,7 @@ fn find_struct_field<'a, 'db>(
         .symbols
         .get(&SymbolKey::new(&immediates.next()?))?;
     if let Some(CompositeType::Struct(Fields(fields))) = def_types
-        .iter()
-        .find(|def_type| def_type.key == struct_def_symbol.key)
+        .get(&struct_def_symbol.key)
         .map(|def_type| &def_type.comp)
     {
         fields
@@ -155,11 +154,11 @@ fn find_struct_field<'a, 'db>(
     }
 }
 
-fn find_array<'a, 'db>(
-    symbol_table: &'a SymbolTable<'db>,
-    def_types: &'a [DefType<'db>],
+fn find_array<'db>(
+    symbol_table: &'db SymbolTable<'db>,
+    def_types: &'db DefTypes<'db>,
     node: &SyntaxNode,
-) -> Option<(&'a StorageType<'db>, &'a Symbol<'db>)> {
+) -> Option<(&'db StorageType<'db>, &'db Symbol<'db>)> {
     let ref_key = SymbolKey::new(
         &node
             .children()
@@ -168,8 +167,7 @@ fn find_array<'a, 'db>(
     let ref_symbol = symbol_table.symbols.get(&ref_key)?;
     let def_symbol = symbol_table.find_def_by_symbol(ref_symbol)?;
     if let Some(CompositeType::Array(Some(FieldType { storage, .. }))) = def_types
-        .iter()
-        .find(|def_type| def_type.key == def_symbol.key)
+        .get(&def_symbol.key)
         .map(|def_type| &def_type.comp)
     {
         Some((storage, ref_symbol))

@@ -1,5 +1,5 @@
 pub(crate) use self::{
-    def_type::{CompositeType, DefType, get_def_types, get_rec_type_groups},
+    def_type::{CompositeType, DefType, DefTypes, get_def_types, get_rec_type_groups},
     extractor::{extract_global_type, extract_type},
     renderer::{render_block_header, render_func_header},
     resolver::resolve_field_type,

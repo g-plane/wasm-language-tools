@@ -819,7 +819,7 @@ fn resolve_sig<'db>(
                 .immediates()
                 .next()
                 .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
+                .and_then(|symbol| def_types.get(&symbol.key))
                 .map(|def_type| {
                     let params = if let CompositeType::Struct(fields) = &def_type.comp {
                         fields.to_operand_types()
@@ -1294,7 +1294,7 @@ fn resolve_sig<'db>(
                         .symbol_table
                         .find_def(SymbolKey::new(immediate.syntax()))
                 })
-                .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
+                .and_then(|symbol| def_types.get(&symbol.key))
                 .map(|def_type| {
                     let mut sig = if let CompositeType::Func(sig) = &def_type.comp {
                         ResolvedSig::from(sig.clone())

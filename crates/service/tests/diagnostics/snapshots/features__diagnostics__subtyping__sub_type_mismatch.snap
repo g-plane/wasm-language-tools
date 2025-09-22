@@ -8,34 +8,50 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 3,
-          "character": 17
+          "line": 24,
+          "character": 18
         },
         "end": {
-          "line": 3,
-          "character": 20
+          "line": 24,
+          "character": 21
         }
       },
       "severity": 1,
       "code": "subtyping",
       "source": "wat",
-      "message": "type of `$s0` doesn't match its super type `$a0`"
+      "message": "type of `$s7'` doesn't match its super type `$s7`"
     },
     {
       "range": {
         "start": {
-          "line": 6,
-          "character": 17
+          "line": 21,
+          "character": 18
         },
         "end": {
-          "line": 6,
-          "character": 20
+          "line": 21,
+          "character": 21
         }
       },
       "severity": 1,
       "code": "subtyping",
       "source": "wat",
-      "message": "type of `$s1` doesn't match its super type `$f1`"
+      "message": "type of `$a6'` doesn't match its super type `$a6`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 27,
+          "character": 18
+        },
+        "end": {
+          "line": 27,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "subtyping",
+      "source": "wat",
+      "message": "type of `$f8'` doesn't match its super type `$f8`"
     },
     {
       "range": {
@@ -88,6 +104,22 @@ expression: response
     {
       "range": {
         "start": {
+          "line": 6,
+          "character": 17
+        },
+        "end": {
+          "line": 6,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "subtyping",
+      "source": "wat",
+      "message": "type of `$s1` doesn't match its super type `$f1`"
+    },
+    {
+      "range": {
+        "start": {
           "line": 18,
           "character": 17
         },
@@ -104,50 +136,18 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 21,
-          "character": 18
+          "line": 3,
+          "character": 17
         },
         "end": {
-          "line": 21,
-          "character": 21
+          "line": 3,
+          "character": 20
         }
       },
       "severity": 1,
       "code": "subtyping",
       "source": "wat",
-      "message": "type of `$a6'` doesn't match its super type `$a6`"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 24,
-          "character": 18
-        },
-        "end": {
-          "line": 24,
-          "character": 21
-        }
-      },
-      "severity": 1,
-      "code": "subtyping",
-      "source": "wat",
-      "message": "type of `$s7'` doesn't match its super type `$s7`"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 27,
-          "character": 18
-        },
-        "end": {
-          "line": 27,
-          "character": 21
-        }
-      },
-      "severity": 1,
-      "code": "subtyping",
-      "source": "wat",
-      "message": "type of `$f8'` doesn't match its super type `$f8`"
+      "message": "type of `$s0` doesn't match its super type `$a0`"
     }
   ]
 }

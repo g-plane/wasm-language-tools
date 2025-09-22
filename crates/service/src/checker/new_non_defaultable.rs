@@ -27,11 +27,7 @@ pub fn check(
         return None;
     }
     let def_symbol = symbol_table.find_def(SymbolKey::new(&immediate))?;
-    match &def_types
-        .iter()
-        .find(|def_type| def_type.key == def_symbol.key)?
-        .comp
-    {
+    match &def_types.get(&def_symbol.key)?.comp {
         CompositeType::Struct(Fields(fields)) => {
             let non_defaultables = fields
                 .iter()

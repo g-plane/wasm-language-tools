@@ -1,5 +1,5 @@
 use super::{
-    def_type::{CompositeType, DefType, get_def_types},
+    def_type::{CompositeType, DefType, DefTypes, get_def_types},
     signature::{get_block_sig, get_func_sig},
     types::{FieldType, Fields, OperandType},
 };
@@ -65,12 +65,12 @@ pub(crate) fn resolve_br_types<'db>(
 
 pub(crate) fn resolve_array_type_with_idx<'db>(
     symbol_table: &SymbolTable,
-    def_types: &[DefType<'db>],
+    def_types: &DefTypes<'db>,
     immediate: &Immediate,
 ) -> Option<(Idx<'db>, Option<OperandType<'db>>)> {
     symbol_table
         .find_def(SymbolKey::new(immediate.syntax()))
-        .and_then(|symbol| def_types.iter().find(|def_type| def_type.key == symbol.key))
+        .and_then(|symbol| def_types.get(&symbol.key))
         .map(|def_type| {
             if let CompositeType::Array(field) = &def_type.comp {
                 (
@@ -105,9 +105,7 @@ pub(crate) fn resolve_field_type<'db>(
     if let Some(DefType {
         comp: CompositeType::Struct(Fields(fields)),
         ..
-    }) = def_types
-        .iter()
-        .find(|def_type| def_type.key == field_def_symbol.region)
+    }) = def_types.get(&field_def_symbol.region)
     {
         fields
             .iter()
