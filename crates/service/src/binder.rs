@@ -23,19 +23,19 @@ pub(crate) struct SymbolTable<'db> {
 fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) -> SymbolTable<'db> {
     fn create_module_level_symbol<'db>(
         db: &'db dyn salsa::Database,
-        node: SyntaxNode,
+        node: &SyntaxNode,
         id: u32,
         kind: SymbolKind,
         module: &SyntaxNode,
     ) -> Symbol<'db> {
         Symbol {
-            key: SymbolKey::new(&node),
+            key: SymbolKey::new(node),
             green: node.green().into(),
             region: SymbolKey::new(module),
             kind,
             idx: Idx {
                 num: Some(id),
-                name: support::token(&node, SyntaxKind::IDENT)
+                name: support::token(node, SyntaxKind::IDENT)
                     .map(|token| InternIdent::new(db, token.text())),
             },
             idx_kind: kind.into(),
@@ -73,7 +73,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
     }
     fn create_first_optional_ref_symbol<'db>(
         db: &'db dyn salsa::Database,
-        instr: PlainInstr,
+        instr: &PlainInstr,
         kind: SymbolKind,
     ) -> Option<Symbol<'db>> {
         let node = instr.syntax();
@@ -148,7 +148,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             SyntaxKind::MODULE_FIELD_FUNC => {
                 let symbol = create_module_level_symbol(
                     db,
-                    node.clone(),
+                    &node,
                     func_idx_gen.pull(),
                     SymbolKind::Func,
                     &module,
@@ -244,7 +244,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             SyntaxKind::TYPE_DEF => {
                 let symbol = create_module_level_symbol(
                     db,
-                    node.clone(),
+                    &node,
                     type_idx_gen.pull(),
                     SymbolKind::Type,
                     &module,
@@ -299,7 +299,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             SyntaxKind::MODULE_FIELD_GLOBAL => {
                 let symbol = create_module_level_symbol(
                     db,
-                    node.clone(),
+                    &node,
                     global_idx_gen.pull(),
                     SymbolKind::GlobalDef,
                     &module,
@@ -399,7 +399,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     }
                     Some("call_indirect" | "return_call_indirect") => {
                         if let Some(symbol) =
-                            create_first_optional_ref_symbol(db, instr, SymbolKind::TableRef)
+                            create_first_optional_ref_symbol(db, &instr, SymbolKind::TableRef)
                         {
                             symbols.insert(symbol.key, symbol);
                         }
@@ -436,7 +436,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         | "v128.store16_lane" | "v128.store32_lane" | "v128.store64_lane",
                     ) => {
                         if let Some(symbol) =
-                            create_first_optional_ref_symbol(db, instr, SymbolKind::MemoryRef)
+                            create_first_optional_ref_symbol(db, &instr, SymbolKind::MemoryRef)
                         {
                             symbols.insert(symbol.key, symbol);
                         }
@@ -540,7 +540,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             SyntaxKind::MODULE_FIELD_MEMORY => {
                 let symbol = create_module_level_symbol(
                     db,
-                    node.clone(),
+                    &node,
                     mem_idx_gen.pull(),
                     SymbolKind::MemoryDef,
                     &module,
@@ -550,7 +550,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             SyntaxKind::MODULE_FIELD_TABLE => {
                 let symbol = create_module_level_symbol(
                     db,
-                    node.clone(),
+                    &node,
                     table_idx_gen.pull(),
                     SymbolKind::TableDef,
                     &module,
