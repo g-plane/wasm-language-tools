@@ -77,9 +77,8 @@ impl Checker<'_, '_> {
                             return;
                         };
                         let immediate = immediate.syntax();
-                        let Some(def_symbol) = self
-                            .symbol_table
-                            .find_param_or_local_def(SymbolKey::new(immediate))
+                        let Some(def_symbol) =
+                            self.symbol_table.find_def(SymbolKey::new(immediate))
                         else {
                             return;
                         };
@@ -113,7 +112,7 @@ impl Checker<'_, '_> {
                             .next()
                             .and_then(|immediate| {
                                 self.symbol_table
-                                    .find_param_or_local_def(SymbolKey::new(immediate.syntax()))
+                                    .find_def(SymbolKey::new(immediate.syntax()))
                             })
                             .and_then(|symbol| self.locals.get_mut(&symbol.key))
                         {

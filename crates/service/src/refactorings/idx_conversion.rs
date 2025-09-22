@@ -21,7 +21,6 @@ pub fn act(
     let ref_idx = symbol_table.symbols.get(&ref_key)?.idx;
     let def_idx = symbol_table
         .find_def(ref_key)
-        .or_else(|| symbol_table.find_param_or_local_def(ref_key))
         .map(|def| &def.idx)
         .or_else(|| {
             symbol_table

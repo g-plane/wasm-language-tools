@@ -560,11 +560,7 @@ fn resolve_sig<'db>(
                 instr
                     .immediates()
                     .next()
-                    .and_then(|idx| {
-                        shared
-                            .symbol_table
-                            .find_param_or_local_def(SymbolKey::new(idx.syntax()))
-                    })
+                    .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
                     .and_then(|symbol| extract_type(shared.service, &symbol.green))
                     .map_or(OperandType::Any, OperandType::Val),
             ],
@@ -574,11 +570,7 @@ fn resolve_sig<'db>(
                 instr
                     .immediates()
                     .next()
-                    .and_then(|idx| {
-                        shared
-                            .symbol_table
-                            .find_param_or_local_def(SymbolKey::new(idx.syntax()))
-                    })
+                    .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
                     .and_then(|symbol| extract_type(shared.service, &symbol.green))
                     .map_or(OperandType::Any, OperandType::Val),
             ],
@@ -588,11 +580,7 @@ fn resolve_sig<'db>(
             let ty = instr
                 .immediates()
                 .next()
-                .and_then(|idx| {
-                    shared
-                        .symbol_table
-                        .find_param_or_local_def(SymbolKey::new(idx.syntax()))
-                })
+                .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
                 .and_then(|symbol| extract_type(shared.service, &symbol.green))
                 .map_or(OperandType::Any, OperandType::Val);
             ResolvedSig {

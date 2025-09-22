@@ -8,7 +8,7 @@ use line_index::LineCol;
 use lspt::{SemanticTokens, SemanticTokensParams, SemanticTokensRangeParams};
 use rowan::ast::support;
 use std::mem;
-use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxToken};
+use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
 impl LanguageService {
     /// Handler for `textDocument/semanticTokens/full` request.
@@ -148,10 +148,7 @@ impl LanguageService {
                     })
                     .and(parent)
                 {
-                    if symbol_table
-                        .find_param_def(SymbolKey::new(&immediate))
-                        .is_some()
-                    {
+                    if is_ref_of_param(&immediate, symbol_table) {
                         token_kinds.get_index_of(&SemanticTokenKind::Param)
                     } else {
                         token_kinds.get_index_of(&SemanticTokenKind::Var)
@@ -185,8 +182,7 @@ impl LanguageService {
                     .is_some_and(|node| node.kind() == SyntaxKind::PARAM)
                     || parent
                         .as_ref()
-                        .and_then(|parent| symbol_table.find_param_def(SymbolKey::new(parent)))
-                        .is_some()
+                        .is_some_and(|node| is_ref_of_param(node, symbol_table))
                 {
                     token_kinds.get_index_of(&SemanticTokenKind::Param)
                 } else {
@@ -247,4 +243,13 @@ pub(crate) enum SemanticTokenKind {
     String,
     Number,
     Op,
+}
+
+fn is_ref_of_param(node: &SyntaxNode, symbol_table: &SymbolTable) -> bool {
+    symbol_table
+        .symbols
+        .get(&SymbolKey::new(node))
+        .filter(|symbol| symbol.kind == SymbolKind::LocalRef)
+        .and_then(|ref_symbol| symbol_table.find_def_by_symbol(ref_symbol))
+        .is_some_and(|symbol| symbol.kind == SymbolKind::Param)
 }

@@ -23,7 +23,7 @@ impl LanguageService {
                     if !range.contains_range(symbol.key.text_range()) {
                         return None;
                     }
-                    let param_or_local = symbol_table.find_param_or_local_def(symbol.key)?;
+                    let param_or_local = symbol_table.find_def(symbol.key)?;
                     let ty = types_analyzer::extract_type(self, &param_or_local.green)?;
                     Some(InlayHint {
                         position: helpers::rowan_pos_to_lsp_pos(

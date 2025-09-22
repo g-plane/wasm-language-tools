@@ -58,92 +58,48 @@ impl LanguageService {
                         | SymbolKind::GlobalDef
                         | SymbolKind::MemoryDef
                         | SymbolKind::TableDef
-                        | SymbolKind::FieldDef => {
-                            let ref_kind = match current_symbol.kind {
-                                SymbolKind::Func => SymbolKind::Call,
-                                SymbolKind::Param | SymbolKind::Local => SymbolKind::LocalRef,
-                                SymbolKind::Type => SymbolKind::TypeUse,
-                                SymbolKind::GlobalDef => SymbolKind::GlobalRef,
-                                SymbolKind::MemoryDef => SymbolKind::MemoryRef,
-                                SymbolKind::TableDef => SymbolKind::TableRef,
-                                SymbolKind::FieldDef => SymbolKind::FieldRef,
-                                _ => return None,
-                            };
-                            Some(
-                                symbol_table
-                                    .symbols
-                                    .values()
-                                    .filter(|symbol| {
-                                        if symbol.kind == current_symbol.kind {
-                                            current_symbol.idx == symbol.idx
-                                                && symbol.region == current_symbol.region
-                                        } else if symbol.kind == ref_kind {
-                                            symbol.idx.is_defined_by(&current_symbol.idx)
-                                                && symbol.region == current_symbol.region
-                                        } else {
-                                            false
-                                        }
-                                    })
-                                    .filter_map(|symbol| {
-                                        create_symbol_highlight(symbol, &root, line_index)
-                                    })
-                                    .collect(),
-                            )
-                        }
+                        | SymbolKind::FieldDef => Some(
+                            symbol_table
+                                .symbols
+                                .values()
+                                .filter(|symbol| {
+                                    if symbol.kind == current_symbol.kind {
+                                        current_symbol.idx == symbol.idx
+                                            && symbol.region == current_symbol.region
+                                    } else if symbol.idx_kind == current_symbol.idx_kind {
+                                        symbol.idx.is_defined_by(&current_symbol.idx)
+                                            && symbol.region == current_symbol.region
+                                    } else {
+                                        false
+                                    }
+                                })
+                                .filter_map(|symbol| {
+                                    create_symbol_highlight(symbol, &root, line_index)
+                                })
+                                .collect(),
+                        ),
                         SymbolKind::Call
+                        | SymbolKind::LocalRef
                         | SymbolKind::TypeUse
                         | SymbolKind::GlobalRef
                         | SymbolKind::MemoryRef
                         | SymbolKind::TableRef
                         | SymbolKind::FieldRef => {
-                            let def_kind = match current_symbol.kind {
-                                SymbolKind::Call => SymbolKind::Func,
-                                SymbolKind::TypeUse => SymbolKind::Type,
-                                SymbolKind::GlobalRef => SymbolKind::GlobalDef,
-                                SymbolKind::MemoryRef => SymbolKind::MemoryDef,
-                                SymbolKind::TableRef => SymbolKind::TableDef,
-                                SymbolKind::FieldRef => SymbolKind::FieldDef,
-                                _ => return None,
-                            };
                             let def = symbol_table.find_def(current_symbol.key)?;
                             Some(
                                 symbol_table
                                     .symbols
                                     .values()
                                     .filter(|symbol| {
-                                        if symbol.kind == def_kind {
-                                            current_symbol.idx.is_defined_by(&symbol.idx)
-                                                && symbol.region == current_symbol.region
-                                        } else if symbol.kind == current_symbol.kind {
+                                        if symbol.kind == current_symbol.kind {
                                             symbol.idx.is_defined_by(&def.idx)
+                                                && symbol.region == current_symbol.region
+                                        } else if symbol.idx_kind == def.idx_kind {
+                                            current_symbol.idx.is_defined_by(&symbol.idx)
                                                 && symbol.region == current_symbol.region
                                         } else {
                                             false
                                         }
-                                    })
-                                    .filter_map(|symbol| {
-                                        create_symbol_highlight(symbol, &root, line_index)
-                                    })
-                                    .collect(),
-                            )
-                        }
-                        SymbolKind::LocalRef => {
-                            let param_or_local =
-                                symbol_table.find_param_or_local_def(current_symbol.key)?;
-                            Some(
-                                symbol_table
-                                    .symbols
-                                    .values()
-                                    .filter(|symbol| match symbol.kind {
-                                        SymbolKind::Param | SymbolKind::Local => {
-                                            current_symbol.idx.is_defined_by(&symbol.idx)
-                                                && symbol.region == current_symbol.region
-                                        }
-                                        SymbolKind::LocalRef => {
-                                            symbol.idx.is_defined_by(&param_or_local.idx)
-                                                && symbol.region == current_symbol.region
-                                        }
-                                        _ => false,
                                     })
                                     .filter_map(|symbol| {
                                         create_symbol_highlight(symbol, &root, line_index)

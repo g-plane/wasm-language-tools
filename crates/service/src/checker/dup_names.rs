@@ -1,6 +1,6 @@
 use crate::{
     LanguageService,
-    binder::{Symbol, SymbolKind, SymbolTable},
+    binder::{IdxKind, Symbol, SymbolKind, SymbolTable},
     helpers,
     uri::InternUri,
 };
@@ -39,13 +39,7 @@ pub fn check(
             })
             .fold(FxHashMap::default(), |mut map, symbol| {
                 if let Some(name) = symbol.idx.name {
-                    let kind = if symbol.kind == SymbolKind::Local {
-                        // re-map this symbol kind to make comparison easier
-                        SymbolKind::Param
-                    } else {
-                        symbol.kind
-                    };
-                    map.entry((name, &symbol.region, kind))
+                    map.entry((name, &symbol.region, symbol.idx_kind))
                         .or_insert_with(|| Vec::with_capacity(1))
                         .push(symbol);
                 }
@@ -55,13 +49,13 @@ pub fn check(
             .filter(|(_, symbols)| symbols.len() > 1)
             .flat_map(|((name, _, kind), symbols)| {
                 let kind = match kind {
-                    SymbolKind::Func => "func",
-                    SymbolKind::Param | SymbolKind::Local => "param or local",
-                    SymbolKind::Type => "type",
-                    SymbolKind::GlobalDef => "global",
-                    SymbolKind::MemoryDef => "memory",
-                    SymbolKind::TableDef => "table",
-                    SymbolKind::FieldDef => "field",
+                    IdxKind::Func => "func",
+                    IdxKind::Local => "param or local",
+                    IdxKind::Type => "type",
+                    IdxKind::Global => "global",
+                    IdxKind::Memory => "memory",
+                    IdxKind::Table => "table",
+                    IdxKind::Field => "field",
                     _ => unreachable!(),
                 };
                 let name = name.ident(service);

@@ -30,7 +30,7 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
         let key = SymbolKey::new(&parent);
         symbol_table
-            .find_param_or_local_def(key)
+            .find_def(key)
             .map(|symbol| {
                 Union2::A(create_location_by_symbol(
                     params.text_document.uri.clone(),
@@ -38,16 +38,6 @@ impl LanguageService {
                     symbol,
                     &root,
                 ))
-            })
-            .or_else(|| {
-                symbol_table.find_def(key).map(|symbol| {
-                    Union2::A(create_location_by_symbol(
-                        params.text_document.uri.clone(),
-                        line_index,
-                        symbol,
-                        &root,
-                    ))
-                })
             })
             .or_else(|| {
                 symbol_table
