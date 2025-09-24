@@ -9,24 +9,11 @@ expression: response
         "range": {
           "start": {
             "line": 2,
-            "character": 10
+            "character": 8
           },
           "end": {
             "line": 2,
-            "character": 15
-          }
-        },
-        "newText": "$f"
-      },
-      {
-        "range": {
-          "start": {
-            "line": 3,
-            "character": 10
-          },
-          "end": {
-            "line": 3,
-            "character": 15
+            "character": 13
           }
         },
         "newText": "$f"

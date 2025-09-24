@@ -75,6 +75,20 @@ fn ignored_tokens() {
 }
 
 #[test]
+fn different_kinds() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func $func)
+  (type $func (func)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.rename(create_params(uri, 2, 12, "$f")).unwrap();
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn func() {
     let uri = "untitled:test".to_string();
     let source = "
@@ -89,21 +103,6 @@ fn func() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.rename(create_params(uri, 2, 14, "$f")).unwrap();
-    assert_json_snapshot!(response);
-}
-
-#[test]
-fn func_conflicts() {
-    let uri = "untitled:test".to_string();
-    let source = "
-(module
-    (type $func)
-    (func $func)
-)
-";
-    let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    let response = service.rename(create_params(uri, 3, 14, "$f")).unwrap();
     assert_json_snapshot!(response);
 }
 
