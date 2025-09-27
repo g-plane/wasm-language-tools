@@ -996,8 +996,9 @@ fn get_cmp_list(
                 CmpCtx::Field(struct_ref_key) => {
                     let def_types = types_analyzer::get_def_types(service, document);
                     if let Some(CompositeType::Struct(Fields(fields))) = symbol_table
-                        .find_def(struct_ref_key)
-                        .and_then(|symbol| def_types.get(&symbol.key))
+                        .resolved
+                        .get(&struct_ref_key)
+                        .and_then(|key| def_types.get(key))
                         .map(|def_type| &def_type.comp)
                     {
                         items.extend(fields.iter().map(|(ty, idx)| {

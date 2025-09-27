@@ -115,17 +115,14 @@ impl LanguageService {
                                 })
                                 .collect(),
                         ),
-                        SymbolKind::BlockRef => {
-                            let def_key = symbol_table.find_block_def(key)?;
-                            Some(
-                                symbol_table
-                                    .find_block_references(def_key, true)
-                                    .filter_map(|symbol| {
-                                        create_symbol_highlight(symbol, &root, line_index)
-                                    })
-                                    .collect(),
-                            )
-                        }
+                        SymbolKind::BlockRef => symbol_table.resolved.get(&key).map(|def_key| {
+                            symbol_table
+                                .find_block_references(*def_key, true)
+                                .filter_map(|symbol| {
+                                    create_symbol_highlight(symbol, &root, line_index)
+                                })
+                                .collect()
+                        }),
                     }
                 } else {
                     let text = token.text();

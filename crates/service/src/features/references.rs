@@ -98,15 +98,12 @@ impl LanguageService {
                     .map(|symbol| create_location_by_symbol(&params, line_index, symbol, &root))
                     .collect(),
             ),
-            SymbolKind::BlockRef => {
-                let def_key = symbol_table.find_block_def(key)?;
-                Some(
-                    symbol_table
-                        .find_block_references(def_key, params.context.include_declaration)
-                        .map(|symbol| create_location_by_symbol(&params, line_index, symbol, &root))
-                        .collect(),
-                )
-            }
+            SymbolKind::BlockRef => symbol_table.resolved.get(&key).map(|def_key| {
+                symbol_table
+                    .find_block_references(*def_key, params.context.include_declaration)
+                    .map(|symbol| create_location_by_symbol(&params, line_index, symbol, &root))
+                    .collect()
+            }),
         }
     }
 }

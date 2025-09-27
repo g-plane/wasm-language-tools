@@ -79,18 +79,13 @@ impl LanguageService {
                                 token.text_range(),
                             )),
                         }),
-                        SymbolKind::BlockRef => symbol_table
-                            .find_block_def(key)
-                            .and_then(|def_key| symbol_table.symbols.get(&def_key))
-                            .map(|block| Hover {
-                                contents: Union3::A(create_block_hover(
-                                    self, block, document, &root,
-                                )),
-                                range: Some(helpers::rowan_range_to_lsp_range(
-                                    line_index,
-                                    token.text_range(),
-                                )),
-                            }),
+                        SymbolKind::BlockRef => symbol_table.find_def(key).map(|block| Hover {
+                            contents: Union3::A(create_block_hover(self, block, document, &root)),
+                            range: Some(helpers::rowan_range_to_lsp_range(
+                                line_index,
+                                token.text_range(),
+                            )),
+                        }),
                         SymbolKind::FieldRef => symbol_table.find_def(key).map(|symbol| Hover {
                             contents: Union3::A(create_field_def_hover(self, symbol, document)),
                             range: Some(helpers::rowan_range_to_lsp_range(

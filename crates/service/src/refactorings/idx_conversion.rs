@@ -19,16 +19,7 @@ pub fn act(
 ) -> Option<CodeAction> {
     let ref_key = SymbolKey::new(node);
     let ref_idx = symbol_table.symbols.get(&ref_key)?.idx;
-    let def_idx = symbol_table
-        .find_def(ref_key)
-        .map(|def| &def.idx)
-        .or_else(|| {
-            symbol_table
-                .blocks
-                .iter()
-                .find(|block| block.ref_key == ref_key)
-                .map(|block| &block.def_idx)
-        })?;
+    let def_idx = symbol_table.find_def(ref_key)?.idx;
     let def_num = def_idx.num?;
     let def_name = def_idx.name?;
     let (new_text, title) = if ref_idx.name.is_some() {

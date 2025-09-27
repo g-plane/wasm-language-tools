@@ -112,9 +112,10 @@ impl Checker<'_, '_> {
                             .next()
                             .and_then(|immediate| {
                                 self.symbol_table
-                                    .find_def(SymbolKey::new(immediate.syntax()))
+                                    .resolved
+                                    .get(&SymbolKey::new(immediate.syntax()))
                             })
-                            .and_then(|symbol| self.locals.get_mut(&symbol.key))
+                            .and_then(|key| self.locals.get_mut(key))
                         {
                             if conditional && matches!(initialized, Init::Unset) {
                                 *initialized = Init::Conditional(node.text_range());

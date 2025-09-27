@@ -818,8 +818,13 @@ fn resolve_sig<'db>(
             instr
                 .immediates()
                 .next()
-                .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                .and_then(|symbol| def_types.get(&symbol.key))
+                .and_then(|immediate| {
+                    shared
+                        .symbol_table
+                        .resolved
+                        .get(&SymbolKey::new(immediate.syntax()))
+                })
+                .and_then(|key| def_types.get(key))
                 .map(|def_type| {
                     let params = if let CompositeType::Struct(fields) = &def_type.comp {
                         fields.to_operand_types()
@@ -1251,11 +1256,12 @@ fn resolve_sig<'db>(
                 .and_then(|immediate| {
                     shared
                         .symbol_table
-                        .find_def(SymbolKey::new(immediate.syntax()))
+                        .resolved
+                        .get(&SymbolKey::new(immediate.syntax()))
                 })
-                .and_then(|symbol| {
+                .and_then(|key| {
                     let root = shared.document.root_tree(shared.service);
-                    ModuleFieldFunc::cast(symbol.key.to_node(&root))
+                    ModuleFieldFunc::cast(key.to_node(&root))
                 })
                 .and_then(|func| func.type_use())
                 .and_then(|type_use| type_use.index())
@@ -1292,9 +1298,10 @@ fn resolve_sig<'db>(
                 .and_then(|immediate| {
                     shared
                         .symbol_table
-                        .find_def(SymbolKey::new(immediate.syntax()))
+                        .resolved
+                        .get(&SymbolKey::new(immediate.syntax()))
                 })
-                .and_then(|symbol| def_types.get(&symbol.key))
+                .and_then(|key| def_types.get(key))
                 .map(|def_type| {
                     let mut sig = if let CompositeType::Func(sig) = &def_type.comp {
                         ResolvedSig::from(sig.clone())

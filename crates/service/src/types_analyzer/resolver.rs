@@ -46,14 +46,13 @@ pub(crate) fn resolve_br_types<'db>(
 ) -> Vec<OperandType<'db>> {
     let key = SymbolKey::new(immediate.syntax());
     symbol_table
-        .blocks
-        .iter()
-        .find(|block| block.ref_key == key)
-        .map(|block| {
+        .resolved
+        .get(&key)
+        .map(|def_key| {
             get_block_sig(
                 service,
                 document,
-                &block.def_key.to_node(&document.root_tree(service)),
+                &def_key.to_node(&document.root_tree(service)),
             )
             .results
             .into_iter()
@@ -69,8 +68,9 @@ pub(crate) fn resolve_array_type_with_idx<'db>(
     immediate: &Immediate,
 ) -> Option<(Idx<'db>, Option<OperandType<'db>>)> {
     symbol_table
-        .find_def(SymbolKey::new(immediate.syntax()))
-        .and_then(|symbol| def_types.get(&symbol.key))
+        .resolved
+        .get(&SymbolKey::new(immediate.syntax()))
+        .and_then(|key| def_types.get(key))
         .map(|def_type| {
             if let CompositeType::Array(field) = &def_type.comp {
                 (

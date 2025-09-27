@@ -27,20 +27,20 @@ pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Def
             if let Some(sub_type) = node.sub_type() {
                 is_final = sub_type.keyword().is_none() || sub_type.final_keyword().is_some();
                 if let Some(index) = sub_type.indexes().next() {
-                    inherits =
-                        symbol_table
-                            .find_def(SymbolKey::new(index.syntax()))
-                            .map(|symbol| Inherits {
-                                symbol: symbol.key,
-                                idx: Idx {
-                                    num: index
-                                        .unsigned_int_token()
-                                        .and_then(|int| int.text().parse().ok()),
-                                    name: index
-                                        .ident_token()
-                                        .map(|ident| InternIdent::new(db, ident.text())),
-                                },
-                            });
+                    inherits = symbol_table
+                        .resolved
+                        .get(&SymbolKey::new(index.syntax()))
+                        .map(|key| Inherits {
+                            symbol: *key,
+                            idx: Idx {
+                                num: index
+                                    .unsigned_int_token()
+                                    .and_then(|int| int.text().parse().ok()),
+                                name: index
+                                    .ident_token()
+                                    .map(|ident| InternIdent::new(db, ident.text())),
+                            },
+                        });
                 }
             }
             let comp = match node.sub_type()?.comp_type()? {

@@ -1,6 +1,6 @@
 use crate::{
     LanguageService,
-    binder::{Symbol, SymbolKey, SymbolTable},
+    binder::{SymbolKey, SymbolTable},
     helpers,
 };
 use line_index::LineIndex;
@@ -29,29 +29,14 @@ impl LanguageService {
         let line_index = document.line_index(self);
         let symbol_table = SymbolTable::of(self, document);
         let key = SymbolKey::new(&parent);
-        symbol_table
-            .find_def(key)
-            .map(|symbol| {
-                Union2::A(create_location_by_symbol(
-                    params.text_document.uri.clone(),
-                    line_index,
-                    symbol,
-                    &root,
-                ))
-            })
-            .or_else(|| {
-                symbol_table
-                    .find_block_def(key)
-                    .and_then(|key| symbol_table.symbols.get(&key))
-                    .map(|symbol| {
-                        Union2::A(create_location_by_symbol(
-                            params.text_document.uri.clone(),
-                            line_index,
-                            symbol,
-                            &root,
-                        ))
-                    })
-            })
+        symbol_table.resolved.get(&key).map(|key| {
+            Union2::A(create_location_by_symbol(
+                params.text_document.uri.clone(),
+                line_index,
+                key,
+                &root,
+            ))
+        })
     }
 
     /// Handler for `textDocument/typeDefinition` request.
@@ -70,19 +55,18 @@ impl LanguageService {
         let grand = parent.parent()?;
         match grand.kind() {
             SyntaxKind::PLAIN_INSTR => symbol_table
-                .find_def(SymbolKey::new(&parent))
-                .and_then(|symbol| {
-                    symbol_table.find_def(SymbolKey::new(
-                        child::<TypeUse>(&symbol.key.to_node(&root))?
-                            .index()?
-                            .syntax(),
+                .resolved
+                .get(&SymbolKey::new(&parent))
+                .and_then(|key| {
+                    symbol_table.resolved.get(&SymbolKey::new(
+                        child::<TypeUse>(&key.to_node(&root))?.index()?.syntax(),
                     ))
                 })
-                .map(|symbol| {
+                .map(|key| {
                     Union2::A(create_location_by_symbol(
                         params.text_document.uri.clone(),
                         line_index,
-                        symbol,
+                        key,
                         &root,
                     ))
                 }),
@@ -102,12 +86,13 @@ impl LanguageService {
         let parent = token.parent()?;
         if parent.kind() == SyntaxKind::IMMEDIATE {
             symbol_table
-                .find_def(SymbolKey::new(&parent))
-                .map(|symbol| {
+                .resolved
+                .get(&SymbolKey::new(&parent))
+                .map(|key| {
                     Union2::A(create_location_by_symbol(
                         params.text_document.uri.clone(),
                         line_index,
-                        symbol,
+                        key,
                         &root,
                     ))
                 })
@@ -120,10 +105,10 @@ impl LanguageService {
 fn create_location_by_symbol(
     uri: String,
     line_index: &LineIndex,
-    symbol: &Symbol,
+    symbol_key: &SymbolKey,
     root: &SyntaxNode,
 ) -> Location {
-    let node = symbol.key.to_node(root);
+    let node = symbol_key.to_node(root);
     let range = token(&node, SyntaxKind::IDENT)
         .or_else(|| token(&node, SyntaxKind::KEYWORD))
         .map(|token| token.text_range())

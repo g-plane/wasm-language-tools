@@ -35,10 +35,8 @@ pub fn check(
                 | SymbolKind::GlobalRef
                 | SymbolKind::MemoryRef
                 | SymbolKind::TableRef
-                | SymbolKind::FieldRef => symbol_table.find_def(symbol.key).is_none(),
-                SymbolKind::BlockRef => !symbol_table.blocks.iter().any(|block| {
-                    block.ref_key == symbol.key && symbol.idx.is_defined_by(&block.def_idx)
-                }),
+                | SymbolKind::FieldRef
+                | SymbolKind::BlockRef => !symbol_table.resolved.contains_key(&symbol.key),
             })
             .map(|symbol| {
                 let kind = match symbol.kind {

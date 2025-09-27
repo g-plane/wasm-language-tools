@@ -221,8 +221,9 @@ fn compute_token_modifier(
                     .map_or(0, |_| 1)
             }
             SymbolKind::GlobalRef | SymbolKind::TypeUse | SymbolKind::FieldRef => symbol_table
-                .find_def_by_symbol(symbol)
-                .and_then(|symbol| mutability::get_mutabilities(service, document).get(&symbol.key))
+                .resolved
+                .get(&symbol.key)
+                .and_then(|def_key| mutability::get_mutabilities(service, document).get(def_key))
                 .and_then(|mutability| mutability.mut_keyword)
                 .map_or(0, |_| 1),
             _ => 0,
@@ -247,9 +248,6 @@ pub(crate) enum SemanticTokenKind {
 
 fn is_ref_of_param(node: &SyntaxNode, symbol_table: &SymbolTable) -> bool {
     symbol_table
-        .symbols
-        .get(&SymbolKey::new(node))
-        .filter(|symbol| symbol.kind == SymbolKind::LocalRef)
-        .and_then(|ref_symbol| symbol_table.find_def_by_symbol(ref_symbol))
+        .find_def(SymbolKey::new(node))
         .is_some_and(|symbol| symbol.kind == SymbolKind::Param)
 }

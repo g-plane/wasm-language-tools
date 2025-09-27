@@ -143,14 +143,12 @@ impl Checker<'_, '_> {
                         plain
                             .immediates()
                             .filter_map(|immediate| {
-                                let key = SymbolKey::new(immediate.syntax());
                                 self.symbol_table
-                                    .blocks
-                                    .iter()
-                                    .find(|block| block.ref_key == key)
+                                    .resolved
+                                    .get(&SymbolKey::new(immediate.syntax()))
                             })
-                            .for_each(|block| {
-                                let block = block.def_key.to_node(self.root);
+                            .for_each(|def_key| {
+                                let block = def_key.to_node(self.root);
                                 if block.kind() == SyntaxKind::BLOCK_LOOP {
                                     self.start_jumps.insert(block);
                                 } else {

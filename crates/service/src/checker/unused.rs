@@ -28,7 +28,7 @@ pub fn check(
         match symbol.kind {
             SymbolKind::Func => {
                 if is_prefixed_with_underscore(service, symbol)
-                    || is_used(symbol_table, symbol, SymbolKind::Call)
+                    || is_used(symbol_table, symbol)
                     || is_exported(root, symbol)
                 {
                     None
@@ -38,7 +38,7 @@ pub fn check(
             }
             SymbolKind::Param | SymbolKind::Local => {
                 if is_prefixed_with_underscore(service, symbol)
-                    || is_used(symbol_table, symbol, SymbolKind::LocalRef)
+                    || is_used(symbol_table, symbol)
                     || symbol
                         .key
                         .to_node(root)
@@ -69,7 +69,7 @@ pub fn check(
             }
             SymbolKind::Type => {
                 if is_prefixed_with_underscore(service, symbol)
-                    || is_used(symbol_table, symbol, SymbolKind::TypeUse)
+                    || is_used(symbol_table, symbol)
                     || is_exported(root, symbol)
                 {
                     None
@@ -79,7 +79,7 @@ pub fn check(
             }
             SymbolKind::GlobalDef => {
                 if is_prefixed_with_underscore(service, symbol)
-                    || is_used(symbol_table, symbol, SymbolKind::GlobalRef)
+                    || is_used(symbol_table, symbol)
                     || is_exported(root, symbol)
                 {
                     None
@@ -89,7 +89,7 @@ pub fn check(
             }
             SymbolKind::MemoryDef => {
                 if is_prefixed_with_underscore(service, symbol)
-                    || is_used(symbol_table, symbol, SymbolKind::MemoryRef)
+                    || is_used(symbol_table, symbol)
                     || is_exported(root, symbol)
                 {
                     None
@@ -99,7 +99,7 @@ pub fn check(
             }
             SymbolKind::TableDef => {
                 if is_prefixed_with_underscore(service, symbol)
-                    || is_used(symbol_table, symbol, SymbolKind::TableRef)
+                    || is_used(symbol_table, symbol)
                     || is_exported(root, symbol)
                 {
                     None
@@ -108,9 +108,7 @@ pub fn check(
                 }
             }
             SymbolKind::FieldDef => {
-                if is_prefixed_with_underscore(service, symbol)
-                    || is_used(symbol_table, symbol, SymbolKind::FieldRef)
-                {
+                if is_prefixed_with_underscore(service, symbol) || is_used(symbol_table, symbol) {
                     None
                 } else {
                     let node = symbol.key.to_node(root);
@@ -134,12 +132,8 @@ fn is_prefixed_with_underscore(service: &LanguageService, symbol: &Symbol) -> bo
         .is_some_and(|name| name.ident(service).starts_with("$_"))
 }
 
-fn is_used(symbol_table: &SymbolTable, def_symbol: &Symbol, ref_kind: SymbolKind) -> bool {
-    symbol_table.symbols.values().any(|other| {
-        other.kind == ref_kind
-            && other.idx.is_defined_by(&def_symbol.idx)
-            && other.region == def_symbol.region
-    })
+fn is_used(symbol_table: &SymbolTable, symbol: &Symbol) -> bool {
+    symbol_table.resolved.values().any(|key| key == &symbol.key)
 }
 
 fn is_exported(root: &SyntaxNode, def_symbol: &Symbol) -> bool {
