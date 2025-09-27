@@ -92,4 +92,9 @@ impl IdxGen {
         self.0 += 1;
         idx
     }
+
+    /// Reset idx generator.
+    pub fn reset(&mut self) {
+        self.0 = 0;
+    }
 }

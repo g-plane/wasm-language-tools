@@ -4,15 +4,12 @@ use crate::{
 };
 use indexmap::IndexMap;
 use rowan::{
-    GreenNode,
+    GreenNode, NodeOrToken,
     ast::{AstNode, support},
 };
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::{hash::Hash, ops::Deref};
-use wat_syntax::{
-    SyntaxKind, SyntaxNode, SyntaxNodePtr,
-    ast::{CompType, ModuleFieldFunc, PlainInstr, SubType},
-};
+use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, ast::ValType};
 
 #[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
 pub(crate) struct SymbolTable<'db> {
@@ -46,20 +43,22 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
         region: SymbolKey,
         kind: SymbolKind,
     ) -> Option<Symbol<'db>> {
-        support::token(node, SyntaxKind::IDENT)
-            .map(|ident| Idx {
-                num: None,
-                name: Some(InternIdent::new(db, ident.text())),
-            })
-            .or_else(|| {
-                node.children_with_tokens()
-                    .filter_map(|it| it.into_token())
-                    .find(|it| matches!(it.kind(), SyntaxKind::UNSIGNED_INT | SyntaxKind::INT))
-                    .and_then(|token| token.text().parse().ok())
-                    .map(|num| Idx {
-                        num: Some(num),
-                        name: None,
-                    })
+        node.children_with_tokens()
+            .find_map(|node_or_token| match node_or_token {
+                NodeOrToken::Token(token) => match token.kind() {
+                    SyntaxKind::IDENT => Some(Idx {
+                        num: None,
+                        name: Some(InternIdent::new(db, token.text())),
+                    }),
+                    SyntaxKind::UNSIGNED_INT | SyntaxKind::INT => {
+                        token.text().parse().ok().map(|num| Idx {
+                            num: Some(num),
+                            name: None,
+                        })
+                    }
+                    _ => None,
+                },
+                _ => None,
             })
             .map(|idx| Symbol {
                 key: SymbolKey::new(node),
@@ -72,18 +71,16 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
     }
     fn create_first_optional_ref_symbol<'db>(
         db: &'db dyn salsa::Database,
-        instr: &PlainInstr,
+        node: &SyntaxNode,
         kind: SymbolKind,
     ) -> Option<Symbol<'db>> {
-        let node = instr.syntax();
         node.ancestors()
             .find(|node| node.kind() == SyntaxKind::MODULE)
             .map(|region| {
                 let region = SymbolKey::new(&region);
-                instr
-                    .immediates()
-                    .next()
-                    .and_then(|immediate| create_ref_symbol(db, immediate.syntax(), region, kind))
+                node.children()
+                    .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                    .and_then(|immediate| create_ref_symbol(db, &immediate, region, kind))
                     .unwrap_or_else(|| Symbol {
                         green: node.green().into(),
                         key: SymbolKey::new(node),
@@ -149,10 +146,12 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             },
         );
         let mut func_idx_gen = IdxGen::default();
+        let mut local_idx_gen = IdxGen::default();
         let mut type_idx_gen = IdxGen::default();
         let mut global_idx_gen = IdxGen::default();
         let mut mem_idx_gen = IdxGen::default();
         let mut table_idx_gen = IdxGen::default();
+        let mut field_idx_gen = IdxGen::default();
 
         let mut funcs = Vec::new();
         let mut locals = Vec::new();
@@ -170,39 +169,44 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 let func_key = symbol.key;
                 funcs.push((func_key, symbol.idx.name));
                 symbols.insert(func_key, symbol);
-                let Some(func) = ModuleFieldFunc::cast(node.clone()) else {
+                locals.clear();
+                local_idx_gen.reset();
+            }
+            SyntaxKind::PARAM => {
+                let func_key = if let Some(node) = node
+                    .parent()
+                    .and_then(|node| node.parent())
+                    .filter(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
+                {
+                    SymbolKey::new(&node)
+                } else {
                     return;
                 };
-                locals.clear();
-                let mut local_idx_gen = IdxGen::default();
-                func.type_use()
-                    .iter()
-                    .flat_map(|type_use| type_use.params())
-                    .for_each(|param| {
-                        if let Some(ident) = param.ident_token() {
-                            let param = param.syntax();
-                            let key = SymbolKey::new(param);
-                            let idx = local_idx_gen.pull();
-                            let name = InternIdent::new(db, ident.text());
-                            locals.push((key, Some(name)));
-                            symbols.insert(
-                                key,
-                                Symbol {
-                                    key,
-                                    green: param.green().into(),
-                                    region: func_key,
-                                    kind: SymbolKind::Param,
-                                    idx: Idx {
-                                        num: Some(idx),
-                                        name: Some(name),
-                                    },
-                                    idx_kind: IdxKind::Local,
-                                },
-                            );
-                        } else {
-                            symbols.extend(param.val_types().map(|val_type| {
-                                let val_type = val_type.syntax();
-                                let key = SymbolKey::new(val_type);
+                if let Some(ident) = support::token(&node, SyntaxKind::IDENT) {
+                    let key = SymbolKey::new(&node);
+                    let idx = local_idx_gen.pull();
+                    let name = InternIdent::new(db, ident.text());
+                    locals.push((key, Some(name)));
+                    symbols.insert(
+                        key,
+                        Symbol {
+                            key,
+                            green: node.green().into(),
+                            region: func_key,
+                            kind: SymbolKind::Param,
+                            idx: Idx {
+                                num: Some(idx),
+                                name: Some(name),
+                            },
+                            idx_kind: IdxKind::Local,
+                        },
+                    );
+                } else {
+                    symbols.extend(
+                        node.children()
+                            .filter(|child| ValType::can_cast(child.kind()))
+                            .map(|val_type| {
+                                let key = SymbolKey::new(&val_type);
                                 locals.push((key, None));
                                 (
                                     key,
@@ -218,52 +222,59 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                         idx_kind: IdxKind::Local,
                                     },
                                 )
-                            }));
-                        }
-                    });
-                func.locals().for_each(|local| {
-                    if let Some(ident) = local.ident_token() {
-                        let local = local.syntax();
-                        let key = SymbolKey::new(local);
-                        let idx = local_idx_gen.pull();
-                        let name = InternIdent::new(db, ident.text());
-                        locals.push((key, Some(name)));
-                        symbols.insert(
+                            }),
+                    );
+                }
+            }
+            SyntaxKind::LOCAL => {
+                let func_key = if let Some(func) = node.parent() {
+                    SymbolKey::new(&func)
+                } else {
+                    return;
+                };
+                if let Some(ident) = support::token(&node, SyntaxKind::IDENT) {
+                    let key = SymbolKey::new(&node);
+                    let idx = local_idx_gen.pull();
+                    let name = InternIdent::new(db, ident.text());
+                    locals.push((key, Some(name)));
+                    symbols.insert(
+                        key,
+                        Symbol {
                             key,
-                            Symbol {
-                                key,
-                                green: local.green().into(),
-                                region: func_key,
-                                kind: SymbolKind::Local,
-                                idx: Idx {
-                                    num: Some(idx),
-                                    name: Some(name),
-                                },
-                                idx_kind: IdxKind::Local,
+                            green: node.green().into(),
+                            region: func_key,
+                            kind: SymbolKind::Local,
+                            idx: Idx {
+                                num: Some(idx),
+                                name: Some(name),
                             },
-                        );
-                    } else {
-                        symbols.extend(local.val_types().map(|val_type| {
-                            let val_type = val_type.syntax();
-                            let key = SymbolKey::new(val_type);
-                            locals.push((key, None));
-                            (
-                                key,
-                                Symbol {
+                            idx_kind: IdxKind::Local,
+                        },
+                    );
+                } else {
+                    symbols.extend(
+                        node.children()
+                            .filter(|child| ValType::can_cast(child.kind()))
+                            .map(|val_type| {
+                                let key = SymbolKey::new(&val_type);
+                                locals.push((key, None));
+                                (
                                     key,
-                                    green: val_type.green().into(),
-                                    region: func_key,
-                                    kind: SymbolKind::Local,
-                                    idx: Idx {
-                                        num: Some(local_idx_gen.pull()),
-                                        name: None,
+                                    Symbol {
+                                        key,
+                                        green: val_type.green().into(),
+                                        region: func_key,
+                                        kind: SymbolKind::Local,
+                                        idx: Idx {
+                                            num: Some(local_idx_gen.pull()),
+                                            name: None,
+                                        },
+                                        idx_kind: IdxKind::Local,
                                     },
-                                    idx_kind: IdxKind::Local,
-                                },
-                            )
-                        }));
-                    }
-                });
+                                )
+                            }),
+                    );
+                }
             }
             SyntaxKind::TYPE_DEF => {
                 let type_idx = type_idx_gen.pull();
@@ -272,37 +283,46 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 let type_def_key = symbol.key;
                 types.push((type_def_key, symbol.idx.name));
                 symbols.insert(type_def_key, symbol);
-                if let Some(CompType::Struct(s)) =
-                    support::child::<SubType>(&node).and_then(|sub_type| sub_type.comp_type())
+                field_idx_gen.reset();
+            }
+            SyntaxKind::FIELD => {
+                let type_def_key = if let Some(type_def) = node
+                    .ancestors()
+                    .find(|ancestor| ancestor.kind() == SyntaxKind::TYPE_DEF)
                 {
-                    let mut field_idx_gen = IdxGen::default();
-                    let mut current_fields = Vec::new();
-                    s.fields().for_each(|field| {
-                        if let Some(ident) = field.ident_token() {
-                            let field = field.syntax();
-                            let key = SymbolKey::new(field);
-                            let idx = field_idx_gen.pull();
-                            let name = InternIdent::new(db, ident.text());
-                            current_fields.push((key, Some(name)));
-                            symbols.insert(
-                                key,
-                                Symbol {
-                                    key,
-                                    green: field.green().into(),
-                                    region: type_def_key,
-                                    kind: SymbolKind::FieldDef,
-                                    idx: Idx {
-                                        num: Some(idx),
-                                        name: Some(name),
-                                    },
-                                    idx_kind: IdxKind::Field,
-                                },
-                            );
-                        } else {
-                            symbols.extend(field.field_types().map(|field_type| {
-                                let field_type = field_type.syntax();
-                                let key = SymbolKey::new(field_type);
-                                current_fields.push((key, None));
+                    SymbolKey::new(&type_def)
+                } else {
+                    return;
+                };
+                let fields = fields
+                    .entry(type_def_key)
+                    .or_insert_with(|| Vec::with_capacity(1));
+                if let Some(ident) = support::token(&node, SyntaxKind::IDENT) {
+                    let key = SymbolKey::new(&node);
+                    let idx = field_idx_gen.pull();
+                    let name = InternIdent::new(db, ident.text());
+                    fields.push((key, Some(name)));
+                    symbols.insert(
+                        key,
+                        Symbol {
+                            key,
+                            green: node.green().into(),
+                            region: type_def_key,
+                            kind: SymbolKind::FieldDef,
+                            idx: Idx {
+                                num: Some(idx),
+                                name: Some(name),
+                            },
+                            idx_kind: IdxKind::Field,
+                        },
+                    );
+                } else {
+                    symbols.extend(
+                        node.children()
+                            .filter(|child| child.kind() == SyntaxKind::FIELD_TYPE)
+                            .map(|field_type| {
+                                let key = SymbolKey::new(&field_type);
+                                fields.push((key, None));
                                 (
                                     key,
                                     Symbol {
@@ -317,10 +337,8 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                         idx_kind: IdxKind::Field,
                                     },
                                 )
-                            }));
-                        }
-                    });
-                    fields.insert(type_def_key, current_fields);
+                            }),
+                    );
                 }
             }
             SyntaxKind::MODULE_FIELD_GLOBAL => {
@@ -331,11 +349,17 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 symbols.insert(symbol.key, symbol);
             }
             SyntaxKind::PLAIN_INSTR => {
-                let Some(instr) = PlainInstr::cast(node) else {
-                    return;
-                };
-                let node = instr.syntax();
-                match instr.instr_name().as_ref().map(|token| token.text()) {
+                match node
+                    .children_with_tokens()
+                    .find_map(|node_or_token| match node_or_token {
+                        NodeOrToken::Token(token) if token.kind() == SyntaxKind::INSTR_NAME => {
+                            Some(token)
+                        }
+                        _ => None,
+                    })
+                    .as_ref()
+                    .map(|token| token.text())
+                {
                     Some("call" | "ref.func" | "return_call") => {
                         symbols.extend(node.children().filter_map(|node| {
                             create_ref_symbol(db, &node, module_key, SymbolKind::Call)
@@ -420,7 +444,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     }
                     Some("call_indirect" | "return_call_indirect") => {
                         if let Some(symbol) =
-                            create_first_optional_ref_symbol(db, &instr, SymbolKind::TableRef)
+                            create_first_optional_ref_symbol(db, &node, SymbolKind::TableRef)
                         {
                             symbols.insert(symbol.key, symbol);
                         }
@@ -457,7 +481,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         | "v128.store16_lane" | "v128.store32_lane" | "v128.store64_lane",
                     ) => {
                         if let Some(symbol) =
-                            create_first_optional_ref_symbol(db, &instr, SymbolKind::MemoryRef)
+                            create_first_optional_ref_symbol(db, &node, SymbolKind::MemoryRef)
                         {
                             symbols.insert(symbol.key, symbol);
                         }
