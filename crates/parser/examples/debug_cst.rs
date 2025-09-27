@@ -7,12 +7,13 @@ use codespan_reporting::{
     },
 };
 use std::{env, fs};
+use wat_syntax::SyntaxNode;
 
 fn main() {
     let path = env::args().nth(1).unwrap();
     let input = fs::read_to_string(&path).unwrap();
-    let (tree, errors) = wat_parser::parse(&input);
-    println!("{tree:#?}");
+    let (green, errors) = wat_parser::parse(&input);
+    println!("{:#?}", SyntaxNode::new_root(green.clone()));
 
     if !errors.is_empty() {
         let file = SimpleFile::new(path, &input);
@@ -29,5 +30,5 @@ fn main() {
         });
     }
 
-    similar_asserts::assert_eq!(input, tree.to_string());
+    similar_asserts::assert_eq!(input, green.to_string());
 }
