@@ -23,10 +23,30 @@ Neovim has built-in support for WebAssembly Language Tools via [nvim-lspconfig](
 For the minimal setup, add the following lines to your `init.lua`:
 
 ```lua
-require("lspconfig").wasm_language_tools.setup({})
+vim.lsp.enable("wasm_language_tools")
 ```
 
 Additionally, you can configure the language server like this:
+
+```lua
+vim.lsp.config("wasm_language_tools", {
+  settings = {
+    format = {},
+    lint = {
+      unused = "warn",
+    },
+  },
+})
+vim.lsp.enable("wasm_language_tools")
+```
+
+If you're using Neovim 0.10 or older:
+
+```lua
+require("lspconfig").wasm_language_tools.setup({})
+```
+
+or with configuration:
 
 ```lua
 require("lspconfig").wasm_language_tools.setup({

@@ -22,7 +22,7 @@ configuration in Visual Studio Code will be:
 While for the same configuration above in Neovim, it will be:
 
 ```lua
-require("lspconfig").wasm_language_tools.setup({
+vim.lsp.config("wasm_language_tools", {
   settings = {
     lint = {
       unused = "deny",

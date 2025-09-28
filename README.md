@@ -166,7 +166,7 @@ cargo install wat_server
 - Visual Studio Code: Install the [WebAssembly Language Tools](https://marketplace.visualstudio.com/items?itemName=gplane.wasm-language-tools) extension.
 - Neovim: Built-in support in [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#wasm_language_tools):
   ```lua
-  require("lspconfig").wasm_language_tools.setup({})
+  vim.lsp.enable("wasm_language_tools")
   ```
 - Zed: Install the [WebAssembly Text Format](https://zed.dev/extensions?query=WebAssembly+Text+Format) extension.
 - Helix: Built-in support.
