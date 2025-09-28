@@ -64,8 +64,12 @@ impl LanguageService {
                         symbol.key,
                         DocumentSymbol {
                             name: render_symbol_name(symbol, self),
-                            detail: types_analyzer::extract_type(self, &symbol.green)
-                                .map(|ty| ty.render(self).to_string()),
+                            detail: types_analyzer::extract_type(
+                                self,
+                                document,
+                                symbol.green.clone(),
+                            )
+                            .map(|ty| ty.render(self).to_string()),
                             kind: LspSymbolKind::Variable,
                             tags: None,
                             deprecated: None,
@@ -103,19 +107,22 @@ impl LanguageService {
                         symbol.key,
                         DocumentSymbol {
                             name: render_symbol_name(symbol, self),
-                            detail: types_analyzer::extract_global_type(self, &symbol.green).map(
-                                |ty| {
-                                    if ModuleFieldGlobal::cast(symbol.key.to_node(&root))
-                                        .and_then(|global| global.global_type())
-                                        .and_then(|global_type| global_type.mut_keyword())
-                                        .is_some()
-                                    {
-                                        format!("(mut {})", ty.render(self))
-                                    } else {
-                                        ty.render(self).to_string()
-                                    }
-                                },
-                            ),
+                            detail: types_analyzer::extract_global_type(
+                                self,
+                                document,
+                                symbol.green.clone(),
+                            )
+                            .map(|ty| {
+                                if ModuleFieldGlobal::cast(symbol.key.to_node(&root))
+                                    .and_then(|global| global.global_type())
+                                    .and_then(|global_type| global_type.mut_keyword())
+                                    .is_some()
+                                {
+                                    format!("(mut {})", ty.render(self))
+                                } else {
+                                    ty.render(self).to_string()
+                                }
+                            }),
                             kind: LspSymbolKind::Variable,
                             tags: None,
                             deprecated: None,

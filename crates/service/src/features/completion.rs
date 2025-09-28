@@ -681,7 +681,11 @@ fn get_cmp_list(
                             })
                             .map(|symbol| {
                                 let label = symbol.idx.render(service).to_string();
-                                let ty = types_analyzer::extract_type(service, &symbol.green);
+                                let ty = types_analyzer::extract_type(
+                                    service,
+                                    document,
+                                    symbol.green.clone(),
+                                );
                                 CompletionItem {
                                     label: label.clone(),
                                     kind: Some(CompletionItemKind::Variable),
@@ -828,8 +832,11 @@ fn get_cmp_list(
                             .get_declared(module, SymbolKind::GlobalDef)
                             .map(|symbol| {
                                 let label = symbol.idx.render(service).to_string();
-                                let ty =
-                                    types_analyzer::extract_global_type(service, &symbol.green);
+                                let ty = types_analyzer::extract_global_type(
+                                    service,
+                                    document,
+                                    symbol.green.clone(),
+                                );
                                 CompletionItem {
                                     label: label.clone(),
                                     kind: Some(CompletionItemKind::Variable),

@@ -1,6 +1,7 @@
 use crate::{
     LanguageService,
     binder::{SymbolKey, SymbolKind, SymbolTable},
+    document::Document,
     helpers, types_analyzer,
 };
 use line_index::LineIndex;
@@ -20,6 +21,7 @@ const DIAGNOSTIC_CODE: &str = "uninit";
 pub fn check(
     service: &LanguageService,
     diagnostics: &mut Vec<Diagnostic>,
+    document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
@@ -30,7 +32,7 @@ pub fn check(
         .values()
         .filter(|symbol| symbol.kind == SymbolKind::Local && symbol.region == region)
         .map(|symbol| {
-            let ty = types_analyzer::extract_type(service, &symbol.green);
+            let ty = types_analyzer::extract_type(service, document, symbol.green.clone());
             (
                 symbol.key,
                 if let Some(false) = ty.map(|ty| ty.defaultable()) {

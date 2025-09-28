@@ -64,7 +64,7 @@ pub fn check_global(
     module_id: u32,
     node: &SyntaxNode,
 ) {
-    let ty = extract_global_type(service, &node.green())
+    let ty = extract_global_type(service, document, node.green().into())
         .map(OperandType::Val)
         .unwrap_or(OperandType::Any);
     check_block_like(
@@ -187,17 +187,6 @@ pub fn check_elem_list(
         });
 }
 
-pub fn unfold(node: SyntaxNode, sequence: &mut Vec<Instr>) {
-    if matches!(node.kind(), SyntaxKind::PLAIN_INSTR | SyntaxKind::BLOCK_IF) {
-        node.children()
-            .filter_map(Instr::cast)
-            .for_each(|child| unfold(child.syntax().clone(), sequence));
-    }
-    if let Some(node) = Instr::cast(node) {
-        sequence.push(node);
-    }
-}
-
 struct Shared<'db> {
     service: &'db dyn salsa::Database,
     document: Document,
@@ -221,18 +210,45 @@ fn check_block_like(
         stack: init_stack,
         has_never: false,
     };
-    let mut sequence = Vec::with_capacity(1);
+
+    fn unfold<'db>(
+        node: SyntaxNode,
+        type_stack: &mut TypeStack<'db>,
+        diagnostics: &mut Vec<Diagnostic>,
+        shared: &Shared<'db>,
+    ) {
+        if matches!(node.kind(), SyntaxKind::PLAIN_INSTR | SyntaxKind::BLOCK_IF) {
+            node.children()
+                .filter_map(Instr::cast)
+                .for_each(|child| unfold(child.syntax().clone(), type_stack, diagnostics, shared));
+        }
+        if let Some(node) = Instr::cast(node) {
+            check_instr(node, type_stack, diagnostics, shared);
+        }
+    }
     node.children()
         .filter(|child| Instr::can_cast(child.kind()))
-        .for_each(|child| unfold(child, &mut sequence));
+        .for_each(|child| unfold(child, &mut type_stack, diagnostics, shared));
 
-    sequence.into_iter().for_each(|instr| match &instr {
+    if let Some(diagnostic) = type_stack.check_to_bottom(expected_results, ReportRange::Last(node))
+    {
+        diagnostics.push(diagnostic);
+    }
+}
+
+fn check_instr<'db>(
+    instr: Instr,
+    type_stack: &mut TypeStack<'db>,
+    diagnostics: &mut Vec<Diagnostic>,
+    shared: &Shared<'db>,
+) {
+    match &instr {
         Instr::Plain(plain_instr) => {
             let Some(instr_name) = plain_instr.instr_name() else {
                 return;
             };
             let instr_name = instr_name.text();
-            let sig = resolve_sig(shared, instr_name, plain_instr, &type_stack);
+            let sig = resolve_sig(shared, instr_name, plain_instr, type_stack);
             if let Some(diagnostic) = type_stack.check(&sig.params, ReportRange::Instr(&instr)) {
                 diagnostics.push(diagnostic);
             }
@@ -354,10 +370,6 @@ fn check_block_like(
                 .stack
                 .extend(results.into_iter().map(|ty| (ty, Some(instr.clone()))));
         }
-    });
-    if let Some(diagnostic) = type_stack.check_to_bottom(expected_results, ReportRange::Last(node))
-    {
-        diagnostics.push(diagnostic);
     }
 }
 
@@ -390,8 +402,8 @@ impl<'db> TypeStack<'db> {
                         self.service,
                         self.document,
                         self.module_id,
-                        received.clone(),
-                        expected.clone(),
+                        received,
+                        expected,
                     ) {
                         return;
                     }
@@ -465,8 +477,8 @@ impl<'db> TypeStack<'db> {
                         self.service,
                         self.document,
                         self.module_id,
-                        received.clone(),
-                        expected.clone(),
+                        received,
+                        expected,
                     ) {
                         return;
                     }
@@ -561,7 +573,9 @@ fn resolve_sig<'db>(
                     .immediates()
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                    .and_then(|symbol| extract_type(shared.service, &symbol.green))
+                    .and_then(|symbol| {
+                        extract_type(shared.service, shared.document, symbol.green.clone())
+                    })
                     .map_or(OperandType::Any, OperandType::Val),
             ],
         },
@@ -571,7 +585,9 @@ fn resolve_sig<'db>(
                     .immediates()
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                    .and_then(|symbol| extract_type(shared.service, &symbol.green))
+                    .and_then(|symbol| {
+                        extract_type(shared.service, shared.document, symbol.green.clone())
+                    })
                     .map_or(OperandType::Any, OperandType::Val),
             ],
             results: vec![],
@@ -581,7 +597,9 @@ fn resolve_sig<'db>(
                 .immediates()
                 .next()
                 .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                .and_then(|symbol| extract_type(shared.service, &symbol.green))
+                .and_then(|symbol| {
+                    extract_type(shared.service, shared.document, symbol.green.clone())
+                })
                 .map_or(OperandType::Any, OperandType::Val);
             ResolvedSig {
                 params: vec![ty.clone()],
@@ -595,7 +613,9 @@ fn resolve_sig<'db>(
                     .immediates()
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                    .and_then(|symbol| extract_global_type(shared.service, &symbol.green))
+                    .and_then(|symbol| {
+                        extract_global_type(shared.service, shared.document, symbol.green.clone())
+                    })
                     .map_or(OperandType::Any, OperandType::Val),
             ],
         },
@@ -605,7 +625,9 @@ fn resolve_sig<'db>(
                     .immediates()
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                    .and_then(|symbol| extract_global_type(shared.service, &symbol.green))
+                    .and_then(|symbol| {
+                        extract_global_type(shared.service, shared.document, symbol.green.clone())
+                    })
                     .map_or(OperandType::Any, OperandType::Val),
             ],
             results: vec![],

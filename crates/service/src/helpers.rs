@@ -103,12 +103,12 @@ pub(crate) struct RenderWithDb<'db, T> {
 
 pub(crate) mod ast {
     use rowan::{
-        Direction, GreenNode, GreenNodeData, NodeOrToken, TextSize, TokenAtOffset,
+        Direction, GreenNodeData, NodeOrToken, TextSize, TokenAtOffset,
         ast::{AstNode, support},
     };
     use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, ast::RefType};
 
-    pub fn find_func_type_of_type_def(green: &GreenNodeData) -> Option<GreenNode> {
+    pub fn find_func_type_of_type_def(green: &GreenNodeData) -> Option<&GreenNodeData> {
         green
             .children()
             .find_map(|child| match child {
@@ -118,7 +118,7 @@ pub(crate) mod ast {
             .and_then(|sub_type| {
                 sub_type.children().find_map(|child| match child {
                     NodeOrToken::Node(node) if node.kind() == SyntaxKind::FUNC_TYPE.into() => {
-                        Some(node.to_owned())
+                        Some(node)
                     }
                     _ => None,
                 })

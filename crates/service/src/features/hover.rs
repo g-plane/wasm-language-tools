@@ -45,7 +45,9 @@ impl LanguageService {
                             }
                         }),
                         SymbolKind::LocalRef => symbol_table.find_def(key).map(|symbol| Hover {
-                            contents: Union3::A(create_param_or_local_hover(self, symbol)),
+                            contents: Union3::A(create_param_or_local_hover(
+                                self, document, symbol,
+                            )),
                             range: Some(helpers::rowan_range_to_lsp_range(
                                 line_index,
                                 token.text_range(),
@@ -212,7 +214,9 @@ fn create_def_hover(
     symbol: &Symbol,
 ) -> Option<MarkupContent> {
     match symbol.kind {
-        SymbolKind::Param | SymbolKind::Local => Some(create_param_or_local_hover(service, symbol)),
+        SymbolKind::Param | SymbolKind::Local => {
+            Some(create_param_or_local_hover(service, document, symbol))
+        }
         SymbolKind::Func => Some(MarkupContent {
             kind: MarkupKind::Markdown,
             value: create_func_hover(service, document, symbol.clone(), root),
@@ -250,7 +254,11 @@ fn create_func_hover(
     content
 }
 
-fn create_param_or_local_hover(service: &LanguageService, symbol: &Symbol) -> MarkupContent {
+fn create_param_or_local_hover(
+    service: &LanguageService,
+    document: Document,
+    symbol: &Symbol,
+) -> MarkupContent {
     let mut content = '('.to_string();
     match symbol.kind {
         SymbolKind::Param => {
@@ -265,7 +273,7 @@ fn create_param_or_local_hover(service: &LanguageService, symbol: &Symbol) -> Ma
         content.push(' ');
         content.push_str(name.ident(service));
     }
-    if let Some(ty) = types_analyzer::extract_type(service, &symbol.green) {
+    if let Some(ty) = types_analyzer::extract_type(service, document, symbol.green.clone()) {
         content.push(' ');
         let _ = write!(content, "{}", ty.render(service));
     }

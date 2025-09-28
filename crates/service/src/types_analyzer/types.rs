@@ -487,13 +487,11 @@ pub(crate) fn operand_type_matches<'db>(
     db: &'db dyn salsa::Database,
     document: Document,
     module_id: u32,
-    sub: OperandType<'db>,
-    sup: OperandType<'db>,
+    sub: &OperandType<'db>,
+    sup: &OperandType<'db>,
 ) -> bool {
     match (sub, sup) {
-        (OperandType::Val(sub), OperandType::Val(sup)) => {
-            sub.matches(&sup, db, document, module_id)
-        }
+        (OperandType::Val(sub), OperandType::Val(sup)) => sub.matches(sup, db, document, module_id),
         (OperandType::Any, _) | (_, OperandType::Any) => true,
     }
 }

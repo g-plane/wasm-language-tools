@@ -77,7 +77,14 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                     symbol_table,
                     &node,
                 );
-                uninit::check(service, &mut diagnostics, line_index, symbol_table, &node);
+                uninit::check(
+                    service,
+                    &mut diagnostics,
+                    document,
+                    line_index,
+                    symbol_table,
+                    &node,
+                );
             }
             SyntaxKind::MODULE_FIELD_GLOBAL => {
                 typeck::check_global(
