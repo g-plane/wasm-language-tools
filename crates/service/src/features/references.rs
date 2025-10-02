@@ -35,8 +35,8 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
 
         let key = SymbolKey::new(&current_node);
-        let current_symbol = symbol_table.symbols.get(&key)?;
-        match &current_symbol.kind {
+        let symbol = symbol_table.symbols.get(&key)?;
+        match symbol.kind {
             SymbolKind::Module => None,
             SymbolKind::Func
             | SymbolKind::Param
@@ -47,20 +47,7 @@ impl LanguageService {
             | SymbolKind::TableDef
             | SymbolKind::FieldDef => Some(
                 symbol_table
-                    .symbols
-                    .values()
-                    .filter(|symbol| {
-                        if symbol.kind == current_symbol.kind {
-                            params.context.include_declaration
-                                && current_symbol.idx == symbol.idx
-                                && symbol.region == current_symbol.region
-                        } else if symbol.idx_kind == current_symbol.idx_kind {
-                            symbol.idx.is_defined_by(&current_symbol.idx)
-                                && symbol.region == current_symbol.region
-                        } else {
-                            false
-                        }
-                    })
+                    .find_references_on_def(symbol, params.context.include_declaration)
                     .map(|symbol| create_location_by_symbol(&params, line_index, symbol, &root))
                     .collect(),
             ),
@@ -70,31 +57,15 @@ impl LanguageService {
             | SymbolKind::GlobalRef
             | SymbolKind::MemoryRef
             | SymbolKind::TableRef
-            | SymbolKind::FieldRef => {
-                let def = symbol_table.find_def(current_symbol.key)?;
-                Some(
-                    symbol_table
-                        .symbols
-                        .values()
-                        .filter(|symbol| {
-                            if symbol.kind == current_symbol.kind {
-                                symbol.idx.is_defined_by(&def.idx)
-                                    && symbol.region == current_symbol.region
-                            } else if symbol.idx_kind == current_symbol.idx_kind {
-                                params.context.include_declaration
-                                    && current_symbol.idx.is_defined_by(&symbol.idx)
-                                    && symbol.region == current_symbol.region
-                            } else {
-                                false
-                            }
-                        })
-                        .map(|symbol| create_location_by_symbol(&params, line_index, symbol, &root))
-                        .collect(),
-                )
-            }
+            | SymbolKind::FieldRef => Some(
+                symbol_table
+                    .find_references_on_ref(symbol, params.context.include_declaration)
+                    .map(|symbol| create_location_by_symbol(&params, line_index, symbol, &root))
+                    .collect(),
+            ),
             SymbolKind::BlockDef => Some(
                 symbol_table
-                    .find_block_references(current_symbol.key, params.context.include_declaration)
+                    .find_block_references(key, params.context.include_declaration)
                     .map(|symbol| create_location_by_symbol(&params, line_index, symbol, &root))
                     .collect(),
             ),

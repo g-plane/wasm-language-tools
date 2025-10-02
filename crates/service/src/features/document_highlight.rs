@@ -48,8 +48,8 @@ impl LanguageService {
             SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
                 let symbol_table = SymbolTable::of(self, document);
                 let key = SymbolKey::new(&token.parent()?);
-                if let Some(current_symbol) = symbol_table.symbols.get(&key) {
-                    match &current_symbol.kind {
+                if let Some(symbol) = symbol_table.symbols.get(&key) {
+                    match symbol.kind {
                         SymbolKind::Module => None,
                         SymbolKind::Func
                         | SymbolKind::Param
@@ -60,19 +60,7 @@ impl LanguageService {
                         | SymbolKind::TableDef
                         | SymbolKind::FieldDef => Some(
                             symbol_table
-                                .symbols
-                                .values()
-                                .filter(|symbol| {
-                                    if symbol.kind == current_symbol.kind {
-                                        current_symbol.idx == symbol.idx
-                                            && symbol.region == current_symbol.region
-                                    } else if symbol.idx_kind == current_symbol.idx_kind {
-                                        symbol.idx.is_defined_by(&current_symbol.idx)
-                                            && symbol.region == current_symbol.region
-                                    } else {
-                                        false
-                                    }
-                                })
+                                .find_references_on_def(symbol, true)
                                 .filter_map(|symbol| {
                                     create_symbol_highlight(symbol, &root, line_index)
                                 })
@@ -84,32 +72,17 @@ impl LanguageService {
                         | SymbolKind::GlobalRef
                         | SymbolKind::MemoryRef
                         | SymbolKind::TableRef
-                        | SymbolKind::FieldRef => {
-                            let def = symbol_table.find_def(current_symbol.key)?;
-                            Some(
-                                symbol_table
-                                    .symbols
-                                    .values()
-                                    .filter(|symbol| {
-                                        if symbol.kind == current_symbol.kind {
-                                            symbol.idx.is_defined_by(&def.idx)
-                                                && symbol.region == current_symbol.region
-                                        } else if symbol.idx_kind == def.idx_kind {
-                                            current_symbol.idx.is_defined_by(&symbol.idx)
-                                                && symbol.region == current_symbol.region
-                                        } else {
-                                            false
-                                        }
-                                    })
-                                    .filter_map(|symbol| {
-                                        create_symbol_highlight(symbol, &root, line_index)
-                                    })
-                                    .collect(),
-                            )
-                        }
+                        | SymbolKind::FieldRef => Some(
+                            symbol_table
+                                .find_references_on_ref(symbol, true)
+                                .filter_map(|symbol| {
+                                    create_symbol_highlight(symbol, &root, line_index)
+                                })
+                                .collect(),
+                        ),
                         SymbolKind::BlockDef => Some(
                             symbol_table
-                                .find_block_references(current_symbol.key, true)
+                                .find_block_references(key, true)
                                 .filter_map(|symbol| {
                                     create_symbol_highlight(symbol, &root, line_index)
                                 })

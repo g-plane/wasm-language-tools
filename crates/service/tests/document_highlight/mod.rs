@@ -168,7 +168,7 @@ fn call_undefined() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.document_highlight(create_params(uri, 2, 15));
-    assert!(response.is_none());
+    assert!(response.unwrap().is_empty());
 }
 
 #[test]
@@ -240,7 +240,7 @@ fn local_ref_undefined() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.document_highlight(create_params(uri, 2, 37));
-    assert!(response.is_none());
+    assert!(response.unwrap().is_empty());
 }
 
 #[test]
@@ -305,7 +305,7 @@ fn type_use_undefined() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.document_highlight(create_params(uri, 2, 15));
-    assert!(response.is_none());
+    assert!(response.unwrap().is_empty());
 }
 
 #[test]
@@ -368,7 +368,7 @@ fn global_ref_undefined() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.document_highlight(create_params(uri, 2, 36));
-    assert!(response.is_none());
+    assert!(response.unwrap().is_empty());
 }
 
 #[test]
@@ -434,7 +434,7 @@ fn memory_ref_undefined() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.document_highlight(create_params(uri, 2, 17));
-    assert!(response.is_none());
+    assert!(response.unwrap().is_empty());
 }
 
 #[test]
@@ -518,7 +518,7 @@ fn table_ref_undefined() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.document_highlight(create_params(uri, 2, 20));
-    assert!(response.is_none());
+    assert!(response.unwrap().is_empty());
 }
 
 #[test]
@@ -655,5 +655,5 @@ fn field_ref_undefined() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.document_highlight(create_params(uri, 4, 18));
-    assert!(response.is_none());
+    assert!(response.unwrap().is_empty());
 }

@@ -91,7 +91,7 @@ fn undef() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let include_decl = service.find_references(create_params(uri.clone(), 4, 18, true));
-    assert!(include_decl.is_none());
+    assert!(include_decl.unwrap().is_empty());
     let exclude_decl = service.find_references(create_params(uri, 4, 18, false));
-    assert!(exclude_decl.is_none());
+    assert!(exclude_decl.unwrap().is_empty());
 }

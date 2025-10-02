@@ -756,6 +756,46 @@ impl<'db> SymbolTable<'db> {
             .filter(move |symbol| symbol.kind == kind && symbol.region == key)
     }
 
+    pub fn find_references_on_def(
+        &self,
+        def_symbol: &Symbol<'db>,
+        with_decl: bool,
+    ) -> impl Iterator<Item = &Symbol<'db>> {
+        debug_assert_ne!(def_symbol.kind, SymbolKind::BlockDef);
+        self.symbols.values().filter(move |symbol| {
+            if symbol.kind == def_symbol.kind {
+                with_decl && symbol == &def_symbol
+            } else if symbol.idx_kind == def_symbol.idx_kind {
+                self.resolved
+                    .get(&symbol.key)
+                    .is_some_and(|def_key| def_key == &def_symbol.key)
+            } else {
+                false
+            }
+        })
+    }
+
+    pub fn find_references_on_ref(
+        &self,
+        ref_symbol: &Symbol<'db>,
+        with_decl: bool,
+    ) -> impl Iterator<Item = &Symbol<'db>> {
+        debug_assert_ne!(ref_symbol.kind, SymbolKind::BlockRef);
+        let def_key = self.resolved.get(&ref_symbol.key);
+        self.symbols.values().filter(move |symbol| {
+            if symbol.kind == ref_symbol.kind {
+                self.resolved
+                    .get(&symbol.key)
+                    .zip(def_key)
+                    .is_some_and(|(a, b)| a == b)
+            } else if symbol.idx_kind == ref_symbol.idx_kind {
+                with_decl && def_key.is_some_and(|def_key| def_key == &symbol.key)
+            } else {
+                false
+            }
+        })
+    }
+
     pub fn find_block_references(
         &self,
         def_key: SymbolKey,
