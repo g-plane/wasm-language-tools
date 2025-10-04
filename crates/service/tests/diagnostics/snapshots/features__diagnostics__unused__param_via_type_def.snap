@@ -1,0 +1,28 @@
+---
+source: crates/service/tests/diagnostics/unused.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 21
+        },
+        "end": {
+          "line": 2,
+          "character": 23
+        }
+      },
+      "severity": 2,
+      "code": "unused",
+      "source": "wat",
+      "message": "param `0` is never used",
+      "tags": [
+        1
+      ]
+    }
+  ]
+}

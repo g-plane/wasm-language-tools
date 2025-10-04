@@ -112,3 +112,33 @@ fn ref_type() {
     let response = service.completion(create_params(uri, 2, 20));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn via_type_def() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (func (param $a i32) (param $b f32)))
+  (func (type 0)
+    (local.get ))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 4, 16));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn type_def_with_inlined() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (func (param $a i32) (param $b f32)))
+  (func (type 0) (param $c i64)
+    (local.get ))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 4, 16));
+    assert_json_snapshot!(response);
+}

@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/undef.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 15
+        },
+        "end": {
+          "line": 4,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find param or local `0` in this scope"
+    }
+  ]
+}

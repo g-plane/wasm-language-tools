@@ -1,0 +1,46 @@
+---
+source: crates/service/tests/completion/param.rs
+expression: response
+---
+[
+  {
+    "label": "0",
+    "labelDetails": {
+      "description": "i32"
+    },
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 15
+        },
+        "end": {
+          "line": 4,
+          "character": 16
+        }
+      },
+      "newText": "0"
+    }
+  },
+  {
+    "label": "1",
+    "labelDetails": {
+      "description": "f32"
+    },
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 15
+        },
+        "end": {
+          "line": 4,
+          "character": 16
+        }
+      },
+      "newText": "1"
+    }
+  }
+]

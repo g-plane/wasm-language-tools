@@ -238,6 +238,36 @@ fn param_in_implicit_module() {
 }
 
 #[test]
+fn param_via_type_def() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (func (param $a i32)))
+  (func (type 0)
+    (local.get 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, 4, 16));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn after_func_type() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func (param i32 i32)
+    call_indirect (param i32)
+    local.get 1))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.goto_definition(create_params(uri, 4, 14));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn local_int_idx() {
     let uri = "untitled:test".to_string();
     let source = "

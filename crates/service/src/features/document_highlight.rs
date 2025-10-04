@@ -144,7 +144,10 @@ fn create_symbol_highlight(
             SyntaxElement::Token(token)
                 if matches!(
                     token.kind(),
-                    SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT
+                    SyntaxKind::IDENT
+                        | SyntaxKind::INT
+                        | SyntaxKind::UNSIGNED_INT
+                        | SyntaxKind::TYPE_KEYWORD
                 ) =>
             {
                 Some(DocumentHighlight {

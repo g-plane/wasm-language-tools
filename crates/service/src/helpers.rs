@@ -106,6 +106,7 @@ pub(crate) mod ast {
         Direction, GreenNodeData, NodeOrToken, TextSize, TokenAtOffset,
         ast::{AstNode, support},
     };
+    use std::ops::ControlFlow;
     use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, ast::RefType};
 
     pub fn find_func_type_of_type_def(green: &GreenNodeData) -> Option<&GreenNodeData> {
@@ -123,6 +124,26 @@ pub(crate) mod ast {
                     _ => None,
                 })
             })
+    }
+
+    /// Pick the `$idx` part from `(func (type $idx) ...)`.
+    /// It will return `None` if there're inlined params or results.
+    pub fn pick_type_idx_from_func(func: &SyntaxNode) -> Option<SyntaxNode> {
+        if let ControlFlow::Continue(Some(index)) = func
+            .children()
+            .find(|child| child.kind() == SyntaxKind::TYPE_USE)
+            .into_iter()
+            .flat_map(|type_use| type_use.children())
+            .try_fold(None, |r, child| match child.kind() {
+                SyntaxKind::PARAM | SyntaxKind::RESULT => ControlFlow::Break(()),
+                SyntaxKind::INDEX => ControlFlow::Continue(Some(child)),
+                _ => ControlFlow::Continue(r),
+            })
+        {
+            Some(index)
+        } else {
+            None
+        }
     }
 
     pub fn is_call(node: &SyntaxNode) -> bool {

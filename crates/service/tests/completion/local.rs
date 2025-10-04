@@ -213,3 +213,18 @@ fn preferred_type_by_call() {
     let response = service.completion(create_params(uri, 5, 18));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn with_type_def() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (func (param $a i32) (param $b f32)))
+  (func (type 0) (local $c i64)
+    (local.get ))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 4, 16));
+    assert_json_snapshot!(response);
+}

@@ -187,6 +187,44 @@ fn param() {
 }
 
 #[test]
+fn param_in_type_def() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (func (param $a i32) (param $b i32) (result i32 i32)))
+  (func (type 0)
+    (local.get 1)
+    (local.get 1))
+  (func (type 0)
+    (local.get 1)
+    (local.get 1)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.document_highlight(create_params(uri, 2, 37));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn param_ref_via_type_def() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (func (param i32 i32) (result i32 i32)))
+  (func (type 0)
+    (local.get 1)
+    (local.get 1))
+  (func (type 0)
+    (local.get 1)
+    (local.get 1)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.document_highlight(create_params(uri, 4, 15));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn local() {
     let uri = "untitled:test".to_string();
     let source = "

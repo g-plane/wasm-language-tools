@@ -1,0 +1,26 @@
+---
+source: crates/service/tests/completion/param.rs
+expression: response
+---
+[
+  {
+    "label": "$c",
+    "labelDetails": {
+      "description": "i64"
+    },
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 15
+        },
+        "end": {
+          "line": 4,
+          "character": 16
+        }
+      },
+      "newText": "$c"
+    }
+  }
+]

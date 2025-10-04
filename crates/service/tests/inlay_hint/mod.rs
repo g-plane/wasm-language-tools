@@ -33,6 +33,23 @@ fn param() {
 }
 
 #[test]
+fn param_via_type_def() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (func (param $a i32) (param $b f32)))
+  (func (type 0)
+    (local.get $a)
+    (local.get 1)
+    i32.add))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.inlay_hint(create_params(uri, 7, 0));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn local() {
     let uri = "untitled:test".to_string();
     let source = "

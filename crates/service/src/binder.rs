@@ -1,5 +1,6 @@
 use crate::{
     document::Document,
+    helpers,
     idx::{Idx, IdxGen, InternIdent},
 };
 use indexmap::IndexMap;
@@ -160,6 +161,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
         let mut memories = Vec::new();
         let mut tables = Vec::new();
         let mut fields = FxHashMap::default();
+        let mut indirect_params = Vec::new();
 
         module.descendants().for_each(|node| match node.kind() {
             SyntaxKind::MODULE_FIELD_FUNC => {
@@ -173,11 +175,14 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 local_idx_gen.reset();
             }
             SyntaxKind::PARAM => {
-                let func_key = if let Some(node) = node
+                let region = if let Some(node) = node
                     .parent()
                     .and_then(|node| node.parent())
-                    .filter(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
-                {
+                    .and_then(|node| match node.kind() {
+                        SyntaxKind::MODULE_FIELD_FUNC => Some(node),
+                        SyntaxKind::SUB_TYPE => node.parent(),
+                        _ => None,
+                    }) {
                     SymbolKey::new(&node)
                 } else {
                     return;
@@ -192,11 +197,15 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         Symbol {
                             key,
                             green: node.green().into(),
-                            region: func_key,
+                            region,
                             kind: SymbolKind::Param,
                             idx: Idx {
                                 num: Some(idx),
-                                name: Some(name),
+                                name: if region.kind() == SyntaxKind::TYPE_DEF {
+                                    None
+                                } else {
+                                    Some(name)
+                                },
                             },
                             idx_kind: IdxKind::Local,
                         },
@@ -213,7 +222,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                     Symbol {
                                         key,
                                         green: val_type.green().into(),
-                                        region: func_key,
+                                        region,
                                         kind: SymbolKind::Param,
                                         idx: Idx {
                                             num: Some(local_idx_gen.pull()),
@@ -283,6 +292,12 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 let type_def_key = symbol.key;
                 types.push((type_def_key, symbol.idx.name));
                 symbols.insert(type_def_key, symbol);
+            }
+            SyntaxKind::FUNC_TYPE => {
+                locals.clear();
+                local_idx_gen.reset();
+            }
+            SyntaxKind::STRUCT_TYPE => {
                 field_idx_gen.reset();
             }
             SyntaxKind::FIELD => {
@@ -367,18 +382,27 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         }));
                     }
                     Some("local.get" | "local.set" | "local.tee") => {
-                        let Some(region) = node
+                        let Some(func) = node
                             .ancestors()
                             .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
-                            .map(|node| SymbolKey::new(&node))
                         else {
                             return;
                         };
+                        let region = SymbolKey::new(&func);
                         symbols.extend(node.children().filter_map(|node| {
                             create_ref_symbol(db, &node, region, SymbolKind::LocalRef)
                                 .inspect(|symbol| {
                                     if let Some((def_key, _)) = search_def(&locals, symbol.idx) {
                                         resolved.insert(symbol.key, *def_key);
+                                    } else if let Some(num) = symbol.idx.num
+                                        && let Some(idx) =
+                                            helpers::ast::pick_type_idx_from_func(&func)
+                                    {
+                                        indirect_params.push((
+                                            SymbolKey::new(&idx),
+                                            symbol.key,
+                                            num,
+                                        ));
                                     }
                                 })
                                 .map(|symbol| (symbol.key, symbol))
@@ -733,6 +757,23 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 symbol.region = *def_key;
             }
         });
+
+        // bind parameters that are defined via type use like `(type 0)`
+        resolved.reserve(indirect_params.len());
+        indirect_params
+            .into_iter()
+            .for_each(|(type_use_key, param_ref_key, idx)| {
+                if let Some(def_symbol) = resolved.get(&type_use_key).and_then(|type_def_key| {
+                    symbols
+                        .values()
+                        .filter(|symbol| {
+                            symbol.kind == SymbolKind::Param && &symbol.region == type_def_key
+                        })
+                        .nth(idx as usize)
+                }) {
+                    resolved.insert(param_ref_key, def_symbol.key);
+                }
+            });
     });
 
     SymbolTable { symbols, resolved }
@@ -784,10 +825,12 @@ impl<'db> SymbolTable<'db> {
         let def_key = self.resolved.get(&ref_symbol.key);
         self.symbols.values().filter(move |symbol| {
             if symbol.kind == ref_symbol.kind {
-                self.resolved
-                    .get(&symbol.key)
-                    .zip(def_key)
-                    .is_some_and(|(a, b)| a == b)
+                symbol.region == ref_symbol.region
+                    && self
+                        .resolved
+                        .get(&symbol.key)
+                        .zip(def_key)
+                        .is_some_and(|(a, b)| a == b)
             } else if symbol.idx_kind == ref_symbol.idx_kind {
                 with_decl && def_key.is_some_and(|def_key| def_key == &symbol.key)
             } else {

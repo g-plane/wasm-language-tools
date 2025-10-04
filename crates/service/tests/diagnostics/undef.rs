@@ -47,6 +47,38 @@ fn local_undefined() {
 }
 
 #[test]
+fn param_via_type_def_by_name() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (func (param $a i32) (result i32)))
+  (func (type 0)
+    (local.get $a)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn param_via_type_def_with_inlined() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (func (param $a i32) (param $b i32)))
+  (func (type 0) (result i32)
+    (local.get 0)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn type_use_defined() {
     let uri = "untitled:test".to_string();
     let source = "(module (func (type $t)) (type $t (func)))";

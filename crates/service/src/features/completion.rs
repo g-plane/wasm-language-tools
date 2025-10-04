@@ -669,15 +669,25 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
-                    let func = SymbolKey::new(&func);
+                    let func_key = SymbolKey::new(&func);
                     let preferred_type = guess_preferred_type(service, document, token);
+                    let param_region = if let Some(type_use) =
+                        helpers::ast::pick_type_idx_from_func(&func)
+                        && let Some(type_def) =
+                            symbol_table.resolved.get(&SymbolKey::new(&type_use))
+                    {
+                        *type_def
+                    } else {
+                        func_key
+                    };
                     items.extend(
                         symbol_table
                             .symbols
                             .values()
-                            .filter(|symbol| {
-                                matches!(symbol.kind, SymbolKind::Param | SymbolKind::Local)
-                                    && symbol.region == func
+                            .filter(|symbol| match symbol.kind {
+                                SymbolKind::Param => symbol.region == param_region,
+                                SymbolKind::Local => symbol.region == func_key,
+                                _ => false,
                             })
                             .map(|symbol| {
                                 let label = symbol.idx.render(service).to_string();
