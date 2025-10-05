@@ -23,19 +23,31 @@ use lspt::{
         TypeHierarchySubtypesRequest, TypeHierarchySupertypesRequest,
     },
 };
-use std::{io::StdinLock, thread};
+use rayon::{ThreadPool, ThreadPoolBuilder};
+use std::io::StdinLock;
 use wat_service::LanguageService;
 
-#[derive(Default)]
 pub struct Server {
     service: LanguageService,
     support_pull_diagnostics: bool,
     support_refresh_diagnostics: bool,
     support_pull_config: bool,
     sent_requests: SentRequests<Vec<String>>,
+    pool: ThreadPool,
 }
 
 impl Server {
+    pub fn new() -> Self {
+        Self {
+            service: LanguageService::default(),
+            support_pull_diagnostics: false,
+            support_refresh_diagnostics: false,
+            support_pull_config: false,
+            sent_requests: SentRequests::default(),
+            pool: ThreadPoolBuilder::new().build().unwrap(),
+        }
+    }
+
     pub fn run(&mut self) -> anyhow::Result<()> {
         let mut stdin = std::io::stdin().lock();
         self.initialize(&mut stdin)?;
@@ -53,9 +65,9 @@ impl Server {
             };
             match message {
                 Message::Request { id, method, params } => {
-                    thread::spawn({
-                        let service = self.service.clone();
-                        move || stdio::write(Self::handle_request(service, id, method, params))
+                    let service = self.service.clone();
+                    self.pool.spawn(move || {
+                        let _ = stdio::write(Self::handle_request(service, id, method, params));
                     });
                 }
                 Message::OkResponse { id, result } => {

@@ -32,6 +32,6 @@ fn main() -> anyhow::Result<()> {
             .apply();
     }
 
-    Server::default().run()?;
+    Server::new().run()?;
     Ok(())
 }
