@@ -7,8 +7,8 @@ mod server;
 mod stdio;
 
 fn main() -> anyhow::Result<()> {
-    if env::args().any(|arg| arg == "-v" || arg == "-V" || arg == "--version") {
-        eprintln!("wat_server v{}", env!("CARGO_PKG_VERSION"));
+    if env::args().any(|arg| matches!(&*arg, "-v" | "-V" | "--version")) {
+        println!("wat_server v{}", env!("CARGO_PKG_VERSION"));
         return Ok(());
     }
 
