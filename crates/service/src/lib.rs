@@ -47,6 +47,7 @@ pub struct LanguageService {
     semantic_token_kinds: Arc<IndexSet<SemanticTokenKind, FxBuildHasher>>,
     documents: Arc<DashMap<InternUri, Document, FxBuildHasher>>,
     global_config: Arc<ServiceConfig>,
+    support_pull_config: bool,
 }
 #[salsa::db]
 impl Database for LanguageService {}
@@ -83,6 +84,14 @@ impl LanguageService {
             self.semantic_token_kinds = Arc::new(kinds_map.keys().cloned().collect());
         }
 
+        self.support_pull_config = matches!(
+            params
+                .capabilities
+                .workspace
+                .as_ref()
+                .and_then(|it| it.configuration),
+            Some(true)
+        );
         if let Some(config) = params
             .initialization_options
             .and_then(|config| serde_json::from_value(config).ok())

@@ -30,11 +30,23 @@ mod unreachable;
 mod unused;
 
 pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
+    // Some clients like VS Code support pulling configuration per document.
+    // In that case, we won't use global configuration,
+    // but document-specific configuration may not be available if client doesn't send it yet.
+    // If it isn't ready, we will skip the checker, (must be before computing symbol table and something else)
+    // otherwise this will cause Salsa data-race panic and resource waste.
+    let config = if let Some(config) = document.config(service) {
+        config
+    } else if service.support_pull_config {
+        return Vec::new();
+    } else {
+        &service.global_config
+    };
+
     let uri = document.uri(service);
     let line_index = document.line_index(service);
     let root = document.root_tree(service);
     let symbol_table = SymbolTable::of(service, document);
-    let config = service.get_config(document);
 
     let mut diagnostics = Vec::with_capacity(4);
     syntax::check(service, &mut diagnostics, document, line_index);
