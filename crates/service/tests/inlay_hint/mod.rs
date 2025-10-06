@@ -1,6 +1,6 @@
 use insta::assert_json_snapshot;
 use lspt::{InlayHintParams, Position, Range, TextDocumentIdentifier};
-use wat_service::LanguageService;
+use wat_service::{InlayHint, LanguageService, ServiceConfig};
 
 fn create_params(uri: String, line: u32, character: u32) -> InlayHintParams {
     InlayHintParams {
@@ -199,4 +199,59 @@ fn field_with_struct_changed() {
         .unwrap();
     let second = &response.first().unwrap().label;
     assert_ne!(first, second);
+}
+
+#[test]
+fn types_only() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $s (struct (field (mut i32))))
+  (global anyref)
+  (func (param (ref null 0))
+    local.get 0
+    struct.get 0 0
+    global.get 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    service.set_config(
+        uri.clone(),
+        ServiceConfig {
+            inlay_hint: InlayHint {
+                types: true,
+                ending: false,
+            },
+            ..Default::default()
+        },
+    );
+    let response = service.inlay_hint(create_params(uri, 8, 0));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn ending_only() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func $f
+    (block $block
+      loop $loop
+        if $if
+        end)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    service.set_config(
+        uri.clone(),
+        ServiceConfig {
+            inlay_hint: InlayHint {
+                types: false,
+                ending: true,
+            },
+            ..Default::default()
+        },
+    );
+    let response = service.inlay_hint(create_params(uri, 7, 0));
+    assert_json_snapshot!(response);
 }

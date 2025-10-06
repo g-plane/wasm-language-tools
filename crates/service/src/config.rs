@@ -11,6 +11,8 @@ pub struct ServiceConfig {
     pub format: wat_formatter::config::LanguageOptions,
     /// Configuration about linting.
     pub lint: Lints,
+    /// Configuration about inlay hints.
+    pub inlay_hint: InlayHint,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -68,6 +70,25 @@ pub enum LintLevel {
     Warn,
     #[serde(alias = "deny")]
     Deny,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+/// Configuration about inlay hints.
+pub struct InlayHint {
+    /// Inlay hints for indicating types.
+    pub types: bool,
+
+    /// Inlay hints that show at the end of blocks and functions.
+    pub ending: bool,
+}
+
+impl Default for InlayHint {
+    fn default() -> Self {
+        Self {
+            types: true,
+            ending: true,
+        }
+    }
 }
 
 impl LanguageService {

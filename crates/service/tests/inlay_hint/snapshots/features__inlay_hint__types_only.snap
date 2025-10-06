@@ -1,0 +1,33 @@
+---
+source: crates/service/tests/inlay_hint/mod.rs
+expression: response
+---
+[
+  {
+    "position": {
+      "line": 5,
+      "character": 15
+    },
+    "label": "(ref null 0)",
+    "kind": 1,
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 6,
+      "character": 18
+    },
+    "label": "(mut i32)",
+    "kind": 1,
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 7,
+      "character": 16
+    },
+    "label": "(ref null any)",
+    "kind": 1,
+    "paddingLeft": true
+  }
+]

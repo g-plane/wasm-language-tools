@@ -41,11 +41,11 @@ fn allowed_by_config() {
     service.set_config(
         uri.clone(),
         ServiceConfig {
-            format: Default::default(),
             lint: Lints {
                 multi_modules: LintLevel::Allow,
                 ..Default::default()
             },
+            ..Default::default()
         },
     );
     let response = service.pull_diagnostics(create_params(uri));

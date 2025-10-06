@@ -13,13 +13,14 @@ impl LanguageService {
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
         let symbol_table = SymbolTable::of(self, document);
+        let config = &self.get_config(document).inlay_hint;
 
         let range = helpers::lsp_range_to_rowan_range(line_index, params.range)?;
         let inlay_hints = symbol_table
             .symbols
             .values()
             .filter_map(|symbol| match symbol.kind {
-                SymbolKind::LocalRef => {
+                SymbolKind::LocalRef if config.types => {
                     if !range.contains_range(symbol.key.text_range()) {
                         return None;
                     }
@@ -40,7 +41,7 @@ impl LanguageService {
                         data: None,
                     })
                 }
-                SymbolKind::GlobalRef => {
+                SymbolKind::GlobalRef if config.types => {
                     if !range.contains_range(symbol.key.text_range()) {
                         return None;
                     }
@@ -61,7 +62,7 @@ impl LanguageService {
                         data: None,
                     })
                 }
-                SymbolKind::Func => {
+                SymbolKind::Func if config.ending => {
                     let func = symbol.key.to_node(&root);
                     func.last_child_or_token()
                         .map(|last| last.text_range())
@@ -78,7 +79,7 @@ impl LanguageService {
                             data: None,
                         })
                 }
-                SymbolKind::BlockDef => {
+                SymbolKind::BlockDef if config.ending => {
                     let block = symbol.key.to_node(&root);
                     block
                         .last_child_or_token()
@@ -104,7 +105,7 @@ impl LanguageService {
                             data: None,
                         })
                 }
-                SymbolKind::FieldRef => {
+                SymbolKind::FieldRef if config.types => {
                     if !range.contains_range(symbol.key.text_range()) {
                         return None;
                     }
