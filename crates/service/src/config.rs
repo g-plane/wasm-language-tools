@@ -11,6 +11,7 @@ pub struct ServiceConfig {
     pub format: wat_formatter::config::LanguageOptions,
     /// Configuration about linting.
     pub lint: Lints,
+    #[serde(alias = "inlayHint")]
     /// Configuration about inlay hints.
     pub inlay_hint: InlayHintOptions,
 }
@@ -73,6 +74,7 @@ pub enum LintLevel {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(default)]
 /// Configuration about inlay hints.
 pub struct InlayHintOptions {
     /// Inlay hints for indicating types.
