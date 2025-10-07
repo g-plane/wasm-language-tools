@@ -80,6 +80,9 @@ pub struct InlayHint {
 
     /// Inlay hints that show at the end of blocks and functions.
     pub ending: bool,
+
+    /// Inlay hints for showing idx.
+    pub index: bool,
 }
 
 impl Default for InlayHint {
@@ -87,6 +90,7 @@ impl Default for InlayHint {
         Self {
             types: true,
             ending: true,
+            index: true,
         }
     }
 }

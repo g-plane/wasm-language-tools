@@ -181,6 +181,17 @@ fn field_with_struct_changed() {
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
+    service.set_config(
+        uri.clone(),
+        ServiceConfig {
+            inlay_hint: InlayHint {
+                types: true,
+                ending: false,
+                index: false,
+            },
+            ..Default::default()
+        },
+    );
     let response = service
         .inlay_hint(create_params(uri.clone(), 6, 0))
         .unwrap();
@@ -221,6 +232,7 @@ fn types_only() {
             inlay_hint: InlayHint {
                 types: true,
                 ending: false,
+                index: false,
             },
             ..Default::default()
         },
@@ -248,6 +260,35 @@ fn ending_only() {
             inlay_hint: InlayHint {
                 types: false,
                 ending: true,
+                index: false,
+            },
+            ..Default::default()
+        },
+    );
+    let response = service.inlay_hint(create_params(uri, 7, 0));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn index_only() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (global $g i32)
+  (func (param $p i32) (param f32 i64) (local (ref 0)))
+  (memory 1 2)
+  (table 1 2 funcref)
+  (type (struct (field (mut i32)))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    service.set_config(
+        uri.clone(),
+        ServiceConfig {
+            inlay_hint: InlayHint {
+                types: false,
+                ending: false,
+                index: true,
             },
             ..Default::default()
         },

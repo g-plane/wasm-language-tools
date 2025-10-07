@@ -5,6 +5,30 @@ expression: response
 [
   {
     "position": {
+      "line": 2,
+      "character": 7
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 2,
+      "character": 32
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 3,
+      "character": 7
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
       "line": 4,
       "character": 18
     },

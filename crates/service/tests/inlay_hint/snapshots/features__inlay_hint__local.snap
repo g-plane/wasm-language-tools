@@ -5,6 +5,22 @@ expression: response
 [
   {
     "position": {
+      "line": 2,
+      "character": 9
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 2,
+      "character": 16
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
       "line": 3,
       "character": 25
     },

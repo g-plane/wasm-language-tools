@@ -1,0 +1,86 @@
+---
+source: crates/service/tests/inlay_hint/mod.rs
+expression: response
+---
+[
+  {
+    "position": {
+      "line": 2,
+      "character": 9
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 3,
+      "character": 7
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 3,
+      "character": 14
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 3,
+      "character": 33
+    },
+    "label": "(;1;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 3,
+      "character": 37
+    },
+    "label": "(;2;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 3,
+      "character": 53
+    },
+    "label": "(;3;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 4,
+      "character": 9
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 5,
+      "character": 8
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 6,
+      "character": 7
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 6,
+      "character": 32
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
+  }
+]

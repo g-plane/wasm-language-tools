@@ -10,5 +10,13 @@ expression: response
     },
     "label": "(func $name)",
     "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 2,
+      "character": 9
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
   }
 ]
