@@ -5,7 +5,7 @@ use crate::{
 };
 use line_index::LineIndex;
 use lspt::{Location, ReferenceParams};
-use rowan::ast::support::token;
+use rowan::ast::support;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 impl LanguageService {
@@ -86,8 +86,8 @@ fn create_location_by_symbol(
     root: &SyntaxNode,
 ) -> Location {
     let node = symbol.key.to_node(root);
-    let range = token(&node, SyntaxKind::IDENT)
-        .or_else(|| token(&node, SyntaxKind::KEYWORD))
+    let range = support::token(&node, SyntaxKind::IDENT)
+        .or_else(|| support::token(&node, SyntaxKind::KEYWORD))
         .map(|token| token.text_range())
         .unwrap_or_else(|| node.text_range());
     Location {

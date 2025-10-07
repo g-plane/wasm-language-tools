@@ -1,7 +1,7 @@
 use crate::helpers;
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, Union2};
-use rowan::ast::{AstNode, support::token};
+use rowan::ast::{AstNode, support};
 use std::iter::Peekable;
 use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxToken, ast::Immediate};
 
@@ -10,7 +10,7 @@ const DIAGNOSTIC_CODE: &str = "immediates";
 const INDEX: [SyntaxKind; 2] = [SyntaxKind::IDENT, SyntaxKind::INT];
 
 pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxNode) {
-    let Some(instr_name) = token(node, SyntaxKind::INSTR_NAME) else {
+    let Some(instr_name) = support::token(node, SyntaxKind::INSTR_NAME) else {
         return;
     };
     let mut immediates = node

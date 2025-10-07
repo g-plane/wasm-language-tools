@@ -7,7 +7,7 @@ use crate::{
     types_analyzer::{self, CompositeType, DefType},
 };
 use lspt::{Hover, HoverParams, MarkupContent, MarkupKind, Union3};
-use rowan::ast::{AstNode, support::child};
+use rowan::ast::{AstNode, support};
 use std::fmt::Write;
 use wat_syntax::{
     SyntaxKind, SyntaxNode,
@@ -295,7 +295,7 @@ fn create_global_def_hover(
         content.push_str(name.ident(service));
     }
     let node = symbol.key.to_node(root);
-    if let Some(global_type) = child::<GlobalType>(&node) {
+    if let Some(global_type) = support::child::<GlobalType>(&node) {
         let mutable = global_type.mut_keyword().is_some();
         if mutable {
             content.push_str(" (mut");
@@ -326,7 +326,7 @@ fn create_memory_def_hover(
         content.push_str(name.ident(service));
     }
     let node = symbol.key.to_node(root);
-    if let Some(limits) = child::<MemoryType>(&node)
+    if let Some(limits) = support::child::<MemoryType>(&node)
         .and_then(|memory_type| memory_type.limits())
         .and_then(|limits| render_limits(&limits))
     {
@@ -353,7 +353,7 @@ fn create_table_def_hover(
         content.push_str(name.ident(service));
     }
     let node = symbol.key.to_node(root);
-    if let Some(table_type) = child::<TableType>(&node) {
+    if let Some(table_type) = support::child::<TableType>(&node) {
         if let Some(limits) = table_type
             .limits()
             .and_then(|limits| render_limits(&limits))

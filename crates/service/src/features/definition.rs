@@ -8,10 +8,7 @@ use lspt::{
     Declaration, DeclarationParams, Definition, DefinitionParams, Location, TypeDefinitionParams,
     Union2,
 };
-use rowan::ast::{
-    AstNode,
-    support::{child, token},
-};
+use rowan::ast::{AstNode, support};
 use wat_syntax::{SyntaxKind, SyntaxNode, ast::TypeUse};
 
 impl LanguageService {
@@ -59,7 +56,9 @@ impl LanguageService {
                 .get(&SymbolKey::new(&parent))
                 .and_then(|key| {
                     symbol_table.resolved.get(&SymbolKey::new(
-                        child::<TypeUse>(&key.to_node(&root))?.index()?.syntax(),
+                        support::child::<TypeUse>(&key.to_node(&root))?
+                            .index()?
+                            .syntax(),
                     ))
                 })
                 .map(|key| {
@@ -109,8 +108,8 @@ fn create_location_by_symbol(
     root: &SyntaxNode,
 ) -> Location {
     let node = symbol_key.to_node(root);
-    let range = token(&node, SyntaxKind::IDENT)
-        .or_else(|| token(&node, SyntaxKind::KEYWORD))
+    let range = support::token(&node, SyntaxKind::IDENT)
+        .or_else(|| support::token(&node, SyntaxKind::KEYWORD))
         .map(|token| token.text_range())
         .unwrap_or_else(|| node.text_range());
     Location {

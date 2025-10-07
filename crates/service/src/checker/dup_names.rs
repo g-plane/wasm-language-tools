@@ -7,7 +7,7 @@ use crate::{
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
-use rowan::{TextRange, ast::support::token};
+use rowan::{TextRange, ast::support};
 use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
@@ -136,7 +136,7 @@ pub fn check(
 }
 
 fn get_ident_range(symbol: &Symbol, root: &SyntaxNode) -> TextRange {
-    token(&symbol.key.to_node(root), SyntaxKind::IDENT)
+    support::token(&symbol.key.to_node(root), SyntaxKind::IDENT)
         .map(|token| token.text_range())
         .unwrap_or_else(|| symbol.key.text_range())
 }
