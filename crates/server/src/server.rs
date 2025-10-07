@@ -16,11 +16,11 @@ use lspt::{
         CallHierarchyPrepareRequest, CodeActionRequest, CompletionRequest, ConfigurationRequest,
         DeclarationRequest, DefinitionRequest, DiagnosticRefreshRequest, DocumentDiagnosticRequest,
         DocumentFormattingRequest, DocumentHighlightRequest, DocumentRangeFormattingRequest,
-        DocumentSymbolRequest, FoldingRangeRequest, HoverRequest, InlayHintRequest,
-        PrepareRenameRequest, ReferencesRequest, RegistrationRequest, RenameRequest, Request as _,
-        SelectionRangeRequest, SemanticTokensRangeRequest, SemanticTokensRequest, ShutdownRequest,
-        SignatureHelpRequest, TypeDefinitionRequest, TypeHierarchyPrepareRequest,
-        TypeHierarchySubtypesRequest, TypeHierarchySupertypesRequest,
+        DocumentSymbolRequest, FoldingRangeRequest, HoverRequest, InlayHintRefreshRequest,
+        InlayHintRequest, PrepareRenameRequest, ReferencesRequest, RegistrationRequest,
+        RenameRequest, Request as _, SelectionRangeRequest, SemanticTokensRangeRequest,
+        SemanticTokensRequest, ShutdownRequest, SignatureHelpRequest, TypeDefinitionRequest,
+        TypeHierarchyPrepareRequest, TypeHierarchySubtypesRequest, TypeHierarchySupertypesRequest,
     },
 };
 use rayon::{ThreadPool, ThreadPoolBuilder};
@@ -31,6 +31,7 @@ pub struct Server {
     service: LanguageService,
     support_pull_diagnostics: bool,
     support_refresh_diagnostics: bool,
+    support_refresh_inlay_hint: bool,
     support_pull_config: bool,
     sent_requests: SentRequests<Vec<String>>,
     pool: ThreadPool,
@@ -42,6 +43,7 @@ impl Server {
             service: LanguageService::default(),
             support_pull_diagnostics: false,
             support_refresh_diagnostics: false,
+            support_refresh_inlay_hint: false,
             support_pull_config: false,
             sent_requests: SentRequests::default(),
             pool: ThreadPoolBuilder::new().build().unwrap(),
@@ -140,6 +142,15 @@ impl Server {
                 .workspace
                 .as_ref()
                 .and_then(|it| it.diagnostics.as_ref())
+                .and_then(|it| it.refresh_support),
+            Some(true)
+        );
+        self.support_refresh_inlay_hint = matches!(
+            params
+                .capabilities
+                .workspace
+                .as_ref()
+                .and_then(|it| it.inlay_hint.as_ref())
                 .and_then(|it| it.refresh_support),
             Some(true)
         );
@@ -415,6 +426,13 @@ impl Server {
                 stdio::write(Message::Request {
                     id: self.sent_requests.next_id(),
                     method: DiagnosticRefreshRequest::METHOD.into(),
+                    params: serde_json::Value::Null,
+                })?;
+            }
+            if self.support_refresh_inlay_hint {
+                stdio::write(Message::Request {
+                    id: self.sent_requests.next_id(),
+                    method: InlayHintRefreshRequest::METHOD.into(),
                     params: serde_json::Value::Null,
                 })?;
             }

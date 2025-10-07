@@ -11,10 +11,20 @@ impl LanguageService {
     /// Handler for `textDocument/inlayHint` request.
     pub fn inlay_hint(&self, params: InlayHintParams) -> Option<Vec<InlayHint>> {
         let document = self.get_document(params.text_document.uri)?;
+        // Avoid inlay hints flashing if client supports pulling config and config is not ready.
+        // This is similar to what we do in the checker.
+        let config = if let Some(config) = document.config(self) {
+            config
+        } else if self.support_pull_config {
+            return None;
+        } else {
+            &self.global_config
+        };
+
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
         let symbol_table = SymbolTable::of(self, document);
-        let options = &self.get_config(document).inlay_hint;
+        let options = &config.inlay_hint;
 
         let range = helpers::lsp_range_to_rowan_range(line_index, params.range)?;
         let mut inlay_hints = Vec::new();
