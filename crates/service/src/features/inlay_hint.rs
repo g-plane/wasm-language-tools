@@ -14,14 +14,14 @@ impl LanguageService {
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
         let symbol_table = SymbolTable::of(self, document);
-        let config = &self.get_config(document).inlay_hint;
+        let options = &self.get_config(document).inlay_hint;
 
         let range = helpers::lsp_range_to_rowan_range(line_index, params.range)?;
         let mut inlay_hints = Vec::new();
         for symbol in symbol_table.symbols.values() {
             match symbol.kind {
                 SymbolKind::LocalRef => {
-                    if config.types
+                    if options.types
                         && range.contains_range(symbol.key.text_range())
                         && let Some(ty) = symbol_table.find_def(symbol.key).and_then(|local| {
                             types_analyzer::extract_type(self, document, local.green.clone())
@@ -43,7 +43,7 @@ impl LanguageService {
                     }
                 }
                 SymbolKind::GlobalRef => {
-                    if config.types
+                    if options.types
                         && range.contains_range(symbol.key.text_range())
                         && let Some(ty) = symbol_table.find_def(symbol.key).and_then(|global| {
                             types_analyzer::extract_global_type(
@@ -69,7 +69,7 @@ impl LanguageService {
                     }
                 }
                 SymbolKind::Func => {
-                    if config.ending
+                    if options.ending
                         && let Some((last, name)) = symbol
                             .key
                             .to_node(&root)
@@ -89,7 +89,7 @@ impl LanguageService {
                             data: None,
                         });
                     }
-                    if config.index
+                    if options.index
                         && let Some(num) = symbol.idx.num
                         && let Some(keyword) =
                             support::token(&symbol.key.to_node(&root), SyntaxKind::KEYWORD)
@@ -110,7 +110,7 @@ impl LanguageService {
                     }
                 }
                 SymbolKind::BlockDef => {
-                    if config.ending
+                    if options.ending
                         && let Some((last, name)) = symbol
                             .key
                             .to_node(&root)
@@ -143,7 +143,7 @@ impl LanguageService {
                 | SymbolKind::GlobalDef
                 | SymbolKind::MemoryDef
                 | SymbolKind::TableDef => {
-                    if config.index
+                    if options.index
                         && let Some(num) = symbol.idx.num
                         && let Some(keyword) =
                             support::token(&symbol.key.to_node(&root), SyntaxKind::KEYWORD)
@@ -164,7 +164,7 @@ impl LanguageService {
                     }
                 }
                 SymbolKind::Param | SymbolKind::Local | SymbolKind::FieldDef => {
-                    if config.index
+                    if options.index
                         && let Some(num) = symbol.idx.num
                     {
                         let end = support::token(&symbol.key.to_node(&root), SyntaxKind::KEYWORD)
@@ -184,7 +184,7 @@ impl LanguageService {
                     }
                 }
                 SymbolKind::FieldRef => {
-                    if config.types
+                    if options.types
                         && range.contains_range(symbol.key.text_range())
                         && let Some(ty) = types_analyzer::resolve_field_type(
                             self,

@@ -12,7 +12,7 @@ pub struct ServiceConfig {
     /// Configuration about linting.
     pub lint: Lints,
     /// Configuration about inlay hints.
-    pub inlay_hint: InlayHint,
+    pub inlay_hint: InlayHintOptions,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -74,7 +74,7 @@ pub enum LintLevel {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 /// Configuration about inlay hints.
-pub struct InlayHint {
+pub struct InlayHintOptions {
     /// Inlay hints for indicating types.
     pub types: bool,
 
@@ -85,7 +85,7 @@ pub struct InlayHint {
     pub index: bool,
 }
 
-impl Default for InlayHint {
+impl Default for InlayHintOptions {
     fn default() -> Self {
         Self {
             types: true,

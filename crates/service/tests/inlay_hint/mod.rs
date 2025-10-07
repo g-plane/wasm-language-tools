@@ -1,6 +1,6 @@
 use insta::assert_json_snapshot;
 use lspt::{InlayHintParams, Position, Range, TextDocumentIdentifier};
-use wat_service::{InlayHint, LanguageService, ServiceConfig};
+use wat_service::{InlayHintOptions, LanguageService, ServiceConfig};
 
 fn create_params(uri: String, line: u32, character: u32) -> InlayHintParams {
     InlayHintParams {
@@ -184,7 +184,7 @@ fn field_with_struct_changed() {
     service.set_config(
         uri.clone(),
         ServiceConfig {
-            inlay_hint: InlayHint {
+            inlay_hint: InlayHintOptions {
                 types: true,
                 ending: false,
                 index: false,
@@ -229,7 +229,7 @@ fn types_only() {
     service.set_config(
         uri.clone(),
         ServiceConfig {
-            inlay_hint: InlayHint {
+            inlay_hint: InlayHintOptions {
                 types: true,
                 ending: false,
                 index: false,
@@ -257,7 +257,7 @@ fn ending_only() {
     service.set_config(
         uri.clone(),
         ServiceConfig {
-            inlay_hint: InlayHint {
+            inlay_hint: InlayHintOptions {
                 types: false,
                 ending: true,
                 index: false,
@@ -285,7 +285,7 @@ fn index_only() {
     service.set_config(
         uri.clone(),
         ServiceConfig {
-            inlay_hint: InlayHint {
+            inlay_hint: InlayHintOptions {
                 types: false,
                 ending: false,
                 index: true,
