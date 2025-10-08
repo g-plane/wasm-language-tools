@@ -3,13 +3,11 @@ use crate::{
     binder::{SymbolKey, SymbolTable},
     helpers,
 };
-use line_index::LineIndex;
 use lspt::{
-    Declaration, DeclarationParams, Definition, DefinitionParams, Location, TypeDefinitionParams,
-    Union2,
+    Declaration, DeclarationParams, Definition, DefinitionParams, TypeDefinitionParams, Union2,
 };
 use rowan::ast::{AstNode, support};
-use wat_syntax::{SyntaxKind, SyntaxNode, ast::TypeUse};
+use wat_syntax::{SyntaxKind, ast::TypeUse};
 
 impl LanguageService {
     /// Handler for `textDocument/definition` request.
@@ -27,10 +25,10 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
         let key = SymbolKey::new(&parent);
         symbol_table.resolved.get(&key).map(|key| {
-            Union2::A(create_location_by_symbol(
+            Union2::A(helpers::create_location_by_symbol(
                 params.text_document.uri.clone(),
                 line_index,
-                key,
+                *key,
                 &root,
             ))
         })
@@ -62,10 +60,10 @@ impl LanguageService {
                     ))
                 })
                 .map(|key| {
-                    Union2::A(create_location_by_symbol(
+                    Union2::A(helpers::create_location_by_symbol(
                         params.text_document.uri.clone(),
                         line_index,
-                        key,
+                        *key,
                         &root,
                     ))
                 }),
@@ -88,32 +86,15 @@ impl LanguageService {
                 .resolved
                 .get(&SymbolKey::new(&parent))
                 .map(|key| {
-                    Union2::A(create_location_by_symbol(
+                    Union2::A(helpers::create_location_by_symbol(
                         params.text_document.uri.clone(),
                         line_index,
-                        key,
+                        *key,
                         &root,
                     ))
                 })
         } else {
             None
         }
-    }
-}
-
-fn create_location_by_symbol(
-    uri: String,
-    line_index: &LineIndex,
-    symbol_key: &SymbolKey,
-    root: &SyntaxNode,
-) -> Location {
-    let node = symbol_key.to_node(root);
-    let range = support::token(&node, SyntaxKind::IDENT)
-        .or_else(|| support::token(&node, SyntaxKind::KEYWORD))
-        .map(|token| token.text_range())
-        .unwrap_or_else(|| node.text_range());
-    Location {
-        uri,
-        range: helpers::rowan_range_to_lsp_range(line_index, range),
     }
 }

@@ -1,6 +1,6 @@
-use crate::binder::Symbol;
+use crate::binder::{Symbol, SymbolKey};
 use line_index::{LineCol, LineIndex};
-use lspt::{Position, Range};
+use lspt::{Location, Position, Range};
 use rowan::{
     TextRange, TextSize,
     ast::{AstNode, support},
@@ -83,6 +83,23 @@ pub fn create_selection_range(symbol: &Symbol, root: &SyntaxNode, line_index: &L
         .map(|token| token.text_range())
         .unwrap_or_else(|| node.text_range());
     rowan_range_to_lsp_range(line_index, range)
+}
+
+pub fn create_location_by_symbol(
+    uri: String,
+    line_index: &LineIndex,
+    symbol_key: SymbolKey,
+    root: &SyntaxNode,
+) -> Location {
+    let node = symbol_key.to_node(root);
+    let range = support::token(&node, SyntaxKind::IDENT)
+        .or_else(|| support::token(&node, SyntaxKind::KEYWORD))
+        .map(|token| token.text_range())
+        .unwrap_or_else(|| node.text_range());
+    Location {
+        uri,
+        range: rowan_range_to_lsp_range(line_index, range),
+    }
 }
 
 pub fn infer_type_def_symbol_detail(symbol: &Symbol, root: &SyntaxNode) -> Option<String> {

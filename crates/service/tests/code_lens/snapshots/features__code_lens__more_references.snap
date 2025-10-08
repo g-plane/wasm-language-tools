@@ -1,0 +1,55 @@
+---
+source: crates/service/tests/code_lens/mod.rs
+expression: response
+---
+{
+  "range": {
+    "start": {
+      "line": 2,
+      "character": 2
+    },
+    "end": {
+      "line": 2,
+      "character": 11
+    }
+  },
+  "command": {
+    "title": "2 references",
+    "command": "wasmLanguageTools.showReferences",
+    "arguments": [
+      "untitled:test",
+      {
+        "character": 2,
+        "line": 2
+      },
+      [
+        {
+          "range": {
+            "end": {
+              "character": 11,
+              "line": 4
+            },
+            "start": {
+              "character": 10,
+              "line": 4
+            }
+          },
+          "uri": "untitled:test"
+        },
+        {
+          "range": {
+            "end": {
+              "character": 12,
+              "line": 5
+            },
+            "start": {
+              "character": 10,
+              "line": 5
+            }
+          },
+          "uri": "untitled:test"
+        }
+      ]
+    ]
+  }
+}

@@ -13,14 +13,15 @@ use lspt::{
     },
     request::{
         CallHierarchyIncomingCallsRequest, CallHierarchyOutgoingCallsRequest,
-        CallHierarchyPrepareRequest, CodeActionRequest, CompletionRequest, ConfigurationRequest,
-        DeclarationRequest, DefinitionRequest, DiagnosticRefreshRequest, DocumentDiagnosticRequest,
-        DocumentFormattingRequest, DocumentHighlightRequest, DocumentRangeFormattingRequest,
-        DocumentSymbolRequest, FoldingRangeRequest, HoverRequest, InlayHintRefreshRequest,
-        InlayHintRequest, PrepareRenameRequest, ReferencesRequest, RegistrationRequest,
-        RenameRequest, Request as _, SelectionRangeRequest, SemanticTokensRangeRequest,
-        SemanticTokensRequest, ShutdownRequest, SignatureHelpRequest, TypeDefinitionRequest,
-        TypeHierarchyPrepareRequest, TypeHierarchySubtypesRequest, TypeHierarchySupertypesRequest,
+        CallHierarchyPrepareRequest, CodeActionRequest, CodeLensRequest, CodeLensResolveRequest,
+        CompletionRequest, ConfigurationRequest, DeclarationRequest, DefinitionRequest,
+        DiagnosticRefreshRequest, DocumentDiagnosticRequest, DocumentFormattingRequest,
+        DocumentHighlightRequest, DocumentRangeFormattingRequest, DocumentSymbolRequest,
+        FoldingRangeRequest, HoverRequest, InlayHintRefreshRequest, InlayHintRequest,
+        PrepareRenameRequest, ReferencesRequest, RegistrationRequest, RenameRequest, Request as _,
+        SelectionRangeRequest, SemanticTokensRangeRequest, SemanticTokensRequest, ShutdownRequest,
+        SignatureHelpRequest, TypeDefinitionRequest, TypeHierarchyPrepareRequest,
+        TypeHierarchySubtypesRequest, TypeHierarchySupertypesRequest,
     },
 };
 use rayon::{ThreadPool, ThreadPoolBuilder};
@@ -207,6 +208,20 @@ impl Server {
                 try_cast_request::<CodeActionRequest>(&method, params).map(|params| {
                     params
                         .and_then(|params| serde_json::to_value(service.code_action(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<CodeLensRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.code_lens(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<CodeLensResolveRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.code_lens_resolve(params)))
                         .map(|result| Message::OkResponse { id, result })
                 })
             })

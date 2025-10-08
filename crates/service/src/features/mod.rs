@@ -1,5 +1,6 @@
 mod call_hierarchy;
 mod code_action;
+mod code_lens;
 mod completion;
 mod definition;
 mod diagnostics;

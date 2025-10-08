@@ -19,8 +19,8 @@ use crate::{document::Document, features::SemanticTokenKind, uri::InternUri};
 use dashmap::DashMap;
 use indexmap::{IndexMap, IndexSet};
 use lspt::{
-    CodeActionKind, CodeActionOptions, CompletionOptions, DiagnosticOptions, InitializeParams,
-    InitializeResult, Registration, RegistrationParams, RenameOptions,
+    CodeActionKind, CodeActionOptions, CodeLensOptions, CompletionOptions, DiagnosticOptions,
+    InitializeParams, InitializeResult, Registration, RegistrationParams, RenameOptions,
     SemanticTokensClientCapabilities, SemanticTokensLegend, SemanticTokensOptions,
     ServerCapabilities, ServerInfo, SignatureHelpOptions, TextDocumentClientCapabilities,
     TextDocumentSyncKind, TextDocumentSyncOptions, Union2, Union3,
@@ -111,6 +111,10 @@ impl LanguageService {
                     resolve_provider: Some(false),
                     ..Default::default()
                 })),
+                code_lens_provider: Some(CodeLensOptions {
+                    resolve_provider: Some(true),
+                    ..Default::default()
+                }),
                 completion_provider: Some(CompletionOptions {
                     trigger_characters: Some(
                         [
