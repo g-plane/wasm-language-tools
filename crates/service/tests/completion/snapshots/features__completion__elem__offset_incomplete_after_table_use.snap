@@ -956,6 +956,46 @@ expression: response
     "kind": 24
   },
   {
+    "label": "v128.load8x8_s",
+    "kind": 24
+  },
+  {
+    "label": "v128.load8x8_u",
+    "kind": 24
+  },
+  {
+    "label": "v128.load16x4_s",
+    "kind": 24
+  },
+  {
+    "label": "v128.load16x4_u",
+    "kind": 24
+  },
+  {
+    "label": "v128.load32x2_s",
+    "kind": 24
+  },
+  {
+    "label": "v128.load32x2_u",
+    "kind": 24
+  },
+  {
+    "label": "v128.load8_splat",
+    "kind": 24
+  },
+  {
+    "label": "v128.load16_splat",
+    "kind": 24
+  },
+  {
+    "label": "v128.load32_splat",
+    "kind": 24
+  },
+  {
+    "label": "v128.load64_splat",
+    "kind": 24
+  },
+  {
     "label": "v128.store",
     "kind": 24
   },
@@ -964,7 +1004,35 @@ expression: response
     "kind": 24
   },
   {
+    "label": "i8x16.shuffle",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.swizzle",
+    "kind": 24
+  },
+  {
     "label": "i8x16.splat",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.splat",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.splat",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.splat",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.splat",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.splat",
     "kind": 24
   },
   {
@@ -980,10 +1048,6 @@ expression: response
     "kind": 24
   },
   {
-    "label": "i16x8.splat",
-    "kind": 24
-  },
-  {
     "label": "i16x8.extract_lane_s",
     "kind": 24
   },
@@ -996,19 +1060,11 @@ expression: response
     "kind": 24
   },
   {
-    "label": "i32x4.splat",
-    "kind": 24
-  },
-  {
     "label": "i32x4.extract_lane",
     "kind": 24
   },
   {
     "label": "i32x4.replace_lane",
-    "kind": 24
-  },
-  {
-    "label": "i64x2.splat",
     "kind": 24
   },
   {
@@ -1020,19 +1076,11 @@ expression: response
     "kind": 24
   },
   {
-    "label": "f32x4.splat",
-    "kind": 24
-  },
-  {
     "label": "f32x4.extract_lane",
     "kind": 24
   },
   {
     "label": "f32x4.replace_lane",
-    "kind": 24
-  },
-  {
-    "label": "f64x2.splat",
     "kind": 24
   },
   {
@@ -1044,231 +1092,171 @@ expression: response
     "kind": 24
   },
   {
-    "label": "i8x16.swizzle",
+    "label": "i8x16.eq",
     "kind": 24
   },
   {
-    "label": "i8x16.shuffle",
+    "label": "i8x16.ne",
     "kind": 24
   },
   {
-    "label": "i8x16.add",
+    "label": "i8x16.lt_s",
     "kind": 24
   },
   {
-    "label": "i8x16.add_sat_s",
+    "label": "i8x16.lt_u",
     "kind": 24
   },
   {
-    "label": "i8x16.add_sat_u",
+    "label": "i8x16.gt_s",
     "kind": 24
   },
   {
-    "label": "i8x16.sub",
+    "label": "i8x16.gt_u",
     "kind": 24
   },
   {
-    "label": "i8x16.sub_sat_s",
+    "label": "i8x16.le_s",
     "kind": 24
   },
   {
-    "label": "i8x16.sub_sat_u",
+    "label": "i8x16.le_u",
     "kind": 24
   },
   {
-    "label": "i8x16.mul",
+    "label": "i8x16.ge_s",
     "kind": 24
   },
   {
-    "label": "i8x16.min_s",
+    "label": "i8x16.ge_u",
     "kind": 24
   },
   {
-    "label": "i8x16.min_u",
+    "label": "i16x8.eq",
     "kind": 24
   },
   {
-    "label": "i8x16.max_s",
+    "label": "i16x8.ne",
     "kind": 24
   },
   {
-    "label": "i8x16.max_u",
+    "label": "i16x8.lt_s",
     "kind": 24
   },
   {
-    "label": "i8x16.avgr_u",
+    "label": "i16x8.lt_u",
     "kind": 24
   },
   {
-    "label": "i16x8.add",
+    "label": "i16x8.gt_s",
     "kind": 24
   },
   {
-    "label": "i16x8.add_sat_s",
+    "label": "i16x8.gt_u",
     "kind": 24
   },
   {
-    "label": "i16x8.add_sat_u",
+    "label": "i16x8.le_s",
     "kind": 24
   },
   {
-    "label": "i16x8.sub",
+    "label": "i16x8.le_u",
     "kind": 24
   },
   {
-    "label": "i16x8.sub_sat_s",
+    "label": "i16x8.ge_s",
     "kind": 24
   },
   {
-    "label": "i16x8.sub_sat_u",
+    "label": "i16x8.ge_u",
     "kind": 24
   },
   {
-    "label": "i16x8.mul",
+    "label": "i32x4.eq",
     "kind": 24
   },
   {
-    "label": "i16x8.min_s",
+    "label": "i32x4.ne",
     "kind": 24
   },
   {
-    "label": "i16x8.min_u",
+    "label": "i32x4.lt_s",
     "kind": 24
   },
   {
-    "label": "i16x8.max_s",
+    "label": "i32x4.lt_u",
     "kind": 24
   },
   {
-    "label": "i16x8.max_u",
+    "label": "i32x4.gt_s",
     "kind": 24
   },
   {
-    "label": "i16x8.avgr_u",
+    "label": "i32x4.gt_u",
     "kind": 24
   },
   {
-    "label": "i32x4.add",
+    "label": "i32x4.le_s",
     "kind": 24
   },
   {
-    "label": "i32x4.sub",
+    "label": "i32x4.le_u",
     "kind": 24
   },
   {
-    "label": "i32x4.mul",
+    "label": "i32x4.ge_s",
     "kind": 24
   },
   {
-    "label": "i32x4.min_s",
+    "label": "i32x4.ge_u",
     "kind": 24
   },
   {
-    "label": "i32x4.min_u",
+    "label": "f32x4.eq",
     "kind": 24
   },
   {
-    "label": "i32x4.max_s",
+    "label": "f32x4.ne",
     "kind": 24
   },
   {
-    "label": "i32x4.max_u",
+    "label": "f32x4.lt",
     "kind": 24
   },
   {
-    "label": "i32x4.dot_i16x8_s",
+    "label": "f32x4.gt",
     "kind": 24
   },
   {
-    "label": "i64x2.add",
+    "label": "f32x4.le",
     "kind": 24
   },
   {
-    "label": "i64x2.sub",
+    "label": "f32x4.ge",
     "kind": 24
   },
   {
-    "label": "i64x2.mul",
+    "label": "f64x2.eq",
     "kind": 24
   },
   {
-    "label": "f32x4.add",
+    "label": "f64x2.ne",
     "kind": 24
   },
   {
-    "label": "f32x4.sub",
+    "label": "f64x2.lt",
     "kind": 24
   },
   {
-    "label": "f32x4.mul",
+    "label": "f64x2.gt",
     "kind": 24
   },
   {
-    "label": "f32x4.div",
+    "label": "f64x2.le",
     "kind": 24
   },
   {
-    "label": "f32x4.min",
-    "kind": 24
-  },
-  {
-    "label": "f32x4.max",
-    "kind": 24
-  },
-  {
-    "label": "f32x4.pmin",
-    "kind": 24
-  },
-  {
-    "label": "f32x4.pmax",
-    "kind": 24
-  },
-  {
-    "label": "f64x2.add",
-    "kind": 24
-  },
-  {
-    "label": "f64x2.sub",
-    "kind": 24
-  },
-  {
-    "label": "f64x2.mul",
-    "kind": 24
-  },
-  {
-    "label": "f64x2.div",
-    "kind": 24
-  },
-  {
-    "label": "f64x2.min",
-    "kind": 24
-  },
-  {
-    "label": "f64x2.max",
-    "kind": 24
-  },
-  {
-    "label": "f64x2.pmin",
-    "kind": 24
-  },
-  {
-    "label": "f64x2.pmax",
-    "kind": 24
-  },
-  {
-    "label": "i32x4.trunc_sat_f32x4_s",
-    "kind": 24
-  },
-  {
-    "label": "i32x4.trunc_sat_f32x4_u",
-    "kind": 24
-  },
-  {
-    "label": "f32x4.convert_i32x4_s",
-    "kind": 24
-  },
-  {
-    "label": "f32x4.convert_i32x4_u",
+    "label": "f64x2.ge",
     "kind": 24
   },
   {
@@ -1328,11 +1316,583 @@ expression: response
     "kind": 24
   },
   {
+    "label": "v128.store64_lane",
+    "kind": 24
+  },
+  {
     "label": "v128.load32_zero",
     "kind": 24
   },
   {
     "label": "v128.load64_zero",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.demote_f64x2_zero",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.promote_low_f32x4",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.abs",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.neg",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.popcnt",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.all_true",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.bitmask",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.narrow_i16x8_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.narrow_i16x8_u",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.ceil",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.floor",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.trunc",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.nearest",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.shl",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.shr_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.shr_u",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.add",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.add_sat_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.add_sat_u",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.sub",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.sub_sat_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.sub_sat_u",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.ceil",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.floor",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.min_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.min_u",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.max_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.max_u",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.trunc",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.avgr_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extadd_pairwise_i8x16_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extadd_pairwise_i8x16_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extadd_pairwise_i16x8_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extadd_pairwise_i16x8_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.abs",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.neg",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.q15mulr_sat_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.all_true",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.bitmask",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.narrow_i32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.narrow_i32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extend_low_i8x16_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extend_high_i8x16_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extend_low_i8x16_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extend_high_i8x16_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.shl",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.shr_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.shr_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.add",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.add_sat_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.add_sat_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.sub",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.sub_sat_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.sub_sat_u",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.nearest",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.mul",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.min_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.min_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.max_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.max_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.avgr_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extmul_low_i8x16_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extmul_high_i8x16_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extmul_low_i8x16_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extmul_high_i8x16_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.abs",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.neg",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.all_true",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.bitmask",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extend_low_i16x8_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extend_high_i16x8_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extend_low_i16x8_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extend_high_i16x8_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.shl",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.shr_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.shr_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.add",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.sub",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.mul",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.min_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.min_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.max_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.max_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.dot_i16x8_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extmul_low_i16x8_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extmul_high_i16x8_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extmul_low_i16x8_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extmul_high_i16x8_u",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.abs",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.neg",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.all_true",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.bitmask",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extend_low_i32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extend_high_i32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extend_low_i32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extend_high_i32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.shl",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.shr_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.shr_u",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.add",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.sub",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.mul",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.eq",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.ne",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.lt_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.gt_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.le_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.ge_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extmul_low_i32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extmul_high_i32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extmul_low_i32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extmul_high_i32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.abs",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.neg",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.sqrt",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.add",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.sub",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.mul",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.div",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.min",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.max",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.pmin",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.pmax",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.abs",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.neg",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.sqrt",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.add",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.sub",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.mul",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.div",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.min",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.max",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.pmin",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.pmax",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.trunc_sat_f32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.trunc_sat_f32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.convert_i32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.convert_i32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.trunc_sat_f64x2_s_zero",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.trunc_sat_f64x2_u_zero",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.convert_low_i32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.convert_low_i32x4_u",
     "kind": 24
   },
   {
