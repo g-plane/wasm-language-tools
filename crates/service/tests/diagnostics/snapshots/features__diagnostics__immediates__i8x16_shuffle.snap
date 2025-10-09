@@ -1,0 +1,73 @@
+---
+source: crates/service/tests/diagnostics/immediates.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 4
+        },
+        "end": {
+          "line": 9,
+          "character": 57
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "expected 16 lane indices in `i8x16.shuffle`, found 17"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 4
+        },
+        "end": {
+          "line": 13,
+          "character": 53
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "expected 16 lane indices in `i8x16.shuffle`, found 15"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 17,
+          "character": 18
+        },
+        "end": {
+          "line": 17,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "laneidx must be smaller than 32"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 17,
+          "character": 54
+        },
+        "end": {
+          "line": 17,
+          "character": 56
+        }
+      },
+      "severity": 1,
+      "code": "immediates",
+      "source": "wat",
+      "message": "laneidx must be smaller than 32"
+    }
+  ]
+}

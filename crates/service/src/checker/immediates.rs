@@ -228,8 +228,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 line_index,
             );
         }
-        "i8x16.shuffle"
-        | "i8x16.extract_lane_s"
+        "i8x16.extract_lane_s"
         | "i8x16.extract_lane_u"
         | "i8x16.replace_lane"
         | "i16x8.extract_lane_s"
@@ -251,6 +250,41 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 &instr_name,
                 line_index,
             );
+        }
+        "i8x16.shuffle" => {
+            let immediates_count = immediates.clone().count();
+            if immediates_count != 16 {
+                diagnostics.push(Diagnostic {
+                    range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
+                    severity: Some(DiagnosticSeverity::Error),
+                    source: Some("wat".into()),
+                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                    message: format!(
+                        "expected 16 lane indices in `i8x16.shuffle`, found {immediates_count}"
+                    ),
+                    ..Default::default()
+                });
+            }
+            immediates.for_each(|immediate| {
+                if immediate
+                    .first_token()
+                    .and_then(|token| token.text().parse::<u8>().ok())
+                    .is_some_and(|idx| idx >= 32)
+                {
+                    diagnostics.push(Diagnostic {
+                        range: helpers::rowan_range_to_lsp_range(
+                            line_index,
+                            immediate.text_range(),
+                        ),
+                        severity: Some(DiagnosticSeverity::Error),
+                        source: Some("wat".into()),
+                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        message: "laneidx must be smaller than 32".into(),
+                        ..Default::default()
+                    });
+                }
+            });
+            return;
         }
         "v128.load8_lane" | "v128.load16_lane" | "v128.load32_lane" | "v128.load64_lane"
         | "v128.store8_lane" | "v128.store16_lane" | "v128.store32_lane" | "v128.store64_lane" => {

@@ -578,6 +578,36 @@ fn br_on_cast() {
 }
 
 #[test]
+fn i8x16_shuffle() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (func (param v128)
+    local.get 0
+    local.get 0
+    i8x16.shuffle 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
+    drop
+    local.get 0
+    local.get 0
+    i8x16.shuffle 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0 0
+    drop
+    local.get 0
+    local.get 0
+    i8x16.shuffle 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1
+    drop
+    local.get 0
+    local.get 0
+    i8x16.shuffle 32 14 13 12 11 10 9 8 7 6 5 4 3 2 1 33
+    drop))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn expected_instr() {
     let uri = "untitled:test".to_string();
     let source = "(module (func (result i32) (i32.add 1 (i32.const 0))))";
