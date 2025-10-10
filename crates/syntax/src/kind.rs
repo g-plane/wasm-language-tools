@@ -19,6 +19,7 @@ pub enum SyntaxKind {
     TYPE_KEYWORD,
     EQ,
     MEM_ARG_KEYWORD,
+    SHAPE_DESCRIPTOR,
     ERROR,
 
     // SyntaxNode

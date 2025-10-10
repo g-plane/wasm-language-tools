@@ -695,3 +695,18 @@ fn field_ref_undefined() {
     let response = service.document_highlight(create_params(uri, 4, 18));
     assert!(response.unwrap().is_empty());
 }
+
+#[test]
+fn shape_descriptor() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    v128.const i16x8
+    v128.const i16x8))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.document_highlight(create_params(uri, 4, 18));
+    assert_json_snapshot!(response);
+}

@@ -135,6 +135,7 @@ impl Parser<'_> {
             })
             .or_else(|| self.lexer.eat(IDENT))
             .or_else(|| self.lexer.eat(STRING))
+            .or_else(|| self.lexer.eat(SHAPE_DESCRIPTOR))
             .map(|token| node(IMMEDIATE, [token.into()]))
             .or_else(|| {
                 self.try_parse(Self::parse_ref_type)

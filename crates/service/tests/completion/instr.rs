@@ -281,3 +281,31 @@ fn after_dot() {
     let response = service.completion(create_params(uri, 2, 16));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn shape_descriptor() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+    (func v128.const )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 2, 21));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn shape_descriptor_incomplete() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+    (func v128.const i)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 2, 22));
+    assert_json_snapshot!(response);
+}

@@ -197,6 +197,13 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                         _ => {}
                     }
                 }
+                if let Some(prev) = parent.prev_sibling().filter(|prev| {
+                    prev.kind() == SyntaxKind::PLAIN_INSTR
+                        && prev.children_with_tokens().count() == 1 // only instr name, no paren
+                }) && let Some(instr_name) = support::token(&prev, SyntaxKind::INSTR_NAME)
+                {
+                    add_cmp_ctx_for_immediates(instr_name.text(), &prev, false, &mut ctx);
+                }
             } else if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::Instr);
                 if let Some(instr_name) = support::token(&parent, SyntaxKind::INSTR_NAME) {
@@ -518,6 +525,11 @@ fn add_cmp_ctx_for_immediates(
             Some(("ref", "null")) => {
                 ctx.extend([CmpCtx::TypeDef(None), CmpCtx::AbsHeapType]);
             }
+            Some(("v128", "const")) => {
+                if is_current_first_immediate {
+                    ctx.push(CmpCtx::ShapeDescriptor);
+                }
+            }
             None => match instr_name {
                 "call" | "return_call" => ctx.push(CmpCtx::Func),
                 "br" | "br_if" | "br_table" | "br_on_null" | "br_on_non_null" => {
@@ -555,6 +567,7 @@ enum CmpCtx {
     Field(SymbolKey),
     AbsHeapType,
     PackedType,
+    ShapeDescriptor,
     KeywordModule,
     KeywordModuleField,
     KeywordImExport,
@@ -1063,6 +1076,17 @@ fn get_cmp_list(
                         kind: Some(CompletionItemKind::Class),
                         ..Default::default()
                     }));
+                }
+                CmpCtx::ShapeDescriptor => {
+                    items.extend(
+                        ["i8x16", "i16x8", "i32x4", "i64x2", "f32x4", "f64x2"]
+                            .into_iter()
+                            .map(|descriptor| CompletionItem {
+                                label: descriptor.to_string(),
+                                kind: Some(CompletionItemKind::Class),
+                                ..Default::default()
+                            }),
+                    );
                 }
                 CmpCtx::KeywordModule => items.push(CompletionItem {
                     label: "module".to_string(),

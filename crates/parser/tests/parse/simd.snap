@@ -1,0 +1,88 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..176
+  MODULE@0..175
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_FUNC@10..173
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "func"
+      WHITESPACE@15..20 "\n    "
+      PLAIN_INSTR@20..40
+        INSTR_NAME@20..30 "v128.const"
+        WHITESPACE@30..31 " "
+        IMMEDIATE@31..36
+          SHAPE_DESCRIPTOR@31..36 "i8x16"
+        WHITESPACE@36..37 " "
+        IMMEDIATE@37..38
+          INT@37..38 "0"
+        WHITESPACE@38..39 " "
+        IMMEDIATE@39..40
+          INT@39..40 "1"
+      WHITESPACE@40..45 "\n    "
+      PLAIN_INSTR@45..65
+        INSTR_NAME@45..55 "v128.const"
+        WHITESPACE@55..56 " "
+        IMMEDIATE@56..61
+          SHAPE_DESCRIPTOR@56..61 "i16x8"
+        WHITESPACE@61..62 " "
+        IMMEDIATE@62..63
+          INT@62..63 "0"
+        WHITESPACE@63..64 " "
+        IMMEDIATE@64..65
+          INT@64..65 "1"
+      WHITESPACE@65..70 "\n    "
+      PLAIN_INSTR@70..90
+        INSTR_NAME@70..80 "v128.const"
+        WHITESPACE@80..81 " "
+        IMMEDIATE@81..86
+          SHAPE_DESCRIPTOR@81..86 "i32x4"
+        WHITESPACE@86..87 " "
+        IMMEDIATE@87..88
+          INT@87..88 "0"
+        WHITESPACE@88..89 " "
+        IMMEDIATE@89..90
+          INT@89..90 "1"
+      WHITESPACE@90..95 "\n    "
+      PLAIN_INSTR@95..115
+        INSTR_NAME@95..105 "v128.const"
+        WHITESPACE@105..106 " "
+        IMMEDIATE@106..111
+          SHAPE_DESCRIPTOR@106..111 "i64x2"
+        WHITESPACE@111..112 " "
+        IMMEDIATE@112..113
+          INT@112..113 "0"
+        WHITESPACE@113..114 " "
+        IMMEDIATE@114..115
+          INT@114..115 "1"
+      WHITESPACE@115..120 "\n    "
+      PLAIN_INSTR@120..144
+        INSTR_NAME@120..130 "v128.const"
+        WHITESPACE@130..131 " "
+        IMMEDIATE@131..136
+          SHAPE_DESCRIPTOR@131..136 "f32x4"
+        WHITESPACE@136..137 " "
+        IMMEDIATE@137..140
+          FLOAT@137..140 "0.0"
+        WHITESPACE@140..141 " "
+        IMMEDIATE@141..144
+          FLOAT@141..144 "1.0"
+      WHITESPACE@144..149 "\n    "
+      PLAIN_INSTR@149..169
+        INSTR_NAME@149..159 "v128.const"
+        WHITESPACE@159..160 " "
+        IMMEDIATE@160..165
+          SHAPE_DESCRIPTOR@160..165 "f64x2"
+        WHITESPACE@165..166 " "
+        IMMEDIATE@166..167
+          INT@166..167 "0"
+        WHITESPACE@167..168 " "
+        IMMEDIATE@168..169
+          INT@168..169 "1"
+      WHITESPACE@169..172 "\n  "
+      R_PAREN@172..173 ")"
+    WHITESPACE@173..174 "\n"
+    R_PAREN@174..175 ")"
+  WHITESPACE@175..176 "\n"

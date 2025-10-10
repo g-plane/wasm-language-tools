@@ -62,6 +62,7 @@ impl<'s> Lexer<'s> {
                     SyntaxKind::FLOAT => Message::Name("float"),
                     SyntaxKind::EQ => Message::Char('='),
                     SyntaxKind::MEM_ARG_KEYWORD => Message::Name("memory argument keyword"),
+                    SyntaxKind::SHAPE_DESCRIPTOR => Message::Name("shape descriptor"),
                     _ => unreachable!(),
                 };
                 let origin = self.source.as_ptr().addr();
@@ -109,6 +110,7 @@ impl<'s> Lexer<'s> {
             SyntaxKind::FLOAT => self.float(),
             SyntaxKind::EQ => self.ascii_char::<b'='>(SyntaxKind::EQ),
             SyntaxKind::MEM_ARG_KEYWORD => self.mem_arg_keyword(),
+            SyntaxKind::SHAPE_DESCRIPTOR => self.shape_descriptor(),
             SyntaxKind::ERROR => self.error().map(|text| Token {
                 kind: SyntaxKind::ERROR,
                 text,
@@ -380,6 +382,24 @@ impl<'s> Lexer<'s> {
                     kind: SyntaxKind::MEM_ARG_KEYWORD,
                     text,
                 })
+        }
+    }
+
+    fn shape_descriptor(&mut self) -> Option<Token<'s>> {
+        if let Some((text, rest)) = self.input.split_at_checked(5).filter(|(text, rest)| {
+            !rest.starts_with(is_id_char)
+                && matches!(
+                    *text,
+                    "i8x16" | "i16x8" | "i32x4" | "i64x2" | "f32x4" | "f64x2"
+                )
+        }) {
+            self.input = rest;
+            Some(Token {
+                kind: SyntaxKind::SHAPE_DESCRIPTOR,
+                text,
+            })
+        } else {
+            None
         }
     }
 

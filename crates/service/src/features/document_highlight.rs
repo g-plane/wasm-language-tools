@@ -23,8 +23,9 @@ impl LanguageService {
             SyntaxKind::KEYWORD
             | SyntaxKind::INSTR_NAME
             | SyntaxKind::TYPE_KEYWORD
-            | SyntaxKind::MEM_ARG
-            | SyntaxKind::FLOAT => {
+            | SyntaxKind::MEM_ARG_KEYWORD
+            | SyntaxKind::FLOAT
+            | SyntaxKind::SHAPE_DESCRIPTOR => {
                 let text = token.text();
                 Some(
                     root.descendants_with_tokens()

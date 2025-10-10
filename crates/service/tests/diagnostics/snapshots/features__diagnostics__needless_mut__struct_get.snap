@@ -8,25 +8,6 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 7,
-          "character": 48
-        },
-        "end": {
-          "line": 7,
-          "character": 51
-        }
-      },
-      "severity": 2,
-      "code": "needless-mut",
-      "source": "wat",
-      "message": "field `$packed_field` is unnecessarily mutable",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
           "line": 2,
           "character": 24
         },
@@ -39,6 +20,25 @@ expression: response
       "code": "needless-mut",
       "source": "wat",
       "message": "field `0` is unnecessarily mutable",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 48
+        },
+        "end": {
+          "line": 7,
+          "character": 51
+        }
+      },
+      "severity": 2,
+      "code": "needless-mut",
+      "source": "wat",
+      "message": "field `$packed_field` is unnecessarily mutable",
       "tags": [
         1
       ]

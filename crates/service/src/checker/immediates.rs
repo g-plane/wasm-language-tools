@@ -34,7 +34,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 line_index,
             );
         }
-        "i32.const" | "i64.const" | "v128.const" => {
+        "i32.const" | "i64.const" => {
             check_immediate::<true>(
                 diagnostics,
                 &mut immediates,
@@ -227,6 +227,72 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 &instr_name,
                 line_index,
             );
+        }
+        "v128.const" => {
+            check_immediate::<true>(
+                diagnostics,
+                &mut immediates,
+                SyntaxKind::SHAPE_DESCRIPTOR,
+                "shape descriptor",
+                &instr_name,
+                line_index,
+            );
+            if let Some((allow_float, expected_count)) = node
+                .children()
+                .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                .and_then(|immediate| immediate.first_token())
+                .filter(|token| token.kind() == SyntaxKind::SHAPE_DESCRIPTOR)
+                .as_ref()
+                .and_then(|token| token.text().split_once('x'))
+                .and_then(|(ty, count)| {
+                    count
+                        .parse::<usize>()
+                        .ok()
+                        .map(|count| (ty.starts_with('f'), count))
+                })
+            {
+                let actual_count = immediates.clone().count();
+                if actual_count != expected_count {
+                    diagnostics.push(Diagnostic {
+                        range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
+                        severity: Some(DiagnosticSeverity::Error),
+                        source: Some("wat".into()),
+                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        message: format!(
+                            "expected {expected_count} {} in `v128.const`",
+                            if allow_float {
+                                "floating-point numbers"
+                            } else {
+                                "integers"
+                            },
+                        ),
+                        ..Default::default()
+                    });
+                }
+                if allow_float {
+                    for _ in 0..actual_count {
+                        check_immediate::<true>(
+                            diagnostics,
+                            &mut immediates,
+                            [SyntaxKind::FLOAT, SyntaxKind::INT],
+                            "floating-point number",
+                            &instr_name,
+                            line_index,
+                        );
+                    }
+                } else {
+                    for _ in 0..actual_count {
+                        check_immediate::<true>(
+                            diagnostics,
+                            &mut immediates,
+                            SyntaxKind::INT,
+                            "integer",
+                            &instr_name,
+                            line_index,
+                        );
+                    }
+                }
+            }
         }
         "i8x16.extract_lane_s"
         | "i8x16.extract_lane_u"

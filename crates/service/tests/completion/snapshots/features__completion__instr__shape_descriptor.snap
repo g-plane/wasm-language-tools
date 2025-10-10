@@ -1,0 +1,1922 @@
+---
+source: crates/service/tests/completion/instr.rs
+expression: response
+---
+[
+  {
+    "label": "i8x16",
+    "kind": 7
+  },
+  {
+    "label": "i16x8",
+    "kind": 7
+  },
+  {
+    "label": "i32x4",
+    "kind": 7
+  },
+  {
+    "label": "i64x2",
+    "kind": 7
+  },
+  {
+    "label": "f32x4",
+    "kind": 7
+  },
+  {
+    "label": "f64x2",
+    "kind": 7
+  },
+  {
+    "label": "unreachable",
+    "kind": 24
+  },
+  {
+    "label": "nop",
+    "kind": 24
+  },
+  {
+    "label": "block",
+    "kind": 24
+  },
+  {
+    "label": "loop",
+    "kind": 24
+  },
+  {
+    "label": "if",
+    "kind": 24
+  },
+  {
+    "label": "else",
+    "kind": 24
+  },
+  {
+    "label": "end",
+    "kind": 24
+  },
+  {
+    "label": "br",
+    "kind": 24
+  },
+  {
+    "label": "br_if",
+    "kind": 24
+  },
+  {
+    "label": "br_table",
+    "kind": 24
+  },
+  {
+    "label": "return",
+    "kind": 24
+  },
+  {
+    "label": "call",
+    "kind": 24
+  },
+  {
+    "label": "call_indirect",
+    "kind": 24
+  },
+  {
+    "label": "return_call",
+    "kind": 24
+  },
+  {
+    "label": "return_call_indirect",
+    "kind": 24
+  },
+  {
+    "label": "call_ref",
+    "kind": 24
+  },
+  {
+    "label": "return_call_ref",
+    "kind": 24
+  },
+  {
+    "label": "drop",
+    "kind": 24
+  },
+  {
+    "label": "select",
+    "kind": 24
+  },
+  {
+    "label": "local.get",
+    "kind": 24
+  },
+  {
+    "label": "local.set",
+    "kind": 24
+  },
+  {
+    "label": "local.tee",
+    "kind": 24
+  },
+  {
+    "label": "global.get",
+    "kind": 24
+  },
+  {
+    "label": "global.set",
+    "kind": 24
+  },
+  {
+    "label": "table.get",
+    "kind": 24
+  },
+  {
+    "label": "table.set",
+    "kind": 24
+  },
+  {
+    "label": "i32.load",
+    "kind": 24
+  },
+  {
+    "label": "i64.load",
+    "kind": 24
+  },
+  {
+    "label": "f32.load",
+    "kind": 24
+  },
+  {
+    "label": "f64.load",
+    "kind": 24
+  },
+  {
+    "label": "i32.load8_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.load8_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.load16_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.load16_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.load8_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.load8_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.load16_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.load16_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.load32_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.load32_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.store",
+    "kind": 24
+  },
+  {
+    "label": "i64.store",
+    "kind": 24
+  },
+  {
+    "label": "f32.store",
+    "kind": 24
+  },
+  {
+    "label": "f64.store",
+    "kind": 24
+  },
+  {
+    "label": "i32.store8",
+    "kind": 24
+  },
+  {
+    "label": "i32.store16",
+    "kind": 24
+  },
+  {
+    "label": "i64.store8",
+    "kind": 24
+  },
+  {
+    "label": "i64.store16",
+    "kind": 24
+  },
+  {
+    "label": "i64.store32",
+    "kind": 24
+  },
+  {
+    "label": "memory.size",
+    "kind": 24
+  },
+  {
+    "label": "memory.grow",
+    "kind": 24
+  },
+  {
+    "label": "i32.const",
+    "kind": 24
+  },
+  {
+    "label": "i64.const",
+    "kind": 24
+  },
+  {
+    "label": "f32.const",
+    "kind": 24
+  },
+  {
+    "label": "f64.const",
+    "kind": 24
+  },
+  {
+    "label": "i32.eqz",
+    "kind": 24
+  },
+  {
+    "label": "i32.eq",
+    "kind": 24
+  },
+  {
+    "label": "i32.ne",
+    "kind": 24
+  },
+  {
+    "label": "i32.lt_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.lt_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.gt_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.gt_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.le_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.le_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.ge_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.ge_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.eqz",
+    "kind": 24
+  },
+  {
+    "label": "i64.eq",
+    "kind": 24
+  },
+  {
+    "label": "i64.ne",
+    "kind": 24
+  },
+  {
+    "label": "i64.lt_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.lt_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.gt_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.gt_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.le_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.le_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.ge_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.ge_u",
+    "kind": 24
+  },
+  {
+    "label": "f32.eq",
+    "kind": 24
+  },
+  {
+    "label": "f32.ne",
+    "kind": 24
+  },
+  {
+    "label": "f32.lt",
+    "kind": 24
+  },
+  {
+    "label": "f32.gt",
+    "kind": 24
+  },
+  {
+    "label": "f32.le",
+    "kind": 24
+  },
+  {
+    "label": "f32.ge",
+    "kind": 24
+  },
+  {
+    "label": "f64.eq",
+    "kind": 24
+  },
+  {
+    "label": "f64.ne",
+    "kind": 24
+  },
+  {
+    "label": "f64.lt",
+    "kind": 24
+  },
+  {
+    "label": "f64.gt",
+    "kind": 24
+  },
+  {
+    "label": "f64.le",
+    "kind": 24
+  },
+  {
+    "label": "f64.ge",
+    "kind": 24
+  },
+  {
+    "label": "i32.clz",
+    "kind": 24
+  },
+  {
+    "label": "i32.ctz",
+    "kind": 24
+  },
+  {
+    "label": "i32.popcnt",
+    "kind": 24
+  },
+  {
+    "label": "i32.add",
+    "kind": 24
+  },
+  {
+    "label": "i32.sub",
+    "kind": 24
+  },
+  {
+    "label": "i32.mul",
+    "kind": 24
+  },
+  {
+    "label": "i32.div_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.div_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.rem_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.rem_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.and",
+    "kind": 24
+  },
+  {
+    "label": "i32.or",
+    "kind": 24
+  },
+  {
+    "label": "i32.xor",
+    "kind": 24
+  },
+  {
+    "label": "i32.shl",
+    "kind": 24
+  },
+  {
+    "label": "i32.shr_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.shr_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.rotl",
+    "kind": 24
+  },
+  {
+    "label": "i32.rotr",
+    "kind": 24
+  },
+  {
+    "label": "i64.clz",
+    "kind": 24
+  },
+  {
+    "label": "i64.ctz",
+    "kind": 24
+  },
+  {
+    "label": "i64.popcnt",
+    "kind": 24
+  },
+  {
+    "label": "i64.add",
+    "kind": 24
+  },
+  {
+    "label": "i64.sub",
+    "kind": 24
+  },
+  {
+    "label": "i64.mul",
+    "kind": 24
+  },
+  {
+    "label": "i64.div_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.div_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.rem_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.rem_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.and",
+    "kind": 24
+  },
+  {
+    "label": "i64.or",
+    "kind": 24
+  },
+  {
+    "label": "i64.xor",
+    "kind": 24
+  },
+  {
+    "label": "i64.shl",
+    "kind": 24
+  },
+  {
+    "label": "i64.shr_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.shr_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.rotl",
+    "kind": 24
+  },
+  {
+    "label": "i64.rotr",
+    "kind": 24
+  },
+  {
+    "label": "f32.abs",
+    "kind": 24
+  },
+  {
+    "label": "f32.neg",
+    "kind": 24
+  },
+  {
+    "label": "f32.ceil",
+    "kind": 24
+  },
+  {
+    "label": "f32.floor",
+    "kind": 24
+  },
+  {
+    "label": "f32.trunc",
+    "kind": 24
+  },
+  {
+    "label": "f32.nearest",
+    "kind": 24
+  },
+  {
+    "label": "f32.sqrt",
+    "kind": 24
+  },
+  {
+    "label": "f32.add",
+    "kind": 24
+  },
+  {
+    "label": "f32.sub",
+    "kind": 24
+  },
+  {
+    "label": "f32.mul",
+    "kind": 24
+  },
+  {
+    "label": "f32.div",
+    "kind": 24
+  },
+  {
+    "label": "f32.min",
+    "kind": 24
+  },
+  {
+    "label": "f32.max",
+    "kind": 24
+  },
+  {
+    "label": "f32.copysign",
+    "kind": 24
+  },
+  {
+    "label": "f64.abs",
+    "kind": 24
+  },
+  {
+    "label": "f64.neg",
+    "kind": 24
+  },
+  {
+    "label": "f64.ceil",
+    "kind": 24
+  },
+  {
+    "label": "f64.floor",
+    "kind": 24
+  },
+  {
+    "label": "f64.trunc",
+    "kind": 24
+  },
+  {
+    "label": "f64.nearest",
+    "kind": 24
+  },
+  {
+    "label": "f64.sqrt",
+    "kind": 24
+  },
+  {
+    "label": "f64.add",
+    "kind": 24
+  },
+  {
+    "label": "f64.sub",
+    "kind": 24
+  },
+  {
+    "label": "f64.mul",
+    "kind": 24
+  },
+  {
+    "label": "f64.div",
+    "kind": 24
+  },
+  {
+    "label": "f64.min",
+    "kind": 24
+  },
+  {
+    "label": "f64.max",
+    "kind": 24
+  },
+  {
+    "label": "f64.copysign",
+    "kind": 24
+  },
+  {
+    "label": "i32.wrap_i64",
+    "kind": 24
+  },
+  {
+    "label": "i32.trunc_f32_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.trunc_f32_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.trunc_f64_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.trunc_f64_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.extend_i32_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.extend_i32_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.trunc_f32_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.trunc_f32_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.trunc_f64_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.trunc_f64_u",
+    "kind": 24
+  },
+  {
+    "label": "f32.convert_i32_s",
+    "kind": 24
+  },
+  {
+    "label": "f32.convert_i32_u",
+    "kind": 24
+  },
+  {
+    "label": "f32.convert_i64_s",
+    "kind": 24
+  },
+  {
+    "label": "f32.convert_i64_u",
+    "kind": 24
+  },
+  {
+    "label": "f32.demote_f64",
+    "kind": 24
+  },
+  {
+    "label": "f64.convert_i32_s",
+    "kind": 24
+  },
+  {
+    "label": "f64.convert_i32_u",
+    "kind": 24
+  },
+  {
+    "label": "f64.convert_i64_s",
+    "kind": 24
+  },
+  {
+    "label": "f64.convert_i64_u",
+    "kind": 24
+  },
+  {
+    "label": "f64.promote_f32",
+    "kind": 24
+  },
+  {
+    "label": "i32.reinterpret_f32",
+    "kind": 24
+  },
+  {
+    "label": "i64.reinterpret_f64",
+    "kind": 24
+  },
+  {
+    "label": "f32.reinterpret_i32",
+    "kind": 24
+  },
+  {
+    "label": "f64.reinterpret_i64",
+    "kind": 24
+  },
+  {
+    "label": "i32.extend8_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.extend16_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.extend8_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.extend16_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.extend32_s",
+    "kind": 24
+  },
+  {
+    "label": "ref.null",
+    "kind": 24
+  },
+  {
+    "label": "ref.is_null",
+    "kind": 24
+  },
+  {
+    "label": "ref.func",
+    "kind": 24
+  },
+  {
+    "label": "ref.eq",
+    "kind": 24
+  },
+  {
+    "label": "ref.as_non_null",
+    "kind": 24
+  },
+  {
+    "label": "br_on_null",
+    "kind": 24
+  },
+  {
+    "label": "br_on_non_null",
+    "kind": 24
+  },
+  {
+    "label": "struct.new",
+    "kind": 24
+  },
+  {
+    "label": "struct.new_default",
+    "kind": 24
+  },
+  {
+    "label": "struct.get",
+    "kind": 24
+  },
+  {
+    "label": "struct.get_s",
+    "kind": 24
+  },
+  {
+    "label": "struct.get_u",
+    "kind": 24
+  },
+  {
+    "label": "struct.set",
+    "kind": 24
+  },
+  {
+    "label": "array.new",
+    "kind": 24
+  },
+  {
+    "label": "array.new_default",
+    "kind": 24
+  },
+  {
+    "label": "array.new_fixed",
+    "kind": 24
+  },
+  {
+    "label": "array.new_data",
+    "kind": 24
+  },
+  {
+    "label": "array.new_elem",
+    "kind": 24
+  },
+  {
+    "label": "array.get",
+    "kind": 24
+  },
+  {
+    "label": "array.get_s",
+    "kind": 24
+  },
+  {
+    "label": "array.get_u",
+    "kind": 24
+  },
+  {
+    "label": "array.set",
+    "kind": 24
+  },
+  {
+    "label": "array.len",
+    "kind": 24
+  },
+  {
+    "label": "array.fill",
+    "kind": 24
+  },
+  {
+    "label": "array.copy",
+    "kind": 24
+  },
+  {
+    "label": "array.init_data",
+    "kind": 24
+  },
+  {
+    "label": "array.init_elem",
+    "kind": 24
+  },
+  {
+    "label": "ref.test",
+    "kind": 24
+  },
+  {
+    "label": "ref.cast",
+    "kind": 24
+  },
+  {
+    "label": "br_on_cast",
+    "kind": 24
+  },
+  {
+    "label": "br_on_cast_fail",
+    "kind": 24
+  },
+  {
+    "label": "any.convert_extern",
+    "kind": 24
+  },
+  {
+    "label": "extern.convert_any",
+    "kind": 24
+  },
+  {
+    "label": "ref.i31",
+    "kind": 24
+  },
+  {
+    "label": "i31.get_s",
+    "kind": 24
+  },
+  {
+    "label": "i31.get_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.trunc_sat_f32_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.trunc_sat_f32_u",
+    "kind": 24
+  },
+  {
+    "label": "i32.trunc_sat_f64_s",
+    "kind": 24
+  },
+  {
+    "label": "i32.trunc_sat_f64_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.trunc_sat_f32_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.trunc_sat_f32_u",
+    "kind": 24
+  },
+  {
+    "label": "i64.trunc_sat_f64_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.trunc_sat_f64_u",
+    "kind": 24
+  },
+  {
+    "label": "memory.init",
+    "kind": 24
+  },
+  {
+    "label": "data.drop",
+    "kind": 24
+  },
+  {
+    "label": "memory.copy",
+    "kind": 24
+  },
+  {
+    "label": "memory.fill",
+    "kind": 24
+  },
+  {
+    "label": "table.init",
+    "kind": 24
+  },
+  {
+    "label": "elem.drop",
+    "kind": 24
+  },
+  {
+    "label": "table.copy",
+    "kind": 24
+  },
+  {
+    "label": "table.grow",
+    "kind": 24
+  },
+  {
+    "label": "table.size",
+    "kind": 24
+  },
+  {
+    "label": "table.fill",
+    "kind": 24
+  },
+  {
+    "label": "v128.load",
+    "kind": 24
+  },
+  {
+    "label": "v128.load8x8_s",
+    "kind": 24
+  },
+  {
+    "label": "v128.load8x8_u",
+    "kind": 24
+  },
+  {
+    "label": "v128.load16x4_s",
+    "kind": 24
+  },
+  {
+    "label": "v128.load16x4_u",
+    "kind": 24
+  },
+  {
+    "label": "v128.load32x2_s",
+    "kind": 24
+  },
+  {
+    "label": "v128.load32x2_u",
+    "kind": 24
+  },
+  {
+    "label": "v128.load8_splat",
+    "kind": 24
+  },
+  {
+    "label": "v128.load16_splat",
+    "kind": 24
+  },
+  {
+    "label": "v128.load32_splat",
+    "kind": 24
+  },
+  {
+    "label": "v128.load64_splat",
+    "kind": 24
+  },
+  {
+    "label": "v128.store",
+    "kind": 24
+  },
+  {
+    "label": "v128.const",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.shuffle",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.swizzle",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.splat",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.splat",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.splat",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.splat",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.splat",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.splat",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.extract_lane_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.extract_lane_u",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.replace_lane",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extract_lane_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extract_lane_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.replace_lane",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extract_lane",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.replace_lane",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extract_lane",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.replace_lane",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.extract_lane",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.replace_lane",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.extract_lane",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.replace_lane",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.eq",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.ne",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.lt_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.lt_u",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.gt_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.gt_u",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.le_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.le_u",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.ge_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.ge_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.eq",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.ne",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.lt_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.lt_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.gt_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.gt_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.le_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.le_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.ge_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.ge_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.eq",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.ne",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.lt_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.lt_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.gt_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.gt_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.le_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.le_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.ge_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.ge_u",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.eq",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.ne",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.lt",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.gt",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.le",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.ge",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.eq",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.ne",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.lt",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.gt",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.le",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.ge",
+    "kind": 24
+  },
+  {
+    "label": "v128.not",
+    "kind": 24
+  },
+  {
+    "label": "v128.and",
+    "kind": 24
+  },
+  {
+    "label": "v128.andnot",
+    "kind": 24
+  },
+  {
+    "label": "v128.or",
+    "kind": 24
+  },
+  {
+    "label": "v128.xor",
+    "kind": 24
+  },
+  {
+    "label": "v128.bitselect",
+    "kind": 24
+  },
+  {
+    "label": "v128.any_true",
+    "kind": 24
+  },
+  {
+    "label": "v128.load8_lane",
+    "kind": 24
+  },
+  {
+    "label": "v128.load16_lane",
+    "kind": 24
+  },
+  {
+    "label": "v128.load32_lane",
+    "kind": 24
+  },
+  {
+    "label": "v128.load64_lane",
+    "kind": 24
+  },
+  {
+    "label": "v128.store8_lane",
+    "kind": 24
+  },
+  {
+    "label": "v128.store16_lane",
+    "kind": 24
+  },
+  {
+    "label": "v128.store32_lane",
+    "kind": 24
+  },
+  {
+    "label": "v128.store64_lane",
+    "kind": 24
+  },
+  {
+    "label": "v128.load32_zero",
+    "kind": 24
+  },
+  {
+    "label": "v128.load64_zero",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.demote_f64x2_zero",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.promote_low_f32x4",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.abs",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.neg",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.popcnt",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.all_true",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.bitmask",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.narrow_i16x8_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.narrow_i16x8_u",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.ceil",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.floor",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.trunc",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.nearest",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.shl",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.shr_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.shr_u",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.add",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.add_sat_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.add_sat_u",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.sub",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.sub_sat_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.sub_sat_u",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.ceil",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.floor",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.min_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.min_u",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.max_s",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.max_u",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.trunc",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.avgr_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extadd_pairwise_i8x16_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extadd_pairwise_i8x16_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extadd_pairwise_i16x8_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extadd_pairwise_i16x8_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.abs",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.neg",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.q15mulr_sat_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.all_true",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.bitmask",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.narrow_i32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.narrow_i32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extend_low_i8x16_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extend_high_i8x16_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extend_low_i8x16_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extend_high_i8x16_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.shl",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.shr_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.shr_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.add",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.add_sat_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.add_sat_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.sub",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.sub_sat_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.sub_sat_u",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.nearest",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.mul",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.min_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.min_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.max_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.max_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.avgr_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extmul_low_i8x16_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extmul_high_i8x16_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extmul_low_i8x16_u",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.extmul_high_i8x16_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.abs",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.neg",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.all_true",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.bitmask",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extend_low_i16x8_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extend_high_i16x8_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extend_low_i16x8_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extend_high_i16x8_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.shl",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.shr_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.shr_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.add",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.sub",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.mul",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.min_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.min_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.max_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.max_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.dot_i16x8_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extmul_low_i16x8_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extmul_high_i16x8_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extmul_low_i16x8_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.extmul_high_i16x8_u",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.abs",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.neg",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.all_true",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.bitmask",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extend_low_i32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extend_high_i32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extend_low_i32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extend_high_i32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.shl",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.shr_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.shr_u",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.add",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.sub",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.mul",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.eq",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.ne",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.lt_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.gt_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.le_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.ge_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extmul_low_i32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extmul_high_i32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extmul_low_i32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.extmul_high_i32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.abs",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.neg",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.sqrt",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.add",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.sub",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.mul",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.div",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.min",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.max",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.pmin",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.pmax",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.abs",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.neg",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.sqrt",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.add",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.sub",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.mul",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.div",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.min",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.max",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.pmin",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.pmax",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.trunc_sat_f32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.trunc_sat_f32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.convert_i32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.convert_i32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.trunc_sat_f64x2_s_zero",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.trunc_sat_f64x2_u_zero",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.convert_low_i32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.convert_low_i32x4_u",
+    "kind": 24
+  }
+]

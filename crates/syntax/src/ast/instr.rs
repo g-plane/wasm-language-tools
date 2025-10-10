@@ -482,6 +482,10 @@ impl Immediate {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
+    pub fn shape_descriptor(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::SHAPE_DESCRIPTOR)
+    }
+    #[inline]
     pub fn type_use(&self) -> Option<TypeUse> {
         child(&self.syntax)
     }
