@@ -293,6 +293,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             } else if find_leading_l_paren(token).is_some() {
                 ctx.extend([CmpCtx::KeywordImExport, CmpCtx::KeywordElem]);
             } else {
+                ctx.push(CmpCtx::AddrType);
                 ctx.push(CmpCtx::AbbrRefType);
             }
         }
@@ -301,8 +302,11 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         SyntaxKind::MODULE_FIELD_MEMORY => {
             if find_leading_l_paren(token).is_some() {
                 ctx.extend([CmpCtx::KeywordImExport, CmpCtx::KeywordData]);
+            } else {
+                ctx.push(CmpCtx::AddrType);
             }
         }
+        SyntaxKind::IMPORT_DESC_MEMORY_TYPE => ctx.push(CmpCtx::AddrType),
         SyntaxKind::MODULE_FIELD_DATA => {
             if find_leading_l_paren(token).is_some() {
                 ctx.extend([CmpCtx::KeywordMemory, CmpCtx::KeywordOffset, CmpCtx::Instr]);
@@ -346,6 +350,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::KeywordRef);
             } else {
+                ctx.push(CmpCtx::AddrType);
                 ctx.push(CmpCtx::AbbrRefType);
             }
         }
@@ -388,6 +393,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::Func);
             }
         }
+        SyntaxKind::ADDR_TYPE => ctx.push(CmpCtx::AddrType),
         SyntaxKind::TABLE_USE => ctx.push(CmpCtx::Table),
         SyntaxKind::MODULE => {
             if find_leading_l_paren(token).is_some() {
@@ -567,6 +573,7 @@ enum CmpCtx {
     Field(SymbolKey),
     AbsHeapType,
     PackedType,
+    AddrType,
     ShapeDescriptor,
     KeywordModule,
     KeywordModuleField,
@@ -1074,6 +1081,19 @@ fn get_cmp_list(
                     items.extend(["i8", "i16"].into_iter().map(|ty| CompletionItem {
                         label: ty.to_string(),
                         kind: Some(CompletionItemKind::Class),
+                        ..Default::default()
+                    }));
+                }
+                CmpCtx::AddrType => {
+                    items.extend(["i32", "i64"].into_iter().map(|ty| CompletionItem {
+                        label: ty.to_string(),
+                        kind: Some(CompletionItemKind::Class),
+                        documentation: data_set::get_value_type_description(ty).map(|desc| {
+                            Union2::B(MarkupContent {
+                                kind: MarkupKind::Markdown,
+                                value: desc.into(),
+                            })
+                        }),
                         ..Default::default()
                     }));
                 }

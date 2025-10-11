@@ -45,6 +45,34 @@ fn table_type() {
 }
 
 #[test]
+fn addr_type() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+    (table  0)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 2, 11));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn addr_type_incomplete() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+    (table i 0)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 2, 12));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn ref_in_table_type() {
     let uri = "untitled:test".to_string();
     let source = "

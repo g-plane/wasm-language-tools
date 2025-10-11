@@ -40,6 +40,7 @@ pub enum SyntaxKind {
     SUB_TYPE,
     TABLE_TYPE,
     MEMORY_TYPE,
+    ADDR_TYPE,
     GLOBAL_TYPE,
     BLOCK_TYPE,
     PLAIN_INSTR,

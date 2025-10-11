@@ -9,6 +9,42 @@ use rowan::{
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct AddrType {
+    syntax: SyntaxNode,
+}
+impl AddrType {
+    #[inline]
+    pub fn type_keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::TYPE_KEYWORD)
+    }
+}
+impl AstNode for AddrType {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::ADDR_TYPE
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(AddrType { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ArrayType {
     syntax: SyntaxNode,
 }
@@ -389,6 +425,10 @@ pub struct MemoryType {
     syntax: SyntaxNode,
 }
 impl MemoryType {
+    #[inline]
+    pub fn addr_type(&self) -> Option<AddrType> {
+        child(&self.syntax)
+    }
     #[inline]
     pub fn limits(&self) -> Option<Limits> {
         child(&self.syntax)
@@ -813,6 +853,10 @@ pub struct TableType {
     syntax: SyntaxNode,
 }
 impl TableType {
+    #[inline]
+    pub fn addr_type(&self) -> Option<AddrType> {
+        child(&self.syntax)
+    }
     #[inline]
     pub fn limits(&self) -> Option<Limits> {
         child(&self.syntax)

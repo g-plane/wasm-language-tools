@@ -2,4 +2,6 @@
   (memory)
   (memory "")
   (memory ())
+  (memory f32 0)
+  (memory i32)
 )

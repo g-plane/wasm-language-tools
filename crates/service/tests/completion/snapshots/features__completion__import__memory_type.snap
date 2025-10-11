@@ -1,0 +1,22 @@
+---
+source: crates/service/tests/completion/import.rs
+expression: response
+---
+[
+  {
+    "label": "i32",
+    "kind": 7,
+    "documentation": {
+      "kind": "markdown",
+      "value": "The type `i32` classifies 32 bit integers."
+    }
+  },
+  {
+    "label": "i64",
+    "kind": 7,
+    "documentation": {
+      "kind": "markdown",
+      "value": "The type `i64` classifies 64 bit integers."
+    }
+  }
+]

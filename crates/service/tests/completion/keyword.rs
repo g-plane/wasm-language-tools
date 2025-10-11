@@ -153,16 +153,6 @@ fn module_field_memory_keyword() {
 }
 
 #[test]
-fn module_field_memory_keyword_without_paren() {
-    let uri = "untitled:test".to_string();
-    let source = "(module (memory ))";
-    let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, 0, 16));
-    assert!(response.is_none());
-}
-
-#[test]
 fn block_type_result_keyword_after_paren() {
     let uri = "untitled:test".to_string();
     let source = "(module (func (block ())))";

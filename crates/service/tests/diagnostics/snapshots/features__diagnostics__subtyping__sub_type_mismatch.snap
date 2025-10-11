@@ -8,22 +8,6 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 24,
-          "character": 18
-        },
-        "end": {
-          "line": 24,
-          "character": 21
-        }
-      },
-      "severity": 1,
-      "code": "subtyping",
-      "source": "wat",
-      "message": "type of `$s7'` doesn't match its super type `$s7`"
-    },
-    {
-      "range": {
-        "start": {
           "line": 21,
           "character": 18
         },
@@ -148,6 +132,22 @@ expression: response
       "code": "subtyping",
       "source": "wat",
       "message": "type of `$s0` doesn't match its super type `$a0`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 24,
+          "character": 18
+        },
+        "end": {
+          "line": 24,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "subtyping",
+      "source": "wat",
+      "message": "type of `$s7'` doesn't match its super type `$s7`"
     }
   ]
 }

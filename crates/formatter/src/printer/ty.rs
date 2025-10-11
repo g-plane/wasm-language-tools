@@ -1,6 +1,16 @@
 use super::*;
 use tiny_pretty::Doc;
 
+impl DocGen for AddrType {
+    fn doc(&self, _: &Ctx) -> Doc<'static> {
+        if let Some(token) = self.syntax().first_token() {
+            Doc::text(token.text().to_string())
+        } else {
+            Doc::nil()
+        }
+    }
+}
+
 impl DocGen for ArrayType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         let mut docs = Vec::with_capacity(2);
@@ -209,11 +219,21 @@ impl DocGen for Limits {
 
 impl DocGen for MemoryType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        if let Some(limits) = self.limits() {
-            limits.doc(ctx)
-        } else {
-            Doc::nil()
+        let mut docs = Vec::with_capacity(2);
+        let mut trivias = vec![];
+        if let Some(addr_type) = self.addr_type() {
+            docs.push(addr_type.doc(ctx));
+            trivias = format_trivias_after_node(addr_type, ctx);
         }
+        if let Some(limits) = self.limits() {
+            if trivias.is_empty() && !docs.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(limits.doc(ctx));
+        }
+        Doc::list(docs)
     }
 }
 
@@ -438,7 +458,16 @@ impl DocGen for TableType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         let mut docs = Vec::with_capacity(2);
         let mut trivias = vec![];
+        if let Some(addr_type) = self.addr_type() {
+            docs.push(addr_type.doc(ctx));
+            trivias = format_trivias_after_node(addr_type, ctx);
+        }
         if let Some(limits) = self.limits() {
+            if trivias.is_empty() && !docs.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
             docs.push(limits.doc(ctx));
             trivias = format_trivias_after_node(limits, ctx);
         }

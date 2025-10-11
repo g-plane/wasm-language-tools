@@ -1,7 +1,7 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..96
+ROOT@0..146
   MODULE@0..19
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
@@ -64,3 +64,39 @@ ROOT@0..96
       R_PAREN@93..94 ")"
     R_PAREN@94..95 ")"
   WHITESPACE@95..96 "\n"
+  MODULE@96..119
+    L_PAREN@96..97 "("
+    KEYWORD@97..103 "module"
+    WHITESPACE@103..104 " "
+    MODULE_FIELD_MEMORY@104..118
+      L_PAREN@104..105 "("
+      KEYWORD@105..111 "memory"
+      WHITESPACE@111..112 " "
+      MEMORY_TYPE@112..117
+        ADDR_TYPE@112..115
+          TYPE_KEYWORD@112..115 "i32"
+        WHITESPACE@115..116 " "
+        LIMITS@116..117
+          UNSIGNED_INT@116..117 "0"
+      R_PAREN@117..118 ")"
+    R_PAREN@118..119 ")"
+  WHITESPACE@119..120 "\n"
+  MODULE@120..145
+    L_PAREN@120..121 "("
+    KEYWORD@121..127 "module"
+    WHITESPACE@127..128 " "
+    MODULE_FIELD_MEMORY@128..144
+      L_PAREN@128..129 "("
+      KEYWORD@129..135 "memory"
+      WHITESPACE@135..136 " "
+      MEMORY_TYPE@136..143
+        ADDR_TYPE@136..139
+          TYPE_KEYWORD@136..139 "i64"
+        WHITESPACE@139..140 " "
+        LIMITS@140..143
+          UNSIGNED_INT@140..141 "0"
+          WHITESPACE@141..142 " "
+          UNSIGNED_INT@142..143 "1"
+      R_PAREN@143..144 ")"
+    R_PAREN@144..145 ")"
+  WHITESPACE@145..146 "\n"

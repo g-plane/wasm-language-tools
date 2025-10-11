@@ -85,3 +85,17 @@ fn type_use() {
     let response = service.completion(create_params(uri, 2, 25));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn memory_type() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+    (import "" "" (memory ))
+)
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 2, 26));
+    assert_json_snapshot!(response);
+}

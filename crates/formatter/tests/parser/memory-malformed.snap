@@ -4,4 +4,6 @@ source: crates/formatter/tests/parser.rs
 (module
   (memory)
   (memory "")
-  (memory ()))
+  (memory ())
+  (memory f32 0)
+  (memory i32))

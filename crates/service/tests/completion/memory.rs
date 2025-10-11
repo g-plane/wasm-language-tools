@@ -142,3 +142,29 @@ fn memory_init() {
     let response = service.completion(create_params(uri, 4, 19));
     assert!(response.is_none());
 }
+
+#[test]
+fn addr_type() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory  1))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 2, 10));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn addr_type_incomplete() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory i 1))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 2, 11));
+    assert_json_snapshot!(response);
+}

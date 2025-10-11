@@ -2,3 +2,5 @@
 (module (memory 0 0))
 (module (memory (data)))
 (module (memory (data "x")))
+(module (memory i32 0))
+(module (memory i64 0 1))

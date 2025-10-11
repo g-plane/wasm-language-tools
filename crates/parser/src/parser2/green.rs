@@ -67,20 +67,14 @@ pub static KW_ELSE: LazyLock<GreenElement> =
 pub static KW_END: LazyLock<GreenElement> =
     LazyLock::new(|| GreenToken::new(SyntaxKind::KEYWORD.into(), "end").into());
 
-pub static TYPE_I32: LazyLock<GreenElement> = LazyLock::new(|| {
-    node(
-        SyntaxKind::NUM_TYPE,
-        [GreenToken::new(SyntaxKind::TYPE_KEYWORD.into(), "i32").into()],
-    )
-    .into()
-});
-pub static TYPE_I64: LazyLock<GreenElement> = LazyLock::new(|| {
-    node(
-        SyntaxKind::NUM_TYPE,
-        [GreenToken::new(SyntaxKind::TYPE_KEYWORD.into(), "i64").into()],
-    )
-    .into()
-});
+pub static TYPE_KW_I32: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::TYPE_KEYWORD.into(), "i32").into());
+pub static TYPE_KW_I64: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::TYPE_KEYWORD.into(), "i64").into());
+pub static TYPE_I32: LazyLock<GreenElement> =
+    LazyLock::new(|| node(SyntaxKind::NUM_TYPE, [TYPE_KW_I32.clone()]).into());
+pub static TYPE_I64: LazyLock<GreenElement> =
+    LazyLock::new(|| node(SyntaxKind::NUM_TYPE, [TYPE_KW_I64.clone()]).into());
 pub static TYPE_F32: LazyLock<GreenElement> = LazyLock::new(|| {
     node(
         SyntaxKind::NUM_TYPE,

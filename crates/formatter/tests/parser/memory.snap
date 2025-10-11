@@ -9,3 +9,7 @@ source: crates/formatter/tests/parser.rs
   (memory (data)))
 (module
   (memory (data "x")))
+(module
+  (memory i32 0))
+(module
+  (memory i64 0 1))

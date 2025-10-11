@@ -4,6 +4,21 @@ use rowan::GreenNode;
 use wat_syntax::SyntaxKind::*;
 
 impl Parser<'_> {
+    fn parse_addr_type(&mut self) -> Option<GreenNode> {
+        self.lexer.eat(TYPE_KEYWORD).map(|mut token| {
+            let token = match token.text {
+                "i32" => green::TYPE_KW_I32.clone(),
+                "i64" => green::TYPE_KW_I64.clone(),
+                _ => {
+                    token.kind = ERROR;
+                    self.report_error_token(&token, Message::Description("invalid address type"));
+                    token.into()
+                }
+            };
+            node(ADDR_TYPE, [token])
+        })
+    }
+
     fn parse_array_type(&mut self, mark: NodeMark) -> Option<GreenNode> {
         if !self.recover(Self::parse_field_type) {
             self.report_missing(Message::Name("field type"));
@@ -138,8 +153,14 @@ impl Parser<'_> {
     }
 
     pub(super) fn parse_memory_type(&mut self) -> Option<GreenNode> {
-        self.parse_limits()
-            .map(|limits| node(MEMORY_TYPE, [limits.into()]))
+        let mark = self.start_node();
+        if let Some(addr_type) = self.try_parse(Self::parse_addr_type) {
+            self.add_child(addr_type);
+            self.parse_trivias();
+        }
+        let limits = self.parse_limits()?;
+        self.add_child(limits);
+        Some(self.finish_node(MEMORY_TYPE, mark))
     }
 
     fn parse_packed_type(&mut self) -> Option<GreenElement> {
@@ -271,6 +292,10 @@ impl Parser<'_> {
 
     pub(super) fn parse_table_type(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
+        if let Some(addr_type) = self.try_parse(Self::parse_addr_type) {
+            self.add_child(addr_type);
+            self.parse_trivias();
+        }
         let limits = self.parse_limits()?;
         self.add_child(limits);
         if !self.recover(Self::parse_ref_type) {
