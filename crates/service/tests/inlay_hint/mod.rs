@@ -1,5 +1,8 @@
 use insta::assert_json_snapshot;
-use lspt::{InlayHintParams, Position, Range, TextDocumentIdentifier};
+use lspt::{
+    ClientCapabilities, InitializeParams, InlayHintParams, Position, Range, TextDocumentIdentifier,
+    WorkspaceClientCapabilities,
+};
 use wat_service::{InlayHintOptions, LanguageService, ServiceConfig};
 
 fn create_params(uri: String, line: u32, character: u32) -> InlayHintParams {
@@ -14,6 +17,29 @@ fn create_params(uri: String, line: u32, character: u32) -> InlayHintParams {
             end: Position { line, character },
         },
     }
+}
+
+#[test]
+fn empty_config() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func))
+";
+    let mut service = LanguageService::default();
+    service.initialize(InitializeParams {
+        capabilities: ClientCapabilities {
+            workspace: Some(WorkspaceClientCapabilities {
+                configuration: Some(true),
+                ..Default::default()
+            }),
+            ..Default::default()
+        },
+        ..Default::default()
+    });
+    service.commit(uri.clone(), source.into());
+    let response = service.inlay_hint(create_params(uri, 3, 0));
+    assert!(response.is_none());
 }
 
 #[test]

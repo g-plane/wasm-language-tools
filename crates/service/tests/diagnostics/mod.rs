@@ -1,4 +1,7 @@
-use lspt::{DocumentDiagnosticParams, TextDocumentIdentifier};
+use lspt::{
+    ClientCapabilities, DocumentDiagnosticParams, InitializeParams, TextDocumentIdentifier,
+    WorkspaceClientCapabilities,
+};
 use wat_service::{LanguageService, LintLevel, Lints, ServiceConfig};
 
 mod block_type;
@@ -51,4 +54,27 @@ fn calm(service: &mut LanguageService, uri: String) {
             ..Default::default()
         },
     );
+}
+
+#[test]
+fn empty_config() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func))
+";
+    let mut service = LanguageService::default();
+    service.initialize(InitializeParams {
+        capabilities: ClientCapabilities {
+            workspace: Some(WorkspaceClientCapabilities {
+                configuration: Some(true),
+                ..Default::default()
+            }),
+            ..Default::default()
+        },
+        ..Default::default()
+    });
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
 }
