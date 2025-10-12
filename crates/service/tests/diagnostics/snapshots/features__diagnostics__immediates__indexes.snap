@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "immediates",
       "source": "wat",
-      "message": "expected identifier or unsigned integer"
+      "message": "unexpected immediate"
     },
     {
       "range": {
@@ -35,7 +35,7 @@ expression: response
       "severity": 1,
       "code": "immediates",
       "source": "wat",
-      "message": "expected identifier or unsigned integer"
+      "message": "unexpected immediate"
     },
     {
       "range": {
@@ -51,7 +51,7 @@ expression: response
       "severity": 1,
       "code": "immediates",
       "source": "wat",
-      "message": "expected identifier or unsigned integer"
+      "message": "unexpected immediate"
     },
     {
       "range": {

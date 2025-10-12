@@ -20,11 +20,10 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
 
     match instr_name.text() {
         "call" | "local.get" | "local.set" | "local.tee" | "global.get" | "global.set"
-        | "table.get" | "table.set" | "ref.func" | "data.drop" | "elem.drop" | "table.grow"
-        | "table.size" | "table.fill" | "br" | "br_if" | "struct.new" | "struct.new_default"
-        | "array.new" | "array.new_default" | "array.get" | "array.get_u" | "array.get_s"
-        | "array.set" | "array.fill" | "br_on_null" | "br_on_non_null" | "call_ref"
-        | "return_call" | "return_call_ref" => {
+        | "ref.func" | "data.drop" | "elem.drop" | "br" | "br_if" | "struct.new"
+        | "struct.new_default" | "array.new" | "array.new_default" | "array.get"
+        | "array.get_u" | "array.get_s" | "array.set" | "array.fill" | "br_on_null"
+        | "br_on_non_null" | "call_ref" | "return_call" | "return_call_ref" => {
             check_immediate::<true>(
                 diagnostics,
                 &mut immediates,
@@ -137,9 +136,8 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 line_index,
             );
         }
-        "table.init" | "table.copy" | "struct.get" | "struct.get_u" | "struct.get_s"
-        | "struct.set" | "array.new_data" | "array.new_elem" | "array.copy" | "array.init_data"
-        | "array.init_elem" => {
+        "struct.get" | "struct.get_u" | "struct.get_s" | "struct.set" | "array.new_data"
+        | "array.new_elem" | "array.copy" | "array.init_data" | "array.init_elem" => {
             check_immediate::<true>(
                 diagnostics,
                 &mut immediates,
@@ -182,7 +180,8 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 line_index,
             );
         }
-        "memory.size" | "memory.grow" | "memory.fill" => {
+        "memory.size" | "memory.grow" | "memory.fill" | "table.get" | "table.set"
+        | "table.grow" | "table.size" | "table.fill" => {
             check_immediate::<false>(
                 diagnostics,
                 &mut immediates,
@@ -192,7 +191,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 line_index,
             );
         }
-        "memory.copy" => {
+        "memory.copy" | "table.copy" => {
             check_immediate::<false>(
                 diagnostics,
                 &mut immediates,
@@ -210,7 +209,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 line_index,
             );
         }
-        "memory.init" => {
+        "memory.init" | "table.init" => {
             check_immediate::<true>(
                 diagnostics,
                 &mut immediates,
