@@ -96,7 +96,6 @@ pub fn check_table(
     node: &SyntaxNode,
 ) {
     let Some(ref_type) = ModuleFieldTable::cast(node.clone())
-        .filter(|table| table.instrs().count() > 0) // expr is required only since WasmGC proposal
         .and_then(|table| {
             table.ref_type().or_else(|| {
                 table
@@ -108,7 +107,11 @@ pub fn check_table(
     else {
         return;
     };
-    let ty = OperandType::Val(ValType::Ref(ref_type));
+    let ty = ValType::Ref(ref_type);
+    if ty.defaultable() && !node.children().any(|child| Instr::can_cast(child.kind())) {
+        return;
+    }
+    let ty = OperandType::Val(ty);
     check_block_like(
         diagnostics,
         &Shared {

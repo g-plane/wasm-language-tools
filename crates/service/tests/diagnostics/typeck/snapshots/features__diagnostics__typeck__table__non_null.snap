@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/typeck/table.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 21
+        },
+        "end": {
+          "line": 2,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref func)], found [] at the end"
+    }
+  ]
+}

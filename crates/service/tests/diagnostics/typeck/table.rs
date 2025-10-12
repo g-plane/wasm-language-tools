@@ -18,3 +18,17 @@ fn module_field() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn non_null() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (table 0 (ref func)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
