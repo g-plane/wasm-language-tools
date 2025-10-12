@@ -3,7 +3,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::{collections::HashMap, sync::LazyLock};
 
 pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = LazyLock::new(|| {
-    let mut map = HashMap::with_capacity_and_hasher(431, FxBuildHasher);
+    let mut map = HashMap::with_capacity_and_hasher(451, FxBuildHasher);
     map.insert(
         "unreachable",
         ResolvedSig {
@@ -3787,11 +3787,208 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
+    map.insert(
+        "i8x16.relaxed_swizzle",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+            ],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "i32x4.relaxed_trunc_f32x4_s",
+        ResolvedSig {
+            params: vec![OperandType::Val(ValType::V128)],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "i32x4.relaxed_trunc_f32x4_u",
+        ResolvedSig {
+            params: vec![OperandType::Val(ValType::V128)],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "i32x4.relaxed_trunc_f64x2_s",
+        ResolvedSig {
+            params: vec![OperandType::Val(ValType::V128)],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "i32x4.relaxed_trunc_f64x2_u",
+        ResolvedSig {
+            params: vec![OperandType::Val(ValType::V128)],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "f32x4.relaxed_madd",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+            ],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "f32x4.relaxed_nmadd",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+            ],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "f64x2.relaxed_madd",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+            ],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "f64x2.relaxed_nmadd",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+            ],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "i8x16.relaxed_laneselect",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+            ],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "i16x8.relaxed_laneselect",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+            ],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "i32x4.relaxed_laneselect",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+            ],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "i64x2.relaxed_laneselect",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+            ],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "f32x4.relaxed_min",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+            ],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "f32x4.relaxed_max",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+            ],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "f64x2.relaxed_min",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+            ],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "f64x2.relaxed_max",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+            ],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "i16x8.relaxed_q15mulr_s",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+            ],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "i16x8.relaxed_dot_i8x16_i7x16_s",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+            ],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
+    map.insert(
+        "i32x4.relaxed_dot_i8x16_i7x16_add_s",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+                OperandType::Val(ValType::V128),
+            ],
+            results: vec![OperandType::Val(ValType::V128)],
+        },
+    );
     map
 });
 
 pub(crate) static INSTR_OP_CODES: LazyLock<FxHashMap<&'static str, u32>> = LazyLock::new(|| {
-    let mut map = HashMap::with_capacity_and_hasher(476, FxBuildHasher);
+    let mut map = HashMap::with_capacity_and_hasher(496, FxBuildHasher);
     map.insert("unreachable", 0x00);
     map.insert("nop", 0x01);
     map.insert("block", 0x02);
@@ -4268,5 +4465,25 @@ pub(crate) static INSTR_OP_CODES: LazyLock<FxHashMap<&'static str, u32>> = LazyL
     map.insert("i32x4.trunc_sat_f64x2_u_zero", 0xFDFD01);
     map.insert("f64x2.convert_low_i32x4_s", 0xFDFE01);
     map.insert("f64x2.convert_low_i32x4_u", 0xFDFF01);
+    map.insert("i8x16.relaxed_swizzle", 0xFD8002);
+    map.insert("i32x4.relaxed_trunc_f32x4_s", 0xFD8102);
+    map.insert("i32x4.relaxed_trunc_f32x4_u", 0xFD8202);
+    map.insert("i32x4.relaxed_trunc_f64x2_s", 0xFD8302);
+    map.insert("i32x4.relaxed_trunc_f64x2_u", 0xFD8402);
+    map.insert("f32x4.relaxed_madd", 0xFD8502);
+    map.insert("f32x4.relaxed_nmadd", 0xFD8602);
+    map.insert("f64x2.relaxed_madd", 0xFD8702);
+    map.insert("f64x2.relaxed_nmadd", 0xFD8802);
+    map.insert("i8x16.relaxed_laneselect", 0xFD8902);
+    map.insert("i16x8.relaxed_laneselect", 0xFD8A02);
+    map.insert("i32x4.relaxed_laneselect", 0xFD8B02);
+    map.insert("i64x2.relaxed_laneselect", 0xFD8C02);
+    map.insert("f32x4.relaxed_min", 0xFD8D02);
+    map.insert("f32x4.relaxed_max", 0xFD8E02);
+    map.insert("f64x2.relaxed_min", 0xFD8F02);
+    map.insert("f64x2.relaxed_max", 0xFD9002);
+    map.insert("i16x8.relaxed_q15mulr_s", 0xFD9102);
+    map.insert("i16x8.relaxed_dot_i8x16_i7x16_s", 0xFD9202);
+    map.insert("i32x4.relaxed_dot_i8x16_i7x16_add_s", 0xFD9302);
     map
 });

@@ -2,7 +2,7 @@ pub(crate) use instr_meta::*;
 
 mod instr_meta;
 
-pub(crate) static INSTR_NAMES: [&str; 473] = [
+pub(crate) static INSTR_NAMES: [&str; 493] = [
     "unreachable",
     "nop",
     "block",
@@ -476,6 +476,26 @@ pub(crate) static INSTR_NAMES: [&str; 473] = [
     "i32x4.trunc_sat_f64x2_u_zero",
     "f64x2.convert_low_i32x4_s",
     "f64x2.convert_low_i32x4_u",
+    "i8x16.relaxed_swizzle",
+    "i32x4.relaxed_trunc_f32x4_s",
+    "i32x4.relaxed_trunc_f32x4_u",
+    "i32x4.relaxed_trunc_f64x2_s",
+    "i32x4.relaxed_trunc_f64x2_u",
+    "f32x4.relaxed_madd",
+    "f32x4.relaxed_nmadd",
+    "f64x2.relaxed_madd",
+    "f64x2.relaxed_nmadd",
+    "i8x16.relaxed_laneselect",
+    "i16x8.relaxed_laneselect",
+    "i32x4.relaxed_laneselect",
+    "i64x2.relaxed_laneselect",
+    "f32x4.relaxed_min",
+    "f32x4.relaxed_max",
+    "f64x2.relaxed_min",
+    "f64x2.relaxed_max",
+    "i16x8.relaxed_q15mulr_s",
+    "i16x8.relaxed_dot_i8x16_i7x16_s",
+    "i32x4.relaxed_dot_i8x16_i7x16_add_s",
 ];
 
 pub(crate) static MODULE_FIELDS: [&str; 11] = [

@@ -1909,5 +1909,85 @@ expression: response
   {
     "label": "f64x2.convert_low_i32x4_u",
     "kind": 24
+  },
+  {
+    "label": "i8x16.relaxed_swizzle",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.relaxed_trunc_f32x4_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.relaxed_trunc_f32x4_u",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.relaxed_trunc_f64x2_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.relaxed_trunc_f64x2_u",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.relaxed_madd",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.relaxed_nmadd",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.relaxed_madd",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.relaxed_nmadd",
+    "kind": 24
+  },
+  {
+    "label": "i8x16.relaxed_laneselect",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.relaxed_laneselect",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.relaxed_laneselect",
+    "kind": 24
+  },
+  {
+    "label": "i64x2.relaxed_laneselect",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.relaxed_min",
+    "kind": 24
+  },
+  {
+    "label": "f32x4.relaxed_max",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.relaxed_min",
+    "kind": 24
+  },
+  {
+    "label": "f64x2.relaxed_max",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.relaxed_q15mulr_s",
+    "kind": 24
+  },
+  {
+    "label": "i16x8.relaxed_dot_i8x16_i7x16_s",
+    "kind": 24
+  },
+  {
+    "label": "i32x4.relaxed_dot_i8x16_i7x16_add_s",
+    "kind": 24
   }
 ]
