@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/type_misuse.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 11,
+          "character": 18
+        },
+        "end": {
+          "line": 11,
+          "character": 19
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "ref type of table `1` must match `(ref null func)`"
+    }
+  ]
+}

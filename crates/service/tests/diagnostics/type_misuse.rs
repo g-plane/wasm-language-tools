@@ -211,3 +211,26 @@ fn br_on_cast_fail() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn table_ref_type() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (func)
+  (table 10 (ref func)
+    ref.func 0)
+  (func
+    i32.const 0
+    call_indirect 0)
+  (table (import "" "") 10 anyref)
+  (func
+    i32.const 0
+    call_indirect 1))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

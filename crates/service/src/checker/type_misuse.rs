@@ -4,14 +4,17 @@ use crate::{
     document::Document,
     helpers,
     types_analyzer::{
-        CompositeType, DefTypes, FieldType, OperandType, RefType, ValType, get_def_types,
+        CompositeType, DefTypes, FieldType, HeapType, OperandType, RefType, ValType, get_def_types,
         resolve_br_types,
     },
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
-use rowan::ast::{AstNode, support};
-use wat_syntax::{SyntaxKind, SyntaxNode, ast::Immediate};
+use rowan::{
+    Language, NodeOrToken,
+    ast::{AstNode, support},
+};
+use wat_syntax::{SyntaxKind, SyntaxNode, WatLanguage, ast::Immediate};
 
 const DIAGNOSTIC_CODE: &str = "type-misuse";
 
@@ -308,6 +311,18 @@ pub fn check(
                     });
                 }
             }
+            "call_indirect" | "return_call_indirect" => {
+                if let Some(diagnostic) = check_table_ref_type(
+                    service,
+                    document,
+                    line_index,
+                    symbol_table,
+                    module_id,
+                    node,
+                ) {
+                    diagnostics.push(diagnostic);
+                }
+            }
             _ => {}
         },
     }
@@ -342,6 +357,75 @@ fn check_type_matches(
             document,
             line_index,
         ))
+    }
+}
+
+fn check_table_ref_type(
+    service: &LanguageService,
+    document: Document,
+    line_index: &LineIndex,
+    symbol_table: &SymbolTable,
+    module_id: u32,
+    node: &SyntaxNode,
+) -> Option<Diagnostic> {
+    if let Some(ref_key) = support::children::<Immediate>(node)
+        .find(|immediate| {
+            matches!(
+                immediate.syntax().first_token().map(|token| token.kind()),
+                Some(SyntaxKind::INT | SyntaxKind::UNSIGNED_INT | SyntaxKind::IDENT)
+            )
+        })
+        .map(|immediate| SymbolKey::new(immediate.syntax()))
+        && let Some(ref_symbol) = symbol_table.symbols.get(&ref_key)
+        && symbol_table
+            .find_def(ref_key)
+            .and_then(|symbol| {
+                symbol.green.children().find_map(|child| {
+                    if let NodeOrToken::Node(node) = child {
+                        match WatLanguage::kind_from_raw(node.kind()) {
+                            SyntaxKind::REF_TYPE => Some(node),
+                            SyntaxKind::TABLE_TYPE => node.children().find_map(|child| {
+                                if let NodeOrToken::Node(node) = child
+                                    && node.kind() == SyntaxKind::REF_TYPE.into()
+                                {
+                                    Some(node)
+                                } else {
+                                    None
+                                }
+                            }),
+                            _ => None,
+                        }
+                    } else {
+                        None
+                    }
+                })
+            })
+            .and_then(|green| RefType::from_green(green, service))
+            .is_some_and(|ty| {
+                !ty.matches(
+                    &RefType {
+                        heap_ty: HeapType::Func,
+                        nullable: true,
+                    },
+                    service,
+                    document,
+                    module_id,
+                )
+            })
+    {
+        Some(Diagnostic {
+            range: helpers::rowan_range_to_lsp_range(line_index, ref_key.text_range()),
+            severity: Some(DiagnosticSeverity::Error),
+            source: Some("wat".into()),
+            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+            message: format!(
+                "ref type of table `{}` must match `(ref null func)`",
+                ref_symbol.idx.render(service),
+            ),
+            ..Default::default()
+        })
+    } else {
+        None
     }
 }
 
