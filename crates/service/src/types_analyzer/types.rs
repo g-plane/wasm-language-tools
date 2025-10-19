@@ -249,6 +249,7 @@ impl<'db> HeapType<'db> {
                 HeapType::Any,
             )
             | (HeapType::I31 | HeapType::Struct | HeapType::Array, HeapType::Eq) => true,
+            (HeapType::DefFunc(..), HeapType::Func) => true,
             (HeapType::None, other) => other.matches(&HeapType::Any, db, document, module_id),
             (HeapType::NoFunc, other) => other.matches(&HeapType::Func, db, document, module_id),
             (HeapType::NoExtern, other) => {
