@@ -121,6 +121,14 @@ impl<'db> RefType<'db> {
                 heap_ty: HeapType::NoFunc,
                 nullable: true,
             }),
+            "exnref" => Some(RefType {
+                heap_ty: HeapType::Exn,
+                nullable: true,
+            }),
+            "nullexnref" => Some(RefType {
+                heap_ty: HeapType::NoExn,
+                nullable: true,
+            }),
             "externref" => Some(RefType {
                 heap_ty: HeapType::Extern,
                 nullable: true,
@@ -195,6 +203,8 @@ pub(crate) enum HeapType<'db> {
     None,
     Func,
     NoFunc,
+    Exn,
+    NoExn,
     Extern,
     NoExtern,
     Rec(u32),          // internal use, not actually a valid heap type
@@ -227,6 +237,8 @@ impl<'db> HeapType<'db> {
                     "none" => Some(HeapType::None),
                     "func" => Some(HeapType::Func),
                     "nofunc" => Some(HeapType::NoFunc),
+                    "exn" => Some(HeapType::Exn),
+                    "noexn" => Some(HeapType::NoExn),
                     "extern" => Some(HeapType::Extern),
                     "noextern" => Some(HeapType::NoExtern),
                     _ => None,
@@ -250,11 +262,6 @@ impl<'db> HeapType<'db> {
             )
             | (HeapType::I31 | HeapType::Struct | HeapType::Array, HeapType::Eq) => true,
             (HeapType::DefFunc(..), HeapType::Func) => true,
-            (HeapType::None, other) => other.matches(&HeapType::Any, db, document, module_id),
-            (HeapType::NoFunc, other) => other.matches(&HeapType::Func, db, document, module_id),
-            (HeapType::NoExtern, other) => {
-                other.matches(&HeapType::Extern, db, document, module_id)
-            }
             (heap_ty_a @ &HeapType::Type(mut a), heap_ty_b @ &HeapType::Type(mut b)) => {
                 if a.is_def() {
                     a.name = None;
@@ -374,6 +381,12 @@ impl<'db> HeapType<'db> {
                     false
                 }
             }
+            (HeapType::None, other) => other.matches(&HeapType::Any, db, document, module_id),
+            (HeapType::NoFunc, other) => other.matches(&HeapType::Func, db, document, module_id),
+            (HeapType::NoExn, other) => other.matches(&HeapType::Exn, db, document, module_id),
+            (HeapType::NoExtern, other) => {
+                other.matches(&HeapType::Extern, db, document, module_id)
+            }
             (a, b) => a == b,
         }
     }
@@ -437,6 +450,7 @@ impl<'db> HeapType<'db> {
             | HeapType::Array
             | HeapType::I31 => Some(HeapType::Any),
             HeapType::Func | HeapType::NoFunc => Some(HeapType::Func),
+            HeapType::Exn | HeapType::NoExn => Some(HeapType::Exn),
             HeapType::Extern | HeapType::NoExtern => Some(HeapType::Extern),
             HeapType::Type(idx) => {
                 let mut idx = *idx;

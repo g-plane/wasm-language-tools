@@ -40,6 +40,14 @@ expression: response
     "kind": 7
   },
   {
+    "label": "exnref",
+    "kind": 7
+  },
+  {
+    "label": "nullexnref",
+    "kind": 7
+  },
+  {
     "label": "externref",
     "kind": 7,
     "documentation": {

@@ -665,6 +665,8 @@ fn get_cmp_list(
                             "nullref",
                             "funcref",
                             "nullfuncref",
+                            "exnref",
+                            "nullexnref",
                             "externref",
                             "nullexternref",
                         ]
@@ -1066,8 +1068,8 @@ fn get_cmp_list(
                 CmpCtx::AbsHeapType => {
                     items.extend(
                         [
-                            "any", "eq", "i31", "struct", "array", "none", "func", "nofunc",
-                            "extern", "noextern",
+                            "any", "eq", "i31", "struct", "array", "none", "func", "nofunc", "exn",
+                            "noexn", "extern", "noextern",
                         ]
                         .into_iter()
                         .map(|ty| CompletionItem {

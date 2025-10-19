@@ -125,8 +125,8 @@ impl Parser<'_> {
         self.lexer
             .eat(TYPE_KEYWORD)
             .and_then(|mut token| match token.text {
-                "any" | "eq" | "i31" | "struct" | "array" | "none" | "func" | "nofunc"
-                | "extern" | "noextern" => Some(node(HEAP_TYPE, [token.into()]).into()),
+                "any" | "eq" | "i31" | "struct" | "array" | "none" | "func" | "nofunc" | "exn"
+                | "noexn" | "extern" | "noextern" => Some(node(HEAP_TYPE, [token.into()]).into()),
                 _ => {
                     if IMMEDIATE {
                         // for better error reporting
@@ -196,9 +196,8 @@ impl Parser<'_> {
             .eat(TYPE_KEYWORD)
             .and_then(|token| match token.text {
                 "anyref" | "eqref" | "i31ref" | "structref" | "arrayref" | "nullref"
-                | "funcref" | "nullfuncref" | "externref" | "nullexternref" => {
-                    Some(node(REF_TYPE, [token.into()]))
-                }
+                | "funcref" | "nullfuncref" | "exnref" | "nullexnref" | "externref"
+                | "nullexternref" => Some(node(REF_TYPE, [token.into()])),
                 _ => None,
             })
             .or_else(|| self.parse_ref_type_detailed())
@@ -315,9 +314,8 @@ impl Parser<'_> {
                 "f64" => green::TYPE_F64.clone(),
                 "v128" => node(VEC_TYPE, [token.into()]).into(),
                 "anyref" | "eqref" | "i31ref" | "structref" | "arrayref" | "nullref"
-                | "funcref" | "nullfuncref" | "externref" | "nullexternref" => {
-                    node(REF_TYPE, [token.into()]).into()
-                }
+                | "funcref" | "nullfuncref" | "exnref" | "nullexnref" | "externref"
+                | "nullexternref" => node(REF_TYPE, [token.into()]).into(),
                 _ => {
                     token.kind = ERROR;
                     self.report_error_token(&token, Message::Description("invalid value type"));

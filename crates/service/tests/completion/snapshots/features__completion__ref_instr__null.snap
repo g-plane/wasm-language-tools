@@ -40,6 +40,14 @@ expression: response
     "kind": 7
   },
   {
+    "label": "exn",
+    "kind": 7
+  },
+  {
+    "label": "noexn",
+    "kind": 7
+  },
+  {
     "label": "extern",
     "kind": 7
   },

@@ -149,6 +149,8 @@ impl Display for RenderWithDb<'_, &RefType<'_>> {
             HeapType::None => write!(f, "none")?,
             HeapType::Func => write!(f, "func")?,
             HeapType::NoFunc => write!(f, "nofunc")?,
+            HeapType::Exn => write!(f, "exn")?,
+            HeapType::NoExn => write!(f, "noexn")?,
             HeapType::Extern => write!(f, "extern")?,
             HeapType::NoExtern => write!(f, "noextern")?,
             HeapType::Rec(..) => unreachable!("rec type is only for internal use"),
