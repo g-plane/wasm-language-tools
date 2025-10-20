@@ -63,7 +63,8 @@ where
         .map(|(_, guess)| guess)
 }
 
-pub fn can_produce_never(instr_name: &str) -> bool {
+// https://webassembly.github.io/spec/core/valid/instructions.html#polymorphism
+pub fn is_stack_polymorphic(instr_name: &str) -> bool {
     matches!(
         instr_name,
         "unreachable"

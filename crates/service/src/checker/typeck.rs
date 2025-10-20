@@ -254,7 +254,7 @@ fn check_instr<'db>(
             if let Some(diagnostic) = type_stack.check(&sig.params, ReportRange::Instr(&instr)) {
                 diagnostics.push(diagnostic);
             }
-            if helpers::can_produce_never(instr_name) {
+            if helpers::is_stack_polymorphic(instr_name) {
                 type_stack.has_never = true;
                 type_stack.stack.clear();
             }

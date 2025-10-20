@@ -156,7 +156,7 @@ impl Checker<'_, '_> {
                                 }
                             });
                     }
-                    *unreachable |= helpers::can_produce_never(instr_name);
+                    *unreachable |= helpers::is_stack_polymorphic(instr_name);
                 }
             }
             Instr::Block(BlockInstr::Block(block_block)) => {
