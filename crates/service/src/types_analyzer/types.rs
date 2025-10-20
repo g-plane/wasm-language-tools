@@ -484,6 +484,22 @@ pub(crate) enum OperandType<'db> {
     Val(ValType<'db>),
     Any,
 }
+impl<'db> OperandType<'db> {
+    pub(crate) fn matches(
+        &self,
+        other: &Self,
+        db: &'db dyn salsa::Database,
+        document: Document,
+        module_id: u32,
+    ) -> bool {
+        match (self, other) {
+            (OperandType::Val(sub), OperandType::Val(sup)) => {
+                sub.matches(sup, db, document, module_id)
+            }
+            (OperandType::Any, _) | (_, OperandType::Any) => true,
+        }
+    }
+}
 impl<'db> From<StorageType<'db>> for OperandType<'db> {
     fn from(value: StorageType<'db>) -> Self {
         match value {
@@ -495,19 +511,6 @@ impl<'db> From<StorageType<'db>> for OperandType<'db> {
 impl<'db> From<FieldType<'db>> for OperandType<'db> {
     fn from(value: FieldType<'db>) -> Self {
         value.storage.into()
-    }
-}
-
-pub(crate) fn operand_type_matches<'db>(
-    db: &'db dyn salsa::Database,
-    document: Document,
-    module_id: u32,
-    sub: &OperandType<'db>,
-    sup: &OperandType<'db>,
-) -> bool {
-    match (sub, sup) {
-        (OperandType::Val(sub), OperandType::Val(sup)) => sub.matches(sup, db, document, module_id),
-        (OperandType::Any, _) | (_, OperandType::Any) => true,
     }
 }
 

@@ -8,8 +8,7 @@ use crate::{
     types_analyzer::{
         CompositeType, HeapType, OperandType, RefType, ResolvedSig, ValType, extract_global_type,
         extract_type, get_block_sig, get_def_types, get_func_sig, get_type_use_sig,
-        operand_type_matches, resolve_array_type_with_idx, resolve_br_types,
-        resolve_field_type_with_struct_idx,
+        resolve_array_type_with_idx, resolve_br_types, resolve_field_type_with_struct_idx,
     },
 };
 use itertools::{EitherOrBoth, Itertools};
@@ -401,13 +400,7 @@ impl<'db> TypeStack<'db> {
             .zip_longest(pops.iter().rev())
             .for_each(|pair| match pair {
                 EitherOrBoth::Both(expected, (received, related_instr)) => {
-                    if operand_type_matches(
-                        self.service,
-                        self.document,
-                        self.module_id,
-                        received,
-                        expected,
-                    ) {
+                    if received.matches(expected, self.service, self.document, self.module_id) {
                         return;
                     }
                     mismatch = true;
@@ -476,13 +469,7 @@ impl<'db> TypeStack<'db> {
             .zip_longest(self.stack.iter().rev())
             .for_each(|pair| match pair {
                 EitherOrBoth::Both(expected, (received, related_instr)) => {
-                    if operand_type_matches(
-                        self.service,
-                        self.document,
-                        self.module_id,
-                        received,
-                        expected,
-                    ) {
+                    if received.matches(expected, self.service, self.document, self.module_id) {
                         return;
                     }
                     mismatch = true;

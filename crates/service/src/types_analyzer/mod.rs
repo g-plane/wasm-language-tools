@@ -8,10 +8,7 @@ pub(crate) use self::{
         resolve_param_types,
     },
     signature::{ResolvedSig, get_block_sig, get_func_sig, get_type_use_sig},
-    types::{
-        FieldType, Fields, HeapType, OperandType, RefType, StorageType, ValType,
-        operand_type_matches,
-    },
+    types::{FieldType, Fields, HeapType, OperandType, RefType, StorageType, ValType},
 };
 
 mod def_type;
