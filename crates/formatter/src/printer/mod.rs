@@ -53,16 +53,10 @@ pub(crate) fn format_node(node: SyntaxNode, ctx: &Ctx) -> Option<Doc<'static>> {
         SyntaxKind::LIMITS => Limits::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::IMPORT => Import::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::EXPORT => Export::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::IMPORT_DESC_TYPE_USE => ImportDescTypeUse::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::IMPORT_DESC_TABLE_TYPE => {
-            ImportDescTableType::cast(node).map(|node| node.doc(ctx))
-        }
-        SyntaxKind::IMPORT_DESC_MEMORY_TYPE => {
-            ImportDescMemoryType::cast(node).map(|node| node.doc(ctx))
-        }
-        SyntaxKind::IMPORT_DESC_GLOBAL_TYPE => {
-            ImportDescGlobalType::cast(node).map(|node| node.doc(ctx))
-        }
+        SyntaxKind::EXTERN_TYPE_FUNC => ExternTypeFunc::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::EXTERN_TYPE_TABLE => ExternTypeTable::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::EXTERN_TYPE_MEMORY => ExternTypeMemory::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::EXTERN_TYPE_GLOBAL => ExternTypeGlobal::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::EXTERN_IDX_FUNC => ExternIdxFunc::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::EXTERN_IDX_TABLE => ExternIdxTable::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::EXTERN_IDX_MEMORY => ExternIdxMemory::cast(node).map(|node| node.doc(ctx)),

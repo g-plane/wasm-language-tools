@@ -9,7 +9,7 @@ use rowan::{
 use rustc_hash::FxHashMap;
 use wat_syntax::{
     SyntaxKind,
-    ast::{CompType, FieldType, ImportDescGlobalType, ModuleFieldGlobal, PlainInstr, TypeDef},
+    ast::{CompType, ExternTypeGlobal, FieldType, ModuleFieldGlobal, PlainInstr, TypeDef},
 };
 
 #[salsa::tracked(returns(ref))]
@@ -40,8 +40,8 @@ pub(crate) fn get_mutabilities<'db>(
                             },
                         ))
                     }
-                    SyntaxKind::IMPORT_DESC_GLOBAL_TYPE => {
-                        let global = ImportDescGlobalType::cast(node)?;
+                    SyntaxKind::EXTERN_TYPE_GLOBAL => {
+                        let global = ExternTypeGlobal::cast(node)?;
                         let range = global
                             .global_type()
                             .and_then(|global_type| global_type.mut_keyword())

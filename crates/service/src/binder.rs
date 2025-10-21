@@ -94,7 +94,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     })
             })
     }
-    fn create_import_desc_symbol<'db>(
+    fn create_extern_type_symbol<'db>(
         db: &'db dyn salsa::Database,
         node: &SyntaxNode,
         id: u32,
@@ -647,30 +647,30 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     symbols.insert(symbol.key, symbol);
                 }
             }
-            SyntaxKind::IMPORT_DESC_TYPE_USE => {
+            SyntaxKind::EXTERN_TYPE_FUNC => {
                 let idx = func_idx_gen.pull();
-                let symbol = create_import_desc_symbol(db, &node, idx, SymbolKind::Func, &module);
+                let symbol = create_extern_type_symbol(db, &node, idx, SymbolKind::Func, &module);
                 funcs.push((symbol.key, symbol.idx.name));
                 symbols.insert(symbol.key, symbol);
             }
-            SyntaxKind::IMPORT_DESC_TABLE_TYPE => {
+            SyntaxKind::EXTERN_TYPE_TABLE => {
                 let idx = table_idx_gen.pull();
                 let symbol =
-                    create_import_desc_symbol(db, &node, idx, SymbolKind::TableDef, &module);
+                    create_extern_type_symbol(db, &node, idx, SymbolKind::TableDef, &module);
                 tables.push((symbol.key, symbol.idx.name));
                 symbols.insert(symbol.key, symbol);
             }
-            SyntaxKind::IMPORT_DESC_MEMORY_TYPE => {
+            SyntaxKind::EXTERN_TYPE_MEMORY => {
                 let idx = mem_idx_gen.pull();
                 let symbol =
-                    create_import_desc_symbol(db, &node, idx, SymbolKind::MemoryDef, &module);
+                    create_extern_type_symbol(db, &node, idx, SymbolKind::MemoryDef, &module);
                 memories.push((symbol.key, symbol.idx.name));
                 symbols.insert(symbol.key, symbol);
             }
-            SyntaxKind::IMPORT_DESC_GLOBAL_TYPE => {
+            SyntaxKind::EXTERN_TYPE_GLOBAL => {
                 let idx = global_idx_gen.pull();
                 let symbol =
-                    create_import_desc_symbol(db, &node, idx, SymbolKind::GlobalDef, &module);
+                    create_extern_type_symbol(db, &node, idx, SymbolKind::GlobalDef, &module);
                 globals.push((symbol.key, symbol.idx.name));
                 symbols.insert(symbol.key, symbol);
             }

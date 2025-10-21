@@ -49,6 +49,52 @@ impl Parser<'_> {
         }
     }
 
+    pub(super) fn parse_extern_type(&mut self) -> Option<GreenNode> {
+        let mark = self.start_node();
+        self.lexer.next(L_PAREN)?;
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
+        match self.lexer.next(KEYWORD)?.text {
+            "func" => {
+                self.add_child(green::KW_FUNC.clone());
+                self.eat(IDENT);
+                if let Some(type_use) = self.try_parse_with_trivias(Self::parse_type_use) {
+                    self.add_child(type_use);
+                }
+                self.expect_right_paren();
+                Some(self.finish_node(EXTERN_TYPE_FUNC, mark))
+            }
+            "global" => {
+                self.add_child(green::KW_GLOBAL.clone());
+                self.eat(IDENT);
+                if !self.recover(Self::parse_global_type) {
+                    self.report_missing(Message::Name("global type"));
+                }
+                self.expect_right_paren();
+                Some(self.finish_node(EXTERN_TYPE_GLOBAL, mark))
+            }
+            "memory" => {
+                self.add_child(green::KW_MEMORY.clone());
+                self.eat(IDENT);
+                if !self.recover(Self::parse_memory_type) {
+                    self.report_missing(Message::Name("memory type"));
+                }
+                self.expect_right_paren();
+                Some(self.finish_node(EXTERN_TYPE_MEMORY, mark))
+            }
+            "table" => {
+                self.add_child(green::KW_TABLE.clone());
+                self.eat(IDENT);
+                if !self.recover(Self::parse_table_type) {
+                    self.report_missing(Message::Name("table type"));
+                }
+                self.expect_right_paren();
+                Some(self.finish_node(EXTERN_TYPE_TABLE, mark))
+            }
+            _ => None,
+        }
+    }
+
     fn parse_field(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;

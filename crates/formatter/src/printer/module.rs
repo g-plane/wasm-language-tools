@@ -248,165 +248,6 @@ impl DocGen for Import {
     }
 }
 
-impl DocGen for ImportDesc {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        match self {
-            ImportDesc::GlobalType(import_desc_global_type) => import_desc_global_type.doc(ctx),
-            ImportDesc::MemoryType(import_desc_memory_type) => import_desc_memory_type.doc(ctx),
-            ImportDesc::TableType(import_desc_table_type) => import_desc_table_type.doc(ctx),
-            ImportDesc::TypeUse(import_desc_type_use) => import_desc_type_use.doc(ctx),
-        }
-    }
-}
-
-impl DocGen for ImportDescGlobalType {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren, ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("global"));
-            trivias = format_trivias_after_token(keyword, ctx);
-        }
-        if let Some(ident) = self.ident_token() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident, ctx);
-        }
-        if let Some(global_type) = self.global_type() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(global_type.doc(ctx));
-            trivias = format_trivias_after_node(global_type, ctx);
-        }
-        docs.append(&mut trivias);
-        docs.push(Doc::text(")"));
-        Doc::list(docs)
-    }
-}
-
-impl DocGen for ImportDescMemoryType {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren, ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("memory"));
-            trivias = format_trivias_after_token(keyword, ctx);
-        }
-        if let Some(ident) = self.ident_token() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident, ctx);
-        }
-        if let Some(memory_type) = self.memory_type() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(memory_type.doc(ctx));
-            trivias = format_trivias_after_node(memory_type, ctx);
-        }
-        docs.append(&mut trivias);
-        docs.push(Doc::text(")"));
-        Doc::list(docs)
-    }
-}
-
-impl DocGen for ImportDescTableType {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren, ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("table"));
-            trivias = format_trivias_after_token(keyword, ctx);
-        }
-        if let Some(ident) = self.ident_token() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident, ctx);
-        }
-        if let Some(table_type) = self.table_type() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(table_type.doc(ctx));
-            trivias = format_trivias_after_node(table_type, ctx);
-        }
-        docs.append(&mut trivias);
-        docs.push(Doc::text(")"));
-        Doc::list(docs)
-    }
-}
-
-impl DocGen for ImportDescTypeUse {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren, ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("func"));
-            trivias = format_trivias_after_token(keyword, ctx);
-        }
-        if let Some(ident) = self.ident_token() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident, ctx);
-        }
-        if let Some(type_use) = self.type_use() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(type_use.doc(ctx));
-            trivias = format_trivias_after_node(type_use, ctx);
-        }
-        docs.append(&mut trivias);
-        docs.push(Doc::text(")"));
-        Doc::list(docs)
-    }
-}
-
 impl DocGen for Index {
     fn doc(&self, _: &Ctx) -> Doc<'static> {
         Doc::text(self.syntax().to_string())
@@ -908,14 +749,14 @@ impl DocGen for ModuleFieldImport {
             docs.push(name.doc(ctx));
             trivias = format_trivias_after_node(name, ctx);
         }
-        if let Some(import_desc) = self.import_desc() {
+        if let Some(extern_type) = self.extern_type() {
             if trivias.is_empty() {
                 docs.push(Doc::space());
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(import_desc.doc(ctx));
-            trivias = format_trivias_after_node(import_desc, ctx);
+            docs.push(extern_type.doc(ctx));
+            trivias = format_trivias_after_node(extern_type, ctx);
         }
         docs.append(&mut trivias);
         docs.push(Doc::text(")"));

@@ -49,6 +49,165 @@ impl DocGen for CompType {
     }
 }
 
+impl DocGen for ExternType {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        match self {
+            ExternType::Func(func) => func.doc(ctx),
+            ExternType::Global(global) => global.doc(ctx),
+            ExternType::Memory(memory) => memory.doc(ctx),
+            ExternType::Table(table) => table.doc(ctx),
+        }
+    }
+}
+
+impl DocGen for ExternTypeFunc {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        let mut docs = Vec::with_capacity(2);
+        let mut trivias = vec![];
+        if let Some(l_paren) = self.l_paren_token() {
+            docs.push(Doc::text("("));
+            trivias = format_trivias_after_token(l_paren, ctx);
+        }
+        if let Some(keyword) = self.keyword() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text("func"));
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(ident) = self.ident_token() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text(ident.to_string()));
+            trivias = format_trivias_after_token(ident, ctx);
+        }
+        if let Some(type_use) = self.type_use() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(type_use.doc(ctx));
+            trivias = format_trivias_after_node(type_use, ctx);
+        }
+        docs.append(&mut trivias);
+        docs.push(Doc::text(")"));
+        Doc::list(docs)
+    }
+}
+
+impl DocGen for ExternTypeGlobal {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        let mut docs = Vec::with_capacity(2);
+        let mut trivias = vec![];
+        if let Some(l_paren) = self.l_paren_token() {
+            docs.push(Doc::text("("));
+            trivias = format_trivias_after_token(l_paren, ctx);
+        }
+        if let Some(keyword) = self.keyword() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text("global"));
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(ident) = self.ident_token() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text(ident.to_string()));
+            trivias = format_trivias_after_token(ident, ctx);
+        }
+        if let Some(global_type) = self.global_type() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(global_type.doc(ctx));
+            trivias = format_trivias_after_node(global_type, ctx);
+        }
+        docs.append(&mut trivias);
+        docs.push(Doc::text(")"));
+        Doc::list(docs)
+    }
+}
+
+impl DocGen for ExternTypeMemory {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        let mut docs = Vec::with_capacity(2);
+        let mut trivias = vec![];
+        if let Some(l_paren) = self.l_paren_token() {
+            docs.push(Doc::text("("));
+            trivias = format_trivias_after_token(l_paren, ctx);
+        }
+        if let Some(keyword) = self.keyword() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text("memory"));
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(ident) = self.ident_token() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text(ident.to_string()));
+            trivias = format_trivias_after_token(ident, ctx);
+        }
+        if let Some(memory_type) = self.memory_type() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(memory_type.doc(ctx));
+            trivias = format_trivias_after_node(memory_type, ctx);
+        }
+        docs.append(&mut trivias);
+        docs.push(Doc::text(")"));
+        Doc::list(docs)
+    }
+}
+
+impl DocGen for ExternTypeTable {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        let mut docs = Vec::with_capacity(2);
+        let mut trivias = vec![];
+        if let Some(l_paren) = self.l_paren_token() {
+            docs.push(Doc::text("("));
+            trivias = format_trivias_after_token(l_paren, ctx);
+        }
+        if let Some(keyword) = self.keyword() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text("table"));
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(ident) = self.ident_token() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text(ident.to_string()));
+            trivias = format_trivias_after_token(ident, ctx);
+        }
+        if let Some(table_type) = self.table_type() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(table_type.doc(ctx));
+            trivias = format_trivias_after_node(table_type, ctx);
+        }
+        docs.append(&mut trivias);
+        docs.push(Doc::text(")"));
+        Doc::list(docs)
+    }
+}
+
 impl DocGen for Field {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         let mut docs = Vec::with_capacity(2);

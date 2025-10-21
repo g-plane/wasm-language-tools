@@ -18,7 +18,7 @@ ROOT@0..1081
       NAME@44..55
         STRING@44..55 "\"print_i32\""
       WHITESPACE@55..56 " "
-      IMPORT_DESC_TYPE_USE@56..74
+      EXTERN_TYPE_FUNC@56..74
         L_PAREN@56..57 "("
         KEYWORD@57..61 "func"
         WHITESPACE@61..62 " "
@@ -68,7 +68,7 @@ ROOT@0..1081
       NAME@150..161
         STRING@150..161 "\"print_i32\""
       WHITESPACE@161..162 " "
-      IMPORT_DESC_TYPE_USE@162..191
+      EXTERN_TYPE_FUNC@162..191
         L_PAREN@162..163 "("
         KEYWORD@163..167 "func"
         WHITESPACE@167..168 " "
@@ -231,7 +231,7 @@ ROOT@0..1081
       NAME@500..511
         STRING@500..511 "\"print_i32\""
       WHITESPACE@511..512 " "
-      IMPORT_DESC_TYPE_USE@512..534
+      EXTERN_TYPE_FUNC@512..534
         L_PAREN@512..513 "("
         KEYWORD@513..517 "func"
         WHITESPACE@517..518 " "
@@ -257,7 +257,7 @@ ROOT@0..1081
       NAME@571..583
         STRING@571..583 "\"global_i32\""
       WHITESPACE@583..584 " "
-      IMPORT_DESC_GLOBAL_TYPE@584..596
+      EXTERN_TYPE_GLOBAL@584..596
         L_PAREN@584..585 "("
         KEYWORD@585..591 "global"
         WHITESPACE@591..592 " "
@@ -297,7 +297,7 @@ ROOT@0..1081
       NAME@668..680
         STRING@668..680 "\"global_i32\""
       WHITESPACE@680..681 " "
-      IMPORT_DESC_GLOBAL_TYPE@681..696
+      EXTERN_TYPE_GLOBAL@681..696
         L_PAREN@681..682 "("
         KEYWORD@682..688 "global"
         WHITESPACE@688..689 " "
@@ -343,7 +343,7 @@ ROOT@0..1081
       NAME@783..790
         STRING@783..790 "\"table\""
       WHITESPACE@790..791 " "
-      IMPORT_DESC_TABLE_TYPE@791..817
+      EXTERN_TYPE_TABLE@791..817
         L_PAREN@791..792 "("
         KEYWORD@792..797 "table"
         WHITESPACE@797..798 " "
@@ -397,7 +397,7 @@ ROOT@0..1081
       NAME@893..907
         STRING@893..907 "\"table-10-inf\""
       WHITESPACE@907..908 " "
-      IMPORT_DESC_TABLE_TYPE@908..926
+      EXTERN_TYPE_TABLE@908..926
         L_PAREN@908..909 "("
         KEYWORD@909..914 "table"
         WHITESPACE@914..915 " "
@@ -420,7 +420,7 @@ ROOT@0..1081
       NAME@949..956
         STRING@949..956 "\"table\""
       WHITESPACE@956..957 " "
-      IMPORT_DESC_TABLE_TYPE@957..974
+      EXTERN_TYPE_TABLE@957..974
         L_PAREN@957..958 "("
         KEYWORD@958..963 "table"
         WHITESPACE@963..964 " "
@@ -445,7 +445,7 @@ ROOT@0..1081
       NAME@1012..1020
         STRING@1012..1020 "\"memory\""
       WHITESPACE@1020..1021 " "
-      IMPORT_DESC_MEMORY_TYPE@1021..1033
+      EXTERN_TYPE_MEMORY@1021..1033
         L_PAREN@1021..1022 "("
         KEYWORD@1022..1028 "memory"
         WHITESPACE@1028..1029 " "

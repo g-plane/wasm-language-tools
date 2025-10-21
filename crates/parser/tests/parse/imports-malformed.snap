@@ -68,7 +68,7 @@ ROOT@0..236
       NAME@103..105
         STRING@103..105 "\"\""
       WHITESPACE@105..106 " "
-      IMPORT_DESC_TYPE_USE@106..113
+      EXTERN_TYPE_FUNC@106..113
         L_PAREN@106..107 "("
         KEYWORD@107..111 "func"
         WHITESPACE@111..112 " "
@@ -85,7 +85,7 @@ ROOT@0..236
       NAME@128..130
         STRING@128..130 "\"\""
       WHITESPACE@130..131 " "
-      IMPORT_DESC_TABLE_TYPE@131..139
+      EXTERN_TYPE_TABLE@131..139
         L_PAREN@131..132 "("
         KEYWORD@132..137 "table"
         WHITESPACE@137..138 " "
@@ -102,7 +102,7 @@ ROOT@0..236
       NAME@154..156
         STRING@154..156 "\"\""
       WHITESPACE@156..157 " "
-      IMPORT_DESC_MEMORY_TYPE@157..166
+      EXTERN_TYPE_MEMORY@157..166
         L_PAREN@157..158 "("
         KEYWORD@158..164 "memory"
         WHITESPACE@164..165 " "
@@ -119,7 +119,7 @@ ROOT@0..236
       NAME@181..183
         STRING@181..183 "\"\""
       WHITESPACE@183..184 " "
-      IMPORT_DESC_GLOBAL_TYPE@184..193
+      EXTERN_TYPE_GLOBAL@184..193
         L_PAREN@184..185 "("
         KEYWORD@185..191 "global"
         WHITESPACE@191..192 " "

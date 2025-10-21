@@ -1,4 +1,7 @@
-use super::{SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage, module::Index};
+use super::{
+    SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage,
+    module::{Index, TypeUse},
+};
 use crate::SyntaxElement;
 use rowan::{
     NodeOrToken,
@@ -129,6 +132,260 @@ impl AstNode for CompType {
             CompType::Struct(it) => it.syntax(),
             CompType::Func(it) => it.syntax(),
         }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum ExternType {
+    Func(ExternTypeFunc),
+    Global(ExternTypeGlobal),
+    Memory(ExternTypeMemory),
+    Table(ExternTypeTable),
+}
+impl AstNode for ExternType {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        matches!(
+            kind,
+            SyntaxKind::EXTERN_TYPE_FUNC
+                | SyntaxKind::EXTERN_TYPE_GLOBAL
+                | SyntaxKind::EXTERN_TYPE_MEMORY
+                | SyntaxKind::EXTERN_TYPE_TABLE
+        )
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        match syntax.kind() {
+            SyntaxKind::EXTERN_TYPE_FUNC => Some(ExternType::Func(ExternTypeFunc { syntax })),
+            SyntaxKind::EXTERN_TYPE_GLOBAL => Some(ExternType::Global(ExternTypeGlobal { syntax })),
+            SyntaxKind::EXTERN_TYPE_MEMORY => Some(ExternType::Memory(ExternTypeMemory { syntax })),
+            SyntaxKind::EXTERN_TYPE_TABLE => Some(ExternType::Table(ExternTypeTable { syntax })),
+            _ => None,
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            ExternType::Func(it) => it.syntax(),
+            ExternType::Global(it) => it.syntax(),
+            ExternType::Memory(it) => it.syntax(),
+            ExternType::Table(it) => it.syntax(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ExternTypeFunc {
+    syntax: SyntaxNode,
+}
+impl ExternTypeFunc {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+    #[inline]
+    pub fn type_use(&self) -> Option<TypeUse> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
+impl AstNode for ExternTypeFunc {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::EXTERN_TYPE_FUNC
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(ExternTypeFunc { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ExternTypeGlobal {
+    syntax: SyntaxNode,
+}
+impl ExternTypeGlobal {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+    #[inline]
+    pub fn global_type(&self) -> Option<GlobalType> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
+impl AstNode for ExternTypeGlobal {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::EXTERN_TYPE_GLOBAL
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(ExternTypeGlobal { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ExternTypeMemory {
+    syntax: SyntaxNode,
+}
+impl ExternTypeMemory {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+    #[inline]
+    pub fn memory_type(&self) -> Option<MemoryType> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
+impl AstNode for ExternTypeMemory {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::EXTERN_TYPE_MEMORY
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(ExternTypeMemory { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ExternTypeTable {
+    syntax: SyntaxNode,
+}
+impl ExternTypeTable {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+    #[inline]
+    pub fn table_type(&self) -> Option<TableType> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
+impl AstNode for ExternTypeTable {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::EXTERN_TYPE_TABLE
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(ExternTypeTable { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
     }
 }
 

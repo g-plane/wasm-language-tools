@@ -306,7 +306,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::AddrType);
             }
         }
-        SyntaxKind::IMPORT_DESC_MEMORY_TYPE => ctx.push(CmpCtx::AddrType),
+        SyntaxKind::EXTERN_TYPE_MEMORY => ctx.push(CmpCtx::AddrType),
         SyntaxKind::MODULE_FIELD_DATA => {
             if find_leading_l_paren(token).is_some() {
                 ctx.extend([CmpCtx::KeywordMemory, CmpCtx::KeywordOffset, CmpCtx::Instr]);
@@ -345,7 +345,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         SyntaxKind::EXTERN_IDX_MEMORY | SyntaxKind::MEM_USE => ctx.push(CmpCtx::Memory),
         SyntaxKind::EXTERN_IDX_TABLE => ctx.push(CmpCtx::Table),
-        SyntaxKind::TABLE_TYPE | SyntaxKind::IMPORT_DESC_TABLE_TYPE => {
+        SyntaxKind::TABLE_TYPE | SyntaxKind::EXTERN_TYPE_TABLE => {
             if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::KeywordRef);
             } else {
@@ -353,7 +353,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::AbbrRefType);
             }
         }
-        SyntaxKind::IMPORT_DESC_TYPE_USE => {
+        SyntaxKind::EXTERN_TYPE_FUNC => {
             if find_leading_l_paren(token).is_some() {
                 ctx.extend([
                     CmpCtx::KeywordParam,
@@ -362,7 +362,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ]);
             }
         }
-        SyntaxKind::IMPORT_DESC_GLOBAL_TYPE => {
+        SyntaxKind::EXTERN_TYPE_GLOBAL => {
             if find_leading_l_paren(token).is_some() {
                 ctx.extend([CmpCtx::KeywordMut, CmpCtx::KeywordRef]);
             } else {

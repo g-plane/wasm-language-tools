@@ -149,52 +149,6 @@ impl Parser<'_> {
         }
     }
 
-    fn parse_import_desc(&mut self) -> Option<GreenNode> {
-        let mark = self.start_node();
-        self.lexer.next(L_PAREN)?;
-        self.add_child(green::L_PAREN.clone());
-        self.parse_trivias();
-        match self.lexer.next(KEYWORD)?.text {
-            "func" => {
-                self.add_child(green::KW_FUNC.clone());
-                self.eat(IDENT);
-                if let Some(type_use) = self.try_parse_with_trivias(Self::parse_type_use) {
-                    self.add_child(type_use);
-                }
-                self.expect_right_paren();
-                Some(self.finish_node(IMPORT_DESC_TYPE_USE, mark))
-            }
-            "global" => {
-                self.add_child(green::KW_GLOBAL.clone());
-                self.eat(IDENT);
-                if !self.recover(Self::parse_global_type) {
-                    self.report_missing(Message::Name("global type"));
-                }
-                self.expect_right_paren();
-                Some(self.finish_node(IMPORT_DESC_GLOBAL_TYPE, mark))
-            }
-            "memory" => {
-                self.add_child(green::KW_MEMORY.clone());
-                self.eat(IDENT);
-                if !self.recover(Self::parse_memory_type) {
-                    self.report_missing(Message::Name("memory type"));
-                }
-                self.expect_right_paren();
-                Some(self.finish_node(IMPORT_DESC_MEMORY_TYPE, mark))
-            }
-            "table" => {
-                self.add_child(green::KW_TABLE.clone());
-                self.eat(IDENT);
-                if !self.recover(Self::parse_table_type) {
-                    self.report_missing(Message::Name("table type"));
-                }
-                self.expect_right_paren();
-                Some(self.finish_node(IMPORT_DESC_TABLE_TYPE, mark))
-            }
-            _ => None,
-        }
-    }
-
     pub(super) fn parse_index(&mut self) -> Option<GreenNode> {
         self.lexer
             .eat(IDENT)
@@ -486,7 +440,7 @@ impl Parser<'_> {
         if !self.retry(Self::parse_name) {
             self.report_missing(Message::Name("import name"));
         }
-        if !self.retry(Self::parse_import_desc) {
+        if !self.retry(Self::parse_extern_type) {
             self.report_missing(Message::Name("import descriptor"));
         }
         self.expect_right_paren();
