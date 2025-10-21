@@ -126,7 +126,7 @@ pub(crate) fn get_mutation_actions<'db>(
                             _ => return None,
                         }
                     }
-                    SyntaxKind::EXPORT_DESC_GLOBAL => MutationActionKind::Export,
+                    SyntaxKind::EXTERN_IDX_GLOBAL => MutationActionKind::Export,
                     _ => return None,
                 };
                 let target = symbol_table.resolved.get(&symbol.key).copied();

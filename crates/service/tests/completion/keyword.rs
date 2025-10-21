@@ -113,7 +113,7 @@ fn no_module_field_func_keyword_without_paren() {
 }
 
 #[test]
-fn export_desc_keyword() {
+fn extern_idx_keyword() {
     let uri = "untitled:test".to_string();
     let source = "(module (export \"\" ())";
     let mut service = LanguageService::default();
@@ -123,7 +123,7 @@ fn export_desc_keyword() {
 }
 
 #[test]
-fn export_desc_keyword_incomplete() {
+fn extern_idx_keyword_incomplete() {
     let uri = "untitled:test".to_string();
     let source = "(module (export \"\" (f))";
     let mut service = LanguageService::default();
@@ -133,7 +133,7 @@ fn export_desc_keyword_incomplete() {
 }
 
 #[test]
-fn export_desc_keyword_without_paren() {
+fn extern_idx_keyword_without_paren() {
     let uri = "untitled:test".to_string();
     let source = "(module (export \"\" ))";
     let mut service = LanguageService::default();

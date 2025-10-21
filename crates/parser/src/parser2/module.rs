@@ -82,7 +82,7 @@ impl Parser<'_> {
         self.finish_node(EXPORT, mark)
     }
 
-    fn parse_export_desc(&mut self) -> Option<GreenNode> {
+    fn parse_extern_idx(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
@@ -90,19 +90,19 @@ impl Parser<'_> {
         let kind = match self.lexer.next(KEYWORD)?.text {
             "func" => {
                 self.add_child(green::KW_FUNC.clone());
-                EXPORT_DESC_FUNC
+                EXTERN_IDX_FUNC
             }
             "table" => {
                 self.add_child(green::KW_TABLE.clone());
-                EXPORT_DESC_TABLE
+                EXTERN_IDX_TABLE
             }
             "memory" => {
                 self.add_child(green::KW_MEMORY.clone());
-                EXPORT_DESC_MEMORY
+                EXTERN_IDX_MEMORY
             }
             "global" => {
                 self.add_child(green::KW_GLOBAL.clone());
-                EXPORT_DESC_GLOBAL
+                EXTERN_IDX_GLOBAL
             }
             _ => return None,
         };
@@ -443,7 +443,7 @@ impl Parser<'_> {
         if !self.retry(Self::parse_name) {
             self.report_missing(Message::Name("export name"));
         }
-        if !self.retry(Self::parse_export_desc) {
+        if !self.retry(Self::parse_extern_idx) {
             self.report_missing(Message::Name("export descriptor"));
         }
         self.expect_right_paren();

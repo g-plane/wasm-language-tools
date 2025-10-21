@@ -63,10 +63,10 @@ pub(crate) fn format_node(node: SyntaxNode, ctx: &Ctx) -> Option<Doc<'static>> {
         SyntaxKind::IMPORT_DESC_GLOBAL_TYPE => {
             ImportDescGlobalType::cast(node).map(|node| node.doc(ctx))
         }
-        SyntaxKind::EXPORT_DESC_FUNC => ExportDescFunc::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::EXPORT_DESC_TABLE => ExportDescTable::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::EXPORT_DESC_MEMORY => ExportDescMemory::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::EXPORT_DESC_GLOBAL => ExportDescGlobal::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::EXTERN_IDX_FUNC => ExternIdxFunc::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::EXTERN_IDX_TABLE => ExternIdxTable::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::EXTERN_IDX_MEMORY => ExternIdxMemory::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::EXTERN_IDX_GLOBAL => ExternIdxGlobal::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::INDEX => Index::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::LOCAL => Local::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::MEM_USE => MemUse::cast(node).map(|node| node.doc(ctx)),

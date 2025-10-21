@@ -25,7 +25,7 @@ ROOT@0..123
       NAME@37..39
         STRING@37..39 "\"\""
       WHITESPACE@39..40 " "
-      EXPORT_DESC_FUNC@40..48
+      EXTERN_IDX_FUNC@40..48
         L_PAREN@40..41 "("
         KEYWORD@41..45 "func"
         WHITESPACE@45..46 " "
@@ -48,7 +48,7 @@ ROOT@0..123
       NAME@74..76
         STRING@74..76 "\"\""
       WHITESPACE@76..77 " "
-      EXPORT_DESC_FUNC@77..83
+      EXTERN_IDX_FUNC@77..83
         L_PAREN@77..78 "("
         KEYWORD@78..82 "func"
         R_PAREN@82..83 ")"
@@ -58,7 +58,7 @@ ROOT@0..123
       L_PAREN@87..88 "("
       KEYWORD@88..94 "export"
       WHITESPACE@94..95 " "
-      EXPORT_DESC_FUNC@95..101
+      EXTERN_IDX_FUNC@95..101
         L_PAREN@95..96 "("
         KEYWORD@96..100 "func"
         R_PAREN@100..101 ")"

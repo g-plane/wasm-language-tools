@@ -3,7 +3,7 @@ use insta::assert_json_snapshot;
 use wat_service::LanguageService;
 
 #[test]
-fn export_desc_memory() {
+fn extern_idx_memory() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
@@ -18,7 +18,7 @@ fn export_desc_memory() {
 }
 
 #[test]
-fn export_desc_memory_following_dollar() {
+fn extern_idx_memory_following_dollar() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
@@ -33,7 +33,7 @@ fn export_desc_memory_following_dollar() {
 }
 
 #[test]
-fn export_desc_memory_incomplete() {
+fn extern_idx_memory_incomplete() {
     let uri = "untitled:test".to_string();
     let source = "
 (module

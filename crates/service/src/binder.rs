@@ -585,7 +585,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     symbols.insert(symbol.key, symbol);
                 }
             }
-            SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC => {
+            SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXTERN_IDX_FUNC => {
                 if let Some(symbol) = node
                     .first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
                     .and_then(|index| create_ref_symbol(db, &index, module_key, SymbolKind::Call))
@@ -617,7 +617,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 tables.push((symbol.key, symbol.idx.name));
                 symbols.insert(symbol.key, symbol);
             }
-            SyntaxKind::EXPORT_DESC_GLOBAL => {
+            SyntaxKind::EXTERN_IDX_GLOBAL => {
                 if let Some(symbol) = node
                     .first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
                     .and_then(|index| {
@@ -627,7 +627,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     symbols.insert(symbol.key, symbol);
                 }
             }
-            SyntaxKind::EXPORT_DESC_MEMORY => {
+            SyntaxKind::EXTERN_IDX_MEMORY => {
                 if let Some(symbol) = node
                     .first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
                     .and_then(|index| {
@@ -637,7 +637,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     symbols.insert(symbol.key, symbol);
                 }
             }
-            SyntaxKind::EXPORT_DESC_TABLE | SyntaxKind::TABLE_USE => {
+            SyntaxKind::EXTERN_IDX_TABLE | SyntaxKind::TABLE_USE => {
                 if let Some(symbol) = node
                     .first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
                     .and_then(|index| {

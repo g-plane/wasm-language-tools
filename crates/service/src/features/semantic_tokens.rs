@@ -136,7 +136,7 @@ impl LanguageService {
                         || matches!(
                             grand.kind(),
                             SyntaxKind::MODULE_FIELD_START
-                                | SyntaxKind::EXPORT_DESC_FUNC
+                                | SyntaxKind::EXTERN_IDX_FUNC
                                 | SyntaxKind::ELEM_LIST
                         )
                 }) {
@@ -168,7 +168,7 @@ impl LanguageService {
                             || matches!(
                                 grand.kind(),
                                 SyntaxKind::MODULE_FIELD_START
-                                    | SyntaxKind::EXPORT_DESC_FUNC
+                                    | SyntaxKind::EXTERN_IDX_FUNC
                                     | SyntaxKind::ELEM_LIST
                             )
                     })

@@ -176,38 +176,38 @@ impl DocGen for Export {
     }
 }
 
-impl DocGen for ExportDesc {
+impl DocGen for ExternIdx {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         match self {
-            ExportDesc::Func(export_desc_func) => export_desc_func.doc(ctx),
-            ExportDesc::Global(export_desc_global) => export_desc_global.doc(ctx),
-            ExportDesc::Memory(export_desc_memory) => export_desc_memory.doc(ctx),
-            ExportDesc::Table(export_desc_table) => export_desc_table.doc(ctx),
+            ExternIdx::Func(extern_idx_func) => extern_idx_func.doc(ctx),
+            ExternIdx::Global(extern_idx_global) => extern_idx_global.doc(ctx),
+            ExternIdx::Memory(extern_idx_memory) => extern_idx_memory.doc(ctx),
+            ExternIdx::Table(extern_idx_table) => extern_idx_table.doc(ctx),
         }
     }
 }
 
-impl DocGen for ExportDescFunc {
+impl DocGen for ExternIdxFunc {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        format_export_desc(self.l_paren_token(), self.keyword(), self.index(), ctx)
+        format_extern_idx(self.l_paren_token(), self.keyword(), self.index(), ctx)
     }
 }
 
-impl DocGen for ExportDescGlobal {
+impl DocGen for ExternIdxGlobal {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        format_export_desc(self.l_paren_token(), self.keyword(), self.index(), ctx)
+        format_extern_idx(self.l_paren_token(), self.keyword(), self.index(), ctx)
     }
 }
 
-impl DocGen for ExportDescMemory {
+impl DocGen for ExternIdxMemory {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        format_export_desc(self.l_paren_token(), self.keyword(), self.index(), ctx)
+        format_extern_idx(self.l_paren_token(), self.keyword(), self.index(), ctx)
     }
 }
 
-impl DocGen for ExportDescTable {
+impl DocGen for ExternIdxTable {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        format_export_desc(self.l_paren_token(), self.keyword(), self.index(), ctx)
+        format_extern_idx(self.l_paren_token(), self.keyword(), self.index(), ctx)
     }
 }
 
@@ -703,14 +703,14 @@ impl DocGen for ModuleFieldExport {
             docs.push(name.doc(ctx));
             trivias = format_trivias_after_node(name, ctx);
         }
-        if let Some(export_desc) = self.export_desc() {
+        if let Some(extern_idx) = self.extern_idx() {
             if trivias.is_empty() {
                 docs.push(Doc::space());
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(export_desc.doc(ctx));
-            trivias = format_trivias_after_node(export_desc, ctx);
+            docs.push(extern_idx.doc(ctx));
+            trivias = format_trivias_after_node(extern_idx, ctx);
         }
         docs.append(&mut trivias);
         docs.push(Doc::text(")"));
@@ -1317,7 +1317,7 @@ impl DocGen for TypeUse {
     }
 }
 
-fn format_export_desc(
+fn format_extern_idx(
     l_paren: Option<SyntaxToken>,
     keyword: Option<SyntaxToken>,
     index: Option<Index>,

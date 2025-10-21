@@ -261,13 +261,13 @@ impl AstNode for Export {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum ExportDesc {
-    Func(ExportDescFunc),
-    Global(ExportDescGlobal),
-    Memory(ExportDescMemory),
-    Table(ExportDescTable),
+pub enum ExternIdx {
+    Func(ExternIdxFunc),
+    Global(ExternIdxGlobal),
+    Memory(ExternIdxMemory),
+    Table(ExternIdxTable),
 }
-impl AstNode for ExportDesc {
+impl AstNode for ExternIdx {
     type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
@@ -276,10 +276,10 @@ impl AstNode for ExportDesc {
     {
         matches!(
             kind,
-            SyntaxKind::EXPORT_DESC_FUNC
-                | SyntaxKind::EXPORT_DESC_GLOBAL
-                | SyntaxKind::EXPORT_DESC_MEMORY
-                | SyntaxKind::EXPORT_DESC_TABLE
+            SyntaxKind::EXTERN_IDX_FUNC
+                | SyntaxKind::EXTERN_IDX_GLOBAL
+                | SyntaxKind::EXTERN_IDX_MEMORY
+                | SyntaxKind::EXTERN_IDX_TABLE
         )
     }
     #[inline]
@@ -288,29 +288,29 @@ impl AstNode for ExportDesc {
         Self: Sized,
     {
         match syntax.kind() {
-            SyntaxKind::EXPORT_DESC_FUNC => Some(ExportDesc::Func(ExportDescFunc { syntax })),
-            SyntaxKind::EXPORT_DESC_GLOBAL => Some(ExportDesc::Global(ExportDescGlobal { syntax })),
-            SyntaxKind::EXPORT_DESC_MEMORY => Some(ExportDesc::Memory(ExportDescMemory { syntax })),
-            SyntaxKind::EXPORT_DESC_TABLE => Some(ExportDesc::Table(ExportDescTable { syntax })),
+            SyntaxKind::EXTERN_IDX_FUNC => Some(ExternIdx::Func(ExternIdxFunc { syntax })),
+            SyntaxKind::EXTERN_IDX_GLOBAL => Some(ExternIdx::Global(ExternIdxGlobal { syntax })),
+            SyntaxKind::EXTERN_IDX_MEMORY => Some(ExternIdx::Memory(ExternIdxMemory { syntax })),
+            SyntaxKind::EXTERN_IDX_TABLE => Some(ExternIdx::Table(ExternIdxTable { syntax })),
             _ => None,
         }
     }
     #[inline]
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            ExportDesc::Func(it) => it.syntax(),
-            ExportDesc::Global(it) => it.syntax(),
-            ExportDesc::Memory(it) => it.syntax(),
-            ExportDesc::Table(it) => it.syntax(),
+            ExternIdx::Func(it) => it.syntax(),
+            ExternIdx::Global(it) => it.syntax(),
+            ExternIdx::Memory(it) => it.syntax(),
+            ExternIdx::Table(it) => it.syntax(),
         }
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ExportDescFunc {
+pub struct ExternIdxFunc {
     syntax: SyntaxNode,
 }
-impl ExportDescFunc {
+impl ExternIdxFunc {
     #[inline]
     pub fn l_paren_token(&self) -> Option<SyntaxToken> {
         token(&self.syntax, SyntaxKind::L_PAREN)
@@ -328,14 +328,14 @@ impl ExportDescFunc {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ExportDescFunc {
+impl AstNode for ExternIdxFunc {
     type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
         Self: Sized,
     {
-        kind == SyntaxKind::EXPORT_DESC_FUNC
+        kind == SyntaxKind::EXTERN_IDX_FUNC
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self>
@@ -343,7 +343,7 @@ impl AstNode for ExportDescFunc {
         Self: Sized,
     {
         if Self::can_cast(syntax.kind()) {
-            Some(ExportDescFunc { syntax })
+            Some(ExternIdxFunc { syntax })
         } else {
             None
         }
@@ -355,10 +355,10 @@ impl AstNode for ExportDescFunc {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ExportDescGlobal {
+pub struct ExternIdxGlobal {
     syntax: SyntaxNode,
 }
-impl ExportDescGlobal {
+impl ExternIdxGlobal {
     #[inline]
     pub fn l_paren_token(&self) -> Option<SyntaxToken> {
         token(&self.syntax, SyntaxKind::L_PAREN)
@@ -376,14 +376,14 @@ impl ExportDescGlobal {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ExportDescGlobal {
+impl AstNode for ExternIdxGlobal {
     type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
         Self: Sized,
     {
-        kind == SyntaxKind::EXPORT_DESC_GLOBAL
+        kind == SyntaxKind::EXTERN_IDX_GLOBAL
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self>
@@ -391,7 +391,7 @@ impl AstNode for ExportDescGlobal {
         Self: Sized,
     {
         if Self::can_cast(syntax.kind()) {
-            Some(ExportDescGlobal { syntax })
+            Some(ExternIdxGlobal { syntax })
         } else {
             None
         }
@@ -403,10 +403,10 @@ impl AstNode for ExportDescGlobal {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ExportDescMemory {
+pub struct ExternIdxMemory {
     syntax: SyntaxNode,
 }
-impl ExportDescMemory {
+impl ExternIdxMemory {
     #[inline]
     pub fn l_paren_token(&self) -> Option<SyntaxToken> {
         token(&self.syntax, SyntaxKind::L_PAREN)
@@ -424,14 +424,14 @@ impl ExportDescMemory {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ExportDescMemory {
+impl AstNode for ExternIdxMemory {
     type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
         Self: Sized,
     {
-        kind == SyntaxKind::EXPORT_DESC_MEMORY
+        kind == SyntaxKind::EXTERN_IDX_MEMORY
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self>
@@ -439,7 +439,7 @@ impl AstNode for ExportDescMemory {
         Self: Sized,
     {
         if Self::can_cast(syntax.kind()) {
-            Some(ExportDescMemory { syntax })
+            Some(ExternIdxMemory { syntax })
         } else {
             None
         }
@@ -451,10 +451,10 @@ impl AstNode for ExportDescMemory {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ExportDescTable {
+pub struct ExternIdxTable {
     syntax: SyntaxNode,
 }
-impl ExportDescTable {
+impl ExternIdxTable {
     #[inline]
     pub fn l_paren_token(&self) -> Option<SyntaxToken> {
         token(&self.syntax, SyntaxKind::L_PAREN)
@@ -472,14 +472,14 @@ impl ExportDescTable {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ExportDescTable {
+impl AstNode for ExternIdxTable {
     type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
         Self: Sized,
     {
-        kind == SyntaxKind::EXPORT_DESC_TABLE
+        kind == SyntaxKind::EXTERN_IDX_TABLE
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self>
@@ -487,7 +487,7 @@ impl AstNode for ExportDescTable {
         Self: Sized,
     {
         if Self::can_cast(syntax.kind()) {
-            Some(ExportDescTable { syntax })
+            Some(ExternIdxTable { syntax })
         } else {
             None
         }
@@ -1236,7 +1236,7 @@ impl ModuleFieldExport {
         child(&self.syntax)
     }
     #[inline]
-    pub fn export_desc(&self) -> Option<ExportDesc> {
+    pub fn extern_idx(&self) -> Option<ExternIdx> {
         child(&self.syntax)
     }
     #[inline]

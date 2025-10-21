@@ -136,7 +136,7 @@ fn ref_func() {
 }
 
 #[test]
-fn export_desc_func() {
+fn extern_idx_func() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
@@ -151,7 +151,7 @@ fn export_desc_func() {
 }
 
 #[test]
-fn export_desc_func_following_dollar() {
+fn extern_idx_func_following_dollar() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
@@ -166,7 +166,7 @@ fn export_desc_func_following_dollar() {
 }
 
 #[test]
-fn export_desc_func_incomplete() {
+fn extern_idx_func_incomplete() {
     let uri = "untitled:test".to_string();
     let source = "
 (module

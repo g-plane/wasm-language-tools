@@ -253,13 +253,13 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         SyntaxKind::INDEX => {
             let grand = parent.parent()?;
             match grand.kind() {
-                SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC => {
+                SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXTERN_IDX_FUNC => {
                     ctx.push(CmpCtx::Func);
                 }
                 SyntaxKind::TYPE_USE => ctx.push(CmpCtx::TypeDef(Some(PreferredType::Func))),
-                SyntaxKind::EXPORT_DESC_GLOBAL => ctx.push(CmpCtx::Global),
-                SyntaxKind::EXPORT_DESC_MEMORY => ctx.push(CmpCtx::Memory),
-                SyntaxKind::EXPORT_DESC_TABLE => ctx.push(CmpCtx::Table),
+                SyntaxKind::EXTERN_IDX_GLOBAL => ctx.push(CmpCtx::Global),
+                SyntaxKind::EXTERN_IDX_MEMORY => ctx.push(CmpCtx::Memory),
+                SyntaxKind::EXTERN_IDX_TABLE => ctx.push(CmpCtx::Table),
                 _ => {}
             }
         }
@@ -297,8 +297,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 ctx.push(CmpCtx::AbbrRefType);
             }
         }
-        SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC => ctx.push(CmpCtx::Func),
-        SyntaxKind::EXPORT_DESC_GLOBAL => ctx.push(CmpCtx::Global),
+        SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXTERN_IDX_FUNC => ctx.push(CmpCtx::Func),
+        SyntaxKind::EXTERN_IDX_GLOBAL => ctx.push(CmpCtx::Global),
         SyntaxKind::MODULE_FIELD_MEMORY => {
             if find_leading_l_paren(token).is_some() {
                 ctx.extend([CmpCtx::KeywordImExport, CmpCtx::KeywordData]);
@@ -343,8 +343,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 }
             }
         }
-        SyntaxKind::EXPORT_DESC_MEMORY | SyntaxKind::MEM_USE => ctx.push(CmpCtx::Memory),
-        SyntaxKind::EXPORT_DESC_TABLE => ctx.push(CmpCtx::Table),
+        SyntaxKind::EXTERN_IDX_MEMORY | SyntaxKind::MEM_USE => ctx.push(CmpCtx::Memory),
+        SyntaxKind::EXTERN_IDX_TABLE => ctx.push(CmpCtx::Table),
         SyntaxKind::TABLE_TYPE | SyntaxKind::IMPORT_DESC_TABLE_TYPE => {
             if find_leading_l_paren(token).is_some() {
                 ctx.push(CmpCtx::KeywordRef);
