@@ -162,8 +162,7 @@ fn find_array<'db>(
 ) -> Option<(&'db StorageType<'db>, &'db Symbol<'db>)> {
     let ref_key = SymbolKey::new(
         &node
-            .children()
-            .find(|child| child.kind() == SyntaxKind::IMMEDIATE)?,
+            .first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)?,
     );
     let ref_symbol = symbol_table.symbols.get(&ref_key)?;
     if let Some(CompositeType::Array(Some(FieldType { storage, .. }))) = def_types

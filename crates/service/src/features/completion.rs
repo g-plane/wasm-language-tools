@@ -325,8 +325,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 }
                 ctx.extend([CmpCtx::KeywordOffset, CmpCtx::KeywordItem, CmpCtx::Instr]);
             } else if parent
-                .children()
-                .find(|child| child.kind() == SyntaxKind::ELEM_LIST)
+                .first_child_by_kind(&|kind| kind == SyntaxKind::ELEM_LIST)
                 .and_then(|elem_list| support::token(&elem_list, SyntaxKind::KEYWORD))
                 .is_some_and(|keyword| keyword.text() == "func")
             {

@@ -18,15 +18,10 @@ pub(crate) fn get_exports<'db>(
                     if module_field.kind() == SyntaxKind::MODULE_FIELD_EXPORT {
                         Some(module_field)
                     } else {
-                        module_field
-                            .children()
-                            .find(|child| child.kind() == SyntaxKind::EXPORT)
+                        module_field.first_child_by_kind(&|kind| kind == SyntaxKind::EXPORT)
                     }
                 })
-                .filter_map(|node| {
-                    node.children()
-                        .find(|child| child.kind() == SyntaxKind::NAME)
-                })
+                .filter_map(|node| node.first_child_by_kind(&|kind| kind == SyntaxKind::NAME))
                 .map(|name| Export {
                     name: name.to_string(),
                     range: name.text_range(),

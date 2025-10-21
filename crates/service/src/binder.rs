@@ -79,8 +79,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             .find(|node| node.kind() == SyntaxKind::MODULE)
             .map(|region| {
                 let region = SymbolKey::new(&region);
-                node.children()
-                    .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
                     .and_then(|immediate| create_ref_symbol(db, &immediate, region, kind))
                     .unwrap_or_else(|| Symbol {
                         green: node.green().into(),
@@ -588,8 +587,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             }
             SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXPORT_DESC_FUNC => {
                 if let Some(symbol) = node
-                    .children()
-                    .find(|child| child.kind() == SyntaxKind::INDEX)
+                    .first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
                     .and_then(|index| create_ref_symbol(db, &index, module_key, SymbolKind::Call))
                 {
                     symbols.insert(symbol.key, symbol);
@@ -597,8 +595,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             }
             SyntaxKind::TYPE_USE | SyntaxKind::HEAP_TYPE | SyntaxKind::SUB_TYPE => {
                 if let Some(symbol) = node
-                    .children()
-                    .find(|child| child.kind() == SyntaxKind::INDEX)
+                    .first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
                     .and_then(|index| {
                         create_ref_symbol(db, &index, module_key, SymbolKind::TypeUse)
                     })
@@ -622,8 +619,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             }
             SyntaxKind::EXPORT_DESC_GLOBAL => {
                 if let Some(symbol) = node
-                    .children()
-                    .find(|child| child.kind() == SyntaxKind::INDEX)
+                    .first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
                     .and_then(|index| {
                         create_ref_symbol(db, &index, module_key, SymbolKind::GlobalRef)
                     })
@@ -633,8 +629,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             }
             SyntaxKind::EXPORT_DESC_MEMORY => {
                 if let Some(symbol) = node
-                    .children()
-                    .find(|child| child.kind() == SyntaxKind::INDEX)
+                    .first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
                     .and_then(|index| {
                         create_ref_symbol(db, &index, module_key, SymbolKind::MemoryRef)
                     })
@@ -644,8 +639,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             }
             SyntaxKind::EXPORT_DESC_TABLE | SyntaxKind::TABLE_USE => {
                 if let Some(symbol) = node
-                    .children()
-                    .find(|child| child.kind() == SyntaxKind::INDEX)
+                    .first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
                     .and_then(|index| {
                         create_ref_symbol(db, &index, module_key, SymbolKind::TableRef)
                     })
@@ -682,8 +676,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             }
             SyntaxKind::MEM_USE => {
                 if let Some(symbol) = node
-                    .children()
-                    .find(|child| child.kind() == SyntaxKind::INDEX)
+                    .first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
                     .and_then(|index| {
                         create_ref_symbol(db, &index, module_key, SymbolKind::MemoryRef)
                     })

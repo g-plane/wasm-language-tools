@@ -148,8 +148,7 @@ pub(crate) mod ast {
     /// It will return `None` if there're inlined params or results.
     pub fn pick_type_idx_from_func(func: &SyntaxNode) -> Option<SyntaxNode> {
         if let ControlFlow::Continue(Some(index)) = func
-            .children()
-            .find(|child| child.kind() == SyntaxKind::TYPE_USE)
+            .first_child_by_kind(&|kind| kind == SyntaxKind::TYPE_USE)
             .into_iter()
             .flat_map(|type_use| type_use.children())
             .try_fold(None, |r, child| match child.kind() {

@@ -237,8 +237,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 line_index,
             );
             if let Some((allow_float, expected_count)) = node
-                .children()
-                .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                .first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
                 .and_then(|immediate| immediate.first_token())
                 .filter(|token| token.kind() == SyntaxKind::SHAPE_DESCRIPTOR)
                 .as_ref()

@@ -1347,8 +1347,7 @@ impl ReportRange<'_> {
                 Instr::Plain(plain_instr) => plain_instr.syntax().text_range(),
                 Instr::Block(block_instr) => block_instr
                     .syntax()
-                    .children()
-                    .find(|child| child.kind() == SyntaxKind::BLOCK_TYPE)
+                    .first_child_by_kind(&|kind| kind == SyntaxKind::BLOCK_TYPE)
                     .map(|block_type| block_type.text_range())
                     .unwrap_or_else(|| block_instr.syntax().text_range()),
             },

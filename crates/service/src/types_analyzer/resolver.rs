@@ -22,9 +22,7 @@ pub(crate) fn resolve_param_types<'db>(
     let instr_name = instr_name.text();
     if matches!(instr_name, "call" | "return_call") {
         let symbol_table = SymbolTable::of(service, document);
-        let idx = instr
-            .children()
-            .find(|child| child.kind() == SyntaxKind::IMMEDIATE)?;
+        let idx = instr.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)?;
         let func = symbol_table.find_def(SymbolKey::new(&idx))?;
         Some(
             get_func_sig(service, document, *func.key, &func.green)
