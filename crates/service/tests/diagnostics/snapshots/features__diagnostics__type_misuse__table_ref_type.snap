@@ -8,12 +8,28 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 11,
+          "line": 14,
           "character": 18
         },
         "end": {
-          "line": 11,
+          "line": 14,
           "character": 19
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "ref type of table `1` must match `(ref null func)`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 17,
+          "character": 25
+        },
+        "end": {
+          "line": 17,
+          "character": 26
         }
       },
       "severity": 1,

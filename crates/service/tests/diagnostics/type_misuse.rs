@@ -223,10 +223,16 @@ fn table_ref_type() {
   (func
     i32.const 0
     call_indirect 0)
+  (func
+    i32.const 0
+    return_call_indirect 0)
   (table (import "" "") 10 anyref)
   (func
     i32.const 0
-    call_indirect 1))
+    call_indirect 1)
+  (func
+    i32.const 0
+    return_call_indirect 1))
 "#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
