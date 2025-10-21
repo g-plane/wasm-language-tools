@@ -40,6 +40,22 @@ expression: response
     {
       "range": {
         "start": {
+          "line": 5,
+          "character": 20
+        },
+        "end": {
+          "line": 5,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "this result type must match the result type of current function"
+    },
+    {
+      "range": {
+        "start": {
           "line": 8,
           "character": 4
         },
@@ -68,6 +84,22 @@ expression: response
       "code": "type-check",
       "source": "wat",
       "message": "expected types [], found [f64] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 20
+        },
+        "end": {
+          "line": 8,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "this result type must match the result type of current function"
     }
   ]
 }

@@ -240,3 +240,25 @@ fn table_ref_type() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn return_call_result_type() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (func)
+  (func (result i32) (return_call 0) (i32.const 0))
+
+  (type (func (result i64)))
+  (func (result i32) (return_call_ref 0 (ref.func 3)) (i32.const 0))
+  (func (result i64) (i64.const 1))
+
+  (table 0 funcref)
+  (func (result i32) (return_call_indirect 0 (result i64) (i32.const 0))))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

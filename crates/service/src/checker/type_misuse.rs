@@ -5,7 +5,7 @@ use crate::{
     helpers,
     types_analyzer::{
         CompositeType, DefTypes, FieldType, HeapType, OperandType, RefType, ValType, get_def_types,
-        resolve_br_types,
+        get_func_sig, get_type_use_sig, resolve_br_types,
     },
 };
 use line_index::LineIndex;
@@ -14,7 +14,7 @@ use rowan::{
     Language, NodeOrToken,
     ast::{AstNode, support},
 };
-use wat_syntax::{SyntaxKind, SyntaxNode, WatLanguage, ast::Immediate};
+use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, WatLanguage, ast::Immediate};
 
 const DIAGNOSTIC_CODE: &str = "type-misuse";
 
@@ -138,7 +138,7 @@ pub fn check(
             }
         }
         _ => match instr_name {
-            "call_ref" | "return_call_ref" => {
+            "call_ref" => {
                 if let Some(diagnostic) = check_type_matches(
                     "func",
                     &node.first_child()?,
@@ -311,7 +311,7 @@ pub fn check(
                     });
                 }
             }
-            "call_indirect" | "return_call_indirect" => {
+            "call_indirect" => {
                 if let Some(diagnostic) = check_table_ref_type(
                     service,
                     document,
@@ -319,6 +319,98 @@ pub fn check(
                     symbol_table,
                     module_id,
                     node,
+                ) {
+                    diagnostics.push(diagnostic);
+                }
+            }
+            "return_call" => {
+                if let Some(immediate) =
+                    node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
+                    && let Some(diagnostic) = symbol_table
+                        .find_def(SymbolKey::new(&immediate))
+                        .map(|func| get_func_sig(service, document, *func.key, &func.green))
+                        .and_then(|sig| {
+                            check_return_call_result_type(
+                                service,
+                                document,
+                                line_index,
+                                module_id,
+                                node,
+                                &immediate,
+                                &sig.results,
+                            )
+                        })
+                {
+                    diagnostics.push(diagnostic);
+                }
+            }
+            "return_call_ref" => {
+                if let Some(diagnostic) = check_type_matches(
+                    "func",
+                    &node.first_child()?,
+                    service,
+                    document,
+                    line_index,
+                    symbol_table,
+                    def_types,
+                ) {
+                    diagnostics.push(diagnostic);
+                }
+                if let Some(immediate) =
+                    node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
+                    && let Some(diagnostic) = symbol_table
+                        .resolved
+                        .get(&SymbolKey::new(&immediate))
+                        .and_then(|key| def_types.get(key))
+                        .and_then(|def_type| {
+                            if let CompositeType::Func(sig) = &def_type.comp {
+                                Some(sig)
+                            } else {
+                                None
+                            }
+                        })
+                        .and_then(|sig| {
+                            check_return_call_result_type(
+                                service,
+                                document,
+                                line_index,
+                                module_id,
+                                node,
+                                &immediate,
+                                &sig.results,
+                            )
+                        })
+                {
+                    diagnostics.push(diagnostic);
+                }
+            }
+            "return_call_indirect" => {
+                if let Some(diagnostic) = check_table_ref_type(
+                    service,
+                    document,
+                    line_index,
+                    symbol_table,
+                    module_id,
+                    node,
+                ) {
+                    diagnostics.push(diagnostic);
+                }
+                if let Some(type_use) = node.children().find_map(|immediate| {
+                    immediate.first_child_by_kind(&|kind| kind == SyntaxKind::TYPE_USE)
+                }) && let Some(diagnostic) = check_return_call_result_type(
+                    service,
+                    document,
+                    line_index,
+                    module_id,
+                    node,
+                    &type_use,
+                    &get_type_use_sig(
+                        service,
+                        document,
+                        SyntaxNodePtr::new(&type_use),
+                        &type_use.green(),
+                    )
+                    .results,
                 ) {
                     diagnostics.push(diagnostic);
                 }
@@ -426,6 +518,39 @@ fn check_table_ref_type(
         })
     } else {
         None
+    }
+}
+
+fn check_return_call_result_type(
+    service: &LanguageService,
+    document: Document,
+    line_index: &LineIndex,
+    module_id: u32,
+    instr: &SyntaxNode,
+    reported_node: &SyntaxNode,
+    actual: &[ValType],
+) -> Option<Diagnostic> {
+    let func = instr
+        .ancestors()
+        .find(|ancestor| ancestor.kind() == SyntaxKind::MODULE_FIELD_FUNC)?;
+    let expected =
+        get_func_sig(service, document, SyntaxNodePtr::new(&func), &func.green()).results;
+    if actual.len() == expected.len()
+        && actual
+            .iter()
+            .zip(expected.iter())
+            .all(|(actual, expected)| actual.matches(expected, service, document, module_id))
+    {
+        None
+    } else {
+        Some(Diagnostic {
+            range: helpers::rowan_range_to_lsp_range(line_index, reported_node.text_range()),
+            severity: Some(DiagnosticSeverity::Error),
+            source: Some("wat".into()),
+            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+            message: "this result type must match the result type of current function".into(),
+            ..Default::default()
+        })
     }
 }
 

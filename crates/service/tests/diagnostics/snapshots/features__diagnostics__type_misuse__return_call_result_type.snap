@@ -1,0 +1,107 @@
+---
+source: crates/service/tests/diagnostics/type_misuse.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 34
+        },
+        "end": {
+          "line": 3,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "this result type must match the result type of current function"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 67
+        },
+        "end": {
+          "line": 6,
+          "character": 68
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found [i64, i32] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 38
+        },
+        "end": {
+          "line": 6,
+          "character": 39
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "this result type must match the result type of current function"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 72
+        },
+        "end": {
+          "line": 10,
+          "character": 73
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found [i64] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 10,
+                "character": 21
+              },
+              "end": {
+                "line": 10,
+                "character": 72
+              }
+            }
+          },
+          "message": "expected type `i32`, found `i64`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 45
+        },
+        "end": {
+          "line": 10,
+          "character": 57
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "this result type must match the result type of current function"
+    }
+  ]
+}
