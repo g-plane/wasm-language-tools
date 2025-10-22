@@ -1,0 +1,120 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..173
+  MODULE@0..172
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_TAG@10..15
+      L_PAREN@10..11 "("
+      KEYWORD@11..14 "tag"
+      R_PAREN@14..15 ")"
+    WHITESPACE@15..18 "\n  "
+    MODULE_FIELD_TAG@18..35
+      L_PAREN@18..19 "("
+      KEYWORD@19..22 "tag"
+      WHITESPACE@22..23 " "
+      TAG_TYPE@23..34
+        TYPE_USE@23..34
+          PARAM@23..34
+            L_PAREN@23..24 "("
+            KEYWORD@24..29 "param"
+            WHITESPACE@29..30 " "
+            NUM_TYPE@30..33
+              TYPE_KEYWORD@30..33 "i32"
+            R_PAREN@33..34 ")"
+      R_PAREN@34..35 ")"
+    WHITESPACE@35..38 "\n  "
+    MODULE_FIELD_TAG@38..69
+      L_PAREN@38..39 "("
+      KEYWORD@39..42 "tag"
+      WHITESPACE@42..43 " "
+      EXPORT@43..56
+        L_PAREN@43..44 "("
+        KEYWORD@44..50 "export"
+        WHITESPACE@50..51 " "
+        NAME@51..55
+          STRING@51..55 "\"t2\""
+        R_PAREN@55..56 ")"
+      WHITESPACE@56..57 " "
+      TAG_TYPE@57..68
+        TYPE_USE@57..68
+          PARAM@57..68
+            L_PAREN@57..58 "("
+            KEYWORD@58..63 "param"
+            WHITESPACE@63..64 " "
+            NUM_TYPE@64..67
+              TYPE_KEYWORD@64..67 "i32"
+            R_PAREN@67..68 ")"
+      R_PAREN@68..69 ")"
+    WHITESPACE@69..72 "\n  "
+    MODULE_FIELD_TAG@72..97
+      L_PAREN@72..73 "("
+      KEYWORD@73..76 "tag"
+      WHITESPACE@76..77 " "
+      IDENT@77..80 "$t3"
+      WHITESPACE@80..81 " "
+      TAG_TYPE@81..96
+        TYPE_USE@81..96
+          PARAM@81..96
+            L_PAREN@81..82 "("
+            KEYWORD@82..87 "param"
+            WHITESPACE@87..88 " "
+            NUM_TYPE@88..91
+              TYPE_KEYWORD@88..91 "i32"
+            WHITESPACE@91..92 " "
+            NUM_TYPE@92..95
+              TYPE_KEYWORD@92..95 "f32"
+            R_PAREN@95..96 ")"
+      R_PAREN@96..97 ")"
+    WHITESPACE@97..100 "\n  "
+    MODULE_FIELD_EXPORT@100..121
+      L_PAREN@100..101 "("
+      KEYWORD@101..107 "export"
+      WHITESPACE@107..108 " "
+      NAME@108..112
+        STRING@108..112 "\"t3\""
+      WHITESPACE@112..113 " "
+      EXTERN_IDX_TAG@113..120
+        L_PAREN@113..114 "("
+        KEYWORD@114..117 "tag"
+        WHITESPACE@117..118 " "
+        INDEX@118..119
+          UNSIGNED_INT@118..119 "3"
+        R_PAREN@119..120 ")"
+      R_PAREN@120..121 ")"
+    WHITESPACE@121..124 "\n  "
+    MODULE_FIELD_IMPORT@124..170
+      L_PAREN@124..125 "("
+      KEYWORD@125..131 "import"
+      WHITESPACE@131..132 " "
+      MODULE_NAME@132..138
+        STRING@132..138 "\"test\""
+      WHITESPACE@138..139 " "
+      NAME@139..143
+        STRING@139..143 "\"t3\""
+      WHITESPACE@143..144 " "
+      EXTERN_TYPE_TAG@144..169
+        L_PAREN@144..145 "("
+        KEYWORD@145..148 "tag"
+        WHITESPACE@148..149 " "
+        IDENT@149..152 "$t1"
+        WHITESPACE@152..153 " "
+        TAG_TYPE@153..168
+          TYPE_USE@153..168
+            PARAM@153..168
+              L_PAREN@153..154 "("
+              KEYWORD@154..159 "param"
+              WHITESPACE@159..160 " "
+              NUM_TYPE@160..163
+                TYPE_KEYWORD@160..163 "i32"
+              WHITESPACE@163..164 " "
+              NUM_TYPE@164..167
+                TYPE_KEYWORD@164..167 "f32"
+              R_PAREN@167..168 ")"
+        R_PAREN@168..169 ")"
+      R_PAREN@169..170 ")"
+    WHITESPACE@170..171 "\n"
+    R_PAREN@171..172 ")"
+  WHITESPACE@172..173 "\n"

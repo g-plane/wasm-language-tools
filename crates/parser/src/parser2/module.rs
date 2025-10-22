@@ -104,6 +104,10 @@ impl Parser<'_> {
                 self.add_child(green::KW_GLOBAL.clone());
                 EXTERN_IDX_GLOBAL
             }
+            "tag" => {
+                self.add_child(green::KW_TAG.clone());
+                EXTERN_IDX_TAG
+            }
             _ => return None,
         };
 
@@ -294,6 +298,14 @@ impl Parser<'_> {
                 while self.recover(Self::parse_module_field) {}
                 Some(self.finish_node(MODULE, mark))
             }
+            "tag" => {
+                self.add_child(green::KW_TAG.clone());
+                let module_field = self.parse_module_field_tag(mark);
+                let mark = self.start_node();
+                self.add_child(module_field);
+                while self.recover(Self::parse_module_field) {}
+                Some(self.finish_node(MODULE, mark))
+            }
             _ => None,
         };
         self.lexer.top_level = true;
@@ -350,6 +362,10 @@ impl Parser<'_> {
             "rec" => {
                 self.add_child(green::KW_REC.clone());
                 Some(self.parse_rec_type(mark))
+            }
+            "tag" => {
+                self.add_child(green::KW_TAG.clone());
+                Some(self.parse_module_field_tag(mark))
             }
             _ => None,
         }
@@ -491,6 +507,16 @@ impl Parser<'_> {
 
         self.expect_right_paren();
         self.finish_node(MODULE_FIELD_TABLE, mark)
+    }
+
+    fn parse_module_field_tag(&mut self, mark: NodeMark) -> GreenNode {
+        self.eat(IDENT);
+        self.parse_imports_and_exports();
+        if let Some(tag_type) = self.try_parse_with_trivias(Self::parse_tag_type) {
+            self.add_child(tag_type);
+        }
+        self.expect_right_paren();
+        self.finish_node(MODULE_FIELD_TAG, mark)
     }
 
     fn parse_module_name(&mut self) -> Option<GreenNode> {

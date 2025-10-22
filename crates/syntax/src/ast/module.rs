@@ -1,7 +1,10 @@
 use super::{
     SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage,
     instr::Instr,
-    ty::{ExternType, GlobalType, MemoryType, Param, RefType, Result, SubType, TableType, ValType},
+    ty::{
+        ExternType, GlobalType, MemoryType, Param, RefType, Result, SubType, TableType, TagType,
+        ValType,
+    },
 };
 use rowan::{
     NodeOrToken,
@@ -266,6 +269,7 @@ pub enum ExternIdx {
     Global(ExternIdxGlobal),
     Memory(ExternIdxMemory),
     Table(ExternIdxTable),
+    Tag(ExternIdxTag),
 }
 impl AstNode for ExternIdx {
     type Language = WatLanguage;
@@ -280,6 +284,7 @@ impl AstNode for ExternIdx {
                 | SyntaxKind::EXTERN_IDX_GLOBAL
                 | SyntaxKind::EXTERN_IDX_MEMORY
                 | SyntaxKind::EXTERN_IDX_TABLE
+                | SyntaxKind::EXTERN_IDX_TAG
         )
     }
     #[inline]
@@ -292,6 +297,7 @@ impl AstNode for ExternIdx {
             SyntaxKind::EXTERN_IDX_GLOBAL => Some(ExternIdx::Global(ExternIdxGlobal { syntax })),
             SyntaxKind::EXTERN_IDX_MEMORY => Some(ExternIdx::Memory(ExternIdxMemory { syntax })),
             SyntaxKind::EXTERN_IDX_TABLE => Some(ExternIdx::Table(ExternIdxTable { syntax })),
+            SyntaxKind::EXTERN_IDX_TAG => Some(ExternIdx::Tag(ExternIdxTag { syntax })),
             _ => None,
         }
     }
@@ -302,6 +308,7 @@ impl AstNode for ExternIdx {
             ExternIdx::Global(it) => it.syntax(),
             ExternIdx::Memory(it) => it.syntax(),
             ExternIdx::Table(it) => it.syntax(),
+            ExternIdx::Tag(it) => it.syntax(),
         }
     }
 }
@@ -488,6 +495,54 @@ impl AstNode for ExternIdxTable {
     {
         if Self::can_cast(syntax.kind()) {
             Some(ExternIdxTable { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ExternIdxTag {
+    syntax: SyntaxNode,
+}
+impl ExternIdxTag {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn index(&self) -> Option<Index> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
+impl AstNode for ExternIdxTag {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::EXTERN_IDX_TAG
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(ExternIdxTag { syntax })
         } else {
             None
         }
@@ -753,6 +808,7 @@ pub enum ModuleField {
     Memory(ModuleFieldMemory),
     Start(ModuleFieldStart),
     Table(ModuleFieldTable),
+    Tag(ModuleFieldTag),
     Type(TypeDef),
     RecType(RecType),
 }
@@ -774,6 +830,7 @@ impl AstNode for ModuleField {
                 | SyntaxKind::MODULE_FIELD_MEMORY
                 | SyntaxKind::MODULE_FIELD_START
                 | SyntaxKind::MODULE_FIELD_TABLE
+                | SyntaxKind::MODULE_FIELD_TAG
                 | SyntaxKind::TYPE_DEF
                 | SyntaxKind::REC_TYPE
         )
@@ -801,6 +858,7 @@ impl AstNode for ModuleField {
             }
             SyntaxKind::MODULE_FIELD_START => Some(ModuleField::Start(ModuleFieldStart { syntax })),
             SyntaxKind::MODULE_FIELD_TABLE => Some(ModuleField::Table(ModuleFieldTable { syntax })),
+            SyntaxKind::MODULE_FIELD_TAG => Some(ModuleField::Tag(ModuleFieldTag { syntax })),
             SyntaxKind::TYPE_DEF => Some(ModuleField::Type(TypeDef { syntax })),
             SyntaxKind::REC_TYPE => Some(ModuleField::RecType(RecType { syntax })),
             _ => None,
@@ -818,6 +876,7 @@ impl AstNode for ModuleField {
             ModuleField::Memory(it) => it.syntax(),
             ModuleField::Start(it) => it.syntax(),
             ModuleField::Table(it) => it.syntax(),
+            ModuleField::Tag(it) => it.syntax(),
             ModuleField::Type(it) => it.syntax(),
             ModuleField::RecType(it) => it.syntax(),
         }
@@ -1370,6 +1429,66 @@ impl AstNode for ModuleFieldTable {
     {
         if Self::can_cast(syntax.kind()) {
             Some(ModuleFieldTable { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ModuleFieldTag {
+    syntax: SyntaxNode,
+}
+impl ModuleFieldTag {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+    #[inline]
+    pub fn import(&self) -> Option<Import> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn export(&self) -> Option<Export> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn tag_type(&self) -> Option<TagType> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
+impl AstNode for ModuleFieldTag {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::MODULE_FIELD_TAG
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(ModuleFieldTag { syntax })
         } else {
             None
         }

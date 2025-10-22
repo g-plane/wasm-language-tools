@@ -183,6 +183,7 @@ impl DocGen for ExternIdx {
             ExternIdx::Global(extern_idx_global) => extern_idx_global.doc(ctx),
             ExternIdx::Memory(extern_idx_memory) => extern_idx_memory.doc(ctx),
             ExternIdx::Table(extern_idx_table) => extern_idx_table.doc(ctx),
+            ExternIdx::Tag(extern_idx_tag) => extern_idx_tag.doc(ctx),
         }
     }
 }
@@ -206,6 +207,12 @@ impl DocGen for ExternIdxMemory {
 }
 
 impl DocGen for ExternIdxTable {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        format_extern_idx(self.l_paren_token(), self.keyword(), self.index(), ctx)
+    }
+}
+
+impl DocGen for ExternIdxTag {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         format_extern_idx(self.l_paren_token(), self.keyword(), self.index(), ctx)
     }
@@ -387,6 +394,7 @@ impl DocGen for ModuleField {
             ModuleField::Memory(module_field_memory) => module_field_memory.doc(ctx),
             ModuleField::Start(module_field_start) => module_field_start.doc(ctx),
             ModuleField::Table(module_field_table) => module_field_table.doc(ctx),
+            ModuleField::Tag(module_field_tag) => module_field_tag.doc(ctx),
             ModuleField::Type(type_def) => type_def.doc(ctx),
             ModuleField::RecType(rec_type) => rec_type.doc(ctx),
         }
@@ -936,6 +944,61 @@ impl DocGen for ModuleFieldTable {
             }))
             .nest(ctx.indent_width),
         );
+        docs.append(&mut trivias);
+        docs.push(Doc::text(")"));
+        Doc::list(docs)
+    }
+}
+
+impl DocGen for ModuleFieldTag {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        let mut docs = Vec::with_capacity(2);
+        let mut trivias = vec![];
+        if let Some(l_paren) = self.l_paren_token() {
+            docs.push(Doc::text("("));
+            trivias = format_trivias_after_token(l_paren, ctx);
+        }
+        if let Some(keyword) = self.keyword() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text("tag"));
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(ident) = self.ident_token() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text(ident.to_string()));
+            trivias = format_trivias_after_token(ident, ctx);
+        }
+        if let Some(import) = self.import() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(import.doc(ctx));
+            trivias = format_trivias_after_node(import, ctx);
+        }
+        if let Some(export) = self.export() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(export.doc(ctx));
+            trivias = format_trivias_after_node(export, ctx);
+        }
+        if let Some(tag_type) = self.tag_type() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(tag_type.doc(ctx));
+            trivias = format_trivias_after_node(tag_type, ctx);
+        }
         docs.append(&mut trivias);
         docs.push(Doc::text(")"));
         Doc::list(docs)
