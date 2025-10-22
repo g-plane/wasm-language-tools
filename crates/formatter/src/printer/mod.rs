@@ -39,6 +39,7 @@ pub(crate) fn format_node(node: SyntaxNode, ctx: &Ctx) -> Option<Doc<'static>> {
         SyntaxKind::SUB_TYPE => SubType::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::TABLE_TYPE => TableType::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::MEMORY_TYPE => MemoryType::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::ADDR_TYPE => AddrType::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::GLOBAL_TYPE => GlobalType::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::TAG_TYPE => TagType::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::BLOCK_TYPE => BlockType::cast(node).map(|node| node.doc(ctx)),
