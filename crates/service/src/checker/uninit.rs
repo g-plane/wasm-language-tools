@@ -144,6 +144,9 @@ impl Checker<'_, '_> {
                     self.check(else_block.syntax());
                 }
             }
+            Instr::Block(BlockInstr::TryTable(block_try_table)) => {
+                self.check(block_try_table.syntax());
+            }
         });
     }
 }

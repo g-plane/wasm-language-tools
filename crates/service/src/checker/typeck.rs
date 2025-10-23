@@ -286,7 +286,7 @@ fn check_instr<'db>(
                 .map(OperandType::Val)
                 .collect::<Vec<_>>();
             match block_instr {
-                BlockInstr::Block(..) | BlockInstr::Loop(..) => {
+                BlockInstr::Block(..) | BlockInstr::Loop(..) | BlockInstr::TryTable(..) => {
                     check_block_like(diagnostics, shared, node, init_stack, &results);
                 }
                 BlockInstr::If(block_if) => {

@@ -1,0 +1,82 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..104
+  MODULE@0..103
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_FUNC@10..40
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "func"
+      WHITESPACE@15..16 " "
+      BLOCK_TRY_TABLE@16..39
+        L_PAREN@16..17 "("
+        KEYWORD@17..26 "try_table"
+        WHITESPACE@26..27 " "
+        CATCH_ALL@27..38
+          L_PAREN@27..28 "("
+          KEYWORD@28..37 "catch_all"
+          R_PAREN@37..38 ")"
+        R_PAREN@38..39 ")"
+      R_PAREN@39..40 ")"
+    WHITESPACE@40..43 "\n  "
+    MODULE_FIELD_FUNC@43..72
+      L_PAREN@43..44 "("
+      KEYWORD@44..48 "func"
+      WHITESPACE@48..49 " "
+      BLOCK_TRY_TABLE@49..71
+        L_PAREN@49..50 "("
+        KEYWORD@50..59 "try_table"
+        WHITESPACE@59..60 " "
+        CATCH@60..70
+          L_PAREN@60..61 "("
+          KEYWORD@61..66 "catch"
+          WHITESPACE@66..67 " "
+          INDEX@67..69
+            IDENT@67..69 "$e"
+          R_PAREN@69..70 ")"
+        R_PAREN@70..71 ")"
+      R_PAREN@71..72 ")"
+    WHITESPACE@72..75 "\n  "
+    MODULE_FIELD_FUNC@75..101
+      L_PAREN@75..76 "("
+      KEYWORD@76..80 "func"
+      WHITESPACE@80..81 " "
+      BLOCK_TRY_TABLE@81..100
+        L_PAREN@81..82 "("
+        KEYWORD@82..91 "try_table"
+        WHITESPACE@91..92 " "
+        CATCH@92..99
+          L_PAREN@92..93 "("
+          KEYWORD@93..98 "catch"
+          R_PAREN@98..99 ")"
+        R_PAREN@99..100 ")"
+      R_PAREN@100..101 ")"
+    WHITESPACE@101..102 "\n"
+    R_PAREN@102..103 ")"
+  WHITESPACE@103..104 "\n"
+
+error: expected label index
+  ┌─ try-table-malformed.wat:2:30
+  │
+2 │   (func (try_table (catch_all)))
+  │                              ^
+
+error: expected label index
+  ┌─ try-table-malformed.wat:3:29
+  │
+3 │   (func (try_table (catch $e)))
+  │                             ^
+
+error: expected tag index
+  ┌─ try-table-malformed.wat:4:26
+  │
+4 │   (func (try_table (catch)))
+  │                          ^
+
+error: expected label index
+  ┌─ try-table-malformed.wat:4:26
+  │
+4 │   (func (try_table (catch)))
+  │                          ^

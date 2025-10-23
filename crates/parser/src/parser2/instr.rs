@@ -111,9 +111,78 @@ impl Parser<'_> {
         Some(self.finish_node(kind, mark))
     }
 
+    fn parse_block_try_table_folded(&mut self, mark: NodeMark) -> Option<GreenNode> {
+        self.eat(IDENT);
+        if let Some(node) = self.try_parse_with_trivias(Self::parse_block_type) {
+            self.add_child(node);
+        }
+        while let Some(node) = self.try_parse_with_trivias(Self::parse_catch) {
+            self.add_child(node);
+        }
+
+        while self.recover(Self::parse_instr) {}
+
+        self.expect_right_paren();
+        Some(self.finish_node(BLOCK_TRY_TABLE, mark))
+    }
+
+    fn parse_block_try_table_sequence(&mut self, mark: NodeMark) -> Option<GreenNode> {
+        self.eat(IDENT);
+        if let Some(node) = self.try_parse_with_trivias(Self::parse_block_type) {
+            self.add_child(node);
+        }
+        while let Some(node) = self.try_parse_with_trivias(Self::parse_catch) {
+            self.add_child(node);
+        }
+
+        while self
+            .lexer
+            .peek(KEYWORD)
+            .filter(|token| token.text == "end")
+            .is_none()
+            && self.recover(Self::parse_instr)
+        {}
+
+        if !self.recover(Self::parse_end_keyword) {
+            self.report_missing(Message::Str("end"));
+        }
+        self.eat(IDENT);
+        Some(self.finish_node(BLOCK_TRY_TABLE, mark))
+    }
+
     fn parse_block_type(&mut self) -> Option<GreenNode> {
         self.parse_type_use()
             .map(|type_use| node(BLOCK_TYPE, [type_use.into()]))
+    }
+
+    fn parse_catch(&mut self) -> Option<GreenNode> {
+        let mark = self.start_node();
+        self.lexer.next(L_PAREN)?;
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
+        let keyword = self.lexer.next(KEYWORD)?;
+        match keyword.text {
+            "catch" | "catch_ref" => {
+                self.add_child(keyword);
+                if !self.recover(Self::parse_index) {
+                    self.report_missing(Message::Name("tag index"));
+                }
+                if !self.recover(Self::parse_index) {
+                    self.report_missing(Message::Name("label index"));
+                }
+                self.expect_right_paren();
+                Some(self.finish_node(CATCH, mark))
+            }
+            "catch_all" | "catch_all_ref" => {
+                self.add_child(keyword);
+                if !self.recover(Self::parse_index) {
+                    self.report_missing(Message::Name("label index"));
+                }
+                self.expect_right_paren();
+                Some(self.finish_node(CATCH_ALL, mark))
+            }
+            _ => None,
+        }
     }
 
     fn parse_end_keyword(&mut self) -> Option<GreenElement> {
@@ -174,6 +243,10 @@ impl Parser<'_> {
                     self.add_child(green::KW_BLOCK.clone());
                     self.parse_block_like_folded(BLOCK_BLOCK, mark)
                 }
+                "try_table" => {
+                    self.add_child(green::KW_TRY_TABLE.clone());
+                    self.parse_block_try_table_folded(mark)
+                }
                 _ => {
                     self.add_child(token);
                     self.parse_plain_instr_folded(mark)
@@ -194,6 +267,10 @@ impl Parser<'_> {
                 "block" => {
                     self.add_child(green::KW_BLOCK.clone());
                     self.parse_block_like_sequence(BLOCK_BLOCK, mark)
+                }
+                "try_table" => {
+                    self.add_child(green::KW_TRY_TABLE.clone());
+                    self.parse_block_try_table_sequence(mark)
                 }
                 _ => {
                     self.add_child(token);

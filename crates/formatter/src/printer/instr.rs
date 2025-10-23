@@ -249,6 +249,7 @@ impl DocGen for BlockInstr {
             BlockInstr::Block(block_block) => block_block.doc(ctx),
             BlockInstr::Loop(block_loop) => block_loop.doc(ctx),
             BlockInstr::If(block_if) => block_if.doc(ctx),
+            BlockInstr::TryTable(..) => todo!(),
         }
     }
 }

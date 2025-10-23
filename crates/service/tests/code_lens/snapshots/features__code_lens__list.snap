@@ -15,7 +15,7 @@ expression: response
       }
     },
     "data": {
-      "kind": 74,
+      "kind": 77,
       "uri": "untitled:test"
     }
   },
@@ -31,7 +31,7 @@ expression: response
       }
     },
     "data": {
-      "kind": 73,
+      "kind": 76,
       "uri": "untitled:test"
     }
   },
@@ -47,7 +47,7 @@ expression: response
       }
     },
     "data": {
-      "kind": 76,
+      "kind": 79,
       "uri": "untitled:test"
     }
   },
@@ -63,7 +63,7 @@ expression: response
       }
     },
     "data": {
-      "kind": 78,
+      "kind": 81,
       "uri": "untitled:test"
     }
   },
@@ -79,7 +79,7 @@ expression: response
       }
     },
     "data": {
-      "kind": 73,
+      "kind": 76,
       "uri": "untitled:test"
     }
   },
@@ -95,7 +95,7 @@ expression: response
       }
     },
     "data": {
-      "kind": 80,
+      "kind": 83,
       "uri": "untitled:test"
     }
   }

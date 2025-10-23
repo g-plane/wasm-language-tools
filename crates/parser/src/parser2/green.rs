@@ -66,6 +66,8 @@ pub static KW_THEN: LazyLock<GreenElement> =
     LazyLock::new(|| GreenToken::new(SyntaxKind::KEYWORD.into(), "then").into());
 pub static KW_ELSE: LazyLock<GreenElement> =
     LazyLock::new(|| GreenToken::new(SyntaxKind::KEYWORD.into(), "else").into());
+pub static KW_TRY_TABLE: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::KEYWORD.into(), "try_table").into());
 pub static KW_END: LazyLock<GreenElement> =
     LazyLock::new(|| GreenToken::new(SyntaxKind::KEYWORD.into(), "end").into());
 

@@ -1,6 +1,6 @@
 use super::{
     SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage,
-    module::TypeUse,
+    module::{Index, TypeUse},
     ty::{HeapType, RefType},
 };
 use rowan::{
@@ -274,6 +274,7 @@ pub enum BlockInstr {
     Block(BlockBlock),
     Loop(BlockLoop),
     If(BlockIf),
+    TryTable(BlockTryTable),
 }
 impl AstNode for BlockInstr {
     type Language = WatLanguage;
@@ -284,7 +285,10 @@ impl AstNode for BlockInstr {
     {
         matches!(
             kind,
-            SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_IF
+            SyntaxKind::BLOCK_BLOCK
+                | SyntaxKind::BLOCK_LOOP
+                | SyntaxKind::BLOCK_IF
+                | SyntaxKind::BLOCK_TRY_TABLE
         )
     }
     #[inline]
@@ -296,6 +300,7 @@ impl AstNode for BlockInstr {
             SyntaxKind::BLOCK_BLOCK => Some(BlockInstr::Block(BlockBlock { syntax })),
             SyntaxKind::BLOCK_LOOP => Some(BlockInstr::Loop(BlockLoop { syntax })),
             SyntaxKind::BLOCK_IF => Some(BlockInstr::If(BlockIf { syntax })),
+            SyntaxKind::BLOCK_TRY_TABLE => Some(BlockInstr::TryTable(BlockTryTable { syntax })),
             _ => None,
         }
     }
@@ -305,6 +310,7 @@ impl AstNode for BlockInstr {
             BlockInstr::Block(it) => it.syntax(),
             BlockInstr::Loop(it) => it.syntax(),
             BlockInstr::If(it) => it.syntax(),
+            BlockInstr::TryTable(it) => it.syntax(),
         }
     }
 }
@@ -383,6 +389,83 @@ impl AstNode for BlockLoop {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct BlockTryTable {
+    syntax: SyntaxNode,
+}
+impl BlockTryTable {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn ident_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::IDENT)
+    }
+    #[inline]
+    pub fn block_type(&self) -> Option<BlockType> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn catches(&self) -> AstChildren<Cat> {
+        children(&self.syntax)
+    }
+    #[inline]
+    pub fn instrs(&self) -> AstChildren<Instr> {
+        children(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+    #[inline]
+    pub fn end_keyword(&self) -> Option<SyntaxToken> {
+        self.syntax
+            .children_with_tokens()
+            .filter_map(|it| it.into_token())
+            .find(|it| it.kind() == SyntaxKind::KEYWORD && it.text() == "end")
+    }
+    #[inline]
+    pub fn end_ident_token(&self) -> Option<SyntaxToken> {
+        self.syntax
+            .children_with_tokens()
+            .filter_map(|it| match it {
+                NodeOrToken::Token(token) if token.kind() == SyntaxKind::IDENT => Some(token),
+                _ => None,
+            })
+            .nth(1)
+    }
+}
+impl AstNode for BlockTryTable {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::BLOCK_TRY_TABLE
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(BlockTryTable { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BlockType {
     syntax: SyntaxNode,
 }
@@ -408,6 +491,140 @@ impl AstNode for BlockType {
     {
         if Self::can_cast(syntax.kind()) {
             Some(BlockType { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum Cat {
+    Catch(Catch),
+    CatchAll(CatchAll),
+}
+impl AstNode for Cat {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        matches!(kind, SyntaxKind::CATCH | SyntaxKind::CATCH_ALL)
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        match syntax.kind() {
+            SyntaxKind::CATCH => Some(Cat::Catch(Catch { syntax })),
+            SyntaxKind::CATCH_ALL => Some(Cat::CatchAll(CatchAll { syntax })),
+            _ => None,
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Cat::Catch(it) => it.syntax(),
+            Cat::CatchAll(it) => it.syntax(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Catch {
+    syntax: SyntaxNode,
+}
+impl Catch {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn tag_index(&self) -> Option<Index> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn label_index(&self) -> Option<Index> {
+        children(&self.syntax).nth(1)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
+impl AstNode for Catch {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::CATCH
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(Catch { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct CatchAll {
+    syntax: SyntaxNode,
+}
+impl CatchAll {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn label_index(&self) -> Option<Index> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
+impl AstNode for CatchAll {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::CATCH_ALL
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(CatchAll { syntax })
         } else {
             None
         }

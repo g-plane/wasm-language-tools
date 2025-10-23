@@ -4,32 +4,6 @@ expression: subtypes
 ---
 [
   {
-    "name": "$t4",
-    "kind": 5,
-    "detail": "struct",
-    "uri": "untitled:test",
-    "range": {
-      "start": {
-        "line": 5,
-        "character": 2
-      },
-      "end": {
-        "line": 5,
-        "character": 31
-      }
-    },
-    "selectionRange": {
-      "start": {
-        "line": 5,
-        "character": 8
-      },
-      "end": {
-        "line": 5,
-        "character": 11
-      }
-    }
-  },
-  {
     "name": "$t5",
     "kind": 5,
     "detail": "struct",
@@ -51,6 +25,32 @@ expression: subtypes
       },
       "end": {
         "line": 6,
+        "character": 11
+      }
+    }
+  },
+  {
+    "name": "$t4",
+    "kind": 5,
+    "detail": "struct",
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 5,
+        "character": 2
+      },
+      "end": {
+        "line": 5,
+        "character": 31
+      }
+    },
+    "selectionRange": {
+      "start": {
+        "line": 5,
+        "character": 8
+      },
+      "end": {
+        "line": 5,
         "character": 11
       }
     }

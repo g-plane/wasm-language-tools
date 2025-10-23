@@ -1,0 +1,149 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..287
+  MODULE@0..286
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_FUNC@10..284
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "func"
+      WHITESPACE@15..20 "\n    "
+      BLOCK_TRY_TABLE@20..31
+        L_PAREN@20..21 "("
+        KEYWORD@21..30 "try_table"
+        R_PAREN@30..31 ")"
+      WHITESPACE@31..36 "\n    "
+      BLOCK_TRY_TABLE@36..75
+        L_PAREN@36..37 "("
+        KEYWORD@37..46 "try_table"
+        WHITESPACE@46..47 " "
+        BLOCK_TYPE@47..59
+          TYPE_USE@47..59
+            RESULT@47..59
+              L_PAREN@47..48 "("
+              KEYWORD@48..54 "result"
+              WHITESPACE@54..55 " "
+              NUM_TYPE@55..58
+                TYPE_KEYWORD@55..58 "i32"
+              R_PAREN@58..59 ")"
+        WHITESPACE@59..60 " "
+        CATCH@60..74
+          L_PAREN@60..61 "("
+          KEYWORD@61..66 "catch"
+          WHITESPACE@66..67 " "
+          INDEX@67..70
+            IDENT@67..70 "$e0"
+          WHITESPACE@70..71 " "
+          INDEX@71..73
+            IDENT@71..73 "$h"
+          R_PAREN@73..74 ")"
+        R_PAREN@74..75 ")"
+      WHITESPACE@75..80 "\n    "
+      BLOCK_TRY_TABLE@80..120
+        L_PAREN@80..81 "("
+        KEYWORD@81..90 "try_table"
+        WHITESPACE@90..91 " "
+        CATCH_ALL@91..105
+          L_PAREN@91..92 "("
+          KEYWORD@92..101 "catch_all"
+          WHITESPACE@101..102 " "
+          INDEX@102..104
+            IDENT@102..104 "$h"
+          R_PAREN@104..105 ")"
+        WHITESPACE@105..106 " "
+        PLAIN_INSTR@106..119
+          L_PAREN@106..107 "("
+          INSTR_NAME@107..118 "unreachable"
+          R_PAREN@118..119 ")"
+        R_PAREN@119..120 ")"
+      WHITESPACE@120..125 "\n    "
+      BLOCK_TRY_TABLE@125..181
+        L_PAREN@125..126 "("
+        KEYWORD@126..135 "try_table"
+        WHITESPACE@135..136 " "
+        BLOCK_TYPE@136..148
+          TYPE_USE@136..148
+            RESULT@136..148
+              L_PAREN@136..137 "("
+              KEYWORD@137..143 "result"
+              WHITESPACE@143..144 " "
+              NUM_TYPE@144..147
+                TYPE_KEYWORD@144..147 "i32"
+              R_PAREN@147..148 ")"
+        WHITESPACE@148..149 " "
+        CATCH@149..164
+          L_PAREN@149..150 "("
+          KEYWORD@150..155 "catch"
+          WHITESPACE@155..156 " "
+          INDEX@156..159
+            IDENT@156..159 "$e0"
+          WHITESPACE@159..160 " "
+          INDEX@160..163
+            IDENT@160..163 "$h0"
+          R_PAREN@163..164 ")"
+        WHITESPACE@164..165 " "
+        CATCH@165..180
+          L_PAREN@165..166 "("
+          KEYWORD@166..171 "catch"
+          WHITESPACE@171..172 " "
+          INDEX@172..175
+            IDENT@172..175 "$e1"
+          WHITESPACE@175..176 " "
+          INDEX@176..179
+            IDENT@176..179 "$h1"
+          R_PAREN@179..180 ")"
+        R_PAREN@180..181 ")"
+      WHITESPACE@181..186 "\n    "
+      BLOCK_TRY_TABLE@186..232
+        L_PAREN@186..187 "("
+        KEYWORD@187..196 "try_table"
+        WHITESPACE@196..197 " "
+        BLOCK_TYPE@197..209
+          TYPE_USE@197..209
+            RESULT@197..209
+              L_PAREN@197..198 "("
+              KEYWORD@198..204 "result"
+              WHITESPACE@204..205 " "
+              NUM_TYPE@205..208
+                TYPE_KEYWORD@205..208 "f32"
+              R_PAREN@208..209 ")"
+        WHITESPACE@209..210 " "
+        CATCH@210..231
+          L_PAREN@210..211 "("
+          KEYWORD@211..220 "catch_ref"
+          WHITESPACE@220..221 " "
+          INDEX@221..227
+            IDENT@221..227 "$e-f32"
+          WHITESPACE@227..228 " "
+          INDEX@228..230
+            IDENT@228..230 "$h"
+          R_PAREN@230..231 ")"
+        R_PAREN@231..232 ")"
+      WHITESPACE@232..237 "\n    "
+      BLOCK_TRY_TABLE@237..280
+        L_PAREN@237..238 "("
+        KEYWORD@238..247 "try_table"
+        WHITESPACE@247..248 " "
+        CATCH_ALL@248..261
+          L_PAREN@248..249 "("
+          KEYWORD@249..258 "catch_all"
+          WHITESPACE@258..259 " "
+          INDEX@259..260
+            UNSIGNED_INT@259..260 "0"
+          R_PAREN@260..261 ")"
+        WHITESPACE@261..262 " "
+        CATCH_ALL@262..279
+          L_PAREN@262..263 "("
+          KEYWORD@263..276 "catch_all_ref"
+          WHITESPACE@276..277 " "
+          INDEX@277..278
+            UNSIGNED_INT@277..278 "0"
+          R_PAREN@278..279 ")"
+        R_PAREN@279..280 ")"
+      WHITESPACE@280..283 "\n  "
+      R_PAREN@283..284 ")"
+    WHITESPACE@284..285 "\n"
+    R_PAREN@285..286 ")"
+  WHITESPACE@286..287 "\n"
