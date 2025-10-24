@@ -87,13 +87,13 @@ fn format_comments() {
     service.commit(uri.clone(), source.into());
     service.set_config(
         uri.clone(),
-        ServiceConfig {
+        Some(ServiceConfig {
             format: wat_formatter::config::LanguageOptions {
                 format_comments: true,
                 ..Default::default()
             },
             ..Default::default()
-        },
+        }),
     );
     let response = service.formatting(create_params(
         uri,

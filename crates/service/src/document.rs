@@ -1,4 +1,4 @@
-use crate::{LanguageService, config::ServiceConfig, helpers, uri::InternUri};
+use crate::{LanguageService, config::ConfigState, helpers, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
@@ -18,8 +18,8 @@ pub(crate) struct Document {
     pub root: GreenNode,
     #[returns(ref)]
     pub syntax_errors: Vec<wat_parser::SyntaxError>,
-    #[returns(as_ref)]
-    pub config: Option<ServiceConfig>,
+    #[returns(ref)]
+    pub config: ConfigState,
 }
 
 impl Document {
@@ -43,7 +43,19 @@ impl LanguageService {
         } else {
             self.documents.insert(
                 uri,
-                Document::new(self, uri, text, line_index, green, errors, None),
+                Document::new(
+                    self,
+                    uri,
+                    text,
+                    line_index,
+                    green,
+                    errors,
+                    if self.support_pull_config {
+                        ConfigState::Uninit
+                    } else {
+                        ConfigState::Inherit
+                    },
+                ),
             );
         };
     }
@@ -62,7 +74,11 @@ impl LanguageService {
                 line_index,
                 green,
                 errors,
-                None,
+                if self.support_pull_config {
+                    ConfigState::Uninit
+                } else {
+                    ConfigState::Inherit
+                },
             ),
         );
     }

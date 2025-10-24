@@ -97,28 +97,43 @@ impl Default for InlayHintOptions {
     }
 }
 
+#[derive(Debug)]
+pub(crate) enum ConfigState {
+    Uninit,
+    Inherit,
+    Override(ServiceConfig),
+}
+
 impl LanguageService {
     #[inline]
     // This should be used internally.
-    pub(crate) fn get_config(&self, document: Document) -> &ServiceConfig {
-        document.config(self).unwrap_or(&self.global_config)
+    pub(crate) fn get_config_or_global(&self, document: Document) -> &ServiceConfig {
+        match document.config(self) {
+            ConfigState::Override(config) => config,
+            _ => &self.global_config,
+        }
     }
 
     #[inline]
     /// Get configurations of all opened documents.
     pub fn get_configs(&self) -> impl Iterator<Item = (String, &ServiceConfig)> {
-        self.documents.iter().filter_map(|pair| {
-            pair.value()
-                .config(self)
-                .map(|config| (pair.key().raw(self), config))
-        })
+        self.documents
+            .iter()
+            .filter_map(|pair| match pair.value().config(self) {
+                ConfigState::Override(config) => Some((pair.key().raw(self), config)),
+                _ => None,
+            })
     }
 
     #[inline]
     /// Update or insert configuration of a specific document.
-    pub fn set_config(&mut self, uri: String, config: ServiceConfig) {
+    ///
+    /// Set `config` to `None` to inherit global configuration.
+    pub fn set_config(&mut self, uri: String, config: Option<ServiceConfig>) {
         if let Some(document) = self.get_document(uri) {
-            document.set_config(self).to(Some(config));
+            document
+                .set_config(self)
+                .to(config.map_or(ConfigState::Inherit, ConfigState::Override));
         }
     }
 
@@ -140,7 +155,7 @@ mod tests {
 
         let uri = "untitled://test".to_string();
         service.commit(uri.clone(), "".into());
-        service.set_config(uri.clone(), ServiceConfig::default());
+        service.set_config(uri.clone(), Some(ServiceConfig::default()));
         assert_eq!(service.get_configs().next().unwrap().0, uri);
     }
 }

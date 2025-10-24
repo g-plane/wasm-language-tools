@@ -1,6 +1,7 @@
 use crate::{
     LanguageService,
     binder::{SymbolKind, SymbolTable},
+    config::ConfigState,
     helpers, types_analyzer,
 };
 use lspt::{InlayHint, InlayHintKind, InlayHintParams, Union2};
@@ -13,12 +14,10 @@ impl LanguageService {
         let document = self.get_document(params.text_document.uri)?;
         // Avoid inlay hints flashing if client supports pulling config and config is not ready.
         // This is similar to what we do in the checker.
-        let config = if let Some(config) = document.config(self) {
-            config
-        } else if self.support_pull_config {
-            return None;
-        } else {
-            &self.global_config
+        let config = match document.config(self) {
+            ConfigState::Uninit => return None,
+            ConfigState::Inherit => &self.global_config,
+            ConfigState::Override(config) => config,
         };
 
         let line_index = document.line_index(self);

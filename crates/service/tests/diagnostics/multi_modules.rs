@@ -40,13 +40,13 @@ fn allowed_by_config() {
     service.commit(uri.clone(), source.into());
     service.set_config(
         uri.clone(),
-        ServiceConfig {
+        Some(ServiceConfig {
             lint: Lints {
                 multi_modules: LintLevel::Allow,
                 ..Default::default()
             },
             ..Default::default()
-        },
+        }),
     );
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());

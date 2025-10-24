@@ -12,7 +12,10 @@ impl LanguageService {
         let root = Root::cast(document.root_tree(self))?;
         let formatted = wat_formatter::format(
             &root,
-            &build_options(&params.options, self.get_config(document).format.clone()),
+            &build_options(
+                &params.options,
+                self.get_config_or_global(document).format.clone(),
+            ),
         );
         let text_edit = TextEdit {
             range: helpers::rowan_range_to_lsp_range(line_index, root.syntax().text_range()),
@@ -28,7 +31,10 @@ impl LanguageService {
         let root = Root::cast(document.root_tree(self))?;
         let (formatted, range) = wat_formatter::format_range(
             &root,
-            &build_options(&params.options, self.get_config(document).format.clone()),
+            &build_options(
+                &params.options,
+                self.get_config_or_global(document).format.clone(),
+            ),
             helpers::lsp_range_to_rowan_range(line_index, params.range)?,
             line_index,
         )?;

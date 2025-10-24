@@ -5,14 +5,14 @@ use wat_service::LanguageService;
 fn configure(service: &mut LanguageService, uri: String) {
     service.set_config(
         uri,
-        ServiceConfig {
+        Some(ServiceConfig {
             lint: Lints {
                 unused: LintLevel::Allow,
                 implicit_module: LintLevel::Deny,
                 ..Default::default()
             },
             ..Default::default()
-        },
+        }),
     );
 }
 

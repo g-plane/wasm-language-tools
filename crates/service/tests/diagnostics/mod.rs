@@ -44,7 +44,7 @@ fn create_params(uri: String) -> DocumentDiagnosticParams {
 fn calm(service: &mut LanguageService, uri: String) {
     service.set_config(
         uri,
-        ServiceConfig {
+        Some(ServiceConfig {
             lint: Lints {
                 unused: LintLevel::Allow,
                 unreachable: LintLevel::Allow,
@@ -52,12 +52,12 @@ fn calm(service: &mut LanguageService, uri: String) {
                 ..Default::default()
             },
             ..Default::default()
-        },
+        }),
     );
 }
 
 #[test]
-fn empty_config() {
+fn uninit_config() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
@@ -77,4 +77,28 @@ fn empty_config() {
     service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
+}
+
+#[test]
+fn inherit_config() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func))
+";
+    let mut service = LanguageService::default();
+    service.initialize(InitializeParams {
+        capabilities: ClientCapabilities {
+            workspace: Some(WorkspaceClientCapabilities {
+                configuration: Some(true),
+                ..Default::default()
+            }),
+            ..Default::default()
+        },
+        ..Default::default()
+    });
+    service.commit(uri.clone(), source.into());
+    service.set_config(uri.clone(), None);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(!response.items.is_empty());
 }

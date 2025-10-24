@@ -1,4 +1,4 @@
-use crate::{LanguageService, binder::SymbolTable, document::Document};
+use crate::{LanguageService, binder::SymbolTable, config::ConfigState, document::Document};
 use lspt::Diagnostic;
 use wat_syntax::SyntaxKind;
 
@@ -35,12 +35,10 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
     // but document-specific configuration may not be available if client doesn't send it yet.
     // If it isn't ready, we will skip the checker, (must be before computing symbol table and something else)
     // otherwise this will cause Salsa data-race panic and resource waste.
-    let config = if let Some(config) = document.config(service) {
-        config
-    } else if service.support_pull_config {
-        return Vec::new();
-    } else {
-        &service.global_config
+    let config = match document.config(service) {
+        ConfigState::Uninit => return Vec::new(),
+        ConfigState::Inherit => &service.global_config,
+        ConfigState::Override(config) => config,
     };
 
     let uri = document.uri(service);

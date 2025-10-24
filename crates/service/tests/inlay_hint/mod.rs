@@ -20,7 +20,7 @@ fn create_params(uri: String, line: u32, character: u32) -> InlayHintParams {
 }
 
 #[test]
-fn empty_config() {
+fn uninit_config() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
@@ -40,6 +40,30 @@ fn empty_config() {
     service.commit(uri.clone(), source.into());
     let response = service.inlay_hint(create_params(uri, 3, 0));
     assert!(response.is_none());
+}
+
+#[test]
+fn inherit_config() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func))
+";
+    let mut service = LanguageService::default();
+    service.initialize(InitializeParams {
+        capabilities: ClientCapabilities {
+            workspace: Some(WorkspaceClientCapabilities {
+                configuration: Some(true),
+                ..Default::default()
+            }),
+            ..Default::default()
+        },
+        ..Default::default()
+    });
+    service.commit(uri.clone(), source.into());
+    service.set_config(uri.clone(), None);
+    let response = service.inlay_hint(create_params(uri, 3, 0));
+    assert!(response.is_some());
 }
 
 #[test]
@@ -209,14 +233,14 @@ fn field_with_struct_changed() {
     service.commit(uri.clone(), source.into());
     service.set_config(
         uri.clone(),
-        ServiceConfig {
+        Some(ServiceConfig {
             inlay_hint: InlayHintOptions {
                 types: true,
                 ending: false,
                 index: false,
             },
             ..Default::default()
-        },
+        }),
     );
     let response = service
         .inlay_hint(create_params(uri.clone(), 6, 0))
@@ -254,14 +278,14 @@ fn types_only() {
     service.commit(uri.clone(), source.into());
     service.set_config(
         uri.clone(),
-        ServiceConfig {
+        Some(ServiceConfig {
             inlay_hint: InlayHintOptions {
                 types: true,
                 ending: false,
                 index: false,
             },
             ..Default::default()
-        },
+        }),
     );
     let response = service.inlay_hint(create_params(uri, 8, 0));
     assert_json_snapshot!(response);
@@ -282,14 +306,14 @@ fn ending_only() {
     service.commit(uri.clone(), source.into());
     service.set_config(
         uri.clone(),
-        ServiceConfig {
+        Some(ServiceConfig {
             inlay_hint: InlayHintOptions {
                 types: false,
                 ending: true,
                 index: false,
             },
             ..Default::default()
-        },
+        }),
     );
     let response = service.inlay_hint(create_params(uri, 7, 0));
     assert_json_snapshot!(response);
@@ -310,14 +334,14 @@ fn index_only() {
     service.commit(uri.clone(), source.into());
     service.set_config(
         uri.clone(),
-        ServiceConfig {
+        Some(ServiceConfig {
             inlay_hint: InlayHintOptions {
                 types: false,
                 ending: false,
                 index: true,
             },
             ..Default::default()
-        },
+        }),
     );
     let response = service.inlay_hint(create_params(uri, 7, 0));
     assert_json_snapshot!(response);

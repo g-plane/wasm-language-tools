@@ -5,14 +5,14 @@ use wat_service::LanguageService;
 fn disable_other_lints(service: &mut LanguageService, uri: String) {
     service.set_config(
         uri,
-        ServiceConfig {
+        Some(ServiceConfig {
             lint: Lints {
                 unused: LintLevel::Allow,
                 needless_mut: LintLevel::Warn,
                 ..Default::default()
             },
             ..Default::default()
-        },
+        }),
     );
 }
 
