@@ -249,7 +249,7 @@ impl DocGen for BlockInstr {
             BlockInstr::Block(block_block) => block_block.doc(ctx),
             BlockInstr::Loop(block_loop) => block_loop.doc(ctx),
             BlockInstr::If(block_if) => block_if.doc(ctx),
-            BlockInstr::TryTable(..) => todo!(),
+            BlockInstr::TryTable(block_try_table) => block_try_table.doc(ctx),
         }
     }
 }
@@ -324,6 +324,85 @@ impl DocGen for BlockLoop {
     }
 }
 
+impl DocGen for BlockTryTable {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        let mut docs = Vec::with_capacity(2);
+        let mut trivias = vec![];
+        if let Some(l_paren) = self.l_paren_token() {
+            docs.push(Doc::text("("));
+            trivias = format_trivias_after_token(l_paren, ctx);
+        }
+        if let Some(keyword) = self.keyword() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text("try_table"));
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(ident) = self.ident_token() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text(ident.to_string()));
+            trivias = format_trivias_after_token(ident, ctx);
+        }
+        if let Some(block_type) = self.block_type() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(block_type.doc(ctx));
+            trivias = format_trivias_after_node(block_type, ctx);
+        }
+        self.catches().for_each(|cat| {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(cat.doc(ctx));
+            trivias = format_trivias_after_node(cat, ctx);
+        });
+        docs.push(
+            Doc::list(self.instrs().fold(vec![], |mut docs, instr| {
+                if trivias.is_empty() {
+                    docs.push(Doc::hard_line());
+                } else {
+                    docs.append(&mut trivias);
+                }
+                docs.push(instr.doc(ctx));
+                trivias = format_trivias_after_node(instr, ctx);
+                docs
+            }))
+            .nest(ctx.indent_width),
+        );
+        if let Some(r_paren) = self.r_paren_token() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text(")"));
+            trivias = format_trivias_after_token(r_paren, ctx);
+        }
+        if let Some(keyword) = self.end_keyword() {
+            if trivias.is_empty() {
+                docs.push(Doc::hard_line());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text("end"));
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(ident) = self.end_ident_token() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text(ident.to_string()));
+        }
+        Doc::list(docs)
+    }
+}
+
 impl DocGen for BlockType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         if let Some(type_use) = self.type_use() {
@@ -331,6 +410,80 @@ impl DocGen for BlockType {
         } else {
             Doc::nil()
         }
+    }
+}
+
+impl DocGen for Cat {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        match self {
+            Cat::Catch(catch) => catch.doc(ctx),
+            Cat::CatchAll(catch_all) => catch_all.doc(ctx),
+        }
+    }
+}
+
+impl DocGen for Catch {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        let mut docs = Vec::with_capacity(2);
+        let mut trivias = vec![];
+        if let Some(l_paren) = self.l_paren_token() {
+            docs.push(Doc::text("("));
+            trivias = format_trivias_after_token(l_paren, ctx);
+        }
+        if let Some(keyword) = self.keyword() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text(keyword.text().to_string()));
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(tag_index) = self.tag_index() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(tag_index.doc(ctx));
+            trivias = format_trivias_after_node(tag_index, ctx);
+        }
+        if let Some(label_index) = self.label_index() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(label_index.doc(ctx));
+            trivias = format_trivias_after_node(label_index, ctx);
+        }
+        docs.append(&mut trivias);
+        docs.push(Doc::text(")"));
+        Doc::list(docs)
+    }
+}
+
+impl DocGen for CatchAll {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        let mut docs = Vec::with_capacity(2);
+        let mut trivias = vec![];
+        if let Some(l_paren) = self.l_paren_token() {
+            docs.push(Doc::text("("));
+            trivias = format_trivias_after_token(l_paren, ctx);
+        }
+        if let Some(keyword) = self.keyword() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text(keyword.text().to_string()));
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(label_index) = self.label_index() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(label_index.doc(ctx));
+            trivias = format_trivias_after_node(label_index, ctx);
+        }
+        docs.append(&mut trivias);
+        docs.push(Doc::text(")"));
+        Doc::list(docs)
     }
 }
 
