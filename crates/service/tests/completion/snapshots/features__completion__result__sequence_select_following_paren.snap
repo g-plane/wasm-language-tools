@@ -32,6 +32,14 @@ expression: response
     "kind": 24
   },
   {
+    "label": "throw",
+    "kind": 24
+  },
+  {
+    "label": "throw_ref",
+    "kind": 24
+  },
+  {
     "label": "end",
     "kind": 24
   },
@@ -81,6 +89,10 @@ expression: response
   },
   {
     "label": "select",
+    "kind": 24
+  },
+  {
+    "label": "try_table",
     "kind": 24
   },
   {

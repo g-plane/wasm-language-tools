@@ -2,13 +2,15 @@ pub(crate) use instr_meta::*;
 
 mod instr_meta;
 
-pub(crate) static INSTR_NAMES: [&str; 493] = [
+pub(crate) static INSTR_NAMES: [&str; 496] = [
     "unreachable",
     "nop",
     "block",
     "loop",
     "if",
     "else",
+    "throw",
+    "throw_ref",
     "end",
     "br",
     "br_if",
@@ -22,6 +24,7 @@ pub(crate) static INSTR_NAMES: [&str; 493] = [
     "return_call_ref",
     "drop",
     "select",
+    "try_table",
     "local.get",
     "local.set",
     "local.tee",
