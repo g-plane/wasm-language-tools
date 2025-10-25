@@ -26,7 +26,11 @@ pub fn check(
     };
     diagnostics.extend(symbol_table.symbols.values().filter_map(|symbol| {
         match symbol.kind {
-            SymbolKind::Func => {
+            SymbolKind::Func
+            | SymbolKind::Type
+            | SymbolKind::GlobalDef
+            | SymbolKind::MemoryDef
+            | SymbolKind::TableDef => {
                 if is_prefixed_with_underscore(service, symbol)
                     || is_used(symbol_table, symbol)
                     || is_exported(root, symbol)
@@ -65,46 +69,6 @@ pub fn check(
                     Some(report_with_range(
                         service, line_index, range, severity, symbol,
                     ))
-                }
-            }
-            SymbolKind::Type => {
-                if is_prefixed_with_underscore(service, symbol)
-                    || is_used(symbol_table, symbol)
-                    || is_exported(root, symbol)
-                {
-                    None
-                } else {
-                    Some(report(service, line_index, root, severity, symbol))
-                }
-            }
-            SymbolKind::GlobalDef => {
-                if is_prefixed_with_underscore(service, symbol)
-                    || is_used(symbol_table, symbol)
-                    || is_exported(root, symbol)
-                {
-                    None
-                } else {
-                    Some(report(service, line_index, root, severity, symbol))
-                }
-            }
-            SymbolKind::MemoryDef => {
-                if is_prefixed_with_underscore(service, symbol)
-                    || is_used(symbol_table, symbol)
-                    || is_exported(root, symbol)
-                {
-                    None
-                } else {
-                    Some(report(service, line_index, root, severity, symbol))
-                }
-            }
-            SymbolKind::TableDef => {
-                if is_prefixed_with_underscore(service, symbol)
-                    || is_used(symbol_table, symbol)
-                    || is_exported(root, symbol)
-                {
-                    None
-                } else {
-                    Some(report(service, line_index, root, severity, symbol))
                 }
             }
             SymbolKind::FieldDef => {
