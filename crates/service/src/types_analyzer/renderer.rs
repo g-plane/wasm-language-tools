@@ -71,42 +71,42 @@ impl Display for RenderWithDb<'_, (&Signature<'_>, bool)> {
     }
 }
 
-#[salsa::tracked]
 pub(crate) fn render_func_header<'db>(
     db: &'db dyn salsa::Database,
     name: Option<InternIdent<'db>>,
     signature: Signature<'db>,
 ) -> String {
-    let mut content = "(func".to_string();
-    if let Some(name) = name {
-        content.push(' ');
-        content.push_str(name.ident(db));
-    }
-    if !signature.params.is_empty() || !signature.results.is_empty() {
-        content.push(' ');
-        let _ = write!(content, "{}", signature.render(db));
-    }
-    content.push(')');
-    content
+    render_header(db, "func", name, signature)
 }
 
-#[salsa::tracked]
 pub(crate) fn render_block_header<'db>(
     db: &'db dyn salsa::Database,
     kind: SyntaxKind,
     name: Option<InternIdent<'db>>,
     signature: Signature<'db>,
 ) -> String {
-    let mut content = format!(
-        "({}",
+    render_header(
+        db,
         match kind {
             SyntaxKind::BLOCK_IF => "if",
             SyntaxKind::BLOCK_LOOP => "loop",
             SyntaxKind::BLOCK_TRY_TABLE => "try_table",
             SyntaxKind::MODULE_FIELD_FUNC => "func",
             _ => "block",
-        }
-    );
+        },
+        name,
+        signature,
+    )
+}
+
+#[salsa::tracked]
+pub(crate) fn render_header<'db>(
+    db: &'db dyn salsa::Database,
+    keyword: &'db str,
+    name: Option<InternIdent<'db>>,
+    signature: Signature<'db>,
+) -> String {
+    let mut content = format!("({keyword}");
     if let Some(name) = name {
         content.push(' ');
         content.push_str(name.ident(db));

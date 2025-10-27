@@ -127,8 +127,8 @@ fn throw() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-  (tag)
-  (tag $e)
+  (tag (param i32 f32) (result i64))
+  (tag $e (param i32) (result f32))
   (func
     try_table
       throw ;;

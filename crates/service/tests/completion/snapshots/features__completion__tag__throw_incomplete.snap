@@ -5,7 +5,11 @@ expression: response
 [
   {
     "label": "0",
+    "labelDetails": {
+      "description": "[]"
+    },
     "kind": 6,
+    "detail": "(tag)",
     "textEdit": {
       "range": {
         "start": {
@@ -22,7 +26,11 @@ expression: response
   },
   {
     "label": "$e",
+    "labelDetails": {
+      "description": "[]"
+    },
     "kind": 6,
+    "detail": "(tag $e)",
     "textEdit": {
       "range": {
         "start": {

@@ -5,10 +5,18 @@ expression: response
 [
   {
     "label": "0",
-    "kind": 6
+    "labelDetails": {
+      "description": "[i32, f32]"
+    },
+    "kind": 6,
+    "detail": "(tag (param i32) (param f32) (result i64))"
   },
   {
     "label": "$e",
-    "kind": 6
+    "labelDetails": {
+      "description": "[i32]"
+    },
+    "kind": 6,
+    "detail": "(tag $e (param i32) (result f32))"
   }
 ]

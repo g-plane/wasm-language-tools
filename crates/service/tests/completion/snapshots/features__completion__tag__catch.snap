@@ -5,10 +5,18 @@ expression: response
 [
   {
     "label": "0",
-    "kind": 6
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(tag)"
   },
   {
     "label": "$e",
-    "kind": 6
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(tag $e)"
   }
 ]

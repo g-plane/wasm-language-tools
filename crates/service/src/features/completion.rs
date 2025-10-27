@@ -1192,6 +1192,12 @@ fn get_cmp_list(
                     items.extend(symbol_table.get_declared(module, SymbolKind::TagDef).map(
                         |symbol| {
                             let label = symbol.idx.render(service).to_string();
+                            let sig = types_analyzer::get_func_sig(
+                                service,
+                                document,
+                                *symbol.key,
+                                &symbol.green,
+                            );
                             CompletionItem {
                                 label: label.clone(),
                                 kind: Some(CompletionItemKind::Variable),
@@ -1206,6 +1212,22 @@ fn get_cmp_list(
                                         new_text: label,
                                     }))
                                 },
+                                label_details: Some(CompletionItemLabelDetails {
+                                    description: Some(format!(
+                                        "[{}]",
+                                        sig.params
+                                            .iter()
+                                            .map(|(ty, _)| ty.render(service))
+                                            .join(", ")
+                                    )),
+                                    ..Default::default()
+                                }),
+                                detail: Some(types_analyzer::render_header(
+                                    service,
+                                    "tag",
+                                    symbol.idx.name,
+                                    sig,
+                                )),
                                 ..Default::default()
                             }
                         },
