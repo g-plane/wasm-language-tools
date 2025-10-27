@@ -1,0 +1,30 @@
+---
+source: crates/service/tests/completion/block.rs
+expression: response
+---
+[
+  {
+    "label": "0",
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(try_table)"
+  },
+  {
+    "label": "$b",
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(block $b)"
+  },
+  {
+    "label": "2",
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(func)"
+  }
+]

@@ -1,0 +1,40 @@
+---
+source: crates/service/tests/completion/tag.rs
+expression: response
+---
+[
+  {
+    "label": "0",
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 13
+        },
+        "end": {
+          "line": 6,
+          "character": 14
+        }
+      },
+      "newText": "0"
+    }
+  },
+  {
+    "label": "$e",
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 13
+        },
+        "end": {
+          "line": 6,
+          "character": 14
+        }
+      },
+      "newText": "$e"
+    }
+  }
+]

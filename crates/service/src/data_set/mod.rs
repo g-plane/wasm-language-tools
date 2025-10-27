@@ -501,8 +501,9 @@ pub(crate) static INSTR_NAMES: [&str; 496] = [
     "i32x4.relaxed_dot_i8x16_i7x16_add_s",
 ];
 
-pub(crate) static MODULE_FIELDS: [&str; 11] = [
-    "func", "type", "import", "table", "memory", "global", "export", "start", "elem", "data", "rec",
+pub(crate) static MODULE_FIELDS: [&str; 12] = [
+    "func", "type", "import", "table", "memory", "global", "export", "start", "elem", "data",
+    "rec", "tag",
 ];
 
 pub(crate) fn get_value_type_description(value_type: &str) -> Option<&'static str> {

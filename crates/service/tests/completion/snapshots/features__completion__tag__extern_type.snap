@@ -1,0 +1,18 @@
+---
+source: crates/service/tests/completion/tag.rs
+expression: response
+---
+[
+  {
+    "label": "type",
+    "kind": 14
+  },
+  {
+    "label": "param",
+    "kind": 14
+  },
+  {
+    "label": "result",
+    "kind": 14
+  }
+]

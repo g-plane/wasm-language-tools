@@ -19,6 +19,7 @@ mod ref_instr;
 mod result;
 mod structs;
 mod table;
+mod tag;
 mod ty_decl;
 
 fn create_params(uri: String, line: u32, character: u32) -> CompletionParams {

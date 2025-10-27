@@ -3,129 +3,54 @@ use insta::assert_json_snapshot;
 use wat_service::LanguageService;
 
 #[test]
-fn blocks() {
+fn module_field() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-  (func
-    (block
-      (block $a
-        (block
-          (block
-            (block $b
-              (br_table ))))))
-    (block)
-    (block $c)))
+  (tag ())
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, 8, 24));
+    let response = service.completion(create_params(uri, 2, 8));
     assert_json_snapshot!(response);
 }
 
 #[test]
-fn blocks_following_int_idx() {
+fn module_field_incomplete() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-  (func
-    (block
-      (block $a
-        (block
-          (block
-            (block $b
-              (br_table 1))))))
-    (block)
-    (block $c)))
+  (tag (p))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, 8, 25));
+    let response = service.completion(create_params(uri, 2, 9));
     assert_json_snapshot!(response);
 }
 
 #[test]
-fn blocks_following_dollar() {
+fn extern_type() {
     let uri = "untitled:test".to_string();
-    let source = "
+    let source = r#"
 (module
-  (func
-    (block
-      (block $a
-        (block
-          (block
-            (block $b
-              (br_table $))))))
-    (block)
-    (block $c)))
-";
+  (import "" "" (tag ()))
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, 8, 25));
+    let response = service.completion(create_params(uri, 2, 22));
     assert_json_snapshot!(response);
 }
 
 #[test]
-fn blocks_following_ident() {
+fn extern_type_incomplete() {
     let uri = "untitled:test".to_string();
-    let source = "
+    let source = r#"
 (module
-  (func
-    (block
-      (block $a
-        (block
-          (block
-            (block $b
-              (br_table $a))))))
-    (block)
-    (block $c)))
-";
+  (import "" "" (tag (p)))
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, 8, 26));
-    assert_json_snapshot!(response);
-}
-
-#[test]
-fn multiple_indexes() {
-    let uri = "untitled:test".to_string();
-    let source = "
-(module
-  (func
-    (block
-      (block $a
-        (block
-          (block
-            (block $b
-              (br_table $b 1 ))))))
-    (block)
-    (block $c)))
-";
-    let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, 8, 29));
-    assert_json_snapshot!(response);
-}
-
-#[test]
-fn block_type() {
-    let uri = "untitled:test".to_string();
-    let source = "
-(module
-  (type $t (func (result i32)))
-  (func
-    (loop (type $t)
-      (block $a
-        (block (param i32 i32) (result i32)
-          (block
-            (if $b (result i32 i32)
-              (br_table ))))))
-    (block)
-    (block $c)))
-";
-    let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, 9, 24));
+    let response = service.completion(create_params(uri, 2, 23));
     assert_json_snapshot!(response);
 }
 
@@ -135,10 +60,60 @@ fn catch() {
     let source = "
 (module
   (tag)
+  (tag $e)
   (func
-    block $b
-      try_table (catch 0 )
-      end
+    try_table (catch )
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 5, 21));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn catch_incomplete() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (tag)
+  (tag $e)
+  (func
+    try_table (catch $)
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 5, 22));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn catch_before_label() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (tag)
+  (tag $e)
+  (func
+    try_table (catch  0)
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 5, 21));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn catch_ref() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (tag)
+  (tag $e)
+  (func
+    try_table (catch_ref )
     end))
 ";
     let mut service = LanguageService::default();
@@ -148,57 +123,85 @@ fn catch() {
 }
 
 #[test]
-fn catch_all() {
-    let uri = "untitled:test".to_string();
-    let source = "
-(module
-  (tag)
-  (func
-    block $b
-      try_table (catch_all )
-      end
-    end))
-";
-    let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, 5, 27));
-    assert_json_snapshot!(response);
-}
-
-#[test]
 fn throw() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
   (tag)
+  (tag $e)
   (func
-    block $b
-      try_table
-        throw 0 ;;
-      end
+    try_table
+      throw ;;
     end))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, 6, 16));
+    let response = service.completion(create_params(uri, 6, 12));
     assert_json_snapshot!(response);
 }
 
 #[test]
-fn throw_ref() {
+fn throw_incomplete() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
   (tag)
+  (tag $e)
   (func
-    block $b
-      try_table
-        throw_ref ;;
-      end
+    try_table
+      (throw $)
     end))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, 6, 18));
+    let response = service.completion(create_params(uri, 6, 14));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn throw_before_label() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (tag)
+  (tag $e)
+  (func
+    try_table
+      throw $ 0
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 6, 13));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn extern_idx() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (tag)
+  (tag $e)
+  (export "" (tag )))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 4, 18));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn extern_idx_following_ident() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (tag)
+  (tag $e)
+  (export "" (tag $e)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 4, 20));
     assert_json_snapshot!(response);
 }

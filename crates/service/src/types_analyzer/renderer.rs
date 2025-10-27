@@ -102,6 +102,7 @@ pub(crate) fn render_block_header<'db>(
         match kind {
             SyntaxKind::BLOCK_IF => "if",
             SyntaxKind::BLOCK_LOOP => "loop",
+            SyntaxKind::BLOCK_TRY_TABLE => "try_table",
             SyntaxKind::MODULE_FIELD_FUNC => "func",
             _ => "block",
         }

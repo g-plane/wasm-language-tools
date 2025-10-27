@@ -255,3 +255,31 @@ fn ref_cast() {
     let response = service.completion(create_params(uri, 3, 15));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn catch() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (try_table ())))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 3, 16));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn catch_incomplete() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (try_table (c))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 3, 17));
+    assert_json_snapshot!(response);
+}
