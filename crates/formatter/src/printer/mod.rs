@@ -41,7 +41,6 @@ pub(crate) fn format_node(node: SyntaxNode, ctx: &Ctx) -> Option<Doc<'static>> {
         SyntaxKind::MEMORY_TYPE => MemoryType::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::ADDR_TYPE => AddrType::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::GLOBAL_TYPE => GlobalType::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::TAG_TYPE => TagType::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::BLOCK_TYPE => BlockType::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::PLAIN_INSTR => PlainInstr::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::BLOCK_BLOCK => BlockBlock::cast(node).map(|node| node.doc(ctx)),

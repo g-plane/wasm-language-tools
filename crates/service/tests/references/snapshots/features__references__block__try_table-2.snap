@@ -21,11 +21,37 @@ expression: ref_1
     "range": {
       "start": {
         "line": 3,
+        "character": 46
+      },
+      "end": {
+        "line": 3,
+        "character": 47
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 3,
         "character": 29
       },
       "end": {
         "line": 3,
         "character": 30
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 81
+      },
+      "end": {
+        "line": 3,
+        "character": 85
       }
     }
   },
@@ -60,37 +86,11 @@ expression: ref_1
     "range": {
       "start": {
         "line": 3,
-        "character": 81
-      },
-      "end": {
-        "line": 3,
-        "character": 85
-      }
-    }
-  },
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
-        "line": 3,
         "character": 60
       },
       "end": {
         "line": 3,
         "character": 64
-      }
-    }
-  },
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
-        "line": 3,
-        "character": 46
-      },
-      "end": {
-        "line": 3,
-        "character": 47
       }
     }
   }

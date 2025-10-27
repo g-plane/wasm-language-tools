@@ -42,7 +42,6 @@ pub enum SyntaxKind {
     MEMORY_TYPE,
     ADDR_TYPE,
     GLOBAL_TYPE,
-    TAG_TYPE,
     BLOCK_TYPE,
     PLAIN_INSTR,
     BLOCK_BLOCK,

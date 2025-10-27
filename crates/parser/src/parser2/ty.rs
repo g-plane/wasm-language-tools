@@ -94,7 +94,7 @@ impl Parser<'_> {
             "tag" => {
                 self.add_child(green::KW_TAG.clone());
                 self.eat(IDENT);
-                if !self.recover(Self::parse_tag_type) {
+                if !self.recover(Self::parse_type_use) {
                     self.report_missing(Message::Name("tag type"));
                 }
                 self.expect_right_paren();
@@ -356,11 +356,6 @@ impl Parser<'_> {
             self.report_missing(Message::Name("ref type"));
         }
         Some(self.finish_node(TABLE_TYPE, mark))
-    }
-
-    pub(super) fn parse_tag_type(&mut self) -> Option<GreenNode> {
-        self.parse_type_use()
-            .map(|type_use| node(TAG_TYPE, [type_use.into()]))
     }
 
     pub(super) fn parse_value_type(&mut self) -> Option<GreenElement> {

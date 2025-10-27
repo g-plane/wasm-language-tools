@@ -1,10 +1,7 @@
 use super::{
     SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage,
     instr::Instr,
-    ty::{
-        ExternType, GlobalType, MemoryType, Param, RefType, Result, SubType, TableType, TagType,
-        ValType,
-    },
+    ty::{ExternType, GlobalType, MemoryType, Param, RefType, Result, SubType, TableType, ValType},
 };
 use rowan::{
     NodeOrToken,
@@ -1465,7 +1462,7 @@ impl ModuleFieldTag {
         child(&self.syntax)
     }
     #[inline]
-    pub fn tag_type(&self) -> Option<TagType> {
+    pub fn type_use(&self) -> Option<TypeUse> {
         child(&self.syntax)
     }
     #[inline]

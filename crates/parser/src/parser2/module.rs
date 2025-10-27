@@ -512,8 +512,8 @@ impl Parser<'_> {
     fn parse_module_field_tag(&mut self, mark: NodeMark) -> GreenNode {
         self.eat(IDENT);
         self.parse_imports_and_exports();
-        if let Some(tag_type) = self.try_parse_with_trivias(Self::parse_tag_type) {
-            self.add_child(tag_type);
+        if let Some(type_use) = self.try_parse_with_trivias(Self::parse_type_use) {
+            self.add_child(type_use);
         }
         self.expect_right_paren();
         self.finish_node(MODULE_FIELD_TAG, mark)

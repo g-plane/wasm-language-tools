@@ -115,7 +115,7 @@ impl DocGen for ExternTypeTag {
             self.l_paren_token(),
             self.keyword(),
             self.ident_token(),
-            self.tag_type(),
+            self.type_use(),
             ctx,
         )
     }
@@ -552,16 +552,6 @@ impl DocGen for TableType {
             docs.push(ref_type.doc(ctx));
         }
         Doc::list(docs)
-    }
-}
-
-impl DocGen for TagType {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        if let Some(type_use) = self.type_use() {
-            type_use.doc(ctx)
-        } else {
-            Doc::nil()
-        }
     }
 }
 

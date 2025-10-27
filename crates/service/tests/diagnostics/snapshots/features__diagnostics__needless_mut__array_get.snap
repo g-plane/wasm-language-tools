@@ -8,25 +8,6 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 8,
-          "character": 24
-        },
-        "end": {
-          "line": 8,
-          "character": 27
-        }
-      },
-      "severity": 2,
-      "code": "needless-mut",
-      "source": "wat",
-      "message": "array `$packed` is unnecessarily mutable",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
           "line": 2,
           "character": 16
         },
@@ -39,6 +20,25 @@ expression: response
       "code": "needless-mut",
       "source": "wat",
       "message": "array `0` is unnecessarily mutable",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 24
+        },
+        "end": {
+          "line": 8,
+          "character": 27
+        }
+      },
+      "severity": 2,
+      "code": "needless-mut",
+      "source": "wat",
+      "message": "array `$packed` is unnecessarily mutable",
       "tags": [
         1
       ]

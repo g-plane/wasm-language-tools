@@ -990,14 +990,14 @@ impl DocGen for ModuleFieldTag {
             docs.push(export.doc(ctx));
             trivias = format_trivias_after_node(export, ctx);
         }
-        if let Some(tag_type) = self.tag_type() {
+        if let Some(type_use) = self.type_use() {
             if trivias.is_empty() {
                 docs.push(Doc::space());
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(tag_type.doc(ctx));
-            trivias = format_trivias_after_node(tag_type, ctx);
+            docs.push(type_use.doc(ctx));
+            trivias = format_trivias_after_node(type_use, ctx);
         }
         docs.append(&mut trivias);
         docs.push(Doc::text(")"));
