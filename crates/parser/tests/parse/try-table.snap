@@ -1,12 +1,12 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..287
-  MODULE@0..286
+ROOT@0..373
+  MODULE@0..372
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
-    MODULE_FIELD_FUNC@10..284
+    MODULE_FIELD_FUNC@10..370
       L_PAREN@10..11 "("
       KEYWORD@11..15 "func"
       WHITESPACE@15..20 "\n    "
@@ -142,8 +142,47 @@ ROOT@0..287
             UNSIGNED_INT@277..278 "0"
           R_PAREN@278..279 ")"
         R_PAREN@279..280 ")"
-      WHITESPACE@280..283 "\n  "
-      R_PAREN@283..284 ")"
-    WHITESPACE@284..285 "\n"
-    R_PAREN@285..286 ")"
-  WHITESPACE@286..287 "\n"
+      WHITESPACE@280..285 "\n    "
+      BLOCK_TRY_TABLE@285..366
+        KEYWORD@285..294 "try_table"
+        WHITESPACE@294..295 " "
+        IDENT@295..297 "$t"
+        WHITESPACE@297..298 " "
+        BLOCK_TYPE@298..306
+          TYPE_USE@298..306
+            RESULT@298..306
+              L_PAREN@298..299 "("
+              KEYWORD@299..305 "result"
+              R_PAREN@305..306 ")"
+        WHITESPACE@306..307 " "
+        CATCH@307..322
+          L_PAREN@307..308 "("
+          KEYWORD@308..313 "catch"
+          WHITESPACE@313..314 " "
+          INDEX@314..317
+            IDENT@314..317 "$e0"
+          WHITESPACE@317..318 " "
+          INDEX@318..321
+            IDENT@318..321 "$h0"
+          R_PAREN@321..322 ")"
+        WHITESPACE@322..323 " "
+        CATCH@323..342
+          L_PAREN@323..324 "("
+          KEYWORD@324..333 "catch_ref"
+          WHITESPACE@333..334 " "
+          INDEX@334..337
+            IDENT@334..337 "$e1"
+          WHITESPACE@337..338 " "
+          INDEX@338..341
+            IDENT@338..341 "$h1"
+          R_PAREN@341..342 ")"
+        WHITESPACE@342..347 "\n    "
+        PLAIN_INSTR@347..358
+          INSTR_NAME@347..358 "unreachable"
+        WHITESPACE@358..363 "\n    "
+        KEYWORD@363..366 "end"
+      WHITESPACE@366..369 "\n  "
+      R_PAREN@369..370 ")"
+    WHITESPACE@370..371 "\n"
+    R_PAREN@371..372 ")"
+  WHITESPACE@372..373 "\n"
