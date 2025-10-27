@@ -214,6 +214,7 @@ fn is_write_access_instr(element: SyntaxElement, node: &SyntaxNode) -> bool {
             matches!(
                 text,
                 "local.set"
+                    | "local.tee"
                     | "global.set"
                     | "table.init"
                     | "table.set"
