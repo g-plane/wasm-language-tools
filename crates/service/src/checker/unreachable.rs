@@ -192,7 +192,7 @@ impl Checker<'_, '_> {
                     }
                 }
             }
-            Instr::Block(BlockInstr::TryTable(..)) => todo!(),
+            Instr::Block(BlockInstr::TryTable(..)) => {}
         }
         ControlFlow::Continue(())
     }

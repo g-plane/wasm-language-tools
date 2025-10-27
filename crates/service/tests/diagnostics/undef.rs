@@ -290,6 +290,43 @@ fn field_undefined() {
 }
 
 #[test]
+fn tag_defined() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (tag $e)
+  (func
+    try_table (catch $e 0) (catch 0 0)
+      throw $e 0
+      throw 0 0
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn tag_undefined() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    try_table (catch $e 0) (catch 0 0)
+      throw $e 0
+      throw 0 0
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn export() {
     let uri = "untitled:test".to_string();
     let source = "

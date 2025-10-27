@@ -23,7 +23,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
         | "ref.func" | "data.drop" | "elem.drop" | "br" | "br_if" | "struct.new"
         | "struct.new_default" | "array.new" | "array.new_default" | "array.get"
         | "array.get_u" | "array.get_s" | "array.set" | "array.fill" | "br_on_null"
-        | "br_on_non_null" | "call_ref" | "return_call" | "return_call_ref" => {
+        | "br_on_non_null" | "call_ref" | "return_call" | "return_call_ref" | "throw_ref" => {
             check_immediate::<true>(
                 diagnostics,
                 &mut immediates,
@@ -137,7 +137,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
             );
         }
         "struct.get" | "struct.get_u" | "struct.get_s" | "struct.set" | "array.new_data"
-        | "array.new_elem" | "array.copy" | "array.init_data" | "array.init_elem" => {
+        | "array.new_elem" | "array.copy" | "array.init_data" | "array.init_elem" | "throw" => {
             check_immediate::<true>(
                 diagnostics,
                 &mut immediates,

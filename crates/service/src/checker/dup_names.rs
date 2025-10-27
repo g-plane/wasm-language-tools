@@ -37,6 +37,7 @@ pub fn check(
                         | SymbolKind::MemoryDef
                         | SymbolKind::TableDef
                         | SymbolKind::FieldDef
+                        | SymbolKind::TagDef
                 )
             })
             .fold(FxHashMap::default(), |mut map, symbol| {
@@ -58,6 +59,7 @@ pub fn check(
                     IdxKind::Memory => "memory",
                     IdxKind::Table => "table",
                     IdxKind::Field => "field",
+                    IdxKind::Tag => "tag",
                     _ => unreachable!(),
                 };
                 let name = name.ident(service);

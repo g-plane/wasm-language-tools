@@ -425,3 +425,43 @@ fn field_ref() {
     let response = service.rename(create_params(uri, 5, 19, "$y")).unwrap();
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn tag_def() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (tag $e)
+  (tag $e')
+  (func
+    block
+      try_table (catch $e 1)
+        throw $e 1
+      end
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.rename(create_params(uri, 2, 9, "$t")).unwrap();
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn tag_ref() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (tag $e)
+  (tag $e')
+  (func
+    block
+      try_table (catch $e 1)
+        throw $e 1
+      end
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.rename(create_params(uri, 6, 24, "$t")).unwrap();
+    assert_json_snapshot!(response);
+}

@@ -1,0 +1,73 @@
+---
+source: crates/service/tests/diagnostics/undef.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 21
+        },
+        "end": {
+          "line": 3,
+          "character": 23
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find tag `$e` in this scope"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 34
+        },
+        "end": {
+          "line": 3,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find tag `0` in this scope"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 12
+        },
+        "end": {
+          "line": 4,
+          "character": 14
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find tag `$e` in this scope"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 12
+        },
+        "end": {
+          "line": 5,
+          "character": 13
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find tag `0` in this scope"
+    }
+  ]
+}

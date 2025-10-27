@@ -405,6 +405,38 @@ fn field_used() {
 }
 
 #[test]
+fn tag_unused() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (tag)
+  (tag $e))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn tag_used() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (tag)
+  (tag $e)
+  (func $_
+    try_table (catch $e 0)
+      throw 0 0
+    end))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
 fn call_indirect_implicit() {
     let uri = "untitled:test".to_string();
     let source = r#"

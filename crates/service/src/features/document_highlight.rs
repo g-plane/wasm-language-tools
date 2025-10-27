@@ -59,7 +59,8 @@ impl LanguageService {
                         | SymbolKind::GlobalDef
                         | SymbolKind::MemoryDef
                         | SymbolKind::TableDef
-                        | SymbolKind::FieldDef => Some(
+                        | SymbolKind::FieldDef
+                        | SymbolKind::TagDef => Some(
                             symbol_table
                                 .find_references_on_def(symbol, true)
                                 .filter_map(|symbol| {
@@ -73,7 +74,8 @@ impl LanguageService {
                         | SymbolKind::GlobalRef
                         | SymbolKind::MemoryRef
                         | SymbolKind::TableRef
-                        | SymbolKind::FieldRef => Some(
+                        | SymbolKind::FieldRef
+                        | SymbolKind::TagRef => Some(
                             symbol_table
                                 .find_references_on_ref(symbol, true)
                                 .filter_map(|symbol| {
@@ -173,14 +175,16 @@ fn get_highlight_kind_of_symbol(
         | SymbolKind::MemoryDef
         | SymbolKind::TableDef
         | SymbolKind::BlockDef
-        | SymbolKind::FieldDef => Some(DocumentHighlightKind::Write),
+        | SymbolKind::FieldDef
+        | SymbolKind::TagDef => Some(DocumentHighlightKind::Write),
         SymbolKind::Call | SymbolKind::TypeUse | SymbolKind::MemoryRef | SymbolKind::BlockRef => {
             Some(DocumentHighlightKind::Read)
         }
         SymbolKind::LocalRef
         | SymbolKind::GlobalRef
         | SymbolKind::TableRef
-        | SymbolKind::FieldRef => {
+        | SymbolKind::FieldRef
+        | SymbolKind::TagRef => {
             let node = symbol.key.to_node(root);
             if node
                 .siblings_with_tokens(Direction::Prev)

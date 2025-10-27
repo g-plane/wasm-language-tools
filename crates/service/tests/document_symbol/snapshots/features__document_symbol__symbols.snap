@@ -12,7 +12,7 @@ expression: response
         "character": 0
       },
       "end": {
-        "line": 14,
+        "line": 15,
         "character": 1
       }
     },
@@ -22,7 +22,7 @@ expression: response
         "character": 0
       },
       "end": {
-        "line": 14,
+        "line": 15,
         "character": 1
       }
     },
@@ -475,6 +475,30 @@ expression: response
             }
           }
         ]
+      },
+      {
+        "name": "$tag",
+        "kind": 13,
+        "range": {
+          "start": {
+            "line": 14,
+            "character": 4
+          },
+          "end": {
+            "line": 14,
+            "character": 14
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 14,
+            "character": 9
+          },
+          "end": {
+            "line": 14,
+            "character": 13
+          }
+        }
       }
     ]
   },
@@ -483,21 +507,21 @@ expression: response
     "kind": 2,
     "range": {
       "start": {
-        "line": 16,
+        "line": 17,
         "character": 0
       },
       "end": {
-        "line": 18,
+        "line": 19,
         "character": 1
       }
     },
     "selectionRange": {
       "start": {
-        "line": 16,
+        "line": 17,
         "character": 0
       },
       "end": {
-        "line": 18,
+        "line": 19,
         "character": 1
       }
     },
@@ -507,21 +531,21 @@ expression: response
         "kind": 12,
         "range": {
           "start": {
-            "line": 17,
+            "line": 18,
             "character": 4
           },
           "end": {
-            "line": 17,
+            "line": 18,
             "character": 10
           }
         },
         "selectionRange": {
           "start": {
-            "line": 17,
+            "line": 18,
             "character": 5
           },
           "end": {
-            "line": 17,
+            "line": 18,
             "character": 9
           }
         }

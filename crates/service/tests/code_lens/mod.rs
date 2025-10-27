@@ -22,7 +22,8 @@ fn list() {
   (table 1 2 funcref)
   (func
     (call $f))
-  (type (struct (field (mut i32)))))
+  (type (struct (field (mut i32))))
+  (tag))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

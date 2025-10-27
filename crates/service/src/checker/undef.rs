@@ -28,7 +28,8 @@ pub fn check(
                 | SymbolKind::MemoryDef
                 | SymbolKind::TableDef
                 | SymbolKind::BlockDef
-                | SymbolKind::FieldDef => false,
+                | SymbolKind::FieldDef
+                | SymbolKind::TagDef => false,
                 SymbolKind::Call
                 | SymbolKind::LocalRef
                 | SymbolKind::TypeUse
@@ -36,7 +37,8 @@ pub fn check(
                 | SymbolKind::MemoryRef
                 | SymbolKind::TableRef
                 | SymbolKind::FieldRef
-                | SymbolKind::BlockRef => !symbol_table.resolved.contains_key(&symbol.key),
+                | SymbolKind::BlockRef
+                | SymbolKind::TagRef => !symbol_table.resolved.contains_key(&symbol.key),
             })
             .map(|symbol| {
                 let kind = match symbol.kind {
@@ -48,6 +50,7 @@ pub fn check(
                     SymbolKind::TableRef => "table",
                     SymbolKind::BlockRef => "label",
                     SymbolKind::FieldRef => "field",
+                    SymbolKind::TagRef => "tag",
                     _ => unreachable!(),
                 };
                 Diagnostic {

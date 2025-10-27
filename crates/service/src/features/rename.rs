@@ -86,7 +86,9 @@ impl LanguageService {
                 | SymbolKind::TableDef
                 | SymbolKind::TableRef
                 | SymbolKind::FieldDef
-                | SymbolKind::FieldRef => {
+                | SymbolKind::FieldRef
+                | SymbolKind::TagDef
+                | SymbolKind::TagRef => {
                     sym.region == symbol.region
                         && sym.idx_kind == symbol.idx_kind
                         && sym.idx.name.is_some_and(|name| name == old_name)

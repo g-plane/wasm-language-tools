@@ -328,7 +328,8 @@ fn index_only() {
   (func (param $p i32) (param f32 i64) (local (ref 0)))
   (memory 1 2)
   (table 1 2 funcref)
-  (type (struct (field (mut i32)))))
+  (type (struct (field (mut i32))))
+  (tag))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());

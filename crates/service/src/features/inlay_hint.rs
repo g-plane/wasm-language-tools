@@ -151,7 +151,8 @@ impl LanguageService {
                 SymbolKind::Type
                 | SymbolKind::GlobalDef
                 | SymbolKind::MemoryDef
-                | SymbolKind::TableDef => {
+                | SymbolKind::TableDef
+                | SymbolKind::TagDef => {
                     if options.index
                         && let Some(num) = symbol.idx.num
                         && let Some(keyword) =

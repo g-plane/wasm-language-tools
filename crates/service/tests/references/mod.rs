@@ -8,6 +8,7 @@ mod global;
 mod local;
 mod mem;
 mod table;
+mod tag;
 mod ty;
 
 fn create_params(

@@ -155,6 +155,21 @@ fn fields() {
 }
 
 #[test]
+fn tag() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (tag $_)
+  (tag $_))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn exports() {
     let uri = "untitled:test".to_string();
     let source = r#"

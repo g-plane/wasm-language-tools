@@ -697,6 +697,75 @@ fn field_ref_undefined() {
 }
 
 #[test]
+fn tag() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (tag $e)
+  (func
+    try_table (catch $e 0)
+      throw $e 0
+    end))
+(module (tag $e))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.document_highlight(create_params(uri, 2, 8));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn tag_ref_int() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (tag $e)
+  (func
+    try_table (catch 0 0)
+      throw 0 0
+    end))
+(module (tag $e))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.document_highlight(create_params(uri, 5, 12));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn tag_ref_ident() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (tag $e)
+  (func
+    try_table (catch $e 0)
+      throw $e 0
+    end))
+(module (tag $e))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.document_highlight(create_params(uri, 5, 13));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn tag_ref_undefined() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func (throw $e 0))
+)
+(module (tag $e))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.document_highlight(create_params(uri, 2, 16));
+    assert!(response.unwrap().is_empty());
+}
+
+#[test]
 fn shape_descriptor() {
     let uri = "untitled:test".to_string();
     let source = "

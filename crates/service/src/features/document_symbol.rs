@@ -134,7 +134,7 @@ impl LanguageService {
                         },
                     ))
                 }
-                SymbolKind::MemoryDef | SymbolKind::TableDef => {
+                SymbolKind::MemoryDef | SymbolKind::TableDef | SymbolKind::TagDef => {
                     let range =
                         helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
                     Some((
@@ -187,7 +187,8 @@ impl LanguageService {
                 | SymbolKind::TableRef
                 | SymbolKind::BlockDef
                 | SymbolKind::BlockRef
-                | SymbolKind::FieldRef => None,
+                | SymbolKind::FieldRef
+                | SymbolKind::TagRef => None,
             })
             .collect::<FxHashMap<_, _>>();
         symbol_table
@@ -237,6 +238,7 @@ fn render_symbol_name(symbol: &Symbol, service: &LanguageService) -> String {
             SymbolKind::MemoryDef => "memory",
             SymbolKind::TableDef => "table",
             SymbolKind::FieldDef => "field",
+            SymbolKind::TagDef => "tag",
             _ => unreachable!(),
         };
         format!("{kind} {num}")

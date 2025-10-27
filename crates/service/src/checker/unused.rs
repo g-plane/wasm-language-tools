@@ -30,7 +30,8 @@ pub fn check(
             | SymbolKind::Type
             | SymbolKind::GlobalDef
             | SymbolKind::MemoryDef
-            | SymbolKind::TableDef => {
+            | SymbolKind::TableDef
+            | SymbolKind::TagDef => {
                 if is_prefixed_with_underscore(service, symbol)
                     || is_used(symbol_table, symbol)
                     || is_exported(root, symbol)
@@ -137,6 +138,7 @@ fn report_with_range(
         SymbolKind::MemoryDef => "memory",
         SymbolKind::TableDef => "table",
         SymbolKind::FieldDef => "field",
+        SymbolKind::TagDef => "tag",
         _ => unreachable!(),
     };
     Diagnostic {

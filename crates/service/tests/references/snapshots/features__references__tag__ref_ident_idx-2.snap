@@ -1,0 +1,32 @@
+---
+source: crates/service/tests/references/tag.rs
+expression: exclude_decl
+---
+[
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 4,
+        "character": 21
+      },
+      "end": {
+        "line": 4,
+        "character": 23
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 5,
+        "character": 12
+      },
+      "end": {
+        "line": 5,
+        "character": 14
+      }
+    }
+  }
+]

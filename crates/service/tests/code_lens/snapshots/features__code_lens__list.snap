@@ -98,5 +98,21 @@ expression: response
       "kind": 83,
       "uri": "untitled:test"
     }
+  },
+  {
+    "range": {
+      "start": {
+        "line": 10,
+        "character": 2
+      },
+      "end": {
+        "line": 10,
+        "character": 7
+      }
+    },
+    "data": {
+      "kind": 82,
+      "uri": "untitled:test"
+    }
   }
 ]
