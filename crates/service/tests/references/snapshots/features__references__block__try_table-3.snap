@@ -1,0 +1,97 @@
+---
+source: crates/service/tests/references/block.rs
+expression: ref_2
+---
+[
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 14
+      },
+      "end": {
+        "line": 3,
+        "character": 18
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 29
+      },
+      "end": {
+        "line": 3,
+        "character": 30
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 4,
+        "character": 15
+      },
+      "end": {
+        "line": 4,
+        "character": 16
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 5,
+        "character": 16
+      },
+      "end": {
+        "line": 5,
+        "character": 20
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 81
+      },
+      "end": {
+        "line": 3,
+        "character": 85
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 60
+      },
+      "end": {
+        "line": 3,
+        "character": 64
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 46
+      },
+      "end": {
+        "line": 3,
+        "character": 47
+      }
+    }
+  }
+]

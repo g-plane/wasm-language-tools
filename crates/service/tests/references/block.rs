@@ -107,3 +107,24 @@ fn block_relation() {
     let ref_1 = service.find_references(create_params(uri.clone(), 5, 20, true));
     assert_json_snapshot!(ref_1);
 }
+
+#[test]
+fn try_table() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    try_table $try (catch $e 0) (catch_ref $e 0) (catch_all $try) (catch_all_ref $try)
+      throw $e 0
+      throw_ref $try
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let def = service.find_references(create_params(uri.clone(), 3, 16, true));
+    assert_json_snapshot!(def);
+    let ref_1 = service.find_references(create_params(uri.clone(), 3, 46, true));
+    assert_json_snapshot!(ref_1);
+    let ref_2 = service.find_references(create_params(uri.clone(), 5, 20, true));
+    assert_json_snapshot!(ref_2);
+}
