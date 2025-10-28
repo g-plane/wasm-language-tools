@@ -436,7 +436,7 @@ fn tag_def() {
   (func
     block
       try_table (catch $e 1)
-        throw $e 1
+        throw $e
       end
     end))
 ";
@@ -456,7 +456,7 @@ fn tag_ref() {
   (func
     block
       try_table (catch $e 1)
-        throw $e 1
+        throw $e
       end
     end))
 ";

@@ -159,24 +159,6 @@ fn throw_incomplete() {
 }
 
 #[test]
-fn throw_before_label() {
-    let uri = "untitled:test".to_string();
-    let source = "
-(module
-  (tag)
-  (tag $e)
-  (func
-    try_table
-      throw $ 0
-    end))
-";
-    let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    let response = service.completion(create_params(uri, 6, 13));
-    assert_json_snapshot!(response);
-}
-
-#[test]
 fn extern_idx() {
     let uri = "untitled:test".to_string();
     let source = r#"

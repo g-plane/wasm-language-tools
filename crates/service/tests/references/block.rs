@@ -115,8 +115,6 @@ fn try_table() {
 (module
   (func
     try_table $try (catch $e 0) (catch_ref $e 0) (catch_all $try) (catch_all_ref $try)
-      throw $e 0
-      throw_ref $try
     end))
 ";
     let mut service = LanguageService::default();
@@ -125,6 +123,4 @@ fn try_table() {
     assert_json_snapshot!(def);
     let ref_1 = service.find_references(create_params(uri.clone(), 3, 46, true));
     assert_json_snapshot!(ref_1);
-    let ref_2 = service.find_references(create_params(uri.clone(), 5, 20, true));
-    assert_json_snapshot!(ref_2);
 }

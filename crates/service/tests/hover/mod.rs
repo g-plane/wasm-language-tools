@@ -1029,7 +1029,7 @@ fn tag_int_idx() {
   (tag $e (param i32) (result f32 f64))
   (func
     try_table
-      throw 0 0
+      throw 0
     end))
 ";
     let mut service = LanguageService::default();

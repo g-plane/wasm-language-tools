@@ -613,14 +613,7 @@ fn add_cmp_ctx_for_immediates(
                 "call_ref" | "return_call_ref" => {
                     ctx.push(CmpCtx::TypeDef(Some(PreferredType::Func)));
                 }
-                "throw" => {
-                    if is_current_first_immediate {
-                        ctx.push(CmpCtx::Tag);
-                    } else {
-                        ctx.push(CmpCtx::Block);
-                    }
-                }
-                "throw_ref" => ctx.push(CmpCtx::Block),
+                "throw" => ctx.push(CmpCtx::Tag),
                 _ => {}
             },
             _ => {}

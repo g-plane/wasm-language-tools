@@ -562,36 +562,12 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         }
                     }
                     Some("throw") => {
-                        let mut immediates = node
-                            .children()
-                            .filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
-                        if let Some(symbol) = immediates.next().and_then(|node| {
-                            create_ref_symbol(db, &node, module_key, SymbolKind::TagRef)
-                        }) {
-                            symbols.insert(symbol.key, symbol);
-                        }
-                        if let Some(region) = find_up_block(&node).map(|node| SymbolKey::new(&node))
-                            && let Some(symbol) = immediates.next().and_then(|node| {
-                                create_ref_symbol(db, &node, region, SymbolKind::BlockRef)
+                        if let Some(symbol) = node
+                            .first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
+                            .and_then(|node| {
+                                create_ref_symbol(db, &node, module_key, SymbolKind::TagRef)
                             })
                         {
-                            if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
-                                resolved.insert(symbol.key, def_key);
-                            }
-                            symbols.insert(symbol.key, symbol);
-                        }
-                    }
-                    Some("throw_ref") => {
-                        if let Some(region) = find_up_block(&node).map(|node| SymbolKey::new(&node))
-                            && let Some(symbol) = node
-                                .first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
-                                .and_then(|node| {
-                                    create_ref_symbol(db, &node, region, SymbolKind::BlockRef)
-                                })
-                        {
-                            if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
-                                resolved.insert(symbol.key, def_key);
-                            }
                             symbols.insert(symbol.key, symbol);
                         }
                     }

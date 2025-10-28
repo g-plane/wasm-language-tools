@@ -297,8 +297,8 @@ fn tag_defined() {
   (tag $e)
   (func
     try_table (catch $e 0) (catch 0 0)
-      throw $e 0
-      throw 0 0
+      throw $e
+      throw 0
     end))
 ";
     let mut service = LanguageService::default();
@@ -315,8 +315,8 @@ fn tag_undefined() {
 (module
   (func
     try_table (catch $e 0) (catch 0 0)
-      throw $e 0
-      throw 0 0
+      throw $e
+      throw 0
     end))
 ";
     let mut service = LanguageService::default();

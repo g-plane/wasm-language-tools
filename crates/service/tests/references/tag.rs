@@ -10,7 +10,7 @@ fn def_int_idx() {
   (tag)
   (func
     try_table (catch 0 0)
-      throw 0 0
+      throw 0
     end))
 (module
   (tag))
@@ -31,7 +31,7 @@ fn def_ident_idx() {
   (tag $e)
   (func
     try_table (catch $e 0)
-      throw $e 0
+      throw $e
     end))
 (module
   (tag $e))
@@ -52,7 +52,7 @@ fn ref_int_idx() {
   (tag)
   (func
     try_table (catch 0 0)
-      throw 0 0
+      throw 0
     end))
 (module
   (tag))
@@ -73,7 +73,7 @@ fn ref_ident_idx() {
   (tag $e)
   (func
     try_table (catch $e 0)
-      throw $e 0
+      throw $e
     end))
 (module
   (tag $e))

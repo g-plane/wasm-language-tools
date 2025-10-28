@@ -427,7 +427,7 @@ fn tag_used() {
   (tag $e)
   (func $_
     try_table (catch $e 0)
-      throw 0 0
+      throw 0
     end))
 "#;
     let mut service = LanguageService::default();

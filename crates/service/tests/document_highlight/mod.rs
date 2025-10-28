@@ -704,7 +704,7 @@ fn tag() {
   (tag $e)
   (func
     try_table (catch $e 0)
-      throw $e 0
+      throw $e
     end))
 (module (tag $e))
 ";
@@ -722,7 +722,7 @@ fn tag_ref_int() {
   (tag $e)
   (func
     try_table (catch 0 0)
-      throw 0 0
+      throw 0
     end))
 (module (tag $e))
 ";
@@ -740,7 +740,7 @@ fn tag_ref_ident() {
   (tag $e)
   (func
     try_table (catch $e 0)
-      throw $e 0
+      throw $e
     end))
 (module (tag $e))
 ";
@@ -755,7 +755,7 @@ fn tag_ref_undefined() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-  (func (throw $e 0))
+  (func (throw $e))
 )
 (module (tag $e))
 ";

@@ -59,32 +59,6 @@ expression: ref_1
     "uri": "untitled:test",
     "range": {
       "start": {
-        "line": 4,
-        "character": 15
-      },
-      "end": {
-        "line": 4,
-        "character": 16
-      }
-    }
-  },
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
-        "line": 5,
-        "character": 16
-      },
-      "end": {
-        "line": 5,
-        "character": 20
-      }
-    }
-  },
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
         "line": 3,
         "character": 60
       },
