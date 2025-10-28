@@ -9,7 +9,7 @@ use rowan::{TextRange, ast::AstNode};
 use rustc_hash::FxHashSet;
 use std::ops::ControlFlow;
 use wat_syntax::{
-    SyntaxKind, SyntaxNode, SyntaxToken,
+    SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage,
     ast::{BlockInstr, Cat, Instr},
 };
 
@@ -142,19 +142,7 @@ impl Checker<'_, '_> {
                     ) {
                         plain
                             .immediates()
-                            .filter_map(|immediate| {
-                                self.symbol_table
-                                    .resolved
-                                    .get(&SymbolKey::new(immediate.syntax()))
-                            })
-                            .for_each(|def_key| {
-                                let block = def_key.to_node(self.root);
-                                if block.kind() == SyntaxKind::BLOCK_LOOP {
-                                    self.start_jumps.insert(block);
-                                } else {
-                                    self.end_jumps.insert(block);
-                                }
-                            });
+                            .for_each(|immediate| self.add_jump(&immediate));
                     }
                     *unreachable |= helpers::is_stack_polymorphic(instr_name);
                 }
@@ -199,25 +187,31 @@ impl Checker<'_, '_> {
                         Cat::Catch(catch) => catch.label_index(),
                         Cat::CatchAll(catch_all) => catch_all.label_index(),
                     })
-                    .filter_map(|index| {
-                        self.symbol_table
-                            .resolved
-                            .get(&SymbolKey::new(index.syntax()))
-                    })
-                    .for_each(|def_key| {
-                        let block = def_key.to_node(self.root);
-                        if block.kind() == SyntaxKind::BLOCK_LOOP {
-                            self.start_jumps.insert(block);
-                        } else {
-                            self.end_jumps.insert(block);
-                        }
-                    });
+                    .for_each(|index| self.add_jump(&index));
                 if self.check_block_like(block_try_table.syntax()) {
                     *unreachable = true;
                 }
             }
         }
         ControlFlow::Continue(())
+    }
+
+    fn add_jump<N>(&mut self, node: &N)
+    where
+        N: AstNode<Language = WatLanguage>,
+    {
+        if let Some(def_key) = self
+            .symbol_table
+            .resolved
+            .get(&SymbolKey::new(node.syntax()))
+        {
+            let block = def_key.to_node(self.root);
+            if block.kind() == SyntaxKind::BLOCK_LOOP {
+                self.start_jumps.insert(block);
+            } else {
+                self.end_jumps.insert(block);
+            }
+        }
     }
 
     fn report_token(&mut self, token: &SyntaxToken) {
