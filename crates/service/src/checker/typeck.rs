@@ -265,20 +265,10 @@ fn check_instr<'db>(
         Instr::Block(block_instr) => {
             let node = block_instr.syntax();
             let signature = get_block_sig(shared.service, shared.document, node);
-            if let Some(diagnostic) = type_stack.check(
-                &signature
-                    .params
-                    .iter()
-                    .map(|(ty, _)| OperandType::Val(ty.clone()))
-                    .collect::<Vec<_>>(),
-                ReportRange::Instr(&instr),
-            ) {
-                diagnostics.push(diagnostic);
-            };
             let init_stack = signature
                 .params
-                .into_iter()
-                .map(|(ty, ..)| (OperandType::Val(ty), Some(instr.clone())))
+                .iter()
+                .map(|(ty, ..)| (OperandType::Val(ty.clone()), Some(instr.clone())))
                 .collect();
             let results = signature
                 .results
@@ -287,6 +277,16 @@ fn check_instr<'db>(
                 .collect::<Vec<_>>();
             match block_instr {
                 BlockInstr::Block(..) | BlockInstr::Loop(..) | BlockInstr::TryTable(..) => {
+                    if let Some(diagnostic) = type_stack.check(
+                        &signature
+                            .params
+                            .into_iter()
+                            .map(|(ty, _)| OperandType::Val(ty))
+                            .collect::<Vec<_>>(),
+                        ReportRange::Instr(&instr),
+                    ) {
+                        diagnostics.push(diagnostic);
+                    }
                     check_block_like(diagnostics, shared, node, init_stack, &results);
                 }
                 BlockInstr::If(block_if) => {
@@ -297,6 +297,16 @@ fn check_instr<'db>(
                         diagnostic
                             .message
                             .push_str(" for the condition of `if` block");
+                        diagnostics.push(diagnostic);
+                    }
+                    if let Some(diagnostic) = type_stack.check(
+                        &signature
+                            .params
+                            .into_iter()
+                            .map(|(ty, _)| OperandType::Val(ty))
+                            .collect::<Vec<_>>(),
+                        ReportRange::Instr(&instr),
+                    ) {
                         diagnostics.push(diagnostic);
                     }
                     if let Some(then_block) = block_if.then_block() {

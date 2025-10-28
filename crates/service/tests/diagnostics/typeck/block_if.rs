@@ -560,3 +560,25 @@ fn if_cond_correct() {
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
+
+#[test]
+fn param_type() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func (param f32 i32)
+    local.get 0
+    (if (param f32)
+      (i32.eqz
+        (local.get 1))
+      (then
+        (drop))
+      (else
+        (drop)))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
