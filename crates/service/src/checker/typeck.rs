@@ -543,7 +543,7 @@ fn resolve_sig<'db>(
     type_stack: &TypeStack<'db>,
 ) -> ResolvedSig<'db> {
     match instr_name {
-        "call" | "return_call" => instr
+        "call" | "return_call" | "throw" => instr
             .immediates()
             .next()
             .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))

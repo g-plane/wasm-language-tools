@@ -11,6 +11,7 @@ mod call;
 mod call_indirect;
 mod drop;
 mod elem;
+mod exception;
 mod func;
 mod global;
 mod local;
