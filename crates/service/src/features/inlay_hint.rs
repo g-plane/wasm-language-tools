@@ -135,6 +135,7 @@ impl LanguageService {
                                 match symbol.key.kind() {
                                     SyntaxKind::BLOCK_IF => "if",
                                     SyntaxKind::BLOCK_LOOP => "loop",
+                                    SyntaxKind::BLOCK_TRY_TABLE => "try_table",
                                     _ => "block",
                                 },
                                 name.ident(self),

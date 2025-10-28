@@ -994,3 +994,62 @@ fn field_ident_idx() {
     let response = service.hover(create_params(uri, 4, 18));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn tag_decl() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (tag $e (param i32) (result f32 f64)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 2, 8));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn tag_keyword() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (tag (param i32) (result f32 f64)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 2, 5));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn tag_int_idx() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (tag $e (param i32) (result f32 f64))
+  (func
+    try_table
+      throw 0 0
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 5, 12));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn tag_ident_idx() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (tag $e (param i32) (result f32 f64))
+  (func
+    try_table (catch $e 0)
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.hover(create_params(uri, 4, 22));
+    assert_json_snapshot!(response);
+}

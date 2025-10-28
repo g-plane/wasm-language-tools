@@ -95,6 +95,13 @@ impl LanguageService {
                                 token.text_range(),
                             )),
                         }),
+                        SymbolKind::TagRef => symbol_table.find_def(key).map(|symbol| Hover {
+                            contents: Union3::A(create_tag_def_hover(self, symbol, document)),
+                            range: Some(helpers::rowan_range_to_lsp_range(
+                                line_index,
+                                token.text_range(),
+                            )),
+                        }),
                         _ => None,
                     })
                     .or_else(|| {
@@ -131,11 +138,9 @@ impl LanguageService {
                 } else {
                     node
                 };
-                let key = SymbolKey::new(&node);
-
                 symbol_table
                     .symbols
-                    .get(&key)
+                    .get(&SymbolKey::new(&node))
                     .and_then(|symbol| create_def_hover(self, document, &root, symbol))
                     .map(|contents| Hover {
                         contents: Union3::A(contents),
@@ -227,6 +232,7 @@ fn create_def_hover(
         SymbolKind::TableDef => Some(create_table_def_hover(service, symbol, root)),
         SymbolKind::BlockDef => Some(create_block_hover(service, symbol, document, root)),
         SymbolKind::FieldDef => Some(create_field_def_hover(service, symbol, document)),
+        SymbolKind::TagDef => Some(create_tag_def_hover(service, symbol, document)),
         _ => None,
     }
 }
@@ -457,6 +463,23 @@ fn create_field_def_hover(
         let _ = write!(content, " {}", ty.render(service));
     }
     content.push(')');
+    MarkupContent {
+        kind: MarkupKind::Markdown,
+        value: format!("```wat\n{content}\n```"),
+    }
+}
+
+fn create_tag_def_hover(
+    service: &LanguageService,
+    symbol: &Symbol,
+    document: Document,
+) -> MarkupContent {
+    let content = types_analyzer::render_header(
+        service,
+        "tag",
+        symbol.idx.name,
+        types_analyzer::get_func_sig(service, document, *symbol.key, &symbol.green),
+    );
     MarkupContent {
         kind: MarkupKind::Markdown,
         value: format!("```wat\n{content}\n```"),

@@ -1,0 +1,20 @@
+---
+source: crates/service/tests/hover/mod.rs
+expression: response
+---
+{
+  "contents": {
+    "kind": "markdown",
+    "value": "```wat\n(tag $e (param i32) (result f32) (result f64))\n```"
+  },
+  "range": {
+    "start": {
+      "line": 4,
+      "character": 21
+    },
+    "end": {
+      "line": 4,
+      "character": 23
+    }
+  }
+}
