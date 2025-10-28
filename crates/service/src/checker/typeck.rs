@@ -1315,11 +1315,11 @@ fn resolve_sig<'db>(
                 })
                 .and_then(|key| def_types.get(key))
                 .map(|def_type| {
-                    let mut sig = if let CompositeType::Func(sig) = &def_type.comp {
-                        ResolvedSig::from(sig.clone())
-                    } else {
-                        ResolvedSig::default()
-                    };
+                    let mut sig = def_type
+                        .comp
+                        .as_func()
+                        .map(|sig| ResolvedSig::from(sig.clone()))
+                        .unwrap_or_default();
                     sig.params.push(OperandType::Val(ValType::Ref(RefType {
                         heap_ty: HeapType::Type(def_type.idx),
                         nullable: true,

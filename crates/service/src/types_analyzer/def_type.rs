@@ -191,6 +191,14 @@ impl<'db> CompositeType<'db> {
             _ => false,
         }
     }
+
+    pub(crate) fn as_func(&self) -> Option<&Signature<'db>> {
+        if let CompositeType::Func(sig) = self {
+            Some(sig)
+        } else {
+            None
+        }
+    }
 }
 
 #[salsa::tracked(returns(ref))]

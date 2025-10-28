@@ -362,13 +362,7 @@ pub fn check(
                         .resolved
                         .get(&SymbolKey::new(&immediate))
                         .and_then(|key| def_types.get(key))
-                        .and_then(|def_type| {
-                            if let CompositeType::Func(sig) = &def_type.comp {
-                                Some(sig)
-                            } else {
-                                None
-                            }
-                        })
+                        .and_then(|def_type| def_type.comp.as_func())
                         .and_then(|sig| {
                             check_return_call_result_type(
                                 service,
