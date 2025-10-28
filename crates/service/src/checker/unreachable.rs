@@ -10,7 +10,7 @@ use rustc_hash::FxHashSet;
 use std::ops::ControlFlow;
 use wat_syntax::{
     SyntaxKind, SyntaxNode, SyntaxToken,
-    ast::{BlockInstr, Instr},
+    ast::{BlockInstr, Cat, Instr},
 };
 
 const DIAGNOSTIC_CODE: &str = "unreachable";
@@ -192,7 +192,30 @@ impl Checker<'_, '_> {
                     }
                 }
             }
-            Instr::Block(BlockInstr::TryTable(..)) => {}
+            Instr::Block(BlockInstr::TryTable(block_try_table)) => {
+                block_try_table
+                    .catches()
+                    .filter_map(|cat| match cat {
+                        Cat::Catch(catch) => catch.label_index(),
+                        Cat::CatchAll(catch_all) => catch_all.label_index(),
+                    })
+                    .filter_map(|index| {
+                        self.symbol_table
+                            .resolved
+                            .get(&SymbolKey::new(index.syntax()))
+                    })
+                    .for_each(|def_key| {
+                        let block = def_key.to_node(self.root);
+                        if block.kind() == SyntaxKind::BLOCK_LOOP {
+                            self.start_jumps.insert(block);
+                        } else {
+                            self.end_jumps.insert(block);
+                        }
+                    });
+                if self.check_block_like(block_try_table.syntax()) {
+                    *unreachable = true;
+                }
+            }
         }
         ControlFlow::Continue(())
     }
@@ -219,6 +242,7 @@ fn is_block_like(node: &SyntaxNode) -> bool {
             | SyntaxKind::MODULE_FIELD_GLOBAL
             | SyntaxKind::BLOCK_BLOCK
             | SyntaxKind::BLOCK_LOOP
+            | SyntaxKind::BLOCK_TRY_TABLE
             | SyntaxKind::BLOCK_IF_THEN
             | SyntaxKind::BLOCK_IF_ELSE
     )

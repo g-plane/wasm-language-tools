@@ -74,6 +74,8 @@ pub fn is_stack_polymorphic(instr_name: &str) -> bool {
             | "return_call"
             | "return_call_indirect"
             | "return_call_ref"
+            | "throw"
+            | "throw_ref"
     )
 }
 

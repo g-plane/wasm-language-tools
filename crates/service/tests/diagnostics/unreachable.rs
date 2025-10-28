@@ -583,3 +583,46 @@ fn return_call_ref() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn exception() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (tag)
+  (func
+    block
+      try_table
+        throw 0
+        nop
+      end
+    end
+    nop)
+  (func
+    block $b
+      try_table (catch 0 $b)
+        throw 0
+        nop
+      end
+    end
+    nop)
+  (func
+    block $b
+      try_table (catch_all $b)
+        throw 0
+        nop
+      end
+    end
+    nop)
+  (func
+    (block $h
+      (try_table (catch_all $h)
+        (unreachable))
+      (return))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
