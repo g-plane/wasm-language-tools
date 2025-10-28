@@ -31,81 +31,34 @@ impl LanguageService {
                     .symbols
                     .get(&key)
                     .and_then(|symbol| match symbol.kind {
-                        SymbolKind::Call => symbol_table.find_def(key).map(|symbol| {
-                            let contents = create_func_hover(self, document, symbol.clone(), &root);
-                            Hover {
-                                contents: Union3::A(MarkupContent {
-                                    kind: MarkupKind::Markdown,
-                                    value: contents,
-                                }),
+                        SymbolKind::Call
+                        | SymbolKind::LocalRef
+                        | SymbolKind::TypeUse
+                        | SymbolKind::GlobalRef
+                        | SymbolKind::MemoryRef
+                        | SymbolKind::TableRef
+                        | SymbolKind::BlockRef
+                        | SymbolKind::FieldRef
+                        | SymbolKind::TagRef => symbol_table
+                            .find_def(key)
+                            .and_then(|symbol| create_def_hover(self, document, &root, symbol))
+                            .map(|contents| Hover {
+                                contents: Union3::A(contents),
                                 range: Some(helpers::rowan_range_to_lsp_range(
                                     line_index,
                                     token.text_range(),
                                 )),
-                            }
-                        }),
-                        SymbolKind::LocalRef => symbol_table.find_def(key).map(|symbol| Hover {
-                            contents: Union3::A(create_param_or_local_hover(
-                                self, document, symbol,
-                            )),
-                            range: Some(helpers::rowan_range_to_lsp_range(
-                                line_index,
-                                token.text_range(),
-                            )),
-                        }),
-                        SymbolKind::TypeUse => symbol_table.find_def(key).map(|symbol| Hover {
-                            contents: Union3::A(create_type_def_hover(self, document, symbol)),
-                            range: Some(helpers::rowan_range_to_lsp_range(
-                                line_index,
-                                token.text_range(),
-                            )),
-                        }),
-                        SymbolKind::GlobalRef => symbol_table.find_def(key).map(|symbol| Hover {
-                            contents: Union3::A(create_global_def_hover(self, symbol, &root)),
-                            range: Some(helpers::rowan_range_to_lsp_range(
-                                line_index,
-                                token.text_range(),
-                            )),
-                        }),
-                        SymbolKind::MemoryRef => symbol_table.find_def(key).map(|symbol| Hover {
-                            contents: Union3::A(create_memory_def_hover(self, symbol, &root)),
-                            range: Some(helpers::rowan_range_to_lsp_range(
-                                line_index,
-                                token.text_range(),
-                            )),
-                        }),
-                        SymbolKind::TableRef => symbol_table.find_def(key).map(|symbol| Hover {
-                            contents: Union3::A(create_table_def_hover(self, symbol, &root)),
-                            range: Some(helpers::rowan_range_to_lsp_range(
-                                line_index,
-                                token.text_range(),
-                            )),
-                        }),
-                        SymbolKind::BlockRef => symbol_table.find_def(key).map(|block| Hover {
-                            contents: Union3::A(create_block_hover(self, block, document, &root)),
-                            range: Some(helpers::rowan_range_to_lsp_range(
-                                line_index,
-                                token.text_range(),
-                            )),
-                        }),
-                        SymbolKind::FieldRef => symbol_table.find_def(key).map(|symbol| Hover {
-                            contents: Union3::A(create_field_def_hover(self, symbol, document)),
-                            range: Some(helpers::rowan_range_to_lsp_range(
-                                line_index,
-                                token.text_range(),
-                            )),
-                        }),
-                        SymbolKind::TagRef => symbol_table.find_def(key).map(|symbol| Hover {
-                            contents: Union3::A(create_tag_def_hover(self, symbol, document)),
-                            range: Some(helpers::rowan_range_to_lsp_range(
-                                line_index,
-                                token.text_range(),
-                            )),
-                        }),
-                        _ => None,
-                    })
-                    .or_else(|| {
-                        symbol_table
+                            }),
+                        SymbolKind::Func
+                        | SymbolKind::Param
+                        | SymbolKind::Local
+                        | SymbolKind::Type
+                        | SymbolKind::GlobalDef
+                        | SymbolKind::MemoryDef
+                        | SymbolKind::TableDef
+                        | SymbolKind::BlockDef
+                        | SymbolKind::FieldDef
+                        | SymbolKind::TagDef => symbol_table
                             .symbols
                             .get(&key)
                             .and_then(|symbol| create_def_hover(self, document, &root, symbol))
@@ -115,7 +68,8 @@ impl LanguageService {
                                     line_index,
                                     token.text_range(),
                                 )),
-                            })
+                            }),
+                        SymbolKind::Module => None,
                     })
             }
             SyntaxKind::TYPE_KEYWORD => {
