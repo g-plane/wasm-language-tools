@@ -16,3 +16,18 @@ fn result_type() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn non_func() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (type (array i32))
+  (tag (type 0)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

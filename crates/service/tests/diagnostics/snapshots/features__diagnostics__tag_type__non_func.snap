@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/tag_type.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 13
+        },
+        "end": {
+          "line": 3,
+          "character": 14
+        }
+      },
+      "severity": 1,
+      "code": "tag-type",
+      "source": "wat",
+      "message": "tag type must be function type"
+    }
+  ]
+}

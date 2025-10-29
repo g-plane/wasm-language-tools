@@ -232,7 +232,14 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                 const_expr::check(&mut diagnostics, line_index, &node);
             }
             SyntaxKind::MODULE_FIELD_TAG | SyntaxKind::EXTERN_TYPE_TAG => {
-                tag_type::check(&mut diagnostics, service, document, line_index, &node);
+                tag_type::check(
+                    &mut diagnostics,
+                    service,
+                    document,
+                    line_index,
+                    symbol_table,
+                    &node,
+                );
             }
             _ => {}
         });
