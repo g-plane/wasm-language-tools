@@ -21,6 +21,7 @@ mod shadow;
 mod start;
 mod subtyping;
 mod syntax;
+mod tag_type;
 mod type_misuse;
 mod typeck;
 mod undef;
@@ -229,6 +230,9 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
             }
             SyntaxKind::ELEM_EXPR => {
                 const_expr::check(&mut diagnostics, line_index, &node);
+            }
+            SyntaxKind::MODULE_FIELD_TAG | SyntaxKind::EXTERN_TYPE_TAG => {
+                tag_type::check(&mut diagnostics, service, document, line_index, &node);
             }
             _ => {}
         });

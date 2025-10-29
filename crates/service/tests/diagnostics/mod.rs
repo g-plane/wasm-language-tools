@@ -23,6 +23,7 @@ mod shadow;
 mod start;
 mod subtyping;
 mod syntax;
+mod tag_type;
 mod type_misuse;
 mod typeck;
 mod undef;

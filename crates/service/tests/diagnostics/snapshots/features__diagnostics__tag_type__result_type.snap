@@ -1,0 +1,41 @@
+---
+source: crates/service/tests/diagnostics/tag_type.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 21
+        },
+        "end": {
+          "line": 2,
+          "character": 33
+        }
+      },
+      "severity": 1,
+      "code": "tag-type",
+      "source": "wat",
+      "message": "tag type's result type must be empty"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 7
+        },
+        "end": {
+          "line": 3,
+          "character": 19
+        }
+      },
+      "severity": 1,
+      "code": "tag-type",
+      "source": "wat",
+      "message": "tag type's result type must be empty"
+    }
+  ]
+}
