@@ -123,28 +123,11 @@ pub(crate) struct RenderWithDb<'db, T> {
 
 pub(crate) mod ast {
     use rowan::{
-        Direction, GreenNodeData, NodeOrToken, TextSize, TokenAtOffset,
+        Direction, TextSize, TokenAtOffset,
         ast::{AstNode, support},
     };
     use std::ops::ControlFlow;
     use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, ast::RefType};
-
-    pub fn find_func_type_of_type_def(green: &GreenNodeData) -> Option<&GreenNodeData> {
-        green
-            .children()
-            .find_map(|child| match child {
-                NodeOrToken::Node(node) if node.kind() == SyntaxKind::SUB_TYPE.into() => Some(node),
-                _ => None,
-            })
-            .and_then(|sub_type| {
-                sub_type.children().find_map(|child| match child {
-                    NodeOrToken::Node(node) if node.kind() == SyntaxKind::FUNC_TYPE.into() => {
-                        Some(node)
-                    }
-                    _ => None,
-                })
-            })
-    }
 
     /// Pick the `$idx` part from `(func (type $idx) ...)`.
     /// It will return `None` if there're inlined params or results.

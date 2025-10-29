@@ -1,11 +1,11 @@
 use super::{
+    def_type::get_def_types,
     extractor::extract_sig,
     types::{OperandType, ValType},
 };
 use crate::{
     binder::{SymbolKey, SymbolTable},
     document::Document,
-    helpers,
     idx::InternIdent,
 };
 use rowan::{
@@ -106,11 +106,12 @@ pub(crate) fn get_func_sig<'db>(
             } else {
                 let node = ptr.to_node(&document.root_tree(db));
                 let symbol_table = SymbolTable::of(db, document);
+                let def_types = get_def_types(db, document);
                 support::child::<TypeUse>(&node)
                     .and_then(|type_use| type_use.index())
-                    .and_then(|idx| symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                    .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.green))
-                    .map(|func_type| extract_sig(db, func_type))
+                    .and_then(|idx| symbol_table.resolved.get(&SymbolKey::new(idx.syntax())))
+                    .and_then(|def_key| def_types.get(def_key))
+                    .and_then(|def_type| def_type.comp.as_func().cloned())
             }
         })
         .unwrap_or_default()
@@ -129,11 +130,12 @@ pub(crate) fn get_type_use_sig<'db>(
         extract_sig(db, type_use)
     } else {
         let symbol_table = SymbolTable::of(db, document);
+        let def_types = get_def_types(db, document);
         TypeUse::cast(ptr.to_node(&document.root_tree(db)))
             .and_then(|type_use| type_use.index())
-            .and_then(|idx| symbol_table.find_def(SymbolKey::new(idx.syntax())))
-            .and_then(|symbol| helpers::ast::find_func_type_of_type_def(&symbol.green))
-            .map(|func_type| extract_sig(db, func_type))
+            .and_then(|idx| symbol_table.resolved.get(&SymbolKey::new(idx.syntax())))
+            .and_then(|def_key| def_types.get(def_key))
+            .and_then(|def_type| def_type.comp.as_func().cloned())
             .unwrap_or_default()
     }
 }
