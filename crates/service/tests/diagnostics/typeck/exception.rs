@@ -60,3 +60,108 @@ fn throw() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn throw_ref() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (tag $e0)
+  (tag $e1)
+
+  (func
+    (throw_ref))
+  (func
+    (block
+      (throw_ref)))
+
+  (func (param i32) (result i32)
+    (block $h (result exnref)
+      (try_table (result i32) (catch_ref $e0 $h)
+        (throw $e0))
+      (return))
+    (if (param exnref)
+      (i32.eqz
+        (local.get 0))
+      (then
+        (throw_ref))
+      (else
+        (drop)))
+    (i32.const 23))
+
+  (func (param i32) (result i32)
+    (block $h (result exnref)
+      (try_table (result i32) (catch_all_ref $h)
+        (throw $e0))
+      (return))
+    (if (param exnref)
+      (i32.eqz
+        (local.get 0))
+      (then
+        (throw_ref))
+      (else
+        (drop)))
+    (i32.const 23))
+
+  (func (param i32) (result i32) (local $exn1 exnref) (local $exn2 exnref)
+    (block $h1 (result exnref)
+      (try_table (result i32) (catch_ref $e1 $h1)
+        (throw $e1))
+      (return))
+    (local.set $exn1)
+    (block $h2 (result exnref)
+      (try_table (result i32) (catch_ref $e0 $h2)
+        (throw $e0))
+      (return))
+    (local.set $exn2)
+    (if
+      (i32.eq
+        (local.get 0)
+        (i32.const 0))
+      (then
+        (throw_ref
+          (local.get $exn1))))
+    (if
+      (i32.eq
+        (local.get 0)
+        (i32.const 1))
+      (then
+        (throw_ref
+          (local.get $exn2))))
+    (i32.const 23))
+
+  (func (param i32) (result i32) (local $e exnref)
+    (block $h1 (result exnref)
+      (try_table (result i32) (catch_ref $e0 $h1)
+        (throw $e0))
+      (return))
+    (local.set $e)
+    (block $h2 (result exnref)
+      (try_table (result i32) (catch_ref $e0 $h2)
+        (if
+          (i32.eqz
+            (local.get 0))
+          (then
+            (throw_ref
+              (local.get $e))))
+        (i32.const 42))
+      (return))
+    (drop)
+    (i32.const 23))
+
+  (func (local $e exnref)
+    (block $h (result exnref)
+      (try_table (result f64) (catch_ref $e0 $h)
+        (throw $e0))
+      (unreachable))
+    (local.set $e)
+    (i32.const 1)
+    (throw_ref
+      (local.get $e))))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
