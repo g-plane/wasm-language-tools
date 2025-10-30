@@ -29,6 +29,7 @@ mod uninit;
 mod unknown_instr;
 mod unreachable;
 mod unused;
+mod useless_catch;
 
 pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
     // Some clients like VS Code support pulling configuration per document.
@@ -236,6 +237,17 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                     &mut diagnostics,
                     service,
                     document,
+                    line_index,
+                    symbol_table,
+                    &node,
+                );
+            }
+            SyntaxKind::BLOCK_TRY_TABLE => {
+                useless_catch::check(
+                    service,
+                    &mut diagnostics,
+                    config.lint.useless_catch,
+                    uri,
                     line_index,
                     symbol_table,
                     &node,

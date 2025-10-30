@@ -31,6 +31,7 @@ mod uninit;
 mod unknown_instr;
 mod unreachable;
 mod unused;
+mod useless_catch;
 
 fn create_params(uri: String) -> DocumentDiagnosticParams {
     DocumentDiagnosticParams {
@@ -50,6 +51,7 @@ fn calm(service: &mut LanguageService, uri: String) {
                 unused: LintLevel::Allow,
                 unreachable: LintLevel::Allow,
                 needless_mut: LintLevel::Allow,
+                useless_catch: LintLevel::Allow,
                 ..Default::default()
             },
             ..Default::default()

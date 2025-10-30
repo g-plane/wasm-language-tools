@@ -44,6 +44,10 @@ pub struct Lints {
     #[serde(alias = "multiMemories")]
     /// Lint for detecting multiple memories in one module.
     pub multi_memories: LintLevel,
+
+    #[serde(alias = "uselessCatch")]
+    /// Lint for detecting useless catch clauses.
+    pub useless_catch: LintLevel,
 }
 
 impl Default for Lints {
@@ -56,6 +60,7 @@ impl Default for Lints {
             unreachable: LintLevel::Hint,
             needless_mut: LintLevel::Warn,
             multi_memories: LintLevel::Allow,
+            useless_catch: LintLevel::Warn,
         }
     }
 }

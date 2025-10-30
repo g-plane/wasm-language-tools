@@ -1,0 +1,77 @@
+---
+source: crates/service/tests/diagnostics/useless_catch.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 30
+        },
+        "end": {
+          "line": 5,
+          "character": 41
+        }
+      },
+      "severity": 2,
+      "code": "useless-catch",
+      "source": "wat",
+      "message": "this catch clause will never be matched",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 16
+              },
+              "end": {
+                "line": 5,
+                "character": 29
+              }
+            }
+          },
+          "message": "catch clause already matched here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 42
+        },
+        "end": {
+          "line": 5,
+          "character": 55
+        }
+      },
+      "severity": 2,
+      "code": "useless-catch",
+      "source": "wat",
+      "message": "this catch clause will never be matched",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 16
+              },
+              "end": {
+                "line": 5,
+                "character": 29
+              }
+            }
+          },
+          "message": "catch clause already matched here"
+        }
+      ]
+    }
+  ]
+}
