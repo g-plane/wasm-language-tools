@@ -45,6 +45,10 @@ pub struct Lints {
     /// Lint for detecting multiple memories in one module.
     pub multi_memories: LintLevel,
 
+    #[serde(alias = "needlessTryTable")]
+    /// Lint for detecting `try_table` block without catch clauses.
+    pub needless_try_table: LintLevel,
+
     #[serde(alias = "uselessCatch")]
     /// Lint for detecting useless catch clauses.
     pub useless_catch: LintLevel,
@@ -60,6 +64,7 @@ impl Default for Lints {
             unreachable: LintLevel::Hint,
             needless_mut: LintLevel::Warn,
             multi_memories: LintLevel::Allow,
+            needless_try_table: LintLevel::Warn,
             useless_catch: LintLevel::Warn,
         }
     }

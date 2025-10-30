@@ -9,6 +9,7 @@ fn disable_other_lints(service: &mut LanguageService, uri: String) {
             lint: Lints {
                 unused: LintLevel::Allow,
                 unreachable: LintLevel::Warn,
+                needless_try_table: LintLevel::Allow,
                 ..Default::default()
             },
             ..Default::default()

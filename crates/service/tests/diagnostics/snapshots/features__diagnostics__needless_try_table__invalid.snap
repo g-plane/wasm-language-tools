@@ -1,0 +1,41 @@
+---
+source: crates/service/tests/diagnostics/needless_try_table.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 4
+        },
+        "end": {
+          "line": 4,
+          "character": 13
+        }
+      },
+      "severity": 2,
+      "code": "needless-try-table",
+      "source": "wat",
+      "message": "`try_table` block without catch clauses is unnecessary"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 7
+        },
+        "end": {
+          "line": 5,
+          "character": 16
+        }
+      },
+      "severity": 2,
+      "code": "needless-try-table",
+      "source": "wat",
+      "message": "`try_table` block without catch clauses is unnecessary"
+    }
+  ]
+}
