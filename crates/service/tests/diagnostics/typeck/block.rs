@@ -292,3 +292,18 @@ fn results_correct() {
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
+
+#[test]
+fn try_table() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func (result i32)
+    (try_table (result i32))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

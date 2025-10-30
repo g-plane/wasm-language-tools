@@ -52,6 +52,7 @@ fn calm(service: &mut LanguageService, uri: String) {
                 unused: LintLevel::Allow,
                 unreachable: LintLevel::Allow,
                 needless_mut: LintLevel::Allow,
+                needless_try_table: LintLevel::Allow,
                 useless_catch: LintLevel::Allow,
                 ..Default::default()
             },
