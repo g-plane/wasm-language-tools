@@ -9,7 +9,7 @@ fn throw() {
 (module
   (tag $e0)
   (tag $e-i32 (param i32))
-  (tag $e-i32-i32 (param i32 i32))
+  (import "" "" (tag $e-i32-i32 (param i32 i32)))
 
   (func (param i32) (result i32)
     (local.get 0)
