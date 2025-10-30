@@ -1,6 +1,6 @@
 use crate::{config::LintLevel, helpers};
 use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, Union2};
+use lspt::{Diagnostic, DiagnosticSeverity, DiagnosticTag, Union2};
 use rowan::ast::{AstNode, support};
 use wat_syntax::{SyntaxKind, SyntaxNode, ast::Cat};
 
@@ -27,6 +27,7 @@ pub fn check(
             source: Some("wat".into()),
             code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
             message: "`try_table` block without catch clauses is unnecessary".into(),
+            tags: Some(vec![DiagnosticTag::Unnecessary]),
             ..Default::default()
         });
     }

@@ -19,7 +19,10 @@ expression: response
       "severity": 2,
       "code": "needless-try-table",
       "source": "wat",
-      "message": "`try_table` block without catch clauses is unnecessary"
+      "message": "`try_table` block without catch clauses is unnecessary",
+      "tags": [
+        1
+      ]
     },
     {
       "range": {
@@ -35,7 +38,10 @@ expression: response
       "severity": 2,
       "code": "needless-try-table",
       "source": "wat",
-      "message": "`try_table` block without catch clauses is unnecessary"
+      "message": "`try_table` block without catch clauses is unnecessary",
+      "tags": [
+        1
+      ]
     }
   ]
 }

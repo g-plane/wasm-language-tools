@@ -20,6 +20,9 @@ expression: response
       "code": "useless-catch",
       "source": "wat",
       "message": "this catch clause will never be matched",
+      "tags": [
+        1
+      ],
       "relatedInformation": [
         {
           "location": {

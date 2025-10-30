@@ -6,7 +6,9 @@ use crate::{
     uri::InternUri,
 };
 use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
+use lspt::{
+    Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, DiagnosticTag, Location, Union2,
+};
 use rowan::ast::{AstNode, support};
 use rustc_hash::FxHashMap;
 use wat_syntax::{
@@ -97,6 +99,7 @@ fn build_diagnostic(
         source: Some("wat".into()),
         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
         message: "this catch clause will never be matched".into(),
+        tags: Some(vec![DiagnosticTag::Unnecessary]),
         related_information: Some(vec![DiagnosticRelatedInformation {
             location: Location {
                 uri: uri.raw(service),
