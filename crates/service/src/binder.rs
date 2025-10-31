@@ -731,7 +731,10 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 {
                     symbols.insert(symbol.key, symbol);
                 }
-                if let Some(region) = find_up_block(&node).map(|node| SymbolKey::new(&node))
+                if let Some(region) = node
+                    .parent()
+                    .and_then(|parent| find_up_block(&parent))
+                    .map(|node| SymbolKey::new(&node))
                     && let Some(symbol) = children
                         .next()
                         .and_then(|node| create_ref_symbol(db, &node, region, SymbolKind::BlockRef))
@@ -743,7 +746,10 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 }
             }
             SyntaxKind::CATCH_ALL => {
-                if let Some(region) = find_up_block(&node).map(|node| SymbolKey::new(&node))
+                if let Some(region) = node
+                    .parent()
+                    .and_then(|parent| find_up_block(&parent))
+                    .map(|node| SymbolKey::new(&node))
                     && let Some(symbol) = node
                         .first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
                         .and_then(|node| create_ref_symbol(db, &node, region, SymbolKind::BlockRef))

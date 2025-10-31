@@ -114,13 +114,15 @@ fn try_table() {
     let source = "
 (module
   (func
-    try_table $try (catch $e 0) (catch_ref $e 0) (catch_all $try) (catch_all_ref $try)
+    block $b
+      try_table (catch $e 0) (catch_ref $e 0) (catch_all $b) (catch_all_ref $b)
+      end
     end))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
-    let def = service.find_references(create_params(uri.clone(), 3, 16, true));
+    let def = service.find_references(create_params(uri.clone(), 3, 11, true));
     assert_json_snapshot!(def);
-    let ref_1 = service.find_references(create_params(uri.clone(), 3, 46, true));
+    let ref_1 = service.find_references(create_params(uri.clone(), 4, 43, true));
     assert_json_snapshot!(ref_1);
 }

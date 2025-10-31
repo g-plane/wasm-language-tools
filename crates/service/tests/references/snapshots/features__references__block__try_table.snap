@@ -8,11 +8,11 @@ expression: def
     "range": {
       "start": {
         "line": 3,
-        "character": 14
+        "character": 10
       },
       "end": {
         "line": 3,
-        "character": 18
+        "character": 12
       }
     }
   },
@@ -20,12 +20,12 @@ expression: def
     "uri": "untitled:test",
     "range": {
       "start": {
-        "line": 3,
-        "character": 46
+        "line": 4,
+        "character": 43
       },
       "end": {
-        "line": 3,
-        "character": 47
+        "line": 4,
+        "character": 44
       }
     }
   },
@@ -33,12 +33,12 @@ expression: def
     "uri": "untitled:test",
     "range": {
       "start": {
-        "line": 3,
-        "character": 29
+        "line": 4,
+        "character": 57
       },
       "end": {
-        "line": 3,
-        "character": 30
+        "line": 4,
+        "character": 59
       }
     }
   },
@@ -46,12 +46,12 @@ expression: def
     "uri": "untitled:test",
     "range": {
       "start": {
-        "line": 3,
-        "character": 81
+        "line": 4,
+        "character": 26
       },
       "end": {
-        "line": 3,
-        "character": 85
+        "line": 4,
+        "character": 27
       }
     }
   },
@@ -59,12 +59,12 @@ expression: def
     "uri": "untitled:test",
     "range": {
       "start": {
-        "line": 3,
-        "character": 60
+        "line": 4,
+        "character": 76
       },
       "end": {
-        "line": 3,
-        "character": 64
+        "line": 4,
+        "character": 78
       }
     }
   }

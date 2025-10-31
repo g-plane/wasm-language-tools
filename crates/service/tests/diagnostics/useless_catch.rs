@@ -24,7 +24,7 @@ fn valid() {
   (tag)
   (func
     block
-      try_table (catch 0 1) (catch 1 2) (catch_all 1)
+      try_table (catch 0 0) (catch 1 1) (catch_all 0)
       end
     end))
 "#;
@@ -43,7 +43,7 @@ fn after_catch() {
   (tag $e)
   (func
     block
-      try_table (catch 0 1) (catch $e 2) (catch_all 1)
+      try_table (catch 0 0) (catch $e 1) (catch_all 0)
       end
     end))
 "#;
@@ -62,7 +62,7 @@ fn after_catch_all() {
   (tag)
   (func
     block
-      try_table (catch_all 1) (catch 0 2) (catch_all 2)
+      try_table (catch_all 0) (catch 0 1) (catch_all 1)
       end
     end))
 "#;
@@ -81,7 +81,7 @@ fn after_catch_and_catch_all() {
   (tag $e)
   (func
     block
-      try_table (catch $e 1) (catch_all 1) (catch 0 2)
+      try_table (catch $e 0) (catch_all 0) (catch 0 1)
       end
     end))
 "#;
