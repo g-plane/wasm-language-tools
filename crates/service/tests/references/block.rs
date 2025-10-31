@@ -109,7 +109,7 @@ fn block_relation() {
 }
 
 #[test]
-fn try_table() {
+fn catch() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
