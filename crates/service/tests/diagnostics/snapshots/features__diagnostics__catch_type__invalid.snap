@@ -1,0 +1,189 @@
+---
+source: crates/service/tests/diagnostics/catch_type.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 28
+        },
+        "end": {
+          "line": 5,
+          "character": 29
+        }
+      },
+      "severity": 1,
+      "code": "catch-type",
+      "source": "wat",
+      "message": "result type [(ref exn)] should match result type of block `0`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 24
+        },
+        "end": {
+          "line": 7,
+          "character": 25
+        }
+      },
+      "severity": 1,
+      "code": "catch-type",
+      "source": "wat",
+      "message": "result type [] should match result type of block `0`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 30
+        },
+        "end": {
+          "line": 10,
+          "character": 31
+        }
+      },
+      "severity": 1,
+      "code": "catch-type",
+      "source": "wat",
+      "message": "result type [(ref exn)] should match result type of block `0`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 12,
+          "character": 26
+        },
+        "end": {
+          "line": 12,
+          "character": 27
+        }
+      },
+      "severity": 1,
+      "code": "catch-type",
+      "source": "wat",
+      "message": "result type [] should match result type of block `0`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 16,
+          "character": 21
+        },
+        "end": {
+          "line": 16,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, (ref null exn)], found [i32] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 15,
+                "character": 15
+              },
+              "end": {
+                "line": 15,
+                "character": 27
+              }
+            }
+          },
+          "message": "expected type `(ref null exn)`, found `i32`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 15,
+          "character": 41
+        },
+        "end": {
+          "line": 15,
+          "character": 42
+        }
+      },
+      "severity": 1,
+      "code": "catch-type",
+      "source": "wat",
+      "message": "result type [i64, (ref exn)] should match result type of block `0`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 22,
+          "character": 27
+        },
+        "end": {
+          "line": 22,
+          "character": 29
+        }
+      },
+      "severity": 1,
+      "code": "catch-type",
+      "source": "wat",
+      "message": "result type [(ref null $t)] should match result type of block `$l`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 27,
+          "character": 20
+        },
+        "end": {
+          "line": 27,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref $t)], found [(ref $t), (ref exn)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 25,
+                "character": 14
+              },
+              "end": {
+                "line": 25,
+                "character": 41
+              }
+            }
+          },
+          "message": "expected type `(ref $t)`, found `(ref exn)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 26,
+          "character": 31
+        },
+        "end": {
+          "line": 26,
+          "character": 33
+        }
+      },
+      "severity": 1,
+      "code": "catch-type",
+      "source": "wat",
+      "message": "result type [(ref null $t), (ref exn)] should match result type of block `$l`"
+    }
+  ]
+}

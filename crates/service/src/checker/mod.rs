@@ -4,6 +4,7 @@ use wat_syntax::SyntaxKind;
 
 mod block_type;
 mod br_table_branches;
+mod catch_type;
 mod const_expr;
 mod dup_names;
 mod elem_type;
@@ -259,6 +260,19 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                     symbol_table,
                     &node,
                 );
+            }
+            SyntaxKind::CATCH | SyntaxKind::CATCH_ALL => {
+                if let Some(diagnostic) = catch_type::check(
+                    service,
+                    document,
+                    line_index,
+                    &root,
+                    symbol_table,
+                    module_id,
+                    node,
+                ) {
+                    diagnostics.push(diagnostic);
+                }
             }
             _ => {}
         });
