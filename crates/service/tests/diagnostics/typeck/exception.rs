@@ -165,3 +165,86 @@ fn throw_ref() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn try_table() {
+    let uri = "untitled:test".to_string();
+    let source = r"
+(module
+  (tag $e0)
+  (tag $e1)
+  (tag $e2)
+  (tag $e-f32 (param f32))
+
+  (func (param i32) (result i32)
+    (block $h1
+      (try_table (result i32) (catch $e1 $h1)
+        (block $h0
+          (try_table (result i32) (catch $e0 $h0)
+            (if
+              (i32.eqz
+                (local.get 0))
+              (then
+                (throw $e0))
+              (else
+                (if
+                  (i32.eq
+                    (local.get 0)
+                    (i32.const 1))
+                  (then
+                    (throw $e1))
+                  (else
+                    (throw $e2)))))
+            (i32.const 2))
+          (br 1))
+        (i32.const 3))
+      (return))
+    (i32.const 4))
+
+  (func (param f32) (result f32)
+    (block $h (result f32)
+      (try_table (result f32) (catch $e-f32 $h)
+        (throw $e-f32
+          (local.get 0))
+        (f32.const 0))
+      (return))
+    (return))
+
+  (func (param f32) (result f32)
+    (block $h (result f32 exnref)
+      (try_table (result f32) (catch_ref $e-f32 $h)
+        (throw $e-f32
+          (local.get 0))
+        (f32.const 0))
+      (return))
+    (drop)
+    (return))
+
+  (func $throw-if (param i32) (result i32)
+    (local.get 0)
+    (i32.const 0)
+    (if
+      (i32.ne)
+      (then
+        (throw $e0)))
+    (i32.const 0))
+  (func (param i32) (result i32)
+    (block $h
+      (try_table (result i32) (catch $e0 $h)
+        (try_table (result i32)
+          (call $throw-if
+            (local.get 0))))
+      (return))
+    (i32.const 1))
+
+  (func
+    (i32.const 0)
+    (try_table (param i32)
+      (drop))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
