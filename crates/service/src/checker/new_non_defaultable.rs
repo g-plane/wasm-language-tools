@@ -14,12 +14,11 @@ const DIAGNOSTIC_CODE: &str = "new-non-defaultable";
 
 pub fn check(
     service: &LanguageService,
-    diagnostics: &mut Vec<Diagnostic>,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
-) -> Option<()> {
+) -> Option<Diagnostic> {
     let def_types = types_analyzer::get_def_types(service, document);
     let immediate = node.first_child()?;
     let instr_name = support::token(node, SyntaxKind::INSTR_NAME)?;
@@ -42,8 +41,10 @@ pub fn check(
                     _ => None,
                 })
                 .collect::<Vec<_>>();
-            if !non_defaultables.is_empty() {
-                diagnostics.push(Diagnostic {
+            if non_defaultables.is_empty() {
+                None
+            } else {
+                Some(Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
                     severity: Some(DiagnosticSeverity::Error),
                     source: Some("wat".into()),
@@ -81,26 +82,23 @@ pub fn check(
                             .collect(),
                     ),
                     ..Default::default()
-                });
+                })
             }
         }
         CompositeType::Array(Some(FieldType {
             storage: StorageType::Val(ty),
             ..
-        })) if !ty.defaultable() => {
-            diagnostics.push(Diagnostic {
-                range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
-                severity: Some(DiagnosticSeverity::Error),
-                source: Some("wat".into()),
-                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                message: format!(
-                    "array type `{}` is not defaultable",
-                    def_symbol.idx.render(service)
-                ),
-                ..Default::default()
-            });
-        }
-        _ => {}
+        })) if !ty.defaultable() => Some(Diagnostic {
+            range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
+            severity: Some(DiagnosticSeverity::Error),
+            source: Some("wat".into()),
+            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+            message: format!(
+                "array type `{}` is not defaultable",
+                def_symbol.idx.render(service)
+            ),
+            ..Default::default()
+        }),
+        _ => None,
     }
-    Some(())
 }

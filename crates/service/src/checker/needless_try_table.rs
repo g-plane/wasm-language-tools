@@ -7,13 +7,12 @@ use wat_syntax::{SyntaxKind, SyntaxNode, ast::Cat};
 const DIAGNOSTIC_CODE: &str = "needless-try-table";
 
 pub fn check(
-    diagnostics: &mut Vec<Diagnostic>,
     lint_level: LintLevel,
     line_index: &LineIndex,
     node: &SyntaxNode,
-) {
+) -> Option<Diagnostic> {
     let severity = match lint_level {
-        LintLevel::Allow => return,
+        LintLevel::Allow => return None,
         LintLevel::Hint => DiagnosticSeverity::Hint,
         LintLevel::Warn => DiagnosticSeverity::Warning,
         LintLevel::Deny => DiagnosticSeverity::Error,
@@ -21,7 +20,7 @@ pub fn check(
     if let Some(keyword) = support::token(node, SyntaxKind::KEYWORD)
         && !node.children().any(|child| Cat::can_cast(child.kind()))
     {
-        diagnostics.push(Diagnostic {
+        Some(Diagnostic {
             range: helpers::rowan_range_to_lsp_range(line_index, keyword.text_range()),
             severity: Some(severity),
             source: Some("wat".into()),
@@ -29,6 +28,8 @@ pub fn check(
             message: "`try_table` block without catch clauses is unnecessary".into(),
             tags: Some(vec![DiagnosticTag::Unnecessary]),
             ..Default::default()
-        });
+        })
+    } else {
+        None
     }
 }

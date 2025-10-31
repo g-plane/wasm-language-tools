@@ -15,13 +15,12 @@ const DIAGNOSTIC_CODE: &str = "packing";
 
 pub fn check(
     service: &LanguageService,
-    diagnostics: &mut Vec<Diagnostic>,
     uri: InternUri,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
-) -> Option<()> {
+) -> Option<Diagnostic> {
     let instr_name = support::token(node, SyntaxKind::INSTR_NAME)?;
     match instr_name.text() {
         "struct.get" => {
@@ -29,7 +28,7 @@ pub fn check(
             if let Some((_, symbol)) =
                 find_struct_field(symbol_table, def_types, node).filter(|(ty, _)| ty.is_packed())
             {
-                diagnostics.push(Diagnostic {
+                Some(Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
                     severity: Some(DiagnosticSeverity::Error),
                     source: Some("wat".into()),
@@ -46,7 +45,9 @@ pub fn check(
                         message: "use `struct.get_s` or `struct.get_u` instead".into(),
                     }]),
                     ..Default::default()
-                });
+                })
+            } else {
+                None
             }
         }
         "struct.get_s" | "struct.get_u" => {
@@ -54,7 +55,7 @@ pub fn check(
             if let Some((_, symbol)) =
                 find_struct_field(symbol_table, def_types, node).filter(|(ty, _)| !ty.is_packed())
             {
-                diagnostics.push(Diagnostic {
+                Some(Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
                     severity: Some(DiagnosticSeverity::Error),
                     source: Some("wat".into()),
@@ -71,7 +72,9 @@ pub fn check(
                         message: "use `struct.get` instead".into(),
                     }]),
                     ..Default::default()
-                });
+                })
+            } else {
+                None
             }
         }
         "array.get" => {
@@ -79,7 +82,7 @@ pub fn check(
             if let Some((_, symbol)) =
                 find_array(symbol_table, def_types, node).filter(|(ty, _)| ty.is_packed())
             {
-                diagnostics.push(Diagnostic {
+                Some(Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
                     severity: Some(DiagnosticSeverity::Error),
                     source: Some("wat".into()),
@@ -96,7 +99,9 @@ pub fn check(
                         message: "use `array.get_s` or `array.get_u` instead".into(),
                     }]),
                     ..Default::default()
-                });
+                })
+            } else {
+                None
             }
         }
         "array.get_s" | "array.get_u" => {
@@ -104,7 +109,7 @@ pub fn check(
             if let Some((_, symbol)) =
                 find_array(symbol_table, def_types, node).filter(|(ty, _)| !ty.is_packed())
             {
-                diagnostics.push(Diagnostic {
+                Some(Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
                     severity: Some(DiagnosticSeverity::Error),
                     source: Some("wat".into()),
@@ -121,12 +126,13 @@ pub fn check(
                         message: "use `array.get` instead".into(),
                     }]),
                     ..Default::default()
-                });
+                })
+            } else {
+                None
             }
         }
-        _ => {}
+        _ => None,
     }
-    Some(())
 }
 
 fn find_struct_field<'db>(
@@ -160,10 +166,7 @@ fn find_array<'db>(
     def_types: &'db DefTypes<'db>,
     node: &SyntaxNode,
 ) -> Option<(&'db StorageType<'db>, &'db Symbol<'db>)> {
-    let ref_key = SymbolKey::new(
-        &node
-            .first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)?,
-    );
+    let ref_key = SymbolKey::new(&node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)?);
     let ref_symbol = symbol_table.symbols.get(&ref_key)?;
     if let Some(CompositeType::Array(Some(FieldType { storage, .. }))) = def_types
         .get(symbol_table.resolved.get(&ref_key)?)

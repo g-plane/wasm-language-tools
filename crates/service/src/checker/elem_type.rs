@@ -15,9 +15,7 @@ use wat_syntax::{
 
 const DIAGNOSTIC_CODE: &str = "elem-type";
 
-#[expect(clippy::too_many_arguments)]
 pub fn check(
-    diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
     document: Document,
     line_index: &LineIndex,
@@ -25,7 +23,7 @@ pub fn check(
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
-) -> Option<()> {
+) -> Option<Diagnostic> {
     let elem = ModuleFieldElem::cast(node.clone())?;
     let table = ModuleFieldTable::cast(
         symbol_table
@@ -37,8 +35,10 @@ pub fn check(
     let table_ref_type = RefType::from_green(&table_ref_type_node.syntax().green(), service)?;
     let elem_ref_type_node = elem.elem_list()?.ref_type()?;
     let elem_ref_type = RefType::from_green(&elem_ref_type_node.syntax().green(), service)?;
-    if !elem_ref_type.matches(&table_ref_type, service, document, module_id) {
-        diagnostics.push(Diagnostic {
+    if elem_ref_type.matches(&table_ref_type, service, document, module_id) {
+        None
+    } else {
+        Some(Diagnostic {
             range: helpers::rowan_range_to_lsp_range(
                 line_index,
                 elem_ref_type_node.syntax().text_range(),
@@ -62,7 +62,6 @@ pub fn check(
                 message: "table's ref type declared here".into(),
             }]),
             ..Default::default()
-        });
+        })
     }
-    Some(())
 }
