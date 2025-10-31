@@ -109,6 +109,24 @@ fn block_relation() {
 }
 
 #[test]
+fn try_table() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    try_table $b
+      br 0
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let def = service.find_references(create_params(uri.clone(), 3, 15, true));
+    assert_json_snapshot!(def);
+    let ref_1 = service.find_references(create_params(uri.clone(), 4, 9, true));
+    assert_json_snapshot!(ref_1);
+}
+
+#[test]
 fn catch() {
     let uri = "untitled:test".to_string();
     let source = "

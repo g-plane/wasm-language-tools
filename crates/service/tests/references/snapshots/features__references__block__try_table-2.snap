@@ -1,0 +1,32 @@
+---
+source: crates/service/tests/references/block.rs
+expression: ref_1
+---
+[
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 14
+      },
+      "end": {
+        "line": 3,
+        "character": 16
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 4,
+        "character": 9
+      },
+      "end": {
+        "line": 4,
+        "character": 10
+      }
+    }
+  }
+]
