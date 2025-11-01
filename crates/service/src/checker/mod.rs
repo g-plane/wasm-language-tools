@@ -117,7 +117,9 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                     symbol_table,
                     &node,
                 );
-                const_expr::check(&mut diagnostics, line_index, &node);
+                if let Some(diagnostic) = const_expr::check(line_index, &node) {
+                    diagnostics.push(diagnostic);
+                }
             }
             SyntaxKind::MODULE_FIELD_IMPORT => {
                 if let Some(diagnostic) = import_occur::check(line_index, &node) {
@@ -181,7 +183,9 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                     module_id,
                     &node,
                 );
-                const_expr::check(&mut diagnostics, line_index, &node);
+                if let Some(diagnostic) = const_expr::check(line_index, &node) {
+                    diagnostics.push(diagnostic);
+                }
             }
             SyntaxKind::MODULE_FIELD_ELEM => {
                 if let Some(diagnostic) = elem_type::check(
@@ -209,7 +213,9 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                     module_id,
                     &node,
                 );
-                const_expr::check(&mut diagnostics, line_index, &node);
+                if let Some(diagnostic) = const_expr::check(line_index, &node) {
+                    diagnostics.push(diagnostic);
+                }
             }
             SyntaxKind::ELEM_LIST => {
                 typeck::check_elem_list(
@@ -223,7 +229,9 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                 );
             }
             SyntaxKind::ELEM_EXPR => {
-                const_expr::check(&mut diagnostics, line_index, &node);
+                if let Some(diagnostic) = const_expr::check(line_index, &node) {
+                    diagnostics.push(diagnostic);
+                }
             }
             SyntaxKind::MODULE_FIELD_TAG | SyntaxKind::EXTERN_TYPE_TAG => {
                 tag_type::check(

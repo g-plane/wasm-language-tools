@@ -12,56 +12,8 @@ expression: response
           "character": 4
         },
         "end": {
-          "line": 5,
-          "character": 20
-        }
-      },
-      "severity": 1,
-      "code": "const-expr",
-      "source": "wat",
-      "message": "expression must be constant"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 6,
-          "character": 4
-        },
-        "end": {
-          "line": 6,
-          "character": 16
-        }
-      },
-      "severity": 1,
-      "code": "const-expr",
-      "source": "wat",
-      "message": "expression must be constant"
-    },
-    {
-      "range": {
-        "start": {
           "line": 7,
-          "character": 4
-        },
-        "end": {
-          "line": 8,
-          "character": 7
-        }
-      },
-      "severity": 1,
-      "code": "const-expr",
-      "source": "wat",
-      "message": "expression must be constant"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 9,
-          "character": 4
-        },
-        "end": {
-          "line": 9,
-          "character": 10
+          "character": 23
         }
       },
       "severity": 1,
@@ -88,46 +40,12 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 15,
-          "character": 13
+          "line": 13,
+          "character": 6
         },
         "end": {
-          "line": 15,
-          "character": 14
-        }
-      },
-      "severity": 1,
-      "code": "type-check",
-      "source": "wat",
-      "message": "expected types [(ref null func)], found [i32] at the end",
-      "relatedInformation": [
-        {
-          "location": {
-            "uri": "untitled:test",
-            "range": {
-              "start": {
-                "line": 15,
-                "character": 4
-              },
-              "end": {
-                "line": 15,
-                "character": 13
-              }
-            }
-          },
-          "message": "expected type `(ref null func)`, found `i32`"
-        }
-      ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 15,
-          "character": 4
-        },
-        "end": {
-          "line": 15,
-          "character": 13
+          "line": 14,
+          "character": 22
         }
       },
       "severity": 1,
@@ -138,12 +56,12 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 20,
+          "line": 18,
           "character": 6
         },
         "end": {
           "line": 20,
-          "character": 15
+          "character": 9
         }
       },
       "severity": 1,
@@ -155,61 +73,11 @@ expression: response
       "range": {
         "start": {
           "line": 25,
-          "character": 15
-        },
-        "end": {
-          "line": 25,
-          "character": 16
-        }
-      },
-      "severity": 1,
-      "code": "type-check",
-      "source": "wat",
-      "message": "expected types [(ref null func)], found [i32] at the end",
-      "relatedInformation": [
-        {
-          "location": {
-            "uri": "untitled:test",
-            "range": {
-              "start": {
-                "line": 25,
-                "character": 6
-              },
-              "end": {
-                "line": 25,
-                "character": 15
-              }
-            }
-          },
-          "message": "expected type `(ref null func)`, found `i32`"
-        }
-      ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 25,
           "character": 6
         },
         "end": {
-          "line": 25,
-          "character": 15
-        }
-      },
-      "severity": 1,
-      "code": "const-expr",
-      "source": "wat",
-      "message": "expression must be constant"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 32,
-          "character": 6
-        },
-        "end": {
-          "line": 32,
-          "character": 15
+          "line": 27,
+          "character": 9
         }
       },
       "severity": 1,
