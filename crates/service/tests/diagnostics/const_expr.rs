@@ -8,7 +8,7 @@ fn invalid() {
     let source = "
 (module
   (global (mut i32)
-    (i32.add
+    (i32.div_s
       (i32.const 1)
       (i32.const 2))
     global.set 0
@@ -20,24 +20,24 @@ fn invalid() {
   (table 0 funcref
     i32.const 0
     i32.const 0
-    i32.add)
+    i32.div_s)
   (elem (table 0)
     (offset
       i32.const 0
       i32.const 0
-      i32.add))
+      i32.div_s))
   (elem funcref
     (item
       i32.const 0
       i32.const 0
-      i32.add))
+      i32.div_s))
 
   (memory 1)
   (data (memory 0)
     (offset
       i32.const 0
       i32.const 0
-      i32.add)))
+      i32.div_s)))
 ";
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
@@ -52,7 +52,9 @@ fn valid() {
     let source = "
 (module
   (global i32
-    i32.const 0)
+    (i32.add
+      (i32.const 1)
+      (i32.const 2)))
   (global i32
     global.get 0)
 

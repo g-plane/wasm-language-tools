@@ -10,27 +10,19 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
     diagnostics.extend(
         support::children::<Instr>(node)
             .filter(|instr| match instr {
-                Instr::Plain(plain) => {
-                    let Some(instr_name) = plain.instr_name() else {
-                        return false;
-                    };
-                    let instr_name = instr_name.text();
-                    !instr_name.ends_with(".const")
-                        && !matches!(
-                            instr_name,
-                            "global.get"
-                                | "ref.null"
-                                | "ref.i31"
-                                | "ref.func"
-                                | "struct.new"
-                                | "struct.new_default"
-                                | "array.new"
-                                | "array.new_default"
-                                | "array.new_fixed"
-                                | "any.convert_extern"
-                                | "extern.convert_any"
-                        )
-                }
+                Instr::Plain(plain) => plain.instr_name().is_some_and(|instr_name| {
+                    !matches!(
+                        instr_name.text().split_once('.'),
+                        Some((_, "const"))
+                            | Some(("i32" | "i64", "add" | "sub" | "mul"))
+                            | Some(("global", "get"))
+                            | Some(("ref", "null" | "i31" | "func"))
+                            | Some(("struct" | "array", "new" | "new_default"))
+                            | Some(("array", "new_fixed"))
+                            | Some(("any", "convert_extern"))
+                            | Some(("extern", "convert_any"))
+                    )
+                }),
                 Instr::Block(..) => true,
             })
             .map(|instr| Diagnostic {
