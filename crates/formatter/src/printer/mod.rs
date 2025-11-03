@@ -214,15 +214,10 @@ fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>
     let respect_first_whitespace = token
         .siblings_with_tokens(Direction::Next)
         .skip(1)
-        .find(|element| {
-            !matches!(
-                element.kind(),
-                SyntaxKind::WHITESPACE | SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT
-            )
-        })
-        .is_some_and(|element| {
+        .find(|node_or_token| !node_or_token.kind().is_trivia())
+        .is_some_and(|node_or_token| {
             matches!(
-                element.kind(),
+                node_or_token.kind(),
                 SyntaxKind::MODULE_FIELD_DATA
                     | SyntaxKind::MODULE_FIELD_ELEM
                     | SyntaxKind::MODULE_FIELD_EXPORT
@@ -232,11 +227,14 @@ fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>
                     | SyntaxKind::MODULE_FIELD_MEMORY
                     | SyntaxKind::MODULE_FIELD_START
                     | SyntaxKind::MODULE_FIELD_TABLE
+                    | SyntaxKind::MODULE_FIELD_TAG
                     | SyntaxKind::TYPE_DEF
+                    | SyntaxKind::REC_TYPE
                     | SyntaxKind::PLAIN_INSTR
                     | SyntaxKind::BLOCK_BLOCK
                     | SyntaxKind::BLOCK_IF
                     | SyntaxKind::BLOCK_LOOP
+                    | SyntaxKind::BLOCK_TRY_TABLE
             )
         });
     let trivias = token
@@ -265,7 +263,7 @@ fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>
         return vec![];
     }
     let mut docs = Vec::with_capacity(3);
-    if !respect_first_whitespace {
+    if !respect_first_whitespace && token.kind() != SyntaxKind::L_PAREN {
         docs.push(Doc::space());
     }
     trivias.iter().for_each(|token| match token.kind() {

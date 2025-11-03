@@ -1,0 +1,8 @@
+---
+source: crates/formatter/tests/fmt.rs
+---
+((;;) global (;;) $g (;;)
+((;;) import (;;) "spectest" (;;) "global_i32" (;;)) (;;)
+((;;) export (;;) "g" (;;)) (;;)
+i32 (;;)
+(;;))
