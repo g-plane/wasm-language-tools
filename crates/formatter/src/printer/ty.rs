@@ -34,8 +34,9 @@ impl DocGen for ArrayType {
             trivias = format_trivias_after_node(field_type, ctx);
         }
         docs.append(&mut trivias);
-        docs.push(Doc::text(")"));
         Doc::list(docs)
+            .nest(ctx.indent_width)
+            .append(ctx.format_right_paren(self))
     }
 }
 
@@ -63,61 +64,31 @@ impl DocGen for ExternType {
 
 impl DocGen for ExternTypeFunc {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        format_extern_type(
-            self.l_paren_token(),
-            self.keyword(),
-            self.ident_token(),
-            self.type_use(),
-            ctx,
-        )
+        format_extern_type(self, self.type_use(), ctx)
     }
 }
 
 impl DocGen for ExternTypeGlobal {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        format_extern_type(
-            self.l_paren_token(),
-            self.keyword(),
-            self.ident_token(),
-            self.global_type(),
-            ctx,
-        )
+        format_extern_type(self, self.global_type(), ctx)
     }
 }
 
 impl DocGen for ExternTypeMemory {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        format_extern_type(
-            self.l_paren_token(),
-            self.keyword(),
-            self.ident_token(),
-            self.memory_type(),
-            ctx,
-        )
+        format_extern_type(self, self.memory_type(), ctx)
     }
 }
 
 impl DocGen for ExternTypeTable {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        format_extern_type(
-            self.l_paren_token(),
-            self.keyword(),
-            self.ident_token(),
-            self.table_type(),
-            ctx,
-        )
+        format_extern_type(self, self.table_type(), ctx)
     }
 }
 
 impl DocGen for ExternTypeTag {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        format_extern_type(
-            self.l_paren_token(),
-            self.keyword(),
-            self.ident_token(),
-            self.type_use(),
-            ctx,
-        )
+        format_extern_type(self, self.type_use(), ctx)
     }
 }
 
@@ -153,8 +124,9 @@ impl DocGen for Field {
             trivias = format_trivias_after_node(field_type, ctx);
         });
         docs.append(&mut trivias);
-        docs.push(Doc::text(")"));
         Doc::list(docs)
+            .nest(ctx.indent_width)
+            .append(ctx.format_right_paren(self))
     }
 }
 
@@ -179,8 +151,9 @@ impl DocGen for FieldType {
                 trivias = format_trivias_after_node(ty, ctx);
             }
             docs.append(&mut trivias);
-            docs.push(Doc::text(")"));
             Doc::list(docs)
+                .nest(ctx.indent_width)
+                .append(ctx.format_right_paren(self))
         } else if let Some(ty) = self.storage_type() {
             ty.doc(ctx)
         } else {
@@ -221,8 +194,9 @@ impl DocGen for FuncType {
             trivias = format_trivias_after_node(result, ctx);
         });
         docs.append(&mut trivias);
-        docs.push(Doc::text(")"));
         Doc::list(docs)
+            .nest(ctx.indent_width)
+            .append(ctx.format_right_paren(self))
     }
 }
 
@@ -247,8 +221,9 @@ impl DocGen for GlobalType {
                 trivias = format_trivias_after_node(ty, ctx);
             }
             docs.append(&mut trivias);
-            docs.push(Doc::text(")"));
             Doc::list(docs)
+                .nest(ctx.indent_width)
+                .append(ctx.format_right_paren(self))
         } else if let Some(ty) = self.val_type() {
             ty.doc(ctx)
         } else {
@@ -361,8 +336,9 @@ impl DocGen for Param {
             trivias = format_trivias_after_node(val_type, ctx);
         });
         docs.append(&mut trivias);
-        docs.push(Doc::text(")"));
         Doc::list(docs)
+            .nest(ctx.indent_width)
+            .append(ctx.format_right_paren(self))
     }
 }
 
@@ -396,8 +372,9 @@ impl DocGen for RefType {
                 trivias = format_trivias_after_node(heap_type, ctx);
             }
             docs.append(&mut trivias);
-            docs.push(Doc::text(")"));
             Doc::list(docs)
+                .nest(ctx.indent_width)
+                .append(ctx.format_right_paren(self))
         } else if let Some(type_keyword) = self.type_keyword() {
             Doc::text(type_keyword.text().to_string())
         } else {
@@ -429,8 +406,9 @@ impl DocGen for Result {
             trivias = format_trivias_after_node(val_type, ctx);
         });
         docs.append(&mut trivias);
-        docs.push(Doc::text(")"));
         Doc::list(docs)
+            .nest(ctx.indent_width)
+            .append(ctx.format_right_paren(self))
     }
 }
 
@@ -472,8 +450,10 @@ impl DocGen for StructType {
             trivias = format_trivias_after_node(field, ctx);
         });
         docs.append(&mut trivias);
-        docs.push(Doc::text(")"));
-        Doc::list(docs).nest(ctx.indent_width).group()
+        Doc::list(docs)
+            .nest(ctx.indent_width)
+            .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -516,8 +496,9 @@ impl DocGen for SubType {
                 trivias = format_trivias_after_node(ty, ctx);
             }
             docs.append(&mut trivias);
-            docs.push(Doc::text(")"));
             Doc::list(docs)
+                .nest(ctx.indent_width)
+                .append(ctx.format_right_paren(self))
         } else if let Some(comp_type) = self.comp_type() {
             comp_type.doc(ctx)
         } else {
@@ -575,28 +556,23 @@ impl DocGen for VecType {
     }
 }
 
-fn format_extern_type<N>(
-    l_paren: Option<SyntaxToken>,
-    keyword: Option<SyntaxToken>,
-    ident: Option<SyntaxToken>,
-    ty: Option<N>,
-    ctx: &Ctx,
-) -> Doc<'static>
+fn format_extern_type<N, Ty>(node: &N, ty: Option<Ty>, ctx: &Ctx) -> Doc<'static>
 where
-    N: AstNode<Language = WatLanguage> + DocGen,
+    N: AstNode<Language = WatLanguage>,
+    Ty: AstNode<Language = WatLanguage> + DocGen,
 {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
-    if let Some(l_paren) = l_paren {
+    if let Some(l_paren) = support::token(node.syntax(), SyntaxKind::L_PAREN) {
         docs.push(Doc::text("("));
         trivias = format_trivias_after_token(l_paren, ctx);
     }
-    if let Some(keyword) = keyword {
+    if let Some(keyword) = support::token(node.syntax(), SyntaxKind::KEYWORD) {
         docs.append(&mut trivias);
         docs.push(Doc::text(keyword.text().to_string()));
         trivias = format_trivias_after_token(keyword, ctx);
     }
-    if let Some(ident) = ident {
+    if let Some(ident) = support::token(node.syntax(), SyntaxKind::IDENT) {
         if trivias.is_empty() {
             docs.push(Doc::space());
         } else {
@@ -615,6 +591,7 @@ where
         trivias = format_trivias_after_node(ty, ctx);
     }
     docs.append(&mut trivias);
-    docs.push(Doc::text(")"));
     Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(node))
 }

@@ -1,0 +1,6 @@
+---
+source: crates/formatter/tests/fmt.rs
+---
+(global $g i32 (;;)
+  (;;) ;; line comment
+)

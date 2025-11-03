@@ -1,5 +1,8 @@
 use crate::config::{FormatOptions, LanguageOptions};
-use rowan::{Direction, ast::AstNode};
+use rowan::{
+    Direction, NodeOrToken,
+    ast::{AstNode, support},
+};
 use tiny_pretty::Doc;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage, ast::*};
 
@@ -17,6 +20,34 @@ impl<'a> Ctx<'a> {
             indent_width: options.layout.indent_width,
             options: &options.language,
         }
+    }
+
+    pub(crate) fn format_right_paren<N>(&self, node: &N) -> Doc<'static>
+    where
+        N: AstNode<Language = WatLanguage>,
+    {
+        let mut docs = Vec::with_capacity(1);
+        let node = node.syntax();
+        if node
+            .last_child_or_token()
+            .and_then(|node_or_token| match node_or_token {
+                NodeOrToken::Token(token) if token.kind() == SyntaxKind::R_PAREN => Some(token),
+                _ => None,
+            })
+            .or_else(|| support::token(node, SyntaxKind::R_PAREN))
+            .and_then(|token| {
+                token
+                    .siblings_with_tokens(Direction::Prev)
+                    .skip(1)
+                    .map_while(|node_or_token| node_or_token.into_token())
+                    .find(|token| token.kind() != SyntaxKind::WHITESPACE)
+            })
+            .is_some_and(|token| token.kind() == SyntaxKind::LINE_COMMENT)
+        {
+            docs.push(Doc::hard_line());
+        }
+        docs.push(Doc::text(")"));
+        Doc::list(docs)
     }
 }
 
@@ -160,20 +191,7 @@ where
         .syntax()
         .siblings_with_tokens(Direction::Next)
         .skip(1)
-        .map_while(|element| match element {
-            SyntaxElement::Token(token)
-                if matches!(
-                    token.kind(),
-                    SyntaxKind::LINE_COMMENT
-                        | SyntaxKind::BLOCK_COMMENT
-                        | SyntaxKind::WHITESPACE
-                        | SyntaxKind::ERROR
-                ) =>
-            {
-                Some(token)
-            }
-            _ => None,
-        })
+        .map_while(into_formattable_trivia)
         .collect::<Vec<_>>();
     if trivias.iter().all(|token| {
         token.kind() == SyntaxKind::WHITESPACE
@@ -240,20 +258,7 @@ fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>
     let trivias = token
         .siblings_with_tokens(Direction::Next)
         .skip(1)
-        .map_while(|element| match element {
-            SyntaxElement::Token(token)
-                if matches!(
-                    token.kind(),
-                    SyntaxKind::LINE_COMMENT
-                        | SyntaxKind::BLOCK_COMMENT
-                        | SyntaxKind::WHITESPACE
-                        | SyntaxKind::ERROR
-                ) =>
-            {
-                Some(token)
-            }
-            _ => None,
-        })
+        .map_while(into_formattable_trivia)
         .skip_while(|token| !respect_first_whitespace && token.kind() == SyntaxKind::WHITESPACE)
         .collect::<Vec<_>>();
     if trivias
@@ -287,6 +292,22 @@ fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>
         _ => {}
     });
     docs
+}
+
+fn into_formattable_trivia(node_or_token: SyntaxElement) -> Option<SyntaxToken> {
+    node_or_token
+        .into_token()
+        .and_then(|token| match token.kind() {
+            SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT | SyntaxKind::ERROR => Some(token),
+            SyntaxKind::WHITESPACE
+                if token
+                    .next_token()
+                    .is_none_or(|token| token.kind() != SyntaxKind::R_PAREN) =>
+            {
+                Some(token)
+            }
+            _ => None,
+        })
 }
 
 fn format_line_comment(text: &str, ctx: &Ctx) -> Doc<'static> {

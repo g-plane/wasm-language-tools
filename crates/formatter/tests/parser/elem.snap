@@ -179,7 +179,8 @@ source: crates/formatter/tests/parser.rs
   (func $f)
   (func $g)
 
-  (table $t funcref (elem
-    (ref.func $f)
-    (ref.null func)
-    (ref.func $g))))
+  (table $t funcref
+    (elem
+      (ref.func $f)
+      (ref.null func)
+      (ref.func $g))))

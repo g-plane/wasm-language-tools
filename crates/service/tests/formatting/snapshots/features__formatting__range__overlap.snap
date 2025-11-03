@@ -14,6 +14,6 @@ expression: response
         "character": 7
       }
     },
-    "newText": "(block $a\n      (block $b\n        (block $c\n          (block $b)\n\n        )\n\n      ))"
+    "newText": "(block $a\n      (block $b\n        (block $c\n          (block $b))))"
   }
 ]
