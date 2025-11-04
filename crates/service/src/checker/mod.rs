@@ -12,7 +12,6 @@ mod immediates;
 mod implicit_module;
 mod import_occur;
 mod mem_type;
-mod multi_memories;
 mod multi_modules;
 mod mutated_immutable;
 mod needless_mut;
@@ -65,12 +64,6 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
         {
             diagnostics.push(diagnostic);
         }
-        multi_memories::check(
-            &mut diagnostics,
-            config.lint.multi_memories,
-            line_index,
-            &module,
-        );
         module.descendants().for_each(|node| match node.kind() {
             SyntaxKind::MODULE_FIELD_FUNC => {
                 typeck::check_func(

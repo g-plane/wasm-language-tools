@@ -126,17 +126,3 @@ For WasmGC, fields in struct type and array type is also supported:
     local.get 1
     struct.get $struct 0))
 ```
-
-## `multiMemories`
-
-> default: `"allow"`
-
-WebAssembly Language Tools supports [Multiple Memories](https://github.com/WebAssembly/multi-memory/blob/master/proposals/multi-memory/Overview.md) proposal by default:
-
-```wasm
-(module
-  (memory 1)
-  (memory 2))
-```
-
-If your compiler or environment doesn't support this proposal, you can set this lint to `"deny"`.

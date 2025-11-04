@@ -14,7 +14,6 @@ mod immediates;
 mod implicit_module;
 mod import_occur;
 mod mem_type;
-mod multi_memories;
 mod multi_modules;
 mod mutated_immutable;
 mod needless_mut;
