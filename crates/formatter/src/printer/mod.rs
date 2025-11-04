@@ -26,9 +26,8 @@ impl<'a> Ctx<'a> {
     where
         N: AstNode<Language = WatLanguage>,
     {
-        let mut docs = Vec::with_capacity(1);
         let node = node.syntax();
-        if node
+        let docs = if node
             .last_child_or_token()
             .and_then(|node_or_token| match node_or_token {
                 NodeOrToken::Token(token) if token.kind() == SyntaxKind::R_PAREN => Some(token),
@@ -44,9 +43,10 @@ impl<'a> Ctx<'a> {
             })
             .is_some_and(|token| token.kind() == SyntaxKind::LINE_COMMENT)
         {
-            docs.push(Doc::hard_line());
-        }
-        docs.push(Doc::text(")"));
+            vec![Doc::hard_line(), Doc::text(")")]
+        } else {
+            vec![Doc::text(")")]
+        };
         Doc::list(docs)
     }
 }
