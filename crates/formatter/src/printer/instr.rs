@@ -65,7 +65,7 @@ impl DocGen for BlockBlock {
                 docs.push(Doc::text(ident.to_string()));
             }
         }
-        Doc::list(docs)
+        Doc::list(docs).group()
     }
 }
 
@@ -132,6 +132,7 @@ impl DocGen for BlockIf {
             Doc::list(docs)
                 .nest(ctx.indent_width)
                 .append(ctx.format_right_paren(self))
+                .group()
         } else {
             if let Some(keyword) = self.end_keyword() {
                 if trivias.is_empty() {
@@ -189,7 +190,7 @@ impl DocGen for BlockIfElse {
         docs.append(&mut trivias);
         let doc = Doc::list(docs).nest(ctx.indent_width);
         if self.r_paren_token().is_some() {
-            doc.append(ctx.format_right_paren(self))
+            doc.append(ctx.format_right_paren(self)).group()
         } else {
             doc
         }
@@ -230,7 +231,7 @@ impl DocGen for BlockIfThen {
         docs.append(&mut trivias);
         let doc = Doc::list(docs).nest(ctx.indent_width);
         if self.r_paren_token().is_some() {
-            doc.append(ctx.format_right_paren(self))
+            doc.append(ctx.format_right_paren(self)).group()
         } else {
             doc
         }
@@ -311,7 +312,7 @@ impl DocGen for BlockLoop {
                 docs.push(Doc::text(ident.to_string()));
             }
         }
-        Doc::list(docs)
+        Doc::list(docs).group()
     }
 }
 
@@ -387,7 +388,7 @@ impl DocGen for BlockTryTable {
                 docs.push(Doc::text(ident.to_string()));
             }
         }
-        Doc::list(docs)
+        Doc::list(docs).group()
     }
 }
 
@@ -445,6 +446,7 @@ impl DocGen for Catch {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -474,6 +476,7 @@ impl DocGen for CatchAll {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -552,7 +555,7 @@ impl DocGen for PlainInstr {
         docs.append(&mut trivias);
         let doc = Doc::list(docs).nest(ctx.indent_width);
         if self.r_paren_token().is_some() {
-            doc.append(ctx.format_right_paren(self))
+            doc.append(ctx.format_right_paren(self)).group()
         } else {
             doc
         }

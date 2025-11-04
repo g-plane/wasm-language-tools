@@ -28,6 +28,7 @@ impl DocGen for Data {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -67,6 +68,7 @@ impl DocGen for Elem {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -97,6 +99,7 @@ impl DocGen for ElemExpr {
             Doc::list(docs)
                 .nest(ctx.indent_width)
                 .append(ctx.format_right_paren(self))
+                .group()
         } else {
             Doc::list(docs)
         }
@@ -167,6 +170,7 @@ impl DocGen for Export {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -247,6 +251,7 @@ impl DocGen for Import {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -291,6 +296,7 @@ impl DocGen for Local {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -320,6 +326,7 @@ impl DocGen for MemUse {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -367,6 +374,7 @@ impl DocGen for Module {
             Doc::list(docs)
                 .nest(ctx.indent_width)
                 .append(ctx.format_right_paren(self))
+                .group()
         } else {
             Doc::list(docs)
         }
@@ -446,6 +454,7 @@ impl DocGen for ModuleFieldData {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -512,6 +521,7 @@ impl DocGen for ModuleFieldElem {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -550,6 +560,7 @@ impl DocGen for ModuleFieldExport {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -638,6 +649,7 @@ impl DocGen for ModuleFieldFunc {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -703,6 +715,7 @@ impl DocGen for ModuleFieldGlobal {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -750,6 +763,7 @@ impl DocGen for ModuleFieldImport {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -815,6 +829,7 @@ impl DocGen for ModuleFieldMemory {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -844,6 +859,7 @@ impl DocGen for ModuleFieldStart {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -984,6 +1000,7 @@ impl DocGen for ModuleFieldTag {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -1026,6 +1043,7 @@ impl DocGen for Offset {
             Doc::list(docs)
                 .nest(ctx.indent_width)
                 .append(ctx.format_right_paren(self))
+                .group()
         } else {
             Doc::list(docs)
         }
@@ -1094,6 +1112,7 @@ impl DocGen for TableUse {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -1160,7 +1179,7 @@ impl DocGen for TypeUse {
         }
         if let Some(r_paren) = self.r_paren_token() {
             docs.append(&mut trivias);
-            docs.push(ctx.format_right_paren(self));
+            docs.push(ctx.format_right_paren(self).group());
             trivias = format_trivias_after_token(r_paren, ctx);
         }
 
@@ -1235,4 +1254,5 @@ where
     Doc::list(docs)
         .nest(ctx.indent_width)
         .append(ctx.format_right_paren(node))
+        .group()
 }

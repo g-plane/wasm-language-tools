@@ -86,6 +86,12 @@ impl From<LineBreak> for tiny_pretty::LineBreak {
 #[cfg_attr(feature = "config_serde", serde(default))]
 /// Configuration related to syntax.
 pub struct LanguageOptions {
+    #[cfg_attr(feature = "config_serde", serde(alias = "splitClosingParens"))]
+    /// Control whether closing parentheses should be splitted into different lines.
+    ///
+    /// Default: `false`
+    pub split_closing_parens: bool,
+
     #[cfg_attr(feature = "config_serde", serde(alias = "formatComments"))]
     /// Control whether whitespace should be inserted at the beginning and end of comments.
     ///
@@ -105,6 +111,7 @@ pub struct LanguageOptions {
 impl Default for LanguageOptions {
     fn default() -> Self {
         Self {
+            split_closing_parens: false,
             format_comments: false,
             ignore_comment_directive: "fmt-ignore".to_string(),
         }

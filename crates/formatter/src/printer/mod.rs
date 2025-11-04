@@ -44,6 +44,8 @@ impl<'a> Ctx<'a> {
             .is_some_and(|token| token.kind() == SyntaxKind::LINE_COMMENT)
         {
             vec![Doc::hard_line(), Doc::text(")")]
+        } else if self.options.split_closing_parens {
+            vec![Doc::line_or_nil(), Doc::text(")")]
         } else {
             vec![Doc::text(")")]
         };

@@ -1,0 +1,8 @@
+{
+  "enabled": {
+    "split_closing_parens": true
+  },
+  "disabled": {
+    "split_closing_parens": false
+  }
+}

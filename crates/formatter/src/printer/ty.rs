@@ -37,6 +37,7 @@ impl DocGen for ArrayType {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -127,6 +128,7 @@ impl DocGen for Field {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -154,6 +156,7 @@ impl DocGen for FieldType {
             Doc::list(docs)
                 .nest(ctx.indent_width)
                 .append(ctx.format_right_paren(self))
+                .group()
         } else if let Some(ty) = self.storage_type() {
             ty.doc(ctx)
         } else {
@@ -197,6 +200,7 @@ impl DocGen for FuncType {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -224,6 +228,7 @@ impl DocGen for GlobalType {
             Doc::list(docs)
                 .nest(ctx.indent_width)
                 .append(ctx.format_right_paren(self))
+                .group()
         } else if let Some(ty) = self.val_type() {
             ty.doc(ctx)
         } else {
@@ -339,6 +344,7 @@ impl DocGen for Param {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -375,6 +381,7 @@ impl DocGen for RefType {
             Doc::list(docs)
                 .nest(ctx.indent_width)
                 .append(ctx.format_right_paren(self))
+                .group()
         } else if let Some(type_keyword) = self.type_keyword() {
             Doc::text(type_keyword.text().to_string())
         } else {
@@ -409,6 +416,7 @@ impl DocGen for Result {
         Doc::list(docs)
             .nest(ctx.indent_width)
             .append(ctx.format_right_paren(self))
+            .group()
     }
 }
 
@@ -499,6 +507,7 @@ impl DocGen for SubType {
             Doc::list(docs)
                 .nest(ctx.indent_width)
                 .append(ctx.format_right_paren(self))
+                .group()
         } else if let Some(comp_type) = self.comp_type() {
             comp_type.doc(ctx)
         } else {
@@ -594,4 +603,5 @@ where
     Doc::list(docs)
         .nest(ctx.indent_width)
         .append(ctx.format_right_paren(node))
+        .group()
 }
