@@ -1,25 +1,22 @@
 //! Configuration-related types.
 
-#[cfg(feature = "config_serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Default)]
-#[cfg_attr(feature = "config_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "config_serde", serde(default))]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(default)]
 /// The whole configuration.
 pub struct FormatOptions {
-    #[cfg_attr(feature = "config_serde", serde(flatten))]
+    #[serde(flatten)]
     pub layout: LayoutOptions,
-    #[cfg_attr(feature = "config_serde", serde(flatten))]
+    #[serde(flatten)]
     pub language: LanguageOptions,
 }
 
-#[derive(Clone, Debug)]
-#[cfg_attr(feature = "config_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "config_serde", serde(default))]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(default)]
 /// Configuration related to layout, such as indentation or print width.
 pub struct LayoutOptions {
-    #[cfg_attr(feature = "config_serde", serde(alias = "printWidth"))]
+    #[serde(alias = "printWidth")]
     /// The line width limitation that formatter should *(but not must)* avoid exceeding.
     /// The formatter will try its best to keep line width less than this value,
     /// but it may exceed for some cases, for example, a very very long single word.
@@ -27,7 +24,7 @@ pub struct LayoutOptions {
     /// Default: `80`
     pub print_width: usize,
 
-    #[cfg_attr(feature = "config_serde", serde(alias = "indentWidth"))]
+    #[serde(alias = "indentWidth")]
     /// Size of indentation. When enabled `useTabs`, this option may be disregarded,
     /// since only one tab will be inserted when indented once.
     ///
@@ -36,16 +33,13 @@ pub struct LayoutOptions {
     /// Panics if value is `0`.
     pub indent_width: usize,
 
-    #[cfg_attr(
-        feature = "config_serde",
-        serde(alias = "lineBreak", alias = "linebreak")
-    )]
+    #[serde(alias = "lineBreak", alias = "linebreak")]
     /// Specify use `\n` (LF) or `\r\n` (CRLF) for line break.
     ///
     /// Default: `Lf`
     pub line_break: LineBreak,
 
-    #[cfg_attr(feature = "config_serde", serde(alias = "useTabs"))]
+    #[serde(alias = "useTabs")]
     /// Specify use space or tab for indentation.
     ///
     /// Default: `false`
@@ -63,9 +57,8 @@ impl Default for LayoutOptions {
     }
 }
 
-#[derive(Clone, Debug, Default)]
-#[cfg_attr(feature = "config_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "config_serde", serde(rename_all = "kebab-case"))]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum LineBreak {
     #[default]
     Lf,
@@ -81,18 +74,17 @@ impl From<LineBreak> for tiny_pretty::LineBreak {
     }
 }
 
-#[derive(Clone, Debug)]
-#[cfg_attr(feature = "config_serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "config_serde", serde(default))]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(default)]
 /// Configuration related to syntax.
 pub struct LanguageOptions {
-    #[cfg_attr(feature = "config_serde", serde(alias = "splitClosingParens"))]
+    #[serde(alias = "splitClosingParens")]
     /// Control whether closing parentheses should be splitted into different lines.
     ///
     /// Default: `false`
     pub split_closing_parens: bool,
 
-    #[cfg_attr(feature = "config_serde", serde(alias = "formatComments"))]
+    #[serde(alias = "formatComments")]
     /// Control whether whitespace should be inserted at the beginning and end of comments.
     ///
     /// Though this option is set to `false`,
@@ -101,7 +93,7 @@ pub struct LanguageOptions {
     /// Default: `false`
     pub format_comments: bool,
 
-    #[cfg_attr(feature = "config_serde", serde(alias = "ignoreCommentDirective"))]
+    #[serde(alias = "ignoreCommentDirective")]
     /// Text directive for ignoring formatting specific module or module field.
     ///
     /// Default: `"fmt-ignore"`
