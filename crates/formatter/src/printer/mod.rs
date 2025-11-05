@@ -201,7 +201,7 @@ where
     }) {
         return vec![];
     }
-    let mut docs = Vec::with_capacity(3);
+    let mut docs = Vec::with_capacity(trivias.len());
     if trivias
         .first()
         .is_some_and(|token| token.kind().is_comment())
@@ -234,37 +234,13 @@ where
     docs
 }
 fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>> {
-    let respect_first_whitespace = token
-        .siblings_with_tokens(Direction::Next)
-        .skip(1)
-        .find(|node_or_token| !node_or_token.kind().is_trivia())
-        .is_some_and(|node_or_token| {
-            matches!(
-                node_or_token.kind(),
-                SyntaxKind::MODULE_FIELD_DATA
-                    | SyntaxKind::MODULE_FIELD_ELEM
-                    | SyntaxKind::MODULE_FIELD_EXPORT
-                    | SyntaxKind::MODULE_FIELD_FUNC
-                    | SyntaxKind::MODULE_FIELD_GLOBAL
-                    | SyntaxKind::MODULE_FIELD_IMPORT
-                    | SyntaxKind::MODULE_FIELD_MEMORY
-                    | SyntaxKind::MODULE_FIELD_START
-                    | SyntaxKind::MODULE_FIELD_TABLE
-                    | SyntaxKind::MODULE_FIELD_TAG
-                    | SyntaxKind::TYPE_DEF
-                    | SyntaxKind::REC_TYPE
-                    | SyntaxKind::PLAIN_INSTR
-                    | SyntaxKind::BLOCK_BLOCK
-                    | SyntaxKind::BLOCK_IF
-                    | SyntaxKind::BLOCK_LOOP
-                    | SyntaxKind::BLOCK_TRY_TABLE
-            )
-        });
     let trivias = token
         .siblings_with_tokens(Direction::Next)
         .skip(1)
         .map_while(into_formattable_trivia)
-        .skip_while(|token| !respect_first_whitespace && token.kind() == SyntaxKind::WHITESPACE)
+        .skip_while(|current| {
+            token.kind() == SyntaxKind::L_PAREN && current.kind() == SyntaxKind::WHITESPACE
+        })
         .collect::<Vec<_>>();
     if trivias
         .iter()
@@ -272,10 +248,7 @@ fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>
     {
         return vec![];
     }
-    let mut docs = Vec::with_capacity(3);
-    if !respect_first_whitespace && token.kind() != SyntaxKind::L_PAREN {
-        docs.push(Doc::space());
-    }
+    let mut docs = Vec::with_capacity(trivias.len());
     trivias.iter().for_each(|token| match token.kind() {
         SyntaxKind::LINE_COMMENT => {
             docs.push(format_line_comment(token.text(), ctx));

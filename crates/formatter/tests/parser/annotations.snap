@@ -1,7 +1,8 @@
 ---
 source: crates/formatter/tests/parser.rs
 ---
-(module (@a)
+(module
+  (@a)
   (@0)
   (@aas-3!@$d-@#4)
   (@@) (@$) (@+) (@0) (@.) (@!$@#$23414@#$)
