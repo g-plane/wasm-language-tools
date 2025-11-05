@@ -1206,7 +1206,7 @@ impl DocGen for TypeUse {
         if let Some(result) = results.next() {
             if trivias.is_empty() && !docs.is_empty() {
                 docs.push(Doc::space());
-            } else if self.l_paren_token().is_some() {
+            } else {
                 docs.append(&mut trivias);
             }
             docs.push(result.doc(ctx));
