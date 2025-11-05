@@ -21,32 +21,6 @@ expression: def
     "range": {
       "start": {
         "line": 4,
-        "character": 43
-      },
-      "end": {
-        "line": 4,
-        "character": 44
-      }
-    }
-  },
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
-        "line": 4,
-        "character": 57
-      },
-      "end": {
-        "line": 4,
-        "character": 59
-      }
-    }
-  },
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
-        "line": 4,
         "character": 26
       },
       "end": {
@@ -65,6 +39,32 @@ expression: def
       "end": {
         "line": 4,
         "character": 78
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 4,
+        "character": 43
+      },
+      "end": {
+        "line": 4,
+        "character": 44
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 4,
+        "character": 57
+      },
+      "end": {
+        "line": 4,
+        "character": 59
       }
     }
   }

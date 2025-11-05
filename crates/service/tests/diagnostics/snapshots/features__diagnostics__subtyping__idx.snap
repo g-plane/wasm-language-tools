@@ -8,22 +8,6 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 5,
-          "character": 16
-        },
-        "end": {
-          "line": 5,
-          "character": 18
-        }
-      },
-      "severity": 1,
-      "code": "subtyping",
-      "source": "wat",
-      "message": "typeidx of super type `$a` must be smaller than type `$z`"
-    },
-    {
-      "range": {
-        "start": {
           "line": 2,
           "character": 13
         },
@@ -36,6 +20,22 @@ expression: response
       "code": "subtyping",
       "source": "wat",
       "message": "typeidx of super type `1` must be smaller than type `0`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 16
+        },
+        "end": {
+          "line": 5,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "subtyping",
+      "source": "wat",
+      "message": "typeidx of super type `$a` must be smaller than type `$z`"
     }
   ]
 }

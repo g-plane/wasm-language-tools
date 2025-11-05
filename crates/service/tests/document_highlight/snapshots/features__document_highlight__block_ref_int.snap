@@ -19,6 +19,19 @@ expression: response
   {
     "range": {
       "start": {
+        "line": 5,
+        "character": 15
+      },
+      "end": {
+        "line": 5,
+        "character": 16
+      }
+    },
+    "kind": 2
+  },
+  {
+    "range": {
+      "start": {
         "line": 7,
         "character": 21
       },
@@ -38,19 +51,6 @@ expression: response
       "end": {
         "line": 7,
         "character": 20
-      }
-    },
-    "kind": 2
-  },
-  {
-    "range": {
-      "start": {
-        "line": 5,
-        "character": 15
-      },
-      "end": {
-        "line": 5,
-        "character": 16
       }
     },
     "kind": 2

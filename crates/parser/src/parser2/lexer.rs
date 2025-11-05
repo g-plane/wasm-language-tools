@@ -1,6 +1,7 @@
 use super::{GreenElement, is_id_char};
 use crate::error::{Message, SyntaxError};
 use rowan::{GreenToken, TextRange, TextSize};
+use std::mem;
 use wat_syntax::SyntaxKind;
 
 #[derive(Clone, Debug)]
@@ -19,6 +20,7 @@ pub(super) struct Lexer<'s> {
     source: &'s str,
     input: &'s str,
     pub top_level: bool,
+    annotation_depth: u32,
 }
 
 impl<'s> Lexer<'s> {
@@ -27,6 +29,7 @@ impl<'s> Lexer<'s> {
             source,
             input: source,
             top_level: true,
+            annotation_depth: 0,
         }
     }
 
@@ -35,6 +38,7 @@ impl<'s> Lexer<'s> {
             source,
             input: &source[offset..],
             top_level: false,
+            annotation_depth: 0,
         }
     }
 
@@ -104,7 +108,7 @@ impl<'s> Lexer<'s> {
                 self.word().map(|text| Token { kind, text })
             }
             SyntaxKind::IDENT => self.ident(),
-            SyntaxKind::STRING => self.string(),
+            SyntaxKind::STRING => self.string().map(|text| Token { kind, text }),
             SyntaxKind::INT => self.int(),
             SyntaxKind::UNSIGNED_INT => self.unsigned_int(),
             SyntaxKind::FLOAT => self.float(),
@@ -189,7 +193,7 @@ impl<'s> Lexer<'s> {
         }
     }
 
-    fn string(&mut self) -> Option<Token<'s>> {
+    fn string(&mut self) -> Option<&'s str> {
         if self.input.starts_with('"') {
             let mut bytes = self.input.get(1..)?.bytes().enumerate();
             loop {
@@ -197,10 +201,7 @@ impl<'s> Lexer<'s> {
                     Some((end, b'"')) => {
                         // SAFETY: `"` is ASCII char, and `+ 2` means it contains the quotes
                         unsafe {
-                            return Some(Token {
-                                kind: SyntaxKind::STRING,
-                                text: self.split_advance(end + 2),
-                            });
+                            return Some(self.split_advance(end + 2));
                         }
                     }
                     Some((_, b'\\')) => {
@@ -432,62 +433,161 @@ impl<'s> Lexer<'s> {
     pub fn trivia(&mut self) -> Option<Token<'s>> {
         let bytes = self.input.as_bytes();
         bytes.first().and_then(|b| match b {
-            b' ' | b'\n' | b'\t' | b'\r' => {
-                let end = self
-                    .input
-                    .bytes()
-                    .position(|b| !matches!(b, b' ' | b'\n' | b'\t' | b'\r'))
-                    .unwrap_or(self.input.len());
-                // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
-                unsafe {
-                    Some(Token {
-                        kind: SyntaxKind::WHITESPACE,
-                        text: self.split_advance(end),
-                    })
+            b' ' | b'\n' | b'\t' | b'\r' => self.whitespace(),
+            b'(' => match bytes.get(1) {
+                Some(b';') => self.block_comment(),
+                Some(b'@') if self.annotation_depth == 0 => self.annot_start(),
+                _ => {
+                    if self.annotation_depth > 0 {
+                        self.annotation_depth += 1;
+                        // SAFETY: `(` is an ASCII char
+                        unsafe {
+                            Some(Token {
+                                kind: SyntaxKind::ANNOT_ELEM,
+                                text: self.split_advance(1),
+                            })
+                        }
+                    } else {
+                        None
+                    }
+                }
+            },
+            b';' if matches!(bytes.get(1), Some(b';')) => self.line_comment(),
+            b')' => {
+                match self.annotation_depth {
+                    0 => None,
+                    1 => {
+                        self.annotation_depth -= 1;
+                        // SAFETY: `)` is an ASCII char
+                        unsafe {
+                            Some(Token {
+                                kind: SyntaxKind::ANNOT_END,
+                                text: self.split_advance(1),
+                            })
+                        }
+                    }
+                    _ => {
+                        self.annotation_depth -= 1;
+                        // SAFETY: `)` is an ASCII char
+                        unsafe {
+                            Some(Token {
+                                kind: SyntaxKind::ANNOT_ELEM,
+                                text: self.split_advance(1),
+                            })
+                        }
+                    }
                 }
             }
-            b'(' if matches!(bytes.get(1), Some(b';')) => {
-                let checkpoint = self.input;
-                let mut stack = 0u8;
-                while !self.input.is_empty() {
-                    match self.input.as_bytes() {
-                        [b'(', b';', ..] => {
-                            stack += 1;
-                            self.input = self.input.get(2..)?;
-                        }
-                        [b';', b')', ..] => {
-                            stack -= 1;
-                            self.input = self.input.get(2..)?;
-                            if stack == 0 {
-                                break;
-                            }
-                        }
-                        [b';' | b'(', ..] => {
-                            self.input = self.input.get(1..)?;
-                        }
-                        _ => break,
-                    }
-                    (_, self.input) = self
+            b'"' if self.annotation_depth > 0 => self.string().map(|text| Token {
+                kind: SyntaxKind::ANNOT_ELEM,
+                text,
+            }),
+            _ => {
+                if self.annotation_depth > 0 {
+                    let end = self
                         .input
-                        .split_at(self.input.find([';', '(']).unwrap_or(self.input.len()));
+                        .bytes()
+                        .position(is_not_annot_elem)
+                        .unwrap_or(self.input.len());
+                    // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
+                    unsafe {
+                        Some(Token {
+                            kind: SyntaxKind::ANNOT_ELEM,
+                            text: self.split_advance(end),
+                        })
+                    }
+                } else {
+                    None
                 }
+            }
+        })
+    }
+
+    fn whitespace(&mut self) -> Option<Token<'s>> {
+        let end = self
+            .input
+            .bytes()
+            .position(|b| !matches!(b, b' ' | b'\n' | b'\t' | b'\r'))
+            .unwrap_or(self.input.len());
+        // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
+        unsafe {
+            Some(Token {
+                kind: SyntaxKind::WHITESPACE,
+                text: self.split_advance(end),
+            })
+        }
+    }
+
+    fn block_comment(&mut self) -> Option<Token<'s>> {
+        let checkpoint = self.input;
+        let mut stack = 0u8;
+        while !self.input.is_empty() {
+            match self.input.as_bytes() {
+                [b'(', b';', ..] => {
+                    stack += 1;
+                    self.input = self.input.get(2..)?;
+                }
+                [b';', b')', ..] => {
+                    stack -= 1;
+                    self.input = self.input.get(2..)?;
+                    if stack == 0 {
+                        break;
+                    }
+                }
+                [b';' | b'(', ..] => {
+                    self.input = self.input.get(1..)?;
+                }
+                _ => break,
+            }
+            (_, self.input) = self
+                .input
+                .split_at(self.input.find([';', '(']).unwrap_or(self.input.len()));
+        }
+        checkpoint
+            .get(..checkpoint.len() - self.input.len())
+            .map(|text| Token {
+                kind: SyntaxKind::BLOCK_COMMENT,
+                text,
+            })
+    }
+
+    fn line_comment(&mut self) -> Option<Token<'s>> {
+        let end = self.input.find('\n').unwrap_or(self.input.len());
+        // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
+        unsafe {
+            Some(Token {
+                kind: SyntaxKind::LINE_COMMENT,
+                text: self.split_advance(end),
+            })
+        }
+    }
+
+    fn annot_start(&mut self) -> Option<Token<'s>> {
+        self.annotation_depth += 1;
+        let rest = self.input.get(2..)?;
+        if rest.starts_with('"') {
+            let checkpoint = mem::replace(&mut self.input, rest);
+            self.string()?;
+            checkpoint
+                .get(..checkpoint.len() - self.input.len())
+                .map(|text| Token {
+                    kind: SyntaxKind::ANNOT_START,
+                    text,
+                })
+        } else {
+            let end = rest
+                .bytes()
+                .position(is_not_annot_elem)
+                .unwrap_or(rest.len());
+            // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary,
+            // and `+ 2` means it contains `(@`
+            unsafe {
                 Some(Token {
-                    kind: SyntaxKind::BLOCK_COMMENT,
-                    text: checkpoint.get(..checkpoint.len() - self.input.len())?,
+                    kind: SyntaxKind::ANNOT_START,
+                    text: self.split_advance(end + 2),
                 })
             }
-            b';' if matches!(bytes.get(1), Some(b';')) => {
-                let end = self.input.find('\n').unwrap_or(self.input.len());
-                // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
-                unsafe {
-                    Some(Token {
-                        kind: SyntaxKind::LINE_COMMENT,
-                        text: self.split_advance(end),
-                    })
-                }
-            }
-            _ => None,
-        })
+        }
     }
 
     unsafe fn split_advance(&mut self, mid: usize) -> &'s str {
@@ -495,6 +595,10 @@ impl<'s> Lexer<'s> {
         self.input = unsafe { self.input.get_unchecked(mid..) };
         left
     }
+}
+
+fn is_not_annot_elem(b: u8) -> bool {
+    matches!(b, b' ' | b'\n' | b'\t' | b'\r' | b'(' | b')' | b'"')
 }
 
 #[derive(Debug, Clone, Copy)]

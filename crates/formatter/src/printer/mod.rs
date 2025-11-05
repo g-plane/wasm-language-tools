@@ -223,7 +223,10 @@ where
                 docs.push(Doc::hard_line());
             }
         },
-        SyntaxKind::ERROR => {
+        SyntaxKind::ERROR
+        | SyntaxKind::ANNOT_START
+        | SyntaxKind::ANNOT_ELEM
+        | SyntaxKind::ANNOT_END => {
             docs.push(Doc::text(token.to_string()));
         }
         _ => {}
@@ -288,7 +291,10 @@ fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>
                 docs.push(Doc::hard_line());
             }
         },
-        SyntaxKind::ERROR => {
+        SyntaxKind::ERROR
+        | SyntaxKind::ANNOT_START
+        | SyntaxKind::ANNOT_ELEM
+        | SyntaxKind::ANNOT_END => {
             docs.push(Doc::text(token.to_string()));
         }
         _ => {}
@@ -300,7 +306,12 @@ fn into_formattable_trivia(node_or_token: SyntaxElement) -> Option<SyntaxToken> 
     node_or_token
         .into_token()
         .and_then(|token| match token.kind() {
-            SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT | SyntaxKind::ERROR => Some(token),
+            SyntaxKind::LINE_COMMENT
+            | SyntaxKind::BLOCK_COMMENT
+            | SyntaxKind::ERROR
+            | SyntaxKind::ANNOT_START
+            | SyntaxKind::ANNOT_ELEM
+            | SyntaxKind::ANNOT_END => Some(token),
             SyntaxKind::WHITESPACE
                 if token
                     .next_token()

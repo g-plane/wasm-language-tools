@@ -20,6 +20,9 @@ pub enum SyntaxKind {
     EQ,
     MEM_ARG_KEYWORD,
     SHAPE_DESCRIPTOR,
+    ANNOT_START,
+    ANNOT_ELEM,
+    ANNOT_END,
     ERROR,
 
     // SyntaxNode
@@ -95,11 +98,16 @@ pub enum SyntaxKind {
 
 impl SyntaxKind {
     #[inline]
-    /// Checks if it is whitespace or comment.
+    /// Checks if it is whitespace or comment or annotation.
     pub fn is_trivia(self) -> bool {
         matches!(
             self,
-            SyntaxKind::WHITESPACE | SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT
+            SyntaxKind::WHITESPACE
+                | SyntaxKind::LINE_COMMENT
+                | SyntaxKind::BLOCK_COMMENT
+                | SyntaxKind::ANNOT_START
+                | SyntaxKind::ANNOT_ELEM
+                | SyntaxKind::ANNOT_END
         )
     }
 

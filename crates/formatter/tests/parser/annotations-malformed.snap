@@ -1,0 +1,17 @@
+---
+source: crates/formatter/tests/parser.rs
+---
+(@a Heiße Würstchen)
+(@a )
+( @a)
+(@)
+(@ )
+(@ x)
+(@(@a)x)
+(@"")
+(@ "a")
+(@x))
+(@x ()))
+(@x (y (z))))
+(@x (@y )))
+((@a)@b)
