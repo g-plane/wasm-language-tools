@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..123
-  MODULE@0..122
+ROOT@0..145
+  MODULE@0..144
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -73,9 +73,21 @@ ROOT@0..123
         KEYWORD@112..118 "export"
         R_PAREN@118..119 ")"
       R_PAREN@119..120 ")"
-    WHITESPACE@120..121 "\n"
-    R_PAREN@121..122 ")"
-  WHITESPACE@122..123 "\n"
+    WHITESPACE@120..123 "\n  "
+    MODULE_FIELD_FUNC@123..142
+      L_PAREN@123..124 "("
+      KEYWORD@124..128 "func"
+      WHITESPACE@128..129 " "
+      EXPORT@129..141
+        L_PAREN@129..130 "("
+        KEYWORD@130..136 "export"
+        WHITESPACE@136..137 " "
+        ERROR@137..140 "$xx"
+        R_PAREN@140..141 ")"
+      R_PAREN@141..142 ")"
+    WHITESPACE@142..143 "\n"
+    R_PAREN@143..144 ")"
+  WHITESPACE@144..145 "\n"
 
 error: expected export descriptor
   ┌─ exports-malformed.wat:2:14
@@ -130,3 +142,15 @@ error: expected export name
   │
 7 │   (func (export))
   │                ^
+
+error: expected string
+  ┌─ exports-malformed.wat:8:17
+  │
+8 │   (func (export $xx))
+  │                 ^^^
+
+error: expected export name
+  ┌─ exports-malformed.wat:8:20
+  │
+8 │   (func (export $xx))
+  │                    ^

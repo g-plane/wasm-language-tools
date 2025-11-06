@@ -92,12 +92,6 @@ error: expected type keyword
 3 │   (type (func (result $x i32)))
   │                       ^^
 
-error: unexpected token
-  ┌─ type-malformed.wat:3:23
-  │
-3 │   (type (func (result $x i32)))
-  │                       ^^
-
 error: expected sub type
   ┌─ type-malformed.wat:4:8
   │

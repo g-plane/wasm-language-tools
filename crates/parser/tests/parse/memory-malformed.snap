@@ -61,12 +61,6 @@ error: expected unsigned integer
   │           ^^
 
 error: unexpected token
-  ┌─ memory-malformed.wat:3:11
-  │
-3 │   (memory "")
-  │           ^^
-
-error: unexpected token
   ┌─ memory-malformed.wat:4:12
   │
 4 │   (memory ())

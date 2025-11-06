@@ -7,4 +7,5 @@ source: crates/formatter/tests/parser.rs
   (export "")
   (export "" (func))
   (export (func))
-  (func (export)))
+  (func (export))
+  (func (export $xx)))

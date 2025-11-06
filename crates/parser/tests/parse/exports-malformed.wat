@@ -5,4 +5,5 @@
   (export "" (func))
   (export (func))
   (func (export))
+  (func (export $xx))
 )

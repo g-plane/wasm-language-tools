@@ -23,9 +23,3 @@ error: expected instruction name
   │
 1 │ (module (func br 0drop))
   │                  ^^^^^
-
-error: unexpected token
-  ┌─ token.wat:1:18
-  │
-1 │ (module (func br 0drop))
-  │                  ^^^^^

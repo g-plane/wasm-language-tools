@@ -210,12 +210,14 @@ impl<'s> Parser<'s> {
 
     pub(super) fn report_error_token(&mut self, token: &Token<'s>, message: Message) {
         let start = token.text.as_ptr().addr() - self.source.as_ptr().addr();
-        self.errors.push(SyntaxError {
-            range: TextRange::new(
-                TextSize::new(start as u32),
-                TextSize::new((start + token.text.len()) as u32),
-            ),
-            message,
-        });
+        let range = TextRange::new(
+            TextSize::new(start as u32),
+            TextSize::new((start + token.text.len()) as u32),
+        );
+        if self.errors.last().is_none_or(|error| {
+            error.range != range || message != Message::Description("unexpected token")
+        }) {
+            self.errors.push(SyntaxError { range, message });
+        }
     }
 }
