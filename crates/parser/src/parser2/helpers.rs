@@ -39,7 +39,7 @@ impl<'s> Parser<'s> {
             }
             self.reset(checkpoint_after_trivias);
             if let Some(token) = self.lexer.eat(SyntaxKind::ERROR) {
-                self.report_error_token(&token, Message::Description("unexpected token"));
+                self.report_error_token(&token, Message::UnexpectedToken);
                 self.add_child(token);
             } else {
                 self.reset(checkpoint_before_trivias);
@@ -111,19 +111,19 @@ impl<'s> Parser<'s> {
                 self.parse_trivias();
                 if let Some(mut token) = self.lexer.eat(SyntaxKind::L_PAREN) {
                     token.kind = SyntaxKind::ERROR;
-                    self.report_error_token(&token, Message::Description("unexpected token"));
+                    self.report_error_token(&token, Message::UnexpectedToken);
                     self.add_child(token);
                     stack += 1;
                 } else if let Some(mut token) = self.lexer.eat(SyntaxKind::R_PAREN) {
                     token.kind = SyntaxKind::ERROR;
-                    self.report_error_token(&token, Message::Description("unexpected token"));
+                    self.report_error_token(&token, Message::UnexpectedToken);
                     self.add_child(token);
                     stack -= 1;
                     if stack == 0 {
                         break;
                     }
                 } else if let Some(token) = self.lexer.eat(SyntaxKind::ERROR) {
-                    self.report_error_token(&token, Message::Description("unexpected token"));
+                    self.report_error_token(&token, Message::UnexpectedToken);
                     self.add_child(token);
                 } else {
                     self.reset(checkpoint);
@@ -132,7 +132,7 @@ impl<'s> Parser<'s> {
             }
             true
         } else if let Some(token) = self.lexer.eat(SyntaxKind::ERROR) {
-            self.report_error_token(&token, Message::Description("unexpected token"));
+            self.report_error_token(&token, Message::UnexpectedToken);
             self.add_child(token);
             true
         } else {
@@ -214,9 +214,11 @@ impl<'s> Parser<'s> {
             TextSize::new(start as u32),
             TextSize::new((start + token.text.len()) as u32),
         );
-        if self.errors.last().is_none_or(|error| {
-            error.range != range || message != Message::Description("unexpected token")
-        }) {
+        if self
+            .errors
+            .last()
+            .is_none_or(|error| error.range != range || message != Message::UnexpectedToken)
+        {
             self.errors.push(SyntaxError { range, message });
         }
     }

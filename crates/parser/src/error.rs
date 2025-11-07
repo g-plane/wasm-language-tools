@@ -15,6 +15,7 @@ pub enum Message {
     Str(&'static str),
     Name(&'static str),
     Description(&'static str),
+    UnexpectedToken,
 }
 
 impl fmt::Display for Message {
@@ -24,6 +25,7 @@ impl fmt::Display for Message {
             Self::Str(c) => write!(f, "expected `{c}`"),
             Self::Name(c) => write!(f, "expected {c}"),
             Self::Description(c) => c.fmt(f),
+            Self::UnexpectedToken => write!(f, "unexpected token"),
         }
     }
 }
