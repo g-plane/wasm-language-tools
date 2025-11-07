@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..145
-  MODULE@0..144
+ROOT@0..176
+  MODULE@0..175
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -85,9 +85,24 @@ ROOT@0..145
         ERROR@137..140 "$xx"
         R_PAREN@140..141 ")"
       R_PAREN@141..142 ")"
-    WHITESPACE@142..143 "\n"
-    R_PAREN@143..144 ")"
-  WHITESPACE@144..145 "\n"
+    WHITESPACE@142..145 "\n  "
+    MODULE_FIELD_FUNC@145..173
+      L_PAREN@145..146 "("
+      KEYWORD@146..150 "func"
+      WHITESPACE@150..151 " "
+      EXPORT@151..172
+        L_PAREN@151..152 "("
+        KEYWORD@152..158 "export"
+        WHITESPACE@158..159 " "
+        ERROR@159..164 "\"func"
+        WHITESPACE@164..167 "\n  "
+        ERROR@167..168 "\""
+        WHITESPACE@168..171 "\n  "
+        R_PAREN@171..172 ")"
+      R_PAREN@172..173 ")"
+    WHITESPACE@173..174 "\n"
+    R_PAREN@174..175 ")"
+  WHITESPACE@175..176 "\n"
 
 error: expected export descriptor
   ┌─ exports-malformed.wat:2:14
@@ -154,3 +169,21 @@ error: expected export name
   │
 8 │   (func (export $xx))
   │                    ^
+
+error: unterminated string
+  ┌─ exports-malformed.wat:9:17
+  │
+9 │   (func (export "func
+  │                 ^^^^^
+
+error: unterminated string
+   ┌─ exports-malformed.wat:10:3
+   │
+10 │   "
+   │   ^
+
+error: expected export name
+   ┌─ exports-malformed.wat:11:3
+   │
+11 │   ))
+   │   ^

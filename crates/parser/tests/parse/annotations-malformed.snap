@@ -1,7 +1,7 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..129
+ROOT@0..146
   ANNOT_START@0..3 "(@a"
   WHITESPACE@3..4 " "
   ANNOT_ELEM@4..10 "Heiße"
@@ -84,6 +84,18 @@ ROOT@0..129
   ERROR@125..127 "@b"
   ERROR@127..128 ")"
   WHITESPACE@128..129 "\n"
+  ANNOT_START@129..132 "(@x"
+  WHITESPACE@132..133 " "
+  ANNOT_ELEM@133..134 "\""
+  WHITESPACE@134..135 "\n"
+  ANNOT_END@135..136 ")"
+  WHITESPACE@136..137 "\n"
+  ANNOT_START@137..140 "(@x"
+  WHITESPACE@140..141 " "
+  ANNOT_ELEM@141..143 "\")"
+  WHITESPACE@143..144 "\n"
+  ANNOT_END@144..145 ")"
+  WHITESPACE@145..146 "\n"
 
 error: unexpected token
   ┌─ annotations-malformed.wat:3:3

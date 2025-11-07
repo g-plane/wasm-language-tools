@@ -60,7 +60,13 @@ impl<'s> Lexer<'s> {
                     SyntaxKind::INSTR_NAME => Message::Name("instruction name"),
                     SyntaxKind::TYPE_KEYWORD => Message::Name("type keyword"),
                     SyntaxKind::IDENT => Message::Name("identifier"),
-                    SyntaxKind::STRING => Message::Name("string"),
+                    SyntaxKind::STRING => {
+                        if is_unterminated_string(text) {
+                            Message::Description("unterminated string")
+                        } else {
+                            Message::Name("string")
+                        }
+                    }
                     SyntaxKind::INT => Message::Name("integer"),
                     SyntaxKind::UNSIGNED_INT => Message::Name("unsigned integer"),
                     SyntaxKind::FLOAT => Message::Name("float"),
@@ -108,7 +114,10 @@ impl<'s> Lexer<'s> {
                 self.word().map(|text| Token { kind, text })
             }
             SyntaxKind::IDENT => self.ident(),
-            SyntaxKind::STRING => self.string().map(|text| Token { kind, text }),
+            SyntaxKind::STRING => self
+                .string()
+                .filter(|text| !is_unterminated_string(text))
+                .map(|text| Token { kind, text }),
             SyntaxKind::INT => self.int(),
             SyntaxKind::UNSIGNED_INT => self.unsigned_int(),
             SyntaxKind::FLOAT => self.float(),
@@ -207,10 +216,18 @@ impl<'s> Lexer<'s> {
                     Some((_, b'\\')) => {
                         bytes.next();
                     }
-                    Some((_, b'\n' | b'\r')) | None => return None,
+                    Some((end, b'\n' | b'\r')) => {
+                        // SAFETY: `"` is ASCII char, and `+ 1` means it contains starting quote
+                        unsafe {
+                            return Some(self.split_advance(end + 1));
+                        }
+                    }
+                    None => break,
                     _ => {}
                 }
             }
+            // SAFETY: this is the whole string
+            unsafe { Some(self.split_advance(self.input.len())) }
         } else {
             None
         }
@@ -418,11 +435,7 @@ impl<'s> Lexer<'s> {
                 // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
                 unsafe { Some(self.split_advance(end)) }
             }
-            '"' => {
-                let checkpoint = self.input;
-                let _ = self.string();
-                checkpoint.get(..checkpoint.len() - self.input.len())
-            }
+            '"' => self.string(),
             c => {
                 // SAFETY: using the length in UTF-8
                 unsafe { Some(self.split_advance(c.len_utf8())) }
@@ -539,9 +552,11 @@ impl<'s> Lexer<'s> {
                 }
                 _ => break,
             }
-            (_, self.input) = self
-                .input
-                .split_at(self.input.find([';', '(']).unwrap_or(self.input.len()));
+            let end = self.input.find([';', '(']).unwrap_or(self.input.len());
+            // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
+            unsafe {
+                self.split_advance(end);
+            }
         }
         checkpoint
             .get(..checkpoint.len() - self.input.len())
@@ -599,6 +614,10 @@ impl<'s> Lexer<'s> {
 
 fn is_not_annot_elem(b: u8) -> bool {
     matches!(b, b' ' | b'\n' | b'\t' | b'\r' | b'(' | b')' | b'"')
+}
+
+fn is_unterminated_string(s: &str) -> bool {
+    s.strip_prefix('"').is_some_and(|rest| !rest.ends_with('"'))
 }
 
 #[derive(Debug, Clone, Copy)]

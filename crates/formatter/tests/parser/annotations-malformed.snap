@@ -15,3 +15,7 @@ source: crates/formatter/tests/parser.rs
 (@x (y (z))))
 (@x (@y )))
 ((@a)@b)
+(@x "
+)
+(@x ")
+)
