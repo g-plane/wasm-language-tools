@@ -445,9 +445,9 @@ impl<'s> Lexer<'s> {
 
     pub fn trivia(&mut self) -> Option<Token<'s>> {
         let bytes = self.input.as_bytes();
-        bytes.first().and_then(|b| match b {
-            b' ' | b'\n' | b'\t' | b'\r' => self.whitespace(),
-            b'(' => match bytes.get(1) {
+        match bytes.first() {
+            Some(b' ' | b'\n' | b'\t' | b'\r') => self.whitespace(),
+            Some(b'(') => match bytes.get(1) {
                 Some(b';') => self.block_comment(),
                 Some(b'@') if self.annotation_depth == 0 => self.annot_start(),
                 _ => {
@@ -465,8 +465,8 @@ impl<'s> Lexer<'s> {
                     }
                 }
             },
-            b';' if matches!(bytes.get(1), Some(b';')) => self.line_comment(),
-            b')' => {
+            Some(b';') if matches!(bytes.get(1), Some(b';')) => self.line_comment(),
+            Some(b')') => {
                 match self.annotation_depth {
                     0 => None,
                     1 => {
@@ -491,11 +491,11 @@ impl<'s> Lexer<'s> {
                     }
                 }
             }
-            b'"' if self.annotation_depth > 0 => self.string().map(|text| Token {
+            Some(b'"') if self.annotation_depth > 0 => self.string().map(|text| Token {
                 kind: SyntaxKind::ANNOT_ELEM,
                 text,
             }),
-            _ => {
+            Some(..) => {
                 if self.annotation_depth > 0 {
                     let end = self
                         .input
@@ -513,7 +513,11 @@ impl<'s> Lexer<'s> {
                     None
                 }
             }
-        })
+            None => {
+                self.annotation_depth = 0;
+                None
+            }
+        }
     }
 
     fn whitespace(&mut self) -> Option<Token<'s>> {

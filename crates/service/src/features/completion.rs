@@ -43,6 +43,9 @@ impl LanguageService {
 
 fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
     let mut ctx = SmallVec::with_capacity(2);
+    if token.kind() == SyntaxKind::ANNOT_START {
+        return Some(smallvec::smallvec![CmpCtx::Annotation]);
+    }
     let parent = token.parent()?;
     match parent.kind() {
         SyntaxKind::MODULE_FIELD_FUNC => {
@@ -639,6 +642,7 @@ enum CmpCtx {
     AddrType,
     ShapeDescriptor,
     Tag,
+    Annotation,
     KeywordModule,
     KeywordsModuleField,
     KeywordImExport,
@@ -1225,6 +1229,22 @@ fn get_cmp_list(
                             }
                         },
                     ));
+                }
+                CmpCtx::Annotation => {
+                    items.extend(
+                        [
+                            "deprecated",
+                            "custom",
+                            "name",
+                            "js",
+                            "metadata.code.branch_hint",
+                        ]
+                        .map(|annot| CompletionItem {
+                            label: annot.to_string(),
+                            kind: Some(CompletionItemKind::Snippet),
+                            ..Default::default()
+                        }),
+                    );
                 }
                 CmpCtx::KeywordModule => items.push(CompletionItem {
                     label: "module".to_string(),

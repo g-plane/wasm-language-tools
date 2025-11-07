@@ -1,0 +1,26 @@
+---
+source: crates/service/tests/completion/annotation.rs
+expression: response
+---
+[
+  {
+    "label": "deprecated",
+    "kind": 15
+  },
+  {
+    "label": "custom",
+    "kind": 15
+  },
+  {
+    "label": "name",
+    "kind": 15
+  },
+  {
+    "label": "js",
+    "kind": 15
+  },
+  {
+    "label": "metadata.code.branch_hint",
+    "kind": 15
+  }
+]
