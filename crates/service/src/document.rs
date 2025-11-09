@@ -219,9 +219,30 @@ mod tests {
     use lspt::{
         Definition, DefinitionParams, DocumentDiagnosticParams, Hover, HoverParams, Location,
         MarkupContent, MarkupKind, Position, Range, TextDocumentContentChangePartial,
-        TextDocumentContentChangeWholeDocument, TextDocumentIdentifier, Union2, Union3,
-        VersionedTextDocumentIdentifier,
+        TextDocumentContentChangeWholeDocument, TextDocumentIdentifier, TextDocumentItem, Union2,
+        Union3, VersionedTextDocumentIdentifier,
     };
+
+    #[test]
+    fn get_opened_uris() {
+        let mut service = LanguageService::default();
+        assert!(service.get_opened_uris().is_empty());
+
+        let a = "untitled://a.wat".to_string();
+        service.commit(a.clone(), "".into());
+        assert_eq!(service.get_opened_uris().first(), Some(&a));
+
+        let b = "untitled://b.wat".to_string();
+        service.did_open(DidOpenTextDocumentParams {
+            text_document: TextDocumentItem {
+                uri: b,
+                language_id: lspt::LanguageKind::Custom_("wat".into()),
+                version: 1,
+                text: "".into(),
+            },
+        });
+        assert_eq!(service.get_opened_uris().len(), 2);
+    }
 
     #[test]
     fn single_cursor_in_module_field() {

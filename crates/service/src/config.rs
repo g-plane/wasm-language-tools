@@ -133,18 +133,3 @@ impl LanguageService {
         self.global_config = Arc::new(config);
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn get_opened_uris() {
-        let mut service = LanguageService::default();
-        assert!(service.get_opened_uris().is_empty());
-
-        let uri = "untitled://test".to_string();
-        service.commit(uri.clone(), "".into());
-        assert_eq!(service.get_opened_uris().first(), Some(&uri));
-    }
-}
