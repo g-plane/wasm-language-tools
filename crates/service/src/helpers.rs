@@ -122,12 +122,9 @@ pub(crate) struct RenderWithDb<'db, T> {
 }
 
 pub(crate) mod ast {
-    use rowan::{
-        Direction, TextSize, TokenAtOffset,
-        ast::{AstNode, support},
-    };
+    use rowan::{Direction, TextSize, TokenAtOffset, ast::support};
     use std::ops::ControlFlow;
-    use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, ast::RefType};
+    use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 
     /// Pick the `$idx` part from `(func (type $idx) ...)`.
     /// It will return `None` if there're inlined params or results.
@@ -186,20 +183,6 @@ pub(crate) mod ast {
                     doc.insert_str(0, text.strip_prefix([' ', '\t']).unwrap_or(text));
                 }
                 doc
-            })
-    }
-
-    pub fn is_nullable_ref_type(ref_type: &RefType) -> bool {
-        ref_type
-            .syntax()
-            .children_with_tokens()
-            .any(|element| match element {
-                SyntaxElement::Token(token) => {
-                    let kind = token.kind();
-                    kind == SyntaxKind::TYPE_KEYWORD
-                        || kind == SyntaxKind::KEYWORD && token.text() == "null"
-                }
-                SyntaxElement::Node(_) => false,
             })
     }
 }

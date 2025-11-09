@@ -4,7 +4,7 @@ use crate::{
     data_set,
     document::Document,
     helpers,
-    types_analyzer::{self, CompositeType, DefType},
+    types_analyzer::{self, CompositeType, DefType, RefType},
 };
 use lspt::{Hover, HoverParams, MarkupContent, MarkupKind, Union3};
 use rowan::ast::{AstNode, support};
@@ -125,7 +125,10 @@ impl LanguageService {
                             .immediates()
                             .next()
                             .and_then(|immediate| immediate.ref_type())
-                            .is_some_and(|ref_type| helpers::ast::is_nullable_ref_type(&ref_type))
+                            .and_then(|ref_type| {
+                                RefType::from_green(&ref_type.syntax().green(), self)
+                            })
+                            .is_some_and(|ty| ty.nullable)
                         {
                             "ref.test."
                         } else {
@@ -138,7 +141,10 @@ impl LanguageService {
                             .immediates()
                             .next()
                             .and_then(|immediate| immediate.ref_type())
-                            .is_some_and(|ref_type| helpers::ast::is_nullable_ref_type(&ref_type))
+                            .and_then(|ref_type| {
+                                RefType::from_green(&ref_type.syntax().green(), self)
+                            })
+                            .is_some_and(|ty| ty.nullable)
                         {
                             "ref.cast."
                         } else {
