@@ -496,11 +496,7 @@ impl Server {
         params: DidChangeConfigurationParams,
     ) -> anyhow::Result<()> {
         if self.support_pull_config {
-            let uris = self
-                .service
-                .get_configs()
-                .map(|(uri, _)| uri)
-                .collect::<Vec<_>>();
+            let uris = self.service.get_opened_uris();
             stdio::write(
                 self.sent_requests.add(
                     ConfigurationRequest::METHOD.into(),

@@ -36,12 +36,12 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
     // Some clients like VS Code support pulling configuration per document.
     // In that case, we won't use global configuration,
     // but document-specific configuration may not be available if client doesn't send it yet.
-    // If it isn't ready, we will skip the checker, (must be before computing symbol table and something else)
-    // otherwise this will cause Salsa data-race panic and resource waste.
-    let config = match document.config(service) {
-        ConfigState::Uninit => return Vec::new(),
-        ConfigState::Inherit => &service.global_config,
-        ConfigState::Override(config) => config,
+    // If it isn't ready, we will skip the checker to avoid diagnostics flickering.
+    let config_state = service.configs.get(&document.uri(service));
+    let config = match config_state.as_deref() {
+        Some(ConfigState::Inherit) => &service.global_config,
+        Some(ConfigState::Override(config)) => config,
+        None => return Vec::new(),
     };
 
     let uri = document.uri(service);

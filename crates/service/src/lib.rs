@@ -47,6 +47,7 @@ pub struct LanguageService {
     semantic_token_kinds: Arc<IndexSet<SemanticTokenKind, FxBuildHasher>>,
     documents: Arc<DashMap<InternUri, Document, FxBuildHasher>>,
     global_config: Arc<ServiceConfig>,
+    configs: Arc<DashMap<InternUri, ConfigState, FxBuildHasher>>,
     support_pull_config: bool,
 }
 #[salsa::db]

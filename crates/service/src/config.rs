@@ -1,5 +1,4 @@
-use crate::{LanguageService, document::Document};
-use salsa::Setter;
+use crate::{LanguageService, uri::InternUri};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -104,42 +103,28 @@ impl Default for InlayHintOptions {
 
 #[derive(Debug)]
 pub(crate) enum ConfigState {
-    Uninit,
     Inherit,
     Override(ServiceConfig),
 }
-
-impl LanguageService {
-    #[inline]
-    // This should be used internally.
-    pub(crate) fn get_config_or_global(&self, document: Document) -> &ServiceConfig {
-        match document.config(self) {
+impl ConfigState {
+    pub fn get_or_global<'a>(&'a self, service: &'a LanguageService) -> &'a ServiceConfig {
+        match self {
+            ConfigState::Inherit => &service.global_config,
             ConfigState::Override(config) => config,
-            _ => &self.global_config,
         }
     }
+}
 
-    #[inline]
-    /// Get configurations of all opened documents.
-    pub fn get_configs(&self) -> impl Iterator<Item = (String, &ServiceConfig)> {
-        self.documents
-            .iter()
-            .filter_map(|pair| match pair.value().config(self) {
-                ConfigState::Override(config) => Some((pair.key().raw(self), config)),
-                _ => None,
-            })
-    }
-
+impl LanguageService {
     #[inline]
     /// Update or insert configuration of a specific document.
     ///
     /// Set `config` to `None` to inherit global configuration.
     pub fn set_config(&mut self, uri: String, config: Option<ServiceConfig>) {
-        if let Some(document) = self.get_document(uri) {
-            document
-                .set_config(self)
-                .to(config.map_or(ConfigState::Inherit, ConfigState::Override));
-        }
+        self.configs.insert(
+            InternUri::new(self, uri),
+            config.map_or(ConfigState::Inherit, ConfigState::Override),
+        );
     }
 
     #[inline]
@@ -154,13 +139,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn get_and_set_configs() {
+    fn get_opened_uris() {
         let mut service = LanguageService::default();
-        assert_eq!(service.get_configs().count(), 0);
+        assert!(service.get_opened_uris().is_empty());
 
         let uri = "untitled://test".to_string();
         service.commit(uri.clone(), "".into());
-        service.set_config(uri.clone(), Some(ServiceConfig::default()));
-        assert_eq!(service.get_configs().next().unwrap().0, uri);
+        assert_eq!(service.get_opened_uris().first(), Some(&uri));
     }
 }

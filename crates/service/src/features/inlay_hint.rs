@@ -1,7 +1,6 @@
 use crate::{
     LanguageService,
     binder::{SymbolKind, SymbolTable},
-    config::ConfigState,
     helpers, types_analyzer,
 };
 use lspt::{InlayHint, InlayHintKind, InlayHintParams, Union2};
@@ -12,13 +11,10 @@ impl LanguageService {
     /// Handler for `textDocument/inlayHint` request.
     pub fn inlay_hint(&self, params: InlayHintParams) -> Option<Vec<InlayHint>> {
         let document = self.get_document(params.text_document.uri)?;
-        // Avoid inlay hints flashing if client supports pulling config and config is not ready.
+        // Avoid inlay hints flickering if client supports pulling config and config is not ready.
         // This is similar to what we do in the checker.
-        let config = match document.config(self) {
-            ConfigState::Uninit => return None,
-            ConfigState::Inherit => &self.global_config,
-            ConfigState::Override(config) => config,
-        };
+        let config_state = self.configs.get(&document.uri(self))?;
+        let config = config_state.get_or_global(self);
 
         let line_index = document.line_index(self);
         let root = document.root_tree(self);

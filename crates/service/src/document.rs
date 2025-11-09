@@ -18,8 +18,6 @@ pub(crate) struct Document {
     pub root: GreenNode,
     #[returns(ref)]
     pub syntax_errors: Vec<wat_parser::SyntaxError>,
-    #[returns(ref)]
-    pub config: ConfigState,
 }
 
 impl Document {
@@ -35,7 +33,8 @@ impl LanguageService {
         let uri = InternUri::new(self, uri);
         let line_index = LineIndex::new(&text);
         let (green, errors) = wat_parser::parse(&text);
-        if let Some(document) = self.documents.get(&uri).map(|r| *r.value()) {
+        let documents = self.documents.clone();
+        if let Some(document) = documents.get_mut(&uri) {
             document.set_text(self).to(text);
             document.set_line_index(self).to(line_index);
             document.set_root(self).to(green);
@@ -43,20 +42,11 @@ impl LanguageService {
         } else {
             self.documents.insert(
                 uri,
-                Document::new(
-                    self,
-                    uri,
-                    text,
-                    line_index,
-                    green,
-                    errors,
-                    if self.support_pull_config {
-                        ConfigState::Uninit
-                    } else {
-                        ConfigState::Inherit
-                    },
-                ),
+                Document::new(self, uri, text, line_index, green, errors),
             );
+            if !self.support_pull_config {
+                self.configs.insert(uri, ConfigState::Inherit);
+            }
         };
     }
 
@@ -74,18 +64,18 @@ impl LanguageService {
                 line_index,
                 green,
                 errors,
-                if self.support_pull_config {
-                    ConfigState::Uninit
-                } else {
-                    ConfigState::Inherit
-                },
             ),
         );
+        if !self.support_pull_config {
+            self.configs.insert(uri, ConfigState::Inherit);
+        }
     }
 
     /// Handler for `textDocument/didChange` notification.
     pub fn did_change(&mut self, params: DidChangeTextDocumentParams) {
-        let Some(document) = self.get_document(params.text_document.uri) else {
+        let documents = self.documents.clone();
+        let Some(document) = documents.get_mut(&InternUri::new(self, params.text_document.uri))
+        else {
             return;
         };
         'single: {
@@ -207,10 +197,19 @@ impl LanguageService {
             .remove(&InternUri::new(self, params.text_document.uri));
     }
 
+    #[inline]
+    /// Get URIs of all opened documents.
+    pub fn get_opened_uris(&self) -> Vec<String> {
+        self.documents
+            .iter()
+            .map(|pair| pair.key().raw(self))
+            .collect()
+    }
+
     pub(crate) fn get_document(&self, uri: impl AsRef<str>) -> Option<Document> {
         self.documents
             .get(&InternUri::new(self, uri.as_ref()))
-            .map(|r| *r.value())
+            .map(|r| *r)
     }
 }
 
