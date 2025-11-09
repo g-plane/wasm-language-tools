@@ -1,0 +1,20 @@
+---
+source: crates/service/tests/hover/doc_comment.rs
+expression: response
+---
+{
+  "contents": {
+    "kind": "markdown",
+    "value": "```wat\n(func $func (param $param i32) (param f32) (param f64) (result i32) (result i64))\n```\n---\n## Function with Annotations"
+  },
+  "range": {
+    "start": {
+      "line": 4,
+      "character": 10
+    },
+    "end": {
+      "line": 4,
+      "character": 15
+    }
+  }
+}

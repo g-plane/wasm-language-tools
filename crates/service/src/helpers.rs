@@ -161,15 +161,8 @@ pub(crate) mod ast {
     pub fn get_doc_comment(node: &SyntaxNode) -> String {
         node.siblings_with_tokens(Direction::Prev)
             .skip(1)
-            .map_while(|element| match element {
-                SyntaxElement::Token(token)
-                    if matches!(
-                        token.kind(),
-                        SyntaxKind::LINE_COMMENT | SyntaxKind::WHITESPACE
-                    ) =>
-                {
-                    Some(token)
-                }
+            .map_while(|node_or_token| match node_or_token {
+                SyntaxElement::Token(token) if token.kind().is_trivia() => Some(token),
                 _ => None,
             })
             .filter(|token| token.kind() == SyntaxKind::LINE_COMMENT)

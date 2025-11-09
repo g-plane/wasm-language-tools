@@ -2,6 +2,7 @@ use insta::assert_json_snapshot;
 use lspt::{HoverParams, Position, TextDocumentIdentifier};
 use wat_service::LanguageService;
 
+mod doc_comment;
 mod memo;
 
 fn create_params(uri: String, line: u32, character: u32) -> HoverParams {
