@@ -584,7 +584,7 @@ fn abbr_ref_type() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.hover(create_params(uri, 2, 19));
-    assert_json_snapshot!(response);
+    assert!(response.is_none());
 }
 
 #[test]
