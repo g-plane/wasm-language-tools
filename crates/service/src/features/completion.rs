@@ -743,12 +743,6 @@ fn get_cmp_list(
                         .map(|ty| CompletionItem {
                             label: ty.into(),
                             kind: Some(CompletionItemKind::Class),
-                            documentation: data_set::get_value_type_description(ty).map(|desc| {
-                                Union2::B(MarkupContent {
-                                    kind: MarkupKind::Markdown,
-                                    value: desc.into(),
-                                })
-                            }),
                             ..Default::default()
                         }),
                     );
