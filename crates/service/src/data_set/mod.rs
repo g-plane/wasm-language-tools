@@ -519,4 +519,4 @@ pub(crate) fn get_value_type_description(value_type: &str) -> Option<&'static st
     }
 }
 
-pub(crate) static PORT_DESC: [&str; 4] = ["func", "table", "memory", "global"];
+pub(crate) static EXTERNS: [&str; 5] = ["func", "table", "memory", "global", "tag"];

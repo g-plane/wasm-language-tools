@@ -18,5 +18,9 @@ expression: response
   {
     "label": "global",
     "kind": 14
+  },
+  {
+    "label": "tag",
+    "kind": 14
   }
 ]

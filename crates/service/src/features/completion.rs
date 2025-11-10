@@ -1291,7 +1291,7 @@ fn get_cmp_list(
                     ..Default::default()
                 }),
                 CmpCtx::KeywordPortDesc => {
-                    items.extend(data_set::PORT_DESC.iter().map(|desc| CompletionItem {
+                    items.extend(data_set::EXTERNS.iter().map(|desc| CompletionItem {
                         label: desc.to_string(),
                         kind: Some(CompletionItemKind::Keyword),
                         ..Default::default()
