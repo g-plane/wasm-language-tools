@@ -94,8 +94,8 @@ impl Parser<'_> {
             "tag" => {
                 self.add_child(green::KW_TAG.clone());
                 self.eat(IDENT);
-                if !self.recover(Self::parse_type_use) {
-                    self.report_missing(Message::Name("tag type"));
+                if let Some(type_use) = self.try_parse_with_trivias(Self::parse_type_use) {
+                    self.add_child(type_use);
                 }
                 self.expect_right_paren();
                 Some(self.finish_node(EXTERN_TYPE_TAG, mark))

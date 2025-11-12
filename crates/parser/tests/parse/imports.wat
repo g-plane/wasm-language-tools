@@ -27,4 +27,7 @@
   ;; Memories
   (import "spectest" "memory" (memory 1 2))
   (memory (import "spectest" "memory") 1 2)
+
+  ;; Tags
+  (import "" "" (tag))
 )

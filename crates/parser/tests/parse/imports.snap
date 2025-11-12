@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..1081
-  MODULE@0..1080
+ROOT@0..1115
+  MODULE@0..1114
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -478,6 +478,24 @@ ROOT@0..1081
           WHITESPACE@1075..1076 " "
           UNSIGNED_INT@1076..1077 "2"
       R_PAREN@1077..1078 ")"
-    WHITESPACE@1078..1079 "\n"
-    R_PAREN@1079..1080 ")"
-  WHITESPACE@1080..1081 "\n"
+    WHITESPACE@1078..1082 "\n\n  "
+    LINE_COMMENT@1082..1089 ";; Tags"
+    WHITESPACE@1089..1092 "\n  "
+    MODULE_FIELD_IMPORT@1092..1112
+      L_PAREN@1092..1093 "("
+      KEYWORD@1093..1099 "import"
+      WHITESPACE@1099..1100 " "
+      MODULE_NAME@1100..1102
+        STRING@1100..1102 "\"\""
+      WHITESPACE@1102..1103 " "
+      NAME@1103..1105
+        STRING@1103..1105 "\"\""
+      WHITESPACE@1105..1106 " "
+      EXTERN_TYPE_TAG@1106..1111
+        L_PAREN@1106..1107 "("
+        KEYWORD@1107..1110 "tag"
+        R_PAREN@1110..1111 ")"
+      R_PAREN@1111..1112 ")"
+    WHITESPACE@1112..1113 "\n"
+    R_PAREN@1113..1114 ")"
+  WHITESPACE@1114..1115 "\n"
