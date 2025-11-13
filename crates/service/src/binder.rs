@@ -1008,7 +1008,7 @@ impl fmt::Display for SymbolKind {
             SymbolKind::GlobalDef | SymbolKind::GlobalRef => write!(f, "global"),
             SymbolKind::MemoryDef | SymbolKind::MemoryRef => write!(f, "memory"),
             SymbolKind::TableDef | SymbolKind::TableRef => write!(f, "table"),
-            SymbolKind::BlockDef | SymbolKind::BlockRef => write!(f, "block"),
+            SymbolKind::BlockDef | SymbolKind::BlockRef => write!(f, "label"),
             SymbolKind::FieldDef | SymbolKind::FieldRef => write!(f, "field"),
             SymbolKind::TagDef | SymbolKind::TagRef => write!(f, "tag"),
         }
@@ -1041,6 +1041,22 @@ impl From<SymbolKind> for IdxKind {
             SymbolKind::BlockDef | SymbolKind::BlockRef => IdxKind::Block,
             SymbolKind::FieldDef | SymbolKind::FieldRef => IdxKind::Field,
             SymbolKind::TagDef | SymbolKind::TagRef => IdxKind::Tag,
+        }
+    }
+}
+impl fmt::Display for IdxKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            IdxKind::Module => write!(f, "module"),
+            IdxKind::Func => write!(f, "func"),
+            IdxKind::Local => write!(f, "param or local"),
+            IdxKind::Type => write!(f, "type"),
+            IdxKind::Global => write!(f, "global"),
+            IdxKind::Memory => write!(f, "memory"),
+            IdxKind::Table => write!(f, "table"),
+            IdxKind::Block => write!(f, "label"),
+            IdxKind::Field => write!(f, "field"),
+            IdxKind::Tag => write!(f, "tag"),
         }
     }
 }

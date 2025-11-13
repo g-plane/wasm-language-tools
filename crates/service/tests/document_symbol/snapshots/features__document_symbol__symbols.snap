@@ -19,11 +19,11 @@ expression: response
     "selectionRange": {
       "start": {
         "line": 1,
-        "character": 0
+        "character": 1
       },
       "end": {
-        "line": 15,
-        "character": 1
+        "line": 1,
+        "character": 7
       }
     },
     "children": [
@@ -518,11 +518,11 @@ expression: response
     "selectionRange": {
       "start": {
         "line": 17,
-        "character": 0
+        "character": 1
       },
       "end": {
-        "line": 30,
-        "character": 1
+        "line": 17,
+        "character": 7
       }
     },
     "children": [

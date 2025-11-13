@@ -40,30 +40,17 @@ pub fn check(
                 | SymbolKind::BlockRef
                 | SymbolKind::TagRef => !symbol_table.resolved.contains_key(&symbol.key),
             })
-            .map(|symbol| {
-                let kind = match symbol.kind {
-                    SymbolKind::Call => "func",
-                    SymbolKind::LocalRef => "param or local",
-                    SymbolKind::TypeUse => "type",
-                    SymbolKind::GlobalRef => "global",
-                    SymbolKind::MemoryRef => "memory",
-                    SymbolKind::TableRef => "table",
-                    SymbolKind::BlockRef => "label",
-                    SymbolKind::FieldRef => "field",
-                    SymbolKind::TagRef => "tag",
-                    _ => unreachable!(),
-                };
-                Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
-                    severity: Some(DiagnosticSeverity::Error),
-                    source: Some("wat".into()),
-                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                    message: format!(
-                        "cannot find {kind} `{}` in this scope",
-                        symbol.idx.render(service)
-                    ),
-                    ..Default::default()
-                }
+            .map(|symbol| Diagnostic {
+                range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
+                severity: Some(DiagnosticSeverity::Error),
+                source: Some("wat".into()),
+                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                message: format!(
+                    "cannot find {} `{}` in this scope",
+                    symbol.kind,
+                    symbol.idx.render(service),
+                ),
+                ..Default::default()
             }),
     );
 }

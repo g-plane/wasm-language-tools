@@ -1,6 +1,6 @@
 use crate::{
     LanguageService,
-    binder::{IdxKind, Symbol, SymbolKind, SymbolTable},
+    binder::{Symbol, SymbolKind, SymbolTable},
     document::Document,
     exports, helpers,
     uri::InternUri,
@@ -51,17 +51,6 @@ pub fn check(
             .iter()
             .filter(|(_, symbols)| symbols.len() > 1)
             .flat_map(|((name, _, kind), symbols)| {
-                let kind = match kind {
-                    IdxKind::Func => "func",
-                    IdxKind::Local => "param or local",
-                    IdxKind::Type => "type",
-                    IdxKind::Global => "global",
-                    IdxKind::Memory => "memory",
-                    IdxKind::Table => "table",
-                    IdxKind::Field => "field",
-                    IdxKind::Tag => "tag",
-                    _ => unreachable!(),
-                };
                 let name = name.ident(service);
                 symbols.iter().map(move |symbol| Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(

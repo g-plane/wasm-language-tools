@@ -129,24 +129,16 @@ fn report_with_range(
     severity: DiagnosticSeverity,
     symbol: &Symbol,
 ) -> Diagnostic {
-    let kind = match symbol.kind {
-        SymbolKind::Func => "func",
-        SymbolKind::Param => "param",
-        SymbolKind::Local => "local",
-        SymbolKind::Type => "type",
-        SymbolKind::GlobalDef => "global",
-        SymbolKind::MemoryDef => "memory",
-        SymbolKind::TableDef => "table",
-        SymbolKind::FieldDef => "field",
-        SymbolKind::TagDef => "tag",
-        _ => unreachable!(),
-    };
     Diagnostic {
         range: helpers::rowan_range_to_lsp_range(line_index, range),
         severity: Some(severity),
         source: Some("wat".into()),
         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-        message: format!("{kind} `{}` is never used", symbol.idx.render(service)),
+        message: format!(
+            "{} `{}` is never used",
+            symbol.kind,
+            symbol.idx.render(service),
+        ),
         tags: Some(vec![DiagnosticTag::Unnecessary]),
         ..Default::default()
     }

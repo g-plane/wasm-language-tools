@@ -22,29 +22,27 @@ impl LanguageService {
             .symbols
             .values()
             .filter_map(|symbol| {
+                let range = helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                let selection_range = helpers::create_selection_range(symbol, &root, line_index);
                 let tags = if deprecation.contains_key(&symbol.key) {
                     Some(vec![SymbolTag::Deprecated])
                 } else {
                     None
                 };
                 match symbol.kind {
-                    SymbolKind::Module => {
-                        let module_range =
-                            helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
-                        Some((
-                            symbol.key,
-                            DocumentSymbol {
-                                name: "module".into(),
-                                detail: None,
-                                kind: LspSymbolKind::Module,
-                                tags,
-                                deprecated: None,
-                                range: module_range,
-                                selection_range: module_range,
-                                children: None,
-                            },
-                        ))
-                    }
+                    SymbolKind::Module => Some((
+                        symbol.key,
+                        DocumentSymbol {
+                            name: "module".into(),
+                            detail: None,
+                            kind: LspSymbolKind::Module,
+                            tags,
+                            deprecated: None,
+                            range,
+                            selection_range,
+                            children: None,
+                        },
+                    )),
                     SymbolKind::Func => {
                         let range =
                             helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
@@ -57,9 +55,7 @@ impl LanguageService {
                                 tags,
                                 deprecated: None,
                                 range,
-                                selection_range: helpers::create_selection_range(
-                                    symbol, &root, line_index,
-                                ),
+                                selection_range,
                                 children: None,
                             },
                         ))
@@ -81,9 +77,7 @@ impl LanguageService {
                                 tags,
                                 deprecated: None,
                                 range,
-                                selection_range: helpers::create_selection_range(
-                                    symbol, &root, line_index,
-                                ),
+                                selection_range,
                                 children: None,
                             },
                         ))
@@ -100,9 +94,7 @@ impl LanguageService {
                                 tags,
                                 deprecated: None,
                                 range,
-                                selection_range: helpers::create_selection_range(
-                                    symbol, &root, line_index,
-                                ),
+                                selection_range,
                                 children: None,
                             },
                         ))
@@ -134,9 +126,7 @@ impl LanguageService {
                                 tags,
                                 deprecated: None,
                                 range,
-                                selection_range: helpers::create_selection_range(
-                                    symbol, &root, line_index,
-                                ),
+                                selection_range,
                                 children: None,
                             },
                         ))
@@ -153,9 +143,7 @@ impl LanguageService {
                                 tags,
                                 deprecated: None,
                                 range,
-                                selection_range: helpers::create_selection_range(
-                                    symbol, &root, line_index,
-                                ),
+                                selection_range,
                                 children: None,
                             },
                         ))
@@ -178,9 +166,7 @@ impl LanguageService {
                                 tags,
                                 deprecated: None,
                                 range,
-                                selection_range: helpers::create_selection_range(
-                                    symbol, &root, line_index,
-                                ),
+                                selection_range,
                                 children: None,
                             },
                         ))
@@ -238,18 +224,7 @@ fn render_symbol_name(symbol: &Symbol, service: &LanguageService) -> String {
     if let Some(name) = symbol.idx.name {
         name.ident(service).to_string()
     } else if let Some(num) = symbol.idx.num {
-        let kind = match symbol.kind {
-            SymbolKind::Func => "func",
-            SymbolKind::Local => "local",
-            SymbolKind::Type => "type",
-            SymbolKind::GlobalDef => "global",
-            SymbolKind::MemoryDef => "memory",
-            SymbolKind::TableDef => "table",
-            SymbolKind::FieldDef => "field",
-            SymbolKind::TagDef => "tag",
-            _ => unreachable!(),
-        };
-        format!("{kind} {num}")
+        format!("{} {num}", symbol.kind)
     } else {
         String::new()
     }
