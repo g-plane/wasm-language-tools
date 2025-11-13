@@ -414,3 +414,20 @@ fn after_other_type_defs_in_rec_type() {
     let response = service.completion(create_params(uri, 2, 15));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn deprecated() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (rec
+    (@deprecated) (type (func)))
+  (@deprecated "this is deprecated")
+  (type $t (func))
+  (func (type )))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 6, 14));
+    assert_json_snapshot!(response);
+}

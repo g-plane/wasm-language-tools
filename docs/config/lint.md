@@ -99,6 +99,20 @@ This lint reports unreachable code, for example those code after `br`, `return` 
     nop))
 ```
 
+## `deprecated`
+
+> default: `"warning"`
+
+This lint reports usages of deprecated items which are marked with the [`@deprecated` annotation](../guide/deprecation.md).
+
+```wasm warning-5-10-5-15 strikethrough-5-10-5-15
+(module
+  (@deprecated)
+  (func $func)
+  (func
+    call $func))
+```
+
 ## `needlessMut`
 
 > default: `"warning"`

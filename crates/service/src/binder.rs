@@ -9,7 +9,7 @@ use rowan::{
     ast::{AstNode, support},
 };
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use std::{hash::Hash, ops::Deref};
+use std::{fmt, hash::Hash, ops::Deref};
 use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, ast::ValType};
 
 #[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
@@ -995,6 +995,24 @@ pub enum SymbolKind {
     FieldRef,
     TagDef,
     TagRef,
+}
+impl fmt::Display for SymbolKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            SymbolKind::Module => write!(f, "module"),
+            SymbolKind::Func | SymbolKind::Call => write!(f, "func"),
+            SymbolKind::Param => write!(f, "param"),
+            SymbolKind::Local => write!(f, "local"),
+            SymbolKind::LocalRef => write!(f, "param or local"),
+            SymbolKind::Type | SymbolKind::TypeUse => write!(f, "type"),
+            SymbolKind::GlobalDef | SymbolKind::GlobalRef => write!(f, "global"),
+            SymbolKind::MemoryDef | SymbolKind::MemoryRef => write!(f, "memory"),
+            SymbolKind::TableDef | SymbolKind::TableRef => write!(f, "table"),
+            SymbolKind::BlockDef | SymbolKind::BlockRef => write!(f, "block"),
+            SymbolKind::FieldDef | SymbolKind::FieldRef => write!(f, "field"),
+            SymbolKind::TagDef | SymbolKind::TagRef => write!(f, "tag"),
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]

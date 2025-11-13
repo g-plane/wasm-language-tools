@@ -1,0 +1,20 @@
+---
+source: crates/service/tests/completion/table.rs
+expression: response
+---
+[
+  {
+    "label": "$table",
+    "kind": 6,
+    "tags": [
+      1
+    ]
+  },
+  {
+    "label": "1",
+    "kind": 6,
+    "tags": [
+      1
+    ]
+  }
+]

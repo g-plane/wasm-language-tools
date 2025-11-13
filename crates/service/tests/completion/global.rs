@@ -227,3 +227,21 @@ fn preferred_type_by_call() {
     let response = service.completion(create_params(uri, 9, 18));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn deprecated() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+    (func global.get )
+    (@deprecated)
+    (global i32)
+    (@deprecated "this is deprecated")
+    (global $global i32)
+)
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 2, 21));
+    assert_json_snapshot!(response);
+}

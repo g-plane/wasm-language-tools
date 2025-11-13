@@ -33,6 +33,7 @@ export default defineConfig({
               },
             ],
           },
+          { text: 'Deprecation', link: '/guide/deprecation' },
         ],
       },
       {
@@ -119,6 +120,26 @@ export default defineConfig({
                   character: Number.parseInt(endChar) - 1,
                 },
                 properties: { class: `code-faded` },
+              })) ?? [],
+          )
+        },
+      },
+      {
+        preprocess(_, options) {
+          options.decorations = (options.decorations ?? []).concat(
+            options.meta?.__raw?.split(' ')
+              .map((it) => it.match(/^strikethrough-(\d+)-(\d+)-(\d+)-(\d+)$/))
+              .filter((it) => !!it)
+              .map(([, startLine, startChar, endLine, endChar]) => ({
+                start: {
+                  line: Number.parseInt(startLine) - 1,
+                  character: Number.parseInt(startChar) - 1,
+                },
+                end: {
+                  line: Number.parseInt(endLine) - 1,
+                  character: Number.parseInt(endChar) - 1,
+                },
+                properties: { class: `code-strikethrough` },
               })) ?? [],
           )
         },

@@ -1,9 +1,9 @@
 use crate::{
     LanguageService,
     binder::{Symbol, SymbolKind, SymbolTable},
-    helpers, types_analyzer,
+    deprecation, helpers, types_analyzer,
 };
-use lspt::{DocumentSymbol, DocumentSymbolParams, SymbolKind as LspSymbolKind};
+use lspt::{DocumentSymbol, DocumentSymbolParams, SymbolKind as LspSymbolKind, SymbolTag};
 use rowan::ast::AstNode;
 use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, ast::ModuleFieldGlobal};
@@ -15,180 +15,188 @@ impl LanguageService {
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
         let symbol_table = SymbolTable::of(self, document);
+        let deprecation = deprecation::get_deprecation(self, document);
 
         #[expect(deprecated)]
         let mut symbols_map = symbol_table
             .symbols
             .values()
-            .filter_map(|symbol| match symbol.kind {
-                SymbolKind::Module => {
-                    let module_range =
-                        helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
-                    Some((
-                        symbol.key,
-                        DocumentSymbol {
-                            name: "module".into(),
-                            detail: None,
-                            kind: LspSymbolKind::Module,
-                            tags: None,
-                            deprecated: None,
-                            range: module_range,
-                            selection_range: module_range,
-                            children: None,
-                        },
-                    ))
+            .filter_map(|symbol| {
+                let tags = if deprecation.contains_key(&symbol.key) {
+                    Some(vec![SymbolTag::Deprecated])
+                } else {
+                    None
+                };
+                match symbol.kind {
+                    SymbolKind::Module => {
+                        let module_range =
+                            helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                        Some((
+                            symbol.key,
+                            DocumentSymbol {
+                                name: "module".into(),
+                                detail: None,
+                                kind: LspSymbolKind::Module,
+                                tags,
+                                deprecated: None,
+                                range: module_range,
+                                selection_range: module_range,
+                                children: None,
+                            },
+                        ))
+                    }
+                    SymbolKind::Func => {
+                        let range =
+                            helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                        Some((
+                            symbol.key,
+                            DocumentSymbol {
+                                name: render_symbol_name(symbol, self),
+                                detail: None,
+                                kind: LspSymbolKind::Function,
+                                tags,
+                                deprecated: None,
+                                range,
+                                selection_range: helpers::create_selection_range(
+                                    symbol, &root, line_index,
+                                ),
+                                children: None,
+                            },
+                        ))
+                    }
+                    SymbolKind::Local => {
+                        let range =
+                            helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                        Some((
+                            symbol.key,
+                            DocumentSymbol {
+                                name: render_symbol_name(symbol, self),
+                                detail: types_analyzer::extract_type(
+                                    self,
+                                    document,
+                                    symbol.green.clone(),
+                                )
+                                .map(|ty| ty.render(self).to_string()),
+                                kind: LspSymbolKind::Variable,
+                                tags,
+                                deprecated: None,
+                                range,
+                                selection_range: helpers::create_selection_range(
+                                    symbol, &root, line_index,
+                                ),
+                                children: None,
+                            },
+                        ))
+                    }
+                    SymbolKind::Type => {
+                        let range =
+                            helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                        Some((
+                            symbol.key,
+                            DocumentSymbol {
+                                name: render_symbol_name(symbol, self),
+                                detail: helpers::infer_type_def_symbol_detail(symbol, &root),
+                                kind: LspSymbolKind::Class,
+                                tags,
+                                deprecated: None,
+                                range,
+                                selection_range: helpers::create_selection_range(
+                                    symbol, &root, line_index,
+                                ),
+                                children: None,
+                            },
+                        ))
+                    }
+                    SymbolKind::GlobalDef => {
+                        let range =
+                            helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                        Some((
+                            symbol.key,
+                            DocumentSymbol {
+                                name: render_symbol_name(symbol, self),
+                                detail: types_analyzer::extract_global_type(
+                                    self,
+                                    document,
+                                    symbol.green.clone(),
+                                )
+                                .map(|ty| {
+                                    if ModuleFieldGlobal::cast(symbol.key.to_node(&root))
+                                        .and_then(|global| global.global_type())
+                                        .and_then(|global_type| global_type.mut_keyword())
+                                        .is_some()
+                                    {
+                                        format!("(mut {})", ty.render(self))
+                                    } else {
+                                        ty.render(self).to_string()
+                                    }
+                                }),
+                                kind: LspSymbolKind::Variable,
+                                tags,
+                                deprecated: None,
+                                range,
+                                selection_range: helpers::create_selection_range(
+                                    symbol, &root, line_index,
+                                ),
+                                children: None,
+                            },
+                        ))
+                    }
+                    SymbolKind::MemoryDef | SymbolKind::TableDef | SymbolKind::TagDef => {
+                        let range =
+                            helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                        Some((
+                            symbol.key,
+                            DocumentSymbol {
+                                name: render_symbol_name(symbol, self),
+                                detail: None,
+                                kind: LspSymbolKind::Variable,
+                                tags,
+                                deprecated: None,
+                                range,
+                                selection_range: helpers::create_selection_range(
+                                    symbol, &root, line_index,
+                                ),
+                                children: None,
+                            },
+                        ))
+                    }
+                    SymbolKind::FieldDef => {
+                        let range =
+                            helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                        Some((
+                            symbol.key,
+                            DocumentSymbol {
+                                name: render_symbol_name(symbol, self),
+                                detail: types_analyzer::resolve_field_type(
+                                    self,
+                                    document,
+                                    symbol.key,
+                                    symbol.region,
+                                )
+                                .map(|ty| ty.render(self).to_string()),
+                                kind: LspSymbolKind::Field,
+                                tags,
+                                deprecated: None,
+                                range,
+                                selection_range: helpers::create_selection_range(
+                                    symbol, &root, line_index,
+                                ),
+                                children: None,
+                            },
+                        ))
+                    }
+                    SymbolKind::Param
+                    | SymbolKind::Call
+                    | SymbolKind::LocalRef
+                    | SymbolKind::TypeUse
+                    | SymbolKind::GlobalRef
+                    | SymbolKind::MemoryRef
+                    | SymbolKind::TableRef
+                    | SymbolKind::BlockDef
+                    | SymbolKind::BlockRef
+                    | SymbolKind::FieldRef
+                    | SymbolKind::TagRef => None,
                 }
-                SymbolKind::Func => {
-                    let range =
-                        helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
-                    Some((
-                        symbol.key,
-                        DocumentSymbol {
-                            name: render_symbol_name(symbol, self),
-                            detail: None,
-                            kind: LspSymbolKind::Function,
-                            tags: None,
-                            deprecated: None,
-                            range,
-                            selection_range: helpers::create_selection_range(
-                                symbol, &root, line_index,
-                            ),
-                            children: None,
-                        },
-                    ))
-                }
-                SymbolKind::Local => {
-                    let range =
-                        helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
-                    Some((
-                        symbol.key,
-                        DocumentSymbol {
-                            name: render_symbol_name(symbol, self),
-                            detail: types_analyzer::extract_type(
-                                self,
-                                document,
-                                symbol.green.clone(),
-                            )
-                            .map(|ty| ty.render(self).to_string()),
-                            kind: LspSymbolKind::Variable,
-                            tags: None,
-                            deprecated: None,
-                            range,
-                            selection_range: helpers::create_selection_range(
-                                symbol, &root, line_index,
-                            ),
-                            children: None,
-                        },
-                    ))
-                }
-                SymbolKind::Type => {
-                    let range =
-                        helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
-                    Some((
-                        symbol.key,
-                        DocumentSymbol {
-                            name: render_symbol_name(symbol, self),
-                            detail: helpers::infer_type_def_symbol_detail(symbol, &root),
-                            kind: LspSymbolKind::Class,
-                            tags: None,
-                            deprecated: None,
-                            range,
-                            selection_range: helpers::create_selection_range(
-                                symbol, &root, line_index,
-                            ),
-                            children: None,
-                        },
-                    ))
-                }
-                SymbolKind::GlobalDef => {
-                    let range =
-                        helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
-                    Some((
-                        symbol.key,
-                        DocumentSymbol {
-                            name: render_symbol_name(symbol, self),
-                            detail: types_analyzer::extract_global_type(
-                                self,
-                                document,
-                                symbol.green.clone(),
-                            )
-                            .map(|ty| {
-                                if ModuleFieldGlobal::cast(symbol.key.to_node(&root))
-                                    .and_then(|global| global.global_type())
-                                    .and_then(|global_type| global_type.mut_keyword())
-                                    .is_some()
-                                {
-                                    format!("(mut {})", ty.render(self))
-                                } else {
-                                    ty.render(self).to_string()
-                                }
-                            }),
-                            kind: LspSymbolKind::Variable,
-                            tags: None,
-                            deprecated: None,
-                            range,
-                            selection_range: helpers::create_selection_range(
-                                symbol, &root, line_index,
-                            ),
-                            children: None,
-                        },
-                    ))
-                }
-                SymbolKind::MemoryDef | SymbolKind::TableDef | SymbolKind::TagDef => {
-                    let range =
-                        helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
-                    Some((
-                        symbol.key,
-                        DocumentSymbol {
-                            name: render_symbol_name(symbol, self),
-                            detail: None,
-                            kind: LspSymbolKind::Variable,
-                            tags: None,
-                            deprecated: None,
-                            range,
-                            selection_range: helpers::create_selection_range(
-                                symbol, &root, line_index,
-                            ),
-                            children: None,
-                        },
-                    ))
-                }
-                SymbolKind::FieldDef => {
-                    let range =
-                        helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
-                    Some((
-                        symbol.key,
-                        DocumentSymbol {
-                            name: render_symbol_name(symbol, self),
-                            detail: types_analyzer::resolve_field_type(
-                                self,
-                                document,
-                                symbol.key,
-                                symbol.region,
-                            )
-                            .map(|ty| ty.render(self).to_string()),
-                            kind: LspSymbolKind::Field,
-                            tags: None,
-                            deprecated: None,
-                            range,
-                            selection_range: helpers::create_selection_range(
-                                symbol, &root, line_index,
-                            ),
-                            children: None,
-                        },
-                    ))
-                }
-                SymbolKind::Param
-                | SymbolKind::Call
-                | SymbolKind::LocalRef
-                | SymbolKind::TypeUse
-                | SymbolKind::GlobalRef
-                | SymbolKind::MemoryRef
-                | SymbolKind::TableRef
-                | SymbolKind::BlockDef
-                | SymbolKind::BlockRef
-                | SymbolKind::FieldRef
-                | SymbolKind::TagRef => None,
             })
             .collect::<FxHashMap<_, _>>();
         symbol_table

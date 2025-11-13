@@ -1,0 +1,20 @@
+---
+source: crates/service/tests/completion/memory.rs
+expression: response
+---
+[
+  {
+    "label": "0",
+    "kind": 6,
+    "tags": [
+      1
+    ]
+  },
+  {
+    "label": "$memory",
+    "kind": 6,
+    "tags": [
+      1
+    ]
+  }
+]

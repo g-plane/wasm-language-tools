@@ -511,7 +511,7 @@ expression: response
         "character": 0
       },
       "end": {
-        "line": 19,
+        "line": 30,
         "character": 1
       }
     },
@@ -521,7 +521,7 @@ expression: response
         "character": 0
       },
       "end": {
-        "line": 19,
+        "line": 30,
         "character": 1
       }
     },
@@ -529,24 +529,164 @@ expression: response
       {
         "name": "func 0",
         "kind": 12,
+        "tags": [
+          1
+        ],
         "range": {
           "start": {
-            "line": 18,
+            "line": 19,
             "character": 4
           },
           "end": {
-            "line": 18,
+            "line": 19,
             "character": 10
           }
         },
         "selectionRange": {
           "start": {
-            "line": 18,
+            "line": 19,
             "character": 5
           },
           "end": {
-            "line": 18,
+            "line": 19,
             "character": 9
+          }
+        }
+      },
+      {
+        "name": "type 0",
+        "detail": "func",
+        "kind": 5,
+        "tags": [
+          1
+        ],
+        "range": {
+          "start": {
+            "line": 21,
+            "character": 4
+          },
+          "end": {
+            "line": 21,
+            "character": 17
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 21,
+            "character": 5
+          },
+          "end": {
+            "line": 21,
+            "character": 9
+          }
+        }
+      },
+      {
+        "name": "global 0",
+        "detail": "i32",
+        "kind": 13,
+        "tags": [
+          1
+        ],
+        "range": {
+          "start": {
+            "line": 23,
+            "character": 4
+          },
+          "end": {
+            "line": 23,
+            "character": 16
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 23,
+            "character": 5
+          },
+          "end": {
+            "line": 23,
+            "character": 11
+          }
+        }
+      },
+      {
+        "name": "memory 0",
+        "kind": 13,
+        "tags": [
+          1
+        ],
+        "range": {
+          "start": {
+            "line": 25,
+            "character": 4
+          },
+          "end": {
+            "line": 25,
+            "character": 14
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 25,
+            "character": 5
+          },
+          "end": {
+            "line": 25,
+            "character": 11
+          }
+        }
+      },
+      {
+        "name": "table 0",
+        "kind": 13,
+        "tags": [
+          1
+        ],
+        "range": {
+          "start": {
+            "line": 27,
+            "character": 4
+          },
+          "end": {
+            "line": 27,
+            "character": 21
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 27,
+            "character": 5
+          },
+          "end": {
+            "line": 27,
+            "character": 10
+          }
+        }
+      },
+      {
+        "name": "tag 0",
+        "kind": 13,
+        "tags": [
+          1
+        ],
+        "range": {
+          "start": {
+            "line": 29,
+            "character": 4
+          },
+          "end": {
+            "line": 29,
+            "character": 9
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 29,
+            "character": 5
+          },
+          "end": {
+            "line": 29,
+            "character": 8
           }
         }
       }

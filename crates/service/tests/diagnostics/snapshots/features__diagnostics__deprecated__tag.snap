@@ -1,0 +1,47 @@
+---
+source: crates/service/tests/diagnostics/deprecated.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 21
+        },
+        "end": {
+          "line": 10,
+          "character": 22
+        }
+      },
+      "severity": 2,
+      "code": "deprecated",
+      "source": "wat",
+      "message": "tag `0` is deprecated",
+      "tags": [
+        2
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 33
+        },
+        "end": {
+          "line": 10,
+          "character": 35
+        }
+      },
+      "severity": 2,
+      "code": "deprecated",
+      "source": "wat",
+      "message": "tag `$e` is deprecated: this is deprecated",
+      "tags": [
+        2
+      ]
+    }
+  ]
+}

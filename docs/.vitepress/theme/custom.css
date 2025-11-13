@@ -19,3 +19,7 @@
 .code-faded {
   opacity: 0.4;
 }
+
+.code-strikethrough {
+  text-decoration: #000 line-through;
+}

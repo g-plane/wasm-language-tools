@@ -4,6 +4,7 @@ mod binder;
 mod checker;
 mod config;
 mod data_set;
+mod deprecation;
 mod document;
 mod exports;
 mod features;

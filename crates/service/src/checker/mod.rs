@@ -6,6 +6,7 @@ mod block_type;
 mod br_table_branches;
 mod catch_type;
 mod const_expr;
+mod deprecated;
 mod dup_names;
 mod elem_type;
 mod immediates;
@@ -317,6 +318,14 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
         document,
         line_index,
         &root,
+        symbol_table,
+    );
+    deprecated::check(
+        &mut diagnostics,
+        service,
+        document,
+        config.lint.deprecated,
+        line_index,
         symbol_table,
     );
 

@@ -366,3 +366,21 @@ fn instr_following_paren() {
     let response = service.completion(create_params(uri, 2, 20));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn deprecated() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (@deprecated)
+  (table $table 0 funcref)
+  (@deprecated "this is deprecated")
+  (table 0 funcref)
+  (func
+    (table.size )))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 7, 16));
+    assert_json_snapshot!(response);
+}

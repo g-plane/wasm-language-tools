@@ -5,7 +5,7 @@ use wat_service::LanguageService;
 #[test]
 fn symbols() {
     let uri = "untitled:test".to_string();
-    let source = "
+    let source = r#"
 (module
     (func $func (param $p i32) (local $l1 i32) (local $l2 f32) (local (ref 0)))
     (func (type 0))
@@ -23,9 +23,20 @@ fn symbols() {
 )
 
 (module
+    (@deprecated)
     (func)
+    (@deprecated)
+    (type (func))
+    (@deprecated "Use another global")
+    (global i32)
+    (@deprecated)
+    (memory 1)
+    (@deprecated "This is deprecated")
+    (table 1 funcref)
+    (@deprecated)
+    (tag)
 )
-";
+"#;
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.document_symbol(DocumentSymbolParams {

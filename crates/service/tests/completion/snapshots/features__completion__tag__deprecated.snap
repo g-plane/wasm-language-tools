@@ -1,0 +1,28 @@
+---
+source: crates/service/tests/completion/tag.rs
+expression: response
+---
+[
+  {
+    "label": "0",
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "tags": [
+      1
+    ],
+    "detail": "(tag)"
+  },
+  {
+    "label": "$e",
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "tags": [
+      1
+    ],
+    "detail": "(tag $e)"
+  }
+]

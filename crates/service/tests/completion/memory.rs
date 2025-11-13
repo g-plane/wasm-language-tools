@@ -168,3 +168,21 @@ fn addr_type_incomplete() {
     let response = service.completion(create_params(uri, 2, 11));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn deprecated() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (func
+    (memory.size ))
+  (@deprecated)
+  (memory 1)
+  (@deprecated "this is deprecated")
+  (memory $memory 1))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 3, 17));
+    assert_json_snapshot!(response);
+}

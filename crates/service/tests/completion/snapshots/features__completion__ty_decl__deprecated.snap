@@ -1,0 +1,22 @@
+---
+source: crates/service/tests/completion/ty_decl.rs
+expression: response
+---
+[
+  {
+    "label": "0",
+    "kind": 8,
+    "tags": [
+      1
+    ],
+    "sortText": "0"
+  },
+  {
+    "label": "$t",
+    "kind": 8,
+    "tags": [
+      1
+    ],
+    "sortText": "0"
+  }
+]

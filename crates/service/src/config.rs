@@ -36,6 +36,9 @@ pub struct Lints {
     /// Lint for detecting unreachable code.
     pub unreachable: LintLevel,
 
+    /// Lint for deprecated usage.
+    pub deprecated: LintLevel,
+
     #[serde(alias = "needlessMut")]
     /// Lint for detecting mutable globals that are never mutated.
     pub needless_mut: LintLevel,
@@ -57,6 +60,7 @@ impl Default for Lints {
             implicit_module: LintLevel::Allow,
             multi_modules: LintLevel::Deny,
             unreachable: LintLevel::Hint,
+            deprecated: LintLevel::Warn,
             needless_mut: LintLevel::Warn,
             needless_try_table: LintLevel::Warn,
             useless_catch: LintLevel::Warn,

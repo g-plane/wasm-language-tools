@@ -243,3 +243,21 @@ fn elem_list_following_dollar() {
     let response = service.completion(create_params(uri, 4, 14));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn deprecated() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+    (func (call ))
+    (@deprecated)
+    (func $func)
+    (@deprecated "this is deprecated")
+    (func)
+)
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 2, 16));
+    assert_json_snapshot!(response);
+}

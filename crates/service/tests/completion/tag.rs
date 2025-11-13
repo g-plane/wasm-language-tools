@@ -187,3 +187,22 @@ fn extern_idx_following_ident() {
     let response = service.completion(create_params(uri, 4, 20));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn deprecated() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (@deprecated)
+  (tag)
+  (@deprecated "this is deprecated")
+  (tag $e)
+  (func
+    try_table (catch )
+    end))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 7, 21));
+    assert_json_snapshot!(response);
+}

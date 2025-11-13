@@ -1,7 +1,7 @@
 use crate::{
     LanguageService,
     binder::{SymbolKey, SymbolKind, SymbolTable},
-    data_set,
+    data_set, deprecation,
     document::Document,
     helpers,
     idx::Idx,
@@ -10,8 +10,8 @@ use crate::{
 use itertools::Itertools;
 use line_index::LineIndex;
 use lspt::{
-    CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionParams,
-    MarkupContent, MarkupKind, TextEdit, Union2,
+    CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionItemTag,
+    CompletionParams, MarkupContent, MarkupKind, TextEdit, Union2,
 };
 use rowan::{
     Direction,
@@ -822,6 +822,7 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
+                    let deprecation = deprecation::get_deprecation(service, document);
                     items.extend(symbol_table.get_declared(module, SymbolKind::Func).map(
                         |symbol| {
                             let label = symbol.idx.render(service).to_string();
@@ -866,6 +867,11 @@ fn get_cmp_list(
                                     kind: MarkupKind::Markdown,
                                     value: helpers::ast::get_doc_comment(&symbol.key.to_node(root)),
                                 })),
+                                tags: if deprecation.contains_key(&symbol.key) {
+                                    Some(vec![CompletionItemTag::Deprecated])
+                                } else {
+                                    None
+                                },
                                 ..Default::default()
                             }
                         },
@@ -879,6 +885,7 @@ fn get_cmp_list(
                         return items;
                     };
                     let def_types = types_analyzer::get_def_types(service, document);
+                    let deprecation = deprecation::get_deprecation(service, document);
                     items.extend(symbol_table.get_declared(module, SymbolKind::Type).map(
                         |symbol| {
                             let label = symbol.idx.render(service).to_string();
@@ -909,6 +916,11 @@ fn get_cmp_list(
                                         }
                                     })
                                 }),
+                                tags: if deprecation.contains_key(&symbol.key) {
+                                    Some(vec![CompletionItemTag::Deprecated])
+                                } else {
+                                    None
+                                },
                                 ..Default::default()
                             }
                         },
@@ -921,6 +933,7 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
+                    let deprecation = deprecation::get_deprecation(service, document);
                     let preferred_type = guess_preferred_type(service, document, token);
                     items.extend(
                         symbol_table
@@ -961,6 +974,11 @@ fn get_cmp_list(
                                             }
                                         },
                                     ),
+                                    tags: if deprecation.contains_key(&symbol.key) {
+                                        Some(vec![CompletionItemTag::Deprecated])
+                                    } else {
+                                        None
+                                    },
                                     ..Default::default()
                                 }
                             }),
@@ -980,6 +998,7 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
+                    let deprecation = deprecation::get_deprecation(service, document);
                     items.extend(
                         symbol_table
                             .get_declared(module, SymbolKind::MemoryDef)
@@ -999,6 +1018,11 @@ fn get_cmp_list(
                                             new_text: label,
                                         }))
                                     },
+                                    tags: if deprecation.contains_key(&symbol.key) {
+                                        Some(vec![CompletionItemTag::Deprecated])
+                                    } else {
+                                        None
+                                    },
                                     ..Default::default()
                                 }
                             }),
@@ -1012,6 +1036,7 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
+                    let deprecation = deprecation::get_deprecation(service, document);
                     items.extend(
                         symbol_table
                             .symbols
@@ -1034,6 +1059,11 @@ fn get_cmp_list(
                                             ),
                                             new_text: label,
                                         }))
+                                    },
+                                    tags: if deprecation.contains_key(&symbol.key) {
+                                        Some(vec![CompletionItemTag::Deprecated])
+                                    } else {
+                                        None
                                     },
                                     ..Default::default()
                                 }
@@ -1180,6 +1210,7 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
+                    let deprecation = deprecation::get_deprecation(service, document);
                     items.extend(symbol_table.get_declared(module, SymbolKind::TagDef).map(
                         |symbol| {
                             let label = symbol.idx.render(service).to_string();
@@ -1219,6 +1250,11 @@ fn get_cmp_list(
                                     symbol.idx.name,
                                     sig,
                                 )),
+                                tags: if deprecation.contains_key(&symbol.key) {
+                                    Some(vec![CompletionItemTag::Deprecated])
+                                } else {
+                                    None
+                                },
                                 ..Default::default()
                             }
                         },
