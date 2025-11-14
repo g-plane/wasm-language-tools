@@ -25,12 +25,12 @@ features:
   - icon: 🩺
     title: Smart Diagnostics
     details: Not only type checking and other basic validations, but it can also catch unused items, unreachable code, mutation detection and other potential issues.
+  - icon: 3️⃣
+    title: Wasm 3.0 Support
+    details: It supports Wasm 3.0, the latest standard of WebAssembly.
   - icon: 🔮
     title: Built-in Formatter
     details: The built-in formatter can format a whole file or a range of code, even there're syntax errors.
-  - icon: 🗑️
-    title: WasmGC Support
-    details: It can understand the syntaxes and semantics of the WebAssembly Garbage Collection proposal.
 ---
 
 ![](https://github.com/user-attachments/assets/49b771fc-2416-4a5a-8b04-f37037cb9b54)

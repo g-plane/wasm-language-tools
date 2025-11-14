@@ -31,6 +31,30 @@ Specify using `\n` (`"lf"`) or `\r\n` (`"crlf"`) for line break.
 
 Specify using space or tab for indentation.
 
+## `splitClosingParens`
+
+> default: `false`
+
+Control whether closing parentheses should be splitted into different lines.
+
+When disabled, code will be formatted like this:
+
+```wasm
+(module
+  (func
+    (block)))
+```
+
+When enabled, code will be formatted like this:
+
+```wasm
+(module
+  (func
+    (block)
+  )
+)
+```
+
 ## `formatComments`
 
 > default: `false`

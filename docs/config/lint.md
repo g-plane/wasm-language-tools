@@ -4,12 +4,12 @@ Each lint has these levels:
 
 - `"allow"` - don't report problems
 - `"hint"` - report problems as slight tips
-- `"warning"` - report problems as warnings
+- `"warn"` - report problems as warnings
 - `"deny"` - report problems as errors
 
 ## `unused`
 
-> default: `"warning"`
+> default: `"warn"`
 
 This lint reports unused items, such as functions, globals, types, and even function parameters and locals.
 For WasmGC, fields in struct type are also supported.
@@ -39,7 +39,7 @@ So they won't be reported as unused.
 
 ## `shadow`
 
-> default: `"warning"`
+> default: `"warn"`
 
 WebAssembly allows shadowing identifiers in block labels. For example:
 
@@ -67,7 +67,7 @@ This lint reports such cases when you accidentally give the same name to differe
 ```
 
 However, you may hope it to be more explicit, or your compiler doesn't support this syntax.
-In such cases, you can set this lint to `"warning"` or `"deny"`.
+In such cases, you can set this lint to `"warn"` or `"deny"`.
 
 ## `multiModules`
 
@@ -101,7 +101,7 @@ This lint reports unreachable code, for example those code after `br`, `return` 
 
 ## `deprecated`
 
-> default: `"warning"`
+> default: `"warn"`
 
 This lint reports usages of deprecated items which are marked with the [`@deprecated` annotation](../guide/deprecation.md).
 
@@ -115,7 +115,7 @@ This lint reports usages of deprecated items which are marked with the [`@deprec
 
 ## `needlessMut`
 
-> default: `"warning"`
+> default: `"warn"`
 
 This lint reports mutable items that are never mutated:
 
@@ -139,4 +139,51 @@ For WasmGC, fields in struct type and array type is also supported:
     array.get $array
     local.get 1
     struct.get $struct 0))
+```
+
+## `needlessTryTable`
+
+> default: `"warn"`
+
+A `try_table` instruction without `catch` or `catch_all` clauses behaves like a `block` instruction, which is unnecessary. Any exception thrown inside such `try_table` will be propagated.
+
+This lint reports such cases:
+
+```wasm warning-4-5-4-14 faded-4-5-4-14
+(module
+  (tag)
+  (func
+    try_table
+      throw 0
+    end))
+```
+
+## `uselessCatch`
+
+> default: `"warn"`
+
+This lint reports catch clauses that will never be matched.
+
+When there're multiple handlers for the same tag, only the first one will be matched:
+
+```wasm warning-5-29-5-41 faded-5-29-5-41
+(module
+  (tag $e)
+  (func
+    block
+      try_table (catch 0 0) (catch $e 1)
+      end
+    end))
+```
+
+Any catch clauses after a `catch_all` clause will never be matched:
+
+```wasm warning-5-31-5-43 faded-5-31-5-43
+(module
+  (tag $e)
+  (func
+    block
+      try_table (catch_all 0) (catch $e 1)
+      end
+    end))
 ```

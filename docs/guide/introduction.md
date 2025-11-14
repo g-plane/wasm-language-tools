@@ -7,7 +7,7 @@ It also provides an out-of-the-box formatter (a.k.a. pretty printer) for WebAsse
 
 While it's mainly used in editors, you can use the [`wat_service`](https://crates.io/crates/wat_service) crate to do semantic analysis with programmatic API.
 
-WebAssembly Language Tools supports some [WebAssembly proposals](https://webassembly.org/features/) like [Garbage Collection](https://github.com/WebAssembly/gc), [Multiple Memories](https://github.com/WebAssembly/multi-memory/blob/master/proposals/multi-memory/Overview.md) and so on.
+WebAssembly Language Tools supports [Wasm 3.0](https://webassembly.org/news/2025-09-17-wasm-3.0/).
 
 Except `wat_server`, other crates provide APIs as libraries. You can use them in your own projects.
 
