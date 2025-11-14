@@ -88,7 +88,7 @@ impl LanguageService {
                         None
                     }
                     _ => {
-                        let token_type = self.token_type(document, &token)?;
+                        let token_type = self.token_type(&token, symbol_table)?;
                         let block_comment_lines = if token.kind() == SyntaxKind::BLOCK_COMMENT {
                             Some(token.text().chars().filter(|c| *c == '\n').count() as u32)
                         } else {
@@ -122,8 +122,7 @@ impl LanguageService {
             .collect()
     }
 
-    fn token_type(&self, document: Document, token: &SyntaxToken) -> Option<u32> {
-        let symbol_table = SymbolTable::of(self, document);
+    fn token_type(&self, token: &SyntaxToken, symbol_table: &SymbolTable) -> Option<u32> {
         let token_kinds = &self.semantic_token_kinds;
         match token.kind() {
             SyntaxKind::TYPE_KEYWORD => token_kinds.get_index_of(&SemanticTokenKind::Type),
@@ -194,6 +193,13 @@ impl LanguageService {
                 token_kinds.get_index_of(&SemanticTokenKind::Comment)
             }
             SyntaxKind::INSTR_NAME => token_kinds.get_index_of(&SemanticTokenKind::Op),
+            SyntaxKind::ANNOT_ELEM => {
+                if token.text().starts_with('"') && token.text().ends_with('"') {
+                    token_kinds.get_index_of(&SemanticTokenKind::String)
+                } else {
+                    None
+                }
+            }
             _ => None,
         }
         .map(|v| v as u32)

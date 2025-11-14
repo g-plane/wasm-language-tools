@@ -68,6 +68,7 @@ const SOURCE: &str = r#"
         global.get $g
         array.get $arr
         struct.get $struct 0)
+    (@annotation "string")
 )
 (; block ;)
 ;; line
