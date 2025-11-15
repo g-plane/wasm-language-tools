@@ -14,13 +14,13 @@ line-index.workspace = true
 rowan.workspace = true
 serde = { version = "1.0", features = ["derive"] }
 tiny_pretty = "0.2"
-wat_syntax = { version = "0.6", path = "../syntax" }
+wat_syntax = { path = "../syntax", version = "0.6" }
 
 [dev-dependencies]
 insta.workspace = true
 serde_json.workspace = true
 similar-asserts.workspace = true
-wat_parser = { version = "0.6", path = "../parser" }
+wat_parser = { path = "../parser", version = "0.6" }
 
 [lints.clippy]
 dbg_macro = "warn"
