@@ -22,7 +22,7 @@ serde_json.workspace = true
 wat_service = { path = "../service", version = "0.6" }
 
 [dev-dependencies]
-assert_cmd = "2.0"
+assert_cmd = "2.1"
 
 [lints.clippy]
 dbg_macro = "warn"

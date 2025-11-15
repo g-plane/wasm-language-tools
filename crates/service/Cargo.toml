@@ -12,13 +12,13 @@ exclude = ["/tests"]
 [dependencies]
 dashmap = "6.1"
 fuzzy-matcher = "0.3"
-indexmap = "2.9"
+indexmap = "2.12"
 itertools = "0.14"
 line-index.workspace = true
 lspt.workspace = true
 rowan.workspace = true
 rustc-hash.workspace = true
-salsa = "0.23"
+salsa = "0.24"
 serde.workspace = true
 serde_json.workspace = true
 smallvec = "1.15"

@@ -15,8 +15,7 @@ fn should_exit_after_stdin_close() {
 
 {"jsonrpc":"2.0","id":10,"method":"shutdown"}"#;
 
-    Command::cargo_bin("wat_server")
-        .unwrap()
+    Command::new(assert_cmd::cargo_bin!("wat_server"))
         .write_stdin(stdin)
         .timeout(Duration::from_secs(5))
         .assert()
@@ -35,8 +34,7 @@ fn should_not_crash_for_invalid_json() {
 
 {"jsonrpc":"2.0","id":10,"method":"shutdown"}"#;
 
-    Command::cargo_bin("wat_server")
-        .unwrap()
+    Command::new(assert_cmd::cargo_bin!("wat_server"))
         .write_stdin(stdin)
         .timeout(Duration::from_secs(5))
         .assert()
@@ -55,8 +53,7 @@ fn should_not_crash_for_unknown_request() {
 
 {"jsonrpc":"2.0","id":10,"method":"shutdown"}"#;
 
-    Command::cargo_bin("wat_server")
-        .unwrap()
+    Command::new(assert_cmd::cargo_bin!("wat_server"))
         .write_stdin(stdin)
         .timeout(Duration::from_secs(5))
         .assert()

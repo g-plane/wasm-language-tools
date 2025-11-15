@@ -15,7 +15,7 @@ rowan.workspace = true
 wat_syntax = { path = "../syntax", version = "0.6" }
 
 [dev-dependencies]
-codespan-reporting = "0.12"
+codespan-reporting = "0.13"
 criterion.workspace = true
 insta.workspace = true
 similar-asserts.workspace = true

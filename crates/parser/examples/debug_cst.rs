@@ -26,7 +26,7 @@ fn main() {
                     (),
                     error.range.start().into()..error.range.end().into(),
                 )]);
-            term::emit(&mut writer.lock(), &config, &file, &diagnostic).unwrap();
+            term::emit_to_write_style(&mut writer.lock(), &config, &file, &diagnostic).unwrap();
         });
     }
 

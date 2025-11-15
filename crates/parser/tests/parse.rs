@@ -1,7 +1,7 @@
 use codespan_reporting::{
     diagnostic::{Diagnostic, Label},
     files::SimpleFile,
-    term::{self, termcolor::Buffer},
+    term,
 };
 use insta::{Settings, assert_snapshot, glob};
 use std::{fs, path::Path};
@@ -21,7 +21,7 @@ fn parser_snapshot() {
 
         let file = SimpleFile::new(path.file_name().unwrap().to_str().unwrap(), &input);
         let config = term::Config::default();
-        let mut buffer = Buffer::no_color();
+        let mut writer = String::new();
         errors
             .into_iter()
             .map(|error| {
@@ -33,18 +33,14 @@ fn parser_snapshot() {
                     )])
             })
             .for_each(|diagnostic| {
-                term::emit(&mut buffer, &config, &file, &diagnostic).unwrap();
+                term::emit_to_string(&mut writer, &config, &file, &diagnostic).unwrap();
             });
 
         build_settings(path).bind(|| {
             let name = path.file_stem().unwrap().to_str().unwrap();
             assert_snapshot!(
                 name,
-                format!(
-                    "{:#?}\n{}",
-                    SyntaxNode::new_root(tree),
-                    String::from_utf8(buffer.into_inner()).unwrap()
-                )
+                format!("{:#?}\n{}", SyntaxNode::new_root(tree), writer),
             );
         });
     });
