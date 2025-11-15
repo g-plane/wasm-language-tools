@@ -15,3 +15,5 @@ It only shows when the function or block contains an identifier.
 
 This inlay hint shows numeric idx of functions, types, globals, memories, tables, tags and etc in their definitions.
 This can be helpful when calling these functions or referencing these items elsewhere.
+
+It will be hidden when an identifier is present.

@@ -1,7 +1,9 @@
 use crate::{
     LanguageService,
     binder::{SymbolKind, SymbolTable},
-    helpers, types_analyzer,
+    helpers,
+    idx::Idx,
+    types_analyzer,
 };
 use lspt::{InlayHint, InlayHintKind, InlayHintParams, Union2};
 use rowan::ast::support;
@@ -95,7 +97,10 @@ impl LanguageService {
                         });
                     }
                     if options.index
-                        && let Some(num) = symbol.idx.num
+                        && let Idx {
+                            num: Some(num),
+                            name: None,
+                        } = symbol.idx
                         && let Some(keyword) =
                             support::token(&symbol.key.to_node(&root), SyntaxKind::KEYWORD)
                     {
@@ -151,7 +156,10 @@ impl LanguageService {
                 | SymbolKind::TableDef
                 | SymbolKind::TagDef => {
                     if options.index
-                        && let Some(num) = symbol.idx.num
+                        && let Idx {
+                            num: Some(num),
+                            name: None,
+                        } = symbol.idx
                         && let Some(keyword) =
                             support::token(&symbol.key.to_node(&root), SyntaxKind::KEYWORD)
                     {
@@ -172,7 +180,10 @@ impl LanguageService {
                 }
                 SymbolKind::Param | SymbolKind::Local | SymbolKind::FieldDef => {
                     if options.index
-                        && let Some(num) = symbol.idx.num
+                        && let Idx {
+                            num: Some(num),
+                            name: None,
+                        } = symbol.idx
                     {
                         let end = support::token(&symbol.key.to_node(&root), SyntaxKind::KEYWORD)
                             .filter(|token| matches!(token.text(), "param" | "local" | "field"))

@@ -22,7 +22,7 @@ expression: response
   {
     "position": {
       "line": 3,
-      "character": 14
+      "character": 18
     },
     "label": "(;0;)",
     "paddingLeft": true
@@ -30,7 +30,7 @@ expression: response
   {
     "position": {
       "line": 3,
-      "character": 33
+      "character": 30
     },
     "label": "(;1;)",
     "paddingLeft": true
@@ -38,7 +38,7 @@ expression: response
   {
     "position": {
       "line": 3,
-      "character": 37
+      "character": 34
     },
     "label": "(;2;)",
     "paddingLeft": true
@@ -46,7 +46,7 @@ expression: response
   {
     "position": {
       "line": 3,
-      "character": 53
+      "character": 50
     },
     "label": "(;3;)",
     "paddingLeft": true

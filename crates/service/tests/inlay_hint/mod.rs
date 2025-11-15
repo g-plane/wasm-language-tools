@@ -324,8 +324,8 @@ fn index_only() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-  (global $g i32)
-  (func (param $p i32) (param f32 i64) (local (ref 0)))
+  (global i32)
+  (func (param i32) (param f32 i64) (local (ref 0)))
   (memory 1 2)
   (table 1 2 funcref)
   (type (struct (field (mut i32))))
