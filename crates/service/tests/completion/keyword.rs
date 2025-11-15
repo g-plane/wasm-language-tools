@@ -283,3 +283,73 @@ fn catch_incomplete() {
     let response = service.completion(create_params(uri, 3, 17));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn then() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (if ())))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 3, 9));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn then_incomplete() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (if (t))))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 3, 10));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn then_after_block_type() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (if (result i32) ())))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 3, 22));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn then_before_else() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (if () (else)))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 3, 9));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn existed_then() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (if (then) ()))
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 3, 16));
+    assert_json_snapshot!(response);
+}

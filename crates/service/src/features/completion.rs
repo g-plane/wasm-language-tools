@@ -184,12 +184,26 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                                     CmpCtx::KeywordType,
                                 ]);
                             }
-                            if grand.kind() == SyntaxKind::BLOCK_TRY_TABLE
-                                && token
-                                    .siblings_with_tokens(Direction::Prev)
-                                    .all(|sibling| !Instr::can_cast(sibling.kind()))
-                            {
-                                ctx.push(CmpCtx::KeywordsCatch);
+                            match grand.kind() {
+                                SyntaxKind::BLOCK_IF => {
+                                    if !token.siblings_with_tokens(Direction::Prev).any(|sibling| {
+                                        matches!(
+                                            sibling.kind(),
+                                            SyntaxKind::BLOCK_IF_THEN | SyntaxKind::BLOCK_IF_ELSE
+                                        )
+                                    }) {
+                                        ctx.push(CmpCtx::KeywordThen);
+                                    }
+                                }
+                                SyntaxKind::BLOCK_TRY_TABLE => {
+                                    if token
+                                        .siblings_with_tokens(Direction::Prev)
+                                        .all(|sibling| !Instr::can_cast(sibling.kind()))
+                                    {
+                                        ctx.push(CmpCtx::KeywordsCatch);
+                                    }
+                                }
+                                _ => {}
                             }
                         }
                         SyntaxKind::OFFSET => {
@@ -247,12 +261,26 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                         CmpCtx::KeywordType,
                     ]);
                 }
-                if parent.kind() == SyntaxKind::BLOCK_TRY_TABLE
-                    && token
-                        .siblings_with_tokens(Direction::Prev)
-                        .all(|sibling| !Instr::can_cast(sibling.kind()))
-                {
-                    ctx.push(CmpCtx::KeywordsCatch);
+                match parent.kind() {
+                    SyntaxKind::BLOCK_IF => {
+                        if !token.siblings_with_tokens(Direction::Prev).any(|sibling| {
+                            matches!(
+                                sibling.kind(),
+                                SyntaxKind::BLOCK_IF_THEN | SyntaxKind::BLOCK_IF_ELSE
+                            )
+                        }) {
+                            ctx.push(CmpCtx::KeywordThen);
+                        }
+                    }
+                    SyntaxKind::BLOCK_TRY_TABLE => {
+                        if token
+                            .siblings_with_tokens(Direction::Prev)
+                            .all(|sibling| !Instr::can_cast(sibling.kind()))
+                        {
+                            ctx.push(CmpCtx::KeywordsCatch);
+                        }
+                    }
+                    _ => {}
                 }
                 ctx.push(CmpCtx::Instr);
             } else if let Some(node) = token
@@ -654,6 +682,7 @@ enum CmpCtx {
     KeywordPortDesc,
     KeywordData,
     KeywordFunc,
+    KeywordThen,
     KeywordElem,
     KeywordItem,
     KeywordMemory,
@@ -1334,6 +1363,11 @@ fn get_cmp_list(
                 }),
                 CmpCtx::KeywordFunc => items.push(CompletionItem {
                     label: "func".to_string(),
+                    kind: Some(CompletionItemKind::Keyword),
+                    ..Default::default()
+                }),
+                CmpCtx::KeywordThen => items.push(CompletionItem {
+                    label: "then".to_string(),
                     kind: Some(CompletionItemKind::Keyword),
                     ..Default::default()
                 }),
