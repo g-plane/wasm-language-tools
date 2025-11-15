@@ -5,12 +5,12 @@ WebAssembly Language Tools aims to provide and improve the editing experience of
 It also provides an out-of-the-box formatter (a.k.a. pretty printer) for WebAssembly Text Format.
 
 <picture>
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/49b771fc-2416-4a5a-8b04-f37037cb9b54">
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/5ec46300-4a79-4163-8d4b-8fc4364de700">
-  <img src="https://github.com/user-attachments/assets/49b771fc-2416-4a5a-8b04-f37037cb9b54" />
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/475a0cbb-adaf-47f1-9277-1080c1e9a92e">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/be706755-9926-41b9-8270-7bc2eff440c0">
+  <img src="https://github.com/user-attachments/assets/475a0cbb-adaf-47f1-9277-1080c1e9a92e" />
 </picture>
 
-WasmGC is also supported.
+[Wasm 3.0](https://webassembly.org/news/2025-09-17-wasm-3.0/) is supported.
 
 ## 📌 Features
 
