@@ -1,6 +1,6 @@
 [package]
 name = "wat_server"
-version = "0.6.1"
+version = "0.7.0"
 description = "WebAssembly Text Format language server."
 authors = ["Pig Fang <g-plane@hotmail.com>"]
 repository = "https://github.com/g-plane/wasm-language-tools"
@@ -19,7 +19,7 @@ rayon = "1.11"
 rustc-hash.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-wat_service = { path = "../service", version = "0.6" }
+wat_service = { path = "../service", version = "0.7" }
 
 [dev-dependencies]
 assert_cmd = "2.1"

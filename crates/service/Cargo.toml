@@ -1,6 +1,6 @@
 [package]
 name = "wat_service"
-version = "0.6.1"
+version = "0.7.0"
 description = "WebAssembly Text Format language service."
 authors = ["Pig Fang <g-plane@hotmail.com>"]
 repository = "https://github.com/g-plane/wasm-language-tools"
@@ -22,9 +22,9 @@ salsa = "0.24"
 serde.workspace = true
 serde_json.workspace = true
 smallvec = "1.15"
-wat_formatter = { path = "../formatter", version = "0.6" }
-wat_parser = { path = "../parser", version = "0.6" }
-wat_syntax = { path = "../syntax", version = "0.6" }
+wat_formatter = { path = "../formatter", version = "0.7" }
+wat_parser = { path = "../parser", version = "0.7" }
+wat_syntax = { path = "../syntax", version = "0.7" }
 
 [dev-dependencies]
 criterion.workspace = true
