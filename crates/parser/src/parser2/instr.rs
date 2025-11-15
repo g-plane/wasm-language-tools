@@ -378,6 +378,7 @@ impl Parser<'_> {
         let checkpoint = self.lexer.checkpoint();
         while self.lexer.trivia().is_some() {}
         if self.lexer.next(L_PAREN).is_none() {
+            self.lexer.reset(checkpoint);
             return true;
         }
         while self.lexer.trivia().is_some() {}

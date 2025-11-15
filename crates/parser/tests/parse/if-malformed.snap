@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..531
-  MODULE@0..530
+ROOT@0..548
+  MODULE@0..547
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -343,9 +343,20 @@ ROOT@0..531
           R_PAREN@525..526 ")"
         R_PAREN@526..527 ")"
       R_PAREN@527..528 ")"
-    WHITESPACE@528..529 "\n"
-    R_PAREN@529..530 ")"
-  WHITESPACE@530..531 "\n"
+    WHITESPACE@528..531 "\n  "
+    MODULE_FIELD_FUNC@531..545
+      L_PAREN@531..532 "("
+      KEYWORD@532..536 "func"
+      WHITESPACE@536..537 " "
+      BLOCK_IF@537..544
+        L_PAREN@537..538 "("
+        KEYWORD@538..540 "if"
+        WHITESPACE@540..543 "\n  "
+        R_PAREN@543..544 ")"
+      R_PAREN@544..545 ")"
+    WHITESPACE@545..546 "\n"
+    R_PAREN@546..547 ")"
+  WHITESPACE@547..548 "\n"
 
 error: invalid immediate
   ┌─ if-malformed.wat:3:41
@@ -388,3 +399,9 @@ error: expected then block
    │
 12 │   (func (if (result i32) (i32.const 1)))
    │                                       ^
+
+error: expected then block
+   ┌─ if-malformed.wat:14:3
+   │
+14 │   ))
+   │   ^

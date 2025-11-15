@@ -10,4 +10,6 @@
   )
   (func if)
   (func (if (result i32) (i32.const 1)))
+  (func (if
+  ))
 )
