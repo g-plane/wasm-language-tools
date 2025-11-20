@@ -14,3 +14,15 @@ If you've installed Rust, you can run Cargo to install it globally:
 ```bash
 cargo install wat_server
 ```
+
+## AUR
+
+Install with your favorite AUR helper, for example:
+
+```bash
+paru -S wasm-language-tools
+```
+
+## Nix
+
+View detail on [Nixpkgs](https://search.nixos.org/packages?show=wasm-language-tools).
