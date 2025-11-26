@@ -24,5 +24,16 @@ wat_service = { path = "../service", version = "0.7" }
 [dev-dependencies]
 assert_cmd = "2.1"
 
+[package.metadata.binstall]
+pkg-fmt = "zip"
+[package.metadata.binstall.overrides.x86_64-apple-darwin]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-x86_64-macos{ archive-suffix }"
+[package.metadata.binstall.overrides.aarch64-apple-darwin]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-arm64-macos{ archive-suffix }"
+[package.metadata.binstall.overrides.x86_64-unknown-linux-gnu]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-x86_64-linux{ archive-suffix }"
+[package.metadata.binstall.overrides.x86_64-pc-windows-gnu]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-x86_64-windows{ archive-suffix }"
+
 [lints.clippy]
 dbg_macro = "warn"

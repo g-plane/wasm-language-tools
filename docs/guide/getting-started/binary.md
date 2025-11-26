@@ -15,6 +15,15 @@ If you've installed Rust, you can run Cargo to install it globally:
 cargo install wat_server
 ```
 
+## cargo-binstall
+
+If you have [cargo-binstall](https://github.com/cargo-bins/cargo-binstall) installed,
+you can install it without building from source:
+
+```bash
+cargo binstall wat_server
+```
+
 ## AUR
 
 Install with your favorite AUR helper, for example:
