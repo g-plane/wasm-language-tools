@@ -14,7 +14,7 @@ fn structs() {
     struct.new ))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 6, 15));
     assert_json_snapshot!(response);
 }
@@ -31,7 +31,7 @@ fn structs_following_int_idx() {
     struct.new 1))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 6, 16));
     assert_json_snapshot!(response);
 }
@@ -48,7 +48,7 @@ fn structs_following_dollar() {
     struct.new $))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 6, 16));
     assert_json_snapshot!(response);
 }
@@ -65,7 +65,7 @@ fn structs_following_ident() {
     struct.new $b))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 6, 17));
     assert_json_snapshot!(response);
 }

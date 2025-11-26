@@ -15,8 +15,8 @@ fn subsumption1() {
     (local.get 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -42,8 +42,8 @@ fn subsumption2() {
     (local.get 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -69,8 +69,8 @@ fn subsumption2_ref_loop() {
     (local.get 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -88,8 +88,8 @@ fn subsumption3() {
     (local.get 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -107,8 +107,8 @@ fn subsumption4() {
     (local.get 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -138,8 +138,8 @@ fn subsumption5() {
     (local.get 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -165,8 +165,8 @@ fn subsumption6() {
     (local.get 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -191,8 +191,8 @@ fn subsumption7() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -208,8 +208,8 @@ fn subsumption8() {
     (local.get 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -226,8 +226,8 @@ fn subsumption9() {
     (local.get 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -257,8 +257,8 @@ fn ref_func1() {
     (ref.func $h)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -277,8 +277,8 @@ fn ref_func2() {
     (ref.func $g)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }

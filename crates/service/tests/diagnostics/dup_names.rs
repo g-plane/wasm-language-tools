@@ -11,8 +11,8 @@ fn same_kind() {
   (func $f (result f32) (f32.const 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -26,8 +26,8 @@ fn different_kinds() {
   (func $f))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -40,8 +40,8 @@ fn param_and_local() {
   (func (param $a i32) (local $a f32)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -55,8 +55,8 @@ fn different_scopes() {
   (func (param $p i32)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -71,8 +71,8 @@ fn ref_idx() {
     (call $fn)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -86,8 +86,8 @@ fn type_def() {
   (type $_ (func)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -103,8 +103,8 @@ fn global() {
     i32.const 0))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -118,8 +118,8 @@ fn memory() {
   (memory $_ 0))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -133,8 +133,8 @@ fn table() {
   (table $_ 0 funcref))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -148,8 +148,8 @@ fn fields() {
   (type (struct (field $x i32))))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -163,8 +163,8 @@ fn tag() {
   (tag $_))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -178,8 +178,8 @@ fn exports() {
   (export "func" (func 0)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }

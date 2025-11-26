@@ -88,8 +88,8 @@ fn incorrect() {
     select (result f64)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -124,8 +124,8 @@ fn correct() {
     select (result f32)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }

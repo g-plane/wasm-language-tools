@@ -7,8 +7,8 @@ fn empty() {
     let uri = "untitled:test".to_string();
     let source = "(module)";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -18,8 +18,8 @@ fn no_imports() {
     let uri = "untitled:test".to_string();
     let source = "(module (func))";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -33,8 +33,8 @@ fn single() {
   (func))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -49,8 +49,8 @@ fn multi() {
   (func))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -64,8 +64,8 @@ fn single_after_other_fields() {
   (import "a" "b" (func)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -80,8 +80,8 @@ fn multi_after_other_fields() {
   (import "c" "d" (func)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -95,8 +95,8 @@ fn after_inline_import() {
   (import "a" "b" (func)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -110,8 +110,8 @@ fn after_type_def() {
   (import "a" "b" (func)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }

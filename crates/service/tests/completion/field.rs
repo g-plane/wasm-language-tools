@@ -12,7 +12,7 @@ fn after_typeidx() {
     struct.get 0 ))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 4, 17));
     assert_json_snapshot!(response);
 }
@@ -27,7 +27,7 @@ fn following_int() {
     struct.get 0 2))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 4, 18));
     assert_json_snapshot!(response);
 }
@@ -42,7 +42,7 @@ fn following_dollar() {
     struct.get 0 $))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 4, 18));
     assert_json_snapshot!(response);
 }
@@ -57,7 +57,7 @@ fn following_ident() {
     struct.get 0 $x))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 4, 19));
     assert_json_snapshot!(response);
 }
@@ -73,7 +73,7 @@ fn different_structs() {
     struct.set 1 ))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 5, 17));
     assert_json_snapshot!(response);
 }

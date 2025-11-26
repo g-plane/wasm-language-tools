@@ -24,7 +24,7 @@ fn with_sequence() {
     end))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.folding_range(create_params(uri));
     assert_json_snapshot!(response);
 }

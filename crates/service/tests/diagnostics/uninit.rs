@@ -12,8 +12,8 @@ fn param() {
     unreachable))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -33,8 +33,8 @@ fn defaultable() {
     unreachable))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -56,8 +56,8 @@ fn set_then_get() {
     unreachable))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -79,8 +79,8 @@ fn tee_then_get() {
     unreachable))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -95,8 +95,8 @@ fn undef() {
     unreachable))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -116,8 +116,8 @@ fn unset() {
     unreachable))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -140,8 +140,8 @@ fn block_block() {
     unreachable))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -164,8 +164,8 @@ fn block_loop() {
     unreachable))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -186,8 +186,8 @@ fn if_condition() {
     unreachable))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -211,8 +211,8 @@ fn then_block() {
     unreachable))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -237,8 +237,8 @@ fn else_block() {
     unreachable))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -261,8 +261,8 @@ fn all_branches() {
     unreachable))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    calm(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }

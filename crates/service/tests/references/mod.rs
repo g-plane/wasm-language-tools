@@ -40,7 +40,7 @@ fn ignored_tokens() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     assert!(
         service
             .find_references(create_params(uri.clone(), 1, 4, true))

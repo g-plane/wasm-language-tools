@@ -7,7 +7,7 @@ fn after_at() {
     let uri = "untitled:test".to_string();
     let source = "(@";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 0, 2));
     assert_json_snapshot!(response);
 }
@@ -17,7 +17,7 @@ fn incomplete() {
     let uri = "untitled:test".to_string();
     let source = "(@d";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 0, 3));
     assert_json_snapshot!(response);
 }

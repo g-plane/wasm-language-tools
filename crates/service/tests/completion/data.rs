@@ -11,7 +11,7 @@ fn module_field() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 2, 11));
     assert_json_snapshot!(response);
 }
@@ -25,7 +25,7 @@ fn memory_keyword() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 2, 13));
     assert_json_snapshot!(response);
 }
@@ -40,7 +40,7 @@ fn memory_idx() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 2, 18));
     assert_json_snapshot!(response);
 }
@@ -54,7 +54,7 @@ fn offset_keyword() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 2, 13));
     assert_json_snapshot!(response);
 }
@@ -68,7 +68,7 @@ fn instr() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 2, 18));
     assert_json_snapshot!(response);
 }
@@ -82,7 +82,7 @@ fn instr_inside_parens() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 2, 19));
     assert_json_snapshot!(response);
 }

@@ -7,7 +7,7 @@ fn no_modules() {
     let uri = "untitled:test".to_string();
     let source = "";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -17,7 +17,7 @@ fn one_module() {
     let uri = "untitled:test".to_string();
     let source = "(module)";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -27,7 +27,7 @@ fn many_modules() {
     let uri = "untitled:test".to_string();
     let source = "(module) (module) (module)";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -37,9 +37,9 @@ fn allowed_by_config() {
     let uri = "untitled:test".to_string();
     let source = "(module) (module) (module)";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     service.set_config(
-        uri.clone(),
+        &uri,
         Some(ServiceConfig {
             lint: Lints {
                 multi_modules: LintLevel::Allow,

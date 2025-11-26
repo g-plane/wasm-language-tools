@@ -11,7 +11,7 @@ fn not_br_if() {
     br_table 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 3, 9, 3, 9));
     assert!(response.is_none());
 }
@@ -25,7 +25,7 @@ fn sequence_without_condition() {
     br_if 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 3, 9, 3, 9));
     assert_json_snapshot!(response);
 }
@@ -40,7 +40,7 @@ fn sequence_with_condition() {
     br_if 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 4, 9, 4, 9));
     assert_json_snapshot!(response);
 }
@@ -54,7 +54,7 @@ fn folded_without_condition() {
     (br_if 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 3, 9, 3, 9));
     assert_json_snapshot!(response);
 }
@@ -68,7 +68,7 @@ fn folded_with_single_condition() {
     (br_if 0 (i32.const 0))))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 3, 9, 3, 9));
     assert_json_snapshot!(response);
 }
@@ -82,7 +82,7 @@ fn folded_with_multi_conditions() {
     (br_if 0 (i32.const 0) (i32.const 1))))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 3, 9, 3, 9));
     assert_json_snapshot!(response);
 }

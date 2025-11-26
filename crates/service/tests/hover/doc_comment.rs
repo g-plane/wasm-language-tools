@@ -15,7 +15,7 @@ fn before_annotations() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.hover(create_params(uri, 4, 12));
     assert_json_snapshot!(response);
 }
@@ -33,7 +33,7 @@ fn after_annotations() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.hover(create_params(uri, 4, 12));
     assert_json_snapshot!(response);
 }

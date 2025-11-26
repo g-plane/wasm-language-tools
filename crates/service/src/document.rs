@@ -29,8 +29,8 @@ impl Document {
 impl LanguageService {
     #[inline]
     /// Commit a document to the service.
-    pub fn commit(&mut self, uri: String, text: String) {
-        let uri = InternUri::new(self, uri);
+    pub fn commit(&mut self, uri: impl AsRef<str>, text: String) {
+        let uri = InternUri::new(self, uri.as_ref());
         let line_index = LineIndex::new(&text);
         let (green, errors) = wat_parser::parse(&text);
         let documents = self.documents.clone();
@@ -229,7 +229,7 @@ mod tests {
         assert!(service.get_opened_uris().is_empty());
 
         let a = "untitled://a.wat".to_string();
-        service.commit(a.clone(), "".into());
+        service.commit(&a, "".into());
         assert_eq!(service.get_opened_uris().first(), Some(&a));
 
         let b = "untitled://b.wat".to_string();
@@ -248,7 +248,7 @@ mod tests {
     fn single_cursor_in_module_field() {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
-        service.commit(uri.clone(), "".into());
+        service.commit(&uri, "".into());
         service.did_change(DidChangeTextDocumentParams {
             text_document: VersionedTextDocumentIdentifier {
                 uri: uri.clone(),
@@ -334,7 +334,7 @@ mod tests {
     fn single_cursor_to_invalid_module_field() {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
-        service.commit(uri.clone(), "".into());
+        service.commit(&uri, "".into());
         service.did_change(DidChangeTextDocumentParams {
             text_document: VersionedTextDocumentIdentifier {
                 uri: uri.clone(),
@@ -433,7 +433,7 @@ mod tests {
     fn single_cursor_out_of_module_field() {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
-        service.commit(uri.clone(), "".into());
+        service.commit(&uri, "".into());
         service.did_change(DidChangeTextDocumentParams {
             text_document: VersionedTextDocumentIdentifier {
                 uri: uri.clone(),
@@ -497,7 +497,7 @@ mod tests {
     fn multi_cursor_asc_insert_and_replace() {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
-        service.commit(uri.clone(), "".into());
+        service.commit(&uri, "".into());
         service.did_change(DidChangeTextDocumentParams {
             text_document: VersionedTextDocumentIdentifier {
                 uri: uri.clone(),
@@ -708,7 +708,7 @@ mod tests {
     fn multi_cursor_asc_delete() {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
-        service.commit(uri.clone(), "".into());
+        service.commit(&uri, "".into());
         service.did_change(DidChangeTextDocumentParams {
             text_document: VersionedTextDocumentIdentifier {
                 uri: uri.clone(),
@@ -850,7 +850,7 @@ mod tests {
     fn multi_cursor_desc_insert_and_replace() {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
-        service.commit(uri.clone(), "".into());
+        service.commit(&uri, "".into());
         service.did_change(DidChangeTextDocumentParams {
             text_document: VersionedTextDocumentIdentifier {
                 uri: uri.clone(),
@@ -1061,7 +1061,7 @@ mod tests {
     fn multi_cursor_desc_delete() {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
-        service.commit(uri.clone(), "".into());
+        service.commit(&uri, "".into());
         service.did_change(DidChangeTextDocumentParams {
             text_document: VersionedTextDocumentIdentifier {
                 uri: uri.clone(),

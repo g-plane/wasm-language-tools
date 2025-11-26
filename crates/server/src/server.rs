@@ -442,7 +442,7 @@ impl Server {
         {
             uris.iter()
                 .zip(configs)
-                .for_each(|(uri, config)| self.service.set_config(uri.clone(), config));
+                .for_each(|(uri, config)| self.service.set_config(uri, config));
             if self.support_refresh_diagnostics {
                 stdio::write(Message::Request {
                     id: self.sent_requests.next_id(),

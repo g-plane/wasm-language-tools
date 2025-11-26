@@ -21,7 +21,7 @@ fn space2() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.formatting(create_params(
         uri,
         FormattingOptions {
@@ -44,7 +44,7 @@ fn space4() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.formatting(create_params(
         uri,
         FormattingOptions {
@@ -67,7 +67,7 @@ fn tab() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.formatting(create_params(
         uri,
         FormattingOptions {
@@ -84,9 +84,9 @@ fn format_comments() {
     let uri = "untitled:test".to_string();
     let source = ";;comment";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     service.set_config(
-        uri.clone(),
+        &uri,
         Some(ServiceConfig {
             format: wat_formatter::config::LanguageOptions {
                 format_comments: true,

@@ -20,7 +20,7 @@ fn first_param() {
     (call $func ())))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.signature_help(create_params(uri, 3, 17));
     assert_json_snapshot!(response);
 }
@@ -34,7 +34,7 @@ fn first_param_end() {
     (call $func (local.get 0))))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.signature_help(create_params(uri, 3, 29));
     assert_json_snapshot!(response);
 }
@@ -48,7 +48,7 @@ fn first_param_before_others() {
     (call $func () (local.get 0))))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.signature_help(create_params(uri, 3, 17));
     assert_json_snapshot!(response);
 }
@@ -62,7 +62,7 @@ fn non_first_param() {
     (call $func (local.get 0) ())))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.signature_help(create_params(uri, 3, 31));
     assert_json_snapshot!(response);
 }
@@ -76,7 +76,7 @@ fn middle() {
     (call $func (local.get 0) ( (local.get 0))))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.signature_help(create_params(uri, 3, 31));
     assert_json_snapshot!(response);
 }
@@ -90,7 +90,7 @@ fn no_params_no_results() {
     (call $func ())))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.signature_help(create_params(uri, 3, 17));
     assert_json_snapshot!(response);
 }
@@ -104,7 +104,7 @@ fn no_params() {
     (call $func ())))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.signature_help(create_params(uri, 3, 17));
     assert_json_snapshot!(response);
 }
@@ -118,7 +118,7 @@ fn no_results() {
     (call $func ())))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.signature_help(create_params(uri, 3, 17));
     assert_json_snapshot!(response);
 }
@@ -133,7 +133,7 @@ fn doc_comment() {
     (call $func ())))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.signature_help(create_params(uri, 4, 17));
     assert_json_snapshot!(response);
 }
@@ -149,7 +149,7 @@ fn call_indirect_type_use() {
     (call_indirect 0 (type 0) ())))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.signature_help(create_params(uri, 5, 31));
     assert_json_snapshot!(response);
 }
@@ -164,7 +164,7 @@ fn call_indirect_inline_func_type() {
     (call_indirect 0 (param f32) (result f64) ())))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.signature_help(create_params(uri, 4, 47));
     assert_json_snapshot!(response);
 }
@@ -178,7 +178,7 @@ fn return_call() {
     (return_call $func ())))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.signature_help(create_params(uri, 3, 24));
     assert_json_snapshot!(response);
 }
@@ -194,7 +194,7 @@ fn return_call_indirect() {
     (return_call_indirect 0 (type 0) ())))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.signature_help(create_params(uri, 5, 38));
     assert_json_snapshot!(response);
 }

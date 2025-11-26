@@ -11,7 +11,7 @@ fn after_instr_name() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 2, 20));
     assert_json_snapshot!(response);
 }
@@ -25,7 +25,7 @@ fn incomplete() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 2, 23));
     assert_json_snapshot!(response);
 }
@@ -38,7 +38,7 @@ fn after_mem_idx() {
   (func (i32.load 0 )))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 2, 20));
     assert_json_snapshot!(response);
 }

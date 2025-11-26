@@ -38,7 +38,7 @@ fn symbols() {
 )
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_symbol(DocumentSymbolParams {
         text_document: TextDocumentIdentifier { uri },
         work_done_token: Default::default(),

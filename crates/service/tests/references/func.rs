@@ -15,7 +15,7 @@ fn func_int_idx() {
 (module (func))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let include_decl = service.find_references(create_params(uri.clone(), 2, 9, true));
     assert_json_snapshot!(include_decl);
     let exclude_decl = service.find_references(create_params(uri, 2, 9, false));
@@ -35,7 +35,7 @@ fn func_ident_idx() {
 (module (func $func))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let include_decl = service.find_references(create_params(uri.clone(), 2, 15, true));
     assert_json_snapshot!(include_decl);
     let exclude_decl = service.find_references(create_params(uri, 2, 15, false));
@@ -50,7 +50,7 @@ fn func_in_implicit_module() {
 (func (call $func))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let include_decl = service.find_references(create_params(uri.clone(), 1, 8, true));
     assert_json_snapshot!(include_decl);
     let exclude_decl = service.find_references(create_params(uri, 1, 8, false));
@@ -71,7 +71,7 @@ fn call_int_idx() {
 (module (func))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let include_decl = service.find_references(create_params(uri.clone(), 3, 15, true));
     assert_json_snapshot!(include_decl);
     let exclude_decl = service.find_references(create_params(uri, 3, 15, false));
@@ -92,7 +92,7 @@ fn call_ident_idx() {
 (module (func $func))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let include_decl = service.find_references(create_params(uri.clone(), 3, 28, true));
     assert_json_snapshot!(include_decl);
     let exclude_decl = service.find_references(create_params(uri, 3, 28, false));

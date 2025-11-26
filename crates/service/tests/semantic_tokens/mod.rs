@@ -78,7 +78,7 @@ const SOURCE: &str = r#"
 fn full() {
     let uri = "untitled:test".to_string();
     let mut service = create_service();
-    service.commit(uri.clone(), SOURCE.into());
+    service.commit(&uri, SOURCE.into());
     let response = service.semantic_tokens_full(SemanticTokensParams {
         work_done_token: Default::default(),
         partial_result_token: Default::default(),
@@ -91,7 +91,7 @@ fn full() {
 fn range() {
     let uri = "untitled:test".to_string();
     let mut service = create_service();
-    service.commit(uri.clone(), SOURCE.into());
+    service.commit(&uri, SOURCE.into());
     let response = service.semantic_tokens_range(SemanticTokensRangeParams {
         work_done_token: Default::default(),
         partial_result_token: Default::default(),
@@ -114,7 +114,7 @@ fn range() {
 fn range_not_boundary() {
     let uri = "untitled:test".to_string();
     let mut service = create_service();
-    service.commit(uri.clone(), SOURCE.into());
+    service.commit(&uri, SOURCE.into());
     let response = service.semantic_tokens_range(SemanticTokensRangeParams {
         work_done_token: Default::default(),
         partial_result_token: Default::default(),

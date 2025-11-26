@@ -12,7 +12,7 @@ fn extern_idx_memory() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 2, 23));
     assert_json_snapshot!(response);
 }
@@ -27,7 +27,7 @@ fn extern_idx_memory_following_dollar() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 2, 24));
     assert_json_snapshot!(response);
 }
@@ -42,7 +42,7 @@ fn extern_idx_memory_incomplete() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 2, 25));
     assert_json_snapshot!(response);
 }
@@ -58,7 +58,7 @@ fn load_and_store_instr() {
   (memory $memory 1))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 4, 14));
     assert_json_snapshot!(response);
 }
@@ -74,7 +74,7 @@ fn load_and_store_instr_following_mem_arg() {
   (memory $memory 1))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 4, 23));
     assert_json_snapshot!(response);
 }
@@ -90,7 +90,7 @@ fn load_and_store_instr_after_mem_arg() {
   (memory $memory 1))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 4, 24));
     assert_json_snapshot!(response);
 }
@@ -106,7 +106,7 @@ fn memory_size() {
   (memory $memory 1))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 4, 17));
     assert_json_snapshot!(response);
 }
@@ -122,7 +122,7 @@ fn memory_fill() {
   (memory $memory 1))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 4, 19));
     assert_json_snapshot!(response);
 }
@@ -138,7 +138,7 @@ fn memory_init() {
   (memory $memory 1))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 4, 19));
     assert!(response.is_none());
 }
@@ -151,7 +151,7 @@ fn addr_type() {
   (memory  1))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 2, 10));
     assert_json_snapshot!(response);
 }
@@ -164,7 +164,7 @@ fn addr_type_incomplete() {
   (memory i 1))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 2, 11));
     assert_json_snapshot!(response);
 }
@@ -182,7 +182,7 @@ fn deprecated() {
   (memory $memory 1))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 3, 17));
     assert_json_snapshot!(response);
 }

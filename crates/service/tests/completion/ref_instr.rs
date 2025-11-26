@@ -11,7 +11,7 @@ fn null() {
   (func (ref.null )))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.completion(create_params(uri, 3, 18));
     assert_json_snapshot!(response);
 }

@@ -12,7 +12,7 @@ fn has_params() {
     (unreachable)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 3, 11, 3, 11));
     assert!(response.is_none());
 }
@@ -27,7 +27,7 @@ fn has_results() {
     (unreachable)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 3, 11, 3, 11));
     assert!(response.is_none());
 }
@@ -42,7 +42,7 @@ fn missing_index() {
     (unreachable)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 3, 11, 3, 11));
     assert!(response.is_none());
 }
@@ -57,7 +57,7 @@ fn undefined_func_type() {
     (unreachable)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 3, 11, 3, 11));
     assert!(response.is_none());
 }
@@ -72,7 +72,7 @@ fn no_func_type() {
     (unreachable)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 3, 11, 3, 11));
     assert!(response.is_none());
 }
@@ -87,7 +87,7 @@ fn empty_func_type() {
     (unreachable)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 3, 11, 3, 11));
     assert!(response.is_none());
 }
@@ -102,7 +102,7 @@ fn single_param() {
     (unreachable)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 3, 11, 3, 11));
     assert_json_snapshot!(response);
 }
@@ -117,7 +117,7 @@ fn params_and_results() {
     (unreachable)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 3, 11, 3, 11));
     assert_json_snapshot!(response);
 }

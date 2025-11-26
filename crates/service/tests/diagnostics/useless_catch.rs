@@ -2,7 +2,7 @@ use super::*;
 use insta::assert_json_snapshot;
 use wat_service::LanguageService;
 
-fn disable_other_lints(service: &mut LanguageService, uri: String) {
+fn disable_other_lints(service: &mut LanguageService, uri: &str) {
     service.set_config(
         uri,
         Some(ServiceConfig {
@@ -29,8 +29,8 @@ fn valid() {
     end))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    disable_other_lints(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    disable_other_lints(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -48,8 +48,8 @@ fn after_catch() {
     end))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    disable_other_lints(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    disable_other_lints(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -67,8 +67,8 @@ fn after_catch_all() {
     end))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    disable_other_lints(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    disable_other_lints(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -86,8 +86,8 @@ fn after_catch_and_catch_all() {
     end))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
-    disable_other_lints(&mut service, uri.clone());
+    service.commit(&uri, source.into());
+    disable_other_lints(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }

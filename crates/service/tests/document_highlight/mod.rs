@@ -21,7 +21,7 @@ fn keyword() {
     (call $func)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 3, 6));
     assert_json_snapshot!(response);
 }
@@ -34,7 +34,7 @@ fn instr_name() {
   (func (local.get) (local.get)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 13));
     assert_json_snapshot!(response);
 }
@@ -49,7 +49,7 @@ fn num_type() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 3, 21));
     assert_json_snapshot!(response);
 }
@@ -64,7 +64,7 @@ fn vec_type() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 3, 24));
     assert_json_snapshot!(response);
 }
@@ -79,7 +79,7 @@ fn ref_type() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 3, 26));
     assert_json_snapshot!(response);
 }
@@ -95,7 +95,7 @@ fn non_idx_int() {
     (f64.const 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 5, 16));
     assert_json_snapshot!(response);
 }
@@ -109,7 +109,7 @@ fn float() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 41));
     assert_json_snapshot!(response);
 }
@@ -124,7 +124,7 @@ fn func() {
 (module (func $f))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 9));
     assert_json_snapshot!(response);
 }
@@ -138,7 +138,7 @@ fn call_int() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 18));
     assert_json_snapshot!(response);
 }
@@ -152,7 +152,7 @@ fn call_ident() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 17));
     assert_json_snapshot!(response);
 }
@@ -166,7 +166,7 @@ fn call_undefined() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 15));
     assert!(response.unwrap().is_empty());
 }
@@ -181,7 +181,7 @@ fn param() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 19));
     assert_json_snapshot!(response);
 }
@@ -200,7 +200,7 @@ fn param_in_type_def() {
     (local.get 1)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 37));
     assert_json_snapshot!(response);
 }
@@ -219,7 +219,7 @@ fn param_ref_via_type_def() {
     (local.get 1)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 4, 15));
     assert_json_snapshot!(response);
 }
@@ -234,7 +234,7 @@ fn local() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 19));
     assert_json_snapshot!(response);
 }
@@ -248,7 +248,7 @@ fn local_ref_int() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 38));
     assert_json_snapshot!(response);
 }
@@ -262,7 +262,7 @@ fn local_ref_ident() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 52));
     assert_json_snapshot!(response);
 }
@@ -276,7 +276,7 @@ fn local_ref_undefined() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 37));
     assert!(response.unwrap().is_empty());
 }
@@ -293,7 +293,7 @@ fn type_def() {
 (module (func $t))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 9));
     assert_json_snapshot!(response);
 }
@@ -310,7 +310,7 @@ fn type_use_int() {
 (module (func $t))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 3, 15));
     assert_json_snapshot!(response);
 }
@@ -327,7 +327,7 @@ fn type_use_ident() {
 (module (func $t))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 4, 15));
     assert_json_snapshot!(response);
 }
@@ -341,7 +341,7 @@ fn type_use_undefined() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 15));
     assert!(response.unwrap().is_empty());
 }
@@ -357,7 +357,7 @@ fn global() {
 (module (global $g))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 11));
     assert_json_snapshot!(response);
 }
@@ -373,7 +373,7 @@ fn global_ref_int() {
 (module (global $g))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 3, 52));
     assert_json_snapshot!(response);
 }
@@ -389,7 +389,7 @@ fn global_ref_ident() {
 (module (global $g))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 3, 68));
     assert_json_snapshot!(response);
 }
@@ -404,7 +404,7 @@ fn global_ref_undefined() {
 (module (global $g))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 36));
     assert!(response.unwrap().is_empty());
 }
@@ -421,7 +421,7 @@ fn memory() {
 (module (memory $m))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 11));
     assert_json_snapshot!(response);
 }
@@ -438,7 +438,7 @@ fn memory_ref_int() {
 (module (memory $m))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 3, 17));
     assert_json_snapshot!(response);
 }
@@ -455,7 +455,7 @@ fn memory_ref_ident() {
 (module (memory $m))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 4, 17));
     assert_json_snapshot!(response);
 }
@@ -470,7 +470,7 @@ fn memory_ref_undefined() {
 (module (memory $m))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 17));
     assert!(response.unwrap().is_empty());
 }
@@ -493,7 +493,7 @@ fn table() {
 (module (table $t))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 10));
     assert_json_snapshot!(response);
 }
@@ -516,7 +516,7 @@ fn table_ref_int() {
 (module (table $t))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 7, 17));
     assert_json_snapshot!(response);
 }
@@ -539,7 +539,7 @@ fn table_ref_ident() {
 (module (table $t))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 4, 30));
     assert_json_snapshot!(response);
 }
@@ -554,7 +554,7 @@ fn table_ref_undefined() {
 (module (table $g))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 20));
     assert!(response.unwrap().is_empty());
 }
@@ -571,7 +571,7 @@ fn block() {
         br_table 0 1 $a $b))))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 3, 12));
     assert_json_snapshot!(response);
 }
@@ -589,7 +589,7 @@ fn block_ref_int() {
         br_table 0 1 $a $b))))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 7, 20));
     assert_json_snapshot!(response);
 }
@@ -607,7 +607,7 @@ fn block_ref_ident() {
         br_table 0 1 $a $b))))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 7, 25));
     assert_json_snapshot!(response);
 }
@@ -625,7 +625,7 @@ fn block_ref_undefined() {
         br_table 3))))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 7, 18));
     assert!(response.is_none());
 }
@@ -642,7 +642,7 @@ fn field() {
     struct.set 0 $x))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 24));
     assert_json_snapshot!(response);
 }
@@ -659,7 +659,7 @@ fn field_ref_int() {
     struct.set 0 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 6, 17));
     assert_json_snapshot!(response);
 }
@@ -676,7 +676,7 @@ fn field_ref_ident() {
     struct.set 0 $x))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 5, 18));
     assert_json_snapshot!(response);
 }
@@ -691,7 +691,7 @@ fn field_ref_undefined() {
     struct.get 0 $x))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 4, 18));
     assert!(response.unwrap().is_empty());
 }
@@ -709,7 +709,7 @@ fn tag() {
 (module (tag $e))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 8));
     assert_json_snapshot!(response);
 }
@@ -727,7 +727,7 @@ fn tag_ref_int() {
 (module (tag $e))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 5, 12));
     assert_json_snapshot!(response);
 }
@@ -745,7 +745,7 @@ fn tag_ref_ident() {
 (module (tag $e))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 5, 13));
     assert_json_snapshot!(response);
 }
@@ -760,7 +760,7 @@ fn tag_ref_undefined() {
 (module (tag $e))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 2, 16));
     assert!(response.unwrap().is_empty());
 }
@@ -775,7 +775,7 @@ fn shape_descriptor() {
     v128.const i16x8))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.document_highlight(create_params(uri, 4, 18));
     assert_json_snapshot!(response);
 }

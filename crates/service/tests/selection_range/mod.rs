@@ -25,7 +25,7 @@ fn sequence() {
     end)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.selection_range(create_params(
         uri,
         vec![Position {

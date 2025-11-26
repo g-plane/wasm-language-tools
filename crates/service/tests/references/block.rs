@@ -16,7 +16,7 @@ fn block_def_int_idx() {
       (br_table 0))))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let include_decl = service.find_references(create_params(uri.clone(), 3, 10, true));
     assert_json_snapshot!(include_decl);
     let exclude_decl = service.find_references(create_params(uri, 3, 10, false));
@@ -37,7 +37,7 @@ fn block_def_ident_idx() {
       (br_table $block))))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let include_decl = service.find_references(create_params(uri.clone(), 3, 14, true));
     assert_json_snapshot!(include_decl);
     let exclude_decl = service.find_references(create_params(uri, 3, 14, false));
@@ -58,7 +58,7 @@ fn block_ref_int_idx() {
       (br_table 0))))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let include_decl = service.find_references(create_params(uri.clone(), 5, 19, true));
     assert_json_snapshot!(include_decl);
     let exclude_decl = service.find_references(create_params(uri, 5, 19, false));
@@ -79,7 +79,7 @@ fn block_ref_ident_idx() {
       (br_table $block))))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let include_decl = service.find_references(create_params(uri.clone(), 5, 21, true));
     assert_json_snapshot!(include_decl);
     let exclude_decl = service.find_references(create_params(uri, 5, 21, false));
@@ -97,7 +97,7 @@ fn block_relation() {
         br_table 0 1))))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let def_a = service.find_references(create_params(uri.clone(), 3, 11, true));
     assert_json_snapshot!(def_a);
     let def_b = service.find_references(create_params(uri.clone(), 4, 14, true));
@@ -119,7 +119,7 @@ fn try_table() {
     end))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let def = service.find_references(create_params(uri.clone(), 3, 15, true));
     assert_json_snapshot!(def);
     let ref_1 = service.find_references(create_params(uri.clone(), 4, 9, true));
@@ -138,7 +138,7 @@ fn catch() {
     end))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let def = service.find_references(create_params(uri.clone(), 3, 11, true));
     assert_json_snapshot!(def);
     let ref_1 = service.find_references(create_params(uri.clone(), 4, 43, true));

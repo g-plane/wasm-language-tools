@@ -12,7 +12,7 @@ fn leading_whitespace() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 2, 25, 2, 25));
     assert_json_snapshot!(response);
 }
@@ -26,7 +26,7 @@ fn trailing_whitespace() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 2, 26, 2, 26));
     assert_json_snapshot!(response);
 }
@@ -40,7 +40,7 @@ fn around_whitespaces() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 2, 25, 2, 25));
     assert_json_snapshot!(response);
 }
@@ -54,7 +54,7 @@ fn sequence_instr() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 2, 25, 2, 25));
     assert_json_snapshot!(response);
 }
@@ -68,7 +68,7 @@ fn diagnostics() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let mut params = create_params(uri, 2, 25, 2, 25);
     params.context = CodeActionContext {
         diagnostics: vec![Diagnostic {

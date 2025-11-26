@@ -11,7 +11,7 @@ fn not_covered() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 2, 19, 2, 19));
     assert!(response.is_none());
 }
@@ -25,7 +25,7 @@ fn too_wide() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 2, 9, 2, 33));
     assert!(response.is_none());
 }
@@ -39,7 +39,7 @@ fn single() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 2, 10, 2, 21));
     assert!(response.is_none());
 }
@@ -53,7 +53,7 @@ fn one_by_one() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 2, 10, 2, 33));
     assert_json_snapshot!(response);
 }
@@ -67,7 +67,7 @@ fn many() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 2, 10, 2, 37));
     assert_json_snapshot!(response);
 }
@@ -81,7 +81,7 @@ fn result() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 2, 10, 2, 39));
     assert_json_snapshot!(response);
 }
@@ -95,7 +95,7 @@ fn local() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 2, 10, 2, 37));
     assert_json_snapshot!(response);
 }

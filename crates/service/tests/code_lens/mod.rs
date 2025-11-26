@@ -26,7 +26,7 @@ fn list() {
   (tag))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.code_lens(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -39,7 +39,7 @@ fn zero_references() {
   (func))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let code_lenses = service.code_lens(create_params(uri)).unwrap();
     let response = service.code_lens_resolve(code_lenses[0].clone());
     assert_json_snapshot!(response);
@@ -55,7 +55,7 @@ fn one_reference() {
     (call 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let code_lenses = service.code_lens(create_params(uri)).unwrap();
     let response = service.code_lens_resolve(code_lenses[0].clone());
     assert_json_snapshot!(response);
@@ -72,7 +72,7 @@ fn more_references() {
     (call $f)))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let code_lenses = service.code_lens(create_params(uri)).unwrap();
     let response = service.code_lens_resolve(code_lenses[0].clone());
     assert_json_snapshot!(response);

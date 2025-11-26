@@ -17,7 +17,7 @@ const SOURCE: &str = "
 fn f1_incoming() {
     let uri = "untitled:test".to_string();
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), SOURCE.into());
+    service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
         position: Position {
@@ -39,7 +39,7 @@ fn f1_incoming() {
 fn f2_incoming() {
     let uri = "untitled:test".to_string();
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), SOURCE.into());
+    service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
         position: Position {
@@ -61,7 +61,7 @@ fn f2_incoming() {
 fn f3_incoming() {
     let uri = "untitled:test".to_string();
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), SOURCE.into());
+    service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
         position: Position {
@@ -83,7 +83,7 @@ fn f3_incoming() {
 fn f1_outgoing() {
     let uri = "untitled:test".to_string();
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), SOURCE.into());
+    service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
         position: Position {
@@ -105,7 +105,7 @@ fn f1_outgoing() {
 fn f2_outgoing() {
     let uri = "untitled:test".to_string();
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), SOURCE.into());
+    service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
         position: Position {
@@ -127,7 +127,7 @@ fn f2_outgoing() {
 fn f3_outgoing() {
     let uri = "untitled:test".to_string();
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), SOURCE.into());
+    service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
         position: Position {

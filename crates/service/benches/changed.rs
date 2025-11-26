@@ -66,7 +66,7 @@ pub fn changed_text_bench(c: &mut Criterion) {
                 },
                 ..Default::default()
             });
-            service.commit(uri.clone(), source.clone());
+            service.commit(&uri, source.clone());
             requests_on_changed(&mut service, &uri);
 
             let mut insert_char = |char: char, line, col| {

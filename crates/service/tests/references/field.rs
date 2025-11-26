@@ -14,7 +14,7 @@ fn field_def_int_idx() {
     struct.set 0 0))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let include_decl = service.find_references(create_params(uri.clone(), 2, 24, true));
     assert_json_snapshot!(include_decl);
     let exclude_decl = service.find_references(create_params(uri, 2, 24, false));
@@ -33,7 +33,7 @@ fn field_def_ident_idx() {
     struct.set 0 $x))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let include_decl = service.find_references(create_params(uri.clone(), 2, 24, true));
     assert_json_snapshot!(include_decl);
     let exclude_decl = service.find_references(create_params(uri, 2, 24, false));
@@ -52,7 +52,7 @@ fn field_ref_int_idx() {
     struct.set 0 0))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let include_decl = service.find_references(create_params(uri.clone(), 5, 18, true));
     assert_json_snapshot!(include_decl);
     let exclude_decl = service.find_references(create_params(uri, 5, 18, false));
@@ -71,7 +71,7 @@ fn field_ref_ident_idx() {
     struct.set 0 $x))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let include_decl = service.find_references(create_params(uri.clone(), 6, 18, true));
     assert_json_snapshot!(include_decl);
     let exclude_decl = service.find_references(create_params(uri, 6, 18, false));
@@ -89,7 +89,7 @@ fn undef() {
     struct.set 0 $x))
 "#;
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let include_decl = service.find_references(create_params(uri.clone(), 4, 18, true));
     assert!(include_decl.unwrap().is_empty());
     let exclude_decl = service.find_references(create_params(uri, 4, 18, false));

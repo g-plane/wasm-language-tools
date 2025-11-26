@@ -43,7 +43,7 @@ fn fully_covered_node() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.range_formatting(create_params(uri, 3, 4, 3, 22));
     assert_json_snapshot!(response);
 }
@@ -68,7 +68,7 @@ fn overlap() {
     ))
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     let response = service.range_formatting(create_params(uri, 4, 8, 5, 23));
     assert_json_snapshot!(response);
 }
@@ -84,9 +84,9 @@ fn format_comments() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(uri.clone(), source.into());
+    service.commit(&uri, source.into());
     service.set_config(
-        uri.clone(),
+        &uri,
         Some(ServiceConfig {
             format: wat_formatter::config::LanguageOptions {
                 format_comments: true,
