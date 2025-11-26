@@ -9,7 +9,7 @@ use lspt::{
     notification::{
         DidChangeConfigurationNotification, DidChangeTextDocumentNotification,
         DidCloseTextDocumentNotification, DidOpenTextDocumentNotification, ExitNotification,
-        Notification as _, PublishDiagnosticsNotification,
+        InitializedNotification, Notification as _, PublishDiagnosticsNotification,
     },
     request::{
         CallHierarchyIncomingCallsRequest, CallHierarchyOutgoingCallsRequest,
@@ -54,11 +54,6 @@ impl Server {
     pub fn run(&mut self) -> anyhow::Result<()> {
         let mut stdin = std::io::stdin().lock();
         self.initialize(&mut stdin)?;
-        stdio::write(Message::Request {
-            id: self.sent_requests.next_id(),
-            method: RegistrationRequest::METHOD.into(),
-            params: serde_json::to_value(self.service.dynamic_capabilities())?,
-        })?;
 
         loop {
             let message = match stdio::read(&mut stdin) {
@@ -113,6 +108,17 @@ impl Server {
                             continue;
                         }
                         Ok(Err(..)) => continue,
+                        Err(p) => params = p,
+                    }
+                    match try_cast_notification::<InitializedNotification>(&method, params) {
+                        Ok(..) => {
+                            stdio::write(Message::Request {
+                                id: self.sent_requests.next_id(),
+                                method: RegistrationRequest::METHOD.into(),
+                                params: serde_json::to_value(self.service.dynamic_capabilities())?,
+                            })?;
+                            continue;
+                        }
                         Err(p) => params = p,
                     }
                     if try_cast_notification::<ExitNotification>(&method, params).is_ok() {

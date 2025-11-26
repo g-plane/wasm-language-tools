@@ -55,6 +55,8 @@ pub struct LanguageService {
 impl Database for LanguageService {}
 
 impl LanguageService {
+    /// Handler for `initialize` request.
+    ///
     /// This method isn't used to create language service instance.
     /// Instead, you can call `LanguageService::default()` to create instance,
     /// then call this method when the language server is initializing.
