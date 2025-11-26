@@ -449,6 +449,10 @@ impl Server {
                     method: DiagnosticRefreshRequest::METHOD.into(),
                     params: serde_json::Value::Null,
                 })?;
+            } else {
+                for uri in uris {
+                    self.publish_diagnostics(uri)?;
+                }
             }
             if self.support_refresh_inlay_hint {
                 stdio::write(Message::Request {
