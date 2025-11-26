@@ -51,6 +51,12 @@ jobs:
           - name: arm64-linux
             host: ubuntu-24.04-arm
             target: aarch64-unknown-linux-gnu
+          - name: x86_64-alpine
+            host: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+          - name: arm64-alpine
+            host: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-musl
           - name: x86_64-windows
             host: windows-latest
             target: x86_64-pc-windows-gnu
