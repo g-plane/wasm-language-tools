@@ -32,6 +32,8 @@ pkg-url = "{ repo }/releases/download/v{ version }/{ name }-x86_64-macos{ archiv
 pkg-url = "{ repo }/releases/download/v{ version }/{ name }-arm64-macos{ archive-suffix }"
 [package.metadata.binstall.overrides.x86_64-unknown-linux-gnu]
 pkg-url = "{ repo }/releases/download/v{ version }/{ name }-x86_64-linux{ archive-suffix }"
+[package.metadata.binstall.overrides.aarch64-unknown-linux-gnu]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-arm64-linux{ archive-suffix }"
 [package.metadata.binstall.overrides.x86_64-pc-windows-gnu]
 pkg-url = "{ repo }/releases/download/v{ version }/{ name }-x86_64-windows{ archive-suffix }"
 
