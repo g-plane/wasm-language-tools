@@ -82,7 +82,7 @@ jobs:
             wat_server-${{ matrix.name }}.zip
 
   vscode:
-    needs: github
+    needs: [crates, github]
     runs-on: ubuntu-latest
     steps:
       - shell: pwsh
