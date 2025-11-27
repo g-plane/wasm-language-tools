@@ -152,14 +152,10 @@ It also provides an out-of-the-box formatter (a.k.a. pretty printer) for WebAsse
 
 ## 🍵 Usage
 
-We've provided pre-built binaries on [GitHub Releases](https://github.com/g-plane/wasm-language-tools/releases).
-You can download it according to your platform, then extract it from the compressed file.
+### Try it Online
 
-Or, if you've installed Rust, you can run Cargo to install it globally:
-
-```shell
-cargo install wat_server
-```
+Open [vscode.dev](https://vscode.dev/), then search and install the `gplane.wasm-language-tools` extension.
+After installed, open or create a ".wat" file to try it out.
 
 ### Editor Support
 
@@ -170,6 +166,12 @@ cargo install wat_server
   ```
 - Zed: Install the [WebAssembly Text Format](https://zed.dev/extensions?query=WebAssembly+Text+Format) extension.
 - Helix: Built-in support.
+
+### Binaries
+
+We've provided pre-built binaries on [GitHub Releases](https://github.com/g-plane/wasm-language-tools/releases).
+You can download it according to your platform, then extract it from the compressed file.
+Or, read the [documentation](https://wasm-language-tools.netlify.app/guide/getting-started/binary.html) for alternative installation methods.
 
 ## 📚 Documentation
 
