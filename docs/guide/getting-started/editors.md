@@ -6,19 +6,19 @@ Visual Studio Code is the recommended editor, since it's the best supported edit
 
 To use WebAssembly Language Tools in Visual Studio Code, you just need to install
 [the extension](https://marketplace.visualstudio.com/items/?itemName=gplane.wasm-language-tools) from the marketplace.
-You don't need to install the server binary manually, since the extension bundles it for you.
+You don't need to install the server executable manually, since the extension bundles it for you.
 
 ## Zed
 
 Install the [WebAssembly Text Format](https://zed.dev/extensions?query=WebAssembly+Text+Format) extension.
-Once opened a `.wat` file, server binary will be automatically downloaded, so you don't need to install it manually.
+Once opened a `.wat` file, server executable will be automatically downloaded, so you don't need to install it manually.
 
 ## Neovim
 
 Neovim has built-in support for WebAssembly Language Tools via [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#wasm_language_tools).
 
 > [!IMPORTANT]
-> You need to [install the server binary](./binary.md) manually and make sure it's in your `$PATH` (or specify the binary path manually).
+> You need to [install the server executable](./executable.md) manually and make sure it's in your `$PATH` (or specify the executable path manually).
 
 For the minimal setup, add the following lines to your `init.lua`:
 
@@ -62,7 +62,7 @@ require("lspconfig").wasm_language_tools.setup({
 ## coc.nvim
 
 > [!IMPORTANT]
-> You need to [install the server binary](./binary.md) manually and make sure it's in your `$PATH` (or specify the binary path manually).
+> You need to [install the server executable](./executable.md) manually and make sure it's in your `$PATH` (or specify the executable path manually).
 
 For the minimal setup, add the following lines to your `coc-settings.json`:
 
@@ -70,7 +70,7 @@ For the minimal setup, add the following lines to your `coc-settings.json`:
 {
   "languageserver": {
     "wasm-language-tools": {
-      "command": "wat_server", // or the absolute path to the binary
+      "command": "wat_server", // or the absolute path to the executable
       "filetypes": ["wat"]
     }
   }
@@ -82,7 +82,7 @@ For the minimal setup, add the following lines to your `coc-settings.json`:
 Helix has built-in support for WebAssembly Language Tools.
 
 > [!IMPORTANT]
-> You need to [install the server binary](./binary.md) manually and make sure it's in your `$PATH` (or specify the binary path manually).
+> You need to [install the server executable](./executable.md) manually and make sure it's in your `$PATH` (or specify the executable path manually).
 
 Additionally, you can configure the language server like this:
 

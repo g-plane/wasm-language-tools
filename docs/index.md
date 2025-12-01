@@ -33,4 +33,4 @@ features:
     details: The built-in formatter can format a whole file or a range of code, even there're syntax errors.
 ---
 
-![](https://github.com/user-attachments/assets/49b771fc-2416-4a5a-8b04-f37037cb9b54)
+![](https://github.com/user-attachments/assets/475a0cbb-adaf-47f1-9277-1080c1e9a92e)

@@ -171,7 +171,7 @@ After installed, open or create a ".wat" file to try it out.
 
 We've provided pre-built binaries on [GitHub Releases](https://github.com/g-plane/wasm-language-tools/releases).
 You can download it according to your platform, then extract it from the compressed file.
-Or, read the [documentation](https://wasm-language-tools.netlify.app/guide/getting-started/binary.html) for alternative installation methods.
+Or, read the [documentation](https://wasm-language-tools.netlify.app/guide/getting-started/executable.html) for alternative installation methods.
 
 ## 📚 Documentation
 

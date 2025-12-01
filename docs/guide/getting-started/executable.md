@@ -1,6 +1,6 @@
-# Server Binary
+# Server Executable
 
-If you're using other editors, manually installing the server binary is required.
+If you're using other editors, manually installing the server executable is required.
 
 ## GitHub Releases
 
@@ -32,6 +32,32 @@ Install with your favorite AUR helper, for example:
 paru -S wasm-language-tools
 ```
 
+or for pre-built executable:
+
+```bash
+paru -S wasm-language-tools-bin
+```
+
 ## Nix
+
+On NixOS:
+
+```bash
+nix-env -iA nixos.wasm-language-tools
+```
+
+On non NixOS:
+
+```bash
+nix-env -iA nixpkgs.wasm-language-tools
+```
+
+Or modifying configuration:
+
+```nix
+environment.systemPackages = [
+  pkgs.wasm-language-tools
+];
+```
 
 View detail on [Nixpkgs](https://search.nixos.org/packages?show=wasm-language-tools).

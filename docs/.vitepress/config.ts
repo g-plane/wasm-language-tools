@@ -28,8 +28,8 @@ export default defineConfig({
                 link: '/guide/getting-started/editors',
               },
               {
-                text: 'Server Binary',
-                link: '/guide/getting-started/binary',
+                text: 'Server Executable',
+                link: '/guide/getting-started/executable',
               },
             ],
           },
