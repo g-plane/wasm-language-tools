@@ -46,7 +46,7 @@ On NixOS:
 nix-env -iA nixos.wasm-language-tools
 ```
 
-On non NixOS:
+On non-NixOS:
 
 ```bash
 nix-env -iA nixpkgs.wasm-language-tools
