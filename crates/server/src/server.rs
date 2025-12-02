@@ -34,7 +34,7 @@ pub struct Server {
     support_refresh_diagnostics: bool,
     support_refresh_inlay_hint: bool,
     support_pull_config: bool,
-    sent_requests: SentRequests<Vec<String>>,
+    sent_requests: SentRequests,
     pool: ThreadPool,
 }
 
@@ -435,34 +435,11 @@ impl Server {
     }
 
     fn handle_response(&mut self, id: u32, result: serde_json::Value) -> anyhow::Result<()> {
-        if let Some((uris, configs)) = self
-            .sent_requests
-            .remove(id)
-            .zip(serde_json::from_value::<Vec<_>>(result).ok())
-        {
-            uris.iter()
-                .zip(configs)
-                .for_each(|(uri, config)| self.service.set_config(uri, config));
-            if self.support_refresh_diagnostics {
-                stdio::write(Message::Request {
-                    id: self.sent_requests.next_id(),
-                    method: DiagnosticRefreshRequest::METHOD.into(),
-                    params: serde_json::Value::Null,
-                })?;
-            } else {
-                for uri in uris {
-                    self.publish_diagnostics(uri)?;
-                }
-            }
-            if self.support_refresh_inlay_hint {
-                stdio::write(Message::Request {
-                    id: self.sent_requests.next_id(),
-                    method: InlayHintRefreshRequest::METHOD.into(),
-                    params: serde_json::Value::Null,
-                })?;
-            }
+        if let Some(callback) = self.sent_requests.remove(id) {
+            callback(self, result)
+        } else {
+            Ok(())
         }
-        Ok(())
     }
 
     fn handle_did_open_text_document(
@@ -483,7 +460,7 @@ impl Server {
                         section: Some("wasmLanguageTools".to_string()),
                     }],
                 })?,
-                vec![uri],
+                move |server, result| server.update_configs(vec![uri], result),
             ))?;
         }
         Ok(())
@@ -519,7 +496,7 @@ impl Server {
                             })
                             .collect(),
                     })?,
-                    uris,
+                    move |server, result| server.update_configs(uris, result),
                 ),
             )?;
         }
@@ -539,5 +516,34 @@ impl Server {
             method: PublishDiagnosticsNotification::METHOD.into(),
             params: serde_json::to_value(self.service.publish_diagnostics(uri))?,
         })
+    }
+
+    fn update_configs(
+        &mut self,
+        uris: Vec<String>,
+        result: serde_json::Value,
+    ) -> anyhow::Result<()> {
+        uris.iter()
+            .zip(serde_json::from_value::<Vec<_>>(result)?)
+            .for_each(|(uri, config)| self.service.set_config(uri, config));
+        if self.support_refresh_diagnostics {
+            stdio::write(Message::Request {
+                id: self.sent_requests.next_id(),
+                method: DiagnosticRefreshRequest::METHOD.into(),
+                params: serde_json::Value::Null,
+            })?;
+        } else {
+            for uri in uris {
+                self.publish_diagnostics(uri)?;
+            }
+        }
+        if self.support_refresh_inlay_hint {
+            stdio::write(Message::Request {
+                id: self.sent_requests.next_id(),
+                method: InlayHintRefreshRequest::METHOD.into(),
+                params: serde_json::Value::Null,
+            })?;
+        }
+        Ok(())
     }
 }

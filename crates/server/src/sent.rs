@@ -1,27 +1,33 @@
-use crate::message::Message;
+use crate::{message::Message, server::Server};
+use anyhow::Result;
 use rustc_hash::FxHashMap;
 use serde_json::Value;
 
-#[derive(Debug, Default)]
-pub struct SentRequests<T> {
+type Callback = Box<dyn FnOnce(&mut Server, Value) -> Result<()> + 'static>;
+
+#[derive(Default)]
+pub struct SentRequests {
     id: u32,
-    data: FxHashMap<u32, T>,
+    callbacks: FxHashMap<u32, Callback>,
 }
 
-impl<T> SentRequests<T> {
+impl SentRequests {
     pub fn next_id(&mut self) -> u32 {
         let id = self.id;
         self.id += 1;
         id
     }
 
-    pub fn add(&mut self, method: String, params: Value, data: T) -> Message {
+    pub fn add<F>(&mut self, method: String, params: Value, callback: F) -> Message
+    where
+        F: FnOnce(&mut Server, Value) -> Result<()> + 'static,
+    {
         let id = self.next_id();
-        self.data.insert(id, data);
+        self.callbacks.insert(id, Box::new(callback));
         Message::Request { id, method, params }
     }
 
-    pub fn remove(&mut self, id: u32) -> Option<T> {
-        self.data.remove(&id)
+    pub fn remove(&mut self, id: u32) -> Option<Callback> {
+        self.callbacks.remove(&id)
     }
 }
