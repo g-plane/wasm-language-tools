@@ -16,6 +16,7 @@ indexmap = "2.12"
 itertools = "0.14"
 line-index.workspace = true
 lspt.workspace = true
+petgraph = "0.8"
 rowan.workspace = true
 rustc-hash.workspace = true
 salsa = "0.24"

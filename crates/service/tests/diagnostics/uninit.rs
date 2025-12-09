@@ -266,3 +266,92 @@ fn all_branches() {
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
+
+#[test]
+fn nested_if() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func (local $a i32) (local $b (ref func))
+    local.get 0
+    if
+      local.get 0
+      if
+        ref.func 0
+        local.set 1
+      else
+        ref.func 0
+        local.set $b
+      end
+      local.get 1
+      drop
+    end
+    local.get $b
+    drop))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn conditional_loop() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (global i32
+    i32.const 0)
+  (func (param (ref any)) (result (ref any)) (local (ref any))
+    block $b
+      loop $loop
+        global.get 0
+        if
+          local.get 0
+          local.set 1
+          br $b
+        else
+          br $loop
+        end
+      end
+    end
+    local.get 1)
+  (func (param (ref any)) (result (ref any)) (local (ref any))
+    (block $b
+      (loop $loop
+        (if
+          (global.get 0)
+          (then
+            (br $b)
+            (local.set 1
+              (local.get 0)))
+          (else
+            (local.set 1
+              (local.get 0))
+            (br $loop)))))
+    (local.get 1))
+  (func (param (ref any)) (result (ref any)) (local (ref any))
+    (block $b
+      (loop $loop
+        (if
+          (global.get 0)
+          (then
+            (br $loop
+              (local.set 1
+                (local.get 0))))
+          (else
+            (br $b)))))
+    (local.get 1))
+  (func (local (ref any))
+    (loop
+      br 0
+      local.get 0
+      drop)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

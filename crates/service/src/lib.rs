@@ -1,6 +1,7 @@
 #![doc = include_str!("../README.md")]
 
 mod binder;
+mod cfa;
 mod checker;
 mod config;
 mod data_set;

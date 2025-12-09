@@ -85,10 +85,11 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                     &node,
                 );
                 uninit::check(
-                    service,
                     &mut diagnostics,
+                    service,
                     document,
                     line_index,
+                    &root,
                     symbol_table,
                     &node,
                 );
