@@ -46,50 +46,12 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 29,
-          "character": 6
-        },
-        "end": {
-          "line": 29,
-          "character": 9
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
           "line": 30,
           "character": 6
         },
         "end": {
           "line": 30,
           "character": 9
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 31,
-          "character": 4
-        },
-        "end": {
-          "line": 31,
-          "character": 7
         }
       },
       "severity": 2,

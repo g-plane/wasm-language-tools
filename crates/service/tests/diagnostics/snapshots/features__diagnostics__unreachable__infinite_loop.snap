@@ -8,25 +8,6 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 5,
-          "character": 4
-        },
-        "end": {
-          "line": 5,
-          "character": 7
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
           "line": 6,
           "character": 4
         },
@@ -46,163 +27,11 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 11,
-          "character": 6
-        },
-        "end": {
-          "line": 11,
-          "character": 9
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 12,
-          "character": 4
-        },
-        "end": {
-          "line": 12,
-          "character": 7
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
           "line": 13,
           "character": 4
         },
         "end": {
           "line": 13,
-          "character": 7
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 23,
-          "character": 8
-        },
-        "end": {
-          "line": 23,
-          "character": 11
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 24,
-          "character": 6
-        },
-        "end": {
-          "line": 24,
-          "character": 9
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 25,
-          "character": 4
-        },
-        "end": {
-          "line": 25,
-          "character": 7
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 36,
-          "character": 8
-        },
-        "end": {
-          "line": 36,
-          "character": 11
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 37,
-          "character": 6
-        },
-        "end": {
-          "line": 37,
-          "character": 9
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 38,
-          "character": 4
-        },
-        "end": {
-          "line": 38,
           "character": 7
         }
       },

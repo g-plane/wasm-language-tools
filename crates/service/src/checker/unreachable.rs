@@ -1,247 +1,102 @@
 use crate::{
-    LintLevel,
-    binder::{SymbolKey, SymbolTable},
+    LanguageService, LintLevel,
+    cfa::{self, FlowNodeKind},
+    document::Document,
     helpers,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, DiagnosticTag, Union2};
-use rowan::{TextRange, ast::AstNode};
-use rustc_hash::FxHashSet;
-use std::ops::ControlFlow;
-use wat_syntax::{
-    SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage,
-    ast::{BlockInstr, Cat, Instr},
+use rowan::{
+    TextRange,
+    ast::{AstNode, SyntaxNodePtr, support},
 };
+use wat_syntax::{SyntaxKind, SyntaxNode, ast::Instr};
 
 const DIAGNOSTIC_CODE: &str = "unreachable";
 
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
+    service: &LanguageService,
+    document: Document,
     lint_level: LintLevel,
     line_index: &LineIndex,
     root: &SyntaxNode,
-    symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) {
-    Checker {
-        diagnostics,
-        line_index,
-        symbol_table,
-        root,
-        severity: match lint_level {
-            LintLevel::Allow => return,
-            LintLevel::Hint => DiagnosticSeverity::Hint,
-            LintLevel::Warn => DiagnosticSeverity::Warning,
-            LintLevel::Deny => DiagnosticSeverity::Error,
-        },
-        start_jumps: FxHashSet::default(),
-        end_jumps: FxHashSet::default(),
-        last_reported: TextRange::default(),
-    }
-    .check_block_like(node);
-}
+    let severity = match lint_level {
+        LintLevel::Allow => return,
+        LintLevel::Hint => DiagnosticSeverity::Hint,
+        LintLevel::Warn => DiagnosticSeverity::Warning,
+        LintLevel::Deny => DiagnosticSeverity::Error,
+    };
 
-struct Checker<'a, 'db> {
-    diagnostics: &'a mut Vec<Diagnostic>,
-    line_index: &'db LineIndex,
-    symbol_table: &'db SymbolTable<'db>,
-    root: &'a SyntaxNode,
-    severity: DiagnosticSeverity,
-    start_jumps: FxHashSet<SyntaxNode>,
-    end_jumps: FxHashSet<SyntaxNode>,
-    last_reported: TextRange,
-}
-impl Checker<'_, '_> {
-    fn check_block_like(&mut self, node: &SyntaxNode) -> bool {
-        let mut unreachable = false;
-        let result = node
-            .children()
-            .filter_map(Instr::cast)
-            .try_for_each(|instr| self.check_instr(&instr, &mut unreachable));
-        if self.end_jumps.contains(node) {
-            unreachable = false;
+    let cfg = cfa::analyze(service, document, SyntaxNodePtr::new(node));
+    let mut ranges = Vec::<TextRange>::new();
+    cfg.graph.raw_nodes().iter().for_each(|node| {
+        if !node.weight.unreachable {
+            return;
         }
-        // When the last instr produces never, the `end` keyword should be marked unreachable.
-        // But for then-block and else-block, they don't have `end` keyword.
-        // (That `end` keyword comes from their children.)
-        if !matches!(
-            node.kind(),
-            SyntaxKind::BLOCK_IF_THEN | SyntaxKind::BLOCK_IF_ELSE
-        ) {
-            match (result, unreachable, node.last_token()) {
-                (ControlFlow::Continue(..), true, Some(token)) if is_end_keyword(&token) => {
-                    self.report_token(&token);
-                }
-                _ => {}
-            }
-        }
-        unreachable
-    }
-
-    fn check_instr(&mut self, instr: &Instr, unreachable: &mut bool) -> ControlFlow<(), ()> {
-        if *unreachable {
-            let instr_node = instr.syntax();
-            if instr_node
-                .prev_sibling()
-                .is_some_and(|prev| self.end_jumps.contains(&prev))
-            {
-                *unreachable = false;
-            } else {
-                if let Some(end) = instr_node
-                    .ancestors()
-                    .skip(1)
-                    .find(is_block_like)
-                    .and_then(|parent_block| {
-                        parent_block
-                            .last_token()
-                            .filter(is_end_keyword)
-                            .map(|token| token.text_range())
-                            .or_else(|| parent_block.last_child().map(|last| last.text_range()))
-                    })
-                    .map(|range| range.end())
-                {
-                    let range = TextRange::new(instr_node.text_range().start(), end);
-                    // avoid duplicate diagnostics
-                    if !self.last_reported.contains_range(range) {
-                        self.diagnostics.push(Diagnostic {
-                            range: helpers::rowan_range_to_lsp_range(self.line_index, range),
-                            severity: Some(self.severity),
-                            source: Some("wat".into()),
-                            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                            message: "unreachable code".into(),
-                            tags: Some(vec![DiagnosticTag::Unnecessary]),
-                            ..Default::default()
-                        });
-                        self.last_reported = range;
-                    }
-                }
-                return ControlFlow::Break(());
-            }
-        }
-        match instr {
-            Instr::Plain(plain) => {
-                let _ = plain
-                    .instrs()
-                    .try_for_each(|instr| self.check_instr(&instr, unreachable));
-                if let Some(instr_name) = plain.instr_name() {
-                    if *unreachable {
-                        if plain
-                            .syntax()
+        match &node.weight.kind {
+            FlowNodeKind::BasicBlock(bb) => {
+                bb.instrs(root).for_each(|instr| {
+                    let current = instr.text_range();
+                    if let Some(last) = ranges.last_mut() {
+                        if instr
                             .prev_sibling()
-                            .is_some_and(|prev| self.end_jumps.contains(&prev))
+                            .is_some_and(|prev| last.contains_range(prev.text_range()))
                         {
-                            *unreachable = false;
-                        } else if !self.last_reported.contains_range(instr_name.text_range()) {
-                            self.report_token(&instr_name);
+                            // current and previous are adjacent, so merge ranges
+                            *last = last.cover(current);
+                        } else if current.contains_range(*last) {
+                            // this can be occurred for folded instructions
+                            if instr
+                                .first_child_by_kind(&Instr::can_cast)
+                                .is_none_or(|first| last.contains_range(first.text_range()))
+                            {
+                                // current instruction is the parent of last range,
+                                // and all children are from the same basic block with current instruction
+                                *last = current;
+                            } else if let Some(instr_name) =
+                                support::token(&instr, SyntaxKind::INSTR_NAME)
+                            {
+                                // if there're child instructions from different basic blocks,
+                                // only mark the instruction name as unreachable
+                                ranges.push(instr_name.text_range());
+                            }
+                        } else if !last.contains_range(current) {
+                            ranges.push(current);
                         }
+                    } else if instr.children().any(|child| Instr::can_cast(child.kind()))
+                        && let Some(instr_name) = support::token(&instr, SyntaxKind::INSTR_NAME)
+                    {
+                        // this can be occurred when all child instructions are from different basic blocks
+                        ranges.push(instr_name.text_range());
+                    } else {
+                        ranges.push(current);
                     }
-                    let instr_name = instr_name.text();
-                    if matches!(
-                        instr_name,
-                        "br" | "br_if" | "br_table" | "br_on_null" | "br_on_non_null"
-                    ) {
-                        plain
-                            .immediates()
-                            .for_each(|immediate| self.add_jump(&immediate));
-                    }
-                    *unreachable |= helpers::is_stack_polymorphic(instr_name);
+                });
+            }
+            FlowNodeKind::BlockEntry(entry) => {
+                let node = entry.to_node(root);
+                if let Some((prev, last)) = node.prev_sibling().zip(ranges.last_mut())
+                    && last.contains_range(prev.text_range())
+                {
+                    // current and previous are adjacent, so merge ranges
+                    *last = last.cover(node.text_range());
+                } else {
+                    ranges.push(node.text_range());
                 }
             }
-            Instr::Block(BlockInstr::Block(block_block)) => {
-                if self.check_block_like(block_block.syntax()) {
-                    *unreachable = true;
-                }
-            }
-            Instr::Block(BlockInstr::Loop(block_loop)) => {
-                let block_loop = block_loop.syntax();
-                if self.check_block_like(block_loop) {
-                    let loop_range = block_loop.text_range();
-                    *unreachable = self.start_jumps.contains(block_loop)
-                        && self
-                            .end_jumps
-                            .iter() /* internal jumps can break out of the loop */
-                            .all(|jump| !loop_range.contains_range(jump.text_range()));
-                }
-            }
-            Instr::Block(BlockInstr::If(block_if)) => {
-                let _ = block_if
-                    .instrs()
-                    .try_for_each(|instr| self.check_instr(&instr, unreachable));
-                let if_branch = block_if
-                    .then_block()
-                    .is_some_and(|block| self.check_block_like(block.syntax()));
-                let else_branch = block_if
-                    .else_block()
-                    .is_some_and(|block| self.check_block_like(block.syntax()));
-                if if_branch && else_branch {
-                    *unreachable = true;
-                    if let Some(keyword) = block_if.end_keyword() {
-                        self.report_token(&keyword);
-                    }
-                }
-            }
-            Instr::Block(BlockInstr::TryTable(block_try_table)) => {
-                block_try_table
-                    .catches()
-                    .filter_map(|cat| match cat {
-                        Cat::Catch(catch) => catch.label_index(),
-                        Cat::CatchAll(catch_all) => catch_all.label_index(),
-                    })
-                    .for_each(|index| self.add_jump(&index));
-                if self.check_block_like(block_try_table.syntax()) {
-                    *unreachable = true;
-                }
-            }
+            _ => {}
         }
-        ControlFlow::Continue(())
-    }
-
-    fn add_jump<N>(&mut self, node: &N)
-    where
-        N: AstNode<Language = WatLanguage>,
-    {
-        if let Some(def_key) = self
-            .symbol_table
-            .resolved
-            .get(&SymbolKey::new(node.syntax()))
-        {
-            let block = def_key.to_node(self.root);
-            if block.kind() == SyntaxKind::BLOCK_LOOP {
-                self.start_jumps.insert(block);
-            } else {
-                self.end_jumps.insert(block);
-            }
-        }
-    }
-
-    fn report_token(&mut self, token: &SyntaxToken) {
-        // We don't update the last reported range for token here
-        // because token is atomic and nothing can be smaller than it.
-        self.diagnostics.push(Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(self.line_index, token.text_range()),
-            severity: Some(self.severity),
-            source: Some("wat".into()),
-            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-            message: "unreachable code".into(),
-            tags: Some(vec![DiagnosticTag::Unnecessary]),
-            ..Default::default()
-        });
-    }
-}
-
-fn is_block_like(node: &SyntaxNode) -> bool {
-    matches!(
-        node.kind(),
-        SyntaxKind::MODULE_FIELD_FUNC
-            | SyntaxKind::MODULE_FIELD_GLOBAL
-            | SyntaxKind::BLOCK_BLOCK
-            | SyntaxKind::BLOCK_LOOP
-            | SyntaxKind::BLOCK_TRY_TABLE
-            | SyntaxKind::BLOCK_IF_THEN
-            | SyntaxKind::BLOCK_IF_ELSE
-    )
-}
-
-fn is_end_keyword(token: &SyntaxToken) -> bool {
-    token.kind() == SyntaxKind::KEYWORD && token.text() == "end"
+    });
+    diagnostics.extend(ranges.into_iter().map(|range| Diagnostic {
+        range: helpers::rowan_range_to_lsp_range(line_index, range),
+        severity: Some(severity),
+        source: Some("wat".into()),
+        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+        message: "unreachable code".into(),
+        tags: Some(vec![DiagnosticTag::Unnecessary]),
+        ..Default::default()
+    }));
 }

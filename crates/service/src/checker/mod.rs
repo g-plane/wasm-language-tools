@@ -78,10 +78,11 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                 );
                 unreachable::check(
                     &mut diagnostics,
+                    service,
+                    document,
                     config.lint.unreachable,
                     line_index,
                     &root,
-                    symbol_table,
                     &node,
                 );
                 uninit::check(
@@ -106,10 +107,11 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                 );
                 unreachable::check(
                     &mut diagnostics,
+                    service,
+                    document,
                     config.lint.unreachable,
                     line_index,
                     &root,
-                    symbol_table,
                     &node,
                 );
                 if let Some(diagnostic) = const_expr::check(line_index, &node) {

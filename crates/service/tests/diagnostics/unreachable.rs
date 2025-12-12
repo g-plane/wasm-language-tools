@@ -30,6 +30,10 @@ fn simple_reachable() {
     return)
   (func
     block
+      return
+    end)
+  (func
+    block
       block
         nop
       end
@@ -90,10 +94,6 @@ fn simple_unreachable() {
     nop
     return
     nop)
-  (func
-    block
-      return
-    end)
   (func
     unreachable
     nop)
@@ -231,7 +231,21 @@ fn merge_range() {
       (drop
         (i32.add
           (i32.const 0)
-          (i32.const 0))))))
+          (i32.const 0)))))
+
+  (func
+    (return)
+    (nop
+      (block)
+      (nop))
+    (nop))
+  (func
+    (nop
+      (nop
+        (nop)
+        (return)
+        (block)
+        (nop)))))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
@@ -529,7 +543,7 @@ fn finite_loop() {
     service.commit(&uri, source.into());
     disable_other_lints(&mut service, &uri);
     let response = service.pull_diagnostics(create_params(uri));
-    assert_json_snapshot!(response);
+    assert!(response.items.is_empty());
 }
 
 #[test]

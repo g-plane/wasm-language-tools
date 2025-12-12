@@ -12,8 +12,8 @@ expression: response
           "character": 6
         },
         "end": {
-          "line": 10,
-          "character": 9
+          "line": 8,
+          "character": 19
         }
       },
       "severity": 2,
@@ -33,6 +33,25 @@ expression: response
         "end": {
           "line": 4,
           "character": 12
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 4
+        },
+        "end": {
+          "line": 10,
+          "character": 9
         }
       },
       "severity": 2,

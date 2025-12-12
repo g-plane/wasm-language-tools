@@ -276,8 +276,8 @@ pub enum FlowNodeKind {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BasicBlock {
-    pub first: SyntaxNodePtr,
-    pub last: SyntaxNodePtr,
+    first: SyntaxNodePtr,
+    last: SyntaxNodePtr,
 }
 impl BasicBlock {
     pub fn instrs(&self, root: &SyntaxNode) -> BasicBlockInstrs {
