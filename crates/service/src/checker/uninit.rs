@@ -84,7 +84,7 @@ pub fn check(
                         source: Some("wat".into()),
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                         message: format!(
-                            "local `{}` is used before being initialized",
+                            "local `{}` is read before being initialized",
                             symbol.idx.render(service),
                         ),
                         ..Default::default()

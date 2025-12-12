@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "uninit",
       "source": "wat",
-      "message": "local `0` is used before being initialized"
+      "message": "local `0` is read before being initialized"
     },
     {
       "range": {
@@ -35,7 +35,7 @@ expression: response
       "severity": 1,
       "code": "uninit",
       "source": "wat",
-      "message": "local `1` is used before being initialized"
+      "message": "local `1` is read before being initialized"
     }
   ]
 }
