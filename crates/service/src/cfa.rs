@@ -22,8 +22,8 @@ struct Builder<'db> {
     graph: Graph<FlowNode, ()>,
     block_stack: Vec<(NodeIndex, Option<InternIdent<'db>>)>,
     current: Option<NodeIndex>,
-    bb_first: Option<SyntaxNode>,
-    bb_last: Option<SyntaxNode>,
+    bb_first: Option<SyntaxNodePtr>,
+    bb_last: Option<SyntaxNodePtr>,
     unreachable: bool,
 }
 impl<'db> Builder<'db> {
@@ -66,9 +66,9 @@ impl<'db> Builder<'db> {
                 self.visit_instrs(plain.syntax());
 
                 if self.bb_first.is_none() {
-                    self.bb_first = Some(plain.syntax().clone());
+                    self.bb_first = Some(SyntaxNodePtr::new(plain.syntax()));
                 }
-                self.bb_last = Some(plain.syntax().clone());
+                self.bb_last = Some(SyntaxNodePtr::new(plain.syntax()));
 
                 let unreachable = match plain.instr_name().as_ref().map(|token| token.text()) {
                     Some("unreachable" | "throw" | "throw_ref") => {
@@ -192,10 +192,7 @@ impl<'db> Builder<'db> {
             .zip(self.bb_last.take())
             .map(|(first, last)| {
                 let bb = self.graph.add_node(FlowNode {
-                    kind: FlowNodeKind::BasicBlock(BasicBlock {
-                        first: SyntaxNodePtr::new(&first),
-                        last: SyntaxNodePtr::new(&last),
-                    }),
+                    kind: FlowNodeKind::BasicBlock(BasicBlock { first, last }),
                     unreachable: self.unreachable,
                 });
                 self.connect_current_to(bb);
@@ -294,8 +291,8 @@ pub struct BasicBlockInstrs {
 impl Iterator for BasicBlockInstrs {
     type Item = SyntaxNode;
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(next) = self.next.clone() {
-            if next == self.last {
+        if let Some(next) = &self.next {
+            if next == &self.last {
                 self.next.take()
             } else if let Some(sibling) = next
                 .next_sibling()
