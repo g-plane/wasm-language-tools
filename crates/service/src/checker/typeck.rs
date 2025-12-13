@@ -442,7 +442,12 @@ impl<'db> TypeStack<'db> {
                 expected.iter().map(|ty| ty.render(self.service)).join(", ")
             );
             let received_types = format!(
-                "[{}]",
+                "[{}{}]",
+                if self.stack.len() > pops.len() {
+                    "... "
+                } else {
+                    ""
+                },
                 pops.iter()
                     .map(|(ty, _)| ty.render(self.service))
                     .join(", ")

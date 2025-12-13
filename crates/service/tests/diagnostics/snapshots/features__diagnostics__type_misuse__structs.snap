@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected types [(ref null $func)], found [(ref $struct)]",
+      "message": "expected types [(ref null $func)], found [... (ref $struct)]",
       "relatedInformation": [
         {
           "location": {
