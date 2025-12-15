@@ -294,11 +294,16 @@ impl Iterator for BasicBlockInstrs {
         if let Some(next) = &self.next {
             if next == &self.last {
                 self.next.take()
-            } else if let Some(sibling) = next
+            } else if let Some(mut node) = next
                 .next_sibling()
                 .filter(|sibling| sibling.kind() == SyntaxKind::PLAIN_INSTR)
             {
-                self.next.replace(sibling)
+                while let Some(child) =
+                    node.first_child_by_kind(&|kind| kind == SyntaxKind::PLAIN_INSTR)
+                {
+                    node = child;
+                }
+                self.next.replace(node)
             } else if let Some(parent) = next
                 .parent()
                 .filter(|parent| parent.kind() == SyntaxKind::PLAIN_INSTR)

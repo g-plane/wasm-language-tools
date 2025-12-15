@@ -1,0 +1,73 @@
+---
+source: crates/service/tests/diagnostics/unread.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 14
+        },
+        "end": {
+          "line": 4,
+          "character": 15
+        }
+      },
+      "severity": 2,
+      "code": "unread",
+      "source": "wat",
+      "message": "local `0` is set but never read"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 16
+        },
+        "end": {
+          "line": 13,
+          "character": 17
+        }
+      },
+      "severity": 2,
+      "code": "unread",
+      "source": "wat",
+      "message": "local `0` is set but never read"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 19,
+          "character": 15
+        },
+        "end": {
+          "line": 19,
+          "character": 16
+        }
+      },
+      "severity": 2,
+      "code": "unread",
+      "source": "wat",
+      "message": "local `0` is set but never read"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 31,
+          "character": 23
+        },
+        "end": {
+          "line": 31,
+          "character": 24
+        }
+      },
+      "severity": 2,
+      "code": "unread",
+      "source": "wat",
+      "message": "local `0` is set but never read"
+    }
+  ]
+}

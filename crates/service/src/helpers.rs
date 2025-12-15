@@ -179,3 +179,30 @@ pub(crate) mod ast {
             })
     }
 }
+
+pub(crate) mod locals {
+    use super::*;
+    use crate::{
+        binder::{SymbolKind, SymbolTable},
+        document::Document,
+    };
+
+    pub fn find_local_def_idx(instr: &SyntaxNode, symbol_table: &SymbolTable) -> Option<u32> {
+        instr
+            .first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
+            .and_then(|immediate| symbol_table.find_def(SymbolKey::new(&immediate)))
+            .and_then(|def| def.idx.num)
+    }
+
+    #[salsa::tracked]
+    pub fn has_locals<'db>(
+        db: &'db dyn salsa::Database,
+        document: Document,
+        func_key: SymbolKey,
+    ) -> bool {
+        SymbolTable::of(db, document)
+            .symbols
+            .values()
+            .any(|symbol| symbol.region == func_key && symbol.kind == SymbolKind::Local)
+    }
+}

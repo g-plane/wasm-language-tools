@@ -32,6 +32,7 @@ mod undef;
 mod uninit;
 mod unknown_instr;
 mod unreachable;
+mod unread;
 mod unused;
 mod useless_catch;
 
@@ -51,6 +52,7 @@ fn calm(service: &mut LanguageService, uri: &str) {
         Some(ServiceConfig {
             lint: Lints {
                 unused: LintLevel::Allow,
+                unread: LintLevel::Allow,
                 unreachable: LintLevel::Allow,
                 needless_mut: LintLevel::Allow,
                 needless_try_table: LintLevel::Allow,

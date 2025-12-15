@@ -30,6 +30,7 @@ mod undef;
 mod uninit;
 mod unknown_instr;
 mod unreachable;
+mod unread;
 mod unused;
 mod useless_catch;
 
@@ -89,6 +90,16 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                     &mut diagnostics,
                     service,
                     document,
+                    line_index,
+                    &root,
+                    symbol_table,
+                    &node,
+                );
+                unread::check(
+                    &mut diagnostics,
+                    service,
+                    document,
+                    config.lint.unread,
                     line_index,
                     &root,
                     symbol_table,

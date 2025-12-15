@@ -2,30 +2,39 @@ use crate::{
     LanguageService,
     binder::{Symbol, SymbolKey, SymbolKind, SymbolTable},
     cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeKind},
+    config::LintLevel,
     document::Document,
     helpers,
     idx::Idx,
-    types_analyzer,
 };
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use petgraph::graph::NodeIndex;
 use rowan::ast::{SyntaxNodePtr, support};
-use rustc_hash::{FxHashMap, FxHashSet};
-use std::cell::RefCell;
+use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
+use std::{cell::RefCell, rc::Rc};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
-const DIAGNOSTIC_CODE: &str = "uninit";
+const DIAGNOSTIC_CODE: &str = "unread";
 
+#[expect(clippy::too_many_arguments)]
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     service: &LanguageService,
     document: Document,
+    lint_level: LintLevel,
     line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) {
+    let severity = match lint_level {
+        LintLevel::Allow => return,
+        LintLevel::Hint => DiagnosticSeverity::Hint,
+        LintLevel::Warn => DiagnosticSeverity::Warning,
+        LintLevel::Deny => DiagnosticSeverity::Error,
+    };
+
     // avoid expensive analysis if there are no locals
     if !helpers::locals::has_locals(service, document, SymbolKey::new(node)) {
         return;
@@ -61,21 +70,21 @@ pub fn check(
             unreachable: false,
         }) = cfg.graph.node_weight(node_index)
             && let Some(vars) = block_vars.get(&node_index)
-            && let Ok(mut vars) = vars.try_borrow_mut()
+            && let Ok(vars) = vars.try_borrow()
         {
             diagnostics.extend(
-                detect_uninit(bb, &mut vars, service, document, root, symbol_table)
+                detect_unread(bb, &vars, root, symbol_table)
                     .filter_map(|immediate| symbol_table.symbols.get(&SymbolKey::new(&immediate)))
                     .map(|symbol| Diagnostic {
                         range: helpers::rowan_range_to_lsp_range(
                             line_index,
                             symbol.key.text_range(),
                         ),
-                        severity: Some(DiagnosticSeverity::Error),
+                        severity: Some(severity),
                         source: Some("wat".into()),
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                         message: format!(
-                            "local `{}` is read before being initialized",
+                            "local `{}` is set but never read",
                             symbol.idx.render(service),
                         ),
                         ..Default::default()
@@ -96,34 +105,32 @@ fn hydrate_block_vars(
             let Ok(mut vars) = vars.try_borrow_mut() else {
                 return;
             };
-            let incomings = cfg
-                .graph
-                .neighbors_directed(*node_index, petgraph::Direction::Incoming)
+            let kills = Rc::clone(&vars.kills);
+            cfg.graph
+                .neighbors_directed(*node_index, petgraph::Direction::Outgoing)
                 .filter_map(|node_index| block_vars.get(&node_index))
-                .filter_map(|vars| vars.try_borrow().ok())
-                .collect::<Vec<_>>();
-            if let Some((first, rest)) = incomings.split_first() {
-                first
-                    .out_set
-                    .iter()
-                    .filter(|idx| rest.iter().all(|other| other.out_set.contains(idx)))
-                    .for_each(|idx| {
-                        changed |= vars.in_set.insert(*idx) || vars.out_set.insert(*idx);
+                .filter_map(|outgoing| outgoing.try_borrow().ok())
+                .for_each(|outgoing| {
+                    outgoing.in_gens.iter().for_each(|idx| {
+                        if !kills.contains(idx) {
+                            changed |= vars.in_gens.insert(*idx);
+                        }
+                        changed |= vars.out_gens.insert(*idx);
                     });
-            }
+                });
         });
     }
 }
 
-fn detect_uninit(
+fn detect_unread(
     bb: &BasicBlock,
-    vars: &mut BlockVars,
-    db: &dyn salsa::Database,
-    document: Document,
+    vars: &BlockVars,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
 ) -> impl Iterator<Item = SyntaxNode> {
-    bb.instrs(root).filter_map(move |instr| {
+    let mut sets =
+        FxHashMap::<_, Vec<_>>::with_capacity_and_hasher(vars.kills.len(), FxBuildHasher);
+    bb.instrs(root).for_each(|instr| {
         match support::token(&instr, SyntaxKind::INSTR_NAME)
             .as_ref()
             .map(|token| token.text())
@@ -134,47 +141,72 @@ fn detect_uninit(
                     && let Some(Symbol {
                         idx: Idx { num: Some(num), .. },
                         kind: SymbolKind::Local,
-                        green,
                         ..
                     }) = symbol_table.find_def(SymbolKey::new(&immediate))
-                    && types_analyzer::extract_type(db, document, green.clone())
-                        .is_some_and(|ty| !ty.defaultable())
-                    && !vars.in_set.contains(num)
+                    && let Some(last) = sets.get_mut(num).and_then(|sets| sets.last_mut())
                 {
-                    Some(immediate)
-                } else {
-                    None
+                    *last = None;
                 }
             }
             Some("local.set" | "local.tee") => {
-                if let Some(idx) = helpers::locals::find_local_def_idx(&instr, symbol_table) {
-                    vars.in_set.insert(idx);
+                if let Some(immediate) =
+                    instr.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
+                    && let Some(Symbol {
+                        idx: Idx { num: Some(num), .. },
+                        kind: SymbolKind::Local,
+                        ..
+                    }) = symbol_table.find_def(SymbolKey::new(&immediate))
+                {
+                    sets.entry(*num)
+                        .or_insert_with(|| Vec::with_capacity(1))
+                        .push(Some(immediate));
                 }
-                None
             }
-            _ => None,
+            _ => {}
         }
-    })
+    });
+    vars.out_gens.iter().for_each(|idx| {
+        if let Some(last) = sets.get_mut(idx).and_then(|sets| sets.last_mut()) {
+            *last = None;
+        }
+    });
+    sets.into_values().flatten().flatten()
 }
 
 #[derive(Default)]
 struct BlockVars {
-    in_set: FxHashSet<u32>,
-    out_set: FxHashSet<u32>,
+    in_gens: FxHashSet<u32>,
+    out_gens: FxHashSet<u32>,
+    kills: Rc<FxHashSet<u32>>,
 }
 impl BlockVars {
     fn new(bb: &BasicBlock, root: &SyntaxNode, symbol_table: &SymbolTable) -> Self {
-        let out_set = bb
-            .instrs(root)
-            .filter_map(|instr| {
-                support::token(&instr, SyntaxKind::INSTR_NAME)
-                    .filter(|token| matches!(token.text(), "local.set" | "local.tee"))
-                    .and_then(|_| helpers::locals::find_local_def_idx(&instr, symbol_table))
-            })
-            .collect();
+        let mut gens = FxHashSet::default();
+        let mut kills = FxHashSet::default();
+        bb.instrs(root).for_each(|instr| {
+            match support::token(&instr, SyntaxKind::INSTR_NAME)
+                .as_ref()
+                .map(|token| token.text())
+            {
+                Some("local.get") => {
+                    if let Some(idx) = helpers::locals::find_local_def_idx(&instr, symbol_table)
+                        && !kills.contains(&idx)
+                    {
+                        gens.insert(idx);
+                    }
+                }
+                Some("local.set" | "local.tee") => {
+                    if let Some(idx) = helpers::locals::find_local_def_idx(&instr, symbol_table) {
+                        kills.insert(idx);
+                    }
+                }
+                _ => {}
+            }
+        });
         Self {
-            in_set: FxHashSet::default(),
-            out_set,
+            in_gens: gens.clone(),
+            out_gens: gens,
+            kills: Rc::new(kills),
         }
     }
 }

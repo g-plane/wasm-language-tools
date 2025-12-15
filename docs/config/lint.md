@@ -37,6 +37,20 @@ then you can add an underscore prefix to the identifier:
 
 So they won't be reported as unused.
 
+## `unread`
+
+> default: `"warn"`
+
+This lint reports function locals that are set with new values but never read afterwards.
+
+```wasm warning-3-16-3-17
+(module
+  (func (result i32) (local i32)
+    (local.set 0 (i32.const 1))
+    (local.set 0 (i32.const 2))
+    (local.get 0)))
+```
+
 ## `shadow`
 
 > default: `"warn"`

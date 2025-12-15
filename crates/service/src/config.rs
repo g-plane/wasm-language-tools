@@ -22,6 +22,9 @@ pub struct Lints {
     /// Lint for detecting unused items.
     pub unused: LintLevel,
 
+    /// Lint for detecting unread locals.
+    pub unread: LintLevel,
+
     /// Lint for detecting shadowing.
     pub shadow: LintLevel,
 
@@ -56,6 +59,7 @@ impl Default for Lints {
     fn default() -> Self {
         Self {
             unused: LintLevel::Warn,
+            unread: LintLevel::Warn,
             shadow: LintLevel::Warn,
             implicit_module: LintLevel::Allow,
             multi_modules: LintLevel::Deny,

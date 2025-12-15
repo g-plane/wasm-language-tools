@@ -1,0 +1,169 @@
+---
+source: crates/service/tests/diagnostics/unread.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 14
+        },
+        "end": {
+          "line": 4,
+          "character": 15
+        }
+      },
+      "severity": 2,
+      "code": "unread",
+      "source": "wat",
+      "message": "local `0` is set but never read"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 14
+        },
+        "end": {
+          "line": 7,
+          "character": 16
+        }
+      },
+      "severity": 2,
+      "code": "unread",
+      "source": "wat",
+      "message": "local `$x` is set but never read"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 12,
+          "character": 21
+        },
+        "end": {
+          "line": 12,
+          "character": 22
+        }
+      },
+      "severity": 2,
+      "code": "unread",
+      "source": "wat",
+      "message": "local `0` is set but never read"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 17,
+          "character": 14
+        },
+        "end": {
+          "line": 17,
+          "character": 15
+        }
+      },
+      "severity": 2,
+      "code": "unread",
+      "source": "wat",
+      "message": "local `0` is set but never read"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 18,
+          "character": 14
+        },
+        "end": {
+          "line": 18,
+          "character": 15
+        }
+      },
+      "severity": 2,
+      "code": "unread",
+      "source": "wat",
+      "message": "local `0` is set but never read"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 24,
+          "character": 14
+        },
+        "end": {
+          "line": 24,
+          "character": 15
+        }
+      },
+      "severity": 2,
+      "code": "unread",
+      "source": "wat",
+      "message": "local `0` is set but never read"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 28,
+          "character": 14
+        },
+        "end": {
+          "line": 28,
+          "character": 15
+        }
+      },
+      "severity": 2,
+      "code": "unread",
+      "source": "wat",
+      "message": "local `0` is set but never read"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 34,
+          "character": 14
+        },
+        "end": {
+          "line": 34,
+          "character": 15
+        }
+      },
+      "severity": 2,
+      "code": "unread",
+      "source": "wat",
+      "message": "local `0` is set but never read"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 41,
+          "character": 14
+        },
+        "end": {
+          "line": 41,
+          "character": 16
+        }
+      },
+      "severity": 2,
+      "code": "unread",
+      "source": "wat",
+      "message": "local `$x` is set but never read"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 49,
+          "character": 14
+        },
+        "end": {
+          "line": 49,
+          "character": 15
+        }
+      },
+      "severity": 2,
+      "code": "unread",
+      "source": "wat",
+      "message": "local `0` is set but never read"
+    }
+  ]
+}
