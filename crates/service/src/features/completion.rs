@@ -100,7 +100,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                     ) | None
                 )
             {
-                ctx.push(CmpCtx::Instr);
+                ctx.push(CmpCtx::Instr(false));
             }
         }
         SyntaxKind::TYPE_DEF => {
@@ -110,7 +110,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         SyntaxKind::PLAIN_INSTR => {
             if token.kind() == SyntaxKind::INSTR_NAME {
-                ctx.push(CmpCtx::Instr);
+                ctx.push(CmpCtx::Instr(is_under_const(&parent)));
                 if let (Some(grand), false) = (parent.parent(), token.text().contains('.')) {
                     match grand.kind() {
                         SyntaxKind::MODULE_FIELD_FUNC => {
@@ -235,7 +235,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                     add_cmp_ctx_for_immediates(instr_name.text(), &prev, false, &mut ctx);
                 }
             } else if has_leading_l_paren(token) {
-                ctx.push(CmpCtx::Instr);
+                ctx.push(CmpCtx::Instr(is_under_const(&parent)));
                 if let Some(instr_name) = support::token(&parent, SyntaxKind::INSTR_NAME) {
                     add_cmp_ctx_for_immediates(instr_name.text(), &parent, true, &mut ctx);
                 }
@@ -281,7 +281,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                     }
                     _ => {}
                 }
-                ctx.push(CmpCtx::Instr);
+                ctx.push(CmpCtx::Instr(false));
             } else if let Some(node) = token
                 .siblings_with_tokens(Direction::Prev)
                 .find_map(|node_or_token| node_or_token.into_node())
@@ -330,7 +330,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 .children()
                 .any(|node| node.kind() == SyntaxKind::GLOBAL_TYPE)
             {
-                ctx.push(CmpCtx::Instr);
+                ctx.push(CmpCtx::Instr(true));
             } else if has_leading_l_paren(token) {
                 ctx.extend([
                     CmpCtx::KeywordMut,
@@ -351,7 +351,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 .and_then(|table_type| table_type.ref_type())
                 .is_some()
             {
-                ctx.push(CmpCtx::Instr);
+                ctx.push(CmpCtx::Instr(true));
             } else if has_leading_l_paren(token) {
                 ctx.extend([CmpCtx::KeywordImExport, CmpCtx::KeywordElem]);
             } else {
@@ -371,7 +371,11 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         SyntaxKind::EXTERN_TYPE_MEMORY => ctx.push(CmpCtx::AddrType),
         SyntaxKind::MODULE_FIELD_DATA => {
             if has_leading_l_paren(token) {
-                ctx.extend([CmpCtx::KeywordMemory, CmpCtx::KeywordOffset, CmpCtx::Instr]);
+                ctx.extend([
+                    CmpCtx::KeywordMemory,
+                    CmpCtx::KeywordOffset,
+                    CmpCtx::Instr(true),
+                ]);
             }
         }
         SyntaxKind::MODULE_FIELD_ELEM => {
@@ -385,7 +389,11 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 {
                     ctx.push(CmpCtx::KeywordTable);
                 }
-                ctx.extend([CmpCtx::KeywordOffset, CmpCtx::KeywordItem, CmpCtx::Instr]);
+                ctx.extend([
+                    CmpCtx::KeywordOffset,
+                    CmpCtx::KeywordItem,
+                    CmpCtx::Instr(true),
+                ]);
             } else if parent
                 .first_child_by_kind(&|kind| kind == SyntaxKind::ELEM_LIST)
                 .and_then(|elem_list| support::token(&elem_list, SyntaxKind::KEYWORD))
@@ -433,15 +441,15 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         SyntaxKind::ELEM => {
             if has_leading_l_paren(token) {
-                ctx.extend([CmpCtx::Instr, CmpCtx::KeywordItem]);
+                ctx.extend([CmpCtx::Instr(true), CmpCtx::KeywordItem]);
             } else {
                 ctx.push(CmpCtx::Func);
             }
         }
-        SyntaxKind::ELEM_EXPR | SyntaxKind::OFFSET => ctx.push(CmpCtx::Instr),
+        SyntaxKind::ELEM_EXPR | SyntaxKind::OFFSET => ctx.push(CmpCtx::Instr(true)),
         SyntaxKind::ELEM_LIST => {
             if has_leading_l_paren(token) {
-                ctx.extend([CmpCtx::KeywordItem, CmpCtx::Instr]);
+                ctx.extend([CmpCtx::KeywordItem, CmpCtx::Instr(true)]);
             } else if token
                 .siblings_with_tokens(Direction::Prev)
                 .any(|element| match element {
@@ -652,7 +660,7 @@ fn add_cmp_ctx_for_immediates(
 }
 
 enum CmpCtx {
-    Instr,
+    Instr(bool),
     NumTypeVecType,
     AbbrRefType,
     Local,
@@ -714,11 +722,15 @@ fn get_cmp_list(
     ctx.into_iter()
         .fold(Vec::with_capacity(2), |mut items, ctx| {
             match ctx {
-                CmpCtx::Instr => {
+                CmpCtx::Instr(const_only) => {
+                    let instrs = if const_only {
+                        data_set::CONST_INSTRS.iter()
+                    } else {
+                        data_set::INSTR_NAMES.iter()
+                    };
                     if let Some((left, _)) = token.text().split_once('.') {
                         items.extend(
-                            data_set::INSTR_NAMES
-                                .iter()
+                            instrs
                                 .filter_map(|name| {
                                     name.strip_prefix(left).and_then(|s| s.strip_prefix('.'))
                                 })
@@ -729,7 +741,7 @@ fn get_cmp_list(
                                 }),
                         );
                     } else {
-                        items.extend(data_set::INSTR_NAMES.iter().map(|name| CompletionItem {
+                        items.extend(instrs.map(|name| CompletionItem {
                             label: name.to_string(),
                             kind: Some(CompletionItemKind::Operator),
                             ..Default::default()
@@ -1486,4 +1498,20 @@ fn guess_preferred_type<'db>(
                 None
             }
         })
+}
+
+fn is_under_const(node: &SyntaxNode) -> bool {
+    node.ancestors().any(|ancestor| {
+        matches!(
+            ancestor.kind(),
+            SyntaxKind::MODULE_FIELD_GLOBAL
+                | SyntaxKind::OFFSET
+                | SyntaxKind::ELEM_EXPR
+                | SyntaxKind::ELEM
+                | SyntaxKind::ELEM_LIST
+                | SyntaxKind::MODULE_FIELD_TABLE
+                | SyntaxKind::MODULE_FIELD_DATA
+                | SyntaxKind::MODULE_FIELD_ELEM
+        )
+    })
 }

@@ -501,6 +501,31 @@ pub(crate) static INSTR_NAMES: [&str; 496] = [
     "i32x4.relaxed_dot_i8x16_i7x16_add_s",
 ];
 
+pub(crate) static CONST_INSTRS: [&str; 22] = [
+    "i32.const",
+    "i64.const",
+    "f32.const",
+    "f64.const",
+    "i32.add",
+    "i32.sub",
+    "i32.mul",
+    "i64.add",
+    "i64.sub",
+    "i64.mul",
+    "global.get",
+    "v128.const",
+    "ref.null",
+    "ref.i31",
+    "ref.func",
+    "struct.new",
+    "struct.new_default",
+    "array.new",
+    "array.new_default",
+    "array.new_fixed",
+    "any.convert_extern",
+    "extern.convert_any",
+];
+
 pub(crate) static MODULE_FIELDS: [&str; 12] = [
     "func", "type", "import", "table", "memory", "global", "export", "start", "elem", "data",
     "rec", "tag",

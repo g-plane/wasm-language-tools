@@ -1,4 +1,4 @@
-use crate::helpers;
+use crate::{data_set::CONST_INSTRS, helpers};
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, Range, Union2};
 use rowan::ast::AstNode;
@@ -14,19 +14,9 @@ pub fn check(line_index: &LineIndex, node: &SyntaxNode) -> Option<Diagnostic> {
         .last()?;
     if node.descendants().filter_map(Instr::cast).all(|instr| {
         if let Instr::Plain(plain) = instr {
-            plain.instr_name().is_some_and(|instr_name| {
-                matches!(
-                    instr_name.text().split_once('.'),
-                    Some((_, "const"))
-                        | Some(("i32" | "i64", "add" | "sub" | "mul"))
-                        | Some(("global", "get"))
-                        | Some(("ref", "null" | "i31" | "func"))
-                        | Some(("struct" | "array", "new" | "new_default"))
-                        | Some(("array", "new_fixed"))
-                        | Some(("any", "convert_extern"))
-                        | Some(("extern", "convert_any"))
-                )
-            })
+            plain
+                .instr_name()
+                .is_some_and(|instr_name| CONST_INSTRS.contains(&instr_name.text()))
         } else {
             false
         }
