@@ -1,6 +1,6 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lspt::{Diagnostic, Position, Range, Union2};
+use lspt::{CodeActionKind, Diagnostic, Position, Range, Union2};
 use wat_service::LanguageService;
 
 fn create_params(uri: String, range: Range, token_range: Range) -> CodeActionParams {
@@ -13,7 +13,7 @@ fn create_params(uri: String, range: Range, token_range: Range) -> CodeActionPar
                 code: Some(Union2::B("needless-mut".into())),
                 ..Default::default()
             }],
-            only: None,
+            only: Some(vec![CodeActionKind::QuickFix]),
             trigger_kind: None,
         },
         work_done_token: Default::default(),
@@ -26,11 +26,11 @@ fn no_mut() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-  (global $a i32))
+  (global i32))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(super::create_params(uri, 2, 15, 2, 15));
+    let response = service.code_action(super::create_params(uri, 2, 12, 2, 12));
     assert!(response.is_none());
 }
 
@@ -39,11 +39,11 @@ fn no_diagnostics() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-  (global $a (mut i32)))
+  (global (mut i32)))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(super::create_params(uri, 2, 15, 2, 15));
+    let response = service.code_action(super::create_params(uri, 2, 17, 2, 17));
     assert!(response.is_none());
 }
 
@@ -120,7 +120,7 @@ fn unrelated_diagnostic() {
                 code: Some(Union2::B("global-mut".into())),
                 ..Default::default()
             }],
-            only: None,
+            only: Some(vec![CodeActionKind::QuickFix]),
             trigger_kind: None,
         },
         work_done_token: Default::default(),

@@ -83,7 +83,7 @@ pub fn check(
     );
 
     exports::get_exports(service, document)
-        .iter()
+        .values()
         .for_each(|exports| {
             diagnostics.extend(
                 exports

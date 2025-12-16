@@ -1,0 +1,29 @@
+---
+source: crates/service/tests/code_action/export_as.rs
+expression: response
+---
+[
+  {
+    "title": "Export as \"f\"",
+    "kind": "refactor",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 10
+              },
+              "end": {
+                "line": 2,
+                "character": 10
+              }
+            },
+            "newText": " (export \"f\")"
+          }
+        ]
+      }
+    }
+  }
+]

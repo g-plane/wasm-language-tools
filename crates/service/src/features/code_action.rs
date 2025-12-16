@@ -12,6 +12,7 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
 
         let mut quickfix = params.context.only.is_none();
+        let mut refactor = params.context.only.is_none();
         let mut rewrite = params.context.only.is_none();
         let mut inline = params.context.only.is_none();
         params
@@ -20,14 +21,12 @@ impl LanguageService {
             .iter()
             .flatten()
             .cloned()
-            .for_each(|kind| {
-                if kind == CodeActionKind::QuickFix {
-                    quickfix = true;
-                } else if kind == CodeActionKind::RefactorRewrite {
-                    rewrite = true;
-                } else if kind == CodeActionKind::RefactorInline {
-                    inline = true;
-                }
+            .for_each(|kind| match kind {
+                CodeActionKind::QuickFix => quickfix = true,
+                CodeActionKind::Refactor => refactor = true,
+                CodeActionKind::RefactorRewrite => rewrite = true,
+                CodeActionKind::RefactorInline => inline = true,
+                _ => {}
             });
 
         let mut actions = vec![];
@@ -45,6 +44,11 @@ impl LanguageService {
                             SyntaxKind::LOCAL,
                             range,
                         )
+                    {
+                        actions.push(action);
+                    }
+                    if refactor
+                        && let Some(action) = export_as::act(self, uri, document, line_index, &it)
                     {
                         actions.push(action);
                     }
@@ -149,6 +153,16 @@ impl LanguageService {
                     if quickfix
                         && let Some(action) =
                             fix_invalid_mem_arg::act(self, uri, line_index, &it, &params.context)
+                    {
+                        actions.push(action);
+                    }
+                }
+                SyntaxKind::MODULE_FIELD_GLOBAL
+                | SyntaxKind::MODULE_FIELD_MEMORY
+                | SyntaxKind::MODULE_FIELD_TABLE
+                | SyntaxKind::MODULE_FIELD_TAG => {
+                    if refactor
+                        && let Some(action) = export_as::act(self, uri, document, line_index, &it)
                     {
                         actions.push(action);
                     }

@@ -1,6 +1,7 @@
 use lspt::{CodeActionContext, CodeActionParams, Position, Range, TextDocumentIdentifier};
 
 mod br_if_to_if_br;
+mod export_as;
 mod fix_invalid_mem_arg;
 mod fix_packing;
 mod func_header_join;
