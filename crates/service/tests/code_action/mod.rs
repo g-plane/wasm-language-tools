@@ -12,6 +12,7 @@ mod if_br_to_br_if;
 mod inline_func_type;
 mod merge_to_return_call;
 mod remove_mut;
+mod simplify_ref_type;
 
 fn create_params(
     uri: String,
