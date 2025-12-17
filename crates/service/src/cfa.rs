@@ -283,6 +283,11 @@ impl BasicBlock {
             last: self.last.to_node(root),
         }
     }
+
+    pub fn contains_instr(&self, node: &SyntaxNode) -> bool {
+        let end = node.text_range().end();
+        self.first.text_range().start() < end && end <= self.last.text_range().end()
+    }
 }
 pub struct BasicBlockInstrs {
     next: Option<SyntaxNode>,

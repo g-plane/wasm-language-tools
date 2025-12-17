@@ -9,6 +9,7 @@ mod func_header_split;
 mod idx_conversion;
 mod if_br_to_br_if;
 mod inline_func_type;
+mod merge_to_return_call;
 mod remove_mut;
 
 fn create_params(

@@ -54,9 +54,20 @@ impl LanguageService {
                     }
                 }
                 SyntaxKind::PLAIN_INSTR => {
-                    if rewrite && let Some(action) = br_if_to_if_br::act(self, uri, line_index, &it)
-                    {
-                        actions.push(action);
+                    if rewrite {
+                        if let Some(action) = br_if_to_if_br::act(self, uri, line_index, &it) {
+                            actions.push(action);
+                        }
+                        if let Some(action) = merge_to_return_call::act(
+                            self,
+                            uri,
+                            document,
+                            line_index,
+                            symbol_table,
+                            &it,
+                        ) {
+                            actions.push(action);
+                        }
                     }
                 }
                 SyntaxKind::PARAM => {

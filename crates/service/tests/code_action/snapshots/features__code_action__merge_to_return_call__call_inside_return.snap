@@ -1,0 +1,68 @@
+---
+source: crates/service/tests/code_action/merge_to_return_call.rs
+expression: response
+---
+[
+  {
+    "title": "Merge `call` and `return` to `return_call`",
+    "kind": "refactor.rewrite",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 17
+              },
+              "end": {
+                "line": 2,
+                "character": 21
+              }
+            },
+            "newText": "return_call"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 8
+              },
+              "end": {
+                "line": 2,
+                "character": 9
+              }
+            },
+            "newText": ""
+          },
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 9
+              },
+              "end": {
+                "line": 2,
+                "character": 15
+              }
+            },
+            "newText": ""
+          },
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 24
+              },
+              "end": {
+                "line": 2,
+                "character": 25
+              }
+            },
+            "newText": ""
+          }
+        ]
+      }
+    }
+  }
+]

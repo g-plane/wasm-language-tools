@@ -36,7 +36,8 @@ fn no_name() {
     let source = "
 (module
   (func
-    (call 0)))
+    (call 0)
+    (nop)))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
@@ -50,7 +51,8 @@ fn ident_to_num() {
     let source = r#"
 (module
   (func $f (export "")
-    (call $f)))
+    (call $f)
+    (nop)))
 "#;
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
