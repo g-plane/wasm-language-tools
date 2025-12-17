@@ -1,4 +1,5 @@
 pub mod br_if_to_if_br;
+pub mod expand_ref_type;
 pub mod export_as;
 pub mod fix_invalid_mem_arg;
 pub mod fix_packing;

@@ -1,0 +1,29 @@
+---
+source: crates/service/tests/code_action/expand_ref_type.rs
+expression: response
+---
+[
+  {
+    "title": "Expand `externref`",
+    "kind": "refactor.rewrite",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 15
+              },
+              "end": {
+                "line": 2,
+                "character": 24
+              }
+            },
+            "newText": "(ref null extern)"
+          }
+        ]
+      }
+    }
+  }
+]

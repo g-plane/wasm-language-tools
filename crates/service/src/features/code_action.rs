@@ -178,6 +178,13 @@ impl LanguageService {
                         actions.push(action);
                     }
                 }
+                SyntaxKind::REF_TYPE => {
+                    if rewrite
+                        && let Some(action) = expand_ref_type::act(self, uri, line_index, &it)
+                    {
+                        actions.push(action);
+                    }
+                }
                 _ => {}
             }
             node = it;
