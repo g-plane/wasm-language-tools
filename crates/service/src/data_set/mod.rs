@@ -2,7 +2,7 @@ pub(crate) use instr_meta::*;
 
 mod instr_meta;
 
-pub(crate) static INSTR_NAMES: [&str; 496] = [
+pub(crate) static INSTR_NAMES: [&str; 500] = [
     "unreachable",
     "nop",
     "block",
@@ -243,6 +243,10 @@ pub(crate) static INSTR_NAMES: [&str; 496] = [
     "table.grow",
     "table.size",
     "table.fill",
+    "i64.add128",
+    "i64.sub128",
+    "i64.mul_wide_s",
+    "i64.mul_wide_u",
     "v128.load",
     "v128.load8x8_s",
     "v128.load8x8_u",

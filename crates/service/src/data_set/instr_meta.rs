@@ -3,7 +3,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::{collections::HashMap, sync::LazyLock};
 
 pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = LazyLock::new(|| {
-    let mut map = HashMap::with_capacity_and_hasher(452, FxBuildHasher);
+    let mut map = HashMap::with_capacity_and_hasher(456, FxBuildHasher);
     map.insert(
         "unreachable",
         ResolvedSig {
@@ -1695,6 +1695,62 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
                 OperandType::Val(ValType::I32),
             ],
             results: vec![],
+        },
+    );
+    map.insert(
+        "i64.add128",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::I64),
+                OperandType::Val(ValType::I64),
+                OperandType::Val(ValType::I64),
+                OperandType::Val(ValType::I64),
+            ],
+            results: vec![
+                OperandType::Val(ValType::I64),
+                OperandType::Val(ValType::I64),
+            ],
+        },
+    );
+    map.insert(
+        "i64.sub128",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::I64),
+                OperandType::Val(ValType::I64),
+                OperandType::Val(ValType::I64),
+                OperandType::Val(ValType::I64),
+            ],
+            results: vec![
+                OperandType::Val(ValType::I64),
+                OperandType::Val(ValType::I64),
+            ],
+        },
+    );
+    map.insert(
+        "i64.mul_wide_s",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::I64),
+                OperandType::Val(ValType::I64),
+            ],
+            results: vec![
+                OperandType::Val(ValType::I64),
+                OperandType::Val(ValType::I64),
+            ],
+        },
+    );
+    map.insert(
+        "i64.mul_wide_u",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::I64),
+                OperandType::Val(ValType::I64),
+            ],
+            results: vec![
+                OperandType::Val(ValType::I64),
+                OperandType::Val(ValType::I64),
+            ],
         },
     );
     map.insert(
@@ -3998,7 +4054,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
 });
 
 pub(crate) static INSTR_OP_CODES: LazyLock<FxHashMap<&'static str, u32>> = LazyLock::new(|| {
-    let mut map = HashMap::with_capacity_and_hasher(499, FxBuildHasher);
+    let mut map = HashMap::with_capacity_and_hasher(503, FxBuildHasher);
     map.insert("unreachable", 0x00);
     map.insert("nop", 0x01);
     map.insert("block", 0x02);
@@ -4242,6 +4298,10 @@ pub(crate) static INSTR_OP_CODES: LazyLock<FxHashMap<&'static str, u32>> = LazyL
     map.insert("table.grow", 0xFC0F);
     map.insert("table.size", 0xFC10);
     map.insert("table.fill", 0xFC11);
+    map.insert("i64.add128", 0xFC19);
+    map.insert("i64.sub128", 0xFC20);
+    map.insert("i64.mul_wide_s", 0xFC21);
+    map.insert("i64.mul_wide_u", 0xFC22);
     map.insert("v128.load", 0xFD00);
     map.insert("v128.load8x8_s", 0xFD01);
     map.insert("v128.load8x8_u", 0xFD02);

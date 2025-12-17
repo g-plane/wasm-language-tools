@@ -984,6 +984,22 @@ expression: response
     "kind": 24
   },
   {
+    "label": "i64.add128",
+    "kind": 24
+  },
+  {
+    "label": "i64.sub128",
+    "kind": 24
+  },
+  {
+    "label": "i64.mul_wide_s",
+    "kind": 24
+  },
+  {
+    "label": "i64.mul_wide_u",
+    "kind": 24
+  },
+  {
     "label": "v128.load",
     "kind": 24
   },
