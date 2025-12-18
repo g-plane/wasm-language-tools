@@ -10,4 +10,5 @@ source: crates/formatter/tests/parser.rs
   (func (export))
   (func (export $xx))
   (func (export "func
-      ")))
+      "))
+  (func (export "f3") (import "env" "f1")))

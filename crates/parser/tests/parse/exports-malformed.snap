@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..176
-  MODULE@0..175
+ROOT@0..219
+  MODULE@0..218
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -100,9 +100,33 @@ ROOT@0..176
         WHITESPACE@168..171 "\n  "
         R_PAREN@171..172 ")"
       R_PAREN@172..173 ")"
-    WHITESPACE@173..174 "\n"
-    R_PAREN@174..175 ")"
-  WHITESPACE@175..176 "\n"
+    WHITESPACE@173..176 "\n  "
+    MODULE_FIELD_FUNC@176..216
+      L_PAREN@176..177 "("
+      KEYWORD@177..181 "func"
+      WHITESPACE@181..182 " "
+      IMPORT@182..201
+        L_PAREN@182..183 "("
+        KEYWORD@183..189 "import"
+        WHITESPACE@189..190 " "
+        MODULE_NAME@190..195
+          STRING@190..195 "\"env\""
+        WHITESPACE@195..196 " "
+        NAME@196..200
+          STRING@196..200 "\"f1\""
+        R_PAREN@200..201 ")"
+      WHITESPACE@201..202 " "
+      EXPORT@202..215
+        L_PAREN@202..203 "("
+        KEYWORD@203..209 "export"
+        WHITESPACE@209..210 " "
+        NAME@210..214
+          STRING@210..214 "\"f3\""
+        R_PAREN@214..215 ")"
+      R_PAREN@215..216 ")"
+    WHITESPACE@216..217 "\n"
+    R_PAREN@217..218 ")"
+  WHITESPACE@218..219 "\n"
 
 error: expected export descriptor
   ┌─ exports-malformed.wat:2:14
@@ -187,3 +211,9 @@ error: expected export name
    │
 11 │   ))
    │   ^
+
+error: export must come before import
+   ┌─ exports-malformed.wat:12:30
+   │
+12 │   (func (import "env" "f1") (export "f3"))
+   │                              ^^^^^^

@@ -1082,12 +1082,12 @@ impl ModuleFieldFunc {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn import(&self) -> Option<Import> {
-        child(&self.syntax)
-    }
-    #[inline]
     pub fn exports(&self) -> AstChildren<Export> {
         children(&self.syntax)
+    }
+    #[inline]
+    pub fn import(&self) -> Option<Import> {
+        child(&self.syntax)
     }
     #[inline]
     pub fn type_use(&self) -> Option<TypeUse> {
@@ -1150,12 +1150,12 @@ impl ModuleFieldGlobal {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn import(&self) -> Option<Import> {
-        child(&self.syntax)
-    }
-    #[inline]
     pub fn exports(&self) -> AstChildren<Export> {
         children(&self.syntax)
+    }
+    #[inline]
+    pub fn import(&self) -> Option<Import> {
+        child(&self.syntax)
     }
     #[inline]
     pub fn global_type(&self) -> Option<GlobalType> {
@@ -1270,12 +1270,12 @@ impl ModuleFieldMemory {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn import(&self) -> Option<Import> {
-        child(&self.syntax)
-    }
-    #[inline]
     pub fn exports(&self) -> AstChildren<Export> {
         children(&self.syntax)
+    }
+    #[inline]
+    pub fn import(&self) -> Option<Import> {
+        child(&self.syntax)
     }
     #[inline]
     pub fn memory_type(&self) -> Option<MemoryType> {
@@ -1382,12 +1382,12 @@ impl ModuleFieldTable {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn import(&self) -> Option<Import> {
-        child(&self.syntax)
-    }
-    #[inline]
     pub fn exports(&self) -> AstChildren<Export> {
         children(&self.syntax)
+    }
+    #[inline]
+    pub fn import(&self) -> Option<Import> {
+        child(&self.syntax)
     }
     #[inline]
     pub fn table_type(&self) -> Option<TableType> {
@@ -1454,12 +1454,12 @@ impl ModuleFieldTag {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn import(&self) -> Option<Import> {
-        child(&self.syntax)
-    }
-    #[inline]
     pub fn exports(&self) -> AstChildren<Export> {
         children(&self.syntax)
+    }
+    #[inline]
+    pub fn import(&self) -> Option<Import> {
+        child(&self.syntax)
     }
     #[inline]
     pub fn type_use(&self) -> Option<TypeUse> {

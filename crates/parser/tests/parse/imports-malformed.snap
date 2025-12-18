@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..236
-  MODULE@0..235
+ROOT@0..285
+  MODULE@0..284
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -148,9 +148,36 @@ ROOT@0..236
           STRING@229..231 "\"\""
         R_PAREN@231..232 ")"
       R_PAREN@232..233 ")"
-    WHITESPACE@233..234 "\n"
-    R_PAREN@234..235 ")"
-  WHITESPACE@235..236 "\n"
+    WHITESPACE@233..236 "\n  "
+    MODULE_FIELD_FUNC@236..282
+      L_PAREN@236..237 "("
+      KEYWORD@237..241 "func"
+      WHITESPACE@241..242 " "
+      IMPORT@242..261
+        L_PAREN@242..243 "("
+        KEYWORD@243..249 "import"
+        WHITESPACE@249..250 " "
+        MODULE_NAME@250..255
+          STRING@250..255 "\"env\""
+        WHITESPACE@255..256 " "
+        NAME@256..260
+          STRING@256..260 "\"f1\""
+        R_PAREN@260..261 ")"
+      WHITESPACE@261..262 " "
+      IMPORT@262..281
+        L_PAREN@262..263 "("
+        KEYWORD@263..269 "import"
+        WHITESPACE@269..270 " "
+        MODULE_NAME@270..275
+          STRING@270..275 "\"env\""
+        WHITESPACE@275..276 " "
+        NAME@276..280
+          STRING@276..280 "\"f2\""
+        R_PAREN@280..281 ")"
+      R_PAREN@281..282 ")"
+    WHITESPACE@282..283 "\n"
+    R_PAREN@283..284 ")"
+  WHITESPACE@284..285 "\n"
 
 error: expected import module name
   ┌─ imports-malformed.wat:2:11
@@ -259,3 +286,9 @@ error: expected import name
    │
 12 │   (func (import ""))
    │                   ^
+
+error: only one import is allowed
+   ┌─ imports-malformed.wat:13:30
+   │
+13 │   (func (import "env" "f1") (import "env" "f2"))
+   │                              ^^^^^^
