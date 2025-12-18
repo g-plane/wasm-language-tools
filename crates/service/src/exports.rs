@@ -1,10 +1,11 @@
 use crate::{
     binder::{SymbolKey, SymbolTable},
     document::Document,
+    helpers,
 };
-use rowan::{TextRange, ast::AstNode};
+use rowan::TextRange;
 use rustc_hash::FxHashMap;
-use wat_syntax::{SyntaxKind, SyntaxNodePtr, ast::ExternIdx};
+use wat_syntax::{SyntaxKind, SyntaxNodePtr};
 
 #[salsa::tracked(returns(ref))]
 pub(crate) fn get_exports<'db>(
@@ -24,12 +25,7 @@ pub(crate) fn get_exports<'db>(
                         if module_field.kind() == SyntaxKind::MODULE_FIELD_EXPORT {
                             let name = module_field
                                 .first_child_by_kind(&|kind| kind == SyntaxKind::NAME)?;
-                            module_field
-                                .first_child_by_kind(&ExternIdx::can_cast)
-                                .and_then(|extern_idx| {
-                                    extern_idx
-                                        .first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
-                                })
+                            helpers::ast::extract_index_from_export(&module_field)
                                 .and_then(|index| {
                                     symbol_table.resolved.get(&SymbolKey::new(&index))
                                 })

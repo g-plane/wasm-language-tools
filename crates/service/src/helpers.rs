@@ -122,9 +122,12 @@ pub(crate) struct RenderWithDb<'db, T> {
 }
 
 pub(crate) mod ast {
-    use rowan::{Direction, TextSize, TokenAtOffset, ast::support};
+    use rowan::{
+        Direction, TextSize, TokenAtOffset,
+        ast::{AstNode, support},
+    };
     use std::ops::ControlFlow;
-    use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
+    use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, ast::ExternIdx};
 
     /// Pick the `$idx` part from `(func (type $idx) ...)`.
     /// It will return `None` if there're inlined params or results.
@@ -143,6 +146,14 @@ pub(crate) mod ast {
         } else {
             None
         }
+    }
+
+    pub fn extract_index_from_export(module_field_export: &SyntaxNode) -> Option<SyntaxNode> {
+        module_field_export
+            .first_child_by_kind(&ExternIdx::can_cast)
+            .and_then(|extern_idx| {
+                extern_idx.first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
+            })
     }
 
     pub fn is_call(node: &SyntaxNode) -> bool {

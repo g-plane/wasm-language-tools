@@ -1,0 +1,42 @@
+---
+source: crates/service/tests/code_action/inline_export.rs
+expression: response
+---
+[
+  {
+    "title": "Inline export",
+    "kind": "refactor.inline",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 2
+              },
+              "end": {
+                "line": 3,
+                "character": 24
+              }
+            },
+            "newText": ""
+          },
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 9
+              },
+              "end": {
+                "line": 2,
+                "character": 9
+              }
+            },
+            "newText": " (export \"\")"
+          }
+        ]
+      }
+    }
+  }
+]

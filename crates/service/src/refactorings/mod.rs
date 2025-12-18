@@ -8,6 +8,7 @@ pub mod func_header_join;
 pub mod func_header_split;
 pub mod idx_conversion;
 pub mod if_br_to_br_if;
+pub mod inline_export;
 pub mod inline_func_type;
 pub mod merge_to_return_call;
 pub mod remove_mut;

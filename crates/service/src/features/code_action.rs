@@ -198,6 +198,14 @@ impl LanguageService {
                         actions.push(action);
                     }
                 }
+                SyntaxKind::MODULE_FIELD_EXPORT => {
+                    if inline
+                        && let Some(action) =
+                            inline_export::act(self, uri, line_index, &root, symbol_table, &it)
+                    {
+                        actions.push(action);
+                    }
+                }
                 _ => {}
             }
             node = it;
