@@ -24,9 +24,7 @@ pub fn act(
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) -> Option<CodeAction> {
-    let instr_name = node
-        .first_child_or_token_by_kind(&|kind| kind == SyntaxKind::INSTR_NAME)?
-        .into_token()?;
+    let instr_name = support::token(node, SyntaxKind::INSTR_NAME)?;
     let (call_instr, return_instr) = match instr_name.text() {
         "call" => {
             if node

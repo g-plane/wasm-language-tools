@@ -3,7 +3,7 @@ use crate::{
 };
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
-use rowan::TextRange;
+use rowan::{TextRange, ast::support};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr};
 
@@ -15,9 +15,7 @@ pub fn act(
     node: &SyntaxNode,
 ) -> Option<CodeAction> {
     let def_key = SymbolKey::new(node);
-    let ident = node
-        .first_child_or_token_by_kind(&|kind| kind == SyntaxKind::IDENT)?
-        .into_token()?;
+    let ident = support::token(node, SyntaxKind::IDENT)?;
     let module = node.parent()?;
     let exports = exports::get_exports(service, document);
     if exports
