@@ -1,0 +1,42 @@
+---
+source: crates/service/tests/code_action/extract_export.rs
+expression: response
+---
+[
+  {
+    "title": "Extract export as a module field",
+    "kind": "refactor.extract",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 10
+              },
+              "end": {
+                "line": 2,
+                "character": 22
+              }
+            },
+            "newText": ""
+          },
+          {
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 8
+              },
+              "end": {
+                "line": 3,
+                "character": 8
+              }
+            },
+            "newText": "\n  (export \"g\" (global 0))"
+          }
+        ]
+      }
+    }
+  }
+]

@@ -15,6 +15,7 @@ impl LanguageService {
         let mut refactor = params.context.only.is_none();
         let mut rewrite = params.context.only.is_none();
         let mut inline = params.context.only.is_none();
+        let mut extract = params.context.only.is_none();
         params
             .context
             .only
@@ -26,6 +27,7 @@ impl LanguageService {
                 CodeActionKind::Refactor => refactor = true,
                 CodeActionKind::RefactorRewrite => rewrite = true,
                 CodeActionKind::RefactorInline => inline = true,
+                CodeActionKind::RefactorExtract => extract = true,
                 _ => {}
             });
 
@@ -186,6 +188,14 @@ impl LanguageService {
                         if let Some(action) = simplify_ref_type::act(self, uri, line_index, &it) {
                             actions.push(action);
                         }
+                    }
+                }
+                SyntaxKind::EXPORT => {
+                    if extract
+                        && let Some(action) =
+                            extract_export::act(self, uri, line_index, &root, symbol_table, &it)
+                    {
+                        actions.push(action);
                     }
                 }
                 _ => {}
