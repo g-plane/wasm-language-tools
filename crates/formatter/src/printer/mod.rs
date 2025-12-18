@@ -286,9 +286,11 @@ fn into_formattable_trivia(node_or_token: SyntaxElement) -> Option<SyntaxToken> 
             | SyntaxKind::ANNOT_ELEM
             | SyntaxKind::ANNOT_END => Some(token),
             SyntaxKind::WHITESPACE
-                if token
-                    .next_token()
-                    .is_none_or(|token| token.kind() != SyntaxKind::R_PAREN) =>
+                if token.next_token().is_none_or(|token| match token.kind() {
+                    SyntaxKind::R_PAREN => false,
+                    SyntaxKind::KEYWORD => token.text() != "end",
+                    _ => true,
+                }) =>
             {
                 Some(token)
             }

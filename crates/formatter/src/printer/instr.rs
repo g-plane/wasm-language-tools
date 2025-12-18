@@ -1,5 +1,6 @@
 use super::*;
 use rowan::ast::AstNode;
+use std::mem;
 use tiny_pretty::Doc;
 
 impl DocGen for BlockBlock {
@@ -48,11 +49,7 @@ impl DocGen for BlockBlock {
             docs.push(ctx.format_right_paren(self));
         } else {
             if let Some(keyword) = self.end_keyword() {
-                if trivias.is_empty() {
-                    docs.push(Doc::hard_line());
-                } else {
-                    docs.append(&mut trivias);
-                }
+                docs.push(Doc::hard_line());
                 docs.push(Doc::text("end"));
                 trivias = format_trivias_after_token(keyword, ctx);
             }
@@ -127,7 +124,7 @@ impl DocGen for BlockIf {
             docs.push(else_block.doc(ctx));
             trivias = format_trivias_after_node(else_block, ctx);
         }
-        docs.append(&mut trivias);
+        docs.push(Doc::list(mem::take(&mut trivias)).nest(ctx.indent_width));
         if self.r_paren_token().is_some() {
             Doc::list(docs)
                 .nest(ctx.indent_width)
@@ -135,11 +132,7 @@ impl DocGen for BlockIf {
                 .group()
         } else {
             if let Some(keyword) = self.end_keyword() {
-                if trivias.is_empty() {
-                    docs.push(Doc::hard_line());
-                } else {
-                    docs.append(&mut trivias);
-                }
+                docs.push(Doc::hard_line());
                 docs.push(Doc::text("end"));
                 trivias = format_trivias_after_token(keyword, ctx);
             }
@@ -295,11 +288,7 @@ impl DocGen for BlockLoop {
             docs.push(ctx.format_right_paren(self));
         } else {
             if let Some(keyword) = self.end_keyword() {
-                if trivias.is_empty() {
-                    docs.push(Doc::hard_line());
-                } else {
-                    docs.append(&mut trivias);
-                }
+                docs.push(Doc::hard_line());
                 docs.push(Doc::text("end"));
                 trivias = format_trivias_after_token(keyword, ctx);
             }
@@ -371,11 +360,7 @@ impl DocGen for BlockTryTable {
             docs.push(ctx.format_right_paren(self));
         } else {
             if let Some(keyword) = self.end_keyword() {
-                if trivias.is_empty() {
-                    docs.push(Doc::hard_line());
-                } else {
-                    docs.append(&mut trivias);
-                }
+                docs.push(Doc::hard_line());
                 docs.push(Doc::text("end"));
                 trivias = format_trivias_after_token(keyword, ctx);
             }
