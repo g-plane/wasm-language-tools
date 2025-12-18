@@ -1154,8 +1154,8 @@ impl ModuleFieldGlobal {
         child(&self.syntax)
     }
     #[inline]
-    pub fn export(&self) -> Option<Export> {
-        child(&self.syntax)
+    pub fn exports(&self) -> AstChildren<Export> {
+        children(&self.syntax)
     }
     #[inline]
     pub fn global_type(&self) -> Option<GlobalType> {
@@ -1274,8 +1274,8 @@ impl ModuleFieldMemory {
         child(&self.syntax)
     }
     #[inline]
-    pub fn export(&self) -> Option<Export> {
-        child(&self.syntax)
+    pub fn exports(&self) -> AstChildren<Export> {
+        children(&self.syntax)
     }
     #[inline]
     pub fn memory_type(&self) -> Option<MemoryType> {
@@ -1386,8 +1386,8 @@ impl ModuleFieldTable {
         child(&self.syntax)
     }
     #[inline]
-    pub fn export(&self) -> Option<Export> {
-        child(&self.syntax)
+    pub fn exports(&self) -> AstChildren<Export> {
+        children(&self.syntax)
     }
     #[inline]
     pub fn table_type(&self) -> Option<TableType> {
@@ -1458,8 +1458,8 @@ impl ModuleFieldTag {
         child(&self.syntax)
     }
     #[inline]
-    pub fn export(&self) -> Option<Export> {
-        child(&self.syntax)
+    pub fn exports(&self) -> AstChildren<Export> {
+        children(&self.syntax)
     }
     #[inline]
     pub fn type_use(&self) -> Option<TypeUse> {

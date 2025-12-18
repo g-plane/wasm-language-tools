@@ -36,7 +36,7 @@ pub(crate) fn get_mutabilities<'db>(
                             symbol.key,
                             Mutability {
                                 mut_keyword: range,
-                                cross_module: global.export().is_some(),
+                                cross_module: global.exports().count() > 0,
                             },
                         ))
                     }
