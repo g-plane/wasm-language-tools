@@ -586,15 +586,6 @@ impl DocGen for ModuleFieldFunc {
             docs.push(Doc::text(ident.to_string()));
             trivias = format_trivias_after_token(ident, ctx);
         }
-        if let Some(import) = self.import() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(import.doc(ctx));
-            trivias = format_trivias_after_node(import, ctx);
-        }
         self.exports().for_each(|export| {
             if trivias.is_empty() {
                 docs.push(Doc::space());
@@ -604,6 +595,15 @@ impl DocGen for ModuleFieldFunc {
             docs.push(export.doc(ctx));
             trivias = format_trivias_after_node(export, ctx);
         });
+        if let Some(import) = self.import() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(import.doc(ctx));
+            trivias = format_trivias_after_node(import, ctx);
+        }
         if let Some(type_use) = self.type_use() {
             if trivias.is_empty() {
                 if type_use.keyword().is_some() {
@@ -675,15 +675,6 @@ impl DocGen for ModuleFieldGlobal {
             docs.push(Doc::text(ident.to_string()));
             trivias = format_trivias_after_token(ident, ctx);
         }
-        if let Some(import) = self.import() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(import.doc(ctx));
-            trivias = format_trivias_after_node(import, ctx);
-        }
         self.exports().for_each(|export| {
             if trivias.is_empty() {
                 docs.push(Doc::space());
@@ -693,6 +684,15 @@ impl DocGen for ModuleFieldGlobal {
             docs.push(export.doc(ctx));
             trivias = format_trivias_after_node(export, ctx);
         });
+        if let Some(import) = self.import() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(import.doc(ctx));
+            trivias = format_trivias_after_node(import, ctx);
+        }
         if let Some(global_type) = self.global_type() {
             if trivias.is_empty() {
                 docs.push(Doc::space());
@@ -789,15 +789,6 @@ impl DocGen for ModuleFieldMemory {
             docs.push(Doc::text(ident.to_string()));
             trivias = format_trivias_after_token(ident, ctx);
         }
-        if let Some(import) = self.import() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(import.doc(ctx));
-            trivias = format_trivias_after_node(import, ctx);
-        }
         self.exports().for_each(|export| {
             if trivias.is_empty() {
                 docs.push(Doc::space());
@@ -807,6 +798,15 @@ impl DocGen for ModuleFieldMemory {
             docs.push(export.doc(ctx));
             trivias = format_trivias_after_node(export, ctx);
         });
+        if let Some(import) = self.import() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(import.doc(ctx));
+            trivias = format_trivias_after_node(import, ctx);
+        }
         if let Some(memory_type) = self.memory_type() {
             if trivias.is_empty() {
                 docs.push(Doc::space());
@@ -885,15 +885,6 @@ impl DocGen for ModuleFieldTable {
             docs.push(Doc::text(ident.to_string()));
             trivias = format_trivias_after_token(ident, ctx);
         }
-        if let Some(import) = self.import() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(import.doc(ctx));
-            trivias = format_trivias_after_node(import, ctx);
-        }
         self.exports().for_each(|export| {
             if trivias.is_empty() {
                 docs.push(Doc::space());
@@ -903,6 +894,15 @@ impl DocGen for ModuleFieldTable {
             docs.push(export.doc(ctx));
             trivias = format_trivias_after_node(export, ctx);
         });
+        if let Some(import) = self.import() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(import.doc(ctx));
+            trivias = format_trivias_after_node(import, ctx);
+        }
         if let Some(table_type) = self.table_type() {
             if trivias.is_empty() {
                 docs.push(Doc::space());
@@ -969,15 +969,6 @@ impl DocGen for ModuleFieldTag {
             docs.push(Doc::text(ident.to_string()));
             trivias = format_trivias_after_token(ident, ctx);
         }
-        if let Some(import) = self.import() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(import.doc(ctx));
-            trivias = format_trivias_after_node(import, ctx);
-        }
         self.exports().for_each(|export| {
             if trivias.is_empty() {
                 docs.push(Doc::space());
@@ -987,6 +978,15 @@ impl DocGen for ModuleFieldTag {
             docs.push(export.doc(ctx));
             trivias = format_trivias_after_node(export, ctx);
         });
+        if let Some(import) = self.import() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(import.doc(ctx));
+            trivias = format_trivias_after_node(import, ctx);
+        }
         if let Some(type_use) = self.type_use() {
             if trivias.is_empty() {
                 docs.push(Doc::space());

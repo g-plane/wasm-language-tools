@@ -8,9 +8,9 @@ source: crates/formatter/tests/parser.rs
   (import "spectest" "print_i32" (func $print_i32 (param i32)))
   (func $print_i32-2 (import "spectest" "print_i32") (param i32))
 
-  (func (import "spectest" "print_i32") (export "p1") (param i32))
-  (func $p (import "spectest" "print_i32") (export "p2") (param i32))
-  (func (import "spectest" "print_i32") (export "p3") (export "p4") (param i32))
+  (func (export "p1") (import "spectest" "print_i32") (param i32))
+  (func $p (export "p2") (import "spectest" "print_i32") (param i32))
+  (func (export "p3") (export "p4") (import "spectest" "print_i32") (param i32))
 
   (import "spectest" "print_i32" (func (type $forward)))
 
