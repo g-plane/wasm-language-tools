@@ -267,6 +267,19 @@ fn conditional() {
       local.get 0
       drop
     end)
+  (func (param i32) (local i32)
+    local.get 0
+    local.set 1
+    loop
+      local.get 0
+      if
+        local.get 0
+        local.set 1
+      else
+        local.get 1
+        drop
+      end
+    end)
 
   ;; valid
   (func (local i32)
@@ -306,7 +319,24 @@ fn conditional() {
           (else
             (br 2)))))
     (drop
-      (local.get 0))))
+      (local.get 0)))
+  (func (param i32) (local i32)
+    local.get 0
+    local.set 1
+    loop
+      local.get 0
+      if
+        local.get 0
+        local.set 1
+      else
+        local.get 1
+        drop
+      end
+      local.get 0
+      if
+        br 1
+      end
+    end))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
