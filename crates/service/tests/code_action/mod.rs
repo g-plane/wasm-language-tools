@@ -1,6 +1,7 @@
 use lspt::{CodeActionContext, CodeActionParams, Position, Range, TextDocumentIdentifier};
 
 mod br_if_to_if_br;
+mod clean_no_types;
 mod expand_ref_type;
 mod export_as;
 mod extract_export;

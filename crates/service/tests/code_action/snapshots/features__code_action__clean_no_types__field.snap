@@ -1,0 +1,29 @@
+---
+source: crates/service/tests/code_action/clean_no_types.rs
+expression: response
+---
+[
+  {
+    "title": "Remove empty field",
+    "kind": "refactor",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 16
+              },
+              "end": {
+                "line": 2,
+                "character": 24
+              }
+            },
+            "newText": ""
+          }
+        ]
+      }
+    }
+  }
+]

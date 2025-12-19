@@ -1,0 +1,29 @@
+---
+source: crates/service/tests/code_action/clean_no_types.rs
+expression: response
+---
+[
+  {
+    "title": "Remove empty local",
+    "kind": "refactor",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 8
+              },
+              "end": {
+                "line": 3,
+                "character": 3
+              }
+            },
+            "newText": ""
+          }
+        ]
+      }
+    }
+  }
+]

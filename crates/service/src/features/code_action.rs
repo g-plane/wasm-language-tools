@@ -73,6 +73,11 @@ impl LanguageService {
                     {
                         actions.push(action);
                     }
+                    if refactor
+                        && let Some(action) = clean_no_types::act(self, uri, line_index, &it)
+                    {
+                        actions.push(action);
+                    }
                 }
                 SyntaxKind::RESULT => {
                     if rewrite
@@ -81,11 +86,21 @@ impl LanguageService {
                     {
                         actions.push(action);
                     }
+                    if refactor
+                        && let Some(action) = clean_no_types::act(self, uri, line_index, &it)
+                    {
+                        actions.push(action);
+                    }
                 }
                 SyntaxKind::LOCAL => {
                     if rewrite
                         && let Some(action) =
                             split_types::act(self, uri, line_index, &it, SyntaxKind::LOCAL)
+                    {
+                        actions.push(action);
+                    }
+                    if refactor
+                        && let Some(action) = clean_no_types::act(self, uri, line_index, &it)
                     {
                         actions.push(action);
                     }
@@ -202,6 +217,11 @@ impl LanguageService {
                     if rewrite
                         && let Some(action) =
                             split_types::act(self, uri, line_index, &it, SyntaxKind::FIELD)
+                    {
+                        actions.push(action);
+                    }
+                    if refactor
+                        && let Some(action) = clean_no_types::act(self, uri, line_index, &it)
                     {
                         actions.push(action);
                     }
