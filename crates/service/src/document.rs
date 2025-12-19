@@ -83,6 +83,10 @@ impl LanguageService {
             if params.content_changes.len() == 1 {
                 match &*params.content_changes {
                     [TextDocumentContentChangeEvent::A(partial)] => {
+                        if partial.text.starts_with(';') {
+                            // user may be typing a comment
+                            break 'single;
+                        }
                         let Some(range) = helpers::lsp_range_to_rowan_range(
                             document.line_index(self),
                             partial.range,
@@ -217,10 +221,10 @@ impl LanguageService {
 mod tests {
     use super::*;
     use lspt::{
-        Definition, DefinitionParams, DocumentDiagnosticParams, Hover, HoverParams, Location,
-        MarkupContent, MarkupKind, Position, Range, TextDocumentContentChangePartial,
-        TextDocumentContentChangeWholeDocument, TextDocumentIdentifier, TextDocumentItem, Union2,
-        Union3, VersionedTextDocumentIdentifier,
+        Definition, DefinitionParams, DocumentDiagnosticParams, DocumentHighlightParams, Hover,
+        HoverParams, Location, MarkupContent, MarkupKind, Position, Range,
+        TextDocumentContentChangePartial, TextDocumentContentChangeWholeDocument,
+        TextDocumentIdentifier, TextDocumentItem, Union2, Union3, VersionedTextDocumentIdentifier,
     };
 
     #[test]
@@ -1197,5 +1201,51 @@ mod tests {
                 ..
             } if value.contains("(func (result i64))"),
         ));
+    }
+
+    #[test]
+    fn insert_semicolon() {
+        let uri = "untitled:test".to_string();
+        let mut service = LanguageService::default();
+        service.commit(
+            &uri,
+            "
+(module
+  (func (param i32) (local i32)))
+"
+            .into(),
+        );
+        service.did_change(DidChangeTextDocumentParams {
+            text_document: VersionedTextDocumentIdentifier {
+                uri: uri.clone(),
+                version: 1,
+            },
+            content_changes: vec![TextDocumentContentChangeEvent::A(
+                TextDocumentContentChangePartial {
+                    range: Range {
+                        start: Position {
+                            line: 2,
+                            character: 9,
+                        },
+                        end: Position {
+                            line: 2,
+                            character: 9,
+                        },
+                    },
+                    text: ";".into(),
+                    ..Default::default()
+                },
+            )],
+        });
+        // should not panic
+        service.document_highlight(DocumentHighlightParams {
+            text_document: TextDocumentIdentifier { uri: uri.clone() },
+            position: Position {
+                line: 2,
+                character: 10,
+            },
+            work_done_token: None,
+            partial_result_token: None,
+        });
     }
 }
