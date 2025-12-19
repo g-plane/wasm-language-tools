@@ -131,15 +131,36 @@ impl Parser<'_> {
 
     fn parse_imports_and_exports(&mut self) {
         let mut has_import = false;
-        while let Some((mark, keyword, is_import)) = self.try_parse_with_trivias(|parser| {
+        while let Some((mark, is_import)) = self.try_parse_with_trivias(|parser| {
             let mark = parser.start_node();
             parser.lexer.next(L_PAREN)?;
             parser.add_child(green::L_PAREN.clone());
             parser.parse_trivias();
             let keyword = parser.lexer.next(KEYWORD)?;
             match keyword.text {
-                "import" => Some((mark, keyword, true)),
-                "export" => Some((mark, keyword, false)),
+                "import" => {
+                    if has_import {
+                        parser.report_error_token(
+                            &keyword,
+                            Message::Description("only one import is allowed"),
+                        );
+                        None
+                    } else {
+                        has_import = true;
+                        Some((mark, true))
+                    }
+                }
+                "export" => {
+                    if has_import {
+                        parser.report_error_token(
+                            &keyword,
+                            Message::Description("export must come before import"),
+                        );
+                        None
+                    } else {
+                        Some((mark, false))
+                    }
+                }
                 _ => None,
             }
         }) {
@@ -147,24 +168,10 @@ impl Parser<'_> {
                 self.add_child(green::KW_IMPORT.clone());
                 let import = self.parse_import(mark);
                 self.add_child(import);
-                if has_import {
-                    self.report_error_token(
-                        &keyword,
-                        Message::Description("only one import is allowed"),
-                    );
-                } else {
-                    has_import = true;
-                }
             } else {
                 self.add_child(green::KW_EXPORT.clone());
                 let export = self.parse_export(mark);
                 self.add_child(export);
-                if has_import {
-                    self.report_error_token(
-                        &keyword,
-                        Message::Description("export must come before import"),
-                    );
-                }
             }
         }
     }

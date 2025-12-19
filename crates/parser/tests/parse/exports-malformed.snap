@@ -116,11 +116,11 @@ ROOT@0..219
           STRING@196..200 "\"f1\""
         R_PAREN@200..201 ")"
       WHITESPACE@201..202 " "
-      EXPORT@202..215
+      PLAIN_INSTR@202..215
         L_PAREN@202..203 "("
-        KEYWORD@203..209 "export"
+        INSTR_NAME@203..209 "export"
         WHITESPACE@209..210 " "
-        NAME@210..214
+        IMMEDIATE@210..214
           STRING@210..214 "\"f3\""
         R_PAREN@214..215 ")"
       R_PAREN@215..216 ")"

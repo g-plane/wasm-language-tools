@@ -13,4 +13,5 @@ source: crates/formatter/tests/parser.rs
   (import "" "" (global))
   (func (import))
   (func (import ""))
-  (func (import "env" "f1")))
+  (func (import "env" "f1")
+    (import "env" "f2")))

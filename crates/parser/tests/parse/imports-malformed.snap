@@ -164,14 +164,14 @@ ROOT@0..285
           STRING@256..260 "\"f1\""
         R_PAREN@260..261 ")"
       WHITESPACE@261..262 " "
-      IMPORT@262..281
+      PLAIN_INSTR@262..281
         L_PAREN@262..263 "("
-        KEYWORD@263..269 "import"
+        INSTR_NAME@263..269 "import"
         WHITESPACE@269..270 " "
-        MODULE_NAME@270..275
+        IMMEDIATE@270..275
           STRING@270..275 "\"env\""
         WHITESPACE@275..276 " "
-        NAME@276..280
+        IMMEDIATE@276..280
           STRING@276..280 "\"f2\""
         R_PAREN@280..281 ")"
       R_PAREN@281..282 ")"
