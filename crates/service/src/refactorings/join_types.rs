@@ -15,17 +15,15 @@ pub fn act(
     kind: SyntaxKind,
     range: TextRange,
 ) -> Option<CodeAction> {
-    let header_items = node
+    let items = node
         .children()
         .skip_while(|child| !can_join(child, kind, range))
         .take_while(|child| can_join(child, kind, range))
         .collect::<Vec<_>>();
-    let [first_node, ..] = &header_items[..] else {
-        return None;
-    };
-    let types = header_items
+    let first_node = items.first()?;
+    let types = items
         .iter()
-        .flat_map(|header_item| header_item.children())
+        .flat_map(|item| item.children())
         .collect::<Vec<_>>();
     if types.len() <= 1 {
         return None;
@@ -35,6 +33,7 @@ pub fn act(
         SyntaxKind::PARAM => "param",
         SyntaxKind::RESULT => "result",
         SyntaxKind::LOCAL => "local",
+        SyntaxKind::FIELD => "field",
         _ => return None,
     };
     let new_text = format!(
@@ -50,7 +49,7 @@ pub fn act(
                 line_index,
                 TextRange::new(
                     first_node.text_range().start(),
-                    header_items.last().unwrap_or(first_node).text_range().end(),
+                    items.last().unwrap_or(first_node).text_range().end(),
                 ),
             ),
             new_text,
@@ -60,6 +59,7 @@ pub fn act(
         SyntaxKind::PARAM => "Join parameters".into(),
         SyntaxKind::RESULT => "Join results".into(),
         SyntaxKind::LOCAL => "Join locals".into(),
+        SyntaxKind::FIELD => "Join fields".into(),
         _ => return None,
     };
     Some(CodeAction {

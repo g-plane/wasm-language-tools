@@ -1,10 +1,10 @@
 ---
-source: crates/service/tests/code_action/func_header_join.rs
+source: crates/service/tests/code_action/split_types.rs
 expression: response
 ---
 [
   {
-    "title": "Join results",
+    "title": "Split locals",
     "kind": "refactor.rewrite",
     "edit": {
       "changes": {
@@ -17,10 +17,10 @@ expression: response
               },
               "end": {
                 "line": 2,
-                "character": 39
+                "character": 25
               }
             },
-            "newText": "(result i32 i64 f64)"
+            "newText": "(local i32) (local f64)"
           }
         ]
       }

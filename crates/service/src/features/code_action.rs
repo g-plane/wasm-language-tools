@@ -38,14 +38,8 @@ impl LanguageService {
             match it.kind() {
                 SyntaxKind::MODULE_FIELD_FUNC => {
                     if rewrite
-                        && let Some(action) = func_header_join::act(
-                            self,
-                            uri,
-                            line_index,
-                            &it,
-                            SyntaxKind::LOCAL,
-                            range,
-                        )
+                        && let Some(action) =
+                            join_types::act(self, uri, line_index, &it, SyntaxKind::LOCAL, range)
                     {
                         actions.push(action);
                     }
@@ -75,7 +69,7 @@ impl LanguageService {
                 SyntaxKind::PARAM => {
                     if rewrite
                         && let Some(action) =
-                            func_header_split::act(self, uri, line_index, &it, SyntaxKind::PARAM)
+                            split_types::act(self, uri, line_index, &it, SyntaxKind::PARAM)
                     {
                         actions.push(action);
                     }
@@ -83,7 +77,7 @@ impl LanguageService {
                 SyntaxKind::RESULT => {
                     if rewrite
                         && let Some(action) =
-                            func_header_split::act(self, uri, line_index, &it, SyntaxKind::RESULT)
+                            split_types::act(self, uri, line_index, &it, SyntaxKind::RESULT)
                     {
                         actions.push(action);
                     }
@@ -91,31 +85,21 @@ impl LanguageService {
                 SyntaxKind::LOCAL => {
                     if rewrite
                         && let Some(action) =
-                            func_header_split::act(self, uri, line_index, &it, SyntaxKind::LOCAL)
+                            split_types::act(self, uri, line_index, &it, SyntaxKind::LOCAL)
                     {
                         actions.push(action);
                     }
                 }
                 SyntaxKind::TYPE_USE | SyntaxKind::FUNC_TYPE => {
                     if rewrite {
-                        if let Some(action) = func_header_join::act(
-                            self,
-                            uri,
-                            line_index,
-                            &it,
-                            SyntaxKind::PARAM,
-                            range,
-                        ) {
+                        if let Some(action) =
+                            join_types::act(self, uri, line_index, &it, SyntaxKind::PARAM, range)
+                        {
                             actions.push(action);
                         }
-                        if let Some(action) = func_header_join::act(
-                            self,
-                            uri,
-                            line_index,
-                            &it,
-                            SyntaxKind::RESULT,
-                            range,
-                        ) {
+                        if let Some(action) =
+                            join_types::act(self, uri, line_index, &it, SyntaxKind::RESULT, range)
+                        {
                             actions.push(action);
                         }
                     }
@@ -202,6 +186,22 @@ impl LanguageService {
                     if inline
                         && let Some(action) =
                             inline_export::act(self, uri, line_index, &root, symbol_table, &it)
+                    {
+                        actions.push(action);
+                    }
+                }
+                SyntaxKind::STRUCT_TYPE => {
+                    if rewrite
+                        && let Some(action) =
+                            join_types::act(self, uri, line_index, &it, SyntaxKind::FIELD, range)
+                    {
+                        actions.push(action);
+                    }
+                }
+                SyntaxKind::FIELD => {
+                    if rewrite
+                        && let Some(action) =
+                            split_types::act(self, uri, line_index, &it, SyntaxKind::FIELD)
                     {
                         actions.push(action);
                     }

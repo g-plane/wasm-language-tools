@@ -1,0 +1,29 @@
+---
+source: crates/service/tests/code_action/join_types.rs
+expression: response
+---
+[
+  {
+    "title": "Join fields",
+    "kind": "refactor.rewrite",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 16
+              },
+              "end": {
+                "line": 2,
+                "character": 45
+              }
+            },
+            "newText": "(field i16 (mut f32))"
+          }
+        ]
+      }
+    }
+  }
+]

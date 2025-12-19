@@ -22,6 +22,7 @@ pub fn act(
         SyntaxKind::PARAM => "param",
         SyntaxKind::RESULT => "result",
         SyntaxKind::LOCAL => "local",
+        SyntaxKind::FIELD => "field",
         _ => return None,
     };
     let new_text = types
@@ -41,6 +42,7 @@ pub fn act(
         SyntaxKind::PARAM => "Split parameters".into(),
         SyntaxKind::RESULT => "Split results".into(),
         SyntaxKind::LOCAL => "Split locals".into(),
+        SyntaxKind::FIELD => "Split fields".into(),
         _ => return None,
     };
     Some(CodeAction {

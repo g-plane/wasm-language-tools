@@ -1,10 +1,10 @@
 ---
-source: crates/service/tests/code_action/func_header_join.rs
+source: crates/service/tests/code_action/split_types.rs
 expression: response
 ---
 [
   {
-    "title": "Join parameters",
+    "title": "Split parameters",
     "kind": "refactor.rewrite",
     "edit": {
       "changes": {
@@ -17,10 +17,10 @@ expression: response
               },
               "end": {
                 "line": 2,
-                "character": 33
+                "character": 25
               }
             },
-            "newText": "(param i32 f64)"
+            "newText": "(param i32) (param f64)"
           }
         ]
       }

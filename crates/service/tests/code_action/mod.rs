@@ -6,15 +6,15 @@ mod export_as;
 mod extract_export;
 mod fix_invalid_mem_arg;
 mod fix_packing;
-mod func_header_join;
-mod func_header_split;
 mod idx_conversion;
 mod if_br_to_br_if;
 mod inline_export;
 mod inline_func_type;
+mod join_types;
 mod merge_to_return_call;
 mod remove_mut;
 mod simplify_ref_type;
+mod split_types;
 
 fn create_params(
     uri: String,

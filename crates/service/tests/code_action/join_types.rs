@@ -99,3 +99,16 @@ fn local() {
     let response = service.code_action(create_params(uri, 2, 10, 2, 37));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn field() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct (field i16) (field (mut f32)))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.code_action(create_params(uri, 2, 16, 2, 45));
+    assert_json_snapshot!(response);
+}
