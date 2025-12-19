@@ -1,10 +1,10 @@
 ---
-source: crates/service/tests/code_action/idx_conversion.rs
+source: crates/service/tests/code_action/convert_idx.rs
 expression: response
 ---
 [
   {
-    "title": "Convert identifier to numeric idx",
+    "title": "Convert numeric idx to identifier",
     "kind": "refactor.rewrite",
     "edit": {
       "changes": {
@@ -12,15 +12,15 @@ expression: response
           {
             "range": {
               "start": {
-                "line": 3,
-                "character": 10
+                "line": 5,
+                "character": 12
               },
               "end": {
-                "line": 3,
-                "character": 12
+                "line": 5,
+                "character": 13
               }
             },
-            "newText": "0"
+            "newText": "$a"
           }
         ]
       }

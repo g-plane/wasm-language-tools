@@ -148,7 +148,7 @@ impl LanguageService {
                     }
                     if rewrite
                         && let Some(action) =
-                            idx_conversion::act(self, uri, line_index, symbol_table, &it)
+                            convert_idx::act(self, uri, line_index, symbol_table, &it)
                     {
                         actions.push(action);
                     }
@@ -156,7 +156,7 @@ impl LanguageService {
                 SyntaxKind::INDEX => {
                     if rewrite
                         && let Some(action) =
-                            idx_conversion::act(self, uri, line_index, symbol_table, &it)
+                            convert_idx::act(self, uri, line_index, symbol_table, &it)
                     {
                         actions.push(action);
                     }

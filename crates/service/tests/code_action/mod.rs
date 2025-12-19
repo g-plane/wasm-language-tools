@@ -2,12 +2,12 @@ use lspt::{CodeActionContext, CodeActionParams, Position, Range, TextDocumentIde
 
 mod br_if_to_if_br;
 mod clean_no_types;
+mod convert_idx;
 mod expand_ref_type;
 mod export_as;
 mod extract_export;
 mod fix_invalid_mem_arg;
 mod fix_packing;
-mod idx_conversion;
 mod if_br_to_br_if;
 mod inline_export;
 mod inline_func_type;
