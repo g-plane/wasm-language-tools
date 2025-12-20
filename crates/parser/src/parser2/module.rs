@@ -129,7 +129,7 @@ impl Parser<'_> {
         self.finish_node(IMPORT, mark)
     }
 
-    fn parse_imports_and_exports(&mut self) {
+    fn parse_exports_and_import(&mut self) {
         let mut has_import = false;
         while let Some((mark, is_import)) = self.try_parse_with_trivias(|parser| {
             let mark = parser.start_node();
@@ -445,7 +445,7 @@ impl Parser<'_> {
 
     fn parse_module_field_func(&mut self, mark: NodeMark) -> GreenNode {
         self.eat(IDENT);
-        self.parse_imports_and_exports();
+        self.parse_exports_and_import();
 
         if let Some(type_use) = self.try_parse_with_trivias(Self::parse_type_use) {
             self.add_child(type_use);
@@ -461,7 +461,7 @@ impl Parser<'_> {
 
     fn parse_module_field_global(&mut self, mark: NodeMark) -> GreenNode {
         self.eat(IDENT);
-        self.parse_imports_and_exports();
+        self.parse_exports_and_import();
 
         if !self.recover(Self::parse_global_type) {
             self.report_missing(Message::Name("global type"));
@@ -488,7 +488,7 @@ impl Parser<'_> {
 
     fn parse_module_field_memory(&mut self, mark: NodeMark) -> GreenNode {
         self.eat(IDENT);
-        self.parse_imports_and_exports();
+        self.parse_exports_and_import();
 
         if self.lexer.peek(L_PAREN).is_some() {
             if !self.recover(Self::parse_data) {
@@ -512,7 +512,7 @@ impl Parser<'_> {
 
     fn parse_module_field_table(&mut self, mark: NodeMark) -> GreenNode {
         self.eat(IDENT);
-        self.parse_imports_and_exports();
+        self.parse_exports_and_import();
 
         if self.lexer.peek(UNSIGNED_INT).is_some() {
             if !self.recover(Self::parse_table_type) {
@@ -534,7 +534,7 @@ impl Parser<'_> {
 
     fn parse_module_field_tag(&mut self, mark: NodeMark) -> GreenNode {
         self.eat(IDENT);
-        self.parse_imports_and_exports();
+        self.parse_exports_and_import();
         if let Some(type_use) = self.try_parse_with_trivias(Self::parse_type_use) {
             self.add_child(type_use);
         }
