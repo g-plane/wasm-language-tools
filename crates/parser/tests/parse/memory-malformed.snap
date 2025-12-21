@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..81
-  MODULE@0..80
+ROOT@0..157
+  MODULE@0..156
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -44,9 +44,54 @@ ROOT@0..81
       WHITESPACE@73..74 " "
       ERROR@74..77 "i32"
       R_PAREN@77..78 ")"
-    WHITESPACE@78..79 "\n"
-    R_PAREN@79..80 ")"
-  WHITESPACE@80..81 "\n"
+    WHITESPACE@78..81 "\n  "
+    MODULE_FIELD_MEMORY@81..103
+      L_PAREN@81..82 "("
+      KEYWORD@82..88 "memory"
+      WHITESPACE@88..89 " "
+      MEMORY_TYPE@89..90
+        LIMITS@89..90
+          UNSIGNED_INT@89..90 "0"
+      WHITESPACE@90..91 " "
+      ERROR@91..92 "("
+      ERROR@92..99 "pagesiz"
+      WHITESPACE@99..100 " "
+      ERROR@100..101 "1"
+      ERROR@101..102 ")"
+      R_PAREN@102..103 ")"
+    WHITESPACE@103..106 "\n  "
+    MODULE_FIELD_MEMORY@106..127
+      L_PAREN@106..107 "("
+      KEYWORD@107..113 "memory"
+      WHITESPACE@113..114 " "
+      MEMORY_TYPE@114..126
+        LIMITS@114..115
+          UNSIGNED_INT@114..115 "0"
+        WHITESPACE@115..116 " "
+        MEM_PAGE_SIZE@116..126
+          L_PAREN@116..117 "("
+          KEYWORD@117..125 "pagesize"
+          R_PAREN@125..126 ")"
+      R_PAREN@126..127 ")"
+    WHITESPACE@127..130 "\n  "
+    MODULE_FIELD_MEMORY@130..154
+      L_PAREN@130..131 "("
+      KEYWORD@131..137 "memory"
+      WHITESPACE@137..138 " "
+      MEMORY_TYPE@138..153
+        LIMITS@138..139
+          UNSIGNED_INT@138..139 "0"
+        WHITESPACE@139..140 " "
+        MEM_PAGE_SIZE@140..153
+          L_PAREN@140..141 "("
+          KEYWORD@141..149 "pagesize"
+          WHITESPACE@149..150 " "
+          ERROR@150..152 "$1"
+          R_PAREN@152..153 ")"
+      R_PAREN@153..154 ")"
+    WHITESPACE@154..155 "\n"
+    R_PAREN@155..156 ")"
+  WHITESPACE@156..157 "\n"
 
 error: expected memory type
   ┌─ memory-malformed.wat:2:10
@@ -77,3 +122,39 @@ error: unexpected token
   │
 6 │   (memory i32)
   │           ^^^
+
+error: unexpected token
+  ┌─ memory-malformed.wat:7:14
+  │
+7 │   (memory 0 (pagesiz 1))
+  │              ^^^^^^^
+
+error: unexpected token
+  ┌─ memory-malformed.wat:7:22
+  │
+7 │   (memory 0 (pagesiz 1))
+  │                      ^
+
+error: unexpected token
+  ┌─ memory-malformed.wat:7:23
+  │
+7 │   (memory 0 (pagesiz 1))
+  │                       ^
+
+error: expected unsigned integer
+  ┌─ memory-malformed.wat:8:22
+  │
+8 │   (memory 0 (pagesize))
+  │                      ^
+
+error: expected unsigned integer
+  ┌─ memory-malformed.wat:9:23
+  │
+9 │   (memory 0 (pagesize $1))
+  │                       ^^
+
+error: expected unsigned integer
+  ┌─ memory-malformed.wat:9:25
+  │
+9 │   (memory 0 (pagesize $1))
+  │                         ^

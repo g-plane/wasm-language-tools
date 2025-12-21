@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/completion/keyword.rs
+source: crates/service/tests/completion/memory.rs
 expression: response
 ---
 [

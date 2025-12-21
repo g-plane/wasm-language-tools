@@ -73,6 +73,7 @@ pub enum SyntaxKind {
     EXTERN_IDX_TAG,
     INDEX,
     LOCAL,
+    MEM_PAGE_SIZE,
     MEM_USE,
     OFFSET,
     ELEM,

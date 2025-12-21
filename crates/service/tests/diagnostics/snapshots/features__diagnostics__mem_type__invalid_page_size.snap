@@ -9,17 +9,17 @@ expression: response
       "range": {
         "start": {
           "line": 2,
-          "character": 12
+          "character": 24
         },
         "end": {
           "line": 2,
-          "character": 13
+          "character": 25
         }
       },
       "severity": 1,
       "code": "mem-type",
       "source": "wat",
-      "message": "max limit must be greater than min limit"
+      "message": "memory page size must be 1 or 65536"
     }
   ]
 }

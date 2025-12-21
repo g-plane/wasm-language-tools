@@ -1,0 +1,10 @@
+---
+source: crates/service/tests/completion/import.rs
+expression: response
+---
+[
+  {
+    "label": "pagesize",
+    "kind": 14
+  }
+]

@@ -734,6 +734,54 @@ impl AstNode for Limits {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct MemoryPageSize {
+    syntax: SyntaxNode,
+}
+impl MemoryPageSize {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn unsigned_int_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::UNSIGNED_INT)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
+impl AstNode for MemoryPageSize {
+    type Language = WatLanguage;
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::MEM_PAGE_SIZE
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(MemoryPageSize { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct MemoryType {
     syntax: SyntaxNode,
 }
@@ -744,6 +792,10 @@ impl MemoryType {
     }
     #[inline]
     pub fn limits(&self) -> Option<Limits> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn memory_page_size(&self) -> Option<MemoryPageSize> {
         child(&self.syntax)
     }
 }

@@ -269,6 +269,36 @@ impl DocGen for Limits {
     }
 }
 
+impl DocGen for MemoryPageSize {
+    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
+        let mut docs = Vec::with_capacity(5);
+        let mut trivias = vec![];
+        if let Some(l_paren) = self.l_paren_token() {
+            docs.push(Doc::text("("));
+            trivias = format_trivias_after_token(l_paren, ctx);
+        }
+        if let Some(keyword) = self.keyword() {
+            docs.append(&mut trivias);
+            docs.push(Doc::text("pagesize"));
+            trivias = format_trivias_after_token(keyword, ctx);
+        }
+        if let Some(unsigned_int) = self.unsigned_int_token() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text(unsigned_int.to_string()));
+            trivias = format_trivias_after_token(unsigned_int, ctx);
+        }
+        docs.append(&mut trivias);
+        Doc::list(docs)
+            .nest(ctx.indent_width)
+            .append(ctx.format_right_paren(self))
+            .group()
+    }
+}
+
 impl DocGen for MemoryType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         let mut docs = Vec::with_capacity(2);
@@ -284,6 +314,15 @@ impl DocGen for MemoryType {
                 docs.append(&mut trivias);
             }
             docs.push(limits.doc(ctx));
+            trivias = format_trivias_after_node(limits, ctx);
+        }
+        if let Some(memory_page_size) = self.memory_page_size() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(memory_page_size.doc(ctx));
         }
         Doc::list(docs)
     }

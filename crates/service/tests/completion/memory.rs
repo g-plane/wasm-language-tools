@@ -186,3 +186,42 @@ fn deprecated() {
     let response = service.completion(create_params(uri, 3, 17));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn pagesize_keyword_incomplete() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory (p))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 2, 12));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn pagesize() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory 1 (pagesize ))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 2, 22));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn pagesize_incomplete() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory 1 (pagesize 6))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 2, 23));
+    assert_json_snapshot!(response);
+}

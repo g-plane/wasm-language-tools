@@ -4,4 +4,7 @@
   (memory ())
   (memory f32 0)
   (memory i32)
+  (memory 0 (pagesiz 1))
+  (memory 0 (pagesize))
+  (memory 0 (pagesize $1))
 )

@@ -4,3 +4,5 @@
 (module (memory (data "x")))
 (module (memory i32 0))
 (module (memory i64 0 1))
+(module (memory 0 (pagesize 1)))
+(module (memory 0 1 (pagesize 65536)))

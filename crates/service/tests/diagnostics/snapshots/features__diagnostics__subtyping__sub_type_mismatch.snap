@@ -56,22 +56,6 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 3,
-          "character": 17
-        },
-        "end": {
-          "line": 3,
-          "character": 20
-        }
-      },
-      "severity": 1,
-      "code": "subtyping",
-      "source": "wat",
-      "message": "type of `$s0` doesn't match its super type `$a0`"
-    },
-    {
-      "range": {
-        "start": {
           "line": 18,
           "character": 17
         },
@@ -84,6 +68,22 @@ expression: response
       "code": "subtyping",
       "source": "wat",
       "message": "type of `$f5` doesn't match its super type `$a5`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 17
+        },
+        "end": {
+          "line": 3,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "subtyping",
+      "source": "wat",
+      "message": "type of `$s0` doesn't match its super type `$a0`"
     },
     {
       "range": {

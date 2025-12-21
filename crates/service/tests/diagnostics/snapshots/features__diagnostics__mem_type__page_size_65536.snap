@@ -8,34 +8,34 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 3,
+          "line": 2,
           "character": 10
         },
         "end": {
-          "line": 3,
-          "character": 33
+          "line": 2,
+          "character": 16
         }
       },
       "severity": 1,
       "code": "mem-type",
       "source": "wat",
-      "message": "limit can't be greater than 4294967295"
+      "message": "limit can't be greater than 65536"
     },
     {
       "range": {
         "start": {
-          "line": 3,
-          "character": 34
+          "line": 2,
+          "character": 17
         },
         "end": {
-          "line": 3,
-          "character": 57
+          "line": 2,
+          "character": 23
         }
       },
       "severity": 1,
       "code": "mem-type",
       "source": "wat",
-      "message": "limit can't be greater than 4294967295"
+      "message": "limit can't be greater than 65536"
     }
   ]
 }

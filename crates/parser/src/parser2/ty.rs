@@ -207,6 +207,20 @@ impl Parser<'_> {
         Some(self.finish_node(LIMITS, mark))
     }
 
+    fn parse_memory_page_size(&mut self) -> Option<GreenNode> {
+        let mark = self.start_node();
+        self.lexer.next(L_PAREN)?;
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
+        let keyword = self.lexer.keyword("pagesize")?;
+        self.add_child(keyword);
+        if !self.retry(|parser| parser.expect(UNSIGNED_INT)) {
+            self.report_missing(Message::Name("unsigned integer"));
+        }
+        self.expect_right_paren();
+        Some(self.finish_node(MEM_PAGE_SIZE, mark))
+    }
+
     pub(super) fn parse_memory_type(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         if let Some(addr_type) = self.try_parse(Self::parse_addr_type) {
@@ -215,6 +229,9 @@ impl Parser<'_> {
         }
         let limits = self.parse_limits()?;
         self.add_child(limits);
+        if let Some(mem_page_size) = self.try_parse_with_trivias(Self::parse_memory_page_size) {
+            self.add_child(mem_page_size);
+        }
         Some(self.finish_node(MEMORY_TYPE, mark))
     }
 

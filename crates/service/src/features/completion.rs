@@ -363,12 +363,22 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         SyntaxKind::EXTERN_IDX_GLOBAL => ctx.push(CmpCtx::Global),
         SyntaxKind::MODULE_FIELD_MEMORY => {
             if has_leading_l_paren(token) {
-                ctx.extend([CmpCtx::KeywordImExport, CmpCtx::KeywordData]);
+                ctx.extend([
+                    CmpCtx::KeywordImExport,
+                    CmpCtx::KeywordData,
+                    CmpCtx::KeywordPagesize,
+                ]);
             } else {
                 ctx.push(CmpCtx::AddrType);
             }
         }
-        SyntaxKind::EXTERN_TYPE_MEMORY => ctx.push(CmpCtx::AddrType),
+        SyntaxKind::EXTERN_TYPE_MEMORY => {
+            if has_leading_l_paren(token) {
+                ctx.push(CmpCtx::KeywordPagesize);
+            } else {
+                ctx.push(CmpCtx::AddrType);
+            }
+        }
         SyntaxKind::MODULE_FIELD_DATA => {
             if has_leading_l_paren(token) {
                 ctx.extend([
@@ -551,6 +561,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         SyntaxKind::CATCH_ALL => ctx.push(CmpCtx::Block),
         SyntaxKind::EXTERN_IDX_TAG => ctx.push(CmpCtx::Tag),
+        SyntaxKind::MEM_PAGE_SIZE => ctx.push(CmpCtx::MemPageSize),
         _ => {}
     }
     if ctx.is_empty() { None } else { Some(ctx) }
@@ -677,6 +688,7 @@ enum CmpCtx {
     AddrType,
     ShapeDescriptor,
     Tag,
+    MemPageSize,
     Annotation,
     KeywordModule,
     KeywordsModuleField,
@@ -703,6 +715,7 @@ enum CmpCtx {
     KeywordRef,
     KeywordNull,
     KeywordsCatch,
+    KeywordPagesize,
 }
 enum PreferredType {
     Func,
@@ -1300,6 +1313,11 @@ fn get_cmp_list(
                         },
                     ));
                 }
+                CmpCtx::MemPageSize => items.extend([1, 65536].map(|page_size| CompletionItem {
+                    label: page_size.to_string(),
+                    kind: Some(CompletionItemKind::Constant),
+                    ..Default::default()
+                })),
                 CmpCtx::Annotation => {
                     items.extend(
                         [
@@ -1455,6 +1473,11 @@ fn get_cmp_list(
                             ..Default::default()
                         }),
                 ),
+                CmpCtx::KeywordPagesize => items.push(CompletionItem {
+                    label: "pagesize".to_string(),
+                    kind: Some(CompletionItemKind::Keyword),
+                    ..Default::default()
+                }),
             }
             items
         })
