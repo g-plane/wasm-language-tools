@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "mem-type",
       "source": "wat",
-      "message": "limit can't be greater than 65536"
+      "message": "memory size can't be greater than 65536"
     },
     {
       "range": {
@@ -35,7 +35,7 @@ expression: response
       "severity": 1,
       "code": "mem-type",
       "source": "wat",
-      "message": "limit can't be greater than 65536"
+      "message": "memory size can't be greater than 65536"
     }
   ]
 }

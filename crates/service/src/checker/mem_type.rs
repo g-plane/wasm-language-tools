@@ -76,7 +76,7 @@ pub fn check(
                 severity: Some(DiagnosticSeverity::Error),
                 source: Some("wat".into()),
                 code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                message: "max limit must be greater than min limit".into(),
+                message: "maximum size must be greater than minimum size".into(),
                 ..Default::default()
             });
         }
@@ -101,7 +101,7 @@ fn report_overflow(token: &SyntaxToken, line_index: &LineIndex, upper_bound: u32
         severity: Some(DiagnosticSeverity::Error),
         source: Some("wat".into()),
         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-        message: format!("limit can't be greater than {upper_bound}"),
+        message: format!("memory size can't be greater than {upper_bound}"),
         ..Default::default()
     }
 }
