@@ -231,15 +231,16 @@ impl Parser<'_> {
         self.add_child(limits);
 
         if let Some(share) = self.try_parse_with_trivias(|parser| {
-            let mut token = parser.lexer.next(KEYWORD)?;
-            if !matches!(token.text, "shared" | "unshared") {
-                token.kind = ERROR;
+            let token = parser.lexer.next(KEYWORD)?;
+            if matches!(token.text, "shared" | "unshared") {
+                Some(token)
+            } else {
                 parser.report_error_token(
                     &token,
                     Message::Description("expected share keyword to be `shared` or `unshared`"),
                 );
+                None
             }
-            Some(token)
         }) {
             self.add_child(share);
         }

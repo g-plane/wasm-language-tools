@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..191
-  MODULE@0..190
+ROOT@0..212
+  MODULE@0..211
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -90,28 +90,40 @@ ROOT@0..191
           R_PAREN@152..153 ")"
       R_PAREN@153..154 ")"
     WHITESPACE@154..157 "\n  "
-    MODULE_FIELD_MEMORY@157..188
+    MODULE_FIELD_MEMORY@157..175
       L_PAREN@157..158 "("
       KEYWORD@158..164 "memory"
       WHITESPACE@164..165 " "
-      MEMORY_TYPE@165..187
+      MEMORY_TYPE@165..168
         LIMITS@165..168
           UNSIGNED_INT@165..166 "0"
           WHITESPACE@166..167 " "
           UNSIGNED_INT@167..168 "1"
-        WHITESPACE@168..169 " "
-        ERROR@169..174 "share"
-        WHITESPACE@174..175 " "
-        MEM_PAGE_SIZE@175..187
-          L_PAREN@175..176 "("
-          KEYWORD@176..184 "pagesize"
-          WHITESPACE@184..185 " "
-          UNSIGNED_INT@185..186 "1"
-          R_PAREN@186..187 ")"
-      R_PAREN@187..188 ")"
-    WHITESPACE@188..189 "\n"
-    R_PAREN@189..190 ")"
-  WHITESPACE@190..191 "\n"
+      WHITESPACE@168..169 " "
+      ERROR@169..174 "share"
+      R_PAREN@174..175 ")"
+    WHITESPACE@175..178 "\n  "
+    MODULE_FIELD_MEMORY@178..209
+      L_PAREN@178..179 "("
+      KEYWORD@179..185 "memory"
+      WHITESPACE@185..186 " "
+      MEMORY_TYPE@186..189
+        LIMITS@186..189
+          UNSIGNED_INT@186..187 "0"
+          WHITESPACE@187..188 " "
+          UNSIGNED_INT@188..189 "1"
+      WHITESPACE@189..190 " "
+      ERROR@190..195 "share"
+      WHITESPACE@195..196 " "
+      ERROR@196..197 "("
+      ERROR@197..205 "pagesize"
+      WHITESPACE@205..206 " "
+      ERROR@206..207 "1"
+      ERROR@207..208 ")"
+      R_PAREN@208..209 ")"
+    WHITESPACE@209..210 "\n"
+    R_PAREN@210..211 ")"
+  WHITESPACE@211..212 "\n"
 
 error: expected memory type
   ┌─ memory-malformed.wat:2:10
@@ -182,5 +194,29 @@ error: expected unsigned integer
 error: expected share keyword to be `shared` or `unshared`
    ┌─ memory-malformed.wat:10:15
    │
-10 │   (memory 0 1 share (pagesize 1))
+10 │   (memory 0 1 share)
    │               ^^^^^
+
+error: expected share keyword to be `shared` or `unshared`
+   ┌─ memory-malformed.wat:11:15
+   │
+11 │   (memory 0 1 share (pagesize 1))
+   │               ^^^^^
+
+error: unexpected token
+   ┌─ memory-malformed.wat:11:22
+   │
+11 │   (memory 0 1 share (pagesize 1))
+   │                      ^^^^^^^^
+
+error: unexpected token
+   ┌─ memory-malformed.wat:11:31
+   │
+11 │   (memory 0 1 share (pagesize 1))
+   │                               ^
+
+error: unexpected token
+   ┌─ memory-malformed.wat:11:32
+   │
+11 │   (memory 0 1 share (pagesize 1))
+   │                                ^
