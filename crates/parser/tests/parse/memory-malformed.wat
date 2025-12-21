@@ -7,4 +7,5 @@
   (memory 0 (pagesiz 1))
   (memory 0 (pagesize))
   (memory 0 (pagesize $1))
+  (memory 0 1 share (pagesize 1))
 )

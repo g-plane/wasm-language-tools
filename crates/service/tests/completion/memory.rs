@@ -188,6 +188,19 @@ fn deprecated() {
 }
 
 #[test]
+fn share_incomplete() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory s)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 2, 11));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn pagesize_keyword_incomplete() {
     let uri = "untitled:test".to_string();
     let source = "

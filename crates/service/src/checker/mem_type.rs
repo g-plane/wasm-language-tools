@@ -4,7 +4,7 @@ use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use rowan::ast::support;
 use std::num::{IntErrorKind, ParseIntError};
 use wat_syntax::{
-    SyntaxNode, SyntaxToken,
+    SyntaxKind, SyntaxNode, SyntaxToken,
     ast::{Limits, MemoryPageSize},
 };
 
@@ -80,6 +80,17 @@ pub fn check(
                 ..Default::default()
             });
         }
+    } else if let Some(token) =
+        support::token(node, SyntaxKind::KEYWORD).filter(|token| token.text() == "shared")
+    {
+        diagnostics.push(Diagnostic {
+            range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+            severity: Some(DiagnosticSeverity::Error),
+            source: Some("wat".into()),
+            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+            message: "shared memory must have a maximum size".into(),
+            ..Default::default()
+        });
     }
     Some(())
 }

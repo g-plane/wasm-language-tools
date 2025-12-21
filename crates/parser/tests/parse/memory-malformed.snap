@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..157
-  MODULE@0..156
+ROOT@0..191
+  MODULE@0..190
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -89,9 +89,29 @@ ROOT@0..157
           ERROR@150..152 "$1"
           R_PAREN@152..153 ")"
       R_PAREN@153..154 ")"
-    WHITESPACE@154..155 "\n"
-    R_PAREN@155..156 ")"
-  WHITESPACE@156..157 "\n"
+    WHITESPACE@154..157 "\n  "
+    MODULE_FIELD_MEMORY@157..188
+      L_PAREN@157..158 "("
+      KEYWORD@158..164 "memory"
+      WHITESPACE@164..165 " "
+      MEMORY_TYPE@165..187
+        LIMITS@165..168
+          UNSIGNED_INT@165..166 "0"
+          WHITESPACE@166..167 " "
+          UNSIGNED_INT@167..168 "1"
+        WHITESPACE@168..169 " "
+        ERROR@169..174 "share"
+        WHITESPACE@174..175 " "
+        MEM_PAGE_SIZE@175..187
+          L_PAREN@175..176 "("
+          KEYWORD@176..184 "pagesize"
+          WHITESPACE@184..185 " "
+          UNSIGNED_INT@185..186 "1"
+          R_PAREN@186..187 ")"
+      R_PAREN@187..188 ")"
+    WHITESPACE@188..189 "\n"
+    R_PAREN@189..190 ")"
+  WHITESPACE@190..191 "\n"
 
 error: expected memory type
   ┌─ memory-malformed.wat:2:10
@@ -158,3 +178,9 @@ error: expected unsigned integer
   │
 9 │   (memory 0 (pagesize $1))
   │                         ^
+
+error: expected share keyword to be `shared` or `unshared`
+   ┌─ memory-malformed.wat:10:15
+   │
+10 │   (memory 0 1 share (pagesize 1))
+   │               ^^^^^

@@ -101,6 +101,20 @@ fn memory_type() {
 }
 
 #[test]
+fn memory_type_with_share() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+    (import "" "" (memory s))
+)
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 2, 27));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn memory_type_with_paren() {
     let uri = "untitled:test".to_string();
     let source = r#"

@@ -316,6 +316,15 @@ impl DocGen for MemoryType {
             docs.push(limits.doc(ctx));
             trivias = format_trivias_after_node(limits, ctx);
         }
+        if let Some(share) = self.share_keyword() {
+            if trivias.is_empty() {
+                docs.push(Doc::space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(Doc::text(share.to_string()));
+            trivias = format_trivias_after_token(share, ctx);
+        }
         if let Some(memory_page_size) = self.memory_page_size() {
             if trivias.is_empty() {
                 docs.push(Doc::space());

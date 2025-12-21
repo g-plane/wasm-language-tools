@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/mem_type.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 12
+        },
+        "end": {
+          "line": 2,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "mem-type",
+      "source": "wat",
+      "message": "shared memory must have a maximum size"
+    }
+  ]
+}

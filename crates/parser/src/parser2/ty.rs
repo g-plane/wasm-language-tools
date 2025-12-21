@@ -229,6 +229,20 @@ impl Parser<'_> {
         }
         let limits = self.parse_limits()?;
         self.add_child(limits);
+
+        if let Some(share) = self.try_parse_with_trivias(|parser| {
+            let mut token = parser.lexer.next(KEYWORD)?;
+            if !matches!(token.text, "shared" | "unshared") {
+                token.kind = ERROR;
+                parser.report_error_token(
+                    &token,
+                    Message::Description("expected share keyword to be `shared` or `unshared`"),
+                );
+            }
+            Some(token)
+        }) {
+            self.add_child(share);
+        }
         if let Some(mem_page_size) = self.try_parse_with_trivias(Self::parse_memory_page_size) {
             self.add_child(mem_page_size);
         }

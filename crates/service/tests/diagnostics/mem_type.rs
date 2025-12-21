@@ -101,3 +101,59 @@ fn page_size_65536() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn unshared_without_max() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory 1 unshared))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn unshared_with_max() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory 1 2 unshared))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn shared_without_max() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory 1 shared))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn shared_with_max() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory 1 2 shared))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}

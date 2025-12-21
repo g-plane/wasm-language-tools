@@ -1,7 +1,7 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..218
+ROOT@0..282
   MODULE@0..19
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
@@ -144,3 +144,41 @@ ROOT@0..218
       R_PAREN@215..216 ")"
     R_PAREN@216..217 ")"
   WHITESPACE@217..218 "\n"
+  MODULE@218..281
+    L_PAREN@218..219 "("
+    KEYWORD@219..225 "module"
+    WHITESPACE@225..226 " "
+    MODULE_FIELD_MEMORY@226..245
+      L_PAREN@226..227 "("
+      KEYWORD@227..233 "memory"
+      WHITESPACE@233..234 " "
+      MEMORY_TYPE@234..244
+        LIMITS@234..237
+          UNSIGNED_INT@234..235 "0"
+          WHITESPACE@235..236 " "
+          UNSIGNED_INT@236..237 "1"
+        WHITESPACE@237..238 " "
+        KEYWORD@238..244 "shared"
+      R_PAREN@244..245 ")"
+    WHITESPACE@245..246 " "
+    MODULE_FIELD_MEMORY@246..280
+      L_PAREN@246..247 "("
+      KEYWORD@247..253 "memory"
+      WHITESPACE@253..254 " "
+      MEMORY_TYPE@254..279
+        LIMITS@254..257
+          UNSIGNED_INT@254..255 "0"
+          WHITESPACE@255..256 " "
+          UNSIGNED_INT@256..257 "1"
+        WHITESPACE@257..258 " "
+        KEYWORD@258..266 "unshared"
+        WHITESPACE@266..267 " "
+        MEM_PAGE_SIZE@267..279
+          L_PAREN@267..268 "("
+          KEYWORD@268..276 "pagesize"
+          WHITESPACE@276..277 " "
+          UNSIGNED_INT@277..278 "1"
+          R_PAREN@278..279 ")"
+      R_PAREN@279..280 ")"
+    R_PAREN@280..281 ")"
+  WHITESPACE@281..282 "\n"

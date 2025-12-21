@@ -795,6 +795,10 @@ impl MemoryType {
         child(&self.syntax)
     }
     #[inline]
+    pub fn share_keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
     pub fn memory_page_size(&self) -> Option<MemoryPageSize> {
         child(&self.syntax)
     }

@@ -369,14 +369,14 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                     CmpCtx::KeywordPagesize,
                 ]);
             } else {
-                ctx.push(CmpCtx::AddrType);
+                ctx.extend([CmpCtx::AddrType, CmpCtx::KeywordsShare]);
             }
         }
         SyntaxKind::EXTERN_TYPE_MEMORY => {
             if has_leading_l_paren(token) {
                 ctx.push(CmpCtx::KeywordPagesize);
             } else {
-                ctx.push(CmpCtx::AddrType);
+                ctx.extend([CmpCtx::AddrType, CmpCtx::KeywordsShare]);
             }
         }
         SyntaxKind::MODULE_FIELD_DATA => {
@@ -715,6 +715,7 @@ enum CmpCtx {
     KeywordRef,
     KeywordNull,
     KeywordsCatch,
+    KeywordsShare,
     KeywordPagesize,
 }
 enum PreferredType {
@@ -1473,6 +1474,13 @@ fn get_cmp_list(
                             ..Default::default()
                         }),
                 ),
+                CmpCtx::KeywordsShare => items.extend(["shared", "unshared"].into_iter().map(
+                    |keyword| CompletionItem {
+                        label: keyword.to_string(),
+                        kind: Some(CompletionItemKind::Keyword),
+                        ..Default::default()
+                    },
+                )),
                 CmpCtx::KeywordPagesize => items.push(CompletionItem {
                     label: "pagesize".to_string(),
                     kind: Some(CompletionItemKind::Keyword),
