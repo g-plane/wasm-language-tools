@@ -269,6 +269,20 @@ fn following_dot() {
 }
 
 #[test]
+fn following_non_first_dot() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+    (func (i32.atomic.))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 2, 22));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn after_dot() {
     let uri = "untitled:test".to_string();
     let source = "
@@ -279,6 +293,34 @@ fn after_dot() {
     let mut service = LanguageService::default();
     service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 2, 16));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn after_non_first_dot() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+    (func (i32.atomic.r))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 2, 23));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn more_dots() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+    (func (i32.atomic.rmw8.))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    let response = service.completion(create_params(uri, 2, 27));
     assert_json_snapshot!(response);
 }
 

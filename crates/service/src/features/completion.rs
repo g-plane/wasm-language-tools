@@ -742,7 +742,7 @@ fn get_cmp_list(
                     } else {
                         data_set::INSTR_NAMES.iter()
                     };
-                    if let Some((left, _)) = token.text().split_once('.') {
+                    if let Some((left, _)) = token.text().rsplit_once('.') {
                         items.extend(
                             instrs
                                 .filter_map(|name| {

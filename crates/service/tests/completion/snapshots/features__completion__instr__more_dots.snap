@@ -1,0 +1,34 @@
+---
+source: crates/service/tests/completion/instr.rs
+expression: response
+---
+[
+  {
+    "label": "add_u",
+    "kind": 24
+  },
+  {
+    "label": "sub_u",
+    "kind": 24
+  },
+  {
+    "label": "and_u",
+    "kind": 24
+  },
+  {
+    "label": "or_u",
+    "kind": 24
+  },
+  {
+    "label": "xor_u",
+    "kind": 24
+  },
+  {
+    "label": "xchg_u",
+    "kind": 24
+  },
+  {
+    "label": "cmpxchg_u",
+    "kind": 24
+  }
+]

@@ -3,7 +3,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::{collections::HashMap, sync::LazyLock};
 
 pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = LazyLock::new(|| {
-    let mut map = HashMap::with_capacity_and_hasher(456, FxBuildHasher);
+    let mut map = HashMap::with_capacity_and_hasher(522, FxBuildHasher);
     map.insert(
         "unreachable",
         ResolvedSig {
@@ -4050,11 +4050,238 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
+    map.insert(
+        "memory.atomic.notify",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::I32),
+                OperandType::Val(ValType::I32),
+            ],
+            results: vec![OperandType::Val(ValType::I32)],
+        },
+    );
+    map.insert(
+        "memory.atomic.wait32",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::I32),
+                OperandType::Val(ValType::I32),
+                OperandType::Val(ValType::I64),
+            ],
+            results: vec![OperandType::Val(ValType::I32)],
+        },
+    );
+    map.insert(
+        "memory.atomic.wait64",
+        ResolvedSig {
+            params: vec![
+                OperandType::Val(ValType::I32),
+                OperandType::Val(ValType::I64),
+                OperandType::Val(ValType::I64),
+            ],
+            results: vec![OperandType::Val(ValType::I32)],
+        },
+    );
+    map.extend(
+        [
+            "i32.atomic.load",
+            "i32.atomic.load8_u",
+            "i32.atomic.load16_u",
+        ]
+        .into_iter()
+        .map(|instr| {
+            (
+                instr,
+                ResolvedSig {
+                    params: vec![OperandType::Val(ValType::I32)],
+                    results: vec![OperandType::Val(ValType::I32)],
+                },
+            )
+        }),
+    );
+    map.extend(
+        [
+            "i64.atomic.load",
+            "i64.atomic.load8_u",
+            "i64.atomic.load16_u",
+            "i64.atomic.load32_u",
+        ]
+        .into_iter()
+        .map(|instr| {
+            (
+                instr,
+                ResolvedSig {
+                    params: vec![OperandType::Val(ValType::I32)],
+                    results: vec![OperandType::Val(ValType::I64)],
+                },
+            )
+        }),
+    );
+    map.extend(
+        [
+            "i32.atomic.store",
+            "i32.atomic.store8_u",
+            "i32.atomic.store16_u",
+        ]
+        .into_iter()
+        .map(|instr| {
+            (
+                instr,
+                ResolvedSig {
+                    params: vec![
+                        OperandType::Val(ValType::I32),
+                        OperandType::Val(ValType::I32),
+                    ],
+                    results: vec![],
+                },
+            )
+        }),
+    );
+    map.extend(
+        [
+            "i64.atomic.store",
+            "i64.atomic.store8",
+            "i64.atomic.store16",
+            "i64.atomic.store32",
+        ]
+        .into_iter()
+        .map(|instr| {
+            (
+                instr,
+                ResolvedSig {
+                    params: vec![
+                        OperandType::Val(ValType::I32),
+                        OperandType::Val(ValType::I64),
+                    ],
+                    results: vec![],
+                },
+            )
+        }),
+    );
+    map.extend(
+        [
+            "i32.atomic.rmw.add",
+            "i32.atomic.rmw8.add_u",
+            "i32.atomic.rmw16.add_u",
+            "i32.atomic.rmw.sub",
+            "i32.atomic.rmw8.sub_u",
+            "i32.atomic.rmw16.sub_u",
+            "i32.atomic.rmw.and",
+            "i32.atomic.rmw8.and_u",
+            "i32.atomic.rmw16.and_u",
+            "i32.atomic.rmw.or",
+            "i32.atomic.rmw8.or_u",
+            "i32.atomic.rmw16.or_u",
+            "i32.atomic.rmw.xor",
+            "i32.atomic.rmw8.xor_u",
+            "i32.atomic.rmw16.xor_u",
+            "i32.atomic.rmw.xchg",
+            "i32.atomic.rmw8.xchg_u",
+            "i32.atomic.rmw16.xchg_u",
+        ]
+        .into_iter()
+        .map(|instr| {
+            (
+                instr,
+                ResolvedSig {
+                    params: vec![
+                        OperandType::Val(ValType::I32),
+                        OperandType::Val(ValType::I32),
+                    ],
+                    results: vec![OperandType::Val(ValType::I32)],
+                },
+            )
+        }),
+    );
+    map.extend(
+        [
+            "i64.atomic.rmw.add",
+            "i64.atomic.rmw8.add_u",
+            "i64.atomic.rmw16.add_u",
+            "i64.atomic.rmw32.add_u",
+            "i64.atomic.rmw.sub",
+            "i64.atomic.rmw8.sub_u",
+            "i64.atomic.rmw16.sub_u",
+            "i64.atomic.rmw32.sub_u",
+            "i64.atomic.rmw.and",
+            "i64.atomic.rmw8.and_u",
+            "i64.atomic.rmw16.and_u",
+            "i64.atomic.rmw32.and_u",
+            "i64.atomic.rmw.or",
+            "i64.atomic.rmw8.or_u",
+            "i64.atomic.rmw16.or_u",
+            "i64.atomic.rmw32.or_u",
+            "i64.atomic.rmw.xor",
+            "i64.atomic.rmw8.xor_u",
+            "i64.atomic.rmw16.xor_u",
+            "i64.atomic.rmw32.xor_u",
+            "i64.atomic.rmw.xchg",
+            "i64.atomic.rmw8.xchg_u",
+            "i64.atomic.rmw16.xchg_u",
+            "i64.atomic.rmw32.xchg_u",
+        ]
+        .into_iter()
+        .map(|instr| {
+            (
+                instr,
+                ResolvedSig {
+                    params: vec![
+                        OperandType::Val(ValType::I32),
+                        OperandType::Val(ValType::I64),
+                    ],
+                    results: vec![OperandType::Val(ValType::I64)],
+                },
+            )
+        }),
+    );
+    map.extend(
+        [
+            "i32.atomic.rmw.cmpxchg",
+            "i32.atomic.rmw8.cmpxchg_u",
+            "i32.atomic.rmw16.cmpxchg_u",
+        ]
+        .into_iter()
+        .map(|instr| {
+            (
+                instr,
+                ResolvedSig {
+                    params: vec![
+                        OperandType::Val(ValType::I32),
+                        OperandType::Val(ValType::I32),
+                        OperandType::Val(ValType::I32),
+                    ],
+                    results: vec![OperandType::Val(ValType::I32)],
+                },
+            )
+        }),
+    );
+    map.extend(
+        [
+            "i64.atomic.rmw.cmpxchg",
+            "i64.atomic.rmw8.cmpxchg_u",
+            "i64.atomic.rmw16.cmpxchg_u",
+            "i64.atomic.rmw32.cmpxchg_u",
+        ]
+        .into_iter()
+        .map(|instr| {
+            (
+                instr,
+                ResolvedSig {
+                    params: vec![
+                        OperandType::Val(ValType::I32),
+                        OperandType::Val(ValType::I64),
+                        OperandType::Val(ValType::I64),
+                    ],
+                    results: vec![OperandType::Val(ValType::I64)],
+                },
+            )
+        }),
+    );
     map
 });
 
 pub(crate) static INSTR_OP_CODES: LazyLock<FxHashMap<&'static str, u32>> = LazyLock::new(|| {
-    let mut map = HashMap::with_capacity_and_hasher(503, FxBuildHasher);
+    let mut map = HashMap::with_capacity_and_hasher(570, FxBuildHasher);
     map.insert("unreachable", 0x00);
     map.insert("nop", 0x01);
     map.insert("block", 0x02);
@@ -4558,5 +4785,72 @@ pub(crate) static INSTR_OP_CODES: LazyLock<FxHashMap<&'static str, u32>> = LazyL
     map.insert("i16x8.relaxed_q15mulr_s", 0xFD9102);
     map.insert("i16x8.relaxed_dot_i8x16_i7x16_s", 0xFD9202);
     map.insert("i32x4.relaxed_dot_i8x16_i7x16_add_s", 0xFD9302);
+    map.insert("memory.atomic.notify", 0xFE00);
+    map.insert("memory.atomic.wait32", 0xFE01);
+    map.insert("memory.atomic.wait64", 0xFE02);
+    map.insert("atomic.fence", 0xFE0300);
+    map.insert("i32.atomic.load", 0xFE10);
+    map.insert("i64.atomic.load", 0xFE11);
+    map.insert("i32.atomic.load8_u", 0xFE12);
+    map.insert("i32.atomic.load16_u", 0xFE13);
+    map.insert("i64.atomic.load8_u", 0xFE14);
+    map.insert("i64.atomic.load16_u", 0xFE15);
+    map.insert("i64.atomic.load32_u", 0xFE16);
+    map.insert("i32.atomic.store", 0xFE17);
+    map.insert("i64.atomic.store", 0xFE18);
+    map.insert("i32.atomic.store8", 0xFE19);
+    map.insert("i32.atomic.store16", 0xFE1A);
+    map.insert("i64.atomic.store8", 0xFE1B);
+    map.insert("i64.atomic.store16", 0xFE1C);
+    map.insert("i64.atomic.store32", 0xFE1D);
+    map.insert("i32.atomic.rmw.add", 0xFE1E);
+    map.insert("i64.atomic.rmw.add", 0xFE1F);
+    map.insert("i32.atomic.rmw8.add_u", 0xFE20);
+    map.insert("i32.atomic.rmw16.add_u", 0xFE21);
+    map.insert("i64.atomic.rmw8.add_u", 0xFE22);
+    map.insert("i64.atomic.rmw16.add_u", 0xFE23);
+    map.insert("i64.atomic.rmw32.add_u", 0xFE24);
+    map.insert("i32.atomic.rmw.sub", 0xFE25);
+    map.insert("i64.atomic.rmw.sub", 0xFE26);
+    map.insert("i32.atomic.rmw8.sub_u", 0xFE27);
+    map.insert("i32.atomic.rmw16.sub_u", 0xFE28);
+    map.insert("i64.atomic.rmw8.sub_u", 0xFE29);
+    map.insert("i64.atomic.rmw16.sub_u", 0xFE2A);
+    map.insert("i64.atomic.rmw32.sub_u", 0xFE2B);
+    map.insert("i32.atomic.rmw.and", 0xFE2C);
+    map.insert("i64.atomic.rmw.and", 0xFE2D);
+    map.insert("i32.atomic.rmw8.and_u", 0xFE2E);
+    map.insert("i32.atomic.rmw16.and_u", 0xFE2F);
+    map.insert("i64.atomic.rmw8.and_u", 0xFE30);
+    map.insert("i64.atomic.rmw16.and_u", 0xFE31);
+    map.insert("i64.atomic.rmw32.and_u", 0xFE32);
+    map.insert("i32.atomic.rmw.or", 0xFE33);
+    map.insert("i64.atomic.rmw.or", 0xFE34);
+    map.insert("i32.atomic.rmw8.or_u", 0xFE35);
+    map.insert("i32.atomic.rmw16.or_u", 0xFE36);
+    map.insert("i64.atomic.rmw8.or_u", 0xFE37);
+    map.insert("i64.atomic.rmw16.or_u", 0xFE38);
+    map.insert("i64.atomic.rmw32.or_u", 0xFE39);
+    map.insert("i32.atomic.rmw.xor", 0xFE3A);
+    map.insert("i64.atomic.rmw.xor", 0xFE3B);
+    map.insert("i32.atomic.rmw8.xor_u", 0xFE3C);
+    map.insert("i32.atomic.rmw16.xor_u", 0xFE3D);
+    map.insert("i64.atomic.rmw8.xor_u", 0xFE3E);
+    map.insert("i64.atomic.rmw16.xor_u", 0xFE3F);
+    map.insert("i64.atomic.rmw32.xor_u", 0xFE40);
+    map.insert("i32.atomic.rmw.xchg", 0xFE41);
+    map.insert("i64.atomic.rmw.xchg", 0xFE42);
+    map.insert("i32.atomic.rmw8.xchg_u", 0xFE43);
+    map.insert("i32.atomic.rmw16.xchg_u", 0xFE44);
+    map.insert("i64.atomic.rmw8.xchg_u", 0xFE45);
+    map.insert("i64.atomic.rmw16.xchg_u", 0xFE46);
+    map.insert("i64.atomic.rmw32.xchg_u", 0xFE47);
+    map.insert("i32.atomic.rmw.cmpxchg", 0xFE48);
+    map.insert("i64.atomic.rmw.cmpxchg", 0xFE49);
+    map.insert("i32.atomic.rmw8.cmpxchg_u", 0xFE4A);
+    map.insert("i32.atomic.rmw16.cmpxchg_u", 0xFE4B);
+    map.insert("i64.atomic.rmw8.cmpxchg_u", 0xFE4C);
+    map.insert("i64.atomic.rmw16.cmpxchg_u", 0xFE4D);
+    map.insert("i64.atomic.rmw32.cmpxchg_u", 0xFE4E);
     map
 });

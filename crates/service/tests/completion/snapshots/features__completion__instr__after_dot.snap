@@ -202,5 +202,113 @@ expression: response
   {
     "label": "trunc_sat_f64_u",
     "kind": 24
+  },
+  {
+    "label": "atomic.load",
+    "kind": 24
+  },
+  {
+    "label": "atomic.load8_u",
+    "kind": 24
+  },
+  {
+    "label": "atomic.load16_u",
+    "kind": 24
+  },
+  {
+    "label": "atomic.store",
+    "kind": 24
+  },
+  {
+    "label": "atomic.store8",
+    "kind": 24
+  },
+  {
+    "label": "atomic.store16",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw.add",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw8.add_u",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw16.add_u",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw.sub",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw8.sub_u",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw16.sub_u",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw.and",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw8.and_u",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw16.and_u",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw.or",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw8.or_u",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw16.or_u",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw.xor",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw8.xor_u",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw16.xor_u",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw.xchg",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw8.xchg_u",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw16.xchg_u",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw.cmpxchg",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw8.cmpxchg_u",
+    "kind": 24
+  },
+  {
+    "label": "atomic.rmw16.cmpxchg_u",
+    "kind": 24
   }
 ]

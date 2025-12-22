@@ -1,0 +1,114 @@
+---
+source: crates/service/tests/completion/instr.rs
+expression: response
+---
+[
+  {
+    "label": "load",
+    "kind": 24
+  },
+  {
+    "label": "load8_u",
+    "kind": 24
+  },
+  {
+    "label": "load16_u",
+    "kind": 24
+  },
+  {
+    "label": "store",
+    "kind": 24
+  },
+  {
+    "label": "store8",
+    "kind": 24
+  },
+  {
+    "label": "store16",
+    "kind": 24
+  },
+  {
+    "label": "rmw.add",
+    "kind": 24
+  },
+  {
+    "label": "rmw8.add_u",
+    "kind": 24
+  },
+  {
+    "label": "rmw16.add_u",
+    "kind": 24
+  },
+  {
+    "label": "rmw.sub",
+    "kind": 24
+  },
+  {
+    "label": "rmw8.sub_u",
+    "kind": 24
+  },
+  {
+    "label": "rmw16.sub_u",
+    "kind": 24
+  },
+  {
+    "label": "rmw.and",
+    "kind": 24
+  },
+  {
+    "label": "rmw8.and_u",
+    "kind": 24
+  },
+  {
+    "label": "rmw16.and_u",
+    "kind": 24
+  },
+  {
+    "label": "rmw.or",
+    "kind": 24
+  },
+  {
+    "label": "rmw8.or_u",
+    "kind": 24
+  },
+  {
+    "label": "rmw16.or_u",
+    "kind": 24
+  },
+  {
+    "label": "rmw.xor",
+    "kind": 24
+  },
+  {
+    "label": "rmw8.xor_u",
+    "kind": 24
+  },
+  {
+    "label": "rmw16.xor_u",
+    "kind": 24
+  },
+  {
+    "label": "rmw.xchg",
+    "kind": 24
+  },
+  {
+    "label": "rmw8.xchg_u",
+    "kind": 24
+  },
+  {
+    "label": "rmw16.xchg_u",
+    "kind": 24
+  },
+  {
+    "label": "rmw.cmpxchg",
+    "kind": 24
+  },
+  {
+    "label": "rmw8.cmpxchg_u",
+    "kind": 24
+  },
+  {
+    "label": "rmw16.cmpxchg_u",
+    "kind": 24
+  }
+]
