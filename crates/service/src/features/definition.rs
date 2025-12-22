@@ -16,11 +16,9 @@ impl LanguageService {
         let root = document.root_tree(self);
         let token = super::find_meaningful_token(self, document, &root, params.position)?;
 
-        let parent = token.parent()?;
-        if !matches!(parent.kind(), SyntaxKind::IMMEDIATE | SyntaxKind::INDEX) {
-            return None;
-        }
-
+        let parent = token
+            .parent()
+            .filter(|parent| matches!(parent.kind(), SyntaxKind::IMMEDIATE | SyntaxKind::INDEX))?;
         let line_index = document.line_index(self);
         let symbol_table = SymbolTable::of(self, document);
         let key = SymbolKey::new(&parent);
@@ -42,11 +40,9 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
         let token = super::find_meaningful_token(self, document, &root, params.position)?;
 
-        let parent = token.parent()?;
-        if !matches!(parent.kind(), SyntaxKind::IMMEDIATE | SyntaxKind::INDEX) {
-            return None;
-        }
-
+        let parent = token
+            .parent()
+            .filter(|parent| matches!(parent.kind(), SyntaxKind::IMMEDIATE | SyntaxKind::INDEX))?;
         let grand = parent.parent()?;
         match grand.kind() {
             SyntaxKind::PLAIN_INSTR => symbol_table
@@ -72,29 +68,12 @@ impl LanguageService {
     }
 
     /// Handler for `textDocument/declaration` request.
-    ///
-    /// Only available for function calls currently. This behaves same as "Goto Definition".
     pub fn goto_declaration(&self, params: DeclarationParams) -> Option<Declaration> {
-        let document = self.get_document(&params.text_document.uri)?;
-        let line_index = document.line_index(self);
-        let root = document.root_tree(self);
-        let symbol_table = SymbolTable::of(self, document);
-        let token = super::find_meaningful_token(self, document, &root, params.position)?;
-        let parent = token.parent()?;
-        if parent.kind() == SyntaxKind::IMMEDIATE {
-            symbol_table
-                .resolved
-                .get(&SymbolKey::new(&parent))
-                .map(|key| {
-                    Union2::A(helpers::create_location_by_symbol(
-                        params.text_document.uri.clone(),
-                        line_index,
-                        *key,
-                        &root,
-                    ))
-                })
-        } else {
-            None
-        }
+        self.goto_definition(DefinitionParams {
+            text_document: params.text_document,
+            position: params.position,
+            work_done_token: params.work_done_token,
+            partial_result_token: params.partial_result_token,
+        })
     }
 }
