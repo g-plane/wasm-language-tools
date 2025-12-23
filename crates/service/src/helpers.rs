@@ -49,9 +49,15 @@ pub fn fuzzy_search<S>(haystack: impl IntoIterator<Item = S>, needle: &str) -> O
 where
     S: AsRef<str>,
 {
-    use fuzzy_matcher::{FuzzyMatcher, skim::SkimMatcherV2};
+    use fuzzy_matcher::{
+        FuzzyMatcher,
+        skim::{SkimMatcherV2, SkimScoreConfig},
+    };
 
-    let matcher = SkimMatcherV2::default();
+    let matcher = SkimMatcherV2::default().score_config(SkimScoreConfig {
+        bonus_head: -12,
+        ..Default::default()
+    });
     haystack
         .into_iter()
         .filter_map(|name| {
@@ -59,7 +65,7 @@ where
                 .fuzzy_match(name.as_ref(), needle)
                 .map(|score| (score, name))
         })
-        .max_by_key(|(score, _)| *score)
+        .min_by_key(|(score, _)| *score)
         .map(|(_, guess)| guess)
 }
 
