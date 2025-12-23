@@ -6,8 +6,7 @@ use crate::{
 use lspt::{
     Declaration, DeclarationParams, Definition, DefinitionParams, TypeDefinitionParams, Union2,
 };
-use rowan::ast::{AstNode, support};
-use wat_syntax::{SyntaxKind, ast::TypeUse};
+use wat_syntax::SyntaxKind;
 
 impl LanguageService {
     /// Handler for `textDocument/definition` request.
@@ -42,29 +41,42 @@ impl LanguageService {
 
         let parent = token
             .parent()
-            .filter(|parent| matches!(parent.kind(), SyntaxKind::IMMEDIATE | SyntaxKind::INDEX))?;
-        let grand = parent.parent()?;
-        match grand.kind() {
-            SyntaxKind::PLAIN_INSTR => symbol_table
-                .resolved
-                .get(&SymbolKey::new(&parent))
-                .and_then(|key| {
-                    symbol_table.resolved.get(&SymbolKey::new(
-                        support::child::<TypeUse>(&key.to_node(&root))?
-                            .index()?
-                            .syntax(),
-                    ))
-                })
-                .map(|key| {
-                    Union2::A(helpers::create_location_by_symbol(
-                        params.text_document.uri.clone(),
-                        line_index,
-                        *key,
-                        &root,
-                    ))
-                }),
-            _ => None,
-        }
+            .filter(|parent| parent.kind() == SyntaxKind::IMMEDIATE)?;
+        symbol_table
+            .resolved
+            .get(&SymbolKey::new(&parent))
+            .and_then(|key| {
+                key.try_to_node(&root)?
+                    .children()
+                    .find_map(|child| match child.kind() {
+                        SyntaxKind::TYPE_USE | SyntaxKind::HEAP_TYPE => {
+                            child.first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
+                        }
+                        SyntaxKind::REF_TYPE => child
+                            .first_child_by_kind(&|kind| kind == SyntaxKind::HEAP_TYPE)
+                            .and_then(|node| {
+                                node.first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
+                            }),
+                        SyntaxKind::GLOBAL_TYPE => child
+                            .first_child_by_kind(&|kind| kind == SyntaxKind::REF_TYPE)
+                            .and_then(|node| {
+                                node.first_child_by_kind(&|kind| kind == SyntaxKind::HEAP_TYPE)
+                            })
+                            .and_then(|node| {
+                                node.first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
+                            }),
+                        _ => None,
+                    })
+                    .and_then(|type_idx| symbol_table.resolved.get(&SymbolKey::new(&type_idx)))
+            })
+            .map(|key| {
+                Union2::A(helpers::create_location_by_symbol(
+                    params.text_document.uri.clone(),
+                    line_index,
+                    *key,
+                    &root,
+                ))
+            })
     }
 
     /// Handler for `textDocument/declaration` request.

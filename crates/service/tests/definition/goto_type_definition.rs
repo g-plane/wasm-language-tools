@@ -161,3 +161,65 @@ fn func_ident_idx_type_use_ident_idx() {
     let response = service.goto_type_definition(create_params(uri, 4, 18));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn param_int_idx() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $s (struct))
+  (func (param (ref $s))
+    local.get 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.goto_type_definition(create_params(uri, 4, 15));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn local_ident_idx() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct))
+  (func (local $l (ref null 0))
+    local.get $l))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.goto_type_definition(create_params(uri, 4, 16));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn global() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $s (struct))
+  (func
+    global.get 0)
+  (global (ref null $s)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.goto_type_definition(create_params(uri, 4, 16));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn global_mut() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct))
+  (func
+    global.get $g)
+  (global $g (mut (ref null 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.goto_type_definition(create_params(uri, 4, 16));
+    assert_json_snapshot!(response);
+}
