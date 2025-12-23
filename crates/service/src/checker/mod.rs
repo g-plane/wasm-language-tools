@@ -12,6 +12,7 @@ mod elem_type;
 mod immediates;
 mod implicit_module;
 mod import_occur;
+mod import_with_def;
 mod mem_type;
 mod multi_modules;
 mod mutated_immutable;
@@ -105,6 +106,9 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                     symbol_table,
                     &node,
                 );
+                if let Some(diagnostic) = import_with_def::check(service, uri, line_index, &node) {
+                    diagnostics.push(diagnostic);
+                }
             }
             SyntaxKind::MODULE_FIELD_GLOBAL => {
                 typeck::check_global(
@@ -126,6 +130,9 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                     &node,
                 );
                 if let Some(diagnostic) = const_expr::check(line_index, &node) {
+                    diagnostics.push(diagnostic);
+                }
+                if let Some(diagnostic) = import_with_def::check(service, uri, line_index, &node) {
                     diagnostics.push(diagnostic);
                 }
             }
@@ -194,6 +201,9 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                 if let Some(diagnostic) = const_expr::check(line_index, &node) {
                     diagnostics.push(diagnostic);
                 }
+                if let Some(diagnostic) = import_with_def::check(service, uri, line_index, &node) {
+                    diagnostics.push(diagnostic);
+                }
             }
             SyntaxKind::MODULE_FIELD_ELEM => {
                 if let Some(diagnostic) = elem_type::check(
@@ -205,6 +215,11 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                     module_id,
                     &node,
                 ) {
+                    diagnostics.push(diagnostic);
+                }
+            }
+            SyntaxKind::MODULE_FIELD_MEMORY => {
+                if let Some(diagnostic) = import_with_def::check(service, uri, line_index, &node) {
                     diagnostics.push(diagnostic);
                 }
             }
@@ -241,7 +256,20 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                     diagnostics.push(diagnostic);
                 }
             }
-            SyntaxKind::MODULE_FIELD_TAG | SyntaxKind::EXTERN_TYPE_TAG => {
+            SyntaxKind::MODULE_FIELD_TAG => {
+                tag_type::check(
+                    &mut diagnostics,
+                    service,
+                    document,
+                    line_index,
+                    symbol_table,
+                    &node,
+                );
+                if let Some(diagnostic) = import_with_def::check(service, uri, line_index, &node) {
+                    diagnostics.push(diagnostic);
+                }
+            }
+            SyntaxKind::EXTERN_TYPE_TAG => {
                 tag_type::check(
                     &mut diagnostics,
                     service,

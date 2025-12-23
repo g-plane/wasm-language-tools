@@ -1,0 +1,59 @@
+---
+source: crates/service/tests/diagnostics/import_with_def.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 14
+        },
+        "end": {
+          "line": 4,
+          "character": 15
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null func)], found [(ref null func), (func 0)] at the end"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 4
+        },
+        "end": {
+          "line": 4,
+          "character": 14
+        }
+      },
+      "severity": 1,
+      "code": "import-with-def",
+      "source": "wat",
+      "message": "imported item can't contain definition",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 9
+              },
+              "end": {
+                "line": 3,
+                "character": 24
+              }
+            }
+          },
+          "message": "import declared here"
+        }
+      ]
+    }
+  ]
+}

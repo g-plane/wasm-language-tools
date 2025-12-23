@@ -1,0 +1,43 @@
+---
+source: crates/service/tests/diagnostics/import_with_def.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 26
+        },
+        "end": {
+          "line": 3,
+          "character": 32
+        }
+      },
+      "severity": 1,
+      "code": "import-with-def",
+      "source": "wat",
+      "message": "imported item can't contain definition",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 10
+              },
+              "end": {
+                "line": 3,
+                "character": 25
+              }
+            }
+          },
+          "message": "import declared here"
+        }
+      ]
+    }
+  ]
+}

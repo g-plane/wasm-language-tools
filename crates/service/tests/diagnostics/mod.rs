@@ -14,6 +14,7 @@ mod elem_type;
 mod immediates;
 mod implicit_module;
 mod import_occur;
+mod import_with_def;
 mod mem_type;
 mod multi_modules;
 mod mutated_immutable;
