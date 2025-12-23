@@ -49,7 +49,11 @@ pub fn check_func(
             module_id,
         },
         node,
-        Vec::with_capacity(2),
+        if support::child::<Import>(node).is_some() {
+            results.iter().map(|ty| (ty.clone(), None)).collect()
+        } else {
+            Vec::with_capacity(2)
+        },
         &results,
     );
 }
