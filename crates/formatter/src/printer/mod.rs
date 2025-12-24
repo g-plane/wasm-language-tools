@@ -6,6 +6,7 @@ use rowan::{
 use tiny_pretty::Doc;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage, ast::*};
 
+mod helpers;
 mod instr;
 mod module;
 mod ty;

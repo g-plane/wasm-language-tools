@@ -84,6 +84,12 @@ pub struct LanguageOptions {
     /// Default: `false`
     pub split_closing_parens: bool,
 
+    #[serde(alias = "wrapBeforeLocals")]
+    /// Control whether to insert line break before function locals.
+    ///
+    /// Default: `Overflow`
+    pub wrap_before_locals: WrapBefore,
+
     #[serde(alias = "formatComments")]
     /// Control whether whitespace should be inserted at the beginning and end of comments.
     ///
@@ -105,7 +111,18 @@ impl Default for LanguageOptions {
         Self {
             split_closing_parens: false,
             format_comments: false,
+            wrap_before_locals: WrapBefore::Overflow,
             ignore_comment_directive: "fmt-ignore".to_string(),
         }
     }
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum WrapBefore {
+    Never,
+    Overflow,
+    #[serde(alias = "multiOnly")]
+    MultiOnly,
+    Always,
 }

@@ -1,0 +1,4 @@
+(module
+  (func (param) (local i32 (ref any)))
+  (func (param) (local i32) (local f64))
+  (func (param) (param i32) (result i32) (local i32)))

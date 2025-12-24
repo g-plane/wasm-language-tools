@@ -1,0 +1,21 @@
+{
+  "default": {
+    "printWidth": 40
+  },
+  "never": {
+    "printWidth": 40,
+    "wrapBeforeLocals": "never"
+  },
+  "overflow": {
+    "printWidth": 40,
+    "wrapBeforeLocals": "overflow"
+  },
+  "multi-only": {
+    "printWidth": 40,
+    "wrapBeforeLocals": "multi-only"
+  },
+  "always": {
+    "printWidth": 40,
+    "wrapBeforeLocals": "always"
+  }
+}

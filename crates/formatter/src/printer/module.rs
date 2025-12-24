@@ -620,7 +620,10 @@ impl DocGen for ModuleFieldFunc {
         let mut locals = self.locals();
         if let Some(local) = locals.next() {
             if trivias.is_empty() {
-                docs.push(Doc::soft_line());
+                docs.push(helpers::wrap_before(
+                    &locals,
+                    ctx.options.wrap_before_locals,
+                ));
             } else {
                 docs.append(&mut trivias);
             }
