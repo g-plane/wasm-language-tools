@@ -2,11 +2,12 @@ use crate::{
     binder::{SymbolKey, SymbolKind, SymbolTable},
     document::Document,
 };
+use indexmap::IndexMap;
 use rowan::{
     TextRange,
     ast::{AstNode, support},
 };
-use rustc_hash::FxHashMap;
+use rustc_hash::FxBuildHasher;
 use wat_syntax::{
     SyntaxKind,
     ast::{CompType, ExternTypeGlobal, FieldType, ModuleFieldGlobal, PlainInstr, TypeDef},
@@ -16,7 +17,7 @@ use wat_syntax::{
 pub(crate) fn get_mutabilities<'db>(
     db: &'db dyn salsa::Database,
     document: Document,
-) -> FxHashMap<SymbolKey, Mutability> {
+) -> IndexMap<SymbolKey, Mutability, FxBuildHasher> {
     let root = document.root_tree(db);
     let symbol_table = SymbolTable::of(db, document);
     symbol_table
@@ -109,7 +110,7 @@ pub(crate) struct Mutability {
 pub(crate) fn get_mutation_actions<'db>(
     db: &'db dyn salsa::Database,
     document: Document,
-) -> FxHashMap<SymbolKey, MutationAction> {
+) -> IndexMap<SymbolKey, MutationAction, FxBuildHasher> {
     let root = document.root_tree(db);
     let symbol_table = SymbolTable::of(db, document);
     symbol_table

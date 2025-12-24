@@ -8,40 +8,6 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 14,
-          "character": 14
-        },
-        "end": {
-          "line": 14,
-          "character": 21
-        }
-      },
-      "severity": 1,
-      "code": "mutated-immutable",
-      "source": "wat",
-      "message": "mutating the immutable array `$packed` is not allowed",
-      "relatedInformation": [
-        {
-          "location": {
-            "uri": "untitled:test",
-            "range": {
-              "start": {
-                "line": 9,
-                "character": 2
-              },
-              "end": {
-                "line": 9,
-                "character": 27
-              }
-            }
-          },
-          "message": "immutable array defined here"
-        }
-      ]
-    },
-    {
-      "range": {
-        "start": {
           "line": 7,
           "character": 14
         },
@@ -66,6 +32,40 @@ expression: response
               "end": {
                 "line": 2,
                 "character": 20
+              }
+            }
+          },
+          "message": "immutable array defined here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 14,
+          "character": 14
+        },
+        "end": {
+          "line": 14,
+          "character": 21
+        }
+      },
+      "severity": 1,
+      "code": "mutated-immutable",
+      "source": "wat",
+      "message": "mutating the immutable array `$packed` is not allowed",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 9,
+                "character": 2
+              },
+              "end": {
+                "line": 9,
+                "character": 27
               }
             }
           },
