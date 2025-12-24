@@ -41,7 +41,15 @@ export default defineConfig({
         items: [
           { text: 'Overview', link: '/config/overview', docFooterText: 'Config Overview' },
           { text: 'Lint', link: '/config/lint' },
-          { text: 'Format', link: '/config/format' },
+          {
+            text: 'Format',
+            link: '/config/format',
+            items: [
+              { text: 'splitClosingParens', link: '/config/format/split-closing-parens' },
+              { text: 'wrapBeforeLocals', link: '/config/format/wrap-before-locals' },
+              { text: 'formatComments', link: '/config/format/format-comments' },
+            ],
+          },
           { text: 'Inlay Hint', link: '/config/inlay-hint' },
         ],
       },
