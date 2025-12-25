@@ -1,12 +1,11 @@
-use crate::config::{FormatOptions, LanguageOptions};
+use crate::config::{FormatOptions, LanguageOptions, WrapBefore};
 use rowan::{
     Direction, NodeOrToken,
-    ast::{AstNode, support},
+    ast::{AstChildren, AstNode, support},
 };
 use tiny_pretty::Doc;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage, ast::*};
 
-mod helpers;
 mod instr;
 mod module;
 mod ty;
@@ -376,4 +375,22 @@ fn has_line_break_after_token(token: &SyntaxToken) -> bool {
         .skip(1)
         .map_while(SyntaxElement::into_token)
         .any(|token| token.text().contains('\n'))
+}
+
+pub fn wrap_before<N>(children: &AstChildren<N>, option: WrapBefore) -> Doc<'static>
+where
+    N: AstNode<Language = WatLanguage> + Clone,
+{
+    match option {
+        WrapBefore::Never => Doc::space(),
+        WrapBefore::Overflow => Doc::soft_line(),
+        WrapBefore::MultiOnly => {
+            if children.clone().peekable().peek().is_some() {
+                Doc::hard_line()
+            } else {
+                Doc::space()
+            }
+        }
+        WrapBefore::Always => Doc::hard_line(),
+    }
 }

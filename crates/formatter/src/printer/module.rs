@@ -612,10 +612,7 @@ impl DocGen for ModuleFieldFunc {
         let mut locals = self.locals();
         if let Some(local) = locals.next() {
             if trivias.is_empty() {
-                docs.push(helpers::wrap_before(
-                    &locals,
-                    ctx.options.wrap_before_locals,
-                ));
+                docs.push(wrap_before(&locals, ctx.options.wrap_before_locals));
             } else {
                 docs.append(&mut trivias);
             }
@@ -1246,10 +1243,7 @@ fn format_const_expr(
             {
                 docs.push(Doc::hard_line());
             } else {
-                docs.push(helpers::wrap_before(
-                    &instrs,
-                    ctx.options.wrap_before_const_expr,
-                ));
+                docs.push(wrap_before(&instrs, ctx.options.wrap_before_const_expr));
             }
         } else {
             docs.append(trivias);
