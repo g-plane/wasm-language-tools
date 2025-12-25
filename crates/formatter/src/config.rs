@@ -90,6 +90,12 @@ pub struct LanguageOptions {
     /// Default: `Overflow`
     pub wrap_before_locals: WrapBefore,
 
+    #[serde(alias = "wrapBeforeGlobalExpr")]
+    /// Control whether to insert line break before global initialization expression.
+    ///
+    /// Default: `Always`
+    pub wrap_before_global_expr: WrapBefore,
+
     #[serde(alias = "formatComments")]
     /// Control whether whitespace should be inserted at the beginning and end of comments.
     ///
@@ -110,8 +116,9 @@ impl Default for LanguageOptions {
     fn default() -> Self {
         Self {
             split_closing_parens: false,
-            format_comments: false,
             wrap_before_locals: WrapBefore::Overflow,
+            wrap_before_global_expr: WrapBefore::Always,
+            format_comments: false,
             ignore_comment_directive: "fmt-ignore".to_string(),
         }
     }

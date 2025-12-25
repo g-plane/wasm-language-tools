@@ -705,7 +705,31 @@ impl DocGen for ModuleFieldGlobal {
             docs.push(global_type.doc(ctx));
             trivias = format_trivias_after_node(global_type, ctx);
         }
-        self.instrs().for_each(|instr| {
+        let mut instrs = self.instrs();
+        if let Some(instr) = instrs.next() {
+            if trivias.is_empty() {
+                if matches!(
+                    ctx.options.wrap_before_global_expr,
+                    crate::config::WrapBefore::MultiOnly
+                ) && instr
+                    .syntax()
+                    .children()
+                    .any(|child| Instr::can_cast(child.kind()))
+                {
+                    docs.push(Doc::hard_line());
+                } else {
+                    docs.push(helpers::wrap_before(
+                        &instrs,
+                        ctx.options.wrap_before_global_expr,
+                    ));
+                }
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(instr.doc(ctx));
+            trivias = format_trivias_after_node(instr, ctx);
+        }
+        instrs.for_each(|instr| {
             if trivias.is_empty() {
                 docs.push(Doc::hard_line());
             } else {

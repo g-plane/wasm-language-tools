@@ -13,7 +13,7 @@ Available option values:
 
 ## `"never"`
 
-Line will never be wrapped before locals.
+Line wrap will never be happened before locals.
 
 ```wasm
 (module
@@ -34,7 +34,7 @@ Line will never be wrapped before locals.
 
 ## `"overflow"`
 
-Line will be wrapped before locals only when it exceeds the print width.
+Line wrap will be happened before locals only when previous code exceeds the print width.
 
 ```wasm
 (module
@@ -53,7 +53,7 @@ Line will be wrapped before locals only when it exceeds the print width.
 
 ## `"multi-only"`
 
-Line will be wrapped before locals only when there are more than one local.
+Line wrap will be happened before locals only when there are more than one local.
 Note that `(local i32 i64)` is considered as one local syntax.
 
 ```wasm
@@ -73,7 +73,7 @@ Note that `(local i32 i64)` is considered as one local syntax.
 
 ## `"always"`
 
-Line will always be wrapped before locals.
+Line wrap will always be happened before locals.
 
 ```wasm
 (module
