@@ -1,5 +1,5 @@
 use super::*;
-use rowan::ast::AstNode;
+use rowan::ast::{AstChildren, AstNode};
 use tiny_pretty::Doc;
 
 impl DocGen for Data {
@@ -85,15 +85,7 @@ impl DocGen for ElemExpr {
             docs.push(Doc::text("item"));
             trivias = format_trivias_after_token(keyword, ctx);
         }
-        self.instrs().for_each(|instr| {
-            if trivias.is_empty() {
-                docs.push(Doc::hard_line());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(instr.doc(ctx));
-            trivias = format_trivias_after_node(instr, ctx);
-        });
+        format_const_expr(self.instrs(), ctx, &mut docs, &mut trivias);
         if self.r_paren_token().is_some() {
             docs.append(&mut trivias);
             Doc::list(docs)
@@ -705,39 +697,7 @@ impl DocGen for ModuleFieldGlobal {
             docs.push(global_type.doc(ctx));
             trivias = format_trivias_after_node(global_type, ctx);
         }
-        let mut instrs = self.instrs();
-        if let Some(instr) = instrs.next() {
-            if trivias.is_empty() {
-                if matches!(
-                    ctx.options.wrap_before_global_expr,
-                    crate::config::WrapBefore::MultiOnly
-                ) && instr
-                    .syntax()
-                    .children()
-                    .any(|child| Instr::can_cast(child.kind()))
-                {
-                    docs.push(Doc::hard_line());
-                } else {
-                    docs.push(helpers::wrap_before(
-                        &instrs,
-                        ctx.options.wrap_before_global_expr,
-                    ));
-                }
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(instr.doc(ctx));
-            trivias = format_trivias_after_node(instr, ctx);
-        }
-        instrs.for_each(|instr| {
-            if trivias.is_empty() {
-                docs.push(Doc::hard_line());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(instr.doc(ctx));
-            trivias = format_trivias_after_node(instr, ctx);
-        });
+        format_const_expr(self.instrs(), ctx, &mut docs, &mut trivias);
         docs.append(&mut trivias);
         Doc::list(docs)
             .nest(ctx.indent_width)
@@ -957,15 +917,7 @@ impl DocGen for ModuleFieldTable {
             docs.push(elem.doc(ctx));
             trivias = format_trivias_after_node(elem, ctx);
         }
-        self.instrs().for_each(|instr| {
-            if trivias.is_empty() {
-                docs.push(Doc::hard_line());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(instr.doc(ctx));
-            trivias = format_trivias_after_node(instr, ctx);
-        });
+        format_const_expr(self.instrs(), ctx, &mut docs, &mut trivias);
         docs.append(&mut trivias);
         Doc::list(docs)
             .nest(ctx.indent_width)
@@ -1056,15 +1008,7 @@ impl DocGen for Offset {
             docs.push(Doc::text("offset"));
             trivias = format_trivias_after_token(keyword, ctx);
         }
-        self.instrs().for_each(|instr| {
-            if trivias.is_empty() {
-                docs.push(Doc::hard_line());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(instr.doc(ctx));
-            trivias = format_trivias_after_node(instr, ctx);
-        });
+        format_const_expr(self.instrs(), ctx, &mut docs, &mut trivias);
         if self.r_paren_token().is_some() {
             docs.append(&mut trivias);
             Doc::list(docs)
@@ -1282,4 +1226,44 @@ where
         .nest(ctx.indent_width)
         .append(ctx.format_right_paren(node))
         .group()
+}
+
+fn format_const_expr(
+    mut instrs: AstChildren<Instr>,
+    ctx: &Ctx,
+    docs: &mut Vec<Doc<'static>>,
+    trivias: &mut Vec<Doc<'static>>,
+) {
+    if let Some(instr) = instrs.next() {
+        if trivias.is_empty() {
+            if matches!(
+                ctx.options.wrap_before_const_expr,
+                crate::config::WrapBefore::MultiOnly
+            ) && instr
+                .syntax()
+                .children()
+                .any(|child| Instr::can_cast(child.kind()))
+            {
+                docs.push(Doc::hard_line());
+            } else {
+                docs.push(helpers::wrap_before(
+                    &instrs,
+                    ctx.options.wrap_before_const_expr,
+                ));
+            }
+        } else {
+            docs.append(trivias);
+        }
+        docs.push(instr.doc(ctx));
+        *trivias = format_trivias_after_node(instr, ctx);
+    }
+    instrs.for_each(|instr| {
+        if trivias.is_empty() {
+            docs.push(Doc::hard_line());
+        } else {
+            docs.append(trivias);
+        }
+        docs.push(instr.doc(ctx));
+        *trivias = format_trivias_after_node(instr, ctx);
+    });
 }

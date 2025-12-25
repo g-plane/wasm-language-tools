@@ -1,8 +1,8 @@
-# `wrapBeforeGlobalExpr`
+# `wrapBeforeConstExpr`
 
 > default: `"always"`
 
-Control whether to insert line break before global initialization expression.
+Control whether to insert line break before constant expression.
 
 Available option values:
 
@@ -13,7 +13,7 @@ Available option values:
 
 ## `"never"`
 
-Line wrap will never be happened before global initialization expression.
+Line wrap will never be happened before constant expression.
 
 Though possible, using `"never"` is not recommended.
 
@@ -41,7 +41,7 @@ Though possible, using `"never"` is not recommended.
 
 ## `"overflow"`
 
-Line wrap will be happened before global initialization expression only when previous code exceeds the print width.
+Line wrap will be happened before constant expression only when previous code exceeds the print width.
 
 ```wasm
 (module
@@ -68,7 +68,7 @@ Line wrap will be happened before global initialization expression only when pre
 
 ## `"multi-only"`
 
-Line wrap will be happened before global initialization expression only when there are more than one instruction.
+Line wrap will be happened before constant expression only when there are more than one instruction.
 Folded instruction with children instructions is considered as multiple instructions.
 
 ```wasm
@@ -97,7 +97,7 @@ Folded instruction with children instructions is considered as multiple instruct
 
 ## `"always"`
 
-Line wrap will always be happened before global initialization expression.
+Line wrap will always be happened before constant expression.
 
 ```wasm
 (module

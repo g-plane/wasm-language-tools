@@ -47,7 +47,7 @@ export default defineConfig({
             items: [
               { text: 'splitClosingParens', link: '/config/format/split-closing-parens' },
               { text: 'wrapBeforeLocals', link: '/config/format/wrap-before-locals' },
-              { text: 'wrapBeforeGlobalExpr', link: '/config/format/wrap-before-global-expr' },
+              { text: 'wrapBeforeConstExpr', link: '/config/format/wrap-before-const-expr' },
               { text: 'formatComments', link: '/config/format/format-comments' },
             ],
           },

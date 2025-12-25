@@ -1,6 +1,0 @@
-(module
-  (global i32 i32.const 0)
-  (global i32 (i32.add (i32.const 0) (i32.const 0)))
-  (global i32 i32.const 0 i32.const 0 i32.add)
-  (global (ref null func) ref.func $long-long-long-long-func-name)
-)

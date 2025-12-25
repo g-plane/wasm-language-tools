@@ -4,18 +4,18 @@
   },
   "never": {
     "printWidth": 60,
-    "wrapBeforeGlobalExpr": "never"
+    "wrapBeforeConstExpr": "never"
   },
   "overflow": {
     "printWidth": 60,
-    "wrapBeforeGlobalExpr": "overflow"
+    "wrapBeforeConstExpr": "overflow"
   },
   "multi-only": {
     "printWidth": 60,
-    "wrapBeforeGlobalExpr": "multi-only"
+    "wrapBeforeConstExpr": "multi-only"
   },
   "always": {
     "printWidth": 60,
-    "wrapBeforeGlobalExpr": "always"
+    "wrapBeforeConstExpr": "always"
   }
 }
