@@ -96,6 +96,12 @@ pub struct LanguageOptions {
     /// Default: `Always`
     pub wrap_before_const_expr: WrapBefore,
 
+    #[serde(alias = "multiLineLocals")]
+    /// Control how to insert whitespace between multiple locals in a function.
+    ///
+    /// Default: `Never`
+    pub multi_line_locals: MultiLine,
+
     #[serde(alias = "formatComments")]
     /// Control whether whitespace should be inserted at the beginning and end of comments.
     ///
@@ -118,6 +124,7 @@ impl Default for LanguageOptions {
             split_closing_parens: false,
             wrap_before_locals: WrapBefore::Overflow,
             wrap_before_const_expr: WrapBefore::Always,
+            multi_line_locals: MultiLine::Never,
             format_comments: false,
             ignore_comment_directive: "fmt-ignore".to_string(),
         }
@@ -131,5 +138,14 @@ pub enum WrapBefore {
     Overflow,
     #[serde(alias = "multiOnly")]
     MultiOnly,
+    Always,
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum MultiLine {
+    Never,
+    Overflow,
+    Smart,
     Always,
 }

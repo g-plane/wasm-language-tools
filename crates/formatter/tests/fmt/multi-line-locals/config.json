@@ -1,0 +1,21 @@
+{
+  "default": {
+    "printWidth": 45
+  },
+  "never": {
+    "printWidth": 45,
+    "multiLineLocals": "never"
+  },
+  "overflow": {
+    "printWidth": 45,
+    "multiLineLocals": "overflow"
+  },
+  "smart": {
+    "printWidth": 45,
+    "multiLineLocals": "smart"
+  },
+  "always": {
+    "printWidth": 45,
+    "multiLineLocals": "always"
+  }
+}

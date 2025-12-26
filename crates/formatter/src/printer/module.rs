@@ -609,25 +609,29 @@ impl DocGen for ModuleFieldFunc {
             docs.push(type_use.doc(ctx));
             trivias = format_trivias_after_node(type_use, ctx);
         }
-        let mut locals = self.locals();
+        let mut locals = self.locals().peekable();
+        let mut locals_docs = Vec::with_capacity(1);
+        let ws_of_multi_line =
+            whitespace_of_multi_line(ctx.options.multi_line_locals, locals.peek());
         if let Some(local) = locals.next() {
             if trivias.is_empty() {
                 docs.push(wrap_before(&locals, ctx.options.wrap_before_locals));
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(local.doc(ctx));
+            locals_docs.push(local.doc(ctx));
             trivias = format_trivias_after_node(local, ctx);
         }
         locals.for_each(|local| {
             if trivias.is_empty() {
-                docs.push(Doc::space());
+                locals_docs.push(ws_of_multi_line.clone());
             } else {
-                docs.append(&mut trivias);
+                locals_docs.append(&mut trivias);
             }
-            docs.push(local.doc(ctx));
+            locals_docs.push(local.doc(ctx));
             trivias = format_trivias_after_node(local, ctx);
         });
+        docs.push(Doc::list(locals_docs).group());
         self.instrs().for_each(|instr| {
             if trivias.is_empty() {
                 docs.push(Doc::hard_line());

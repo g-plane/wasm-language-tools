@@ -1,7 +1,7 @@
-use crate::config::{FormatOptions, LanguageOptions, WrapBefore};
+use crate::config::{FormatOptions, LanguageOptions, MultiLine, WrapBefore};
 use rowan::{
     Direction, NodeOrToken,
-    ast::{AstChildren, AstNode, support},
+    ast::{AstNode, support},
 };
 use tiny_pretty::Doc;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage, ast::*};
@@ -377,8 +377,9 @@ fn has_line_break_after_token(token: &SyntaxToken) -> bool {
         .any(|token| token.text().contains('\n'))
 }
 
-pub fn wrap_before<N>(children: &AstChildren<N>, option: WrapBefore) -> Doc<'static>
+fn wrap_before<C, N>(children: &C, option: WrapBefore) -> Doc<'static>
 where
+    C: Iterator<Item = N> + Clone,
     N: AstNode<Language = WatLanguage> + Clone,
 {
     match option {
@@ -392,5 +393,30 @@ where
             }
         }
         WrapBefore::Always => Doc::hard_line(),
+    }
+}
+
+fn whitespace_of_multi_line<N>(option: MultiLine, first: Option<&N>) -> Doc<'static>
+where
+    N: AstNode<Language = WatLanguage>,
+{
+    match option {
+        MultiLine::Never => Doc::space(),
+        MultiLine::Overflow => Doc::line_or_space(),
+        MultiLine::Smart => {
+            if first.is_some_and(|first| {
+                first
+                    .syntax()
+                    .siblings_with_tokens(Direction::Next)
+                    .skip(1)
+                    .map_while(NodeOrToken::into_token)
+                    .any(|token| token.text().contains('\n'))
+            }) {
+                Doc::hard_line()
+            } else {
+                Doc::line_or_space()
+            }
+        }
+        MultiLine::Always => Doc::hard_line(),
     }
 }
