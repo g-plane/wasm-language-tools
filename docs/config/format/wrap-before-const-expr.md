@@ -11,6 +11,8 @@ Available option values:
 - `"multi-only"`
 - `"always"`
 
+All the examples below assume the print width is `60`.
+
 ## `"never"`
 
 Line wrap will never be happened before constant expression.
