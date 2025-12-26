@@ -479,7 +479,6 @@ impl DocGen for StorageType {
 
 impl DocGen for StructType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut preferred_multi_line = false;
         let mut docs = Vec::with_capacity(2);
         let mut trivias = vec![];
         if let Some(l_paren) = self.l_paren_token() {
@@ -489,16 +488,21 @@ impl DocGen for StructType {
         if let Some(keyword) = self.keyword() {
             docs.append(&mut trivias);
             docs.push(Doc::text("struct"));
-            preferred_multi_line = has_line_break_after_token(&keyword);
             trivias = format_trivias_after_token(keyword, ctx);
         }
-        self.fields().for_each(|field| {
+        let mut fields = self.fields();
+        if let Some(field) = fields.next() {
             if trivias.is_empty() {
-                if preferred_multi_line {
-                    docs.push(Doc::hard_line());
-                } else {
-                    docs.push(Doc::line_or_space());
-                }
+                docs.push(wrap_before(&fields, ctx.options.wrap_before_fields));
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(field.doc(ctx));
+            trivias = format_trivias_after_node(field, ctx);
+        }
+        fields.for_each(|field| {
+            if trivias.is_empty() {
+                docs.push(Doc::line_or_space());
             } else {
                 docs.append(&mut trivias);
             }
@@ -544,7 +548,22 @@ impl DocGen for SubType {
             });
             if let Some(ty) = self.comp_type() {
                 if trivias.is_empty() {
-                    docs.push(Doc::space());
+                    if let CompType::Struct(struct_ty) = &ty {
+                        match ctx.options.wrap_before_fields {
+                            WrapBefore::Never => docs.push(Doc::space()),
+                            WrapBefore::Overflow => docs.push(Doc::line_or_space()),
+                            WrapBefore::MultiOnly => {
+                                if struct_ty.fields().count() > 1 {
+                                    docs.push(Doc::hard_line());
+                                } else {
+                                    docs.push(Doc::space());
+                                }
+                            }
+                            WrapBefore::Always => docs.push(Doc::hard_line()),
+                        }
+                    } else {
+                        docs.push(Doc::space());
+                    }
                 } else {
                     docs.append(&mut trivias);
                 }

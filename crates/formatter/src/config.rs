@@ -90,6 +90,12 @@ pub struct LanguageOptions {
     /// Default: `Overflow`
     pub wrap_before_locals: WrapBefore,
 
+    #[serde(alias = "wrapBeforeFields")]
+    /// Control whether to insert line break before struct fields.
+    ///
+    /// Default: `MultiOnly`
+    pub wrap_before_fields: WrapBefore,
+
     #[serde(alias = "wrapBeforeConstExpr")]
     /// Control whether to insert line break before constant expression.
     ///
@@ -123,6 +129,7 @@ impl Default for LanguageOptions {
         Self {
             split_closing_parens: false,
             wrap_before_locals: WrapBefore::Overflow,
+            wrap_before_fields: WrapBefore::MultiOnly,
             wrap_before_const_expr: WrapBefore::Always,
             multi_line_locals: MultiLine::Never,
             format_comments: false,

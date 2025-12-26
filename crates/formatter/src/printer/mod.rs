@@ -369,14 +369,6 @@ fn should_ignore(node: &SyntaxNode, ctx: &Ctx) -> bool {
         .is_some_and(|rest| rest.is_empty() || rest.starts_with(|c: char| c.is_ascii_whitespace()))
 }
 
-fn has_line_break_after_token(token: &SyntaxToken) -> bool {
-    token
-        .siblings_with_tokens(Direction::Next)
-        .skip(1)
-        .map_while(SyntaxElement::into_token)
-        .any(|token| token.text().contains('\n'))
-}
-
 fn wrap_before<C, N>(children: &C, option: WrapBefore) -> Doc<'static>
 where
     C: Iterator<Item = N> + Clone,

@@ -1,8 +1,0 @@
----
-source: crates/formatter/tests/fmt.rs
----
-(module
-  (type
-    (struct
-      (field)
-      (field))))

@@ -1,0 +1,21 @@
+{
+  "default": {
+    "printWidth": 50
+  },
+  "never": {
+    "printWidth": 50,
+    "wrapBeforeFields": "never"
+  },
+  "overflow": {
+    "printWidth": 50,
+    "wrapBeforeFields": "overflow"
+  },
+  "multi-only": {
+    "printWidth": 50,
+    "wrapBeforeFields": "multi-only"
+  },
+  "always": {
+    "printWidth": 50,
+    "wrapBeforeFields": "always"
+  }
+}
