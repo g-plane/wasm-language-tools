@@ -1024,7 +1024,6 @@ impl DocGen for Offset {
 
 impl DocGen for RecType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut preferred_multi_line = false;
         let mut docs = Vec::with_capacity(2);
         let mut trivias = vec![];
         if let Some(l_paren) = self.l_paren_token() {
@@ -1034,16 +1033,11 @@ impl DocGen for RecType {
         if let Some(keyword) = self.keyword() {
             docs.append(&mut trivias);
             docs.push(Doc::text("rec"));
-            preferred_multi_line = has_line_break_after_token(&keyword);
             trivias = format_trivias_after_token(keyword, ctx);
         }
         self.type_defs().for_each(|type_def| {
             if trivias.is_empty() {
-                if preferred_multi_line {
-                    docs.push(Doc::hard_line());
-                } else {
-                    docs.push(Doc::line_or_space());
-                }
+                docs.push(Doc::hard_line());
             } else {
                 docs.append(&mut trivias);
             }
