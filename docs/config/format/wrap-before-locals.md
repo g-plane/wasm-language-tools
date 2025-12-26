@@ -1,6 +1,6 @@
 # `wrapBeforeLocals`
 
-> default: `"overflow"`
+> default: `"always"`
 
 Control whether to insert line break before function locals.
 
@@ -19,7 +19,7 @@ Line wrap will never be happened before locals.
 
 ```wasm
 (module
-  (func (param)(local i32 (ref any)))
+  (func (param) (local i32 (ref any)))
   (func (param) (local i32) (local f64))
   (func (param) (param i32) (result i32)
     (local i32)))
@@ -31,7 +31,8 @@ Line wrap will never be happened before locals.
 (module
   (func (param) (local i32 (ref any)))
   (func (param) (local i32) (local f64))
-  (func (param) (param i32) (result i32) (local i32)))
+  (func
+    (param) (param i32) (result i32) (local i32)))
 ```
 
 ## `"overflow"`

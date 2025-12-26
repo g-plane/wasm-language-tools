@@ -87,7 +87,7 @@ pub struct LanguageOptions {
     #[serde(alias = "wrapBeforeLocals")]
     /// Control whether to insert line break before function locals.
     ///
-    /// Default: `Overflow`
+    /// Default: `Always`
     pub wrap_before_locals: WrapBefore,
 
     #[serde(alias = "wrapBeforeFields")]
@@ -105,7 +105,7 @@ pub struct LanguageOptions {
     #[serde(alias = "multiLineLocals")]
     /// Control how to insert whitespace between multiple locals in a function.
     ///
-    /// Default: `Never`
+    /// Default: `Smart`
     pub multi_line_locals: MultiLine,
 
     #[serde(alias = "multiLineFields")]
@@ -134,10 +134,10 @@ impl Default for LanguageOptions {
     fn default() -> Self {
         Self {
             split_closing_parens: false,
-            wrap_before_locals: WrapBefore::Overflow,
+            wrap_before_locals: WrapBefore::Always,
             wrap_before_fields: WrapBefore::MultiOnly,
             wrap_before_const_expr: WrapBefore::Always,
-            multi_line_locals: MultiLine::Never,
+            multi_line_locals: MultiLine::Smart,
             multi_line_fields: MultiLine::Smart,
             format_comments: false,
             ignore_comment_directive: "fmt-ignore".to_string(),

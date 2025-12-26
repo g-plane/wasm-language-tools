@@ -3,7 +3,8 @@ source: crates/formatter/tests/parser.rs
 ---
 (module
   (func (export "fac-stack-raw") (param $n i64) (result i64)
-    (local $i i64) (local $res i64)
+    (local $i i64)
+    (local $res i64)
     local.get $n
     local.set $i
     i64.const 1
@@ -31,7 +32,8 @@ source: crates/formatter/tests/parser.rs
     local.get $res)
 
   (func (export "fac-mixed-raw") (param $n i64) (result i64)
-    (local $i i64) (local $res i64)
+    (local $i i64)
+    (local $res i64)
     (local.set $i
       (local.get $n))
     (local.set $res

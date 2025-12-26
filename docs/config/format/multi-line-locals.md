@@ -1,6 +1,6 @@
 # `multiLineLocals`
 
-> default: `"never"`
+> default: `"smart"`
 
 Control how to insert whitespace between multiple locals in a function.
 
@@ -31,8 +31,10 @@ All locals will be printed in the same line, regardless of the print width.
 
 ```wasm
 (module
-  (func (local i32) (local i64) (local f32))
-  (func (local i32) (local i64) (local f32))
+  (func
+    (local i32) (local i64) (local f32))
+  (func
+    (local i32) (local i64) (local f32))
   (func
     (local $1 i32) (local $2 i32) (local $3 i32))
   (func
@@ -57,8 +59,10 @@ If failed to print all locals in the same line within the print width, each loca
 
 ```wasm
 (module
-  (func (local i32) (local i64) (local f32))
-  (func (local i32) (local i64) (local f32))
+  (func
+    (local i32) (local i64) (local f32))
+  (func
+    (local i32) (local i64) (local f32))
   (func (local $1 i32)
     (local $2 i32)
     (local $3 i32))
@@ -83,7 +87,8 @@ If there's a line break, it behaves like `"always"`, though it doesn't exceed th
 
 ```wasm
 (module
-  (func (local i32)
+  (func
+    (local i32)
     (local i64)
     (local f32)))
 ```
@@ -102,7 +107,8 @@ If there's no line break, it behaves like `"overflow"`, even if there're line br
 ```wasm
 (module
   (func (local i32) (local i64) (local f32))
-  (func (local $1 i32)
+  (func
+    (local $1 i32)
     (local $2 i32)
     (local $3 i32)))
 ```
@@ -125,16 +131,20 @@ All locals will be printed in their own lines.
 
 ```wasm
 (module
-  (func (local i32)
+  (func
+    (local i32)
     (local i64)
     (local f32))
-  (func (local i32)
+  (func
+    (local i32)
     (local i64)
     (local f32))
-  (func (local $1 i32)
+  (func
+    (local $1 i32)
     (local $2 i32)
     (local $3 i32))
-  (func (local $1 i32)
+  (func
+    (local $1 i32)
     (local $2 i32)
     (local $3 i32)))
 ```

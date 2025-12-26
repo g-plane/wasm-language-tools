@@ -245,12 +245,14 @@ source: crates/formatter/tests/parser.rs
       (br 0
         (block (result i32)
           (i32.const 1)))))
-  (func (export "as-local.set-value") (result i32) (local i32)
+  (func (export "as-local.set-value") (result i32)
+    (local i32)
     (local.set 0
       (block (result i32)
         (i32.const 1)))
     (local.get 0))
-  (func (export "as-local.tee-value") (result i32) (local i32)
+  (func (export "as-local.tee-value") (result i32)
+    (local i32)
     (local.tee 0
       (block (result i32)
         (i32.const 1))))
@@ -371,7 +373,8 @@ source: crates/formatter/tests/parser.rs
         (i32.const 23)
         (i32.const 1))
       (i32.const 21)))
-  (func (export "break-inner") (result i32) (local i32)
+  (func (export "break-inner") (result i32)
+    (local i32)
     (local.set 0
       (i32.const 0))
     (local.set 0
@@ -439,7 +442,8 @@ source: crates/formatter/tests/parser.rs
       (br 0))
     (i32.add))
 
-  (func (export "effects") (result i32) (local i32)
+  (func (export "effects") (result i32)
+    (local i32)
     (block
       (local.set 0
         (i32.const 1))
