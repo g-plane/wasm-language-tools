@@ -615,7 +615,7 @@ impl DocGen for ModuleFieldFunc {
             whitespace_of_multi_line(ctx.options.multi_line_locals, locals.peek());
         if let Some(local) = locals.next() {
             if trivias.is_empty() {
-                docs.push(wrap_before(&locals, ctx.options.wrap_before_locals));
+                docs.push(wrap_before(&mut locals, ctx.options.wrap_before_locals));
             } else {
                 docs.append(&mut trivias);
             }
@@ -1224,11 +1224,12 @@ where
 }
 
 fn format_const_expr(
-    mut instrs: AstChildren<Instr>,
+    instrs: AstChildren<Instr>,
     ctx: &Ctx,
     docs: &mut Vec<Doc<'static>>,
     trivias: &mut Vec<Doc<'static>>,
 ) {
+    let mut instrs = instrs.peekable();
     if let Some(instr) = instrs.next() {
         if trivias.is_empty() {
             if matches!(
@@ -1241,7 +1242,7 @@ fn format_const_expr(
             {
                 docs.push(Doc::hard_line());
             } else {
-                docs.push(wrap_before(&instrs, ctx.options.wrap_before_const_expr));
+                docs.push(wrap_before(&mut instrs, ctx.options.wrap_before_const_expr));
             }
         } else {
             docs.append(trivias);

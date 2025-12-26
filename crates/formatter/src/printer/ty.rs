@@ -490,10 +490,10 @@ impl DocGen for StructType {
             docs.push(Doc::text("struct"));
             trivias = format_trivias_after_token(keyword, ctx);
         }
-        let mut fields = self.fields();
+        let mut fields = self.fields().peekable();
         if let Some(field) = fields.next() {
             if trivias.is_empty() {
-                docs.push(wrap_before(&fields, ctx.options.wrap_before_fields));
+                docs.push(wrap_before(&mut fields, ctx.options.wrap_before_fields));
             } else {
                 docs.append(&mut trivias);
             }

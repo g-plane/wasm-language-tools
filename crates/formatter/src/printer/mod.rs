@@ -1,8 +1,9 @@
 use crate::config::{FormatOptions, LanguageOptions, MultiLine, WrapBefore};
 use rowan::{
     Direction, NodeOrToken,
-    ast::{AstNode, support},
+    ast::{AstChildren, AstNode, support},
 };
+use std::iter;
 use tiny_pretty::Doc;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage, ast::*};
 
@@ -369,16 +370,15 @@ fn should_ignore(node: &SyntaxNode, ctx: &Ctx) -> bool {
         .is_some_and(|rest| rest.is_empty() || rest.starts_with(|c: char| c.is_ascii_whitespace()))
 }
 
-fn wrap_before<C, N>(children: &C, option: WrapBefore) -> Doc<'static>
+fn wrap_before<N>(children: &mut iter::Peekable<AstChildren<N>>, option: WrapBefore) -> Doc<'static>
 where
-    C: Iterator<Item = N> + Clone,
     N: AstNode<Language = WatLanguage> + Clone,
 {
     match option {
         WrapBefore::Never => Doc::space(),
         WrapBefore::Overflow => Doc::soft_line(),
         WrapBefore::MultiOnly => {
-            if children.clone().peekable().peek().is_some() {
+            if children.peek().is_some() {
                 Doc::hard_line()
             } else {
                 Doc::space()
