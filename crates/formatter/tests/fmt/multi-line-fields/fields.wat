@@ -1,0 +1,12 @@
+(module
+  (type (struct (field i32) (field i64)
+    (field f32)))
+  (type (struct (field i32)
+    (field i64) (field f32)))
+  (type (struct (field $1 i32) (field $2 i32) (field $3 i32) (field $4 i32)))
+  (type (struct (field $1 i32)
+    (field $2 i32) (field $3 i32) (field $4 i32)))
+  (type (struct (field $1 i32)
+    (;;)
+    (field $2 i32) (field $3 i32)))
+)

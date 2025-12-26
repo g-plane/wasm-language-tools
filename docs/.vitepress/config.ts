@@ -50,6 +50,7 @@ export default defineConfig({
               { text: 'wrapBeforeFields', link: '/config/format/wrap-before-fields' },
               { text: 'wrapBeforeConstExpr', link: '/config/format/wrap-before-const-expr' },
               { text: 'multiLineLocals', link: '/config/format/multi-line-locals' },
+              { text: 'multiLineFields', link: '/config/format/multi-line-fields' },
               { text: 'formatComments', link: '/config/format/format-comments' },
             ],
           },

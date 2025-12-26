@@ -491,24 +491,28 @@ impl DocGen for StructType {
             trivias = format_trivias_after_token(keyword, ctx);
         }
         let mut fields = self.fields().peekable();
+        let mut fields_docs = Vec::with_capacity(1);
+        let ws_of_multi_line =
+            whitespace_of_multi_line(ctx.options.multi_line_fields, fields.peek());
         if let Some(field) = fields.next() {
             if trivias.is_empty() {
                 docs.push(wrap_before(&mut fields, ctx.options.wrap_before_fields));
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(field.doc(ctx));
+            fields_docs.push(field.doc(ctx));
             trivias = format_trivias_after_node(field, ctx);
         }
         fields.for_each(|field| {
             if trivias.is_empty() {
-                docs.push(Doc::line_or_space());
+                fields_docs.push(ws_of_multi_line.clone());
             } else {
-                docs.append(&mut trivias);
+                fields_docs.append(&mut trivias);
             }
-            docs.push(field.doc(ctx));
+            fields_docs.push(field.doc(ctx));
             trivias = format_trivias_after_node(field, ctx);
         });
+        docs.push(Doc::list(fields_docs).group());
         docs.append(&mut trivias);
         Doc::list(docs)
             .nest(ctx.indent_width)

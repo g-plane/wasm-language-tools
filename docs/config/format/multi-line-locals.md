@@ -69,9 +69,9 @@ If failed to print all locals in the same line within the print width, each loca
 
 ## `"smart"`
 
-`"smart"` will detect if there's line break between the first local and the second local in original code.
+`"smart"` will detect if there's a line break between the first local and the second local in original code.
 
-If there's line break, it behaves like `"always"`, though it doesn't exceed the print width:
+If there's a line break, it behaves like `"always"`, though it doesn't exceed the print width:
 
 ```wasm
 (module

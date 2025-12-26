@@ -108,6 +108,12 @@ pub struct LanguageOptions {
     /// Default: `Never`
     pub multi_line_locals: MultiLine,
 
+    #[serde(alias = "multiLineFields")]
+    /// Control how to insert whitespace between multiple fields in a struct.
+    ///
+    /// Default: `Smart`
+    pub multi_line_fields: MultiLine,
+
     #[serde(alias = "formatComments")]
     /// Control whether whitespace should be inserted at the beginning and end of comments.
     ///
@@ -132,6 +138,7 @@ impl Default for LanguageOptions {
             wrap_before_fields: WrapBefore::MultiOnly,
             wrap_before_const_expr: WrapBefore::Always,
             multi_line_locals: MultiLine::Never,
+            multi_line_fields: MultiLine::Smart,
             format_comments: false,
             ignore_comment_directive: "fmt-ignore".to_string(),
         }

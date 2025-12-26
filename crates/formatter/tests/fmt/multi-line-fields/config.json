@@ -1,0 +1,21 @@
+{
+  "default": {
+    "printWidth": 60
+  },
+  "never": {
+    "printWidth": 60,
+    "multiLineFields": "never"
+  },
+  "overflow": {
+    "printWidth": 60,
+    "multiLineFields": "overflow"
+  },
+  "smart": {
+    "printWidth": 60,
+    "multiLineFields": "smart"
+  },
+  "always": {
+    "printWidth": 60,
+    "multiLineFields": "always"
+  }
+}
