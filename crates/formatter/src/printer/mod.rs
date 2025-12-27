@@ -103,6 +103,7 @@ pub(crate) fn format_node(node: SyntaxNode, ctx: &Ctx) -> Option<Doc<'static>> {
         SyntaxKind::EXTERN_IDX_TAG => ExternIdxTag::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::INDEX => Index::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::LOCAL => Local::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::MEM_PAGE_SIZE => MemoryPageSize::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::MEM_USE => MemUse::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::OFFSET => Offset::cast(node).map(|node| node.doc(ctx)),
         SyntaxKind::ELEM => Elem::cast(node).map(|node| node.doc(ctx)),
