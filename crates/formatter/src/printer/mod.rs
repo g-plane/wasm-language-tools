@@ -409,6 +409,7 @@ where
                 Doc::line_or_space()
             }
         }
+        MultiLine::Wrap => Doc::soft_line(),
         MultiLine::Always => Doc::hard_line(),
     }
 }

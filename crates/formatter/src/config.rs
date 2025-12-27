@@ -161,5 +161,6 @@ pub enum MultiLine {
     Never,
     Overflow,
     Smart,
+    Wrap,
     Always,
 }

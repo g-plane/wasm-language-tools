@@ -9,6 +9,7 @@ Available option values:
 - `"never"`
 - `"overflow"`
 - `"smart"`
+- `"wrap"`
 - `"always"`
 
 All the examples below assume the print width is `45`.
@@ -110,6 +111,36 @@ If there's no line break, it behaves like `"overflow"`, even if there're line br
   (func
     (local $1 i32)
     (local $2 i32)
+    (local $3 i32)))
+```
+
+## `"wrap"`
+
+Locals will be printed in the same line until the print width is exceeded, then insert a line break.
+
+```wasm
+(module
+  (func (local i32) (local i64) (local f32))
+  (func (local i32)
+    (local i64) (local f32))
+  (func (local $1 i32) (local $2 i32) (local $3 i32))
+  (func (local $1 i32)
+    (local $2 i32) (local $3 i32)))
+```
+
+<CenteredArrowDown />
+
+```wasm
+(module
+  (func
+    (local i32) (local i64) (local f32))
+  (func
+    (local i32) (local i64) (local f32))
+  (func
+    (local $1 i32) (local $2 i32)
+    (local $3 i32))
+  (func
+    (local $1 i32) (local $2 i32)
     (local $3 i32)))
 ```
 

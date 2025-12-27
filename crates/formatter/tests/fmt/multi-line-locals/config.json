@@ -14,6 +14,10 @@
     "printWidth": 45,
     "multiLineLocals": "smart"
   },
+  "wrap": {
+    "printWidth": 45,
+    "multiLineLocals": "wrap"
+  },
   "always": {
     "printWidth": 45,
     "multiLineLocals": "always"

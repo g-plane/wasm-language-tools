@@ -9,6 +9,7 @@ Available option values:
 - `"never"`
 - `"overflow"`
 - `"smart"`
+- `"wrap"`
 - `"always"`
 
 All the examples below assume the print width is `60`.
@@ -129,6 +130,41 @@ If there's no line break, it behaves like `"overflow"`, even if there're line br
       (field $1 i32)
       (field $2 i32)
       (field $3 i32)
+      (field $4 i32))))
+```
+
+## `"wrap"`
+
+Fields will be printed in the same line until the print width is exceeded, then insert a line break.
+
+```wasm
+(module
+  (type (struct (field i32) (field i64)
+    (field f32)))
+  (type (struct (field i32)
+    (field i64) (field f32)))
+  (type (struct (field $1 i32) (field $2 i32) (field $3 i32) (field $4 i32)))
+  (type (struct (field $1 i32)
+    (field $2 i32) (field $3 i32) (field $4 i32))))
+```
+
+<CenteredArrowDown />
+
+```wasm
+(module
+  (type
+    (struct
+      (field i32) (field i64) (field f32)))
+  (type
+    (struct
+      (field i32) (field i64) (field f32)))
+  (type
+    (struct
+      (field $1 i32) (field $2 i32) (field $3 i32)
+      (field $4 i32)))
+  (type
+    (struct
+      (field $1 i32) (field $2 i32) (field $3 i32)
       (field $4 i32))))
 ```
 
