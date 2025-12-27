@@ -27,7 +27,9 @@ jobs:
           if ! git show --exit-code -G^version crates/formatter/Cargo.toml; then
             cargo publish -p wat_formatter
           fi
-          cargo publish -p wat_service
+          if ! git show --exit-code -G^version crates/service/Cargo.toml; then
+            cargo publish -p wat_service
+          fi
           cargo publish -p wat_server
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.cratesio-auth.outputs.token }}
@@ -76,7 +78,7 @@ jobs:
           elseif (Test-Path ./target/${{ matrix.target }}/release/wat_server) {
             7z a wat_server-${{ matrix.name }}.zip ./target/${{ matrix.target }}/release/wat_server
           }
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v2.4.2
         with:
           files: |
             wat_server-${{ matrix.name }}.zip
