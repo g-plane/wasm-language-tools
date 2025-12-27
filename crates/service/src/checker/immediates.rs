@@ -507,7 +507,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
         | "i64.atomic.rmw8.cmpxchg_u"
         | "i64.atomic.rmw16.cmpxchg_u"
         | "i64.atomic.rmw32.cmpxchg_u" => {
-            check_immediate::<true>(
+            check_immediate::<false>(
                 diagnostics,
                 &mut immediates,
                 SyntaxKind::MEM_ARG,
