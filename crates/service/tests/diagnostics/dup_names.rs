@@ -175,7 +175,8 @@ fn exports() {
     let source = r#"
 (module
   (func (export "func"))
-  (export "func" (func 0)))
+  (export "func" (func 0))
+  (func (export "f1") (export "f1")))
 "#;
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

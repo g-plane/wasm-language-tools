@@ -72,6 +72,74 @@ expression: response
           "message": "already exported here as `func`"
         }
       ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 16
+        },
+        "end": {
+          "line": 4,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "duplicated-names",
+      "source": "wat",
+      "message": "duplicated export `f1` in this module",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 30
+              },
+              "end": {
+                "line": 4,
+                "character": 34
+              }
+            }
+          },
+          "message": "already exported here as `f1`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 30
+        },
+        "end": {
+          "line": 4,
+          "character": 34
+        }
+      },
+      "severity": 1,
+      "code": "duplicated-names",
+      "source": "wat",
+      "message": "duplicated export `f1` in this module",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 16
+              },
+              "end": {
+                "line": 4,
+                "character": 20
+              }
+            }
+          },
+          "message": "already exported here as `f1`"
+        }
+      ]
     }
   ]
 }
