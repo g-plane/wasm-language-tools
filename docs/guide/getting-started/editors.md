@@ -95,3 +95,54 @@ config = { format = {}, lint = { unused = "warn" } } # [!code ++]
 name = "wat"
 language-servers = ["wasm-language-tools"]
 ```
+
+## Fresh
+
+> [!IMPORTANT]
+> You need to [install the server executable](./executable.md) manually and make sure it's in your `$PATH` (or specify the executable path manually).
+
+For the minimal setup, add the following lines to your [Fresh Editor](https://github.com/sinelaw/fresh) config `~/.config/fresh/config.json`:
+
+```json
+{
+  "languages": {
+    "wat": {
+      "extensions": ["wat"],
+      "comment_prefix": ";;",
+      "auto_indent": true
+    }
+  },
+  "lsp": {
+    "wat": {
+      "command": "wat_server",
+      "args": [],
+      "enabled": true
+    }
+  }
+}
+```
+
+or with configuration:
+
+```json
+{
+  "languages": {
+    "wat": {
+      "extensions": ["wat"],
+      "comment_prefix": ";;",
+      "auto_indent": true
+    }
+  },
+  "lsp": {
+    "wat": {
+      "command": "wat_server",
+      "args": [],
+      "enabled": true,
+      "initialization_options": { // [!code ++]
+        "lint": {}, // [!code ++]
+        "format": {} // [!code ++]
+      } // [!code ++]
+    }
+  }
+}
+```
