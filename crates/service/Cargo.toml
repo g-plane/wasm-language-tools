@@ -14,22 +14,22 @@ dashmap = "6.1"
 fuzzy-matcher = "0.3"
 indexmap = "2.12"
 itertools = "0.14"
-line-index.workspace = true
-lspt.workspace = true
+line-index = { workspace = true }
+lspt = { workspace = true }
 petgraph = "0.8"
-rowan.workspace = true
-rustc-hash.workspace = true
+rowan = { workspace = true }
+rustc-hash = { workspace = true }
 salsa = "0.24"
-serde.workspace = true
-serde_json.workspace = true
+serde = { workspace = true }
+serde_json = { workspace = true }
 smallvec = "1.15"
 wat_formatter = { path = "../formatter", version = "0.8" }
 wat_parser = { path = "../parser", version = "0.8" }
 wat_syntax = { path = "../syntax", version = "0.8" }
 
 [dev-dependencies]
-criterion.workspace = true
-insta.workspace = true
+criterion = { workspace = true }
+insta = { workspace = true }
 
 [lints.clippy]
 dbg_macro = "warn"

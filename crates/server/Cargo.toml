@@ -14,11 +14,11 @@ anyhow = "1.0"
 fern = "0.7"
 humantime = "2.3"
 log = "0.4"
-lspt.workspace = true
+lspt = { workspace = true }
 rayon = "1.11"
-rustc-hash.workspace = true
-serde.workspace = true
-serde_json.workspace = true
+rustc-hash = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
 wat_service = { path = "../service", version = "0.8" }
 
 [dev-dependencies]

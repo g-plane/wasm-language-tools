@@ -10,17 +10,17 @@ keywords = ["wasm", "formatter"]
 exclude = ["/tests"]
 
 [dependencies]
-line-index.workspace = true
-rowan.workspace = true
+line-index = { workspace = true }
+rowan = { workspace = true }
 serde = { version = "1.0", features = ["derive"] }
 tiny_pretty = "0.2"
 wat_syntax = { path = "../syntax", version = "0.8" }
 
 [dev-dependencies]
-criterion.workspace = true
-insta.workspace = true
-serde_json.workspace = true
-similar-asserts.workspace = true
+criterion = { workspace = true }
+insta = { workspace = true }
+serde_json = { workspace = true }
+similar-asserts = { workspace = true }
 wat_parser = { path = "../parser", version = "0.8" }
 
 [[bench]]

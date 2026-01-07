@@ -11,14 +11,14 @@ keywords = ["wasm", "parser"]
 exclude = ["/tests"]
 
 [dependencies]
-rowan.workspace = true
+rowan = { workspace = true }
 wat_syntax = { path = "../syntax", version = "0.8" }
 
 [dev-dependencies]
 codespan-reporting = "0.13"
-criterion.workspace = true
-insta.workspace = true
-similar-asserts.workspace = true
+criterion = { workspace = true }
+insta = { workspace = true }
+similar-asserts = { workspace = true }
 
 [[bench]]
 name = "parser"
