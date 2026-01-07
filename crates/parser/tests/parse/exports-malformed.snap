@@ -128,7 +128,7 @@ ROOT@0..219
     R_PAREN@217..218 ")"
   WHITESPACE@218..219 "\n"
 
-error: expected export descriptor
+error: expected export idx
   ┌─ exports-malformed.wat:2:14
   │
 2 │   (export "" (fu))
@@ -152,7 +152,7 @@ error: unexpected token
 3 │   (export "" (func $))
   │                    ^
 
-error: expected export descriptor
+error: expected export idx
   ┌─ exports-malformed.wat:4:13
   │
 4 │   (export "")

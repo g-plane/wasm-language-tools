@@ -191,7 +191,7 @@ error: expected import name
 2 │   (import ())
   │           ^
 
-error: expected import descriptor
+error: expected extern type
   ┌─ imports-malformed.wat:2:11
   │
 2 │   (import ())
@@ -209,13 +209,13 @@ error: expected import name
 3 │   (import "")
   │             ^
 
-error: expected import descriptor
+error: expected extern type
   ┌─ imports-malformed.wat:3:13
   │
 3 │   (import "")
   │             ^
 
-error: expected import descriptor
+error: expected extern type
   ┌─ imports-malformed.wat:4:16
   │
 4 │   (import "" "")
@@ -227,7 +227,7 @@ error: expected import name
 5 │   (import "" ())
   │              ^
 
-error: expected import descriptor
+error: expected extern type
   ┌─ imports-malformed.wat:5:14
   │
 5 │   (import "" ())
@@ -239,7 +239,7 @@ error: unexpected token
 5 │   (import "" ())
   │               ^
 
-error: expected import descriptor
+error: expected extern type
   ┌─ imports-malformed.wat:6:17
   │
 6 │   (import "" "" ())

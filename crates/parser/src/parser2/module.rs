@@ -437,7 +437,7 @@ impl Parser<'_> {
             self.report_missing(Message::Name("export name"));
         }
         if !self.retry(Self::parse_extern_idx) {
-            self.report_missing(Message::Name("export descriptor"));
+            self.report_missing(Message::Name("export idx"));
         }
         self.expect_right_paren();
         self.finish_node(MODULE_FIELD_EXPORT, mark)
@@ -480,7 +480,7 @@ impl Parser<'_> {
             self.report_missing(Message::Name("import name"));
         }
         if !self.retry(Self::parse_extern_type) {
-            self.report_missing(Message::Name("import descriptor"));
+            self.report_missing(Message::Name("extern type"));
         }
         self.expect_right_paren();
         self.finish_node(MODULE_FIELD_IMPORT, mark)
