@@ -514,7 +514,15 @@ impl Parser<'_> {
         self.eat(IDENT);
         self.parse_exports_and_import();
 
-        if self.lexer.peek(UNSIGNED_INT).is_some() {
+        if self.lexer.peek(UNSIGNED_INT).is_some()
+            || matches!(
+                self.lexer.peek(TYPE_KEYWORD),
+                Some(super::lexer::Token {
+                    text: "i32" | "i64",
+                    ..
+                })
+            )
+        {
             if !self.recover(Self::parse_table_type) {
                 self.report_missing(Message::Name("table type"));
             }

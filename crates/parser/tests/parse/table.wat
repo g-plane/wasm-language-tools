@@ -6,3 +6,4 @@
 (module (table 0 65536 funcref))
 (module (table 0 0xffff_ffff funcref))
 (module (table 0 funcref ref.null $a))
+(module (table i32 0 funcref))

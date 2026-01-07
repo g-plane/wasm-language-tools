@@ -1,7 +1,7 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..254
+ROOT@0..285
   MODULE@0..26
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
@@ -154,3 +154,23 @@ ROOT@0..254
       R_PAREN@251..252 ")"
     R_PAREN@252..253 ")"
   WHITESPACE@253..254 "\n"
+  MODULE@254..284
+    L_PAREN@254..255 "("
+    KEYWORD@255..261 "module"
+    WHITESPACE@261..262 " "
+    MODULE_FIELD_TABLE@262..283
+      L_PAREN@262..263 "("
+      KEYWORD@263..268 "table"
+      WHITESPACE@268..269 " "
+      TABLE_TYPE@269..282
+        ADDR_TYPE@269..272
+          TYPE_KEYWORD@269..272 "i32"
+        WHITESPACE@272..273 " "
+        LIMITS@273..274
+          UNSIGNED_INT@273..274 "0"
+        WHITESPACE@274..275 " "
+        REF_TYPE@275..282
+          TYPE_KEYWORD@275..282 "funcref"
+      R_PAREN@282..283 ")"
+    R_PAREN@283..284 ")"
+  WHITESPACE@284..285 "\n"

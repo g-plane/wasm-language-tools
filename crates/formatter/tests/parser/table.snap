@@ -18,3 +18,5 @@ source: crates/formatter/tests/parser.rs
 (module
   (table 0 funcref
     ref.null $a))
+(module
+  (table i32 0 funcref))
