@@ -34,12 +34,10 @@ static CODE: &str = r#"(module
 
 fn bench_fmt(c: &mut Criterion) {
     c.bench_function("fmt", |b| {
+        let (tree, _) = wat_parser::parse(CODE);
+        let root = Root::cast(SyntaxNode::new_root(tree)).unwrap();
         b.iter(|| {
-            let (tree, _) = wat_parser::parse(CODE);
-            let _ = wat_formatter::format(
-                &Root::cast(SyntaxNode::new_root(tree)).unwrap(),
-                &Default::default(),
-            );
+            let _ = wat_formatter::format(&root, &Default::default());
         });
     });
 }
