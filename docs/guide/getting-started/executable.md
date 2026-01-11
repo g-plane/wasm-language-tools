@@ -61,3 +61,11 @@ environment.systemPackages = [
 ```
 
 View detail on [Nixpkgs](https://search.nixos.org/packages?show=wasm-language-tools).
+
+## Mason
+
+If you're using [Mason](https://github.com/mason-org/mason.nvim) in Neovim, you can install with the following command or via Mason's UI:
+
+```vim
+:MasonInstall wasm-language-tools
+```
