@@ -11,7 +11,7 @@ It also provides an out-of-the-box formatter (a.k.a. pretty printer) for WebAsse
 </picture>
 
 [Wasm 3.0](https://webassembly.org/news/2025-09-17-wasm-3.0/) is supported.
-Visit [WebAssembly Features Status](https://webassembly.org/features/) page for details about the supported features.
+Visit [WebAssembly Features Status](https://webassembly.org/features/?categories=tools) page for details about the supported features.
 
 ## 📌 Features
 
