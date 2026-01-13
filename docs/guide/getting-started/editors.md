@@ -79,6 +79,9 @@ For the minimal setup, add the following lines to your `coc-settings.json`:
 
 ## Emacs
 
+> [!IMPORTANT]
+> You need to [install the server executable](./executable.md) manually and make sure it's in your `$PATH` (or specify the executable path manually).
+
 Emacs can't recognize `.wat` files by default. You need to create a major mode like this:
 
 ```emacs-lisp
@@ -91,9 +94,6 @@ or use similar packages.
 ### lsp-mode
 
 [lsp-mode](https://github.com/emacs-lsp/lsp-mode/) has built-in support for WebAssembly Language Tools.
-
-> [!IMPORTANT]
-> You need to [install the server executable](./executable.md) manually and make sure it's in your `$PATH` (or specify the executable path manually).
 
 For the minimal setup, you may need to add a hook:
 
