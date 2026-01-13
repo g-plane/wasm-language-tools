@@ -210,10 +210,11 @@ impl LanguageService {
             .collect()
     }
 
-    pub(crate) fn get_document(&self, uri: impl AsRef<str>) -> Option<Document> {
-        self.documents
-            .get(&InternUri::new(self, uri.as_ref()))
-            .map(|r| *r)
+    pub(crate) fn get_document(
+        &self,
+        uri: impl AsRef<str>,
+    ) -> Option<dashmap::mapref::one::Ref<'_, InternUri, Document>> {
+        self.documents.get(&InternUri::new(self, uri.as_ref()))
     }
 }
 

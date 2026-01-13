@@ -4,6 +4,7 @@ use lspt::{
     SemanticTokensParams, SemanticTokensRangeParams, TextDocumentClientCapabilities,
     TextDocumentIdentifier,
 };
+use std::thread;
 use wat_service::LanguageService;
 
 fn create_service() -> LanguageService {
@@ -88,6 +89,25 @@ fn full() {
 }
 
 #[test]
+fn concurrent_full() {
+    let uri = "untitled:test".to_string();
+    let mut service = create_service();
+    service.commit(&uri, SOURCE.into());
+    thread::spawn({
+        let mut service = service.clone();
+        let uri = uri.clone();
+        move || {
+            service.commit(&uri, SOURCE.into());
+        }
+    });
+    service.semantic_tokens_full(SemanticTokensParams {
+        work_done_token: Default::default(),
+        partial_result_token: Default::default(),
+        text_document: TextDocumentIdentifier { uri },
+    });
+}
+
+#[test]
 fn range() {
     let uri = "untitled:test".to_string();
     let mut service = create_service();
@@ -108,6 +128,35 @@ fn range() {
         },
     });
     assert_json_snapshot!(response);
+}
+
+#[test]
+fn concurrent_range() {
+    let uri = "untitled:test".to_string();
+    let mut service = create_service();
+    service.commit(&uri, SOURCE.into());
+    thread::spawn({
+        let mut service = service.clone();
+        let uri = uri.clone();
+        move || {
+            service.commit(&uri, SOURCE.into());
+        }
+    });
+    service.semantic_tokens_range(SemanticTokensRangeParams {
+        work_done_token: Default::default(),
+        partial_result_token: Default::default(),
+        text_document: TextDocumentIdentifier { uri },
+        range: Range {
+            start: Position {
+                line: 4,
+                character: 19,
+            },
+            end: Position {
+                line: 5,
+                character: 21,
+            },
+        },
+    });
 }
 
 #[test]

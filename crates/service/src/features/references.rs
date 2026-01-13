@@ -12,7 +12,7 @@ impl LanguageService {
         let uri = params.text_document.uri;
         let document = self.get_document(&uri)?;
         let root = document.root_tree(self);
-        let token = super::find_meaningful_token(self, document, &root, params.position)?;
+        let token = super::find_meaningful_token(self, *document, &root, params.position)?;
         if !matches!(
             token.kind(),
             SyntaxKind::IDENT
@@ -31,7 +31,7 @@ impl LanguageService {
         };
 
         let line_index = document.line_index(self);
-        let symbol_table = SymbolTable::of(self, document);
+        let symbol_table = SymbolTable::of(self, *document);
 
         let key = SymbolKey::new(&current_node);
         let symbol = symbol_table.symbols.get(&key)?;

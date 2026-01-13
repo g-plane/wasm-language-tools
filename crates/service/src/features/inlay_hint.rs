@@ -20,7 +20,7 @@ impl LanguageService {
 
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
-        let symbol_table = SymbolTable::of(self, document);
+        let symbol_table = SymbolTable::of(self, *document);
         let options = &config.inlay_hint;
 
         let range = helpers::lsp_range_to_rowan_range(line_index, params.range)?;
@@ -31,7 +31,7 @@ impl LanguageService {
                     if options.types
                         && range.contains_range(symbol.key.text_range())
                         && let Some(ty) = symbol_table.find_def(symbol.key).and_then(|local| {
-                            types_analyzer::extract_type(self, document, local.green.clone())
+                            types_analyzer::extract_type(self, *document, local.green.clone())
                         })
                     {
                         inlay_hints.push(InlayHint {
@@ -55,7 +55,7 @@ impl LanguageService {
                         && let Some(ty) = symbol_table.find_def(symbol.key).and_then(|global| {
                             types_analyzer::extract_global_type(
                                 self,
-                                document,
+                                *document,
                                 global.green.clone(),
                             )
                         })
@@ -206,7 +206,7 @@ impl LanguageService {
                         && range.contains_range(symbol.key.text_range())
                         && let Some(ty) = types_analyzer::resolve_field_type(
                             self,
-                            document,
+                            *document,
                             symbol.key,
                             symbol.region,
                         )

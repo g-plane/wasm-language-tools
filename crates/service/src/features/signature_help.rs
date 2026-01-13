@@ -22,7 +22,7 @@ impl LanguageService {
         let document = self.get_document(params.text_document.uri)?;
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
-        let symbol_table = SymbolTable::of(self, document);
+        let symbol_table = SymbolTable::of(self, *document);
 
         let token = helpers::ast::find_token(
             &root,
@@ -50,7 +50,7 @@ impl LanguageService {
                 let first_immediate = parent_instr.immediates().next()?;
                 let func = symbol_table.find_def(SymbolKey::new(first_immediate.syntax()))?;
                 (
-                    types_analyzer::get_func_sig(self, document, *func.key, &func.green),
+                    types_analyzer::get_func_sig(self, *document, *func.key, &func.green),
                     Some(func),
                 )
             }
@@ -61,7 +61,7 @@ impl LanguageService {
                 let type_use = type_use.syntax();
                 let mut sig = types_analyzer::get_type_use_sig(
                     self,
-                    document,
+                    *document,
                     SyntaxNodePtr::new(type_use),
                     &type_use.green(),
                 );

@@ -17,7 +17,7 @@ impl LanguageService {
         let mut delta_line = 0;
         let mut prev_start = 0;
         let tokens = self.build_tokens(
-            document,
+            *document,
             document
                 .root_tree(self)
                 .descendants_with_tokens()
@@ -56,7 +56,7 @@ impl LanguageService {
                 col: prev_start,
             } = line_index.line_col(token.text_range().start());
         }
-        let tokens = self.build_tokens(document, tokens, &mut delta_line, &mut prev_start);
+        let tokens = self.build_tokens(*document, tokens, &mut delta_line, &mut prev_start);
         Some(SemanticTokens {
             result_id: None,
             data: tokens,

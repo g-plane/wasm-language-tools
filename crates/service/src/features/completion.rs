@@ -36,7 +36,7 @@ impl LanguageService {
 
         let cmp_ctx = get_cmp_ctx(&token)?;
         Some(get_cmp_list(
-            self, cmp_ctx, &token, document, line_index, &root,
+            self, cmp_ctx, &token, *document, line_index, &root,
         ))
     }
 }

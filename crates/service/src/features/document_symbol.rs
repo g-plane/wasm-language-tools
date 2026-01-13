@@ -14,8 +14,8 @@ impl LanguageService {
         let document = self.get_document(params.text_document.uri)?;
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
-        let symbol_table = SymbolTable::of(self, document);
-        let deprecation = deprecation::get_deprecation(self, document);
+        let symbol_table = SymbolTable::of(self, *document);
+        let deprecation = deprecation::get_deprecation(self, *document);
 
         #[expect(deprecated)]
         let mut symbols_map = symbol_table
@@ -69,7 +69,7 @@ impl LanguageService {
                                 name: render_symbol_name(symbol, self),
                                 detail: types_analyzer::extract_type(
                                     self,
-                                    document,
+                                    *document,
                                     symbol.green.clone(),
                                 )
                                 .map(|ty| ty.render(self).to_string()),
@@ -108,7 +108,7 @@ impl LanguageService {
                                 name: render_symbol_name(symbol, self),
                                 detail: types_analyzer::extract_global_type(
                                     self,
-                                    document,
+                                    *document,
                                     symbol.green.clone(),
                                 )
                                 .map(|ty| {
@@ -157,7 +157,7 @@ impl LanguageService {
                                 name: render_symbol_name(symbol, self),
                                 detail: types_analyzer::resolve_field_type(
                                     self,
-                                    document,
+                                    *document,
                                     symbol.key,
                                     symbol.region,
                                 )

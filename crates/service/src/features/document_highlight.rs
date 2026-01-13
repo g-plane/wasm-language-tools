@@ -17,7 +17,7 @@ impl LanguageService {
         let document = self.get_document(params.text_document.uri)?;
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
-        let token = super::find_meaningful_token(self, document, &root, params.position)?;
+        let token = super::find_meaningful_token(self, *document, &root, params.position)?;
         let kind = token.kind();
         match kind {
             SyntaxKind::KEYWORD
@@ -47,7 +47,7 @@ impl LanguageService {
                 )
             }
             SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
-                let symbol_table = SymbolTable::of(self, document);
+                let symbol_table = SymbolTable::of(self, *document);
                 let key = SymbolKey::new(&token.parent()?);
                 if let Some(symbol) = symbol_table.symbols.get(&key) {
                     match symbol.kind {

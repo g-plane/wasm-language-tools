@@ -9,7 +9,7 @@ impl LanguageService {
         let document = self.get_document(params.text_document.uri)?;
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
-        let symbol_table = SymbolTable::of(self, document);
+        let symbol_table = SymbolTable::of(self, *document);
 
         let mut quickfix = params.context.only.is_none();
         let mut refactor = params.context.only.is_none();
@@ -44,7 +44,7 @@ impl LanguageService {
                         actions.push(action);
                     }
                     if refactor
-                        && let Some(action) = export_as::act(self, uri, document, line_index, &it)
+                        && let Some(action) = export_as::act(self, uri, *document, line_index, &it)
                     {
                         actions.push(action);
                     }
@@ -57,7 +57,7 @@ impl LanguageService {
                         if let Some(action) = merge_to_return_call::act(
                             self,
                             uri,
-                            document,
+                            *document,
                             line_index,
                             symbol_table,
                             &it,
@@ -174,7 +174,7 @@ impl LanguageService {
                 | SyntaxKind::MODULE_FIELD_TABLE
                 | SyntaxKind::MODULE_FIELD_TAG => {
                     if refactor
-                        && let Some(action) = export_as::act(self, uri, document, line_index, &it)
+                        && let Some(action) = export_as::act(self, uri, *document, line_index, &it)
                     {
                         actions.push(action);
                     }

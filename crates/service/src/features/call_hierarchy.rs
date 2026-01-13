@@ -19,9 +19,9 @@ impl LanguageService {
         let document = self.get_document(&params.text_document.uri)?;
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
-        let symbol_table = SymbolTable::of(self, document);
+        let symbol_table = SymbolTable::of(self, *document);
 
-        let token = super::find_meaningful_token(self, document, &root, params.position)?;
+        let token = super::find_meaningful_token(self, *document, &root, params.position)?;
         let parent_range = token.parent()?.text_range();
 
         symbol_table
@@ -38,7 +38,7 @@ impl LanguageService {
                             symbol.idx.name,
                             types_analyzer::get_func_sig(
                                 self,
-                                document,
+                                *document,
                                 *symbol.key,
                                 &symbol.green,
                             ),
@@ -63,7 +63,7 @@ impl LanguageService {
                                 symbol.idx.name,
                                 types_analyzer::get_func_sig(
                                     self,
-                                    document,
+                                    *document,
                                     *symbol.key,
                                     &symbol.green,
                                 ),
@@ -91,7 +91,7 @@ impl LanguageService {
     ) -> Option<Vec<CallHierarchyIncomingCall>> {
         let document = self.get_document(&params.item.uri)?;
         let root = document.root_tree(self);
-        let symbol_table = SymbolTable::of(self, document);
+        let symbol_table = SymbolTable::of(self, *document);
 
         let line_index = document.line_index(self);
         let callee_def_range = helpers::lsp_range_to_rowan_range(line_index, params.item.range)?;
@@ -131,7 +131,7 @@ impl LanguageService {
                             func_symbol.idx.name,
                             types_analyzer::get_func_sig(
                                 self,
-                                document,
+                                *document,
                                 *func_symbol.key,
                                 &func_symbol.green,
                             ),
@@ -162,7 +162,7 @@ impl LanguageService {
     ) -> Option<Vec<CallHierarchyOutgoingCall>> {
         let document = self.get_document(&params.item.uri)?;
         let root = &document.root_tree(self);
-        let symbol_table = SymbolTable::of(self, document);
+        let symbol_table = SymbolTable::of(self, *document);
 
         let line_index = document.line_index(self);
         let call_def_range = helpers::lsp_range_to_rowan_range(line_index, params.item.range)?;
@@ -178,6 +178,7 @@ impl LanguageService {
                 let plain_instr_range =
                     helpers::rowan_range_to_lsp_range(line_index, node.text_range());
                 let uri = &params.item.uri;
+                let document = *document;
                 node.children()
                     .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
                     .filter_map(|immediate| symbol_table.find_def(SymbolKey::new(&immediate)))

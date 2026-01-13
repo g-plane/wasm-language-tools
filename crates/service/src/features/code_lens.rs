@@ -13,7 +13,7 @@ impl LanguageService {
     pub fn code_lens(&self, params: CodeLensParams) -> Option<Vec<CodeLens>> {
         let document = self.get_document(&params.text_document.uri)?;
         let line_index = document.line_index(self);
-        let symbol_table = SymbolTable::of(self, document);
+        let symbol_table = SymbolTable::of(self, *document);
         let code_lenses = symbol_table
             .symbols
             .values()
@@ -52,7 +52,7 @@ impl LanguageService {
         let document = self.get_document(&data.uri)?;
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
-        let symbol_table = SymbolTable::of(self, document);
+        let symbol_table = SymbolTable::of(self, *document);
 
         let syntax_kind = WatLanguage::kind_from_raw(rowan::SyntaxKind(data.kind));
         let range = helpers::lsp_range_to_rowan_range(line_index, params.range)?;

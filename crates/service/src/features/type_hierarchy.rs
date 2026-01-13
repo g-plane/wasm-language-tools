@@ -17,9 +17,9 @@ impl LanguageService {
         let document = self.get_document(&params.text_document.uri)?;
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
-        let symbol_table = SymbolTable::of(self, document);
+        let symbol_table = SymbolTable::of(self, *document);
 
-        let token = super::find_meaningful_token(self, document, &root, params.position)?;
+        let token = super::find_meaningful_token(self, *document, &root, params.position)?;
         let parent_range = token.parent()?.text_range();
 
         symbol_table
@@ -71,8 +71,8 @@ impl LanguageService {
     ) -> Option<Vec<TypeHierarchyItem>> {
         let document = self.get_document(&params.item.uri)?;
         let root = document.root_tree(self);
-        let symbol_table = SymbolTable::of(self, document);
-        let def_types = types_analyzer::get_def_types(self, document);
+        let symbol_table = SymbolTable::of(self, *document);
+        let def_types = types_analyzer::get_def_types(self, *document);
 
         let line_index = document.line_index(self);
         let type_def_range = helpers::lsp_range_to_rowan_range(line_index, params.item.range)?;
@@ -106,8 +106,8 @@ impl LanguageService {
     ) -> Option<Vec<TypeHierarchyItem>> {
         let document = self.get_document(&params.item.uri)?;
         let root = document.root_tree(self);
-        let symbol_table = SymbolTable::of(self, document);
-        let def_types = types_analyzer::get_def_types(self, document);
+        let symbol_table = SymbolTable::of(self, *document);
+        let def_types = types_analyzer::get_def_types(self, *document);
 
         let line_index = document.line_index(self);
         let type_def_range = helpers::lsp_range_to_rowan_range(line_index, params.item.range)?;

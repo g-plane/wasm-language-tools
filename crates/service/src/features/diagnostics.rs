@@ -11,7 +11,7 @@ impl LanguageService {
     ) -> RelatedFullDocumentDiagnosticReport {
         let diagnostics = self
             .get_document(params.text_document.uri)
-            .map(|document| checker::check(self, document))
+            .map(|document| checker::check(self, *document))
             .unwrap_or_default();
         RelatedFullDocumentDiagnosticReport {
             kind: "full".into(),
@@ -25,7 +25,7 @@ impl LanguageService {
     pub fn publish_diagnostics(&self, uri: String) -> PublishDiagnosticsParams {
         let diagnostics = self
             .get_document(&uri)
-            .map(|document| checker::check(self, document))
+            .map(|document| checker::check(self, *document))
             .unwrap_or_default();
         PublishDiagnosticsParams {
             uri,

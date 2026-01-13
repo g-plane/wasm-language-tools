@@ -14,7 +14,7 @@ impl LanguageService {
                 .positions
                 .into_iter()
                 .filter_map(|position| {
-                    super::find_meaningful_token(self, document, &root, position).map(|token| {
+                    super::find_meaningful_token(self, *document, &root, position).map(|token| {
                         SelectionRange {
                             range: helpers::rowan_range_to_lsp_range(
                                 line_index,
