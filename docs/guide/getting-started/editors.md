@@ -118,6 +118,10 @@ Additionally, you can configure the language server like this:
 
 To view all available configurations, please refer to [the documentation of lsp-mode](https://emacs-lsp.github.io/lsp-mode/page/lsp-wasm-language-tools/#available-configurations).
 
+### lsp-bridge
+
+[lsp-bridge](https://github.com/manateelazycat/lsp-bridge) has built-in support for WebAssembly Language Tools.
+
 ## Helix
 
 Helix has built-in support for WebAssembly Language Tools.
