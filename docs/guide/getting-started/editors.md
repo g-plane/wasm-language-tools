@@ -30,6 +30,7 @@ Additionally, you can configure the language server like this:
 
 ```lua
 vim.lsp.config("wasm_language_tools", {
+  cmd = { "/path/to/wat_server" }, -- optional
   settings = {
     format = {},
     lint = {
@@ -140,6 +141,49 @@ config = { format = {}, lint = { unused = "warn" } } # [!code ++]
 name = "wat"
 language-servers = ["wasm-language-tools"]
 ```
+
+## Kakoune
+
+> [!IMPORTANT]
+> You need to [install the server executable](./executable.md) manually and make sure it's in your `$PATH` (or specify the executable path manually).
+
+For the minimal setup, add the following lines to your `kakrc` after `eval %sh{kak-lsp}`:
+
+```
+hook global BufCreate .*[.](wat) %{
+    set-option buffer filetype wat
+}
+hook -group lsp-filetype-wat global BufSetOption filetype=wat %{
+    set-option buffer lsp_servers %{
+        [wasm-language-tools]
+        command = "/path/to/wat_server"
+        root_globs = [".git", ".hg"]
+    }
+}
+```
+
+## Sublime Text
+
+> [!IMPORTANT]
+> You need to [install the server executable](./executable.md) manually and make sure it's in your `$PATH` (or specify the executable path manually).
+
+For the minimal setup, add the following lines to your Sublime Text LSP config:
+
+```json
+{
+    "clients": {
+        "wasm-language-tools": {
+            "enabled": true,
+            "command": ["/path/to/wat_server"],
+            "selector": "source.wat | source.wast"
+        }
+    }
+}
+```
+
+Please note that `source.wast` in selector is just a trigger for starting language server, but WebAssembly Language Tools doesn't actually support WAST.
+
+Also, Sublime Text can't recognize `.wat` files by default. You may need to install third-party packages to achieve that.
 
 ## Fresh
 
