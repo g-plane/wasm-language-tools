@@ -15,6 +15,7 @@ mod import_occur;
 mod import_with_def;
 mod mem_type;
 mod multi_modules;
+mod multi_starts;
 mod mutated_immutable;
 mod needless_mut;
 mod needless_try_table;
@@ -310,6 +311,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
             }
             _ => {}
         });
+        multi_starts::check(&mut diagnostics, line_index, &module);
     });
     undef::check(service, &mut diagnostics, line_index, symbol_table);
     dup_names::check(

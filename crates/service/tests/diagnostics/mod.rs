@@ -18,6 +18,7 @@ mod import_occur;
 mod import_with_def;
 mod mem_type;
 mod multi_modules;
+mod multi_starts;
 mod mutated_immutable;
 mod needless_mut;
 mod needless_try_table;

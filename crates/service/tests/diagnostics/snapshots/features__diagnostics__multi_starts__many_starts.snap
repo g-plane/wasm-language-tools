@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/multi_starts.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 25
+        },
+        "end": {
+          "line": 0,
+          "character": 34
+        }
+      },
+      "severity": 1,
+      "code": "multiple-starts",
+      "source": "wat",
+      "message": "only one start section is allowed"
+    }
+  ]
+}
