@@ -3,7 +3,6 @@ use lspt::{
     ClientCapabilities, InitializeParams, InlayHintParams, Position, Range, TextDocumentIdentifier,
     WorkspaceClientCapabilities,
 };
-use std::thread;
 use wat_service::{InlayHintOptions, LanguageService, ServiceConfig};
 
 fn create_params(uri: String, line: u32, character: u32) -> InlayHintParams {
@@ -65,21 +64,6 @@ fn inherit_config() {
     service.set_config(&uri, None);
     let response = service.inlay_hint(create_params(uri, 3, 0));
     assert!(response.is_some());
-}
-
-#[test]
-fn concurrent() {
-    let uri = "untitled:test".to_string();
-    let mut service = LanguageService::default();
-    service.commit(&uri, "(module (func)".into());
-    thread::spawn({
-        let mut service = service.clone();
-        let uri = uri.clone();
-        move || {
-            service.commit(&uri, "(module (func))".into());
-        }
-    });
-    service.inlay_hint(create_params(uri, 0, 14));
 }
 
 #[test]

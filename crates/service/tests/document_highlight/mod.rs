@@ -1,6 +1,5 @@
 use insta::assert_json_snapshot;
 use lspt::{DocumentHighlightParams, Position, TextDocumentIdentifier};
-use std::thread;
 use wat_service::LanguageService;
 
 fn create_params(uri: String, line: u32, character: u32) -> DocumentHighlightParams {
@@ -10,21 +9,6 @@ fn create_params(uri: String, line: u32, character: u32) -> DocumentHighlightPar
         work_done_token: Default::default(),
         partial_result_token: Default::default(),
     }
-}
-
-#[test]
-fn concurrent() {
-    let uri = "untitled:test".to_string();
-    let mut service = LanguageService::default();
-    service.commit(&uri, "(module (func)) ".into());
-    thread::spawn({
-        let mut service = service.clone();
-        let uri = uri.clone();
-        move || {
-            service.commit(&uri, "(module (func))".into());
-        }
-    });
-    service.document_highlight(create_params(uri, 0, 10));
 }
 
 #[test]

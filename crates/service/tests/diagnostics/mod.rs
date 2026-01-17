@@ -2,7 +2,6 @@ use lspt::{
     ClientCapabilities, DocumentDiagnosticParams, InitializeParams, TextDocumentIdentifier,
     WorkspaceClientCapabilities,
 };
-use std::thread;
 use wat_service::{LanguageService, LintLevel, Lints, ServiceConfig};
 
 mod block_type;
@@ -112,34 +111,4 @@ fn inherit_config() {
     service.set_config(&uri, None);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(!response.items.is_empty());
-}
-
-#[test]
-fn concurrent_pull() {
-    let uri = "untitled:test".to_string();
-    let mut service = LanguageService::default();
-    service.commit(&uri, "(module (func)".into());
-    thread::spawn({
-        let mut service = service.clone();
-        let uri = uri.clone();
-        move || {
-            service.commit(&uri, "(module (func))".into());
-        }
-    });
-    service.pull_diagnostics(create_params(uri));
-}
-
-#[test]
-fn concurrent_publish() {
-    let uri = "untitled:test".to_string();
-    let mut service = LanguageService::default();
-    service.commit(&uri, "(module (func)".into());
-    thread::spawn({
-        let mut service = service.clone();
-        let uri = uri.clone();
-        move || {
-            service.commit(&uri, "(module (func))".into());
-        }
-    });
-    service.publish_diagnostics(uri);
 }

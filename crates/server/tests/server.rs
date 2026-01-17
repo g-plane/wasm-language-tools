@@ -59,3 +59,36 @@ fn should_not_crash_for_unknown_request() {
         .assert()
         .success();
 }
+
+#[test]
+fn should_handle_concurrent_document() {
+    let stdin = r#"Content-Length: 3253
+
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"capabilities":{"general":{"positionEncodings":["utf-32","utf-16"]},"textDocument":{"callHierarchy":{"dynamicRegistration":false},"codeAction":{"codeActionLiteralSupport":{"codeActionKind":{"valueSet":["","quickfix","refactor","refactor.extract","refactor.inline","refactor.rewrite","source","source.organizeImports"]}},"dataSupport":true,"dynamicRegistration":true,"isPreferredSupport":true,"resolveSupport":{"properties":["edit","command"]}},"completion":{"completionItem":{"deprecatedSupport":true,"documentationFormat":["markdown","plaintext"],"insertReplaceSupport":true,"insertTextModeSupport":{"valueSet":[1,2]},"labelDetailsSupport":true,"resolveAdditionalTextEditsSupport":true,"resolveSupport":{"properties":["documentation","detail","additionalTextEdits","command"]},"snippetSupport":false},"contextSupport":true,"dynamicRegistration":true},"declaration":{"dynamicRegistration":true,"linkSupport":true},"definition":{"dynamicRegistration":true,"linkSupport":true},"diagnostic":{"dynamicRegistration":false,"relatedDocumentSupport":false},"documentLink":{"dynamicRegistration":true,"tooltipSupport":true},"documentSymbol":{"hierarchicalDocumentSymbolSupport":true,"symbolKind":{"valueSet":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]}},"foldingRange":{"dynamicRegistration":true},"formatting":{"dynamicRegistration":true},"hover":{"contentFormat":["markdown","plaintext"],"dynamicRegistration":true},"implementation":{"dynamicRegistration":true,"linkSupport":true},"inlineCompletion":null,"linkedEditingRange":{"dynamicRegistration":true},"onTypeFormatting":{"dynamicRegistration":true},"publishDiagnostics":{"relatedInformation":true,"tagSupport":{"valueSet":[1,2]},"versionSupport":true},"rangeFormatting":{"dynamicRegistration":true},"references":{"dynamicRegistration":true},"rename":{"dynamicRegistration":true,"prepareSupport":true},"selectionRange":{"dynamicRegistration":true},"signatureHelp":{"dynamicRegistration":true,"signatureInformation":{"activeParameterSupport":true,"parameterInformation":{"labelOffsetSupport":true}}},"synchronization":{"didSave":true,"willSave":true,"willSaveWaitUntil":true},"typeDefinition":{"dynamicRegistration":true,"linkSupport":true},"typeHierarchy":{"dynamicRegistration":true}},"window":{"showDocument":{"support":true},"workDoneProgress":true},"workspace":{"applyEdit":true,"codeLens":{"refreshSupport":true},"configuration":true,"diagnostics":{"refreshSupport":false},"didChangeWatchedFiles":{"dynamicRegistration":true},"executeCommand":{"dynamicRegistration":false},"fileOperations":{"didCreate":false,"didDelete":false,"didRename":true,"willCreate":false,"willDelete":false,"willRename":true},"symbol":{"symbolKind":{"valueSet":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]}},"workspaceEdit":{"documentChanges":true,"resourceOperations":["create","rename","delete"]},"workspaceFolders":true}},"clientInfo":{"name":"emacs","version":"GNU Emacs 30.2 (build 1, aarch64-apple-darwin24.6.0)\n of 2025-12-10"},"initializationOptions":null,"processId":31439,"rootPath":"/Users/gplane/programming/local/wat-play","rootUri":"file:///Users/gplane/programming/local/wat-play","workDoneToken":"1"}}Content-Length: 52
+
+{"jsonrpc":"2.0","method":"initialized","params":{}}Content-Length: 250
+
+{"jsonrpc":"2.0","method":"textDocument/didOpen","params":{"textDocument":{"languageId":"wat","text":"(module\n  (func (param $a i32) (param $b i32)\n    (local.get $a)))\n","uri":"file:///Users/gplane/programming/local/wat-play/b.wat","version":0}}}Content-Length: 38
+
+{"jsonrpc":"2.0","id":0,"result":null}Content-Length: 496
+
+{"jsonrpc":"2.0","id":1,"result":[{"format":{"ignoreCommentDirective":"fmt-ignore","multiLineFields":"smart","multiLineLocals":"smart","wrapBeforeConstExpr":"always","wrapBeforeFields":"multiOnly","wrapBeforeLocals":"always"},"inlayHint":{"ending":true,"index":true,"types":true},"lint":{"deprecated":"warn","implicitModule":"allow","multiModules":"deny","needlessMut":"warn","needlessTryTable":"warn","shadow":"warn","unreachable":"hint","unread":"warn","unused":"warn","uselessCatch":"warn"}}]}Content-Length: 276
+
+{"jsonrpc":"2.0","method":"textDocument/didChange","params":{"contentChanges":[{"range":{"end":{"character":0,"line":2},"start":{"character":0,"line":2}},"rangeLength":0,"text":"\n"}],"textDocument":{"uri":"file:///Users/gplane/programming/local/wat-play/b.wat","version":1}}}Content-Length: 150
+
+{"jsonrpc":"2.0","id":12,"method":"textDocument/diagnostic","params":{"textDocument":{"uri":"file:///Users/gplane/programming/local/wat-play/b.wat"}}}Content-Length: 63
+
+{"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":12}}Content-Length: 274
+
+{"jsonrpc":"2.0","method":"textDocument/didChange","params":{"contentChanges":[{"range":{"end":{"character":4,"line":3},"start":{"character":0,"line":3}},"rangeLength":4,"text":""}],"textDocument":{"uri":"file:///Users/gplane/programming/local/wat-play/b.wat","version":2}}}Content-Length: 150
+
+{"jsonrpc":"2.0","id":13,"method":"textDocument/diagnostic","params":{"textDocument":{"uri":"file:///Users/gplane/programming/local/wat-play/b.wat"}}}Content-Length: 45
+
+{"jsonrpc":"2.0","id":10,"method":"shutdown"}"#;
+
+    Command::new(assert_cmd::cargo_bin!("wat_server"))
+        .write_stdin(stdin)
+        .timeout(Duration::from_secs(5))
+        .assert()
+        .success();
+}
