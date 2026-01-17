@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..34
-  MODULE@0..33
+ROOT@0..90
+  MODULE@0..89
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -19,5 +19,33 @@ ROOT@0..34
       WHITESPACE@27..28 " "
       IDENT@28..31 "$f'"
       R_PAREN@31..32 ")"
-    R_PAREN@32..33 ")"
-  WHITESPACE@33..34 "\n"
+    WHITESPACE@32..35 "\n  "
+    MODULE_FIELD_FUNC@35..45
+      L_PAREN@35..36 "("
+      KEYWORD@36..40 "func"
+      WHITESPACE@40..41 " "
+      IDENT@41..44 "$\"\""
+      R_PAREN@44..45 ")"
+    WHITESPACE@45..48 "\n  "
+    MODULE_FIELD_FUNC@48..59
+      L_PAREN@48..49 "("
+      KEYWORD@49..53 "func"
+      WHITESPACE@53..54 " "
+      IDENT@54..58 "$\"f\""
+      R_PAREN@58..59 ")"
+    WHITESPACE@59..62 "\n  "
+    MODULE_FIELD_FUNC@62..73
+      L_PAREN@62..63 "("
+      KEYWORD@63..67 "func"
+      WHITESPACE@67..68 " "
+      IDENT@68..72 "$\" \""
+      R_PAREN@72..73 ")"
+    WHITESPACE@73..76 "\n  "
+    MODULE_FIELD_FUNC@76..88
+      L_PAREN@76..77 "("
+      KEYWORD@77..81 "func"
+      WHITESPACE@81..82 " "
+      IDENT@82..87 "$\"()\""
+      R_PAREN@87..88 ")"
+    R_PAREN@88..89 ")"
+  WHITESPACE@89..90 "\n"

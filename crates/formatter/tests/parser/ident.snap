@@ -3,4 +3,8 @@ source: crates/formatter/tests/parser.rs
 ---
 (module
   (func $')
-  (func $f'))
+  (func $f')
+  (func $"")
+  (func $"f")
+  (func $" ")
+  (func $"()"))

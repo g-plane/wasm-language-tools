@@ -15,7 +15,7 @@ pub fn act(
     node: &SyntaxNode,
 ) -> Option<CodeAction> {
     let def_key = SymbolKey::new(node);
-    let ident = support::token(node, SyntaxKind::IDENT)?;
+    let ident_token = support::token(node, SyntaxKind::IDENT)?;
     let module = node.parent()?;
     let exports = exports::get_exports(service, document);
     if exports
@@ -25,14 +25,19 @@ pub fn act(
         return None;
     }
 
-    let name = format!("\"{}\"", ident.text().strip_prefix('$')?);
+    let ident = ident_token.text().strip_prefix('$')?;
+    let name = if ident.starts_with('"') {
+        ident.into()
+    } else {
+        format!("\"{ident}\"")
+    };
     let mut changes = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
         uri.raw(service),
         vec![TextEdit {
             range: helpers::rowan_range_to_lsp_range(
                 line_index,
-                TextRange::empty(ident.text_range().end()),
+                TextRange::empty(ident_token.text_range().end()),
             ),
             new_text: format!(" (export {name})"),
         }],

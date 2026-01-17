@@ -167,26 +167,31 @@ impl<'s> Lexer<'s> {
     }
 
     fn ident(&mut self) -> Option<Token<'s>> {
-        if self.input.starts_with('$') {
-            let end = self
-                .input
-                .find(|c| !is_id_char(c))
-                .unwrap_or(self.input.len());
-            if end == 1 {
-                // identifier can't be only `$`
-                None
-            } else {
+        let checkpoint = self.input;
+        self.input.strip_prefix('$').and_then(|rest| {
+            if rest.starts_with(is_id_char) {
+                let end = rest.find(|c| !is_id_char(c)).unwrap_or(rest.len());
                 // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
                 unsafe {
                     Some(Token {
                         kind: SyntaxKind::IDENT,
-                        text: self.split_advance(end),
+                        text: self.split_advance(end + 1),
                     })
                 }
+            } else if rest.starts_with('"') {
+                self.input = rest;
+                self.string()?;
+                // SAFETY: the difference of two valid UTF-8 strings is valid
+                unsafe {
+                    Some(Token {
+                        kind: SyntaxKind::IDENT,
+                        text: checkpoint.get_unchecked(..checkpoint.len() - self.input.len()),
+                    })
+                }
+            } else {
+                None
             }
-        } else {
-            None
-        }
+        })
     }
 
     fn word(&mut self) -> Option<&'s str> {

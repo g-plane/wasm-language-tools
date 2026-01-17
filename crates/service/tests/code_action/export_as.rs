@@ -106,3 +106,16 @@ fn tag() {
     let response = service.code_action(create_params(uri, 2, 6, 2, 6));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn quoted_ident() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (func $"my func")
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.code_action(create_params(uri, 2, 6, 2, 6));
+    assert_json_snapshot!(response);
+}
