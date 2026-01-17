@@ -35,7 +35,14 @@ expression: response
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected types [], found [i32] at the end"
+      "message": "expected types [], found [i32] at the end",
+      "data": [
+        278,
+        302,
+        [
+          "i32"
+        ]
+      ]
     },
     {
       "range": {
@@ -85,7 +92,14 @@ expression: response
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected types [], found [i32] at the end"
+      "message": "expected types [], found [i32] at the end",
+      "data": [
+        305,
+        361,
+        [
+          "i32"
+        ]
+      ]
     }
   ]
 }

@@ -48,6 +48,12 @@ impl LanguageService {
                     {
                         actions.push(action);
                     }
+                    if quickfix
+                        && let Some(action) =
+                            add_result_types::act(self, uri, line_index, &it, &params.context)
+                    {
+                        actions.push(action);
+                    }
                 }
                 SyntaxKind::PLAIN_INSTR => {
                     if rewrite {
@@ -127,6 +133,20 @@ impl LanguageService {
                 }
                 SyntaxKind::BLOCK_IF => {
                     if rewrite && let Some(action) = if_br_to_br_if::act(self, uri, line_index, &it)
+                    {
+                        actions.push(action);
+                    }
+                    if quickfix
+                        && let Some(action) =
+                            add_result_types::act(self, uri, line_index, &it, &params.context)
+                    {
+                        actions.push(action);
+                    }
+                }
+                SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_TRY_TABLE => {
+                    if quickfix
+                        && let Some(action) =
+                            add_result_types::act(self, uri, line_index, &it, &params.context)
                     {
                         actions.push(action);
                     }

@@ -35,7 +35,14 @@ expression: response
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected types [], found [f64] at the end"
+      "message": "expected types [], found [f64] at the end",
+      "data": [
+        93,
+        121,
+        [
+          "f64"
+        ]
+      ]
     },
     {
       "range": {
@@ -83,7 +90,14 @@ expression: response
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected types [], found [f64] at the end"
+      "message": "expected types [], found [f64] at the end",
+      "data": [
+        124,
+        184,
+        [
+          "f64"
+        ]
+      ]
     },
     {
       "range": {

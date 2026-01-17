@@ -236,7 +236,8 @@ fn check_block_like(
         .filter(|child| Instr::can_cast(child.kind()))
         .for_each(|child| unfold(child, &mut type_stack, diagnostics, shared));
 
-    if let Some(diagnostic) = type_stack.check_to_bottom(expected_results, ReportRange::Last(node))
+    if let Some(diagnostic) =
+        type_stack.check_to_bottom(expected_results, node, ReportRange::Last(node))
     {
         diagnostics.push(diagnostic);
     }
@@ -358,7 +359,7 @@ fn check_instr<'db>(
                             has_never: false,
                         };
                         if type_stack
-                            .check_to_bottom(&results, ReportRange::Instr(&instr))
+                            .check_to_bottom(&results, node, ReportRange::Instr(&instr))
                             .is_some()
                         {
                             diagnostics.push(Diagnostic {
@@ -477,9 +478,9 @@ impl<'db> TypeStack<'db> {
     fn check_to_bottom(
         &mut self,
         expected: &[OperandType<'db>],
+        block_node: &SyntaxNode,
         report_range: ReportRange,
     ) -> Option<Diagnostic> {
-        let mut diagnostic = None;
         let mut mismatch = false;
         let mut related_information = vec![];
         expected
@@ -529,7 +530,7 @@ impl<'db> TypeStack<'db> {
                     .map(|(ty, _)| ty.render(self.service))
                     .join(", ")
             );
-            diagnostic = Some(Diagnostic {
+            Some(Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(self.line_index, report_range.pick()),
                 severity: Some(DiagnosticSeverity::Error),
                 source: Some("wat".into()),
@@ -547,11 +548,31 @@ impl<'db> TypeStack<'db> {
                 } else {
                     Some(related_information)
                 },
+                data: if expected.is_empty() {
+                    let range = block_node.text_range();
+                    self.stack
+                        .iter()
+                        .map(|(ty, _)| match ty {
+                            OperandType::Val(ty) => Some(ty.render(self.service).to_string()),
+                            OperandType::Any => None,
+                        })
+                        .collect::<Option<Vec<_>>>()
+                        .and_then(|types| {
+                            serde_json::to_value((
+                                u32::from(range.start()),
+                                u32::from(range.end()),
+                                types,
+                            ))
+                            .ok()
+                        })
+                } else {
+                    None
+                },
                 ..Default::default()
-            });
+            })
+        } else {
+            None
         }
-        self.stack.clear();
-        diagnostic
     }
 }
 

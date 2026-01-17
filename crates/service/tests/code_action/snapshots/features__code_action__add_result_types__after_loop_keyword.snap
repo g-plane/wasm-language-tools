@@ -1,0 +1,52 @@
+---
+source: crates/service/tests/code_action/add_result_types.rs
+expression: response
+---
+[
+  {
+    "title": "Add result types",
+    "kind": "quickfix",
+    "diagnostics": [
+      {
+        "range": {
+          "start": {
+            "line": 0,
+            "character": 0
+          },
+          "end": {
+            "line": 0,
+            "character": 0
+          }
+        },
+        "code": "type-check",
+        "message": "",
+        "data": [
+          21,
+          45,
+          [
+            "i32"
+          ]
+        ]
+      }
+    ],
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 9
+              },
+              "end": {
+                "line": 3,
+                "character": 9
+              }
+            },
+            "newText": " (result i32)"
+          }
+        ]
+      }
+    }
+  }
+]

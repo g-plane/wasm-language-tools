@@ -1,3 +1,4 @@
+pub mod add_result_types;
 pub mod br_if_to_if_br;
 pub mod clean_no_types;
 pub mod convert_idx;

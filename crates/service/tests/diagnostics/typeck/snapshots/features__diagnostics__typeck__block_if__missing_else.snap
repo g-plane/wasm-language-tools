@@ -51,7 +51,14 @@ expression: response
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected types [], found [i32] at the end"
+      "message": "expected types [], found [i32] at the end",
+      "data": [
+        116,
+        184,
+        [
+          "i32"
+        ]
+      ]
     }
   ]
 }

@@ -35,7 +35,14 @@ expression: response
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected types [], found [(ref null any)] at the end"
+      "message": "expected types [], found [(ref null any)] at the end",
+      "data": [
+        45,
+        251,
+        [
+          "(ref null any)"
+        ]
+      ]
     },
     {
       "range": {
