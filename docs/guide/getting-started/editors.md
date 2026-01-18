@@ -96,11 +96,11 @@ or use similar packages.
 
 [lsp-mode](https://github.com/emacs-lsp/lsp-mode/) has built-in support for WebAssembly Language Tools.
 
-For the minimal setup, you may need to add a hook:
+You may need to add a hook to start the language server automatically:
 
 ```emacs-lisp
 (use-package lsp-mode
-  ; ... other configurations ...
+  ;; ... other configurations ...
   :hook
   (wat-mode . lsp-deferred))
 ```
@@ -109,7 +109,7 @@ Additionally, you can configure the language server like this:
 
 ```emacs-lisp
 (use-package lsp-mode
-  ; ... other configurations ...
+  ;; ... other configurations ...
   :hook
   (wat-mode . lsp-deferred)
   :config
@@ -118,6 +118,45 @@ Additionally, you can configure the language server like this:
 ```
 
 To view all available configurations, please refer to [the documentation of lsp-mode](https://emacs-lsp.github.io/lsp-mode/page/lsp-wasm-language-tools/#available-configurations).
+
+### Eglot
+
+> [!NOTE]
+> It's required to install Eglot from GNU-devel ELPA.
+
+[Eglot](https://elpa.gnu.org/packages/doc/eglot.html) has built-in support for WebAssembly Language Tools.
+
+You may need to add a hook to start the language server automatically:
+
+```emacs-lisp
+(add-hook 'wat-mode-hook 'eglot-ensure)
+```
+
+or with `use-package`:
+
+```emacs-lisp
+(use-package eglot
+  ;; ... other configurations ...
+  :hook
+  (wat-mode . eglot-ensure))
+```
+
+Additionally, you can configure the language server like this:
+
+```emacs-lisp
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               `(wat-mode . ("wat_server" :initializationOptions
+                                          (:lint (:unused "deny"))))))
+```
+
+or configure in `.dir-locals.el` for specific projects: (recommended)
+
+```emacs-lisp
+((nil
+  . ((eglot-workspace-configuration
+    . (:wasmLanguageTools (:lint (:unused "deny")))))))
+```
 
 ### lsp-bridge
 

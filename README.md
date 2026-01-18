@@ -161,12 +161,15 @@ After installed, open or create a ".wat" file to try it out.
 ### Editor Support
 
 - Visual Studio Code: Install the [WebAssembly Language Tools](https://marketplace.visualstudio.com/items?itemName=gplane.wasm-language-tools) extension.
+- Zed: Install the [WebAssembly Text Format](https://zed.dev/extensions?query=WebAssembly+Text+Format) extension.
 - Neovim: Built-in support in [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md#wasm_language_tools):
   ```lua
   vim.lsp.enable("wasm_language_tools")
   ```
-- Zed: Install the [WebAssembly Text Format](https://zed.dev/extensions?query=WebAssembly+Text+Format) extension.
+- Emacs: [lsp-mode](https://emacs-lsp.github.io/lsp-mode/page/lsp-wasm-language-tools/), [Eglot](https://elpa.gnu.org/packages/doc/eglot.html), and [lsp-bridge](https://github.com/manateelazycat/lsp-bridge) all have built-in support.
 - Helix: Built-in support.
+
+For other editors and advanced configurations, please refer to the [editor guide](https://wasm-language-tools.netlify.app/guide/getting-started/editors.html).
 
 ### Binaries
 
