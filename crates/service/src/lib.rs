@@ -22,11 +22,10 @@ use dashmap::DashMap;
 use indexmap::{IndexMap, IndexSet};
 use lspt::{
     CodeActionKind, CodeActionOptions, CodeLensOptions, CompletionOptions, DiagnosticOptions,
-    InitializeParams, InitializeResult, Registration, RegistrationParams, RenameOptions,
-    SemanticTokensClientCapabilities, SemanticTokensLegend, SemanticTokensOptions,
-    ServerCapabilities, ServerInfo, SignatureHelpOptions, TextDocumentClientCapabilities,
-    TextDocumentSyncKind, TextDocumentSyncOptions, Union2, Union3,
-    notification::DidChangeConfigurationNotification,
+    InitializeParams, InitializeResult, RenameOptions, SemanticTokensClientCapabilities,
+    SemanticTokensLegend, SemanticTokensOptions, ServerCapabilities, ServerInfo,
+    SignatureHelpOptions, TextDocumentClientCapabilities, TextDocumentSyncKind,
+    TextDocumentSyncOptions, Union2, Union3,
 };
 use rustc_hash::FxBuildHasher;
 use salsa::Database;
@@ -183,19 +182,6 @@ impl LanguageService {
                 name: "WebAssembly Language Tools".into(),
                 version: Some(env!("CARGO_PKG_VERSION").into()),
             }),
-        }
-    }
-
-    #[inline]
-    /// Get dynamically registered capabilities.
-    pub fn dynamic_capabilities(&self) -> RegistrationParams {
-        use lspt::notification::Notification;
-        RegistrationParams {
-            registrations: vec![Registration {
-                id: DidChangeConfigurationNotification::METHOD.into(),
-                method: DidChangeConfigurationNotification::METHOD.into(),
-                register_options: None,
-            }],
         }
     }
 }

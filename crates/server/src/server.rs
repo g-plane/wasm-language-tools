@@ -5,7 +5,8 @@ use crate::{
 };
 use lspt::{
     ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams,
-    DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams,
+    DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams, Registration,
+    RegistrationParams,
     notification::{
         DidChangeConfigurationNotification, DidChangeTextDocumentNotification,
         DidCloseTextDocumentNotification, DidOpenTextDocumentNotification, ExitNotification,
@@ -34,6 +35,7 @@ pub struct Server {
     support_refresh_diagnostics: bool,
     support_refresh_inlay_hint: bool,
     support_pull_config: bool,
+    support_register_change_config: bool,
     sent_requests: SentRequests,
     pool: ThreadPool,
 }
@@ -46,6 +48,7 @@ impl Server {
             support_refresh_diagnostics: false,
             support_refresh_inlay_hint: false,
             support_pull_config: false,
+            support_register_change_config: false,
             sent_requests: SentRequests::default(),
             pool: ThreadPoolBuilder::new().build().unwrap(),
         }
@@ -112,11 +115,20 @@ impl Server {
                     }
                     match try_cast_notification::<InitializedNotification>(&method, params) {
                         Ok(..) => {
-                            stdio::write(Message::Request {
-                                id: self.sent_requests.next_id(),
-                                method: RegistrationRequest::METHOD.into(),
-                                params: serde_json::to_value(self.service.dynamic_capabilities())?,
-                            })?;
+                            if self.support_register_change_config {
+                                stdio::write(Message::Request {
+                                    id: self.sent_requests.next_id(),
+                                    method: RegistrationRequest::METHOD.into(),
+                                    params: serde_json::to_value(RegistrationParams {
+                                        registrations: vec![Registration {
+                                            id: DidChangeConfigurationNotification::METHOD.into(),
+                                            method: DidChangeConfigurationNotification::METHOD
+                                                .into(),
+                                            register_options: None,
+                                        }],
+                                    })?,
+                                })?;
+                            }
                             continue;
                         }
                         Err(p) => params = p,
@@ -167,6 +179,15 @@ impl Server {
                 .workspace
                 .as_ref()
                 .and_then(|it| it.configuration),
+            Some(true)
+        );
+        self.support_register_change_config = matches!(
+            params
+                .capabilities
+                .workspace
+                .as_ref()
+                .and_then(|it| it.did_change_configuration.as_ref())
+                .and_then(|it| it.dynamic_registration),
             Some(true)
         );
         stdio::write(Message::OkResponse {
