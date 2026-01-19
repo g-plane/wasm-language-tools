@@ -97,7 +97,8 @@ impl LanguageService {
                         let Some(node) = document
                             .root_tree(self)
                             .children()
-                            .find_map(|child| child.child_or_token_at_range(range))
+                            .find(|module| module.text_range().contains_range(range))
+                            .and_then(|module| module.child_or_token_at_range(range))
                             .and_then(|node_or_token| node_or_token.into_node())
                             .filter(|node| {
                                 let node_range = node.text_range();
@@ -1247,6 +1248,44 @@ mod tests {
             },
             work_done_token: None,
             partial_result_token: None,
+        });
+    }
+
+    #[test]
+    fn insert_before_module() {
+        let uri = "untitled:test".to_string();
+        let mut service = LanguageService::default();
+        service.commit(
+            &uri,
+            "
+(@metadata.code.call_target )
+(module
+  (func (param i32) (local i32)))
+"
+            .into(),
+        );
+        // should not panic
+        service.did_change(DidChangeTextDocumentParams {
+            text_document: VersionedTextDocumentIdentifier {
+                uri: uri.clone(),
+                version: 1,
+            },
+            content_changes: vec![TextDocumentContentChangeEvent::A(
+                TextDocumentContentChangePartial {
+                    range: Range {
+                        start: Position {
+                            line: 1,
+                            character: 27,
+                        },
+                        end: Position {
+                            line: 1,
+                            character: 27,
+                        },
+                    },
+                    text: "s".into(),
+                    ..Default::default()
+                },
+            )],
         });
     }
 }
