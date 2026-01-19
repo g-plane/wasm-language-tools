@@ -14,10 +14,10 @@ use lspt::{
     CompletionParams, MarkupContent, MarkupKind, TextEdit, Union2,
 };
 use rowan::{
-    Direction,
+    Direction, NodeOrToken,
     ast::{AstNode, support},
 };
-use smallvec::SmallVec;
+use smallvec::{SmallVec, smallvec};
 use wat_syntax::{
     SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken,
     ast::{Instr, PlainInstr, TableType},
@@ -42,10 +42,29 @@ impl LanguageService {
 }
 
 fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
-    let mut ctx = SmallVec::with_capacity(2);
-    if token.kind() == SyntaxKind::ANNOT_START {
-        return Some(smallvec::smallvec![CmpCtx::Annotation]);
+    match token.kind() {
+        SyntaxKind::ANNOT_START => return Some(smallvec![CmpCtx::Annotation]),
+        SyntaxKind::ANNOT_ELEM => {
+            return match token
+                .siblings_with_tokens(Direction::Prev)
+                .map_while(NodeOrToken::into_token)
+                .find(|token| token.kind() == SyntaxKind::ANNOT_START)
+                .as_ref()
+                .and_then(|token| token.text().strip_prefix("(@"))
+            {
+                Some("metadata.code.compilation_priority") => {
+                    Some(smallvec![CmpCtx::AnnotationCompilationPriority])
+                }
+                Some("metadata.code.instr_freq") => Some(smallvec![CmpCtx::AnnotationInstrFreq]),
+                Some("metadata.code.call_targets") => {
+                    Some(smallvec![CmpCtx::AnnotationCallTargets])
+                }
+                _ => None,
+            };
+        }
+        _ => {}
     }
+    let mut ctx = SmallVec::with_capacity(2);
     let parent = token.parent()?;
     match parent.kind() {
         SyntaxKind::MODULE_FIELD_FUNC => {
@@ -717,6 +736,9 @@ enum CmpCtx {
     KeywordsCatch,
     KeywordsShare,
     KeywordPagesize,
+    AnnotationCompilationPriority,
+    AnnotationInstrFreq,
+    AnnotationCallTargets,
 }
 enum PreferredType {
     Func,
@@ -1327,6 +1349,9 @@ fn get_cmp_list(
                             "name",
                             "js",
                             "metadata.code.branch_hint",
+                            "metadata.code.compilation_priority",
+                            "metadata.code.instr_freq",
+                            "metadata.code.call_targets",
                         ]
                         .map(|annot| CompletionItem {
                             label: annot.to_string(),
@@ -1484,6 +1509,25 @@ fn get_cmp_list(
                 CmpCtx::KeywordPagesize => items.push(CompletionItem {
                     label: "pagesize".to_string(),
                     kind: Some(CompletionItemKind::Keyword),
+                    ..Default::default()
+                }),
+                CmpCtx::AnnotationCompilationPriority => {
+                    items.extend(["compilation", "optimization", "run_once"].into_iter().map(
+                        |keyword| CompletionItem {
+                            label: keyword.to_string(),
+                            kind: Some(CompletionItemKind::Snippet),
+                            ..Default::default()
+                        },
+                    ));
+                }
+                CmpCtx::AnnotationInstrFreq => items.push(CompletionItem {
+                    label: "freq".to_string(),
+                    kind: Some(CompletionItemKind::Snippet),
+                    ..Default::default()
+                }),
+                CmpCtx::AnnotationCallTargets => items.push(CompletionItem {
+                    label: "target".to_string(),
+                    kind: Some(CompletionItemKind::Snippet),
                     ..Default::default()
                 }),
             }

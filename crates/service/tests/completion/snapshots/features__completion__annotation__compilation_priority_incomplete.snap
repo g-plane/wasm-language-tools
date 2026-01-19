@@ -1,0 +1,18 @@
+---
+source: crates/service/tests/completion/annotation.rs
+expression: response
+---
+[
+  {
+    "label": "compilation",
+    "kind": 15
+  },
+  {
+    "label": "optimization",
+    "kind": 15
+  },
+  {
+    "label": "run_once",
+    "kind": 15
+  }
+]

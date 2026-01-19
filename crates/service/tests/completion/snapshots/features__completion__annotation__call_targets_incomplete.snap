@@ -1,0 +1,10 @@
+---
+source: crates/service/tests/completion/annotation.rs
+expression: response
+---
+[
+  {
+    "label": "target",
+    "kind": 15
+  }
+]

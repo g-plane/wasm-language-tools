@@ -22,5 +22,17 @@ expression: response
   {
     "label": "metadata.code.branch_hint",
     "kind": 15
+  },
+  {
+    "label": "metadata.code.compilation_priority",
+    "kind": 15
+  },
+  {
+    "label": "metadata.code.instr_freq",
+    "kind": 15
+  },
+  {
+    "label": "metadata.code.call_targets",
+    "kind": 15
   }
 ]
