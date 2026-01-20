@@ -99,10 +99,9 @@ pub(crate) fn render_block_header<'db>(
     )
 }
 
-#[salsa::tracked]
 pub(crate) fn render_header<'db>(
     db: &'db dyn salsa::Database,
-    keyword: &'db str,
+    keyword: &str,
     name: Option<InternIdent<'db>>,
     signature: Signature<'db>,
 ) -> String {

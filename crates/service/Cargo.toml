@@ -19,7 +19,7 @@ lspt = { workspace = true }
 petgraph = "0.8"
 rowan = { workspace = true }
 rustc-hash = { workspace = true }
-salsa = "0.24"
+salsa = "0.25"
 serde = { workspace = true }
 serde_json = { workspace = true }
 smallvec = "1.15"
