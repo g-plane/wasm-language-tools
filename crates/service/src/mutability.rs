@@ -14,8 +14,8 @@ use wat_syntax::{
 };
 
 #[salsa::tracked(returns(ref))]
-pub(crate) fn get_mutabilities<'db>(
-    db: &'db dyn salsa::Database,
+pub(crate) fn get_mutabilities(
+    db: &dyn salsa::Database,
     document: Document,
 ) -> IndexMap<SymbolKey, Mutability, FxBuildHasher> {
     let root = document.root_tree(db);
@@ -107,8 +107,8 @@ pub(crate) struct Mutability {
 }
 
 #[salsa::tracked(returns(ref))]
-pub(crate) fn get_mutation_actions<'db>(
-    db: &'db dyn salsa::Database,
+pub(crate) fn get_mutation_actions(
+    db: &dyn salsa::Database,
     document: Document,
 ) -> IndexMap<SymbolKey, MutationAction, FxBuildHasher> {
     let root = document.root_tree(db);

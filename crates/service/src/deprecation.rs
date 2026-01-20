@@ -4,8 +4,8 @@ use rustc_hash::FxHashMap;
 use wat_syntax::SyntaxKind;
 
 #[salsa::tracked(returns(ref))]
-pub(crate) fn get_deprecation<'db>(
-    db: &'db dyn salsa::Database,
+pub(crate) fn get_deprecation(
+    db: &dyn salsa::Database,
     document: Document,
 ) -> FxHashMap<SymbolKey, Option<String>> {
     let root = document.root_tree(db);

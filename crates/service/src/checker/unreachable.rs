@@ -1,5 +1,5 @@
 use crate::{
-    LanguageService, LintLevel,
+    LintLevel,
     cfa::{self, FlowNodeKind},
     document::Document,
     helpers,
@@ -16,7 +16,7 @@ const DIAGNOSTIC_CODE: &str = "unreachable";
 
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     lint_level: LintLevel,
     line_index: &LineIndex,
@@ -30,7 +30,7 @@ pub fn check(
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
 
-    let cfg = cfa::analyze(service, document, SyntaxNodePtr::new(node));
+    let cfg = cfa::analyze(db, document, SyntaxNodePtr::new(node));
     let mut ranges = Vec::<TextRange>::new();
     cfg.graph.raw_nodes().iter().for_each(|node| {
         if !node.weight.unreachable {

@@ -8,8 +8,8 @@ use wat_syntax::{
 };
 
 #[salsa::tracked(returns(ref))]
-pub fn analyze<'db>(
-    db: &'db dyn salsa::Database,
+pub fn analyze(
+    db: &dyn salsa::Database,
     document: Document,
     ptr: SyntaxNodePtr,
 ) -> ControlFlowGraph {

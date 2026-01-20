@@ -1,4 +1,4 @@
-use crate::{LanguageService, binder::SymbolTable, document::Document, helpers, types_analyzer};
+use crate::{binder::SymbolTable, document::Document, helpers, types_analyzer};
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use rowan::ast::AstNode;
@@ -8,13 +8,13 @@ const DIAGNOSTIC_CODE: &str = "subtyping";
 
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
 ) {
-    let def_types = types_analyzer::get_def_types(service, document);
+    let def_types = types_analyzer::get_def_types(db, document);
     diagnostics.extend(
         def_types
             .iter()
@@ -34,25 +34,25 @@ pub fn check(
                         key,
                         format!(
                             "typeidx of super type `{}` must be smaller than type `{}`",
-                            super_type.idx.render(service),
-                            sub_type.idx.render(service),
+                            super_type.idx.render(db),
+                            sub_type.idx.render(db),
                         ),
                     ))
                 } else if super_type.is_final {
                     Some((
                         key,
-                        format!("type `{}` is final", super_type.idx.render(service)),
+                        format!("type `{}` is final", super_type.idx.render(db)),
                     ))
                 } else if !sub_type
                     .comp
-                    .matches(&super_type.comp, service, document, module_id)
+                    .matches(&super_type.comp, db, document, module_id)
                 {
                     Some((
                         key,
                         format!(
                             "type of `{}` doesn't match its super type `{}`",
-                            sub_type.idx.render(service),
-                            super_type.idx.render(service),
+                            sub_type.idx.render(db),
+                            super_type.idx.render(db),
                         ),
                     ))
                 } else {

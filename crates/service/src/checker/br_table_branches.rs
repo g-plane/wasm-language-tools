@@ -1,7 +1,4 @@
-use crate::{
-    LanguageService, binder::SymbolTable, document::Document, helpers,
-    types_analyzer::resolve_br_types,
-};
+use crate::{binder::SymbolTable, document::Document, helpers, types_analyzer::resolve_br_types};
 use itertools::Itertools;
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticSeverity, Union2};
@@ -12,7 +9,7 @@ const DIAGNOSTIC_CODE: &str = "br-table-branches";
 
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
@@ -29,9 +26,9 @@ pub fn check(
     let mut immediates = instr.immediates();
     let expected = immediates
         .next()
-        .map(|immediate| resolve_br_types(service, document, symbol_table, &immediate))?;
+        .map(|immediate| resolve_br_types(db, document, symbol_table, &immediate))?;
     diagnostics.extend(immediates.filter_map(|immediate| {
-        let received = resolve_br_types(service, document, symbol_table, &immediate);
+        let received = resolve_br_types(db, document, symbol_table, &immediate);
         if received != expected {
             Some(Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(
@@ -43,8 +40,8 @@ pub fn check(
                 code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                 message: format!(
                     "type mismatch in `br_table`: expected [{}], found [{}]",
-                    expected.iter().map(|ty| ty.render(service)).join(", "),
-                    received.iter().map(|ty| ty.render(service)).join(", ")
+                    expected.iter().map(|ty| ty.render(db)).join(", "),
+                    received.iter().map(|ty| ty.render(db)).join(", ")
                 ),
                 ..Default::default()
             })

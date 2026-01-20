@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{SymbolKey, SymbolTable},
     helpers,
     uri::InternUri,
@@ -11,7 +10,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 pub fn act(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     uri: InternUri,
     line_index: &LineIndex,
     root: &SyntaxNode,
@@ -26,7 +25,7 @@ pub fn act(
 
     let mut changes = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
-        uri.raw(service),
+        uri.raw(db),
         vec![
             TextEdit {
                 range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),

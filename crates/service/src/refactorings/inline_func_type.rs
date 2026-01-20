@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{SymbolKey, SymbolTable},
     helpers,
     uri::InternUri,
@@ -15,7 +14,7 @@ use wat_syntax::{
 };
 
 pub fn act(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     uri: InternUri,
     line_index: &LineIndex,
     root: &SyntaxNode,
@@ -46,7 +45,7 @@ pub fn act(
     let end = helpers::rowan_pos_to_lsp_pos(line_index, node.text_range().end());
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
-        uri.raw(service),
+        uri.raw(db),
         vec![TextEdit {
             range: Range { start: end, end },
             new_text,

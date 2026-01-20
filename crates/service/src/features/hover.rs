@@ -173,32 +173,32 @@ impl LanguageService {
 }
 
 fn create_def_hover(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     root: &SyntaxNode,
     symbol: &Symbol,
 ) -> Option<MarkupContent> {
     match symbol.kind {
         SymbolKind::Param | SymbolKind::Local => {
-            Some(create_param_or_local_hover(service, document, symbol))
+            Some(create_param_or_local_hover(db, document, symbol))
         }
         SymbolKind::Func => Some(MarkupContent {
             kind: MarkupKind::Markdown,
-            value: create_func_hover(service, document, symbol.clone(), root),
+            value: create_func_hover(db, document, symbol.clone(), root),
         }),
-        SymbolKind::Type => Some(create_type_def_hover(service, document, symbol)),
-        SymbolKind::GlobalDef => Some(create_global_def_hover(service, symbol, root)),
-        SymbolKind::MemoryDef => Some(create_memory_def_hover(service, symbol, root)),
-        SymbolKind::TableDef => Some(create_table_def_hover(service, symbol, root)),
-        SymbolKind::BlockDef => Some(create_block_hover(service, symbol, document, root)),
-        SymbolKind::FieldDef => Some(create_field_def_hover(service, symbol, document)),
-        SymbolKind::TagDef => Some(create_tag_def_hover(service, symbol, document)),
+        SymbolKind::Type => Some(create_type_def_hover(db, document, symbol)),
+        SymbolKind::GlobalDef => Some(create_global_def_hover(db, symbol, root)),
+        SymbolKind::MemoryDef => Some(create_memory_def_hover(db, symbol, root)),
+        SymbolKind::TableDef => Some(create_table_def_hover(db, symbol, root)),
+        SymbolKind::BlockDef => Some(create_block_hover(db, symbol, document, root)),
+        SymbolKind::FieldDef => Some(create_field_def_hover(db, symbol, document)),
+        SymbolKind::TagDef => Some(create_tag_def_hover(db, symbol, document)),
         _ => None,
     }
 }
 
 fn create_func_hover(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     symbol: Symbol,
     root: &SyntaxNode,
@@ -208,9 +208,9 @@ fn create_func_hover(
     let mut content = format!(
         "```wat\n{}\n```",
         types_analyzer::render_func_header(
-            service,
+            db,
             symbol.idx.name,
-            types_analyzer::get_func_sig(service, document, *symbol.key, &symbol.green)
+            types_analyzer::get_func_sig(db, document, *symbol.key, &symbol.green)
         )
     );
     if !doc.is_empty() {
@@ -221,7 +221,7 @@ fn create_func_hover(
 }
 
 fn create_param_or_local_hover(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     symbol: &Symbol,
 ) -> MarkupContent {
@@ -237,11 +237,11 @@ fn create_param_or_local_hover(
     }
     if let Some(name) = symbol.idx.name {
         content.push(' ');
-        content.push_str(name.ident(service));
+        content.push_str(name.ident(db));
     }
-    if let Some(ty) = types_analyzer::extract_type(service, document, symbol.green.clone()) {
+    if let Some(ty) = types_analyzer::extract_type(db, document, symbol.green.clone()) {
         content.push(' ');
-        let _ = write!(content, "{}", ty.render(service));
+        let _ = write!(content, "{}", ty.render(db));
     }
     content.push(')');
     MarkupContent {
@@ -251,14 +251,14 @@ fn create_param_or_local_hover(
 }
 
 fn create_global_def_hover(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     symbol: &Symbol,
     root: &SyntaxNode,
 ) -> MarkupContent {
     let mut content = "(global".to_string();
     if let Some(name) = symbol.idx.name {
         content.push(' ');
-        content.push_str(name.ident(service));
+        content.push_str(name.ident(db));
     }
     let node = symbol.key.to_node(root);
     if let Some(global_type) = support::child::<GlobalType>(&node) {
@@ -282,14 +282,14 @@ fn create_global_def_hover(
 }
 
 fn create_memory_def_hover(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     symbol: &Symbol,
     root: &SyntaxNode,
 ) -> MarkupContent {
     let mut content = "(memory".to_string();
     if let Some(name) = symbol.idx.name {
         content.push(' ');
-        content.push_str(name.ident(service));
+        content.push_str(name.ident(db));
     }
     let node = symbol.key.to_node(root);
     if let Some(limits) = support::child::<MemoryType>(&node)
@@ -307,7 +307,7 @@ fn create_memory_def_hover(
 }
 
 fn create_table_def_hover(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     symbol: &Symbol,
     root: &SyntaxNode,
 ) -> MarkupContent {
@@ -316,7 +316,7 @@ fn create_table_def_hover(
     let mut content = "(table".to_string();
     if let Some(name) = symbol.idx.name {
         content.push(' ');
-        content.push_str(name.ident(service));
+        content.push_str(name.ident(db));
     }
     let node = symbol.key.to_node(root);
     if let Some(table_type) = support::child::<TableType>(&node) {
@@ -329,10 +329,10 @@ fn create_table_def_hover(
         }
         if let Some(ref_type) = table_type
             .ref_type()
-            .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), service))
+            .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), db))
         {
             content.push(' ');
-            let _ = write!(content, "{}", ref_type.render(service));
+            let _ = write!(content, "{}", ref_type.render(db));
         }
     }
     content.push(')');
@@ -343,15 +343,15 @@ fn create_table_def_hover(
 }
 
 fn create_type_def_hover(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     symbol: &Symbol,
 ) -> MarkupContent {
-    let def_types = types_analyzer::get_def_types(service, document);
+    let def_types = types_analyzer::get_def_types(db, document);
     let mut content = "(type".to_string();
     if let Some(name) = symbol.idx.name {
         content.push(' ');
-        content.push_str(name.ident(service));
+        content.push_str(name.ident(db));
     }
     if let Some(DefType { comp, .. }) = def_types.get(&symbol.key) {
         content.push(' ');
@@ -360,7 +360,7 @@ fn create_type_def_hover(
                 content.push_str("(func");
                 if !sig.params.is_empty() || !sig.results.is_empty() {
                     content.push(' ');
-                    let _ = write!(content, "{}", sig.render(service));
+                    let _ = write!(content, "{}", sig.render(db));
                 }
                 content.push(')');
             }
@@ -368,7 +368,7 @@ fn create_type_def_hover(
                 content.push_str("(struct");
                 if !fields.0.is_empty() {
                     content.push(' ');
-                    let _ = write!(content, "{}", fields.render(service));
+                    let _ = write!(content, "{}", fields.render(db));
                 }
                 content.push(')');
             }
@@ -376,7 +376,7 @@ fn create_type_def_hover(
                 content.push_str("(array");
                 if let Some(field_ty) = field_ty {
                     content.push(' ');
-                    let _ = write!(content, "{}", field_ty.render(service));
+                    let _ = write!(content, "{}", field_ty.render(db));
                 }
                 content.push(')');
             }
@@ -390,16 +390,16 @@ fn create_type_def_hover(
 }
 
 fn create_block_hover(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     symbol: &Symbol,
     document: Document,
     root: &SyntaxNode,
 ) -> MarkupContent {
     let content = types_analyzer::render_block_header(
-        service,
+        db,
         symbol.key.kind(),
         symbol.idx.name,
-        types_analyzer::get_block_sig(service, document, &symbol.key.to_node(root)),
+        types_analyzer::get_block_sig(db, document, &symbol.key.to_node(root)),
     );
     MarkupContent {
         kind: MarkupKind::Markdown,
@@ -408,19 +408,17 @@ fn create_block_hover(
 }
 
 fn create_field_def_hover(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     symbol: &Symbol,
     document: Document,
 ) -> MarkupContent {
     let mut content = "(field".to_string();
     if let Some(name) = symbol.idx.name {
         content.push(' ');
-        content.push_str(name.ident(service));
+        content.push_str(name.ident(db));
     }
-    if let Some(ty) =
-        types_analyzer::resolve_field_type(service, document, symbol.key, symbol.region)
-    {
-        let _ = write!(content, " {}", ty.render(service));
+    if let Some(ty) = types_analyzer::resolve_field_type(db, document, symbol.key, symbol.region) {
+        let _ = write!(content, " {}", ty.render(db));
     }
     content.push(')');
     MarkupContent {
@@ -430,15 +428,15 @@ fn create_field_def_hover(
 }
 
 fn create_tag_def_hover(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     symbol: &Symbol,
     document: Document,
 ) -> MarkupContent {
     let content = types_analyzer::render_header(
-        service,
+        db,
         "tag",
         symbol.idx.name,
-        types_analyzer::get_func_sig(service, document, *symbol.key, &symbol.green),
+        types_analyzer::get_func_sig(db, document, *symbol.key, &symbol.green),
     );
     MarkupContent {
         kind: MarkupKind::Markdown,

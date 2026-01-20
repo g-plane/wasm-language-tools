@@ -207,7 +207,7 @@ impl LanguageService {
 }
 
 fn compute_token_modifier(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     symbol_table: &SymbolTable,
     token: &SyntaxToken,
@@ -221,7 +221,7 @@ fn compute_token_modifier(
     {
         match symbol.kind {
             SymbolKind::GlobalDef | SymbolKind::Type | SymbolKind::FieldDef => {
-                mutability::get_mutabilities(service, document)
+                mutability::get_mutabilities(db, document)
                     .get(&symbol.key)
                     .and_then(|mutability| mutability.mut_keyword)
                     .map_or(0, |_| 1)
@@ -229,7 +229,7 @@ fn compute_token_modifier(
             SymbolKind::GlobalRef | SymbolKind::TypeUse | SymbolKind::FieldRef => symbol_table
                 .resolved
                 .get(&symbol.key)
-                .and_then(|def_key| mutability::get_mutabilities(service, document).get(def_key))
+                .and_then(|def_key| mutability::get_mutabilities(db, document).get(def_key))
                 .and_then(|mutability| mutability.mut_keyword)
                 .map_or(0, |_| 1),
             _ => 0,

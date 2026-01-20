@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{SymbolKey, SymbolKind, SymbolTable},
     document::Document,
     helpers,
@@ -13,13 +12,13 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 const DIAGNOSTIC_CODE: &str = "new-non-defaultable";
 
 pub fn check(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) -> Option<Diagnostic> {
-    let def_types = types_analyzer::get_def_types(service, document);
+    let def_types = types_analyzer::get_def_types(db, document);
     let immediate = node.first_child()?;
     let instr_name = support::token(node, SyntaxKind::INSTR_NAME)?;
     if !instr_name.text().ends_with(".new_default") {
@@ -51,7 +50,7 @@ pub fn check(
                     code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                     message: format!(
                         "struct type `{}` is not defaultable",
-                        def_symbol.idx.render(service)
+                        def_symbol.idx.render(db)
                     ),
                     related_information: Some(
                         non_defaultables
@@ -67,7 +66,7 @@ pub fn check(
                                     })
                                     .map(|symbol| DiagnosticRelatedInformation {
                                         location: Location {
-                                            uri: document.uri(service).raw(service),
+                                            uri: document.uri(db).raw(db),
                                             range: helpers::rowan_range_to_lsp_range(
                                                 line_index,
                                                 symbol.key.text_range(),
@@ -75,7 +74,7 @@ pub fn check(
                                         },
                                         message: format!(
                                             "field type `{}` is not defaultable",
-                                            symbol.idx.render(service)
+                                            symbol.idx.render(db)
                                         ),
                                     })
                             })
@@ -95,7 +94,7 @@ pub fn check(
             code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
             message: format!(
                 "array type `{}` is not defaultable",
-                def_symbol.idx.render(service)
+                def_symbol.idx.render(db)
             ),
             ..Default::default()
         }),

@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{Symbol, SymbolKey, SymbolKind, SymbolTable},
     cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeKind},
     config::LintLevel,
@@ -20,7 +19,7 @@ const DIAGNOSTIC_CODE: &str = "unread";
 #[expect(clippy::too_many_arguments)]
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     lint_level: LintLevel,
     line_index: &LineIndex,
@@ -36,11 +35,11 @@ pub fn check(
     };
 
     // avoid expensive analysis if there are no locals
-    if !helpers::locals::has_locals(service, document, SymbolKey::new(node)) {
+    if !helpers::locals::has_locals(db, document, SymbolKey::new(node)) {
         return;
     }
 
-    let cfg = cfa::analyze(service, document, SyntaxNodePtr::new(node));
+    let cfg = cfa::analyze(db, document, SyntaxNodePtr::new(node));
     let mut block_vars = cfg
         .graph
         .node_indices()
@@ -85,7 +84,7 @@ pub fn check(
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                         message: format!(
                             "local `{}` is set but never read",
-                            symbol.idx.render(service),
+                            symbol.idx.render(db),
                         ),
                         ..Default::default()
                     }),

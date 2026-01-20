@@ -13,7 +13,7 @@ use rowan::ast::{AstNode, support};
 use wat_syntax::{SyntaxKind, SyntaxNode, ast::Immediate};
 
 pub(crate) fn resolve_param_types<'db>(
-    service: &'db dyn salsa::Database,
+    db: &'db dyn salsa::Database,
     document: Document,
     instr: &SyntaxNode,
 ) -> Option<Vec<OperandType<'db>>> {
@@ -21,11 +21,11 @@ pub(crate) fn resolve_param_types<'db>(
     let instr_name = support::token(instr, SyntaxKind::INSTR_NAME)?;
     let instr_name = instr_name.text();
     if matches!(instr_name, "call" | "return_call") {
-        let symbol_table = SymbolTable::of(service, document);
+        let symbol_table = SymbolTable::of(db, document);
         let idx = instr.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)?;
         let func = symbol_table.find_def(SymbolKey::new(&idx))?;
         Some(
-            get_func_sig(service, document, *func.key, &func.green)
+            get_func_sig(db, document, *func.key, &func.green)
                 .params
                 .into_iter()
                 .map(|(ty, ..)| OperandType::Val(ty))
@@ -37,7 +37,7 @@ pub(crate) fn resolve_param_types<'db>(
 }
 
 pub(crate) fn resolve_br_types<'db>(
-    service: &'db dyn salsa::Database,
+    db: &'db dyn salsa::Database,
     document: Document,
     symbol_table: &'db SymbolTable<'db>,
     immediate: &Immediate,
@@ -47,15 +47,11 @@ pub(crate) fn resolve_br_types<'db>(
         .resolved
         .get(&key)
         .map(|def_key| {
-            get_block_sig(
-                service,
-                document,
-                &def_key.to_node(&document.root_tree(service)),
-            )
-            .results
-            .into_iter()
-            .map(OperandType::Val)
-            .collect()
+            get_block_sig(db, document, &def_key.to_node(&document.root_tree(db)))
+                .results
+                .into_iter()
+                .map(OperandType::Val)
+                .collect()
         })
         .unwrap_or_default()
 }
@@ -116,15 +112,15 @@ pub(crate) fn resolve_field_type<'db>(
 }
 
 pub(crate) fn resolve_field_type_with_struct_idx<'db>(
-    service: &'db dyn salsa::Database,
+    db: &'db dyn salsa::Database,
     document: Document,
     struct_ref: &Immediate,
     field_ref: &Immediate,
 ) -> Option<(Idx<'db>, Option<OperandType<'db>>)> {
-    let symbol_table = SymbolTable::of(service, document);
+    let symbol_table = SymbolTable::of(db, document);
     let struct_def_symbol = symbol_table.find_def(SymbolKey::new(struct_ref.syntax()))?;
     let ty = resolve_field_type(
-        service,
+        db,
         document,
         SymbolKey::new(field_ref.syntax()),
         struct_def_symbol.key,

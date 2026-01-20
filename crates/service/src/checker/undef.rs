@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{SymbolKind, SymbolTable},
     helpers,
 };
@@ -9,7 +8,7 @@ use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 const DIAGNOSTIC_CODE: &str = "undef";
 
 pub fn check(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     diagnostics: &mut Vec<Diagnostic>,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
@@ -48,7 +47,7 @@ pub fn check(
                 message: format!(
                     "cannot find {} `{}` in this scope",
                     symbol.kind,
-                    symbol.idx.render(service),
+                    symbol.idx.render(db),
                 ),
                 ..Default::default()
             }),

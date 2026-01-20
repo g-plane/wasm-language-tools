@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{SymbolKey, SymbolTable},
     document::Document,
     helpers, types_analyzer,
@@ -12,7 +11,7 @@ use wat_syntax::{SyntaxNode, ast::Index};
 const DIAGNOSTIC_CODE: &str = "start";
 
 pub fn check(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
@@ -22,7 +21,7 @@ pub fn check(
     let index = index.syntax();
     if symbol_table
         .find_def(SymbolKey::new(index))
-        .map(|func| types_analyzer::get_func_sig(service, document, *func.key, &func.green))
+        .map(|func| types_analyzer::get_func_sig(db, document, *func.key, &func.green))
         .is_some_and(|sig| !sig.params.is_empty() || !sig.results.is_empty())
     {
         Some(Diagnostic {

@@ -1,6 +1,4 @@
-use crate::{
-    LanguageService, binder::SymbolKey, document::Document, exports, helpers, uri::InternUri,
-};
+use crate::{binder::SymbolKey, document::Document, exports, helpers, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rowan::{TextRange, ast::support};
@@ -8,7 +6,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr};
 
 pub fn act(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     uri: InternUri,
     document: Document,
     line_index: &LineIndex,
@@ -17,7 +15,7 @@ pub fn act(
     let def_key = SymbolKey::new(node);
     let ident_token = support::token(node, SyntaxKind::IDENT)?;
     let module = node.parent()?;
-    let exports = exports::get_exports(service, document);
+    let exports = exports::get_exports(db, document);
     if exports
         .get(&SyntaxNodePtr::new(&module))
         .is_some_and(|exports| exports.iter().any(|export| export.def_key == def_key))
@@ -33,7 +31,7 @@ pub fn act(
     };
     let mut changes = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
-        uri.raw(service),
+        uri.raw(db),
         vec![TextEdit {
             range: helpers::rowan_range_to_lsp_range(
                 line_index,

@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{Symbol, SymbolKey, SymbolTable},
     document::Document,
     helpers,
@@ -19,7 +18,7 @@ use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, WatLanguage, ast::Immedi
 const DIAGNOSTIC_CODE: &str = "type-misuse";
 
 pub fn check(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     diagnostics: &mut Vec<Diagnostic>,
     document: Document,
     line_index: &LineIndex,
@@ -27,7 +26,7 @@ pub fn check(
     module_id: u32,
     node: &SyntaxNode,
 ) -> Option<()> {
-    let def_types = get_def_types(service, document);
+    let def_types = get_def_types(db, document);
     let instr_name = support::token(node, SyntaxKind::INSTR_NAME)?;
     let instr_name = instr_name.text();
     match instr_name.split_once('.') {
@@ -35,7 +34,7 @@ pub fn check(
             if let Some(diagnostic) = check_type_matches(
                 "struct",
                 &node.first_child()?,
-                service,
+                db,
                 document,
                 line_index,
                 symbol_table,
@@ -51,13 +50,13 @@ pub fn check(
             let dst_type = match &def_types.get(&dst_symbol.key)?.comp {
                 CompositeType::Func(..) => {
                     diagnostics.push(build_diagnostic(
-                        "array", "func", &dst, dst_symbol, service, document, line_index,
+                        "array", "func", &dst, dst_symbol, db, document, line_index,
                     ));
                     None
                 }
                 CompositeType::Struct(..) => {
                     diagnostics.push(build_diagnostic(
-                        "array", "struct", &dst, dst_symbol, service, document, line_index,
+                        "array", "struct", &dst, dst_symbol, db, document, line_index,
                     ));
                     None
                 }
@@ -69,13 +68,13 @@ pub fn check(
             let src_type = match &def_types.get(&src_symbol.key)?.comp {
                 CompositeType::Func(..) => {
                     diagnostics.push(build_diagnostic(
-                        "array", "func", &src, src_symbol, service, document, line_index,
+                        "array", "func", &src, src_symbol, db, document, line_index,
                     ));
                     None
                 }
                 CompositeType::Struct(..) => {
                     diagnostics.push(build_diagnostic(
-                        "array", "struct", &src, src_symbol, service, document, line_index,
+                        "array", "struct", &src, src_symbol, db, document, line_index,
                     ));
                     None
                 }
@@ -84,7 +83,7 @@ pub fn check(
 
             match (dst_type, src_type) {
                 (Some(FieldType { storage: dst, .. }), Some(FieldType { storage: src, .. }))
-                    if !src.matches(dst, service, document, module_id) =>
+                    if !src.matches(dst, db, document, module_id) =>
                 {
                     diagnostics.push(Diagnostic {
                         range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
@@ -93,13 +92,13 @@ pub fn check(
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                         message: format!(
                             "destination array type `{}` doesn't match source array type `{}`",
-                            dst_symbol.idx.render(service),
-                            src_symbol.idx.render(service),
+                            dst_symbol.idx.render(db),
+                            src_symbol.idx.render(db),
                         ),
                         related_information: Some(vec![
                             DiagnosticRelatedInformation {
                                 location: Location {
-                                    uri: document.uri(service).raw(service),
+                                    uri: document.uri(db).raw(db),
                                     range: helpers::rowan_range_to_lsp_range(
                                         line_index,
                                         dst_symbol.key.text_range(),
@@ -109,7 +108,7 @@ pub fn check(
                             },
                             DiagnosticRelatedInformation {
                                 location: Location {
-                                    uri: document.uri(service).raw(service),
+                                    uri: document.uri(db).raw(db),
                                     range: helpers::rowan_range_to_lsp_range(
                                         line_index,
                                         src_symbol.key.text_range(),
@@ -128,7 +127,7 @@ pub fn check(
             if let Some(diagnostic) = check_type_matches(
                 "array",
                 &node.first_child()?,
-                service,
+                db,
                 document,
                 line_index,
                 symbol_table,
@@ -142,7 +141,7 @@ pub fn check(
                 if let Some(diagnostic) = check_type_matches(
                     "func",
                     &node.first_child()?,
-                    service,
+                    db,
                     document,
                     line_index,
                     symbol_table,
@@ -154,7 +153,7 @@ pub fn check(
             "br_on_cast" => {
                 let mut immediates = support::children::<Immediate>(node);
                 let label = immediates.next()?;
-                let label_types = resolve_br_types(service, document, symbol_table, &label);
+                let label_types = resolve_br_types(db, document, symbol_table, &label);
                 let rt_label =
                     if let Some(OperandType::Val(ValType::Ref(rt_label))) = label_types.last() {
                         rt_label
@@ -173,10 +172,10 @@ pub fn check(
                         return None;
                     };
                 let rt1_node = immediates.next()?;
-                let rt1 = RefType::from_green(&rt1_node.ref_type()?.syntax().green(), service)?;
+                let rt1 = RefType::from_green(&rt1_node.ref_type()?.syntax().green(), db)?;
                 let rt2_node = immediates.next()?;
-                let rt2 = RefType::from_green(&rt2_node.ref_type()?.syntax().green(), service)?;
-                if !rt2.matches(&rt1, service, document, module_id) {
+                let rt2 = RefType::from_green(&rt2_node.ref_type()?.syntax().green(), db)?;
+                if !rt2.matches(&rt1, db, document, module_id) {
                     diagnostics.push(Diagnostic {
                         range: helpers::rowan_range_to_lsp_range(
                             line_index,
@@ -187,12 +186,12 @@ pub fn check(
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                         message: format!(
                             "ref type `{}` doesn't match the ref type `{}`",
-                            rt2.render(service),
-                            rt1.render(service),
+                            rt2.render(db),
+                            rt1.render(db),
                         ),
                         related_information: Some(vec![DiagnosticRelatedInformation {
                             location: Location {
-                                uri: document.uri(service).raw(service),
+                                uri: document.uri(db).raw(db),
                                 range: helpers::rowan_range_to_lsp_range(
                                     line_index,
                                     rt1_node.syntax().text_range(),
@@ -203,7 +202,7 @@ pub fn check(
                         ..Default::default()
                     });
                 }
-                if !rt2.matches(rt_label, service, document, module_id) {
+                if !rt2.matches(rt_label, db, document, module_id) {
                     diagnostics.push(Diagnostic {
                         range: helpers::rowan_range_to_lsp_range(
                             line_index,
@@ -214,12 +213,12 @@ pub fn check(
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                         message: format!(
                             "ref type `{}` doesn't match the ref type `{}`",
-                            rt2.render(service),
-                            rt_label.render(service),
+                            rt2.render(db),
+                            rt_label.render(db),
                         ),
                         related_information: Some(vec![DiagnosticRelatedInformation {
                             location: Location {
-                                uri: document.uri(service).raw(service),
+                                uri: document.uri(db).raw(db),
                                 range: helpers::rowan_range_to_lsp_range(
                                     line_index,
                                     label.syntax().text_range(),
@@ -236,7 +235,7 @@ pub fn check(
             "br_on_cast_fail" => {
                 let mut immediates = support::children::<Immediate>(node);
                 let label = immediates.next()?;
-                let label_types = resolve_br_types(service, document, symbol_table, &label);
+                let label_types = resolve_br_types(db, document, symbol_table, &label);
                 let rt_label =
                     if let Some(OperandType::Val(ValType::Ref(rt_label))) = label_types.last() {
                         rt_label
@@ -255,10 +254,10 @@ pub fn check(
                         return None;
                     };
                 let rt1_node = immediates.next()?;
-                let rt1 = RefType::from_green(&rt1_node.ref_type()?.syntax().green(), service)?;
+                let rt1 = RefType::from_green(&rt1_node.ref_type()?.syntax().green(), db)?;
                 let rt2_node = immediates.next()?;
-                let rt2 = RefType::from_green(&rt2_node.ref_type()?.syntax().green(), service)?;
-                if !rt2.matches(&rt1, service, document, module_id) {
+                let rt2 = RefType::from_green(&rt2_node.ref_type()?.syntax().green(), db)?;
+                if !rt2.matches(&rt1, db, document, module_id) {
                     diagnostics.push(Diagnostic {
                         range: helpers::rowan_range_to_lsp_range(
                             line_index,
@@ -269,12 +268,12 @@ pub fn check(
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                         message: format!(
                             "ref type `{}` doesn't match the ref type `{}`",
-                            rt2.render(service),
-                            rt1.render(service),
+                            rt2.render(db),
+                            rt1.render(db),
                         ),
                         related_information: Some(vec![DiagnosticRelatedInformation {
                             location: Location {
-                                uri: document.uri(service).raw(service),
+                                uri: document.uri(db).raw(db),
                                 range: helpers::rowan_range_to_lsp_range(
                                     line_index,
                                     rt1_node.syntax().text_range(),
@@ -286,7 +285,7 @@ pub fn check(
                     });
                 }
                 let rt_diff = rt1.diff(&rt2);
-                if !rt_diff.matches(rt_label, service, document, module_id) {
+                if !rt_diff.matches(rt_label, db, document, module_id) {
                     diagnostics.push(Diagnostic {
                         range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
                         severity: Some(DiagnosticSeverity::Error),
@@ -294,12 +293,12 @@ pub fn check(
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                         message: format!(
                             "type difference between given two ref types `{}` doesn't match the ref type `{}`",
-                            rt_diff.render(service),
-                            rt_label.render(service),
+                            rt_diff.render(db),
+                            rt_label.render(db),
                         ),
                         related_information: Some(vec![DiagnosticRelatedInformation {
                             location: Location {
-                                uri: document.uri(service).raw(service),
+                                uri: document.uri(db).raw(db),
                                 range: helpers::rowan_range_to_lsp_range(
                                     line_index,
                                     label.syntax().text_range(),
@@ -312,14 +311,9 @@ pub fn check(
                 }
             }
             "call_indirect" => {
-                if let Some(diagnostic) = check_table_ref_type(
-                    service,
-                    document,
-                    line_index,
-                    symbol_table,
-                    module_id,
-                    node,
-                ) {
+                if let Some(diagnostic) =
+                    check_table_ref_type(db, document, line_index, symbol_table, module_id, node)
+                {
                     diagnostics.push(diagnostic);
                 }
             }
@@ -328,10 +322,10 @@ pub fn check(
                     node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
                     && let Some(diagnostic) = symbol_table
                         .find_def(SymbolKey::new(&immediate))
-                        .map(|func| get_func_sig(service, document, *func.key, &func.green))
+                        .map(|func| get_func_sig(db, document, *func.key, &func.green))
                         .and_then(|sig| {
                             check_return_call_result_type(
-                                service,
+                                db,
                                 document,
                                 line_index,
                                 module_id,
@@ -348,7 +342,7 @@ pub fn check(
                 if let Some(diagnostic) = check_type_matches(
                     "func",
                     &node.first_child()?,
-                    service,
+                    db,
                     document,
                     line_index,
                     symbol_table,
@@ -365,7 +359,7 @@ pub fn check(
                         .and_then(|def_type| def_type.comp.as_func())
                         .and_then(|sig| {
                             check_return_call_result_type(
-                                service,
+                                db,
                                 document,
                                 line_index,
                                 module_id,
@@ -379,27 +373,22 @@ pub fn check(
                 }
             }
             "return_call_indirect" => {
-                if let Some(diagnostic) = check_table_ref_type(
-                    service,
-                    document,
-                    line_index,
-                    symbol_table,
-                    module_id,
-                    node,
-                ) {
+                if let Some(diagnostic) =
+                    check_table_ref_type(db, document, line_index, symbol_table, module_id, node)
+                {
                     diagnostics.push(diagnostic);
                 }
                 if let Some(type_use) = node.children().find_map(|immediate| {
                     immediate.first_child_by_kind(&|kind| kind == SyntaxKind::TYPE_USE)
                 }) && let Some(diagnostic) = check_return_call_result_type(
-                    service,
+                    db,
                     document,
                     line_index,
                     module_id,
                     node,
                     &type_use,
                     &get_type_use_sig(
-                        service,
+                        db,
                         document,
                         SyntaxNodePtr::new(&type_use),
                         &type_use.green(),
@@ -418,7 +407,7 @@ pub fn check(
 fn check_type_matches(
     expected_kind: &'static str,
     ref_node: &SyntaxNode,
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
@@ -439,7 +428,7 @@ fn check_type_matches(
             kind,
             ref_node,
             def_symbol,
-            service,
+            db,
             document,
             line_index,
         ))
@@ -447,7 +436,7 @@ fn check_type_matches(
 }
 
 fn check_table_ref_type(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
@@ -486,14 +475,14 @@ fn check_table_ref_type(
                     }
                 })
             })
-            .and_then(|green| RefType::from_green(green, service))
+            .and_then(|green| RefType::from_green(green, db))
             .is_some_and(|ty| {
                 !ty.matches(
                     &RefType {
                         heap_ty: HeapType::Func,
                         nullable: true,
                     },
-                    service,
+                    db,
                     document,
                     module_id,
                 )
@@ -506,7 +495,7 @@ fn check_table_ref_type(
             code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
             message: format!(
                 "ref type of table `{}` must match `(ref null func)`",
-                ref_symbol.idx.render(service),
+                ref_symbol.idx.render(db),
             ),
             ..Default::default()
         })
@@ -516,7 +505,7 @@ fn check_table_ref_type(
 }
 
 fn check_return_call_result_type(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
     module_id: u32,
@@ -527,13 +516,12 @@ fn check_return_call_result_type(
     let func = instr
         .ancestors()
         .find(|ancestor| ancestor.kind() == SyntaxKind::MODULE_FIELD_FUNC)?;
-    let expected =
-        get_func_sig(service, document, SyntaxNodePtr::new(&func), &func.green()).results;
+    let expected = get_func_sig(db, document, SyntaxNodePtr::new(&func), &func.green()).results;
     if actual.len() == expected.len()
         && actual
             .iter()
             .zip(expected.iter())
-            .all(|(actual, expected)| actual.matches(expected, service, document, module_id))
+            .all(|(actual, expected)| actual.matches(expected, db, document, module_id))
     {
         None
     } else {
@@ -553,7 +541,7 @@ fn build_diagnostic(
     actual_kind: &str,
     ref_node: &SyntaxNode,
     def_symbol: &Symbol,
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
 ) -> Diagnostic {
@@ -566,11 +554,11 @@ fn build_diagnostic(
         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
         message: format!(
             "expected type is {expected_kind}, but type of `{}` is {actual_kind}",
-            def_symbol.idx.render(service)
+            def_symbol.idx.render(db)
         ),
         related_information: Some(vec![DiagnosticRelatedInformation {
             location: Location {
-                uri: document.uri(service).raw(service),
+                uri: document.uri(db).raw(db),
                 range: helpers::rowan_range_to_lsp_range(line_index, def_symbol.key.text_range()),
             },
             message: format!("{actual_kind} type defined here"),

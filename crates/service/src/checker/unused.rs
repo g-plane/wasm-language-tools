@@ -1,5 +1,5 @@
 use crate::{
-    LanguageService, LintLevel,
+    LintLevel,
     binder::{Symbol, SymbolKind, SymbolTable},
     helpers,
 };
@@ -11,7 +11,7 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 const DIAGNOSTIC_CODE: &str = "unused";
 
 pub fn check(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     diagnostics: &mut Vec<Diagnostic>,
     lint_level: LintLevel,
     line_index: &LineIndex,
@@ -32,17 +32,17 @@ pub fn check(
             | SymbolKind::MemoryDef
             | SymbolKind::TableDef
             | SymbolKind::TagDef => {
-                if is_prefixed_with_underscore(service, symbol)
+                if is_prefixed_with_underscore(db, symbol)
                     || is_used(symbol_table, symbol)
                     || is_exported(root, symbol)
                 {
                     None
                 } else {
-                    Some(report(service, line_index, root, severity, symbol))
+                    Some(report(db, line_index, root, severity, symbol))
                 }
             }
             SymbolKind::Param | SymbolKind::Local => {
-                if is_prefixed_with_underscore(service, symbol)
+                if is_prefixed_with_underscore(db, symbol)
                     || is_used(symbol_table, symbol)
                     || symbol
                         .key
@@ -67,22 +67,18 @@ pub fn check(
                     let range = support::token(&node, SyntaxKind::IDENT)
                         .map(|token| token.text_range())
                         .unwrap_or_else(|| node.text_range());
-                    Some(report_with_range(
-                        service, line_index, range, severity, symbol,
-                    ))
+                    Some(report_with_range(db, line_index, range, severity, symbol))
                 }
             }
             SymbolKind::FieldDef => {
-                if is_prefixed_with_underscore(service, symbol) || is_used(symbol_table, symbol) {
+                if is_prefixed_with_underscore(db, symbol) || is_used(symbol_table, symbol) {
                     None
                 } else {
                     let node = symbol.key.to_node(root);
                     let range = support::token(&node, SyntaxKind::IDENT)
                         .map(|token| token.text_range())
                         .unwrap_or_else(|| node.text_range());
-                    Some(report_with_range(
-                        service, line_index, range, severity, symbol,
-                    ))
+                    Some(report_with_range(db, line_index, range, severity, symbol))
                 }
             }
             _ => None,
@@ -90,11 +86,11 @@ pub fn check(
     }));
 }
 
-fn is_prefixed_with_underscore(service: &LanguageService, symbol: &Symbol) -> bool {
+fn is_prefixed_with_underscore(db: &dyn salsa::Database, symbol: &Symbol) -> bool {
     symbol
         .idx
         .name
-        .is_some_and(|name| name.ident(service).starts_with("$_"))
+        .is_some_and(|name| name.ident(db).starts_with("$_"))
 }
 
 fn is_used(symbol_table: &SymbolTable, symbol: &Symbol) -> bool {
@@ -108,7 +104,7 @@ fn is_exported(root: &SyntaxNode, def_symbol: &Symbol) -> bool {
 }
 
 fn report(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     line_index: &LineIndex,
     root: &SyntaxNode,
     severity: DiagnosticSeverity,
@@ -119,11 +115,11 @@ fn report(
         .or_else(|| support::token(&node, SyntaxKind::KEYWORD))
         .map(|token| token.text_range())
         .unwrap_or_else(|| node.text_range());
-    report_with_range(service, line_index, range, severity, symbol)
+    report_with_range(db, line_index, range, severity, symbol)
 }
 
 fn report_with_range(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     line_index: &LineIndex,
     range: TextRange,
     severity: DiagnosticSeverity,
@@ -134,11 +130,7 @@ fn report_with_range(
         severity: Some(severity),
         source: Some("wat".into()),
         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-        message: format!(
-            "{} `{}` is never used",
-            symbol.kind,
-            symbol.idx.render(service),
-        ),
+        message: format!("{} `{}` is never used", symbol.kind, symbol.idx.render(db)),
         tags: Some(vec![DiagnosticTag::Unnecessary]),
         ..Default::default()
     }

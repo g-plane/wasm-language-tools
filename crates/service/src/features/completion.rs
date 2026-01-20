@@ -747,14 +747,14 @@ enum PreferredType {
 }
 
 fn get_cmp_list(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     ctx: SmallVec<[CmpCtx; 4]>,
     token: &SyntaxToken,
     document: Document,
     line_index: &LineIndex,
     root: &SyntaxNode,
 ) -> Vec<CompletionItem> {
-    let symbol_table = SymbolTable::of(service, document);
+    let symbol_table = SymbolTable::of(db, document);
     ctx.into_iter()
         .fold(Vec::with_capacity(2), |mut items, ctx| {
             match ctx {
@@ -831,7 +831,7 @@ fn get_cmp_list(
                         return items;
                     };
                     let func_key = SymbolKey::new(&func);
-                    let preferred_type = guess_preferred_type(service, document, token);
+                    let preferred_type = guess_preferred_type(db, document, token);
                     let param_region = if let Some(type_use) =
                         helpers::ast::pick_type_idx_from_func(&func)
                         && let Some(type_def) =
@@ -851,9 +851,9 @@ fn get_cmp_list(
                                 _ => false,
                             })
                             .map(|symbol| {
-                                let label = symbol.idx.render(service).to_string();
+                                let label = symbol.idx.render(db).to_string();
                                 let ty = types_analyzer::extract_type(
-                                    service,
+                                    db,
                                     document,
                                     symbol.green.clone(),
                                 );
@@ -873,7 +873,7 @@ fn get_cmp_list(
                                     },
                                     label_details: ty.as_ref().map(|ty| {
                                         CompletionItemLabelDetails {
-                                            description: Some(ty.render(service).to_string()),
+                                            description: Some(ty.render(db).to_string()),
                                             ..Default::default()
                                         }
                                     }),
@@ -898,10 +898,10 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
-                    let deprecation = deprecation::get_deprecation(service, document);
+                    let deprecation = deprecation::get_deprecation(db, document);
                     items.extend(symbol_table.get_declared(module, SymbolKind::Func).map(
                         |symbol| {
-                            let label = symbol.idx.render(service).to_string();
+                            let label = symbol.idx.render(db).to_string();
                             CompletionItem {
                                 label: label.clone(),
                                 kind: Some(CompletionItemKind::Function),
@@ -917,10 +917,10 @@ fn get_cmp_list(
                                     }))
                                 },
                                 detail: Some(types_analyzer::render_func_header(
-                                    service,
+                                    db,
                                     symbol.idx.name,
                                     types_analyzer::get_func_sig(
-                                        service,
+                                        db,
                                         document,
                                         *symbol.key,
                                         &symbol.green,
@@ -929,12 +929,12 @@ fn get_cmp_list(
                                 label_details: Some(CompletionItemLabelDetails {
                                     description: Some(
                                         types_analyzer::get_func_sig(
-                                            service,
+                                            db,
                                             document,
                                             *symbol.key,
                                             &symbol.green,
                                         )
-                                        .render_compact(service)
+                                        .render_compact(db)
                                         .to_string(),
                                     ),
                                     ..Default::default()
@@ -960,11 +960,11 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
-                    let def_types = types_analyzer::get_def_types(service, document);
-                    let deprecation = deprecation::get_deprecation(service, document);
+                    let def_types = types_analyzer::get_def_types(db, document);
+                    let deprecation = deprecation::get_deprecation(db, document);
                     items.extend(symbol_table.get_declared(module, SymbolKind::Type).map(
                         |symbol| {
-                            let label = symbol.idx.render(service).to_string();
+                            let label = symbol.idx.render(db).to_string();
                             CompletionItem {
                                 label: label.clone(),
                                 kind: Some(CompletionItemKind::Interface),
@@ -1009,15 +1009,15 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
-                    let deprecation = deprecation::get_deprecation(service, document);
-                    let preferred_type = guess_preferred_type(service, document, token);
+                    let deprecation = deprecation::get_deprecation(db, document);
+                    let preferred_type = guess_preferred_type(db, document, token);
                     items.extend(
                         symbol_table
                             .get_declared(module, SymbolKind::GlobalDef)
                             .map(|symbol| {
-                                let label = symbol.idx.render(service).to_string();
+                                let label = symbol.idx.render(db).to_string();
                                 let ty = types_analyzer::extract_global_type(
-                                    service,
+                                    db,
                                     document,
                                     symbol.green.clone(),
                                 );
@@ -1037,7 +1037,7 @@ fn get_cmp_list(
                                     },
                                     label_details: ty.as_ref().map(|ty| {
                                         CompletionItemLabelDetails {
-                                            description: Some(ty.render(service).to_string()),
+                                            description: Some(ty.render(db).to_string()),
                                             ..Default::default()
                                         }
                                     }),
@@ -1074,12 +1074,12 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
-                    let deprecation = deprecation::get_deprecation(service, document);
+                    let deprecation = deprecation::get_deprecation(db, document);
                     items.extend(
                         symbol_table
                             .get_declared(module, SymbolKind::MemoryDef)
                             .map(|symbol| {
-                                let label = symbol.idx.render(service).to_string();
+                                let label = symbol.idx.render(db).to_string();
                                 CompletionItem {
                                     label: label.clone(),
                                     kind: Some(CompletionItemKind::Variable),
@@ -1112,7 +1112,7 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
-                    let deprecation = deprecation::get_deprecation(service, document);
+                    let deprecation = deprecation::get_deprecation(db, document);
                     items.extend(
                         symbol_table
                             .symbols
@@ -1121,7 +1121,7 @@ fn get_cmp_list(
                                 symbol.kind == SymbolKind::TableDef && symbol.region == module
                             })
                             .map(|symbol| {
-                                let label = symbol.idx.render(service).to_string();
+                                let label = symbol.idx.render(db).to_string();
                                 CompletionItem {
                                     label: label.clone(),
                                     kind: Some(CompletionItemKind::Variable),
@@ -1162,10 +1162,9 @@ fn get_cmp_list(
                                     num: Some(num as u32),
                                     name: symbol.idx.name,
                                 };
-                                let label = idx.render(service).to_string();
+                                let label = idx.render(db).to_string();
                                 let block_node = symbol.key.to_node(root);
-                                let sig =
-                                    types_analyzer::get_block_sig(service, document, &block_node);
+                                let sig = types_analyzer::get_block_sig(db, document, &block_node);
                                 CompletionItem {
                                     label: label.clone(),
                                     kind: Some(CompletionItemKind::Variable),
@@ -1185,13 +1184,13 @@ fn get_cmp_list(
                                             "[{}]",
                                             sig.results
                                                 .iter()
-                                                .map(|result| result.render(service))
+                                                .map(|result| result.render(db))
                                                 .join(", ")
                                         )),
                                         ..Default::default()
                                     }),
                                     detail: Some(types_analyzer::render_block_header(
-                                        service,
+                                        db,
                                         symbol.key.kind(),
                                         idx.name,
                                         sig,
@@ -1202,7 +1201,7 @@ fn get_cmp_list(
                     );
                 }
                 CmpCtx::Field(struct_ref_key) => {
-                    let def_types = types_analyzer::get_def_types(service, document);
+                    let def_types = types_analyzer::get_def_types(db, document);
                     if let Some(CompositeType::Struct(Fields(fields))) = symbol_table
                         .resolved
                         .get(&struct_ref_key)
@@ -1210,7 +1209,7 @@ fn get_cmp_list(
                         .map(|def_type| &def_type.comp)
                     {
                         items.extend(fields.iter().map(|(ty, idx)| {
-                            let label = idx.render(service).to_string();
+                            let label = idx.render(db).to_string();
                             CompletionItem {
                                 label: label.clone(),
                                 kind: Some(CompletionItemKind::Field),
@@ -1226,7 +1225,7 @@ fn get_cmp_list(
                                     }))
                                 },
                                 label_details: Some(CompletionItemLabelDetails {
-                                    description: Some(ty.render(service).to_string()),
+                                    description: Some(ty.render(db).to_string()),
                                     ..Default::default()
                                 }),
                                 ..Default::default()
@@ -1286,12 +1285,12 @@ fn get_cmp_list(
                     else {
                         return items;
                     };
-                    let deprecation = deprecation::get_deprecation(service, document);
+                    let deprecation = deprecation::get_deprecation(db, document);
                     items.extend(symbol_table.get_declared(module, SymbolKind::TagDef).map(
                         |symbol| {
-                            let label = symbol.idx.render(service).to_string();
+                            let label = symbol.idx.render(db).to_string();
                             let sig = types_analyzer::get_func_sig(
-                                service,
+                                db,
                                 document,
                                 *symbol.key,
                                 &symbol.green,
@@ -1313,15 +1312,12 @@ fn get_cmp_list(
                                 label_details: Some(CompletionItemLabelDetails {
                                     description: Some(format!(
                                         "[{}]",
-                                        sig.params
-                                            .iter()
-                                            .map(|(ty, _)| ty.render(service))
-                                            .join(", ")
+                                        sig.params.iter().map(|(ty, _)| ty.render(db)).join(", ")
                                     )),
                                     ..Default::default()
                                 }),
                                 detail: Some(types_analyzer::render_header(
-                                    service,
+                                    db,
                                     "tag",
                                     symbol.idx.name,
                                     sig,

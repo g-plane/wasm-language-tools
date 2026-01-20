@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{SymbolKey, SymbolTable},
     document::Document,
     helpers,
@@ -13,7 +12,7 @@ const DIAGNOSTIC_CODE: &str = "tag-type";
 
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
@@ -23,7 +22,7 @@ pub fn check(
         return;
     };
     if let Some(index) = type_use.first_child_by_kind(&|kind| kind == SyntaxKind::INDEX) {
-        let def_types = types_analyzer::get_def_types(service, document);
+        let def_types = types_analyzer::get_def_types(db, document);
         if symbol_table
             .resolved
             .get(&SymbolKey::new(&index))
@@ -41,7 +40,7 @@ pub fn check(
         }
     }
     let sig = types_analyzer::get_type_use_sig(
-        service,
+        db,
         document,
         SyntaxNodePtr::new(&type_use),
         &type_use.green(),

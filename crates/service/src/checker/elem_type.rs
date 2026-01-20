@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{SymbolKey, SymbolTable},
     document::Document,
     helpers,
@@ -16,7 +15,7 @@ use wat_syntax::{
 const DIAGNOSTIC_CODE: &str = "elem-type";
 
 pub fn check(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
     root: &SyntaxNode,
@@ -32,10 +31,10 @@ pub fn check(
             .to_node(root),
     )?;
     let table_ref_type_node = table.table_type()?.ref_type()?;
-    let table_ref_type = RefType::from_green(&table_ref_type_node.syntax().green(), service)?;
+    let table_ref_type = RefType::from_green(&table_ref_type_node.syntax().green(), db)?;
     let elem_ref_type_node = elem.elem_list()?.ref_type()?;
-    let elem_ref_type = RefType::from_green(&elem_ref_type_node.syntax().green(), service)?;
-    if elem_ref_type.matches(&table_ref_type, service, document, module_id) {
+    let elem_ref_type = RefType::from_green(&elem_ref_type_node.syntax().green(), db)?;
+    if elem_ref_type.matches(&table_ref_type, db, document, module_id) {
         None
     } else {
         Some(Diagnostic {
@@ -48,12 +47,12 @@ pub fn check(
             code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
             message: format!(
                 "ref type `{}` doesn't match the table's ref type `{}`",
-                elem_ref_type.render(service),
-                table_ref_type.render(service),
+                elem_ref_type.render(db),
+                table_ref_type.render(db),
             ),
             related_information: Some(vec![DiagnosticRelatedInformation {
                 location: Location {
-                    uri: document.uri(service).raw(service),
+                    uri: document.uri(db).raw(db),
                     range: helpers::rowan_range_to_lsp_range(
                         line_index,
                         table_ref_type_node.syntax().text_range(),

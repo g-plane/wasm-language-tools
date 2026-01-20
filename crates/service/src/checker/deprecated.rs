@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{SymbolKind, SymbolTable},
     config::LintLevel,
     deprecation,
@@ -13,7 +12,7 @@ const DIAGNOSTIC_CODE: &str = "deprecated";
 
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     lint_level: LintLevel,
     line_index: &LineIndex,
@@ -25,7 +24,7 @@ pub fn check(
         LintLevel::Warn => DiagnosticSeverity::Warning,
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
-    let deprecation = deprecation::get_deprecation(service, document);
+    let deprecation = deprecation::get_deprecation(db, document);
     let deprecated_usage = symbol_table
         .symbols
         .values()
@@ -54,14 +53,10 @@ pub fn check(
                         format!(
                             "{} `{}` is deprecated: {reason}",
                             symbol.kind,
-                            symbol.idx.render(service),
+                            symbol.idx.render(db),
                         )
                     } else {
-                        format!(
-                            "{} `{}` is deprecated",
-                            symbol.kind,
-                            symbol.idx.render(service),
-                        )
+                        format!("{} `{}` is deprecated", symbol.kind, symbol.idx.render(db))
                     },
                     tags: Some(vec![DiagnosticTag::Deprecated]),
                     ..Default::default()

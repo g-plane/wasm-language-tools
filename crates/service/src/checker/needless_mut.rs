@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{SymbolKind, SymbolTable},
     config::LintLevel,
     document::Document,
@@ -11,7 +10,7 @@ use lspt::{Diagnostic, DiagnosticSeverity, DiagnosticTag, Union2};
 const DIAGNOSTIC_CODE: &str = "needless-mut";
 
 pub fn check(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     diagnostics: &mut Vec<Diagnostic>,
     lint_level: LintLevel,
     document: Document,
@@ -25,9 +24,9 @@ pub fn check(
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
 
-    let mutation_actions = mutability::get_mutation_actions(service, document);
+    let mutation_actions = mutability::get_mutation_actions(db, document);
     diagnostics.extend(
-        mutability::get_mutabilities(service, document)
+        mutability::get_mutabilities(db, document)
             .iter()
             .filter(|(key, mutability)| {
                 mutability.mut_keyword.is_some()
@@ -54,7 +53,7 @@ pub fn check(
                     code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                     message: format!(
                         "{kind} `{}` is unnecessarily mutable",
-                        symbol.idx.render(service)
+                        symbol.idx.render(db)
                     ),
                     tags: Some(vec![DiagnosticTag::Unnecessary]),
                     ..Default::default()

@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{Symbol, SymbolKey, SymbolKind, SymbolTable},
     cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeKind},
     document::Document,
@@ -19,7 +18,7 @@ const DIAGNOSTIC_CODE: &str = "uninit";
 
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
     root: &SyntaxNode,
@@ -27,11 +26,11 @@ pub fn check(
     node: &SyntaxNode,
 ) {
     // avoid expensive analysis if there are no locals
-    if !helpers::locals::has_locals(service, document, SymbolKey::new(node)) {
+    if !helpers::locals::has_locals(db, document, SymbolKey::new(node)) {
         return;
     }
 
-    let cfg = cfa::analyze(service, document, SyntaxNodePtr::new(node));
+    let cfg = cfa::analyze(db, document, SyntaxNodePtr::new(node));
     let mut block_vars = cfg
         .graph
         .node_indices()
@@ -64,7 +63,7 @@ pub fn check(
             && let Ok(mut vars) = vars.try_borrow_mut()
         {
             diagnostics.extend(
-                detect_uninit(bb, &mut vars, service, document, root, symbol_table)
+                detect_uninit(bb, &mut vars, db, document, root, symbol_table)
                     .filter_map(|immediate| symbol_table.symbols.get(&SymbolKey::new(&immediate)))
                     .map(|symbol| Diagnostic {
                         range: helpers::rowan_range_to_lsp_range(
@@ -76,7 +75,7 @@ pub fn check(
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                         message: format!(
                             "local `{}` is read before being initialized",
-                            symbol.idx.render(service),
+                            symbol.idx.render(db),
                         ),
                         ..Default::default()
                     }),

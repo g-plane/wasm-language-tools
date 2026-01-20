@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{SymbolKey, SymbolTable},
     data_set,
     document::Document,
@@ -27,14 +26,14 @@ const DIAGNOSTIC_CODE: &str = "type-check";
 
 pub fn check_func(
     diagnostics: &mut Vec<Diagnostic>,
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
 ) {
-    let results = get_func_sig(service, document, SyntaxNodePtr::new(node), &node.green())
+    let results = get_func_sig(db, document, SyntaxNodePtr::new(node), &node.green())
         .results
         .into_iter()
         .map(OperandType::Val)
@@ -42,7 +41,7 @@ pub fn check_func(
     check_block_like(
         diagnostics,
         &Shared {
-            service,
+            db,
             document,
             symbol_table,
             line_index,
@@ -60,20 +59,20 @@ pub fn check_func(
 
 pub fn check_global(
     diagnostics: &mut Vec<Diagnostic>,
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
 ) {
-    let ty = extract_global_type(service, document, node.green().into())
+    let ty = extract_global_type(db, document, node.green().into())
         .map(OperandType::Val)
         .unwrap_or(OperandType::Any);
     check_block_like(
         diagnostics,
         &Shared {
-            service,
+            db,
             document,
             symbol_table,
             line_index,
@@ -91,7 +90,7 @@ pub fn check_global(
 
 pub fn check_table(
     diagnostics: &mut Vec<Diagnostic>,
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
@@ -106,7 +105,7 @@ pub fn check_table(
                     .and_then(|table_type| table_type.ref_type())
             })
         })
-        .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), service))
+        .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), db))
     else {
         return;
     };
@@ -118,7 +117,7 @@ pub fn check_table(
     check_block_like(
         diagnostics,
         &Shared {
-            service,
+            db,
             document,
             symbol_table,
             line_index,
@@ -136,7 +135,7 @@ pub fn check_table(
 
 pub fn check_offset(
     diagnostics: &mut Vec<Diagnostic>,
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
@@ -146,7 +145,7 @@ pub fn check_offset(
     check_block_like(
         diagnostics,
         &Shared {
-            service,
+            db,
             document,
             symbol_table,
             line_index,
@@ -160,7 +159,7 @@ pub fn check_offset(
 
 pub fn check_elem_list(
     diagnostics: &mut Vec<Diagnostic>,
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
@@ -169,7 +168,7 @@ pub fn check_elem_list(
 ) {
     let Some(ref_type) = ElemList::cast(node.clone())
         .and_then(|elem_list| elem_list.ref_type())
-        .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), service))
+        .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), db))
     else {
         return;
     };
@@ -180,7 +179,7 @@ pub fn check_elem_list(
             check_block_like(
                 diagnostics,
                 &Shared {
-                    service,
+                    db,
                     document,
                     symbol_table,
                     line_index,
@@ -194,7 +193,7 @@ pub fn check_elem_list(
 }
 
 struct Shared<'db> {
-    service: &'db dyn salsa::Database,
+    db: &'db dyn salsa::Database,
     document: Document,
     symbol_table: &'db SymbolTable<'db>,
     line_index: &'db LineIndex,
@@ -210,7 +209,7 @@ fn check_block_like(
 ) {
     let mut type_stack = TypeStack {
         document: shared.document,
-        service: shared.service,
+        db: shared.db,
         line_index: shared.line_index,
         module_id: shared.module_id,
         stack: init_stack,
@@ -269,7 +268,7 @@ fn check_instr<'db>(
         }
         Instr::Block(block_instr) => {
             let node = block_instr.syntax();
-            let signature = get_block_sig(shared.service, shared.document, node);
+            let signature = get_block_sig(shared.db, shared.document, node);
             let init_stack = signature
                 .params
                 .iter()
@@ -333,10 +332,7 @@ fn check_instr<'db>(
                             code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                             message: format!(
                                 "missing `then` branch with expected types [{}]",
-                                results
-                                    .iter()
-                                    .map(|ty| ty.render(shared.service))
-                                    .join(", ")
+                                results.iter().map(|ty| ty.render(shared.db)).join(", ")
                             ),
                             ..Default::default()
                         });
@@ -352,7 +348,7 @@ fn check_instr<'db>(
                     } else {
                         let mut type_stack = TypeStack {
                             document: shared.document,
-                            service: shared.service,
+                            db: shared.db,
                             line_index: shared.line_index,
                             module_id: shared.module_id,
                             stack: init_stack,
@@ -372,10 +368,7 @@ fn check_instr<'db>(
                                 code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                                 message: format!(
                                     "missing `else` branch with expected types [{}]",
-                                    results
-                                        .iter()
-                                        .map(|ty| ty.render(shared.service))
-                                        .join(", ")
+                                    results.iter().map(|ty| ty.render(shared.db)).join(", ")
                                 ),
                                 ..Default::default()
                             });
@@ -392,7 +385,7 @@ fn check_instr<'db>(
 
 struct TypeStack<'db> {
     document: Document,
-    service: &'db dyn salsa::Database,
+    db: &'db dyn salsa::Database,
     line_index: &'db LineIndex,
     module_id: u32,
     stack: Vec<(OperandType<'db>, Option<Instr>)>,
@@ -415,14 +408,14 @@ impl<'db> TypeStack<'db> {
             .zip_longest(pops.iter().rev())
             .for_each(|pair| match pair {
                 EitherOrBoth::Both(expected, (received, related_instr)) => {
-                    if received.matches(expected, self.service, self.document, self.module_id) {
+                    if received.matches(expected, self.db, self.document, self.module_id) {
                         return;
                     }
                     mismatch = true;
                     if let Some(related_instr) = related_instr {
                         related_information.push(DiagnosticRelatedInformation {
                             location: Location {
-                                uri: self.document.uri(self.service).raw(self.service),
+                                uri: self.document.uri(self.db).raw(self.db),
                                 range: helpers::rowan_range_to_lsp_range(
                                     self.line_index,
                                     ReportRange::Instr(related_instr).pick(),
@@ -430,8 +423,8 @@ impl<'db> TypeStack<'db> {
                             },
                             message: format!(
                                 "expected type `{}`, found `{}`",
-                                expected.render(self.service),
-                                received.render(self.service),
+                                expected.render(self.db),
+                                received.render(self.db),
                             ),
                         });
                     }
@@ -444,7 +437,7 @@ impl<'db> TypeStack<'db> {
         if mismatch {
             let expected_types = format!(
                 "[{}]",
-                expected.iter().map(|ty| ty.render(self.service)).join(", ")
+                expected.iter().map(|ty| ty.render(self.db)).join(", ")
             );
             let received_types = format!(
                 "[{}{}]",
@@ -453,9 +446,7 @@ impl<'db> TypeStack<'db> {
                 } else {
                     ""
                 },
-                pops.iter()
-                    .map(|(ty, _)| ty.render(self.service))
-                    .join(", ")
+                pops.iter().map(|(ty, _)| ty.render(self.db)).join(", ")
             );
             diagnostic = Some(Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(self.line_index, report_range.pick()),
@@ -489,14 +480,14 @@ impl<'db> TypeStack<'db> {
             .zip_longest(self.stack.iter().rev())
             .for_each(|pair| match pair {
                 EitherOrBoth::Both(expected, (received, related_instr)) => {
-                    if received.matches(expected, self.service, self.document, self.module_id) {
+                    if received.matches(expected, self.db, self.document, self.module_id) {
                         return;
                     }
                     mismatch = true;
                     if let Some(related_instr) = related_instr {
                         related_information.push(DiagnosticRelatedInformation {
                             location: Location {
-                                uri: self.document.uri(self.service).raw(self.service),
+                                uri: self.document.uri(self.db).raw(self.db),
                                 range: helpers::rowan_range_to_lsp_range(
                                     self.line_index,
                                     ReportRange::Instr(related_instr).pick(),
@@ -504,8 +495,8 @@ impl<'db> TypeStack<'db> {
                             },
                             message: format!(
                                 "expected type `{}`, found `{}`",
-                                expected.render(self.service),
-                                received.render(self.service),
+                                expected.render(self.db),
+                                received.render(self.db),
                             ),
                         });
                     }
@@ -521,13 +512,13 @@ impl<'db> TypeStack<'db> {
         if mismatch {
             let expected_types = format!(
                 "[{}]",
-                expected.iter().map(|ty| ty.render(self.service)).join(", ")
+                expected.iter().map(|ty| ty.render(self.db)).join(", ")
             );
             let received_types = format!(
                 "[{}]",
                 self.stack
                     .iter()
-                    .map(|(ty, _)| ty.render(self.service))
+                    .map(|(ty, _)| ty.render(self.db))
                     .join(", ")
             );
             Some(Diagnostic {
@@ -553,7 +544,7 @@ impl<'db> TypeStack<'db> {
                     self.stack
                         .iter()
                         .map(|(ty, _)| match ty {
-                            OperandType::Val(ty) => Some(ty.render(self.service).to_string()),
+                            OperandType::Val(ty) => Some(ty.render(self.db).to_string()),
                             OperandType::Any => None,
                         })
                         .collect::<Option<Vec<_>>>()
@@ -589,7 +580,7 @@ fn resolve_sig<'db>(
             .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
             .map(|func| {
                 ResolvedSig::from(get_func_sig(
-                    shared.service,
+                    shared.db,
                     shared.document,
                     *func.key,
                     &func.green,
@@ -604,7 +595,7 @@ fn resolve_sig<'db>(
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
                     .and_then(|symbol| {
-                        extract_type(shared.service, shared.document, symbol.green.clone())
+                        extract_type(shared.db, shared.document, symbol.green.clone())
                     })
                     .map_or(OperandType::Any, OperandType::Val),
             ],
@@ -616,7 +607,7 @@ fn resolve_sig<'db>(
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
                     .and_then(|symbol| {
-                        extract_type(shared.service, shared.document, symbol.green.clone())
+                        extract_type(shared.db, shared.document, symbol.green.clone())
                     })
                     .map_or(OperandType::Any, OperandType::Val),
             ],
@@ -627,9 +618,7 @@ fn resolve_sig<'db>(
                 .immediates()
                 .next()
                 .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                .and_then(|symbol| {
-                    extract_type(shared.service, shared.document, symbol.green.clone())
-                })
+                .and_then(|symbol| extract_type(shared.db, shared.document, symbol.green.clone()))
                 .map_or(OperandType::Any, OperandType::Val);
             ResolvedSig {
                 params: vec![ty.clone()],
@@ -644,7 +633,7 @@ fn resolve_sig<'db>(
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
                     .and_then(|symbol| {
-                        extract_global_type(shared.service, shared.document, symbol.green.clone())
+                        extract_global_type(shared.db, shared.document, symbol.green.clone())
                     })
                     .map_or(OperandType::Any, OperandType::Val),
             ],
@@ -656,7 +645,7 @@ fn resolve_sig<'db>(
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
                     .and_then(|symbol| {
-                        extract_global_type(shared.service, shared.document, symbol.green.clone())
+                        extract_global_type(shared.db, shared.document, symbol.green.clone())
                     })
                     .map_or(OperandType::Any, OperandType::Val),
             ],
@@ -669,7 +658,7 @@ fn resolve_sig<'db>(
                 .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
                 .map(|func| {
                     get_func_sig(
-                        shared.service,
+                        shared.db,
                         shared.document,
                         SyntaxNodePtr::new(&func),
                         &func.green(),
@@ -686,9 +675,7 @@ fn resolve_sig<'db>(
             params: instr
                 .immediates()
                 .next()
-                .map(|idx| {
-                    resolve_br_types(shared.service, shared.document, shared.symbol_table, &idx)
-                })
+                .map(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, &idx))
                 .unwrap_or_default(),
             results: vec![],
         },
@@ -696,9 +683,7 @@ fn resolve_sig<'db>(
             let results = instr
                 .immediates()
                 .next()
-                .map(|idx| {
-                    resolve_br_types(shared.service, shared.document, shared.symbol_table, &idx)
-                })
+                .map(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, &idx))
                 .unwrap_or_default();
             let mut params = results.clone();
             params.push(OperandType::Val(ValType::I32));
@@ -708,9 +693,7 @@ fn resolve_sig<'db>(
             let mut params = instr
                 .immediates()
                 .next()
-                .map(|idx| {
-                    resolve_br_types(shared.service, shared.document, shared.symbol_table, &idx)
-                })
+                .map(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, &idx))
                 .unwrap_or_default();
             params.push(OperandType::Val(ValType::I32));
             ResolvedSig {
@@ -730,9 +713,7 @@ fn resolve_sig<'db>(
             let mut results = instr
                 .immediates()
                 .next()
-                .map(|idx| {
-                    resolve_br_types(shared.service, shared.document, shared.symbol_table, &idx)
-                })
+                .map(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, &idx))
                 .unwrap_or_default();
             let mut params = results.clone();
             params.push(OperandType::Val(ValType::Ref(RefType {
@@ -757,9 +738,7 @@ fn resolve_sig<'db>(
             let results = instr
                 .immediates()
                 .next()
-                .map(|idx| {
-                    resolve_br_types(shared.service, shared.document, shared.symbol_table, &idx)
-                })
+                .map(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, &idx))
                 .unwrap_or_default();
             let mut params = results.clone();
             params.push(OperandType::Val(ValType::Ref(RefType {
@@ -772,23 +751,17 @@ fn resolve_sig<'db>(
             let mut immediates = instr.immediates();
             let mut types = immediates
                 .next()
-                .map(|idx| {
-                    resolve_br_types(shared.service, shared.document, shared.symbol_table, &idx)
-                })
+                .map(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, &idx))
                 .unwrap_or_default();
             types.pop();
             let rt1 = immediates
                 .next()
                 .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| {
-                    RefType::from_green(&ref_type.syntax().green(), shared.service)
-                });
+                .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), shared.db));
             let rt2 = immediates
                 .next()
                 .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| {
-                    RefType::from_green(&ref_type.syntax().green(), shared.service)
-                });
+                .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), shared.db));
             let mut params = types.clone();
             let mut results = types;
             if let Some((rt1, rt2)) = rt1.zip(rt2) {
@@ -801,23 +774,17 @@ fn resolve_sig<'db>(
             let mut immediates = instr.immediates();
             let mut types = immediates
                 .next()
-                .map(|idx| {
-                    resolve_br_types(shared.service, shared.document, shared.symbol_table, &idx)
-                })
+                .map(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, &idx))
                 .unwrap_or_default();
             types.pop();
             let rt1 = immediates
                 .next()
                 .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| {
-                    RefType::from_green(&ref_type.syntax().green(), shared.service)
-                });
+                .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), shared.db));
             let rt2 = immediates
                 .next()
                 .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| {
-                    RefType::from_green(&ref_type.syntax().green(), shared.service)
-                });
+                .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), shared.db));
             let mut params = types.clone();
             let mut results = types;
             if let Some((rt1, rt2)) = rt1.zip(rt2) {
@@ -834,7 +801,7 @@ fn resolve_sig<'db>(
                 .and_then(|type_use| type_use.results().next())
                 .and_then(|result| result.val_types().next())
             {
-                ValType::from_ast(&ty, shared.service).map_or(OperandType::Any, OperandType::Val)
+                ValType::from_ast(&ty, shared.db).map_or(OperandType::Any, OperandType::Val)
             } else {
                 type_stack
                     .stack
@@ -855,7 +822,7 @@ fn resolve_sig<'db>(
                 .map(|type_use| {
                     let node = type_use.syntax();
                     ResolvedSig::from(get_type_use_sig(
-                        shared.service,
+                        shared.db,
                         shared.document,
                         SyntaxNodePtr::new(node),
                         &node.green(),
@@ -866,7 +833,7 @@ fn resolve_sig<'db>(
             sig
         }
         "struct.new" => {
-            let def_types = get_def_types(shared.service, shared.document);
+            let def_types = get_def_types(shared.db, shared.document);
             instr
                 .immediates()
                 .next()
@@ -918,7 +885,7 @@ fn resolve_sig<'db>(
                 .zip(immediates.next())
                 .and_then(|(struct_ref, field_ref)| {
                     resolve_field_type_with_struct_idx(
-                        shared.service,
+                        shared.db,
                         shared.document,
                         &struct_ref,
                         &field_ref,
@@ -961,7 +928,7 @@ fn resolve_sig<'db>(
                 .zip(immediates.next())
                 .and_then(|(struct_ref, field_ref)| {
                     resolve_field_type_with_struct_idx(
-                        shared.service,
+                        shared.db,
                         shared.document,
                         &struct_ref,
                         &field_ref,
@@ -987,7 +954,7 @@ fn resolve_sig<'db>(
                 .immediates()
                 .next()
                 .and_then(|immediate| {
-                    let def_types = get_def_types(shared.service, shared.document);
+                    let def_types = get_def_types(shared.db, shared.document);
                     resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
                 })
                 .map(|(idx, ty)| ResolvedSig {
@@ -1024,7 +991,7 @@ fn resolve_sig<'db>(
             immediates
                 .next()
                 .and_then(|immediate| {
-                    let def_types = get_def_types(shared.service, shared.document);
+                    let def_types = get_def_types(shared.db, shared.document);
                     resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
                 })
                 .map(|(idx, ty)| {
@@ -1065,7 +1032,7 @@ fn resolve_sig<'db>(
             .immediates()
             .next()
             .and_then(|immediate| {
-                let def_types = get_def_types(shared.service, shared.document);
+                let def_types = get_def_types(shared.db, shared.document);
                 resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
             })
             .map(|(idx, ty)| ResolvedSig {
@@ -1104,7 +1071,7 @@ fn resolve_sig<'db>(
             .immediates()
             .next()
             .and_then(|immediate| {
-                let def_types = get_def_types(shared.service, shared.document);
+                let def_types = get_def_types(shared.db, shared.document);
                 resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
             })
             .map(|(idx, ty)| ResolvedSig {
@@ -1123,7 +1090,7 @@ fn resolve_sig<'db>(
             .immediates()
             .next()
             .and_then(|immediate| {
-                let def_types = get_def_types(shared.service, shared.document);
+                let def_types = get_def_types(shared.db, shared.document);
                 resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
             })
             .map(|(idx, ty)| ResolvedSig {
@@ -1191,12 +1158,12 @@ fn resolve_sig<'db>(
                 .and_then(|immediate| immediate.syntax().first_child_or_token())
                 .and_then(|element| match element {
                     SyntaxElement::Node(node) if node.kind() == SyntaxKind::HEAP_TYPE => {
-                        HeapType::from_green(&node.green(), shared.service)
+                        HeapType::from_green(&node.green(), shared.db)
                     }
                     SyntaxElement::Token(token) if token.kind() == SyntaxKind::IDENT => {
                         Some(HeapType::Type(Idx {
                             num: None,
-                            name: Some(InternIdent::new(shared.service, token.text())),
+                            name: Some(InternIdent::new(shared.db, token.text())),
                         }))
                     }
                     SyntaxElement::Token(token) if token.kind() == SyntaxKind::INT => {
@@ -1260,13 +1227,11 @@ fn resolve_sig<'db>(
                 .immediates()
                 .next()
                 .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| {
-                    RefType::from_green(&ref_type.syntax().green(), shared.service)
-                })
+                .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), shared.db))
                 .and_then(|ref_type| {
                     ref_type
                         .heap_ty
-                        .to_top_type(shared.service, shared.document, shared.module_id)
+                        .to_top_type(shared.db, shared.document, shared.module_id)
                 })
                 .unwrap_or(HeapType::Any);
             ResolvedSig {
@@ -1282,16 +1247,14 @@ fn resolve_sig<'db>(
                 .immediates()
                 .next()
                 .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| {
-                    RefType::from_green(&ref_type.syntax().green(), shared.service)
-                })
+                .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), shared.db))
                 .unwrap_or(RefType {
                     heap_ty: HeapType::Any,
                     nullable: true,
                 });
             let heap_ty = ref_type
                 .heap_ty
-                .to_top_type(shared.service, shared.document, shared.module_id)
+                .to_top_type(shared.db, shared.document, shared.module_id)
                 .unwrap_or(HeapType::Any);
             ResolvedSig {
                 params: vec![OperandType::Val(ValType::Ref(RefType {
@@ -1312,7 +1275,7 @@ fn resolve_sig<'db>(
                         .get(&SymbolKey::new(immediate.syntax()))
                 })
                 .and_then(|key| {
-                    let root = shared.document.root_tree(shared.service);
+                    let root = shared.document.root_tree(shared.db);
                     ModuleFieldFunc::cast(key.to_node(&root))
                 })
                 .and_then(|func| func.type_use())
@@ -1324,12 +1287,12 @@ fn resolve_sig<'db>(
                             .and_then(|int| int.text().parse().ok()),
                         name: index
                             .ident_token()
-                            .map(|ident| InternIdent::new(shared.service, ident.text())),
+                            .map(|ident| InternIdent::new(shared.db, ident.text())),
                     })
                 })
                 .or_else(|| {
                     immediate.map(|immediate| {
-                        HeapType::DefFunc(Idx::from_immediate(&immediate, shared.service))
+                        HeapType::DefFunc(Idx::from_immediate(&immediate, shared.db))
                     })
                 });
             ResolvedSig {
@@ -1343,7 +1306,7 @@ fn resolve_sig<'db>(
             }
         }
         "call_ref" | "return_call_ref" => {
-            let def_types = get_def_types(shared.service, shared.document);
+            let def_types = get_def_types(shared.db, shared.document);
             instr
                 .immediates()
                 .next()

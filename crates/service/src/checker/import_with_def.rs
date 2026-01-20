@@ -1,4 +1,4 @@
-use crate::{LanguageService, helpers, uri::InternUri};
+use crate::{helpers, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
 use wat_syntax::{SyntaxKind, SyntaxNode};
@@ -6,7 +6,7 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 const DIAGNOSTIC_CODE: &str = "import-with-def";
 
 pub fn check(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     uri: InternUri,
     line_index: &LineIndex,
     node: &SyntaxNode,
@@ -35,7 +35,7 @@ pub fn check(
         message: "imported item can't contain definition".into(),
         related_information: Some(vec![DiagnosticRelatedInformation {
             location: Location {
-                uri: uri.raw(service),
+                uri: uri.raw(db),
                 range: helpers::rowan_range_to_lsp_range(line_index, import.text_range()),
             },
             message: "import declared here".into(),

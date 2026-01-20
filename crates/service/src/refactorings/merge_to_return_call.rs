@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{SymbolKey, SymbolTable},
     cfa::{self, FlowNode, FlowNodeKind},
     document::Document,
@@ -17,7 +16,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 pub fn act(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     uri: InternUri,
     document: Document,
     line_index: &LineIndex,
@@ -75,7 +74,7 @@ pub fn act(
         return None;
     }
 
-    let cfg = cfa::analyze(service, document, SyntaxNodePtr::new(&func));
+    let cfg = cfa::analyze(db, document, SyntaxNodePtr::new(&func));
     let bb_node_index = cfg.graph.node_indices().find(|node_index| {
         if let Some(FlowNode {
             kind: FlowNodeKind::BasicBlock(bb),
@@ -128,7 +127,7 @@ pub fn act(
         }));
     }
     let mut changes = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
-    changes.insert(uri.raw(service), text_edits);
+    changes.insert(uri.raw(db), text_edits);
     Some(CodeAction {
         title: if return_instr.is_some() {
             "Merge `call` and `return` to `return_call`".into()

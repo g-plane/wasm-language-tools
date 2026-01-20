@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{SymbolKey, SymbolTable},
     helpers,
     uri::InternUri,
@@ -11,7 +10,7 @@ use std::collections::HashMap;
 use wat_syntax::SyntaxNode;
 
 pub fn act(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     uri: InternUri,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
@@ -29,14 +28,14 @@ pub fn act(
         )
     } else {
         (
-            def_name.ident(service).to_string(),
+            def_name.ident(db).to_string(),
             "Convert numeric idx to identifier".into(),
         )
     };
 
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
-        uri.raw(service),
+        uri.raw(db),
         vec![TextEdit {
             range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
             new_text,

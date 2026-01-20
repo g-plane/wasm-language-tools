@@ -1,5 +1,5 @@
 use crate::{
-    LanguageService, LintLevel,
+    LintLevel,
     binder::{Symbol, SymbolKind, SymbolTable},
     helpers,
     idx::Idx,
@@ -14,7 +14,7 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 const DIAGNOSTIC_CODE: &str = "shadow";
 
 pub fn check(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     diagnostics: &mut Vec<Diagnostic>,
     lint_level: LintLevel,
     uri: InternUri,
@@ -63,7 +63,7 @@ pub fn check(
             .into_iter()
             .filter(|(_, ranges)| !ranges.is_empty())
             .map(|((symbol, name), ranges)| {
-                let name = name.ident(service);
+                let name = name.ident(db);
                 Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(
                         line_index,
@@ -78,7 +78,7 @@ pub fn check(
                             .into_iter()
                             .map(|range| DiagnosticRelatedInformation {
                                 location: Location {
-                                    uri: uri.raw(service),
+                                    uri: uri.raw(db),
                                     range: helpers::rowan_range_to_lsp_range(line_index, range),
                                 },
                                 message: format!("`{name}` shadowing occurs here"),

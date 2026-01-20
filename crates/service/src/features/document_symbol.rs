@@ -220,9 +220,9 @@ impl LanguageService {
     }
 }
 
-fn render_symbol_name(symbol: &Symbol, service: &LanguageService) -> String {
+fn render_symbol_name(symbol: &Symbol, db: &dyn salsa::Database) -> String {
     if let Some(name) = symbol.idx.name {
-        name.ident(service).to_string()
+        name.ident(db).to_string()
     } else if let Some(num) = symbol.idx.num {
         format!("{} {num}", symbol.kind)
     } else {

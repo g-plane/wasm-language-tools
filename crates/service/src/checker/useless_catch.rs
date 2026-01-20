@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{SymbolKey, SymbolTable},
     config::LintLevel,
     helpers,
@@ -19,7 +18,7 @@ use wat_syntax::{
 const DIAGNOSTIC_CODE: &str = "useless-catch";
 
 pub fn check(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     diagnostics: &mut Vec<Diagnostic>,
     lint_level: LintLevel,
     uri: InternUri,
@@ -63,7 +62,7 @@ pub fn check(
                     matched,
                     line_index,
                     uri,
-                    service,
+                    db,
                     severity,
                 ));
             }
@@ -75,7 +74,7 @@ pub fn check(
                     matched.syntax(),
                     line_index,
                     uri,
-                    service,
+                    db,
                     severity,
                 ));
             } else {
@@ -90,7 +89,7 @@ fn build_diagnostic(
     related: &SyntaxNode,
     line_index: &LineIndex,
     uri: InternUri,
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     severity: DiagnosticSeverity,
 ) -> Diagnostic {
     Diagnostic {
@@ -102,7 +101,7 @@ fn build_diagnostic(
         tags: Some(vec![DiagnosticTag::Unnecessary]),
         related_information: Some(vec![DiagnosticRelatedInformation {
             location: Location {
-                uri: uri.raw(service),
+                uri: uri.raw(db),
                 range: helpers::rowan_range_to_lsp_range(line_index, related.text_range()),
             },
             message: "catch clause already matched here".into(),

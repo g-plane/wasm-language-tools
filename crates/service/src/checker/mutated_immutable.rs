@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{SymbolKind, SymbolTable},
     document::Document,
     helpers, mutability,
@@ -11,15 +10,15 @@ use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Locatio
 const DIAGNOSTIC_CODE: &str = "mutated-immutable";
 
 pub fn check(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     diagnostics: &mut Vec<Diagnostic>,
     uri: InternUri,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
 ) {
-    let mutabilities = mutability::get_mutabilities(service, document);
-    let mutation_actions = mutability::get_mutation_actions(service, document);
+    let mutabilities = mutability::get_mutabilities(db, document);
+    let mutation_actions = mutability::get_mutation_actions(db, document);
     diagnostics.extend(
         mutation_actions
             .iter()
@@ -44,11 +43,11 @@ pub fn check(
                             code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                             message: format!(
                                 "mutating the immutable {kind} `{}` is not allowed",
-                                ref_symbol.idx.render(service)
+                                ref_symbol.idx.render(db)
                             ),
                             related_information: Some(vec![DiagnosticRelatedInformation {
                                 location: Location {
-                                    uri: uri.raw(service),
+                                    uri: uri.raw(db),
                                     range: helpers::rowan_range_to_lsp_range(
                                         line_index,
                                         def_key.text_range(),

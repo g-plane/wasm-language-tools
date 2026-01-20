@@ -8,8 +8,8 @@ use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNodePtr};
 
 #[salsa::tracked(returns(ref))]
-pub(crate) fn get_exports<'db>(
-    db: &'db dyn salsa::Database,
+pub(crate) fn get_exports(
+    db: &dyn salsa::Database,
     document: Document,
 ) -> FxHashMap<SyntaxNodePtr, Vec<Export>> {
     let symbol_table = SymbolTable::of(db, document);

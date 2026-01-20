@@ -212,11 +212,7 @@ pub(crate) mod locals {
     }
 
     #[salsa::tracked]
-    pub fn has_locals<'db>(
-        db: &'db dyn salsa::Database,
-        document: Document,
-        func_key: SymbolKey,
-    ) -> bool {
+    pub fn has_locals(db: &dyn salsa::Database, document: Document, func_key: SymbolKey) -> bool {
         SymbolTable::of(db, document)
             .symbols
             .values()

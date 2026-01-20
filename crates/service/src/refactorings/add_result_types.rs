@@ -1,4 +1,4 @@
-use crate::{LanguageService, helpers, uri::InternUri};
+use crate::{helpers, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionContext, CodeActionKind, TextEdit, Union2, WorkspaceEdit};
 use rowan::{NodeOrToken, TextRange, ast::support};
@@ -7,7 +7,7 @@ use std::{collections::HashMap, ops::ControlFlow};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 pub fn act(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     uri: InternUri,
     line_index: &LineIndex,
     node: &SyntaxNode,
@@ -73,7 +73,7 @@ pub fn act(
 
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
-        uri.raw(service),
+        uri.raw(db),
         vec![TextEdit {
             range: helpers::rowan_range_to_lsp_range(line_index, TextRange::empty(end)),
             new_text: format!(" (result {})", types.join(" ")),

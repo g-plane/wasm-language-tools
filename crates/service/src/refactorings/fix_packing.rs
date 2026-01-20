@@ -1,4 +1,4 @@
-use crate::{LanguageService, helpers, uri::InternUri};
+use crate::{helpers, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{
     CodeAction, CodeActionContext, CodeActionKind, Diagnostic, TextEdit, Union2, WorkspaceEdit,
@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode};
 
 pub fn act(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     uri: InternUri,
     line_index: &LineIndex,
     node: &SyntaxNode,
@@ -37,28 +37,28 @@ pub fn act(
         "struct.get" => Some(
             ["struct.get_s", "struct.get_u"]
                 .iter()
-                .map(|new_text| build_action(new_text, range, diagnostic, service, uri, line_index))
+                .map(|new_text| build_action(new_text, range, diagnostic, db, uri, line_index))
                 .collect(),
         ),
         "struct.get_s" | "struct.get_u" => Some(vec![build_action(
             "struct.get",
             range,
             diagnostic,
-            service,
+            db,
             uri,
             line_index,
         )]),
         "array.get" => Some(
             ["array.get_s", "array.get_u"]
                 .iter()
-                .map(|new_text| build_action(new_text, range, diagnostic, service, uri, line_index))
+                .map(|new_text| build_action(new_text, range, diagnostic, db, uri, line_index))
                 .collect(),
         ),
         "array.get_s" | "array.get_u" => Some(vec![build_action(
             "array.get",
             range,
             diagnostic,
-            service,
+            db,
             uri,
             line_index,
         )]),
@@ -70,7 +70,7 @@ fn build_action(
     new_text: &str,
     range: TextRange,
     diagnostic: &Diagnostic,
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     uri: InternUri,
     line_index: &LineIndex,
 ) -> CodeAction {
@@ -79,7 +79,7 @@ fn build_action(
         new_text: new_text.into(),
     }];
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
-    changes.insert(uri.raw(service), text_edits);
+    changes.insert(uri.raw(db), text_edits);
     CodeAction {
         title: format!("Replace instruction with `{new_text}`"),
         kind: Some(CodeActionKind::QuickFix),

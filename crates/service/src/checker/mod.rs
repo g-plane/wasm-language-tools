@@ -1,4 +1,4 @@
-use crate::{LanguageService, binder::SymbolTable, config::ConfigState, document::Document};
+use crate::{binder::SymbolTable, config::ServiceConfig, document::Document};
 use lspt::Diagnostic;
 use wat_syntax::SyntaxKind;
 
@@ -36,25 +36,18 @@ mod unread;
 mod unused;
 mod useless_catch;
 
-pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
-    // Some clients like VS Code support pulling configuration per document.
-    // In that case, we won't use global configuration,
-    // but document-specific configuration may not be available if client doesn't send it yet.
-    // If it isn't ready, we will skip the checker to avoid diagnostics flickering.
-    let config_state = service.configs.get(&document.uri(service));
-    let config = match config_state.as_deref() {
-        Some(ConfigState::Inherit) => &service.global_config,
-        Some(ConfigState::Override(config)) => config,
-        None => return Vec::new(),
-    };
-
-    let uri = document.uri(service);
-    let line_index = document.line_index(service);
-    let root = document.root_tree(service);
-    let symbol_table = SymbolTable::of(service, document);
+pub fn check(
+    db: &dyn salsa::Database,
+    document: Document,
+    config: &ServiceConfig,
+) -> Vec<Diagnostic> {
+    let uri = document.uri(db);
+    let line_index = document.line_index(db);
+    let root = document.root_tree(db);
+    let symbol_table = SymbolTable::of(db, document);
 
     let mut diagnostics = Vec::with_capacity(4);
-    syntax::check(service, &mut diagnostics, document, line_index);
+    syntax::check(db, &mut diagnostics, document, line_index);
     multi_modules::check(
         &mut diagnostics,
         config.lint.multi_modules,
@@ -72,7 +65,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
             SyntaxKind::MODULE_FIELD_FUNC => {
                 typeck::check_func(
                     &mut diagnostics,
-                    service,
+                    db,
                     document,
                     line_index,
                     symbol_table,
@@ -81,7 +74,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                 );
                 unreachable::check(
                     &mut diagnostics,
-                    service,
+                    db,
                     document,
                     config.lint.unreachable,
                     line_index,
@@ -90,7 +83,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                 );
                 uninit::check(
                     &mut diagnostics,
-                    service,
+                    db,
                     document,
                     line_index,
                     &root,
@@ -99,7 +92,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                 );
                 unread::check(
                     &mut diagnostics,
-                    service,
+                    db,
                     document,
                     config.lint.unread,
                     line_index,
@@ -107,14 +100,14 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                     symbol_table,
                     &node,
                 );
-                if let Some(diagnostic) = import_with_def::check(service, uri, line_index, &node) {
+                if let Some(diagnostic) = import_with_def::check(db, uri, line_index, &node) {
                     diagnostics.push(diagnostic);
                 }
             }
             SyntaxKind::MODULE_FIELD_GLOBAL => {
                 typeck::check_global(
                     &mut diagnostics,
-                    service,
+                    db,
                     document,
                     line_index,
                     symbol_table,
@@ -123,7 +116,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                 );
                 unreachable::check(
                     &mut diagnostics,
-                    service,
+                    db,
                     document,
                     config.lint.unreachable,
                     line_index,
@@ -133,7 +126,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                 if let Some(diagnostic) = const_expr::check(line_index, &node) {
                     diagnostics.push(diagnostic);
                 }
-                if let Some(diagnostic) = import_with_def::check(service, uri, line_index, &node) {
+                if let Some(diagnostic) = import_with_def::check(db, uri, line_index, &node) {
                     diagnostics.push(diagnostic);
                 }
             }
@@ -149,19 +142,19 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                 immediates::check(&mut diagnostics, line_index, &node);
                 br_table_branches::check(
                     &mut diagnostics,
-                    service,
+                    db,
                     document,
                     line_index,
                     symbol_table,
                     &node,
                 );
                 if let Some(diagnostic) =
-                    packing::check(service, uri, document, line_index, symbol_table, &node)
+                    packing::check(db, uri, document, line_index, symbol_table, &node)
                 {
                     diagnostics.push(diagnostic);
                 }
                 type_misuse::check(
-                    service,
+                    db,
                     &mut diagnostics,
                     document,
                     line_index,
@@ -170,21 +163,21 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                     &node,
                 );
                 if let Some(diagnostic) =
-                    new_non_defaultable::check(service, document, line_index, symbol_table, &node)
+                    new_non_defaultable::check(db, document, line_index, symbol_table, &node)
                 {
                     diagnostics.push(diagnostic);
                 }
             }
             SyntaxKind::BLOCK_TYPE => {
                 if let Some(diagnostic) =
-                    block_type::check(service, document, line_index, symbol_table, &node)
+                    block_type::check(db, document, line_index, symbol_table, &node)
                 {
                     diagnostics.push(diagnostic);
                 }
             }
             SyntaxKind::MODULE_FIELD_START => {
                 if let Some(diagnostic) =
-                    start::check(service, document, line_index, symbol_table, &node)
+                    start::check(db, document, line_index, symbol_table, &node)
                 {
                     diagnostics.push(diagnostic);
                 }
@@ -192,7 +185,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
             SyntaxKind::MODULE_FIELD_TABLE => {
                 typeck::check_table(
                     &mut diagnostics,
-                    service,
+                    db,
                     document,
                     line_index,
                     symbol_table,
@@ -202,13 +195,13 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                 if let Some(diagnostic) = const_expr::check(line_index, &node) {
                     diagnostics.push(diagnostic);
                 }
-                if let Some(diagnostic) = import_with_def::check(service, uri, line_index, &node) {
+                if let Some(diagnostic) = import_with_def::check(db, uri, line_index, &node) {
                     diagnostics.push(diagnostic);
                 }
             }
             SyntaxKind::MODULE_FIELD_ELEM => {
                 if let Some(diagnostic) = elem_type::check(
-                    service,
+                    db,
                     document,
                     line_index,
                     &root,
@@ -220,7 +213,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                 }
             }
             SyntaxKind::MODULE_FIELD_MEMORY => {
-                if let Some(diagnostic) = import_with_def::check(service, uri, line_index, &node) {
+                if let Some(diagnostic) = import_with_def::check(db, uri, line_index, &node) {
                     diagnostics.push(diagnostic);
                 }
             }
@@ -230,7 +223,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
             SyntaxKind::OFFSET => {
                 typeck::check_offset(
                     &mut diagnostics,
-                    service,
+                    db,
                     document,
                     line_index,
                     symbol_table,
@@ -244,7 +237,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
             SyntaxKind::ELEM_LIST => {
                 typeck::check_elem_list(
                     &mut diagnostics,
-                    service,
+                    db,
                     document,
                     line_index,
                     symbol_table,
@@ -260,20 +253,20 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
             SyntaxKind::MODULE_FIELD_TAG => {
                 tag_type::check(
                     &mut diagnostics,
-                    service,
+                    db,
                     document,
                     line_index,
                     symbol_table,
                     &node,
                 );
-                if let Some(diagnostic) = import_with_def::check(service, uri, line_index, &node) {
+                if let Some(diagnostic) = import_with_def::check(db, uri, line_index, &node) {
                     diagnostics.push(diagnostic);
                 }
             }
             SyntaxKind::EXTERN_TYPE_TAG => {
                 tag_type::check(
                     &mut diagnostics,
-                    service,
+                    db,
                     document,
                     line_index,
                     symbol_table,
@@ -287,7 +280,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
                     diagnostics.push(diagnostic);
                 }
                 useless_catch::check(
-                    service,
+                    db,
                     &mut diagnostics,
                     config.lint.useless_catch,
                     uri,
@@ -298,7 +291,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
             }
             SyntaxKind::CATCH | SyntaxKind::CATCH_ALL => {
                 if let Some(diagnostic) = catch_type::check(
-                    service,
+                    db,
                     document,
                     line_index,
                     &root,
@@ -313,9 +306,9 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
         });
         multi_starts::check(&mut diagnostics, line_index, &module);
     });
-    undef::check(service, &mut diagnostics, line_index, symbol_table);
+    undef::check(db, &mut diagnostics, line_index, symbol_table);
     dup_names::check(
-        service,
+        db,
         &mut diagnostics,
         uri,
         document,
@@ -324,7 +317,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
         symbol_table,
     );
     unused::check(
-        service,
+        db,
         &mut diagnostics,
         config.lint.unused,
         line_index,
@@ -332,7 +325,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
         symbol_table,
     );
     shadow::check(
-        service,
+        db,
         &mut diagnostics,
         config.lint.shadow,
         uri,
@@ -341,7 +334,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
         symbol_table,
     );
     mutated_immutable::check(
-        service,
+        db,
         &mut diagnostics,
         uri,
         document,
@@ -349,7 +342,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
         symbol_table,
     );
     needless_mut::check(
-        service,
+        db,
         &mut diagnostics,
         config.lint.needless_mut,
         document,
@@ -358,7 +351,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
     );
     subtyping::check(
         &mut diagnostics,
-        service,
+        db,
         document,
         line_index,
         &root,
@@ -366,7 +359,7 @@ pub fn check(service: &LanguageService, document: Document) -> Vec<Diagnostic> {
     );
     deprecated::check(
         &mut diagnostics,
-        service,
+        db,
         document,
         config.lint.deprecated,
         line_index,

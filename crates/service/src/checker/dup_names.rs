@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{Symbol, SymbolKind, SymbolTable},
     document::Document,
     exports, helpers,
@@ -14,7 +13,7 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 const DIAGNOSTIC_CODE: &str = "duplicated-names";
 
 pub fn check(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     diagnostics: &mut Vec<Diagnostic>,
     uri: InternUri,
     document: Document,
@@ -51,7 +50,7 @@ pub fn check(
             .iter()
             .filter(|(_, symbols)| symbols.len() > 1)
             .flat_map(|((name, _, kind), symbols)| {
-                let name = name.ident(service);
+                let name = name.ident(db);
                 symbols.iter().map(move |symbol| Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(
                         line_index,
@@ -67,7 +66,7 @@ pub fn check(
                             .filter(|other| *other != symbol)
                             .map(|symbol| DiagnosticRelatedInformation {
                                 location: Location {
-                                    uri: uri.raw(service),
+                                    uri: uri.raw(db),
                                     range: helpers::rowan_range_to_lsp_range(
                                         line_index,
                                         get_ident_range(symbol, root),
@@ -82,7 +81,7 @@ pub fn check(
             }),
     );
 
-    exports::get_exports(service, document)
+    exports::get_exports(db, document)
         .values()
         .for_each(|exports| {
             diagnostics.extend(
@@ -110,7 +109,7 @@ pub fn check(
                                     .filter(|other| *other != range)
                                     .map(|range| DiagnosticRelatedInformation {
                                         location: Location {
-                                            uri: uri.raw(service),
+                                            uri: uri.raw(db),
                                             range: helpers::rowan_range_to_lsp_range(
                                                 line_index, *range,
                                             ),

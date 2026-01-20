@@ -1,5 +1,4 @@
 use crate::{
-    LanguageService,
     binder::{SymbolKey, SymbolTable},
     document::Document,
     helpers,
@@ -13,7 +12,7 @@ use wat_syntax::{SyntaxNode, ast::TypeUse};
 const DIAGNOSTIC_CODE: &str = "block-type";
 
 pub fn check(
-    service: &LanguageService,
+    db: &dyn salsa::Database,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
@@ -21,7 +20,7 @@ pub fn check(
 ) -> Option<Diagnostic> {
     let index = support::child::<TypeUse>(node).and_then(|type_use| type_use.index())?;
     let index = index.syntax();
-    let def_types = types_analyzer::get_def_types(service, document);
+    let def_types = types_analyzer::get_def_types(db, document);
     if symbol_table
         .resolved
         .get(&SymbolKey::new(index))
