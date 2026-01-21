@@ -1,8 +1,6 @@
 use crate::{helpers, uri::InternUri};
 use line_index::LineIndex;
-use lspt::{
-    CodeAction, CodeActionContext, CodeActionKind, Diagnostic, TextEdit, Union2, WorkspaceEdit,
-};
+use lspt::{CodeAction, CodeActionContext, CodeActionKind, Diagnostic, TextEdit, Union2, WorkspaceEdit};
 use rowan::{Direction, TextRange};
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
@@ -16,21 +14,16 @@ pub fn act(
     context: &CodeActionContext,
 ) -> Option<Vec<CodeAction>> {
     let node_lsp_range = helpers::rowan_range_to_lsp_range(line_index, node.text_range());
-    let diagnostic = context
-        .diagnostics
-        .iter()
-        .find(|diagnostic| match &diagnostic.code {
-            Some(Union2::B(code)) => code == "packing" && diagnostic.range == node_lsp_range,
-            _ => false,
+    let diagnostic = context.diagnostics.iter().find(|diagnostic| match &diagnostic.code {
+        Some(Union2::B(code)) => code == "packing" && diagnostic.range == node_lsp_range,
+        _ => false,
+    })?;
+    let instr_name = node
+        .siblings_with_tokens(Direction::Prev)
+        .find_map(|element| match element {
+            SyntaxElement::Token(token) if token.kind() == SyntaxKind::INSTR_NAME => Some(token),
+            _ => None,
         })?;
-    let instr_name =
-        node.siblings_with_tokens(Direction::Prev)
-            .find_map(|element| match element {
-                SyntaxElement::Token(token) if token.kind() == SyntaxKind::INSTR_NAME => {
-                    Some(token)
-                }
-                _ => None,
-            })?;
 
     let range = instr_name.text_range();
     match instr_name.text() {
@@ -40,28 +33,16 @@ pub fn act(
                 .map(|new_text| build_action(new_text, range, diagnostic, db, uri, line_index))
                 .collect(),
         ),
-        "struct.get_s" | "struct.get_u" => Some(vec![build_action(
-            "struct.get",
-            range,
-            diagnostic,
-            db,
-            uri,
-            line_index,
-        )]),
+        "struct.get_s" | "struct.get_u" => {
+            Some(vec![build_action("struct.get", range, diagnostic, db, uri, line_index)])
+        }
         "array.get" => Some(
             ["array.get_s", "array.get_u"]
                 .iter()
                 .map(|new_text| build_action(new_text, range, diagnostic, db, uri, line_index))
                 .collect(),
         ),
-        "array.get_s" | "array.get_u" => Some(vec![build_action(
-            "array.get",
-            range,
-            diagnostic,
-            db,
-            uri,
-            line_index,
-        )]),
+        "array.get_s" | "array.get_u" => Some(vec![build_action("array.get", range, diagnostic, db, uri, line_index)]),
         _ => None,
     }
 }

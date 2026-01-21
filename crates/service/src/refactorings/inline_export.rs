@@ -18,10 +18,7 @@ pub fn act(
     node: &SyntaxNode,
 ) -> Option<CodeAction> {
     let index = helpers::ast::extract_index_from_export(node)?;
-    let def_node = symbol_table
-        .resolved
-        .get(&SymbolKey::new(&index))?
-        .try_to_node(root)?;
+    let def_node = symbol_table.resolved.get(&SymbolKey::new(&index))?.try_to_node(root)?;
 
     let mut changes = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
@@ -43,8 +40,7 @@ pub fn act(
                 ),
                 new_text: format!(
                     " (export {})",
-                    node.first_child_by_kind(&|kind| kind == SyntaxKind::NAME)?
-                        .text(),
+                    node.first_child_by_kind(&|kind| kind == SyntaxKind::NAME)?.text(),
                 ),
             },
         ],

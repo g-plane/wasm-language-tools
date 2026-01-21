@@ -36,8 +36,7 @@ pub fn act(
                 ),
                 new_text: format!(
                     "\n  (export {} ({} {}))",
-                    node.first_child_by_kind(&|kind| kind == SyntaxKind::NAME)?
-                        .text(),
+                    node.first_child_by_kind(&|kind| kind == SyntaxKind::NAME)?.text(),
                     def_symbol.kind,
                     def_symbol.idx.render(db),
                 ),

@@ -5,12 +5,7 @@ use rowan::ast::support;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
-pub fn act(
-    db: &dyn salsa::Database,
-    uri: InternUri,
-    line_index: &LineIndex,
-    node: &SyntaxNode,
-) -> Option<CodeAction> {
+pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
     if !RefType::from_green(&node.green(), db)?.nullable {
         return None;
     }

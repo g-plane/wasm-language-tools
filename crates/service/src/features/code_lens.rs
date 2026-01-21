@@ -43,8 +43,7 @@ impl LanguageService {
 
     /// Handler for `codeLens/resolve` request.
     pub fn code_lens_resolve(&self, params: CodeLens) -> CodeLens {
-        self.code_lens_resolve_impl(params.clone())
-            .unwrap_or(params)
+        self.code_lens_resolve_impl(params.clone()).unwrap_or(params)
     }
 
     fn code_lens_resolve_impl(&self, params: CodeLens) -> Option<CodeLens> {
@@ -62,9 +61,7 @@ impl LanguageService {
             .find(|symbol| symbol.key.kind() == syntax_kind && symbol.key.text_range() == range)?;
         let locations = symbol_table
             .find_references_on_def(def_symbol, false)
-            .map(|symbol| {
-                helpers::create_location_by_symbol(data.uri.clone(), line_index, symbol.key, &root)
-            })
+            .map(|symbol| helpers::create_location_by_symbol(data.uri.clone(), line_index, symbol.key, &root))
             .collect::<Vec<_>>();
         Some(CodeLens {
             range: params.range,

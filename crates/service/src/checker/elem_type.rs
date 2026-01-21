@@ -38,10 +38,7 @@ pub fn check(
         None
     } else {
         Some(Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(
-                line_index,
-                elem_ref_type_node.syntax().text_range(),
-            ),
+            range: helpers::rowan_range_to_lsp_range(line_index, elem_ref_type_node.syntax().text_range()),
             severity: Some(DiagnosticSeverity::Error),
             source: Some("wat".into()),
             code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
@@ -53,10 +50,7 @@ pub fn check(
             related_information: Some(vec![DiagnosticRelatedInformation {
                 location: Location {
                     uri: document.uri(db).raw(db),
-                    range: helpers::rowan_range_to_lsp_range(
-                        line_index,
-                        table_ref_type_node.syntax().text_range(),
-                    ),
+                    range: helpers::rowan_range_to_lsp_range(line_index, table_ref_type_node.syntax().text_range()),
                 },
                 message: "table's ref type declared here".into(),
             }]),

@@ -120,13 +120,11 @@ pub(crate) fn get_mutation_actions(
             SymbolKind::GlobalRef => {
                 let parent = symbol.key.to_node(&root).parent()?;
                 let kind = match parent.kind() {
-                    SyntaxKind::PLAIN_INSTR => {
-                        match PlainInstr::cast(parent)?.instr_name()?.text() {
-                            "global.get" => MutationActionKind::Get,
-                            "global.set" => MutationActionKind::Set,
-                            _ => return None,
-                        }
-                    }
+                    SyntaxKind::PLAIN_INSTR => match PlainInstr::cast(parent)?.instr_name()?.text() {
+                        "global.get" => MutationActionKind::Get,
+                        "global.set" => MutationActionKind::Set,
+                        _ => return None,
+                    },
                     SyntaxKind::EXTERN_IDX_GLOBAL => MutationActionKind::Export,
                     _ => return None,
                 };
@@ -148,9 +146,7 @@ pub(crate) fn get_mutation_actions(
                 let parent = current_node.parent()?;
                 let kind = match PlainInstr::cast(parent.clone())?.instr_name()?.text() {
                     "array.get" | "array.get_s" | "array.get_u" => MutationActionKind::Get,
-                    "array.set" | "array.fill" | "array.init_data" | "array.init_elem" => {
-                        MutationActionKind::Set
-                    }
+                    "array.set" | "array.fill" | "array.init_data" | "array.init_elem" => MutationActionKind::Set,
                     "array.copy" => {
                         if parent.children().next() == Some(current_node) {
                             MutationActionKind::Set

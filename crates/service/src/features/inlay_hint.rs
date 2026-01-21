@@ -30,15 +30,12 @@ impl LanguageService {
                 SymbolKind::LocalRef => {
                     if options.types
                         && range.contains_range(symbol.key.text_range())
-                        && let Some(ty) = symbol_table.find_def(symbol.key).and_then(|local| {
-                            types_analyzer::extract_type(self, *document, local.green.clone())
-                        })
+                        && let Some(ty) = symbol_table
+                            .find_def(symbol.key)
+                            .and_then(|local| types_analyzer::extract_type(self, *document, local.green.clone()))
                     {
                         inlay_hints.push(InlayHint {
-                            position: helpers::rowan_pos_to_lsp_pos(
-                                line_index,
-                                symbol.key.text_range().end(),
-                            ),
+                            position: helpers::rowan_pos_to_lsp_pos(line_index, symbol.key.text_range().end()),
                             label: Union2::A(ty.render(self).to_string()),
                             kind: Some(InlayHintKind::Type),
                             text_edits: None,
@@ -53,18 +50,11 @@ impl LanguageService {
                     if options.types
                         && range.contains_range(symbol.key.text_range())
                         && let Some(ty) = symbol_table.find_def(symbol.key).and_then(|global| {
-                            types_analyzer::extract_global_type(
-                                self,
-                                *document,
-                                global.green.clone(),
-                            )
+                            types_analyzer::extract_global_type(self, *document, global.green.clone())
                         })
                     {
                         inlay_hints.push(InlayHint {
-                            position: helpers::rowan_pos_to_lsp_pos(
-                                line_index,
-                                symbol.key.text_range().end(),
-                            ),
+                            position: helpers::rowan_pos_to_lsp_pos(line_index, symbol.key.text_range().end()),
                             label: Union2::A(ty.render(self).to_string()),
                             kind: Some(InlayHintKind::Type),
                             text_edits: None,
@@ -101,14 +91,10 @@ impl LanguageService {
                             num: Some(num),
                             name: None,
                         } = symbol.idx
-                        && let Some(keyword) =
-                            support::token(&symbol.key.to_node(&root), SyntaxKind::KEYWORD)
+                        && let Some(keyword) = support::token(&symbol.key.to_node(&root), SyntaxKind::KEYWORD)
                     {
                         inlay_hints.push(InlayHint {
-                            position: helpers::rowan_pos_to_lsp_pos(
-                                line_index,
-                                keyword.text_range().end(),
-                            ),
+                            position: helpers::rowan_pos_to_lsp_pos(line_index, keyword.text_range().end()),
                             label: Union2::A(format!("(;{num};)")),
                             kind: None,
                             text_edits: None,
@@ -160,14 +146,10 @@ impl LanguageService {
                             num: Some(num),
                             name: None,
                         } = symbol.idx
-                        && let Some(keyword) =
-                            support::token(&symbol.key.to_node(&root), SyntaxKind::KEYWORD)
+                        && let Some(keyword) = support::token(&symbol.key.to_node(&root), SyntaxKind::KEYWORD)
                     {
                         inlay_hints.push(InlayHint {
-                            position: helpers::rowan_pos_to_lsp_pos(
-                                line_index,
-                                keyword.text_range().end(),
-                            ),
+                            position: helpers::rowan_pos_to_lsp_pos(line_index, keyword.text_range().end()),
                             label: Union2::A(format!("(;{num};)")),
                             kind: None,
                             text_edits: None,
@@ -204,18 +186,10 @@ impl LanguageService {
                 SymbolKind::FieldRef => {
                     if options.types
                         && range.contains_range(symbol.key.text_range())
-                        && let Some(ty) = types_analyzer::resolve_field_type(
-                            self,
-                            *document,
-                            symbol.key,
-                            symbol.region,
-                        )
+                        && let Some(ty) = types_analyzer::resolve_field_type(self, *document, symbol.key, symbol.region)
                     {
                         inlay_hints.push(InlayHint {
-                            position: helpers::rowan_pos_to_lsp_pos(
-                                line_index,
-                                symbol.key.text_range().end(),
-                            ),
+                            position: helpers::rowan_pos_to_lsp_pos(line_index, symbol.key.text_range().end()),
                             label: Union2::A(ty.render(self).to_string()),
                             kind: Some(InlayHintKind::Type),
                             text_edits: None,

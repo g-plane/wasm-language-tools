@@ -25,10 +25,7 @@ pub fn act(
         SyntaxKind::FIELD => "field",
         _ => return None,
     };
-    let new_text = types
-        .into_iter()
-        .map(|ty| format!("({keyword} {ty})"))
-        .join(" ");
+    let new_text = types.into_iter().map(|ty| format!("({keyword} {ty})")).join(" ");
 
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(

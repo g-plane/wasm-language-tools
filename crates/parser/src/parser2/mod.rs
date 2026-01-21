@@ -34,9 +34,7 @@ pub fn parse(source: &str) -> (GreenNode, Vec<SyntaxError>) {
 /// ```
 pub fn parse_partial(source: &str, from: usize) -> Option<(GreenNode, Vec<SyntaxError>)> {
     let mut parser = Parser::offset_from(source, from);
-    parser
-        .parse_module_field()
-        .map(|green| (green, parser.errors))
+    parser.parse_module_field().map(|green| (green, parser.errors))
 }
 
 #[inline]
@@ -56,8 +54,7 @@ pub fn parse_partial(source: &str, from: usize) -> Option<(GreenNode, Vec<Syntax
 /// ```
 pub fn is_id_char(c: char) -> bool {
     c.is_ascii_alphanumeric()
-        || c.is_ascii_punctuation()
-            && !matches!(c, '"' | ',' | ';' | '(' | ')' | '[' | ']' | '{' | '}')
+        || c.is_ascii_punctuation() && !matches!(c, '"' | ',' | ';' | '(' | ')' | '[' | ']' | '{' | '}')
 }
 
 type GreenElement = NodeOrToken<GreenNode, GreenToken>;

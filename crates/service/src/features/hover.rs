@@ -27,50 +27,41 @@ impl LanguageService {
             SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
                 let parent = token.parent()?;
                 let key = SymbolKey::new(&parent);
-                symbol_table
-                    .symbols
-                    .get(&key)
-                    .and_then(|symbol| match symbol.kind {
-                        SymbolKind::Call
-                        | SymbolKind::LocalRef
-                        | SymbolKind::TypeUse
-                        | SymbolKind::GlobalRef
-                        | SymbolKind::MemoryRef
-                        | SymbolKind::TableRef
-                        | SymbolKind::BlockRef
-                        | SymbolKind::FieldRef
-                        | SymbolKind::TagRef => symbol_table
-                            .find_def(key)
-                            .and_then(|symbol| create_def_hover(self, *document, &root, symbol))
-                            .map(|contents| Hover {
-                                contents: Union3::A(contents),
-                                range: Some(helpers::rowan_range_to_lsp_range(
-                                    line_index,
-                                    token.text_range(),
-                                )),
-                            }),
-                        SymbolKind::Func
-                        | SymbolKind::Param
-                        | SymbolKind::Local
-                        | SymbolKind::Type
-                        | SymbolKind::GlobalDef
-                        | SymbolKind::MemoryDef
-                        | SymbolKind::TableDef
-                        | SymbolKind::BlockDef
-                        | SymbolKind::FieldDef
-                        | SymbolKind::TagDef => symbol_table
-                            .symbols
-                            .get(&key)
-                            .and_then(|symbol| create_def_hover(self, *document, &root, symbol))
-                            .map(|contents| Hover {
-                                contents: Union3::A(contents),
-                                range: Some(helpers::rowan_range_to_lsp_range(
-                                    line_index,
-                                    token.text_range(),
-                                )),
-                            }),
-                        SymbolKind::Module => None,
-                    })
+                symbol_table.symbols.get(&key).and_then(|symbol| match symbol.kind {
+                    SymbolKind::Call
+                    | SymbolKind::LocalRef
+                    | SymbolKind::TypeUse
+                    | SymbolKind::GlobalRef
+                    | SymbolKind::MemoryRef
+                    | SymbolKind::TableRef
+                    | SymbolKind::BlockRef
+                    | SymbolKind::FieldRef
+                    | SymbolKind::TagRef => symbol_table
+                        .find_def(key)
+                        .and_then(|symbol| create_def_hover(self, *document, &root, symbol))
+                        .map(|contents| Hover {
+                            contents: Union3::A(contents),
+                            range: Some(helpers::rowan_range_to_lsp_range(line_index, token.text_range())),
+                        }),
+                    SymbolKind::Func
+                    | SymbolKind::Param
+                    | SymbolKind::Local
+                    | SymbolKind::Type
+                    | SymbolKind::GlobalDef
+                    | SymbolKind::MemoryDef
+                    | SymbolKind::TableDef
+                    | SymbolKind::BlockDef
+                    | SymbolKind::FieldDef
+                    | SymbolKind::TagDef => symbol_table
+                        .symbols
+                        .get(&key)
+                        .and_then(|symbol| create_def_hover(self, *document, &root, symbol))
+                        .map(|contents| Hover {
+                            contents: Union3::A(contents),
+                            range: Some(helpers::rowan_range_to_lsp_range(line_index, token.text_range())),
+                        }),
+                    SymbolKind::Module => None,
+                })
             }
             SyntaxKind::TYPE_KEYWORD => {
                 let ty = token.text();
@@ -79,10 +70,7 @@ impl LanguageService {
                         kind: MarkupKind::Markdown,
                         value: format!("```wat\n{ty}\n```\n\n{doc}"),
                     }),
-                    range: Some(helpers::rowan_range_to_lsp_range(
-                        line_index,
-                        token.text_range(),
-                    )),
+                    range: Some(helpers::rowan_range_to_lsp_range(line_index, token.text_range())),
                 })
             }
             SyntaxKind::KEYWORD => {
@@ -125,9 +113,7 @@ impl LanguageService {
                             .immediates()
                             .next()
                             .and_then(|immediate| immediate.ref_type())
-                            .and_then(|ref_type| {
-                                RefType::from_green(&ref_type.syntax().green(), self)
-                            })
+                            .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), self))
                             .is_some_and(|ty| ty.nullable)
                         {
                             "ref.test."
@@ -141,9 +127,7 @@ impl LanguageService {
                             .immediates()
                             .next()
                             .and_then(|immediate| immediate.ref_type())
-                            .and_then(|ref_type| {
-                                RefType::from_green(&ref_type.syntax().green(), self)
-                            })
+                            .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), self))
                             .is_some_and(|ty| ty.nullable)
                         {
                             "ref.cast."
@@ -156,15 +140,9 @@ impl LanguageService {
                 data_set::INSTR_OP_CODES.get(key).map(|code| Hover {
                     contents: Union3::A(MarkupContent {
                         kind: MarkupKind::Markdown,
-                        value: format!(
-                            "```wat\n{name}\n```\nBinary Opcode: {}",
-                            format_op_code(*code)
-                        ),
+                        value: format!("```wat\n{name}\n```\nBinary Opcode: {}", format_op_code(*code)),
                     }),
-                    range: Some(helpers::rowan_range_to_lsp_range(
-                        line_index,
-                        token.text_range(),
-                    )),
+                    range: Some(helpers::rowan_range_to_lsp_range(line_index, token.text_range())),
                 })
             }
             _ => None,
@@ -179,9 +157,7 @@ fn create_def_hover(
     symbol: &Symbol,
 ) -> Option<MarkupContent> {
     match symbol.kind {
-        SymbolKind::Param | SymbolKind::Local => {
-            Some(create_param_or_local_hover(db, document, symbol))
-        }
+        SymbolKind::Param | SymbolKind::Local => Some(create_param_or_local_hover(db, document, symbol)),
         SymbolKind::Func => Some(MarkupContent {
             kind: MarkupKind::Markdown,
             value: create_func_hover(db, document, symbol.clone(), root),
@@ -197,12 +173,7 @@ fn create_def_hover(
     }
 }
 
-fn create_func_hover(
-    db: &dyn salsa::Database,
-    document: Document,
-    symbol: Symbol,
-    root: &SyntaxNode,
-) -> String {
+fn create_func_hover(db: &dyn salsa::Database, document: Document, symbol: Symbol, root: &SyntaxNode) -> String {
     let node = symbol.key.to_node(root);
     let doc = helpers::ast::get_doc_comment(&node);
     let mut content = format!(
@@ -220,11 +191,7 @@ fn create_func_hover(
     content
 }
 
-fn create_param_or_local_hover(
-    db: &dyn salsa::Database,
-    document: Document,
-    symbol: &Symbol,
-) -> MarkupContent {
+fn create_param_or_local_hover(db: &dyn salsa::Database, document: Document, symbol: &Symbol) -> MarkupContent {
     let mut content = '('.to_string();
     match symbol.kind {
         SymbolKind::Param => {
@@ -250,11 +217,7 @@ fn create_param_or_local_hover(
     }
 }
 
-fn create_global_def_hover(
-    db: &dyn salsa::Database,
-    symbol: &Symbol,
-    root: &SyntaxNode,
-) -> MarkupContent {
+fn create_global_def_hover(db: &dyn salsa::Database, symbol: &Symbol, root: &SyntaxNode) -> MarkupContent {
     let mut content = "(global".to_string();
     if let Some(name) = symbol.idx.name {
         content.push(' ');
@@ -281,11 +244,7 @@ fn create_global_def_hover(
     }
 }
 
-fn create_memory_def_hover(
-    db: &dyn salsa::Database,
-    symbol: &Symbol,
-    root: &SyntaxNode,
-) -> MarkupContent {
+fn create_memory_def_hover(db: &dyn salsa::Database, symbol: &Symbol, root: &SyntaxNode) -> MarkupContent {
     let mut content = "(memory".to_string();
     if let Some(name) = symbol.idx.name {
         content.push(' ');
@@ -306,11 +265,7 @@ fn create_memory_def_hover(
     }
 }
 
-fn create_table_def_hover(
-    db: &dyn salsa::Database,
-    symbol: &Symbol,
-    root: &SyntaxNode,
-) -> MarkupContent {
+fn create_table_def_hover(db: &dyn salsa::Database, symbol: &Symbol, root: &SyntaxNode) -> MarkupContent {
     use crate::types_analyzer::RefType;
 
     let mut content = "(table".to_string();
@@ -320,10 +275,7 @@ fn create_table_def_hover(
     }
     let node = symbol.key.to_node(root);
     if let Some(table_type) = support::child::<TableType>(&node) {
-        if let Some(limits) = table_type
-            .limits()
-            .and_then(|limits| render_limits(&limits))
-        {
+        if let Some(limits) = table_type.limits().and_then(|limits| render_limits(&limits)) {
             content.push(' ');
             content.push_str(&limits);
         }
@@ -342,11 +294,7 @@ fn create_table_def_hover(
     }
 }
 
-fn create_type_def_hover(
-    db: &dyn salsa::Database,
-    document: Document,
-    symbol: &Symbol,
-) -> MarkupContent {
+fn create_type_def_hover(db: &dyn salsa::Database, document: Document, symbol: &Symbol) -> MarkupContent {
     let def_types = types_analyzer::get_def_types(db, document);
     let mut content = "(type".to_string();
     if let Some(name) = symbol.idx.name {
@@ -407,11 +355,7 @@ fn create_block_hover(
     }
 }
 
-fn create_field_def_hover(
-    db: &dyn salsa::Database,
-    symbol: &Symbol,
-    document: Document,
-) -> MarkupContent {
+fn create_field_def_hover(db: &dyn salsa::Database, symbol: &Symbol, document: Document) -> MarkupContent {
     let mut content = "(field".to_string();
     if let Some(name) = symbol.idx.name {
         content.push(' ');
@@ -427,11 +371,7 @@ fn create_field_def_hover(
     }
 }
 
-fn create_tag_def_hover(
-    db: &dyn salsa::Database,
-    symbol: &Symbol,
-    document: Document,
-) -> MarkupContent {
+fn create_tag_def_hover(db: &dyn salsa::Database, symbol: &Symbol, document: Document) -> MarkupContent {
     let content = types_analyzer::render_header(
         db,
         "tag",

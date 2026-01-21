@@ -38,10 +38,7 @@ fn parser_snapshot() {
 
         build_settings(path).bind(|| {
             let name = path.file_stem().unwrap().to_str().unwrap();
-            assert_snapshot!(
-                name,
-                format!("{:#?}\n{}", SyntaxNode::new_root(tree), writer),
-            );
+            assert_snapshot!(name, format!("{:#?}\n{}", SyntaxNode::new_root(tree), writer));
         });
     });
 }

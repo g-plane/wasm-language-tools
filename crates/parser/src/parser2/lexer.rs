@@ -135,11 +135,7 @@ impl<'s> Lexer<'s> {
     pub fn keyword(&mut self, keyword: &'static str) -> Option<Token<'s>> {
         debug_assert!(keyword.chars().all(|c| c.is_ascii_lowercase()));
         let bytes = self.input.as_bytes();
-        if bytes.starts_with(keyword.as_bytes())
-            && bytes
-                .get(keyword.len())
-                .is_none_or(|b| !is_id_char(*b as char))
-        {
+        if bytes.starts_with(keyword.as_bytes()) && bytes.get(keyword.len()).is_none_or(|b| !is_id_char(*b as char)) {
             // SAFETY: `keyword` is a static ASCII string in UTF-8
             unsafe {
                 Some(Token {
@@ -196,10 +192,7 @@ impl<'s> Lexer<'s> {
 
     fn word(&mut self) -> Option<&'s str> {
         if self.input.starts_with(|c: char| c.is_ascii_lowercase()) {
-            let end = self
-                .input
-                .find(|c| !is_id_char(c))
-                .unwrap_or(self.input.len());
+            let end = self.input.find(|c| !is_id_char(c)).unwrap_or(self.input.len());
             // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
             unsafe { Some(self.split_advance(end)) }
         } else {
@@ -270,11 +263,7 @@ impl<'s> Lexer<'s> {
         } else {
             self.unsigned_dec()
         };
-        if self.input.starts_with(is_id_char) {
-            None
-        } else {
-            text
-        }
+        if self.input.starts_with(is_id_char) { None } else { text }
     }
 
     fn unsigned_dec(&mut self) -> Option<&'s str> {
@@ -376,11 +365,7 @@ impl<'s> Lexer<'s> {
             // SAFETY: the difference of two valid UTF-8 strings is valid
             let text = unsafe { checkpoint.get_unchecked(..checkpoint.len() - self.input.len()) };
             Some(Token {
-                kind: if valid {
-                    SyntaxKind::FLOAT
-                } else {
-                    SyntaxKind::ERROR
-                },
+                kind: if valid { SyntaxKind::FLOAT } else { SyntaxKind::ERROR },
                 text,
             })
         }
@@ -395,22 +380,16 @@ impl<'s> Lexer<'s> {
         if self.input.starts_with(|c: char| c.is_ascii_alphabetic()) {
             None
         } else {
-            checkpoint
-                .get(..checkpoint.len() - self.input.len())
-                .map(|text| Token {
-                    kind: SyntaxKind::MEM_ARG_KEYWORD,
-                    text,
-                })
+            checkpoint.get(..checkpoint.len() - self.input.len()).map(|text| Token {
+                kind: SyntaxKind::MEM_ARG_KEYWORD,
+                text,
+            })
         }
     }
 
     fn shape_descriptor(&mut self) -> Option<Token<'s>> {
         if let Some((text, rest)) = self.input.split_at_checked(5).filter(|(text, rest)| {
-            !rest.starts_with(is_id_char)
-                && matches!(
-                    *text,
-                    "i8x16" | "i16x8" | "i32x4" | "i64x2" | "f32x4" | "f64x2"
-                )
+            !rest.starts_with(is_id_char) && matches!(*text, "i8x16" | "i16x8" | "i32x4" | "i64x2" | "f32x4" | "f64x2")
         }) {
             self.input = rest;
             Some(Token {
@@ -429,10 +408,7 @@ impl<'s> Lexer<'s> {
             ';' if matches!(chars.peek(), Some(';')) => None,
             ')' if !self.top_level => None,
             c if is_id_char(c) => {
-                let end = self
-                    .input
-                    .find(|c| !is_id_char(c))
-                    .unwrap_or(self.input.len());
+                let end = self.input.find(|c| !is_id_char(c)).unwrap_or(self.input.len());
                 // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary
                 unsafe { Some(self.split_advance(end)) }
             }
@@ -563,12 +539,10 @@ impl<'s> Lexer<'s> {
                 self.split_advance(end);
             }
         }
-        checkpoint
-            .get(..checkpoint.len() - self.input.len())
-            .map(|text| Token {
-                kind: SyntaxKind::BLOCK_COMMENT,
-                text,
-            })
+        checkpoint.get(..checkpoint.len() - self.input.len()).map(|text| Token {
+            kind: SyntaxKind::BLOCK_COMMENT,
+            text,
+        })
     }
 
     fn line_comment(&mut self) -> Option<Token<'s>> {
@@ -588,17 +562,12 @@ impl<'s> Lexer<'s> {
         if rest.starts_with('"') {
             let checkpoint = mem::replace(&mut self.input, rest);
             self.string()?;
-            checkpoint
-                .get(..checkpoint.len() - self.input.len())
-                .map(|text| Token {
-                    kind: SyntaxKind::ANNOT_START,
-                    text,
-                })
+            checkpoint.get(..checkpoint.len() - self.input.len()).map(|text| Token {
+                kind: SyntaxKind::ANNOT_START,
+                text,
+            })
         } else {
-            let end = rest
-                .bytes()
-                .position(is_not_annot_elem)
-                .unwrap_or(rest.len());
+            let end = rest.bytes().position(is_not_annot_elem).unwrap_or(rest.len());
             // SAFETY: the `find` result or the length of the input is guaranteed to be valid UTF-8 boundary,
             // and `+ 2` means it contains `(@`
             unsafe {

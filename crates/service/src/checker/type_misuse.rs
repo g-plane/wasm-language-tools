@@ -3,8 +3,8 @@ use crate::{
     document::Document,
     helpers,
     types_analyzer::{
-        CompositeType, DefTypes, FieldType, HeapType, OperandType, RefType, ValType, get_def_types,
-        get_func_sig, get_type_use_sig, resolve_br_types,
+        CompositeType, DefTypes, FieldType, HeapType, OperandType, RefType, ValType, get_def_types, get_func_sig,
+        get_type_use_sig, resolve_br_types,
     },
 };
 use line_index::LineIndex;
@@ -99,20 +99,14 @@ pub fn check(
                             DiagnosticRelatedInformation {
                                 location: Location {
                                     uri: document.uri(db).raw(db),
-                                    range: helpers::rowan_range_to_lsp_range(
-                                        line_index,
-                                        dst_symbol.key.text_range(),
-                                    ),
+                                    range: helpers::rowan_range_to_lsp_range(line_index, dst_symbol.key.text_range()),
                                 },
                                 message: "destination array type defined here".into(),
                             },
                             DiagnosticRelatedInformation {
                                 location: Location {
                                     uri: document.uri(db).raw(db),
-                                    range: helpers::rowan_range_to_lsp_range(
-                                        line_index,
-                                        src_symbol.key.text_range(),
-                                    ),
+                                    range: helpers::rowan_range_to_lsp_range(line_index, src_symbol.key.text_range()),
                                 },
                                 message: "source array type defined here".into(),
                             },
@@ -154,33 +148,26 @@ pub fn check(
                 let mut immediates = support::children::<Immediate>(node);
                 let label = immediates.next()?;
                 let label_types = resolve_br_types(db, document, symbol_table, &label);
-                let rt_label =
-                    if let Some(OperandType::Val(ValType::Ref(rt_label))) = label_types.last() {
-                        rt_label
-                    } else {
-                        diagnostics.push(Diagnostic {
-                            range: helpers::rowan_range_to_lsp_range(
-                                line_index,
-                                label.syntax().text_range(),
-                            ),
-                            severity: Some(DiagnosticSeverity::Error),
-                            source: Some("wat".into()),
-                            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                            message: "the last type of this label must be a ref type".into(),
-                            ..Default::default()
-                        });
-                        return None;
-                    };
+                let rt_label = if let Some(OperandType::Val(ValType::Ref(rt_label))) = label_types.last() {
+                    rt_label
+                } else {
+                    diagnostics.push(Diagnostic {
+                        range: helpers::rowan_range_to_lsp_range(line_index, label.syntax().text_range()),
+                        severity: Some(DiagnosticSeverity::Error),
+                        source: Some("wat".into()),
+                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        message: "the last type of this label must be a ref type".into(),
+                        ..Default::default()
+                    });
+                    return None;
+                };
                 let rt1_node = immediates.next()?;
                 let rt1 = RefType::from_green(&rt1_node.ref_type()?.syntax().green(), db)?;
                 let rt2_node = immediates.next()?;
                 let rt2 = RefType::from_green(&rt2_node.ref_type()?.syntax().green(), db)?;
                 if !rt2.matches(&rt1, db, document, module_id) {
                     diagnostics.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(
-                            line_index,
-                            rt2_node.syntax().text_range(),
-                        ),
+                        range: helpers::rowan_range_to_lsp_range(line_index, rt2_node.syntax().text_range()),
                         severity: Some(DiagnosticSeverity::Error),
                         source: Some("wat".into()),
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
@@ -192,10 +179,7 @@ pub fn check(
                         related_information: Some(vec![DiagnosticRelatedInformation {
                             location: Location {
                                 uri: document.uri(db).raw(db),
-                                range: helpers::rowan_range_to_lsp_range(
-                                    line_index,
-                                    rt1_node.syntax().text_range(),
-                                ),
+                                range: helpers::rowan_range_to_lsp_range(line_index, rt1_node.syntax().text_range()),
                             },
                             message: "should match this ref type".into(),
                         }]),
@@ -204,10 +188,7 @@ pub fn check(
                 }
                 if !rt2.matches(rt_label, db, document, module_id) {
                     diagnostics.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(
-                            line_index,
-                            rt2_node.syntax().text_range(),
-                        ),
+                        range: helpers::rowan_range_to_lsp_range(line_index, rt2_node.syntax().text_range()),
                         severity: Some(DiagnosticSeverity::Error),
                         source: Some("wat".into()),
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
@@ -219,14 +200,9 @@ pub fn check(
                         related_information: Some(vec![DiagnosticRelatedInformation {
                             location: Location {
                                 uri: document.uri(db).raw(db),
-                                range: helpers::rowan_range_to_lsp_range(
-                                    line_index,
-                                    label.syntax().text_range(),
-                                ),
+                                range: helpers::rowan_range_to_lsp_range(line_index, label.syntax().text_range()),
                             },
-                            message:
-                                "should match the last ref type in the result type of this label"
-                                    .into(),
+                            message: "should match the last ref type in the result type of this label".into(),
                         }]),
                         ..Default::default()
                     });
@@ -236,33 +212,26 @@ pub fn check(
                 let mut immediates = support::children::<Immediate>(node);
                 let label = immediates.next()?;
                 let label_types = resolve_br_types(db, document, symbol_table, &label);
-                let rt_label =
-                    if let Some(OperandType::Val(ValType::Ref(rt_label))) = label_types.last() {
-                        rt_label
-                    } else {
-                        diagnostics.push(Diagnostic {
-                            range: helpers::rowan_range_to_lsp_range(
-                                line_index,
-                                label.syntax().text_range(),
-                            ),
-                            severity: Some(DiagnosticSeverity::Error),
-                            source: Some("wat".into()),
-                            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                            message: "the last type of this label must be a ref type".into(),
-                            ..Default::default()
-                        });
-                        return None;
-                    };
+                let rt_label = if let Some(OperandType::Val(ValType::Ref(rt_label))) = label_types.last() {
+                    rt_label
+                } else {
+                    diagnostics.push(Diagnostic {
+                        range: helpers::rowan_range_to_lsp_range(line_index, label.syntax().text_range()),
+                        severity: Some(DiagnosticSeverity::Error),
+                        source: Some("wat".into()),
+                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        message: "the last type of this label must be a ref type".into(),
+                        ..Default::default()
+                    });
+                    return None;
+                };
                 let rt1_node = immediates.next()?;
                 let rt1 = RefType::from_green(&rt1_node.ref_type()?.syntax().green(), db)?;
                 let rt2_node = immediates.next()?;
                 let rt2 = RefType::from_green(&rt2_node.ref_type()?.syntax().green(), db)?;
                 if !rt2.matches(&rt1, db, document, module_id) {
                     diagnostics.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(
-                            line_index,
-                            rt2_node.syntax().text_range(),
-                        ),
+                        range: helpers::rowan_range_to_lsp_range(line_index, rt2_node.syntax().text_range()),
                         severity: Some(DiagnosticSeverity::Error),
                         source: Some("wat".into()),
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
@@ -274,10 +243,7 @@ pub fn check(
                         related_information: Some(vec![DiagnosticRelatedInformation {
                             location: Location {
                                 uri: document.uri(db).raw(db),
-                                range: helpers::rowan_range_to_lsp_range(
-                                    line_index,
-                                    rt1_node.syntax().text_range(),
-                                ),
+                                range: helpers::rowan_range_to_lsp_range(line_index, rt1_node.syntax().text_range()),
                             },
                             message: "should match this ref type".into(),
                         }]),
@@ -299,10 +265,7 @@ pub fn check(
                         related_information: Some(vec![DiagnosticRelatedInformation {
                             location: Location {
                                 uri: document.uri(db).raw(db),
-                                range: helpers::rowan_range_to_lsp_range(
-                                    line_index,
-                                    label.syntax().text_range(),
-                                ),
+                                range: helpers::rowan_range_to_lsp_range(line_index, label.syntax().text_range()),
                             },
                             message: "should match the last ref type in the result type of this label".into(),
                         }]),
@@ -311,15 +274,13 @@ pub fn check(
                 }
             }
             "call_indirect" => {
-                if let Some(diagnostic) =
-                    check_table_ref_type(db, document, line_index, symbol_table, module_id, node)
+                if let Some(diagnostic) = check_table_ref_type(db, document, line_index, symbol_table, module_id, node)
                 {
                     diagnostics.push(diagnostic);
                 }
             }
             "return_call" => {
-                if let Some(immediate) =
-                    node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
+                if let Some(immediate) = node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
                     && let Some(diagnostic) = symbol_table
                         .find_def(SymbolKey::new(&immediate))
                         .map(|func| get_func_sig(db, document, *func.key, &func.green))
@@ -350,8 +311,7 @@ pub fn check(
                 ) {
                     diagnostics.push(diagnostic);
                 }
-                if let Some(immediate) =
-                    node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
+                if let Some(immediate) = node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
                     && let Some(diagnostic) = symbol_table
                         .resolved
                         .get(&SymbolKey::new(&immediate))
@@ -373,28 +333,23 @@ pub fn check(
                 }
             }
             "return_call_indirect" => {
-                if let Some(diagnostic) =
-                    check_table_ref_type(db, document, line_index, symbol_table, module_id, node)
+                if let Some(diagnostic) = check_table_ref_type(db, document, line_index, symbol_table, module_id, node)
                 {
                     diagnostics.push(diagnostic);
                 }
-                if let Some(type_use) = node.children().find_map(|immediate| {
-                    immediate.first_child_by_kind(&|kind| kind == SyntaxKind::TYPE_USE)
-                }) && let Some(diagnostic) = check_return_call_result_type(
-                    db,
-                    document,
-                    line_index,
-                    module_id,
-                    node,
-                    &type_use,
-                    &get_type_use_sig(
+                if let Some(type_use) = node
+                    .children()
+                    .find_map(|immediate| immediate.first_child_by_kind(&|kind| kind == SyntaxKind::TYPE_USE))
+                    && let Some(diagnostic) = check_return_call_result_type(
                         db,
                         document,
-                        SyntaxNodePtr::new(&type_use),
-                        &type_use.green(),
+                        line_index,
+                        module_id,
+                        node,
+                        &type_use,
+                        &get_type_use_sig(db, document, SyntaxNodePtr::new(&type_use), &type_use.green()).results,
                     )
-                    .results,
-                ) {
+                {
                     diagnostics.push(diagnostic);
                 }
             }

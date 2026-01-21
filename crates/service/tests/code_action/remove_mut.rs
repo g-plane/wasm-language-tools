@@ -60,24 +60,12 @@ fn unrelated_range() {
     let response = service.code_action(create_params(
         uri,
         Range {
-            start: Position {
-                line: 2,
-                character: 15,
-            },
-            end: Position {
-                line: 2,
-                character: 15,
-            },
+            start: Position { line: 2, character: 15 },
+            end: Position { line: 2, character: 15 },
         },
         Range {
-            start: Position {
-                line: 3,
-                character: 14,
-            },
-            end: Position {
-                line: 3,
-                character: 17,
-            },
+            start: Position { line: 3, character: 14 },
+            end: Position { line: 3, character: 17 },
         },
     ));
     assert!(response.is_none());
@@ -96,26 +84,14 @@ fn unrelated_diagnostic() {
     let response = service.code_action(CodeActionParams {
         text_document: TextDocumentIdentifier { uri },
         range: Range {
-            start: Position {
-                line: 2,
-                character: 15,
-            },
-            end: Position {
-                line: 2,
-                character: 15,
-            },
+            start: Position { line: 2, character: 15 },
+            end: Position { line: 2, character: 15 },
         },
         context: CodeActionContext {
             diagnostics: vec![Diagnostic {
                 range: Range {
-                    start: Position {
-                        line: 2,
-                        character: 15,
-                    },
-                    end: Position {
-                        line: 2,
-                        character: 15,
-                    },
+                    start: Position { line: 2, character: 15 },
+                    end: Position { line: 2, character: 15 },
                 },
                 code: Some(Union2::B("global-mut".into())),
                 ..Default::default()
@@ -141,24 +117,12 @@ fn simple() {
     let response = service.code_action(create_params(
         uri,
         Range {
-            start: Position {
-                line: 2,
-                character: 15,
-            },
-            end: Position {
-                line: 2,
-                character: 15,
-            },
+            start: Position { line: 2, character: 15 },
+            end: Position { line: 2, character: 15 },
         },
         Range {
-            start: Position {
-                line: 2,
-                character: 14,
-            },
-            end: Position {
-                line: 2,
-                character: 17,
-            },
+            start: Position { line: 2, character: 14 },
+            end: Position { line: 2, character: 17 },
         },
     ));
     assert_json_snapshot!(response);
@@ -176,24 +140,12 @@ fn missing_r_paren() {
     let response = service.code_action(create_params(
         uri,
         Range {
-            start: Position {
-                line: 2,
-                character: 15,
-            },
-            end: Position {
-                line: 2,
-                character: 15,
-            },
+            start: Position { line: 2, character: 15 },
+            end: Position { line: 2, character: 15 },
         },
         Range {
-            start: Position {
-                line: 2,
-                character: 14,
-            },
-            end: Position {
-                line: 2,
-                character: 17,
-            },
+            start: Position { line: 2, character: 14 },
+            end: Position { line: 2, character: 17 },
         },
     ));
     assert_json_snapshot!(response);
@@ -211,24 +163,12 @@ fn with_comments() {
     let response = service.code_action(create_params(
         uri,
         Range {
-            start: Position {
-                line: 2,
-                character: 20,
-            },
-            end: Position {
-                line: 2,
-                character: 20,
-            },
+            start: Position { line: 2, character: 20 },
+            end: Position { line: 2, character: 20 },
         },
         Range {
-            start: Position {
-                line: 2,
-                character: 20,
-            },
-            end: Position {
-                line: 2,
-                character: 23,
-            },
+            start: Position { line: 2, character: 20 },
+            end: Position { line: 2, character: 23 },
         },
     ));
     assert_json_snapshot!(response);

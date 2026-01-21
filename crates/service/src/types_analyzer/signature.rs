@@ -75,11 +75,7 @@ pub(crate) struct ResolvedSig<'db> {
 impl<'db> From<Signature<'db>> for ResolvedSig<'db> {
     fn from(sig: Signature<'db>) -> Self {
         ResolvedSig {
-            params: sig
-                .params
-                .into_iter()
-                .map(|(ty, _)| OperandType::Val(ty))
-                .collect(),
+            params: sig.params.into_iter().map(|(ty, _)| OperandType::Val(ty)).collect(),
             results: sig.results.into_iter().map(OperandType::Val).collect(),
         }
     }

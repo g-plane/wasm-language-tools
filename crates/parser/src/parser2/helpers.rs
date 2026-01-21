@@ -5,10 +5,7 @@ use wat_syntax::SyntaxKind;
 
 impl<'s> Parser<'s> {
     #[must_use]
-    pub(super) fn recover<T: Into<GreenElement>>(
-        &mut self,
-        parser: fn(&mut Self) -> Option<T>,
-    ) -> bool {
+    pub(super) fn recover<T: Into<GreenElement>>(&mut self, parser: fn(&mut Self) -> Option<T>) -> bool {
         let checkpoint_before_trivias = self.checkpoint();
         self.parse_trivias();
         let checkpoint_after_trivias = self.checkpoint();
@@ -25,10 +22,7 @@ impl<'s> Parser<'s> {
         }
     }
 
-    pub(super) fn retry<T: Into<GreenElement>>(
-        &mut self,
-        parser: fn(&mut Self) -> Option<T>,
-    ) -> bool {
+    pub(super) fn retry<T: Into<GreenElement>>(&mut self, parser: fn(&mut Self) -> Option<T>) -> bool {
         loop {
             let checkpoint_before_trivias = self.checkpoint();
             self.parse_trivias();
@@ -48,10 +42,7 @@ impl<'s> Parser<'s> {
         }
     }
 
-    pub(super) fn try_parse<T>(
-        &mut self,
-        parser: impl FnOnce(&mut Self) -> Option<T>,
-    ) -> Option<T> {
+    pub(super) fn try_parse<T>(&mut self, parser: impl FnOnce(&mut Self) -> Option<T>) -> Option<T> {
         let checkpoint = self.checkpoint();
         let result = parser(self);
         if result.is_none() {
@@ -59,10 +50,7 @@ impl<'s> Parser<'s> {
         }
         result
     }
-    pub(super) fn try_parse_with_trivias<T>(
-        &mut self,
-        parser: impl FnOnce(&mut Self) -> Option<T>,
-    ) -> Option<T> {
+    pub(super) fn try_parse_with_trivias<T>(&mut self, parser: impl FnOnce(&mut Self) -> Option<T>) -> Option<T> {
         let checkpoint = self.checkpoint();
         self.parse_trivias();
         match parser(self) {

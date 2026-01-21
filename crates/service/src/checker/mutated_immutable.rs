@@ -48,10 +48,7 @@ pub fn check(
                             related_information: Some(vec![DiagnosticRelatedInformation {
                                 location: Location {
                                     uri: uri.raw(db),
-                                    range: helpers::rowan_range_to_lsp_range(
-                                        line_index,
-                                        def_key.text_range(),
-                                    ),
+                                    range: helpers::rowan_range_to_lsp_range(line_index, def_key.text_range()),
                                 },
                                 message: format!("immutable {kind} defined here"),
                             }]),

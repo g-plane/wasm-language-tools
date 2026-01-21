@@ -6,11 +6,7 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "implicit-module";
 
-pub fn check(
-    lint_level: LintLevel,
-    line_index: &LineIndex,
-    node: &SyntaxNode,
-) -> Option<Diagnostic> {
+pub fn check(lint_level: LintLevel, line_index: &LineIndex, node: &SyntaxNode) -> Option<Diagnostic> {
     let severity = match lint_level {
         LintLevel::Allow => return None,
         LintLevel::Hint => DiagnosticSeverity::Hint,

@@ -1,7 +1,6 @@
 use insta::assert_json_snapshot;
 use lspt::{
-    CodeActionContext, CodeActionKind, CodeActionParams, Diagnostic, Position, Range,
-    TextDocumentIdentifier, Union2,
+    CodeActionContext, CodeActionKind, CodeActionParams, Diagnostic, Position, Range, TextDocumentIdentifier, Union2,
 };
 use wat_service::LanguageService;
 
@@ -9,14 +8,8 @@ fn create_params(uri: String, line: u32, col: u32, diagnostic: Diagnostic) -> Co
     CodeActionParams {
         text_document: TextDocumentIdentifier { uri },
         range: Range {
-            start: Position {
-                line,
-                character: col,
-            },
-            end: Position {
-                line,
-                character: col,
-            },
+            start: Position { line, character: col },
+            end: Position { line, character: col },
         },
         context: CodeActionContext {
             diagnostics: vec![diagnostic],

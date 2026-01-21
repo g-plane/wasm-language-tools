@@ -39,14 +39,8 @@ pub fn check(
                         ),
                     ))
                 } else if super_type.is_final {
-                    Some((
-                        key,
-                        format!("type `{}` is final", super_type.idx.render(db)),
-                    ))
-                } else if !sub_type
-                    .comp
-                    .matches(&super_type.comp, db, document, module_id)
-                {
+                    Some((key, format!("type `{}` is final", super_type.idx.render(db))))
+                } else if !sub_type.comp.matches(&super_type.comp, db, document, module_id) {
                     Some((
                         key,
                         format!(
@@ -60,15 +54,9 @@ pub fn check(
                 }
             })
             .filter_map(|(key, message)| {
-                let index = TypeDef::cast(key.to_node(root))?
-                    .sub_type()?
-                    .indexes()
-                    .next()?;
+                let index = TypeDef::cast(key.to_node(root))?.sub_type()?.indexes().next()?;
                 Some(Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(
-                        line_index,
-                        index.syntax().text_range(),
-                    ),
+                    range: helpers::rowan_range_to_lsp_range(line_index, index.syntax().text_range()),
                     severity: Some(DiagnosticSeverity::Error),
                     source: Some("wat".into()),
                     code: Some(Union2::B(DIAGNOSTIC_CODE.into())),

@@ -44,11 +44,7 @@ pub fn check(
                 severity: Some(DiagnosticSeverity::Error),
                 source: Some("wat".into()),
                 code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                message: format!(
-                    "cannot find {} `{}` in this scope",
-                    symbol.kind,
-                    symbol.idx.render(db),
-                ),
+                message: format!("cannot find {} `{}` in this scope", symbol.kind, symbol.idx.render(db)),
                 ..Default::default()
             }),
     );

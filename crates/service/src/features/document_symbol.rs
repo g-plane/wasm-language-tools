@@ -44,8 +44,7 @@ impl LanguageService {
                         },
                     )),
                     SymbolKind::Func => {
-                        let range =
-                            helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                        let range = helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
                         Some((
                             symbol.key,
                             DocumentSymbol {
@@ -61,18 +60,13 @@ impl LanguageService {
                         ))
                     }
                     SymbolKind::Local => {
-                        let range =
-                            helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                        let range = helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
                         Some((
                             symbol.key,
                             DocumentSymbol {
                                 name: render_symbol_name(symbol, self),
-                                detail: types_analyzer::extract_type(
-                                    self,
-                                    *document,
-                                    symbol.green.clone(),
-                                )
-                                .map(|ty| ty.render(self).to_string()),
+                                detail: types_analyzer::extract_type(self, *document, symbol.green.clone())
+                                    .map(|ty| ty.render(self).to_string()),
                                 kind: LspSymbolKind::Variable,
                                 tags,
                                 deprecated: None,
@@ -83,8 +77,7 @@ impl LanguageService {
                         ))
                     }
                     SymbolKind::Type => {
-                        let range =
-                            helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                        let range = helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
                         Some((
                             symbol.key,
                             DocumentSymbol {
@@ -100,28 +93,24 @@ impl LanguageService {
                         ))
                     }
                     SymbolKind::GlobalDef => {
-                        let range =
-                            helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                        let range = helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
                         Some((
                             symbol.key,
                             DocumentSymbol {
                                 name: render_symbol_name(symbol, self),
-                                detail: types_analyzer::extract_global_type(
-                                    self,
-                                    *document,
-                                    symbol.green.clone(),
-                                )
-                                .map(|ty| {
-                                    if ModuleFieldGlobal::cast(symbol.key.to_node(&root))
-                                        .and_then(|global| global.global_type())
-                                        .and_then(|global_type| global_type.mut_keyword())
-                                        .is_some()
-                                    {
-                                        format!("(mut {})", ty.render(self))
-                                    } else {
-                                        ty.render(self).to_string()
-                                    }
-                                }),
+                                detail: types_analyzer::extract_global_type(self, *document, symbol.green.clone()).map(
+                                    |ty| {
+                                        if ModuleFieldGlobal::cast(symbol.key.to_node(&root))
+                                            .and_then(|global| global.global_type())
+                                            .and_then(|global_type| global_type.mut_keyword())
+                                            .is_some()
+                                        {
+                                            format!("(mut {})", ty.render(self))
+                                        } else {
+                                            ty.render(self).to_string()
+                                        }
+                                    },
+                                ),
                                 kind: LspSymbolKind::Variable,
                                 tags,
                                 deprecated: None,
@@ -132,8 +121,7 @@ impl LanguageService {
                         ))
                     }
                     SymbolKind::MemoryDef | SymbolKind::TableDef | SymbolKind::TagDef => {
-                        let range =
-                            helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                        let range = helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
                         Some((
                             symbol.key,
                             DocumentSymbol {
@@ -149,19 +137,13 @@ impl LanguageService {
                         ))
                     }
                     SymbolKind::FieldDef => {
-                        let range =
-                            helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                        let range = helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
                         Some((
                             symbol.key,
                             DocumentSymbol {
                                 name: render_symbol_name(symbol, self),
-                                detail: types_analyzer::resolve_field_type(
-                                    self,
-                                    *document,
-                                    symbol.key,
-                                    symbol.region,
-                                )
-                                .map(|ty| ty.render(self).to_string()),
+                                detail: types_analyzer::resolve_field_type(self, *document, symbol.key, symbol.region)
+                                    .map(|ty| ty.render(self).to_string()),
                                 kind: LspSymbolKind::Field,
                                 tags,
                                 deprecated: None,
@@ -191,9 +173,8 @@ impl LanguageService {
             .filter(|symbol| symbol.region.kind() != SyntaxKind::ROOT)
             .rev()
             .for_each(|symbol| {
-                if let Some((mut lsp_symbol, parent)) = symbols_map
-                    .remove(&symbol.key)
-                    .zip(symbols_map.get_mut(&symbol.region))
+                if let Some((mut lsp_symbol, parent)) =
+                    symbols_map.remove(&symbol.key).zip(symbols_map.get_mut(&symbol.region))
                 {
                     if let Some(children) = &mut lsp_symbol.children {
                         children.sort_by_key(|symbol| symbol.range.start);

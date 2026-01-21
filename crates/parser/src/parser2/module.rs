@@ -47,8 +47,7 @@ impl Parser<'_> {
             self.expect_right_paren();
             Some(self.finish_node(ELEM_EXPR, mark))
         } else if self.lexer.peek(L_PAREN).is_some() {
-            self.parse_instr()
-                .map(|instr| node(ELEM_EXPR, [instr.into()]))
+            self.parse_instr().map(|instr| node(ELEM_EXPR, [instr.into()]))
         } else {
             None
         }
@@ -140,10 +139,7 @@ impl Parser<'_> {
             match keyword.text {
                 "import" => {
                     if has_import {
-                        parser.report_error_token(
-                            &keyword,
-                            Message::Description("only one import is allowed"),
-                        );
+                        parser.report_error_token(&keyword, Message::Description("only one import is allowed"));
                         None
                     } else {
                         has_import = true;
@@ -152,10 +148,7 @@ impl Parser<'_> {
                 }
                 "export" => {
                     if has_import {
-                        parser.report_error_token(
-                            &keyword,
-                            Message::Description("export must come before import"),
-                        );
+                        parser.report_error_token(&keyword, Message::Description("export must come before import"));
                         None
                     } else {
                         Some((mark, false))
@@ -409,8 +402,7 @@ impl Parser<'_> {
 
     fn parse_module_field_elem(&mut self, mark: NodeMark) -> GreenNode {
         self.eat(IDENT);
-        if let Some(keyword) = self.try_parse_with_trivias(|parser| parser.lexer.keyword("declare"))
-        {
+        if let Some(keyword) = self.try_parse_with_trivias(|parser| parser.lexer.keyword("declare")) {
             self.add_child(keyword);
             if !self.recover(Self::parse_elem_list) {
                 self.report_missing(Message::Name("elem list"));
@@ -551,8 +543,7 @@ impl Parser<'_> {
     }
 
     fn parse_module_name(&mut self) -> Option<GreenNode> {
-        self.expect(STRING)
-            .map(|token| node(MODULE_NAME, [token.into()]))
+        self.expect(STRING).map(|token| node(MODULE_NAME, [token.into()]))
     }
 
     fn parse_name(&mut self) -> Option<GreenNode> {

@@ -13,16 +13,10 @@ use wat_syntax::{
     ast::{StructType, ValType as AstValType},
 };
 
-pub(crate) fn extract_type<'db>(
-    db: &'db dyn salsa::Database,
-    _: Document,
-    node: GreenNode,
-) -> Option<ValType<'db>> {
+pub(crate) fn extract_type<'db>(db: &'db dyn salsa::Database, _: Document, node: GreenNode) -> Option<ValType<'db>> {
     ValType::from_green(&node, db).or_else(|| {
         node.children().find_map(|child| match child {
-            NodeOrToken::Node(node)
-                if AstValType::can_cast(WatLanguage::kind_from_raw(node.kind())) =>
-            {
+            NodeOrToken::Node(node) if AstValType::can_cast(WatLanguage::kind_from_raw(node.kind())) => {
                 ValType::from_green(node, db)
             }
             _ => None,
@@ -43,15 +37,11 @@ pub(crate) fn extract_global_type<'db>(
         .and_then(|global_type| extract_type(db, document, global_type.to_owned()))
 }
 
-pub(crate) fn extract_sig<'db>(
-    db: &'db dyn salsa::Database,
-    node: &GreenNodeData,
-) -> Signature<'db> {
+pub(crate) fn extract_sig<'db>(db: &'db dyn salsa::Database, node: &GreenNodeData) -> Signature<'db> {
     let mut params = Vec::with_capacity(1);
     let mut results = Vec::with_capacity(1);
-    node.children()
-        .filter_map(|child| child.into_node())
-        .for_each(|node| match WatLanguage::kind_from_raw(node.kind()) {
+    node.children().filter_map(|child| child.into_node()).for_each(|node| {
+        match WatLanguage::kind_from_raw(node.kind()) {
             SyntaxKind::PARAM => {
                 let mut ident = None;
                 let _ = node.children().try_for_each(|child| match child {
@@ -74,20 +64,17 @@ pub(crate) fn extract_sig<'db>(
                     _ => ControlFlow::Continue(()),
                 });
             }
-            SyntaxKind::RESULT => results.extend(node.children().filter_map(|child| {
-                child
-                    .into_node()
-                    .and_then(|node| ValType::from_green(node, db))
-            })),
+            SyntaxKind::RESULT => results.extend(
+                node.children()
+                    .filter_map(|child| child.into_node().and_then(|node| ValType::from_green(node, db))),
+            ),
             _ => {}
-        });
+        }
+    });
     Signature { params, results }
 }
 
-pub(super) fn extract_fields<'db>(
-    db: &'db dyn salsa::Database,
-    struct_ty: &StructType,
-) -> Fields<'db> {
+pub(super) fn extract_fields<'db>(db: &'db dyn salsa::Database, struct_ty: &StructType) -> Fields<'db> {
     let mut field_idx_gen = IdxGen::default();
     Fields(struct_ty.fields().fold(vec![], |mut acc, field| {
         if let Some((ty, ident)) = field

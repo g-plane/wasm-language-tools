@@ -55,24 +55,12 @@ fn unrelated_range() {
     let response = service.code_action(create_params(
         uri,
         Range {
-            start: Position {
-                line: 5,
-                character: 19,
-            },
-            end: Position {
-                line: 5,
-                character: 19,
-            },
+            start: Position { line: 5, character: 19 },
+            end: Position { line: 5, character: 19 },
         },
         Range {
-            start: Position {
-                line: 8,
-                character: 18,
-            },
-            end: Position {
-                line: 8,
-                character: 19,
-            },
+            start: Position { line: 8, character: 18 },
+            end: Position { line: 8, character: 19 },
         },
     ));
     assert!(response.is_none());
@@ -93,26 +81,14 @@ fn unrelated_diagnostic() {
     let response = service.code_action(CodeActionParams {
         text_document: TextDocumentIdentifier { uri },
         range: Range {
-            start: Position {
-                line: 5,
-                character: 19,
-            },
-            end: Position {
-                line: 5,
-                character: 19,
-            },
+            start: Position { line: 5, character: 19 },
+            end: Position { line: 5, character: 19 },
         },
         context: CodeActionContext {
             diagnostics: vec![Diagnostic {
                 range: Range {
-                    start: Position {
-                        line: 5,
-                        character: 18,
-                    },
-                    end: Position {
-                        line: 5,
-                        character: 19,
-                    },
+                    start: Position { line: 5, character: 18 },
+                    end: Position { line: 5, character: 19 },
                 },
                 code: Some(Union2::B("undef".into())),
                 ..Default::default()
@@ -141,24 +117,12 @@ fn struct_get() {
     let response = service.code_action(create_params(
         uri,
         Range {
-            start: Position {
-                line: 5,
-                character: 19,
-            },
-            end: Position {
-                line: 5,
-                character: 19,
-            },
+            start: Position { line: 5, character: 19 },
+            end: Position { line: 5, character: 19 },
         },
         Range {
-            start: Position {
-                line: 5,
-                character: 18,
-            },
-            end: Position {
-                line: 5,
-                character: 19,
-            },
+            start: Position { line: 5, character: 18 },
+            end: Position { line: 5, character: 19 },
         },
     ));
     assert_json_snapshot!(response);
@@ -179,24 +143,12 @@ fn struct_get_s() {
     let response = service.code_action(create_params(
         uri,
         Range {
-            start: Position {
-                line: 5,
-                character: 21,
-            },
-            end: Position {
-                line: 5,
-                character: 21,
-            },
+            start: Position { line: 5, character: 21 },
+            end: Position { line: 5, character: 21 },
         },
         Range {
-            start: Position {
-                line: 5,
-                character: 20,
-            },
-            end: Position {
-                line: 5,
-                character: 21,
-            },
+            start: Position { line: 5, character: 20 },
+            end: Position { line: 5, character: 21 },
         },
     ));
     assert_json_snapshot!(response);
@@ -217,24 +169,12 @@ fn struct_get_u() {
     let response = service.code_action(create_params(
         uri,
         Range {
-            start: Position {
-                line: 5,
-                character: 21,
-            },
-            end: Position {
-                line: 5,
-                character: 21,
-            },
+            start: Position { line: 5, character: 21 },
+            end: Position { line: 5, character: 21 },
         },
         Range {
-            start: Position {
-                line: 5,
-                character: 20,
-            },
-            end: Position {
-                line: 5,
-                character: 21,
-            },
+            start: Position { line: 5, character: 20 },
+            end: Position { line: 5, character: 21 },
         },
     ));
     assert_json_snapshot!(response);
@@ -255,24 +195,12 @@ fn array_get() {
     let response = service.code_action(create_params(
         uri,
         Range {
-            start: Position {
-                line: 5,
-                character: 15,
-            },
-            end: Position {
-                line: 5,
-                character: 15,
-            },
+            start: Position { line: 5, character: 15 },
+            end: Position { line: 5, character: 15 },
         },
         Range {
-            start: Position {
-                line: 5,
-                character: 14,
-            },
-            end: Position {
-                line: 5,
-                character: 15,
-            },
+            start: Position { line: 5, character: 14 },
+            end: Position { line: 5, character: 15 },
         },
     ));
     assert_json_snapshot!(response);
@@ -293,24 +221,12 @@ fn array_get_s() {
     let response = service.code_action(create_params(
         uri,
         Range {
-            start: Position {
-                line: 5,
-                character: 17,
-            },
-            end: Position {
-                line: 5,
-                character: 17,
-            },
+            start: Position { line: 5, character: 17 },
+            end: Position { line: 5, character: 17 },
         },
         Range {
-            start: Position {
-                line: 5,
-                character: 16,
-            },
-            end: Position {
-                line: 5,
-                character: 17,
-            },
+            start: Position { line: 5, character: 16 },
+            end: Position { line: 5, character: 17 },
         },
     ));
     assert_json_snapshot!(response);
@@ -331,24 +247,12 @@ fn array_get_u() {
     let response = service.code_action(create_params(
         uri,
         Range {
-            start: Position {
-                line: 5,
-                character: 17,
-            },
-            end: Position {
-                line: 5,
-                character: 17,
-            },
+            start: Position { line: 5, character: 17 },
+            end: Position { line: 5, character: 17 },
         },
         Range {
-            start: Position {
-                line: 5,
-                character: 16,
-            },
-            end: Position {
-                line: 5,
-                character: 17,
-            },
+            start: Position { line: 5, character: 16 },
+            end: Position { line: 5, character: 17 },
         },
     ));
     assert_json_snapshot!(response);

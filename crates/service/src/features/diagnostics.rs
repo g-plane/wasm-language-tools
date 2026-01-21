@@ -1,15 +1,9 @@
 use crate::{LanguageService, checker, uri::InternUri};
-use lspt::{
-    Diagnostic, DocumentDiagnosticParams, PublishDiagnosticsParams,
-    RelatedFullDocumentDiagnosticReport,
-};
+use lspt::{Diagnostic, DocumentDiagnosticParams, PublishDiagnosticsParams, RelatedFullDocumentDiagnosticReport};
 
 impl LanguageService {
     /// Handler for `textDocument/diagnostic` request.
-    pub fn pull_diagnostics(
-        &self,
-        params: DocumentDiagnosticParams,
-    ) -> RelatedFullDocumentDiagnosticReport {
+    pub fn pull_diagnostics(&self, params: DocumentDiagnosticParams) -> RelatedFullDocumentDiagnosticReport {
         RelatedFullDocumentDiagnosticReport {
             kind: "full".into(),
             result_id: None,

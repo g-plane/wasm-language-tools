@@ -25,10 +25,7 @@ pub fn check(
     })?;
     let last = node.last_child()?;
     Some(Diagnostic {
-        range: helpers::rowan_range_to_lsp_range(
-            line_index,
-            first.text_range().cover(last.text_range()),
-        ),
+        range: helpers::rowan_range_to_lsp_range(line_index, first.text_range().cover(last.text_range())),
         severity: Some(DiagnosticSeverity::Error),
         source: Some("wat".into()),
         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),

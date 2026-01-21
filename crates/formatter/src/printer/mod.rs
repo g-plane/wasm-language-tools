@@ -197,17 +197,14 @@ where
         .skip(1)
         .map_while(into_formattable_trivia)
         .collect::<Vec<_>>();
-    if trivias.iter().all(|token| {
-        token.kind() == SyntaxKind::WHITESPACE
-            && token.text().chars().filter(|c| *c == '\n').count() < 2
-    }) {
+    if trivias
+        .iter()
+        .all(|token| token.kind() == SyntaxKind::WHITESPACE && token.text().chars().filter(|c| *c == '\n').count() < 2)
+    {
         return vec![];
     }
     let mut docs = Vec::with_capacity(trivias.len());
-    if trivias
-        .first()
-        .is_some_and(|token| token.kind().is_comment())
-    {
+    if trivias.first().is_some_and(|token| token.kind().is_comment()) {
         docs.push(Doc::soft_line());
     }
     trivias.iter().for_each(|token| match token.kind() {
@@ -225,10 +222,7 @@ where
                 docs.push(Doc::hard_line());
             }
         },
-        SyntaxKind::ERROR
-        | SyntaxKind::ANNOT_START
-        | SyntaxKind::ANNOT_ELEM
-        | SyntaxKind::ANNOT_END => {
+        SyntaxKind::ERROR | SyntaxKind::ANNOT_START | SyntaxKind::ANNOT_ELEM | SyntaxKind::ANNOT_END => {
             docs.push(Doc::text(token.to_string()));
         }
         _ => {}
@@ -240,14 +234,9 @@ fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>
         .siblings_with_tokens(Direction::Next)
         .skip(1)
         .map_while(into_formattable_trivia)
-        .skip_while(|current| {
-            token.kind() == SyntaxKind::L_PAREN && current.kind() == SyntaxKind::WHITESPACE
-        })
+        .skip_while(|current| token.kind() == SyntaxKind::L_PAREN && current.kind() == SyntaxKind::WHITESPACE)
         .collect::<Vec<_>>();
-    if trivias
-        .iter()
-        .all(|token| token.kind() == SyntaxKind::WHITESPACE)
-    {
+    if trivias.iter().all(|token| token.kind() == SyntaxKind::WHITESPACE) {
         return vec![];
     }
     let mut docs = Vec::with_capacity(trivias.len());
@@ -266,10 +255,7 @@ fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>
                 docs.push(Doc::hard_line());
             }
         },
-        SyntaxKind::ERROR
-        | SyntaxKind::ANNOT_START
-        | SyntaxKind::ANNOT_ELEM
-        | SyntaxKind::ANNOT_END => {
+        SyntaxKind::ERROR | SyntaxKind::ANNOT_START | SyntaxKind::ANNOT_ELEM | SyntaxKind::ANNOT_END => {
             docs.push(Doc::text(token.to_string()));
         }
         _ => {}
@@ -278,33 +264,29 @@ fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>
 }
 
 fn into_formattable_trivia(node_or_token: SyntaxElement) -> Option<SyntaxToken> {
-    node_or_token
-        .into_token()
-        .and_then(|token| match token.kind() {
-            SyntaxKind::LINE_COMMENT
-            | SyntaxKind::BLOCK_COMMENT
-            | SyntaxKind::ERROR
-            | SyntaxKind::ANNOT_START
-            | SyntaxKind::ANNOT_ELEM
-            | SyntaxKind::ANNOT_END => Some(token),
-            SyntaxKind::WHITESPACE
-                if token.next_token().is_none_or(|token| match token.kind() {
-                    SyntaxKind::R_PAREN => false,
-                    SyntaxKind::KEYWORD => token.text() != "end",
-                    _ => true,
-                }) =>
-            {
-                Some(token)
-            }
-            _ => None,
-        })
+    node_or_token.into_token().and_then(|token| match token.kind() {
+        SyntaxKind::LINE_COMMENT
+        | SyntaxKind::BLOCK_COMMENT
+        | SyntaxKind::ERROR
+        | SyntaxKind::ANNOT_START
+        | SyntaxKind::ANNOT_ELEM
+        | SyntaxKind::ANNOT_END => Some(token),
+        SyntaxKind::WHITESPACE
+            if token.next_token().is_none_or(|token| match token.kind() {
+                SyntaxKind::R_PAREN => false,
+                SyntaxKind::KEYWORD => token.text() != "end",
+                _ => true,
+            }) =>
+        {
+            Some(token)
+        }
+        _ => None,
+    })
 }
 
 fn format_line_comment(text: &str, ctx: &Ctx) -> Doc<'static> {
     if ctx.options.format_comments {
-        let content = text
-            .strip_prefix(";;")
-            .expect("line comment must start with `;;`");
+        let content = text.strip_prefix(";;").expect("line comment must start with `;;`");
         if content.is_empty() || content.starts_with([' ', '\t']) {
             Doc::text(text.to_owned())
         } else {
@@ -360,12 +342,10 @@ fn should_ignore(node: &SyntaxNode, ctx: &Ctx) -> bool {
         })
         .as_ref()
         .and_then(|element| match element {
-            SyntaxElement::Token(token) if token.kind() == SyntaxKind::LINE_COMMENT => {
-                token.text().strip_prefix(";;").and_then(|s| {
-                    s.trim_start()
-                        .strip_prefix(&ctx.options.ignore_comment_directive)
-                })
-            }
+            SyntaxElement::Token(token) if token.kind() == SyntaxKind::LINE_COMMENT => token
+                .text()
+                .strip_prefix(";;")
+                .and_then(|s| s.trim_start().strip_prefix(&ctx.options.ignore_comment_directive)),
             _ => None,
         })
         .is_some_and(|rest| rest.is_empty() || rest.starts_with(|c: char| c.is_ascii_whitespace()))

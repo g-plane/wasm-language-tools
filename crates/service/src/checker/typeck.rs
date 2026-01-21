@@ -5,9 +5,9 @@ use crate::{
     helpers,
     idx::{Idx, InternIdent},
     types_analyzer::{
-        CompositeType, HeapType, OperandType, RefType, ResolvedSig, ValType, extract_global_type,
-        extract_type, get_block_sig, get_def_types, get_func_sig, get_type_use_sig,
-        resolve_array_type_with_idx, resolve_br_types, resolve_field_type_with_struct_idx,
+        CompositeType, HeapType, OperandType, RefType, ResolvedSig, ValType, extract_global_type, extract_type,
+        get_block_sig, get_def_types, get_func_sig, get_type_use_sig, resolve_array_type_with_idx, resolve_br_types,
+        resolve_field_type_with_struct_idx,
     },
 };
 use itertools::{EitherOrBoth, Itertools};
@@ -99,11 +99,9 @@ pub fn check_table(
 ) {
     let Some(ref_type) = ModuleFieldTable::cast(node.clone())
         .and_then(|table| {
-            table.ref_type().or_else(|| {
-                table
-                    .table_type()
-                    .and_then(|table_type| table_type.ref_type())
-            })
+            table
+                .ref_type()
+                .or_else(|| table.table_type().and_then(|table_type| table_type.ref_type()))
         })
         .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), db))
     else {
@@ -235,9 +233,7 @@ fn check_block_like(
         .filter(|child| Instr::can_cast(child.kind()))
         .for_each(|child| unfold(child, &mut type_stack, diagnostics, shared));
 
-    if let Some(diagnostic) =
-        type_stack.check_to_bottom(expected_results, node, ReportRange::Last(node))
-    {
+    if let Some(diagnostic) = type_stack.check_to_bottom(expected_results, node, ReportRange::Last(node)) {
         diagnostics.push(diagnostic);
     }
 }
@@ -274,11 +270,7 @@ fn check_instr<'db>(
                 .iter()
                 .map(|(ty, ..)| (OperandType::Val(ty.clone()), Some(instr.clone())))
                 .collect();
-            let results = signature
-                .results
-                .into_iter()
-                .map(OperandType::Val)
-                .collect::<Vec<_>>();
+            let results = signature.results.into_iter().map(OperandType::Val).collect::<Vec<_>>();
             match block_instr {
                 BlockInstr::Block(..) | BlockInstr::Loop(..) | BlockInstr::TryTable(..) => {
                     if let Some(diagnostic) = type_stack.check(
@@ -294,13 +286,10 @@ fn check_instr<'db>(
                     check_block_like(diagnostics, shared, node, init_stack, &results);
                 }
                 BlockInstr::If(block_if) => {
-                    if let Some(mut diagnostic) = type_stack.check(
-                        &[OperandType::Val(ValType::I32)],
-                        ReportRange::Keyword(node),
-                    ) {
-                        diagnostic
-                            .message
-                            .push_str(" for the condition of `if` block");
+                    if let Some(mut diagnostic) =
+                        type_stack.check(&[OperandType::Val(ValType::I32)], ReportRange::Keyword(node))
+                    {
+                        diagnostic.message.push_str(" for the condition of `if` block");
                         diagnostics.push(diagnostic);
                     }
                     if let Some(diagnostic) = type_stack.check(
@@ -314,19 +303,10 @@ fn check_instr<'db>(
                         diagnostics.push(diagnostic);
                     }
                     if let Some(then_block) = block_if.then_block() {
-                        check_block_like(
-                            diagnostics,
-                            shared,
-                            then_block.syntax(),
-                            init_stack.clone(),
-                            &results,
-                        );
+                        check_block_like(diagnostics, shared, then_block.syntax(), init_stack.clone(), &results);
                     } else {
                         diagnostics.push(Diagnostic {
-                            range: helpers::rowan_range_to_lsp_range(
-                                shared.line_index,
-                                node.text_range(),
-                            ),
+                            range: helpers::rowan_range_to_lsp_range(shared.line_index, node.text_range()),
                             severity: Some(DiagnosticSeverity::Error),
                             source: Some("wat".into()),
                             code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
@@ -338,13 +318,7 @@ fn check_instr<'db>(
                         });
                     }
                     if let Some(else_block) = block_if.else_block() {
-                        check_block_like(
-                            diagnostics,
-                            shared,
-                            else_block.syntax(),
-                            init_stack,
-                            &results,
-                        );
+                        check_block_like(diagnostics, shared, else_block.syntax(), init_stack, &results);
                     } else {
                         let mut type_stack = TypeStack {
                             document: shared.document,
@@ -359,10 +333,7 @@ fn check_instr<'db>(
                             .is_some()
                         {
                             diagnostics.push(Diagnostic {
-                                range: helpers::rowan_range_to_lsp_range(
-                                    shared.line_index,
-                                    node.text_range(),
-                                ),
+                                range: helpers::rowan_range_to_lsp_range(shared.line_index, node.text_range()),
                                 severity: Some(DiagnosticSeverity::Error),
                                 source: Some("wat".into()),
                                 code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
@@ -392,11 +363,7 @@ struct TypeStack<'db> {
     has_never: bool,
 }
 impl<'db> TypeStack<'db> {
-    fn check(
-        &mut self,
-        expected: &[OperandType<'db>],
-        report_range: ReportRange,
-    ) -> Option<Diagnostic> {
+    fn check(&mut self, expected: &[OperandType<'db>], report_range: ReportRange) -> Option<Diagnostic> {
         let mut diagnostic = None;
         let rest_len = self.stack.len().saturating_sub(expected.len());
         let pops = self.stack.get(rest_len..).unwrap_or(&*self.stack);
@@ -435,17 +402,10 @@ impl<'db> TypeStack<'db> {
                 _ => {}
             });
         if mismatch {
-            let expected_types = format!(
-                "[{}]",
-                expected.iter().map(|ty| ty.render(self.db)).join(", ")
-            );
+            let expected_types = format!("[{}]", expected.iter().map(|ty| ty.render(self.db)).join(", "));
             let received_types = format!(
                 "[{}{}]",
-                if self.stack.len() > pops.len() {
-                    "... "
-                } else {
-                    ""
-                },
+                if self.stack.len() > pops.len() { "... " } else { "" },
                 pops.iter().map(|(ty, _)| ty.render(self.db)).join(", ")
             );
             diagnostic = Some(Diagnostic {
@@ -510,17 +470,8 @@ impl<'db> TypeStack<'db> {
                 _ => {}
             });
         if mismatch {
-            let expected_types = format!(
-                "[{}]",
-                expected.iter().map(|ty| ty.render(self.db)).join(", ")
-            );
-            let received_types = format!(
-                "[{}]",
-                self.stack
-                    .iter()
-                    .map(|(ty, _)| ty.render(self.db))
-                    .join(", ")
-            );
+            let expected_types = format!("[{}]", expected.iter().map(|ty| ty.render(self.db)).join(", "));
+            let received_types = format!("[{}]", self.stack.iter().map(|(ty, _)| ty.render(self.db)).join(", "));
             Some(Diagnostic {
                 range: helpers::rowan_range_to_lsp_range(self.line_index, report_range.pick()),
                 severity: Some(DiagnosticSeverity::Error),
@@ -549,12 +500,7 @@ impl<'db> TypeStack<'db> {
                         })
                         .collect::<Option<Vec<_>>>()
                         .and_then(|types| {
-                            serde_json::to_value((
-                                u32::from(range.start()),
-                                u32::from(range.end()),
-                                types,
-                            ))
-                            .ok()
+                            serde_json::to_value((u32::from(range.start()), u32::from(range.end()), types)).ok()
                         })
                 } else {
                     None
@@ -578,14 +524,7 @@ fn resolve_sig<'db>(
             .immediates()
             .next()
             .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-            .map(|func| {
-                ResolvedSig::from(get_func_sig(
-                    shared.db,
-                    shared.document,
-                    *func.key,
-                    &func.green,
-                ))
-            })
+            .map(|func| ResolvedSig::from(get_func_sig(shared.db, shared.document, *func.key, &func.green)))
             .unwrap_or_default(),
         "local.get" => ResolvedSig {
             params: vec![],
@@ -594,9 +533,7 @@ fn resolve_sig<'db>(
                     .immediates()
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                    .and_then(|symbol| {
-                        extract_type(shared.db, shared.document, symbol.green.clone())
-                    })
+                    .and_then(|symbol| extract_type(shared.db, shared.document, symbol.green.clone()))
                     .map_or(OperandType::Any, OperandType::Val),
             ],
         },
@@ -606,9 +543,7 @@ fn resolve_sig<'db>(
                     .immediates()
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                    .and_then(|symbol| {
-                        extract_type(shared.db, shared.document, symbol.green.clone())
-                    })
+                    .and_then(|symbol| extract_type(shared.db, shared.document, symbol.green.clone()))
                     .map_or(OperandType::Any, OperandType::Val),
             ],
             results: vec![],
@@ -632,9 +567,7 @@ fn resolve_sig<'db>(
                     .immediates()
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                    .and_then(|symbol| {
-                        extract_global_type(shared.db, shared.document, symbol.green.clone())
-                    })
+                    .and_then(|symbol| extract_global_type(shared.db, shared.document, symbol.green.clone()))
                     .map_or(OperandType::Any, OperandType::Val),
             ],
         },
@@ -644,9 +577,7 @@ fn resolve_sig<'db>(
                     .immediates()
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                    .and_then(|symbol| {
-                        extract_global_type(shared.db, shared.document, symbol.green.clone())
-                    })
+                    .and_then(|symbol| extract_global_type(shared.db, shared.document, symbol.green.clone()))
                     .map_or(OperandType::Any, OperandType::Val),
             ],
             results: vec![],
@@ -657,16 +588,11 @@ fn resolve_sig<'db>(
                 .ancestors()
                 .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
                 .map(|func| {
-                    get_func_sig(
-                        shared.db,
-                        shared.document,
-                        SyntaxNodePtr::new(&func),
-                        &func.green(),
-                    )
-                    .results
-                    .into_iter()
-                    .map(OperandType::Val)
-                    .collect()
+                    get_func_sig(shared.db, shared.document, SyntaxNodePtr::new(&func), &func.green())
+                        .results
+                        .into_iter()
+                        .map(OperandType::Val)
+                        .collect()
                 })
                 .unwrap_or_default(),
             results: vec![],
@@ -703,9 +629,7 @@ fn resolve_sig<'db>(
         }
         "br_on_null" => {
             let heap_ty =
-                if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) =
-                    type_stack.stack.last()
-                {
+                if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) = type_stack.stack.last() {
                     heap_ty.clone()
                 } else {
                     HeapType::Any
@@ -728,9 +652,7 @@ fn resolve_sig<'db>(
         }
         "br_on_non_null" => {
             let heap_ty =
-                if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) =
-                    type_stack.stack.last()
-                {
+                if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) = type_stack.stack.last() {
                     heap_ty.clone()
                 } else {
                     HeapType::Any
@@ -837,12 +759,7 @@ fn resolve_sig<'db>(
             instr
                 .immediates()
                 .next()
-                .and_then(|immediate| {
-                    shared
-                        .symbol_table
-                        .resolved
-                        .get(&SymbolKey::new(immediate.syntax()))
-                })
+                .and_then(|immediate| shared.symbol_table.resolved.get(&SymbolKey::new(immediate.syntax())))
                 .and_then(|key| def_types.get(key))
                 .map(|def_type| {
                     let params = if let CompositeType::Struct(fields) = &def_type.comp {
@@ -884,12 +801,7 @@ fn resolve_sig<'db>(
                 .next()
                 .zip(immediates.next())
                 .and_then(|(struct_ref, field_ref)| {
-                    resolve_field_type_with_struct_idx(
-                        shared.db,
-                        shared.document,
-                        &struct_ref,
-                        &field_ref,
-                    )
+                    resolve_field_type_with_struct_idx(shared.db, shared.document, &struct_ref, &field_ref)
                 })
                 .map(|(idx, ty)| ResolvedSig {
                     params: vec![OperandType::Val(ValType::Ref(RefType {
@@ -907,11 +819,7 @@ fn resolve_sig<'db>(
             params: instr
                 .immediates()
                 .next()
-                .and_then(|immediate| {
-                    shared
-                        .symbol_table
-                        .find_def(SymbolKey::new(immediate.syntax()))
-                })
+                .and_then(|immediate| shared.symbol_table.find_def(SymbolKey::new(immediate.syntax())))
                 .map(|symbol| {
                     vec![OperandType::Val(ValType::Ref(RefType {
                         heap_ty: HeapType::Type(symbol.idx),
@@ -927,12 +835,7 @@ fn resolve_sig<'db>(
                 .next()
                 .zip(immediates.next())
                 .and_then(|(struct_ref, field_ref)| {
-                    resolve_field_type_with_struct_idx(
-                        shared.db,
-                        shared.document,
-                        &struct_ref,
-                        &field_ref,
-                    )
+                    resolve_field_type_with_struct_idx(shared.db, shared.document, &struct_ref, &field_ref)
                 })
                 .map(|(idx, ty)| ResolvedSig {
                     params: vec![
@@ -1160,18 +1063,14 @@ fn resolve_sig<'db>(
                     SyntaxElement::Node(node) if node.kind() == SyntaxKind::HEAP_TYPE => {
                         HeapType::from_green(&node.green(), shared.db)
                     }
-                    SyntaxElement::Token(token) if token.kind() == SyntaxKind::IDENT => {
-                        Some(HeapType::Type(Idx {
-                            num: None,
-                            name: Some(InternIdent::new(shared.db, token.text())),
-                        }))
-                    }
-                    SyntaxElement::Token(token) if token.kind() == SyntaxKind::INT => {
-                        Some(HeapType::Type(Idx {
-                            num: token.text().parse().ok(),
-                            name: None,
-                        }))
-                    }
+                    SyntaxElement::Token(token) if token.kind() == SyntaxKind::IDENT => Some(HeapType::Type(Idx {
+                        num: None,
+                        name: Some(InternIdent::new(shared.db, token.text())),
+                    })),
+                    SyntaxElement::Token(token) if token.kind() == SyntaxKind::INT => Some(HeapType::Type(Idx {
+                        num: token.text().parse().ok(),
+                        name: None,
+                    })),
                     _ => None,
                 })
                 .map_or(OperandType::Any, |heap_ty| {
@@ -1187,9 +1086,7 @@ fn resolve_sig<'db>(
         }
         "ref.is_null" => {
             let heap_ty =
-                if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) =
-                    type_stack.stack.last()
-                {
+                if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) = type_stack.stack.last() {
                     heap_ty.clone()
                 } else {
                     HeapType::Any
@@ -1204,9 +1101,7 @@ fn resolve_sig<'db>(
         }
         "ref.as_non_null" => {
             let heap_ty =
-                if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) =
-                    type_stack.stack.last()
-                {
+                if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) = type_stack.stack.last() {
                     heap_ty.clone()
                 } else {
                     HeapType::Any
@@ -1268,12 +1163,7 @@ fn resolve_sig<'db>(
             let immediate = instr.immediates().next();
             let heap_ty = immediate
                 .as_ref()
-                .and_then(|immediate| {
-                    shared
-                        .symbol_table
-                        .resolved
-                        .get(&SymbolKey::new(immediate.syntax()))
-                })
+                .and_then(|immediate| shared.symbol_table.resolved.get(&SymbolKey::new(immediate.syntax())))
                 .and_then(|key| {
                     let root = shared.document.root_tree(shared.db);
                     ModuleFieldFunc::cast(key.to_node(&root))
@@ -1282,19 +1172,13 @@ fn resolve_sig<'db>(
                 .and_then(|type_use| type_use.index())
                 .map(|index| {
                     HeapType::Type(Idx {
-                        num: index
-                            .unsigned_int_token()
-                            .and_then(|int| int.text().parse().ok()),
+                        num: index.unsigned_int_token().and_then(|int| int.text().parse().ok()),
                         name: index
                             .ident_token()
                             .map(|ident| InternIdent::new(shared.db, ident.text())),
                     })
                 })
-                .or_else(|| {
-                    immediate.map(|immediate| {
-                        HeapType::DefFunc(Idx::from_immediate(&immediate, shared.db))
-                    })
-                });
+                .or_else(|| immediate.map(|immediate| HeapType::DefFunc(Idx::from_immediate(&immediate, shared.db))));
             ResolvedSig {
                 params: vec![],
                 results: vec![heap_ty.map_or(OperandType::Any, |heap_ty| {
@@ -1310,12 +1194,7 @@ fn resolve_sig<'db>(
             instr
                 .immediates()
                 .next()
-                .and_then(|immediate| {
-                    shared
-                        .symbol_table
-                        .resolved
-                        .get(&SymbolKey::new(immediate.syntax()))
-                })
+                .and_then(|immediate| shared.symbol_table.resolved.get(&SymbolKey::new(immediate.syntax())))
                 .and_then(|key| def_types.get(key))
                 .map(|def_type| {
                     let mut sig = def_type
@@ -1331,10 +1210,7 @@ fn resolve_sig<'db>(
                 })
                 .unwrap_or_default()
         }
-        _ => data_set::INSTR_SIG
-            .get(instr_name)
-            .cloned()
-            .unwrap_or_default(),
+        _ => data_set::INSTR_SIG.get(instr_name).cloned().unwrap_or_default(),
     }
 }
 

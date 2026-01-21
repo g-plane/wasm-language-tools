@@ -26,12 +26,10 @@ impl Data {
     }
     #[inline]
     pub fn string_tokens(&self) -> impl Iterator<Item = SyntaxToken> {
-        self.syntax
-            .children_with_tokens()
-            .filter_map(|it| match it {
-                NodeOrToken::Token(it) if it.kind() == SyntaxKind::STRING => Some(it),
-                _ => None,
-            })
+        self.syntax.children_with_tokens().filter_map(|it| match it {
+            NodeOrToken::Token(it) if it.kind() == SyntaxKind::STRING => Some(it),
+            _ => None,
+        })
     }
     #[inline]
     pub fn r_paren_token(&self) -> Option<SyntaxToken> {
@@ -840,19 +838,11 @@ impl AstNode for ModuleField {
         match syntax.kind() {
             SyntaxKind::MODULE_FIELD_DATA => Some(ModuleField::Data(ModuleFieldData { syntax })),
             SyntaxKind::MODULE_FIELD_ELEM => Some(ModuleField::Elem(ModuleFieldElem { syntax })),
-            SyntaxKind::MODULE_FIELD_EXPORT => {
-                Some(ModuleField::Export(ModuleFieldExport { syntax }))
-            }
+            SyntaxKind::MODULE_FIELD_EXPORT => Some(ModuleField::Export(ModuleFieldExport { syntax })),
             SyntaxKind::MODULE_FIELD_FUNC => Some(ModuleField::Func(ModuleFieldFunc { syntax })),
-            SyntaxKind::MODULE_FIELD_GLOBAL => {
-                Some(ModuleField::Global(ModuleFieldGlobal { syntax }))
-            }
-            SyntaxKind::MODULE_FIELD_IMPORT => {
-                Some(ModuleField::Import(ModuleFieldImport { syntax }))
-            }
-            SyntaxKind::MODULE_FIELD_MEMORY => {
-                Some(ModuleField::Memory(ModuleFieldMemory { syntax }))
-            }
+            SyntaxKind::MODULE_FIELD_GLOBAL => Some(ModuleField::Global(ModuleFieldGlobal { syntax })),
+            SyntaxKind::MODULE_FIELD_IMPORT => Some(ModuleField::Import(ModuleFieldImport { syntax })),
+            SyntaxKind::MODULE_FIELD_MEMORY => Some(ModuleField::Memory(ModuleFieldMemory { syntax })),
             SyntaxKind::MODULE_FIELD_START => Some(ModuleField::Start(ModuleFieldStart { syntax })),
             SyntaxKind::MODULE_FIELD_TABLE => Some(ModuleField::Table(ModuleFieldTable { syntax })),
             SyntaxKind::MODULE_FIELD_TAG => Some(ModuleField::Tag(ModuleFieldTag { syntax })),
@@ -907,12 +897,10 @@ impl ModuleFieldData {
     }
     #[inline]
     pub fn string_tokens(&self) -> impl Iterator<Item = SyntaxToken> {
-        self.syntax
-            .children_with_tokens()
-            .filter_map(|it| match it {
-                NodeOrToken::Token(it) if it.kind() == SyntaxKind::STRING => Some(it),
-                _ => None,
-            })
+        self.syntax.children_with_tokens().filter_map(|it| match it {
+            NodeOrToken::Token(it) if it.kind() == SyntaxKind::STRING => Some(it),
+            _ => None,
+        })
     }
     #[inline]
     pub fn r_paren_token(&self) -> Option<SyntaxToken> {

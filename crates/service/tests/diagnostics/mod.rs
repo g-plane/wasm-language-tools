@@ -1,6 +1,5 @@
 use lspt::{
-    ClientCapabilities, DocumentDiagnosticParams, InitializeParams, TextDocumentIdentifier,
-    WorkspaceClientCapabilities,
+    ClientCapabilities, DocumentDiagnosticParams, InitializeParams, TextDocumentIdentifier, WorkspaceClientCapabilities,
 };
 use wat_service::{LanguageService, LintLevel, Lints, ServiceConfig};
 

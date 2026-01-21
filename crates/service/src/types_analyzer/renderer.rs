@@ -13,10 +13,7 @@ impl<'db> Signature<'db> {
             db,
         }
     }
-    pub(crate) fn render_compact(
-        &self,
-        db: &'db dyn salsa::Database,
-    ) -> RenderWithDb<'db, (&Self, bool)> {
+    pub(crate) fn render_compact(&self, db: &'db dyn salsa::Database) -> RenderWithDb<'db, (&Self, bool)> {
         RenderWithDb {
             value: (self, true),
             db,

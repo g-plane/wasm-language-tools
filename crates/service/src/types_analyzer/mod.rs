@@ -4,8 +4,7 @@ pub(crate) use self::{
     renderer::{render_block_header, render_func_header, render_header},
     resolver::resolve_field_type,
     resolver::{
-        resolve_array_type_with_idx, resolve_br_types, resolve_field_type_with_struct_idx,
-        resolve_param_types,
+        resolve_array_type_with_idx, resolve_br_types, resolve_field_type_with_struct_idx, resolve_param_types,
     },
     signature::{ResolvedSig, get_block_sig, get_func_sig, get_type_use_sig},
     types::{FieldType, Fields, HeapType, OperandType, RefType, StorageType, ValType},

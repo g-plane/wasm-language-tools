@@ -12,8 +12,7 @@ impl LanguageService {
         let folding_ranges = root
             .descendants()
             .filter_map(|node| {
-                support::token(&node, SyntaxKind::KEYWORD)
-                    .or_else(|| support::token(&node, SyntaxKind::L_PAREN))?;
+                support::token(&node, SyntaxKind::KEYWORD).or_else(|| support::token(&node, SyntaxKind::L_PAREN))?;
                 let range = helpers::rowan_range_to_lsp_range(line_index, node.text_range());
                 if range.start.line == range.end.line {
                     None

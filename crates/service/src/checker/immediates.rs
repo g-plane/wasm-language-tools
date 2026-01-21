@@ -19,10 +19,9 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
         .peekable();
 
     match instr_name.text() {
-        "call" | "local.get" | "local.set" | "local.tee" | "global.get" | "global.set"
-        | "ref.func" | "data.drop" | "elem.drop" | "br" | "br_if" | "struct.new"
-        | "struct.new_default" | "array.new" | "array.new_default" | "array.get"
-        | "array.get_u" | "array.get_s" | "array.set" | "array.fill" | "br_on_null"
+        "call" | "local.get" | "local.set" | "local.tee" | "global.get" | "global.set" | "ref.func" | "data.drop"
+        | "elem.drop" | "br" | "br_if" | "struct.new" | "struct.new_default" | "array.new" | "array.new_default"
+        | "array.get" | "array.get_u" | "array.get_s" | "array.set" | "array.fill" | "br_on_null"
         | "br_on_non_null" | "call_ref" | "return_call" | "return_call_ref" | "throw" => {
             check_immediate::<true>(
                 diagnostics,
@@ -57,9 +56,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
             if let Some(immediate) = immediates.next() {
                 let range = immediate.text_range();
                 'a: {
-                    let Some(type_use) =
-                        Immediate::cast(immediate).and_then(|immediate| immediate.type_use())
-                    else {
+                    let Some(type_use) = Immediate::cast(immediate).and_then(|immediate| immediate.type_use()) else {
                         diagnostics.push(Diagnostic {
                             range: helpers::rowan_range_to_lsp_range(line_index, range),
                             severity: Some(DiagnosticSeverity::Error),
@@ -71,9 +68,10 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                         break 'a;
                     };
                     let mut children = type_use.syntax().children();
-                    if children.next().is_some_and(|child| {
-                        child.kind() == SyntaxKind::RESULT && child.children().count() == 1
-                    }) && children.next().is_none()
+                    if children
+                        .next()
+                        .is_some_and(|child| child.kind() == SyntaxKind::RESULT && child.children().count() == 1)
+                        && children.next().is_none()
                     {
                         break 'a;
                     }
@@ -100,15 +98,12 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
             diagnostics.extend(
                 immediates
                     .filter(|immediate| {
-                        !immediate.first_token().is_some_and(|token| {
-                            matches!(token.kind(), SyntaxKind::IDENT | SyntaxKind::INT)
-                        })
+                        !immediate
+                            .first_token()
+                            .is_some_and(|token| matches!(token.kind(), SyntaxKind::IDENT | SyntaxKind::INT))
                     })
                     .map(|immediate| Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(
-                            line_index,
-                            immediate.text_range(),
-                        ),
+                        range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
                         severity: Some(DiagnosticSeverity::Error),
                         source: Some("wat".into()),
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
@@ -136,8 +131,8 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 line_index,
             );
         }
-        "struct.get" | "struct.get_u" | "struct.get_s" | "struct.set" | "array.new_data"
-        | "array.new_elem" | "array.copy" | "array.init_data" | "array.init_elem" => {
+        "struct.get" | "struct.get_u" | "struct.get_s" | "struct.set" | "array.new_data" | "array.new_elem"
+        | "array.copy" | "array.init_data" | "array.init_elem" => {
             check_immediate::<true>(
                 diagnostics,
                 &mut immediates,
@@ -155,14 +150,13 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 line_index,
             );
         }
-        "i32.load" | "i64.load" | "f32.load" | "f64.load" | "i32.load8_s" | "i32.load8_u"
-        | "i32.load16_s" | "i32.load16_u" | "i64.load8_s" | "i64.load8_u" | "i64.load16_s"
-        | "i64.load16_u" | "i64.load32_s" | "i64.load32_u" | "i32.store" | "i64.store"
-        | "f32.store" | "f64.store" | "i32.store8" | "i32.store16" | "i64.store8"
-        | "i64.store16" | "i64.store32" | "v128.load" | "v128.load8x8_s" | "v128.load8x8_u"
-        | "v128.load16x4_s" | "v128.load16x4_u" | "v128.load32x2_s" | "v128.load32x2_u"
-        | "v128.load8_splat" | "v128.load16_splat" | "v128.load32_splat" | "v128.load64_splat"
-        | "v128.load32_zero" | "v128.load64_zero" | "v128.store" => {
+        "i32.load" | "i64.load" | "f32.load" | "f64.load" | "i32.load8_s" | "i32.load8_u" | "i32.load16_s"
+        | "i32.load16_u" | "i64.load8_s" | "i64.load8_u" | "i64.load16_s" | "i64.load16_u" | "i64.load32_s"
+        | "i64.load32_u" | "i32.store" | "i64.store" | "f32.store" | "f64.store" | "i32.store8" | "i32.store16"
+        | "i64.store8" | "i64.store16" | "i64.store32" | "v128.load" | "v128.load8x8_s" | "v128.load8x8_u"
+        | "v128.load16x4_s" | "v128.load16x4_u" | "v128.load32x2_s" | "v128.load32x2_u" | "v128.load8_splat"
+        | "v128.load16_splat" | "v128.load32_splat" | "v128.load64_splat" | "v128.load32_zero" | "v128.load64_zero"
+        | "v128.store" => {
             check_immediate::<false>(
                 diagnostics,
                 &mut immediates,
@@ -180,8 +174,8 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 line_index,
             );
         }
-        "memory.size" | "memory.grow" | "memory.fill" | "table.get" | "table.set"
-        | "table.grow" | "table.size" | "table.fill" => {
+        "memory.size" | "memory.grow" | "memory.fill" | "table.get" | "table.set" | "table.grow" | "table.size"
+        | "table.fill" => {
             check_immediate::<false>(
                 diagnostics,
                 &mut immediates,
@@ -242,12 +236,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 .filter(|token| token.kind() == SyntaxKind::SHAPE_DESCRIPTOR)
                 .as_ref()
                 .and_then(|token| token.text().split_once('x'))
-                .and_then(|(ty, count)| {
-                    count
-                        .parse::<usize>()
-                        .ok()
-                        .map(|count| (ty.starts_with('f'), count))
-                })
+                .and_then(|(ty, count)| count.parse::<usize>().ok().map(|count| (ty.starts_with('f'), count)))
             {
                 let actual_count = immediates.clone().count();
                 if actual_count != expected_count {
@@ -323,9 +312,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                     severity: Some(DiagnosticSeverity::Error),
                     source: Some("wat".into()),
                     code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                    message: format!(
-                        "expected 16 lane indices in `i8x16.shuffle`, found {immediates_count}"
-                    ),
+                    message: format!("expected 16 lane indices in `i8x16.shuffle`, found {immediates_count}"),
                     ..Default::default()
                 });
             }
@@ -336,10 +323,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                     .is_some_and(|idx| idx >= 32)
                 {
                     diagnostics.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(
-                            line_index,
-                            immediate.text_range(),
-                        ),
+                        range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
                         severity: Some(DiagnosticSeverity::Error),
                         source: Some("wat".into()),
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
@@ -350,8 +334,8 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
             });
             return;
         }
-        "v128.load8_lane" | "v128.load16_lane" | "v128.load32_lane" | "v128.load64_lane"
-        | "v128.store8_lane" | "v128.store16_lane" | "v128.store32_lane" | "v128.store64_lane" => {
+        "v128.load8_lane" | "v128.load16_lane" | "v128.load32_lane" | "v128.load64_lane" | "v128.store8_lane"
+        | "v128.store16_lane" | "v128.store32_lane" | "v128.store64_lane" => {
             check_immediate::<false>(
                 diagnostics,
                 &mut immediates,
@@ -536,9 +520,7 @@ fn check_immediate<const REQUIRED: bool>(
     instr_name: &SyntaxToken,
     line_index: &LineIndex,
 ) {
-    let immediate = immediates
-        .peek()
-        .and_then(|immediate| immediate.first_child_or_token());
+    let immediate = immediates.peek().and_then(|immediate| immediate.first_child_or_token());
     if let Some(immediate) = immediate {
         if expected.cmp(immediate.kind()) {
             immediates.next();

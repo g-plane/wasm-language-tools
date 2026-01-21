@@ -38,19 +38,14 @@ impl LanguageService {
             match it.kind() {
                 SyntaxKind::MODULE_FIELD_FUNC => {
                     if rewrite
-                        && let Some(action) =
-                            join_types::act(self, uri, line_index, &it, SyntaxKind::LOCAL, range)
+                        && let Some(action) = join_types::act(self, uri, line_index, &it, SyntaxKind::LOCAL, range)
                     {
                         actions.push(action);
                     }
-                    if refactor
-                        && let Some(action) = export_as::act(self, uri, *document, line_index, &it)
-                    {
+                    if refactor && let Some(action) = export_as::act(self, uri, *document, line_index, &it) {
                         actions.push(action);
                     }
-                    if quickfix
-                        && let Some(action) =
-                            add_result_types::act(self, uri, line_index, &it, &params.context)
+                    if quickfix && let Some(action) = add_result_types::act(self, uri, line_index, &it, &params.context)
                     {
                         actions.push(action);
                     }
@@ -60,131 +55,89 @@ impl LanguageService {
                         if let Some(action) = br_if_to_if_br::act(self, uri, line_index, &it) {
                             actions.push(action);
                         }
-                        if let Some(action) = merge_to_return_call::act(
-                            self,
-                            uri,
-                            *document,
-                            line_index,
-                            symbol_table,
-                            &it,
-                        ) {
+                        if let Some(action) =
+                            merge_to_return_call::act(self, uri, *document, line_index, symbol_table, &it)
+                        {
                             actions.push(action);
                         }
                     }
                 }
                 SyntaxKind::PARAM => {
-                    if rewrite
-                        && let Some(action) =
-                            split_types::act(self, uri, line_index, &it, SyntaxKind::PARAM)
-                    {
+                    if rewrite && let Some(action) = split_types::act(self, uri, line_index, &it, SyntaxKind::PARAM) {
                         actions.push(action);
                     }
-                    if refactor
-                        && let Some(action) = clean_no_types::act(self, uri, line_index, &it)
-                    {
+                    if refactor && let Some(action) = clean_no_types::act(self, uri, line_index, &it) {
                         actions.push(action);
                     }
                 }
                 SyntaxKind::RESULT => {
-                    if rewrite
-                        && let Some(action) =
-                            split_types::act(self, uri, line_index, &it, SyntaxKind::RESULT)
-                    {
+                    if rewrite && let Some(action) = split_types::act(self, uri, line_index, &it, SyntaxKind::RESULT) {
                         actions.push(action);
                     }
-                    if refactor
-                        && let Some(action) = clean_no_types::act(self, uri, line_index, &it)
-                    {
+                    if refactor && let Some(action) = clean_no_types::act(self, uri, line_index, &it) {
                         actions.push(action);
                     }
                 }
                 SyntaxKind::LOCAL => {
-                    if rewrite
-                        && let Some(action) =
-                            split_types::act(self, uri, line_index, &it, SyntaxKind::LOCAL)
-                    {
+                    if rewrite && let Some(action) = split_types::act(self, uri, line_index, &it, SyntaxKind::LOCAL) {
                         actions.push(action);
                     }
-                    if refactor
-                        && let Some(action) = clean_no_types::act(self, uri, line_index, &it)
-                    {
+                    if refactor && let Some(action) = clean_no_types::act(self, uri, line_index, &it) {
                         actions.push(action);
                     }
                 }
                 SyntaxKind::TYPE_USE | SyntaxKind::FUNC_TYPE => {
                     if rewrite {
-                        if let Some(action) =
-                            join_types::act(self, uri, line_index, &it, SyntaxKind::PARAM, range)
-                        {
+                        if let Some(action) = join_types::act(self, uri, line_index, &it, SyntaxKind::PARAM, range) {
                             actions.push(action);
                         }
-                        if let Some(action) =
-                            join_types::act(self, uri, line_index, &it, SyntaxKind::RESULT, range)
-                        {
+                        if let Some(action) = join_types::act(self, uri, line_index, &it, SyntaxKind::RESULT, range) {
                             actions.push(action);
                         }
                     }
                     if inline
-                        && let Some(action) =
-                            inline_func_type::act(self, uri, line_index, &root, symbol_table, &it)
+                        && let Some(action) = inline_func_type::act(self, uri, line_index, &root, symbol_table, &it)
                     {
                         actions.push(action);
                     }
                 }
                 SyntaxKind::BLOCK_IF => {
-                    if rewrite && let Some(action) = if_br_to_br_if::act(self, uri, line_index, &it)
-                    {
+                    if rewrite && let Some(action) = if_br_to_br_if::act(self, uri, line_index, &it) {
                         actions.push(action);
                     }
-                    if quickfix
-                        && let Some(action) =
-                            add_result_types::act(self, uri, line_index, &it, &params.context)
+                    if quickfix && let Some(action) = add_result_types::act(self, uri, line_index, &it, &params.context)
                     {
                         actions.push(action);
                     }
                 }
                 SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_TRY_TABLE => {
-                    if quickfix
-                        && let Some(action) =
-                            add_result_types::act(self, uri, line_index, &it, &params.context)
+                    if quickfix && let Some(action) = add_result_types::act(self, uri, line_index, &it, &params.context)
                     {
                         actions.push(action);
                     }
                 }
                 SyntaxKind::GLOBAL_TYPE => {
-                    if quickfix
-                        && let Some(action) =
-                            remove_mut::act(self, uri, line_index, &it, &params.context)
-                    {
+                    if quickfix && let Some(action) = remove_mut::act(self, uri, line_index, &it, &params.context) {
                         actions.push(action);
                     }
                 }
                 SyntaxKind::IMMEDIATE => {
-                    if quickfix
-                        && let Some(mut action) =
-                            fix_packing::act(self, uri, line_index, &it, &params.context)
+                    if quickfix && let Some(mut action) = fix_packing::act(self, uri, line_index, &it, &params.context)
                     {
                         actions.append(&mut action);
                     }
-                    if rewrite
-                        && let Some(action) =
-                            convert_idx::act(self, uri, line_index, symbol_table, &it)
-                    {
+                    if rewrite && let Some(action) = convert_idx::act(self, uri, line_index, symbol_table, &it) {
                         actions.push(action);
                     }
                 }
                 SyntaxKind::INDEX => {
-                    if rewrite
-                        && let Some(action) =
-                            convert_idx::act(self, uri, line_index, symbol_table, &it)
-                    {
+                    if rewrite && let Some(action) = convert_idx::act(self, uri, line_index, symbol_table, &it) {
                         actions.push(action);
                     }
                 }
                 SyntaxKind::MEM_ARG => {
                     if quickfix
-                        && let Some(action) =
-                            fix_invalid_mem_arg::act(self, uri, line_index, &it, &params.context)
+                        && let Some(action) = fix_invalid_mem_arg::act(self, uri, line_index, &it, &params.context)
                     {
                         actions.push(action);
                     }
@@ -193,9 +146,7 @@ impl LanguageService {
                 | SyntaxKind::MODULE_FIELD_MEMORY
                 | SyntaxKind::MODULE_FIELD_TABLE
                 | SyntaxKind::MODULE_FIELD_TAG => {
-                    if refactor
-                        && let Some(action) = export_as::act(self, uri, *document, line_index, &it)
-                    {
+                    if refactor && let Some(action) = export_as::act(self, uri, *document, line_index, &it) {
                         actions.push(action);
                     }
                 }
@@ -211,38 +162,29 @@ impl LanguageService {
                 }
                 SyntaxKind::EXPORT => {
                     if extract
-                        && let Some(action) =
-                            extract_export::act(self, uri, line_index, &root, symbol_table, &it)
+                        && let Some(action) = extract_export::act(self, uri, line_index, &root, symbol_table, &it)
                     {
                         actions.push(action);
                     }
                 }
                 SyntaxKind::MODULE_FIELD_EXPORT => {
-                    if inline
-                        && let Some(action) =
-                            inline_export::act(self, uri, line_index, &root, symbol_table, &it)
+                    if inline && let Some(action) = inline_export::act(self, uri, line_index, &root, symbol_table, &it)
                     {
                         actions.push(action);
                     }
                 }
                 SyntaxKind::STRUCT_TYPE => {
                     if rewrite
-                        && let Some(action) =
-                            join_types::act(self, uri, line_index, &it, SyntaxKind::FIELD, range)
+                        && let Some(action) = join_types::act(self, uri, line_index, &it, SyntaxKind::FIELD, range)
                     {
                         actions.push(action);
                     }
                 }
                 SyntaxKind::FIELD => {
-                    if rewrite
-                        && let Some(action) =
-                            split_types::act(self, uri, line_index, &it, SyntaxKind::FIELD)
-                    {
+                    if rewrite && let Some(action) = split_types::act(self, uri, line_index, &it, SyntaxKind::FIELD) {
                         actions.push(action);
                     }
-                    if refactor
-                        && let Some(action) = clean_no_types::act(self, uri, line_index, &it)
-                    {
+                    if refactor && let Some(action) = clean_no_types::act(self, uri, line_index, &it) {
                         actions.push(action);
                     }
                 }
@@ -251,10 +193,6 @@ impl LanguageService {
             node = it;
         }
 
-        if actions.is_empty() {
-            None
-        } else {
-            Some(actions)
-        }
+        if actions.is_empty() { None } else { Some(actions) }
     }
 }

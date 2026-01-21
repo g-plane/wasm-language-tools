@@ -35,9 +35,7 @@ pub fn check(
             .fold(FxHashMap::<_, Vec<_>>::default(), |mut map, symbol| {
                 if let Symbol {
                     kind: SymbolKind::BlockDef,
-                    idx: Idx {
-                        name: Some(name), ..
-                    },
+                    idx: Idx { name: Some(name), .. },
                     ..
                 } = symbol
                 {
@@ -50,10 +48,7 @@ pub fn check(
                                 *other != symbol
                                     && other.kind == SymbolKind::BlockDef
                                     && other.idx.name.is_some_and(|other| other == name)
-                                    && symbol
-                                        .key
-                                        .text_range()
-                                        .contains_range(other.key.text_range())
+                                    && symbol.key.text_range().contains_range(other.key.text_range())
                             })
                             .map(|other| get_ident_range(other, root)),
                     );
@@ -65,10 +60,7 @@ pub fn check(
             .map(|((symbol, name), ranges)| {
                 let name = name.ident(db);
                 Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(
-                        line_index,
-                        get_ident_range(symbol, root),
-                    ),
+                    range: helpers::rowan_range_to_lsp_range(line_index, get_ident_range(symbol, root)),
                     severity: Some(severity),
                     source: Some("wat".into()),
                     code: Some(Union2::B(DIAGNOSTIC_CODE.into())),

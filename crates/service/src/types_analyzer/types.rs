@@ -27,12 +27,7 @@ impl<'db> ValType<'db> {
 
     pub(crate) fn from_green(node: &GreenNodeData, db: &'db dyn salsa::Database) -> Option<Self> {
         match WatLanguage::kind_from_raw(node.kind()) {
-            SyntaxKind::NUM_TYPE => match node
-                .children()
-                .next()
-                .and_then(|child| child.into_token())?
-                .text()
-            {
+            SyntaxKind::NUM_TYPE => match node.children().next().and_then(|child| child.into_token())?.text() {
                 "i32" => Some(ValType::I32),
                 "i64" => Some(ValType::I64),
                 "f32" => Some(ValType::F32),
@@ -142,12 +137,10 @@ impl<'db> RefType<'db> {
                 for node_or_token in children {
                     match node_or_token {
                         NodeOrToken::Node(node) if node.kind() == SyntaxKind::HEAP_TYPE.into() => {
-                            return HeapType::from_green(node, db)
-                                .map(|heap_ty| RefType { heap_ty, nullable });
+                            return HeapType::from_green(node, db).map(|heap_ty| RefType { heap_ty, nullable });
                         }
                         NodeOrToken::Token(token)
-                            if token.kind() == SyntaxKind::KEYWORD.into()
-                                && token.text() == "null" =>
+                            if token.kind() == SyntaxKind::KEYWORD.into() && token.text() == "null" =>
                         {
                             nullable = true;
                         }
@@ -166,9 +159,7 @@ impl<'db> RefType<'db> {
         document: Document,
         module_id: u32,
     ) -> bool {
-        self.heap_ty
-            .matches(&other.heap_ty, db, document, module_id)
-            && (!self.nullable || other.nullable)
+        self.heap_ty.matches(&other.heap_ty, db, document, module_id) && (!self.nullable || other.nullable)
     }
 
     pub(crate) fn type_equals(
@@ -178,10 +169,7 @@ impl<'db> RefType<'db> {
         document: Document,
         module_id: u32,
     ) -> bool {
-        self.nullable == other.nullable
-            && self
-                .heap_ty
-                .type_equals(&other.heap_ty, db, document, module_id)
+        self.nullable == other.nullable && self.heap_ty.type_equals(&other.heap_ty, db, document, module_id)
     }
 
     pub(crate) fn diff(&self, other: &Self) -> Self {
@@ -227,23 +215,21 @@ impl<'db> HeapType<'db> {
                     _ => None,
                 }
             }
-            Some(NodeOrToken::Token(token)) if token.kind() == SyntaxKind::TYPE_KEYWORD.into() => {
-                match token.text() {
-                    "any" => Some(HeapType::Any),
-                    "eq" => Some(HeapType::Eq),
-                    "i31" => Some(HeapType::I31),
-                    "struct" => Some(HeapType::Struct),
-                    "array" => Some(HeapType::Array),
-                    "none" => Some(HeapType::None),
-                    "func" => Some(HeapType::Func),
-                    "nofunc" => Some(HeapType::NoFunc),
-                    "exn" => Some(HeapType::Exn),
-                    "noexn" => Some(HeapType::NoExn),
-                    "extern" => Some(HeapType::Extern),
-                    "noextern" => Some(HeapType::NoExtern),
-                    _ => None,
-                }
-            }
+            Some(NodeOrToken::Token(token)) if token.kind() == SyntaxKind::TYPE_KEYWORD.into() => match token.text() {
+                "any" => Some(HeapType::Any),
+                "eq" => Some(HeapType::Eq),
+                "i31" => Some(HeapType::I31),
+                "struct" => Some(HeapType::Struct),
+                "array" => Some(HeapType::Array),
+                "none" => Some(HeapType::None),
+                "func" => Some(HeapType::Func),
+                "nofunc" => Some(HeapType::NoFunc),
+                "exn" => Some(HeapType::Exn),
+                "noexn" => Some(HeapType::NoExn),
+                "extern" => Some(HeapType::Extern),
+                "noextern" => Some(HeapType::NoExtern),
+                _ => None,
+            },
             _ => None,
         }
     }
@@ -256,10 +242,7 @@ impl<'db> HeapType<'db> {
         module_id: u32,
     ) -> bool {
         match (self, other) {
-            (
-                HeapType::Any | HeapType::Eq | HeapType::Struct | HeapType::Array | HeapType::I31,
-                HeapType::Any,
-            )
+            (HeapType::Any | HeapType::Eq | HeapType::Struct | HeapType::Array | HeapType::I31, HeapType::Any)
             | (HeapType::I31 | HeapType::Struct | HeapType::Array, HeapType::Eq) => true,
             (HeapType::DefFunc(..), HeapType::Func) => true,
             (heap_ty_a @ &HeapType::Type(mut a), heap_ty_b @ &HeapType::Type(mut b)) => {
@@ -278,14 +261,10 @@ impl<'db> HeapType<'db> {
                     .symbols
                     .values()
                     .find(|symbol| {
-                        symbol.kind == SymbolKind::Type
-                            && symbol.region == module.key
-                            && a.is_defined_by(&symbol.idx)
+                        symbol.kind == SymbolKind::Type && symbol.region == module.key && a.is_defined_by(&symbol.idx)
                     })
                     .zip(symbol_table.symbols.values().find(|symbol| {
-                        symbol.kind == SymbolKind::Type
-                            && symbol.region == module.key
-                            && b.is_defined_by(&symbol.idx)
+                        symbol.kind == SymbolKind::Type && symbol.region == module.key && b.is_defined_by(&symbol.idx)
                     }))
                     .map(|(a, b)| (a.key, b.key))
                     .is_some_and(|(a, b)| {
@@ -295,8 +274,7 @@ impl<'db> HeapType<'db> {
                                 .get(&a)
                                 .and_then(|def_type| def_type.inherits.as_ref())
                                 .is_some_and(|inherits| {
-                                    HeapType::Type(inherits.idx)
-                                        .matches(heap_ty_b, db, document, module_id)
+                                    HeapType::Type(inherits.idx).matches(heap_ty_b, db, document, module_id)
                                 })
                     })
             }
@@ -314,20 +292,12 @@ impl<'db> HeapType<'db> {
                     .symbols
                     .values()
                     .find(|symbol| {
-                        symbol.kind == SymbolKind::Type
-                            && symbol.region == module.key
-                            && a.is_defined_by(&symbol.idx)
+                        symbol.kind == SymbolKind::Type && symbol.region == module.key && a.is_defined_by(&symbol.idx)
                     })
                     .and_then(|symbol| def_types.get(&symbol.key))
                     .is_some_and(|def_type| match (&def_type.comp, b) {
-                        (
-                            CompositeType::Struct(..),
-                            HeapType::Any | HeapType::Eq | HeapType::Struct,
-                        ) => true,
-                        (
-                            CompositeType::Array(..),
-                            HeapType::Any | HeapType::Eq | HeapType::Array,
-                        ) => true,
+                        (CompositeType::Struct(..), HeapType::Any | HeapType::Eq | HeapType::Struct) => true,
+                        (CompositeType::Array(..), HeapType::Any | HeapType::Eq | HeapType::Array) => true,
                         (CompositeType::Func(..), HeapType::Func) => true,
                         _ => false,
                     })
@@ -351,13 +321,9 @@ impl<'db> HeapType<'db> {
                     .symbols
                     .values()
                     .find(|symbol| {
-                        symbol.kind == SymbolKind::Func
-                            && symbol.region == module.key
-                            && a.is_defined_by(&symbol.idx)
+                        symbol.kind == SymbolKind::Func && symbol.region == module.key && a.is_defined_by(&symbol.idx)
                     })
-                    .map(|symbol| {
-                        types_analyzer::get_func_sig(db, document, *symbol.key, &symbol.green)
-                    })
+                    .map(|symbol| types_analyzer::get_func_sig(db, document, *symbol.key, &symbol.green))
                     .zip(
                         symbol_table
                             .symbols
@@ -384,9 +350,7 @@ impl<'db> HeapType<'db> {
             (HeapType::None, other) => other.matches(&HeapType::Any, db, document, module_id),
             (HeapType::NoFunc, other) => other.matches(&HeapType::Func, db, document, module_id),
             (HeapType::NoExn, other) => other.matches(&HeapType::Exn, db, document, module_id),
-            (HeapType::NoExtern, other) => {
-                other.matches(&HeapType::Extern, db, document, module_id)
-            }
+            (HeapType::NoExtern, other) => other.matches(&HeapType::Extern, db, document, module_id),
             (a, b) => a == b,
         }
     }
@@ -414,14 +378,10 @@ impl<'db> HeapType<'db> {
                 .symbols
                 .values()
                 .find(|symbol| {
-                    symbol.kind == SymbolKind::Type
-                        && symbol.region == module.key
-                        && a.is_defined_by(&symbol.idx)
+                    symbol.kind == SymbolKind::Type && symbol.region == module.key && a.is_defined_by(&symbol.idx)
                 })
                 .zip(symbol_table.symbols.values().find(|symbol| {
-                    symbol.kind == SymbolKind::Type
-                        && symbol.region == module.key
-                        && b.is_defined_by(&symbol.idx)
+                    symbol.kind == SymbolKind::Type && symbol.region == module.key && b.is_defined_by(&symbol.idx)
                 }))
                 .map(|(a, b)| (a.key, b.key))
                 .is_some_and(|(a, b)| {
@@ -436,19 +396,11 @@ impl<'db> HeapType<'db> {
         }
     }
 
-    pub(crate) fn to_top_type(
-        &self,
-        db: &'db dyn salsa::Database,
-        document: Document,
-        module_id: u32,
-    ) -> Option<Self> {
+    pub(crate) fn to_top_type(&self, db: &'db dyn salsa::Database, document: Document, module_id: u32) -> Option<Self> {
         match self {
-            HeapType::Any
-            | HeapType::None
-            | HeapType::Eq
-            | HeapType::Struct
-            | HeapType::Array
-            | HeapType::I31 => Some(HeapType::Any),
+            HeapType::Any | HeapType::None | HeapType::Eq | HeapType::Struct | HeapType::Array | HeapType::I31 => {
+                Some(HeapType::Any)
+            }
             HeapType::Func | HeapType::NoFunc => Some(HeapType::Func),
             HeapType::Exn | HeapType::NoExn => Some(HeapType::Exn),
             HeapType::Extern | HeapType::NoExtern => Some(HeapType::Extern),
@@ -464,9 +416,7 @@ impl<'db> HeapType<'db> {
                     .symbols
                     .values()
                     .find(|symbol| {
-                        symbol.kind == SymbolKind::Type
-                            && symbol.region == module.key
-                            && idx.is_defined_by(&symbol.idx)
+                        symbol.kind == SymbolKind::Type && symbol.region == module.key && idx.is_defined_by(&symbol.idx)
                     })
                     .and_then(|symbol| def_types.get(&symbol.key))
                     .map(|def_type| match &def_type.comp {
@@ -493,9 +443,7 @@ impl<'db> OperandType<'db> {
         module_id: u32,
     ) -> bool {
         match (self, other) {
-            (OperandType::Val(sub), OperandType::Val(sup)) => {
-                sub.matches(sup, db, document, module_id)
-            }
+            (OperandType::Val(sub), OperandType::Val(sup)) => sub.matches(sup, db, document, module_id),
             (OperandType::Any, _) | (_, OperandType::Any) => true,
         }
     }
@@ -548,10 +496,7 @@ impl<'db> Fields<'db> {
     }
 
     pub(crate) fn to_operand_types(&self) -> Vec<OperandType<'db>> {
-        self.0
-            .iter()
-            .map(|(field, _)| field.storage.clone().into())
-            .collect()
+        self.0.iter().map(|(field, _)| field.storage.clone().into()).collect()
     }
 }
 
@@ -579,15 +524,10 @@ impl<'db> FieldType<'db> {
     ) -> bool {
         match (self.mutable, other.mutable) {
             (true, true) => {
-                self.storage
-                    .matches(&other.storage, db, document, module_id)
-                    && other
-                        .storage
-                        .matches(&self.storage, db, document, module_id)
+                self.storage.matches(&other.storage, db, document, module_id)
+                    && other.storage.matches(&self.storage, db, document, module_id)
             }
-            (false, false) => self
-                .storage
-                .matches(&other.storage, db, document, module_id),
+            (false, false) => self.storage.matches(&other.storage, db, document, module_id),
             _ => false,
         }
     }
@@ -599,10 +539,7 @@ impl<'db> FieldType<'db> {
         document: Document,
         module_id: u32,
     ) -> bool {
-        self.mutable == other.mutable
-            && self
-                .storage
-                .type_equals(&other.storage, db, document, module_id)
+        self.mutable == other.mutable && self.storage.type_equals(&other.storage, db, document, module_id)
     }
 }
 
@@ -616,14 +553,11 @@ impl<'db> StorageType<'db> {
     fn from_ast(node: &AstStorageType, db: &'db dyn salsa::Database) -> Option<Self> {
         match node {
             AstStorageType::Val(ty) => ValType::from_ast(ty, db).map(StorageType::Val),
-            AstStorageType::Packed(ty) => {
-                ty.type_keyword()
-                    .and_then(|type_keyword| match type_keyword.text() {
-                        "i8" => Some(StorageType::PackedI8),
-                        "i16" => Some(StorageType::PackedI16),
-                        _ => None,
-                    })
-            }
+            AstStorageType::Packed(ty) => ty.type_keyword().and_then(|type_keyword| match type_keyword.text() {
+                "i8" => Some(StorageType::PackedI8),
+                "i16" => Some(StorageType::PackedI16),
+                _ => None,
+            }),
         }
     }
 

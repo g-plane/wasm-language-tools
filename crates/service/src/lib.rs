@@ -21,10 +21,9 @@ use crate::{document::Document, features::SemanticTokenKind, uri::InternUri};
 use dashmap::DashMap;
 use indexmap::{IndexMap, IndexSet};
 use lspt::{
-    CodeActionKind, CodeActionOptions, CodeLensOptions, CompletionOptions, DiagnosticOptions,
-    InitializeParams, InitializeResult, RenameOptions, SemanticTokensClientCapabilities,
-    SemanticTokensLegend, SemanticTokensOptions, ServerCapabilities, ServerInfo,
-    SignatureHelpOptions, TextDocumentClientCapabilities, TextDocumentSyncKind,
+    CodeActionKind, CodeActionOptions, CodeLensOptions, CompletionOptions, DiagnosticOptions, InitializeParams,
+    InitializeResult, RenameOptions, SemanticTokensClientCapabilities, SemanticTokensLegend, SemanticTokensOptions,
+    ServerCapabilities, ServerInfo, SignatureHelpOptions, TextDocumentClientCapabilities, TextDocumentSyncKind,
     TextDocumentSyncOptions, Union2, Union3,
 };
 use rustc_hash::FxBuildHasher;
@@ -89,11 +88,7 @@ impl LanguageService {
         }
 
         self.support_pull_config = matches!(
-            params
-                .capabilities
-                .workspace
-                .as_ref()
-                .and_then(|it| it.configuration),
+            params.capabilities.workspace.as_ref().and_then(|it| it.configuration),
             Some(true)
         );
         if let Some(config) = params
@@ -122,9 +117,9 @@ impl LanguageService {
                 completion_provider: Some(CompletionOptions {
                     trigger_characters: Some(
                         [
-                            '$', '(', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
-                            'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-                            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '@',
+                            '$', '(', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+                            'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7',
+                            '8', '9', '.', '@',
                         ]
                         .iter()
                         .map(char::to_string)

@@ -48,10 +48,7 @@ pub fn check(
                     severity: Some(DiagnosticSeverity::Error),
                     source: Some("wat".into()),
                     code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                    message: format!(
-                        "struct type `{}` is not defaultable",
-                        def_symbol.idx.render(db)
-                    ),
+                    message: format!("struct type `{}` is not defaultable", def_symbol.idx.render(db)),
                     related_information: Some(
                         non_defaultables
                             .into_iter()
@@ -72,10 +69,7 @@ pub fn check(
                                                 symbol.key.text_range(),
                                             ),
                                         },
-                                        message: format!(
-                                            "field type `{}` is not defaultable",
-                                            symbol.idx.render(db)
-                                        ),
+                                        message: format!("field type `{}` is not defaultable", symbol.idx.render(db)),
                                     })
                             })
                             .collect(),
@@ -92,10 +86,7 @@ pub fn check(
             severity: Some(DiagnosticSeverity::Error),
             source: Some("wat".into()),
             code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-            message: format!(
-                "array type `{}` is not defaultable",
-                def_symbol.idx.render(db)
-            ),
+            message: format!("array type `{}` is not defaultable", def_symbol.idx.render(db)),
             ..Default::default()
         }),
         _ => None,

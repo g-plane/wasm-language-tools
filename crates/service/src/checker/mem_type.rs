@@ -10,11 +10,7 @@ use wat_syntax::{
 
 const DIAGNOSTIC_CODE: &str = "mem-type";
 
-pub fn check(
-    diagnostics: &mut Vec<Diagnostic>,
-    line_index: &LineIndex,
-    node: &SyntaxNode,
-) -> Option<()> {
+pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxNode) -> Option<()> {
     let limits = support::child::<Limits>(node)?;
     let page_size = if let Some(token) =
         support::child::<MemoryPageSize>(node).and_then(|page_size| page_size.unsigned_int_token())
@@ -80,9 +76,7 @@ pub fn check(
                 ..Default::default()
             });
         }
-    } else if let Some(token) =
-        support::token(node, SyntaxKind::KEYWORD).filter(|token| token.text() == "shared")
-    {
+    } else if let Some(token) = support::token(node, SyntaxKind::KEYWORD).filter(|token| token.text() == "shared") {
         diagnostics.push(Diagnostic {
             range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
             severity: Some(DiagnosticSeverity::Error),

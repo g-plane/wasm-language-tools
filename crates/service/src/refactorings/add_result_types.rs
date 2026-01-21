@@ -13,53 +13,47 @@ pub fn act(
     node: &SyntaxNode,
     context: &CodeActionContext,
 ) -> Option<CodeAction> {
-    let (types, diagnostic) =
-        context
-            .diagnostics
-            .iter()
-            .find_map(|diagnostic| match &diagnostic.code {
-                Some(Union2::B(code)) if code == "type-check" => diagnostic
-                    .data
-                    .as_ref()
-                    .and_then(|data| {
-                        serde_json::from_value::<(u32, u32, Vec<String>)>(data.clone())
-                            .ok()
-                            .filter(|(start, end, _)| {
-                                node.text_range() == TextRange::new((*start).into(), (*end).into())
-                            })
-                    })
-                    .map(|(.., types)| (types, diagnostic)),
-                _ => None,
-            })?;
+    let (types, diagnostic) = context
+        .diagnostics
+        .iter()
+        .find_map(|diagnostic| match &diagnostic.code {
+            Some(Union2::B(code)) if code == "type-check" => diagnostic
+                .data
+                .as_ref()
+                .and_then(|data| {
+                    serde_json::from_value::<(u32, u32, Vec<String>)>(data.clone())
+                        .ok()
+                        .filter(|(start, end, _)| node.text_range() == TextRange::new((*start).into(), (*end).into()))
+                })
+                .map(|(.., types)| (types, diagnostic)),
+            _ => None,
+        })?;
     let end = match node.kind() {
         SyntaxKind::MODULE_FIELD_FUNC => {
-            let (ControlFlow::Continue(range) | ControlFlow::Break(range)) = node
-                .children_with_tokens()
-                .try_fold(None, |range, node_or_token| match node_or_token {
-                    NodeOrToken::Node(node) => {
-                        if matches!(
-                            node.kind(),
-                            SyntaxKind::EXPORT | SyntaxKind::IMPORT | SyntaxKind::TYPE_USE
-                        ) {
-                            ControlFlow::Continue(Some(node.text_range()))
-                        } else {
-                            ControlFlow::Break(range)
+            let (ControlFlow::Continue(range) | ControlFlow::Break(range)) =
+                node.children_with_tokens()
+                    .try_fold(None, |range, node_or_token| match node_or_token {
+                        NodeOrToken::Node(node) => {
+                            if matches!(
+                                node.kind(),
+                                SyntaxKind::EXPORT | SyntaxKind::IMPORT | SyntaxKind::TYPE_USE
+                            ) {
+                                ControlFlow::Continue(Some(node.text_range()))
+                            } else {
+                                ControlFlow::Break(range)
+                            }
                         }
-                    }
-                    NodeOrToken::Token(token) => {
-                        if matches!(token.kind(), SyntaxKind::KEYWORD | SyntaxKind::IDENT) {
-                            ControlFlow::Continue(Some(token.text_range()))
-                        } else {
-                            ControlFlow::Continue(range)
+                        NodeOrToken::Token(token) => {
+                            if matches!(token.kind(), SyntaxKind::KEYWORD | SyntaxKind::IDENT) {
+                                ControlFlow::Continue(Some(token.text_range()))
+                            } else {
+                                ControlFlow::Continue(range)
+                            }
                         }
-                    }
-                });
+                    });
             range
         }
-        SyntaxKind::BLOCK_BLOCK
-        | SyntaxKind::BLOCK_LOOP
-        | SyntaxKind::BLOCK_IF
-        | SyntaxKind::BLOCK_TRY_TABLE => node
+        SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_IF | SyntaxKind::BLOCK_TRY_TABLE => node
             .first_child_by_kind(&|kind| kind == SyntaxKind::BLOCK_TYPE)
             .map(|child| child.text_range())
             .or_else(|| {

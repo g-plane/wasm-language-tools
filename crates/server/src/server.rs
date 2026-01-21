@@ -4,25 +4,23 @@ use crate::{
     stdio,
 };
 use lspt::{
-    ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams,
-    DidChangeTextDocumentParams, DidOpenTextDocumentParams, InitializeParams, Registration,
-    RegistrationParams,
+    ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams, DidChangeTextDocumentParams,
+    DidOpenTextDocumentParams, InitializeParams, Registration, RegistrationParams,
     notification::{
-        DidChangeConfigurationNotification, DidChangeTextDocumentNotification,
-        DidCloseTextDocumentNotification, DidOpenTextDocumentNotification, ExitNotification,
-        InitializedNotification, Notification as _, PublishDiagnosticsNotification,
+        DidChangeConfigurationNotification, DidChangeTextDocumentNotification, DidCloseTextDocumentNotification,
+        DidOpenTextDocumentNotification, ExitNotification, InitializedNotification, Notification as _,
+        PublishDiagnosticsNotification,
     },
     request::{
-        CallHierarchyIncomingCallsRequest, CallHierarchyOutgoingCallsRequest,
-        CallHierarchyPrepareRequest, CodeActionRequest, CodeLensRequest, CodeLensResolveRequest,
-        CompletionRequest, ConfigurationRequest, DeclarationRequest, DefinitionRequest,
-        DiagnosticRefreshRequest, DocumentDiagnosticRequest, DocumentFormattingRequest,
-        DocumentHighlightRequest, DocumentRangeFormattingRequest, DocumentSymbolRequest,
-        FoldingRangeRequest, HoverRequest, InlayHintRefreshRequest, InlayHintRequest,
-        PrepareRenameRequest, ReferencesRequest, RegistrationRequest, RenameRequest, Request as _,
-        SelectionRangeRequest, SemanticTokensRangeRequest, SemanticTokensRequest, ShutdownRequest,
-        SignatureHelpRequest, TypeDefinitionRequest, TypeHierarchyPrepareRequest,
-        TypeHierarchySubtypesRequest, TypeHierarchySupertypesRequest,
+        CallHierarchyIncomingCallsRequest, CallHierarchyOutgoingCallsRequest, CallHierarchyPrepareRequest,
+        CodeActionRequest, CodeLensRequest, CodeLensResolveRequest, CompletionRequest, ConfigurationRequest,
+        DeclarationRequest, DefinitionRequest, DiagnosticRefreshRequest, DocumentDiagnosticRequest,
+        DocumentFormattingRequest, DocumentHighlightRequest, DocumentRangeFormattingRequest, DocumentSymbolRequest,
+        FoldingRangeRequest, HoverRequest, InlayHintRefreshRequest, InlayHintRequest, PrepareRenameRequest,
+        ReferencesRequest, RegistrationRequest, RenameRequest, Request as _, SelectionRangeRequest,
+        SemanticTokensRangeRequest, SemanticTokensRequest, ShutdownRequest, SignatureHelpRequest,
+        TypeDefinitionRequest, TypeHierarchyPrepareRequest, TypeHierarchySubtypesRequest,
+        TypeHierarchySupertypesRequest,
     },
 };
 use rayon::{ThreadPool, ThreadPoolBuilder};
@@ -75,8 +73,7 @@ impl Server {
                     self.handle_response(id, result)?;
                 }
                 Message::Notification { method, mut params } => {
-                    match try_cast_notification::<DidOpenTextDocumentNotification>(&method, params)
-                    {
+                    match try_cast_notification::<DidOpenTextDocumentNotification>(&method, params) {
                         Ok(Ok(params)) => {
                             self.handle_did_open_text_document(params)?;
                             continue;
@@ -84,9 +81,7 @@ impl Server {
                         Ok(Err(..)) => continue,
                         Err(p) => params = p,
                     }
-                    match try_cast_notification::<DidChangeTextDocumentNotification>(
-                        &method, params,
-                    ) {
+                    match try_cast_notification::<DidChangeTextDocumentNotification>(&method, params) {
                         Ok(Ok(params)) => {
                             self.handle_did_change_text_document(params)?;
                             continue;
@@ -94,8 +89,7 @@ impl Server {
                         Ok(Err(..)) => continue,
                         Err(p) => params = p,
                     }
-                    match try_cast_notification::<DidCloseTextDocumentNotification>(&method, params)
-                    {
+                    match try_cast_notification::<DidCloseTextDocumentNotification>(&method, params) {
                         Ok(Ok(params)) => {
                             self.service.did_close(params);
                             continue;
@@ -103,9 +97,7 @@ impl Server {
                         Ok(Err(..)) => continue,
                         Err(p) => params = p,
                     }
-                    match try_cast_notification::<DidChangeConfigurationNotification>(
-                        &method, params,
-                    ) {
+                    match try_cast_notification::<DidChangeConfigurationNotification>(&method, params) {
                         Ok(Ok(params)) => {
                             self.handle_did_change_configuration(params)?;
                             continue;
@@ -122,8 +114,7 @@ impl Server {
                                     params: serde_json::to_value(RegistrationParams {
                                         registrations: vec![Registration {
                                             id: DidChangeConfigurationNotification::METHOD.into(),
-                                            method: DidChangeConfigurationNotification::METHOD
-                                                .into(),
+                                            method: DidChangeConfigurationNotification::METHOD.into(),
                                             register_options: None,
                                         }],
                                     })?,
@@ -174,11 +165,7 @@ impl Server {
             Some(true)
         );
         self.support_pull_config = matches!(
-            params
-                .capabilities
-                .workspace
-                .as_ref()
-                .and_then(|it| it.configuration),
+            params.capabilities.workspace.as_ref().and_then(|it| it.configuration),
             Some(true)
         );
         self.support_register_change_config = matches!(
@@ -197,12 +184,7 @@ impl Server {
         Ok(())
     }
 
-    fn handle_request(
-        service: LanguageService,
-        id: u32,
-        method: String,
-        params: serde_json::Value,
-    ) -> Message {
+    fn handle_request(service: LanguageService, id: u32, method: String, params: serde_json::Value) -> Message {
         try_cast_request::<CallHierarchyPrepareRequest>(&method, params)
             .map(|params| {
                 params
@@ -210,26 +192,18 @@ impl Server {
                     .map(|result| Message::OkResponse { id, result })
             })
             .or_else(|params| {
-                try_cast_request::<CallHierarchyIncomingCallsRequest>(&method, params).map(
-                    |params| {
-                        params
-                            .and_then(|params| {
-                                serde_json::to_value(service.call_hierarchy_incoming_calls(params))
-                            })
-                            .map(|result| Message::OkResponse { id, result })
-                    },
-                )
+                try_cast_request::<CallHierarchyIncomingCallsRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.call_hierarchy_incoming_calls(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
             })
             .or_else(|params| {
-                try_cast_request::<CallHierarchyOutgoingCallsRequest>(&method, params).map(
-                    |params| {
-                        params
-                            .and_then(|params| {
-                                serde_json::to_value(service.call_hierarchy_outgoing_calls(params))
-                            })
-                            .map(|result| Message::OkResponse { id, result })
-                    },
-                )
+                try_cast_request::<CallHierarchyOutgoingCallsRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.call_hierarchy_outgoing_calls(params)))
+                        .map(|result| Message::OkResponse { id, result })
+                })
             })
             .or_else(|params| {
                 try_cast_request::<CodeActionRequest>(&method, params).map(|params| {
@@ -304,9 +278,7 @@ impl Server {
             .or_else(|params| {
                 try_cast_request::<TypeDefinitionRequest>(&method, params).map(|params| {
                     params
-                        .and_then(|params| {
-                            serde_json::to_value(service.goto_type_definition(params))
-                        })
+                        .and_then(|params| serde_json::to_value(service.goto_type_definition(params)))
                         .map(|result| Message::OkResponse { id, result })
                 })
             })
@@ -348,8 +320,7 @@ impl Server {
             .or_else(|params| {
                 try_cast_request::<RenameRequest>(&method, params).map(|params| {
                     params.and_then(|params| match service.rename(params) {
-                        Ok(result) => serde_json::to_value(result)
-                            .map(|result| Message::OkResponse { id, result }),
+                        Ok(result) => serde_json::to_value(result).map(|result| Message::OkResponse { id, result }),
                         Err(message) => Ok(Message::ErrResponse {
                             id,
                             error: ResponseError {
@@ -371,18 +342,14 @@ impl Server {
             .or_else(|params| {
                 try_cast_request::<SemanticTokensRequest>(&method, params).map(|params| {
                     params
-                        .and_then(|params| {
-                            serde_json::to_value(service.semantic_tokens_full(params))
-                        })
+                        .and_then(|params| serde_json::to_value(service.semantic_tokens_full(params)))
                         .map(|result| Message::OkResponse { id, result })
                 })
             })
             .or_else(|params| {
                 try_cast_request::<SemanticTokensRangeRequest>(&method, params).map(|params| {
                     params
-                        .and_then(|params| {
-                            serde_json::to_value(service.semantic_tokens_range(params))
-                        })
+                        .and_then(|params| serde_json::to_value(service.semantic_tokens_range(params)))
                         .map(|result| Message::OkResponse { id, result })
                 })
             })
@@ -403,27 +370,21 @@ impl Server {
             .or_else(|params| {
                 try_cast_request::<TypeHierarchyPrepareRequest>(&method, params).map(|params| {
                     params
-                        .and_then(|params| {
-                            serde_json::to_value(service.prepare_type_hierarchy(params))
-                        })
+                        .and_then(|params| serde_json::to_value(service.prepare_type_hierarchy(params)))
                         .map(|result| Message::OkResponse { id, result })
                 })
             })
             .or_else(|params| {
                 try_cast_request::<TypeHierarchySupertypesRequest>(&method, params).map(|params| {
                     params
-                        .and_then(|params| {
-                            serde_json::to_value(service.type_hierarchy_supertypes(params))
-                        })
+                        .and_then(|params| serde_json::to_value(service.type_hierarchy_supertypes(params)))
                         .map(|result| Message::OkResponse { id, result })
                 })
             })
             .or_else(|params| {
                 try_cast_request::<TypeHierarchySubtypesRequest>(&method, params).map(|params| {
                     params
-                        .and_then(|params| {
-                            serde_json::to_value(service.type_hierarchy_subtypes(params))
-                        })
+                        .and_then(|params| serde_json::to_value(service.type_hierarchy_subtypes(params)))
                         .map(|result| Message::OkResponse { id, result })
                 })
             })
@@ -463,10 +424,7 @@ impl Server {
         }
     }
 
-    fn handle_did_open_text_document(
-        &mut self,
-        params: DidOpenTextDocumentParams,
-    ) -> anyhow::Result<()> {
+    fn handle_did_open_text_document(&mut self, params: DidOpenTextDocumentParams) -> anyhow::Result<()> {
         let uri = params.text_document.uri.clone();
         self.service.did_open(params);
         if !self.support_pull_diagnostics {
@@ -487,10 +445,7 @@ impl Server {
         Ok(())
     }
 
-    fn handle_did_change_text_document(
-        &mut self,
-        params: DidChangeTextDocumentParams,
-    ) -> anyhow::Result<()> {
+    fn handle_did_change_text_document(&mut self, params: DidChangeTextDocumentParams) -> anyhow::Result<()> {
         let uri = params.text_document.uri.clone();
         self.service.did_change(params);
         if !self.support_pull_diagnostics {
@@ -499,10 +454,7 @@ impl Server {
         Ok(())
     }
 
-    fn handle_did_change_configuration(
-        &mut self,
-        params: DidChangeConfigurationParams,
-    ) -> anyhow::Result<()> {
+    fn handle_did_change_configuration(&mut self, params: DidChangeConfigurationParams) -> anyhow::Result<()> {
         if self.support_pull_config {
             let uris = self.service.get_opened_uris();
             stdio::write(
@@ -539,11 +491,7 @@ impl Server {
         })
     }
 
-    fn update_configs(
-        &mut self,
-        uris: Vec<String>,
-        result: serde_json::Value,
-    ) -> anyhow::Result<()> {
+    fn update_configs(&mut self, uris: Vec<String>, result: serde_json::Value) -> anyhow::Result<()> {
         uris.iter()
             .zip(serde_json::from_value::<Vec<_>>(result)?)
             .for_each(|(uri, config)| self.service.set_config(uri, config));

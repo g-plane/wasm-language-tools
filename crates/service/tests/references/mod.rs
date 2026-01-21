@@ -11,20 +11,13 @@ mod table;
 mod tag;
 mod ty;
 
-fn create_params(
-    uri: String,
-    line: u32,
-    character: u32,
-    include_declaration: bool,
-) -> ReferenceParams {
+fn create_params(uri: String, line: u32, character: u32, include_declaration: bool) -> ReferenceParams {
     ReferenceParams {
         text_document: TextDocumentIdentifier { uri },
         position: Position { line, character },
         work_done_token: Default::default(),
         partial_result_token: Default::default(),
-        context: ReferenceContext {
-            include_declaration,
-        },
+        context: ReferenceContext { include_declaration },
     }
 }
 

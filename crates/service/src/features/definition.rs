@@ -3,9 +3,7 @@ use crate::{
     binder::{SymbolKey, SymbolTable},
     helpers,
 };
-use lspt::{
-    Declaration, DeclarationParams, Definition, DefinitionParams, TypeDefinitionParams, Union2,
-};
+use lspt::{Declaration, DeclarationParams, Definition, DefinitionParams, TypeDefinitionParams, Union2};
 use wat_syntax::SyntaxKind;
 
 impl LanguageService {
@@ -39,9 +37,7 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, *document);
         let token = super::find_meaningful_token(self, *document, &root, params.position)?;
 
-        let parent = token
-            .parent()
-            .filter(|parent| parent.kind() == SyntaxKind::IMMEDIATE)?;
+        let parent = token.parent().filter(|parent| parent.kind() == SyntaxKind::IMMEDIATE)?;
         symbol_table
             .resolved
             .get(&SymbolKey::new(&parent))
@@ -54,17 +50,11 @@ impl LanguageService {
                         }
                         SyntaxKind::REF_TYPE => child
                             .first_child_by_kind(&|kind| kind == SyntaxKind::HEAP_TYPE)
-                            .and_then(|node| {
-                                node.first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
-                            }),
+                            .and_then(|node| node.first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)),
                         SyntaxKind::GLOBAL_TYPE => child
                             .first_child_by_kind(&|kind| kind == SyntaxKind::REF_TYPE)
-                            .and_then(|node| {
-                                node.first_child_by_kind(&|kind| kind == SyntaxKind::HEAP_TYPE)
-                            })
-                            .and_then(|node| {
-                                node.first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
-                            }),
+                            .and_then(|node| node.first_child_by_kind(&|kind| kind == SyntaxKind::HEAP_TYPE))
+                            .and_then(|node| node.first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)),
                         _ => None,
                     })
                     .and_then(|type_idx| symbol_table.resolved.get(&SymbolKey::new(&type_idx)))

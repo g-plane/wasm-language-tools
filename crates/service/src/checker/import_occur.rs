@@ -13,9 +13,7 @@ pub fn check(line_index: &LineIndex, node: &SyntaxNode) -> Option<Diagnostic> {
                 | SyntaxKind::MODULE_FIELD_TABLE
                 | SyntaxKind::MODULE_FIELD_MEMORY
                 | SyntaxKind::MODULE_FIELD_GLOBAL
-        ) && !prev
-            .children()
-            .any(|child| child.kind() == SyntaxKind::IMPORT)
+        ) && !prev.children().any(|child| child.kind() == SyntaxKind::IMPORT)
     }) {
         Some(Diagnostic {
             range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),

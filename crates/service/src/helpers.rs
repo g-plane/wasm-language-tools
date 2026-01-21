@@ -60,11 +60,7 @@ where
     });
     haystack
         .into_iter()
-        .filter_map(|name| {
-            matcher
-                .fuzzy_match(name.as_ref(), needle)
-                .map(|score| (score, name))
-        })
+        .filter_map(|name| matcher.fuzzy_match(name.as_ref(), needle).map(|score| (score, name)))
         .min_by_key(|(score, _)| *score)
         .map(|(_, guess)| guess)
 }
@@ -157,9 +153,7 @@ pub(crate) mod ast {
     pub fn extract_index_from_export(module_field_export: &SyntaxNode) -> Option<SyntaxNode> {
         module_field_export
             .first_child_by_kind(&ExternIdx::can_cast)
-            .and_then(|extern_idx| {
-                extern_idx.first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
-            })
+            .and_then(|extern_idx| extern_idx.first_child_by_kind(&|kind| kind == SyntaxKind::INDEX))
     }
 
     pub fn is_call(node: &SyntaxNode) -> bool {

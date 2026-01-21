@@ -72,8 +72,7 @@ fn diagnostics() {
     let mut params = create_params(uri, 2, 25, 2, 25);
     params.context = CodeActionContext {
         diagnostics: vec![Diagnostic {
-            message: "syntax error: whitespaces or comments are not allowed inside memory argument"
-                .into(),
+            message: "syntax error: whitespaces or comments are not allowed inside memory argument".into(),
             code: Some(Union2::B("syntax".into())),
             ..Default::default()
         }],

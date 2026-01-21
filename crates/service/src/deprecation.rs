@@ -4,10 +4,7 @@ use rustc_hash::FxHashMap;
 use wat_syntax::SyntaxKind;
 
 #[salsa::tracked(returns(ref))]
-pub(crate) fn get_deprecation(
-    db: &dyn salsa::Database,
-    document: Document,
-) -> FxHashMap<SymbolKey, Option<String>> {
+pub(crate) fn get_deprecation(db: &dyn salsa::Database, document: Document) -> FxHashMap<SymbolKey, Option<String>> {
     let root = document.root_tree(db);
     root.children()
         .flat_map(|module| module.children())
@@ -55,11 +52,7 @@ pub(crate) fn get_deprecation(
                         && token
                             .text()
                             .strip_prefix("(@")
-                            .map(|s| {
-                                s.strip_prefix('"')
-                                    .and_then(|s| s.strip_suffix('"'))
-                                    .unwrap_or(s)
-                            })
+                            .map(|s| s.strip_prefix('"').and_then(|s| s.strip_suffix('"')).unwrap_or(s))
                             .is_some_and(|name| name == "deprecated")
                 })
                 .map(|annot_start| {

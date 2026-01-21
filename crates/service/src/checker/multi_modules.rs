@@ -5,12 +5,7 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "multiple-modules";
 
-pub fn check(
-    diagnostics: &mut Vec<Diagnostic>,
-    lint_level: LintLevel,
-    line_index: &LineIndex,
-    root: &SyntaxNode,
-) {
+pub fn check(diagnostics: &mut Vec<Diagnostic>, lint_level: LintLevel, line_index: &LineIndex, root: &SyntaxNode) {
     let severity = match lint_level {
         LintLevel::Allow => return,
         LintLevel::Hint => DiagnosticSeverity::Hint,

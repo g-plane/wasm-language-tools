@@ -22,10 +22,7 @@ pub fn act(
     let def_num = def_idx.num?;
     let def_name = def_idx.name?;
     let (new_text, title) = if ref_idx.name.is_some() {
-        (
-            def_num.to_string(),
-            "Convert identifier to numeric idx".into(),
-        )
+        (def_num.to_string(), "Convert identifier to numeric idx".into())
     } else {
         (
             def_name.ident(db).to_string(),

@@ -24,8 +24,7 @@ pub fn check(
     match instr_name.text() {
         "struct.get" => {
             let def_types = types_analyzer::get_def_types(db, document);
-            if let Some((_, symbol)) =
-                find_struct_field(symbol_table, def_types, node).filter(|(ty, _)| ty.is_packed())
+            if let Some((_, symbol)) = find_struct_field(symbol_table, def_types, node).filter(|(ty, _)| ty.is_packed())
             {
                 Some(Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
@@ -36,10 +35,7 @@ pub fn check(
                     related_information: Some(vec![DiagnosticRelatedInformation {
                         location: Location {
                             uri: uri.raw(db),
-                            range: helpers::rowan_range_to_lsp_range(
-                                line_index,
-                                instr_name.text_range(),
-                            ),
+                            range: helpers::rowan_range_to_lsp_range(line_index, instr_name.text_range()),
                         },
                         message: "use `struct.get_s` or `struct.get_u` instead".into(),
                     }]),
@@ -63,10 +59,7 @@ pub fn check(
                     related_information: Some(vec![DiagnosticRelatedInformation {
                         location: Location {
                             uri: uri.raw(db),
-                            range: helpers::rowan_range_to_lsp_range(
-                                line_index,
-                                instr_name.text_range(),
-                            ),
+                            range: helpers::rowan_range_to_lsp_range(line_index, instr_name.text_range()),
                         },
                         message: "use `struct.get` instead".into(),
                     }]),
@@ -78,9 +71,7 @@ pub fn check(
         }
         "array.get" => {
             let def_types = types_analyzer::get_def_types(db, document);
-            if let Some((_, symbol)) =
-                find_array(symbol_table, def_types, node).filter(|(ty, _)| ty.is_packed())
-            {
+            if let Some((_, symbol)) = find_array(symbol_table, def_types, node).filter(|(ty, _)| ty.is_packed()) {
                 Some(Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
                     severity: Some(DiagnosticSeverity::Error),
@@ -90,10 +81,7 @@ pub fn check(
                     related_information: Some(vec![DiagnosticRelatedInformation {
                         location: Location {
                             uri: uri.raw(db),
-                            range: helpers::rowan_range_to_lsp_range(
-                                line_index,
-                                instr_name.text_range(),
-                            ),
+                            range: helpers::rowan_range_to_lsp_range(line_index, instr_name.text_range()),
                         },
                         message: "use `array.get_s` or `array.get_u` instead".into(),
                     }]),
@@ -105,9 +93,7 @@ pub fn check(
         }
         "array.get_s" | "array.get_u" => {
             let def_types = types_analyzer::get_def_types(db, document);
-            if let Some((_, symbol)) =
-                find_array(symbol_table, def_types, node).filter(|(ty, _)| !ty.is_packed())
-            {
+            if let Some((_, symbol)) = find_array(symbol_table, def_types, node).filter(|(ty, _)| !ty.is_packed()) {
                 Some(Diagnostic {
                     range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
                     severity: Some(DiagnosticSeverity::Error),
@@ -117,10 +103,7 @@ pub fn check(
                     related_information: Some(vec![DiagnosticRelatedInformation {
                         location: Location {
                             uri: uri.raw(db),
-                            range: helpers::rowan_range_to_lsp_range(
-                                line_index,
-                                instr_name.text_range(),
-                            ),
+                            range: helpers::rowan_range_to_lsp_range(line_index, instr_name.text_range()),
                         },
                         message: "use `array.get` instead".into(),
                     }]),
@@ -139,18 +122,10 @@ fn find_struct_field<'db>(
     def_types: &'db DefTypes<'db>,
     node: &SyntaxNode,
 ) -> Option<(&'db StorageType<'db>, &'db Symbol<'db>)> {
-    let mut immediates = node
-        .children()
-        .filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
-    let struct_def_key = symbol_table
-        .resolved
-        .get(&SymbolKey::new(&immediates.next()?))?;
-    let field_ref_symbol = symbol_table
-        .symbols
-        .get(&SymbolKey::new(&immediates.next()?))?;
-    if let Some(CompositeType::Struct(Fields(fields))) =
-        def_types.get(struct_def_key).map(|def_type| &def_type.comp)
-    {
+    let mut immediates = node.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+    let struct_def_key = symbol_table.resolved.get(&SymbolKey::new(&immediates.next()?))?;
+    let field_ref_symbol = symbol_table.symbols.get(&SymbolKey::new(&immediates.next()?))?;
+    if let Some(CompositeType::Struct(Fields(fields))) = def_types.get(struct_def_key).map(|def_type| &def_type.comp) {
         fields
             .iter()
             .find(|(_, idx)| field_ref_symbol.idx.is_defined_by(idx))

@@ -76,10 +76,7 @@ pub struct ResponseError {
 // ---------------------
 // ↓ `lspt` crate related code
 
-pub fn try_cast_request<R>(
-    method: &str,
-    params: Value,
-) -> Result<Result<R::Params, serde_json::Error>, Value>
+pub fn try_cast_request<R>(method: &str, params: Value) -> Result<Result<R::Params, serde_json::Error>, Value>
 where
     R: lspt::request::Request,
     R::Params: serde::de::DeserializeOwned,
@@ -91,10 +88,7 @@ where
     }
 }
 
-pub fn try_cast_notification<N>(
-    method: &str,
-    params: Value,
-) -> Result<Result<N::Params, serde_json::Error>, Value>
+pub fn try_cast_notification<N>(method: &str, params: Value) -> Result<Result<N::Params, serde_json::Error>, Value>
 where
     N: lspt::notification::Notification,
     N::Params: serde::de::DeserializeOwned,

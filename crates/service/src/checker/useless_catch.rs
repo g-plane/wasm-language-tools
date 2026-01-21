@@ -5,9 +5,7 @@ use crate::{
     uri::InternUri,
 };
 use line_index::LineIndex;
-use lspt::{
-    Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, DiagnosticTag, Location, Union2,
-};
+use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, DiagnosticTag, Location, Union2};
 use rowan::ast::{AstNode, support};
 use rustc_hash::FxHashMap;
 use wat_syntax::{
@@ -57,14 +55,7 @@ pub fn check(
                         return;
                     }
                 };
-                diagnostics.push(build_diagnostic(
-                    catch.syntax(),
-                    matched,
-                    line_index,
-                    uri,
-                    db,
-                    severity,
-                ));
+                diagnostics.push(build_diagnostic(catch.syntax(), matched, line_index, uri, db, severity));
             }
         }
         Cat::CatchAll(catch_all) => {

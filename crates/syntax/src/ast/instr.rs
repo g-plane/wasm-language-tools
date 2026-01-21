@@ -285,10 +285,7 @@ impl AstNode for BlockInstr {
     {
         matches!(
             kind,
-            SyntaxKind::BLOCK_BLOCK
-                | SyntaxKind::BLOCK_LOOP
-                | SyntaxKind::BLOCK_IF
-                | SyntaxKind::BLOCK_TRY_TABLE
+            SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_IF | SyntaxKind::BLOCK_TRY_TABLE
         )
     }
     #[inline]
@@ -666,9 +663,7 @@ impl AstNode for Instr {
             SyntaxKind::BLOCK_BLOCK => Some(Instr::Block(BlockInstr::Block(BlockBlock { syntax }))),
             SyntaxKind::BLOCK_LOOP => Some(Instr::Block(BlockInstr::Loop(BlockLoop { syntax }))),
             SyntaxKind::BLOCK_IF => Some(Instr::Block(BlockInstr::If(BlockIf { syntax }))),
-            SyntaxKind::BLOCK_TRY_TABLE => {
-                Some(Instr::Block(BlockInstr::TryTable(BlockTryTable { syntax })))
-            }
+            SyntaxKind::BLOCK_TRY_TABLE => Some(Instr::Block(BlockInstr::TryTable(BlockTryTable { syntax }))),
             _ => None,
         }
     }

@@ -1,8 +1,7 @@
 use crate::{LanguageService, config::ConfigState, helpers, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{
-    DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
-    TextDocumentContentChangeEvent,
+    DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams, TextDocumentContentChangeEvent,
 };
 use rowan::{GreenNode, TextSize};
 use salsa::Setter;
@@ -40,10 +39,8 @@ impl LanguageService {
             document.set_root(self).to(green);
             document.set_syntax_errors(self).to(errors);
         } else {
-            self.documents.insert(
-                uri,
-                Document::new(self, uri, text, line_index, green, errors),
-            );
+            self.documents
+                .insert(uri, Document::new(self, uri, text, line_index, green, errors));
             if !self.support_pull_config {
                 self.configs.insert(uri, ConfigState::Inherit);
             }
@@ -57,14 +54,7 @@ impl LanguageService {
         let (green, errors) = wat_parser::parse(&params.text_document.text);
         self.documents.insert(
             uri,
-            Document::new(
-                self,
-                uri,
-                params.text_document.text,
-                line_index,
-                green,
-                errors,
-            ),
+            Document::new(self, uri, params.text_document.text, line_index, green, errors),
         );
         if !self.support_pull_config {
             self.configs.insert(uri, ConfigState::Inherit);
@@ -74,8 +64,7 @@ impl LanguageService {
     /// Handler for `textDocument/didChange` notification.
     pub fn did_change(&mut self, params: DidChangeTextDocumentParams) {
         let documents = self.documents.clone();
-        let Some(document) = documents.get_mut(&InternUri::new(self, params.text_document.uri))
-        else {
+        let Some(document) = documents.get_mut(&InternUri::new(self, params.text_document.uri)) else {
             return;
         };
         'single: {
@@ -87,10 +76,8 @@ impl LanguageService {
                             // user may be typing a comment
                             break 'single;
                         }
-                        let Some(range) = helpers::lsp_range_to_rowan_range(
-                            document.line_index(self),
-                            partial.range,
-                        ) else {
+                        let Some(range) = helpers::lsp_range_to_rowan_range(document.line_index(self), partial.range)
+                        else {
                             break 'single;
                         };
                         // search the module field where code is changed
@@ -102,8 +89,7 @@ impl LanguageService {
                             .and_then(|node_or_token| node_or_token.into_node())
                             .filter(|node| {
                                 let node_range = node.text_range();
-                                node_range.start() <= range.start()
-                                    && node_range.end() > range.end()
+                                node_range.start() <= range.start() && node_range.end() > range.end()
                             })
                         else {
                             break 'single;
@@ -129,15 +115,11 @@ impl LanguageService {
                             ) {
                                 // parser has returned new syntax errors about that module field,
                                 // so we need to remove old errors that belongs to that module field
-                                (
-                                    Ordering::Less | Ordering::Equal,
-                                    Ordering::Greater | Ordering::Equal,
-                                ) => false,
+                                (Ordering::Less | Ordering::Equal, Ordering::Greater | Ordering::Equal) => false,
                                 // for syntax errors after that module field,
                                 // we need to adjust their locations
                                 (Ordering::Less | Ordering::Equal, _) => {
-                                    error.range =
-                                        error.range + TextSize::of(&partial.text) - range.len();
+                                    error.range = error.range + TextSize::of(&partial.text) - range.len();
                                     true
                                 }
                                 _ => true,
@@ -154,9 +136,7 @@ impl LanguageService {
                     [TextDocumentContentChangeEvent::B(whole)] => {
                         let (green, errors) = wat_parser::parse(&whole.text);
                         document.set_text(self).to(whole.text.clone());
-                        document
-                            .set_line_index(self)
-                            .to(LineIndex::new(&whole.text));
+                        document.set_line_index(self).to(LineIndex::new(&whole.text));
                         document.set_root(self).to(green);
                         document.set_syntax_errors(self).to(errors);
                     }
@@ -168,26 +148,18 @@ impl LanguageService {
 
         let mut line_index = document.line_index(self).clone();
         let mut text = document.text(self);
-        params
-            .content_changes
-            .into_iter()
-            .for_each(|change| match change {
-                TextDocumentContentChangeEvent::A(partial) => {
-                    if let Some(range) =
-                        helpers::lsp_range_to_rowan_range(&line_index, partial.range)
-                    {
-                        text.replace_range::<Range<usize>>(
-                            range.start().into()..range.end().into(),
-                            &partial.text,
-                        );
-                        line_index = LineIndex::new(&text);
-                    }
+        params.content_changes.into_iter().for_each(|change| match change {
+            TextDocumentContentChangeEvent::A(partial) => {
+                if let Some(range) = helpers::lsp_range_to_rowan_range(&line_index, partial.range) {
+                    text.replace_range::<Range<usize>>(range.start().into()..range.end().into(), &partial.text);
+                    line_index = LineIndex::new(&text);
                 }
-                TextDocumentContentChangeEvent::B(whole) => {
-                    line_index = LineIndex::new(&whole.text);
-                    text = whole.text;
-                }
-            });
+            }
+            TextDocumentContentChangeEvent::B(whole) => {
+                line_index = LineIndex::new(&whole.text);
+                text = whole.text;
+            }
+        });
 
         let (green, errors) = wat_parser::parse(&text);
         document.set_text(self).to(text);
@@ -198,17 +170,13 @@ impl LanguageService {
 
     /// Handler for `textDocument/didClose` notification.
     pub fn did_close(&mut self, params: DidCloseTextDocumentParams) {
-        self.documents
-            .remove(&InternUri::new(self, params.text_document.uri));
+        self.documents.remove(&InternUri::new(self, params.text_document.uri));
     }
 
     #[inline]
     /// Get URIs of all opened documents.
     pub fn get_opened_uris(&self) -> Vec<String> {
-        self.documents
-            .iter()
-            .map(|pair| pair.key().raw(self))
-            .collect()
+        self.documents.iter().map(|pair| pair.key().raw(self)).collect()
     }
 
     pub(crate) fn get_document(
@@ -223,10 +191,10 @@ impl LanguageService {
 mod tests {
     use super::*;
     use lspt::{
-        Definition, DefinitionParams, DocumentDiagnosticParams, DocumentHighlightParams, Hover,
-        HoverParams, Location, MarkupContent, MarkupKind, Position, Range,
-        TextDocumentContentChangePartial, TextDocumentContentChangeWholeDocument,
-        TextDocumentIdentifier, TextDocumentItem, Union2, Union3, VersionedTextDocumentIdentifier,
+        Definition, DefinitionParams, DocumentDiagnosticParams, DocumentHighlightParams, Hover, HoverParams, Location,
+        MarkupContent, MarkupKind, Position, Range, TextDocumentContentChangePartial,
+        TextDocumentContentChangeWholeDocument, TextDocumentIdentifier, TextDocumentItem, Union2, Union3,
+        VersionedTextDocumentIdentifier,
     };
 
     #[test]
@@ -274,22 +242,14 @@ mod tests {
                 uri: uri.clone(),
                 version: 2,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::A(
-                TextDocumentContentChangePartial {
-                    range: Range {
-                        start: Position {
-                            line: 1,
-                            character: 8,
-                        },
-                        end: Position {
-                            line: 1,
-                            character: 8,
-                        },
-                    },
-                    text: "(func (param $x) (param i32))".into(),
-                    ..Default::default()
+            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                range: Range {
+                    start: Position { line: 1, character: 8 },
+                    end: Position { line: 1, character: 8 },
                 },
-            )],
+                text: "(func (param $x) (param i32))".into(),
+                ..Default::default()
+            })],
         });
         let mut diagnostics = service
             .pull_diagnostics(DocumentDiagnosticParams {
@@ -311,27 +271,15 @@ mod tests {
         assert_eq!(
             diagnostics.next().unwrap().range,
             Range {
-                start: Position {
-                    line: 1,
-                    character: 23,
-                },
-                end: Position {
-                    line: 1,
-                    character: 24,
-                },
+                start: Position { line: 1, character: 23 },
+                end: Position { line: 1, character: 24 },
             }
         );
         assert_eq!(
             diagnostics.next().unwrap().range,
             Range {
-                start: Position {
-                    line: 1,
-                    character: 45,
-                },
-                end: Position {
-                    line: 1,
-                    character: 46,
-                },
+                start: Position { line: 1, character: 45 },
+                end: Position { line: 1, character: 46 },
             }
         );
     }
@@ -360,22 +308,14 @@ mod tests {
                 uri: uri.clone(),
                 version: 2,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::A(
-                TextDocumentContentChangePartial {
-                    range: Range {
-                        start: Position {
-                            line: 1,
-                            character: 7,
-                        },
-                        end: Position {
-                            line: 1,
-                            character: 8,
-                        },
-                    },
-                    text: "".into(),
-                    ..Default::default()
+            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                range: Range {
+                    start: Position { line: 1, character: 7 },
+                    end: Position { line: 1, character: 8 },
                 },
-            )],
+                text: "".into(),
+                ..Default::default()
+            })],
         });
         let mut diagnostics = service
             .pull_diagnostics(DocumentDiagnosticParams {
@@ -397,40 +337,22 @@ mod tests {
         assert_eq!(
             diagnostics.next().unwrap().range,
             Range {
-                start: Position {
-                    line: 1,
-                    character: 3,
-                },
-                end: Position {
-                    line: 1,
-                    character: 7,
-                },
+                start: Position { line: 1, character: 3 },
+                end: Position { line: 1, character: 7 },
             }
         );
         assert_eq!(
             diagnostics.next().unwrap().range,
             Range {
-                start: Position {
-                    line: 1,
-                    character: 8,
-                },
-                end: Position {
-                    line: 1,
-                    character: 9,
-                },
+                start: Position { line: 1, character: 8 },
+                end: Position { line: 1, character: 9 },
             }
         );
         assert_eq!(
             diagnostics.next().unwrap().range,
             Range {
-                start: Position {
-                    line: 1,
-                    character: 9,
-                },
-                end: Position {
-                    line: 1,
-                    character: 10,
-                },
+                start: Position { line: 1, character: 9 },
+                end: Position { line: 1, character: 10 },
             }
         );
     }
@@ -461,22 +383,14 @@ mod tests {
                 uri: uri.clone(),
                 version: 2,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::A(
-                TextDocumentContentChangePartial {
-                    range: Range {
-                        start: Position {
-                            line: 3,
-                            character: 9,
-                        },
-                        end: Position {
-                            line: 3,
-                            character: 9,
-                        },
-                    },
-                    text: "(type (func))".into(),
-                    ..Default::default()
+            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                range: Range {
+                    start: Position { line: 3, character: 9 },
+                    end: Position { line: 3, character: 9 },
                 },
-            )],
+                text: "(type (func))".into(),
+                ..Default::default()
+            })],
         });
         assert!(
             service
@@ -524,10 +438,7 @@ mod tests {
             service
                 .goto_definition(DefinitionParams {
                     text_document: TextDocumentIdentifier { uri: uri.clone() },
-                    position: Position {
-                        line: 2,
-                        character: 10
-                    },
+                    position: Position { line: 2, character: 10 },
                     work_done_token: None,
                     partial_result_token: None
                 })
@@ -549,28 +460,16 @@ mod tests {
             content_changes: vec![
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
-                        start: Position {
-                            line: 1,
-                            character: 18,
-                        },
-                        end: Position {
-                            line: 1,
-                            character: 18,
-                        },
+                        start: Position { line: 1, character: 18 },
+                        end: Position { line: 1, character: 18 },
                     },
                     text: "\n   ".into(),
                     ..Default::default()
                 }),
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
-                        start: Position {
-                            line: 4,
-                            character: 20,
-                        },
-                        end: Position {
-                            line: 4,
-                            character: 20,
-                        },
+                        start: Position { line: 4, character: 20 },
+                        end: Position { line: 4, character: 20 },
                     },
                     text: "\n     ".into(),
                     ..Default::default()
@@ -581,10 +480,7 @@ mod tests {
             service
                 .goto_definition(DefinitionParams {
                     text_document: TextDocumentIdentifier { uri: uri.clone() },
-                    position: Position {
-                        line: 3,
-                        character: 10
-                    },
+                    position: Position { line: 3, character: 10 },
                     work_done_token: None,
                     partial_result_token: None
                 })
@@ -606,28 +502,16 @@ mod tests {
             content_changes: vec![
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
-                        start: Position {
-                            line: 2,
-                            character: 3,
-                        },
-                        end: Position {
-                            line: 2,
-                            character: 3,
-                        },
+                        start: Position { line: 2, character: 3 },
+                        end: Position { line: 2, character: 3 },
                     },
                     text: "f".into(),
                     ..Default::default()
                 }),
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
-                        start: Position {
-                            line: 5,
-                            character: 5,
-                        },
-                        end: Position {
-                            line: 5,
-                            character: 5,
-                        },
+                        start: Position { line: 5, character: 5 },
+                        end: Position { line: 5, character: 5 },
                     },
                     text: "f".into(),
                     ..Default::default()
@@ -642,28 +526,16 @@ mod tests {
             content_changes: vec![
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
-                        start: Position {
-                            line: 2,
-                            character: 3,
-                        },
-                        end: Position {
-                            line: 2,
-                            character: 4,
-                        },
+                        start: Position { line: 2, character: 3 },
+                        end: Position { line: 2, character: 4 },
                     },
                     text: "f32".into(),
                     ..Default::default()
                 }),
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
-                        start: Position {
-                            line: 5,
-                            character: 5,
-                        },
-                        end: Position {
-                            line: 5,
-                            character: 6,
-                        },
+                        start: Position { line: 5, character: 5 },
+                        end: Position { line: 5, character: 6 },
                     },
                     text: "f32".into(),
                     ..Default::default()
@@ -739,10 +611,7 @@ mod tests {
             service
                 .goto_definition(DefinitionParams {
                     text_document: TextDocumentIdentifier { uri: uri.clone() },
-                    position: Position {
-                        line: 4,
-                        character: 10
-                    },
+                    position: Position { line: 4, character: 10 },
                     work_done_token: None,
                     partial_result_token: None
                 })
@@ -764,28 +633,16 @@ mod tests {
             content_changes: vec![
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
-                        start: Position {
-                            line: 2,
-                            character: 0,
-                        },
-                        end: Position {
-                            line: 3,
-                            character: 0,
-                        },
+                        start: Position { line: 2, character: 0 },
+                        end: Position { line: 3, character: 0 },
                     },
                     text: "".into(),
                     ..Default::default()
                 }),
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
-                        start: Position {
-                            line: 5,
-                            character: 0,
-                        },
-                        end: Position {
-                            line: 6,
-                            character: 0,
-                        },
+                        start: Position { line: 5, character: 0 },
+                        end: Position { line: 6, character: 0 },
                     },
                     text: "".into(),
                     ..Default::default()
@@ -796,10 +653,7 @@ mod tests {
             service
                 .goto_definition(DefinitionParams {
                     text_document: TextDocumentIdentifier { uri: uri.clone() },
-                    position: Position {
-                        line: 3,
-                        character: 10
-                    },
+                    position: Position { line: 3, character: 10 },
                     work_done_token: None,
                     partial_result_token: None
                 })
@@ -877,10 +731,7 @@ mod tests {
             service
                 .goto_definition(DefinitionParams {
                     text_document: TextDocumentIdentifier { uri: uri.clone() },
-                    position: Position {
-                        line: 2,
-                        character: 10
-                    },
+                    position: Position { line: 2, character: 10 },
                     work_done_token: None,
                     partial_result_token: None
                 })
@@ -902,28 +753,16 @@ mod tests {
             content_changes: vec![
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
-                        start: Position {
-                            line: 3,
-                            character: 20,
-                        },
-                        end: Position {
-                            line: 3,
-                            character: 20,
-                        },
+                        start: Position { line: 3, character: 20 },
+                        end: Position { line: 3, character: 20 },
                     },
                     text: "\n      ".into(),
                     ..Default::default()
                 }),
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
-                        start: Position {
-                            line: 1,
-                            character: 18,
-                        },
-                        end: Position {
-                            line: 1,
-                            character: 18,
-                        },
+                        start: Position { line: 1, character: 18 },
+                        end: Position { line: 1, character: 18 },
                     },
                     text: "\n    ".into(),
                     ..Default::default()
@@ -934,10 +773,7 @@ mod tests {
             service
                 .goto_definition(DefinitionParams {
                     text_document: TextDocumentIdentifier { uri: uri.clone() },
-                    position: Position {
-                        line: 3,
-                        character: 10
-                    },
+                    position: Position { line: 3, character: 10 },
                     work_done_token: None,
                     partial_result_token: None
                 })
@@ -959,28 +795,16 @@ mod tests {
             content_changes: vec![
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
-                        start: Position {
-                            line: 5,
-                            character: 6,
-                        },
-                        end: Position {
-                            line: 5,
-                            character: 6,
-                        },
+                        start: Position { line: 5, character: 6 },
+                        end: Position { line: 5, character: 6 },
                     },
                     text: "f".into(),
                     ..Default::default()
                 }),
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
-                        start: Position {
-                            line: 2,
-                            character: 4,
-                        },
-                        end: Position {
-                            line: 2,
-                            character: 4,
-                        },
+                        start: Position { line: 2, character: 4 },
+                        end: Position { line: 2, character: 4 },
                     },
                     text: "f".into(),
                     ..Default::default()
@@ -995,28 +819,16 @@ mod tests {
             content_changes: vec![
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
-                        start: Position {
-                            line: 5,
-                            character: 6,
-                        },
-                        end: Position {
-                            line: 5,
-                            character: 7,
-                        },
+                        start: Position { line: 5, character: 6 },
+                        end: Position { line: 5, character: 7 },
                     },
                     text: "f32".into(),
                     ..Default::default()
                 }),
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
-                        start: Position {
-                            line: 2,
-                            character: 4,
-                        },
-                        end: Position {
-                            line: 2,
-                            character: 5,
-                        },
+                        start: Position { line: 2, character: 4 },
+                        end: Position { line: 2, character: 5 },
                     },
                     text: "f32".into(),
                     ..Default::default()
@@ -1092,10 +904,7 @@ mod tests {
             service
                 .goto_definition(DefinitionParams {
                     text_document: TextDocumentIdentifier { uri: uri.clone() },
-                    position: Position {
-                        line: 4,
-                        character: 10
-                    },
+                    position: Position { line: 4, character: 10 },
                     work_done_token: None,
                     partial_result_token: None
                 })
@@ -1117,28 +926,16 @@ mod tests {
             content_changes: vec![
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
-                        start: Position {
-                            line: 6,
-                            character: 0,
-                        },
-                        end: Position {
-                            line: 7,
-                            character: 0,
-                        },
+                        start: Position { line: 6, character: 0 },
+                        end: Position { line: 7, character: 0 },
                     },
                     text: "".into(),
                     ..Default::default()
                 }),
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
-                        start: Position {
-                            line: 2,
-                            character: 0,
-                        },
-                        end: Position {
-                            line: 3,
-                            character: 0,
-                        },
+                        start: Position { line: 2, character: 0 },
+                        end: Position { line: 3, character: 0 },
                     },
                     text: "".into(),
                     ..Default::default()
@@ -1149,10 +946,7 @@ mod tests {
             service
                 .goto_definition(DefinitionParams {
                     text_document: TextDocumentIdentifier { uri: uri.clone() },
-                    position: Position {
-                        line: 3,
-                        character: 10
-                    },
+                    position: Position { line: 3, character: 10 },
                     work_done_token: None,
                     partial_result_token: None
                 })
@@ -1222,30 +1016,19 @@ mod tests {
                 uri: uri.clone(),
                 version: 1,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::A(
-                TextDocumentContentChangePartial {
-                    range: Range {
-                        start: Position {
-                            line: 2,
-                            character: 9,
-                        },
-                        end: Position {
-                            line: 2,
-                            character: 9,
-                        },
-                    },
-                    text: ";".into(),
-                    ..Default::default()
+            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                range: Range {
+                    start: Position { line: 2, character: 9 },
+                    end: Position { line: 2, character: 9 },
                 },
-            )],
+                text: ";".into(),
+                ..Default::default()
+            })],
         });
         // should not panic
         service.document_highlight(DocumentHighlightParams {
             text_document: TextDocumentIdentifier { uri: uri.clone() },
-            position: Position {
-                line: 2,
-                character: 10,
-            },
+            position: Position { line: 2, character: 10 },
             work_done_token: None,
             partial_result_token: None,
         });
@@ -1270,22 +1053,14 @@ mod tests {
                 uri: uri.clone(),
                 version: 1,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::A(
-                TextDocumentContentChangePartial {
-                    range: Range {
-                        start: Position {
-                            line: 1,
-                            character: 27,
-                        },
-                        end: Position {
-                            line: 1,
-                            character: 27,
-                        },
-                    },
-                    text: "s".into(),
-                    ..Default::default()
+            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                range: Range {
+                    start: Position { line: 1, character: 27 },
+                    end: Position { line: 1, character: 27 },
                 },
-            )],
+                text: "s".into(),
+                ..Default::default()
+            })],
         });
     }
 }

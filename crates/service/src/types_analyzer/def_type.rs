@@ -33,28 +33,18 @@ pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Def
                         .map(|key| Inherits {
                             symbol: *key,
                             idx: Idx {
-                                num: index
-                                    .unsigned_int_token()
-                                    .and_then(|int| int.text().parse().ok()),
-                                name: index
-                                    .ident_token()
-                                    .map(|ident| InternIdent::new(db, ident.text())),
+                                num: index.unsigned_int_token().and_then(|int| int.text().parse().ok()),
+                                name: index.ident_token().map(|ident| InternIdent::new(db, ident.text())),
                             },
                         });
                 }
             }
             let comp = match node.sub_type()?.comp_type()? {
-                CompType::Func(func_type) => {
-                    CompositeType::Func(extract_sig(db, &func_type.syntax().green()))
+                CompType::Func(func_type) => CompositeType::Func(extract_sig(db, &func_type.syntax().green())),
+                CompType::Struct(struct_type) => CompositeType::Struct(extract_fields(db, &struct_type)),
+                CompType::Array(array_type) => {
+                    CompositeType::Array(array_type.field_type().and_then(|node| FieldType::from_ast(&node, db)))
                 }
-                CompType::Struct(struct_type) => {
-                    CompositeType::Struct(extract_fields(db, &struct_type))
-                }
-                CompType::Array(array_type) => CompositeType::Array(
-                    array_type
-                        .field_type()
-                        .and_then(|node| FieldType::from_ast(&node, db)),
-                ),
             };
             Some((
                 symbol.key,
@@ -96,13 +86,8 @@ impl<'db> DefType<'db> {
         }
         let def_types = get_def_types(db, document);
         match (
-            self.inherits
-                .as_ref()
-                .and_then(|a| def_types.get(&a.symbol)),
-            other
-                .inherits
-                .as_ref()
-                .and_then(|b| def_types.get(&b.symbol)),
+            self.inherits.as_ref().and_then(|a| def_types.get(&a.symbol)),
+            other.inherits.as_ref().and_then(|b| def_types.get(&b.symbol)),
         ) {
             (Some(a), Some(b)) => {
                 if !a.type_equals(b, db, document, module_id) {
@@ -158,15 +143,9 @@ impl<'db> CompositeType<'db> {
         module_id: u32,
     ) -> bool {
         match (self, other) {
-            (CompositeType::Func(a), CompositeType::Func(b)) => {
-                a.matches(b, db, document, module_id)
-            }
-            (CompositeType::Struct(a), CompositeType::Struct(b)) => {
-                a.matches(b, db, document, module_id)
-            }
-            (CompositeType::Array(Some(a)), CompositeType::Array(Some(b))) => {
-                a.matches(b, db, document, module_id)
-            }
+            (CompositeType::Func(a), CompositeType::Func(b)) => a.matches(b, db, document, module_id),
+            (CompositeType::Struct(a), CompositeType::Struct(b)) => a.matches(b, db, document, module_id),
+            (CompositeType::Array(Some(a)), CompositeType::Array(Some(b))) => a.matches(b, db, document, module_id),
             _ => false,
         }
     }
@@ -179,15 +158,9 @@ impl<'db> CompositeType<'db> {
         module_id: u32,
     ) -> bool {
         match (self, other) {
-            (CompositeType::Func(a), CompositeType::Func(b)) => {
-                a.type_equals(b, db, document, module_id)
-            }
-            (CompositeType::Struct(a), CompositeType::Struct(b)) => {
-                a.type_equals(b, db, document, module_id)
-            }
-            (CompositeType::Array(Some(a)), CompositeType::Array(Some(b))) => {
-                a.type_equals(b, db, document, module_id)
-            }
+            (CompositeType::Func(a), CompositeType::Func(b)) => a.type_equals(b, db, document, module_id),
+            (CompositeType::Struct(a), CompositeType::Struct(b)) => a.type_equals(b, db, document, module_id),
+            (CompositeType::Array(Some(a)), CompositeType::Array(Some(b))) => a.type_equals(b, db, document, module_id),
             _ => false,
         }
     }
@@ -202,10 +175,7 @@ impl<'db> CompositeType<'db> {
 }
 
 #[salsa::tracked(returns(ref))]
-pub(crate) fn get_rec_type_groups<'db>(
-    db: &'db dyn salsa::Database,
-    document: Document,
-) -> Vec<RecTypeGroup> {
+pub(crate) fn get_rec_type_groups<'db>(db: &'db dyn salsa::Database, document: Document) -> Vec<RecTypeGroup> {
     let root = Root::cast(document.root_tree(db)).expect("expected root tree");
     let symbol_table = SymbolTable::of(db, document);
     root.modules()
@@ -225,8 +195,7 @@ pub(crate) fn get_rec_type_groups<'db>(
                         .symbols
                         .values()
                         .filter(|symbol| {
-                            symbol.kind == SymbolKind::Type
-                                && rec_range.contains_range(symbol.key.text_range())
+                            symbol.kind == SymbolKind::Type && rec_range.contains_range(symbol.key.text_range())
                         })
                         .map(|symbol| symbol.key)
                         .collect(),
@@ -258,17 +227,14 @@ impl RecTypeGroup {
             .map(|key| def_types.get(key))
             .zip(other.type_defs.iter().map(|key| def_types.get(key)))
             .all(|(a, b)| {
-                if let (Some(a), Some(b), Some(module)) =
-                    (a, b, symbol_table.find_module(module_id))
-                {
+                if let (Some(a), Some(b), Some(module)) = (a, b, symbol_table.find_module(module_id)) {
                     // check whether their super types equal or not
                     match (&a.inherits, &b.inherits) {
                         (Some(Inherits { idx: a, .. }), Some(Inherits { idx: b, .. })) => {
                             let mut a = HeapType::Type(*a);
                             let mut b = HeapType::Type(*b);
                             if substitute_heap_type(&mut a, symbol_table, module.key, self).is_err()
-                                || substitute_heap_type(&mut b, symbol_table, module.key, other)
-                                    .is_err()
+                                || substitute_heap_type(&mut b, symbol_table, module.key, other).is_err()
                                 || !a.type_equals(&b, db, document, module_id)
                             {
                                 return false;
@@ -350,17 +316,12 @@ fn substitute_heap_type<'db>(
     rec_group: &RecTypeGroup,
 ) -> Result<(), ()> {
     if let HeapType::Type(idx) = heap_type
-        && let Some(symbol) = symbol_table.symbols.values().find(|symbol| {
-            symbol.kind == SymbolKind::Type
-                && symbol.region == module
-                && idx.is_defined_by(&symbol.idx)
-        })
+        && let Some(symbol) = symbol_table
+            .symbols
+            .values()
+            .find(|symbol| symbol.kind == SymbolKind::Type && symbol.region == module && idx.is_defined_by(&symbol.idx))
     {
-        if let Some(i) = rec_group
-            .type_defs
-            .iter()
-            .position(|key| *key == symbol.key)
-        {
+        if let Some(i) = rec_group.type_defs.iter().position(|key| *key == symbol.key) {
             *heap_type = HeapType::Rec(i as u32);
         } else if symbol.key.text_range().start() > rec_group.range.end() {
             return Err(());

@@ -13,16 +13,12 @@ pub fn act(
     node: &SyntaxNode,
     context: &CodeActionContext,
 ) -> Option<CodeAction> {
-    let mut_token =
-        support::token(node, SyntaxKind::KEYWORD).filter(|keyword| keyword.text() == "mut")?;
+    let mut_token = support::token(node, SyntaxKind::KEYWORD).filter(|keyword| keyword.text() == "mut")?;
     let token_lsp_range = helpers::rowan_range_to_lsp_range(line_index, mut_token.text_range());
-    let diagnostic = context
-        .diagnostics
-        .iter()
-        .find(|diagnostic| match &diagnostic.code {
-            Some(Union2::B(code)) => code == "needless-mut" && diagnostic.range == token_lsp_range,
-            _ => false,
-        })?;
+    let diagnostic = context.diagnostics.iter().find(|diagnostic| match &diagnostic.code {
+        Some(Union2::B(code)) => code == "needless-mut" && diagnostic.range == token_lsp_range,
+        _ => false,
+    })?;
 
     let mut text_edits = Vec::with_capacity(4);
     if let Some(l_paren) = support::token(node, SyntaxKind::L_PAREN) {

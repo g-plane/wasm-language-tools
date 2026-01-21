@@ -6,8 +6,7 @@ use crate::{
     types_analyzer::{self, ValType},
 };
 use lspt::{
-    MarkupContent, MarkupKind, ParameterInformation, SignatureHelp, SignatureHelpParams,
-    SignatureInformation, Union2,
+    MarkupContent, MarkupKind, ParameterInformation, SignatureHelp, SignatureHelpParams, SignatureInformation, Union2,
 };
 use rowan::{Direction, ast::AstNode};
 use std::fmt::Write;
@@ -24,10 +23,7 @@ impl LanguageService {
         let root = document.root_tree(self);
         let symbol_table = SymbolTable::of(self, *document);
 
-        let token = helpers::ast::find_token(
-            &root,
-            helpers::lsp_pos_to_rowan_pos(line_index, params.position)?,
-        )?;
+        let token = helpers::ast::find_token(&root, helpers::lsp_pos_to_rowan_pos(line_index, params.position)?)?;
         let (node, instr, is_next) = if token.kind() == SyntaxKind::ERROR {
             (
                 token.parent()?,
@@ -55,16 +51,10 @@ impl LanguageService {
                 )
             }
             "call_indirect" | "return_call_indirect" => {
-                let type_use = parent_instr
-                    .immediates()
-                    .find_map(|immediate| immediate.type_use())?;
+                let type_use = parent_instr.immediates().find_map(|immediate| immediate.type_use())?;
                 let type_use = type_use.syntax();
-                let mut sig = types_analyzer::get_type_use_sig(
-                    self,
-                    *document,
-                    SyntaxNodePtr::new(type_use),
-                    &type_use.green(),
-                );
+                let mut sig =
+                    types_analyzer::get_type_use_sig(self, *document, SyntaxNodePtr::new(type_use), &type_use.green());
                 sig.params.push((ValType::I32, None));
                 (sig, None)
             }
@@ -74,9 +64,7 @@ impl LanguageService {
         let mut label = "(func".to_string();
         let mut parameters = Vec::with_capacity(signature.params.len());
         if let Some(Symbol {
-            idx: Idx {
-                name: Some(name), ..
-            },
+            idx: Idx { name: Some(name), .. },
             ..
         }) = func
         {

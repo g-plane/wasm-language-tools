@@ -18,9 +18,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     };
 
     let (tree, _) = wat_parser::parse(&input);
-    print!(
-        "{}",
-        format(&Root::cast(SyntaxNode::new_root(tree)).unwrap(), &options)
-    );
+    print!("{}", format(&Root::cast(SyntaxNode::new_root(tree)).unwrap(), &options));
     Ok(())
 }

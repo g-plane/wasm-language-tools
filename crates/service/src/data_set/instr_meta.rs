@@ -185,90 +185,63 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i32.store",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![],
         },
     );
     map.insert(
         "i64.store",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I64)],
             results: vec![],
         },
     );
     map.insert(
         "f32.store",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::F32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::F32)],
             results: vec![],
         },
     );
     map.insert(
         "f64.store",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::F64),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::F64)],
             results: vec![],
         },
     );
     map.insert(
         "i32.store8",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![],
         },
     );
     map.insert(
         "i32.store16",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![],
         },
     );
     map.insert(
         "i64.store8",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I64)],
             results: vec![],
         },
     );
     map.insert(
         "i64.store16",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I64)],
             results: vec![],
         },
     );
     map.insert(
         "i64.store32",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I64)],
             results: vec![],
         },
     );
@@ -324,100 +297,70 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i32.eq",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.ne",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.lt_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.lt_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.gt_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.gt_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.le_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.le_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.ge_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.ge_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
@@ -431,220 +374,154 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i64.eq",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.ne",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.lt_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.lt_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.gt_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.gt_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.le_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.le_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.ge_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i64.ge_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "f32.eq",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F32),
-                OperandType::Val(ValType::F32),
-            ],
+            params: vec![OperandType::Val(ValType::F32), OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "f32.ne",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F32),
-                OperandType::Val(ValType::F32),
-            ],
+            params: vec![OperandType::Val(ValType::F32), OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "f32.lt",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F32),
-                OperandType::Val(ValType::F32),
-            ],
+            params: vec![OperandType::Val(ValType::F32), OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "f32.gt",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F32),
-                OperandType::Val(ValType::F32),
-            ],
+            params: vec![OperandType::Val(ValType::F32), OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "f32.le",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F32),
-                OperandType::Val(ValType::F32),
-            ],
+            params: vec![OperandType::Val(ValType::F32), OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "f32.ge",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F32),
-                OperandType::Val(ValType::F32),
-            ],
+            params: vec![OperandType::Val(ValType::F32), OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "f64.eq",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F64),
-                OperandType::Val(ValType::F64),
-            ],
+            params: vec![OperandType::Val(ValType::F64), OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "f64.ne",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F64),
-                OperandType::Val(ValType::F64),
-            ],
+            params: vec![OperandType::Val(ValType::F64), OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "f64.lt",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F64),
-                OperandType::Val(ValType::F64),
-            ],
+            params: vec![OperandType::Val(ValType::F64), OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "f64.gt",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F64),
-                OperandType::Val(ValType::F64),
-            ],
+            params: vec![OperandType::Val(ValType::F64), OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "f64.le",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F64),
-                OperandType::Val(ValType::F64),
-            ],
+            params: vec![OperandType::Val(ValType::F64), OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "f64.ge",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F64),
-                OperandType::Val(ValType::F64),
-            ],
+            params: vec![OperandType::Val(ValType::F64), OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
@@ -672,150 +549,105 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i32.add",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.sub",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.mul",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.div_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.div_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.rem_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.rem_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.and",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.or",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.xor",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.shl",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.shr_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.shr_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.rotl",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
     map.insert(
         "i32.rotr",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
@@ -843,150 +675,105 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i64.add",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.sub",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.mul",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.div_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.div_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.rem_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.rem_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.and",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.or",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.xor",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.shl",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.shr_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.shr_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.rotl",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.rotr",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::I64)],
         },
     );
@@ -1042,70 +829,49 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "f32.add",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F32),
-                OperandType::Val(ValType::F32),
-            ],
+            params: vec![OperandType::Val(ValType::F32), OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.sub",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F32),
-                OperandType::Val(ValType::F32),
-            ],
+            params: vec![OperandType::Val(ValType::F32), OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.mul",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F32),
-                OperandType::Val(ValType::F32),
-            ],
+            params: vec![OperandType::Val(ValType::F32), OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.div",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F32),
-                OperandType::Val(ValType::F32),
-            ],
+            params: vec![OperandType::Val(ValType::F32), OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.min",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F32),
-                OperandType::Val(ValType::F32),
-            ],
+            params: vec![OperandType::Val(ValType::F32), OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.max",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F32),
-                OperandType::Val(ValType::F32),
-            ],
+            params: vec![OperandType::Val(ValType::F32), OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
     map.insert(
         "f32.copysign",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F32),
-                OperandType::Val(ValType::F32),
-            ],
+            params: vec![OperandType::Val(ValType::F32), OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::F32)],
         },
     );
@@ -1161,70 +927,49 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "f64.add",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F64),
-                OperandType::Val(ValType::F64),
-            ],
+            params: vec![OperandType::Val(ValType::F64), OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.sub",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F64),
-                OperandType::Val(ValType::F64),
-            ],
+            params: vec![OperandType::Val(ValType::F64), OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.mul",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F64),
-                OperandType::Val(ValType::F64),
-            ],
+            params: vec![OperandType::Val(ValType::F64), OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.div",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F64),
-                OperandType::Val(ValType::F64),
-            ],
+            params: vec![OperandType::Val(ValType::F64), OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.min",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F64),
-                OperandType::Val(ValType::F64),
-            ],
+            params: vec![OperandType::Val(ValType::F64), OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.max",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F64),
-                OperandType::Val(ValType::F64),
-            ],
+            params: vec![OperandType::Val(ValType::F64), OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
     map.insert(
         "f64.copysign",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::F64),
-                OperandType::Val(ValType::F64),
-            ],
+            params: vec![OperandType::Val(ValType::F64), OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::F64)],
         },
     );
@@ -1706,10 +1451,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
             ],
-            results: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            results: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
@@ -1721,36 +1463,21 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
                 OperandType::Val(ValType::I64),
                 OperandType::Val(ValType::I64),
             ],
-            results: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            results: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.mul_wide_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
-            results: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
+            results: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
         "i64.mul_wide_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
-            results: vec![
-                OperandType::Val(ValType::I64),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
+            results: vec![OperandType::Val(ValType::I64), OperandType::Val(ValType::I64)],
         },
     );
     map.insert(
@@ -1833,10 +1560,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "v128.store",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::V128)],
             results: vec![],
         },
     );
@@ -1850,20 +1574,14 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i8x16.shuffle",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.swizzle",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -1926,10 +1644,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i8x16.replace_lane",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -1950,10 +1665,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i16x8.replace_lane",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -1967,10 +1679,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i32x4.replace_lane",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -1984,10 +1693,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i64x2.replace_lane",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::I64),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::I64)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -2001,10 +1707,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "f32x4.replace_lane",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::F32),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::F32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -2018,430 +1721,301 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "f64x2.replace_lane",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::F64),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::F64)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.eq",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.ne",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.lt_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.lt_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.gt_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.gt_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.le_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.le_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.ge_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.ge_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.eq",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.ne",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.lt_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.lt_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.gt_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.gt_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.le_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.le_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.ge_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.ge_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.eq",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.ne",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.lt_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.lt_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.gt_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.gt_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.le_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.le_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.ge_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.ge_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.eq",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.ne",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.lt",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.gt",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.le",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.ge",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.eq",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.ne",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.lt",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.gt",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.le",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.ge",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -2455,40 +2029,28 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "v128.and",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.andnot",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.or",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.xor",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -2513,80 +2075,56 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "v128.load8_lane",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.load16_lane",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.load32_lane",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.load64_lane",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "v128.store8_lane",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::V128)],
             results: vec![],
         },
     );
     map.insert(
         "v128.store16_lane",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::V128)],
             results: vec![],
         },
     );
     map.insert(
         "v128.store32_lane",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::V128)],
             results: vec![],
         },
     );
     map.insert(
         "v128.store64_lane",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::V128)],
             results: vec![],
         },
     );
@@ -2656,20 +2194,14 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i8x16.narrow_i16x8_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.narrow_i16x8_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -2704,90 +2236,63 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i8x16.shl",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.shr_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.shr_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.add",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.add_sat_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.add_sat_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.sub",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.sub_sat_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.sub_sat_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -2808,40 +2313,28 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i8x16.min_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.min_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.max_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i8x16.max_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -2855,10 +2348,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i8x16.avgr_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -2907,10 +2397,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i16x8.q15mulr_sat_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -2931,20 +2418,14 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i16x8.narrow_i32x4_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.narrow_i32x4_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -2979,90 +2460,63 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i16x8.shl",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.shr_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.shr_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.add",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.add_sat_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.add_sat_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.sub",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.sub_sat_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.sub_sat_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -3076,100 +2530,70 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i16x8.mul",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.min_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.min_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.max_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.max_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.avgr_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.extmul_low_i8x16_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.extmul_high_i8x16_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.extmul_low_i8x16_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.extmul_high_i8x16_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -3232,150 +2656,105 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i32x4.shl",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.shr_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.shr_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.add",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.sub",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.mul",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.min_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.min_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.max_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.max_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.dot_i16x8_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.extmul_low_i16x8_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.extmul_high_i16x8_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.extmul_low_i16x8_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i32x4.extmul_high_i16x8_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -3438,160 +2817,112 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i64x2.shl",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.shr_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.shr_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.add",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.sub",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.mul",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.eq",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.ne",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.lt_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.gt_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.le_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.ge_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.extmul_low_i32x4_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.extmul_high_i32x4_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.extmul_low_i32x4_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i64x2.extmul_high_i32x4_u",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -3619,80 +2950,56 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "f32x4.add",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.sub",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.mul",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.div",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.min",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.max",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.pmin",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.pmax",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -3720,80 +3027,56 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "f64x2.add",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.sub",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.mul",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.div",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.min",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.max",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.pmin",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.pmax",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -3856,10 +3139,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "i8x16.relaxed_swizzle",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -3982,60 +3262,42 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "f32x4.relaxed_min",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f32x4.relaxed_max",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.relaxed_min",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "f64x2.relaxed_max",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.relaxed_q15mulr_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
     map.insert(
         "i16x8.relaxed_dot_i8x16_i7x16_s",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::V128),
-                OperandType::Val(ValType::V128),
-            ],
+            params: vec![OperandType::Val(ValType::V128), OperandType::Val(ValType::V128)],
             results: vec![OperandType::Val(ValType::V128)],
         },
     );
@@ -4053,10 +3315,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
     map.insert(
         "memory.atomic.notify",
         ResolvedSig {
-            params: vec![
-                OperandType::Val(ValType::I32),
-                OperandType::Val(ValType::I32),
-            ],
+            params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
             results: vec![OperandType::Val(ValType::I32)],
         },
     );
@@ -4083,21 +3342,17 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
         },
     );
     map.extend(
-        [
-            "i32.atomic.load",
-            "i32.atomic.load8_u",
-            "i32.atomic.load16_u",
-        ]
-        .into_iter()
-        .map(|instr| {
-            (
-                instr,
-                ResolvedSig {
-                    params: vec![OperandType::Val(ValType::I32)],
-                    results: vec![OperandType::Val(ValType::I32)],
-                },
-            )
-        }),
+        ["i32.atomic.load", "i32.atomic.load8_u", "i32.atomic.load16_u"]
+            .into_iter()
+            .map(|instr| {
+                (
+                    instr,
+                    ResolvedSig {
+                        params: vec![OperandType::Val(ValType::I32)],
+                        results: vec![OperandType::Val(ValType::I32)],
+                    },
+                )
+            }),
     );
     map.extend(
         [
@@ -4118,24 +3373,17 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
         }),
     );
     map.extend(
-        [
-            "i32.atomic.store",
-            "i32.atomic.store8_u",
-            "i32.atomic.store16_u",
-        ]
-        .into_iter()
-        .map(|instr| {
-            (
-                instr,
-                ResolvedSig {
-                    params: vec![
-                        OperandType::Val(ValType::I32),
-                        OperandType::Val(ValType::I32),
-                    ],
-                    results: vec![],
-                },
-            )
-        }),
+        ["i32.atomic.store", "i32.atomic.store8_u", "i32.atomic.store16_u"]
+            .into_iter()
+            .map(|instr| {
+                (
+                    instr,
+                    ResolvedSig {
+                        params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
+                        results: vec![],
+                    },
+                )
+            }),
     );
     map.extend(
         [
@@ -4149,10 +3397,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
             (
                 instr,
                 ResolvedSig {
-                    params: vec![
-                        OperandType::Val(ValType::I32),
-                        OperandType::Val(ValType::I64),
-                    ],
+                    params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I64)],
                     results: vec![],
                 },
             )
@@ -4184,10 +3429,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
             (
                 instr,
                 ResolvedSig {
-                    params: vec![
-                        OperandType::Val(ValType::I32),
-                        OperandType::Val(ValType::I32),
-                    ],
+                    params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I32)],
                     results: vec![OperandType::Val(ValType::I32)],
                 },
             )
@@ -4225,10 +3467,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
             (
                 instr,
                 ResolvedSig {
-                    params: vec![
-                        OperandType::Val(ValType::I32),
-                        OperandType::Val(ValType::I64),
-                    ],
+                    params: vec![OperandType::Val(ValType::I32), OperandType::Val(ValType::I64)],
                     results: vec![OperandType::Val(ValType::I64)],
                 },
             )

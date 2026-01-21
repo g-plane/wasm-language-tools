@@ -42,8 +42,7 @@ pub fn act(
                     .iter()
                     .filter(|diagnostic| {
                         if let Some(Union2::B(s)) = &diagnostic.code {
-                            s.starts_with("syntax")
-                                && diagnostic.message.contains("memory argument")
+                            s.starts_with("syntax") && diagnostic.message.contains("memory argument")
                         } else {
                             false
                         }

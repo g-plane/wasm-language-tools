@@ -32,9 +32,7 @@ pub fn check(
             | SymbolKind::MemoryDef
             | SymbolKind::TableDef
             | SymbolKind::TagDef => {
-                if is_prefixed_with_underscore(db, symbol)
-                    || is_used(symbol_table, symbol)
-                    || is_exported(root, symbol)
+                if is_prefixed_with_underscore(db, symbol) || is_used(symbol_table, symbol) || is_exported(root, symbol)
                 {
                     None
                 } else {
@@ -87,10 +85,7 @@ pub fn check(
 }
 
 fn is_prefixed_with_underscore(db: &dyn salsa::Database, symbol: &Symbol) -> bool {
-    symbol
-        .idx
-        .name
-        .is_some_and(|name| name.ident(db).starts_with("$_"))
+    symbol.idx.name.is_some_and(|name| name.ident(db).starts_with("$_"))
 }
 
 fn is_used(symbol_table: &SymbolTable, symbol: &Symbol) -> bool {
@@ -99,8 +94,7 @@ fn is_used(symbol_table: &SymbolTable, symbol: &Symbol) -> bool {
 
 fn is_exported(root: &SyntaxNode, def_symbol: &Symbol) -> bool {
     let node = def_symbol.key.to_node(root);
-    node.children()
-        .any(|child| child.kind() == SyntaxKind::EXPORT)
+    node.children().any(|child| child.kind() == SyntaxKind::EXPORT)
 }
 
 fn report(

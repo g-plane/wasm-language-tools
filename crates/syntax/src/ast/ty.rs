@@ -699,9 +699,7 @@ impl Limits {
         self.syntax
             .children_with_tokens()
             .filter_map(|it| match it {
-                NodeOrToken::Token(token) if token.kind() == SyntaxKind::UNSIGNED_INT => {
-                    Some(token)
-                }
+                NodeOrToken::Token(token) if token.kind() == SyntaxKind::UNSIGNED_INT => Some(token),
                 _ => None,
             })
             .nth(1)
@@ -973,11 +971,7 @@ impl RefType {
     #[inline]
     pub fn null_keyword(&self) -> Option<SyntaxToken> {
         self.syntax.children_with_tokens().find_map(|it| match it {
-            SyntaxElement::Token(token)
-                if token.kind() == SyntaxKind::KEYWORD && token.text() == "null" =>
-            {
-                Some(token)
-            }
+            SyntaxElement::Token(token) if token.kind() == SyntaxKind::KEYWORD && token.text() == "null" => Some(token),
             _ => None,
         })
     }
@@ -1078,10 +1072,7 @@ impl AstNode for StorageType {
     {
         matches!(
             kind,
-            SyntaxKind::NUM_TYPE
-                | SyntaxKind::VEC_TYPE
-                | SyntaxKind::REF_TYPE
-                | SyntaxKind::PACKED_TYPE
+            SyntaxKind::NUM_TYPE | SyntaxKind::VEC_TYPE | SyntaxKind::REF_TYPE | SyntaxKind::PACKED_TYPE
         )
     }
     #[inline]
@@ -1170,9 +1161,7 @@ impl SubType {
     #[inline]
     pub fn final_keyword(&self) -> Option<SyntaxToken> {
         self.syntax.children_with_tokens().find_map(|it| match it {
-            SyntaxElement::Token(token)
-                if token.kind() == SyntaxKind::KEYWORD && token.text() == "final" =>
-            {
+            SyntaxElement::Token(token) if token.kind() == SyntaxKind::KEYWORD && token.text() == "final" => {
                 Some(token)
             }
             _ => None,
@@ -1274,10 +1263,7 @@ impl AstNode for ValType {
     where
         Self: Sized,
     {
-        matches!(
-            kind,
-            SyntaxKind::NUM_TYPE | SyntaxKind::VEC_TYPE | SyntaxKind::REF_TYPE
-        )
+        matches!(kind, SyntaxKind::NUM_TYPE | SyntaxKind::VEC_TYPE | SyntaxKind::REF_TYPE)
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self>

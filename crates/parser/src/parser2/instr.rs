@@ -60,11 +60,7 @@ impl Parser<'_> {
             let else_mark = self.start_node();
             self.add_child(green::KW_ELSE.clone());
             self.eat(IDENT);
-            while self
-                .lexer
-                .peek(KEYWORD)
-                .filter(|token| token.text == "end")
-                .is_none()
+            while self.lexer.peek(KEYWORD).filter(|token| token.text == "end").is_none()
                 && self.recover(Self::parse_instr)
             {}
             let node = self.finish_node(BLOCK_IF_ELSE, else_mark);
@@ -96,13 +92,9 @@ impl Parser<'_> {
             self.add_child(node);
         }
 
-        while self
-            .lexer
-            .peek(KEYWORD)
-            .filter(|token| token.text == "end")
-            .is_none()
-            && self.recover(Self::parse_instr)
-        {}
+        while self.lexer.peek(KEYWORD).filter(|token| token.text == "end").is_none() && self.recover(Self::parse_instr)
+        {
+        }
 
         if !self.recover(Self::parse_end_keyword) {
             self.report_missing(Message::Str("end"));
@@ -135,13 +127,9 @@ impl Parser<'_> {
             self.add_child(node);
         }
 
-        while self
-            .lexer
-            .peek(KEYWORD)
-            .filter(|token| token.text == "end")
-            .is_none()
-            && self.recover(Self::parse_instr)
-        {}
+        while self.lexer.peek(KEYWORD).filter(|token| token.text == "end").is_none() && self.recover(Self::parse_instr)
+        {
+        }
 
         if !self.recover(Self::parse_end_keyword) {
             self.report_missing(Message::Str("end"));
@@ -195,10 +183,7 @@ impl Parser<'_> {
             .or_else(|| {
                 self.lexer.eat(FLOAT).inspect(|token| {
                     if token.kind == ERROR {
-                        self.report_error_token(
-                            token,
-                            Message::Description("invalid float literal"),
-                        );
+                        self.report_error_token(token, Message::Description("invalid float literal"));
                     }
                 })
             })
@@ -327,16 +312,12 @@ impl Parser<'_> {
 
     fn parse_plain_instr_folded(&mut self, mark: NodeMark) -> Option<GreenNode> {
         while let Some(node_or_token) = self.try_parse_with_trivias(|parser| {
-            parser
-                .parse_immediate()
-                .map(GreenElement::from)
-                .or_else(|| {
-                    parser.lexer.eat(ERROR).map(|token| {
-                        parser
-                            .report_error_token(&token, Message::Description("invalid immediate"));
-                        token.into()
-                    })
+            parser.parse_immediate().map(GreenElement::from).or_else(|| {
+                parser.lexer.eat(ERROR).map(|token| {
+                    parser.report_error_token(&token, Message::Description("invalid immediate"));
+                    token.into()
                 })
+            })
         }) {
             self.add_child(node_or_token);
         }

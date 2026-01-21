@@ -10,10 +10,7 @@ fn create_params(uri: String, line: u32, character: u32) -> InlayHintParams {
         work_done_token: Default::default(),
         text_document: TextDocumentIdentifier { uri },
         range: Range {
-            start: Position {
-                line: 0,
-                character: 0,
-            },
+            start: Position { line: 0, character: 0 },
             end: Position { line, character },
         },
     }
@@ -242,9 +239,7 @@ fn field_with_struct_changed() {
             ..Default::default()
         }),
     );
-    let response = service
-        .inlay_hint(create_params(uri.clone(), 6, 0))
-        .unwrap();
+    let response = service.inlay_hint(create_params(uri.clone(), 6, 0)).unwrap();
     let first = &response.first().unwrap().label;
 
     let source = "
@@ -255,9 +250,7 @@ fn field_with_struct_changed() {
     struct.get 1 0))
 ";
     service.commit(&uri, source.into());
-    let response = service
-        .inlay_hint(create_params(uri.clone(), 6, 0))
-        .unwrap();
+    let response = service.inlay_hint(create_params(uri.clone(), 6, 0)).unwrap();
     let second = &response.first().unwrap().label;
     assert_ne!(first, second);
 }

@@ -34,33 +34,20 @@ impl LanguageService {
             .strip_prefix('$')
             .is_some_and(|rest| !rest.is_empty() && rest.chars().all(is_id_char))
         {
-            return Err(format!(
-                "Invalid name `{}`: {ERR_INVALID_IDENTIFIER}.",
-                params.new_name
-            ));
+            return Err(format!("Invalid name `{}`: {ERR_INVALID_IDENTIFIER}.", params.new_name));
         }
 
         let Some(document) = self.get_document(&params.text_document.uri) else {
             return Ok(None);
         };
         // We can't assume client supports "prepareRename" so we need to check the token again.
-        let token = super::find_meaningful_token(
-            self,
-            *document,
-            &document.root_tree(self),
-            params.position,
-        )
-        .filter(|token| token.kind() == SyntaxKind::IDENT)
-        .ok_or_else(|| ERR_CANT_BE_RENAMED.to_owned())?;
+        let token = super::find_meaningful_token(self, *document, &document.root_tree(self), params.position)
+            .filter(|token| token.kind() == SyntaxKind::IDENT)
+            .ok_or_else(|| ERR_CANT_BE_RENAMED.to_owned())?;
         Ok(self.rename_impl(params, *document, token))
     }
 
-    fn rename_impl(
-        &self,
-        params: RenameParams,
-        document: Document,
-        ident_token: SyntaxToken,
-    ) -> Option<WorkspaceEdit> {
+    fn rename_impl(&self, params: RenameParams, document: Document, ident_token: SyntaxToken) -> Option<WorkspaceEdit> {
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
         let symbol_table = SymbolTable::of(self, document);

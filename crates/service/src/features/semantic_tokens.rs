@@ -32,10 +32,7 @@ impl LanguageService {
     }
 
     /// Handler for `textDocument/semanticTokens/range` request.
-    pub fn semantic_tokens_range(
-        &self,
-        params: SemanticTokensRangeParams,
-    ) -> Option<SemanticTokens> {
+    pub fn semantic_tokens_range(&self, params: SemanticTokensRangeParams) -> Option<SemanticTokens> {
         let document = self.get_document(params.text_document.uri)?;
         let line_index = document.line_index(self);
         let start = helpers::lsp_pos_to_rowan_pos(line_index, params.range.start)?;
@@ -134,9 +131,7 @@ impl LanguageService {
                     helpers::ast::is_call(grand)
                         || matches!(
                             grand.kind(),
-                            SyntaxKind::MODULE_FIELD_START
-                                | SyntaxKind::EXTERN_IDX_FUNC
-                                | SyntaxKind::ELEM_LIST
+                            SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXTERN_IDX_FUNC | SyntaxKind::ELEM_LIST
                         )
                 }) {
                     token_kinds.get_index_of(&SemanticTokenKind::Func)
@@ -159,29 +154,19 @@ impl LanguageService {
             SyntaxKind::FLOAT => token_kinds.get_index_of(&SemanticTokenKind::Number),
             SyntaxKind::IDENT => {
                 let parent = token.parent();
-                if parent
+                if parent.as_ref().and_then(|parent| parent.parent()).is_some_and(|grand| {
+                    helpers::ast::is_call(&grand)
+                        || matches!(
+                            grand.kind(),
+                            SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXTERN_IDX_FUNC | SyntaxKind::ELEM_LIST
+                        )
+                }) || parent
                     .as_ref()
-                    .and_then(|parent| parent.parent())
-                    .is_some_and(|grand| {
-                        helpers::ast::is_call(&grand)
-                            || matches!(
-                                grand.kind(),
-                                SyntaxKind::MODULE_FIELD_START
-                                    | SyntaxKind::EXTERN_IDX_FUNC
-                                    | SyntaxKind::ELEM_LIST
-                            )
-                    })
-                    || parent
-                        .as_ref()
-                        .is_some_and(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
+                    .is_some_and(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
                 {
                     token_kinds.get_index_of(&SemanticTokenKind::Func)
-                } else if parent
-                    .as_ref()
-                    .is_some_and(|node| node.kind() == SyntaxKind::PARAM)
-                    || parent
-                        .as_ref()
-                        .is_some_and(|node| is_ref_of_param(node, symbol_table))
+                } else if parent.as_ref().is_some_and(|node| node.kind() == SyntaxKind::PARAM)
+                    || parent.as_ref().is_some_and(|node| is_ref_of_param(node, symbol_table))
                 {
                     token_kinds.get_index_of(&SemanticTokenKind::Param)
                 } else {

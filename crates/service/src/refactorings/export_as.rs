@@ -33,10 +33,7 @@ pub fn act(
     changes.insert(
         uri.raw(db),
         vec![TextEdit {
-            range: helpers::rowan_range_to_lsp_range(
-                line_index,
-                TextRange::empty(ident_token.text_range().end()),
-            ),
+            range: helpers::rowan_range_to_lsp_range(line_index, TextRange::empty(ident_token.text_range().end())),
             new_text: format!(" (export {name})"),
         }],
     );

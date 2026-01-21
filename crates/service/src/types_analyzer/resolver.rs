@@ -67,10 +67,7 @@ pub(crate) fn resolve_array_type_with_idx<'db>(
         .and_then(|key| def_types.get(key))
         .map(|def_type| {
             if let CompositeType::Array(field) = &def_type.comp {
-                (
-                    def_type.idx,
-                    field.as_ref().map(|field| field.storage.clone().into()),
-                )
+                (def_type.idx, field.as_ref().map(|field| field.storage.clone().into()))
             } else {
                 (def_type.idx, None)
             }
@@ -89,9 +86,7 @@ pub(crate) fn resolve_field_type<'db>(
     let field_def_symbol = match symbol.kind {
         SymbolKind::FieldDef => symbol,
         SymbolKind::FieldRef => symbol_table.symbols.values().find(|other| {
-            other.kind == SymbolKind::FieldDef
-                && other.region == region
-                && symbol.idx.is_defined_by(&other.idx)
+            other.kind == SymbolKind::FieldDef && other.region == region && symbol.idx.is_defined_by(&other.idx)
         })?,
         _ => return None,
     };
@@ -119,12 +114,7 @@ pub(crate) fn resolve_field_type_with_struct_idx<'db>(
 ) -> Option<(Idx<'db>, Option<OperandType<'db>>)> {
     let symbol_table = SymbolTable::of(db, document);
     let struct_def_symbol = symbol_table.find_def(SymbolKey::new(struct_ref.syntax()))?;
-    let ty = resolve_field_type(
-        db,
-        document,
-        SymbolKey::new(field_ref.syntax()),
-        struct_def_symbol.key,
-    )
-    .map(|ty| ty.into());
+    let ty =
+        resolve_field_type(db, document, SymbolKey::new(field_ref.syntax()), struct_def_symbol.key).map(|ty| ty.into());
     Some((struct_def_symbol.idx, ty))
 }

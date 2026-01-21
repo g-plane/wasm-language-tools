@@ -26,12 +26,6 @@ fn sequence() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.selection_range(create_params(
-        uri,
-        vec![Position {
-            line: 7,
-            character: 17,
-        }],
-    ));
+    let response = service.selection_range(create_params(uri, vec![Position { line: 7, character: 17 }]));
     assert_json_snapshot!(response);
 }

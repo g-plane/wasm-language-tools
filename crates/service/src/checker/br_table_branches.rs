@@ -16,10 +16,7 @@ pub fn check(
     node: &SyntaxNode,
 ) -> Option<()> {
     let instr = PlainInstr::cast(node.clone())?;
-    if instr
-        .instr_name()
-        .is_none_or(|name| name.text() != "br_table")
-    {
+    if instr.instr_name().is_none_or(|name| name.text() != "br_table") {
         return None;
     }
 
@@ -31,10 +28,7 @@ pub fn check(
         let received = resolve_br_types(db, document, symbol_table, &immediate);
         if received != expected {
             Some(Diagnostic {
-                range: helpers::rowan_range_to_lsp_range(
-                    line_index,
-                    immediate.syntax().text_range(),
-                ),
+                range: helpers::rowan_range_to_lsp_range(line_index, immediate.syntax().text_range()),
                 severity: Some(DiagnosticSeverity::Error),
                 source: Some("wat".into()),
                 code: Some(Union2::B(DIAGNOSTIC_CODE.into())),

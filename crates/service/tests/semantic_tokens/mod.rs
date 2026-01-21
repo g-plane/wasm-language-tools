@@ -1,8 +1,7 @@
 use insta::assert_json_snapshot;
 use lspt::{
-    ClientCapabilities, InitializeParams, Position, Range, SemanticTokensClientCapabilities,
-    SemanticTokensParams, SemanticTokensRangeParams, TextDocumentClientCapabilities,
-    TextDocumentIdentifier,
+    ClientCapabilities, InitializeParams, Position, Range, SemanticTokensClientCapabilities, SemanticTokensParams,
+    SemanticTokensRangeParams, TextDocumentClientCapabilities, TextDocumentIdentifier,
 };
 use wat_service::LanguageService;
 
@@ -97,14 +96,8 @@ fn range() {
         partial_result_token: Default::default(),
         text_document: TextDocumentIdentifier { uri },
         range: Range {
-            start: Position {
-                line: 4,
-                character: 19,
-            },
-            end: Position {
-                line: 5,
-                character: 21,
-            },
+            start: Position { line: 4, character: 19 },
+            end: Position { line: 5, character: 21 },
         },
     });
     assert_json_snapshot!(response);
@@ -120,14 +113,8 @@ fn range_not_boundary() {
         partial_result_token: Default::default(),
         text_document: TextDocumentIdentifier { uri },
         range: Range {
-            start: Position {
-                line: 4,
-                character: 23,
-            },
-            end: Position {
-                line: 5,
-                character: 16,
-            },
+            start: Position { line: 4, character: 23 },
+            end: Position { line: 5, character: 16 },
         },
     });
     assert_json_snapshot!(response);

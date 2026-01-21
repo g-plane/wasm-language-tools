@@ -21,10 +21,7 @@ fn t1_supertypes() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_type_hierarchy(TypeHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position {
-            line: 2,
-            character: 10,
-        },
+        position: Position { line: 2, character: 10 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
@@ -43,10 +40,7 @@ fn t1_subtypes() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_type_hierarchy(TypeHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position {
-            line: 2,
-            character: 10,
-        },
+        position: Position { line: 2, character: 10 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
@@ -65,10 +59,7 @@ fn t2_supertypes() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_type_hierarchy(TypeHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position {
-            line: 4,
-            character: 19,
-        },
+        position: Position { line: 4, character: 19 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
@@ -87,10 +78,7 @@ fn t3_subtypes() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_type_hierarchy(TypeHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position {
-            line: 5,
-            character: 19,
-        },
+        position: Position { line: 5, character: 19 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
@@ -109,10 +97,7 @@ fn t4_supertypes() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_type_hierarchy(TypeHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position {
-            line: 5,
-            character: 10,
-        },
+        position: Position { line: 5, character: 10 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
@@ -131,10 +116,7 @@ fn t5_subtypes() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_type_hierarchy(TypeHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position {
-            line: 6,
-            character: 10,
-        },
+        position: Position { line: 6, character: 10 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);

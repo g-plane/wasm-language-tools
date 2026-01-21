@@ -39,12 +39,7 @@ pub fn check(
             });
         }
     }
-    let sig = types_analyzer::get_type_use_sig(
-        db,
-        document,
-        SyntaxNodePtr::new(&type_use),
-        &type_use.green(),
-    );
+    let sig = types_analyzer::get_type_use_sig(db, document, SyntaxNodePtr::new(&type_use), &type_use.green());
     if !sig.results.is_empty() {
         diagnostics.push(Diagnostic {
             range: helpers::rowan_range_to_lsp_range(line_index, type_use.text_range()),

@@ -1,7 +1,7 @@
 use insta::assert_json_snapshot;
 use lspt::{
-    CallHierarchyIncomingCallsParams, CallHierarchyOutgoingCallsParams, CallHierarchyPrepareParams,
-    Position, TextDocumentIdentifier,
+    CallHierarchyIncomingCallsParams, CallHierarchyOutgoingCallsParams, CallHierarchyPrepareParams, Position,
+    TextDocumentIdentifier,
 };
 use wat_service::LanguageService;
 
@@ -20,10 +20,7 @@ fn f1_incoming() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position {
-            line: 2,
-            character: 12,
-        },
+        position: Position { line: 2, character: 12 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
@@ -42,10 +39,7 @@ fn f2_incoming() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position {
-            line: 3,
-            character: 33,
-        },
+        position: Position { line: 3, character: 33 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
@@ -64,10 +58,7 @@ fn f3_incoming() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position {
-            line: 4,
-            character: 12,
-        },
+        position: Position { line: 4, character: 12 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
@@ -86,10 +77,7 @@ fn f1_outgoing() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position {
-            line: 2,
-            character: 12,
-        },
+        position: Position { line: 2, character: 12 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
@@ -108,10 +96,7 @@ fn f2_outgoing() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position {
-            line: 3,
-            character: 33,
-        },
+        position: Position { line: 3, character: 33 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
@@ -130,10 +115,7 @@ fn f3_outgoing() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position {
-            line: 4,
-            character: 12,
-        },
+        position: Position { line: 4, character: 12 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);

@@ -51,9 +51,7 @@ pub fn act(
                 .first_child()
                 .or_else(|| node.prev_sibling())
                 .filter(|node| node.kind() == SyntaxKind::PLAIN_INSTR)?;
-            if support::token(&prev_instr, SyntaxKind::INSTR_NAME)
-                .is_some_and(|token| token.text() != "call")
-            {
+            if support::token(&prev_instr, SyntaxKind::INSTR_NAME).is_some_and(|token| token.text() != "call") {
                 return None;
             }
             (prev_instr, Some(node.clone()))
@@ -66,9 +64,9 @@ pub fn act(
         .find(|ancestor| ancestor.kind() == SyntaxKind::MODULE_FIELD_FUNC)?;
     if symbol_table
         .resolved
-        .get(&SymbolKey::new(&call_instr.first_child_by_kind(
-            &|kind| kind == SyntaxKind::IMMEDIATE,
-        )?))
+        .get(&SymbolKey::new(
+            &call_instr.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)?,
+        ))
         .is_none_or(|def_key| *def_key != SymbolKey::new(&func))
     {
         return None;
@@ -109,22 +107,24 @@ pub fn act(
         new_text: "return_call".into(),
     }];
     if let Some(instr) = &return_instr {
-        text_edits.extend(instr.children_with_tokens().filter_map(|node_or_token| {
-            match node_or_token {
-                NodeOrToken::Token(token)
-                    if matches!(
-                        token.kind(),
-                        SyntaxKind::L_PAREN | SyntaxKind::INSTR_NAME | SyntaxKind::R_PAREN
-                    ) =>
-                {
-                    Some(TextEdit {
-                        range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
-                        new_text: "".into(),
-                    })
-                }
-                _ => None,
-            }
-        }));
+        text_edits.extend(
+            instr
+                .children_with_tokens()
+                .filter_map(|node_or_token| match node_or_token {
+                    NodeOrToken::Token(token)
+                        if matches!(
+                            token.kind(),
+                            SyntaxKind::L_PAREN | SyntaxKind::INSTR_NAME | SyntaxKind::R_PAREN
+                        ) =>
+                    {
+                        Some(TextEdit {
+                            range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                            new_text: "".into(),
+                        })
+                    }
+                    _ => None,
+                }),
+        );
     }
     let mut changes = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(uri.raw(db), text_edits);

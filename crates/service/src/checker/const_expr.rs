@@ -8,10 +8,7 @@ const DIAGNOSTIC_CODE: &str = "const-expr";
 
 pub fn check(line_index: &LineIndex, node: &SyntaxNode) -> Option<Diagnostic> {
     let first = node.first_child_by_kind(&Instr::can_cast)?;
-    let last = node
-        .children()
-        .filter(|child| Instr::can_cast(child.kind()))
-        .last()?;
+    let last = node.children().filter(|child| Instr::can_cast(child.kind())).last()?;
     if node.descendants().filter_map(Instr::cast).all(|instr| {
         if let Instr::Plain(plain) = instr {
             plain

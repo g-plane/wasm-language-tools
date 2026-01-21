@@ -9,12 +9,7 @@ use wat_syntax::{
     ast::{BlockIf, Instr},
 };
 
-pub fn act(
-    db: &dyn salsa::Database,
-    uri: InternUri,
-    line_index: &LineIndex,
-    node: &SyntaxNode,
-) -> Option<CodeAction> {
+pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
     let block_if = BlockIf::cast(node.clone())?;
     if block_if.else_block().is_some() {
         return None;

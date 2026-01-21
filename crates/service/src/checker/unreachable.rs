@@ -56,9 +56,7 @@ pub fn check(
                                 // current instruction is the parent of last range,
                                 // and all children are from the same basic block with current instruction
                                 *last = current;
-                            } else if let Some(instr_name) =
-                                support::token(&instr, SyntaxKind::INSTR_NAME)
-                            {
+                            } else if let Some(instr_name) = support::token(&instr, SyntaxKind::INSTR_NAME) {
                                 // if there're child instructions from different basic blocks,
                                 // only mark the instruction name as unreachable
                                 ranges.push(instr_name.text_range());

@@ -48,14 +48,7 @@ impl LanguageService {
             | SymbolKind::TagDef => Some(
                 symbol_table
                     .find_references_on_def(symbol, params.context.include_declaration)
-                    .map(|symbol| {
-                        helpers::create_location_by_symbol(
-                            uri.clone(),
-                            line_index,
-                            symbol.key,
-                            &root,
-                        )
-                    })
+                    .map(|symbol| helpers::create_location_by_symbol(uri.clone(), line_index, symbol.key, &root))
                     .collect(),
             ),
             SymbolKind::Call
@@ -68,40 +61,19 @@ impl LanguageService {
             | SymbolKind::TagRef => Some(
                 symbol_table
                     .find_references_on_ref(symbol, params.context.include_declaration)
-                    .map(|symbol| {
-                        helpers::create_location_by_symbol(
-                            uri.clone(),
-                            line_index,
-                            symbol.key,
-                            &root,
-                        )
-                    })
+                    .map(|symbol| helpers::create_location_by_symbol(uri.clone(), line_index, symbol.key, &root))
                     .collect(),
             ),
             SymbolKind::BlockDef => Some(
                 symbol_table
                     .find_block_references(key, params.context.include_declaration)
-                    .map(|symbol| {
-                        helpers::create_location_by_symbol(
-                            uri.clone(),
-                            line_index,
-                            symbol.key,
-                            &root,
-                        )
-                    })
+                    .map(|symbol| helpers::create_location_by_symbol(uri.clone(), line_index, symbol.key, &root))
                     .collect(),
             ),
             SymbolKind::BlockRef => symbol_table.resolved.get(&key).map(|def_key| {
                 symbol_table
                     .find_block_references(*def_key, params.context.include_declaration)
-                    .map(|symbol| {
-                        helpers::create_location_by_symbol(
-                            uri.clone(),
-                            line_index,
-                            symbol.key,
-                            &root,
-                        )
-                    })
+                    .map(|symbol| helpers::create_location_by_symbol(uri.clone(), line_index, symbol.key, &root))
                     .collect()
             }),
         }

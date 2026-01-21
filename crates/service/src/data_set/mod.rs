@@ -598,8 +598,7 @@ pub(crate) static CONST_INSTRS: [&str; 22] = [
 ];
 
 pub(crate) static MODULE_FIELDS: [&str; 12] = [
-    "func", "type", "import", "table", "memory", "global", "export", "start", "elem", "data",
-    "rec", "tag",
+    "func", "type", "import", "table", "memory", "global", "export", "start", "elem", "data", "rec", "tag",
 ];
 
 pub(crate) fn get_value_type_description(value_type: &str) -> Option<&'static str> {
@@ -608,9 +607,7 @@ pub(crate) fn get_value_type_description(value_type: &str) -> Option<&'static st
         "i64" => Some("The type `i64` classifies 64 bit integers."),
         "f32" => Some("The type `f32` classifies 32 bit floating-point data."),
         "f64" => Some("The type `f64` classifies 64 bit floating-point data."),
-        "v128" => Some(
-            "The type `v128` corresponds to a 128 bit vector of packed integer or floating-point data.",
-        ),
+        "v128" => Some("The type `v128` corresponds to a 128 bit vector of packed integer or floating-point data."),
         _ => None,
     }
 }

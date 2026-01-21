@@ -36,9 +36,7 @@ pub fn check(
                         .filter(|action| action.target.is_some_and(|target| target == **key))
                         .all(|action| action.kind == mutability::MutationActionKind::Get)
             })
-            .filter_map(|(key, mutability)| {
-                symbol_table.symbols.get(key).zip(mutability.mut_keyword)
-            })
+            .filter_map(|(key, mutability)| symbol_table.symbols.get(key).zip(mutability.mut_keyword))
             .map(|(symbol, keyword_range)| {
                 let kind = match symbol.kind {
                     SymbolKind::GlobalDef => "global",
@@ -51,10 +49,7 @@ pub fn check(
                     severity: Some(severity),
                     source: Some("wat".into()),
                     code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                    message: format!(
-                        "{kind} `{}` is unnecessarily mutable",
-                        symbol.idx.render(db)
-                    ),
+                    message: format!("{kind} `{}` is unnecessarily mutable", symbol.idx.render(db)),
                     tags: Some(vec![DiagnosticTag::Unnecessary]),
                     ..Default::default()
                 }

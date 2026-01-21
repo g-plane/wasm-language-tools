@@ -492,8 +492,7 @@ impl DocGen for StructType {
         }
         let mut fields = self.fields().peekable();
         let mut fields_docs = Vec::with_capacity(1);
-        let ws_of_multi_line =
-            whitespace_of_multi_line(ctx.options.multi_line_fields, fields.peek());
+        let ws_of_multi_line = whitespace_of_multi_line(ctx.options.multi_line_fields, fields.peek());
         if let Some(field) = fields.next() {
             if trivias.is_empty() {
                 docs.push(wrap_before(&mut fields, ctx.options.wrap_before_fields));

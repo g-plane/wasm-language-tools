@@ -5,12 +5,7 @@ use rowan::ast::support;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
-pub fn act(
-    db: &dyn salsa::Database,
-    uri: InternUri,
-    line_index: &LineIndex,
-    node: &SyntaxNode,
-) -> Option<CodeAction> {
+pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
     let token = support::token(node, SyntaxKind::TYPE_KEYWORD)?;
     let type_keyword = token.text();
     let heap_ty = match type_keyword {

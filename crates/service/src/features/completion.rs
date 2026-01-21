@@ -10,8 +10,8 @@ use crate::{
 use itertools::Itertools;
 use line_index::LineIndex;
 use lspt::{
-    CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionItemTag,
-    CompletionParams, MarkupContent, MarkupKind, TextEdit, Union2,
+    CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionItemTag, CompletionParams, MarkupContent,
+    MarkupKind, TextEdit, Union2,
 };
 use rowan::{
     Direction, NodeOrToken,
@@ -29,15 +29,10 @@ impl LanguageService {
         let document = self.get_document(params.text_document.uri)?;
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
-        let token = helpers::ast::find_token(
-            &root,
-            helpers::lsp_pos_to_rowan_pos(line_index, params.position)?,
-        )?;
+        let token = helpers::ast::find_token(&root, helpers::lsp_pos_to_rowan_pos(line_index, params.position)?)?;
 
         let cmp_ctx = get_cmp_ctx(&token)?;
-        Some(get_cmp_list(
-            self, cmp_ctx, &token, *document, line_index, &root,
-        ))
+        Some(get_cmp_list(self, cmp_ctx, &token, *document, line_index, &root))
     }
 }
 
@@ -52,13 +47,9 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 .as_ref()
                 .and_then(|token| token.text().strip_prefix("(@"))
             {
-                Some("metadata.code.compilation_priority") => {
-                    Some(smallvec![CmpCtx::AnnotationCompilationPriority])
-                }
+                Some("metadata.code.compilation_priority") => Some(smallvec![CmpCtx::AnnotationCompilationPriority]),
                 Some("metadata.code.instr_freq") => Some(smallvec![CmpCtx::AnnotationInstrFreq]),
-                Some("metadata.code.call_targets") => {
-                    Some(smallvec![CmpCtx::AnnotationCallTargets])
-                }
+                Some("metadata.code.call_targets") => Some(smallvec![CmpCtx::AnnotationCallTargets]),
                 _ => None,
             };
         }
@@ -95,17 +86,10 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                     CmpCtx::KeywordResult,
                     CmpCtx::KeywordLocal,
                 ]);
-            } else if let Some(node) = prev_node
-                .as_ref()
-                .filter(|prev| prev.kind() == SyntaxKind::PLAIN_INSTR)
+            } else if let Some(node) = prev_node.as_ref().filter(|prev| prev.kind() == SyntaxKind::PLAIN_INSTR)
                 && let Some(instr_name) = support::token(node, SyntaxKind::INSTR_NAME)
             {
-                add_cmp_ctx_for_immediates(
-                    instr_name.text(),
-                    node,
-                    has_leading_l_paren(token),
-                    &mut ctx,
-                );
+                add_cmp_ctx_for_immediates(instr_name.text(), node, has_leading_l_paren(token), &mut ctx);
             }
             if !token.text().starts_with('$')
                 && matches!(
@@ -168,12 +152,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                             if let Some(instr_name) = support::token(&grand, SyntaxKind::INSTR_NAME)
                                 && has_leading_l_paren(token)
                             {
-                                add_cmp_ctx_for_immediates(
-                                    instr_name.text(),
-                                    &grand,
-                                    true,
-                                    &mut ctx,
-                                );
+                                add_cmp_ctx_for_immediates(instr_name.text(), &grand, true, &mut ctx);
                             }
                         }
                         SyntaxKind::BLOCK_BLOCK
@@ -196,19 +175,12 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                                 )
                             ) && has_leading_l_paren(token)
                             {
-                                ctx.extend([
-                                    CmpCtx::KeywordParam,
-                                    CmpCtx::KeywordResult,
-                                    CmpCtx::KeywordType,
-                                ]);
+                                ctx.extend([CmpCtx::KeywordParam, CmpCtx::KeywordResult, CmpCtx::KeywordType]);
                             }
                             match grand.kind() {
                                 SyntaxKind::BLOCK_IF => {
                                     if !token.siblings_with_tokens(Direction::Prev).any(|sibling| {
-                                        matches!(
-                                            sibling.kind(),
-                                            SyntaxKind::BLOCK_IF_THEN | SyntaxKind::BLOCK_IF_ELSE
-                                        )
+                                        matches!(sibling.kind(), SyntaxKind::BLOCK_IF_THEN | SyntaxKind::BLOCK_IF_ELSE)
                                     }) {
                                         ctx.push(CmpCtx::KeywordThen);
                                     }
@@ -247,8 +219,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                     }
                 }
                 if let Some(prev) = parent.prev_sibling().filter(|prev| {
-                    prev.kind() == SyntaxKind::PLAIN_INSTR
-                        && prev.children_with_tokens().count() == 1 // only instr name, no paren
+                    prev.kind() == SyntaxKind::PLAIN_INSTR && prev.children_with_tokens().count() == 1 // only instr name, no paren
                 }) && let Some(instr_name) = support::token(&prev, SyntaxKind::INSTR_NAME)
                 {
                     add_cmp_ctx_for_immediates(instr_name.text(), &prev, false, &mut ctx);
@@ -263,29 +234,19 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 add_cmp_ctx_for_immediates(instr_name.text(), &parent, false, &mut ctx);
             }
         }
-        SyntaxKind::BLOCK_BLOCK
-        | SyntaxKind::BLOCK_IF
-        | SyntaxKind::BLOCK_LOOP
-        | SyntaxKind::BLOCK_TRY_TABLE => {
+        SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_IF | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_TRY_TABLE => {
             if has_leading_l_paren(token) {
                 if token
                     .siblings_with_tokens(Direction::Prev)
                     .skip(1)
                     .all(|element| !matches!(element, SyntaxElement::Node(..)))
                 {
-                    ctx.extend([
-                        CmpCtx::KeywordParam,
-                        CmpCtx::KeywordResult,
-                        CmpCtx::KeywordType,
-                    ]);
+                    ctx.extend([CmpCtx::KeywordParam, CmpCtx::KeywordResult, CmpCtx::KeywordType]);
                 }
                 match parent.kind() {
                     SyntaxKind::BLOCK_IF => {
                         if !token.siblings_with_tokens(Direction::Prev).any(|sibling| {
-                            matches!(
-                                sibling.kind(),
-                                SyntaxKind::BLOCK_IF_THEN | SyntaxKind::BLOCK_IF_ELSE
-                            )
+                            matches!(sibling.kind(), SyntaxKind::BLOCK_IF_THEN | SyntaxKind::BLOCK_IF_ELSE)
                         }) {
                             ctx.push(CmpCtx::KeywordThen);
                         }
@@ -311,9 +272,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             }
         }
         SyntaxKind::IMMEDIATE => {
-            let instr = parent
-                .ancestors()
-                .find(|node| node.kind() == SyntaxKind::PLAIN_INSTR)?;
+            let instr = parent.ancestors().find(|node| node.kind() == SyntaxKind::PLAIN_INSTR)?;
             let instr_name = support::token(&instr, SyntaxKind::INSTR_NAME)?;
             add_cmp_ctx_for_immediates(instr_name.text(), &parent, false, &mut ctx);
         }
@@ -345,17 +304,10 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             }
         }
         SyntaxKind::MODULE_FIELD_GLOBAL => {
-            if parent
-                .children()
-                .any(|node| node.kind() == SyntaxKind::GLOBAL_TYPE)
-            {
+            if parent.children().any(|node| node.kind() == SyntaxKind::GLOBAL_TYPE) {
                 ctx.push(CmpCtx::Instr(true));
             } else if has_leading_l_paren(token) {
-                ctx.extend([
-                    CmpCtx::KeywordMut,
-                    CmpCtx::KeywordImExport,
-                    CmpCtx::KeywordRef,
-                ]);
+                ctx.extend([CmpCtx::KeywordMut, CmpCtx::KeywordImExport, CmpCtx::KeywordRef]);
             } else {
                 ctx.extend([CmpCtx::NumTypeVecType, CmpCtx::AbbrRefType]);
             }
@@ -382,11 +334,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         SyntaxKind::EXTERN_IDX_GLOBAL => ctx.push(CmpCtx::Global),
         SyntaxKind::MODULE_FIELD_MEMORY => {
             if has_leading_l_paren(token) {
-                ctx.extend([
-                    CmpCtx::KeywordImExport,
-                    CmpCtx::KeywordData,
-                    CmpCtx::KeywordPagesize,
-                ]);
+                ctx.extend([CmpCtx::KeywordImExport, CmpCtx::KeywordData, CmpCtx::KeywordPagesize]);
             } else {
                 ctx.extend([CmpCtx::AddrType, CmpCtx::KeywordsShare]);
             }
@@ -400,29 +348,19 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         SyntaxKind::MODULE_FIELD_DATA => {
             if has_leading_l_paren(token) {
-                ctx.extend([
-                    CmpCtx::KeywordMemory,
-                    CmpCtx::KeywordOffset,
-                    CmpCtx::Instr(true),
-                ]);
+                ctx.extend([CmpCtx::KeywordMemory, CmpCtx::KeywordOffset, CmpCtx::Instr(true)]);
             }
         }
         SyntaxKind::MODULE_FIELD_ELEM => {
             if has_leading_l_paren(token) {
-                if !parent
-                    .children()
-                    .any(|child| child.kind() == SyntaxKind::TABLE_USE)
+                if !parent.children().any(|child| child.kind() == SyntaxKind::TABLE_USE)
                     && !token
                         .siblings_with_tokens(Direction::Prev)
                         .any(|element| element.kind() == SyntaxKind::OFFSET)
                 {
                     ctx.push(CmpCtx::KeywordTable);
                 }
-                ctx.extend([
-                    CmpCtx::KeywordOffset,
-                    CmpCtx::KeywordItem,
-                    CmpCtx::Instr(true),
-                ]);
+                ctx.extend([CmpCtx::KeywordOffset, CmpCtx::KeywordItem, CmpCtx::Instr(true)]);
             } else if parent
                 .first_child_by_kind(&|kind| kind == SyntaxKind::ELEM_LIST)
                 .and_then(|elem_list| support::token(&elem_list, SyntaxKind::KEYWORD))
@@ -454,11 +392,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         SyntaxKind::EXTERN_TYPE_FUNC => {
             if has_leading_l_paren(token) {
-                ctx.extend([
-                    CmpCtx::KeywordParam,
-                    CmpCtx::KeywordResult,
-                    CmpCtx::KeywordType,
-                ]);
+                ctx.extend([CmpCtx::KeywordParam, CmpCtx::KeywordResult, CmpCtx::KeywordType]);
             }
         }
         SyntaxKind::EXTERN_TYPE_GLOBAL => {
@@ -482,9 +416,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             } else if token
                 .siblings_with_tokens(Direction::Prev)
                 .any(|element| match element {
-                    SyntaxElement::Token(token) => {
-                        token.kind() == SyntaxKind::KEYWORD && token.text() == "func"
-                    }
+                    SyntaxElement::Token(token) => token.kind() == SyntaxKind::KEYWORD && token.text() == "func",
                     _ => false,
                 })
             {
@@ -519,30 +451,18 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
             if has_leading_l_paren(token) {
                 ctx.extend([CmpCtx::KeywordMut, CmpCtx::KeywordRef]);
             } else {
-                ctx.extend([
-                    CmpCtx::NumTypeVecType,
-                    CmpCtx::AbbrRefType,
-                    CmpCtx::PackedType,
-                ]);
+                ctx.extend([CmpCtx::NumTypeVecType, CmpCtx::AbbrRefType, CmpCtx::PackedType]);
             }
         }
         SyntaxKind::FIELD_TYPE => {
             if has_leading_l_paren(token) {
                 ctx.push(CmpCtx::KeywordRef);
             } else {
-                ctx.extend([
-                    CmpCtx::NumTypeVecType,
-                    CmpCtx::AbbrRefType,
-                    CmpCtx::PackedType,
-                ]);
+                ctx.extend([CmpCtx::NumTypeVecType, CmpCtx::AbbrRefType, CmpCtx::PackedType]);
             }
         }
         SyntaxKind::REF_TYPE => {
-            ctx.extend([
-                CmpCtx::TypeDef(None),
-                CmpCtx::KeywordNull,
-                CmpCtx::AbsHeapType,
-            ]);
+            ctx.extend([CmpCtx::TypeDef(None), CmpCtx::KeywordNull, CmpCtx::AbsHeapType]);
         }
         SyntaxKind::REC_TYPE => {
             if has_leading_l_paren(token) {
@@ -561,11 +481,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         }
         SyntaxKind::EXTERN_TYPE_TAG => {
             if has_leading_l_paren(token) {
-                ctx.extend([
-                    CmpCtx::KeywordType,
-                    CmpCtx::KeywordParam,
-                    CmpCtx::KeywordResult,
-                ]);
+                ctx.extend([CmpCtx::KeywordType, CmpCtx::KeywordParam, CmpCtx::KeywordResult]);
             }
         }
         SyntaxKind::CATCH => {
@@ -595,11 +511,7 @@ fn add_cmp_ctx_for_immediates(
         match instr_name {
             "select" => ctx.push(CmpCtx::KeywordResult),
             "call_indirect" | "return_call_indirect" => {
-                ctx.extend([
-                    CmpCtx::KeywordType,
-                    CmpCtx::KeywordParam,
-                    CmpCtx::KeywordResult,
-                ]);
+                ctx.extend([CmpCtx::KeywordType, CmpCtx::KeywordParam, CmpCtx::KeywordResult]);
             }
             "ref.test" | "ref.cast" => ctx.push(CmpCtx::KeywordRef),
             _ => {}
@@ -755,38 +667,37 @@ fn get_cmp_list(
     root: &SyntaxNode,
 ) -> Vec<CompletionItem> {
     let symbol_table = SymbolTable::of(db, document);
-    ctx.into_iter()
-        .fold(Vec::with_capacity(2), |mut items, ctx| {
-            match ctx {
-                CmpCtx::Instr(const_only) => {
-                    let instrs = if const_only {
-                        data_set::CONST_INSTRS.iter()
-                    } else {
-                        data_set::INSTR_NAMES.iter()
-                    };
-                    if let Some((left, _)) = token.text().rsplit_once('.') {
-                        items.extend(
-                            instrs
-                                .filter_map(|name| {
-                                    name.strip_prefix(left).and_then(|s| s.strip_prefix('.'))
-                                })
-                                .map(|name| CompletionItem {
-                                    label: name.to_string(),
-                                    kind: Some(CompletionItemKind::Operator),
-                                    ..Default::default()
-                                }),
-                        );
-                    } else {
-                        items.extend(instrs.map(|name| CompletionItem {
-                            label: name.to_string(),
-                            kind: Some(CompletionItemKind::Operator),
-                            ..Default::default()
-                        }));
-                    }
+    ctx.into_iter().fold(Vec::with_capacity(2), |mut items, ctx| {
+        match ctx {
+            CmpCtx::Instr(const_only) => {
+                let instrs = if const_only {
+                    data_set::CONST_INSTRS.iter()
+                } else {
+                    data_set::INSTR_NAMES.iter()
+                };
+                if let Some((left, _)) = token.text().rsplit_once('.') {
+                    items.extend(
+                        instrs
+                            .filter_map(|name| name.strip_prefix(left).and_then(|s| s.strip_prefix('.')))
+                            .map(|name| CompletionItem {
+                                label: name.to_string(),
+                                kind: Some(CompletionItemKind::Operator),
+                                ..Default::default()
+                            }),
+                    );
+                } else {
+                    items.extend(instrs.map(|name| CompletionItem {
+                        label: name.to_string(),
+                        kind: Some(CompletionItemKind::Operator),
+                        ..Default::default()
+                    }));
                 }
-                CmpCtx::NumTypeVecType => {
-                    items.extend(["i32", "i64", "f32", "f64", "v128"].into_iter().map(|ty| {
-                        CompletionItem {
+            }
+            CmpCtx::NumTypeVecType => {
+                items.extend(
+                    ["i32", "i64", "f32", "f64", "v128"]
+                        .into_iter()
+                        .map(|ty| CompletionItem {
                             label: ty.to_string(),
                             kind: Some(CompletionItemKind::Class),
                             documentation: data_set::get_value_type_description(ty).map(|desc| {
@@ -796,505 +707,61 @@ fn get_cmp_list(
                                 })
                             }),
                             ..Default::default()
-                        }
-                    }));
-                }
-                CmpCtx::AbbrRefType => {
-                    items.extend(
-                        [
-                            "anyref",
-                            "eqref",
-                            "i31ref",
-                            "structref",
-                            "arrayref",
-                            "nullref",
-                            "funcref",
-                            "nullfuncref",
-                            "exnref",
-                            "nullexnref",
-                            "externref",
-                            "nullexternref",
-                        ]
-                        .into_iter()
-                        .map(|ty| CompletionItem {
-                            label: ty.into(),
-                            kind: Some(CompletionItemKind::Class),
-                            ..Default::default()
                         }),
-                    );
-                }
-                CmpCtx::Local => {
-                    let Some(func) = token
-                        .parent_ancestors()
-                        .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
-                    else {
-                        return items;
-                    };
-                    let func_key = SymbolKey::new(&func);
-                    let preferred_type = guess_preferred_type(db, document, token);
-                    let param_region = if let Some(type_use) =
-                        helpers::ast::pick_type_idx_from_func(&func)
-                        && let Some(type_def) =
-                            symbol_table.resolved.get(&SymbolKey::new(&type_use))
-                    {
-                        *type_def
-                    } else {
-                        func_key
-                    };
-                    items.extend(
-                        symbol_table
-                            .symbols
-                            .values()
-                            .filter(|symbol| match symbol.kind {
-                                SymbolKind::Param => symbol.region == param_region,
-                                SymbolKind::Local => symbol.region == func_key,
-                                _ => false,
-                            })
-                            .map(|symbol| {
-                                let label = symbol.idx.render(db).to_string();
-                                let ty = types_analyzer::extract_type(
-                                    db,
-                                    document,
-                                    symbol.green.clone(),
-                                );
-                                CompletionItem {
-                                    label: label.clone(),
-                                    kind: Some(CompletionItemKind::Variable),
-                                    text_edit: if token.kind().is_trivia() {
-                                        None
-                                    } else {
-                                        Some(Union2::A(TextEdit {
-                                            range: helpers::rowan_range_to_lsp_range(
-                                                line_index,
-                                                token.text_range(),
-                                            ),
-                                            new_text: label,
-                                        }))
-                                    },
-                                    label_details: ty.as_ref().map(|ty| {
-                                        CompletionItemLabelDetails {
-                                            description: Some(ty.render(db).to_string()),
-                                            ..Default::default()
-                                        }
-                                    }),
-                                    sort_text: preferred_type.as_ref().zip(ty.as_ref()).map(
-                                        |(expected, it)| {
-                                            if expected == it {
-                                                "0".into()
-                                            } else {
-                                                "1".into()
-                                            }
-                                        },
-                                    ),
-                                    ..Default::default()
-                                }
-                            }),
-                    );
-                }
-                CmpCtx::Func => {
-                    let Some(module) = token
-                        .parent_ancestors()
-                        .find(|node| node.kind() == SyntaxKind::MODULE)
-                    else {
-                        return items;
-                    };
-                    let deprecation = deprecation::get_deprecation(db, document);
-                    items.extend(symbol_table.get_declared(module, SymbolKind::Func).map(
-                        |symbol| {
-                            let label = symbol.idx.render(db).to_string();
-                            CompletionItem {
-                                label: label.clone(),
-                                kind: Some(CompletionItemKind::Function),
-                                text_edit: if token.kind().is_trivia() {
-                                    None
-                                } else {
-                                    Some(Union2::A(TextEdit {
-                                        range: helpers::rowan_range_to_lsp_range(
-                                            line_index,
-                                            token.text_range(),
-                                        ),
-                                        new_text: label,
-                                    }))
-                                },
-                                detail: Some(types_analyzer::render_func_header(
-                                    db,
-                                    symbol.idx.name,
-                                    types_analyzer::get_func_sig(
-                                        db,
-                                        document,
-                                        *symbol.key,
-                                        &symbol.green,
-                                    ),
-                                )),
-                                label_details: Some(CompletionItemLabelDetails {
-                                    description: Some(
-                                        types_analyzer::get_func_sig(
-                                            db,
-                                            document,
-                                            *symbol.key,
-                                            &symbol.green,
-                                        )
-                                        .render_compact(db)
-                                        .to_string(),
-                                    ),
-                                    ..Default::default()
-                                }),
-                                documentation: Some(Union2::B(MarkupContent {
-                                    kind: MarkupKind::Markdown,
-                                    value: helpers::ast::get_doc_comment(&symbol.key.to_node(root)),
-                                })),
-                                tags: if deprecation.contains_key(&symbol.key) {
-                                    Some(vec![CompletionItemTag::Deprecated])
-                                } else {
-                                    None
-                                },
-                                ..Default::default()
-                            }
-                        },
-                    ));
-                }
-                CmpCtx::TypeDef(preferred_type) => {
-                    let Some(module) = token
-                        .parent_ancestors()
-                        .find(|node| node.kind() == SyntaxKind::MODULE)
-                    else {
-                        return items;
-                    };
-                    let def_types = types_analyzer::get_def_types(db, document);
-                    let deprecation = deprecation::get_deprecation(db, document);
-                    items.extend(symbol_table.get_declared(module, SymbolKind::Type).map(
-                        |symbol| {
-                            let label = symbol.idx.render(db).to_string();
-                            CompletionItem {
-                                label: label.clone(),
-                                kind: Some(CompletionItemKind::Interface),
-                                text_edit: if token.kind().is_trivia() {
-                                    None
-                                } else {
-                                    Some(Union2::A(TextEdit {
-                                        range: helpers::rowan_range_to_lsp_range(
-                                            line_index,
-                                            token.text_range(),
-                                        ),
-                                        new_text: label,
-                                    }))
-                                },
-                                sort_text: preferred_type.as_ref().and_then(|preferred_type| {
-                                    def_types.get(&symbol.key).map(|def_type| {
-                                        if let (CompositeType::Func(..), PreferredType::Func)
-                                        | (CompositeType::Array(..), PreferredType::Array)
-                                        | (CompositeType::Struct(..), PreferredType::Struct) =
-                                            (&def_type.comp, preferred_type)
-                                        {
-                                            "0".into()
-                                        } else {
-                                            "1".into()
-                                        }
-                                    })
-                                }),
-                                tags: if deprecation.contains_key(&symbol.key) {
-                                    Some(vec![CompletionItemTag::Deprecated])
-                                } else {
-                                    None
-                                },
-                                ..Default::default()
-                            }
-                        },
-                    ));
-                }
-                CmpCtx::Global => {
-                    let Some(module) = token
-                        .parent_ancestors()
-                        .find(|node| node.kind() == SyntaxKind::MODULE)
-                    else {
-                        return items;
-                    };
-                    let deprecation = deprecation::get_deprecation(db, document);
-                    let preferred_type = guess_preferred_type(db, document, token);
-                    items.extend(
-                        symbol_table
-                            .get_declared(module, SymbolKind::GlobalDef)
-                            .map(|symbol| {
-                                let label = symbol.idx.render(db).to_string();
-                                let ty = types_analyzer::extract_global_type(
-                                    db,
-                                    document,
-                                    symbol.green.clone(),
-                                );
-                                CompletionItem {
-                                    label: label.clone(),
-                                    kind: Some(CompletionItemKind::Variable),
-                                    text_edit: if token.kind().is_trivia() {
-                                        None
-                                    } else {
-                                        Some(Union2::A(TextEdit {
-                                            range: helpers::rowan_range_to_lsp_range(
-                                                line_index,
-                                                token.text_range(),
-                                            ),
-                                            new_text: label,
-                                        }))
-                                    },
-                                    label_details: ty.as_ref().map(|ty| {
-                                        CompletionItemLabelDetails {
-                                            description: Some(ty.render(db).to_string()),
-                                            ..Default::default()
-                                        }
-                                    }),
-                                    sort_text: preferred_type.as_ref().zip(ty.as_ref()).map(
-                                        |(expected, it)| {
-                                            if expected == it {
-                                                "0".into()
-                                            } else {
-                                                "1".into()
-                                            }
-                                        },
-                                    ),
-                                    tags: if deprecation.contains_key(&symbol.key) {
-                                        Some(vec![CompletionItemTag::Deprecated])
-                                    } else {
-                                        None
-                                    },
-                                    ..Default::default()
-                                }
-                            }),
-                    );
-                }
-                CmpCtx::MemArg => {
-                    items.extend(["offset=", "align="].iter().map(|label| CompletionItem {
-                        label: label.to_string(),
-                        kind: Some(CompletionItemKind::Snippet),
-                        ..Default::default()
-                    }));
-                }
-                CmpCtx::Memory => {
-                    let Some(module) = token
-                        .parent_ancestors()
-                        .find(|node| node.kind() == SyntaxKind::MODULE)
-                    else {
-                        return items;
-                    };
-                    let deprecation = deprecation::get_deprecation(db, document);
-                    items.extend(
-                        symbol_table
-                            .get_declared(module, SymbolKind::MemoryDef)
-                            .map(|symbol| {
-                                let label = symbol.idx.render(db).to_string();
-                                CompletionItem {
-                                    label: label.clone(),
-                                    kind: Some(CompletionItemKind::Variable),
-                                    text_edit: if token.kind().is_trivia() {
-                                        None
-                                    } else {
-                                        Some(Union2::A(TextEdit {
-                                            range: helpers::rowan_range_to_lsp_range(
-                                                line_index,
-                                                token.text_range(),
-                                            ),
-                                            new_text: label,
-                                        }))
-                                    },
-                                    tags: if deprecation.contains_key(&symbol.key) {
-                                        Some(vec![CompletionItemTag::Deprecated])
-                                    } else {
-                                        None
-                                    },
-                                    ..Default::default()
-                                }
-                            }),
-                    );
-                }
-                CmpCtx::Table => {
-                    let Some(module) = token
-                        .parent_ancestors()
-                        .find(|node| node.kind() == SyntaxKind::MODULE)
-                        .map(|module| SymbolKey::new(&module))
-                    else {
-                        return items;
-                    };
-                    let deprecation = deprecation::get_deprecation(db, document);
-                    items.extend(
-                        symbol_table
-                            .symbols
-                            .values()
-                            .filter(|symbol| {
-                                symbol.kind == SymbolKind::TableDef && symbol.region == module
-                            })
-                            .map(|symbol| {
-                                let label = symbol.idx.render(db).to_string();
-                                CompletionItem {
-                                    label: label.clone(),
-                                    kind: Some(CompletionItemKind::Variable),
-                                    text_edit: if token.kind().is_trivia() {
-                                        None
-                                    } else {
-                                        Some(Union2::A(TextEdit {
-                                            range: helpers::rowan_range_to_lsp_range(
-                                                line_index,
-                                                token.text_range(),
-                                            ),
-                                            new_text: label,
-                                        }))
-                                    },
-                                    tags: if deprecation.contains_key(&symbol.key) {
-                                        Some(vec![CompletionItemTag::Deprecated])
-                                    } else {
-                                        None
-                                    },
-                                    ..Default::default()
-                                }
-                            }),
-                    );
-                }
-                CmpCtx::Block => {
-                    items.extend(
-                        symbol_table
-                            .symbols
-                            .values()
-                            .filter(|symbol| {
-                                matches!(symbol.kind, SymbolKind::BlockDef | SymbolKind::Func)
-                                    && symbol.key.text_range().contains_range(token.text_range())
-                            })
-                            .rev()
-                            .enumerate()
-                            .map(|(num, symbol)| {
-                                let idx = Idx {
-                                    num: Some(num as u32),
-                                    name: symbol.idx.name,
-                                };
-                                let label = idx.render(db).to_string();
-                                let block_node = symbol.key.to_node(root);
-                                let sig = types_analyzer::get_block_sig(db, document, &block_node);
-                                CompletionItem {
-                                    label: label.clone(),
-                                    kind: Some(CompletionItemKind::Variable),
-                                    text_edit: if token.kind().is_trivia() {
-                                        None
-                                    } else {
-                                        Some(Union2::A(TextEdit {
-                                            range: helpers::rowan_range_to_lsp_range(
-                                                line_index,
-                                                token.text_range(),
-                                            ),
-                                            new_text: label,
-                                        }))
-                                    },
-                                    label_details: Some(CompletionItemLabelDetails {
-                                        description: Some(format!(
-                                            "[{}]",
-                                            sig.results
-                                                .iter()
-                                                .map(|result| result.render(db))
-                                                .join(", ")
-                                        )),
-                                        ..Default::default()
-                                    }),
-                                    detail: Some(types_analyzer::render_block_header(
-                                        db,
-                                        symbol.key.kind(),
-                                        idx.name,
-                                        sig,
-                                    )),
-                                    ..Default::default()
-                                }
-                            }),
-                    );
-                }
-                CmpCtx::Field(struct_ref_key) => {
-                    let def_types = types_analyzer::get_def_types(db, document);
-                    if let Some(CompositeType::Struct(Fields(fields))) = symbol_table
-                        .resolved
-                        .get(&struct_ref_key)
-                        .and_then(|key| def_types.get(key))
-                        .map(|def_type| &def_type.comp)
-                    {
-                        items.extend(fields.iter().map(|(ty, idx)| {
-                            let label = idx.render(db).to_string();
-                            CompletionItem {
-                                label: label.clone(),
-                                kind: Some(CompletionItemKind::Field),
-                                text_edit: if token.kind().is_trivia() {
-                                    None
-                                } else {
-                                    Some(Union2::A(TextEdit {
-                                        range: helpers::rowan_range_to_lsp_range(
-                                            line_index,
-                                            token.text_range(),
-                                        ),
-                                        new_text: label,
-                                    }))
-                                },
-                                label_details: Some(CompletionItemLabelDetails {
-                                    description: Some(ty.render(db).to_string()),
-                                    ..Default::default()
-                                }),
-                                ..Default::default()
-                            }
-                        }));
-                    }
-                }
-                CmpCtx::AbsHeapType => {
-                    items.extend(
-                        [
-                            "any", "eq", "i31", "struct", "array", "none", "func", "nofunc", "exn",
-                            "noexn", "extern", "noextern",
-                        ]
-                        .into_iter()
-                        .map(|ty| CompletionItem {
-                            label: ty.into(),
-                            kind: Some(CompletionItemKind::Class),
-                            ..Default::default()
-                        }),
-                    );
-                }
-                CmpCtx::PackedType => {
-                    items.extend(["i8", "i16"].into_iter().map(|ty| CompletionItem {
-                        label: ty.to_string(),
+                );
+            }
+            CmpCtx::AbbrRefType => {
+                items.extend(
+                    [
+                        "anyref",
+                        "eqref",
+                        "i31ref",
+                        "structref",
+                        "arrayref",
+                        "nullref",
+                        "funcref",
+                        "nullfuncref",
+                        "exnref",
+                        "nullexnref",
+                        "externref",
+                        "nullexternref",
+                    ]
+                    .into_iter()
+                    .map(|ty| CompletionItem {
+                        label: ty.into(),
                         kind: Some(CompletionItemKind::Class),
                         ..Default::default()
-                    }));
-                }
-                CmpCtx::AddrType => {
-                    items.extend(["i32", "i64"].into_iter().map(|ty| CompletionItem {
-                        label: ty.to_string(),
-                        kind: Some(CompletionItemKind::Class),
-                        documentation: data_set::get_value_type_description(ty).map(|desc| {
-                            Union2::B(MarkupContent {
-                                kind: MarkupKind::Markdown,
-                                value: desc.into(),
-                            })
-                        }),
-                        ..Default::default()
-                    }));
-                }
-                CmpCtx::ShapeDescriptor => {
-                    items.extend(
-                        ["i8x16", "i16x8", "i32x4", "i64x2", "f32x4", "f64x2"]
-                            .into_iter()
-                            .map(|descriptor| CompletionItem {
-                                label: descriptor.to_string(),
-                                kind: Some(CompletionItemKind::Class),
-                                ..Default::default()
-                            }),
-                    );
-                }
-                CmpCtx::Tag => {
-                    let Some(module) = token
-                        .parent_ancestors()
-                        .find(|node| node.kind() == SyntaxKind::MODULE)
-                    else {
-                        return items;
-                    };
-                    let deprecation = deprecation::get_deprecation(db, document);
-                    items.extend(symbol_table.get_declared(module, SymbolKind::TagDef).map(
-                        |symbol| {
+                    }),
+                );
+            }
+            CmpCtx::Local => {
+                let Some(func) = token
+                    .parent_ancestors()
+                    .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
+                else {
+                    return items;
+                };
+                let func_key = SymbolKey::new(&func);
+                let preferred_type = guess_preferred_type(db, document, token);
+                let param_region = if let Some(type_use) = helpers::ast::pick_type_idx_from_func(&func)
+                    && let Some(type_def) = symbol_table.resolved.get(&SymbolKey::new(&type_use))
+                {
+                    *type_def
+                } else {
+                    func_key
+                };
+                items.extend(
+                    symbol_table
+                        .symbols
+                        .values()
+                        .filter(|symbol| match symbol.kind {
+                            SymbolKind::Param => symbol.region == param_region,
+                            SymbolKind::Local => symbol.region == func_key,
+                            _ => false,
+                        })
+                        .map(|symbol| {
                             let label = symbol.idx.render(db).to_string();
-                            let sig = types_analyzer::get_func_sig(
-                                db,
-                                document,
-                                *symbol.key,
-                                &symbol.green,
-                            );
+                            let ty = types_analyzer::extract_type(db, document, symbol.green.clone());
                             CompletionItem {
                                 label: label.clone(),
                                 kind: Some(CompletionItemKind::Variable),
@@ -1302,26 +769,206 @@ fn get_cmp_list(
                                     None
                                 } else {
                                     Some(Union2::A(TextEdit {
-                                        range: helpers::rowan_range_to_lsp_range(
-                                            line_index,
-                                            token.text_range(),
-                                        ),
+                                        range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
                                         new_text: label,
                                     }))
                                 },
-                                label_details: Some(CompletionItemLabelDetails {
-                                    description: Some(format!(
-                                        "[{}]",
-                                        sig.params.iter().map(|(ty, _)| ty.render(db)).join(", ")
-                                    )),
+                                label_details: ty.as_ref().map(|ty| CompletionItemLabelDetails {
+                                    description: Some(ty.render(db).to_string()),
                                     ..Default::default()
                                 }),
-                                detail: Some(types_analyzer::render_header(
-                                    db,
-                                    "tag",
-                                    symbol.idx.name,
-                                    sig,
-                                )),
+                                sort_text: preferred_type
+                                    .as_ref()
+                                    .zip(ty.as_ref())
+                                    .map(|(expected, it)| if expected == it { "0".into() } else { "1".into() }),
+                                ..Default::default()
+                            }
+                        }),
+                );
+            }
+            CmpCtx::Func => {
+                let Some(module) = token.parent_ancestors().find(|node| node.kind() == SyntaxKind::MODULE) else {
+                    return items;
+                };
+                let deprecation = deprecation::get_deprecation(db, document);
+                items.extend(symbol_table.get_declared(module, SymbolKind::Func).map(|symbol| {
+                    let label = symbol.idx.render(db).to_string();
+                    CompletionItem {
+                        label: label.clone(),
+                        kind: Some(CompletionItemKind::Function),
+                        text_edit: if token.kind().is_trivia() {
+                            None
+                        } else {
+                            Some(Union2::A(TextEdit {
+                                range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                new_text: label,
+                            }))
+                        },
+                        detail: Some(types_analyzer::render_func_header(
+                            db,
+                            symbol.idx.name,
+                            types_analyzer::get_func_sig(db, document, *symbol.key, &symbol.green),
+                        )),
+                        label_details: Some(CompletionItemLabelDetails {
+                            description: Some(
+                                types_analyzer::get_func_sig(db, document, *symbol.key, &symbol.green)
+                                    .render_compact(db)
+                                    .to_string(),
+                            ),
+                            ..Default::default()
+                        }),
+                        documentation: Some(Union2::B(MarkupContent {
+                            kind: MarkupKind::Markdown,
+                            value: helpers::ast::get_doc_comment(&symbol.key.to_node(root)),
+                        })),
+                        tags: if deprecation.contains_key(&symbol.key) {
+                            Some(vec![CompletionItemTag::Deprecated])
+                        } else {
+                            None
+                        },
+                        ..Default::default()
+                    }
+                }));
+            }
+            CmpCtx::TypeDef(preferred_type) => {
+                let Some(module) = token.parent_ancestors().find(|node| node.kind() == SyntaxKind::MODULE) else {
+                    return items;
+                };
+                let def_types = types_analyzer::get_def_types(db, document);
+                let deprecation = deprecation::get_deprecation(db, document);
+                items.extend(symbol_table.get_declared(module, SymbolKind::Type).map(|symbol| {
+                    let label = symbol.idx.render(db).to_string();
+                    CompletionItem {
+                        label: label.clone(),
+                        kind: Some(CompletionItemKind::Interface),
+                        text_edit: if token.kind().is_trivia() {
+                            None
+                        } else {
+                            Some(Union2::A(TextEdit {
+                                range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                new_text: label,
+                            }))
+                        },
+                        sort_text: preferred_type.as_ref().and_then(|preferred_type| {
+                            def_types.get(&symbol.key).map(|def_type| {
+                                if let (CompositeType::Func(..), PreferredType::Func)
+                                | (CompositeType::Array(..), PreferredType::Array)
+                                | (CompositeType::Struct(..), PreferredType::Struct) =
+                                    (&def_type.comp, preferred_type)
+                                {
+                                    "0".into()
+                                } else {
+                                    "1".into()
+                                }
+                            })
+                        }),
+                        tags: if deprecation.contains_key(&symbol.key) {
+                            Some(vec![CompletionItemTag::Deprecated])
+                        } else {
+                            None
+                        },
+                        ..Default::default()
+                    }
+                }));
+            }
+            CmpCtx::Global => {
+                let Some(module) = token.parent_ancestors().find(|node| node.kind() == SyntaxKind::MODULE) else {
+                    return items;
+                };
+                let deprecation = deprecation::get_deprecation(db, document);
+                let preferred_type = guess_preferred_type(db, document, token);
+                items.extend(symbol_table.get_declared(module, SymbolKind::GlobalDef).map(|symbol| {
+                    let label = symbol.idx.render(db).to_string();
+                    let ty = types_analyzer::extract_global_type(db, document, symbol.green.clone());
+                    CompletionItem {
+                        label: label.clone(),
+                        kind: Some(CompletionItemKind::Variable),
+                        text_edit: if token.kind().is_trivia() {
+                            None
+                        } else {
+                            Some(Union2::A(TextEdit {
+                                range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                new_text: label,
+                            }))
+                        },
+                        label_details: ty.as_ref().map(|ty| CompletionItemLabelDetails {
+                            description: Some(ty.render(db).to_string()),
+                            ..Default::default()
+                        }),
+                        sort_text: preferred_type
+                            .as_ref()
+                            .zip(ty.as_ref())
+                            .map(|(expected, it)| if expected == it { "0".into() } else { "1".into() }),
+                        tags: if deprecation.contains_key(&symbol.key) {
+                            Some(vec![CompletionItemTag::Deprecated])
+                        } else {
+                            None
+                        },
+                        ..Default::default()
+                    }
+                }));
+            }
+            CmpCtx::MemArg => {
+                items.extend(["offset=", "align="].iter().map(|label| CompletionItem {
+                    label: label.to_string(),
+                    kind: Some(CompletionItemKind::Snippet),
+                    ..Default::default()
+                }));
+            }
+            CmpCtx::Memory => {
+                let Some(module) = token.parent_ancestors().find(|node| node.kind() == SyntaxKind::MODULE) else {
+                    return items;
+                };
+                let deprecation = deprecation::get_deprecation(db, document);
+                items.extend(symbol_table.get_declared(module, SymbolKind::MemoryDef).map(|symbol| {
+                    let label = symbol.idx.render(db).to_string();
+                    CompletionItem {
+                        label: label.clone(),
+                        kind: Some(CompletionItemKind::Variable),
+                        text_edit: if token.kind().is_trivia() {
+                            None
+                        } else {
+                            Some(Union2::A(TextEdit {
+                                range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                new_text: label,
+                            }))
+                        },
+                        tags: if deprecation.contains_key(&symbol.key) {
+                            Some(vec![CompletionItemTag::Deprecated])
+                        } else {
+                            None
+                        },
+                        ..Default::default()
+                    }
+                }));
+            }
+            CmpCtx::Table => {
+                let Some(module) = token
+                    .parent_ancestors()
+                    .find(|node| node.kind() == SyntaxKind::MODULE)
+                    .map(|module| SymbolKey::new(&module))
+                else {
+                    return items;
+                };
+                let deprecation = deprecation::get_deprecation(db, document);
+                items.extend(
+                    symbol_table
+                        .symbols
+                        .values()
+                        .filter(|symbol| symbol.kind == SymbolKind::TableDef && symbol.region == module)
+                        .map(|symbol| {
+                            let label = symbol.idx.render(db).to_string();
+                            CompletionItem {
+                                label: label.clone(),
+                                kind: Some(CompletionItemKind::Variable),
+                                text_edit: if token.kind().is_trivia() {
+                                    None
+                                } else {
+                                    Some(Union2::A(TextEdit {
+                                        range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                        new_text: label,
+                                    }))
+                                },
                                 tags: if deprecation.contains_key(&symbol.key) {
                                     Some(vec![CompletionItemTag::Deprecated])
                                 } else {
@@ -1329,206 +976,363 @@ fn get_cmp_list(
                                 },
                                 ..Default::default()
                             }
-                        },
-                    ));
-                }
-                CmpCtx::MemPageSize => items.extend([1, 65536].map(|page_size| CompletionItem {
-                    label: page_size.to_string(),
-                    kind: Some(CompletionItemKind::Constant),
-                    ..Default::default()
-                })),
-                CmpCtx::Annotation => {
-                    items.extend(
-                        [
-                            "deprecated",
-                            "custom",
-                            "name",
-                            "js",
-                            "metadata.code.branch_hint",
-                            "metadata.code.compilation_priority",
-                            "metadata.code.instr_freq",
-                            "metadata.code.call_targets",
-                        ]
-                        .map(|annot| CompletionItem {
-                            label: annot.to_string(),
-                            kind: Some(CompletionItemKind::Snippet),
-                            ..Default::default()
                         }),
-                    );
-                }
-                CmpCtx::KeywordModule => items.push(CompletionItem {
-                    label: "module".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordsModuleField => {
-                    items.extend(data_set::MODULE_FIELDS.iter().map(|ty| CompletionItem {
-                        label: ty.to_string(),
-                        kind: Some(CompletionItemKind::Keyword),
-                        ..Default::default()
-                    }));
-                }
-                CmpCtx::KeywordImExport => {
-                    items.extend(["import", "export"].iter().map(|keyword| CompletionItem {
-                        label: keyword.to_string(),
-                        kind: Some(CompletionItemKind::Keyword),
-                        ..Default::default()
-                    }));
-                }
-                CmpCtx::KeywordType => items.push(CompletionItem {
-                    label: "type".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordParam => items.push(CompletionItem {
-                    label: "param".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordResult => items.push(CompletionItem {
-                    label: "result".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordLocal => items.push(CompletionItem {
-                    label: "local".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordMut => items.push(CompletionItem {
-                    label: "mut".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordPortDesc => {
-                    items.extend(data_set::EXTERNS.iter().map(|desc| CompletionItem {
-                        label: desc.to_string(),
-                        kind: Some(CompletionItemKind::Keyword),
-                        ..Default::default()
-                    }));
-                }
-                CmpCtx::KeywordData => items.push(CompletionItem {
-                    label: "data".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordFunc => items.push(CompletionItem {
-                    label: "func".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordThen => items.push(CompletionItem {
-                    label: "then".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordElem => items.push(CompletionItem {
-                    label: "elem".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordItem => items.push(CompletionItem {
-                    label: "item".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordMemory => items.push(CompletionItem {
-                    label: "memory".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordOffset => items.push(CompletionItem {
-                    label: "offset".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordDeclare => items.push(CompletionItem {
-                    label: "declare".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordTable => items.push(CompletionItem {
-                    label: "table".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordSub => items.push(CompletionItem {
-                    label: "sub".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordFinal => items.push(CompletionItem {
-                    label: "final".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordsCompType => {
-                    items.extend(["func", "struct", "array"].into_iter().map(|keyword| {
+                );
+            }
+            CmpCtx::Block => {
+                items.extend(
+                    symbol_table
+                        .symbols
+                        .values()
+                        .filter(|symbol| {
+                            matches!(symbol.kind, SymbolKind::BlockDef | SymbolKind::Func)
+                                && symbol.key.text_range().contains_range(token.text_range())
+                        })
+                        .rev()
+                        .enumerate()
+                        .map(|(num, symbol)| {
+                            let idx = Idx {
+                                num: Some(num as u32),
+                                name: symbol.idx.name,
+                            };
+                            let label = idx.render(db).to_string();
+                            let block_node = symbol.key.to_node(root);
+                            let sig = types_analyzer::get_block_sig(db, document, &block_node);
+                            CompletionItem {
+                                label: label.clone(),
+                                kind: Some(CompletionItemKind::Variable),
+                                text_edit: if token.kind().is_trivia() {
+                                    None
+                                } else {
+                                    Some(Union2::A(TextEdit {
+                                        range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                        new_text: label,
+                                    }))
+                                },
+                                label_details: Some(CompletionItemLabelDetails {
+                                    description: Some(format!(
+                                        "[{}]",
+                                        sig.results.iter().map(|result| result.render(db)).join(", ")
+                                    )),
+                                    ..Default::default()
+                                }),
+                                detail: Some(types_analyzer::render_block_header(
+                                    db,
+                                    symbol.key.kind(),
+                                    idx.name,
+                                    sig,
+                                )),
+                                ..Default::default()
+                            }
+                        }),
+                );
+            }
+            CmpCtx::Field(struct_ref_key) => {
+                let def_types = types_analyzer::get_def_types(db, document);
+                if let Some(CompositeType::Struct(Fields(fields))) = symbol_table
+                    .resolved
+                    .get(&struct_ref_key)
+                    .and_then(|key| def_types.get(key))
+                    .map(|def_type| &def_type.comp)
+                {
+                    items.extend(fields.iter().map(|(ty, idx)| {
+                        let label = idx.render(db).to_string();
                         CompletionItem {
-                            label: keyword.to_string(),
-                            kind: Some(CompletionItemKind::Keyword),
+                            label: label.clone(),
+                            kind: Some(CompletionItemKind::Field),
+                            text_edit: if token.kind().is_trivia() {
+                                None
+                            } else {
+                                Some(Union2::A(TextEdit {
+                                    range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                    new_text: label,
+                                }))
+                            },
+                            label_details: Some(CompletionItemLabelDetails {
+                                description: Some(ty.render(db).to_string()),
+                                ..Default::default()
+                            }),
                             ..Default::default()
                         }
                     }));
                 }
-                CmpCtx::KeywordField => items.push(CompletionItem {
-                    label: "field".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
+            }
+            CmpCtx::AbsHeapType => {
+                items.extend(
+                    [
+                        "any", "eq", "i31", "struct", "array", "none", "func", "nofunc", "exn", "noexn", "extern",
+                        "noextern",
+                    ]
+                    .into_iter()
+                    .map(|ty| CompletionItem {
+                        label: ty.into(),
+                        kind: Some(CompletionItemKind::Class),
+                        ..Default::default()
+                    }),
+                );
+            }
+            CmpCtx::PackedType => {
+                items.extend(["i8", "i16"].into_iter().map(|ty| CompletionItem {
+                    label: ty.to_string(),
+                    kind: Some(CompletionItemKind::Class),
                     ..Default::default()
-                }),
-                CmpCtx::KeywordRef => items.push(CompletionItem {
-                    label: "ref".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
+                }));
+            }
+            CmpCtx::AddrType => {
+                items.extend(["i32", "i64"].into_iter().map(|ty| CompletionItem {
+                    label: ty.to_string(),
+                    kind: Some(CompletionItemKind::Class),
+                    documentation: data_set::get_value_type_description(ty).map(|desc| {
+                        Union2::B(MarkupContent {
+                            kind: MarkupKind::Markdown,
+                            value: desc.into(),
+                        })
+                    }),
                     ..Default::default()
-                }),
-                CmpCtx::KeywordNull => items.push(CompletionItem {
-                    label: "null".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::KeywordsCatch => items.extend(
-                    ["catch", "catch_ref", "catch_all", "catch_all_ref"]
+                }));
+            }
+            CmpCtx::ShapeDescriptor => {
+                items.extend(
+                    ["i8x16", "i16x8", "i32x4", "i64x2", "f32x4", "f64x2"]
                         .into_iter()
-                        .map(|keyword| CompletionItem {
-                            label: keyword.to_string(),
-                            kind: Some(CompletionItemKind::Keyword),
+                        .map(|descriptor| CompletionItem {
+                            label: descriptor.to_string(),
+                            kind: Some(CompletionItemKind::Class),
                             ..Default::default()
                         }),
-                ),
-                CmpCtx::KeywordsShare => items.extend(["shared", "unshared"].into_iter().map(
-                    |keyword| CompletionItem {
+                );
+            }
+            CmpCtx::Tag => {
+                let Some(module) = token.parent_ancestors().find(|node| node.kind() == SyntaxKind::MODULE) else {
+                    return items;
+                };
+                let deprecation = deprecation::get_deprecation(db, document);
+                items.extend(symbol_table.get_declared(module, SymbolKind::TagDef).map(|symbol| {
+                    let label = symbol.idx.render(db).to_string();
+                    let sig = types_analyzer::get_func_sig(db, document, *symbol.key, &symbol.green);
+                    CompletionItem {
+                        label: label.clone(),
+                        kind: Some(CompletionItemKind::Variable),
+                        text_edit: if token.kind().is_trivia() {
+                            None
+                        } else {
+                            Some(Union2::A(TextEdit {
+                                range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                new_text: label,
+                            }))
+                        },
+                        label_details: Some(CompletionItemLabelDetails {
+                            description: Some(format!(
+                                "[{}]",
+                                sig.params.iter().map(|(ty, _)| ty.render(db)).join(", ")
+                            )),
+                            ..Default::default()
+                        }),
+                        detail: Some(types_analyzer::render_header(db, "tag", symbol.idx.name, sig)),
+                        tags: if deprecation.contains_key(&symbol.key) {
+                            Some(vec![CompletionItemTag::Deprecated])
+                        } else {
+                            None
+                        },
+                        ..Default::default()
+                    }
+                }));
+            }
+            CmpCtx::MemPageSize => items.extend([1, 65536].map(|page_size| CompletionItem {
+                label: page_size.to_string(),
+                kind: Some(CompletionItemKind::Constant),
+                ..Default::default()
+            })),
+            CmpCtx::Annotation => {
+                items.extend(
+                    [
+                        "deprecated",
+                        "custom",
+                        "name",
+                        "js",
+                        "metadata.code.branch_hint",
+                        "metadata.code.compilation_priority",
+                        "metadata.code.instr_freq",
+                        "metadata.code.call_targets",
+                    ]
+                    .map(|annot| CompletionItem {
+                        label: annot.to_string(),
+                        kind: Some(CompletionItemKind::Snippet),
+                        ..Default::default()
+                    }),
+                );
+            }
+            CmpCtx::KeywordModule => items.push(CompletionItem {
+                label: "module".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordsModuleField => {
+                items.extend(data_set::MODULE_FIELDS.iter().map(|ty| CompletionItem {
+                    label: ty.to_string(),
+                    kind: Some(CompletionItemKind::Keyword),
+                    ..Default::default()
+                }));
+            }
+            CmpCtx::KeywordImExport => {
+                items.extend(["import", "export"].iter().map(|keyword| CompletionItem {
+                    label: keyword.to_string(),
+                    kind: Some(CompletionItemKind::Keyword),
+                    ..Default::default()
+                }));
+            }
+            CmpCtx::KeywordType => items.push(CompletionItem {
+                label: "type".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordParam => items.push(CompletionItem {
+                label: "param".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordResult => items.push(CompletionItem {
+                label: "result".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordLocal => items.push(CompletionItem {
+                label: "local".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordMut => items.push(CompletionItem {
+                label: "mut".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordPortDesc => {
+                items.extend(data_set::EXTERNS.iter().map(|desc| CompletionItem {
+                    label: desc.to_string(),
+                    kind: Some(CompletionItemKind::Keyword),
+                    ..Default::default()
+                }));
+            }
+            CmpCtx::KeywordData => items.push(CompletionItem {
+                label: "data".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordFunc => items.push(CompletionItem {
+                label: "func".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordThen => items.push(CompletionItem {
+                label: "then".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordElem => items.push(CompletionItem {
+                label: "elem".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordItem => items.push(CompletionItem {
+                label: "item".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordMemory => items.push(CompletionItem {
+                label: "memory".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordOffset => items.push(CompletionItem {
+                label: "offset".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordDeclare => items.push(CompletionItem {
+                label: "declare".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordTable => items.push(CompletionItem {
+                label: "table".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordSub => items.push(CompletionItem {
+                label: "sub".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordFinal => items.push(CompletionItem {
+                label: "final".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordsCompType => {
+                items.extend(["func", "struct", "array"].into_iter().map(|keyword| CompletionItem {
+                    label: keyword.to_string(),
+                    kind: Some(CompletionItemKind::Keyword),
+                    ..Default::default()
+                }));
+            }
+            CmpCtx::KeywordField => items.push(CompletionItem {
+                label: "field".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordRef => items.push(CompletionItem {
+                label: "ref".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordNull => items.push(CompletionItem {
+                label: "null".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordsCatch => items.extend(
+                ["catch", "catch_ref", "catch_all", "catch_all_ref"]
+                    .into_iter()
+                    .map(|keyword| CompletionItem {
                         label: keyword.to_string(),
                         kind: Some(CompletionItemKind::Keyword),
                         ..Default::default()
-                    },
-                )),
-                CmpCtx::KeywordPagesize => items.push(CompletionItem {
-                    label: "pagesize".to_string(),
-                    kind: Some(CompletionItemKind::Keyword),
-                    ..Default::default()
-                }),
-                CmpCtx::AnnotationCompilationPriority => {
-                    items.extend(["compilation", "optimization", "run_once"].into_iter().map(
-                        |keyword| CompletionItem {
+                    }),
+            ),
+            CmpCtx::KeywordsShare => items.extend(["shared", "unshared"].into_iter().map(|keyword| CompletionItem {
+                label: keyword.to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            })),
+            CmpCtx::KeywordPagesize => items.push(CompletionItem {
+                label: "pagesize".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::AnnotationCompilationPriority => {
+                items.extend(
+                    ["compilation", "optimization", "run_once"]
+                        .into_iter()
+                        .map(|keyword| CompletionItem {
                             label: keyword.to_string(),
                             kind: Some(CompletionItemKind::Snippet),
                             ..Default::default()
-                        },
-                    ));
-                }
-                CmpCtx::AnnotationInstrFreq => items.push(CompletionItem {
-                    label: "freq".to_string(),
-                    kind: Some(CompletionItemKind::Snippet),
-                    ..Default::default()
-                }),
-                CmpCtx::AnnotationCallTargets => items.push(CompletionItem {
-                    label: "target".to_string(),
-                    kind: Some(CompletionItemKind::Snippet),
-                    ..Default::default()
-                }),
+                        }),
+                );
             }
-            items
-        })
+            CmpCtx::AnnotationInstrFreq => items.push(CompletionItem {
+                label: "freq".to_string(),
+                kind: Some(CompletionItemKind::Snippet),
+                ..Default::default()
+            }),
+            CmpCtx::AnnotationCallTargets => items.push(CompletionItem {
+                label: "target".to_string(),
+                kind: Some(CompletionItemKind::Snippet),
+                ..Default::default()
+            }),
+        }
+        items
+    })
 }
 
 fn has_leading_l_paren(token: &SyntaxToken) -> bool {

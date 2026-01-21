@@ -611,8 +611,7 @@ impl DocGen for ModuleFieldFunc {
         }
         let mut locals = self.locals().peekable();
         let mut locals_docs = Vec::with_capacity(1);
-        let ws_of_multi_line =
-            whitespace_of_multi_line(ctx.options.multi_line_locals, locals.peek());
+        let ws_of_multi_line = whitespace_of_multi_line(ctx.options.multi_line_locals, locals.peek());
         if let Some(local) = locals.next() {
             if trivias.is_empty() {
                 docs.push(wrap_before(&mut locals, ctx.options.wrap_before_locals));
@@ -1232,13 +1231,8 @@ fn format_const_expr(
     let mut instrs = instrs.peekable();
     if let Some(instr) = instrs.next() {
         if trivias.is_empty() {
-            if matches!(
-                ctx.options.wrap_before_const_expr,
-                crate::config::WrapBefore::MultiOnly
-            ) && instr
-                .syntax()
-                .children()
-                .any(|child| Instr::can_cast(child.kind()))
+            if matches!(ctx.options.wrap_before_const_expr, crate::config::WrapBefore::MultiOnly)
+                && instr.syntax().children().any(|child| Instr::can_cast(child.kind()))
             {
                 docs.push(Doc::hard_line());
             } else {

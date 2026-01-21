@@ -180,8 +180,8 @@ impl Parser<'_> {
         self.lexer
             .eat(TYPE_KEYWORD)
             .and_then(|mut token| match token.text {
-                "any" | "eq" | "i31" | "struct" | "array" | "none" | "func" | "nofunc" | "exn"
-                | "noexn" | "extern" | "noextern" => Some(node(HEAP_TYPE, [token.into()]).into()),
+                "any" | "eq" | "i31" | "struct" | "array" | "none" | "func" | "nofunc" | "exn" | "noexn" | "extern"
+                | "noextern" => Some(node(HEAP_TYPE, [token.into()]).into()),
                 _ => {
                     if IMMEDIATE {
                         // for better error reporting
@@ -193,10 +193,7 @@ impl Parser<'_> {
                     }
                 }
             })
-            .or_else(|| {
-                self.parse_index()
-                    .map(|index| node(HEAP_TYPE, [index.into()]).into())
-            })
+            .or_else(|| self.parse_index().map(|index| node(HEAP_TYPE, [index.into()]).into()))
     }
 
     fn parse_limits(&mut self) -> Option<GreenNode> {
@@ -251,12 +248,10 @@ impl Parser<'_> {
     }
 
     fn parse_packed_type(&mut self) -> Option<GreenElement> {
-        self.lexer
-            .next(TYPE_KEYWORD)
-            .and_then(|token| match token.text {
-                "i8" | "i16" => Some(node(PACKED_TYPE, [token.into()]).into()),
-                _ => None,
-            })
+        self.lexer.next(TYPE_KEYWORD).and_then(|token| match token.text {
+            "i8" | "i16" => Some(node(PACKED_TYPE, [token.into()]).into()),
+            _ => None,
+        })
     }
 
     pub(super) fn parse_param(&mut self) -> Option<GreenNode> {
@@ -282,9 +277,8 @@ impl Parser<'_> {
         self.lexer
             .eat(TYPE_KEYWORD)
             .and_then(|token| match token.text {
-                "anyref" | "eqref" | "i31ref" | "structref" | "arrayref" | "nullref"
-                | "funcref" | "nullfuncref" | "exnref" | "nullexnref" | "externref"
-                | "nullexternref" => Some(node(REF_TYPE, [token.into()])),
+                "anyref" | "eqref" | "i31ref" | "structref" | "arrayref" | "nullref" | "funcref" | "nullfuncref"
+                | "exnref" | "nullexnref" | "externref" | "nullexternref" => Some(node(REF_TYPE, [token.into()])),
                 _ => None,
             })
             .or_else(|| self.parse_ref_type_detailed())
@@ -341,24 +335,19 @@ impl Parser<'_> {
         match self.lexer.next(KEYWORD)?.text {
             "func" => {
                 self.add_child(green::KW_FUNC.clone());
-                self.parse_func_type(mark)
-                    .map(|ty| node(SUB_TYPE, [ty.into()]))
+                self.parse_func_type(mark).map(|ty| node(SUB_TYPE, [ty.into()]))
             }
             "struct" => {
                 self.add_child(green::KW_STRUCT.clone());
-                self.parse_struct_type(mark)
-                    .map(|ty| node(SUB_TYPE, [ty.into()]))
+                self.parse_struct_type(mark).map(|ty| node(SUB_TYPE, [ty.into()]))
             }
             "array" => {
                 self.add_child(green::KW_ARRAY.clone());
-                self.parse_array_type(mark)
-                    .map(|ty| node(SUB_TYPE, [ty.into()]))
+                self.parse_array_type(mark).map(|ty| node(SUB_TYPE, [ty.into()]))
             }
             "sub" => {
                 self.add_child(green::KW_SUB.clone());
-                if let Some(keyword) =
-                    self.try_parse_with_trivias(|parser| parser.lexer.keyword("final"))
-                {
+                if let Some(keyword) = self.try_parse_with_trivias(|parser| parser.lexer.keyword("final")) {
                     self.add_child(keyword);
                 }
 
@@ -400,9 +389,8 @@ impl Parser<'_> {
                 "f32" => green::TYPE_F32.clone(),
                 "f64" => green::TYPE_F64.clone(),
                 "v128" => node(VEC_TYPE, [token.into()]).into(),
-                "anyref" | "eqref" | "i31ref" | "structref" | "arrayref" | "nullref"
-                | "funcref" | "nullfuncref" | "exnref" | "nullexnref" | "externref"
-                | "nullexternref" => node(REF_TYPE, [token.into()]).into(),
+                "anyref" | "eqref" | "i31ref" | "structref" | "arrayref" | "nullref" | "funcref" | "nullfuncref"
+                | "exnref" | "nullexnref" | "externref" | "nullexternref" => node(REF_TYPE, [token.into()]).into(),
                 _ => {
                     token.kind = ERROR;
                     self.report_error_token(&token, Message::Description("invalid value type"));

@@ -7,12 +7,7 @@ use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_syntax::{SyntaxNode, ast::PlainInstr};
 
-pub fn act(
-    db: &dyn salsa::Database,
-    uri: InternUri,
-    line_index: &LineIndex,
-    node: &SyntaxNode,
-) -> Option<CodeAction> {
+pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
     let instr = PlainInstr::cast(node.clone())?;
     if instr.instr_name()?.text() != "br_if" {
         return None;

@@ -50,11 +50,7 @@ pub fn check(
                     source: Some("wat".into()),
                     code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
                     message: if let Some(reason) = reason {
-                        format!(
-                            "{} `{}` is deprecated: {reason}",
-                            symbol.kind,
-                            symbol.idx.render(db),
-                        )
+                        format!("{} `{}` is deprecated: {reason}", symbol.kind, symbol.idx.render(db))
                     } else {
                         format!("{} `{}` is deprecated", symbol.kind, symbol.idx.render(db))
                     },

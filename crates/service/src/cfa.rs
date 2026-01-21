@@ -8,11 +8,7 @@ use wat_syntax::{
 };
 
 #[salsa::tracked(returns(ref))]
-pub fn analyze(
-    db: &dyn salsa::Database,
-    document: Document,
-    ptr: SyntaxNodePtr,
-) -> ControlFlowGraph {
+pub fn analyze(db: &dyn salsa::Database, document: Document, ptr: SyntaxNodePtr) -> ControlFlowGraph {
     let root = document.root_tree(db);
     Builder::new(db).build(ptr.to_node(&root))
 }
@@ -76,9 +72,7 @@ impl<'db> Builder<'db> {
                         true
                     }
                     Some("return" | "return_call" | "return_call_indirect" | "return_call_ref") => {
-                        if let Some((bb, (exit, _))) =
-                            self.add_basic_block().zip(self.block_stack.first())
-                        {
+                        if let Some((bb, (exit, _))) = self.add_basic_block().zip(self.block_stack.first()) {
                             self.graph.add_edge(bb, *exit, ());
                         }
                         true
@@ -93,10 +87,7 @@ impl<'db> Builder<'db> {
                         }
                         true
                     }
-                    Some(
-                        "br_if" | "br_on_null" | "br_on_non_null" | "br_on_cast"
-                        | "br_on_cast_fail",
-                    ) => {
+                    Some("br_if" | "br_on_null" | "br_on_non_null" | "br_on_cast" | "br_on_cast_fail") => {
                         let target = plain
                             .immediates()
                             .next()
@@ -187,18 +178,15 @@ impl<'db> Builder<'db> {
     }
 
     fn add_basic_block(&mut self) -> Option<NodeIndex> {
-        self.bb_first
-            .take()
-            .zip(self.bb_last.take())
-            .map(|(first, last)| {
-                let bb = self.graph.add_node(FlowNode {
-                    kind: FlowNodeKind::BasicBlock(BasicBlock { first, last }),
-                    unreachable: self.unreachable,
-                });
-                self.connect_current_to(bb);
-                self.current = Some(bb);
-                bb
-            })
+        self.bb_first.take().zip(self.bb_last.take()).map(|(first, last)| {
+            let bb = self.graph.add_node(FlowNode {
+                kind: FlowNodeKind::BasicBlock(BasicBlock { first, last }),
+                unreachable: self.unreachable,
+            });
+            self.connect_current_to(bb);
+            self.current = Some(bb);
+            bb
+        })
     }
 
     fn connect_current_to(&mut self, node_index: NodeIndex) {
@@ -221,15 +209,13 @@ impl<'db> Builder<'db> {
                         .rev()
                         .find(|(_, it)| it.is_some_and(|it| it == ident))
                 }
-                SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
-                    token.text().parse::<usize>().ok().and_then(|i| {
-                        if i < self.block_stack.len() {
-                            self.block_stack.get(self.block_stack.len() - 1 - i)
-                        } else {
-                            None
-                        }
-                    })
-                }
+                SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => token.text().parse::<usize>().ok().and_then(|i| {
+                    if i < self.block_stack.len() {
+                        self.block_stack.get(self.block_stack.len() - 1 - i)
+                    } else {
+                        None
+                    }
+                }),
                 _ => None,
             })
             .map(|(target, _)| *target)
@@ -244,10 +230,7 @@ impl<'db> Builder<'db> {
             .all(|node_index| {
                 matches!(
                     self.graph.node_weight(node_index),
-                    Some(FlowNode {
-                        unreachable: true,
-                        ..
-                    }) | None
+                    Some(FlowNode { unreachable: true, .. }) | None
                 )
             });
         if let Some(flow_node) = self.graph.node_weight_mut(exit) {
@@ -303,16 +286,11 @@ impl Iterator for BasicBlockInstrs {
                 .next_sibling()
                 .filter(|sibling| sibling.kind() == SyntaxKind::PLAIN_INSTR)
             {
-                while let Some(child) =
-                    node.first_child_by_kind(&|kind| kind == SyntaxKind::PLAIN_INSTR)
-                {
+                while let Some(child) = node.first_child_by_kind(&|kind| kind == SyntaxKind::PLAIN_INSTR) {
                     node = child;
                 }
                 self.next.replace(node)
-            } else if let Some(parent) = next
-                .parent()
-                .filter(|parent| parent.kind() == SyntaxKind::PLAIN_INSTR)
-            {
+            } else if let Some(parent) = next.parent().filter(|parent| parent.kind() == SyntaxKind::PLAIN_INSTR) {
                 self.next.replace(parent)
             } else {
                 None
@@ -332,12 +310,11 @@ pub struct ControlFlowGraph {
 impl PartialEq for ControlFlowGraph {
     fn eq(&self, other: &Self) -> bool {
         self.entry == other.entry
-            && self
+            && self.graph.raw_nodes().iter().map(|node| &node.weight).eq(other
                 .graph
                 .raw_nodes()
                 .iter()
-                .map(|node| &node.weight)
-                .eq(other.graph.raw_nodes().iter().map(|node| &node.weight))
+                .map(|node| &node.weight))
             && self
                 .graph
                 .raw_edges()

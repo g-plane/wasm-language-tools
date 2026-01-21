@@ -1,10 +1,9 @@
 use criterion::{Criterion, criterion_group, criterion_main};
 use lspt::{
-    ClientCapabilities, CompletionContext, CompletionParams, CompletionTriggerKind,
-    DidChangeTextDocumentParams, DocumentSymbolParams, InitializeParams, InlayHintParams, Position,
-    Range, SemanticTokensClientCapabilities, SemanticTokensParams, TextDocumentClientCapabilities,
-    TextDocumentContentChangeEvent, TextDocumentContentChangePartial, TextDocumentIdentifier,
-    VersionedTextDocumentIdentifier,
+    ClientCapabilities, CompletionContext, CompletionParams, CompletionTriggerKind, DidChangeTextDocumentParams,
+    DocumentSymbolParams, InitializeParams, InlayHintParams, Position, Range, SemanticTokensClientCapabilities,
+    SemanticTokensParams, TextDocumentClientCapabilities, TextDocumentContentChangeEvent,
+    TextDocumentContentChangePartial, TextDocumentIdentifier, VersionedTextDocumentIdentifier,
 };
 use std::hint::black_box;
 use wat_service::LanguageService;
@@ -75,22 +74,14 @@ pub fn changed_text_bench(c: &mut Criterion) {
                         uri: uri.clone(),
                         version: 0,
                     },
-                    content_changes: vec![TextDocumentContentChangeEvent::A(
-                        TextDocumentContentChangePartial {
-                            range: Range {
-                                start: Position {
-                                    line,
-                                    character: col,
-                                },
-                                end: Position {
-                                    line,
-                                    character: col,
-                                },
-                            },
-                            text: char.to_string(),
-                            ..Default::default()
+                    content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                        range: Range {
+                            start: Position { line, character: col },
+                            end: Position { line, character: col },
                         },
-                    )],
+                        text: char.to_string(),
+                        ..Default::default()
+                    })],
                 });
                 let completions = service.completion(black_box(CompletionParams {
                     context: Some(CompletionContext {
@@ -98,10 +89,7 @@ pub fn changed_text_bench(c: &mut Criterion) {
                         trigger_kind: CompletionTriggerKind::TriggerCharacter,
                     }),
                     text_document: TextDocumentIdentifier { uri: uri.clone() },
-                    position: Position {
-                        line,
-                        character: col,
-                    },
+                    position: Position { line, character: col },
                     work_done_token: Default::default(),
                     partial_result_token: Default::default(),
                 }));
@@ -120,36 +108,24 @@ pub fn changed_text_bench(c: &mut Criterion) {
 
 fn requests_on_changed(service: &mut LanguageService, uri: &str) {
     let document_symbols = service.document_symbol(black_box(DocumentSymbolParams {
-        text_document: TextDocumentIdentifier {
-            uri: uri.to_string(),
-        },
+        text_document: TextDocumentIdentifier { uri: uri.to_string() },
         work_done_token: Default::default(),
         partial_result_token: Default::default(),
     }));
     black_box(document_symbols);
 
     let inlay_hints = service.inlay_hint(black_box(InlayHintParams {
-        text_document: TextDocumentIdentifier {
-            uri: uri.to_string(),
-        },
+        text_document: TextDocumentIdentifier { uri: uri.to_string() },
         range: Range {
-            start: Position {
-                line: 0,
-                character: 0,
-            },
-            end: Position {
-                line: 14,
-                character: 0,
-            },
+            start: Position { line: 0, character: 0 },
+            end: Position { line: 14, character: 0 },
         },
         work_done_token: Default::default(),
     }));
     black_box(inlay_hints);
 
     let semantic_tokens = service.semantic_tokens_full(black_box(SemanticTokensParams {
-        text_document: TextDocumentIdentifier {
-            uri: uri.to_string(),
-        },
+        text_document: TextDocumentIdentifier { uri: uri.to_string() },
         work_done_token: Default::default(),
         partial_result_token: Default::default(),
     }));

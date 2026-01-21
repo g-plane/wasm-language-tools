@@ -29,12 +29,7 @@ fn run_format_test(path: &Path, input: &str, options: &FormatOptions) -> String 
 
     let (tree, _) = wat_parser::parse(input);
     let regression_format = format(&Root::cast(SyntaxNode::new_root(tree)).unwrap(), options);
-    similar_asserts::assert_eq!(
-        output,
-        regression_format,
-        "'{}' format is unstable",
-        path.display()
-    );
+    similar_asserts::assert_eq!(output, regression_format, "'{}' format is unstable", path.display());
 
     output
 }

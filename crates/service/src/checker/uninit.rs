@@ -40,10 +40,9 @@ pub fn check(
                     None
                 } else {
                     match &node.kind {
-                        FlowNodeKind::BasicBlock(bb) => Some((
-                            node_index,
-                            RefCell::new(BlockVars::new(bb, root, symbol_table)),
-                        )),
+                        FlowNodeKind::BasicBlock(bb) => {
+                            Some((node_index, RefCell::new(BlockVars::new(bb, root, symbol_table))))
+                        }
                         FlowNodeKind::BlockEntry(..) | FlowNodeKind::BlockExit => {
                             Some((node_index, RefCell::new(BlockVars::default())))
                         }
@@ -66,17 +65,11 @@ pub fn check(
                 detect_uninit(bb, &mut vars, db, document, root, symbol_table)
                     .filter_map(|immediate| symbol_table.symbols.get(&SymbolKey::new(&immediate)))
                     .map(|symbol| Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(
-                            line_index,
-                            symbol.key.text_range(),
-                        ),
+                        range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
                         severity: Some(DiagnosticSeverity::Error),
                         source: Some("wat".into()),
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                        message: format!(
-                            "local `{}` is read before being initialized",
-                            symbol.idx.render(db),
-                        ),
+                        message: format!("local `{}` is read before being initialized", symbol.idx.render(db)),
                         ..Default::default()
                     }),
             );
@@ -84,10 +77,7 @@ pub fn check(
     });
 }
 
-fn hydrate_block_vars(
-    cfg: &ControlFlowGraph,
-    block_vars: &mut FxHashMap<NodeIndex, RefCell<BlockVars>>,
-) {
+fn hydrate_block_vars(cfg: &ControlFlowGraph, block_vars: &mut FxHashMap<NodeIndex, RefCell<BlockVars>>) {
     let mut changed = true;
     while changed {
         changed = false;
@@ -128,16 +118,14 @@ fn detect_uninit(
             .map(|token| token.text())
         {
             Some("local.get") => {
-                if let Some(immediate) =
-                    instr.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
+                if let Some(immediate) = instr.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
                     && let Some(Symbol {
                         idx: Idx { num: Some(num), .. },
                         kind: SymbolKind::Local,
                         green,
                         ..
                     }) = symbol_table.find_def(SymbolKey::new(&immediate))
-                    && types_analyzer::extract_type(db, document, green.clone())
-                        .is_some_and(|ty| !ty.defaultable())
+                    && types_analyzer::extract_type(db, document, green.clone()).is_some_and(|ty| !ty.defaultable())
                     && !vars.in_set.contains(num)
                 {
                     Some(immediate)

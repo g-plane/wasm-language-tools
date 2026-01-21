@@ -1,8 +1,8 @@
 use criterion::{Criterion, criterion_group, criterion_main};
 use lspt::{
-    ClientCapabilities, DefinitionParams, DocumentSymbolParams, HoverParams, InitializeParams,
-    InlayHintParams, Position, Range, SemanticTokensClientCapabilities, SemanticTokensParams,
-    TextDocumentClientCapabilities, TextDocumentIdentifier,
+    ClientCapabilities, DefinitionParams, DocumentSymbolParams, HoverParams, InitializeParams, InlayHintParams,
+    Position, Range, SemanticTokensClientCapabilities, SemanticTokensParams, TextDocumentClientCapabilities,
+    TextDocumentIdentifier,
 };
 use std::hint::black_box;
 use wat_service::LanguageService;
@@ -75,14 +75,8 @@ pub fn unchanged_text_bench(c: &mut Criterion) {
             let inlay_hints = service.inlay_hint(black_box(InlayHintParams {
                 text_document: TextDocumentIdentifier { uri: uri.clone() },
                 range: Range {
-                    start: Position {
-                        line: 0,
-                        character: 0,
-                    },
-                    end: Position {
-                        line: 14,
-                        character: 0,
-                    },
+                    start: Position { line: 0, character: 0 },
+                    end: Position { line: 14, character: 0 },
                 },
                 work_done_token: Default::default(),
             }));
@@ -97,28 +91,19 @@ pub fn unchanged_text_bench(c: &mut Criterion) {
 
             let hover_func = service.hover(black_box(HoverParams {
                 text_document: TextDocumentIdentifier { uri: uri.clone() },
-                position: Position {
-                    line: 2,
-                    character: 12,
-                },
+                position: Position { line: 2, character: 12 },
                 work_done_token: Default::default(),
             }));
             black_box(hover_func);
             let hover_param = service.hover(black_box(HoverParams {
                 text_document: TextDocumentIdentifier { uri: uri.clone() },
-                position: Position {
-                    line: 2,
-                    character: 39,
-                },
+                position: Position { line: 2, character: 39 },
                 work_done_token: Default::default(),
             }));
             black_box(hover_param);
             let hover_global = service.hover(black_box(HoverParams {
                 text_document: TextDocumentIdentifier { uri: uri.clone() },
-                position: Position {
-                    line: 5,
-                    character: 14,
-                },
+                position: Position { line: 5, character: 14 },
                 work_done_token: Default::default(),
             }));
             black_box(hover_global);

@@ -12,9 +12,7 @@ impl<'db> Idx<'db> {
     pub fn from_immediate(immediate: &Immediate, db: &'db dyn salsa::Database) -> Self {
         Idx {
             num: immediate.int().and_then(|int| int.text().parse().ok()),
-            name: immediate
-                .ident()
-                .map(|ident| InternIdent::new(db, ident.text())),
+            name: immediate.ident().map(|ident| InternIdent::new(db, ident.text())),
         }
     }
 
@@ -42,17 +40,13 @@ impl<'db> Idx<'db> {
             (
                 Idx { num: Some(num), .. },
                 Idx {
-                    num: Some(other_num),
-                    ..
+                    num: Some(other_num), ..
                 },
             ) => num == other_num,
             (
+                Idx { name: Some(name), .. },
                 Idx {
-                    name: Some(name), ..
-                },
-                Idx {
-                    name: Some(other_name),
-                    ..
+                    name: Some(other_name), ..
                 },
             ) => name == other_name,
             _ => false,

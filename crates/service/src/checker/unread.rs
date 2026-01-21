@@ -49,10 +49,9 @@ pub fn check(
                     None
                 } else {
                     match &node.kind {
-                        FlowNodeKind::BasicBlock(bb) => Some((
-                            node_index,
-                            RefCell::new(BlockVars::new(bb, root, symbol_table)),
-                        )),
+                        FlowNodeKind::BasicBlock(bb) => {
+                            Some((node_index, RefCell::new(BlockVars::new(bb, root, symbol_table))))
+                        }
                         FlowNodeKind::BlockEntry(..) | FlowNodeKind::BlockExit => {
                             Some((node_index, RefCell::new(BlockVars::default())))
                         }
@@ -75,17 +74,11 @@ pub fn check(
                 detect_unread(bb, &vars, root, symbol_table)
                     .filter_map(|immediate| symbol_table.symbols.get(&SymbolKey::new(&immediate)))
                     .map(|symbol| Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(
-                            line_index,
-                            symbol.key.text_range(),
-                        ),
+                        range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
                         severity: Some(severity),
                         source: Some("wat".into()),
                         code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
-                        message: format!(
-                            "local `{}` is set but never read",
-                            symbol.idx.render(db),
-                        ),
+                        message: format!("local `{}` is set but never read", symbol.idx.render(db)),
                         ..Default::default()
                     }),
             );
@@ -93,10 +86,7 @@ pub fn check(
     });
 }
 
-fn hydrate_block_vars(
-    cfg: &ControlFlowGraph,
-    block_vars: &mut FxHashMap<NodeIndex, RefCell<BlockVars>>,
-) {
+fn hydrate_block_vars(cfg: &ControlFlowGraph, block_vars: &mut FxHashMap<NodeIndex, RefCell<BlockVars>>) {
     let mut changed = true;
     while changed {
         changed = false;
@@ -127,16 +117,14 @@ fn detect_unread(
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
 ) -> impl Iterator<Item = SyntaxNode> {
-    let mut sets =
-        FxHashMap::<_, Vec<_>>::with_capacity_and_hasher(vars.kills.len(), FxBuildHasher);
+    let mut sets = FxHashMap::<_, Vec<_>>::with_capacity_and_hasher(vars.kills.len(), FxBuildHasher);
     bb.instrs(root).for_each(|instr| {
         match support::token(&instr, SyntaxKind::INSTR_NAME)
             .as_ref()
             .map(|token| token.text())
         {
             Some("local.get") => {
-                if let Some(immediate) =
-                    instr.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
+                if let Some(immediate) = instr.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
                     && let Some(Symbol {
                         idx: Idx { num: Some(num), .. },
                         kind: SymbolKind::Local,
@@ -148,8 +136,7 @@ fn detect_unread(
                 }
             }
             Some("local.set" | "local.tee") => {
-                if let Some(immediate) =
-                    instr.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
+                if let Some(immediate) = instr.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
                     && let Some(Symbol {
                         idx: Idx { num: Some(num), .. },
                         kind: SymbolKind::Local,

@@ -21,10 +21,7 @@ pub fn act(
         .take_while(|child| can_join(child, kind, range))
         .collect::<Vec<_>>();
     let first_node = items.first()?;
-    let types = items
-        .iter()
-        .flat_map(|item| item.children())
-        .collect::<Vec<_>>();
+    let types = items.iter().flat_map(|item| item.children()).collect::<Vec<_>>();
     if types.len() <= 1 {
         return None;
     }
@@ -36,10 +33,7 @@ pub fn act(
         SyntaxKind::FIELD => "field",
         _ => return None,
     };
-    let new_text = format!(
-        "({keyword} {})",
-        types.iter().map(|ty| ty.to_string()).join(" ")
-    );
+    let new_text = format!("({keyword} {})", types.iter().map(|ty| ty.to_string()).join(" "));
 
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
@@ -76,7 +70,5 @@ pub fn act(
 fn can_join(node: &SyntaxNode, kind: SyntaxKind, range: TextRange) -> bool {
     node.kind() == kind
         && range.contains_range(node.text_range())
-        && !node
-            .children_with_tokens()
-            .any(|it| it.kind() == SyntaxKind::IDENT)
+        && !node.children_with_tokens().any(|it| it.kind() == SyntaxKind::IDENT)
 }

@@ -10,9 +10,7 @@ fn fmt_snapshot() {
         let input = fs::read_to_string(path).unwrap();
 
         let options = fs::read_to_string(path.with_file_name("config.json"))
-            .map(|config_file| {
-                serde_json::from_str::<HashMap<String, FormatOptions>>(&config_file).unwrap()
-            })
+            .map(|config_file| serde_json::from_str::<HashMap<String, FormatOptions>>(&config_file).unwrap())
             .ok();
 
         if let Some(options) = options {
@@ -37,16 +35,8 @@ fn run_format_test(path: &Path, input: &str, options: &FormatOptions) -> String 
     let (tree, _) = wat_parser::parse(input);
     let output = format(&Root::cast(SyntaxNode::new_root(tree)).unwrap(), options);
 
-    assert!(
-        !output.starts_with('\n'),
-        "'{}' has leading newline",
-        path.display(),
-    );
-    assert!(
-        !output.contains(" \n"),
-        "'{}' has trailing whitespaces",
-        path.display(),
-    );
+    assert!(!output.starts_with('\n'), "'{}' has leading newline", path.display());
+    assert!(!output.contains(" \n"), "'{}' has trailing whitespaces", path.display());
 
     let (tree, errors) = wat_parser::parse(&output);
     assert!(
@@ -56,12 +46,7 @@ fn run_format_test(path: &Path, input: &str, options: &FormatOptions) -> String 
         errors
     );
     let regression_format = format(&Root::cast(SyntaxNode::new_root(tree)).unwrap(), options);
-    similar_asserts::assert_eq!(
-        output,
-        regression_format,
-        "'{}' format is unstable",
-        path.display()
-    );
+    similar_asserts::assert_eq!(output, regression_format, "'{}' format is unstable", path.display());
 
     output
 }
