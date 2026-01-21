@@ -11,94 +11,23 @@ use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, ast::PlainInstr};
 impl LanguageService {
     /// Handler for `textDocument/documentHighlight` request.
     pub fn document_highlight(&self, params: DocumentHighlightParams) -> Option<Vec<DocumentHighlight>> {
-        let document = self.get_document(params.text_document.uri)?;
-        let line_index = document.line_index(self);
-        let root = document.root_tree(self);
-        let token = super::find_meaningful_token(self, *document, &root, params.position)?;
-        let kind = token.kind();
-        match kind {
-            SyntaxKind::KEYWORD
-            | SyntaxKind::INSTR_NAME
-            | SyntaxKind::TYPE_KEYWORD
-            | SyntaxKind::MEM_ARG_KEYWORD
-            | SyntaxKind::FLOAT
-            | SyntaxKind::SHAPE_DESCRIPTOR => {
-                let text = token.text();
-                Some(
-                    root.descendants_with_tokens()
-                        .filter_map(|element| match element {
-                            SyntaxElement::Token(other) if other.kind() == kind && other.text() == text => {
-                                Some(DocumentHighlight {
-                                    range: helpers::rowan_range_to_lsp_range(line_index, other.text_range()),
-                                    kind: Some(DocumentHighlightKind::Text),
-                                })
-                            }
-                            _ => None,
-                        })
-                        .collect(),
-                )
-            }
-            SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
-                let symbol_table = SymbolTable::of(self, *document);
-                let key = SymbolKey::new(&token.parent()?);
-                if let Some(symbol) = symbol_table.symbols.get(&key) {
-                    match symbol.kind {
-                        SymbolKind::Module => None,
-                        SymbolKind::Func
-                        | SymbolKind::Param
-                        | SymbolKind::Local
-                        | SymbolKind::Type
-                        | SymbolKind::GlobalDef
-                        | SymbolKind::MemoryDef
-                        | SymbolKind::TableDef
-                        | SymbolKind::FieldDef
-                        | SymbolKind::TagDef => Some(
-                            symbol_table
-                                .find_references_on_def(symbol, true)
-                                .filter_map(|symbol| create_symbol_highlight(symbol, &root, line_index))
-                                .collect(),
-                        ),
-                        SymbolKind::Call
-                        | SymbolKind::LocalRef
-                        | SymbolKind::TypeUse
-                        | SymbolKind::GlobalRef
-                        | SymbolKind::MemoryRef
-                        | SymbolKind::TableRef
-                        | SymbolKind::FieldRef
-                        | SymbolKind::TagRef => Some(
-                            symbol_table
-                                .find_references_on_ref(symbol, true)
-                                .filter_map(|symbol| create_symbol_highlight(symbol, &root, line_index))
-                                .collect(),
-                        ),
-                        SymbolKind::BlockDef => Some(
-                            symbol_table
-                                .find_block_references(key, true)
-                                .filter_map(|symbol| create_symbol_highlight(symbol, &root, line_index))
-                                .collect(),
-                        ),
-                        SymbolKind::BlockRef => symbol_table.resolved.get(&key).map(|def_key| {
-                            symbol_table
-                                .find_block_references(*def_key, true)
-                                .filter_map(|symbol| create_symbol_highlight(symbol, &root, line_index))
-                                .collect()
-                        }),
-                    }
-                } else {
+        self.with_document(params.text_document.uri, |db, document| {
+            let line_index = document.line_index(db);
+            let root = document.root_tree(db);
+            let token = super::find_meaningful_token(db, document, &root, params.position)?;
+            let kind = token.kind();
+            match kind {
+                SyntaxKind::KEYWORD
+                | SyntaxKind::INSTR_NAME
+                | SyntaxKind::TYPE_KEYWORD
+                | SyntaxKind::MEM_ARG_KEYWORD
+                | SyntaxKind::FLOAT
+                | SyntaxKind::SHAPE_DESCRIPTOR => {
                     let text = token.text();
                     Some(
                         root.descendants_with_tokens()
                             .filter_map(|element| match element {
-                                SyntaxElement::Token(other)
-                                    if other.kind() == kind
-                                        && other.text() == text
-                                        && other
-                                            .parent()
-                                            .and_then(|parent| parent.parent())
-                                            .and_then(PlainInstr::cast)
-                                            .and_then(|instr| instr.instr_name())
-                                            .is_some_and(|name| name.text().ends_with(".const")) =>
-                                {
+                                SyntaxElement::Token(other) if other.kind() == kind && other.text() == text => {
                                     Some(DocumentHighlight {
                                         range: helpers::rowan_range_to_lsp_range(line_index, other.text_range()),
                                         kind: Some(DocumentHighlightKind::Text),
@@ -109,9 +38,82 @@ impl LanguageService {
                             .collect(),
                     )
                 }
+                SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
+                    let symbol_table = SymbolTable::of(db, document);
+                    let key = SymbolKey::new(&token.parent()?);
+                    if let Some(symbol) = symbol_table.symbols.get(&key) {
+                        match symbol.kind {
+                            SymbolKind::Module => None,
+                            SymbolKind::Func
+                            | SymbolKind::Param
+                            | SymbolKind::Local
+                            | SymbolKind::Type
+                            | SymbolKind::GlobalDef
+                            | SymbolKind::MemoryDef
+                            | SymbolKind::TableDef
+                            | SymbolKind::FieldDef
+                            | SymbolKind::TagDef => Some(
+                                symbol_table
+                                    .find_references_on_def(symbol, true)
+                                    .filter_map(|symbol| create_symbol_highlight(symbol, &root, line_index))
+                                    .collect(),
+                            ),
+                            SymbolKind::Call
+                            | SymbolKind::LocalRef
+                            | SymbolKind::TypeUse
+                            | SymbolKind::GlobalRef
+                            | SymbolKind::MemoryRef
+                            | SymbolKind::TableRef
+                            | SymbolKind::FieldRef
+                            | SymbolKind::TagRef => Some(
+                                symbol_table
+                                    .find_references_on_ref(symbol, true)
+                                    .filter_map(|symbol| create_symbol_highlight(symbol, &root, line_index))
+                                    .collect(),
+                            ),
+                            SymbolKind::BlockDef => Some(
+                                symbol_table
+                                    .find_block_references(key, true)
+                                    .filter_map(|symbol| create_symbol_highlight(symbol, &root, line_index))
+                                    .collect(),
+                            ),
+                            SymbolKind::BlockRef => symbol_table.resolved.get(&key).map(|def_key| {
+                                symbol_table
+                                    .find_block_references(*def_key, true)
+                                    .filter_map(|symbol| create_symbol_highlight(symbol, &root, line_index))
+                                    .collect()
+                            }),
+                        }
+                    } else {
+                        let text = token.text();
+                        Some(
+                            root.descendants_with_tokens()
+                                .filter_map(|element| match element {
+                                    SyntaxElement::Token(other)
+                                        if other.kind() == kind
+                                            && other.text() == text
+                                            && other
+                                                .parent()
+                                                .and_then(|parent| parent.parent())
+                                                .and_then(PlainInstr::cast)
+                                                .and_then(|instr| instr.instr_name())
+                                                .is_some_and(|name| name.text().ends_with(".const")) =>
+                                    {
+                                        Some(DocumentHighlight {
+                                            range: helpers::rowan_range_to_lsp_range(line_index, other.text_range()),
+                                            kind: Some(DocumentHighlightKind::Text),
+                                        })
+                                    }
+                                    _ => None,
+                                })
+                                .collect(),
+                        )
+                    }
+                }
+                _ => None,
             }
-            _ => None,
-        }
+        })
+        .flatten()
     }
 }
 

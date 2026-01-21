@@ -26,13 +26,15 @@ use wat_syntax::{
 impl LanguageService {
     /// Handler for `textDocument/completion` request.
     pub fn completion(&self, params: CompletionParams) -> Option<Vec<CompletionItem>> {
-        let document = self.get_document(params.text_document.uri)?;
-        let line_index = document.line_index(self);
-        let root = document.root_tree(self);
-        let token = helpers::ast::find_token(&root, helpers::lsp_pos_to_rowan_pos(line_index, params.position)?)?;
+        self.with_document(params.text_document.uri, |db, document| {
+            let line_index = document.line_index(db);
+            let root = document.root_tree(db);
+            let token = helpers::ast::find_token(&root, helpers::lsp_pos_to_rowan_pos(line_index, params.position)?)?;
 
-        let cmp_ctx = get_cmp_ctx(&token)?;
-        Some(get_cmp_list(self, cmp_ctx, &token, *document, line_index, &root))
+            let cmp_ctx = get_cmp_ctx(&token)?;
+            Some(get_cmp_list(db, cmp_ctx, &token, document, line_index, &root))
+        })
+        .flatten()
     }
 }
 

@@ -1,11 +1,20 @@
-use crate::{LanguageService, config::ConfigState, helpers, uri::InternUri};
+use crate::{
+    LanguageService,
+    config::ConfigState,
+    helpers,
+    uri::{InternUri, IntoInternUri},
+};
 use line_index::LineIndex;
 use lspt::{
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams, TextDocumentContentChangeEvent,
 };
 use rowan::{GreenNode, TextSize};
 use salsa::Setter;
-use std::{cmp::Ordering, ops::Range};
+use std::{
+    cmp::Ordering,
+    ops::Range,
+    panic::{AssertUnwindSafe, UnwindSafe},
+};
 use wat_syntax::SyntaxNode;
 
 #[salsa::input(debug)]
@@ -184,6 +193,17 @@ impl LanguageService {
         uri: impl AsRef<str>,
     ) -> Option<dashmap::mapref::one::Ref<'_, InternUri, Document>> {
         self.documents.get(&InternUri::new(self, uri.as_ref()))
+    }
+
+    /// Run computation that may be cancelled on pending write, with a specific document.
+    /// It should only run read-only computation for LSP requests.
+    pub(crate) fn with_document<F, R>(&self, uri: impl IntoInternUri, f: F) -> Option<R>
+    where
+        F: FnOnce(&dyn salsa::Database, Document) -> R + UnwindSafe,
+    {
+        let document = *self.documents.get(&uri.into_intern_uri(self))?;
+        let service = AssertUnwindSafe(self);
+        salsa::Cancelled::catch(|| f(*service, document)).ok()
     }
 }
 

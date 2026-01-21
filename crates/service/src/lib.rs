@@ -17,9 +17,13 @@ mod types_analyzer;
 mod uri;
 
 pub use crate::config::*;
-use crate::{document::Document, features::SemanticTokenKind, uri::InternUri};
+use crate::{
+    document::Document,
+    features::{SemanticTokenKind, SemanticTokenKinds},
+    uri::InternUri,
+};
 use dashmap::DashMap;
-use indexmap::{IndexMap, IndexSet};
+use indexmap::IndexMap;
 use lspt::{
     CodeActionKind, CodeActionOptions, CodeLensOptions, CompletionOptions, DiagnosticOptions, InitializeParams,
     InitializeResult, RenameOptions, SemanticTokensClientCapabilities, SemanticTokensLegend, SemanticTokensOptions,
@@ -44,7 +48,7 @@ use std::sync::Arc;
 /// not the `initialize` method.
 pub struct LanguageService {
     storage: salsa::Storage<Self>,
-    semantic_token_kinds: Arc<IndexSet<SemanticTokenKind, FxBuildHasher>>,
+    semantic_token_kinds: Arc<SemanticTokenKinds>,
     documents: Arc<DashMap<InternUri, Document, FxBuildHasher>>,
     global_config: Arc<ServiceConfig>,
     configs: Arc<DashMap<InternUri, ConfigState, FxBuildHasher>>,

@@ -11,34 +11,34 @@ use wat_syntax::WatLanguage;
 impl LanguageService {
     /// Handler for `textDocument/codeLens` request.
     pub fn code_lens(&self, params: CodeLensParams) -> Option<Vec<CodeLens>> {
-        let document = self.get_document(&params.text_document.uri)?;
-        let line_index = document.line_index(self);
-        let symbol_table = SymbolTable::of(self, *document);
-        let code_lenses = symbol_table
-            .symbols
-            .values()
-            .filter(|symbol| {
-                matches!(
-                    symbol.kind,
-                    SymbolKind::Func
-                        | SymbolKind::Type
-                        | SymbolKind::GlobalDef
-                        | SymbolKind::MemoryDef
-                        | SymbolKind::TableDef
-                        | SymbolKind::TagDef
-                )
-            })
-            .map(|symbol| CodeLens {
-                range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
-                command: None,
-                data: serde_json::to_value(CodeLensData {
-                    uri: params.text_document.uri.clone(),
-                    kind: rowan::SyntaxKind::from(symbol.key.kind()).0,
+        self.with_document(&params.text_document.uri, |db, document| {
+            let line_index = document.line_index(db);
+            let symbol_table = SymbolTable::of(db, document);
+            symbol_table
+                .symbols
+                .values()
+                .filter(|symbol| {
+                    matches!(
+                        symbol.kind,
+                        SymbolKind::Func
+                            | SymbolKind::Type
+                            | SymbolKind::GlobalDef
+                            | SymbolKind::MemoryDef
+                            | SymbolKind::TableDef
+                            | SymbolKind::TagDef
+                    )
                 })
-                .ok(),
-            })
-            .collect();
-        Some(code_lenses)
+                .map(|symbol| CodeLens {
+                    range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
+                    command: None,
+                    data: serde_json::to_value(CodeLensData {
+                        uri: params.text_document.uri.clone(),
+                        kind: rowan::SyntaxKind::from(symbol.key.kind()).0,
+                    })
+                    .ok(),
+                })
+                .collect()
+        })
     }
 
     /// Handler for `codeLens/resolve` request.
