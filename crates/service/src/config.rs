@@ -115,7 +115,7 @@ pub(crate) enum ConfigState {
     Override(ServiceConfig),
 }
 impl ConfigState {
-    pub fn get_or_global<'a>(&'a self, service: &'a LanguageService) -> &'a ServiceConfig {
+    pub fn unwrap_or_global<'a>(&'a self, service: &'a LanguageService) -> &'a ServiceConfig {
         match self {
             ConfigState::Inherit => &service.global_config,
             ConfigState::Override(config) => config,
@@ -129,7 +129,7 @@ impl LanguageService {
     ///
     /// Set `config` to `None` to inherit global configuration.
     pub fn set_config(&mut self, uri: impl AsRef<str>, config: Option<ServiceConfig>) {
-        self.configs.insert(
+        self.configs.write().insert(
             InternUri::new(self, uri.as_ref()),
             config.map_or(ConfigState::Inherit, ConfigState::Override),
         );

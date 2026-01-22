@@ -1,4 +1,4 @@
-use crate::{LanguageService, helpers};
+use crate::{LanguageService, helpers, uri::InternUri};
 use lspt::{DocumentFormattingParams, DocumentRangeFormattingParams, FormattingOptions, TextEdit};
 use rowan::ast::AstNode;
 use wat_formatter::config::{FormatOptions, LanguageOptions, LayoutOptions};
@@ -7,9 +7,10 @@ use wat_syntax::ast::Root;
 impl LanguageService {
     /// Handler for `textDocument/formatting` request.
     pub fn formatting(&self, params: DocumentFormattingParams) -> Option<Vec<TextEdit>> {
-        let document = self.get_document(params.text_document.uri)?;
-        let config_state = self.configs.get(&document.uri(self))?;
-        let config = config_state.get_or_global(self);
+        let uri = InternUri::new(self, params.text_document.uri);
+        let document = self.get_document(uri)?;
+        let configs = self.configs.read();
+        let config = configs.get(&uri)?.unwrap_or_global(self);
         let line_index = document.line_index(self);
         let root = Root::cast(document.root_tree(self))?;
         let formatted = wat_formatter::format(&root, &build_options(&params.options, config.format.clone()));
@@ -22,9 +23,10 @@ impl LanguageService {
 
     /// Handler for `textDocument/rangeFormatting` request.
     pub fn range_formatting(&self, params: DocumentRangeFormattingParams) -> Option<Vec<TextEdit>> {
-        let document = self.get_document(params.text_document.uri)?;
-        let config_state = self.configs.get(&document.uri(self))?;
-        let config = config_state.get_or_global(self);
+        let uri = InternUri::new(self, params.text_document.uri);
+        let document = self.get_document(uri)?;
+        let configs = self.configs.read();
+        let config = configs.get(&uri)?.unwrap_or_global(self);
         let line_index = document.line_index(self);
         let root = Root::cast(document.root_tree(self))?;
         let (formatted, range) = wat_formatter::format_range(

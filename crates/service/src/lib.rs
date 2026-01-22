@@ -22,7 +22,6 @@ use crate::{
     features::{SemanticTokenKind, SemanticTokenKinds},
     uri::InternUri,
 };
-use dashmap::DashMap;
 use indexmap::IndexMap;
 use lspt::{
     CodeActionKind, CodeActionOptions, CodeLensOptions, CompletionOptions, DiagnosticOptions, InitializeParams,
@@ -30,9 +29,13 @@ use lspt::{
     ServerCapabilities, ServerInfo, SignatureHelpOptions, TextDocumentClientCapabilities, TextDocumentSyncKind,
     TextDocumentSyncOptions, Union2, Union3,
 };
-use rustc_hash::FxBuildHasher;
+use parking_lot::RwLock;
+use rustc_hash::{FxBuildHasher, FxHashMap};
 use salsa::Database;
-use std::sync::Arc;
+use std::{
+    panic::{AssertUnwindSafe, UnwindSafe},
+    sync::Arc,
+};
 
 #[salsa::db]
 #[derive(Clone, Default)]
@@ -49,9 +52,9 @@ use std::sync::Arc;
 pub struct LanguageService {
     storage: salsa::Storage<Self>,
     semantic_token_kinds: Arc<SemanticTokenKinds>,
-    documents: Arc<DashMap<InternUri, Document, FxBuildHasher>>,
+    documents: Arc<RwLock<FxHashMap<InternUri, Document>>>,
     global_config: Arc<ServiceConfig>,
-    configs: Arc<DashMap<InternUri, ConfigState, FxBuildHasher>>,
+    configs: Arc<RwLock<FxHashMap<InternUri, ConfigState>>>,
     support_pull_config: bool,
 }
 #[salsa::db]
@@ -182,5 +185,15 @@ impl LanguageService {
                 version: Some(env!("CARGO_PKG_VERSION").into()),
             }),
         }
+    }
+
+    /// Run computation that may be cancelled on pending write.
+    /// It should only run read-only computation for LSP requests.
+    fn with_db<F, R>(&self, f: F) -> Option<R>
+    where
+        F: FnOnce(&dyn salsa::Database) -> R + UnwindSafe,
+    {
+        let service = AssertUnwindSafe(self);
+        salsa::Cancelled::catch(|| f(*service)).ok()
     }
 }

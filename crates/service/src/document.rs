@@ -10,11 +10,7 @@ use lspt::{
 };
 use rowan::{GreenNode, TextSize};
 use salsa::Setter;
-use std::{
-    cmp::Ordering,
-    ops::Range,
-    panic::{AssertUnwindSafe, UnwindSafe},
-};
+use std::{cmp::Ordering, ops::Range};
 use wat_syntax::SyntaxNode;
 
 #[salsa::input(debug)]
@@ -41,17 +37,17 @@ impl LanguageService {
         let uri = InternUri::new(self, uri.as_ref());
         let line_index = LineIndex::new(&text);
         let (green, errors) = wat_parser::parse(&text);
-        let documents = self.documents.clone();
-        if let Some(document) = documents.get_mut(&uri) {
+        if let Some(document) = self.get_document(uri) {
             document.set_text(self).to(text);
             document.set_line_index(self).to(line_index);
             document.set_root(self).to(green);
             document.set_syntax_errors(self).to(errors);
         } else {
             self.documents
+                .write()
                 .insert(uri, Document::new(self, uri, text, line_index, green, errors));
             if !self.support_pull_config {
-                self.configs.insert(uri, ConfigState::Inherit);
+                self.configs.write().insert(uri, ConfigState::Inherit);
             }
         };
     }
@@ -61,19 +57,18 @@ impl LanguageService {
         let uri = InternUri::new(self, params.text_document.uri);
         let line_index = LineIndex::new(&params.text_document.text);
         let (green, errors) = wat_parser::parse(&params.text_document.text);
-        self.documents.insert(
+        self.documents.write().insert(
             uri,
             Document::new(self, uri, params.text_document.text, line_index, green, errors),
         );
         if !self.support_pull_config {
-            self.configs.insert(uri, ConfigState::Inherit);
+            self.configs.write().insert(uri, ConfigState::Inherit);
         }
     }
 
     /// Handler for `textDocument/didChange` notification.
     pub fn did_change(&mut self, params: DidChangeTextDocumentParams) {
-        let documents = self.documents.clone();
-        let Some(document) = documents.get_mut(&InternUri::new(self, params.text_document.uri)) else {
+        let Some(document) = self.get_document(params.text_document.uri) else {
             return;
         };
         'single: {
@@ -179,31 +174,19 @@ impl LanguageService {
 
     /// Handler for `textDocument/didClose` notification.
     pub fn did_close(&mut self, params: DidCloseTextDocumentParams) {
-        self.documents.remove(&InternUri::new(self, params.text_document.uri));
+        let uri = InternUri::new(self, params.text_document.uri);
+        self.documents.write().remove(&uri);
+        self.configs.write().remove(&uri);
     }
 
     #[inline]
     /// Get URIs of all opened documents.
     pub fn get_opened_uris(&self) -> Vec<String> {
-        self.documents.iter().map(|pair| pair.key().raw(self)).collect()
+        self.documents.read().keys().map(|uri| uri.raw(self)).collect()
     }
 
-    pub(crate) fn get_document(
-        &self,
-        uri: impl AsRef<str>,
-    ) -> Option<dashmap::mapref::one::Ref<'_, InternUri, Document>> {
-        self.documents.get(&InternUri::new(self, uri.as_ref()))
-    }
-
-    /// Run computation that may be cancelled on pending write, with a specific document.
-    /// It should only run read-only computation for LSP requests.
-    pub(crate) fn with_document<F, R>(&self, uri: impl IntoInternUri, f: F) -> Option<R>
-    where
-        F: FnOnce(&dyn salsa::Database, Document) -> R + UnwindSafe,
-    {
-        let document = *self.documents.get(&uri.into_intern_uri(self))?;
-        let service = AssertUnwindSafe(self);
-        salsa::Cancelled::catch(|| f(*service, document)).ok()
+    pub(crate) fn get_document(&self, uri: impl IntoInternUri) -> Option<Document> {
+        self.documents.read().get(&uri.into_intern_uri(self)).copied()
     }
 }
 

@@ -26,7 +26,8 @@ use wat_syntax::{
 impl LanguageService {
     /// Handler for `textDocument/completion` request.
     pub fn completion(&self, params: CompletionParams) -> Option<Vec<CompletionItem>> {
-        self.with_document(params.text_document.uri, |db, document| {
+        let document = self.get_document(params.text_document.uri)?;
+        self.with_db(|db| {
             let line_index = document.line_index(db);
             let root = document.root_tree(db);
             let token = helpers::ast::find_token(&root, helpers::lsp_pos_to_rowan_pos(line_index, params.position)?)?;

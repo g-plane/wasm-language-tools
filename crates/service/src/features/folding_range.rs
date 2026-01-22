@@ -6,7 +6,8 @@ use wat_syntax::SyntaxKind;
 impl LanguageService {
     /// Handler for `textDocument/foldingRange` request.
     pub fn folding_range(&self, params: FoldingRangeParams) -> Option<Vec<FoldingRange>> {
-        self.with_document(params.text_document.uri, |db, document| {
+        let document = self.get_document(params.text_document.uri)?;
+        self.with_db(|db| {
             let line_index = document.line_index(db);
             let root = document.root_tree(db);
             root.descendants()

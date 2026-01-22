@@ -21,7 +21,7 @@ impl LanguageService {
         let document = self.get_document(params.text_document.uri)?;
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
-        let token = super::find_meaningful_token(self, *document, &root, params.position)
+        let token = super::find_meaningful_token(self, document, &root, params.position)
             .filter(|token| token.kind() == SyntaxKind::IDENT)?;
         let range = helpers::rowan_range_to_lsp_range(line_index, token.text_range());
         Some(PrepareRenameResult::A(range))
@@ -41,10 +41,10 @@ impl LanguageService {
             return Ok(None);
         };
         // We can't assume client supports "prepareRename" so we need to check the token again.
-        let token = super::find_meaningful_token(self, *document, &document.root_tree(self), params.position)
+        let token = super::find_meaningful_token(self, document, &document.root_tree(self), params.position)
             .filter(|token| token.kind() == SyntaxKind::IDENT)
             .ok_or_else(|| ERR_CANT_BE_RENAMED.to_owned())?;
-        Ok(self.rename_impl(params, *document, token))
+        Ok(self.rename_impl(params, document, token))
     }
 
     fn rename_impl(&self, params: RenameParams, document: Document, ident_token: SyntaxToken) -> Option<WorkspaceEdit> {

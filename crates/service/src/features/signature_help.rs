@@ -18,7 +18,8 @@ use wat_syntax::{
 impl LanguageService {
     /// Handler for `textDocument/signatureHelp` request.
     pub fn signature_help(&self, params: SignatureHelpParams) -> Option<SignatureHelp> {
-        self.with_document(params.text_document.uri, |db, document| {
+        let document = self.get_document(params.text_document.uri)?;
+        self.with_db(|db| {
             let line_index = document.line_index(db);
             let root = document.root_tree(db);
             let symbol_table = SymbolTable::of(db, document);

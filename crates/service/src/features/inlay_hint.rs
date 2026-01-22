@@ -14,11 +14,12 @@ impl LanguageService {
     /// Handler for `textDocument/inlayHint` request.
     pub fn inlay_hint(&self, params: InlayHintParams) -> Option<Vec<InlayHint>> {
         let uri = InternUri::new(self, params.text_document.uri);
+        let document = self.get_document(uri)?;
         // Avoid inlay hints flickering if client supports pulling config and config is not ready.
         // This is similar to what we do in the checker.
-        let config_state = self.configs.get(&uri)?;
-        let config = config_state.get_or_global(self);
-        self.with_document(uri, |db, document| {
+        let configs = self.configs.read();
+        let config = configs.get(&uri)?.unwrap_or_global(self);
+        self.with_db(|db| {
             let line_index = document.line_index(db);
             let root = document.root_tree(db);
             let symbol_table = SymbolTable::of(db, document);

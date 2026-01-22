@@ -11,7 +11,8 @@ use wat_syntax::WatLanguage;
 impl LanguageService {
     /// Handler for `textDocument/codeLens` request.
     pub fn code_lens(&self, params: CodeLensParams) -> Option<Vec<CodeLens>> {
-        self.with_document(&params.text_document.uri, |db, document| {
+        let document = self.get_document(&params.text_document.uri)?;
+        self.with_db(|db| {
             let line_index = document.line_index(db);
             let symbol_table = SymbolTable::of(db, document);
             symbol_table
@@ -51,7 +52,7 @@ impl LanguageService {
         let document = self.get_document(&data.uri)?;
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
-        let symbol_table = SymbolTable::of(self, *document);
+        let symbol_table = SymbolTable::of(self, document);
 
         let syntax_kind = WatLanguage::kind_from_raw(rowan::SyntaxKind(data.kind));
         let range = helpers::lsp_range_to_rowan_range(line_index, params.range)?;

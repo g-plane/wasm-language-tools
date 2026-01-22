@@ -6,7 +6,8 @@ use wat_syntax::SyntaxNode;
 impl LanguageService {
     /// Handler for `textDocument/selectionRange` request.
     pub fn selection_range(&self, params: SelectionRangeParams) -> Option<Vec<SelectionRange>> {
-        self.with_document(params.text_document.uri, |db, document| {
+        let document = self.get_document(params.text_document.uri)?;
+        self.with_db(|db| {
             let line_index = document.line_index(db);
             let root = document.root_tree(db);
             params

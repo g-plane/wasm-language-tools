@@ -10,12 +10,12 @@ keywords = ["wasm"]
 exclude = ["/tests"]
 
 [dependencies]
-dashmap = "6.1"
 fuzzy-matcher = "0.3"
 indexmap = "2.12"
 itertools = "0.14"
 line-index = { workspace = true }
 lspt = { workspace = true }
+parking_lot = "0.12"
 petgraph = "0.8"
 rowan = { workspace = true }
 rustc-hash = { workspace = true }

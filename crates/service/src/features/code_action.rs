@@ -6,7 +6,8 @@ impl LanguageService {
     /// Handler for `textDocument/codeAction` request.
     pub fn code_action(&self, params: CodeActionParams) -> Option<Vec<CodeAction>> {
         let uri = InternUri::new(self, params.text_document.uri);
-        self.with_document(uri, |db, document| {
+        let document = self.get_document(uri)?;
+        self.with_db(|db| {
             let line_index = document.line_index(db);
             let root = document.root_tree(db);
             let symbol_table = SymbolTable::of(db, document);

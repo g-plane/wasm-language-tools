@@ -11,7 +11,8 @@ use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, ast::PlainInstr};
 impl LanguageService {
     /// Handler for `textDocument/documentHighlight` request.
     pub fn document_highlight(&self, params: DocumentHighlightParams) -> Option<Vec<DocumentHighlight>> {
-        self.with_document(params.text_document.uri, |db, document| {
+        let document = self.get_document(params.text_document.uri)?;
+        self.with_db(|db| {
             let line_index = document.line_index(db);
             let root = document.root_tree(db);
             let token = super::find_meaningful_token(db, document, &root, params.position)?;

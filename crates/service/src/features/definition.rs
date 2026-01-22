@@ -11,13 +11,13 @@ impl LanguageService {
     pub fn goto_definition(&self, params: DefinitionParams) -> Option<Definition> {
         let document = self.get_document(&params.text_document.uri)?;
         let root = document.root_tree(self);
-        let token = super::find_meaningful_token(self, *document, &root, params.position)?;
+        let token = super::find_meaningful_token(self, document, &root, params.position)?;
 
         let parent = token
             .parent()
             .filter(|parent| matches!(parent.kind(), SyntaxKind::IMMEDIATE | SyntaxKind::INDEX))?;
         let line_index = document.line_index(self);
-        let symbol_table = SymbolTable::of(self, *document);
+        let symbol_table = SymbolTable::of(self, document);
         let key = SymbolKey::new(&parent);
         symbol_table.resolved.get(&key).map(|key| {
             Union2::A(helpers::create_location_by_symbol(
@@ -34,8 +34,8 @@ impl LanguageService {
         let document = self.get_document(&params.text_document.uri)?;
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
-        let symbol_table = SymbolTable::of(self, *document);
-        let token = super::find_meaningful_token(self, *document, &root, params.position)?;
+        let symbol_table = SymbolTable::of(self, document);
+        let token = super::find_meaningful_token(self, document, &root, params.position)?;
 
         let parent = token.parent().filter(|parent| parent.kind() == SyntaxKind::IMMEDIATE)?;
         symbol_table

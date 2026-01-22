@@ -19,9 +19,9 @@ impl LanguageService {
     pub fn hover(&self, params: HoverParams) -> Option<Hover> {
         let document = self.get_document(params.text_document.uri)?;
         let root = document.root_tree(self);
-        let token = super::find_meaningful_token(self, *document, &root, params.position)?;
+        let token = super::find_meaningful_token(self, document, &root, params.position)?;
         let line_index = document.line_index(self);
-        let symbol_table = SymbolTable::of(self, *document);
+        let symbol_table = SymbolTable::of(self, document);
 
         match token.kind() {
             SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
@@ -38,7 +38,7 @@ impl LanguageService {
                     | SymbolKind::FieldRef
                     | SymbolKind::TagRef => symbol_table
                         .find_def(key)
-                        .and_then(|symbol| create_def_hover(self, *document, &root, symbol))
+                        .and_then(|symbol| create_def_hover(self, document, &root, symbol))
                         .map(|contents| Hover {
                             contents: Union3::A(contents),
                             range: Some(helpers::rowan_range_to_lsp_range(line_index, token.text_range())),
@@ -55,7 +55,7 @@ impl LanguageService {
                     | SymbolKind::TagDef => symbol_table
                         .symbols
                         .get(&key)
-                        .and_then(|symbol| create_def_hover(self, *document, &root, symbol))
+                        .and_then(|symbol| create_def_hover(self, document, &root, symbol))
                         .map(|contents| Hover {
                             contents: Union3::A(contents),
                             range: Some(helpers::rowan_range_to_lsp_range(line_index, token.text_range())),
@@ -83,7 +83,7 @@ impl LanguageService {
                 symbol_table
                     .symbols
                     .get(&SymbolKey::new(&node))
-                    .and_then(|symbol| create_def_hover(self, *document, &root, symbol))
+                    .and_then(|symbol| create_def_hover(self, document, &root, symbol))
                     .map(|contents| Hover {
                         contents: Union3::A(contents),
                         range: Some(helpers::rowan_range_to_lsp_range(

@@ -16,7 +16,8 @@ impl LanguageService {
     /// Handler for `textDocument/semanticTokens/full` request.
     pub fn semantic_tokens_full(&self, params: SemanticTokensParams) -> Option<SemanticTokens> {
         let token_kinds = &self.semantic_token_kinds;
-        self.with_document(params.text_document.uri, |db, document| {
+        let document = self.get_document(params.text_document.uri)?;
+        self.with_db(|db| {
             let mut delta_line = 0;
             let mut prev_start = 0;
             let tokens = build_tokens(
@@ -40,7 +41,8 @@ impl LanguageService {
     /// Handler for `textDocument/semanticTokens/range` request.
     pub fn semantic_tokens_range(&self, params: SemanticTokensRangeParams) -> Option<SemanticTokens> {
         let token_kinds = &self.semantic_token_kinds;
-        self.with_document(params.text_document.uri, |db, document| {
+        let document = self.get_document(params.text_document.uri)?;
+        self.with_db(|db| {
             let line_index = document.line_index(db);
             let start = helpers::lsp_pos_to_rowan_pos(line_index, params.range.start)?;
             let end = helpers::lsp_pos_to_rowan_pos(line_index, params.range.end)?;

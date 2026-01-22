@@ -11,7 +11,8 @@ use wat_syntax::{SyntaxKind, ast::ModuleFieldGlobal};
 impl LanguageService {
     /// Handler for `textDocument/documentSymbol` request.
     pub fn document_symbol(&self, params: DocumentSymbolParams) -> Option<Vec<DocumentSymbol>> {
-        self.with_document(params.text_document.uri, |db, document| {
+        let document = self.get_document(params.text_document.uri)?;
+        self.with_db(|db| {
             let line_index = document.line_index(db);
             let root = document.root_tree(db);
             let symbol_table = SymbolTable::of(db, document);
