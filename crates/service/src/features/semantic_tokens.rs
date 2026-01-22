@@ -15,14 +15,14 @@ use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
 impl LanguageService {
     /// Handler for `textDocument/semanticTokens/full` request.
     pub fn semantic_tokens_full(&self, params: SemanticTokensParams) -> Option<SemanticTokens> {
-        let token_kinds = &self.semantic_token_kinds;
+        let token_types = &self.semantic_token_types;
         let document = self.get_document(params.text_document.uri)?;
         self.with_db(|db| {
             let mut delta_line = 0;
             let mut prev_start = 0;
             let tokens = build_tokens(
                 db,
-                token_kinds,
+                token_types,
                 document,
                 document
                     .root_tree(db)
@@ -40,7 +40,7 @@ impl LanguageService {
 
     /// Handler for `textDocument/semanticTokens/range` request.
     pub fn semantic_tokens_range(&self, params: SemanticTokensRangeParams) -> Option<SemanticTokens> {
-        let token_kinds = &self.semantic_token_kinds;
+        let token_types = &self.semantic_token_types;
         let document = self.get_document(params.text_document.uri)?;
         self.with_db(|db| {
             let line_index = document.line_index(db);
@@ -62,7 +62,7 @@ impl LanguageService {
                     col: prev_start,
                 } = line_index.line_col(token.text_range().start());
             }
-            let tokens = build_tokens(db, token_kinds, document, tokens, &mut delta_line, &mut prev_start);
+            let tokens = build_tokens(db, token_types, document, tokens, &mut delta_line, &mut prev_start);
             Some(SemanticTokens {
                 result_id: None,
                 data: tokens,
@@ -74,7 +74,7 @@ impl LanguageService {
 
 fn build_tokens(
     db: &dyn salsa::Database,
-    token_kinds: &SemanticTokenKinds,
+    token_types: &SemanticTokenTypes,
     document: Document,
     tokens: impl Iterator<Item = SyntaxToken>,
     delta_line: &mut u32,
@@ -98,7 +98,7 @@ fn build_tokens(
                     None
                 }
                 _ => {
-                    let token_type = compute_token_type(token_kinds, &token, symbol_table)?;
+                    let token_type = compute_token_type(token_types, &token, symbol_table)?;
                     let block_comment_lines = if token.kind() == SyntaxKind::BLOCK_COMMENT {
                         Some(token.text().chars().filter(|c| *c == '\n').count() as u32)
                     } else {
@@ -133,13 +133,13 @@ fn build_tokens(
 }
 
 fn compute_token_type(
-    token_kinds: &SemanticTokenKinds,
+    token_types: &SemanticTokenTypes,
     token: &SyntaxToken,
     symbol_table: &SymbolTable,
 ) -> Option<u32> {
     match token.kind() {
-        SyntaxKind::TYPE_KEYWORD => token_kinds.get_index_of(&SemanticTokenKind::Type),
-        SyntaxKind::KEYWORD => token_kinds.get_index_of(&SemanticTokenKind::Keyword),
+        SyntaxKind::TYPE_KEYWORD => token_types.get_index_of(&SemanticTokenType::Type),
+        SyntaxKind::KEYWORD => token_types.get_index_of(&SemanticTokenType::Keyword),
         SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
             let parent = token.parent();
             let grand = parent.as_ref().and_then(|parent| parent.parent());
@@ -150,7 +150,7 @@ fn compute_token_type(
                         SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXTERN_IDX_FUNC | SyntaxKind::ELEM_LIST
                     )
             }) {
-                token_kinds.get_index_of(&SemanticTokenKind::Func)
+                token_types.get_index_of(&SemanticTokenType::Func)
             } else if let Some(immediate) = grand
                 .filter(|grand| {
                     support::token(grand, SyntaxKind::INSTR_NAME).is_some_and(|name| name.text().starts_with("local."))
@@ -158,15 +158,15 @@ fn compute_token_type(
                 .and(parent)
             {
                 if is_ref_of_param(&immediate, symbol_table) {
-                    token_kinds.get_index_of(&SemanticTokenKind::Param)
+                    token_types.get_index_of(&SemanticTokenType::Param)
                 } else {
-                    token_kinds.get_index_of(&SemanticTokenKind::Var)
+                    token_types.get_index_of(&SemanticTokenType::Var)
                 }
             } else {
-                token_kinds.get_index_of(&SemanticTokenKind::Number)
+                token_types.get_index_of(&SemanticTokenType::Number)
             }
         }
-        SyntaxKind::FLOAT => token_kinds.get_index_of(&SemanticTokenKind::Number),
+        SyntaxKind::FLOAT => token_types.get_index_of(&SemanticTokenType::Number),
         SyntaxKind::IDENT => {
             let parent = token.parent();
             if parent.as_ref().and_then(|parent| parent.parent()).is_some_and(|grand| {
@@ -179,21 +179,21 @@ fn compute_token_type(
                 .as_ref()
                 .is_some_and(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
             {
-                token_kinds.get_index_of(&SemanticTokenKind::Func)
+                token_types.get_index_of(&SemanticTokenType::Func)
             } else if parent.as_ref().is_some_and(|node| node.kind() == SyntaxKind::PARAM)
                 || parent.as_ref().is_some_and(|node| is_ref_of_param(node, symbol_table))
             {
-                token_kinds.get_index_of(&SemanticTokenKind::Param)
+                token_types.get_index_of(&SemanticTokenType::Param)
             } else {
-                token_kinds.get_index_of(&SemanticTokenKind::Var)
+                token_types.get_index_of(&SemanticTokenType::Var)
             }
         }
-        SyntaxKind::STRING => token_kinds.get_index_of(&SemanticTokenKind::String),
-        SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT => token_kinds.get_index_of(&SemanticTokenKind::Comment),
-        SyntaxKind::INSTR_NAME => token_kinds.get_index_of(&SemanticTokenKind::Op),
+        SyntaxKind::STRING => token_types.get_index_of(&SemanticTokenType::String),
+        SyntaxKind::LINE_COMMENT | SyntaxKind::BLOCK_COMMENT => token_types.get_index_of(&SemanticTokenType::Comment),
+        SyntaxKind::INSTR_NAME => token_types.get_index_of(&SemanticTokenType::Op),
         SyntaxKind::ANNOT_ELEM => {
             if token.text().starts_with('"') && token.text().ends_with('"') {
-                token_kinds.get_index_of(&SemanticTokenKind::String)
+                token_types.get_index_of(&SemanticTokenType::String)
             } else {
                 None
             }
@@ -236,10 +236,10 @@ fn compute_token_modifier(
     }
 }
 
-pub(crate) type SemanticTokenKinds = IndexSet<SemanticTokenKind, FxBuildHasher>;
+pub(crate) type SemanticTokenTypes = IndexSet<SemanticTokenType, FxBuildHasher>;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub(crate) enum SemanticTokenKind {
+pub(crate) enum SemanticTokenType {
     Type,
     Param,
     Var,

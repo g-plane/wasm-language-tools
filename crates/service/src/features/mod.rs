@@ -17,7 +17,7 @@ mod semantic_tokens;
 mod signature_help;
 mod type_hierarchy;
 
-pub(crate) use self::semantic_tokens::{SemanticTokenKind, SemanticTokenKinds};
+pub(crate) use self::semantic_tokens::{SemanticTokenType, SemanticTokenTypes};
 use crate::{document::Document, helpers};
 use lspt::Position;
 use rowan::TokenAtOffset;

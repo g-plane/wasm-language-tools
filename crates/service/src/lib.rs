@@ -19,7 +19,7 @@ mod uri;
 pub use crate::config::*;
 use crate::{
     document::Document,
-    features::{SemanticTokenKind, SemanticTokenKinds},
+    features::{SemanticTokenType, SemanticTokenTypes},
     uri::InternUri,
 };
 use indexmap::IndexMap;
@@ -51,7 +51,7 @@ use std::{
 /// not the `initialize` method.
 pub struct LanguageService {
     storage: salsa::Storage<Self>,
-    semantic_token_kinds: Arc<SemanticTokenKinds>,
+    semantic_token_types: Arc<SemanticTokenTypes>,
     documents: Arc<RwLock<FxHashMap<InternUri, Document>>>,
     global_config: Arc<ServiceConfig>,
     configs: Arc<RwLock<FxHashMap<InternUri, ConfigState>>>,
@@ -67,31 +67,31 @@ impl LanguageService {
     /// Instead, you can call `LanguageService::default()` to create instance,
     /// then call this method when the language server is initializing.
     pub fn initialize(&mut self, params: InitializeParams) -> InitializeResult {
-        let mut kinds_map = IndexMap::<_, _, FxBuildHasher>::default();
+        let mut types_map = IndexMap::<_, _, FxBuildHasher>::default();
         if let Some(TextDocumentClientCapabilities {
             semantic_tokens: Some(SemanticTokensClientCapabilities { token_types, .. }),
             ..
         }) = params.capabilities.text_document
         {
-            kinds_map = token_types
+            types_map = token_types
                 .iter()
                 .filter_map(|token_type| {
-                    let internal_kind = match &**token_type {
-                        "type" => SemanticTokenKind::Type,
-                        "parameter" => SemanticTokenKind::Param,
-                        "variable" => SemanticTokenKind::Var,
-                        "function" => SemanticTokenKind::Func,
-                        "keyword" => SemanticTokenKind::Keyword,
-                        "comment" => SemanticTokenKind::Comment,
-                        "string" => SemanticTokenKind::String,
-                        "number" => SemanticTokenKind::Number,
-                        "operator" => SemanticTokenKind::Op,
+                    let internal_type = match &**token_type {
+                        "type" => SemanticTokenType::Type,
+                        "parameter" => SemanticTokenType::Param,
+                        "variable" => SemanticTokenType::Var,
+                        "function" => SemanticTokenType::Func,
+                        "keyword" => SemanticTokenType::Keyword,
+                        "comment" => SemanticTokenType::Comment,
+                        "string" => SemanticTokenType::String,
+                        "number" => SemanticTokenType::Number,
+                        "operator" => SemanticTokenType::Op,
                         _ => return None,
                     };
-                    Some((internal_kind, token_type.clone()))
+                    Some((internal_type, token_type.clone()))
                 })
                 .collect();
-            self.semantic_token_kinds = Arc::new(kinds_map.keys().cloned().collect());
+            self.semantic_token_types = Arc::new(types_map.keys().cloned().collect());
         }
 
         self.support_pull_config = matches!(
@@ -159,7 +159,7 @@ impl LanguageService {
                 selection_range_provider: Some(Union3::A(true)),
                 semantic_tokens_provider: Some(Union2::A(SemanticTokensOptions {
                     legend: SemanticTokensLegend {
-                        token_types: kinds_map.into_values().collect(),
+                        token_types: types_map.into_values().collect(),
                         token_modifiers: vec!["mutable".into()],
                     },
                     range: Some(Union2::A(true)),
