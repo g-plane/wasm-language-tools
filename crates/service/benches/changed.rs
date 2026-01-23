@@ -25,6 +25,22 @@ pub fn changed_text_bench(c: &mut Criterion) {
     (func $f3 (type $t)
         (call)
     )
+    (func $conditional_compute (param $x i32) (result i32)
+        local.get $x
+        i32.const 10
+        i32.gt_s
+        if (result i32)
+            local.get $x
+            i32.const 2
+            i32.mul
+            i32.const 5
+            i32.add
+        else
+            local.get $x
+            i32.const 100
+            i32.add
+        end
+    )
 )
 "
             .to_string();
