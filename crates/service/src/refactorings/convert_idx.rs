@@ -1,6 +1,6 @@
 use crate::{
     binder::{SymbolKey, SymbolTable},
-    helpers,
+    helpers::LineIndexExt,
     uri::InternUri,
 };
 use line_index::LineIndex;
@@ -34,7 +34,7 @@ pub fn act(
     changes.insert(
         uri.raw(db),
         vec![TextEdit {
-            range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
+            range: line_index.convert(node.text_range()),
             new_text,
         }],
     );

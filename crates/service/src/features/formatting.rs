@@ -1,4 +1,4 @@
-use crate::{LanguageService, helpers, uri::InternUri};
+use crate::{LanguageService, helpers::LineIndexExt, uri::InternUri};
 use lspt::{DocumentFormattingParams, DocumentRangeFormattingParams, FormattingOptions, TextEdit};
 use rowan::ast::AstNode;
 use wat_formatter::config::{FormatOptions, LanguageOptions, LayoutOptions};
@@ -15,7 +15,7 @@ impl LanguageService {
         let root = Root::cast(document.root_tree(self))?;
         let formatted = wat_formatter::format(&root, &build_options(&params.options, config.format.clone()));
         let text_edit = TextEdit {
-            range: helpers::rowan_range_to_lsp_range(line_index, root.syntax().text_range()),
+            range: line_index.convert(root.syntax().text_range()),
             new_text: formatted,
         };
         Some(vec![text_edit])
@@ -32,11 +32,11 @@ impl LanguageService {
         let (formatted, range) = wat_formatter::format_range(
             &root,
             &build_options(&params.options, config.format.clone()),
-            helpers::lsp_range_to_rowan_range(line_index, params.range)?,
+            line_index.convert(params.range)?,
             line_index,
         )?;
         let text_edit = TextEdit {
-            range: helpers::rowan_range_to_lsp_range(line_index, range),
+            range: line_index.convert(range),
             new_text: formatted,
         };
         Some(vec![text_edit])

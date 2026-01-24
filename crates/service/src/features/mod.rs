@@ -18,7 +18,7 @@ mod signature_help;
 mod type_hierarchy;
 
 pub(crate) use self::semantic_tokens::{SemanticTokenType, SemanticTokenTypes};
-use crate::{document::Document, helpers};
+use crate::{document::Document, helpers::LineIndexExt};
 use lspt::Position;
 use rowan::TokenAtOffset;
 use wat_syntax::{SyntaxNode, SyntaxToken};
@@ -29,7 +29,7 @@ fn find_meaningful_token(
     root: &SyntaxNode,
     position: Position,
 ) -> Option<SyntaxToken> {
-    let offset = helpers::lsp_pos_to_rowan_pos(document.line_index(db), position)?;
+    let offset = document.line_index(db).convert(position)?;
 
     match root.token_at_offset(offset) {
         TokenAtOffset::None => None,

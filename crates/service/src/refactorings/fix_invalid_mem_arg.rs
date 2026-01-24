@@ -1,4 +1,4 @@
-use crate::{helpers, uri::InternUri};
+use crate::{helpers::LineIndexExt, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionContext, CodeActionKind, TextEdit, Union2, WorkspaceEdit};
 use rustc_hash::FxBuildHasher;
@@ -19,7 +19,7 @@ pub fn act(
             _ => None,
         })
         .map(|range| TextEdit {
-            range: helpers::rowan_range_to_lsp_range(line_index, range),
+            range: line_index.convert(range),
             new_text: String::new(),
         })
         .collect::<Vec<_>>();

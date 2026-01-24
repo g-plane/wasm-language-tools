@@ -1,7 +1,8 @@
 use crate::{
     LanguageService,
     binder::{SymbolKind, SymbolTable},
-    helpers, types_analyzer,
+    helpers::{self, LineIndexExt},
+    types_analyzer,
 };
 use lspt::{
     SymbolKind as LspSymbolKind, TypeHierarchyItem, TypeHierarchyPrepareParams, TypeHierarchySubtypesParams,
@@ -26,7 +27,7 @@ impl LanguageService {
                 tags: None,
                 detail: helpers::infer_type_def_symbol_detail(symbol, &root),
                 uri: params.text_document.uri.clone(),
-                range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
+                range: line_index.convert(symbol.key.text_range()),
                 selection_range: helpers::create_selection_range(symbol, &root, line_index),
                 data: None,
             }]),
@@ -38,7 +39,7 @@ impl LanguageService {
                         tags: None,
                         detail: helpers::infer_type_def_symbol_detail(symbol, &root),
                         uri: params.text_document.uri.clone(),
-                        range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
+                        range: line_index.convert(symbol.key.text_range()),
                         selection_range: helpers::create_selection_range(symbol, &root, line_index),
                         data: None,
                     }]
@@ -56,7 +57,7 @@ impl LanguageService {
         let def_types = types_analyzer::get_def_types(self, document);
 
         let line_index = document.line_index(self);
-        let type_def_range = helpers::lsp_range_to_rowan_range(line_index, params.item.range)?;
+        let type_def_range = line_index.convert(params.item.range)?;
         let type_def = symbol_table
             .symbols
             .values()
@@ -73,7 +74,7 @@ impl LanguageService {
                     tags: None,
                     detail: helpers::infer_type_def_symbol_detail(symbol, &root),
                     uri: params.item.uri,
-                    range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
+                    range: line_index.convert(symbol.key.text_range()),
                     selection_range: helpers::create_selection_range(symbol, &root, line_index),
                     data: None,
                 }]
@@ -88,7 +89,7 @@ impl LanguageService {
         let def_types = types_analyzer::get_def_types(self, document);
 
         let line_index = document.line_index(self);
-        let type_def_range = helpers::lsp_range_to_rowan_range(line_index, params.item.range)?;
+        let type_def_range = line_index.convert(params.item.range)?;
         let key = symbol_table
             .symbols
             .values()
@@ -111,7 +112,7 @@ impl LanguageService {
                     tags: None,
                     detail: helpers::infer_type_def_symbol_detail(symbol, &root),
                     uri: params.item.uri.clone(),
-                    range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
+                    range: line_index.convert(symbol.key.text_range()),
                     selection_range: helpers::create_selection_range(symbol, &root, line_index),
                     data: None,
                 })

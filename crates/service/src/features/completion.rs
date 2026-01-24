@@ -3,7 +3,7 @@ use crate::{
     binder::{SymbolKey, SymbolKind, SymbolTable},
     data_set, deprecation,
     document::Document,
-    helpers,
+    helpers::{self, LineIndexExt},
     idx::Idx,
     types_analyzer::{self, CompositeType, Fields, OperandType, ValType},
 };
@@ -30,7 +30,7 @@ impl LanguageService {
         self.with_db(|db| {
             let line_index = document.line_index(db);
             let root = document.root_tree(db);
-            let token = helpers::ast::find_token(&root, helpers::lsp_pos_to_rowan_pos(line_index, params.position)?)?;
+            let token = helpers::ast::find_token(&root, line_index.convert(params.position)?)?;
 
             let cmp_ctx = get_cmp_ctx(&token)?;
             Some(get_cmp_list(db, cmp_ctx, &token, document, line_index, &root))
@@ -772,7 +772,7 @@ fn get_cmp_list(
                                     None
                                 } else {
                                     Some(Union2::A(TextEdit {
-                                        range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                        range: line_index.convert(token.text_range()),
                                         new_text: label,
                                     }))
                                 },
@@ -803,7 +803,7 @@ fn get_cmp_list(
                             None
                         } else {
                             Some(Union2::A(TextEdit {
-                                range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                range: line_index.convert(token.text_range()),
                                 new_text: label,
                             }))
                         },
@@ -848,7 +848,7 @@ fn get_cmp_list(
                             None
                         } else {
                             Some(Union2::A(TextEdit {
-                                range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                range: line_index.convert(token.text_range()),
                                 new_text: label,
                             }))
                         },
@@ -890,7 +890,7 @@ fn get_cmp_list(
                             None
                         } else {
                             Some(Union2::A(TextEdit {
-                                range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                range: line_index.convert(token.text_range()),
                                 new_text: label,
                             }))
                         },
@@ -932,7 +932,7 @@ fn get_cmp_list(
                             None
                         } else {
                             Some(Union2::A(TextEdit {
-                                range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                range: line_index.convert(token.text_range()),
                                 new_text: label,
                             }))
                         },
@@ -968,7 +968,7 @@ fn get_cmp_list(
                                     None
                                 } else {
                                     Some(Union2::A(TextEdit {
-                                        range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                        range: line_index.convert(token.text_range()),
                                         new_text: label,
                                     }))
                                 },
@@ -1008,7 +1008,7 @@ fn get_cmp_list(
                                     None
                                 } else {
                                     Some(Union2::A(TextEdit {
-                                        range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                        range: line_index.convert(token.text_range()),
                                         new_text: label,
                                     }))
                                 },
@@ -1047,7 +1047,7 @@ fn get_cmp_list(
                                 None
                             } else {
                                 Some(Union2::A(TextEdit {
-                                    range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                    range: line_index.convert(token.text_range()),
                                     new_text: label,
                                 }))
                             },
@@ -1120,7 +1120,7 @@ fn get_cmp_list(
                             None
                         } else {
                             Some(Union2::A(TextEdit {
-                                range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                                range: line_index.convert(token.text_range()),
                                 new_text: label,
                             }))
                         },

@@ -2,7 +2,7 @@ use crate::{
     LanguageService,
     binder::{SymbolKey, SymbolKind, SymbolTable},
     document::Document,
-    helpers,
+    helpers::LineIndexExt,
     idx::InternIdent,
 };
 use lspt::{PrepareRenameParams, PrepareRenameResult, RenameParams, TextEdit, WorkspaceEdit};
@@ -23,7 +23,7 @@ impl LanguageService {
         let root = document.root_tree(self);
         let token = super::find_meaningful_token(self, document, &root, params.position)
             .filter(|token| token.kind() == SyntaxKind::IDENT)?;
-        let range = helpers::rowan_range_to_lsp_range(line_index, token.text_range());
+        let range = line_index.convert(token.text_range());
         Some(PrepareRenameResult::A(range))
     }
 
@@ -106,7 +106,7 @@ impl LanguageService {
             })
             .filter_map(|sym| support::token(&sym.key.to_node(&root), SyntaxKind::IDENT))
             .map(|token| TextEdit {
-                range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                range: line_index.convert(token.text_range()),
                 new_text: params.new_name.clone(),
             })
             .collect();

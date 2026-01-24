@@ -1,4 +1,4 @@
-use crate::{binder::SymbolTable, config::ServiceConfig, document::Document, helpers};
+use crate::{binder::SymbolTable, config::ServiceConfig, document::Document, helpers::LineIndexExt};
 use lspt::{DiagnosticRelatedInformation, DiagnosticSeverity, DiagnosticTag, Location, Union2};
 use rowan::TextRange;
 use std::cmp::Ordering;
@@ -185,7 +185,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
     diagnostics
         .into_iter()
         .map(|diagnostic| lspt::Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(line_index, diagnostic.range),
+            range: line_index.convert(diagnostic.range),
             severity: Some(diagnostic.severity),
             code: Some(Union2::B(diagnostic.code)),
             code_description: None,
@@ -198,7 +198,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                     .map(|info| DiagnosticRelatedInformation {
                         location: Location {
                             uri: uri.raw(db),
-                            range: helpers::rowan_range_to_lsp_range(line_index, info.range),
+                            range: line_index.convert(info.range),
                         },
                         message: info.message,
                     })

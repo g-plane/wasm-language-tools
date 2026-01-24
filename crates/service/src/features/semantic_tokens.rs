@@ -2,7 +2,8 @@ use crate::{
     LanguageService,
     binder::{SymbolKey, SymbolKind, SymbolTable},
     document::Document,
-    helpers, mutability,
+    helpers::{self, LineIndexExt},
+    mutability,
 };
 use indexmap::IndexSet;
 use line_index::LineCol;
@@ -44,8 +45,8 @@ impl LanguageService {
         let document = self.get_document(params.text_document.uri)?;
         self.with_db(|db| {
             let line_index = document.line_index(db);
-            let start = helpers::lsp_pos_to_rowan_pos(line_index, params.range.start)?;
-            let end = helpers::lsp_pos_to_rowan_pos(line_index, params.range.end)?;
+            let start = line_index.convert(params.range.start)?;
+            let end = line_index.convert(params.range.end)?;
 
             let mut delta_line = 0;
             let mut prev_start = 0;

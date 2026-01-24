@@ -2,7 +2,7 @@ use crate::{
     binder::{SymbolKey, SymbolTable},
     cfa::{self, FlowNode, FlowNodeKind},
     document::Document,
-    helpers,
+    helpers::LineIndexExt,
     uri::InternUri,
 };
 use line_index::LineIndex;
@@ -100,10 +100,7 @@ pub fn act(
     }
 
     let mut text_edits = vec![TextEdit {
-        range: helpers::rowan_range_to_lsp_range(
-            line_index,
-            support::token(&call_instr, SyntaxKind::INSTR_NAME)?.text_range(),
-        ),
+        range: line_index.convert(support::token(&call_instr, SyntaxKind::INSTR_NAME)?.text_range()),
         new_text: "return_call".into(),
     }];
     if let Some(instr) = &return_instr {
@@ -118,7 +115,7 @@ pub fn act(
                         ) =>
                     {
                         Some(TextEdit {
-                            range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                            range: line_index.convert(token.text_range()),
                             new_text: "".into(),
                         })
                     }

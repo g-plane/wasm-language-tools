@@ -1,7 +1,8 @@
 use crate::{
     LanguageService,
     binder::{SymbolKey, SymbolKind, SymbolTable},
-    helpers, types_analyzer,
+    helpers::{self, LineIndexExt},
+    types_analyzer,
 };
 use lspt::{
     CallHierarchyIncomingCall, CallHierarchyIncomingCallsParams, CallHierarchyItem, CallHierarchyOutgoingCall,
@@ -31,7 +32,7 @@ impl LanguageService {
                     types_analyzer::get_func_sig(self, document, *symbol.key, &symbol.green),
                 )),
                 uri: params.text_document.uri.clone(),
-                range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
+                range: line_index.convert(symbol.key.text_range()),
                 selection_range: helpers::create_selection_range(symbol, &root, line_index),
                 data: None,
             }]),
@@ -47,7 +48,7 @@ impl LanguageService {
                             types_analyzer::get_func_sig(self, document, *symbol.key, &symbol.green),
                         )),
                         uri: params.text_document.uri.clone(),
-                        range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
+                        range: line_index.convert(symbol.key.text_range()),
                         selection_range: helpers::create_selection_range(symbol, &root, line_index),
                         data: None,
                     }]
@@ -67,7 +68,7 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
 
         let line_index = document.line_index(self);
-        let callee_def_range = helpers::lsp_range_to_rowan_range(line_index, params.item.range)?;
+        let callee_def_range = line_index.convert(params.item.range)?;
         let callee_def = symbol_table
             .symbols
             .values()
@@ -94,7 +95,7 @@ impl LanguageService {
                     .key
                     .to_node(&root)
                     .parent()
-                    .map(|call| helpers::rowan_range_to_lsp_range(line_index, call.text_range()));
+                    .map(|call| line_index.convert(call.text_range()));
                 CallHierarchyIncomingCall {
                     from: CallHierarchyItem {
                         name: func_symbol.idx.render(self).to_string(),
@@ -106,7 +107,7 @@ impl LanguageService {
                             types_analyzer::get_func_sig(self, document, *func_symbol.key, &func_symbol.green),
                         )),
                         uri: params.item.uri.clone(),
-                        range: helpers::rowan_range_to_lsp_range(line_index, func_symbol.key.text_range()),
+                        range: line_index.convert(func_symbol.key.text_range()),
                         selection_range: helpers::create_selection_range(func_symbol, &root, line_index),
                         data: None,
                     },
@@ -127,7 +128,7 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
 
         let line_index = document.line_index(self);
-        let call_def_range = helpers::lsp_range_to_rowan_range(line_index, params.item.range)?;
+        let call_def_range = line_index.convert(params.item.range)?;
         let call_def_symbol = symbol_table
             .symbols
             .values()
@@ -137,7 +138,7 @@ impl LanguageService {
             .descendants()
             .filter(|node| node.kind() == SyntaxKind::PLAIN_INSTR && helpers::ast::is_call(node))
             .flat_map(|node| {
-                let plain_instr_range = helpers::rowan_range_to_lsp_range(line_index, node.text_range());
+                let plain_instr_range = line_index.convert(node.text_range());
                 let uri = &params.item.uri;
                 node.children()
                     .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
@@ -154,7 +155,7 @@ impl LanguageService {
                                 types_analyzer::get_func_sig(self, document, *func_symbol.key, &func_symbol.green),
                             )),
                             uri: uri.clone(),
-                            range: helpers::rowan_range_to_lsp_range(line_index, func_symbol.key.text_range()),
+                            range: line_index.convert(func_symbol.key.text_range()),
                             selection_range: helpers::create_selection_range(func_symbol, root, line_index),
                             data: None,
                         },

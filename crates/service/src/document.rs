@@ -1,7 +1,7 @@
 use crate::{
     LanguageService,
     config::ConfigState,
-    helpers,
+    helpers::LineIndexExt,
     uri::{InternUri, IntoInternUri},
 };
 use line_index::LineIndex;
@@ -80,8 +80,7 @@ impl LanguageService {
                             // user may be typing a comment
                             break 'single;
                         }
-                        let Some(range) = helpers::lsp_range_to_rowan_range(document.line_index(self), partial.range)
-                        else {
+                        let Some(range) = document.line_index(self).convert(partial.range) else {
                             break 'single;
                         };
                         // search the module field where code is changed
@@ -154,7 +153,7 @@ impl LanguageService {
         let mut text = document.text(self);
         params.content_changes.into_iter().for_each(|change| match change {
             TextDocumentContentChangeEvent::A(partial) => {
-                if let Some(range) = helpers::lsp_range_to_rowan_range(&line_index, partial.range) {
+                if let Some(range) = line_index.convert(partial.range) {
                     text.replace_range::<Range<usize>>(range.start().into()..range.end().into(), &partial.text);
                     line_index = LineIndex::new(&text);
                 }

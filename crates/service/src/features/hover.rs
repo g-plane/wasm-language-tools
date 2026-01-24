@@ -3,7 +3,7 @@ use crate::{
     binder::{Symbol, SymbolKey, SymbolKind, SymbolTable},
     data_set,
     document::Document,
-    helpers,
+    helpers::{self, LineIndexExt},
     types_analyzer::{self, CompositeType, DefType, RefType},
 };
 use lspt::{Hover, HoverParams, MarkupContent, MarkupKind, Union3};
@@ -41,7 +41,7 @@ impl LanguageService {
                         .and_then(|symbol| create_def_hover(self, document, &root, symbol))
                         .map(|contents| Hover {
                             contents: Union3::A(contents),
-                            range: Some(helpers::rowan_range_to_lsp_range(line_index, token.text_range())),
+                            range: Some(line_index.convert(token.text_range())),
                         }),
                     SymbolKind::Func
                     | SymbolKind::Param
@@ -58,7 +58,7 @@ impl LanguageService {
                         .and_then(|symbol| create_def_hover(self, document, &root, symbol))
                         .map(|contents| Hover {
                             contents: Union3::A(contents),
-                            range: Some(helpers::rowan_range_to_lsp_range(line_index, token.text_range())),
+                            range: Some(line_index.convert(token.text_range())),
                         }),
                     SymbolKind::Module => None,
                 })
@@ -70,7 +70,7 @@ impl LanguageService {
                         kind: MarkupKind::Markdown,
                         value: format!("```wat\n{ty}\n```\n\n{doc}"),
                     }),
-                    range: Some(helpers::rowan_range_to_lsp_range(line_index, token.text_range())),
+                    range: Some(line_index.convert(token.text_range())),
                 })
             }
             SyntaxKind::KEYWORD => {
@@ -86,14 +86,11 @@ impl LanguageService {
                     .and_then(|symbol| create_def_hover(self, document, &root, symbol))
                     .map(|contents| Hover {
                         contents: Union3::A(contents),
-                        range: Some(helpers::rowan_range_to_lsp_range(
-                            line_index,
-                            if matches!(token.text(), "mut" | "ref") {
-                                node.text_range()
-                            } else {
-                                token.text_range()
-                            },
-                        )),
+                        range: Some(line_index.convert(if matches!(token.text(), "mut" | "ref") {
+                            node.text_range()
+                        } else {
+                            token.text_range()
+                        })),
                     })
             }
             SyntaxKind::INSTR_NAME => {
@@ -142,7 +139,7 @@ impl LanguageService {
                         kind: MarkupKind::Markdown,
                         value: format!("```wat\n{name}\n```\nBinary Opcode: {}", format_op_code(*code)),
                     }),
-                    range: Some(helpers::rowan_range_to_lsp_range(line_index, token.text_range())),
+                    range: Some(line_index.convert(token.text_range())),
                 })
             }
             _ => None,

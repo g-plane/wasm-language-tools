@@ -10,39 +10,55 @@ use wat_syntax::{
     ast::{CompType, TypeDef},
 };
 
-pub fn rowan_pos_to_lsp_pos(line_index: &LineIndex, pos: TextSize) -> Position {
-    let line_col = line_index.line_col(pos);
-    Position {
-        line: line_col.line,
-        character: line_col.col,
+pub trait LineIndexExt<In> {
+    type Out;
+    fn convert(&self, input: In) -> Self::Out;
+}
+impl LineIndexExt<TextSize> for LineIndex {
+    type Out = Position;
+    /// Convert rowan offset to LSP position.
+    fn convert(&self, input: TextSize) -> Self::Out {
+        let line_col = self.line_col(input);
+        Position {
+            line: line_col.line,
+            character: line_col.col,
+        }
     }
 }
-
-pub fn rowan_range_to_lsp_range(line_index: &LineIndex, range: TextRange) -> Range {
-    Range {
-        start: rowan_pos_to_lsp_pos(line_index, range.start()),
-        end: rowan_pos_to_lsp_pos(line_index, range.end()),
+impl LineIndexExt<TextRange> for LineIndex {
+    type Out = Range;
+    /// Convert rowan range to LSP range.
+    fn convert(&self, input: TextRange) -> Self::Out {
+        Range {
+            start: self.convert(input.start()),
+            end: self.convert(input.end()),
+        }
     }
 }
-
-pub fn lsp_pos_to_rowan_pos(line_index: &LineIndex, pos: Position) -> Option<TextSize> {
-    line_index.offset(LineCol {
-        line: pos.line,
-        col: pos.character,
-    })
-}
-
-pub fn lsp_range_to_rowan_range(line_index: &LineIndex, range: Range) -> Option<TextRange> {
-    line_index
-        .offset(LineCol {
-            line: range.start.line,
-            col: range.start.character,
+impl LineIndexExt<Position> for LineIndex {
+    type Out = Option<TextSize>;
+    /// Convert LSP position to rowan offset.
+    fn convert(&self, input: Position) -> Self::Out {
+        self.offset(LineCol {
+            line: input.line,
+            col: input.character,
         })
-        .zip(line_index.offset(LineCol {
-            line: range.end.line,
-            col: range.end.character,
+    }
+}
+impl LineIndexExt<Range> for LineIndex {
+    type Out = Option<TextRange>;
+    /// Convert LSP range to rowan range.
+    fn convert(&self, input: Range) -> Self::Out {
+        self.offset(LineCol {
+            line: input.start.line,
+            col: input.start.character,
+        })
+        .zip(self.offset(LineCol {
+            line: input.end.line,
+            col: input.end.character,
         }))
         .map(|(start, end)| TextRange::new(start, end))
+    }
 }
 
 pub fn fuzzy_search<S>(haystack: impl IntoIterator<Item = S>, needle: &str) -> Option<S>
@@ -87,7 +103,7 @@ pub fn create_selection_range(symbol: &Symbol, root: &SyntaxNode, line_index: &L
         .or_else(|| support::token(&node, SyntaxKind::KEYWORD))
         .map(|token| token.text_range())
         .unwrap_or_else(|| node.text_range());
-    rowan_range_to_lsp_range(line_index, range)
+    line_index.convert(range)
 }
 
 pub fn create_location_by_symbol(
@@ -103,7 +119,7 @@ pub fn create_location_by_symbol(
         .unwrap_or_else(|| node.text_range());
     Location {
         uri,
-        range: rowan_range_to_lsp_range(line_index, range),
+        range: line_index.convert(range),
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::{helpers, uri::InternUri};
+use crate::{helpers::LineIndexExt, uri::InternUri};
 use itertools::Itertools;
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
@@ -39,13 +39,10 @@ pub fn act(
     changes.insert(
         uri.raw(db),
         vec![TextEdit {
-            range: helpers::rowan_range_to_lsp_range(
-                line_index,
-                TextRange::new(
-                    first_node.text_range().start(),
-                    items.last().unwrap_or(first_node).text_range().end(),
-                ),
-            ),
+            range: line_index.convert(TextRange::new(
+                first_node.text_range().start(),
+                items.last().unwrap_or(first_node).text_range().end(),
+            )),
             new_text,
         }],
     );

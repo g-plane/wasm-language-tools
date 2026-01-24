@@ -1,7 +1,7 @@
 use crate::{
     LanguageService,
     binder::{SymbolKind, SymbolTable},
-    helpers,
+    helpers::LineIndexExt,
     idx::Idx,
     types_analyzer,
     uri::InternUri,
@@ -25,7 +25,7 @@ impl LanguageService {
             let symbol_table = SymbolTable::of(db, document);
             let options = &config.inlay_hint;
 
-            let range = helpers::lsp_range_to_rowan_range(line_index, params.range)?;
+            let range = line_index.convert(params.range)?;
             let mut inlay_hints = Vec::new();
             for symbol in symbol_table.symbols.values() {
                 match symbol.kind {
@@ -37,7 +37,7 @@ impl LanguageService {
                                 .and_then(|local| types_analyzer::extract_type(db, document, local.green.clone()))
                         {
                             inlay_hints.push(InlayHint {
-                                position: helpers::rowan_pos_to_lsp_pos(line_index, symbol.key.text_range().end()),
+                                position: line_index.convert(symbol.key.text_range().end()),
                                 label: Union2::A(ty.render(db).to_string()),
                                 kind: Some(InlayHintKind::Type),
                                 text_edits: None,
@@ -56,7 +56,7 @@ impl LanguageService {
                             })
                         {
                             inlay_hints.push(InlayHint {
-                                position: helpers::rowan_pos_to_lsp_pos(line_index, symbol.key.text_range().end()),
+                                position: line_index.convert(symbol.key.text_range().end()),
                                 label: Union2::A(ty.render(db).to_string()),
                                 kind: Some(InlayHintKind::Type),
                                 text_edits: None,
@@ -78,7 +78,7 @@ impl LanguageService {
                                 .zip(symbol.idx.name)
                         {
                             inlay_hints.push(InlayHint {
-                                position: helpers::rowan_pos_to_lsp_pos(line_index, last.end()),
+                                position: line_index.convert(last.end()),
                                 label: Union2::A(format!("(func {})", name.ident(db))),
                                 kind: None,
                                 text_edits: None,
@@ -96,7 +96,7 @@ impl LanguageService {
                             && let Some(keyword) = support::token(&symbol.key.to_node(&root), SyntaxKind::KEYWORD)
                         {
                             inlay_hints.push(InlayHint {
-                                position: helpers::rowan_pos_to_lsp_pos(line_index, keyword.text_range().end()),
+                                position: line_index.convert(keyword.text_range().end()),
                                 label: Union2::A(format!("(;{num};)")),
                                 kind: None,
                                 text_edits: None,
@@ -118,7 +118,7 @@ impl LanguageService {
                                 .zip(symbol.idx.name)
                         {
                             inlay_hints.push(InlayHint {
-                                position: helpers::rowan_pos_to_lsp_pos(line_index, last.end()),
+                                position: line_index.convert(last.end()),
                                 label: Union2::A(format!(
                                     "({} {})",
                                     match symbol.key.kind() {
@@ -151,7 +151,7 @@ impl LanguageService {
                             && let Some(keyword) = support::token(&symbol.key.to_node(&root), SyntaxKind::KEYWORD)
                         {
                             inlay_hints.push(InlayHint {
-                                position: helpers::rowan_pos_to_lsp_pos(line_index, keyword.text_range().end()),
+                                position: line_index.convert(keyword.text_range().end()),
                                 label: Union2::A(format!("(;{num};)")),
                                 kind: None,
                                 text_edits: None,
@@ -174,7 +174,7 @@ impl LanguageService {
                                 .map(|token| token.text_range().end())
                                 .unwrap_or_else(|| symbol.key.text_range().end());
                             inlay_hints.push(InlayHint {
-                                position: helpers::rowan_pos_to_lsp_pos(line_index, end),
+                                position: line_index.convert(end),
                                 label: Union2::A(format!("(;{num};)")),
                                 kind: None,
                                 text_edits: None,
@@ -192,7 +192,7 @@ impl LanguageService {
                                 types_analyzer::resolve_field_type(db, document, symbol.key, symbol.region)
                         {
                             inlay_hints.push(InlayHint {
-                                position: helpers::rowan_pos_to_lsp_pos(line_index, symbol.key.text_range().end()),
+                                position: line_index.convert(symbol.key.text_range().end()),
                                 label: Union2::A(ty.render(db).to_string()),
                                 kind: Some(InlayHintKind::Type),
                                 text_edits: None,

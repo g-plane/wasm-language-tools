@@ -1,6 +1,6 @@
 use crate::{
     binder::{SymbolKey, SymbolTable},
-    helpers,
+    helpers::{self, LineIndexExt},
     uri::InternUri,
 };
 use line_index::LineIndex;
@@ -25,19 +25,16 @@ pub fn act(
         uri.raw(db),
         vec![
             TextEdit {
-                range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
+                range: line_index.convert(node.text_range()),
                 new_text: "".into(),
             },
             TextEdit {
-                range: helpers::rowan_range_to_lsp_range(
-                    line_index,
-                    TextRange::empty(
-                        support::token(&def_node, SyntaxKind::IDENT)
-                            .or_else(|| support::token(&def_node, SyntaxKind::KEYWORD))?
-                            .text_range()
-                            .end(),
-                    ),
-                ),
+                range: line_index.convert(TextRange::empty(
+                    support::token(&def_node, SyntaxKind::IDENT)
+                        .or_else(|| support::token(&def_node, SyntaxKind::KEYWORD))?
+                        .text_range()
+                        .end(),
+                )),
                 new_text: format!(
                     " (export {})",
                     node.first_child_by_kind(&|kind| kind == SyntaxKind::NAME)?.text(),

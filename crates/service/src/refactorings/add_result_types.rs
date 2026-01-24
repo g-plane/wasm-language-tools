@@ -1,4 +1,4 @@
-use crate::{helpers, uri::InternUri};
+use crate::{helpers::LineIndexExt, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionContext, CodeActionKind, TextEdit, Union2, WorkspaceEdit};
 use rowan::{NodeOrToken, TextRange, ast::support};
@@ -69,7 +69,7 @@ pub fn act(
     changes.insert(
         uri.raw(db),
         vec![TextEdit {
-            range: helpers::rowan_range_to_lsp_range(line_index, TextRange::empty(end)),
+            range: line_index.convert(TextRange::empty(end)),
             new_text: format!(" (result {})", types.join(" ")),
         }],
     );

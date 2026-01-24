@@ -1,7 +1,7 @@
 use crate::{
     LanguageService,
     binder::{Symbol, SymbolKey, SymbolTable},
-    helpers,
+    helpers::{self, LineIndexExt},
     idx::Idx,
     types_analyzer::{self, ValType},
 };
@@ -24,7 +24,7 @@ impl LanguageService {
             let root = document.root_tree(db);
             let symbol_table = SymbolTable::of(db, document);
 
-            let token = helpers::ast::find_token(&root, helpers::lsp_pos_to_rowan_pos(line_index, params.position)?)?;
+            let token = helpers::ast::find_token(&root, line_index.convert(params.position)?)?;
             let (node, instr, is_next) = if token.kind() == SyntaxKind::ERROR {
                 (
                     token.parent()?,

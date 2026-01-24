@@ -1,4 +1,4 @@
-use crate::{LanguageService, helpers};
+use crate::{LanguageService, helpers::LineIndexExt};
 use line_index::LineIndex;
 use lspt::{SelectionRange, SelectionRangeParams};
 use wat_syntax::SyntaxNode;
@@ -15,10 +15,10 @@ impl LanguageService {
                 .into_iter()
                 .filter_map(|position| {
                     super::find_meaningful_token(db, document, &root, position).map(|token| SelectionRange {
-                        range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                        range: line_index.convert(token.text_range()),
                         parent: token.parent().map(|parent| {
                             Box::new(SelectionRange {
-                                range: helpers::rowan_range_to_lsp_range(line_index, parent.text_range()),
+                                range: line_index.convert(parent.text_range()),
                                 parent: get_parent_range(parent, line_index),
                             })
                         }),
@@ -32,7 +32,7 @@ impl LanguageService {
 fn get_parent_range(current: SyntaxNode, line_index: &LineIndex) -> Option<Box<SelectionRange>> {
     current.parent().map(|parent| {
         Box::new(SelectionRange {
-            range: helpers::rowan_range_to_lsp_range(line_index, parent.text_range()),
+            range: line_index.convert(parent.text_range()),
             parent: get_parent_range(parent, line_index),
         })
     })

@@ -1,7 +1,9 @@
 use crate::{
     LanguageService,
     binder::{Symbol, SymbolKind, SymbolTable},
-    deprecation, helpers, types_analyzer,
+    deprecation,
+    helpers::{self, LineIndexExt},
+    types_analyzer,
 };
 use lspt::{DocumentSymbol, DocumentSymbolParams, SymbolKind as LspSymbolKind, SymbolTag};
 use rowan::ast::AstNode;
@@ -23,7 +25,7 @@ impl LanguageService {
                 .symbols
                 .values()
                 .filter_map(|symbol| {
-                    let range = helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                    let range = line_index.convert(symbol.key.text_range());
                     let selection_range = helpers::create_selection_range(symbol, &root, line_index);
                     let tags = if deprecation.contains_key(&symbol.key) {
                         Some(vec![SymbolTag::Deprecated])
@@ -45,7 +47,7 @@ impl LanguageService {
                             },
                         )),
                         SymbolKind::Func => {
-                            let range = helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                            let range = line_index.convert(symbol.key.text_range());
                             Some((
                                 symbol.key,
                                 DocumentSymbol {
@@ -61,7 +63,7 @@ impl LanguageService {
                             ))
                         }
                         SymbolKind::Local => {
-                            let range = helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                            let range = line_index.convert(symbol.key.text_range());
                             Some((
                                 symbol.key,
                                 DocumentSymbol {
@@ -78,7 +80,7 @@ impl LanguageService {
                             ))
                         }
                         SymbolKind::Type => {
-                            let range = helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                            let range = line_index.convert(symbol.key.text_range());
                             Some((
                                 symbol.key,
                                 DocumentSymbol {
@@ -94,7 +96,7 @@ impl LanguageService {
                             ))
                         }
                         SymbolKind::GlobalDef => {
-                            let range = helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                            let range = line_index.convert(symbol.key.text_range());
                             Some((
                                 symbol.key,
                                 DocumentSymbol {
@@ -121,7 +123,7 @@ impl LanguageService {
                             ))
                         }
                         SymbolKind::MemoryDef | SymbolKind::TableDef | SymbolKind::TagDef => {
-                            let range = helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                            let range = line_index.convert(symbol.key.text_range());
                             Some((
                                 symbol.key,
                                 DocumentSymbol {
@@ -137,7 +139,7 @@ impl LanguageService {
                             ))
                         }
                         SymbolKind::FieldDef => {
-                            let range = helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range());
+                            let range = line_index.convert(symbol.key.text_range());
                             Some((
                                 symbol.key,
                                 DocumentSymbol {

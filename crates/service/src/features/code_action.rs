@@ -1,4 +1,4 @@
-use crate::{LanguageService, binder::SymbolTable, helpers, refactorings::*, uri::InternUri};
+use crate::{LanguageService, binder::SymbolTable, helpers::LineIndexExt, refactorings::*, uri::InternUri};
 use lspt::{CodeAction, CodeActionKind, CodeActionParams};
 use wat_syntax::{SyntaxElement, SyntaxKind};
 
@@ -33,7 +33,7 @@ impl LanguageService {
                 });
 
             let mut actions = vec![];
-            let range = helpers::lsp_range_to_rowan_range(line_index, params.range)?;
+            let range = line_index.convert(params.range)?;
             let mut node = root.clone();
             while let Some(SyntaxElement::Node(it)) = node.child_or_token_at_range(range) {
                 match it.kind() {

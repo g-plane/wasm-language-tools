@@ -1,7 +1,7 @@
 use crate::{
     LanguageService,
     binder::{SymbolKind, SymbolTable},
-    helpers,
+    helpers::{self, LineIndexExt},
 };
 use lspt::{CodeLens, CodeLensParams, Command};
 use rowan::Language;
@@ -30,7 +30,7 @@ impl LanguageService {
                     )
                 })
                 .map(|symbol| CodeLens {
-                    range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
+                    range: line_index.convert(symbol.key.text_range()),
                     command: None,
                     data: serde_json::to_value(CodeLensData {
                         uri: params.text_document.uri.clone(),
@@ -55,7 +55,7 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
 
         let syntax_kind = WatLanguage::kind_from_raw(rowan::SyntaxKind(data.kind));
-        let range = helpers::lsp_range_to_rowan_range(line_index, params.range)?;
+        let range = line_index.convert(params.range)?;
         let def_symbol = symbol_table
             .symbols
             .values()

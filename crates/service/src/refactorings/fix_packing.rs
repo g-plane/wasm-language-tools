@@ -1,4 +1,4 @@
-use crate::{helpers, uri::InternUri};
+use crate::{helpers::LineIndexExt, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionContext, CodeActionKind, Diagnostic, TextEdit, Union2, WorkspaceEdit};
 use rowan::{Direction, TextRange};
@@ -13,7 +13,7 @@ pub fn act(
     node: &SyntaxNode,
     context: &CodeActionContext,
 ) -> Option<Vec<CodeAction>> {
-    let node_lsp_range = helpers::rowan_range_to_lsp_range(line_index, node.text_range());
+    let node_lsp_range = line_index.convert(node.text_range());
     let diagnostic = context.diagnostics.iter().find(|diagnostic| match &diagnostic.code {
         Some(Union2::B(code)) => code == "packing" && diagnostic.range == node_lsp_range,
         _ => false,
@@ -56,7 +56,7 @@ fn build_action(
     line_index: &LineIndex,
 ) -> CodeAction {
     let text_edits = vec![TextEdit {
-        range: helpers::rowan_range_to_lsp_range(line_index, range),
+        range: line_index.convert(range),
         new_text: new_text.into(),
     }];
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);

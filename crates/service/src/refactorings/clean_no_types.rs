@@ -1,4 +1,4 @@
-use crate::{helpers, uri::InternUri};
+use crate::{helpers::LineIndexExt, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rowan::NodeOrToken;
@@ -29,7 +29,7 @@ pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, nod
         changes.insert(
             uri.raw(db),
             vec![TextEdit {
-                range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
+                range: line_index.convert(node.text_range()),
                 new_text: "".into(),
             }],
         );

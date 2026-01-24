@@ -1,7 +1,7 @@
 use crate::{
     LanguageService,
     binder::{Symbol, SymbolKey, SymbolKind, SymbolTable},
-    helpers,
+    helpers::LineIndexExt,
 };
 use line_index::LineIndex;
 use lspt::{DocumentHighlight, DocumentHighlightKind, DocumentHighlightParams};
@@ -30,7 +30,7 @@ impl LanguageService {
                             .filter_map(|element| match element {
                                 SyntaxElement::Token(other) if other.kind() == kind && other.text() == text => {
                                     Some(DocumentHighlight {
-                                        range: helpers::rowan_range_to_lsp_range(line_index, other.text_range()),
+                                        range: line_index.convert(other.text_range()),
                                         kind: Some(DocumentHighlightKind::Text),
                                     })
                                 }
@@ -101,7 +101,7 @@ impl LanguageService {
                                                 .is_some_and(|name| name.text().ends_with(".const")) =>
                                     {
                                         Some(DocumentHighlight {
-                                            range: helpers::rowan_range_to_lsp_range(line_index, other.text_range()),
+                                            range: line_index.convert(other.text_range()),
                                             kind: Some(DocumentHighlightKind::Text),
                                         })
                                     }
@@ -128,7 +128,7 @@ fn create_symbol_highlight(symbol: &Symbol, root: &SyntaxNode, line_index: &Line
             ) =>
         {
             Some(DocumentHighlight {
-                range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
+                range: line_index.convert(token.text_range()),
                 kind: get_highlight_kind_of_symbol(symbol, root),
             })
         }

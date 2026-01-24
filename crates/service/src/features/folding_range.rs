@@ -1,4 +1,4 @@
-use crate::{LanguageService, helpers};
+use crate::{LanguageService, helpers::LineIndexExt};
 use lspt::{FoldingRange, FoldingRangeKind, FoldingRangeParams};
 use rowan::ast::support;
 use wat_syntax::SyntaxKind;
@@ -14,7 +14,7 @@ impl LanguageService {
                 .filter_map(|node| {
                     support::token(&node, SyntaxKind::KEYWORD)
                         .or_else(|| support::token(&node, SyntaxKind::L_PAREN))?;
-                    let range = helpers::rowan_range_to_lsp_range(line_index, node.text_range());
+                    let range = line_index.convert(node.text_range());
                     if range.start.line == range.end.line {
                         None
                     } else {
