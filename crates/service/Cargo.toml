@@ -40,3 +40,6 @@ harness = false
 [[bench]]
 name = "changed"
 harness = false
+[[bench]]
+name = "diagnostics"
+harness = false
