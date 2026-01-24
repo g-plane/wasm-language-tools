@@ -1,6 +1,4 @@
-use crate::helpers;
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, Union2};
+use super::Diagnostic;
 use rowan::ast::{AstNode, support};
 use std::iter::Peekable;
 use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxToken, ast::Immediate};
@@ -9,7 +7,7 @@ const DIAGNOSTIC_CODE: &str = "immediates";
 
 const INDEX: [SyntaxKind; 2] = [SyntaxKind::IDENT, SyntaxKind::INT];
 
-pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &SyntaxNode) {
+pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
     let Some(instr_name) = support::token(node, SyntaxKind::INSTR_NAME) else {
         return;
     };
@@ -29,18 +27,10 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 INDEX,
                 "identifier or unsigned integer",
                 &instr_name,
-                line_index,
             );
         }
         "i32.const" | "i64.const" => {
-            check_immediate::<true>(
-                diagnostics,
-                &mut immediates,
-                SyntaxKind::INT,
-                "integer",
-                &instr_name,
-                line_index,
-            );
+            check_immediate::<true>(diagnostics, &mut immediates, SyntaxKind::INT, "integer", &instr_name);
         }
         "f32.const" | "f64.const" => {
             check_immediate::<true>(
@@ -49,7 +39,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 [SyntaxKind::FLOAT, SyntaxKind::INT],
                 "floating-point number",
                 &instr_name,
-                line_index,
             );
         }
         "select" => {
@@ -58,10 +47,8 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 'a: {
                     let Some(type_use) = Immediate::cast(immediate).and_then(|immediate| immediate.type_use()) else {
                         diagnostics.push(Diagnostic {
-                            range: helpers::rowan_range_to_lsp_range(line_index, range),
-                            severity: Some(DiagnosticSeverity::Error),
-                            source: Some("wat".into()),
-                            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                            range,
+                            code: DIAGNOSTIC_CODE.into(),
                             message: "expected result type".into(),
                             ..Default::default()
                         });
@@ -76,10 +63,8 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                         break 'a;
                     }
                     diagnostics.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(line_index, range),
-                        severity: Some(DiagnosticSeverity::Error),
-                        source: Some("wat".into()),
-                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        range,
+                        code: DIAGNOSTIC_CODE.into(),
                         message: "there must be exactly one result type".into(),
                         ..Default::default()
                     });
@@ -93,7 +78,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 INDEX,
                 "identifier or unsigned integer",
                 &instr_name,
-                line_index,
             );
             diagnostics.extend(
                 immediates
@@ -103,10 +87,8 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                             .is_some_and(|token| matches!(token.kind(), SyntaxKind::IDENT | SyntaxKind::INT))
                     })
                     .map(|immediate| Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
-                        severity: Some(DiagnosticSeverity::Error),
-                        source: Some("wat".into()),
-                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        range: immediate.text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
                         message: "expected identifier or unsigned integer".into(),
                         ..Default::default()
                     }),
@@ -120,7 +102,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 INDEX,
                 "identifier or unsigned integer",
                 &instr_name,
-                line_index,
             );
             check_immediate::<false>(
                 diagnostics,
@@ -128,7 +109,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 SyntaxKind::TYPE_USE,
                 "type use",
                 &instr_name,
-                line_index,
             );
         }
         "struct.get" | "struct.get_u" | "struct.get_s" | "struct.set" | "array.new_data" | "array.new_elem"
@@ -139,7 +119,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 INDEX,
                 "identifier or unsigned integer",
                 &instr_name,
-                line_index,
             );
             check_immediate::<true>(
                 diagnostics,
@@ -147,7 +126,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 INDEX,
                 "identifier or unsigned integer",
                 &instr_name,
-                line_index,
             );
         }
         "i32.load" | "i64.load" | "f32.load" | "f64.load" | "i32.load8_s" | "i32.load8_u" | "i32.load16_s"
@@ -163,7 +141,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 INDEX,
                 "identifier or unsigned integer",
                 &instr_name,
-                line_index,
             );
             check_immediate::<false>(
                 diagnostics,
@@ -171,7 +148,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 SyntaxKind::MEM_ARG,
                 "memory argument",
                 &instr_name,
-                line_index,
             );
         }
         "memory.size" | "memory.grow" | "memory.fill" | "table.get" | "table.set" | "table.grow" | "table.size"
@@ -182,7 +158,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 INDEX,
                 "identifier or unsigned integer",
                 &instr_name,
-                line_index,
             );
         }
         "memory.copy" | "table.copy" => {
@@ -192,7 +167,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 INDEX,
                 "identifier or unsigned integer",
                 &instr_name,
-                line_index,
             );
             check_immediate::<false>(
                 diagnostics,
@@ -200,7 +174,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 INDEX,
                 "identifier or unsigned integer",
                 &instr_name,
-                line_index,
             );
         }
         "memory.init" | "table.init" => {
@@ -210,7 +183,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 INDEX,
                 "identifier or unsigned integer",
                 &instr_name,
-                line_index,
             );
             check_immediate::<false>(
                 diagnostics,
@@ -218,7 +190,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 INDEX,
                 "identifier or unsigned integer",
                 &instr_name,
-                line_index,
             );
         }
         "v128.const" => {
@@ -228,7 +199,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 SyntaxKind::SHAPE_DESCRIPTOR,
                 "shape descriptor",
                 &instr_name,
-                line_index,
             );
             if let Some((allow_float, expected_count)) = node
                 .first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
@@ -241,10 +211,8 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 let actual_count = immediates.clone().count();
                 if actual_count != expected_count {
                     diagnostics.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
-                        severity: Some(DiagnosticSeverity::Error),
-                        source: Some("wat".into()),
-                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        range: node.text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
                         message: format!(
                             "expected {expected_count} {} in `v128.const`",
                             if allow_float {
@@ -264,19 +232,11 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                             [SyntaxKind::FLOAT, SyntaxKind::INT],
                             "floating-point number",
                             &instr_name,
-                            line_index,
                         );
                     }
                 } else {
                     for _ in 0..actual_count {
-                        check_immediate::<true>(
-                            diagnostics,
-                            &mut immediates,
-                            SyntaxKind::INT,
-                            "integer",
-                            &instr_name,
-                            line_index,
-                        );
+                        check_immediate::<true>(diagnostics, &mut immediates, SyntaxKind::INT, "integer", &instr_name);
                     }
                 }
             }
@@ -301,17 +261,14 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 INDEX,
                 "identifier or unsigned integer",
                 &instr_name,
-                line_index,
             );
         }
         "i8x16.shuffle" => {
             let immediates_count = immediates.clone().count();
             if immediates_count != 16 {
                 diagnostics.push(Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
-                    severity: Some(DiagnosticSeverity::Error),
-                    source: Some("wat".into()),
-                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                    range: node.text_range(),
+                    code: DIAGNOSTIC_CODE.into(),
                     message: format!("expected 16 lane indices in `i8x16.shuffle`, found {immediates_count}"),
                     ..Default::default()
                 });
@@ -323,10 +280,8 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                     .is_some_and(|idx| idx >= 32)
                 {
                     diagnostics.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
-                        severity: Some(DiagnosticSeverity::Error),
-                        source: Some("wat".into()),
-                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        range: immediate.text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
                         message: "laneidx must be smaller than 32".into(),
                         ..Default::default()
                     });
@@ -342,7 +297,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 INDEX,
                 "identifier or unsigned integer",
                 &instr_name,
-                line_index,
             );
             check_immediate::<false>(
                 diagnostics,
@@ -350,7 +304,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 SyntaxKind::MEM_ARG,
                 "memory argument",
                 &instr_name,
-                line_index,
             );
             check_immediate::<false>(
                 diagnostics,
@@ -358,7 +311,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 SyntaxKind::INT,
                 "unsigned integer",
                 &instr_name,
-                line_index,
             );
         }
         "ref.null" => {
@@ -368,7 +320,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 [SyntaxKind::HEAP_TYPE, SyntaxKind::IDENT, SyntaxKind::INT],
                 "heap type",
                 &instr_name,
-                line_index,
             );
         }
         "ref.test" | "ref.cast" => {
@@ -378,7 +329,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 SyntaxKind::REF_TYPE,
                 "ref type",
                 &instr_name,
-                line_index,
             );
         }
         "array.new_fixed" => {
@@ -388,7 +338,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 INDEX,
                 "identifier or unsigned integer",
                 &instr_name,
-                line_index,
             );
             check_immediate::<true>(
                 diagnostics,
@@ -396,7 +345,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 SyntaxKind::INT,
                 "unsigned integer",
                 &instr_name,
-                line_index,
             );
         }
         "br_on_cast" | "br_on_cast_fail" => {
@@ -406,7 +354,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 INDEX,
                 "identifier or unsigned integer",
                 &instr_name,
-                line_index,
             );
             check_immediate::<true>(
                 diagnostics,
@@ -414,7 +361,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 SyntaxKind::REF_TYPE,
                 "ref type",
                 &instr_name,
-                line_index,
             );
             check_immediate::<true>(
                 diagnostics,
@@ -422,7 +368,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 SyntaxKind::REF_TYPE,
                 "ref type",
                 &instr_name,
-                line_index,
             );
         }
         "memory.atomic.notify"
@@ -497,16 +442,13 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, line_index: &LineIndex, node: &S
                 SyntaxKind::MEM_ARG,
                 "memory argument",
                 &instr_name,
-                line_index,
             );
         }
         _ => {}
     }
     diagnostics.extend(immediates.map(|immediate| Diagnostic {
-        range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
-        severity: Some(DiagnosticSeverity::Error),
-        source: Some("wat".into()),
-        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+        range: immediate.text_range(),
+        code: DIAGNOSTIC_CODE.into(),
         message: "unexpected immediate".into(),
         ..Default::default()
     }));
@@ -518,7 +460,6 @@ fn check_immediate<const REQUIRED: bool>(
     expected: impl SyntaxKindCmp,
     description: &'static str,
     instr_name: &SyntaxToken,
-    line_index: &LineIndex,
 ) {
     let immediate = immediates.peek().and_then(|immediate| immediate.first_child_or_token());
     if let Some(immediate) = immediate {
@@ -526,10 +467,8 @@ fn check_immediate<const REQUIRED: bool>(
             immediates.next();
         } else if REQUIRED {
             diagnostics.push(Diagnostic {
-                range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
-                severity: Some(DiagnosticSeverity::Error),
-                source: Some("wat".into()),
-                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                range: immediate.text_range(),
+                code: DIAGNOSTIC_CODE.into(),
                 message: format!("expected {description}"),
                 ..Default::default()
             });
@@ -537,10 +476,8 @@ fn check_immediate<const REQUIRED: bool>(
         }
     } else if REQUIRED {
         diagnostics.push(Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(line_index, instr_name.text_range()),
-            severity: Some(DiagnosticSeverity::Error),
-            source: Some("wat".into()),
-            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+            range: instr_name.text_range(),
+            code: DIAGNOSTIC_CODE.into(),
             message: format!("missing {description}"),
             ..Default::default()
         });

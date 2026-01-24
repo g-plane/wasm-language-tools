@@ -1,11 +1,9 @@
-use crate::helpers;
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, Union2};
+use super::Diagnostic;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "import-occurrence";
 
-pub fn check(line_index: &LineIndex, node: &SyntaxNode) -> Option<Diagnostic> {
+pub fn check(node: &SyntaxNode) -> Option<Diagnostic> {
     if node.prev_sibling().is_some_and(|prev| {
         matches!(
             prev.kind(),
@@ -16,10 +14,8 @@ pub fn check(line_index: &LineIndex, node: &SyntaxNode) -> Option<Diagnostic> {
         ) && !prev.children().any(|child| child.kind() == SyntaxKind::IMPORT)
     }) {
         Some(Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
-            severity: Some(DiagnosticSeverity::Error),
-            source: Some("wat".into()),
-            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+            range: node.text_range(),
+            code: DIAGNOSTIC_CODE.into(),
             message: "import must occur before all non-import definitions".into(),
             ..Default::default()
         })

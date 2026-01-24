@@ -1,3 +1,4 @@
+use super::{Diagnostic, RelatedInformation};
 use crate::{
     binder::{SymbolKey, SymbolTable},
     data_set,
@@ -11,8 +12,6 @@ use crate::{
     },
 };
 use itertools::{EitherOrBoth, Itertools};
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
 use rowan::{
     TextRange,
     ast::{AstNode, support},
@@ -28,7 +27,6 @@ pub fn check_func(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
     document: Document,
-    line_index: &LineIndex,
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
@@ -44,7 +42,6 @@ pub fn check_func(
             db,
             document,
             symbol_table,
-            line_index,
             module_id,
         },
         node,
@@ -61,7 +58,6 @@ pub fn check_global(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
     document: Document,
-    line_index: &LineIndex,
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
@@ -75,7 +71,6 @@ pub fn check_global(
             db,
             document,
             symbol_table,
-            line_index,
             module_id,
         },
         node,
@@ -92,7 +87,6 @@ pub fn check_table(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
     document: Document,
-    line_index: &LineIndex,
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
@@ -118,7 +112,6 @@ pub fn check_table(
             db,
             document,
             symbol_table,
-            line_index,
             module_id,
         },
         node,
@@ -135,7 +128,6 @@ pub fn check_offset(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
     document: Document,
-    line_index: &LineIndex,
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
@@ -146,7 +138,6 @@ pub fn check_offset(
             db,
             document,
             symbol_table,
-            line_index,
             module_id,
         },
         node,
@@ -159,7 +150,6 @@ pub fn check_elem_list(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
     document: Document,
-    line_index: &LineIndex,
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
@@ -180,7 +170,6 @@ pub fn check_elem_list(
                     db,
                     document,
                     symbol_table,
-                    line_index,
                     module_id,
                 },
                 &child,
@@ -194,7 +183,6 @@ struct Shared<'db> {
     db: &'db dyn salsa::Database,
     document: Document,
     symbol_table: &'db SymbolTable<'db>,
-    line_index: &'db LineIndex,
     module_id: u32,
 }
 
@@ -208,7 +196,6 @@ fn check_block_like(
     let mut type_stack = TypeStack {
         document: shared.document,
         db: shared.db,
-        line_index: shared.line_index,
         module_id: shared.module_id,
         stack: init_stack,
         has_never: false,
@@ -306,10 +293,8 @@ fn check_instr<'db>(
                         check_block_like(diagnostics, shared, then_block.syntax(), init_stack.clone(), &results);
                     } else {
                         diagnostics.push(Diagnostic {
-                            range: helpers::rowan_range_to_lsp_range(shared.line_index, node.text_range()),
-                            severity: Some(DiagnosticSeverity::Error),
-                            source: Some("wat".into()),
-                            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                            range: node.text_range(),
+                            code: DIAGNOSTIC_CODE.into(),
                             message: format!(
                                 "missing `then` branch with expected types [{}]",
                                 results.iter().map(|ty| ty.render(shared.db)).join(", ")
@@ -323,7 +308,6 @@ fn check_instr<'db>(
                         let mut type_stack = TypeStack {
                             document: shared.document,
                             db: shared.db,
-                            line_index: shared.line_index,
                             module_id: shared.module_id,
                             stack: init_stack,
                             has_never: false,
@@ -333,10 +317,8 @@ fn check_instr<'db>(
                             .is_some()
                         {
                             diagnostics.push(Diagnostic {
-                                range: helpers::rowan_range_to_lsp_range(shared.line_index, node.text_range()),
-                                severity: Some(DiagnosticSeverity::Error),
-                                source: Some("wat".into()),
-                                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                                range: node.text_range(),
+                                code: DIAGNOSTIC_CODE.into(),
                                 message: format!(
                                     "missing `else` branch with expected types [{}]",
                                     results.iter().map(|ty| ty.render(shared.db)).join(", ")
@@ -357,7 +339,6 @@ fn check_instr<'db>(
 struct TypeStack<'db> {
     document: Document,
     db: &'db dyn salsa::Database,
-    line_index: &'db LineIndex,
     module_id: u32,
     stack: Vec<(OperandType<'db>, Option<Instr>)>,
     has_never: bool,
@@ -380,14 +361,8 @@ impl<'db> TypeStack<'db> {
                     }
                     mismatch = true;
                     if let Some(related_instr) = related_instr {
-                        related_information.push(DiagnosticRelatedInformation {
-                            location: Location {
-                                uri: self.document.uri(self.db).raw(self.db),
-                                range: helpers::rowan_range_to_lsp_range(
-                                    self.line_index,
-                                    ReportRange::Instr(related_instr).pick(),
-                                ),
-                            },
+                        related_information.push(RelatedInformation {
+                            range: ReportRange::Instr(related_instr).pick(),
                             message: format!(
                                 "expected type `{}`, found `{}`",
                                 expected.render(self.db),
@@ -409,10 +384,8 @@ impl<'db> TypeStack<'db> {
                 pops.iter().map(|(ty, _)| ty.render(self.db)).join(", ")
             );
             diagnostic = Some(Diagnostic {
-                range: helpers::rowan_range_to_lsp_range(self.line_index, report_range.pick()),
-                severity: Some(DiagnosticSeverity::Error),
-                source: Some("wat".into()),
-                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                range: report_range.pick(),
+                code: DIAGNOSTIC_CODE.into(),
                 message: format!("expected types {expected_types}, found {received_types}"),
                 related_information: if related_information.is_empty() {
                     None
@@ -445,14 +418,8 @@ impl<'db> TypeStack<'db> {
                     }
                     mismatch = true;
                     if let Some(related_instr) = related_instr {
-                        related_information.push(DiagnosticRelatedInformation {
-                            location: Location {
-                                uri: self.document.uri(self.db).raw(self.db),
-                                range: helpers::rowan_range_to_lsp_range(
-                                    self.line_index,
-                                    ReportRange::Instr(related_instr).pick(),
-                                ),
-                            },
+                        related_information.push(RelatedInformation {
+                            range: ReportRange::Instr(related_instr).pick(),
                             message: format!(
                                 "expected type `{}`, found `{}`",
                                 expected.render(self.db),
@@ -473,10 +440,8 @@ impl<'db> TypeStack<'db> {
             let expected_types = format!("[{}]", expected.iter().map(|ty| ty.render(self.db)).join(", "));
             let received_types = format!("[{}]", self.stack.iter().map(|(ty, _)| ty.render(self.db)).join(", "));
             Some(Diagnostic {
-                range: helpers::rowan_range_to_lsp_range(self.line_index, report_range.pick()),
-                severity: Some(DiagnosticSeverity::Error),
-                source: Some("wat".into()),
-                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                range: report_range.pick(),
+                code: DIAGNOSTIC_CODE.into(),
                 message: format!(
                     "expected types {expected_types}, found {received_types}{}",
                     if let ReportRange::Last(..) = report_range {

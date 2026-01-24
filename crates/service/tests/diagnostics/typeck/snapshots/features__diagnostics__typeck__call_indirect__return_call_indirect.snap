@@ -47,22 +47,6 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 6,
-          "character": 25
-        },
-        "end": {
-          "line": 6,
-          "character": 33
-        }
-      },
-      "severity": 1,
-      "code": "type-misuse",
-      "source": "wat",
-      "message": "this result type must match the result type of current function"
-    },
-    {
-      "range": {
-        "start": {
           "line": 9,
           "character": 4
         },
@@ -116,22 +100,6 @@ expression: response
           "f64"
         ]
       ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 9,
-          "character": 25
-        },
-        "end": {
-          "line": 9,
-          "character": 33
-        }
-      },
-      "severity": 1,
-      "code": "type-misuse",
-      "source": "wat",
-      "message": "this result type must match the result type of current function"
     },
     {
       "range": {
@@ -209,22 +177,6 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 13,
-          "character": 27
-        },
-        "end": {
-          "line": 13,
-          "character": 35
-        }
-      },
-      "severity": 1,
-      "code": "type-misuse",
-      "source": "wat",
-      "message": "this result type must match the result type of current function"
-    },
-    {
-      "range": {
-        "start": {
           "line": 17,
           "character": 35
         },
@@ -244,6 +196,54 @@ expression: response
           "f64"
         ]
       ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 25
+        },
+        "end": {
+          "line": 6,
+          "character": 33
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "this result type must match the result type of current function"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 25
+        },
+        "end": {
+          "line": 9,
+          "character": 33
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "this result type must match the result type of current function"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 27
+        },
+        "end": {
+          "line": 13,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "this result type must match the result type of current function"
     },
     {
       "range": {

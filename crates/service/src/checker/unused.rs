@@ -1,10 +1,9 @@
+use super::Diagnostic;
 use crate::{
     LintLevel,
     binder::{Symbol, SymbolKind, SymbolTable},
-    helpers,
 };
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, DiagnosticTag, Union2};
+use lspt::{DiagnosticSeverity, DiagnosticTag};
 use rowan::{Direction, TextRange, ast::support};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
@@ -14,7 +13,6 @@ pub fn check(
     db: &dyn salsa::Database,
     diagnostics: &mut Vec<Diagnostic>,
     lint_level: LintLevel,
-    line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
 ) {
@@ -36,7 +34,7 @@ pub fn check(
                 {
                     None
                 } else {
-                    Some(report(db, line_index, root, severity, symbol))
+                    Some(report(db, root, severity, symbol))
                 }
             }
             SymbolKind::Param | SymbolKind::Local => {
@@ -65,7 +63,7 @@ pub fn check(
                     let range = support::token(&node, SyntaxKind::IDENT)
                         .map(|token| token.text_range())
                         .unwrap_or_else(|| node.text_range());
-                    Some(report_with_range(db, line_index, range, severity, symbol))
+                    Some(report_with_range(db, range, severity, symbol))
                 }
             }
             SymbolKind::FieldDef => {
@@ -76,7 +74,7 @@ pub fn check(
                     let range = support::token(&node, SyntaxKind::IDENT)
                         .map(|token| token.text_range())
                         .unwrap_or_else(|| node.text_range());
-                    Some(report_with_range(db, line_index, range, severity, symbol))
+                    Some(report_with_range(db, range, severity, symbol))
                 }
             }
             _ => None,
@@ -97,33 +95,25 @@ fn is_exported(root: &SyntaxNode, def_symbol: &Symbol) -> bool {
     node.children().any(|child| child.kind() == SyntaxKind::EXPORT)
 }
 
-fn report(
-    db: &dyn salsa::Database,
-    line_index: &LineIndex,
-    root: &SyntaxNode,
-    severity: DiagnosticSeverity,
-    symbol: &Symbol,
-) -> Diagnostic {
+fn report(db: &dyn salsa::Database, root: &SyntaxNode, severity: DiagnosticSeverity, symbol: &Symbol) -> Diagnostic {
     let node = symbol.key.to_node(root);
     let range = support::token(&node, SyntaxKind::IDENT)
         .or_else(|| support::token(&node, SyntaxKind::KEYWORD))
         .map(|token| token.text_range())
         .unwrap_or_else(|| node.text_range());
-    report_with_range(db, line_index, range, severity, symbol)
+    report_with_range(db, range, severity, symbol)
 }
 
 fn report_with_range(
     db: &dyn salsa::Database,
-    line_index: &LineIndex,
     range: TextRange,
     severity: DiagnosticSeverity,
     symbol: &Symbol,
 ) -> Diagnostic {
     Diagnostic {
-        range: helpers::rowan_range_to_lsp_range(line_index, range),
-        severity: Some(severity),
-        source: Some("wat".into()),
-        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+        range,
+        severity,
+        code: DIAGNOSTIC_CODE.into(),
         message: format!("{} `{}` is never used", symbol.kind, symbol.idx.render(db)),
         tags: Some(vec![DiagnosticTag::Unnecessary]),
         ..Default::default()

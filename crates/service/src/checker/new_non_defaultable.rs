@@ -1,11 +1,9 @@
+use super::{Diagnostic, RelatedInformation};
 use crate::{
     binder::{SymbolKey, SymbolKind, SymbolTable},
     document::Document,
-    helpers,
     types_analyzer::{self, CompositeType, FieldType, Fields, StorageType},
 };
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
 use rowan::ast::support;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
@@ -14,7 +12,6 @@ const DIAGNOSTIC_CODE: &str = "new-non-defaultable";
 pub fn check(
     db: &dyn salsa::Database,
     document: Document,
-    line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) -> Option<Diagnostic> {
@@ -44,10 +41,8 @@ pub fn check(
                 None
             } else {
                 Some(Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
-                    severity: Some(DiagnosticSeverity::Error),
-                    source: Some("wat".into()),
-                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                    range: immediate.text_range(),
+                    code: DIAGNOSTIC_CODE.into(),
                     message: format!("struct type `{}` is not defaultable", def_symbol.idx.render(db)),
                     related_information: Some(
                         non_defaultables
@@ -61,14 +56,8 @@ pub fn check(
                                             && symbol.region == def_symbol.key
                                             && &symbol.idx == idx
                                     })
-                                    .map(|symbol| DiagnosticRelatedInformation {
-                                        location: Location {
-                                            uri: document.uri(db).raw(db),
-                                            range: helpers::rowan_range_to_lsp_range(
-                                                line_index,
-                                                symbol.key.text_range(),
-                                            ),
-                                        },
+                                    .map(|symbol| RelatedInformation {
+                                        range: symbol.key.text_range(),
                                         message: format!("field type `{}` is not defaultable", symbol.idx.render(db)),
                                     })
                             })
@@ -82,10 +71,8 @@ pub fn check(
             storage: StorageType::Val(ty),
             ..
         })) if !ty.defaultable() => Some(Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(line_index, immediate.text_range()),
-            severity: Some(DiagnosticSeverity::Error),
-            source: Some("wat".into()),
-            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+            range: immediate.text_range(),
+            code: DIAGNOSTIC_CODE.into(),
             message: format!("array type `{}` is not defaultable", def_symbol.idx.render(db)),
             ..Default::default()
         }),

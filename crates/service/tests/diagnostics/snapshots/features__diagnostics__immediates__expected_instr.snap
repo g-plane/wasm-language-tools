@@ -9,22 +9,6 @@ expression: response
       "range": {
         "start": {
           "line": 0,
-          "character": 27
-        },
-        "end": {
-          "line": 0,
-          "character": 52
-        }
-      },
-      "severity": 1,
-      "code": "type-check",
-      "source": "wat",
-      "message": "expected types [i32, i32], found [i32]"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 0,
           "character": 36
         },
         "end": {
@@ -36,6 +20,22 @@ expression: response
       "code": "immediates",
       "source": "wat",
       "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 27
+        },
+        "end": {
+          "line": 0,
+          "character": 52
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i32], found [i32]"
     }
   ]
 }

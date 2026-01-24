@@ -1,6 +1,5 @@
-use crate::{binder::SymbolTable, document::Document, helpers, types_analyzer};
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, Union2};
+use super::Diagnostic;
+use crate::{binder::SymbolTable, document::Document, types_analyzer};
 use rowan::ast::AstNode;
 use wat_syntax::{SyntaxNode, ast::TypeDef};
 
@@ -10,7 +9,6 @@ pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
     document: Document,
-    line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
 ) {
@@ -56,10 +54,8 @@ pub fn check(
             .filter_map(|(key, message)| {
                 let index = TypeDef::cast(key.to_node(root))?.sub_type()?.indexes().next()?;
                 Some(Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(line_index, index.syntax().text_range()),
-                    severity: Some(DiagnosticSeverity::Error),
-                    source: Some("wat".into()),
-                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                    range: index.syntax().text_range(),
+                    code: DIAGNOSTIC_CODE.into(),
                     message,
                     ..Default::default()
                 })

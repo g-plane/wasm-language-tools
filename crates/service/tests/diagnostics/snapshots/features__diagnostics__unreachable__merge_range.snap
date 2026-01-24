@@ -46,6 +46,82 @@ expression: response
     {
       "range": {
         "start": {
+          "line": 17,
+          "character": 5
+        },
+        "end": {
+          "line": 17,
+          "character": 12
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 18,
+          "character": 7
+        },
+        "end": {
+          "line": 18,
+          "character": 14
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 19,
+          "character": 9
+        },
+        "end": {
+          "line": 19,
+          "character": 16
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 20,
+          "character": 11
+        },
+        "end": {
+          "line": 20,
+          "character": 18
+        }
+      },
+      "severity": 2,
+      "code": "unreachable",
+      "source": "wat",
+      "message": "unreachable code",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
           "line": 21,
           "character": 13
         },
@@ -84,50 +160,12 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 20,
-          "character": 11
-        },
-        "end": {
-          "line": 20,
-          "character": 18
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
           "line": 25,
           "character": 10
         },
         "end": {
           "line": 25,
           "character": 23
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 19,
-          "character": 9
-        },
-        "end": {
-          "line": 19,
-          "character": 16
         }
       },
       "severity": 2,
@@ -160,50 +198,12 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 18,
-          "character": 7
-        },
-        "end": {
-          "line": 18,
-          "character": 14
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
           "line": 27,
           "character": 6
         },
         "end": {
           "line": 30,
           "character": 25
-        }
-      },
-      "severity": 2,
-      "code": "unreachable",
-      "source": "wat",
-      "message": "unreachable code",
-      "tags": [
-        1
-      ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 17,
-          "character": 5
-        },
-        "end": {
-          "line": 17,
-          "character": 12
         }
       },
       "severity": 2,
@@ -236,12 +236,12 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 43,
-          "character": 8
+          "line": 39,
+          "character": 5
         },
         "end": {
-          "line": 44,
-          "character": 13
+          "line": 39,
+          "character": 8
         }
       },
       "severity": 2,
@@ -274,12 +274,12 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 39,
-          "character": 5
+          "line": 43,
+          "character": 8
         },
         "end": {
-          "line": 39,
-          "character": 8
+          "line": 44,
+          "character": 13
         }
       },
       "severity": 2,

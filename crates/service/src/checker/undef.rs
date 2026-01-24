@@ -1,18 +1,9 @@
-use crate::{
-    binder::{SymbolKind, SymbolTable},
-    helpers,
-};
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, Union2};
+use super::Diagnostic;
+use crate::binder::{SymbolKind, SymbolTable};
 
 const DIAGNOSTIC_CODE: &str = "undef";
 
-pub fn check(
-    db: &dyn salsa::Database,
-    diagnostics: &mut Vec<Diagnostic>,
-    line_index: &LineIndex,
-    symbol_table: &SymbolTable,
-) {
+pub fn check(db: &dyn salsa::Database, diagnostics: &mut Vec<Diagnostic>, symbol_table: &SymbolTable) {
     diagnostics.extend(
         symbol_table
             .symbols
@@ -40,10 +31,8 @@ pub fn check(
                 | SymbolKind::TagRef => !symbol_table.resolved.contains_key(&symbol.key),
             })
             .map(|symbol| Diagnostic {
-                range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
-                severity: Some(DiagnosticSeverity::Error),
-                source: Some("wat".into()),
-                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                range: symbol.key.text_range(),
+                code: DIAGNOSTIC_CODE.into(),
                 message: format!("cannot find {} `{}` in this scope", symbol.kind, symbol.idx.render(db)),
                 ..Default::default()
             }),

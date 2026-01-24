@@ -58,6 +58,56 @@ expression: response
     {
       "range": {
         "start": {
+          "line": 19,
+          "character": 4
+        },
+        "end": {
+          "line": 19,
+          "character": 26
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null $func), i32, (ref null $func), i32, i32], found [(ref $dst_array), i32, (ref $src_array), i32, i32]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 16,
+                "character": 4
+              },
+              "end": {
+                "line": 16,
+                "character": 15
+              }
+            }
+          },
+          "message": "expected type `(ref null $func)`, found `(ref $src_array)`"
+        },
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 14,
+                "character": 4
+              },
+              "end": {
+                "line": 14,
+                "character": 15
+              }
+            }
+          },
+          "message": "expected type `(ref null $func)`, found `(ref $dst_array)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
           "line": 12,
           "character": 15
         },
@@ -120,56 +170,6 @@ expression: response
             }
           },
           "message": "struct type defined here"
-        }
-      ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 19,
-          "character": 4
-        },
-        "end": {
-          "line": 19,
-          "character": 26
-        }
-      },
-      "severity": 1,
-      "code": "type-check",
-      "source": "wat",
-      "message": "expected types [(ref null $func), i32, (ref null $func), i32, i32], found [(ref $dst_array), i32, (ref $src_array), i32, i32]",
-      "relatedInformation": [
-        {
-          "location": {
-            "uri": "untitled:test",
-            "range": {
-              "start": {
-                "line": 16,
-                "character": 4
-              },
-              "end": {
-                "line": 16,
-                "character": 15
-              }
-            }
-          },
-          "message": "expected type `(ref null $func)`, found `(ref $src_array)`"
-        },
-        {
-          "location": {
-            "uri": "untitled:test",
-            "range": {
-              "start": {
-                "line": 14,
-                "character": 4
-              },
-              "end": {
-                "line": 14,
-                "character": 15
-              }
-            }
-          },
-          "message": "expected type `(ref null $func)`, found `(ref $dst_array)`"
         }
       ]
     },

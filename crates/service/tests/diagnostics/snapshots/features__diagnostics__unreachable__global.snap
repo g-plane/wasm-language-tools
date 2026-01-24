@@ -8,6 +8,22 @@ expression: response
     {
       "range": {
         "start": {
+          "line": 3,
+          "character": 4
+        },
+        "end": {
+          "line": 4,
+          "character": 15
+        }
+      },
+      "severity": 1,
+      "code": "const-expr",
+      "source": "wat",
+      "message": "expression must be constant"
+    },
+    {
+      "range": {
+        "start": {
           "line": 4,
           "character": 4
         },
@@ -23,22 +39,6 @@ expression: response
       "tags": [
         1
       ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 3,
-          "character": 4
-        },
-        "end": {
-          "line": 4,
-          "character": 15
-        }
-      },
-      "severity": 1,
-      "code": "const-expr",
-      "source": "wat",
-      "message": "expression must be constant"
     }
   ]
 }

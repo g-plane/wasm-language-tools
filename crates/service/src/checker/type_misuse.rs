@@ -1,14 +1,12 @@
+use super::{Diagnostic, RelatedInformation};
 use crate::{
     binder::{Symbol, SymbolKey, SymbolTable},
     document::Document,
-    helpers,
     types_analyzer::{
         CompositeType, DefTypes, FieldType, HeapType, OperandType, RefType, ValType, get_def_types, get_func_sig,
         get_type_use_sig, resolve_br_types,
     },
 };
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
 use rowan::{
     Language, NodeOrToken,
     ast::{AstNode, support},
@@ -21,7 +19,6 @@ pub fn check(
     db: &dyn salsa::Database,
     diagnostics: &mut Vec<Diagnostic>,
     document: Document,
-    line_index: &LineIndex,
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
@@ -31,15 +28,7 @@ pub fn check(
     let instr_name = instr_name.text();
     match instr_name.split_once('.') {
         Some(("struct", _)) => {
-            if let Some(diagnostic) = check_type_matches(
-                "struct",
-                &node.first_child()?,
-                db,
-                document,
-                line_index,
-                symbol_table,
-                def_types,
-            ) {
+            if let Some(diagnostic) = check_type_matches("struct", &node.first_child()?, db, symbol_table, def_types) {
                 diagnostics.push(diagnostic);
             }
         }
@@ -49,15 +38,11 @@ pub fn check(
             let dst_symbol = symbol_table.find_def(SymbolKey::new(&dst))?;
             let dst_type = match &def_types.get(&dst_symbol.key)?.comp {
                 CompositeType::Func(..) => {
-                    diagnostics.push(build_diagnostic(
-                        "array", "func", &dst, dst_symbol, db, document, line_index,
-                    ));
+                    diagnostics.push(build_diagnostic("array", "func", &dst, dst_symbol, db));
                     None
                 }
                 CompositeType::Struct(..) => {
-                    diagnostics.push(build_diagnostic(
-                        "array", "struct", &dst, dst_symbol, db, document, line_index,
-                    ));
+                    diagnostics.push(build_diagnostic("array", "struct", &dst, dst_symbol, db));
                     None
                 }
                 CompositeType::Array(field_type) => field_type.as_ref(),
@@ -67,15 +52,11 @@ pub fn check(
             let src_symbol = symbol_table.find_def(SymbolKey::new(&src))?;
             let src_type = match &def_types.get(&src_symbol.key)?.comp {
                 CompositeType::Func(..) => {
-                    diagnostics.push(build_diagnostic(
-                        "array", "func", &src, src_symbol, db, document, line_index,
-                    ));
+                    diagnostics.push(build_diagnostic("array", "func", &src, src_symbol, db));
                     None
                 }
                 CompositeType::Struct(..) => {
-                    diagnostics.push(build_diagnostic(
-                        "array", "struct", &src, src_symbol, db, document, line_index,
-                    ));
+                    diagnostics.push(build_diagnostic("array", "struct", &src, src_symbol, db));
                     None
                 }
                 CompositeType::Array(field_type) => field_type.as_ref(),
@@ -86,28 +67,20 @@ pub fn check(
                     if !src.matches(dst, db, document, module_id) =>
                 {
                     diagnostics.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
-                        severity: Some(DiagnosticSeverity::Error),
-                        source: Some("wat".into()),
-                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        range: node.text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
                         message: format!(
                             "destination array type `{}` doesn't match source array type `{}`",
                             dst_symbol.idx.render(db),
                             src_symbol.idx.render(db),
                         ),
                         related_information: Some(vec![
-                            DiagnosticRelatedInformation {
-                                location: Location {
-                                    uri: document.uri(db).raw(db),
-                                    range: helpers::rowan_range_to_lsp_range(line_index, dst_symbol.key.text_range()),
-                                },
+                            RelatedInformation {
+                                range: dst_symbol.key.text_range(),
                                 message: "destination array type defined here".into(),
                             },
-                            DiagnosticRelatedInformation {
-                                location: Location {
-                                    uri: document.uri(db).raw(db),
-                                    range: helpers::rowan_range_to_lsp_range(line_index, src_symbol.key.text_range()),
-                                },
+                            RelatedInformation {
+                                range: src_symbol.key.text_range(),
                                 message: "source array type defined here".into(),
                             },
                         ]),
@@ -118,29 +91,14 @@ pub fn check(
             }
         }
         Some(("array", _)) => {
-            if let Some(diagnostic) = check_type_matches(
-                "array",
-                &node.first_child()?,
-                db,
-                document,
-                line_index,
-                symbol_table,
-                def_types,
-            ) {
+            if let Some(diagnostic) = check_type_matches("array", &node.first_child()?, db, symbol_table, def_types) {
                 diagnostics.push(diagnostic);
             }
         }
         _ => match instr_name {
             "call_ref" => {
-                if let Some(diagnostic) = check_type_matches(
-                    "func",
-                    &node.first_child()?,
-                    db,
-                    document,
-                    line_index,
-                    symbol_table,
-                    def_types,
-                ) {
+                if let Some(diagnostic) = check_type_matches("func", &node.first_child()?, db, symbol_table, def_types)
+                {
                     diagnostics.push(diagnostic);
                 }
             }
@@ -152,10 +110,8 @@ pub fn check(
                     rt_label
                 } else {
                     diagnostics.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(line_index, label.syntax().text_range()),
-                        severity: Some(DiagnosticSeverity::Error),
-                        source: Some("wat".into()),
-                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        range: label.syntax().text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
                         message: "the last type of this label must be a ref type".into(),
                         ..Default::default()
                     });
@@ -167,20 +123,15 @@ pub fn check(
                 let rt2 = RefType::from_green(&rt2_node.ref_type()?.syntax().green(), db)?;
                 if !rt2.matches(&rt1, db, document, module_id) {
                     diagnostics.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(line_index, rt2_node.syntax().text_range()),
-                        severity: Some(DiagnosticSeverity::Error),
-                        source: Some("wat".into()),
-                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        range: rt2_node.syntax().text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
                         message: format!(
                             "ref type `{}` doesn't match the ref type `{}`",
                             rt2.render(db),
                             rt1.render(db),
                         ),
-                        related_information: Some(vec![DiagnosticRelatedInformation {
-                            location: Location {
-                                uri: document.uri(db).raw(db),
-                                range: helpers::rowan_range_to_lsp_range(line_index, rt1_node.syntax().text_range()),
-                            },
+                        related_information: Some(vec![RelatedInformation {
+                            range: rt1_node.syntax().text_range(),
                             message: "should match this ref type".into(),
                         }]),
                         ..Default::default()
@@ -188,20 +139,15 @@ pub fn check(
                 }
                 if !rt2.matches(rt_label, db, document, module_id) {
                     diagnostics.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(line_index, rt2_node.syntax().text_range()),
-                        severity: Some(DiagnosticSeverity::Error),
-                        source: Some("wat".into()),
-                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        range: rt2_node.syntax().text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
                         message: format!(
                             "ref type `{}` doesn't match the ref type `{}`",
                             rt2.render(db),
                             rt_label.render(db),
                         ),
-                        related_information: Some(vec![DiagnosticRelatedInformation {
-                            location: Location {
-                                uri: document.uri(db).raw(db),
-                                range: helpers::rowan_range_to_lsp_range(line_index, label.syntax().text_range()),
-                            },
+                        related_information: Some(vec![RelatedInformation {
+                            range: label.syntax().text_range(),
                             message: "should match the last ref type in the result type of this label".into(),
                         }]),
                         ..Default::default()
@@ -216,10 +162,8 @@ pub fn check(
                     rt_label
                 } else {
                     diagnostics.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(line_index, label.syntax().text_range()),
-                        severity: Some(DiagnosticSeverity::Error),
-                        source: Some("wat".into()),
-                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        range: label.syntax().text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
                         message: "the last type of this label must be a ref type".into(),
                         ..Default::default()
                     });
@@ -231,20 +175,15 @@ pub fn check(
                 let rt2 = RefType::from_green(&rt2_node.ref_type()?.syntax().green(), db)?;
                 if !rt2.matches(&rt1, db, document, module_id) {
                     diagnostics.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(line_index, rt2_node.syntax().text_range()),
-                        severity: Some(DiagnosticSeverity::Error),
-                        source: Some("wat".into()),
-                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        range: rt2_node.syntax().text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
                         message: format!(
                             "ref type `{}` doesn't match the ref type `{}`",
                             rt2.render(db),
                             rt1.render(db),
                         ),
-                        related_information: Some(vec![DiagnosticRelatedInformation {
-                            location: Location {
-                                uri: document.uri(db).raw(db),
-                                range: helpers::rowan_range_to_lsp_range(line_index, rt1_node.syntax().text_range()),
-                            },
+                        related_information: Some(vec![RelatedInformation {
+                            range: rt1_node.syntax().text_range(),
                             message: "should match this ref type".into(),
                         }]),
                         ..Default::default()
@@ -253,20 +192,15 @@ pub fn check(
                 let rt_diff = rt1.diff(&rt2);
                 if !rt_diff.matches(rt_label, db, document, module_id) {
                     diagnostics.push(Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(line_index, node.text_range()),
-                        severity: Some(DiagnosticSeverity::Error),
-                        source: Some("wat".into()),
-                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        range: node.text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
                         message: format!(
                             "type difference between given two ref types `{}` doesn't match the ref type `{}`",
                             rt_diff.render(db),
                             rt_label.render(db),
                         ),
-                        related_information: Some(vec![DiagnosticRelatedInformation {
-                            location: Location {
-                                uri: document.uri(db).raw(db),
-                                range: helpers::rowan_range_to_lsp_range(line_index, label.syntax().text_range()),
-                            },
+                        related_information: Some(vec![RelatedInformation {
+                            range: label.syntax().text_range(),
                             message: "should match the last ref type in the result type of this label".into(),
                         }]),
                         ..Default::default()
@@ -274,8 +208,7 @@ pub fn check(
                 }
             }
             "call_indirect" => {
-                if let Some(diagnostic) = check_table_ref_type(db, document, line_index, symbol_table, module_id, node)
-                {
+                if let Some(diagnostic) = check_table_ref_type(db, document, symbol_table, module_id, node) {
                     diagnostics.push(diagnostic);
                 }
             }
@@ -285,30 +218,15 @@ pub fn check(
                         .find_def(SymbolKey::new(&immediate))
                         .map(|func| get_func_sig(db, document, *func.key, &func.green))
                         .and_then(|sig| {
-                            check_return_call_result_type(
-                                db,
-                                document,
-                                line_index,
-                                module_id,
-                                node,
-                                &immediate,
-                                &sig.results,
-                            )
+                            check_return_call_result_type(db, document, module_id, node, &immediate, &sig.results)
                         })
                 {
                     diagnostics.push(diagnostic);
                 }
             }
             "return_call_ref" => {
-                if let Some(diagnostic) = check_type_matches(
-                    "func",
-                    &node.first_child()?,
-                    db,
-                    document,
-                    line_index,
-                    symbol_table,
-                    def_types,
-                ) {
+                if let Some(diagnostic) = check_type_matches("func", &node.first_child()?, db, symbol_table, def_types)
+                {
                     diagnostics.push(diagnostic);
                 }
                 if let Some(immediate) = node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
@@ -318,23 +236,14 @@ pub fn check(
                         .and_then(|key| def_types.get(key))
                         .and_then(|def_type| def_type.comp.as_func())
                         .and_then(|sig| {
-                            check_return_call_result_type(
-                                db,
-                                document,
-                                line_index,
-                                module_id,
-                                node,
-                                &immediate,
-                                &sig.results,
-                            )
+                            check_return_call_result_type(db, document, module_id, node, &immediate, &sig.results)
                         })
                 {
                     diagnostics.push(diagnostic);
                 }
             }
             "return_call_indirect" => {
-                if let Some(diagnostic) = check_table_ref_type(db, document, line_index, symbol_table, module_id, node)
-                {
+                if let Some(diagnostic) = check_table_ref_type(db, document, symbol_table, module_id, node) {
                     diagnostics.push(diagnostic);
                 }
                 if let Some(type_use) = node
@@ -343,7 +252,6 @@ pub fn check(
                     && let Some(diagnostic) = check_return_call_result_type(
                         db,
                         document,
-                        line_index,
                         module_id,
                         node,
                         &type_use,
@@ -363,8 +271,6 @@ fn check_type_matches(
     expected_kind: &'static str,
     ref_node: &SyntaxNode,
     db: &dyn salsa::Database,
-    document: Document,
-    line_index: &LineIndex,
     symbol_table: &SymbolTable,
     def_types: &DefTypes,
 ) -> Option<Diagnostic> {
@@ -378,22 +284,13 @@ fn check_type_matches(
     if kind == expected_kind {
         None
     } else {
-        Some(build_diagnostic(
-            expected_kind,
-            kind,
-            ref_node,
-            def_symbol,
-            db,
-            document,
-            line_index,
-        ))
+        Some(build_diagnostic(expected_kind, kind, ref_node, def_symbol, db))
     }
 }
 
 fn check_table_ref_type(
     db: &dyn salsa::Database,
     document: Document,
-    line_index: &LineIndex,
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
@@ -444,10 +341,8 @@ fn check_table_ref_type(
             })
     {
         Some(Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(line_index, ref_key.text_range()),
-            severity: Some(DiagnosticSeverity::Error),
-            source: Some("wat".into()),
-            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+            range: ref_key.text_range(),
+            code: DIAGNOSTIC_CODE.into(),
             message: format!(
                 "ref type of table `{}` must match `(ref null func)`",
                 ref_symbol.idx.render(db),
@@ -462,7 +357,6 @@ fn check_table_ref_type(
 fn check_return_call_result_type(
     db: &dyn salsa::Database,
     document: Document,
-    line_index: &LineIndex,
     module_id: u32,
     instr: &SyntaxNode,
     reported_node: &SyntaxNode,
@@ -481,10 +375,8 @@ fn check_return_call_result_type(
         None
     } else {
         Some(Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(line_index, reported_node.text_range()),
-            severity: Some(DiagnosticSeverity::Error),
-            source: Some("wat".into()),
-            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+            range: reported_node.text_range(),
+            code: DIAGNOSTIC_CODE.into(),
             message: "this result type must match the result type of current function".into(),
             ..Default::default()
         })
@@ -497,25 +389,18 @@ fn build_diagnostic(
     ref_node: &SyntaxNode,
     def_symbol: &Symbol,
     db: &dyn salsa::Database,
-    document: Document,
-    line_index: &LineIndex,
 ) -> Diagnostic {
     debug_assert!(matches!(expected_kind, "func" | "struct" | "array"));
     debug_assert!(matches!(actual_kind, "func" | "struct" | "array"));
     Diagnostic {
-        range: helpers::rowan_range_to_lsp_range(line_index, ref_node.text_range()),
-        severity: Some(DiagnosticSeverity::Error),
-        source: Some("wat".into()),
-        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+        range: ref_node.text_range(),
+        code: DIAGNOSTIC_CODE.into(),
         message: format!(
             "expected type is {expected_kind}, but type of `{}` is {actual_kind}",
             def_symbol.idx.render(db)
         ),
-        related_information: Some(vec![DiagnosticRelatedInformation {
-            location: Location {
-                uri: document.uri(db).raw(db),
-                range: helpers::rowan_range_to_lsp_range(line_index, def_symbol.key.text_range()),
-            },
+        related_information: Some(vec![RelatedInformation {
+            range: def_symbol.key.text_range(),
             message: format!("{actual_kind} type defined here"),
         }]),
         ..Default::default()

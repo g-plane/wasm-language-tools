@@ -1,11 +1,11 @@
+use super::Diagnostic;
 use crate::{
     binder::{SymbolKind, SymbolTable},
     config::LintLevel,
     document::Document,
-    helpers, mutability,
+    mutability,
 };
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, DiagnosticTag, Union2};
+use lspt::{DiagnosticSeverity, DiagnosticTag};
 
 const DIAGNOSTIC_CODE: &str = "needless-mut";
 
@@ -14,7 +14,6 @@ pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     lint_level: LintLevel,
     document: Document,
-    line_index: &LineIndex,
     symbol_table: &SymbolTable,
 ) {
     let severity = match lint_level {
@@ -45,10 +44,9 @@ pub fn check(
                     _ => unreachable!(),
                 };
                 Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(line_index, keyword_range),
-                    severity: Some(severity),
-                    source: Some("wat".into()),
-                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                    range: keyword_range,
+                    severity,
+                    code: DIAGNOSTIC_CODE.into(),
                     message: format!("{kind} `{}` is unnecessarily mutable", symbol.idx.render(db)),
                     tags: Some(vec![DiagnosticTag::Unnecessary]),
                     ..Default::default()

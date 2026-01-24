@@ -9,22 +9,6 @@ expression: response
       "range": {
         "start": {
           "line": 4,
-          "character": 15
-        },
-        "end": {
-          "line": 4,
-          "character": 16
-        }
-      },
-      "severity": 1,
-      "code": "type-check",
-      "source": "wat",
-      "message": "expected types [i32], found [i32, i32] at the end"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 4,
           "character": 4
         },
         "end": {
@@ -54,6 +38,22 @@ expression: response
           "message": "import declared here"
         }
       ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 15
+        },
+        "end": {
+          "line": 4,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32], found [i32, i32] at the end"
     }
   ]
 }

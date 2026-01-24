@@ -8,22 +8,6 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 4,
-          "character": 19
-        },
-        "end": {
-          "line": 4,
-          "character": 20
-        }
-      },
-      "severity": 1,
-      "code": "syntax/then-block",
-      "source": "wat",
-      "message": "syntax error: expected then block"
-    },
-    {
-      "range": {
-        "start": {
           "line": 7,
           "character": 7
         },
@@ -52,6 +36,22 @@ expression: response
       "code": "syntax",
       "source": "wat",
       "message": "syntax error: unexpected token"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 19
+        },
+        "end": {
+          "line": 4,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "syntax/then-block",
+      "source": "wat",
+      "message": "syntax error: expected then block"
     },
     {
       "range": {

@@ -1,7 +1,6 @@
-use crate::{binder::SymbolTable, document::Document, helpers, types_analyzer::resolve_br_types};
+use super::Diagnostic;
+use crate::{binder::SymbolTable, document::Document, types_analyzer::resolve_br_types};
 use itertools::Itertools;
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use rowan::ast::AstNode;
 use wat_syntax::{SyntaxNode, ast::PlainInstr};
 
@@ -11,7 +10,6 @@ pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
     document: Document,
-    line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) -> Option<()> {
@@ -28,10 +26,8 @@ pub fn check(
         let received = resolve_br_types(db, document, symbol_table, &immediate);
         if received != expected {
             Some(Diagnostic {
-                range: helpers::rowan_range_to_lsp_range(line_index, immediate.syntax().text_range()),
-                severity: Some(DiagnosticSeverity::Error),
-                source: Some("wat".into()),
-                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                range: immediate.syntax().text_range(),
+                code: DIAGNOSTIC_CODE.into(),
                 message: format!(
                     "type mismatch in `br_table`: expected [{}], found [{}]",
                     expected.iter().map(|ty| ty.render(db)).join(", "),

@@ -1,11 +1,9 @@
+use super::{Diagnostic, RelatedInformation};
 use crate::{
     binder::{Symbol, SymbolKind, SymbolTable},
     document::Document,
-    exports, helpers,
-    uri::InternUri,
+    exports,
 };
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
 use rowan::{TextRange, ast::support};
 use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
@@ -15,9 +13,7 @@ const DIAGNOSTIC_CODE: &str = "duplicated-names";
 pub fn check(
     db: &dyn salsa::Database,
     diagnostics: &mut Vec<Diagnostic>,
-    uri: InternUri,
     document: Document,
-    line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
 ) {
@@ -52,20 +48,15 @@ pub fn check(
             .flat_map(|((name, _, kind), symbols)| {
                 let name = name.ident(db);
                 symbols.iter().map(move |symbol| Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(line_index, get_ident_range(symbol, root)),
-                    severity: Some(DiagnosticSeverity::Error),
-                    source: Some("wat".into()),
-                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                    range: get_ident_range(symbol, root),
+                    code: DIAGNOSTIC_CODE.into(),
                     message: format!("duplicated {kind} name `{name}` in this scope"),
                     related_information: Some(
                         symbols
                             .iter()
                             .filter(|other| *other != symbol)
-                            .map(|symbol| DiagnosticRelatedInformation {
-                                location: Location {
-                                    uri: uri.raw(db),
-                                    range: helpers::rowan_range_to_lsp_range(line_index, get_ident_range(symbol, root)),
-                                },
+                            .map(|symbol| RelatedInformation {
+                                range: get_ident_range(symbol, root),
                                 message: format!("already defined here as `{name}`"),
                             })
                             .collect(),
@@ -90,20 +81,15 @@ pub fn check(
                 .flat_map(|(name, ranges)| {
                     let name = &name[1..name.len() - 1];
                     ranges.iter().map(move |range| Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(line_index, *range),
-                        severity: Some(DiagnosticSeverity::Error),
-                        source: Some("wat".into()),
-                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        range: *range,
+                        code: DIAGNOSTIC_CODE.into(),
                         message: format!("duplicated export `{name}` in this module"),
                         related_information: Some(
                             ranges
                                 .iter()
                                 .filter(|other| *other != range)
-                                .map(|range| DiagnosticRelatedInformation {
-                                    location: Location {
-                                        uri: uri.raw(db),
-                                        range: helpers::rowan_range_to_lsp_range(line_index, *range),
-                                    },
+                                .map(|range| RelatedInformation {
+                                    range: *range,
                                     message: format!("already exported here as `{name}`"),
                                 })
                                 .collect(),

@@ -1,11 +1,9 @@
+use super::Diagnostic;
 use crate::{
     binder::{SymbolKey, SymbolTable},
     document::Document,
-    helpers,
     types_analyzer::{self, CompositeType},
 };
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr};
 
 const DIAGNOSTIC_CODE: &str = "tag-type";
@@ -14,7 +12,6 @@ pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
     document: Document,
-    line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) {
@@ -30,10 +27,8 @@ pub fn check(
             .is_some_and(|def_type| !matches!(def_type.comp, CompositeType::Func(..)))
         {
             diagnostics.push(Diagnostic {
-                range: helpers::rowan_range_to_lsp_range(line_index, index.text_range()),
-                severity: Some(DiagnosticSeverity::Error),
-                source: Some("wat".into()),
-                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                range: index.text_range(),
+                code: DIAGNOSTIC_CODE.into(),
                 message: "tag type must be function type".into(),
                 ..Default::default()
             });
@@ -42,10 +37,8 @@ pub fn check(
     let sig = types_analyzer::get_type_use_sig(db, document, SyntaxNodePtr::new(&type_use), &type_use.green());
     if !sig.results.is_empty() {
         diagnostics.push(Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(line_index, type_use.text_range()),
-            severity: Some(DiagnosticSeverity::Error),
-            source: Some("wat".into()),
-            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+            range: type_use.text_range(),
+            code: DIAGNOSTIC_CODE.into(),
             message: "tag type's result type must be empty".into(),
             ..Default::default()
         });

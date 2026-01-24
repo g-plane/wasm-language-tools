@@ -8,38 +8,6 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 18,
-          "character": 16
-        },
-        "end": {
-          "line": 18,
-          "character": 18
-        }
-      },
-      "severity": 1,
-      "code": "subtyping",
-      "source": "wat",
-      "message": "type of `$h` doesn't match its super type `$g`"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 14,
-          "character": 16
-        },
-        "end": {
-          "line": 14,
-          "character": 18
-        }
-      },
-      "severity": 1,
-      "code": "subtyping",
-      "source": "wat",
-      "message": "type of `$f` doesn't match its super type `$e`"
-    },
-    {
-      "range": {
-        "start": {
           "line": 5,
           "character": 16
         },
@@ -68,6 +36,38 @@ expression: response
       "code": "subtyping",
       "source": "wat",
       "message": "type of `$d` doesn't match its super type `$c`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 14,
+          "character": 16
+        },
+        "end": {
+          "line": 14,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "subtyping",
+      "source": "wat",
+      "message": "type of `$f` doesn't match its super type `$e`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 18,
+          "character": 16
+        },
+        "end": {
+          "line": 18,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "subtyping",
+      "source": "wat",
+      "message": "type of `$h` doesn't match its super type `$g`"
     }
   ]
 }

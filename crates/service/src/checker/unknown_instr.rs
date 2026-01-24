@@ -1,12 +1,11 @@
+use super::Diagnostic;
 use crate::{data_set::INSTR_NAMES, helpers};
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use rowan::ast::support;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "unknown-instr";
 
-pub fn check(line_index: &LineIndex, node: &SyntaxNode) -> Option<Diagnostic> {
+pub fn check(node: &SyntaxNode) -> Option<Diagnostic> {
     let token = support::token(node, SyntaxKind::INSTR_NAME)?;
     let instr_name = token.text();
     if INSTR_NAMES.contains(&instr_name) {
@@ -18,10 +17,8 @@ pub fn check(line_index: &LineIndex, node: &SyntaxNode) -> Option<Diagnostic> {
             format!("unknown instruction `{instr_name}`")
         };
         Some(Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(line_index, token.text_range()),
-            severity: Some(DiagnosticSeverity::Error),
-            source: Some("wat".into()),
-            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+            range: token.text_range(),
+            code: DIAGNOSTIC_CODE.into(),
             message,
             ..Default::default()
         })

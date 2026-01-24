@@ -1,11 +1,9 @@
+use super::{Diagnostic, RelatedInformation};
 use crate::{
     binder::{SymbolKey, SymbolTable},
     config::LintLevel,
-    helpers,
-    uri::InternUri,
 };
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, DiagnosticTag, Location, Union2};
+use lspt::{DiagnosticSeverity, DiagnosticTag};
 use rowan::ast::{AstNode, support};
 use rustc_hash::FxHashMap;
 use wat_syntax::{
@@ -15,15 +13,7 @@ use wat_syntax::{
 
 const DIAGNOSTIC_CODE: &str = "useless-catch";
 
-pub fn check(
-    db: &dyn salsa::Database,
-    diagnostics: &mut Vec<Diagnostic>,
-    lint_level: LintLevel,
-    uri: InternUri,
-    line_index: &LineIndex,
-    symbol_table: &SymbolTable,
-    node: &SyntaxNode,
-) {
+pub fn check(diagnostics: &mut Vec<Diagnostic>, lint_level: LintLevel, symbol_table: &SymbolTable, node: &SyntaxNode) {
     let severity = match lint_level {
         LintLevel::Allow => return,
         LintLevel::Hint => DiagnosticSeverity::Hint,
@@ -55,19 +45,12 @@ pub fn check(
                         return;
                     }
                 };
-                diagnostics.push(build_diagnostic(catch.syntax(), matched, line_index, uri, db, severity));
+                diagnostics.push(build_diagnostic(catch.syntax(), matched, severity));
             }
         }
         Cat::CatchAll(catch_all) => {
             if let Some(matched) = &default_match {
-                diagnostics.push(build_diagnostic(
-                    catch_all.syntax(),
-                    matched.syntax(),
-                    line_index,
-                    uri,
-                    db,
-                    severity,
-                ));
+                diagnostics.push(build_diagnostic(catch_all.syntax(), matched.syntax(), severity));
             } else {
                 default_match = Some(catch_all);
             }
@@ -75,26 +58,15 @@ pub fn check(
     });
 }
 
-fn build_diagnostic(
-    reported: &SyntaxNode,
-    related: &SyntaxNode,
-    line_index: &LineIndex,
-    uri: InternUri,
-    db: &dyn salsa::Database,
-    severity: DiagnosticSeverity,
-) -> Diagnostic {
+fn build_diagnostic(reported: &SyntaxNode, related: &SyntaxNode, severity: DiagnosticSeverity) -> Diagnostic {
     Diagnostic {
-        range: helpers::rowan_range_to_lsp_range(line_index, reported.text_range()),
-        severity: Some(severity),
-        source: Some("wat".into()),
-        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+        range: reported.text_range(),
+        severity,
+        code: DIAGNOSTIC_CODE.into(),
         message: "this catch clause will never be matched".into(),
         tags: Some(vec![DiagnosticTag::Unnecessary]),
-        related_information: Some(vec![DiagnosticRelatedInformation {
-            location: Location {
-                uri: uri.raw(db),
-                range: helpers::rowan_range_to_lsp_range(line_index, related.text_range()),
-            },
+        related_information: Some(vec![RelatedInformation {
+            range: related.text_range(),
             message: "catch clause already matched here".into(),
         }]),
         ..Default::default()

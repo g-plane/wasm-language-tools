@@ -72,6 +72,54 @@ expression: response
     {
       "range": {
         "start": {
+          "line": 15,
+          "character": 41
+        },
+        "end": {
+          "line": 15,
+          "character": 42
+        }
+      },
+      "severity": 1,
+      "code": "catch-type",
+      "source": "wat",
+      "message": "result type [i64, (ref exn)] should match result type of block `0`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 22,
+          "character": 27
+        },
+        "end": {
+          "line": 22,
+          "character": 29
+        }
+      },
+      "severity": 1,
+      "code": "catch-type",
+      "source": "wat",
+      "message": "result type [(ref null $t)] should match result type of block `$l`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 26,
+          "character": 31
+        },
+        "end": {
+          "line": 26,
+          "character": 33
+        }
+      },
+      "severity": 1,
+      "code": "catch-type",
+      "source": "wat",
+      "message": "result type [(ref null $t), (ref exn)] should match result type of block `$l`"
+    },
+    {
+      "range": {
+        "start": {
           "line": 16,
           "character": 21
         },
@@ -106,38 +154,6 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 15,
-          "character": 41
-        },
-        "end": {
-          "line": 15,
-          "character": 42
-        }
-      },
-      "severity": 1,
-      "code": "catch-type",
-      "source": "wat",
-      "message": "result type [i64, (ref exn)] should match result type of block `0`"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 22,
-          "character": 27
-        },
-        "end": {
-          "line": 22,
-          "character": 29
-        }
-      },
-      "severity": 1,
-      "code": "catch-type",
-      "source": "wat",
-      "message": "result type [(ref null $t)] should match result type of block `$l`"
-    },
-    {
-      "range": {
-        "start": {
           "line": 27,
           "character": 20
         },
@@ -168,22 +184,6 @@ expression: response
           "message": "expected type `(ref $t)`, found `(ref exn)`"
         }
       ]
-    },
-    {
-      "range": {
-        "start": {
-          "line": 26,
-          "character": 31
-        },
-        "end": {
-          "line": 26,
-          "character": 33
-        }
-      },
-      "severity": 1,
-      "code": "catch-type",
-      "source": "wat",
-      "message": "result type [(ref null $t), (ref exn)] should match result type of block `$l`"
     }
   ]
 }

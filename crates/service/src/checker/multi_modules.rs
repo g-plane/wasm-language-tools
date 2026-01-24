@@ -1,11 +1,11 @@
-use crate::{config::LintLevel, helpers};
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, Union2};
+use super::Diagnostic;
+use crate::config::LintLevel;
+use lspt::DiagnosticSeverity;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "multiple-modules";
 
-pub fn check(diagnostics: &mut Vec<Diagnostic>, lint_level: LintLevel, line_index: &LineIndex, root: &SyntaxNode) {
+pub fn check(diagnostics: &mut Vec<Diagnostic>, lint_level: LintLevel, root: &SyntaxNode) {
     let severity = match lint_level {
         LintLevel::Allow => return,
         LintLevel::Hint => DiagnosticSeverity::Hint,
@@ -17,10 +17,9 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, lint_level: LintLevel, line_inde
             .filter(|child| child.kind() == SyntaxKind::MODULE)
             .skip(1)
             .map(|module| Diagnostic {
-                range: helpers::rowan_range_to_lsp_range(line_index, module.text_range()),
-                severity: Some(severity),
-                source: Some("wat".into()),
-                code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                range: module.text_range(),
+                severity,
+                code: DIAGNOSTIC_CODE.into(),
                 message: "only one module is allowed".into(),
                 ..Default::default()
             }),

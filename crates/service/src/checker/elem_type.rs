@@ -1,11 +1,9 @@
+use super::{Diagnostic, RelatedInformation};
 use crate::{
     binder::{SymbolKey, SymbolTable},
     document::Document,
-    helpers,
     types_analyzer::RefType,
 };
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
 use rowan::ast::AstNode;
 use wat_syntax::{
     SyntaxNode,
@@ -17,7 +15,6 @@ const DIAGNOSTIC_CODE: &str = "elem-type";
 pub fn check(
     db: &dyn salsa::Database,
     document: Document,
-    line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
     module_id: u32,
@@ -38,20 +35,15 @@ pub fn check(
         None
     } else {
         Some(Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(line_index, elem_ref_type_node.syntax().text_range()),
-            severity: Some(DiagnosticSeverity::Error),
-            source: Some("wat".into()),
-            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+            range: elem_ref_type_node.syntax().text_range(),
+            code: DIAGNOSTIC_CODE.into(),
             message: format!(
                 "ref type `{}` doesn't match the table's ref type `{}`",
                 elem_ref_type.render(db),
                 table_ref_type.render(db),
             ),
-            related_information: Some(vec![DiagnosticRelatedInformation {
-                location: Location {
-                    uri: document.uri(db).raw(db),
-                    range: helpers::rowan_range_to_lsp_range(line_index, table_ref_type_node.syntax().text_range()),
-                },
+            related_information: Some(vec![RelatedInformation {
+                range: table_ref_type_node.syntax().text_range(),
                 message: "table's ref type declared here".into(),
             }]),
             ..Default::default()

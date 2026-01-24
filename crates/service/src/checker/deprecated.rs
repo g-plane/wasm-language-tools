@@ -1,12 +1,11 @@
+use super::Diagnostic;
 use crate::{
     binder::{SymbolKind, SymbolTable},
     config::LintLevel,
     deprecation,
     document::Document,
-    helpers,
 };
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, DiagnosticTag, Union2};
+use lspt::{DiagnosticSeverity, DiagnosticTag};
 
 const DIAGNOSTIC_CODE: &str = "deprecated";
 
@@ -15,7 +14,6 @@ pub fn check(
     db: &dyn salsa::Database,
     document: Document,
     lint_level: LintLevel,
-    line_index: &LineIndex,
     symbol_table: &SymbolTable,
 ) {
     let severity = match lint_level {
@@ -45,10 +43,9 @@ pub fn check(
                 .get(&symbol.key)
                 .and_then(|def_key| deprecation.get(def_key))
                 .map(|reason| Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
-                    severity: Some(severity),
-                    source: Some("wat".into()),
-                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                    range: symbol.key.text_range(),
+                    severity,
+                    code: DIAGNOSTIC_CODE.into(),
                     message: if let Some(reason) = reason {
                         format!("{} `{}` is deprecated: {reason}", symbol.kind, symbol.idx.render(db))
                     } else {

@@ -1,10 +1,9 @@
+use super::Diagnostic;
 use crate::{
     binder::{SymbolKey, SymbolTable},
     document::Document,
-    helpers, types_analyzer,
+    types_analyzer,
 };
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use rowan::ast::{AstNode, support};
 use wat_syntax::{SyntaxNode, ast::Index};
 
@@ -13,7 +12,6 @@ const DIAGNOSTIC_CODE: &str = "start";
 pub fn check(
     db: &dyn salsa::Database,
     document: Document,
-    line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) -> Option<Diagnostic> {
@@ -25,10 +23,8 @@ pub fn check(
         .is_some_and(|sig| !sig.params.is_empty() || !sig.results.is_empty())
     {
         Some(Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(line_index, index.text_range()),
-            severity: Some(DiagnosticSeverity::Error),
-            source: Some("wat".into()),
-            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+            range: index.text_range(),
+            code: DIAGNOSTIC_CODE.into(),
             message: "start function must be type of [] -> []".into(),
             ..Default::default()
         })

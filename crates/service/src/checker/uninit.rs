@@ -1,3 +1,4 @@
+use super::Diagnostic;
 use crate::{
     binder::{Symbol, SymbolKey, SymbolKind, SymbolTable},
     cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeKind},
@@ -6,8 +7,6 @@ use crate::{
     idx::Idx,
     types_analyzer,
 };
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use petgraph::graph::NodeIndex;
 use rowan::ast::{SyntaxNodePtr, support};
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -20,7 +19,6 @@ pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
     document: Document,
-    line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
@@ -65,10 +63,8 @@ pub fn check(
                 detect_uninit(bb, &mut vars, db, document, root, symbol_table)
                     .filter_map(|immediate| symbol_table.symbols.get(&SymbolKey::new(&immediate)))
                     .map(|symbol| Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
-                        severity: Some(DiagnosticSeverity::Error),
-                        source: Some("wat".into()),
-                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        range: symbol.key.text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
                         message: format!("local `{}` is read before being initialized", symbol.idx.render(db)),
                         ..Default::default()
                     }),

@@ -1,12 +1,10 @@
+use super::Diagnostic;
 use crate::{
     binder::{SymbolKey, SymbolTable},
     document::Document,
-    helpers,
     types_analyzer::{self, HeapType, RefType, ValType},
 };
 use itertools::Itertools;
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, Union2};
 use rowan::ast::AstNode;
 use wat_syntax::{SyntaxNode, ast::Cat};
 
@@ -15,7 +13,6 @@ const DIAGNOSTIC_CODE: &str = "catch-type";
 pub fn check(
     db: &dyn salsa::Database,
     document: Document,
-    line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
     module_id: u32,
@@ -59,10 +56,8 @@ pub fn check(
             .all(|(a, b)| a.matches(b, db, document, module_id))
     {
         Some(Diagnostic {
-            range: helpers::rowan_range_to_lsp_range(line_index, label_index.syntax().text_range()),
-            severity: Some(DiagnosticSeverity::Error),
-            source: Some("wat".into()),
-            code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+            range: label_index.syntax().text_range(),
+            code: DIAGNOSTIC_CODE.into(),
             message: format!(
                 "result type [{}] should match result type of block `{}`",
                 results.iter().map(|ty| ty.render(db)).join(", "),

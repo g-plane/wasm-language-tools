@@ -1,12 +1,10 @@
+use super::{Diagnostic, RelatedInformation};
 use crate::{
     LintLevel,
     binder::{Symbol, SymbolKind, SymbolTable},
-    helpers,
     idx::Idx,
-    uri::InternUri,
 };
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
+use lspt::DiagnosticSeverity;
 use rowan::{TextRange, ast::support};
 use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
@@ -17,8 +15,6 @@ pub fn check(
     db: &dyn salsa::Database,
     diagnostics: &mut Vec<Diagnostic>,
     lint_level: LintLevel,
-    uri: InternUri,
-    line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
 ) {
@@ -60,19 +56,15 @@ pub fn check(
             .map(|((symbol, name), ranges)| {
                 let name = name.ident(db);
                 Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(line_index, get_ident_range(symbol, root)),
-                    severity: Some(severity),
-                    source: Some("wat".into()),
-                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                    range: get_ident_range(symbol, root),
+                    severity,
+                    code: DIAGNOSTIC_CODE.into(),
                     message: format!("`{name}` is shadowed"),
                     related_information: Some(
                         ranges
                             .into_iter()
-                            .map(|range| DiagnosticRelatedInformation {
-                                location: Location {
-                                    uri: uri.raw(db),
-                                    range: helpers::rowan_range_to_lsp_range(line_index, range),
-                                },
+                            .map(|range| RelatedInformation {
+                                range,
                                 message: format!("`{name}` shadowing occurs here"),
                             })
                             .collect(),

@@ -1,3 +1,4 @@
+use super::Diagnostic;
 use crate::{
     binder::{Symbol, SymbolKey, SymbolKind, SymbolTable},
     cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeKind},
@@ -6,8 +7,7 @@ use crate::{
     helpers,
     idx::Idx,
 };
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, Union2};
+use lspt::DiagnosticSeverity;
 use petgraph::graph::NodeIndex;
 use rowan::ast::{SyntaxNodePtr, support};
 use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
@@ -16,13 +16,11 @@ use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "unread";
 
-#[expect(clippy::too_many_arguments)]
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
     document: Document,
     lint_level: LintLevel,
-    line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
@@ -74,10 +72,9 @@ pub fn check(
                 detect_unread(bb, &vars, root, symbol_table)
                     .filter_map(|immediate| symbol_table.symbols.get(&SymbolKey::new(&immediate)))
                     .map(|symbol| Diagnostic {
-                        range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
-                        severity: Some(severity),
-                        source: Some("wat".into()),
-                        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                        range: symbol.key.text_range(),
+                        severity,
+                        code: DIAGNOSTIC_CODE.into(),
                         message: format!("local `{}` is set but never read", symbol.idx.render(db)),
                         ..Default::default()
                     }),

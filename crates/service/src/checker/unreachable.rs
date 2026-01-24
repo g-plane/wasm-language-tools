@@ -1,11 +1,10 @@
+use super::Diagnostic;
 use crate::{
     LintLevel,
     cfa::{self, FlowNodeKind},
     document::Document,
-    helpers,
 };
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticSeverity, DiagnosticTag, Union2};
+use lspt::{DiagnosticSeverity, DiagnosticTag};
 use rowan::{
     TextRange,
     ast::{AstNode, SyntaxNodePtr, support},
@@ -19,7 +18,6 @@ pub fn check(
     db: &dyn salsa::Database,
     document: Document,
     lint_level: LintLevel,
-    line_index: &LineIndex,
     root: &SyntaxNode,
     node: &SyntaxNode,
 ) {
@@ -89,10 +87,9 @@ pub fn check(
         }
     });
     diagnostics.extend(ranges.into_iter().map(|range| Diagnostic {
-        range: helpers::rowan_range_to_lsp_range(line_index, range),
-        severity: Some(severity),
-        source: Some("wat".into()),
-        code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+        range,
+        severity,
+        code: DIAGNOSTIC_CODE.into(),
         message: "unreachable code".into(),
         tags: Some(vec![DiagnosticTag::Unnecessary]),
         ..Default::default()

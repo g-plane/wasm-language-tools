@@ -1,12 +1,9 @@
+use super::{Diagnostic, RelatedInformation};
 use crate::{
     binder::{Symbol, SymbolKey, SymbolTable},
     document::Document,
-    helpers,
     types_analyzer::{self, CompositeType, DefTypes, FieldType, Fields, StorageType},
-    uri::InternUri,
 };
-use line_index::LineIndex;
-use lspt::{Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, Union2};
 use rowan::ast::support;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
@@ -14,9 +11,7 @@ const DIAGNOSTIC_CODE: &str = "packing";
 
 pub fn check(
     db: &dyn salsa::Database,
-    uri: InternUri,
     document: Document,
-    line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) -> Option<Diagnostic> {
@@ -27,16 +22,11 @@ pub fn check(
             if let Some((_, symbol)) = find_struct_field(symbol_table, def_types, node).filter(|(ty, _)| ty.is_packed())
             {
                 Some(Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
-                    severity: Some(DiagnosticSeverity::Error),
-                    source: Some("wat".into()),
-                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                    range: symbol.key.text_range(),
+                    code: DIAGNOSTIC_CODE.into(),
                     message: format!("field `{}` is packed", symbol.idx.render(db)),
-                    related_information: Some(vec![DiagnosticRelatedInformation {
-                        location: Location {
-                            uri: uri.raw(db),
-                            range: helpers::rowan_range_to_lsp_range(line_index, instr_name.text_range()),
-                        },
+                    related_information: Some(vec![RelatedInformation {
+                        range: instr_name.text_range(),
                         message: "use `struct.get_s` or `struct.get_u` instead".into(),
                     }]),
                     ..Default::default()
@@ -51,16 +41,11 @@ pub fn check(
                 find_struct_field(symbol_table, def_types, node).filter(|(ty, _)| !ty.is_packed())
             {
                 Some(Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
-                    severity: Some(DiagnosticSeverity::Error),
-                    source: Some("wat".into()),
-                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                    range: symbol.key.text_range(),
+                    code: DIAGNOSTIC_CODE.into(),
                     message: format!("field `{}` is unpacked", symbol.idx.render(db)),
-                    related_information: Some(vec![DiagnosticRelatedInformation {
-                        location: Location {
-                            uri: uri.raw(db),
-                            range: helpers::rowan_range_to_lsp_range(line_index, instr_name.text_range()),
-                        },
+                    related_information: Some(vec![RelatedInformation {
+                        range: instr_name.text_range(),
                         message: "use `struct.get` instead".into(),
                     }]),
                     ..Default::default()
@@ -73,16 +58,11 @@ pub fn check(
             let def_types = types_analyzer::get_def_types(db, document);
             if let Some((_, symbol)) = find_array(symbol_table, def_types, node).filter(|(ty, _)| ty.is_packed()) {
                 Some(Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
-                    severity: Some(DiagnosticSeverity::Error),
-                    source: Some("wat".into()),
-                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                    range: symbol.key.text_range(),
+                    code: DIAGNOSTIC_CODE.into(),
                     message: format!("array `{}` is packed", symbol.idx.render(db)),
-                    related_information: Some(vec![DiagnosticRelatedInformation {
-                        location: Location {
-                            uri: uri.raw(db),
-                            range: helpers::rowan_range_to_lsp_range(line_index, instr_name.text_range()),
-                        },
+                    related_information: Some(vec![RelatedInformation {
+                        range: instr_name.text_range(),
                         message: "use `array.get_s` or `array.get_u` instead".into(),
                     }]),
                     ..Default::default()
@@ -95,16 +75,11 @@ pub fn check(
             let def_types = types_analyzer::get_def_types(db, document);
             if let Some((_, symbol)) = find_array(symbol_table, def_types, node).filter(|(ty, _)| !ty.is_packed()) {
                 Some(Diagnostic {
-                    range: helpers::rowan_range_to_lsp_range(line_index, symbol.key.text_range()),
-                    severity: Some(DiagnosticSeverity::Error),
-                    source: Some("wat".into()),
-                    code: Some(Union2::B(DIAGNOSTIC_CODE.into())),
+                    range: symbol.key.text_range(),
+                    code: DIAGNOSTIC_CODE.into(),
                     message: format!("array `{}` is unpacked", symbol.idx.render(db)),
-                    related_information: Some(vec![DiagnosticRelatedInformation {
-                        location: Location {
-                            uri: uri.raw(db),
-                            range: helpers::rowan_range_to_lsp_range(line_index, instr_name.text_range()),
-                        },
+                    related_information: Some(vec![RelatedInformation {
+                        range: instr_name.text_range(),
                         message: "use `array.get` instead".into(),
                     }]),
                     ..Default::default()
