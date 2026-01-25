@@ -139,9 +139,7 @@ impl<'db> RefType<'db> {
                         NodeOrToken::Node(node) if node.kind() == SyntaxKind::HEAP_TYPE.into() => {
                             return HeapType::from_green(node, db).map(|heap_ty| RefType { heap_ty, nullable });
                         }
-                        NodeOrToken::Token(token)
-                            if token.kind() == SyntaxKind::KEYWORD.into() && token.text() == "null" =>
-                        {
+                        NodeOrToken::Token(token) if token.kind() == SyntaxKind::MODIFIER_KEYWORD.into() => {
                             nullable = true;
                         }
                         _ => {}

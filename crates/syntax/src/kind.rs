@@ -17,6 +17,7 @@ pub enum SyntaxKind {
     UNSIGNED_INT,
     FLOAT,
     TYPE_KEYWORD,
+    MODIFIER_KEYWORD,
     EQ,
     MEM_ARG_KEYWORD,
     SHAPE_DESCRIPTOR,

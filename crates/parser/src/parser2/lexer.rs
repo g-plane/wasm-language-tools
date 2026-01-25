@@ -59,6 +59,7 @@ impl<'s> Lexer<'s> {
                     SyntaxKind::KEYWORD => Message::Name("keyword"),
                     SyntaxKind::INSTR_NAME => Message::Name("instruction name"),
                     SyntaxKind::TYPE_KEYWORD => Message::Name("type keyword"),
+                    SyntaxKind::MODIFIER_KEYWORD => Message::Name("modifier keyword"),
                     SyntaxKind::IDENT => Message::Name("identifier"),
                     SyntaxKind::STRING => {
                         if is_unterminated_string(text) {
@@ -110,7 +111,7 @@ impl<'s> Lexer<'s> {
         match kind {
             SyntaxKind::L_PAREN => self.ascii_char::<b'('>(SyntaxKind::L_PAREN),
             SyntaxKind::R_PAREN => self.ascii_char::<b')'>(SyntaxKind::R_PAREN),
-            SyntaxKind::KEYWORD | SyntaxKind::INSTR_NAME | SyntaxKind::TYPE_KEYWORD => {
+            SyntaxKind::KEYWORD | SyntaxKind::INSTR_NAME | SyntaxKind::TYPE_KEYWORD | SyntaxKind::MODIFIER_KEYWORD => {
                 self.word().map(|text| Token { kind, text })
             }
             SyntaxKind::IDENT => self.ident(),

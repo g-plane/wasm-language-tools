@@ -166,7 +166,7 @@ ROOT@0..540
               L_PAREN@227..228 "("
               KEYWORD@228..231 "ref"
               WHITESPACE@231..232 " "
-              KEYWORD@232..236 "null"
+              MODIFIER_KEYWORD@232..236 "null"
               WHITESPACE@236..237 " "
               HEAP_TYPE@237..238
                 INDEX@237..238
@@ -374,7 +374,7 @@ ROOT@0..540
               L_PAREN@520..521 "("
               KEYWORD@521..524 "ref"
               WHITESPACE@524..525 " "
-              KEYWORD@525..529 "null"
+              MODIFIER_KEYWORD@525..529 "null"
               WHITESPACE@529..530 " "
               HEAP_TYPE@530..533
                 TYPE_KEYWORD@530..533 "i31"

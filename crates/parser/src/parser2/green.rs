@@ -84,3 +84,6 @@ pub static TYPE_F64: LazyLock<GreenElement> = LazyLock::new(|| {
     )
     .into()
 });
+
+pub static MODIFIER_KW_NULL: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::MODIFIER_KEYWORD.into(), "null").into());

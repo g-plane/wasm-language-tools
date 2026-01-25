@@ -292,8 +292,11 @@ impl Parser<'_> {
         self.lexer.keyword("ref")?;
         self.add_child(green::KW_REF.clone());
 
-        if let Some(keyword) = self.try_parse_with_trivias(|parser| parser.lexer.keyword("null")) {
-            self.add_child(keyword);
+        if self
+            .try_parse_with_trivias(|parser| parser.lexer.next(MODIFIER_KEYWORD).filter(|token| token.text == "null"))
+            .is_some()
+        {
+            self.add_child(green::MODIFIER_KW_NULL.clone());
         }
 
         if !self.recover(Self::parse_heap_type::<false>) {

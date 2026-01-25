@@ -970,10 +970,7 @@ impl RefType {
     }
     #[inline]
     pub fn null_keyword(&self) -> Option<SyntaxToken> {
-        self.syntax.children_with_tokens().find_map(|it| match it {
-            SyntaxElement::Token(token) if token.kind() == SyntaxKind::KEYWORD && token.text() == "null" => Some(token),
-            _ => None,
-        })
+        token(&self.syntax, SyntaxKind::MODIFIER_KEYWORD)
     }
     #[inline]
     pub fn heap_type(&self) -> Option<HeapType> {

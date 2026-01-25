@@ -34,7 +34,7 @@ ROOT@0..331
             L_PAREN@44..45 "("
             KEYWORD@45..48 "ref"
             WHITESPACE@48..50 "  "
-            KEYWORD@50..54 "null"
+            MODIFIER_KEYWORD@50..54 "null"
             WHITESPACE@54..56 "  "
             HEAP_TYPE@56..58
               TYPE_KEYWORD@56..58 "eq"
