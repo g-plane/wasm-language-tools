@@ -1,12 +1,10 @@
 use crate::{
     LanguageService,
-    binder::{SymbolKind, SymbolTable},
+    binder::{IdxKind, SymbolKind, SymbolTable},
     helpers::{self, LineIndexExt},
 };
 use lspt::{CodeLens, CodeLensParams, Command};
-use rowan::Language;
 use serde::{Deserialize, Serialize};
-use wat_syntax::WatLanguage;
 
 impl LanguageService {
     /// Handler for `textDocument/codeLens` request.
@@ -34,7 +32,7 @@ impl LanguageService {
                     command: None,
                     data: serde_json::to_value(CodeLensData {
                         uri: params.text_document.uri.clone(),
-                        kind: rowan::SyntaxKind::from(symbol.key.kind()).0,
+                        kind: symbol.idx_kind,
                     })
                     .ok(),
                 })
@@ -54,12 +52,11 @@ impl LanguageService {
         let root = document.root_tree(self);
         let symbol_table = SymbolTable::of(self, document);
 
-        let syntax_kind = WatLanguage::kind_from_raw(rowan::SyntaxKind(data.kind));
         let range = line_index.convert(params.range)?;
         let def_symbol = symbol_table
             .symbols
             .values()
-            .find(|symbol| symbol.key.kind() == syntax_kind && symbol.key.text_range() == range)?;
+            .find(|symbol| symbol.idx_kind == data.kind && symbol.key.text_range() == range)?;
         let locations = symbol_table
             .find_references_on_def(def_symbol, false)
             .map(|symbol| helpers::create_location_by_symbol(data.uri.clone(), line_index, symbol.key, &root))
@@ -87,5 +84,5 @@ impl LanguageService {
 #[derive(Serialize, Deserialize)]
 struct CodeLensData {
     uri: String,
-    kind: u16,
+    kind: IdxKind,
 }

@@ -950,7 +950,8 @@ impl fmt::Display for SymbolKind {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum IdxKind {
     Module,
     Func,

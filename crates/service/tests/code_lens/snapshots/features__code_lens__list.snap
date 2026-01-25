@@ -15,7 +15,7 @@ expression: response
       }
     },
     "data": {
-      "kind": 80,
+      "kind": "global",
       "uri": "untitled:test"
     }
   },
@@ -31,7 +31,7 @@ expression: response
       }
     },
     "data": {
-      "kind": 79,
+      "kind": "func",
       "uri": "untitled:test"
     }
   },
@@ -47,7 +47,7 @@ expression: response
       }
     },
     "data": {
-      "kind": 82,
+      "kind": "memory",
       "uri": "untitled:test"
     }
   },
@@ -63,7 +63,7 @@ expression: response
       }
     },
     "data": {
-      "kind": 84,
+      "kind": "table",
       "uri": "untitled:test"
     }
   },
@@ -79,7 +79,7 @@ expression: response
       }
     },
     "data": {
-      "kind": 79,
+      "kind": "func",
       "uri": "untitled:test"
     }
   },
@@ -95,7 +95,7 @@ expression: response
       }
     },
     "data": {
-      "kind": 86,
+      "kind": "type",
       "uri": "untitled:test"
     }
   },
@@ -111,7 +111,7 @@ expression: response
       }
     },
     "data": {
-      "kind": 85,
+      "kind": "tag",
       "uri": "untitled:test"
     }
   }
