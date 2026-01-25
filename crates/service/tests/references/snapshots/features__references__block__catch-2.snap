@@ -34,19 +34,6 @@ expression: ref_1
     "range": {
       "start": {
         "line": 4,
-        "character": 76
-      },
-      "end": {
-        "line": 4,
-        "character": 78
-      }
-    }
-  },
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
-        "line": 4,
         "character": 43
       },
       "end": {
@@ -65,6 +52,19 @@ expression: ref_1
       "end": {
         "line": 4,
         "character": 59
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 4,
+        "character": 76
+      },
+      "end": {
+        "line": 4,
+        "character": 78
       }
     }
   }

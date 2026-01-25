@@ -77,5 +77,9 @@ impl LanguageService {
                     .collect()
             }),
         }
+        .map(|mut references: Vec<_>| {
+            references.sort_unstable_by_key(|location| location.range.start);
+            references
+        })
     }
 }
