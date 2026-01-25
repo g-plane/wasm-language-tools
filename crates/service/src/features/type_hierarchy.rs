@@ -96,27 +96,27 @@ impl LanguageService {
             .find(|symbol| symbol.key.text_range() == type_def_range)?
             .key;
 
-        Some(
-            def_types
-                .iter()
-                .filter(|(_, def_type)| {
-                    def_type
-                        .inherits
-                        .as_ref()
-                        .is_some_and(|inherits| inherits.symbol == key)
-                })
-                .filter_map(|(key, _)| symbol_table.symbols.get(key))
-                .map(|symbol| TypeHierarchyItem {
-                    name: symbol.idx.render(self).to_string(),
-                    kind: LspSymbolKind::Class,
-                    tags: None,
-                    detail: helpers::infer_type_def_symbol_detail(symbol, &root),
-                    uri: params.item.uri.clone(),
-                    range: line_index.convert(symbol.key.text_range()),
-                    selection_range: helpers::create_selection_range(symbol, &root, line_index),
-                    data: None,
-                })
-                .collect(),
-        )
+        let mut items = def_types
+            .iter()
+            .filter(|(_, def_type)| {
+                def_type
+                    .inherits
+                    .as_ref()
+                    .is_some_and(|inherits| inherits.symbol == key)
+            })
+            .filter_map(|(key, _)| symbol_table.symbols.get(key))
+            .map(|symbol| TypeHierarchyItem {
+                name: symbol.idx.render(self).to_string(),
+                kind: LspSymbolKind::Class,
+                tags: None,
+                detail: helpers::infer_type_def_symbol_detail(symbol, &root),
+                uri: params.item.uri.clone(),
+                range: line_index.convert(symbol.key.text_range()),
+                selection_range: helpers::create_selection_range(symbol, &root, line_index),
+                data: None,
+            })
+            .collect::<Vec<_>>();
+        items.sort_unstable_by_key(|item| item.range.start);
+        Some(items)
     }
 }
