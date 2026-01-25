@@ -42,7 +42,7 @@ pub enum SyntaxKind {
     FIELD,
     SUB_TYPE,
     TABLE_TYPE,
-    MEMORY_TYPE,
+    MEM_TYPE,
     ADDR_TYPE,
     GLOBAL_TYPE,
     BLOCK_TYPE,

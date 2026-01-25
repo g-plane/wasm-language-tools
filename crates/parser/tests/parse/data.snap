@@ -12,7 +12,7 @@ ROOT@0..1101
       WHITESPACE@17..18 " "
       IDENT@18..20 "$m"
       WHITESPACE@20..21 " "
-      MEMORY_TYPE@21..22
+      MEM_TYPE@21..22
         LIMITS@21..22
           UNSIGNED_INT@21..22 "1"
       R_PAREN@22..23 ")"

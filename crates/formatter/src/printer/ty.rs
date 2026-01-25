@@ -77,7 +77,7 @@ impl DocGen for ExternTypeGlobal {
 
 impl DocGen for ExternTypeMemory {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        format_extern_type(self, self.memory_type(), ctx)
+        format_extern_type(self, self.mem_type(), ctx)
     }
 }
 
@@ -269,7 +269,7 @@ impl DocGen for Limits {
     }
 }
 
-impl DocGen for MemoryPageSize {
+impl DocGen for MemPageSize {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         let mut docs = Vec::with_capacity(5);
         let mut trivias = vec![];
@@ -299,7 +299,7 @@ impl DocGen for MemoryPageSize {
     }
 }
 
-impl DocGen for MemoryType {
+impl DocGen for MemType {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         let mut docs = Vec::with_capacity(2);
         let mut trivias = vec![];
@@ -325,13 +325,13 @@ impl DocGen for MemoryType {
             docs.push(Doc::text(share.to_string()));
             trivias = format_trivias_after_token(share, ctx);
         }
-        if let Some(memory_page_size) = self.memory_page_size() {
+        if let Some(mem_page_size) = self.mem_page_size() {
             if trivias.is_empty() {
                 docs.push(Doc::space());
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(memory_page_size.doc(ctx));
+            docs.push(mem_page_size.doc(ctx));
         }
         Doc::list(docs)
     }

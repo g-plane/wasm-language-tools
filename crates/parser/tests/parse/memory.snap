@@ -10,7 +10,7 @@ ROOT@0..282
       L_PAREN@8..9 "("
       KEYWORD@9..15 "memory"
       WHITESPACE@15..16 " "
-      MEMORY_TYPE@16..17
+      MEM_TYPE@16..17
         LIMITS@16..17
           UNSIGNED_INT@16..17 "0"
       R_PAREN@17..18 ")"
@@ -24,7 +24,7 @@ ROOT@0..282
       L_PAREN@28..29 "("
       KEYWORD@29..35 "memory"
       WHITESPACE@35..36 " "
-      MEMORY_TYPE@36..39
+      MEM_TYPE@36..39
         LIMITS@36..39
           UNSIGNED_INT@36..37 "0"
           WHITESPACE@37..38 " "
@@ -72,7 +72,7 @@ ROOT@0..282
       L_PAREN@104..105 "("
       KEYWORD@105..111 "memory"
       WHITESPACE@111..112 " "
-      MEMORY_TYPE@112..117
+      MEM_TYPE@112..117
         ADDR_TYPE@112..115
           TYPE_KEYWORD@112..115 "i32"
         WHITESPACE@115..116 " "
@@ -89,7 +89,7 @@ ROOT@0..282
       L_PAREN@128..129 "("
       KEYWORD@129..135 "memory"
       WHITESPACE@135..136 " "
-      MEMORY_TYPE@136..143
+      MEM_TYPE@136..143
         ADDR_TYPE@136..139
           TYPE_KEYWORD@136..139 "i64"
         WHITESPACE@139..140 " "
@@ -108,7 +108,7 @@ ROOT@0..282
       L_PAREN@154..155 "("
       KEYWORD@155..161 "memory"
       WHITESPACE@161..162 " "
-      MEMORY_TYPE@162..176
+      MEM_TYPE@162..176
         LIMITS@162..163
           UNSIGNED_INT@162..163 "0"
         WHITESPACE@163..164 " "
@@ -129,7 +129,7 @@ ROOT@0..282
       L_PAREN@187..188 "("
       KEYWORD@188..194 "memory"
       WHITESPACE@194..195 " "
-      MEMORY_TYPE@195..215
+      MEM_TYPE@195..215
         LIMITS@195..198
           UNSIGNED_INT@195..196 "0"
           WHITESPACE@196..197 " "
@@ -152,7 +152,7 @@ ROOT@0..282
       L_PAREN@226..227 "("
       KEYWORD@227..233 "memory"
       WHITESPACE@233..234 " "
-      MEMORY_TYPE@234..244
+      MEM_TYPE@234..244
         LIMITS@234..237
           UNSIGNED_INT@234..235 "0"
           WHITESPACE@235..236 " "
@@ -165,7 +165,7 @@ ROOT@0..282
       L_PAREN@246..247 "("
       KEYWORD@247..253 "memory"
       WHITESPACE@253..254 " "
-      MEMORY_TYPE@254..279
+      MEM_TYPE@254..279
         LIMITS@254..257
           UNSIGNED_INT@254..255 "0"
           WHITESPACE@255..256 " "

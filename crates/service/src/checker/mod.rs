@@ -128,7 +128,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                     diagnostics.push(diagnostic);
                 }
             }
-            SyntaxKind::MEMORY_TYPE => {
+            SyntaxKind::MEM_TYPE => {
                 mem_type::check(&mut diagnostics, &node);
             }
             SyntaxKind::OFFSET => {

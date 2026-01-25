@@ -76,7 +76,7 @@ impl Parser<'_> {
             "memory" => {
                 self.add_child(green::KW_MEMORY.clone());
                 self.eat(IDENT);
-                if !self.recover(Self::parse_memory_type) {
+                if !self.recover(Self::parse_mem_type) {
                     self.report_missing(Message::Name("memory type"));
                 }
                 self.expect_right_paren();
@@ -204,7 +204,7 @@ impl Parser<'_> {
         Some(self.finish_node(LIMITS, mark))
     }
 
-    fn parse_memory_page_size(&mut self) -> Option<GreenNode> {
+    fn parse_mem_page_size(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
@@ -218,7 +218,7 @@ impl Parser<'_> {
         Some(self.finish_node(MEM_PAGE_SIZE, mark))
     }
 
-    pub(super) fn parse_memory_type(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_mem_type(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         if let Some(addr_type) = self.try_parse(Self::parse_addr_type) {
             self.add_child(addr_type);
@@ -241,10 +241,10 @@ impl Parser<'_> {
         }) {
             self.add_child(share);
         }
-        if let Some(mem_page_size) = self.try_parse_with_trivias(Self::parse_memory_page_size) {
+        if let Some(mem_page_size) = self.try_parse_with_trivias(Self::parse_mem_page_size) {
             self.add_child(mem_page_size);
         }
-        Some(self.finish_node(MEMORY_TYPE, mark))
+        Some(self.finish_node(MEM_TYPE, mark))
     }
 
     fn parse_packed_type(&mut self) -> Option<GreenElement> {

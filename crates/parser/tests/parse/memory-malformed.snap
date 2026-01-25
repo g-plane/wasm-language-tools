@@ -30,7 +30,7 @@ ROOT@0..212
       L_PAREN@49..50 "("
       KEYWORD@50..56 "memory"
       WHITESPACE@56..57 " "
-      MEMORY_TYPE@57..62
+      MEM_TYPE@57..62
         ADDR_TYPE@57..60
           ERROR@57..60 "f32"
         WHITESPACE@60..61 " "
@@ -49,7 +49,7 @@ ROOT@0..212
       L_PAREN@81..82 "("
       KEYWORD@82..88 "memory"
       WHITESPACE@88..89 " "
-      MEMORY_TYPE@89..90
+      MEM_TYPE@89..90
         LIMITS@89..90
           UNSIGNED_INT@89..90 "0"
       WHITESPACE@90..91 " "
@@ -64,7 +64,7 @@ ROOT@0..212
       L_PAREN@106..107 "("
       KEYWORD@107..113 "memory"
       WHITESPACE@113..114 " "
-      MEMORY_TYPE@114..126
+      MEM_TYPE@114..126
         LIMITS@114..115
           UNSIGNED_INT@114..115 "0"
         WHITESPACE@115..116 " "
@@ -78,7 +78,7 @@ ROOT@0..212
       L_PAREN@130..131 "("
       KEYWORD@131..137 "memory"
       WHITESPACE@137..138 " "
-      MEMORY_TYPE@138..153
+      MEM_TYPE@138..153
         LIMITS@138..139
           UNSIGNED_INT@138..139 "0"
         WHITESPACE@139..140 " "
@@ -94,7 +94,7 @@ ROOT@0..212
       L_PAREN@157..158 "("
       KEYWORD@158..164 "memory"
       WHITESPACE@164..165 " "
-      MEMORY_TYPE@165..168
+      MEM_TYPE@165..168
         LIMITS@165..168
           UNSIGNED_INT@165..166 "0"
           WHITESPACE@166..167 " "
@@ -107,7 +107,7 @@ ROOT@0..212
       L_PAREN@178..179 "("
       KEYWORD@179..185 "memory"
       WHITESPACE@185..186 " "
-      MEMORY_TYPE@186..189
+      MEM_TYPE@186..189
         LIMITS@186..189
           UNSIGNED_INT@186..187 "0"
           WHITESPACE@187..188 " "

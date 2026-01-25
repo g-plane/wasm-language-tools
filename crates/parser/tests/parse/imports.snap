@@ -449,7 +449,7 @@ ROOT@0..1115
         L_PAREN@1021..1022 "("
         KEYWORD@1022..1028 "memory"
         WHITESPACE@1028..1029 " "
-        MEMORY_TYPE@1029..1032
+        MEM_TYPE@1029..1032
           LIMITS@1029..1032
             UNSIGNED_INT@1029..1030 "1"
             WHITESPACE@1030..1031 " "
@@ -472,7 +472,7 @@ ROOT@0..1115
           STRING@1064..1072 "\"memory\""
         R_PAREN@1072..1073 ")"
       WHITESPACE@1073..1074 " "
-      MEMORY_TYPE@1074..1077
+      MEM_TYPE@1074..1077
         LIMITS@1074..1077
           UNSIGNED_INT@1074..1075 "1"
           WHITESPACE@1075..1076 " "

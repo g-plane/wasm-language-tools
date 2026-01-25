@@ -486,7 +486,7 @@ impl Parser<'_> {
             if !self.recover(Self::parse_data) {
                 self.report_missing(Message::Name("data"));
             }
-        } else if !self.recover(Self::parse_memory_type) {
+        } else if !self.recover(Self::parse_mem_type) {
             self.report_missing(Message::Name("memory type"));
         }
 

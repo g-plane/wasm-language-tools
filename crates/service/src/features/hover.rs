@@ -11,7 +11,7 @@ use rowan::ast::{AstNode, support};
 use std::fmt::Write;
 use wat_syntax::{
     SyntaxKind, SyntaxNode,
-    ast::{GlobalType, Limits, MemoryType, PlainInstr, TableType},
+    ast::{GlobalType, Limits, MemType, PlainInstr, TableType},
 };
 
 impl LanguageService {
@@ -248,8 +248,8 @@ fn create_memory_def_hover(db: &dyn salsa::Database, symbol: &Symbol, root: &Syn
         content.push_str(name.ident(db));
     }
     let node = symbol.key.to_node(root);
-    if let Some(limits) = support::child::<MemoryType>(&node)
-        .and_then(|memory_type| memory_type.limits())
+    if let Some(limits) = support::child::<MemType>(&node)
+        .and_then(|mem_type| mem_type.limits())
         .and_then(|limits| render_limits(&limits))
     {
         content.push(' ');

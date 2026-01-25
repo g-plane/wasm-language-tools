@@ -3,7 +3,7 @@ use rowan::ast::support;
 use std::num::{IntErrorKind, ParseIntError};
 use wat_syntax::{
     SyntaxKind, SyntaxNode, SyntaxToken,
-    ast::{Limits, MemoryPageSize},
+    ast::{Limits, MemPageSize},
 };
 
 const DIAGNOSTIC_CODE: &str = "mem-type";
@@ -11,7 +11,7 @@ const DIAGNOSTIC_CODE: &str = "mem-type";
 pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) -> Option<()> {
     let limits = support::child::<Limits>(node)?;
     let page_size = if let Some(token) =
-        support::child::<MemoryPageSize>(node).and_then(|page_size| page_size.unsigned_int_token())
+        support::child::<MemPageSize>(node).and_then(|page_size| page_size.unsigned_int_token())
         && let Ok(page_size) = parse_u32(token.text())
     {
         if page_size == 1 || page_size == 65536 {

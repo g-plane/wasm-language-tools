@@ -307,7 +307,7 @@ impl ExternTypeMemory {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn memory_type(&self) -> Option<MemoryType> {
+    pub fn mem_type(&self) -> Option<MemType> {
         child(&self.syntax)
     }
     #[inline]
@@ -732,10 +732,10 @@ impl AstNode for Limits {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct MemoryPageSize {
+pub struct MemPageSize {
     syntax: SyntaxNode,
 }
-impl MemoryPageSize {
+impl MemPageSize {
     #[inline]
     pub fn l_paren_token(&self) -> Option<SyntaxToken> {
         token(&self.syntax, SyntaxKind::L_PAREN)
@@ -753,7 +753,7 @@ impl MemoryPageSize {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for MemoryPageSize {
+impl AstNode for MemPageSize {
     type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
@@ -768,7 +768,7 @@ impl AstNode for MemoryPageSize {
         Self: Sized,
     {
         if Self::can_cast(syntax.kind()) {
-            Some(MemoryPageSize { syntax })
+            Some(MemPageSize { syntax })
         } else {
             None
         }
@@ -780,10 +780,10 @@ impl AstNode for MemoryPageSize {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct MemoryType {
+pub struct MemType {
     syntax: SyntaxNode,
 }
-impl MemoryType {
+impl MemType {
     #[inline]
     pub fn addr_type(&self) -> Option<AddrType> {
         child(&self.syntax)
@@ -797,18 +797,18 @@ impl MemoryType {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn memory_page_size(&self) -> Option<MemoryPageSize> {
+    pub fn mem_page_size(&self) -> Option<MemPageSize> {
         child(&self.syntax)
     }
 }
-impl AstNode for MemoryType {
+impl AstNode for MemType {
     type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
         Self: Sized,
     {
-        kind == SyntaxKind::MEMORY_TYPE
+        kind == SyntaxKind::MEM_TYPE
     }
     #[inline]
     fn cast(syntax: SyntaxNode) -> Option<Self>
@@ -816,7 +816,7 @@ impl AstNode for MemoryType {
         Self: Sized,
     {
         if Self::can_cast(syntax.kind()) {
-            Some(MemoryType { syntax })
+            Some(MemType { syntax })
         } else {
             None
         }

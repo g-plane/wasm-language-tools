@@ -12,7 +12,7 @@ ROOT@0..11133
       L_PAREN@36..37 "("
       KEYWORD@37..43 "memory"
       WHITESPACE@43..44 " "
-      MEMORY_TYPE@44..45
+      MEM_TYPE@44..45
         LIMITS@44..45
           UNSIGNED_INT@44..45 "1"
       R_PAREN@45..46 ")"

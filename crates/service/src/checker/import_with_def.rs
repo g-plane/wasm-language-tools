@@ -12,7 +12,7 @@ pub fn check(node: &SyntaxNode) -> Option<Diagnostic> {
                 | SyntaxKind::IMPORT
                 | SyntaxKind::TYPE_USE
                 | SyntaxKind::GLOBAL_TYPE
-                | SyntaxKind::MEMORY_TYPE
+                | SyntaxKind::MEM_TYPE
                 | SyntaxKind::TABLE_TYPE
         )
     })?;

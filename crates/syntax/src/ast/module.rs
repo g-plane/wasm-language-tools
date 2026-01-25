@@ -1,7 +1,7 @@
 use super::{
     SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage,
     instr::Instr,
-    ty::{ExternType, GlobalType, MemoryType, Param, RefType, Result, SubType, TableType, ValType},
+    ty::{ExternType, GlobalType, MemType, Param, RefType, Result, SubType, TableType, ValType},
 };
 use rowan::{
     NodeOrToken,
@@ -1266,7 +1266,7 @@ impl ModuleFieldMemory {
         child(&self.syntax)
     }
     #[inline]
-    pub fn memory_type(&self) -> Option<MemoryType> {
+    pub fn mem_type(&self) -> Option<MemType> {
         child(&self.syntax)
     }
     #[inline]

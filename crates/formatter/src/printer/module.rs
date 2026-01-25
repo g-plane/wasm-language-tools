@@ -794,14 +794,14 @@ impl DocGen for ModuleFieldMemory {
             docs.push(import.doc(ctx));
             trivias = format_trivias_after_node(import, ctx);
         }
-        if let Some(memory_type) = self.memory_type() {
+        if let Some(mem_type) = self.mem_type() {
             if trivias.is_empty() {
                 docs.push(Doc::space());
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(memory_type.doc(ctx));
-            trivias = format_trivias_after_node(memory_type, ctx);
+            docs.push(mem_type.doc(ctx));
+            trivias = format_trivias_after_node(mem_type, ctx);
         }
         if let Some(data) = self.data() {
             if trivias.is_empty() {
