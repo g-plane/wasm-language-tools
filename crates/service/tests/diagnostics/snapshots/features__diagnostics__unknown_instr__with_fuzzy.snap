@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "unknown-instr",
       "source": "wat",
-      "message": "unknown instruction `log`, do you mean `local.get`?"
+      "message": "unknown instruction `log`"
     }
   ]
 }

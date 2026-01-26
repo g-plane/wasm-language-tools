@@ -1,5 +1,5 @@
 use super::Diagnostic;
-use crate::{data_set::INSTR_NAMES, helpers};
+use crate::data_set::INSTR_NAMES;
 use rowan::ast::support;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
@@ -11,15 +11,10 @@ pub fn check(node: &SyntaxNode) -> Option<Diagnostic> {
     if INSTR_NAMES.contains(&instr_name) {
         None
     } else {
-        let message = if let Some(guess) = helpers::fuzzy_search(INSTR_NAMES, instr_name) {
-            format!("unknown instruction `{instr_name}`, do you mean `{guess}`?")
-        } else {
-            format!("unknown instruction `{instr_name}`")
-        };
         Some(Diagnostic {
             range: token.text_range(),
             code: DIAGNOSTIC_CODE.into(),
-            message,
+            message: format!("unknown instruction `{instr_name}`"),
             ..Default::default()
         })
     }

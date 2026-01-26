@@ -61,26 +61,6 @@ impl LineIndexExt<Range> for LineIndex {
     }
 }
 
-pub fn fuzzy_search<S>(haystack: impl IntoIterator<Item = S>, needle: &str) -> Option<S>
-where
-    S: AsRef<str>,
-{
-    use fuzzy_matcher::{
-        FuzzyMatcher,
-        skim::{SkimMatcherV2, SkimScoreConfig},
-    };
-
-    let matcher = SkimMatcherV2::default().score_config(SkimScoreConfig {
-        bonus_head: -12,
-        ..Default::default()
-    });
-    haystack
-        .into_iter()
-        .filter_map(|name| matcher.fuzzy_match(name.as_ref(), needle).map(|score| (score, name)))
-        .min_by_key(|(score, _)| *score)
-        .map(|(_, guess)| guess)
-}
-
 // https://webassembly.github.io/spec/core/valid/instructions.html#polymorphism
 pub fn is_stack_polymorphic(instr_name: &str) -> bool {
     matches!(
