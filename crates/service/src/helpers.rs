@@ -194,13 +194,6 @@ pub(crate) mod locals {
         document::Document,
     };
 
-    pub fn find_local_def_idx(instr: &SyntaxNode, symbol_table: &SymbolTable) -> Option<u32> {
-        instr
-            .first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
-            .and_then(|immediate| symbol_table.find_def(SymbolKey::new(&immediate)))
-            .and_then(|def| def.idx.num)
-    }
-
     #[salsa::tracked]
     pub fn has_locals(db: &dyn salsa::Database, document: Document, func_key: SymbolKey) -> bool {
         SymbolTable::of(db, document)

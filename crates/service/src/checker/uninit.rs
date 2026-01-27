@@ -9,8 +9,8 @@ use crate::{
 };
 use oxc_allocator::{Allocator, HashMap as OxcHashMap, HashSet as OxcHashSet, Vec as OxcVec};
 use petgraph::graph::NodeIndex;
-use rowan::ast::{SyntaxNodePtr, support};
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use rowan::ast::SyntaxNodePtr;
+use wat_syntax::SyntaxNode;
 
 const DIAGNOSTIC_CODE: &str = "uninit";
 
@@ -18,7 +18,6 @@ pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
     document: Document,
-    root: &SyntaxNode,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
     allocator: &mut Allocator,
@@ -36,9 +35,7 @@ pub fn check(
                     None
                 } else {
                     match &node.kind {
-                        FlowNodeKind::BasicBlock(bb) => {
-                            Some((node_index, BlockVars::new(bb, root, symbol_table, allocator)))
-                        }
+                        FlowNodeKind::BasicBlock(bb) => Some((node_index, BlockVars::new(bb, symbol_table, allocator))),
                         FlowNodeKind::BlockEntry(..) | FlowNodeKind::BlockExit => Some((
                             node_index,
                             BlockVars {
@@ -62,8 +59,8 @@ pub fn check(
             && let Some(vars) = block_vars.get_mut(&node_index)
         {
             diagnostics.extend(
-                detect_uninit(bb, vars, db, document, root, symbol_table)
-                    .filter_map(|immediate| symbol_table.symbols.get(&SymbolKey::new(&immediate)))
+                detect_uninit(bb, vars, db, document, symbol_table)
+                    .filter_map(|key| symbol_table.symbols.get(&key))
                     .map(|symbol| Diagnostic {
                         range: symbol.key.text_range(),
                         code: DIAGNOSTIC_CODE.into(),
@@ -121,38 +118,36 @@ fn detect_uninit(
     vars: &mut BlockVars,
     db: &dyn salsa::Database,
     document: Document,
-    root: &SyntaxNode,
     symbol_table: &SymbolTable,
-) -> impl Iterator<Item = SyntaxNode> {
-    bb.instrs(root).filter_map(move |instr| {
-        match support::token(&instr, SyntaxKind::INSTR_NAME)
-            .as_ref()
-            .map(|token| token.text())
-        {
-            Some("local.get") => {
-                if let Some(immediate) = instr.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
-                    && let Some(Symbol {
-                        idx: Idx { num: Some(num), .. },
-                        kind: SymbolKind::Local,
-                        green,
-                        ..
-                    }) = symbol_table.find_def(SymbolKey::new(&immediate))
-                    && types_analyzer::extract_type(db, document, green.clone()).is_some_and(|ty| !ty.defaultable())
-                    && !vars.in_set.contains(num)
-                {
-                    Some(immediate)
-                } else {
-                    None
-                }
-            }
-            Some("local.set" | "local.tee") => {
-                if let Some(idx) = helpers::locals::find_local_def_idx(&instr, symbol_table) {
-                    vars.in_set.insert(idx);
-                }
+) -> impl Iterator<Item = SymbolKey> {
+    bb.0.iter().filter_map(move |instr| match instr.name.text() {
+        "local.get" => {
+            if let Some(immediate) = instr.immediates.first().copied()
+                && let Some(Symbol {
+                    idx: Idx { num: Some(num), .. },
+                    kind: SymbolKind::Local,
+                    green,
+                    ..
+                }) = symbol_table.find_def(immediate.into())
+                && types_analyzer::extract_type(db, document, green.clone()).is_some_and(|ty| !ty.defaultable())
+                && !vars.in_set.contains(num)
+            {
+                Some(immediate.into())
+            } else {
                 None
             }
-            _ => None,
         }
+        "local.set" | "local.tee" => {
+            if let Some(immediate) = instr.immediates.first().copied()
+                && let Some(idx) = symbol_table
+                    .find_def(immediate.into())
+                    .and_then(|symbol| symbol.idx.num)
+            {
+                vars.in_set.insert(idx);
+            }
+            None
+        }
+        _ => None,
     })
 }
 
@@ -161,13 +156,18 @@ struct BlockVars<'alloc> {
     out_set: OxcHashSet<'alloc, u32>,
 }
 impl<'alloc> BlockVars<'alloc> {
-    fn new(bb: &BasicBlock, root: &SyntaxNode, symbol_table: &SymbolTable, allocator: &'alloc Allocator) -> Self {
+    fn new(bb: &BasicBlock, symbol_table: &SymbolTable, allocator: &'alloc Allocator) -> Self {
         let out_set = OxcHashSet::from_iter_in(
-            bb.instrs(root).filter_map(|instr| {
-                support::token(&instr, SyntaxKind::INSTR_NAME)
-                    .filter(|token| matches!(token.text(), "local.set" | "local.tee"))
-                    .and_then(|_| helpers::locals::find_local_def_idx(&instr, symbol_table))
-            }),
+            bb.0.iter()
+                .filter(|instr| matches!(instr.name.text(), "local.set" | "local.tee"))
+                .filter_map(|instr| {
+                    instr
+                        .immediates
+                        .first()
+                        .copied()
+                        .and_then(|immediate| symbol_table.find_def(immediate.into()))
+                        .and_then(|symbol| symbol.idx.num)
+                }),
             allocator,
         );
         Self {

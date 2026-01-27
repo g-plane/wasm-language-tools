@@ -1,7 +1,9 @@
 use crate::{document::Document, idx::InternIdent};
 use petgraph::graph::{Graph, NodeIndex};
-use rowan::ast::{AstNode, support};
-use std::iter;
+use rowan::{
+    GreenToken,
+    ast::{AstNode, support},
+};
 use wat_syntax::{
     SyntaxKind, SyntaxNode, SyntaxNodePtr, WatLanguage,
     ast::{BlockInstr, Cat, Instr},
@@ -18,8 +20,7 @@ struct Builder<'db> {
     graph: Graph<FlowNode, ()>,
     block_stack: Vec<(NodeIndex, Option<InternIdent<'db>>)>,
     current: Option<NodeIndex>,
-    bb_first: Option<SyntaxNodePtr>,
-    bb_last: Option<SyntaxNodePtr>,
+    bb_instrs: Vec<BasicBlockInstr>,
     unreachable: bool,
 }
 impl<'db> Builder<'db> {
@@ -29,8 +30,7 @@ impl<'db> Builder<'db> {
             graph: Graph::new(),
             block_stack: Vec::new(),
             current: None,
-            bb_first: None,
-            bb_last: None,
+            bb_instrs: Vec::with_capacity(2),
             unreachable: false,
         }
     }
@@ -61,10 +61,16 @@ impl<'db> Builder<'db> {
             Instr::Plain(plain) => {
                 self.visit_instrs(plain.syntax());
 
-                if self.bb_first.is_none() {
-                    self.bb_first = Some(SyntaxNodePtr::new(plain.syntax()));
+                if let Some(instr_name) = plain.instr_name() {
+                    self.bb_instrs.push(BasicBlockInstr {
+                        ptr: SyntaxNodePtr::new(plain.syntax()),
+                        name: instr_name.green().to_owned(),
+                        immediates: plain
+                            .immediates()
+                            .map(|immediate| SyntaxNodePtr::new(immediate.syntax()))
+                            .collect(),
+                    });
                 }
-                self.bb_last = Some(SyntaxNodePtr::new(plain.syntax()));
 
                 let unreachable = match plain.instr_name().as_ref().map(|token| token.text()) {
                     Some("unreachable" | "throw" | "throw_ref") => {
@@ -178,15 +184,17 @@ impl<'db> Builder<'db> {
     }
 
     fn add_basic_block(&mut self) -> Option<NodeIndex> {
-        self.bb_first.take().zip(self.bb_last.take()).map(|(first, last)| {
+        if self.bb_instrs.is_empty() {
+            None
+        } else {
             let bb = self.graph.add_node(FlowNode {
-                kind: FlowNodeKind::BasicBlock(BasicBlock { first, last }),
+                kind: FlowNodeKind::BasicBlock(BasicBlock(self.bb_instrs.drain(..).collect())),
                 unreachable: self.unreachable,
             });
             self.connect_current_to(bb);
             self.current = Some(bb);
-            bb
-        })
+            Some(bb)
+        }
     }
 
     fn connect_current_to(&mut self, node_index: NodeIndex) {
@@ -255,52 +263,22 @@ pub enum FlowNodeKind {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct BasicBlock {
-    first: SyntaxNodePtr,
-    last: SyntaxNodePtr,
-}
+pub struct BasicBlock(pub Vec<BasicBlockInstr>);
 impl BasicBlock {
-    pub fn instrs(&self, root: &SyntaxNode) -> BasicBlockInstrs {
-        BasicBlockInstrs {
-            next: Some(self.first.to_node(root)),
-            last: self.last.to_node(root),
-        }
-    }
-
     pub fn contains_instr(&self, node: &SyntaxNode) -> bool {
         let end = node.text_range().end();
-        self.first.text_range().start() < end && end <= self.last.text_range().end()
+        self.0
+            .first()
+            .zip(self.0.last())
+            .is_some_and(|(first, last)| first.ptr.text_range().start() < end && end <= last.ptr.text_range().end())
     }
 }
-pub struct BasicBlockInstrs {
-    next: Option<SyntaxNode>,
-    last: SyntaxNode,
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct BasicBlockInstr {
+    pub ptr: SyntaxNodePtr,
+    pub name: GreenToken,
+    pub immediates: Vec<SyntaxNodePtr>,
 }
-impl Iterator for BasicBlockInstrs {
-    type Item = SyntaxNode;
-    fn next(&mut self) -> Option<Self::Item> {
-        if let Some(next) = &self.next {
-            if next == &self.last {
-                self.next.take()
-            } else if let Some(mut node) = next
-                .next_sibling()
-                .filter(|sibling| sibling.kind() == SyntaxKind::PLAIN_INSTR)
-            {
-                while let Some(child) = node.first_child_by_kind(&|kind| kind == SyntaxKind::PLAIN_INSTR) {
-                    node = child;
-                }
-                self.next.replace(node)
-            } else if let Some(parent) = next.parent().filter(|parent| parent.kind() == SyntaxKind::PLAIN_INSTR) {
-                self.next.replace(parent)
-            } else {
-                None
-            }
-        } else {
-            None
-        }
-    }
-}
-impl iter::FusedIterator for BasicBlockInstrs {}
 
 #[derive(Clone)]
 pub struct ControlFlowGraph {

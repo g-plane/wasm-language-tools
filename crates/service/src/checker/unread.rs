@@ -10,19 +10,17 @@ use crate::{
 use lspt::DiagnosticSeverity;
 use oxc_allocator::{Allocator, HashMap as OxcHashMap, HashSet as OxcHashSet, Vec as OxcVec};
 use petgraph::graph::NodeIndex;
-use rowan::ast::{SyntaxNodePtr, support};
+use rowan::ast::SyntaxNodePtr;
 use std::cell::RefCell;
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::SyntaxNode;
 
 const DIAGNOSTIC_CODE: &str = "unread";
 
-#[expect(clippy::too_many_arguments)]
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
     document: Document,
     lint_level: LintLevel,
-    root: &SyntaxNode,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
     allocator: &mut Allocator,
@@ -47,10 +45,9 @@ pub fn check(
                     None
                 } else {
                     match &node.kind {
-                        FlowNodeKind::BasicBlock(bb) => Some((
-                            node_index,
-                            RefCell::new(BlockVars::new(bb, root, symbol_table, allocator)),
-                        )),
+                        FlowNodeKind::BasicBlock(bb) => {
+                            Some((node_index, RefCell::new(BlockVars::new(bb, symbol_table, allocator))))
+                        }
                         FlowNodeKind::BlockEntry(..) | FlowNodeKind::BlockExit => Some((
                             node_index,
                             RefCell::new(BlockVars {
@@ -76,7 +73,7 @@ pub fn check(
             && let Ok(vars) = vars.try_borrow()
         {
             diagnostics.extend(
-                detect_unread(bb, &vars, root, symbol_table, allocator)
+                detect_unread(bb, &vars, symbol_table, allocator)
                     .filter_map(|key| symbol_table.symbols.get(&key))
                     .map(|symbol| Diagnostic {
                         range: symbol.key.text_range(),
@@ -119,43 +116,37 @@ fn hydrate_block_vars(cfg: &ControlFlowGraph, block_vars: &mut OxcHashMap<NodeIn
 fn detect_unread(
     bb: &BasicBlock,
     vars: &BlockVars,
-    root: &SyntaxNode,
     symbol_table: &SymbolTable,
     allocator: &Allocator,
 ) -> impl Iterator<Item = SymbolKey> {
     let mut sets = OxcHashMap::<_, OxcVec<_>>::with_capacity_in(vars.kills.len(), allocator);
-    bb.instrs(root).for_each(|instr| {
-        match support::token(&instr, SyntaxKind::INSTR_NAME)
-            .as_ref()
-            .map(|token| token.text())
-        {
-            Some("local.get") => {
-                if let Some(immediate) = instr.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
-                    && let Some(Symbol {
-                        idx: Idx { num: Some(num), .. },
-                        kind: SymbolKind::Local,
-                        ..
-                    }) = symbol_table.find_def(SymbolKey::new(&immediate))
-                    && let Some(last) = sets.get_mut(num).and_then(|sets| sets.last_mut())
-                {
-                    *last = None;
-                }
+    bb.0.iter().for_each(|instr| match instr.name.text() {
+        "local.get" => {
+            if let Some(immediate) = instr.immediates.first().copied()
+                && let Some(Symbol {
+                    idx: Idx { num: Some(num), .. },
+                    kind: SymbolKind::Local,
+                    ..
+                }) = symbol_table.find_def(immediate.into())
+                && let Some(last) = sets.get_mut(num).and_then(|sets| sets.last_mut())
+            {
+                *last = None;
             }
-            Some("local.set" | "local.tee") => {
-                if let Some(immediate) = instr.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
-                    && let Some(Symbol {
-                        idx: Idx { num: Some(num), .. },
-                        kind: SymbolKind::Local,
-                        ..
-                    }) = symbol_table.find_def(SymbolKey::new(&immediate))
-                {
-                    sets.entry(*num)
-                        .or_insert_with(|| OxcVec::with_capacity_in(1, allocator))
-                        .push(Some(SymbolKey::new(&immediate)));
-                }
-            }
-            _ => {}
         }
+        "local.set" | "local.tee" => {
+            if let Some(immediate) = instr.immediates.first().copied()
+                && let Some(Symbol {
+                    idx: Idx { num: Some(num), .. },
+                    kind: SymbolKind::Local,
+                    ..
+                }) = symbol_table.find_def(immediate.into())
+            {
+                sets.entry(*num)
+                    .or_insert_with(|| OxcVec::with_capacity_in(1, allocator))
+                    .push(Some(immediate.into()));
+            }
+        }
+        _ => {}
     });
     vars.out_gens.iter().for_each(|idx| {
         if let Some(last) = sets.get_mut(idx).and_then(|sets| sets.last_mut()) {
@@ -171,28 +162,30 @@ struct BlockVars<'alloc> {
     kills: OxcHashSet<'alloc, u32>,
 }
 impl<'alloc> BlockVars<'alloc> {
-    fn new(bb: &BasicBlock, root: &SyntaxNode, symbol_table: &SymbolTable, allocator: &'alloc Allocator) -> Self {
+    fn new(bb: &BasicBlock, symbol_table: &SymbolTable, allocator: &'alloc Allocator) -> Self {
         let mut gens = OxcHashSet::new_in(allocator);
         let mut kills = OxcHashSet::new_in(allocator);
-        bb.instrs(root).for_each(|instr| {
-            match support::token(&instr, SyntaxKind::INSTR_NAME)
-                .as_ref()
-                .map(|token| token.text())
-            {
-                Some("local.get") => {
-                    if let Some(idx) = helpers::locals::find_local_def_idx(&instr, symbol_table)
-                        && !kills.contains(&idx)
-                    {
-                        gens.insert(idx);
-                    }
+        bb.0.iter().for_each(|instr| match instr.name.text() {
+            "local.get" => {
+                if let Some(immediate) = instr.immediates.first().copied()
+                    && let Some(idx) = symbol_table
+                        .find_def(immediate.into())
+                        .and_then(|symbol| symbol.idx.num)
+                    && !kills.contains(&idx)
+                {
+                    gens.insert(idx);
                 }
-                Some("local.set" | "local.tee") => {
-                    if let Some(idx) = helpers::locals::find_local_def_idx(&instr, symbol_table) {
-                        kills.insert(idx);
-                    }
-                }
-                _ => {}
             }
+            "local.set" | "local.tee" => {
+                if let Some(immediate) = instr.immediates.first().copied()
+                    && let Some(idx) = symbol_table
+                        .find_def(immediate.into())
+                        .and_then(|symbol| symbol.idx.num)
+                {
+                    kills.insert(idx);
+                }
+            }
+            _ => {}
         });
         Self {
             in_gens: OxcHashSet::from_iter_in(gens.iter().copied(), allocator),

@@ -880,6 +880,11 @@ impl SymbolKey {
         SymbolKey(SyntaxNodePtr::new(node))
     }
 }
+impl From<SyntaxNodePtr> for SymbolKey {
+    fn from(ptr: SyntaxNodePtr) -> Self {
+        SymbolKey(ptr)
+    }
+}
 impl Deref for SymbolKey {
     type Target = SyntaxNodePtr;
     fn deref(&self) -> &Self::Target {

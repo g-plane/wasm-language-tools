@@ -38,7 +38,8 @@ pub fn check(
         }
         match &node.weight.kind {
             FlowNodeKind::BasicBlock(bb) => {
-                bb.instrs(root).for_each(|instr| {
+                bb.0.iter().for_each(|instr| {
+                    let instr = instr.ptr.to_node(root);
                     let current = instr.text_range();
                     if let Some(last) = ranges.last_mut() {
                         if instr

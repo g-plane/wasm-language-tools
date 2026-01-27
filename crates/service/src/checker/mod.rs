@@ -66,21 +66,12 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                     &node,
                     &mut allocator,
                 );
-                uninit::check(
-                    &mut diagnostics,
-                    db,
-                    document,
-                    &root,
-                    symbol_table,
-                    &node,
-                    &mut allocator,
-                );
+                uninit::check(&mut diagnostics, db, document, symbol_table, &node, &mut allocator);
                 unread::check(
                     &mut diagnostics,
                     db,
                     document,
                     config.lint.unread,
-                    &root,
                     symbol_table,
                     &node,
                     &mut allocator,
