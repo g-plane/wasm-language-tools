@@ -95,13 +95,13 @@ impl LanguageService {
             }
             SyntaxKind::INSTR_NAME => {
                 let name = token.text();
-                let key = match name {
+                match name {
                     "select" => {
                         let parent = token.parent().and_then(PlainInstr::cast)?;
                         if parent.immediates().count() > 0 {
-                            "select."
+                            Some(0x1C)
                         } else {
-                            "select"
+                            data_set::INSTR_OP_CODES.get("select").copied()
                         }
                     }
                     "ref.test" => {
@@ -113,9 +113,9 @@ impl LanguageService {
                             .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), self))
                             .is_some_and(|ty| ty.nullable)
                         {
-                            "ref.test."
+                            Some(0xFB15)
                         } else {
-                            "ref.test"
+                            data_set::INSTR_OP_CODES.get("ref.test").copied()
                         }
                     }
                     "ref.cast" => {
@@ -127,17 +127,17 @@ impl LanguageService {
                             .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), self))
                             .is_some_and(|ty| ty.nullable)
                         {
-                            "ref.cast."
+                            Some(0xFB17)
                         } else {
-                            "ref.cast"
+                            data_set::INSTR_OP_CODES.get("ref.cast").copied()
                         }
                     }
-                    name => name,
-                };
-                data_set::INSTR_OP_CODES.get(key).map(|code| Hover {
+                    name => data_set::INSTR_OP_CODES.get(name).copied(),
+                }
+                .map(|code| Hover {
                     contents: Union3::A(MarkupContent {
                         kind: MarkupKind::Markdown,
-                        value: format!("```wat\n{name}\n```\nBinary Opcode: {}", format_op_code(*code)),
+                        value: format!("```wat\n{name}\n```\nBinary Opcode: {}", format_op_code(code)),
                     }),
                     range: Some(line_index.convert(token.text_range())),
                 })

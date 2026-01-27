@@ -1,0 +1,57 @@
+---
+source: crates/service/tests/diagnostics/unknown_instr.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 4
+        },
+        "end": {
+          "line": 3,
+          "character": 11
+        }
+      },
+      "severity": 1,
+      "code": "unknown-instr",
+      "source": "wat",
+      "message": "unknown instruction `select.`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 4
+        },
+        "end": {
+          "line": 4,
+          "character": 13
+        }
+      },
+      "severity": 1,
+      "code": "unknown-instr",
+      "source": "wat",
+      "message": "unknown instruction `ref.test.`"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 4
+        },
+        "end": {
+          "line": 5,
+          "character": 13
+        }
+      },
+      "severity": 1,
+      "code": "unknown-instr",
+      "source": "wat",
+      "message": "unknown instruction `ref.cast.`"
+    }
+  ]
+}

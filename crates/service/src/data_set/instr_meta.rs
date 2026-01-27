@@ -3452,7 +3452,6 @@ pub(crate) static INSTR_OP_CODES: LazyLock<FxHashMap<&'static str, u32>> = LazyL
     map.insert("return_call_ref", 0x15);
     map.insert("drop", 0x1A);
     map.insert("select", 0x1B);
-    map.insert("select.", 0x1C);
     map.insert("try_table", 0x1F);
     map.insert("local.get", 0x20);
     map.insert("local.set", 0x21);
@@ -3646,9 +3645,7 @@ pub(crate) static INSTR_OP_CODES: LazyLock<FxHashMap<&'static str, u32>> = LazyL
     map.insert("array.init_data", 0xFB12);
     map.insert("array.init_elem", 0xFB13);
     map.insert("ref.test", 0xFB14);
-    map.insert("ref.test.", 0xFB15);
     map.insert("ref.cast", 0xFB16);
-    map.insert("ref.cast.", 0xFB17);
     map.insert("br_on_cast", 0xFB18);
     map.insert("br_on_cast_fail", 0xFB19);
     map.insert("any.convert_extern", 0xFB1A);
