@@ -109,7 +109,7 @@ pub fn diagnostics_bench(c: &mut Criterion) {
 
 criterion_group! {
     name = benches;
-    config = Criterion::default().significance_level(0.1).sample_size(500);
+    config = Criterion::default().significance_level(0.1).sample_size(250);
     targets = diagnostics_bench
 }
 criterion_main!(benches);
