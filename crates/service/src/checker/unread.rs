@@ -8,14 +8,15 @@ use crate::{
     idx::Idx,
 };
 use lspt::DiagnosticSeverity;
+use oxc_allocator::{Allocator, HashMap as OxcHashMap, HashSet as OxcHashSet, Vec as OxcVec};
 use petgraph::graph::NodeIndex;
 use rowan::ast::{SyntaxNodePtr, support};
-use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
-use std::{cell::RefCell, rc::Rc};
+use std::cell::RefCell;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "unread";
 
+#[expect(clippy::too_many_arguments)]
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
@@ -24,6 +25,7 @@ pub fn check(
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
+    allocator: &mut Allocator,
 ) {
     let severity = match lint_level {
         LintLevel::Allow => return,
@@ -38,27 +40,32 @@ pub fn check(
     }
 
     let cfg = cfa::analyze(db, document, SyntaxNodePtr::new(node));
-    let mut block_vars = cfg
-        .graph
-        .node_indices()
-        .filter_map(|node_index| {
+    let mut block_vars = OxcHashMap::from_iter_in(
+        cfg.graph.node_indices().filter_map(|node_index| {
             cfg.graph.node_weight(node_index).and_then(|node| {
                 if node.unreachable {
                     None
                 } else {
                     match &node.kind {
-                        FlowNodeKind::BasicBlock(bb) => {
-                            Some((node_index, RefCell::new(BlockVars::new(bb, root, symbol_table))))
-                        }
-                        FlowNodeKind::BlockEntry(..) | FlowNodeKind::BlockExit => {
-                            Some((node_index, RefCell::new(BlockVars::default())))
-                        }
+                        FlowNodeKind::BasicBlock(bb) => Some((
+                            node_index,
+                            RefCell::new(BlockVars::new(bb, root, symbol_table, allocator)),
+                        )),
+                        FlowNodeKind::BlockEntry(..) | FlowNodeKind::BlockExit => Some((
+                            node_index,
+                            RefCell::new(BlockVars {
+                                in_gens: OxcHashSet::new_in(allocator),
+                                out_gens: OxcHashSet::new_in(allocator),
+                                kills: OxcHashSet::new_in(allocator),
+                            }),
+                        )),
                         _ => None,
                     }
                 }
             })
-        })
-        .collect::<FxHashMap<_, _>>();
+        }),
+        allocator,
+    );
     hydrate_block_vars(cfg, &mut block_vars);
     cfg.graph.node_indices().for_each(|node_index| {
         if let Some(FlowNode {
@@ -69,8 +76,8 @@ pub fn check(
             && let Ok(vars) = vars.try_borrow()
         {
             diagnostics.extend(
-                detect_unread(bb, &vars, root, symbol_table)
-                    .filter_map(|immediate| symbol_table.symbols.get(&SymbolKey::new(&immediate)))
+                detect_unread(bb, &vars, root, symbol_table, allocator)
+                    .filter_map(|key| symbol_table.symbols.get(&key))
                     .map(|symbol| Diagnostic {
                         range: symbol.key.text_range(),
                         severity,
@@ -81,9 +88,11 @@ pub fn check(
             );
         }
     });
+
+    allocator.reset();
 }
 
-fn hydrate_block_vars(cfg: &ControlFlowGraph, block_vars: &mut FxHashMap<NodeIndex, RefCell<BlockVars>>) {
+fn hydrate_block_vars(cfg: &ControlFlowGraph, block_vars: &mut OxcHashMap<NodeIndex, RefCell<BlockVars>>) {
     let mut changed = true;
     while changed {
         changed = false;
@@ -91,14 +100,13 @@ fn hydrate_block_vars(cfg: &ControlFlowGraph, block_vars: &mut FxHashMap<NodeInd
             let Ok(mut vars) = vars.try_borrow_mut() else {
                 return;
             };
-            let kills = Rc::clone(&vars.kills);
             cfg.graph
                 .neighbors_directed(*node_index, petgraph::Direction::Outgoing)
                 .filter_map(|node_index| block_vars.get(&node_index))
                 .filter_map(|outgoing| outgoing.try_borrow().ok())
                 .for_each(|outgoing| {
                     outgoing.in_gens.iter().for_each(|idx| {
-                        if !kills.contains(idx) {
+                        if !vars.kills.contains(idx) {
                             changed |= vars.in_gens.insert(*idx);
                         }
                         changed |= vars.out_gens.insert(*idx);
@@ -113,8 +121,9 @@ fn detect_unread(
     vars: &BlockVars,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
-) -> impl Iterator<Item = SyntaxNode> {
-    let mut sets = FxHashMap::<_, Vec<_>>::with_capacity_and_hasher(vars.kills.len(), FxBuildHasher);
+    allocator: &Allocator,
+) -> impl Iterator<Item = SymbolKey> {
+    let mut sets = OxcHashMap::<_, OxcVec<_>>::with_capacity_in(vars.kills.len(), allocator);
     bb.instrs(root).for_each(|instr| {
         match support::token(&instr, SyntaxKind::INSTR_NAME)
             .as_ref()
@@ -141,8 +150,8 @@ fn detect_unread(
                     }) = symbol_table.find_def(SymbolKey::new(&immediate))
                 {
                     sets.entry(*num)
-                        .or_insert_with(|| Vec::with_capacity(1))
-                        .push(Some(immediate));
+                        .or_insert_with(|| OxcVec::with_capacity_in(1, allocator))
+                        .push(Some(SymbolKey::new(&immediate)));
                 }
             }
             _ => {}
@@ -156,16 +165,15 @@ fn detect_unread(
     sets.into_values().flatten().flatten()
 }
 
-#[derive(Default)]
-struct BlockVars {
-    in_gens: FxHashSet<u32>,
-    out_gens: FxHashSet<u32>,
-    kills: Rc<FxHashSet<u32>>,
+struct BlockVars<'alloc> {
+    in_gens: OxcHashSet<'alloc, u32>,
+    out_gens: OxcHashSet<'alloc, u32>,
+    kills: OxcHashSet<'alloc, u32>,
 }
-impl BlockVars {
-    fn new(bb: &BasicBlock, root: &SyntaxNode, symbol_table: &SymbolTable) -> Self {
-        let mut gens = FxHashSet::default();
-        let mut kills = FxHashSet::default();
+impl<'alloc> BlockVars<'alloc> {
+    fn new(bb: &BasicBlock, root: &SyntaxNode, symbol_table: &SymbolTable, allocator: &'alloc Allocator) -> Self {
+        let mut gens = OxcHashSet::new_in(allocator);
+        let mut kills = OxcHashSet::new_in(allocator);
         bb.instrs(root).for_each(|instr| {
             match support::token(&instr, SyntaxKind::INSTR_NAME)
                 .as_ref()
@@ -187,9 +195,9 @@ impl BlockVars {
             }
         });
         Self {
-            in_gens: gens.clone(),
+            in_gens: OxcHashSet::from_iter_in(gens.iter().copied(), allocator),
             out_gens: gens,
-            kills: Rc::new(kills),
+            kills,
         }
     }
 }

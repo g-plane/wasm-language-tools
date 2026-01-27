@@ -39,6 +39,8 @@ mod unused;
 mod useless_catch;
 
 pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfig) -> Vec<lspt::Diagnostic> {
+    let mut allocator = oxc_allocator::Allocator::with_capacity(32 * 1024);
+
     let uri = document.uri(db);
     let line_index = document.line_index(db);
     let root = document.root_tree(db);
@@ -55,8 +57,24 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
         module.descendants().for_each(|node| match node.kind() {
             SyntaxKind::MODULE_FIELD_FUNC => {
                 typeck::check_func(&mut diagnostics, db, document, symbol_table, module_id, &node);
-                unreachable::check(&mut diagnostics, db, document, config.lint.unreachable, &root, &node);
-                uninit::check(&mut diagnostics, db, document, &root, symbol_table, &node);
+                unreachable::check(
+                    &mut diagnostics,
+                    db,
+                    document,
+                    config.lint.unreachable,
+                    &root,
+                    &node,
+                    &mut allocator,
+                );
+                uninit::check(
+                    &mut diagnostics,
+                    db,
+                    document,
+                    &root,
+                    symbol_table,
+                    &node,
+                    &mut allocator,
+                );
                 unread::check(
                     &mut diagnostics,
                     db,
@@ -65,6 +83,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                     &root,
                     symbol_table,
                     &node,
+                    &mut allocator,
                 );
                 if let Some(diagnostic) = import_with_def::check(&node) {
                     diagnostics.push(diagnostic);
@@ -72,7 +91,15 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
             }
             SyntaxKind::MODULE_FIELD_GLOBAL => {
                 typeck::check_global(&mut diagnostics, db, document, symbol_table, module_id, &node);
-                unreachable::check(&mut diagnostics, db, document, config.lint.unreachable, &root, &node);
+                unreachable::check(
+                    &mut diagnostics,
+                    db,
+                    document,
+                    config.lint.unreachable,
+                    &root,
+                    &node,
+                    &mut allocator,
+                );
                 if let Some(diagnostic) = const_expr::check(&node) {
                     diagnostics.push(diagnostic);
                 }
@@ -170,9 +197,16 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
         multi_starts::check(&mut diagnostics, &module);
     });
     undef::check(db, &mut diagnostics, symbol_table);
-    dup_names::check(db, &mut diagnostics, document, &root, symbol_table);
+    dup_names::check(db, &mut diagnostics, document, &root, symbol_table, &mut allocator);
     unused::check(db, &mut diagnostics, config.lint.unused, &root, symbol_table);
-    shadow::check(db, &mut diagnostics, config.lint.shadow, &root, symbol_table);
+    shadow::check(
+        db,
+        &mut diagnostics,
+        config.lint.shadow,
+        &root,
+        symbol_table,
+        &mut allocator,
+    );
     mutated_immutable::check(db, &mut diagnostics, document, symbol_table);
     needless_mut::check(db, &mut diagnostics, config.lint.needless_mut, document, symbol_table);
     subtyping::check(&mut diagnostics, db, document, &root, symbol_table);

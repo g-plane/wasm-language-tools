@@ -5,6 +5,7 @@ use crate::{
     document::Document,
 };
 use lspt::{DiagnosticSeverity, DiagnosticTag};
+use oxc_allocator::{Allocator, Vec as OxcVec};
 use rowan::{
     TextRange,
     ast::{AstNode, SyntaxNodePtr, support},
@@ -20,6 +21,7 @@ pub fn check(
     lint_level: LintLevel,
     root: &SyntaxNode,
     node: &SyntaxNode,
+    allocator: &mut Allocator,
 ) {
     let severity = match lint_level {
         LintLevel::Allow => return,
@@ -29,7 +31,7 @@ pub fn check(
     };
 
     let cfg = cfa::analyze(db, document, SyntaxNodePtr::new(node));
-    let mut ranges = Vec::<TextRange>::new();
+    let mut ranges = OxcVec::<TextRange>::new_in(allocator);
     cfg.graph.raw_nodes().iter().for_each(|node| {
         if !node.weight.unreachable {
             return;
@@ -94,4 +96,6 @@ pub fn check(
         tags: Some(vec![DiagnosticTag::Unnecessary]),
         ..Default::default()
     }));
+
+    allocator.reset();
 }

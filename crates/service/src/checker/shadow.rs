@@ -5,8 +5,8 @@ use crate::{
     idx::Idx,
 };
 use lspt::DiagnosticSeverity;
+use oxc_allocator::{Allocator, HashMap as OxcHashMap, Vec as OxcVec};
 use rowan::{TextRange, ast::support};
-use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "shadow";
@@ -17,6 +17,7 @@ pub fn check(
     lint_level: LintLevel,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
+    allocator: &mut Allocator,
 ) {
     let severity = match lint_level {
         LintLevel::Allow => return,
@@ -28,7 +29,7 @@ pub fn check(
         symbol_table
             .symbols
             .values()
-            .fold(FxHashMap::<_, Vec<_>>::default(), |mut map, symbol| {
+            .fold(OxcHashMap::new_in(allocator), |mut map, symbol| {
                 if let Symbol {
                     kind: SymbolKind::BlockDef,
                     idx: Idx { name: Some(name), .. },
@@ -36,18 +37,20 @@ pub fn check(
                 } = symbol
                 {
                     let name = *name;
-                    map.entry((symbol, name)).or_default().extend(
-                        symbol_table
-                            .symbols
-                            .values()
-                            .filter(|other| {
-                                *other != symbol
-                                    && other.kind == SymbolKind::BlockDef
-                                    && other.idx.name.is_some_and(|other| other == name)
-                                    && symbol.key.text_range().contains_range(other.key.text_range())
-                            })
-                            .map(|other| get_ident_range(other, root)),
-                    );
+                    map.entry((symbol, name))
+                        .or_insert_with(|| OxcVec::new_in(allocator))
+                        .extend(
+                            symbol_table
+                                .symbols
+                                .values()
+                                .filter(|other| {
+                                    *other != symbol
+                                        && other.kind == SymbolKind::BlockDef
+                                        && other.idx.name.is_some_and(|other| other == name)
+                                        && symbol.key.text_range().contains_range(other.key.text_range())
+                                })
+                                .map(|other| get_ident_range(other, root)),
+                        );
                 }
                 map
             })
@@ -73,6 +76,8 @@ pub fn check(
                 }
             }),
     );
+
+    allocator.reset();
 }
 
 fn get_ident_range(symbol: &Symbol, root: &SyntaxNode) -> TextRange {

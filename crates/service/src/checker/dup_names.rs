@@ -4,8 +4,8 @@ use crate::{
     document::Document,
     exports,
 };
+use oxc_allocator::{Allocator, HashMap as OxcHashMap, Vec as OxcVec};
 use rowan::{TextRange, ast::support};
-use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "duplicated-names";
@@ -16,6 +16,7 @@ pub fn check(
     document: Document,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
+    allocator: &mut Allocator,
 ) {
     diagnostics.extend(
         symbol_table
@@ -35,10 +36,10 @@ pub fn check(
                         | SymbolKind::TagDef
                 )
             })
-            .fold(FxHashMap::default(), |mut map, symbol| {
+            .fold(OxcHashMap::new_in(allocator), |mut map, symbol| {
                 if let Some(name) = symbol.idx.name {
                     map.entry((name, &symbol.region, symbol.idx_kind))
-                        .or_insert_with(|| Vec::with_capacity(1))
+                        .or_insert_with(|| OxcVec::with_capacity_in(1, allocator))
                         .push(symbol);
                 }
                 map
@@ -65,14 +66,15 @@ pub fn check(
                 })
             }),
     );
+    allocator.reset();
 
     exports::get_exports(db, document).values().for_each(|exports| {
         diagnostics.extend(
             exports
                 .iter()
-                .fold(FxHashMap::default(), |mut map, export| {
+                .fold(OxcHashMap::new_in(allocator), |mut map, export| {
                     map.entry(&export.name)
-                        .or_insert_with(|| Vec::with_capacity(1))
+                        .or_insert_with(|| OxcVec::with_capacity_in(1, allocator))
                         .push(export.range);
                     map
                 })
@@ -99,6 +101,7 @@ pub fn check(
                 }),
         );
     });
+    allocator.reset();
 }
 
 fn get_ident_range(symbol: &Symbol, root: &SyntaxNode) -> TextRange {
