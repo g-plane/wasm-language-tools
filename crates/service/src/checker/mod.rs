@@ -77,7 +77,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                     &node,
                     &mut allocator,
                 );
-                if let Some(diagnostic) = import_with_def::check(&node) {
+                if let Some(diagnostic) = import_with_def::check(db, document, &node) {
                     diagnostics.push(diagnostic);
                 }
             }
@@ -95,12 +95,12 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                 if let Some(diagnostic) = const_expr::check(&node) {
                     diagnostics.push(diagnostic);
                 }
-                if let Some(diagnostic) = import_with_def::check(&node) {
+                if let Some(diagnostic) = import_with_def::check(db, document, &node) {
                     diagnostics.push(diagnostic);
                 }
             }
             SyntaxKind::MODULE_FIELD_IMPORT => {
-                if let Some(diagnostic) = import_occur::check(&node) {
+                if let Some(diagnostic) = import_occur::check(db, document, &node) {
                     diagnostics.push(diagnostic);
                 }
             }
@@ -137,7 +137,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                 if let Some(diagnostic) = const_expr::check(&node) {
                     diagnostics.push(diagnostic);
                 }
-                if let Some(diagnostic) = import_with_def::check(&node) {
+                if let Some(diagnostic) = import_with_def::check(db, document, &node) {
                     diagnostics.push(diagnostic);
                 }
             }
@@ -147,7 +147,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                 }
             }
             SyntaxKind::MODULE_FIELD_MEMORY => {
-                if let Some(diagnostic) = import_with_def::check(&node) {
+                if let Some(diagnostic) = import_with_def::check(db, document, &node) {
                     diagnostics.push(diagnostic);
                 }
             }
@@ -170,7 +170,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
             }
             SyntaxKind::MODULE_FIELD_TAG => {
                 tag_type::check(&mut diagnostics, db, document, symbol_table, &node);
-                if let Some(diagnostic) = import_with_def::check(&node) {
+                if let Some(diagnostic) = import_with_def::check(db, document, &node) {
                     diagnostics.push(diagnostic);
                 }
             }
@@ -199,7 +199,6 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
         &mut diagnostics,
         document,
         config.lint.unused,
-        &root,
         symbol_table,
         &mut allocator,
     );

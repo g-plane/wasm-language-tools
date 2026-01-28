@@ -3,12 +3,11 @@ use crate::{
     LintLevel,
     binder::{Symbol, SymbolKind, SymbolTable},
     document::Document,
-    exports,
+    imex,
 };
 use lspt::{DiagnosticSeverity, DiagnosticTag};
 use oxc_allocator::{Allocator, HashSet as OxcHashSet};
-use rowan::{Direction, TextRange};
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use rowan::TextRange;
 
 const DIAGNOSTIC_CODE: &str = "unused";
 
@@ -17,7 +16,6 @@ pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     document: Document,
     lint_level: LintLevel,
-    root: &SyntaxNode,
     symbol_table: &SymbolTable,
     allocator: &mut Allocator,
 ) {
@@ -27,7 +25,8 @@ pub fn check(
         LintLevel::Warn => DiagnosticSeverity::Warning,
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
-    let exports = exports::get_exports(db, document);
+    let imports = imex::get_imports(db, document);
+    let exports = imex::get_exports(db, document);
     let used = OxcHashSet::from_iter_in(
         symbol_table.resolved.values().copied().chain(
             exports
@@ -36,55 +35,36 @@ pub fn check(
         ),
         allocator,
     );
-    diagnostics.extend(symbol_table.symbols.values().filter_map(|symbol| {
-        match symbol.kind {
-            SymbolKind::Func
-            | SymbolKind::Local
-            | SymbolKind::Type
-            | SymbolKind::GlobalDef
-            | SymbolKind::MemoryDef
-            | SymbolKind::TableDef
-            | SymbolKind::FieldDef
-            | SymbolKind::TagDef => {
-                if used.contains(&symbol.key) || is_prefixed_with_underscore(db, symbol) {
-                    None
-                } else {
-                    symbol_table
-                        .def_poi
-                        .get(&symbol.key)
-                        .map(|range| report(db, *range, severity, symbol))
-                }
+    diagnostics.extend(symbol_table.symbols.values().filter_map(|symbol| match symbol.kind {
+        SymbolKind::Func
+        | SymbolKind::Local
+        | SymbolKind::Type
+        | SymbolKind::GlobalDef
+        | SymbolKind::MemoryDef
+        | SymbolKind::TableDef
+        | SymbolKind::FieldDef
+        | SymbolKind::TagDef => {
+            if used.contains(&symbol.key) || is_prefixed_with_underscore(db, symbol) {
+                None
+            } else {
+                symbol_table
+                    .def_poi
+                    .get(&symbol.key)
+                    .map(|range| report(db, *range, severity, symbol))
             }
-            SymbolKind::Param => {
-                if used.contains(&symbol.key)
-                    || is_prefixed_with_underscore(db, symbol)
-                    || symbol
-                        .key
-                        .to_node(root)
-                        .parent()
-                        .and_then(|parent| {
-                            if parent.kind() == SyntaxKind::TYPE_USE {
-                                Some(parent)
-                            } else {
-                                parent.parent()
-                            }
-                        })
-                        .map(|node| {
-                            node.siblings(Direction::Prev)
-                                .any(|sibling| sibling.kind() == SyntaxKind::IMPORT)
-                        })
-                        .unwrap_or_default()
-                {
-                    None
-                } else {
-                    symbol_table
-                        .def_poi
-                        .get(&symbol.key)
-                        .map(|range| report(db, *range, severity, symbol))
-                }
-            }
-            _ => None,
         }
+        SymbolKind::Param => {
+            if used.contains(&symbol.key) || is_prefixed_with_underscore(db, symbol) || imports.contains(&symbol.region)
+            {
+                None
+            } else {
+                symbol_table
+                    .def_poi
+                    .get(&symbol.key)
+                    .map(|range| report(db, *range, severity, symbol))
+            }
+        }
+        _ => None,
     }));
     allocator.reset();
 }

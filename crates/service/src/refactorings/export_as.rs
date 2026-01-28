@@ -1,4 +1,4 @@
-use crate::{binder::SymbolKey, document::Document, exports, helpers::LineIndexExt, uri::InternUri};
+use crate::{binder::SymbolKey, document::Document, helpers::LineIndexExt, imex, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rowan::{TextRange, ast::support};
@@ -15,7 +15,7 @@ pub fn act(
     let def_key = SymbolKey::new(node);
     let ident_token = support::token(node, SyntaxKind::IDENT)?;
     let module = node.parent()?;
-    let exports = exports::get_exports(db, document);
+    let exports = imex::get_exports(db, document);
     if exports
         .get(&SyntaxNodePtr::new(&module))
         .is_some_and(|exports| exports.iter().any(|export| export.def_key == def_key))

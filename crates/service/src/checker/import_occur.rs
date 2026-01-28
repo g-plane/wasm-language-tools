@@ -1,9 +1,11 @@
 use super::Diagnostic;
+use crate::{binder::SymbolKey, document::Document, imex};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "import-occurrence";
 
-pub fn check(node: &SyntaxNode) -> Option<Diagnostic> {
+pub fn check(db: &dyn salsa::Database, document: Document, node: &SyntaxNode) -> Option<Diagnostic> {
+    let imports = imex::get_imports(db, document);
     if node.prev_sibling().is_some_and(|prev| {
         matches!(
             prev.kind(),
@@ -11,7 +13,8 @@ pub fn check(node: &SyntaxNode) -> Option<Diagnostic> {
                 | SyntaxKind::MODULE_FIELD_TABLE
                 | SyntaxKind::MODULE_FIELD_MEMORY
                 | SyntaxKind::MODULE_FIELD_GLOBAL
-        ) && !prev.children().any(|child| child.kind() == SyntaxKind::IMPORT)
+                | SyntaxKind::MODULE_FIELD_TAG
+        ) && !imports.contains(&SymbolKey::new(&prev))
     }) {
         Some(Diagnostic {
             range: node.text_range(),

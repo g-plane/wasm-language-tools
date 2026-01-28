@@ -2,7 +2,7 @@ use super::{Diagnostic, RelatedInformation};
 use crate::{
     binder::{SymbolKind, SymbolTable},
     document::Document,
-    exports,
+    imex,
 };
 use oxc_allocator::{Allocator, HashMap as OxcHashMap, Vec as OxcVec};
 
@@ -69,7 +69,7 @@ pub fn check(
     );
     allocator.reset();
 
-    exports::get_exports(db, document).values().for_each(|exports| {
+    imex::get_exports(db, document).values().for_each(|exports| {
         diagnostics.extend(
             exports
                 .iter()

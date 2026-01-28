@@ -7,6 +7,32 @@ use rowan::TextRange;
 use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNodePtr};
 
+#[salsa::tracked(returns(ref))]
+pub(crate) fn get_imports(db: &dyn salsa::Database, document: Document) -> Vec<SymbolKey> {
+    let root = document.root_tree(db);
+    SymbolTable::of(db, document)
+        .symbols
+        .iter()
+        .filter(|(_, symbol)| match symbol.key.kind() {
+            SyntaxKind::EXTERN_TYPE_FUNC
+            | SyntaxKind::EXTERN_TYPE_GLOBAL
+            | SyntaxKind::EXTERN_TYPE_MEMORY
+            | SyntaxKind::EXTERN_TYPE_TABLE
+            | SyntaxKind::EXTERN_TYPE_TAG => true,
+            SyntaxKind::MODULE_FIELD_FUNC
+            | SyntaxKind::MODULE_FIELD_GLOBAL
+            | SyntaxKind::MODULE_FIELD_MEMORY
+            | SyntaxKind::MODULE_FIELD_TABLE
+            | SyntaxKind::MODULE_FIELD_TAG => {
+                let node = symbol.key.to_node(&root);
+                node.children().any(|child| child.kind() == SyntaxKind::IMPORT)
+            }
+            _ => false,
+        })
+        .map(|(key, _)| *key)
+        .collect()
+}
+
 pub(crate) type ExportMap = FxHashMap<SyntaxNodePtr, Vec<Export>>;
 
 #[salsa::tracked(returns(ref))]
