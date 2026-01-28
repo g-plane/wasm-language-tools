@@ -1,8 +1,9 @@
 use crate::{binder::SymbolTable, config::ServiceConfig, document::Document, helpers::LineIndexExt};
 use lspt::{DiagnosticRelatedInformation, DiagnosticSeverity, DiagnosticTag, Location, Union2};
-use rowan::TextRange;
+use oxc_allocator::{Allocator, Vec as OxcVec};
+use rowan::{TextRange, ast::support};
 use std::cmp::Ordering;
-use wat_syntax::SyntaxKind;
+use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr};
 
 mod block_type;
 mod br_table_branches;
@@ -39,7 +40,7 @@ mod unused;
 mod useless_catch;
 
 pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfig) -> Vec<lspt::Diagnostic> {
-    let mut allocator = oxc_allocator::Allocator::with_capacity(32 * 1024);
+    let mut allocator = Allocator::with_capacity(32 * 1024);
 
     let uri = document.uri(db);
     let line_index = document.line_index(db);
@@ -104,18 +105,22 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                 }
             }
             SyntaxKind::PLAIN_INSTR => {
-                if let Some(diagnostic) = unknown_instr::check(&node) {
+                let Some(instr) = FastPlainInstr::new(&node, &allocator) else {
+                    return;
+                };
+                if let Some(diagnostic) = unknown_instr::check(&instr) {
                     diagnostics.push(diagnostic);
                 }
                 immediates::check(&mut diagnostics, &node);
                 br_table_branches::check(&mut diagnostics, db, document, symbol_table, &node);
-                if let Some(diagnostic) = packing::check(db, document, symbol_table, &node) {
+                if let Some(diagnostic) = packing::check(db, document, symbol_table, &instr) {
                     diagnostics.push(diagnostic);
                 }
-                type_misuse::check(db, &mut diagnostics, document, symbol_table, module_id, &node);
-                if let Some(diagnostic) = new_non_defaultable::check(db, document, symbol_table, &node) {
+                type_misuse::check(db, &mut diagnostics, document, symbol_table, module_id, &node, &instr);
+                if let Some(diagnostic) = new_non_defaultable::check(db, document, symbol_table, &instr) {
                     diagnostics.push(diagnostic);
                 }
+                allocator.reset();
             }
             SyntaxKind::BLOCK_TYPE => {
                 if let Some(diagnostic) = block_type::check(db, document, symbol_table, &node) {
@@ -258,5 +263,27 @@ impl Default for Diagnostic {
             related_information: Default::default(),
             data: None,
         }
+    }
+}
+
+struct FastPlainInstr<'alloc> {
+    ptr: SyntaxNodePtr,
+    name: &'alloc str,
+    name_range: TextRange,
+    immediates: OxcVec<'alloc, SyntaxNodePtr>,
+}
+impl<'alloc> FastPlainInstr<'alloc> {
+    fn new(node: &SyntaxNode, allocator: &'alloc Allocator) -> Option<Self> {
+        support::token(node, SyntaxKind::INSTR_NAME).map(|instr_name| Self {
+            ptr: SyntaxNodePtr::new(node),
+            name: allocator.alloc_str(instr_name.text()),
+            name_range: instr_name.text_range(),
+            immediates: OxcVec::from_iter_in(
+                node.children()
+                    .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                    .map(|immediate| SyntaxNodePtr::new(&immediate)),
+                allocator,
+            ),
+        })
     }
 }

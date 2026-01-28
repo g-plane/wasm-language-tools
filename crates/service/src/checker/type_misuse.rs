@@ -1,4 +1,4 @@
-use super::{Diagnostic, RelatedInformation};
+use super::{Diagnostic, FastPlainInstr, RelatedInformation};
 use crate::{
     binder::{Symbol, SymbolKey, SymbolTable},
     document::Document,
@@ -22,41 +22,41 @@ pub fn check(
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
+    instr: &FastPlainInstr,
 ) -> Option<()> {
     let def_types = get_def_types(db, document);
-    let instr_name = support::token(node, SyntaxKind::INSTR_NAME)?;
-    let instr_name = instr_name.text();
-    match instr_name.split_once('.') {
+    match instr.name.split_once('.') {
         Some(("struct", _)) => {
-            if let Some(diagnostic) = check_type_matches("struct", &node.first_child()?, db, symbol_table, def_types) {
+            if let Some(diagnostic) =
+                check_type_matches("struct", *instr.immediates.first()?, db, symbol_table, def_types)
+            {
                 diagnostics.push(diagnostic);
             }
         }
         Some(("array", "copy")) => {
-            let mut children = node.children();
-            let dst = children.next()?;
-            let dst_symbol = symbol_table.find_def(SymbolKey::new(&dst))?;
+            let dst = *instr.immediates.first()?;
+            let dst_symbol = symbol_table.find_def(dst.into())?;
             let dst_type = match &def_types.get(&dst_symbol.key)?.comp {
                 CompositeType::Func(..) => {
-                    diagnostics.push(build_diagnostic("array", "func", &dst, dst_symbol, db));
+                    diagnostics.push(build_diagnostic("array", "func", dst, dst_symbol, db));
                     None
                 }
                 CompositeType::Struct(..) => {
-                    diagnostics.push(build_diagnostic("array", "struct", &dst, dst_symbol, db));
+                    diagnostics.push(build_diagnostic("array", "struct", dst, dst_symbol, db));
                     None
                 }
                 CompositeType::Array(field_type) => field_type.as_ref(),
             };
 
-            let src = children.next()?;
-            let src_symbol = symbol_table.find_def(SymbolKey::new(&src))?;
+            let src = *instr.immediates.get(1)?;
+            let src_symbol = symbol_table.find_def(src.into())?;
             let src_type = match &def_types.get(&src_symbol.key)?.comp {
                 CompositeType::Func(..) => {
-                    diagnostics.push(build_diagnostic("array", "func", &src, src_symbol, db));
+                    diagnostics.push(build_diagnostic("array", "func", src, src_symbol, db));
                     None
                 }
                 CompositeType::Struct(..) => {
-                    diagnostics.push(build_diagnostic("array", "struct", &src, src_symbol, db));
+                    diagnostics.push(build_diagnostic("array", "struct", src, src_symbol, db));
                     None
                 }
                 CompositeType::Array(field_type) => field_type.as_ref(),
@@ -67,7 +67,7 @@ pub fn check(
                     if !src.matches(dst, db, document, module_id) =>
                 {
                     diagnostics.push(Diagnostic {
-                        range: node.text_range(),
+                        range: instr.ptr.text_range(),
                         code: DIAGNOSTIC_CODE.into(),
                         message: format!(
                             "destination array type `{}` doesn't match source array type `{}`",
@@ -91,13 +91,16 @@ pub fn check(
             }
         }
         Some(("array", _)) => {
-            if let Some(diagnostic) = check_type_matches("array", &node.first_child()?, db, symbol_table, def_types) {
+            if let Some(diagnostic) =
+                check_type_matches("array", *instr.immediates.first()?, db, symbol_table, def_types)
+            {
                 diagnostics.push(diagnostic);
             }
         }
-        _ => match instr_name {
+        _ => match instr.name {
             "call_ref" => {
-                if let Some(diagnostic) = check_type_matches("func", &node.first_child()?, db, symbol_table, def_types)
+                if let Some(diagnostic) =
+                    check_type_matches("func", *instr.immediates.first()?, db, symbol_table, def_types)
                 {
                     diagnostics.push(diagnostic);
                 }
@@ -225,7 +228,8 @@ pub fn check(
                 }
             }
             "return_call_ref" => {
-                if let Some(diagnostic) = check_type_matches("func", &node.first_child()?, db, symbol_table, def_types)
+                if let Some(diagnostic) =
+                    check_type_matches("func", *instr.immediates.first()?, db, symbol_table, def_types)
                 {
                     diagnostics.push(diagnostic);
                 }
@@ -269,12 +273,12 @@ pub fn check(
 
 fn check_type_matches(
     expected_kind: &'static str,
-    ref_node: &SyntaxNode,
+    immediate: SyntaxNodePtr,
     db: &dyn salsa::Database,
     symbol_table: &SymbolTable,
     def_types: &DefTypes,
 ) -> Option<Diagnostic> {
-    let def_symbol = symbol_table.find_def(SymbolKey::new(ref_node))?;
+    let def_symbol = symbol_table.find_def(immediate.into())?;
     let def_type = def_types.get(&def_symbol.key)?;
     let kind = match def_type.comp {
         CompositeType::Func(..) => "func",
@@ -284,7 +288,7 @@ fn check_type_matches(
     if kind == expected_kind {
         None
     } else {
-        Some(build_diagnostic(expected_kind, kind, ref_node, def_symbol, db))
+        Some(build_diagnostic(expected_kind, kind, immediate, def_symbol, db))
     }
 }
 
@@ -386,14 +390,14 @@ fn check_return_call_result_type(
 fn build_diagnostic(
     expected_kind: &'static str,
     actual_kind: &str,
-    ref_node: &SyntaxNode,
+    ptr: SyntaxNodePtr,
     def_symbol: &Symbol,
     db: &dyn salsa::Database,
 ) -> Diagnostic {
     debug_assert!(matches!(expected_kind, "func" | "struct" | "array"));
     debug_assert!(matches!(actual_kind, "func" | "struct" | "array"));
     Diagnostic {
-        range: ref_node.text_range(),
+        range: ptr.text_range(),
         code: DIAGNOSTIC_CODE.into(),
         message: format!(
             "expected type is {expected_kind}, but type of `{}` is {actual_kind}",

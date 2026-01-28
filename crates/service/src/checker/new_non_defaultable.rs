@@ -1,11 +1,9 @@
-use super::{Diagnostic, RelatedInformation};
+use super::{Diagnostic, FastPlainInstr, RelatedInformation};
 use crate::{
-    binder::{SymbolKey, SymbolKind, SymbolTable},
+    binder::{SymbolKind, SymbolTable},
     document::Document,
     types_analyzer::{self, CompositeType, FieldType, Fields, StorageType},
 };
-use rowan::ast::support;
-use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "new-non-defaultable";
 
@@ -13,15 +11,14 @@ pub fn check(
     db: &dyn salsa::Database,
     document: Document,
     symbol_table: &SymbolTable,
-    node: &SyntaxNode,
+    instr: &FastPlainInstr,
 ) -> Option<Diagnostic> {
     let def_types = types_analyzer::get_def_types(db, document);
-    let immediate = node.first_child()?;
-    let instr_name = support::token(node, SyntaxKind::INSTR_NAME)?;
-    if !instr_name.text().ends_with(".new_default") {
+    let immediate = instr.immediates.first().copied()?;
+    if !instr.name.ends_with(".new_default") {
         return None;
     }
-    let def_symbol = symbol_table.find_def(SymbolKey::new(&immediate))?;
+    let def_symbol = symbol_table.find_def(immediate.into())?;
     match &def_types.get(&def_symbol.key)?.comp {
         CompositeType::Struct(Fields(fields)) => {
             let non_defaultables = fields

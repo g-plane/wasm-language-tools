@@ -1,20 +1,16 @@
-use super::Diagnostic;
+use super::{Diagnostic, FastPlainInstr};
 use crate::data_set::INSTR_OP_CODES;
-use rowan::ast::support;
-use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "unknown-instr";
 
-pub fn check(node: &SyntaxNode) -> Option<Diagnostic> {
-    let token = support::token(node, SyntaxKind::INSTR_NAME)?;
-    let instr_name = token.text();
-    if INSTR_OP_CODES.contains_key(instr_name) {
+pub fn check(instr: &FastPlainInstr) -> Option<Diagnostic> {
+    if INSTR_OP_CODES.contains_key(instr.name) {
         None
     } else {
         Some(Diagnostic {
-            range: token.text_range(),
+            range: instr.name_range,
             code: DIAGNOSTIC_CODE.into(),
-            message: format!("unknown instruction `{instr_name}`"),
+            message: format!("unknown instruction `{}`", instr.name),
             ..Default::default()
         })
     }
