@@ -6,7 +6,7 @@ use crate::{
     exports,
 };
 use lspt::{DiagnosticSeverity, DiagnosticTag};
-use rowan::{Direction, TextRange, ast::support};
+use rowan::{Direction, TextRange};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "unused";
@@ -40,7 +40,10 @@ pub fn check(
                 {
                     None
                 } else {
-                    Some(report(db, root, severity, symbol))
+                    symbol_table
+                        .def_poi
+                        .get(&symbol.key)
+                        .map(|range| report(db, *range, severity, symbol))
                 }
             }
             SymbolKind::Param | SymbolKind::Local => {
@@ -65,22 +68,20 @@ pub fn check(
                 {
                     None
                 } else {
-                    let node = symbol.key.to_node(root);
-                    let range = support::token(&node, SyntaxKind::IDENT)
-                        .map(|token| token.text_range())
-                        .unwrap_or_else(|| node.text_range());
-                    Some(report_with_range(db, range, severity, symbol))
+                    symbol_table
+                        .def_poi
+                        .get(&symbol.key)
+                        .map(|range| report(db, *range, severity, symbol))
                 }
             }
             SymbolKind::FieldDef => {
                 if is_prefixed_with_underscore(db, symbol) || is_used(symbol_table, symbol) {
                     None
                 } else {
-                    let node = symbol.key.to_node(root);
-                    let range = support::token(&node, SyntaxKind::IDENT)
-                        .map(|token| token.text_range())
-                        .unwrap_or_else(|| node.text_range());
-                    Some(report_with_range(db, range, severity, symbol))
+                    symbol_table
+                        .def_poi
+                        .get(&symbol.key)
+                        .map(|range| report(db, *range, severity, symbol))
                 }
             }
             _ => None,
@@ -102,21 +103,7 @@ fn is_exported(def_symbol: &Symbol, exports: &exports::ExportMap) -> bool {
         .is_some_and(|exports| exports.iter().any(|export| export.def_key == def_symbol.key))
 }
 
-fn report(db: &dyn salsa::Database, root: &SyntaxNode, severity: DiagnosticSeverity, symbol: &Symbol) -> Diagnostic {
-    let node = symbol.key.to_node(root);
-    let range = support::token(&node, SyntaxKind::IDENT)
-        .or_else(|| support::token(&node, SyntaxKind::KEYWORD))
-        .map(|token| token.text_range())
-        .unwrap_or_else(|| node.text_range());
-    report_with_range(db, range, severity, symbol)
-}
-
-fn report_with_range(
-    db: &dyn salsa::Database,
-    range: TextRange,
-    severity: DiagnosticSeverity,
-    symbol: &Symbol,
-) -> Diagnostic {
+fn report(db: &dyn salsa::Database, range: TextRange, severity: DiagnosticSeverity, symbol: &Symbol) -> Diagnostic {
     Diagnostic {
         range,
         severity,

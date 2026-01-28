@@ -118,11 +118,11 @@ expression: response
             "selectionRange": {
               "start": {
                 "line": 2,
-                "character": 71
+                "character": 70
               },
               "end": {
                 "line": 2,
-                "character": 74
+                "character": 77
               }
             }
           }

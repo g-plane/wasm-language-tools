@@ -93,10 +93,10 @@ impl LanguageService {
                                 num: Some(num),
                                 name: None,
                             } = symbol.idx
-                            && let Some(keyword) = support::token(&symbol.key.to_node(&root), SyntaxKind::KEYWORD)
+                            && let Some(range) = symbol_table.def_poi.get(&symbol.key)
                         {
                             inlay_hints.push(InlayHint {
-                                position: line_index.convert(keyword.text_range().end()),
+                                position: line_index.convert(range.end()),
                                 label: Union2::A(format!("(;{num};)")),
                                 kind: None,
                                 text_edits: None,
@@ -148,10 +148,10 @@ impl LanguageService {
                                 num: Some(num),
                                 name: None,
                             } = symbol.idx
-                            && let Some(keyword) = support::token(&symbol.key.to_node(&root), SyntaxKind::KEYWORD)
+                            && let Some(range) = symbol_table.def_poi.get(&symbol.key)
                         {
                             inlay_hints.push(InlayHint {
-                                position: line_index.convert(keyword.text_range().end()),
+                                position: line_index.convert(range.end()),
                                 label: Union2::A(format!("(;{num};)")),
                                 kind: None,
                                 text_edits: None,

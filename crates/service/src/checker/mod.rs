@@ -193,16 +193,9 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
         multi_starts::check(&mut diagnostics, &module);
     });
     undef::check(db, &mut diagnostics, symbol_table);
-    dup_names::check(db, &mut diagnostics, document, &root, symbol_table, &mut allocator);
+    dup_names::check(db, &mut diagnostics, document, symbol_table, &mut allocator);
     unused::check(db, &mut diagnostics, document, config.lint.unused, &root, symbol_table);
-    shadow::check(
-        db,
-        &mut diagnostics,
-        config.lint.shadow,
-        &root,
-        symbol_table,
-        &mut allocator,
-    );
+    shadow::check(db, &mut diagnostics, config.lint.shadow, symbol_table, &mut allocator);
     mutated_immutable::check(db, &mut diagnostics, document, symbol_table);
     needless_mut::check(db, &mut diagnostics, config.lint.needless_mut, document, symbol_table);
     subtyping::check(&mut diagnostics, db, document, &root, symbol_table);

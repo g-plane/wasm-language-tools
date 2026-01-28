@@ -26,7 +26,7 @@ impl LanguageService {
                 .values()
                 .filter_map(|symbol| {
                     let range = line_index.convert(symbol.key.text_range());
-                    let selection_range = helpers::create_selection_range(symbol, &root, line_index);
+                    let selection_range = line_index.convert(*symbol_table.def_poi.get(&symbol.key)?);
                     let tags = if deprecation.contains_key(&symbol.key) {
                         Some(vec![SymbolTag::Deprecated])
                     } else {

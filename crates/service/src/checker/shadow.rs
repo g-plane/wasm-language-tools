@@ -6,8 +6,6 @@ use crate::{
 };
 use lspt::DiagnosticSeverity;
 use oxc_allocator::{Allocator, HashMap as OxcHashMap, Vec as OxcVec};
-use rowan::{TextRange, ast::support};
-use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "shadow";
 
@@ -15,7 +13,6 @@ pub fn check(
     db: &dyn salsa::Database,
     diagnostics: &mut Vec<Diagnostic>,
     lint_level: LintLevel,
-    root: &SyntaxNode,
     symbol_table: &SymbolTable,
     allocator: &mut Allocator,
 ) {
@@ -49,17 +46,18 @@ pub fn check(
                                         && other.idx.name.is_some_and(|other| other == name)
                                         && symbol.key.text_range().contains_range(other.key.text_range())
                                 })
-                                .map(|other| get_ident_range(other, root)),
+                                .filter_map(|other| symbol_table.def_poi.get(&other.key).copied()),
                         );
                 }
                 map
             })
             .into_iter()
             .filter(|(_, ranges)| !ranges.is_empty())
-            .map(|((symbol, name), ranges)| {
+            .filter_map(|((symbol, name), ranges)| {
                 let name = name.ident(db);
-                Diagnostic {
-                    range: get_ident_range(symbol, root),
+                let range = symbol_table.def_poi.get(&symbol.key)?;
+                Some(Diagnostic {
+                    range: *range,
                     severity,
                     code: DIAGNOSTIC_CODE.into(),
                     message: format!("`{name}` is shadowed"),
@@ -73,15 +71,9 @@ pub fn check(
                             .collect(),
                     ),
                     ..Default::default()
-                }
+                })
             }),
     );
 
     allocator.reset();
-}
-
-fn get_ident_range(symbol: &Symbol, root: &SyntaxNode) -> TextRange {
-    support::token(&symbol.key.to_node(root), SyntaxKind::IDENT)
-        .map(|token| token.text_range())
-        .unwrap_or_else(|| symbol.key.text_range())
 }

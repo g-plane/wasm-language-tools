@@ -1,12 +1,10 @@
 use super::{Diagnostic, RelatedInformation};
 use crate::{
-    binder::{Symbol, SymbolKind, SymbolTable},
+    binder::{SymbolKind, SymbolTable},
     document::Document,
     exports,
 };
 use oxc_allocator::{Allocator, HashMap as OxcHashMap, Vec as OxcVec};
-use rowan::{TextRange, ast::support};
-use wat_syntax::{SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "duplicated-names";
 
@@ -14,7 +12,6 @@ pub fn check(
     db: &dyn salsa::Database,
     diagnostics: &mut Vec<Diagnostic>,
     document: Document,
-    root: &SyntaxNode,
     symbol_table: &SymbolTable,
     allocator: &mut Allocator,
 ) {
@@ -48,21 +45,25 @@ pub fn check(
             .filter(|(_, symbols)| symbols.len() > 1)
             .flat_map(|((name, _, kind), symbols)| {
                 let name = name.ident(db);
-                symbols.iter().map(move |symbol| Diagnostic {
-                    range: get_ident_range(symbol, root),
-                    code: DIAGNOSTIC_CODE.into(),
-                    message: format!("duplicated {kind} name `{name}` in this scope"),
-                    related_information: Some(
-                        symbols
-                            .iter()
-                            .filter(|other| *other != symbol)
-                            .map(|symbol| RelatedInformation {
-                                range: get_ident_range(symbol, root),
-                                message: format!("already defined here as `{name}`"),
-                            })
-                            .collect(),
-                    ),
-                    ..Default::default()
+                symbols.iter().filter_map(move |symbol| {
+                    symbol_table.def_poi.get(&symbol.key).map(|range| Diagnostic {
+                        range: *range,
+                        code: DIAGNOSTIC_CODE.into(),
+                        message: format!("duplicated {kind} name `{name}` in this scope"),
+                        related_information: Some(
+                            symbols
+                                .iter()
+                                .filter(|other| *other != symbol)
+                                .filter_map(|symbol| {
+                                    symbol_table.def_poi.get(&symbol.key).map(|range| RelatedInformation {
+                                        range: *range,
+                                        message: format!("already defined here as `{name}`"),
+                                    })
+                                })
+                                .collect(),
+                        ),
+                        ..Default::default()
+                    })
                 })
             }),
     );
@@ -102,10 +103,4 @@ pub fn check(
         );
     });
     allocator.reset();
-}
-
-fn get_ident_range(symbol: &Symbol, root: &SyntaxNode) -> TextRange {
-    support::token(&symbol.key.to_node(root), SyntaxKind::IDENT)
-        .map(|token| token.text_range())
-        .unwrap_or_else(|| symbol.key.text_range())
 }
