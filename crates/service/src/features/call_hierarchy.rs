@@ -136,7 +136,7 @@ impl LanguageService {
         let func = call_def_symbol.key.to_node(root);
         let items = func
             .descendants()
-            .filter(|node| node.kind() == SyntaxKind::PLAIN_INSTR && helpers::ast::is_call(node))
+            .filter(|node| node.kind() == SyntaxKind::PLAIN_INSTR && helpers::syntax::is_call(node))
             .flat_map(|node| {
                 let plain_instr_range = line_index.convert(node.text_range());
                 let uri = &params.item.uri;

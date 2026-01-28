@@ -172,7 +172,7 @@ fn create_def_hover(
 
 fn create_func_hover(db: &dyn salsa::Database, document: Document, symbol: Symbol, root: &SyntaxNode) -> String {
     let node = symbol.key.to_node(root);
-    let doc = helpers::ast::get_doc_comment(&node);
+    let doc = helpers::syntax::get_doc_comment(&node);
     let mut content = format!(
         "```wat\n{}\n```",
         types_analyzer::render_func_header(

@@ -18,7 +18,7 @@ pub(crate) fn get_exports(db: &dyn salsa::Database, document: Document) -> FxHas
             module.children().for_each(|module_field| {
                 if module_field.kind() == SyntaxKind::MODULE_FIELD_EXPORT {
                     if let Some(name) = module_field.first_child_by_kind(&|kind| kind == SyntaxKind::NAME)
-                        && let Some(def_key) = helpers::ast::extract_index_from_export(&module_field)
+                        && let Some(def_key) = helpers::syntax::extract_index_from_export(&module_field)
                             .and_then(|index| symbol_table.resolved.get(&SymbolKey::new(&index)))
                     {
                         exports.push(Export {

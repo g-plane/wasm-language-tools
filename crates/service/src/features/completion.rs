@@ -30,7 +30,7 @@ impl LanguageService {
         self.with_db(|db| {
             let line_index = document.line_index(db);
             let root = document.root_tree(db);
-            let token = helpers::ast::find_token(&root, line_index.convert(params.position)?)?;
+            let token = helpers::syntax::find_token(&root, line_index.convert(params.position)?)?;
 
             let cmp_ctx = get_cmp_ctx(&token)?;
             Some(get_cmp_list(db, cmp_ctx, &token, document, line_index, &root))
@@ -746,7 +746,7 @@ fn get_cmp_list(
                 };
                 let func_key = SymbolKey::new(&func);
                 let preferred_type = guess_preferred_type(db, document, token);
-                let param_region = if let Some(type_use) = helpers::ast::pick_type_idx_from_func(&func)
+                let param_region = if let Some(type_use) = helpers::syntax::pick_type_idx_from_func(&func)
                     && let Some(type_def) = symbol_table.resolved.get(&SymbolKey::new(&type_use))
                 {
                     *type_def
@@ -822,7 +822,7 @@ fn get_cmp_list(
                         }),
                         documentation: Some(Union2::B(MarkupContent {
                             kind: MarkupKind::Markdown,
-                            value: helpers::ast::get_doc_comment(&symbol.key.to_node(root)),
+                            value: helpers::syntax::get_doc_comment(&symbol.key.to_node(root)),
                         })),
                         tags: if deprecation.contains_key(&symbol.key) {
                             Some(vec![CompletionItemTag::Deprecated])

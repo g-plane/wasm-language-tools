@@ -425,7 +425,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                     if let Some((def_key, _)) = search_def(&locals, symbol.idx) {
                                         resolved.insert(symbol.key, *def_key);
                                     } else if let Some(num) = symbol.idx.num
-                                        && let Some(idx) = helpers::ast::pick_type_idx_from_func(&func)
+                                        && let Some(idx) = helpers::syntax::pick_type_idx_from_func(&func)
                                     {
                                         indirect_params.push((SymbolKey::new(&idx), symbol.key, num));
                                     }

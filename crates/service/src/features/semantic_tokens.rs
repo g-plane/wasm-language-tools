@@ -145,7 +145,7 @@ fn compute_token_type(
             let parent = token.parent();
             let grand = parent.as_ref().and_then(|parent| parent.parent());
             if grand.as_ref().is_some_and(|grand| {
-                helpers::ast::is_call(grand)
+                helpers::syntax::is_call(grand)
                     || matches!(
                         grand.kind(),
                         SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXTERN_IDX_FUNC | SyntaxKind::ELEM_LIST
@@ -171,7 +171,7 @@ fn compute_token_type(
         SyntaxKind::IDENT => {
             let parent = token.parent();
             if parent.as_ref().and_then(|parent| parent.parent()).is_some_and(|grand| {
-                helpers::ast::is_call(&grand)
+                helpers::syntax::is_call(&grand)
                     || matches!(
                         grand.kind(),
                         SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXTERN_IDX_FUNC | SyntaxKind::ELEM_LIST

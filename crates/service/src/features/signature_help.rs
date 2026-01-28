@@ -24,7 +24,7 @@ impl LanguageService {
             let root = document.root_tree(db);
             let symbol_table = SymbolTable::of(db, document);
 
-            let token = helpers::ast::find_token(&root, line_index.convert(params.position)?)?;
+            let token = helpers::syntax::find_token(&root, line_index.convert(params.position)?)?;
             let (node, instr, is_next) = if token.kind() == SyntaxKind::ERROR {
                 (
                     token.parent()?,
@@ -111,7 +111,7 @@ impl LanguageService {
                     documentation: func.map(|func| {
                         Union2::B(MarkupContent {
                             kind: MarkupKind::Markdown,
-                            value: helpers::ast::get_doc_comment(&func.key.to_node(&root)),
+                            value: helpers::syntax::get_doc_comment(&func.key.to_node(&root)),
                         })
                     }),
                     parameters: Some(parameters),

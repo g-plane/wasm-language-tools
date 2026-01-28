@@ -1,14 +1,8 @@
 use crate::binder::{Symbol, SymbolKey};
 use line_index::{LineCol, LineIndex};
 use lspt::{Location, Position, Range};
-use rowan::{
-    TextRange, TextSize,
-    ast::{AstNode, support},
-};
-use wat_syntax::{
-    SyntaxKind, SyntaxNode,
-    ast::{CompType, TypeDef},
-};
+use rowan::{TextRange, TextSize, ast::support};
+use wat_syntax::{SyntaxKind, SyntaxNode};
 
 pub trait LineIndexExt<In> {
     type Out;
@@ -103,29 +97,22 @@ pub fn create_location_by_symbol(
     }
 }
 
-pub fn infer_type_def_symbol_detail(symbol: &Symbol, root: &SyntaxNode) -> Option<String> {
-    TypeDef::cast(symbol.key.to_node(root))
-        .and_then(|node| node.sub_type())
-        .and_then(|sub_type| sub_type.comp_type())
-        .map(|comp_type| match comp_type {
-            CompType::Array(..) => "array".into(),
-            CompType::Struct(..) => "struct".into(),
-            CompType::Func(..) => "func".into(),
-        })
-}
-
 pub(crate) struct RenderWithDb<'db, T> {
     pub value: T,
     pub db: &'db dyn salsa::Database,
 }
 
-pub(crate) mod ast {
+pub(crate) mod syntax {
+    use crate::binder::Symbol;
     use rowan::{
         Direction, TextSize, TokenAtOffset,
         ast::{AstNode, support},
     };
     use std::ops::ControlFlow;
-    use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, ast::ExternIdx};
+    use wat_syntax::{
+        SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken,
+        ast::{CompType, ExternIdx, TypeDef},
+    };
 
     /// Pick the `$idx` part from `(func (type $idx) ...)`.
     /// It will return `None` if there're inlined params or results.
@@ -155,6 +142,17 @@ pub(crate) mod ast {
     pub fn is_call(node: &SyntaxNode) -> bool {
         support::token(node, SyntaxKind::INSTR_NAME)
             .is_some_and(|token| matches!(token.text(), "call" | "ref.func" | "return_call"))
+    }
+
+    pub fn infer_type_def_symbol_detail(symbol: &Symbol, root: &SyntaxNode) -> Option<String> {
+        TypeDef::cast(symbol.key.to_node(root))
+            .and_then(|node| node.sub_type())
+            .and_then(|sub_type| sub_type.comp_type())
+            .map(|comp_type| match comp_type {
+                CompType::Array(..) => "array".into(),
+                CompType::Struct(..) => "struct".into(),
+                CompType::Func(..) => "func".into(),
+            })
     }
 
     pub fn find_token(root: &SyntaxNode, offset: TextSize) -> Option<SyntaxToken> {

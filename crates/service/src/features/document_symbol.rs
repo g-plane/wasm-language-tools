@@ -85,7 +85,7 @@ impl LanguageService {
                                 symbol.key,
                                 DocumentSymbol {
                                     name: render_symbol_name(symbol, db),
-                                    detail: helpers::infer_type_def_symbol_detail(symbol, &root),
+                                    detail: helpers::syntax::infer_type_def_symbol_detail(symbol, &root),
                                     kind: LspSymbolKind::Class,
                                     tags,
                                     deprecated: None,
