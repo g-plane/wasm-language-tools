@@ -6,6 +6,7 @@ use crate::{
     exports,
 };
 use lspt::{DiagnosticSeverity, DiagnosticTag};
+use oxc_allocator::{Allocator, HashSet as OxcHashSet};
 use rowan::{Direction, TextRange};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
@@ -18,6 +19,7 @@ pub fn check(
     lint_level: LintLevel,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
+    allocator: &mut Allocator,
 ) {
     let severity = match lint_level {
         LintLevel::Allow => return,
@@ -26,18 +28,25 @@ pub fn check(
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
     let exports = exports::get_exports(db, document);
+    let used = OxcHashSet::from_iter_in(
+        symbol_table.resolved.values().copied().chain(
+            exports
+                .values()
+                .flat_map(|exports| exports.iter().map(|export| export.def_key)),
+        ),
+        allocator,
+    );
     diagnostics.extend(symbol_table.symbols.values().filter_map(|symbol| {
         match symbol.kind {
             SymbolKind::Func
+            | SymbolKind::Local
             | SymbolKind::Type
             | SymbolKind::GlobalDef
             | SymbolKind::MemoryDef
             | SymbolKind::TableDef
+            | SymbolKind::FieldDef
             | SymbolKind::TagDef => {
-                if is_prefixed_with_underscore(db, symbol)
-                    || is_used(symbol_table, symbol)
-                    || is_exported(symbol, exports)
-                {
+                if used.contains(&symbol.key) || is_prefixed_with_underscore(db, symbol) {
                     None
                 } else {
                     symbol_table
@@ -46,9 +55,9 @@ pub fn check(
                         .map(|range| report(db, *range, severity, symbol))
                 }
             }
-            SymbolKind::Param | SymbolKind::Local => {
-                if is_prefixed_with_underscore(db, symbol)
-                    || is_used(symbol_table, symbol)
+            SymbolKind::Param => {
+                if used.contains(&symbol.key)
+                    || is_prefixed_with_underscore(db, symbol)
                     || symbol
                         .key
                         .to_node(root)
@@ -74,33 +83,14 @@ pub fn check(
                         .map(|range| report(db, *range, severity, symbol))
                 }
             }
-            SymbolKind::FieldDef => {
-                if is_prefixed_with_underscore(db, symbol) || is_used(symbol_table, symbol) {
-                    None
-                } else {
-                    symbol_table
-                        .def_poi
-                        .get(&symbol.key)
-                        .map(|range| report(db, *range, severity, symbol))
-                }
-            }
             _ => None,
         }
     }));
+    allocator.reset();
 }
 
 fn is_prefixed_with_underscore(db: &dyn salsa::Database, symbol: &Symbol) -> bool {
     symbol.idx.name.is_some_and(|name| name.ident(db).starts_with("$_"))
-}
-
-fn is_used(symbol_table: &SymbolTable, symbol: &Symbol) -> bool {
-    symbol_table.resolved.values().any(|key| key == &symbol.key)
-}
-
-fn is_exported(def_symbol: &Symbol, exports: &exports::ExportMap) -> bool {
-    exports
-        .get(&def_symbol.region)
-        .is_some_and(|exports| exports.iter().any(|export| export.def_key == def_symbol.key))
 }
 
 fn report(db: &dyn salsa::Database, range: TextRange, severity: DiagnosticSeverity, symbol: &Symbol) -> Diagnostic {
