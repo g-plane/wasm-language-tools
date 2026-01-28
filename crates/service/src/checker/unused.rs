@@ -2,6 +2,8 @@ use super::Diagnostic;
 use crate::{
     LintLevel,
     binder::{Symbol, SymbolKind, SymbolTable},
+    document::Document,
+    exports,
 };
 use lspt::{DiagnosticSeverity, DiagnosticTag};
 use rowan::{Direction, TextRange, ast::support};
@@ -12,6 +14,7 @@ const DIAGNOSTIC_CODE: &str = "unused";
 pub fn check(
     db: &dyn salsa::Database,
     diagnostics: &mut Vec<Diagnostic>,
+    document: Document,
     lint_level: LintLevel,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
@@ -22,6 +25,7 @@ pub fn check(
         LintLevel::Warn => DiagnosticSeverity::Warning,
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
+    let exports = exports::get_exports(db, document);
     diagnostics.extend(symbol_table.symbols.values().filter_map(|symbol| {
         match symbol.kind {
             SymbolKind::Func
@@ -30,7 +34,9 @@ pub fn check(
             | SymbolKind::MemoryDef
             | SymbolKind::TableDef
             | SymbolKind::TagDef => {
-                if is_prefixed_with_underscore(db, symbol) || is_used(symbol_table, symbol) || is_exported(root, symbol)
+                if is_prefixed_with_underscore(db, symbol)
+                    || is_used(symbol_table, symbol)
+                    || is_exported(symbol, exports)
                 {
                     None
                 } else {
@@ -90,9 +96,10 @@ fn is_used(symbol_table: &SymbolTable, symbol: &Symbol) -> bool {
     symbol_table.resolved.values().any(|key| key == &symbol.key)
 }
 
-fn is_exported(root: &SyntaxNode, def_symbol: &Symbol) -> bool {
-    let node = def_symbol.key.to_node(root);
-    node.children().any(|child| child.kind() == SyntaxKind::EXPORT)
+fn is_exported(def_symbol: &Symbol, exports: &exports::ExportMap) -> bool {
+    exports
+        .get(&def_symbol.region)
+        .is_some_and(|exports| exports.iter().any(|export| export.def_key == def_symbol.key))
 }
 
 fn report(db: &dyn salsa::Database, root: &SyntaxNode, severity: DiagnosticSeverity, symbol: &Symbol) -> Diagnostic {

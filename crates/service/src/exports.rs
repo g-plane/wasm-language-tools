@@ -7,8 +7,10 @@ use rowan::TextRange;
 use rustc_hash::FxHashMap;
 use wat_syntax::{SyntaxKind, SyntaxNodePtr};
 
+pub(crate) type ExportMap = FxHashMap<SyntaxNodePtr, Vec<Export>>;
+
 #[salsa::tracked(returns(ref))]
-pub(crate) fn get_exports(db: &dyn salsa::Database, document: Document) -> FxHashMap<SyntaxNodePtr, Vec<Export>> {
+pub(crate) fn get_exports(db: &dyn salsa::Database, document: Document) -> ExportMap {
     let symbol_table = SymbolTable::of(db, document);
     document
         .root_tree(db)
