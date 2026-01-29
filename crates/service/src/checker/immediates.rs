@@ -1,22 +1,19 @@
-use super::Diagnostic;
-use rowan::ast::{AstNode, support};
+use super::{Diagnostic, FastPlainInstr};
+use rowan::ast::AstNode;
 use std::iter::Peekable;
-use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxToken, ast::Immediate};
+use wat_syntax::{SyntaxKind, SyntaxNode, ast::Immediate};
 
 const DIAGNOSTIC_CODE: &str = "immediates";
 
 const INDEX: [SyntaxKind; 2] = [SyntaxKind::IDENT, SyntaxKind::INT];
 
-pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
-    let Some(instr_name) = support::token(node, SyntaxKind::INSTR_NAME) else {
-        return;
-    };
+pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastPlainInstr) {
     let mut immediates = node
         .children()
         .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
         .peekable();
 
-    match instr_name.text() {
+    match instr.name {
         "call" | "local.get" | "local.set" | "local.tee" | "global.get" | "global.set" | "ref.func" | "data.drop"
         | "elem.drop" | "br" | "br_if" | "struct.new" | "struct.new_default" | "array.new" | "array.new_default"
         | "array.get" | "array.get_u" | "array.get_s" | "array.set" | "array.fill" | "br_on_null"
@@ -26,11 +23,11 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
-                &instr_name,
+                instr,
             );
         }
         "i32.const" | "i64.const" => {
-            check_immediate::<true>(diagnostics, &mut immediates, SyntaxKind::INT, "integer", &instr_name);
+            check_immediate::<true>(diagnostics, &mut immediates, SyntaxKind::INT, "integer", instr);
         }
         "f32.const" | "f64.const" => {
             check_immediate::<true>(
@@ -38,7 +35,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                 &mut immediates,
                 [SyntaxKind::FLOAT, SyntaxKind::INT],
                 "floating-point number",
-                &instr_name,
+                instr,
             );
         }
         "select" => {
@@ -77,7 +74,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
-                &instr_name,
+                instr,
             );
             diagnostics.extend(
                 immediates
@@ -101,15 +98,9 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
-                &instr_name,
+                instr,
             );
-            check_immediate::<false>(
-                diagnostics,
-                &mut immediates,
-                SyntaxKind::TYPE_USE,
-                "type use",
-                &instr_name,
-            );
+            check_immediate::<false>(diagnostics, &mut immediates, SyntaxKind::TYPE_USE, "type use", instr);
         }
         "struct.get" | "struct.get_u" | "struct.get_s" | "struct.set" | "array.new_data" | "array.new_elem"
         | "array.copy" | "array.init_data" | "array.init_elem" => {
@@ -118,14 +109,14 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
-                &instr_name,
+                instr,
             );
             check_immediate::<true>(
                 diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
-                &instr_name,
+                instr,
             );
         }
         "i32.load" | "i64.load" | "f32.load" | "f64.load" | "i32.load8_s" | "i32.load8_u" | "i32.load16_s"
@@ -140,14 +131,14 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
-                &instr_name,
+                instr,
             );
             check_immediate::<false>(
                 diagnostics,
                 &mut immediates,
                 SyntaxKind::MEM_ARG,
                 "memory argument",
-                &instr_name,
+                instr,
             );
         }
         "memory.size" | "memory.grow" | "memory.fill" | "table.get" | "table.set" | "table.grow" | "table.size"
@@ -157,7 +148,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
-                &instr_name,
+                instr,
             );
         }
         "memory.copy" | "table.copy" => {
@@ -166,14 +157,14 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
-                &instr_name,
+                instr,
             );
             check_immediate::<false>(
                 diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
-                &instr_name,
+                instr,
             );
         }
         "memory.init" | "table.init" => {
@@ -182,14 +173,14 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
-                &instr_name,
+                instr,
             );
             check_immediate::<false>(
                 diagnostics,
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
-                &instr_name,
+                instr,
             );
         }
         "v128.const" => {
@@ -198,7 +189,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                 &mut immediates,
                 SyntaxKind::SHAPE_DESCRIPTOR,
                 "shape descriptor",
-                &instr_name,
+                instr,
             );
             if let Some((allow_float, expected_count)) = node
                 .first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
@@ -231,12 +222,12 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                             &mut immediates,
                             [SyntaxKind::FLOAT, SyntaxKind::INT],
                             "floating-point number",
-                            &instr_name,
+                            instr,
                         );
                     }
                 } else {
                     for _ in 0..actual_count {
-                        check_immediate::<true>(diagnostics, &mut immediates, SyntaxKind::INT, "integer", &instr_name);
+                        check_immediate::<true>(diagnostics, &mut immediates, SyntaxKind::INT, "integer", instr);
                     }
                 }
             }
@@ -260,7 +251,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
-                &instr_name,
+                instr,
             );
         }
         "i8x16.shuffle" => {
@@ -296,22 +287,16 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
-                &instr_name,
+                instr,
             );
             check_immediate::<false>(
                 diagnostics,
                 &mut immediates,
                 SyntaxKind::MEM_ARG,
                 "memory argument",
-                &instr_name,
+                instr,
             );
-            check_immediate::<false>(
-                diagnostics,
-                &mut immediates,
-                SyntaxKind::INT,
-                "unsigned integer",
-                &instr_name,
-            );
+            check_immediate::<false>(diagnostics, &mut immediates, SyntaxKind::INT, "unsigned integer", instr);
         }
         "ref.null" => {
             check_immediate::<true>(
@@ -319,17 +304,11 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                 &mut immediates,
                 [SyntaxKind::HEAP_TYPE, SyntaxKind::IDENT, SyntaxKind::INT],
                 "heap type",
-                &instr_name,
+                instr,
             );
         }
         "ref.test" | "ref.cast" => {
-            check_immediate::<true>(
-                diagnostics,
-                &mut immediates,
-                SyntaxKind::REF_TYPE,
-                "ref type",
-                &instr_name,
-            );
+            check_immediate::<true>(diagnostics, &mut immediates, SyntaxKind::REF_TYPE, "ref type", instr);
         }
         "array.new_fixed" => {
             check_immediate::<true>(
@@ -337,15 +316,9 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
-                &instr_name,
+                instr,
             );
-            check_immediate::<true>(
-                diagnostics,
-                &mut immediates,
-                SyntaxKind::INT,
-                "unsigned integer",
-                &instr_name,
-            );
+            check_immediate::<true>(diagnostics, &mut immediates, SyntaxKind::INT, "unsigned integer", instr);
         }
         "br_on_cast" | "br_on_cast_fail" => {
             check_immediate::<true>(
@@ -353,22 +326,10 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                 &mut immediates,
                 INDEX,
                 "identifier or unsigned integer",
-                &instr_name,
+                instr,
             );
-            check_immediate::<true>(
-                diagnostics,
-                &mut immediates,
-                SyntaxKind::REF_TYPE,
-                "ref type",
-                &instr_name,
-            );
-            check_immediate::<true>(
-                diagnostics,
-                &mut immediates,
-                SyntaxKind::REF_TYPE,
-                "ref type",
-                &instr_name,
-            );
+            check_immediate::<true>(diagnostics, &mut immediates, SyntaxKind::REF_TYPE, "ref type", instr);
+            check_immediate::<true>(diagnostics, &mut immediates, SyntaxKind::REF_TYPE, "ref type", instr);
         }
         "memory.atomic.notify"
         | "memory.atomic.wait32"
@@ -441,7 +402,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) {
                 &mut immediates,
                 SyntaxKind::MEM_ARG,
                 "memory argument",
-                &instr_name,
+                instr,
             );
         }
         _ => {}
@@ -459,7 +420,7 @@ fn check_immediate<const REQUIRED: bool>(
     immediates: &mut Peekable<impl Iterator<Item = SyntaxNode>>,
     expected: impl SyntaxKindCmp,
     description: &'static str,
-    instr_name: &SyntaxToken,
+    instr: &FastPlainInstr,
 ) {
     let immediate = immediates.peek().and_then(|immediate| immediate.first_child_or_token());
     if let Some(immediate) = immediate {
@@ -476,7 +437,7 @@ fn check_immediate<const REQUIRED: bool>(
         }
     } else if REQUIRED {
         diagnostics.push(Diagnostic {
-            range: instr_name.text_range(),
+            range: instr.name_range,
             code: DIAGNOSTIC_CODE.into(),
             message: format!("missing {description}"),
             ..Default::default()
