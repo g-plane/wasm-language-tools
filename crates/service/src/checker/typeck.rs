@@ -5,6 +5,7 @@ use crate::{
     document::Document,
     helpers,
     idx::{Idx, InternIdent},
+    imex,
     types_analyzer::{
         CompositeType, HeapType, OperandType, RefType, ResolvedSig, ValType, extract_global_type, extract_type,
         get_block_sig, get_def_types, get_func_sig, get_type_use_sig, resolve_array_type_with_idx, resolve_br_types,
@@ -18,7 +19,7 @@ use rowan::{
 };
 use wat_syntax::{
     SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodePtr,
-    ast::{BlockInstr, ElemList, Import, Instr, ModuleFieldFunc, ModuleFieldTable, PlainInstr},
+    ast::{BlockInstr, ElemList, Instr, ModuleFieldFunc, ModuleFieldTable, PlainInstr},
 };
 
 const DIAGNOSTIC_CODE: &str = "type-check";
@@ -45,7 +46,7 @@ pub fn check_func(
             module_id,
         },
         node,
-        if support::child::<Import>(node).is_some() {
+        if imex::get_imports(db, document).contains(&SymbolKey::new(node)) {
             results.iter().map(|ty| (ty.clone(), None)).collect()
         } else {
             Vec::with_capacity(2)
@@ -74,7 +75,7 @@ pub fn check_global(
             module_id,
         },
         node,
-        if support::child::<Import>(node).is_some() {
+        if imex::get_imports(db, document).contains(&SymbolKey::new(node)) {
             vec![(ty.clone(), None)]
         } else {
             Vec::with_capacity(1)
@@ -115,7 +116,7 @@ pub fn check_table(
             module_id,
         },
         node,
-        if support::child::<Import>(node).is_some() {
+        if imex::get_imports(db, document).contains(&SymbolKey::new(node)) {
             vec![(ty.clone(), None)]
         } else {
             Vec::with_capacity(1)
