@@ -13,7 +13,6 @@ const DIAGNOSTIC_CODE: &str = "catch-type";
 pub fn check(
     db: &dyn salsa::Database,
     document: Document,
-    root: &SyntaxNode,
     symbol_table: &SymbolTable,
     module_id: u32,
     node: SyntaxNode,
@@ -48,7 +47,7 @@ pub fn check(
     };
     let ref_key = SymbolKey::new(label_index.syntax());
     let block = symbol_table.find_def(ref_key)?;
-    let block_sig = types_analyzer::get_block_sig(db, document, &block.key.to_node(root));
+    let block_sig = types_analyzer::get_block_sig(db, document, block.key);
     if results.len() != block_sig.results.len()
         || !results
             .iter()

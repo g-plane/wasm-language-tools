@@ -251,7 +251,7 @@ fn check_instr<'db>(
         }
         Instr::Block(block_instr) => {
             let node = block_instr.syntax();
-            let signature = get_block_sig(shared.db, shared.document, node);
+            let signature = get_block_sig(shared.db, shared.document, SymbolKey::new(node));
             let init_stack = signature
                 .params
                 .iter()

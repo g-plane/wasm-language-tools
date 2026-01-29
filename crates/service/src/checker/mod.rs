@@ -184,7 +184,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                 useless_catch::check(&mut diagnostics, config.lint.useless_catch, symbol_table, &node);
             }
             SyntaxKind::CATCH | SyntaxKind::CATCH_ALL => {
-                if let Some(diagnostic) = catch_type::check(db, document, &root, symbol_table, module_id, node) {
+                if let Some(diagnostic) = catch_type::check(db, document, symbol_table, module_id, node) {
                     diagnostics.push(diagnostic);
                 }
             }

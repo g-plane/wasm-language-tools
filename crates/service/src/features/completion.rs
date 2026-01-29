@@ -999,8 +999,7 @@ fn get_cmp_list(
                                 name: symbol.idx.name,
                             };
                             let label = idx.render(db).to_string();
-                            let block_node = symbol.key.to_node(root);
-                            let sig = types_analyzer::get_block_sig(db, document, &block_node);
+                            let sig = types_analyzer::get_block_sig(db, document, symbol.key);
                             CompletionItem {
                                 label: label.clone(),
                                 kind: Some(CompletionItemKind::Variable),

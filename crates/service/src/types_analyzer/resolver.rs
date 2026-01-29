@@ -47,7 +47,7 @@ pub(crate) fn resolve_br_types<'db>(
         .resolved
         .get(&key)
         .map(|def_key| {
-            get_block_sig(db, document, &def_key.to_node(&document.root_tree(db)))
+            get_block_sig(db, document, *def_key)
                 .results
                 .into_iter()
                 .map(OperandType::Val)

@@ -13,7 +13,7 @@ use rowan::{
     ast::{AstNode, support},
 };
 use wat_syntax::{
-    SyntaxKind, SyntaxNode, SyntaxNodePtr,
+    SyntaxKind, SyntaxNodePtr,
     ast::{BlockType, TypeUse},
 };
 
@@ -136,16 +136,18 @@ pub(crate) fn get_type_use_sig<'db>(
     }
 }
 
+#[salsa::tracked]
 pub(crate) fn get_block_sig<'db>(
     db: &'db dyn salsa::Database,
     document: Document,
-    node: &SyntaxNode,
+    symbol_key: SymbolKey,
 ) -> Signature<'db> {
-    support::child::<BlockType>(node)
+    let node = symbol_key.to_node(&document.root_tree(db));
+    support::child::<BlockType>(&node)
         .and_then(|block_type| block_type.type_use())
         .map(|type_use| {
             let node = type_use.syntax();
             get_type_use_sig(db, document, SyntaxNodePtr::new(node), &node.green())
         })
-        .unwrap_or_else(|| get_func_sig(db, document, SyntaxNodePtr::new(node), &node.green()))
+        .unwrap_or_else(|| get_func_sig(db, document, SyntaxNodePtr::new(&node), &node.green()))
 }

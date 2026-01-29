@@ -163,7 +163,7 @@ fn create_def_hover(
         SymbolKind::GlobalDef => Some(create_global_def_hover(db, symbol, root)),
         SymbolKind::MemoryDef => Some(create_memory_def_hover(db, symbol, root)),
         SymbolKind::TableDef => Some(create_table_def_hover(db, symbol, root)),
-        SymbolKind::BlockDef => Some(create_block_hover(db, symbol, document, root)),
+        SymbolKind::BlockDef => Some(create_block_hover(db, symbol, document)),
         SymbolKind::FieldDef => Some(create_field_def_hover(db, symbol, document)),
         SymbolKind::TagDef => Some(create_tag_def_hover(db, symbol, document)),
         _ => None,
@@ -334,17 +334,12 @@ fn create_type_def_hover(db: &dyn salsa::Database, document: Document, symbol: &
     }
 }
 
-fn create_block_hover(
-    db: &dyn salsa::Database,
-    symbol: &Symbol,
-    document: Document,
-    root: &SyntaxNode,
-) -> MarkupContent {
+fn create_block_hover(db: &dyn salsa::Database, symbol: &Symbol, document: Document) -> MarkupContent {
     let content = types_analyzer::render_block_header(
         db,
         symbol.key.kind(),
         symbol.idx.name,
-        types_analyzer::get_block_sig(db, document, &symbol.key.to_node(root)),
+        types_analyzer::get_block_sig(db, document, symbol.key),
     );
     MarkupContent {
         kind: MarkupKind::Markdown,
