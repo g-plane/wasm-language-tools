@@ -12,10 +12,7 @@ use rowan::{
     GreenNodeData, NodeOrToken,
     ast::{AstNode, support},
 };
-use wat_syntax::{
-    SyntaxKind, SyntaxNodePtr,
-    ast::{BlockType, TypeUse},
-};
+use wat_syntax::{SyntaxKind, SyntaxNodePtr, ast::TypeUse};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash, salsa::Update)]
 pub(crate) struct Signature<'db> {
@@ -84,7 +81,7 @@ impl<'db> From<Signature<'db>> for ResolvedSig<'db> {
 pub(crate) fn get_func_sig<'db>(
     db: &'db dyn salsa::Database,
     document: Document,
-    ptr: SyntaxNodePtr,
+    key: SymbolKey,
     green: &GreenNodeData,
 ) -> Signature<'db> {
     green
@@ -100,7 +97,7 @@ pub(crate) fn get_func_sig<'db>(
             }) {
                 Some(extract_sig(db, type_use))
             } else {
-                let node = ptr.to_node(&document.root_tree(db));
+                let node = key.to_node(&document.root_tree(db));
                 let symbol_table = SymbolTable::of(db, document);
                 let def_types = get_def_types(db, document);
                 support::child::<TypeUse>(&node)
@@ -134,20 +131,4 @@ pub(crate) fn get_type_use_sig<'db>(
             .and_then(|def_type| def_type.comp.as_func().cloned())
             .unwrap_or_default()
     }
-}
-
-#[salsa::tracked]
-pub(crate) fn get_block_sig<'db>(
-    db: &'db dyn salsa::Database,
-    document: Document,
-    symbol_key: SymbolKey,
-) -> Signature<'db> {
-    let node = symbol_key.to_node(&document.root_tree(db));
-    support::child::<BlockType>(&node)
-        .and_then(|block_type| block_type.type_use())
-        .map(|type_use| {
-            let node = type_use.syntax();
-            get_type_use_sig(db, document, SyntaxNodePtr::new(node), &node.green())
-        })
-        .unwrap_or_else(|| get_func_sig(db, document, SyntaxNodePtr::new(&node), &node.green()))
 }

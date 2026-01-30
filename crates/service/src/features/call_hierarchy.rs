@@ -29,7 +29,7 @@ impl LanguageService {
                 detail: Some(types_analyzer::render_func_header(
                     self,
                     symbol.idx.name,
-                    types_analyzer::get_func_sig(self, document, *symbol.key, &symbol.green),
+                    types_analyzer::get_func_sig(self, document, symbol.key, &symbol.green),
                 )),
                 uri: params.text_document.uri.clone(),
                 range: line_index.convert(symbol.key.text_range()),
@@ -45,7 +45,7 @@ impl LanguageService {
                         detail: Some(types_analyzer::render_func_header(
                             self,
                             symbol.idx.name,
-                            types_analyzer::get_func_sig(self, document, *symbol.key, &symbol.green),
+                            types_analyzer::get_func_sig(self, document, symbol.key, &symbol.green),
                         )),
                         uri: params.text_document.uri.clone(),
                         range: line_index.convert(symbol.key.text_range()),
@@ -104,7 +104,7 @@ impl LanguageService {
                         detail: Some(types_analyzer::render_func_header(
                             self,
                             func_symbol.idx.name,
-                            types_analyzer::get_func_sig(self, document, *func_symbol.key, &func_symbol.green),
+                            types_analyzer::get_func_sig(self, document, func_symbol.key, &func_symbol.green),
                         )),
                         uri: params.item.uri.clone(),
                         range: line_index.convert(func_symbol.key.text_range()),
@@ -152,7 +152,7 @@ impl LanguageService {
                             detail: Some(types_analyzer::render_func_header(
                                 self,
                                 func_symbol.idx.name,
-                                types_analyzer::get_func_sig(self, document, *func_symbol.key, &func_symbol.green),
+                                types_analyzer::get_func_sig(self, document, func_symbol.key, &func_symbol.green),
                             )),
                             uri: uri.clone(),
                             range: line_index.convert(func_symbol.key.text_range()),

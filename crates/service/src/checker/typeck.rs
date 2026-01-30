@@ -8,7 +8,7 @@ use crate::{
     imex,
     types_analyzer::{
         CompositeType, HeapType, OperandType, RefType, ResolvedSig, ValType, extract_global_type, extract_type,
-        get_block_sig, get_def_types, get_func_sig, get_type_use_sig, resolve_array_type_with_idx, resolve_br_types,
+        get_def_types, get_func_sig, get_type_use_sig, resolve_array_type_with_idx, resolve_br_types,
         resolve_field_type_with_struct_idx,
     },
 };
@@ -32,7 +32,7 @@ pub fn check_func(
     module_id: u32,
     node: &SyntaxNode,
 ) {
-    let results = get_func_sig(db, document, SyntaxNodePtr::new(node), &node.green())
+    let results = get_func_sig(db, document, SymbolKey::new(node), &node.green())
         .results
         .into_iter()
         .map(OperandType::Val)
@@ -252,7 +252,7 @@ fn check_instr<'db>(
         }
         Instr::Block(block_instr) => {
             let node = block_instr.syntax();
-            let signature = get_block_sig(shared.db, shared.document, SymbolKey::new(node));
+            let signature = get_func_sig(shared.db, shared.document, SymbolKey::new(node), &node.green());
             let init_stack = signature
                 .params
                 .iter()
@@ -490,7 +490,7 @@ fn resolve_sig<'db>(
             .immediates()
             .next()
             .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-            .map(|func| ResolvedSig::from(get_func_sig(shared.db, shared.document, *func.key, &func.green)))
+            .map(|func| ResolvedSig::from(get_func_sig(shared.db, shared.document, func.key, &func.green)))
             .unwrap_or_default(),
         "local.get" => ResolvedSig {
             params: vec![],
@@ -554,7 +554,7 @@ fn resolve_sig<'db>(
                 .ancestors()
                 .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
                 .map(|func| {
-                    get_func_sig(shared.db, shared.document, SyntaxNodePtr::new(&func), &func.green())
+                    get_func_sig(shared.db, shared.document, SymbolKey::new(&func), &func.green())
                         .results
                         .into_iter()
                         .map(OperandType::Val)
@@ -1192,8 +1192,8 @@ impl ReportRange<'_> {
                 Instr::Plain(plain_instr) => plain_instr.syntax().text_range(),
                 Instr::Block(block_instr) => block_instr
                     .syntax()
-                    .first_child_by_kind(&|kind| kind == SyntaxKind::BLOCK_TYPE)
-                    .map(|block_type| block_type.text_range())
+                    .first_child_by_kind(&|kind| kind == SyntaxKind::TYPE_USE)
+                    .map(|type_use| type_use.text_range())
                     .unwrap_or_else(|| block_instr.syntax().text_range()),
             },
             ReportRange::Keyword(node) => support::token(node, SyntaxKind::KEYWORD)

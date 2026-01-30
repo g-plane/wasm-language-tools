@@ -20,7 +20,7 @@ pub fn check(
     let (label_index, results) = match Cat::cast(node)? {
         Cat::Catch(catch) => {
             let tag = symbol_table.find_def(SymbolKey::new(catch.tag_index()?.syntax()))?;
-            let mut results = types_analyzer::get_func_sig(db, document, *tag.key, &tag.green)
+            let mut results = types_analyzer::get_func_sig(db, document, tag.key, &tag.green)
                 .params
                 .into_iter()
                 .map(|(ty, _)| ty)
@@ -47,7 +47,7 @@ pub fn check(
     };
     let ref_key = SymbolKey::new(label_index.syntax());
     let block = symbol_table.find_def(ref_key)?;
-    let block_sig = types_analyzer::get_block_sig(db, document, block.key);
+    let block_sig = types_analyzer::get_func_sig(db, document, block.key, &block.green);
     if results.len() != block_sig.results.len()
         || !results
             .iter()

@@ -178,7 +178,7 @@ fn create_func_hover(db: &dyn salsa::Database, document: Document, symbol: Symbo
         types_analyzer::render_func_header(
             db,
             symbol.idx.name,
-            types_analyzer::get_func_sig(db, document, *symbol.key, &symbol.green)
+            types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green)
         )
     );
     if !doc.is_empty() {
@@ -339,7 +339,7 @@ fn create_block_hover(db: &dyn salsa::Database, symbol: &Symbol, document: Docum
         db,
         symbol.key.kind(),
         symbol.idx.name,
-        types_analyzer::get_block_sig(db, document, symbol.key),
+        types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green),
     );
     MarkupContent {
         kind: MarkupKind::Markdown,
@@ -368,7 +368,7 @@ fn create_tag_def_hover(db: &dyn salsa::Database, symbol: &Symbol, document: Doc
         db,
         "tag",
         symbol.idx.name,
-        types_analyzer::get_func_sig(db, document, *symbol.key, &symbol.green),
+        types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green),
     );
     MarkupContent {
         kind: MarkupKind::Markdown,

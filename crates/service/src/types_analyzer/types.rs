@@ -321,7 +321,7 @@ impl<'db> HeapType<'db> {
                     .find(|symbol| {
                         symbol.kind == SymbolKind::Func && symbol.region == module.key && a.is_defined_by(&symbol.idx)
                     })
-                    .map(|symbol| types_analyzer::get_func_sig(db, document, *symbol.key, &symbol.green))
+                    .map(|symbol| types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green))
                     .zip(
                         symbol_table
                             .symbols

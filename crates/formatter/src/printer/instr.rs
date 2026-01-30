@@ -25,14 +25,14 @@ impl DocGen for BlockBlock {
             docs.push(Doc::text(ident.to_string()));
             trivias = format_trivias_after_token(ident, ctx);
         }
-        if let Some(block_type) = self.block_type() {
+        if let Some(type_use) = self.type_use() {
             if trivias.is_empty() {
                 docs.push(Doc::space());
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(block_type.doc(ctx));
-            trivias = format_trivias_after_node(block_type, ctx);
+            docs.push(type_use.doc(ctx));
+            trivias = format_trivias_after_node(type_use, ctx);
         }
         self.instrs().for_each(|instr| {
             if trivias.is_empty() {
@@ -88,14 +88,14 @@ impl DocGen for BlockIf {
             docs.push(Doc::text(ident.to_string()));
             trivias = format_trivias_after_token(ident, ctx);
         }
-        if let Some(block_type) = self.block_type() {
+        if let Some(type_use) = self.type_use() {
             if trivias.is_empty() {
                 docs.push(Doc::space());
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(block_type.doc(ctx));
-            trivias = format_trivias_after_node(block_type, ctx);
+            docs.push(type_use.doc(ctx));
+            trivias = format_trivias_after_node(type_use, ctx);
         }
         self.instrs().for_each(|instr| {
             if trivias.is_empty() {
@@ -264,14 +264,14 @@ impl DocGen for BlockLoop {
             docs.push(Doc::text(ident.to_string()));
             trivias = format_trivias_after_token(ident, ctx);
         }
-        if let Some(block_type) = self.block_type() {
+        if let Some(type_use) = self.type_use() {
             if trivias.is_empty() {
                 docs.push(Doc::space());
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(block_type.doc(ctx));
-            trivias = format_trivias_after_node(block_type, ctx);
+            docs.push(type_use.doc(ctx));
+            trivias = format_trivias_after_node(type_use, ctx);
         }
         self.instrs().for_each(|instr| {
             if trivias.is_empty() {
@@ -327,14 +327,14 @@ impl DocGen for BlockTryTable {
             docs.push(Doc::text(ident.to_string()));
             trivias = format_trivias_after_token(ident, ctx);
         }
-        if let Some(block_type) = self.block_type() {
+        if let Some(type_use) = self.type_use() {
             if trivias.is_empty() {
                 docs.push(Doc::space());
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(block_type.doc(ctx));
-            trivias = format_trivias_after_node(block_type, ctx);
+            docs.push(type_use.doc(ctx));
+            trivias = format_trivias_after_node(type_use, ctx);
         }
         self.catches().for_each(|cat| {
             if trivias.is_empty() {
@@ -374,16 +374,6 @@ impl DocGen for BlockTryTable {
             }
         }
         Doc::list(docs).group()
-    }
-}
-
-impl DocGen for BlockType {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        if let Some(type_use) = self.type_use() {
-            type_use.doc(ctx)
-        } else {
-            Doc::nil()
-        }
     }
 }
 

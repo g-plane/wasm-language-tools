@@ -49,3 +49,53 @@ fn array() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn in_loop() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct))
+  (func
+    (loop (type 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn in_if() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct))
+  (func
+    (if (type 0)
+      (i32.const 1)
+      (then))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn in_try_table() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type (struct))
+  (func
+    (try_table (type 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

@@ -29,7 +29,7 @@ impl BlockBlock {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn block_type(&self) -> Option<BlockType> {
+    pub fn type_use(&self) -> Option<TypeUse> {
         child(&self.syntax)
     }
     #[inline]
@@ -102,7 +102,7 @@ impl BlockIf {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn block_type(&self) -> Option<BlockType> {
+    pub fn type_use(&self) -> Option<TypeUse> {
         child(&self.syntax)
     }
     #[inline]
@@ -330,7 +330,7 @@ impl BlockLoop {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn block_type(&self) -> Option<BlockType> {
+    pub fn type_use(&self) -> Option<TypeUse> {
         child(&self.syntax)
     }
     #[inline]
@@ -403,7 +403,7 @@ impl BlockTryTable {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn block_type(&self) -> Option<BlockType> {
+    pub fn type_use(&self) -> Option<TypeUse> {
         child(&self.syntax)
     }
     #[inline]
@@ -452,42 +452,6 @@ impl AstNode for BlockTryTable {
     {
         if Self::can_cast(syntax.kind()) {
             Some(BlockTryTable { syntax })
-        } else {
-            None
-        }
-    }
-    #[inline]
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct BlockType {
-    syntax: SyntaxNode,
-}
-impl BlockType {
-    #[inline]
-    pub fn type_use(&self) -> Option<TypeUse> {
-        child(&self.syntax)
-    }
-}
-impl AstNode for BlockType {
-    type Language = WatLanguage;
-    #[inline]
-    fn can_cast(kind: SyntaxKind) -> bool
-    where
-        Self: Sized,
-    {
-        kind == SyntaxKind::BLOCK_TYPE
-    }
-    #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        if Self::can_cast(syntax.kind()) {
-            Some(BlockType { syntax })
         } else {
             None
         }

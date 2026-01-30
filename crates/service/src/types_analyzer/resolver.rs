@@ -1,6 +1,6 @@
 use super::{
     def_type::{CompositeType, DefType, DefTypes, get_def_types},
-    signature::{get_block_sig, get_func_sig},
+    signature::get_func_sig,
     types::{FieldType, Fields, OperandType},
 };
 use crate::{
@@ -25,7 +25,7 @@ pub(crate) fn resolve_param_types<'db>(
         let idx = instr.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)?;
         let func = symbol_table.find_def(SymbolKey::new(&idx))?;
         Some(
-            get_func_sig(db, document, *func.key, &func.green)
+            get_func_sig(db, document, func.key, &func.green)
                 .params
                 .into_iter()
                 .map(|(ty, ..)| OperandType::Val(ty))
@@ -44,10 +44,9 @@ pub(crate) fn resolve_br_types<'db>(
 ) -> Vec<OperandType<'db>> {
     let key = SymbolKey::new(immediate.syntax());
     symbol_table
-        .resolved
-        .get(&key)
-        .map(|def_key| {
-            get_block_sig(db, document, *def_key)
+        .find_def(key)
+        .map(|def_symbol| {
+            get_func_sig(db, document, def_symbol.key, &def_symbol.green)
                 .results
                 .into_iter()
                 .map(OperandType::Val)

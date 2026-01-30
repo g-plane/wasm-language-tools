@@ -54,7 +54,7 @@ pub fn act(
             range
         }
         SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_IF | SyntaxKind::BLOCK_TRY_TABLE => node
-            .first_child_by_kind(&|kind| kind == SyntaxKind::BLOCK_TYPE)
+            .first_child_by_kind(&|kind| kind == SyntaxKind::TYPE_USE)
             .map(|child| child.text_range())
             .or_else(|| {
                 support::token(node, SyntaxKind::IDENT)

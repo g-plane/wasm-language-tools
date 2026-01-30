@@ -1498,24 +1498,23 @@ ROOT@0..3370
         ANNOT_START@2894..2897 "(@a"
         ANNOT_END@2897..2898 ")"
         WHITESPACE@2898..2905 "\n      "
-        BLOCK_TYPE@2905..2932
-          TYPE_USE@2905..2932
-            RESULT@2905..2932
-              L_PAREN@2905..2906 "("
-              ANNOT_START@2906..2909 "(@a"
-              ANNOT_END@2909..2910 ")"
-              WHITESPACE@2910..2911 " "
-              KEYWORD@2911..2917 "result"
-              WHITESPACE@2917..2918 " "
-              ANNOT_START@2918..2921 "(@a"
-              ANNOT_END@2921..2922 ")"
-              WHITESPACE@2922..2923 " "
-              NUM_TYPE@2923..2926
-                TYPE_KEYWORD@2923..2926 "i32"
-              WHITESPACE@2926..2927 " "
-              ANNOT_START@2927..2930 "(@a"
-              ANNOT_END@2930..2931 ")"
-              R_PAREN@2931..2932 ")"
+        TYPE_USE@2905..2932
+          RESULT@2905..2932
+            L_PAREN@2905..2906 "("
+            ANNOT_START@2906..2909 "(@a"
+            ANNOT_END@2909..2910 ")"
+            WHITESPACE@2910..2911 " "
+            KEYWORD@2911..2917 "result"
+            WHITESPACE@2917..2918 " "
+            ANNOT_START@2918..2921 "(@a"
+            ANNOT_END@2921..2922 ")"
+            WHITESPACE@2922..2923 " "
+            NUM_TYPE@2923..2926
+              TYPE_KEYWORD@2923..2926 "i32"
+            WHITESPACE@2926..2927 " "
+            ANNOT_START@2927..2930 "(@a"
+            ANNOT_END@2930..2931 ")"
+            R_PAREN@2931..2932 ")"
         WHITESPACE@2932..2933 " "
         ANNOT_START@2933..2936 "(@a"
         ANNOT_END@2936..2937 ")"

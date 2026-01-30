@@ -219,7 +219,7 @@ pub fn check(
                 if let Some(immediate) = node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
                     && let Some(diagnostic) = symbol_table
                         .find_def(SymbolKey::new(&immediate))
-                        .map(|func| get_func_sig(db, document, *func.key, &func.green))
+                        .map(|func| get_func_sig(db, document, func.key, &func.green))
                         .and_then(|sig| {
                             check_return_call_result_type(db, document, module_id, node, &immediate, &sig.results)
                         })
@@ -369,7 +369,7 @@ fn check_return_call_result_type(
     let func = instr
         .ancestors()
         .find(|ancestor| ancestor.kind() == SyntaxKind::MODULE_FIELD_FUNC)?;
-    let expected = get_func_sig(db, document, SyntaxNodePtr::new(&func), &func.green()).results;
+    let expected = get_func_sig(db, document, SymbolKey::new(&func), &func.green()).results;
     if actual.len() == expected.len()
         && actual
             .iter()

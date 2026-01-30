@@ -122,7 +122,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                 }
                 allocator.reset();
             }
-            SyntaxKind::BLOCK_TYPE => {
+            SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_IF => {
                 if let Some(diagnostic) = block_type::check(db, document, symbol_table, &node) {
                     diagnostics.push(diagnostic);
                 }
@@ -182,6 +182,9 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                     diagnostics.push(diagnostic);
                 }
                 useless_catch::check(&mut diagnostics, config.lint.useless_catch, symbol_table, &node);
+                if let Some(diagnostic) = block_type::check(db, document, symbol_table, &node) {
+                    diagnostics.push(diagnostic);
+                }
             }
             SyntaxKind::CATCH | SyntaxKind::CATCH_ALL => {
                 if let Some(diagnostic) = catch_type::check(db, document, symbol_table, module_id, node) {

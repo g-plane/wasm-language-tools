@@ -6,7 +6,7 @@ use wat_syntax::SyntaxKind::{self, *};
 impl Parser<'_> {
     fn parse_block_if_folded(&mut self, mark: NodeMark) -> Option<GreenNode> {
         self.eat(IDENT);
-        if let Some(node) = self.try_parse_with_trivias(Self::parse_block_type) {
+        if let Some(node) = self.try_parse_with_trivias(Self::parse_type_use) {
             self.add_child(node);
         }
 
@@ -38,7 +38,7 @@ impl Parser<'_> {
 
     fn parse_block_if_sequence(&mut self, mark: NodeMark) -> Option<GreenNode> {
         self.eat(IDENT);
-        if let Some(node) = self.try_parse_with_trivias(Self::parse_block_type) {
+        if let Some(node) = self.try_parse_with_trivias(Self::parse_type_use) {
             self.add_child(node);
         }
 
@@ -76,7 +76,7 @@ impl Parser<'_> {
 
     fn parse_block_like_folded(&mut self, kind: SyntaxKind, mark: NodeMark) -> Option<GreenNode> {
         self.eat(IDENT);
-        if let Some(node) = self.try_parse_with_trivias(Self::parse_block_type) {
+        if let Some(node) = self.try_parse_with_trivias(Self::parse_type_use) {
             self.add_child(node);
         }
 
@@ -88,7 +88,7 @@ impl Parser<'_> {
 
     fn parse_block_like_sequence(&mut self, kind: SyntaxKind, mark: NodeMark) -> Option<GreenNode> {
         self.eat(IDENT);
-        if let Some(node) = self.try_parse_with_trivias(Self::parse_block_type) {
+        if let Some(node) = self.try_parse_with_trivias(Self::parse_type_use) {
             self.add_child(node);
         }
 
@@ -105,7 +105,7 @@ impl Parser<'_> {
 
     fn parse_block_try_table_folded(&mut self, mark: NodeMark) -> Option<GreenNode> {
         self.eat(IDENT);
-        if let Some(node) = self.try_parse_with_trivias(Self::parse_block_type) {
+        if let Some(node) = self.try_parse_with_trivias(Self::parse_type_use) {
             self.add_child(node);
         }
         while let Some(node) = self.try_parse_with_trivias(Self::parse_catch) {
@@ -120,7 +120,7 @@ impl Parser<'_> {
 
     fn parse_block_try_table_sequence(&mut self, mark: NodeMark) -> Option<GreenNode> {
         self.eat(IDENT);
-        if let Some(node) = self.try_parse_with_trivias(Self::parse_block_type) {
+        if let Some(node) = self.try_parse_with_trivias(Self::parse_type_use) {
             self.add_child(node);
         }
         while let Some(node) = self.try_parse_with_trivias(Self::parse_catch) {
@@ -136,11 +136,6 @@ impl Parser<'_> {
         }
         self.eat(IDENT);
         Some(self.finish_node(BLOCK_TRY_TABLE, mark))
-    }
-
-    fn parse_block_type(&mut self) -> Option<GreenNode> {
-        self.parse_type_use()
-            .map(|type_use| node(BLOCK_TYPE, [type_use.into()]))
     }
 
     fn parse_catch(&mut self) -> Option<GreenNode> {

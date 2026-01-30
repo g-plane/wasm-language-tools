@@ -810,11 +810,11 @@ fn get_cmp_list(
                         detail: Some(types_analyzer::render_func_header(
                             db,
                             symbol.idx.name,
-                            types_analyzer::get_func_sig(db, document, *symbol.key, &symbol.green),
+                            types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green),
                         )),
                         label_details: Some(CompletionItemLabelDetails {
                             description: Some(
-                                types_analyzer::get_func_sig(db, document, *symbol.key, &symbol.green)
+                                types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green)
                                     .render_compact(db)
                                     .to_string(),
                             ),
@@ -999,7 +999,7 @@ fn get_cmp_list(
                                 name: symbol.idx.name,
                             };
                             let label = idx.render(db).to_string();
-                            let sig = types_analyzer::get_block_sig(db, document, symbol.key);
+                            let sig = types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green);
                             CompletionItem {
                                 label: label.clone(),
                                 kind: Some(CompletionItemKind::Variable),
@@ -1111,7 +1111,7 @@ fn get_cmp_list(
                 let deprecation = deprecation::get_deprecation(db, document);
                 items.extend(symbol_table.get_declared(module, SymbolKind::TagDef).map(|symbol| {
                     let label = symbol.idx.render(db).to_string();
-                    let sig = types_analyzer::get_func_sig(db, document, *symbol.key, &symbol.green);
+                    let sig = types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green);
                     CompletionItem {
                         label: label.clone(),
                         kind: Some(CompletionItemKind::Variable),
