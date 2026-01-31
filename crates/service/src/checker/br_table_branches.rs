@@ -1,4 +1,4 @@
-use super::Diagnostic;
+use super::{Diagnostic, FastPlainInstr};
 use crate::{binder::SymbolTable, document::Document, types_analyzer::resolve_br_types};
 use itertools::Itertools;
 use rowan::ast::AstNode;
@@ -12,13 +12,12 @@ pub fn check(
     document: Document,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
+    instr: &FastPlainInstr,
 ) -> Option<()> {
-    let instr = PlainInstr::cast(node.clone())?;
-    if instr.instr_name().is_none_or(|name| name.text() != "br_table") {
+    if instr.name != "br_table" {
         return None;
     }
-
-    let mut immediates = instr.immediates();
+    let mut immediates = PlainInstr::cast(node.clone())?.immediates();
     let expected = immediates
         .next()
         .map(|immediate| resolve_br_types(db, document, symbol_table, &immediate))?;
