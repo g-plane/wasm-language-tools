@@ -57,7 +57,15 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
         }
         module.descendants().for_each(|node| match node.kind() {
             SyntaxKind::MODULE_FIELD_FUNC => {
-                typeck::check_func(&mut diagnostics, db, document, symbol_table, module_id, &node);
+                typeck::check_func(
+                    &mut diagnostics,
+                    db,
+                    document,
+                    symbol_table,
+                    module_id,
+                    &node,
+                    &mut allocator,
+                );
                 unreachable::check(
                     &mut diagnostics,
                     db,
@@ -82,7 +90,15 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                 }
             }
             SyntaxKind::MODULE_FIELD_GLOBAL => {
-                typeck::check_global(&mut diagnostics, db, document, symbol_table, module_id, &node);
+                typeck::check_global(
+                    &mut diagnostics,
+                    db,
+                    document,
+                    symbol_table,
+                    module_id,
+                    &node,
+                    &mut allocator,
+                );
                 unreachable::check(
                     &mut diagnostics,
                     db,
@@ -133,7 +149,15 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                 }
             }
             SyntaxKind::MODULE_FIELD_TABLE => {
-                typeck::check_table(&mut diagnostics, db, document, symbol_table, module_id, &node);
+                typeck::check_table(
+                    &mut diagnostics,
+                    db,
+                    document,
+                    symbol_table,
+                    module_id,
+                    &node,
+                    &mut allocator,
+                );
                 if let Some(diagnostic) = const_expr::check(&node) {
                     diagnostics.push(diagnostic);
                 }
@@ -155,13 +179,29 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                 mem_type::check(&mut diagnostics, &node);
             }
             SyntaxKind::OFFSET => {
-                typeck::check_offset(&mut diagnostics, db, document, symbol_table, module_id, &node);
+                typeck::check_offset(
+                    &mut diagnostics,
+                    db,
+                    document,
+                    symbol_table,
+                    module_id,
+                    &node,
+                    &mut allocator,
+                );
                 if let Some(diagnostic) = const_expr::check(&node) {
                     diagnostics.push(diagnostic);
                 }
             }
             SyntaxKind::ELEM_LIST => {
-                typeck::check_elem_list(&mut diagnostics, db, document, symbol_table, module_id, &node);
+                typeck::check_elem_list(
+                    &mut diagnostics,
+                    db,
+                    document,
+                    symbol_table,
+                    module_id,
+                    &node,
+                    &mut allocator,
+                );
             }
             SyntaxKind::ELEM_EXPR => {
                 if let Some(diagnostic) = const_expr::check(&node) {

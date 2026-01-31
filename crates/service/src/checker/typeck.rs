@@ -13,10 +13,12 @@ use crate::{
     },
 };
 use itertools::{EitherOrBoth, Itertools};
+use oxc_allocator::{Allocator, StringBuilder};
 use rowan::{
     TextRange,
     ast::{AstNode, support},
 };
+use std::fmt::Write;
 use wat_syntax::{
     SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodePtr,
     ast::{BlockInstr, ElemList, Instr, ModuleFieldFunc, ModuleFieldTable, PlainInstr},
@@ -31,6 +33,7 @@ pub fn check_func(
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
+    allocator: &mut Allocator,
 ) {
     let results = get_func_sig(db, document, SymbolKey::new(node), &node.green())
         .results
@@ -44,6 +47,7 @@ pub fn check_func(
             document,
             symbol_table,
             module_id,
+            allocator,
         },
         node,
         if imex::get_imports(db, document).contains(&SymbolKey::new(node)) {
@@ -53,6 +57,7 @@ pub fn check_func(
         },
         &results,
     );
+    allocator.reset();
 }
 
 pub fn check_global(
@@ -62,6 +67,7 @@ pub fn check_global(
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
+    allocator: &mut Allocator,
 ) {
     let ty = extract_global_type(db, document, node.green().into())
         .map(OperandType::Val)
@@ -73,6 +79,7 @@ pub fn check_global(
             document,
             symbol_table,
             module_id,
+            allocator,
         },
         node,
         if imex::get_imports(db, document).contains(&SymbolKey::new(node)) {
@@ -82,6 +89,7 @@ pub fn check_global(
         },
         &[ty],
     );
+    allocator.reset();
 }
 
 pub fn check_table(
@@ -91,6 +99,7 @@ pub fn check_table(
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
+    allocator: &mut Allocator,
 ) {
     let Some(ref_type) = ModuleFieldTable::cast(node.clone())
         .and_then(|table| {
@@ -114,6 +123,7 @@ pub fn check_table(
             document,
             symbol_table,
             module_id,
+            allocator,
         },
         node,
         if imex::get_imports(db, document).contains(&SymbolKey::new(node)) {
@@ -123,6 +133,7 @@ pub fn check_table(
         },
         &[ty],
     );
+    allocator.reset();
 }
 
 pub fn check_offset(
@@ -132,6 +143,7 @@ pub fn check_offset(
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
+    allocator: &mut Allocator,
 ) {
     check_block_like(
         diagnostics,
@@ -140,11 +152,13 @@ pub fn check_offset(
             document,
             symbol_table,
             module_id,
+            allocator,
         },
         node,
         Vec::with_capacity(1),
         &[OperandType::Val(ValType::I32)],
     );
+    allocator.reset();
 }
 
 pub fn check_elem_list(
@@ -154,6 +168,7 @@ pub fn check_elem_list(
     symbol_table: &SymbolTable,
     module_id: u32,
     node: &SyntaxNode,
+    allocator: &mut Allocator,
 ) {
     let Some(ref_type) = ElemList::cast(node.clone())
         .and_then(|elem_list| elem_list.ref_type())
@@ -172,19 +187,22 @@ pub fn check_elem_list(
                     document,
                     symbol_table,
                     module_id,
+                    allocator,
                 },
                 &child,
                 Vec::with_capacity(1),
                 std::slice::from_ref(&ty),
             );
         });
+    allocator.reset();
 }
 
-struct Shared<'db> {
+struct Shared<'db, 'alloc> {
     db: &'db dyn salsa::Database,
     document: Document,
     symbol_table: &'db SymbolTable<'db>,
     module_id: u32,
+    allocator: &'alloc Allocator,
 }
 
 fn check_block_like(
@@ -195,18 +213,16 @@ fn check_block_like(
     expected_results: &[OperandType],
 ) {
     let mut type_stack = TypeStack {
-        document: shared.document,
-        db: shared.db,
-        module_id: shared.module_id,
+        shared,
         stack: init_stack,
         has_never: false,
     };
 
-    fn unfold<'db>(
+    fn unfold<'db, 'alloc>(
         node: SyntaxNode,
-        type_stack: &mut TypeStack<'db>,
+        type_stack: &mut TypeStack<'db, 'alloc>,
         diagnostics: &mut Vec<Diagnostic>,
-        shared: &Shared<'db>,
+        shared: &Shared<'db, 'alloc>,
     ) {
         if matches!(node.kind(), SyntaxKind::PLAIN_INSTR | SyntaxKind::BLOCK_IF) {
             node.children()
@@ -226,11 +242,11 @@ fn check_block_like(
     }
 }
 
-fn check_instr<'db>(
+fn check_instr<'db, 'alloc>(
     instr: Instr,
-    type_stack: &mut TypeStack<'db>,
+    type_stack: &mut TypeStack<'db, 'alloc>,
     diagnostics: &mut Vec<Diagnostic>,
-    shared: &Shared<'db>,
+    shared: &Shared<'db, 'alloc>,
 ) {
     match &instr {
         Instr::Plain(plain_instr) => {
@@ -297,8 +313,8 @@ fn check_instr<'db>(
                             range: node.text_range(),
                             code: DIAGNOSTIC_CODE.into(),
                             message: format!(
-                                "missing `then` branch with expected types [{}]",
-                                results.iter().map(|ty| ty.render(shared.db)).join(", ")
+                                "missing `then` branch with expected types {}",
+                                join_types(shared, results.iter(), "")
                             ),
                             ..Default::default()
                         });
@@ -307,9 +323,7 @@ fn check_instr<'db>(
                         check_block_like(diagnostics, shared, else_block.syntax(), init_stack, &results);
                     } else {
                         let mut type_stack = TypeStack {
-                            document: shared.document,
-                            db: shared.db,
-                            module_id: shared.module_id,
+                            shared,
                             stack: init_stack,
                             has_never: false,
                         };
@@ -321,8 +335,8 @@ fn check_instr<'db>(
                                 range: node.text_range(),
                                 code: DIAGNOSTIC_CODE.into(),
                                 message: format!(
-                                    "missing `else` branch with expected types [{}]",
-                                    results.iter().map(|ty| ty.render(shared.db)).join(", ")
+                                    "missing `else` branch with expected types {}",
+                                    join_types(shared, results.iter(), "")
                                 ),
                                 ..Default::default()
                             });
@@ -337,14 +351,12 @@ fn check_instr<'db>(
     }
 }
 
-struct TypeStack<'db> {
-    document: Document,
-    db: &'db dyn salsa::Database,
-    module_id: u32,
+struct TypeStack<'db, 'alloc> {
+    shared: &'alloc Shared<'db, 'alloc>,
     stack: Vec<(OperandType<'db>, Option<Instr>)>,
     has_never: bool,
 }
-impl<'db> TypeStack<'db> {
+impl<'db, 'alloc> TypeStack<'db, 'alloc> {
     fn check(&mut self, expected: &[OperandType<'db>], report_range: ReportRange) -> Option<Diagnostic> {
         let mut diagnostic = None;
         let rest_len = self.stack.len().saturating_sub(expected.len());
@@ -357,7 +369,7 @@ impl<'db> TypeStack<'db> {
             .zip_longest(pops.iter().rev())
             .for_each(|pair| match pair {
                 EitherOrBoth::Both(expected, (received, related_instr)) => {
-                    if received.matches(expected, self.db, self.document, self.module_id) {
+                    if received.matches(expected, self.shared.db, self.shared.document, self.shared.module_id) {
                         return;
                     }
                     mismatch = true;
@@ -366,8 +378,8 @@ impl<'db> TypeStack<'db> {
                             range: ReportRange::Instr(related_instr).pick(),
                             message: format!(
                                 "expected type `{}`, found `{}`",
-                                expected.render(self.db),
-                                received.render(self.db),
+                                expected.render(self.shared.db),
+                                received.render(self.shared.db),
                             ),
                         });
                     }
@@ -378,16 +390,18 @@ impl<'db> TypeStack<'db> {
                 _ => {}
             });
         if mismatch {
-            let expected_types = format!("[{}]", expected.iter().map(|ty| ty.render(self.db)).join(", "));
-            let received_types = format!(
-                "[{}{}]",
-                if self.stack.len() > pops.len() { "... " } else { "" },
-                pops.iter().map(|(ty, _)| ty.render(self.db)).join(", ")
-            );
             diagnostic = Some(Diagnostic {
                 range: report_range.pick(),
                 code: DIAGNOSTIC_CODE.into(),
-                message: format!("expected types {expected_types}, found {received_types}"),
+                message: format!(
+                    "expected types {}, found {}",
+                    join_types(self.shared, expected.iter(), ""),
+                    join_types(
+                        self.shared,
+                        pops.iter().map(|(ty, _)| ty),
+                        if self.stack.len() > pops.len() { "... " } else { "" }
+                    ),
+                ),
                 related_information: if related_information.is_empty() {
                     None
                 } else {
@@ -414,7 +428,7 @@ impl<'db> TypeStack<'db> {
             .zip_longest(self.stack.iter().rev())
             .for_each(|pair| match pair {
                 EitherOrBoth::Both(expected, (received, related_instr)) => {
-                    if received.matches(expected, self.db, self.document, self.module_id) {
+                    if received.matches(expected, self.shared.db, self.shared.document, self.shared.module_id) {
                         return;
                     }
                     mismatch = true;
@@ -423,8 +437,8 @@ impl<'db> TypeStack<'db> {
                             range: ReportRange::Instr(related_instr).pick(),
                             message: format!(
                                 "expected type `{}`, found `{}`",
-                                expected.render(self.db),
-                                received.render(self.db),
+                                expected.render(self.shared.db),
+                                received.render(self.shared.db),
                             ),
                         });
                     }
@@ -438,18 +452,18 @@ impl<'db> TypeStack<'db> {
                 _ => {}
             });
         if mismatch {
-            let expected_types = format!("[{}]", expected.iter().map(|ty| ty.render(self.db)).join(", "));
-            let received_types = format!("[{}]", self.stack.iter().map(|(ty, _)| ty.render(self.db)).join(", "));
             Some(Diagnostic {
                 range: report_range.pick(),
                 code: DIAGNOSTIC_CODE.into(),
                 message: format!(
-                    "expected types {expected_types}, found {received_types}{}",
+                    "expected types {}, found {}{}",
+                    join_types(self.shared, expected.iter(), ""),
+                    join_types(self.shared, self.stack.iter().map(|(ty, _)| ty), ""),
                     if let ReportRange::Last(..) = report_range {
                         " at the end"
                     } else {
                         ""
-                    }
+                    },
                 ),
                 related_information: if related_information.is_empty() {
                     None
@@ -461,7 +475,7 @@ impl<'db> TypeStack<'db> {
                     self.stack
                         .iter()
                         .map(|(ty, _)| match ty {
-                            OperandType::Val(ty) => Some(ty.render(self.db).to_string()),
+                            OperandType::Val(ty) => Some(ty.render(self.shared.db).to_string()),
                             OperandType::Any => None,
                         })
                         .collect::<Option<Vec<_>>>()
@@ -479,11 +493,11 @@ impl<'db> TypeStack<'db> {
     }
 }
 
-fn resolve_sig<'db>(
-    shared: &Shared<'db>,
+fn resolve_sig<'db, 'alloc>(
+    shared: &Shared<'db, 'alloc>,
     instr_name: &str,
     instr: &PlainInstr,
-    type_stack: &TypeStack<'db>,
+    type_stack: &TypeStack<'db, 'alloc>,
 ) -> ResolvedSig<'db> {
     match instr_name {
         "call" | "return_call" | "throw" => instr
@@ -1177,6 +1191,24 @@ fn resolve_sig<'db>(
                 .unwrap_or_default()
         }
         _ => data_set::INSTR_SIG.get(instr_name).cloned().unwrap_or_default(),
+    }
+}
+
+fn join_types<'db, 'alloc, I>(shared: &Shared<'db, 'alloc>, mut types: I, prefix: &str) -> StringBuilder<'alloc>
+where
+    I: Iterator<Item = &'db OperandType<'db>> + ExactSizeIterator,
+{
+    if let Some(first) = types.next() {
+        let mut builder = StringBuilder::with_capacity_in(2 + prefix.len() + 5 * types.len(), shared.allocator);
+        builder.push('[');
+        let _ = write!(&mut builder, "{prefix}{}", first.render(shared.db));
+        types.for_each(|ty| {
+            let _ = write!(&mut builder, ", {}", ty.render(shared.db));
+        });
+        builder.push(']');
+        builder
+    } else {
+        StringBuilder::from_str_in("[]", shared.allocator)
     }
 }
 
