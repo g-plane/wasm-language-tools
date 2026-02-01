@@ -547,22 +547,6 @@ fn finite_loop() {
 }
 
 #[test]
-fn global() {
-    let uri = "untitled:test".to_string();
-    let source = "
-(module
-  (global i32
-    unreachable
-    i32.const 0))
-";
-    let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
-    let response = service.pull_diagnostics(create_params(uri));
-    assert_json_snapshot!(response);
-}
-
-#[test]
 fn folded_instr_with_loop() {
     let uri = "untitled:test".to_string();
     let source = "

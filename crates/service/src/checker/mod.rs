@@ -126,15 +126,6 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         &node,
                         &mut allocator,
                     );
-                    unreachable::check(
-                        &mut diagnostics,
-                        db,
-                        document,
-                        config.lint.unreachable,
-                        &root,
-                        &node,
-                        &mut allocator,
-                    );
                     if let Some(diagnostic) = const_expr::check(&node) {
                         diagnostics.push(diagnostic);
                     }
