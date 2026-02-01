@@ -46,24 +46,20 @@ fn check_local(
     cfg: &ControlFlowGraph,
     allocator: &Allocator,
 ) {
-    let mut block_marks = OxcHashMap::from_iter_in(
-        cfg.graph.node_indices().filter_map(|node_index| {
-            cfg.graph.node_weight(node_index).and_then(|node| {
-                if node.unreachable {
-                    None
-                } else {
-                    match &node.kind {
-                        FlowNodeKind::BasicBlock(bb) => Some((node_index, BlockMark::new(bb, symbol_table, local.key))),
-                        FlowNodeKind::BlockEntry(..) | FlowNodeKind::BlockExit => {
-                            Some((node_index, BlockMark::default()))
-                        }
-                        _ => None,
-                    }
+    let mut block_marks = OxcHashMap::with_capacity_in(cfg.graph.node_count(), allocator);
+    block_marks.extend(cfg.graph.node_indices().filter_map(|node_index| {
+        cfg.graph.node_weight(node_index).and_then(|node| {
+            if node.unreachable {
+                None
+            } else {
+                match &node.kind {
+                    FlowNodeKind::BasicBlock(bb) => Some((node_index, BlockMark::new(bb, symbol_table, local.key))),
+                    FlowNodeKind::BlockEntry(..) | FlowNodeKind::BlockExit => Some((node_index, BlockMark::default())),
+                    _ => None,
                 }
-            })
-        }),
-        allocator,
-    );
+            }
+        })
+    }));
     hydrate_block_marks(cfg, &mut block_marks);
     cfg.graph.node_indices().for_each(|node_index| {
         if let Some(FlowNode {
