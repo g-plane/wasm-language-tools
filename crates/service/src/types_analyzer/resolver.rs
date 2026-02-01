@@ -40,11 +40,10 @@ pub(crate) fn resolve_br_types<'db>(
     db: &'db dyn salsa::Database,
     document: Document,
     symbol_table: &'db SymbolTable<'db>,
-    immediate: &Immediate,
+    ref_key: SymbolKey,
 ) -> Vec<OperandType<'db>> {
-    let key = SymbolKey::new(immediate.syntax());
     symbol_table
-        .find_def(key)
+        .find_def(ref_key)
         .map(|def_symbol| {
             get_func_sig(db, document, def_symbol.key, &def_symbol.green)
                 .results

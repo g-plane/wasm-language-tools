@@ -581,7 +581,14 @@ fn resolve_sig<'db, 'alloc>(
             params: instr
                 .immediates()
                 .next()
-                .map(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, &idx))
+                .map(|idx| {
+                    resolve_br_types(
+                        shared.db,
+                        shared.document,
+                        shared.symbol_table,
+                        SymbolKey::new(idx.syntax()),
+                    )
+                })
                 .unwrap_or_default(),
             results: vec![],
         },
@@ -589,7 +596,14 @@ fn resolve_sig<'db, 'alloc>(
             let results = instr
                 .immediates()
                 .next()
-                .map(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, &idx))
+                .map(|idx| {
+                    resolve_br_types(
+                        shared.db,
+                        shared.document,
+                        shared.symbol_table,
+                        SymbolKey::new(idx.syntax()),
+                    )
+                })
                 .unwrap_or_default();
             let mut params = results.clone();
             params.push(OperandType::Val(ValType::I32));
@@ -599,7 +613,14 @@ fn resolve_sig<'db, 'alloc>(
             let mut params = instr
                 .immediates()
                 .next()
-                .map(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, &idx))
+                .map(|idx| {
+                    resolve_br_types(
+                        shared.db,
+                        shared.document,
+                        shared.symbol_table,
+                        SymbolKey::new(idx.syntax()),
+                    )
+                })
                 .unwrap_or_default();
             params.push(OperandType::Val(ValType::I32));
             ResolvedSig {
@@ -617,7 +638,14 @@ fn resolve_sig<'db, 'alloc>(
             let mut results = instr
                 .immediates()
                 .next()
-                .map(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, &idx))
+                .map(|idx| {
+                    resolve_br_types(
+                        shared.db,
+                        shared.document,
+                        shared.symbol_table,
+                        SymbolKey::new(idx.syntax()),
+                    )
+                })
                 .unwrap_or_default();
             let mut params = results.clone();
             params.push(OperandType::Val(ValType::Ref(RefType {
@@ -640,7 +668,14 @@ fn resolve_sig<'db, 'alloc>(
             let results = instr
                 .immediates()
                 .next()
-                .map(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, &idx))
+                .map(|idx| {
+                    resolve_br_types(
+                        shared.db,
+                        shared.document,
+                        shared.symbol_table,
+                        SymbolKey::new(idx.syntax()),
+                    )
+                })
                 .unwrap_or_default();
             let mut params = results.clone();
             params.push(OperandType::Val(ValType::Ref(RefType {
@@ -653,7 +688,14 @@ fn resolve_sig<'db, 'alloc>(
             let mut immediates = instr.immediates();
             let mut types = immediates
                 .next()
-                .map(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, &idx))
+                .map(|idx| {
+                    resolve_br_types(
+                        shared.db,
+                        shared.document,
+                        shared.symbol_table,
+                        SymbolKey::new(idx.syntax()),
+                    )
+                })
                 .unwrap_or_default();
             types.pop();
             let rt1 = immediates
@@ -676,7 +718,14 @@ fn resolve_sig<'db, 'alloc>(
             let mut immediates = instr.immediates();
             let mut types = immediates
                 .next()
-                .map(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, &idx))
+                .map(|idx| {
+                    resolve_br_types(
+                        shared.db,
+                        shared.document,
+                        shared.symbol_table,
+                        SymbolKey::new(idx.syntax()),
+                    )
+                })
                 .unwrap_or_default();
             types.pop();
             let rt1 = immediates

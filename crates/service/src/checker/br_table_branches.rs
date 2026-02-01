@@ -1,8 +1,6 @@
 use super::{Diagnostic, FastPlainInstr};
 use crate::{binder::SymbolTable, document::Document, types_analyzer::resolve_br_types};
 use itertools::Itertools;
-use rowan::ast::AstNode;
-use wat_syntax::{SyntaxNode, ast::PlainInstr};
 
 const DIAGNOSTIC_CODE: &str = "br-table-branches";
 
@@ -11,21 +9,21 @@ pub fn check(
     db: &dyn salsa::Database,
     document: Document,
     symbol_table: &SymbolTable,
-    node: &SyntaxNode,
     instr: &FastPlainInstr,
 ) -> Option<()> {
     if instr.name != "br_table" {
         return None;
     }
-    let mut immediates = PlainInstr::cast(node.clone())?.immediates();
-    let expected = immediates
-        .next()
-        .map(|immediate| resolve_br_types(db, document, symbol_table, &immediate))?;
-    diagnostics.extend(immediates.filter_map(|immediate| {
-        let received = resolve_br_types(db, document, symbol_table, &immediate);
+    let expected = instr
+        .immediates
+        .first()
+        .copied()
+        .map(|immediate| resolve_br_types(db, document, symbol_table, immediate.into()))?;
+    diagnostics.extend(instr.immediates.get(1..)?.iter().copied().filter_map(|immediate| {
+        let received = resolve_br_types(db, document, symbol_table, immediate.into());
         if received != expected {
             Some(Diagnostic {
-                range: immediate.syntax().text_range(),
+                range: immediate.text_range(),
                 code: DIAGNOSTIC_CODE.into(),
                 message: format!(
                     "type mismatch in `br_table`: expected [{}], found [{}]",

@@ -108,7 +108,7 @@ pub fn check(
             "br_on_cast" => {
                 let mut immediates = support::children::<Immediate>(node);
                 let label = immediates.next()?;
-                let label_types = resolve_br_types(db, document, symbol_table, &label);
+                let label_types = resolve_br_types(db, document, symbol_table, SymbolKey::new(label.syntax()));
                 let rt_label = if let Some(OperandType::Val(ValType::Ref(rt_label))) = label_types.last() {
                     rt_label
                 } else {
@@ -160,7 +160,7 @@ pub fn check(
             "br_on_cast_fail" => {
                 let mut immediates = support::children::<Immediate>(node);
                 let label = immediates.next()?;
-                let label_types = resolve_br_types(db, document, symbol_table, &label);
+                let label_types = resolve_br_types(db, document, symbol_table, SymbolKey::new(label.syntax()));
                 let rt_label = if let Some(OperandType::Val(ValType::Ref(rt_label))) = label_types.last() {
                     rt_label
                 } else {
