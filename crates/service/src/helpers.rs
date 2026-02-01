@@ -184,19 +184,3 @@ pub(crate) mod syntax {
             })
     }
 }
-
-pub(crate) mod locals {
-    use super::*;
-    use crate::{
-        binder::{SymbolKind, SymbolTable},
-        document::Document,
-    };
-
-    #[salsa::tracked]
-    pub fn has_locals(db: &dyn salsa::Database, document: Document, func_key: SymbolKey) -> bool {
-        SymbolTable::of(db, document)
-            .symbols
-            .values()
-            .any(|symbol| symbol.region == func_key && symbol.kind == SymbolKind::Local)
-    }
-}

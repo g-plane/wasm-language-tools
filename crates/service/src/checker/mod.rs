@@ -1,4 +1,9 @@
-use crate::{binder::SymbolTable, config::ServiceConfig, document::Document, helpers::LineIndexExt};
+use crate::{
+    binder::{SymbolKind, SymbolTable},
+    config::ServiceConfig,
+    document::Document,
+    helpers::LineIndexExt,
+};
 use lspt::{DiagnosticRelatedInformation, DiagnosticSeverity, DiagnosticTag, Location, Union2};
 use oxc_allocator::{Allocator, Vec as OxcVec};
 use rowan::{TextRange, WalkEvent, ast::support};
@@ -80,7 +85,23 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         &node,
                         &mut allocator,
                     );
-                    uninit::check(&mut diagnostics, db, document, symbol_table, &node, &mut allocator);
+                    let locals = symbol_table
+                        .symbols
+                        .values()
+                        .filter(|symbol| {
+                            symbol.kind == SymbolKind::Local
+                                && node.text_range().contains_range(symbol.key.text_range())
+                        })
+                        .collect::<Vec<_>>();
+                    uninit::check(
+                        &mut diagnostics,
+                        db,
+                        document,
+                        symbol_table,
+                        &node,
+                        &locals,
+                        &mut allocator,
+                    );
                     unread::check(
                         &mut diagnostics,
                         db,
@@ -88,6 +109,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         config.lint.unread,
                         symbol_table,
                         &node,
+                        &locals,
                         &mut allocator,
                     );
                     if let Some(diagnostic) = import_with_def::check(db, document, &node) {
