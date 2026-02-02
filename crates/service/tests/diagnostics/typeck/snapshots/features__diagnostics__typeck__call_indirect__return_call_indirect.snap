@@ -37,11 +37,7 @@ expression: response
       "source": "wat",
       "message": "expected types [], found [f64] at the end",
       "data": [
-        72,
-        128,
-        [
-          "f64"
-        ]
+        "f64"
       ]
     },
     {
@@ -94,11 +90,7 @@ expression: response
       "source": "wat",
       "message": "expected types [], found [f64] at the end",
       "data": [
-        131,
-        187,
-        [
-          "f64"
-        ]
+        "f64"
       ]
     },
     {
@@ -167,11 +159,7 @@ expression: response
       "source": "wat",
       "message": "expected types [], found [f64] at the end",
       "data": [
-        190,
-        264,
-        [
-          "f64"
-        ]
+        "f64"
       ]
     },
     {
@@ -190,11 +178,7 @@ expression: response
       "source": "wat",
       "message": "expected types [], found [f64] at the end",
       "data": [
-        267,
-        341,
-        [
-          "f64"
-        ]
+        "f64"
       ]
     },
     {

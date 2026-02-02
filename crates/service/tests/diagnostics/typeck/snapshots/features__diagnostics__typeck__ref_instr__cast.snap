@@ -89,11 +89,7 @@ expression: response
       "source": "wat",
       "message": "expected types [], found [(ref null func)] at the end",
       "data": [
-        191,
-        258,
-        [
-          "(ref null func)"
-        ]
+        "(ref null func)"
       ]
     },
     {

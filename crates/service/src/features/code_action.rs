@@ -108,6 +108,8 @@ impl LanguageService {
                         if rewrite && let Some(action) = if_br_to_br_if::act(db, uri, line_index, &it) {
                             actions.push(action);
                         }
+                    }
+                    SyntaxKind::BLOCK_IF_THEN => {
                         if quickfix
                             && let Some(action) = add_result_types::act(db, uri, line_index, &it, &params.context)
                         {

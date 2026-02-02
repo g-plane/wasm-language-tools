@@ -21,12 +21,8 @@ expression: response
       "source": "wat",
       "message": "expected types [], found [i32, i32] at the end",
       "data": [
-        8,
-        66,
-        [
-          "i32",
-          "i32"
-        ]
+        "i32",
+        "i32"
       ]
     }
   ]

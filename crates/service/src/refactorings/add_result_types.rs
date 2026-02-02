@@ -13,19 +13,16 @@ pub fn act(
     node: &SyntaxNode,
     context: &CodeActionContext,
 ) -> Option<CodeAction> {
+    let end = line_index.convert(node.text_range().end());
     let (types, diagnostic) = context
         .diagnostics
         .iter()
         .find_map(|diagnostic| match &diagnostic.code {
-            Some(Union2::B(code)) if code == "type-check" => diagnostic
+            Some(Union2::B(code)) if code == "type-check" && diagnostic.range.end == end => diagnostic
                 .data
                 .as_ref()
-                .and_then(|data| {
-                    serde_json::from_value::<(u32, u32, Vec<String>)>(data.clone())
-                        .ok()
-                        .filter(|(start, end, _)| node.text_range() == TextRange::new((*start).into(), (*end).into()))
-                })
-                .map(|(.., types)| (types, diagnostic)),
+                .and_then(|data| serde_json::from_value::<Vec<String>>(data.clone()).ok())
+                .map(|types| (types, diagnostic)),
             _ => None,
         })?;
     let end = match node.kind() {
@@ -53,7 +50,7 @@ pub fn act(
                     });
             range
         }
-        SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_IF | SyntaxKind::BLOCK_TRY_TABLE => node
+        SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_TRY_TABLE => node
             .first_child_by_kind(&|kind| kind == SyntaxKind::TYPE_USE)
             .map(|child| child.text_range())
             .or_else(|| {
@@ -61,6 +58,17 @@ pub fn act(
                     .or_else(|| support::token(node, SyntaxKind::KEYWORD))
                     .map(|token| token.text_range())
             }),
+        SyntaxKind::BLOCK_IF_THEN => {
+            let parent = node.parent()?;
+            parent
+                .first_child_by_kind(&|kind| kind == SyntaxKind::TYPE_USE)
+                .map(|child| child.text_range())
+                .or_else(|| {
+                    support::token(&parent, SyntaxKind::IDENT)
+                        .or_else(|| support::token(&parent, SyntaxKind::KEYWORD))
+                        .map(|token| token.text_range())
+                })
+        }
         _ => None,
     }?
     .end();

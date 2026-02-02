@@ -10,22 +10,18 @@ expression: response
       {
         "range": {
           "start": {
-            "line": 0,
-            "character": 0
+            "line": 4,
+            "character": 17
           },
           "end": {
-            "line": 0,
-            "character": 0
+            "line": 4,
+            "character": 18
           }
         },
         "code": "type-check",
         "message": "",
         "data": [
-          21,
-          49,
-          [
-            "i32"
-          ]
+          "i32"
         ]
       }
     ],

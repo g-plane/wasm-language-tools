@@ -105,11 +105,7 @@ expression: response
       "source": "wat",
       "message": "expected types [], found [i32] at the end",
       "data": [
-        34,
-        153,
-        [
-          "i32"
-        ]
+        "i32"
       ]
     },
     {
@@ -162,11 +158,7 @@ expression: response
       "source": "wat",
       "message": "expected types [], found [i32] at the end",
       "data": [
-        156,
-        280,
-        [
-          "i32"
-        ]
+        "i32"
       ]
     }
   ]

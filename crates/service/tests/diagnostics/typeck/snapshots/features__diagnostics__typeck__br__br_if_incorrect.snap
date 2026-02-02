@@ -37,11 +37,7 @@ expression: response
       "source": "wat",
       "message": "expected types [], found [f64] at the end",
       "data": [
-        37,
-        102,
-        [
-          "f64"
-        ]
+        "f64"
       ]
     },
     {
@@ -110,11 +106,7 @@ expression: response
       "source": "wat",
       "message": "expected types [], found [f64] at the end",
       "data": [
-        132,
-        197,
-        [
-          "f64"
-        ]
+        "f64"
       ]
     },
     {
@@ -197,11 +189,7 @@ expression: response
       "source": "wat",
       "message": "expected types [], found [i32] at the end",
       "data": [
-        496,
-        563,
-        [
-          "i32"
-        ]
+        "i32"
       ]
     },
     {
@@ -220,11 +208,7 @@ expression: response
       "source": "wat",
       "message": "expected types [], found [i32] at the end",
       "data": [
-        604,
-        671,
-        [
-          "i32"
-        ]
+        "i32"
       ]
     },
     {
@@ -489,11 +473,7 @@ expression: response
       "source": "wat",
       "message": "expected types [], found [i32] at the end",
       "data": [
-        1776,
-        1825,
-        [
-          "i32"
-        ]
+        "i32"
       ]
     },
     {
@@ -594,12 +574,8 @@ expression: response
       "source": "wat",
       "message": "expected types [], found [i32, i32] at the end",
       "data": [
-        2023,
-        2129,
-        [
-          "i32",
-          "i32"
-        ]
+        "i32",
+        "i32"
       ]
     },
     {
@@ -666,12 +642,8 @@ expression: response
       "source": "wat",
       "message": "expected types [], found [i32, i32] at the end",
       "data": [
-        2197,
-        2329,
-        [
-          "i32",
-          "i32"
-        ]
+        "i32",
+        "i32"
       ]
     },
     {

@@ -289,11 +289,7 @@ expression: response
       "source": "wat",
       "message": "expected types [], found [f64] at the end",
       "data": [
-        492,
-        522,
-        [
-          "f64"
-        ]
+        "f64"
       ]
     },
     {

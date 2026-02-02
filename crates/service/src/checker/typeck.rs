@@ -239,7 +239,7 @@ fn check_block_like(
         .filter(|child| Instr::can_cast(child.kind()))
         .for_each(|child| unfold(child, &mut type_stack, diagnostics, shared));
 
-    if let Some(diagnostic) = type_stack.check_to_bottom(expected_results, node, ReportRange::Last(node)) {
+    if let Some(diagnostic) = type_stack.check_to_bottom(expected_results, ReportRange::Last(node)) {
         diagnostics.push(diagnostic);
     }
 }
@@ -328,7 +328,7 @@ fn check_instr<'db, 'alloc>(
                             has_never: false,
                         };
                         if type_stack
-                            .check_to_bottom(&results, node, ReportRange::Instr(&instr))
+                            .check_to_bottom(&results, ReportRange::Instr(&instr))
                             .is_some()
                         {
                             diagnostics.push(Diagnostic {
@@ -415,12 +415,7 @@ impl<'db, 'alloc> TypeStack<'db, 'alloc> {
         diagnostic
     }
 
-    fn check_to_bottom(
-        &mut self,
-        expected: &[OperandType<'db>],
-        block_node: &SyntaxNode,
-        report_range: ReportRange,
-    ) -> Option<Diagnostic> {
+    fn check_to_bottom(&mut self, expected: &[OperandType<'db>], report_range: ReportRange) -> Option<Diagnostic> {
         let mut mismatch = false;
         let mut related_information = vec![];
         expected
@@ -477,7 +472,6 @@ impl<'db, 'alloc> TypeStack<'db, 'alloc> {
                     Some(related_information)
                 },
                 data: if expected.is_empty() {
-                    let range = block_node.text_range();
                     self.stack
                         .iter()
                         .map(|(ty, _)| match ty {
@@ -485,9 +479,7 @@ impl<'db, 'alloc> TypeStack<'db, 'alloc> {
                             OperandType::Any => None,
                         })
                         .collect::<Option<Vec<_>>>()
-                        .and_then(|types| {
-                            serde_json::to_value((u32::from(range.start()), u32::from(range.end()), types)).ok()
-                        })
+                        .and_then(|types| serde_json::to_value(types).ok())
                 } else {
                     None
                 },

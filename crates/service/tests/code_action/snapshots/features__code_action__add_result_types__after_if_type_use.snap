@@ -4,25 +4,24 @@ expression: response
 ---
 [
   {
-    "title": "Add result types to `$f`",
+    "title": "Add result types",
     "kind": "quickfix",
     "diagnostics": [
       {
         "range": {
           "start": {
-            "line": 3,
-            "character": 15
+            "line": 5,
+            "character": 21
           },
           "end": {
-            "line": 3,
-            "character": 16
+            "line": 5,
+            "character": 22
           }
         },
         "code": "type-check",
         "message": "",
         "data": [
-          "i32",
-          "(ref null any)"
+          "i32"
         ]
       }
     ],
@@ -32,15 +31,15 @@ expression: response
           {
             "range": {
               "start": {
-                "line": 2,
-                "character": 10
+                "line": 3,
+                "character": 15
               },
               "end": {
-                "line": 2,
-                "character": 10
+                "line": 3,
+                "character": 15
               }
             },
-            "newText": " (result i32 (ref null any))"
+            "newText": " (result i32)"
           }
         ]
       }
