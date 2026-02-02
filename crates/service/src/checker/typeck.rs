@@ -13,12 +13,12 @@ use crate::{
     },
 };
 use itertools::{EitherOrBoth, Itertools};
-use oxc_allocator::{Allocator, Vec as OxcVec};
+use oxc_allocator::{Allocator, StringBuilder, Vec as OxcVec};
 use rowan::{
     TextRange,
     ast::{AstNode, support},
 };
-use std::iter;
+use std::{fmt::Write, iter};
 use wat_syntax::{
     SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodePtr,
     ast::{BlockInstr, ElemList, Instr, ModuleFieldFunc, ModuleFieldTable, PlainInstr},
@@ -475,11 +475,15 @@ impl<'db, 'alloc> TypeStack<'db, 'alloc> {
                     self.stack
                         .iter()
                         .map(|(ty, _)| match ty {
-                            OperandType::Val(ty) => Some(ty.render(self.shared.db).to_string()),
+                            OperandType::Val(ty) => {
+                                let mut builder = StringBuilder::with_capacity_in(3, self.shared.allocator);
+                                let _ = write!(&mut builder, "{}", ty.render(self.shared.db));
+                                serde_json::to_value(builder.as_str()).ok()
+                            }
                             OperandType::Any => None,
                         })
                         .collect::<Option<Vec<_>>>()
-                        .and_then(|types| serde_json::to_value(types).ok())
+                        .map(serde_json::Value::Array)
                 } else {
                     None
                 },
