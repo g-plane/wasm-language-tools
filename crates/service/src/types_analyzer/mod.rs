@@ -6,7 +6,7 @@ pub(crate) use self::{
     resolver::{
         resolve_array_type_with_idx, resolve_br_types, resolve_field_type_with_struct_idx, resolve_param_types,
     },
-    signature::{ResolvedSig, get_func_sig, get_type_use_sig},
+    signature::{ResolvedSig, Signature, get_func_sig, get_type_use_sig},
     types::{FieldType, Fields, HeapType, OperandType, RefType, StorageType, ValType},
 };
 

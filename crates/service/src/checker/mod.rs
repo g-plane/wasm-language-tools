@@ -146,7 +146,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         diagnostics.push(diagnostic);
                     }
                     immediates::check(&mut diagnostics, &node, &instr);
-                    br_table_branches::check(&mut diagnostics, db, document, symbol_table, &instr);
+                    br_table_branches::check(&mut diagnostics, db, document, symbol_table, &instr, &allocator);
                     if let Some(diagnostic) = packing::check(db, document, symbol_table, &instr) {
                         diagnostics.push(diagnostic);
                     }

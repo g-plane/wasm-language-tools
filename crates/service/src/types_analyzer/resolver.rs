@@ -41,17 +41,13 @@ pub(crate) fn resolve_br_types<'db>(
     document: Document,
     symbol_table: &'db SymbolTable<'db>,
     ref_key: SymbolKey,
-) -> Vec<OperandType<'db>> {
-    symbol_table
-        .find_def(ref_key)
-        .map(|def_symbol| {
-            get_func_sig(db, document, def_symbol.key, &def_symbol.green)
-                .results
-                .into_iter()
-                .map(OperandType::Val)
-                .collect()
-        })
-        .unwrap_or_default()
+) -> Option<impl DoubleEndedIterator<Item = OperandType<'db>> + use<'db>> {
+    symbol_table.find_def(ref_key).map(|def_symbol| {
+        get_func_sig(db, document, def_symbol.key, &def_symbol.green)
+            .results
+            .into_iter()
+            .map(OperandType::Val)
+    })
 }
 
 pub(crate) fn resolve_array_type_with_idx<'db>(

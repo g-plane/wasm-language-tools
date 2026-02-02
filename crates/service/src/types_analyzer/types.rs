@@ -492,10 +492,6 @@ impl<'db> Fields<'db> {
                 .zip(&other.0)
                 .all(|((a, _), (b, _))| a.type_equals(b, db, document, module_id))
     }
-
-    pub(crate) fn to_operand_types(&self) -> Vec<OperandType<'db>> {
-        self.0.iter().map(|(field, _)| field.storage.clone().into()).collect()
-    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]

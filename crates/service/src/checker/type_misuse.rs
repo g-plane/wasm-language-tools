@@ -108,8 +108,9 @@ pub fn check(
             "br_on_cast" => {
                 let mut immediates = support::children::<Immediate>(node);
                 let label = immediates.next()?;
-                let label_types = resolve_br_types(db, document, symbol_table, SymbolKey::new(label.syntax()));
-                let rt_label = if let Some(OperandType::Val(ValType::Ref(rt_label))) = label_types.last() {
+                let rt_label_type = resolve_br_types(db, document, symbol_table, SymbolKey::new(label.syntax()))
+                    .and_then(|mut types| types.next_back());
+                let rt_label = if let Some(OperandType::Val(ValType::Ref(rt_label))) = rt_label_type {
                     rt_label
                 } else {
                     diagnostics.push(Diagnostic {
@@ -140,7 +141,7 @@ pub fn check(
                         ..Default::default()
                     });
                 }
-                if !rt2.matches(rt_label, db, document, module_id) {
+                if !rt2.matches(&rt_label, db, document, module_id) {
                     diagnostics.push(Diagnostic {
                         range: rt2_node.syntax().text_range(),
                         code: DIAGNOSTIC_CODE.into(),
@@ -160,8 +161,9 @@ pub fn check(
             "br_on_cast_fail" => {
                 let mut immediates = support::children::<Immediate>(node);
                 let label = immediates.next()?;
-                let label_types = resolve_br_types(db, document, symbol_table, SymbolKey::new(label.syntax()));
-                let rt_label = if let Some(OperandType::Val(ValType::Ref(rt_label))) = label_types.last() {
+                let rt_label_type = resolve_br_types(db, document, symbol_table, SymbolKey::new(label.syntax()))
+                    .and_then(|mut types| types.next_back());
+                let rt_label = if let Some(OperandType::Val(ValType::Ref(rt_label))) = rt_label_type {
                     rt_label
                 } else {
                     diagnostics.push(Diagnostic {
@@ -193,7 +195,7 @@ pub fn check(
                     });
                 }
                 let rt_diff = rt1.diff(&rt2);
-                if !rt_diff.matches(rt_label, db, document, module_id) {
+                if !rt_diff.matches(&rt_label, db, document, module_id) {
                     diagnostics.push(Diagnostic {
                         range: node.text_range(),
                         code: DIAGNOSTIC_CODE.into(),
