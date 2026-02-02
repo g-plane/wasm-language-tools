@@ -596,6 +596,22 @@ fn resolve_sig<'db, 'alloc>(
             ),
             results: OxcVec::new_in(allocator),
         },
+        "i32.const" => ResolvedSig {
+            params: OxcVec::new_in(allocator),
+            results: OxcVec::from_array_in([OperandType::Val(ValType::I32)], allocator),
+        },
+        "i64.const" => ResolvedSig {
+            params: OxcVec::new_in(allocator),
+            results: OxcVec::from_array_in([OperandType::Val(ValType::I64)], allocator),
+        },
+        "f32.const" => ResolvedSig {
+            params: OxcVec::new_in(allocator),
+            results: OxcVec::from_array_in([OperandType::Val(ValType::F32)], allocator),
+        },
+        "f64.const" => ResolvedSig {
+            params: OxcVec::new_in(allocator),
+            results: OxcVec::from_array_in([OperandType::Val(ValType::F64)], allocator),
+        },
         "return" => ResolvedSig {
             params: instr
                 .syntax()
