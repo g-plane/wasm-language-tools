@@ -8,17 +8,17 @@ use crate::{
     imex,
     types_analyzer::{
         CompositeType, HeapType, OperandType, RefType, Signature, ValType, extract_global_type, extract_type,
-        get_def_types, get_func_sig, get_type_use_sig, resolve_array_type_with_idx, resolve_br_types,
+        get_def_types, get_func_sig, get_type_use_sig, join_types, resolve_array_type_with_idx, resolve_br_types,
         resolve_field_type_with_struct_idx,
     },
 };
 use itertools::{EitherOrBoth, Itertools};
-use oxc_allocator::{Allocator, StringBuilder, Vec as OxcVec};
+use oxc_allocator::{Allocator, Vec as OxcVec};
 use rowan::{
     TextRange,
     ast::{AstNode, support},
 };
-use std::{fmt::Write, iter};
+use std::iter;
 use wat_syntax::{
     SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodePtr,
     ast::{BlockInstr, ElemList, Instr, ModuleFieldFunc, ModuleFieldTable, PlainInstr},
@@ -35,11 +35,13 @@ pub fn check_func(
     node: &SyntaxNode,
     allocator: &mut Allocator,
 ) {
-    let results = get_func_sig(db, document, SymbolKey::new(node), &node.green())
-        .results
-        .into_iter()
-        .map(OperandType::Val)
-        .collect::<Vec<_>>();
+    let results = OxcVec::from_iter_in(
+        get_func_sig(db, document, SymbolKey::new(node), &node.green())
+            .results
+            .into_iter()
+            .map(OperandType::Val),
+        allocator,
+    );
     check_block_like(
         diagnostics,
         &Shared {
@@ -274,15 +276,14 @@ fn check_instr<'db, 'alloc>(
                 .iter()
                 .map(|(ty, ..)| (OperandType::Val(ty.clone()), Some(instr.clone())))
                 .collect();
-            let results = signature.results.into_iter().map(OperandType::Val).collect::<Vec<_>>();
+            let results = OxcVec::from_iter_in(signature.results.into_iter().map(OperandType::Val), shared.allocator);
             match block_instr {
                 BlockInstr::Block(..) | BlockInstr::Loop(..) | BlockInstr::TryTable(..) => {
                     if let Some(diagnostic) = type_stack.check(
-                        &signature
-                            .params
-                            .into_iter()
-                            .map(|(ty, _)| OperandType::Val(ty))
-                            .collect::<Vec<_>>(),
+                        &OxcVec::from_iter_in(
+                            signature.params.into_iter().map(|(ty, _)| OperandType::Val(ty)),
+                            shared.allocator,
+                        ),
                         ReportRange::Instr(&instr),
                     ) {
                         diagnostics.push(diagnostic);
@@ -297,11 +298,10 @@ fn check_instr<'db, 'alloc>(
                         diagnostics.push(diagnostic);
                     }
                     if let Some(diagnostic) = type_stack.check(
-                        &signature
-                            .params
-                            .into_iter()
-                            .map(|(ty, _)| OperandType::Val(ty))
-                            .collect::<Vec<_>>(),
+                        &OxcVec::from_iter_in(
+                            signature.params.into_iter().map(|(ty, _)| OperandType::Val(ty)),
+                            shared.allocator,
+                        ),
                         ReportRange::Instr(&instr),
                     ) {
                         diagnostics.push(diagnostic);
@@ -314,7 +314,7 @@ fn check_instr<'db, 'alloc>(
                             code: DIAGNOSTIC_CODE.into(),
                             message: format!(
                                 "missing `then` branch with expected types {}",
-                                join_types(shared, results.iter(), "")
+                                join_types(shared.db, results.iter(), "", shared.allocator)
                             ),
                             ..Default::default()
                         });
@@ -336,7 +336,7 @@ fn check_instr<'db, 'alloc>(
                                 code: DIAGNOSTIC_CODE.into(),
                                 message: format!(
                                     "missing `else` branch with expected types {}",
-                                    join_types(shared, results.iter(), "")
+                                    join_types(shared.db, results.iter(), "", shared.allocator)
                                 ),
                                 ..Default::default()
                             });
@@ -395,11 +395,12 @@ impl<'db, 'alloc> TypeStack<'db, 'alloc> {
                 code: DIAGNOSTIC_CODE.into(),
                 message: format!(
                     "expected types {}, found {}",
-                    join_types(self.shared, expected.iter(), ""),
+                    join_types(self.shared.db, expected.iter(), "", self.shared.allocator),
                     join_types(
-                        self.shared,
+                        self.shared.db,
                         pops.iter().map(|(ty, _)| ty),
-                        if self.stack.len() > pops.len() { "... " } else { "" }
+                        if self.stack.len() > pops.len() { "... " } else { "" },
+                        self.shared.allocator,
                     ),
                 ),
                 related_information: if related_information.is_empty() {
@@ -457,8 +458,13 @@ impl<'db, 'alloc> TypeStack<'db, 'alloc> {
                 code: DIAGNOSTIC_CODE.into(),
                 message: format!(
                     "expected types {}, found {}{}",
-                    join_types(self.shared, expected.iter(), ""),
-                    join_types(self.shared, self.stack.iter().map(|(ty, _)| ty), ""),
+                    join_types(self.shared.db, expected.iter(), "", self.shared.allocator),
+                    join_types(
+                        self.shared.db,
+                        self.stack.iter().map(|(ty, _)| ty),
+                        "",
+                        self.shared.allocator,
+                    ),
                     if let ReportRange::Last(..) = report_range {
                         " at the end"
                     } else {
@@ -1371,24 +1377,6 @@ fn resolve_sig<'db, 'alloc>(
                 results: OxcVec::from_iter_in(sig.results.iter().cloned(), allocator),
             })
             .unwrap_or_else(|| ResolvedSig::new_in(allocator)),
-    }
-}
-
-fn join_types<'db, 'alloc, I>(shared: &Shared<'db, 'alloc>, mut types: I, prefix: &str) -> StringBuilder<'alloc>
-where
-    I: Iterator<Item = &'db OperandType<'db>> + ExactSizeIterator,
-{
-    if let Some(first) = types.next() {
-        let mut builder = StringBuilder::with_capacity_in(2 + prefix.len() + 5 * types.len(), shared.allocator);
-        builder.push('[');
-        let _ = write!(&mut builder, "{prefix}{}", first.render(shared.db));
-        types.for_each(|ty| {
-            let _ = write!(&mut builder, ", {}", ty.render(shared.db));
-        });
-        builder.push(']');
-        builder
-    } else {
-        StringBuilder::from_str_in("[]", shared.allocator)
     }
 }
 

@@ -1,6 +1,9 @@
 use super::{Diagnostic, FastPlainInstr};
-use crate::{binder::SymbolTable, document::Document, types_analyzer::resolve_br_types};
-use itertools::Itertools;
+use crate::{
+    binder::SymbolTable,
+    document::Document,
+    types_analyzer::{join_types, resolve_br_types},
+};
 use oxc_allocator::{Allocator, Vec as OxcVec};
 
 const DIAGNOSTIC_CODE: &str = "br-table-branches";
@@ -34,9 +37,9 @@ pub fn check(
                 range: immediate.text_range(),
                 code: DIAGNOSTIC_CODE.into(),
                 message: format!(
-                    "type mismatch in `br_table`: expected [{}], found [{}]",
-                    expected.iter().map(|ty| ty.render(db)).join(", "),
-                    received.iter().map(|ty| ty.render(db)).join(", ")
+                    "type mismatch in `br_table`: expected {}, found {}",
+                    join_types(db, expected.iter(), "", allocator),
+                    join_types(db, received.iter(), "", allocator),
                 ),
                 ..Default::default()
             })
