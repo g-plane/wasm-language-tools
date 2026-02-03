@@ -1,9 +1,9 @@
 use crate::{
     LanguageService,
     binder::{SymbolKey, SymbolTable},
-    helpers,
+    helpers::LineIndexExt,
 };
-use lspt::{Declaration, DeclarationParams, Definition, DefinitionParams, TypeDefinitionParams, Union2};
+use lspt::{Declaration, DeclarationParams, Definition, DefinitionParams, Location, TypeDefinitionParams, Union2};
 use wat_syntax::SyntaxKind;
 
 impl LanguageService {
@@ -19,14 +19,16 @@ impl LanguageService {
         let line_index = document.line_index(self);
         let symbol_table = SymbolTable::of(self, document);
         let key = SymbolKey::new(&parent);
-        symbol_table.resolved.get(&key).map(|key| {
-            Union2::A(helpers::create_location_by_symbol(
-                params.text_document.uri.clone(),
-                line_index,
-                *key,
-                &root,
-            ))
-        })
+        symbol_table
+            .resolved
+            .get(&key)
+            .and_then(|key| symbol_table.def_poi.get(key))
+            .map(|range| {
+                Union2::A(Location {
+                    uri: params.text_document.uri.clone(),
+                    range: line_index.convert(*range),
+                })
+            })
     }
 
     /// Handler for `textDocument/typeDefinition` request.
@@ -59,13 +61,12 @@ impl LanguageService {
                     })
                     .and_then(|type_idx| symbol_table.resolved.get(&SymbolKey::new(&type_idx)))
             })
-            .map(|key| {
-                Union2::A(helpers::create_location_by_symbol(
-                    params.text_document.uri.clone(),
-                    line_index,
-                    *key,
-                    &root,
-                ))
+            .and_then(|key| symbol_table.def_poi.get(key))
+            .map(|range| {
+                Union2::A(Location {
+                    uri: params.text_document.uri.clone(),
+                    range: line_index.convert(*range),
+                })
             })
     }
 

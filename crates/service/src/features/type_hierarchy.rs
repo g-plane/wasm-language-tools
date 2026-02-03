@@ -28,7 +28,13 @@ impl LanguageService {
                 detail: helpers::syntax::infer_type_def_symbol_detail(symbol, &root),
                 uri: params.text_document.uri.clone(),
                 range: line_index.convert(symbol.key.text_range()),
-                selection_range: helpers::create_selection_range(symbol, &root, line_index),
+                selection_range: line_index.convert(
+                    symbol_table
+                        .def_poi
+                        .get(&symbol.key)
+                        .copied()
+                        .unwrap_or_else(|| symbol.key.text_range()),
+                ),
                 data: None,
             }]),
             SymbolKind::TypeUse if symbol.key.text_range() == parent_range => {
@@ -40,7 +46,13 @@ impl LanguageService {
                         detail: helpers::syntax::infer_type_def_symbol_detail(symbol, &root),
                         uri: params.text_document.uri.clone(),
                         range: line_index.convert(symbol.key.text_range()),
-                        selection_range: helpers::create_selection_range(symbol, &root, line_index),
+                        selection_range: line_index.convert(
+                            symbol_table
+                                .def_poi
+                                .get(&symbol.key)
+                                .copied()
+                                .unwrap_or_else(|| symbol.key.text_range()),
+                        ),
                         data: None,
                     }]
                 })
@@ -75,7 +87,13 @@ impl LanguageService {
                     detail: helpers::syntax::infer_type_def_symbol_detail(symbol, &root),
                     uri: params.item.uri,
                     range: line_index.convert(symbol.key.text_range()),
-                    selection_range: helpers::create_selection_range(symbol, &root, line_index),
+                    selection_range: line_index.convert(
+                        symbol_table
+                            .def_poi
+                            .get(&symbol.key)
+                            .copied()
+                            .unwrap_or_else(|| symbol.key.text_range()),
+                    ),
                     data: None,
                 }]
             })
@@ -112,7 +130,13 @@ impl LanguageService {
                 detail: helpers::syntax::infer_type_def_symbol_detail(symbol, &root),
                 uri: params.item.uri.clone(),
                 range: line_index.convert(symbol.key.text_range()),
-                selection_range: helpers::create_selection_range(symbol, &root, line_index),
+                selection_range: line_index.convert(
+                    symbol_table
+                        .def_poi
+                        .get(&symbol.key)
+                        .copied()
+                        .unwrap_or_else(|| symbol.key.text_range()),
+                ),
                 data: None,
             })
             .collect::<Vec<_>>();

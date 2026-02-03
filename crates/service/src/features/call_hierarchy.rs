@@ -33,7 +33,13 @@ impl LanguageService {
                 )),
                 uri: params.text_document.uri.clone(),
                 range: line_index.convert(symbol.key.text_range()),
-                selection_range: helpers::create_selection_range(symbol, &root, line_index),
+                selection_range: line_index.convert(
+                    symbol_table
+                        .def_poi
+                        .get(&symbol.key)
+                        .copied()
+                        .unwrap_or_else(|| symbol.key.text_range()),
+                ),
                 data: None,
             }]),
             SymbolKind::Call if symbol.key.text_range() == parent_range => {
@@ -49,7 +55,13 @@ impl LanguageService {
                         )),
                         uri: params.text_document.uri.clone(),
                         range: line_index.convert(symbol.key.text_range()),
-                        selection_range: helpers::create_selection_range(symbol, &root, line_index),
+                        selection_range: line_index.convert(
+                            symbol_table
+                                .def_poi
+                                .get(&symbol.key)
+                                .copied()
+                                .unwrap_or_else(|| symbol.key.text_range()),
+                        ),
                         data: None,
                     }]
                 })
@@ -108,7 +120,13 @@ impl LanguageService {
                         )),
                         uri: params.item.uri.clone(),
                         range: line_index.convert(func_symbol.key.text_range()),
-                        selection_range: helpers::create_selection_range(func_symbol, &root, line_index),
+                        selection_range: line_index.convert(
+                            symbol_table
+                                .def_poi
+                                .get(&func_symbol.key)
+                                .copied()
+                                .unwrap_or_else(|| func_symbol.key.text_range()),
+                        ),
                         data: None,
                     },
                     from_ranges: plain_instr_range.into_iter().collect(),
@@ -156,7 +174,13 @@ impl LanguageService {
                             )),
                             uri: uri.clone(),
                             range: line_index.convert(func_symbol.key.text_range()),
-                            selection_range: helpers::create_selection_range(func_symbol, root, line_index),
+                            selection_range: line_index.convert(
+                                symbol_table
+                                    .def_poi
+                                    .get(&func_symbol.key)
+                                    .copied()
+                                    .unwrap_or_else(|| func_symbol.key.text_range()),
+                            ),
                             data: None,
                         },
                         from_ranges: vec![plain_instr_range],

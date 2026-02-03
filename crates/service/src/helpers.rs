@@ -1,4 +1,4 @@
-use crate::binder::{Symbol, SymbolKey};
+use crate::binder::SymbolKey;
 use line_index::{LineCol, LineIndex};
 use lspt::{Location, Position, Range};
 use rowan::{TextRange, TextSize, ast::support};
@@ -69,15 +69,6 @@ pub fn is_stack_polymorphic(instr_name: &str) -> bool {
             | "throw"
             | "throw_ref"
     )
-}
-
-pub fn create_selection_range(symbol: &Symbol, root: &SyntaxNode, line_index: &LineIndex) -> Range {
-    let node = symbol.key.to_node(root);
-    let range = support::token(&node, SyntaxKind::IDENT)
-        .or_else(|| support::token(&node, SyntaxKind::KEYWORD))
-        .map(|token| token.text_range())
-        .unwrap_or_else(|| node.text_range());
-    line_index.convert(range)
 }
 
 pub fn create_location_by_symbol(
