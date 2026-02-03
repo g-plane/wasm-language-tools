@@ -532,7 +532,7 @@ fn resolve_sig<'db, 'alloc>(
             .unwrap_or_else(|| ResolvedSig::new_in(allocator)),
         "local.get" => ResolvedSig {
             params: OxcVec::new_in(allocator),
-            results: OxcVec::from_array_in(
+            results: OxcVec::from_iter_in(
                 [instr
                     .immediates()
                     .next()
@@ -543,7 +543,7 @@ fn resolve_sig<'db, 'alloc>(
             ),
         },
         "local.set" => ResolvedSig {
-            params: OxcVec::from_array_in(
+            params: OxcVec::from_iter_in(
                 [instr
                     .immediates()
                     .next()
@@ -562,13 +562,13 @@ fn resolve_sig<'db, 'alloc>(
                 .and_then(|symbol| extract_type(shared.db, shared.document, symbol.green.clone()))
                 .map_or(OperandType::Any, OperandType::Val);
             ResolvedSig {
-                params: OxcVec::from_array_in([ty.clone()], allocator),
-                results: OxcVec::from_array_in([ty], allocator),
+                params: OxcVec::from_iter_in([ty.clone()], allocator),
+                results: OxcVec::from_iter_in([ty], allocator),
             }
         }
         "global.get" => ResolvedSig {
             params: OxcVec::new_in(allocator),
-            results: OxcVec::from_array_in(
+            results: OxcVec::from_iter_in(
                 [instr
                     .immediates()
                     .next()
@@ -579,7 +579,7 @@ fn resolve_sig<'db, 'alloc>(
             ),
         },
         "global.set" => ResolvedSig {
-            params: OxcVec::from_array_in(
+            params: OxcVec::from_iter_in(
                 [instr
                     .immediates()
                     .next()
@@ -592,19 +592,19 @@ fn resolve_sig<'db, 'alloc>(
         },
         "i32.const" => ResolvedSig {
             params: OxcVec::new_in(allocator),
-            results: OxcVec::from_array_in([OperandType::Val(ValType::I32)], allocator),
+            results: OxcVec::from_iter_in([OperandType::Val(ValType::I32)], allocator),
         },
         "i64.const" => ResolvedSig {
             params: OxcVec::new_in(allocator),
-            results: OxcVec::from_array_in([OperandType::Val(ValType::I64)], allocator),
+            results: OxcVec::from_iter_in([OperandType::Val(ValType::I64)], allocator),
         },
         "f32.const" => ResolvedSig {
             params: OxcVec::new_in(allocator),
-            results: OxcVec::from_array_in([OperandType::Val(ValType::F32)], allocator),
+            results: OxcVec::from_iter_in([OperandType::Val(ValType::F32)], allocator),
         },
         "f64.const" => ResolvedSig {
             params: OxcVec::new_in(allocator),
-            results: OxcVec::from_array_in([OperandType::Val(ValType::F64)], allocator),
+            results: OxcVec::from_iter_in([OperandType::Val(ValType::F64)], allocator),
         },
         "return" => ResolvedSig {
             params: instr
@@ -830,8 +830,8 @@ fn resolve_sig<'db, 'alloc>(
                     .map_or(OperandType::Any, |(ty, _)| ty.clone())
             };
             ResolvedSig {
-                params: OxcVec::from_array_in([ty.clone(), ty.clone(), OperandType::Val(ValType::I32)], allocator),
-                results: OxcVec::from_array_in([ty], allocator),
+                params: OxcVec::from_iter_in([ty.clone(), ty.clone(), OperandType::Val(ValType::I32)], allocator),
+                results: OxcVec::from_iter_in([ty], allocator),
             }
         }
         "call_indirect" | "return_call_indirect" => {
@@ -867,7 +867,7 @@ fn resolve_sig<'db, 'alloc>(
                     };
                     ResolvedSig {
                         params,
-                        results: OxcVec::from_array_in(
+                        results: OxcVec::from_iter_in(
                             [OperandType::Val(ValType::Ref(RefType {
                                 heap_ty: HeapType::Type(def_type.idx),
                                 nullable: false,
@@ -878,7 +878,7 @@ fn resolve_sig<'db, 'alloc>(
                 })
                 .unwrap_or_else(|| ResolvedSig {
                     params: OxcVec::new_in(allocator),
-                    results: OxcVec::from_array_in([OperandType::Any], allocator),
+                    results: OxcVec::from_iter_in([OperandType::Any], allocator),
                 })
         }
         "struct.new_default" => instr
@@ -887,7 +887,7 @@ fn resolve_sig<'db, 'alloc>(
             .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
             .map(|symbol| ResolvedSig {
                 params: OxcVec::new_in(allocator),
-                results: OxcVec::from_array_in(
+                results: OxcVec::from_iter_in(
                     [OperandType::Val(ValType::Ref(RefType {
                         heap_ty: HeapType::Type(symbol.idx),
                         nullable: false,
@@ -897,7 +897,7 @@ fn resolve_sig<'db, 'alloc>(
             })
             .unwrap_or_else(|| ResolvedSig {
                 params: OxcVec::new_in(allocator),
-                results: OxcVec::from_array_in([OperandType::Any], allocator),
+                results: OxcVec::from_iter_in([OperandType::Any], allocator),
             }),
         "struct.get" => {
             let mut immediates = instr.immediates();
@@ -908,18 +908,18 @@ fn resolve_sig<'db, 'alloc>(
                     resolve_field_type_with_struct_idx(shared.db, shared.document, &struct_ref, &field_ref)
                 })
                 .map(|(idx, ty)| ResolvedSig {
-                    params: OxcVec::from_array_in(
+                    params: OxcVec::from_iter_in(
                         [OperandType::Val(ValType::Ref(RefType {
                             heap_ty: HeapType::Type(idx),
                             nullable: true,
                         }))],
                         allocator,
                     ),
-                    results: OxcVec::from_array_in([ty.unwrap_or(OperandType::Any)], allocator),
+                    results: OxcVec::from_iter_in([ty.unwrap_or(OperandType::Any)], allocator),
                 })
                 .unwrap_or_else(|| ResolvedSig {
                     params: OxcVec::new_in(allocator),
-                    results: OxcVec::from_array_in([OperandType::Any], allocator),
+                    results: OxcVec::from_iter_in([OperandType::Any], allocator),
                 })
         }
         "struct.get_s" | "struct.get_u" => ResolvedSig {
@@ -928,7 +928,7 @@ fn resolve_sig<'db, 'alloc>(
                 .next()
                 .and_then(|immediate| shared.symbol_table.find_def(SymbolKey::new(immediate.syntax())))
                 .map(|symbol| {
-                    OxcVec::from_array_in(
+                    OxcVec::from_iter_in(
                         [OperandType::Val(ValType::Ref(RefType {
                             heap_ty: HeapType::Type(symbol.idx),
                             nullable: true,
@@ -937,7 +937,7 @@ fn resolve_sig<'db, 'alloc>(
                     )
                 })
                 .unwrap_or_else(|| OxcVec::new_in(allocator)),
-            results: OxcVec::from_array_in([OperandType::Val(ValType::I32)], allocator),
+            results: OxcVec::from_iter_in([OperandType::Val(ValType::I32)], allocator),
         },
         "struct.set" => {
             let mut immediates = instr.immediates();
@@ -948,7 +948,7 @@ fn resolve_sig<'db, 'alloc>(
                     resolve_field_type_with_struct_idx(shared.db, shared.document, &struct_ref, &field_ref)
                 })
                 .map(|(idx, ty)| ResolvedSig {
-                    params: OxcVec::from_array_in(
+                    params: OxcVec::from_iter_in(
                         [
                             OperandType::Val(ValType::Ref(RefType {
                                 heap_ty: HeapType::Type(idx),
@@ -961,7 +961,7 @@ fn resolve_sig<'db, 'alloc>(
                     results: OxcVec::new_in(allocator),
                 })
                 .unwrap_or_else(|| ResolvedSig {
-                    params: OxcVec::from_array_in([OperandType::Any], allocator),
+                    params: OxcVec::from_iter_in([OperandType::Any], allocator),
                     results: OxcVec::new_in(allocator),
                 })
         }
@@ -974,8 +974,8 @@ fn resolve_sig<'db, 'alloc>(
                     resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
                 })
                 .map(|(idx, ty)| ResolvedSig {
-                    params: OxcVec::from_array_in([ty.unwrap_or(OperandType::Any)], allocator),
-                    results: OxcVec::from_array_in(
+                    params: OxcVec::from_iter_in([ty.unwrap_or(OperandType::Any)], allocator),
+                    results: OxcVec::from_iter_in(
                         [OperandType::Val(ValType::Ref(RefType {
                             heap_ty: HeapType::Type(idx),
                             nullable: false,
@@ -985,7 +985,7 @@ fn resolve_sig<'db, 'alloc>(
                 })
                 .unwrap_or_else(|| ResolvedSig {
                     params: OxcVec::new_in(allocator),
-                    results: OxcVec::from_array_in([OperandType::Any], allocator),
+                    results: OxcVec::from_iter_in([OperandType::Any], allocator),
                 });
             sig.params.push(OperandType::Val(ValType::I32));
             sig
@@ -995,8 +995,8 @@ fn resolve_sig<'db, 'alloc>(
             .next()
             .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
             .map(|symbol| ResolvedSig {
-                params: OxcVec::from_array_in([OperandType::Val(ValType::I32)], allocator),
-                results: OxcVec::from_array_in(
+                params: OxcVec::from_iter_in([OperandType::Val(ValType::I32)], allocator),
+                results: OxcVec::from_iter_in(
                     [OperandType::Val(ValType::Ref(RefType {
                         heap_ty: HeapType::Type(symbol.idx),
                         nullable: false,
@@ -1006,7 +1006,7 @@ fn resolve_sig<'db, 'alloc>(
             })
             .unwrap_or_else(|| ResolvedSig {
                 params: OxcVec::new_in(allocator),
-                results: OxcVec::from_array_in([OperandType::Any], allocator),
+                results: OxcVec::from_iter_in([OperandType::Any], allocator),
             }),
         "array.new_fixed" => {
             let mut immediates = instr.immediates();
@@ -1024,7 +1024,7 @@ fn resolve_sig<'db, 'alloc>(
                         .unwrap_or_default();
                     ResolvedSig {
                         params: OxcVec::from_iter_in(iter::repeat_n(ty.unwrap_or(OperandType::Any), count), allocator),
-                        results: OxcVec::from_array_in(
+                        results: OxcVec::from_iter_in(
                             [OperandType::Val(ValType::Ref(RefType {
                                 heap_ty: HeapType::Type(idx),
                                 nullable: false,
@@ -1035,7 +1035,7 @@ fn resolve_sig<'db, 'alloc>(
                 })
                 .unwrap_or_else(|| ResolvedSig {
                     params: OxcVec::new_in(allocator),
-                    results: OxcVec::from_array_in([OperandType::Any], allocator),
+                    results: OxcVec::from_iter_in([OperandType::Any], allocator),
                 })
         }
         "array.new_data" | "array.new_elem" => instr
@@ -1044,7 +1044,7 @@ fn resolve_sig<'db, 'alloc>(
             .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
             .map(|symbol| ResolvedSig {
                 params: OxcVec::from_iter_in(iter::repeat_n(OperandType::Val(ValType::I32), 2), allocator),
-                results: OxcVec::from_array_in(
+                results: OxcVec::from_iter_in(
                     [OperandType::Val(ValType::Ref(RefType {
                         heap_ty: HeapType::Type(symbol.idx),
                         nullable: false,
@@ -1054,7 +1054,7 @@ fn resolve_sig<'db, 'alloc>(
             })
             .unwrap_or_else(|| ResolvedSig {
                 params: OxcVec::new_in(allocator),
-                results: OxcVec::from_array_in([OperandType::Any], allocator),
+                results: OxcVec::from_iter_in([OperandType::Any], allocator),
             }),
         "array.get" => instr
             .immediates()
@@ -1064,7 +1064,7 @@ fn resolve_sig<'db, 'alloc>(
                 resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
             })
             .map(|(idx, ty)| ResolvedSig {
-                params: OxcVec::from_array_in(
+                params: OxcVec::from_iter_in(
                     [
                         OperandType::Val(ValType::Ref(RefType {
                             heap_ty: HeapType::Type(idx),
@@ -1074,18 +1074,18 @@ fn resolve_sig<'db, 'alloc>(
                     ],
                     allocator,
                 ),
-                results: OxcVec::from_array_in([ty.unwrap_or(OperandType::Any)], allocator),
+                results: OxcVec::from_iter_in([ty.unwrap_or(OperandType::Any)], allocator),
             })
             .unwrap_or_else(|| ResolvedSig {
                 params: OxcVec::new_in(allocator),
-                results: OxcVec::from_array_in([OperandType::Any], allocator),
+                results: OxcVec::from_iter_in([OperandType::Any], allocator),
             }),
         "array.get_s" | "array.get_u" => instr
             .immediates()
             .next()
             .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
             .map(|symbol| ResolvedSig {
-                params: OxcVec::from_array_in(
+                params: OxcVec::from_iter_in(
                     [
                         OperandType::Val(ValType::Ref(RefType {
                             heap_ty: HeapType::Type(symbol.idx),
@@ -1095,11 +1095,11 @@ fn resolve_sig<'db, 'alloc>(
                     ],
                     allocator,
                 ),
-                results: OxcVec::from_array_in([OperandType::Val(ValType::I32)], allocator),
+                results: OxcVec::from_iter_in([OperandType::Val(ValType::I32)], allocator),
             })
             .unwrap_or_else(|| ResolvedSig {
                 params: OxcVec::new_in(allocator),
-                results: OxcVec::from_array_in([OperandType::Val(ValType::I32)], allocator),
+                results: OxcVec::from_iter_in([OperandType::Val(ValType::I32)], allocator),
             }),
         "array.set" => instr
             .immediates()
@@ -1109,7 +1109,7 @@ fn resolve_sig<'db, 'alloc>(
                 resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
             })
             .map(|(idx, ty)| ResolvedSig {
-                params: OxcVec::from_array_in(
+                params: OxcVec::from_iter_in(
                     [
                         OperandType::Val(ValType::Ref(RefType {
                             heap_ty: HeapType::Type(idx),
@@ -1131,7 +1131,7 @@ fn resolve_sig<'db, 'alloc>(
                 resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
             })
             .map(|(idx, ty)| ResolvedSig {
-                params: OxcVec::from_array_in(
+                params: OxcVec::from_iter_in(
                     [
                         OperandType::Val(ValType::Ref(RefType {
                             heap_ty: HeapType::Type(idx),
@@ -1157,7 +1157,7 @@ fn resolve_sig<'db, 'alloc>(
                         .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax()))),
                 )
                 .map(|(dst, src)| ResolvedSig {
-                    params: OxcVec::from_array_in(
+                    params: OxcVec::from_iter_in(
                         [
                             OperandType::Val(ValType::Ref(RefType {
                                 heap_ty: HeapType::Type(dst.idx),
@@ -1182,7 +1182,7 @@ fn resolve_sig<'db, 'alloc>(
             .next()
             .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
             .map(|symbol| ResolvedSig {
-                params: OxcVec::from_array_in(
+                params: OxcVec::from_iter_in(
                     [
                         OperandType::Val(ValType::Ref(RefType {
                             heap_ty: HeapType::Type(symbol.idx),
@@ -1224,7 +1224,7 @@ fn resolve_sig<'db, 'alloc>(
                 });
             ResolvedSig {
                 params: OxcVec::new_in(allocator),
-                results: OxcVec::from_array_in([ty], allocator),
+                results: OxcVec::from_iter_in([ty], allocator),
             }
         }
         "ref.is_null" => {
@@ -1235,14 +1235,14 @@ fn resolve_sig<'db, 'alloc>(
                     HeapType::Any
                 };
             ResolvedSig {
-                params: OxcVec::from_array_in(
+                params: OxcVec::from_iter_in(
                     [OperandType::Val(ValType::Ref(RefType {
                         heap_ty,
                         nullable: true,
                     }))],
                     allocator,
                 ),
-                results: OxcVec::from_array_in([OperandType::Val(ValType::I32)], allocator),
+                results: OxcVec::from_iter_in([OperandType::Val(ValType::I32)], allocator),
             }
         }
         "ref.as_non_null" => {
@@ -1253,14 +1253,14 @@ fn resolve_sig<'db, 'alloc>(
                     HeapType::Any
                 };
             ResolvedSig {
-                params: OxcVec::from_array_in(
+                params: OxcVec::from_iter_in(
                     [OperandType::Val(ValType::Ref(RefType {
                         heap_ty: heap_ty.clone(),
                         nullable: true,
                     }))],
                     allocator,
                 ),
-                results: OxcVec::from_array_in(
+                results: OxcVec::from_iter_in(
                     [OperandType::Val(ValType::Ref(RefType {
                         heap_ty: heap_ty.clone(),
                         nullable: false,
@@ -1282,14 +1282,14 @@ fn resolve_sig<'db, 'alloc>(
                 })
                 .unwrap_or(HeapType::Any);
             ResolvedSig {
-                params: OxcVec::from_array_in(
+                params: OxcVec::from_iter_in(
                     [OperandType::Val(ValType::Ref(RefType {
                         heap_ty,
                         nullable: true,
                     }))],
                     allocator,
                 ),
-                results: OxcVec::from_array_in([OperandType::Val(ValType::I32)], allocator),
+                results: OxcVec::from_iter_in([OperandType::Val(ValType::I32)], allocator),
             }
         }
         "ref.cast" => {
@@ -1307,14 +1307,14 @@ fn resolve_sig<'db, 'alloc>(
                 .to_top_type(shared.db, shared.document, shared.module_id)
                 .unwrap_or(HeapType::Any);
             ResolvedSig {
-                params: OxcVec::from_array_in(
+                params: OxcVec::from_iter_in(
                     [OperandType::Val(ValType::Ref(RefType {
                         heap_ty,
                         nullable: true,
                     }))],
                     allocator,
                 ),
-                results: OxcVec::from_array_in([OperandType::Val(ValType::Ref(ref_type))], allocator),
+                results: OxcVec::from_iter_in([OperandType::Val(ValType::Ref(ref_type))], allocator),
             }
         }
         "ref.func" => {
@@ -1339,7 +1339,7 @@ fn resolve_sig<'db, 'alloc>(
                 .or_else(|| immediate.map(|immediate| HeapType::DefFunc(Idx::from_immediate(&immediate, shared.db))));
             ResolvedSig {
                 params: OxcVec::new_in(allocator),
-                results: OxcVec::from_array_in(
+                results: OxcVec::from_iter_in(
                     [heap_ty.map_or(OperandType::Any, |heap_ty| {
                         OperandType::Val(ValType::Ref(RefType {
                             heap_ty,
