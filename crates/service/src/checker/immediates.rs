@@ -1,16 +1,21 @@
 use super::{Diagnostic, FastPlainInstr};
-use rowan::ast::AstNode;
+use rowan::{GreenNodeData, Language, NodeOrToken};
 use std::iter::Peekable;
-use wat_syntax::{SyntaxKind, SyntaxNode, ast::Immediate};
+use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, WatLanguage};
 
 const DIAGNOSTIC_CODE: &str = "immediates";
 
 const INDEX: [SyntaxKind; 2] = [SyntaxKind::IDENT, SyntaxKind::INT];
 
 pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastPlainInstr) {
-    let mut immediates = node
+    let green = node.green();
+    let mut immediates = green
         .children()
-        .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
+        .filter_map(|node_or_token| match node_or_token {
+            NodeOrToken::Node(node) if node.kind() == SyntaxKind::IMMEDIATE.into() => Some(node),
+            _ => None,
+        })
+        .zip(instr.immediates.iter())
         .peekable();
 
     match instr.name {
@@ -39,28 +44,30 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
             );
         }
         "select" => {
-            if let Some(immediate) = immediates.next() {
-                let range = immediate.text_range();
+            if let Some((node, ptr)) = immediates.next() {
                 'a: {
-                    let Some(type_use) = Immediate::cast(immediate).and_then(|immediate| immediate.type_use()) else {
+                    let Some(type_use) = node.children().find_map(|node_or_token| match node_or_token {
+                        NodeOrToken::Node(node) if node.kind() == SyntaxKind::TYPE_USE.into() => Some(node),
+                        _ => None,
+                    }) else {
                         diagnostics.push(Diagnostic {
-                            range,
+                            range: ptr.text_range(),
                             code: DIAGNOSTIC_CODE.into(),
                             message: "expected result type".into(),
                             ..Default::default()
                         });
                         break 'a;
                     };
-                    let mut children = type_use.syntax().children();
-                    if children
-                        .next()
-                        .is_some_and(|child| child.kind() == SyntaxKind::RESULT && child.children().count() == 1)
-                        && children.next().is_none()
+                    let mut children = type_use.children().filter_map(NodeOrToken::into_node);
+                    if children.next().is_some_and(|child| {
+                        child.kind() == SyntaxKind::RESULT.into()
+                            && child.children().filter_map(NodeOrToken::into_node).count() == 1
+                    }) && children.next().is_none()
                     {
                         break 'a;
                     }
                     diagnostics.push(Diagnostic {
-                        range,
+                        range: ptr.text_range(),
                         code: DIAGNOSTIC_CODE.into(),
                         message: "there must be exactly one result type".into(),
                         ..Default::default()
@@ -78,13 +85,16 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
             );
             diagnostics.extend(
                 immediates
-                    .filter(|immediate| {
-                        !immediate
-                            .first_token()
-                            .is_some_and(|token| matches!(token.kind(), SyntaxKind::IDENT | SyntaxKind::INT))
+                    .filter(|(node, _)| {
+                        !node.children().next().is_some_and(|node_or_token| {
+                            matches!(
+                                WatLanguage::kind_from_raw(node_or_token.kind()),
+                                SyntaxKind::IDENT | SyntaxKind::INT
+                            )
+                        })
                     })
-                    .map(|immediate| Diagnostic {
-                        range: immediate.text_range(),
+                    .map(|(_, ptr)| Diagnostic {
+                        range: ptr.text_range(),
                         code: DIAGNOSTIC_CODE.into(),
                         message: "expected identifier or unsigned integer".into(),
                         ..Default::default()
@@ -264,14 +274,16 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
                     ..Default::default()
                 });
             }
-            immediates.for_each(|immediate| {
-                if immediate
-                    .first_token()
+            immediates.for_each(|(node, ptr)| {
+                if node
+                    .children()
+                    .next()
+                    .and_then(NodeOrToken::into_token)
                     .and_then(|token| token.text().parse::<u8>().ok())
                     .is_some_and(|idx| idx >= 32)
                 {
                     diagnostics.push(Diagnostic {
-                        range: immediate.text_range(),
+                        range: ptr.text_range(),
                         code: DIAGNOSTIC_CODE.into(),
                         message: "laneidx must be smaller than 32".into(),
                         ..Default::default()
@@ -407,28 +419,32 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
         }
         _ => {}
     }
-    diagnostics.extend(immediates.map(|immediate| Diagnostic {
-        range: immediate.text_range(),
+    diagnostics.extend(immediates.map(|(_, ptr)| Diagnostic {
+        range: ptr.text_range(),
         code: DIAGNOSTIC_CODE.into(),
         message: "unexpected immediate".into(),
         ..Default::default()
     }));
 }
 
-fn check_immediate<const REQUIRED: bool>(
+fn check_immediate<'a, const REQUIRED: bool>(
     diagnostics: &mut Vec<Diagnostic>,
-    immediates: &mut Peekable<impl Iterator<Item = SyntaxNode>>,
+    immediates: &mut Peekable<impl Iterator<Item = (&'a GreenNodeData, &'a SyntaxNodePtr)>>,
     expected: impl SyntaxKindCmp,
     description: &'static str,
     instr: &FastPlainInstr,
 ) {
-    let immediate = immediates.peek().and_then(|immediate| immediate.first_child_or_token());
-    if let Some(immediate) = immediate {
-        if expected.cmp(immediate.kind()) {
+    let immediate = immediates.peek().and_then(|(node, ptr)| {
+        node.children()
+            .next()
+            .map(|node_or_token| (WatLanguage::kind_from_raw(node_or_token.kind()), ptr))
+    });
+    if let Some((kind, ptr)) = immediate {
+        if expected.cmp(kind) {
             immediates.next();
         } else if REQUIRED {
             diagnostics.push(Diagnostic {
-                range: immediate.text_range(),
+                range: ptr.text_range(),
                 code: DIAGNOSTIC_CODE.into(),
                 message: format!("expected {description}"),
                 ..Default::default()
