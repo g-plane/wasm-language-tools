@@ -1,4 +1,8 @@
-use crate::{document::Document, idx::InternIdent};
+use crate::{
+    binder::{SymbolKey, SymbolTable},
+    document::Document,
+    idx::InternIdent,
+};
 use petgraph::graph::{Graph, NodeIndex};
 use rowan::{
     GreenToken,
@@ -12,11 +16,12 @@ use wat_syntax::{
 #[salsa::tracked(returns(ref))]
 pub fn analyze(db: &dyn salsa::Database, document: Document, ptr: SyntaxNodePtr) -> ControlFlowGraph {
     let root = document.root_tree(db);
-    Builder::new(db).build(ptr.to_node(&root))
+    Builder::new(db, document).build(ptr.to_node(&root))
 }
 
 struct Builder<'db> {
     db: &'db dyn salsa::Database,
+    symbol_table: &'db SymbolTable<'db>,
     graph: Graph<FlowNode, ()>,
     block_stack: Vec<(NodeIndex, Option<InternIdent<'db>>)>,
     current: Option<NodeIndex>,
@@ -24,9 +29,10 @@ struct Builder<'db> {
     unreachable: bool,
 }
 impl<'db> Builder<'db> {
-    fn new(db: &'db dyn salsa::Database) -> Self {
+    fn new(db: &'db dyn salsa::Database, document: Document) -> Self {
         Self {
             db,
+            symbol_table: SymbolTable::of(db, document),
             graph: Graph::new(),
             block_stack: Vec::new(),
             current: None,
@@ -61,29 +67,32 @@ impl<'db> Builder<'db> {
             Instr::Plain(plain) => {
                 self.visit_instrs(plain.syntax());
 
-                if let Some(instr_name) = plain.instr_name() {
-                    self.bb_instrs.push(BasicBlockInstr {
-                        ptr: SyntaxNodePtr::new(plain.syntax()),
-                        name: instr_name.green().to_owned(),
-                        immediates: plain
-                            .immediates()
-                            .map(|immediate| SyntaxNodePtr::new(immediate.syntax()))
-                            .collect(),
-                    });
-                }
+                let Some(instr_name) = plain.instr_name() else {
+                    return;
+                };
+                let instr_name = instr_name.green();
 
-                let unreachable = match plain.instr_name().as_ref().map(|token| token.text()) {
-                    Some("unreachable" | "throw" | "throw_ref") => {
+                self.bb_instrs.push(BasicBlockInstr {
+                    ptr: SyntaxNodePtr::new(plain.syntax()),
+                    name: instr_name.to_owned(),
+                    immediates: plain
+                        .immediates()
+                        .map(|immediate| SyntaxNodePtr::new(immediate.syntax()))
+                        .collect(),
+                });
+
+                let unreachable = match instr_name.text() {
+                    "unreachable" | "throw" | "throw_ref" => {
                         self.add_basic_block();
                         true
                     }
-                    Some("return" | "return_call" | "return_call_indirect" | "return_call_ref") => {
+                    "return" | "return_call" | "return_call_indirect" | "return_call_ref" => {
                         if let Some((bb, (exit, _))) = self.add_basic_block().zip(self.block_stack.first()) {
                             self.graph.add_edge(bb, *exit, ());
                         }
                         true
                     }
-                    Some("br" | "br_table") => {
+                    "br" | "br_table" => {
                         if let Some(bb) = self.add_basic_block() {
                             for immediate in plain.immediates() {
                                 if let Some(target) = self.find_jump_target(immediate) {
@@ -93,7 +102,7 @@ impl<'db> Builder<'db> {
                         }
                         true
                     }
-                    Some("br_if" | "br_on_null" | "br_on_non_null" | "br_on_cast" | "br_on_cast_fail") => {
+                    "br_if" | "br_on_null" | "br_on_non_null" | "br_on_cast" | "br_on_cast_fail" => {
                         let target = plain
                             .immediates()
                             .next()
@@ -207,24 +216,21 @@ impl<'db> Builder<'db> {
     where
         N: AstNode<Language = WatLanguage>,
     {
-        node.syntax()
-            .first_token()
-            .and_then(|token| match token.kind() {
-                SyntaxKind::IDENT => {
-                    let ident = InternIdent::new(self.db, token.text());
-                    self.block_stack
-                        .iter()
-                        .rev()
-                        .find(|(_, it)| it.is_some_and(|it| it == ident))
-                }
-                SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => token.text().parse::<usize>().ok().and_then(|i| {
-                    if i < self.block_stack.len() {
-                        self.block_stack.get(self.block_stack.len() - 1 - i)
+        self.symbol_table
+            .symbols
+            .get(&SymbolKey::new(node.syntax()))
+            .and_then(|symbol| {
+                if let Some(num) = symbol.idx.num {
+                    let num = num as usize;
+                    let total = self.block_stack.len();
+                    if num < total {
+                        self.block_stack.get(total - 1 - num)
                     } else {
                         None
                     }
-                }),
-                _ => None,
+                } else {
+                    self.block_stack.iter().rev().find(|(_, it)| *it == symbol.idx.name)
+                }
             })
             .map(|(target, _)| *target)
     }
