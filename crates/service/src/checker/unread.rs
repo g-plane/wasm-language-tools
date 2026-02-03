@@ -4,9 +4,10 @@ use crate::{
     cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeKind},
     config::LintLevel,
     document::Document,
+    helpers::{BumpCollectionsExt, BumpHashMap},
 };
+use bumpalo::{Bump, collections::Vec as BumpVec};
 use lspt::DiagnosticSeverity;
-use oxc_allocator::{Allocator, HashMap as OxcHashMap, Vec as OxcVec};
 use petgraph::graph::NodeIndex;
 use rowan::ast::SyntaxNodePtr;
 use std::cell::Cell;
@@ -23,7 +24,7 @@ pub fn check(
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
     locals: &[&Symbol],
-    allocator: &mut Allocator,
+    bump: &mut Bump,
 ) {
     let severity = match lint_level {
         LintLevel::Allow => return,
@@ -38,8 +39,8 @@ pub fn check(
     }
     let cfg = cfa::analyze(db, document, SyntaxNodePtr::new(node));
     locals.iter().for_each(|local| {
-        check_local(diagnostics, db, severity, local, symbol_table, cfg, allocator);
-        allocator.reset();
+        check_local(diagnostics, db, severity, local, symbol_table, cfg, bump);
+        bump.reset();
     });
 }
 
@@ -50,9 +51,9 @@ fn check_local(
     local: &Symbol,
     symbol_table: &SymbolTable,
     cfg: &ControlFlowGraph,
-    allocator: &Allocator,
+    bump: &Bump,
 ) {
-    let mut block_marks = OxcHashMap::with_capacity_in(cfg.graph.node_count(), allocator);
+    let mut block_marks = BumpHashMap::with_capacity_in(cfg.graph.node_count(), bump);
     block_marks.extend(cfg.graph.node_indices().filter_map(|node_index| {
         cfg.graph.node_weight(node_index).and_then(|node| {
             if node.unreachable {
@@ -75,7 +76,7 @@ fn check_local(
             && let Some(mark) = block_marks.get(&node_index)
         {
             diagnostics.extend(
-                detect_unread(bb, local.key, mark, symbol_table, allocator)
+                detect_unread(bb, local.key, mark, symbol_table, bump)
                     .filter_map(|key| symbol_table.symbols.get(&key))
                     .map(|symbol| Diagnostic {
                         range: symbol.key.text_range(),
@@ -89,7 +90,7 @@ fn check_local(
     });
 }
 
-fn hydrate_block_marks(cfg: &ControlFlowGraph, block_marks: &mut OxcHashMap<NodeIndex, BlockMark>) {
+fn hydrate_block_marks(cfg: &ControlFlowGraph, block_marks: &mut BumpHashMap<NodeIndex, BlockMark>) {
     let mut changed = true;
     while changed {
         changed = false;
@@ -117,9 +118,9 @@ fn detect_unread(
     def_key: SymbolKey,
     mark: &BlockMark,
     symbol_table: &SymbolTable,
-    allocator: &Allocator,
+    bump: &Bump,
 ) -> impl Iterator<Item = SymbolKey> {
-    let mut set = OxcVec::with_capacity_in(1, allocator);
+    let mut set = BumpVec::with_capacity_in(1, bump);
     bb.0.iter().for_each(|instr| match instr.name.text() {
         "local.get" => {
             if let Some(immediate) = instr.immediates.first().copied()

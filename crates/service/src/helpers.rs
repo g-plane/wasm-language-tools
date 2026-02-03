@@ -4,6 +4,8 @@ use lspt::{Location, Position, Range};
 use rowan::{TextRange, TextSize, ast::support};
 use wat_syntax::{SyntaxKind, SyntaxNode};
 
+pub use self::arena::{BumpCollectionsExt, BumpHashMap, BumpHashSet};
+
 pub trait LineIndexExt<In> {
     type Out;
     fn convert(&self, input: In) -> Self::Out;
@@ -173,5 +175,74 @@ pub(crate) mod syntax {
                 }
                 doc
             })
+    }
+}
+
+pub(crate) mod arena {
+    use bumpalo::Bump;
+    use hashbrown::{HashMap, HashSet};
+    use rustc_hash::FxBuildHasher;
+    use std::hash::Hash;
+
+    pub trait BumpCollectionsExt<'bump, T> {
+        fn new_in(bump: &'bump Bump) -> Self;
+        fn with_capacity_in(capacity: usize, bump: &'bump Bump) -> Self;
+        fn from_iter_in<I>(iter: I, bump: &'bump Bump) -> Self
+        where
+            I: IntoIterator<Item = T>;
+    }
+
+    pub type BumpHashMap<'bump, K, V> = HashMap<K, V, FxBuildHasher, &'bump Bump>;
+    impl<'bump, K, V> BumpCollectionsExt<'bump, (K, V)> for BumpHashMap<'bump, K, V>
+    where
+        K: Eq + Hash,
+    {
+        #[inline]
+        fn new_in(bump: &'bump Bump) -> Self {
+            HashMap::with_hasher_in(FxBuildHasher, bump)
+        }
+        #[inline]
+        fn with_capacity_in(capacity: usize, bump: &'bump Bump) -> Self {
+            HashMap::with_capacity_and_hasher_in(capacity, FxBuildHasher, bump)
+        }
+        #[inline]
+        fn from_iter_in<I>(iter: I, bump: &'bump Bump) -> Self
+        where
+            I: IntoIterator<Item = (K, V)>,
+        {
+            let iter = iter.into_iter();
+            let capacity = iter.size_hint().0;
+            iter.fold(Self::with_capacity_in(capacity, bump), |mut map, (k, v)| {
+                map.insert(k, v);
+                map
+            })
+        }
+    }
+
+    pub type BumpHashSet<'bump, T> = HashSet<T, FxBuildHasher, &'bump Bump>;
+    impl<'bump, T> BumpCollectionsExt<'bump, T> for BumpHashSet<'bump, T>
+    where
+        T: Eq + Hash,
+    {
+        #[inline]
+        fn new_in(bump: &'bump Bump) -> Self {
+            HashSet::with_hasher_in(FxBuildHasher, bump)
+        }
+        #[inline]
+        fn with_capacity_in(capacity: usize, bump: &'bump Bump) -> Self {
+            HashSet::with_capacity_and_hasher_in(capacity, FxBuildHasher, bump)
+        }
+        #[inline]
+        fn from_iter_in<I>(iter: I, bump: &'bump Bump) -> Self
+        where
+            I: IntoIterator<Item = T>,
+        {
+            let iter = iter.into_iter();
+            let capacity = iter.size_hint().0;
+            iter.fold(Self::with_capacity_in(capacity, bump), |mut set, k| {
+                set.insert(k);
+                set
+            })
+        }
     }
 }

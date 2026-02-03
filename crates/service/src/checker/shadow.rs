@@ -2,10 +2,11 @@ use super::{Diagnostic, RelatedInformation};
 use crate::{
     LintLevel,
     binder::{Symbol, SymbolKind, SymbolTable},
+    helpers::{BumpCollectionsExt, BumpHashMap},
     idx::Idx,
 };
+use bumpalo::{Bump, collections::Vec as BumpVec};
 use lspt::DiagnosticSeverity;
-use oxc_allocator::{Allocator, HashMap as OxcHashMap, Vec as OxcVec};
 
 const DIAGNOSTIC_CODE: &str = "shadow";
 
@@ -14,7 +15,7 @@ pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     lint_level: LintLevel,
     symbol_table: &SymbolTable,
-    allocator: &mut Allocator,
+    bump: &mut Bump,
 ) {
     let severity = match lint_level {
         LintLevel::Allow => return,
@@ -26,7 +27,7 @@ pub fn check(
         symbol_table
             .symbols
             .values()
-            .fold(OxcHashMap::new_in(allocator), |mut map, symbol| {
+            .fold(BumpHashMap::new_in(bump), |mut map, symbol| {
                 if let Symbol {
                     kind: SymbolKind::BlockDef,
                     idx: Idx { name: Some(name), .. },
@@ -35,7 +36,7 @@ pub fn check(
                 {
                     let name = *name;
                     map.entry((symbol, name))
-                        .or_insert_with(|| OxcVec::new_in(allocator))
+                        .or_insert_with(|| BumpVec::new_in(bump))
                         .extend(
                             symbol_table
                                 .symbols
@@ -51,7 +52,7 @@ pub fn check(
                 }
                 map
             })
-            .into_iter()
+            .iter()
             .filter(|(_, ranges)| !ranges.is_empty())
             .filter_map(|((symbol, name), ranges)| {
                 let name = name.ident(db);
@@ -65,7 +66,7 @@ pub fn check(
                         ranges
                             .into_iter()
                             .map(|range| RelatedInformation {
-                                range,
+                                range: *range,
                                 message: format!("`{name}` shadowing occurs here"),
                             })
                             .collect(),
@@ -75,5 +76,5 @@ pub fn check(
             }),
     );
 
-    allocator.reset();
+    bump.reset();
 }

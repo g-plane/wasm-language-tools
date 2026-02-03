@@ -3,10 +3,11 @@ use crate::{
     LintLevel,
     binder::{Symbol, SymbolKind, SymbolTable},
     document::Document,
+    helpers::{BumpCollectionsExt, BumpHashSet},
     imex,
 };
+use bumpalo::Bump;
 use lspt::{DiagnosticSeverity, DiagnosticTag};
-use oxc_allocator::{Allocator, HashSet as OxcHashSet};
 use rowan::TextRange;
 
 const DIAGNOSTIC_CODE: &str = "unused";
@@ -17,7 +18,7 @@ pub fn check(
     document: Document,
     lint_level: LintLevel,
     symbol_table: &SymbolTable,
-    allocator: &mut Allocator,
+    bump: &Bump,
 ) {
     let severity = match lint_level {
         LintLevel::Allow => return,
@@ -27,13 +28,13 @@ pub fn check(
     };
     let imports = imex::get_imports(db, document);
     let exports = imex::get_exports(db, document);
-    let used = OxcHashSet::from_iter_in(
+    let used = BumpHashSet::from_iter_in(
         symbol_table.resolved.values().copied().chain(
             exports
                 .values()
                 .flat_map(|exports| exports.iter().map(|export| export.def_key)),
         ),
-        allocator,
+        bump,
     );
     diagnostics.extend(symbol_table.symbols.values().filter_map(|symbol| match symbol.kind {
         SymbolKind::Func
@@ -66,7 +67,6 @@ pub fn check(
         }
         _ => None,
     }));
-    allocator.reset();
 }
 
 fn is_prefixed_with_underscore(db: &dyn salsa::Database, symbol: &Symbol) -> bool {

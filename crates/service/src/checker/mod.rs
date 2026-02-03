@@ -4,8 +4,8 @@ use crate::{
     document::Document,
     helpers::LineIndexExt,
 };
+use bumpalo::{Bump, collections::Vec as BumpVec};
 use lspt::{DiagnosticRelatedInformation, DiagnosticSeverity, DiagnosticTag, Location, Union2};
-use oxc_allocator::{Allocator, Vec as OxcVec};
 use rowan::{TextRange, WalkEvent, ast::support};
 use std::cmp::Ordering;
 use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr};
@@ -45,7 +45,7 @@ mod unused;
 mod useless_catch;
 
 pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfig) -> Vec<lspt::Diagnostic> {
-    let mut allocator = Allocator::with_capacity(32 * 1024);
+    let mut bump = Bump::with_capacity(32 * 1024);
 
     let uri = document.uri(db);
     let line_index = document.line_index(db);
@@ -74,7 +74,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         symbol_table,
                         module_id,
                         &node,
-                        &mut allocator,
+                        &mut bump,
                     );
                     unreachable::check(
                         &mut diagnostics,
@@ -83,7 +83,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         config.lint.unreachable,
                         &root,
                         &node,
-                        &mut allocator,
+                        &mut bump,
                     );
                     let locals = symbol_table
                         .symbols
@@ -93,15 +93,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                                 && node.text_range().contains_range(symbol.key.text_range())
                         })
                         .collect::<Vec<_>>();
-                    uninit::check(
-                        &mut diagnostics,
-                        db,
-                        document,
-                        symbol_table,
-                        &node,
-                        &locals,
-                        &mut allocator,
-                    );
+                    uninit::check(&mut diagnostics, db, document, symbol_table, &node, &locals, &mut bump);
                     unread::check(
                         &mut diagnostics,
                         db,
@@ -110,7 +102,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         symbol_table,
                         &node,
                         &locals,
-                        &mut allocator,
+                        &mut bump,
                     );
                     if let Some(diagnostic) = import_with_def::check(db, document, &node) {
                         diagnostics.push(diagnostic);
@@ -124,7 +116,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         symbol_table,
                         module_id,
                         &node,
-                        &mut allocator,
+                        &mut bump,
                     );
                     if let Some(diagnostic) = const_expr::check(&node) {
                         diagnostics.push(diagnostic);
@@ -139,22 +131,21 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                     }
                 }
                 SyntaxKind::PLAIN_INSTR => {
-                    let Some(instr) = FastPlainInstr::new(&node, &allocator) else {
-                        return;
-                    };
-                    if let Some(diagnostic) = unknown_instr::check(&instr) {
-                        diagnostics.push(diagnostic);
+                    if let Some(instr) = FastPlainInstr::new(&node, &bump) {
+                        if let Some(diagnostic) = unknown_instr::check(&instr) {
+                            diagnostics.push(diagnostic);
+                        }
+                        immediates::check(&mut diagnostics, &node, &instr);
+                        br_table_branches::check(&mut diagnostics, db, document, symbol_table, &instr, &bump);
+                        if let Some(diagnostic) = packing::check(db, document, symbol_table, &instr) {
+                            diagnostics.push(diagnostic);
+                        }
+                        type_misuse::check(db, &mut diagnostics, document, symbol_table, module_id, &node, &instr);
+                        if let Some(diagnostic) = new_non_defaultable::check(db, document, symbol_table, &instr) {
+                            diagnostics.push(diagnostic);
+                        }
                     }
-                    immediates::check(&mut diagnostics, &node, &instr);
-                    br_table_branches::check(&mut diagnostics, db, document, symbol_table, &instr, &allocator);
-                    if let Some(diagnostic) = packing::check(db, document, symbol_table, &instr) {
-                        diagnostics.push(diagnostic);
-                    }
-                    type_misuse::check(db, &mut diagnostics, document, symbol_table, module_id, &node, &instr);
-                    if let Some(diagnostic) = new_non_defaultable::check(db, document, symbol_table, &instr) {
-                        diagnostics.push(diagnostic);
-                    }
-                    allocator.reset();
+                    bump.reset();
                 }
                 SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_IF => {
                     if let Some(diagnostic) = block_type::check(db, document, symbol_table, &node) {
@@ -174,7 +165,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         symbol_table,
                         module_id,
                         &node,
-                        &mut allocator,
+                        &mut bump,
                     );
                     if let Some(diagnostic) = const_expr::check(&node) {
                         diagnostics.push(diagnostic);
@@ -204,7 +195,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         symbol_table,
                         module_id,
                         &node,
-                        &mut allocator,
+                        &mut bump,
                     );
                     if let Some(diagnostic) = const_expr::check(&node) {
                         diagnostics.push(diagnostic);
@@ -218,7 +209,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         symbol_table,
                         module_id,
                         &node,
-                        &mut allocator,
+                        &mut bump,
                     );
                 }
                 SyntaxKind::ELEM_EXPR => {
@@ -265,16 +256,9 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
         multi_starts::check(&mut diagnostics, &module);
     });
     undef::check(db, &mut diagnostics, symbol_table);
-    dup_names::check(db, &mut diagnostics, document, symbol_table, &mut allocator);
-    unused::check(
-        db,
-        &mut diagnostics,
-        document,
-        config.lint.unused,
-        symbol_table,
-        &mut allocator,
-    );
-    shadow::check(db, &mut diagnostics, config.lint.shadow, symbol_table, &mut allocator);
+    dup_names::check(db, &mut diagnostics, document, symbol_table, &mut bump);
+    unused::check(db, &mut diagnostics, document, config.lint.unused, symbol_table, &bump);
+    shadow::check(db, &mut diagnostics, config.lint.shadow, symbol_table, &mut bump);
     mutated_immutable::check(db, &mut diagnostics, document, symbol_table);
     needless_mut::check(db, &mut diagnostics, config.lint.needless_mut, document, symbol_table);
     subtyping::check(&mut diagnostics, db, document, &root, symbol_table);
@@ -338,23 +322,23 @@ impl Default for Diagnostic {
     }
 }
 
-struct FastPlainInstr<'alloc> {
+struct FastPlainInstr<'bump> {
     ptr: SyntaxNodePtr,
-    name: &'alloc str,
+    name: &'bump str,
     name_range: TextRange,
-    immediates: OxcVec<'alloc, SyntaxNodePtr>,
+    immediates: BumpVec<'bump, SyntaxNodePtr>,
 }
-impl<'alloc> FastPlainInstr<'alloc> {
-    fn new(node: &SyntaxNode, allocator: &'alloc Allocator) -> Option<Self> {
+impl<'bump> FastPlainInstr<'bump> {
+    fn new(node: &SyntaxNode, bump: &'bump Bump) -> Option<Self> {
         support::token(node, SyntaxKind::INSTR_NAME).map(|instr_name| Self {
             ptr: SyntaxNodePtr::new(node),
-            name: allocator.alloc_str(instr_name.text()),
+            name: bump.alloc_str(instr_name.text()),
             name_range: instr_name.text_range(),
-            immediates: OxcVec::from_iter_in(
+            immediates: BumpVec::from_iter_in(
                 node.children()
                     .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
                     .map(|immediate| SyntaxNodePtr::new(&immediate)),
-                allocator,
+                bump,
             ),
         })
     }

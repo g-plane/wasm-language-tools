@@ -10,11 +10,12 @@ keywords = ["wasm"]
 exclude = ["/tests"]
 
 [dependencies]
+bumpalo = { version = "3.19", features = ["collections", "allocator-api2"] }
+hashbrown = { version = "0.16", default-features = false, features = ["inline-more", "allocator-api2"] }
 indexmap = "2.12"
 itertools = "0.14"
 line-index = { workspace = true }
 lspt = { workspace = true }
-oxc_allocator = "0.111"
 parking_lot = "0.12"
 petgraph = "0.8"
 rowan = { workspace = true }

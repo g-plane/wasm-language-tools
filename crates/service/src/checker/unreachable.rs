@@ -4,8 +4,8 @@ use crate::{
     cfa::{self, FlowNodeKind},
     document::Document,
 };
+use bumpalo::{Bump, collections::Vec as BumpVec};
 use lspt::{DiagnosticSeverity, DiagnosticTag};
-use oxc_allocator::{Allocator, Vec as OxcVec};
 use rowan::{
     TextRange,
     ast::{AstNode, SyntaxNodePtr, support},
@@ -21,7 +21,7 @@ pub fn check(
     lint_level: LintLevel,
     root: &SyntaxNode,
     node: &SyntaxNode,
-    allocator: &mut Allocator,
+    bump: &mut Bump,
 ) {
     let severity = match lint_level {
         LintLevel::Allow => return,
@@ -31,7 +31,7 @@ pub fn check(
     };
 
     let cfg = cfa::analyze(db, document, SyntaxNodePtr::new(node));
-    let mut ranges = OxcVec::<TextRange>::new_in(allocator);
+    let mut ranges = BumpVec::<TextRange>::new_in(bump);
     cfg.graph.raw_nodes().iter().for_each(|node| {
         if !node.weight.unreachable {
             return;
@@ -98,5 +98,5 @@ pub fn check(
         ..Default::default()
     }));
 
-    allocator.reset();
+    bump.reset();
 }

@@ -3,7 +3,7 @@ use super::{
     types::{FieldType, Fields, HeapType, OperandType, RefType, StorageType, ValType},
 };
 use crate::{helpers::RenderWithDb, idx::InternIdent};
-use oxc_allocator::{Allocator, StringBuilder};
+use bumpalo::{Bump, collections::String as BumpString};
 use std::fmt::{self, Display, Write};
 use wat_syntax::SyntaxKind;
 
@@ -234,25 +234,25 @@ impl Display for RenderWithDb<'_, &Fields<'_>> {
     }
 }
 
-pub(crate) fn join_types<'db, 'alloc, I>(
+pub(crate) fn join_types<'db, 'bump, I>(
     db: &'db dyn salsa::Database,
     mut types: I,
     prefix: &str,
-    allocator: &'alloc Allocator,
-) -> StringBuilder<'alloc>
+    bump: &'bump Bump,
+) -> BumpString<'bump>
 where
     I: Iterator<Item = &'db OperandType<'db>> + ExactSizeIterator,
 {
     if let Some(first) = types.next() {
-        let mut builder = StringBuilder::with_capacity_in(2 + prefix.len() + 5 * types.len(), allocator);
-        builder.push('[');
-        let _ = write!(&mut builder, "{prefix}{}", first.render(db));
+        let mut bs = BumpString::with_capacity_in(2 + prefix.len() + 5 * types.len(), bump);
+        bs.push('[');
+        let _ = write!(&mut bs, "{prefix}{}", first.render(db));
         types.for_each(|ty| {
-            let _ = write!(&mut builder, ", {}", ty.render(db));
+            let _ = write!(&mut bs, ", {}", ty.render(db));
         });
-        builder.push(']');
-        builder
+        bs.push(']');
+        bs
     } else {
-        StringBuilder::from_str_in("[]", allocator)
+        BumpString::from_str_in("[]", bump)
     }
 }

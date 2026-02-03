@@ -3,9 +3,10 @@ use crate::{
     binder::{Symbol, SymbolKey, SymbolTable},
     cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeKind},
     document::Document,
+    helpers::{BumpCollectionsExt, BumpHashMap},
     types_analyzer,
 };
-use oxc_allocator::{Allocator, HashMap as OxcHashMap};
+use bumpalo::Bump;
 use petgraph::graph::NodeIndex;
 use rowan::ast::SyntaxNodePtr;
 use std::cell::Cell;
@@ -20,7 +21,7 @@ pub fn check(
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
     locals: &[&Symbol],
-    allocator: &mut Allocator,
+    bump: &mut Bump,
 ) {
     // avoid expensive analysis if there are no locals
     if locals.is_empty() {
@@ -33,8 +34,8 @@ pub fn check(
             types_analyzer::extract_type(db, document, local.green.clone()).is_some_and(|ty| !ty.defaultable())
         })
         .for_each(|local| {
-            check_local(diagnostics, db, local, symbol_table, cfg, allocator);
-            allocator.reset();
+            check_local(diagnostics, db, local, symbol_table, cfg, bump);
+            bump.reset();
         });
 }
 
@@ -44,9 +45,9 @@ fn check_local(
     local: &Symbol,
     symbol_table: &SymbolTable,
     cfg: &ControlFlowGraph,
-    allocator: &Allocator,
+    bump: &Bump,
 ) {
-    let mut block_marks = OxcHashMap::with_capacity_in(cfg.graph.node_count(), allocator);
+    let mut block_marks = BumpHashMap::with_capacity_in(cfg.graph.node_count(), bump);
     block_marks.extend(cfg.graph.node_indices().filter_map(|node_index| {
         cfg.graph.node_weight(node_index).and_then(|node| {
             if node.unreachable {
@@ -82,7 +83,7 @@ fn check_local(
     });
 }
 
-fn hydrate_block_marks(cfg: &ControlFlowGraph, block_marks: &mut OxcHashMap<NodeIndex, BlockMark>) {
+fn hydrate_block_marks(cfg: &ControlFlowGraph, block_marks: &mut BumpHashMap<NodeIndex, BlockMark>) {
     let mut changed = true;
     while changed {
         changed = false;

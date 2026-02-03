@@ -2,9 +2,10 @@ use super::{Diagnostic, RelatedInformation};
 use crate::{
     binder::{SymbolKind, SymbolTable},
     document::Document,
+    helpers::{BumpCollectionsExt, BumpHashMap},
     imex,
 };
-use oxc_allocator::{Allocator, HashMap as OxcHashMap, Vec as OxcVec};
+use bumpalo::{Bump, collections::Vec as BumpVec};
 
 const DIAGNOSTIC_CODE: &str = "duplicated-names";
 
@@ -13,7 +14,7 @@ pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     document: Document,
     symbol_table: &SymbolTable,
-    allocator: &mut Allocator,
+    bump: &mut Bump,
 ) {
     diagnostics.extend(
         symbol_table
@@ -33,10 +34,10 @@ pub fn check(
                         | SymbolKind::TagDef
                 )
             })
-            .fold(OxcHashMap::new_in(allocator), |mut map, symbol| {
+            .fold(BumpHashMap::new_in(bump), |mut map, symbol| {
                 if let Some(name) = symbol.idx.name {
                     map.entry((name, &symbol.region, symbol.idx_kind))
-                        .or_insert_with(|| OxcVec::with_capacity_in(1, allocator))
+                        .or_insert_with(|| BumpVec::with_capacity_in(1, bump))
                         .push(symbol);
                 }
                 map
@@ -67,15 +68,15 @@ pub fn check(
                 })
             }),
     );
-    allocator.reset();
+    bump.reset();
 
     imex::get_exports(db, document).values().for_each(|exports| {
         diagnostics.extend(
             exports
                 .iter()
-                .fold(OxcHashMap::new_in(allocator), |mut map, export| {
+                .fold(BumpHashMap::new_in(bump), |mut map, export| {
                     map.entry(&export.name)
-                        .or_insert_with(|| OxcVec::with_capacity_in(1, allocator))
+                        .or_insert_with(|| BumpVec::with_capacity_in(1, bump))
                         .push(export.range);
                     map
                 })
@@ -102,5 +103,5 @@ pub fn check(
                 }),
         );
     });
-    allocator.reset();
+    bump.reset();
 }
