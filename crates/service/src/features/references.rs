@@ -1,7 +1,7 @@
 use crate::{
     LanguageService,
     binder::{SymbolKey, SymbolKind, SymbolTable},
-    helpers,
+    helpers::LineIndexExt,
 };
 use lspt::{Location, ReferenceParams};
 use wat_syntax::SyntaxKind;
@@ -48,7 +48,17 @@ impl LanguageService {
             | SymbolKind::TagDef => Some(
                 symbol_table
                     .find_references_on_def(symbol, params.context.include_declaration)
-                    .map(|symbol| helpers::create_location_by_symbol(uri.clone(), line_index, symbol.key, &root))
+                    .map(|symbol| {
+                        let range = symbol_table
+                            .def_poi
+                            .get(&symbol.key)
+                            .copied()
+                            .unwrap_or_else(|| symbol.key.text_range());
+                        Location {
+                            uri: uri.clone(),
+                            range: line_index.convert(range),
+                        }
+                    })
                     .collect(),
             ),
             SymbolKind::Call
@@ -61,19 +71,49 @@ impl LanguageService {
             | SymbolKind::TagRef => Some(
                 symbol_table
                     .find_references_on_ref(symbol, params.context.include_declaration)
-                    .map(|symbol| helpers::create_location_by_symbol(uri.clone(), line_index, symbol.key, &root))
+                    .map(|symbol| {
+                        let range = symbol_table
+                            .def_poi
+                            .get(&symbol.key)
+                            .copied()
+                            .unwrap_or_else(|| symbol.key.text_range());
+                        Location {
+                            uri: uri.clone(),
+                            range: line_index.convert(range),
+                        }
+                    })
                     .collect(),
             ),
             SymbolKind::BlockDef => Some(
                 symbol_table
                     .find_block_references(key, params.context.include_declaration)
-                    .map(|symbol| helpers::create_location_by_symbol(uri.clone(), line_index, symbol.key, &root))
+                    .map(|symbol| {
+                        let range = symbol_table
+                            .def_poi
+                            .get(&symbol.key)
+                            .copied()
+                            .unwrap_or_else(|| symbol.key.text_range());
+                        Location {
+                            uri: uri.clone(),
+                            range: line_index.convert(range),
+                        }
+                    })
                     .collect(),
             ),
             SymbolKind::BlockRef => symbol_table.resolved.get(&key).map(|def_key| {
                 symbol_table
                     .find_block_references(*def_key, params.context.include_declaration)
-                    .map(|symbol| helpers::create_location_by_symbol(uri.clone(), line_index, symbol.key, &root))
+                    .map(|symbol| {
+                        let range = symbol_table
+                            .def_poi
+                            .get(&symbol.key)
+                            .copied()
+                            .unwrap_or_else(|| symbol.key.text_range());
+                        Location {
+                            uri: uri.clone(),
+                            range: line_index.convert(range),
+                        }
+                    })
                     .collect()
             }),
         }

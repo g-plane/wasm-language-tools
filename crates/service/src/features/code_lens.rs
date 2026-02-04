@@ -1,9 +1,9 @@
 use crate::{
     LanguageService,
     binder::{IdxKind, SymbolKind, SymbolTable},
-    helpers::{self, LineIndexExt},
+    helpers::LineIndexExt,
 };
-use lspt::{CodeLens, CodeLensParams, Command};
+use lspt::{CodeLens, CodeLensParams, Command, Location};
 use serde::{Deserialize, Serialize};
 
 impl LanguageService {
@@ -49,7 +49,6 @@ impl LanguageService {
         let data = serde_json::from_value::<CodeLensData>(params.data?).ok()?;
         let document = self.get_document(&data.uri)?;
         let line_index = document.line_index(self);
-        let root = document.root_tree(self);
         let symbol_table = SymbolTable::of(self, document);
 
         let range = line_index.convert(params.range)?;
@@ -59,7 +58,17 @@ impl LanguageService {
             .find(|symbol| symbol.idx_kind == data.kind && symbol.key.text_range() == range)?;
         let locations = symbol_table
             .find_references_on_def(def_symbol, false)
-            .map(|symbol| helpers::create_location_by_symbol(data.uri.clone(), line_index, symbol.key, &root))
+            .map(|symbol| {
+                let range = symbol_table
+                    .def_poi
+                    .get(&symbol.key)
+                    .copied()
+                    .unwrap_or_else(|| symbol.key.text_range());
+                Location {
+                    uri: data.uri.clone(),
+                    range: line_index.convert(range),
+                }
+            })
             .collect::<Vec<_>>();
         Some(CodeLens {
             range: params.range,

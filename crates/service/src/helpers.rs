@@ -1,8 +1,6 @@
-use crate::binder::SymbolKey;
 use line_index::{LineCol, LineIndex};
-use lspt::{Location, Position, Range};
-use rowan::{TextRange, TextSize, ast::support};
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use lspt::{Position, Range};
+use rowan::{TextRange, TextSize};
 
 pub use self::arena::{BumpCollectionsExt, BumpHashMap, BumpHashSet};
 
@@ -71,23 +69,6 @@ pub fn is_stack_polymorphic(instr_name: &str) -> bool {
             | "throw"
             | "throw_ref"
     )
-}
-
-pub fn create_location_by_symbol(
-    uri: String,
-    line_index: &LineIndex,
-    symbol_key: SymbolKey,
-    root: &SyntaxNode,
-) -> Location {
-    let node = symbol_key.to_node(root);
-    let range = support::token(&node, SyntaxKind::IDENT)
-        .or_else(|| support::token(&node, SyntaxKind::KEYWORD))
-        .map(|token| token.text_range())
-        .unwrap_or_else(|| node.text_range());
-    Location {
-        uri,
-        range: line_index.convert(range),
-    }
 }
 
 pub(crate) struct RenderWithDb<'db, T> {
