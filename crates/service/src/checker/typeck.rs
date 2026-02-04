@@ -73,7 +73,7 @@ pub fn check_global(
     node: &SyntaxNode,
     bump: &mut Bump,
 ) {
-    let ty = extract_global_type(db, document, node.green().into())
+    let ty = extract_global_type(db, &node.green())
         .map(OperandType::Val)
         .unwrap_or(OperandType::Any);
     check_block_like(
@@ -536,7 +536,7 @@ fn resolve_sig<'db, 'bump>(
                     .immediates()
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                    .and_then(|symbol| extract_type(shared.db, shared.document, symbol.green.clone()))
+                    .and_then(|symbol| extract_type(shared.db, &symbol.green))
                     .map_or(OperandType::Any, OperandType::Val)],
                 bump,
             ),
@@ -547,7 +547,7 @@ fn resolve_sig<'db, 'bump>(
                     .immediates()
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                    .and_then(|symbol| extract_type(shared.db, shared.document, symbol.green.clone()))
+                    .and_then(|symbol| extract_type(shared.db, &symbol.green))
                     .map_or(OperandType::Any, OperandType::Val)],
                 bump,
             ),
@@ -558,7 +558,7 @@ fn resolve_sig<'db, 'bump>(
                 .immediates()
                 .next()
                 .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                .and_then(|symbol| extract_type(shared.db, shared.document, symbol.green.clone()))
+                .and_then(|symbol| extract_type(shared.db, &symbol.green))
                 .map_or(OperandType::Any, OperandType::Val);
             ResolvedSig {
                 params: BumpVec::from_iter_in([ty.clone()], bump),
@@ -572,7 +572,7 @@ fn resolve_sig<'db, 'bump>(
                     .immediates()
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                    .and_then(|symbol| extract_global_type(shared.db, shared.document, symbol.green.clone()))
+                    .and_then(|symbol| extract_global_type(shared.db, &symbol.green))
                     .map_or(OperandType::Any, OperandType::Val)],
                 bump,
             ),
@@ -583,7 +583,7 @@ fn resolve_sig<'db, 'bump>(
                     .immediates()
                     .next()
                     .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
-                    .and_then(|symbol| extract_global_type(shared.db, shared.document, symbol.green.clone()))
+                    .and_then(|symbol| extract_global_type(shared.db, &symbol.green))
                     .map_or(OperandType::Any, OperandType::Val)],
                 bump,
             ),

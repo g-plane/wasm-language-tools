@@ -2,20 +2,17 @@ use super::{
     signature::Signature,
     types::{FieldType, Fields, ValType},
 };
-use crate::{
-    document::Document,
-    idx::{Idx, IdxGen, InternIdent},
-};
-use rowan::{GreenNode, GreenNodeData, Language, NodeOrToken, ast::AstNode};
+use crate::idx::{Idx, IdxGen, InternIdent};
+use rowan::{GreenNodeData, Language, NodeOrToken, ast::AstNode};
 use std::ops::ControlFlow;
 use wat_syntax::{
     SyntaxKind, WatLanguage,
     ast::{StructType, ValType as AstValType},
 };
 
-pub(crate) fn extract_type<'db>(db: &'db dyn salsa::Database, _: Document, node: GreenNode) -> Option<ValType<'db>> {
-    ValType::from_green(&node, db).or_else(|| {
-        node.children().find_map(|child| match child {
+pub(crate) fn extract_type<'db>(db: &'db dyn salsa::Database, green: &GreenNodeData) -> Option<ValType<'db>> {
+    ValType::from_green(green, db).or_else(|| {
+        green.children().find_map(|child| match child {
             NodeOrToken::Node(node) if AstValType::can_cast(WatLanguage::kind_from_raw(node.kind())) => {
                 ValType::from_green(node, db)
             }
@@ -24,17 +21,14 @@ pub(crate) fn extract_type<'db>(db: &'db dyn salsa::Database, _: Document, node:
     })
 }
 
-pub(crate) fn extract_global_type<'db>(
-    db: &'db dyn salsa::Database,
-    document: Document,
-    node: GreenNode,
-) -> Option<ValType<'db>> {
-    node.children()
+pub(crate) fn extract_global_type<'db>(db: &'db dyn salsa::Database, green: &GreenNodeData) -> Option<ValType<'db>> {
+    green
+        .children()
         .find_map(|child| match child {
             NodeOrToken::Node(node) if node.kind() == SyntaxKind::GLOBAL_TYPE.into() => Some(node),
             _ => None,
         })
-        .and_then(|global_type| extract_type(db, document, global_type.to_owned()))
+        .and_then(|global_type| extract_type(db, global_type))
 }
 
 pub(crate) fn extract_sig<'db>(db: &'db dyn salsa::Database, node: &GreenNodeData) -> Signature<'db> {

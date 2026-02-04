@@ -34,7 +34,7 @@ impl LanguageService {
                             && range.contains_range(symbol.key.text_range())
                             && let Some(ty) = symbol_table
                                 .find_def(symbol.key)
-                                .and_then(|local| types_analyzer::extract_type(db, document, local.green.clone()))
+                                .and_then(|local| types_analyzer::extract_type(db, &local.green))
                         {
                             inlay_hints.push(InlayHint {
                                 position: line_index.convert(symbol.key.text_range().end()),
@@ -51,9 +51,9 @@ impl LanguageService {
                     SymbolKind::GlobalRef => {
                         if options.types
                             && range.contains_range(symbol.key.text_range())
-                            && let Some(ty) = symbol_table.find_def(symbol.key).and_then(|global| {
-                                types_analyzer::extract_global_type(db, document, global.green.clone())
-                            })
+                            && let Some(ty) = symbol_table
+                                .find_def(symbol.key)
+                                .and_then(|global| types_analyzer::extract_global_type(db, &global.green))
                         {
                             inlay_hints.push(InlayHint {
                                 position: line_index.convert(symbol.key.text_range().end()),

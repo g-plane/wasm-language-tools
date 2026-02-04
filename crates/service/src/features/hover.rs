@@ -154,7 +154,7 @@ fn create_def_hover(
     symbol: &Symbol,
 ) -> Option<MarkupContent> {
     match symbol.kind {
-        SymbolKind::Param | SymbolKind::Local => Some(create_param_or_local_hover(db, document, symbol)),
+        SymbolKind::Param | SymbolKind::Local => Some(create_param_or_local_hover(db, symbol)),
         SymbolKind::Func => Some(MarkupContent {
             kind: MarkupKind::Markdown,
             value: create_func_hover(db, document, symbol.clone(), root),
@@ -188,7 +188,7 @@ fn create_func_hover(db: &dyn salsa::Database, document: Document, symbol: Symbo
     content
 }
 
-fn create_param_or_local_hover(db: &dyn salsa::Database, document: Document, symbol: &Symbol) -> MarkupContent {
+fn create_param_or_local_hover(db: &dyn salsa::Database, symbol: &Symbol) -> MarkupContent {
     let mut content = '('.to_string();
     match symbol.kind {
         SymbolKind::Param => {
@@ -203,7 +203,7 @@ fn create_param_or_local_hover(db: &dyn salsa::Database, document: Document, sym
         content.push(' ');
         content.push_str(name.ident(db));
     }
-    if let Some(ty) = types_analyzer::extract_type(db, document, symbol.green.clone()) {
+    if let Some(ty) = types_analyzer::extract_type(db, &symbol.green) {
         content.push(' ');
         let _ = write!(content, "{}", ty.render(db));
     }

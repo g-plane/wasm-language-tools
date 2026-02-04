@@ -764,7 +764,7 @@ fn get_cmp_list(
                         })
                         .map(|symbol| {
                             let label = symbol.idx.render(db).to_string();
-                            let ty = types_analyzer::extract_type(db, document, symbol.green.clone());
+                            let ty = types_analyzer::extract_type(db, &symbol.green);
                             CompletionItem {
                                 label: label.clone(),
                                 kind: Some(CompletionItemKind::Variable),
@@ -882,7 +882,7 @@ fn get_cmp_list(
                 let preferred_type = guess_preferred_type(db, document, token);
                 items.extend(symbol_table.get_declared(module, SymbolKind::GlobalDef).map(|symbol| {
                     let label = symbol.idx.render(db).to_string();
-                    let ty = types_analyzer::extract_global_type(db, document, symbol.green.clone());
+                    let ty = types_analyzer::extract_global_type(db, &symbol.green);
                     CompletionItem {
                         label: label.clone(),
                         kind: Some(CompletionItemKind::Variable),

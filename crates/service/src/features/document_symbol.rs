@@ -68,7 +68,7 @@ impl LanguageService {
                                 symbol.key,
                                 DocumentSymbol {
                                     name: render_symbol_name(symbol, db),
-                                    detail: types_analyzer::extract_type(db, document, symbol.green.clone())
+                                    detail: types_analyzer::extract_type(db, &symbol.green)
                                         .map(|ty| ty.render(db).to_string()),
                                     kind: LspSymbolKind::Variable,
                                     tags,
@@ -101,18 +101,17 @@ impl LanguageService {
                                 symbol.key,
                                 DocumentSymbol {
                                     name: render_symbol_name(symbol, db),
-                                    detail: types_analyzer::extract_global_type(db, document, symbol.green.clone())
-                                        .map(|ty| {
-                                            if ModuleFieldGlobal::cast(symbol.key.to_node(&root))
-                                                .and_then(|global| global.global_type())
-                                                .and_then(|global_type| global_type.mut_keyword())
-                                                .is_some()
-                                            {
-                                                format!("(mut {})", ty.render(db))
-                                            } else {
-                                                ty.render(db).to_string()
-                                            }
-                                        }),
+                                    detail: types_analyzer::extract_global_type(db, &symbol.green).map(|ty| {
+                                        if ModuleFieldGlobal::cast(symbol.key.to_node(&root))
+                                            .and_then(|global| global.global_type())
+                                            .and_then(|global_type| global_type.mut_keyword())
+                                            .is_some()
+                                        {
+                                            format!("(mut {})", ty.render(db))
+                                        } else {
+                                            ty.render(db).to_string()
+                                        }
+                                    }),
                                     kind: LspSymbolKind::Variable,
                                     tags,
                                     deprecated: None,

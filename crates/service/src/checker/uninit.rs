@@ -30,9 +30,7 @@ pub fn check(
     let cfg = cfa::analyze(db, document, SyntaxNodePtr::new(node));
     locals
         .iter()
-        .filter(|local| {
-            types_analyzer::extract_type(db, document, local.green.clone()).is_some_and(|ty| !ty.defaultable())
-        })
+        .filter(|local| types_analyzer::extract_type(db, &local.green).is_some_and(|ty| !ty.defaultable()))
         .for_each(|local| {
             check_local(diagnostics, db, local, symbol_table, cfg, bump);
             bump.reset();
