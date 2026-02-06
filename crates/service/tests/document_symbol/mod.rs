@@ -22,7 +22,21 @@ fn symbols() {
     (tag $tag)
     (data $data)
 )
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.document_symbol(DocumentSymbolParams {
+        text_document: TextDocumentIdentifier { uri },
+        work_done_token: Default::default(),
+        partial_result_token: Default::default(),
+    });
+    assert_json_snapshot!(response);
+}
 
+#[test]
+fn deprecated() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
 (module
     (@deprecated)
     (func)

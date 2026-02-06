@@ -1,0 +1,223 @@
+---
+source: crates/service/tests/document_symbol/mod.rs
+expression: response
+---
+[
+  {
+    "name": "module",
+    "kind": 2,
+    "range": {
+      "start": {
+        "line": 1,
+        "character": 0
+      },
+      "end": {
+        "line": 16,
+        "character": 1
+      }
+    },
+    "selectionRange": {
+      "start": {
+        "line": 1,
+        "character": 1
+      },
+      "end": {
+        "line": 1,
+        "character": 7
+      }
+    },
+    "children": [
+      {
+        "name": "func 0",
+        "kind": 12,
+        "tags": [
+          1
+        ],
+        "range": {
+          "start": {
+            "line": 3,
+            "character": 4
+          },
+          "end": {
+            "line": 3,
+            "character": 10
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 3,
+            "character": 5
+          },
+          "end": {
+            "line": 3,
+            "character": 9
+          }
+        }
+      },
+      {
+        "name": "type 0",
+        "detail": "func",
+        "kind": 5,
+        "tags": [
+          1
+        ],
+        "range": {
+          "start": {
+            "line": 5,
+            "character": 4
+          },
+          "end": {
+            "line": 5,
+            "character": 17
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 5,
+            "character": 5
+          },
+          "end": {
+            "line": 5,
+            "character": 9
+          }
+        }
+      },
+      {
+        "name": "global 0",
+        "detail": "i32",
+        "kind": 13,
+        "tags": [
+          1
+        ],
+        "range": {
+          "start": {
+            "line": 7,
+            "character": 4
+          },
+          "end": {
+            "line": 7,
+            "character": 16
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 7,
+            "character": 5
+          },
+          "end": {
+            "line": 7,
+            "character": 11
+          }
+        }
+      },
+      {
+        "name": "memory 0",
+        "kind": 13,
+        "tags": [
+          1
+        ],
+        "range": {
+          "start": {
+            "line": 9,
+            "character": 4
+          },
+          "end": {
+            "line": 9,
+            "character": 14
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 9,
+            "character": 5
+          },
+          "end": {
+            "line": 9,
+            "character": 11
+          }
+        }
+      },
+      {
+        "name": "table 0",
+        "kind": 13,
+        "tags": [
+          1
+        ],
+        "range": {
+          "start": {
+            "line": 11,
+            "character": 4
+          },
+          "end": {
+            "line": 11,
+            "character": 21
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 11,
+            "character": 5
+          },
+          "end": {
+            "line": 11,
+            "character": 10
+          }
+        }
+      },
+      {
+        "name": "tag 0",
+        "kind": 13,
+        "tags": [
+          1
+        ],
+        "range": {
+          "start": {
+            "line": 13,
+            "character": 4
+          },
+          "end": {
+            "line": 13,
+            "character": 9
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 13,
+            "character": 5
+          },
+          "end": {
+            "line": 13,
+            "character": 8
+          }
+        }
+      },
+      {
+        "name": "data segment 0",
+        "kind": 13,
+        "tags": [
+          1
+        ],
+        "range": {
+          "start": {
+            "line": 15,
+            "character": 4
+          },
+          "end": {
+            "line": 15,
+            "character": 10
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 15,
+            "character": 5
+          },
+          "end": {
+            "line": 15,
+            "character": 9
+          }
+        }
+      }
+    ]
+  }
+]
