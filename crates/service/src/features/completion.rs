@@ -17,7 +17,6 @@ use rowan::{
     Direction, NodeOrToken,
     ast::{AstNode, support},
 };
-use smallvec::{SmallVec, smallvec};
 use wat_syntax::{
     SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken,
     ast::{Instr, PlainInstr, TableType},
@@ -40,9 +39,9 @@ impl LanguageService {
     }
 }
 
-fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
+fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
     match token.kind() {
-        SyntaxKind::ANNOT_START => return Some(smallvec![CmpCtx::Annotation]),
+        SyntaxKind::ANNOT_START => return Some(vec![CmpCtx::Annotation]),
         SyntaxKind::ANNOT_ELEM => {
             return match token
                 .siblings_with_tokens(Direction::Prev)
@@ -51,15 +50,15 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
                 .as_ref()
                 .and_then(|token| token.text().strip_prefix("(@"))
             {
-                Some("metadata.code.compilation_priority") => Some(smallvec![CmpCtx::AnnotationCompilationPriority]),
-                Some("metadata.code.instr_freq") => Some(smallvec![CmpCtx::AnnotationInstrFreq]),
-                Some("metadata.code.call_targets") => Some(smallvec![CmpCtx::AnnotationCallTargets]),
+                Some("metadata.code.compilation_priority") => Some(vec![CmpCtx::AnnotationCompilationPriority]),
+                Some("metadata.code.instr_freq") => Some(vec![CmpCtx::AnnotationInstrFreq]),
+                Some("metadata.code.call_targets") => Some(vec![CmpCtx::AnnotationCallTargets]),
                 _ => None,
             };
         }
         _ => {}
     }
-    let mut ctx = SmallVec::with_capacity(2);
+    let mut ctx = Vec::with_capacity(4);
     let parent = token.parent()?;
     match parent.kind() {
         SyntaxKind::MODULE_FIELD_FUNC => {
@@ -505,12 +504,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
     }
     Some(ctx)
 }
-fn add_cmp_ctx_for_immediates(
-    instr_name: &str,
-    node: &SyntaxNode,
-    has_leading_l_paren: bool,
-    ctx: &mut SmallVec<[CmpCtx; 4]>,
-) {
+fn add_cmp_ctx_for_immediates(instr_name: &str, node: &SyntaxNode, has_leading_l_paren: bool, ctx: &mut Vec<CmpCtx>) {
     if has_leading_l_paren {
         match instr_name {
             "select" => ctx.push(CmpCtx::KeywordResult),
@@ -675,7 +669,7 @@ enum PreferredType {
 
 fn get_cmp_list(
     db: &dyn salsa::Database,
-    ctx: SmallVec<[CmpCtx; 4]>,
+    ctx: Vec<CmpCtx>,
     token: &SyntaxToken,
     document: Document,
     line_index: &LineIndex,

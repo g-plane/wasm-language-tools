@@ -1209,7 +1209,6 @@ dependencies = [
  "salsa",
  "serde",
  "serde_json",
- "smallvec",
  "wat_formatter",
  "wat_parser",
  "wat_syntax",
