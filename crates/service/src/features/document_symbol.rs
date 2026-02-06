@@ -20,7 +20,6 @@ impl LanguageService {
             let symbol_table = SymbolTable::of(db, document);
             let deprecation = deprecation::get_deprecation(db, document);
 
-            #[expect(deprecated)]
             let mut symbols_map = symbol_table
                 .symbols
                 .values()
@@ -40,7 +39,6 @@ impl LanguageService {
                                 detail: None,
                                 kind: LspSymbolKind::Module,
                                 tags,
-                                deprecated: None,
                                 range,
                                 selection_range,
                                 children: None,
@@ -55,7 +53,6 @@ impl LanguageService {
                                     detail: None,
                                     kind: LspSymbolKind::Function,
                                     tags,
-                                    deprecated: None,
                                     range,
                                     selection_range,
                                     children: None,
@@ -72,7 +69,6 @@ impl LanguageService {
                                         .map(|ty| ty.render(db).to_string()),
                                     kind: LspSymbolKind::Variable,
                                     tags,
-                                    deprecated: None,
                                     range,
                                     selection_range,
                                     children: None,
@@ -88,7 +84,6 @@ impl LanguageService {
                                     detail: helpers::syntax::infer_type_def_symbol_detail(symbol, &root),
                                     kind: LspSymbolKind::Class,
                                     tags,
-                                    deprecated: None,
                                     range,
                                     selection_range,
                                     children: None,
@@ -114,7 +109,6 @@ impl LanguageService {
                                     }),
                                     kind: LspSymbolKind::Variable,
                                     tags,
-                                    deprecated: None,
                                     range,
                                     selection_range,
                                     children: None,
@@ -130,7 +124,6 @@ impl LanguageService {
                                     detail: None,
                                     kind: LspSymbolKind::Variable,
                                     tags,
-                                    deprecated: None,
                                     range,
                                     selection_range,
                                     children: None,
@@ -147,7 +140,6 @@ impl LanguageService {
                                         .map(|ty| ty.render(db).to_string()),
                                     kind: LspSymbolKind::Field,
                                     tags,
-                                    deprecated: None,
                                     range,
                                     selection_range,
                                     children: None,

@@ -12,7 +12,7 @@ exclude = ["/tests"]
 [dependencies]
 line-index = { workspace = true }
 rowan = { workspace = true }
-serde = { version = "1.0", features = ["derive"] }
+serde = { workspace = true }
 tiny_pretty = "0.2"
 wat_syntax = { path = "../syntax", version = "0.8" }
 
