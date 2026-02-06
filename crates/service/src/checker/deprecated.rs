@@ -35,6 +35,7 @@ pub fn check(
                     | SymbolKind::MemoryRef
                     | SymbolKind::TableRef
                     | SymbolKind::TagRef
+                    | SymbolKind::DataRef
             )
         })
         .filter_map(|symbol| {

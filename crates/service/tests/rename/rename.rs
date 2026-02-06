@@ -465,3 +465,35 @@ fn tag_ref() {
     let response = service.rename(create_params(uri, 6, 24, "$t")).unwrap();
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn data_def() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (data $data)
+  (func
+    data.drop $data)
+  (data $data'))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 2, 13, "$d")).unwrap();
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn data_ref() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (data $data)
+  (func
+    data.drop $data)
+  (data $data'))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 4, 18, "$d")).unwrap();
+    assert_json_snapshot!(response);
+}

@@ -25,6 +25,7 @@ impl LanguageService {
                             | SymbolKind::MemoryDef
                             | SymbolKind::TableDef
                             | SymbolKind::TagDef
+                            | SymbolKind::DataDef
                     )
                 })
                 .map(|symbol| CodeLens {

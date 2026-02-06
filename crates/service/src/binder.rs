@@ -198,6 +198,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
         let mut table_idx_gen = IdxGen::default();
         let mut field_idx_gen = IdxGen::default();
         let mut tag_idx_gen = IdxGen::default();
+        let mut data_idx_gen = IdxGen::default();
 
         let mut funcs = Vec::new();
         let mut locals = Vec::new();
@@ -207,6 +208,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
         let mut tables = Vec::new();
         let mut fields = FxHashMap::default();
         let mut tags = Vec::new();
+        let mut datas = Vec::new();
         let mut indirect_params = Vec::new();
 
         module.descendants().for_each(|node| match node.kind() {
@@ -493,11 +495,11 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         }
                     }
                     Some(
-                        "memory.size" | "memory.grow" | "memory.fill" | "memory.init" | "i32.load" | "i64.load"
-                        | "f32.load" | "f64.load" | "i32.load8_s" | "i32.load8_u" | "i32.load16_s" | "i32.load16_u"
-                        | "i64.load8_s" | "i64.load8_u" | "i64.load16_s" | "i64.load16_u" | "i64.load32_s"
-                        | "i64.load32_u" | "i32.store" | "i64.store" | "f32.store" | "f64.store" | "i32.store8"
-                        | "i32.store16" | "i64.store8" | "i64.store16" | "i64.store32" | "v128.load" | "v128.load8x8_s"
+                        "memory.size" | "memory.grow" | "memory.fill" | "i32.load" | "i64.load" | "f32.load"
+                        | "f64.load" | "i32.load8_s" | "i32.load8_u" | "i32.load16_s" | "i32.load16_u" | "i64.load8_s"
+                        | "i64.load8_u" | "i64.load16_s" | "i64.load16_u" | "i64.load32_s" | "i64.load32_u"
+                        | "i32.store" | "i64.store" | "f32.store" | "f64.store" | "i32.store8" | "i32.store16"
+                        | "i64.store8" | "i64.store16" | "i64.store32" | "v128.load" | "v128.load8x8_s"
                         | "v128.load8x8_u" | "v128.load16x4_s" | "v128.load16x4_u" | "v128.load32x2_s"
                         | "v128.load32x2_u" | "v128.load8_splat" | "v128.load16_splat" | "v128.load32_splat"
                         | "v128.load64_splat" | "v128.load32_zero" | "v128.load64_zero" | "v128.store"
@@ -506,6 +508,38 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     ) => {
                         if let Some(symbol) = create_first_optional_ref_symbol(db, &node, SymbolKind::MemoryRef) {
                             symbols.insert(symbol.key, symbol);
+                        }
+                    }
+                    Some("memory.init") => {
+                        let mut immediates = node.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+                        if let Some(first) = immediates.next() {
+                            if let Some(second) = immediates.next() {
+                                if let Some(symbol) = create_ref_symbol(db, &first, module_key, SymbolKind::MemoryRef) {
+                                    symbols.insert(symbol.key, symbol);
+                                }
+                                if let Some(symbol) = create_ref_symbol(db, &second, module_key, SymbolKind::DataRef) {
+                                    symbols.insert(symbol.key, symbol);
+                                }
+                            } else {
+                                let key = SymbolKey::new(&node);
+                                symbols.insert(
+                                    key,
+                                    Symbol {
+                                        key,
+                                        green: node.green().into_owned(),
+                                        region: module_key,
+                                        kind: SymbolKind::MemoryRef,
+                                        idx: Idx {
+                                            num: Some(0),
+                                            name: None,
+                                        },
+                                        idx_kind: IdxKind::Memory,
+                                    },
+                                );
+                                if let Some(symbol) = create_ref_symbol(db, &first, module_key, SymbolKind::DataRef) {
+                                    symbols.insert(symbol.key, symbol);
+                                }
+                            }
                         }
                     }
                     Some("memory.copy") => {
@@ -517,15 +551,21 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                             symbols.insert(symbol.key, symbol);
                         }
                     }
+                    Some("data.drop") => {
+                        if let Some(symbol) = node
+                            .first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
+                            .and_then(|node| create_ref_symbol(db, &node, module_key, SymbolKind::DataRef))
+                        {
+                            symbols.insert(symbol.key, symbol);
+                        }
+                    }
                     Some(
                         "struct.new" | "struct.new_default" | "array.new" | "array.new_default" | "array.new_fixed"
-                        | "array.new_data" | "array.new_elem" | "array.get" | "array.get_u" | "array.get_s"
-                        | "array.set" | "array.fill" | "array.init_data" | "array.init_elem" | "call_ref"
-                        | "return_call_ref" | "ref.null",
+                        | "array.new_elem" | "array.get" | "array.get_u" | "array.get_s" | "array.set" | "array.fill"
+                        | "array.init_elem" | "call_ref" | "return_call_ref" | "ref.null",
                     ) => {
                         if let Some(symbol) = node
-                            .children()
-                            .next()
+                            .first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
                             .and_then(|node| create_ref_symbol(db, &node, module_key, SymbolKind::TypeUse))
                         {
                             symbols.insert(symbol.key, symbol);
@@ -536,6 +576,21 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                             create_ref_symbol(db, &node, module_key, SymbolKind::TypeUse)
                                 .map(|symbol| (symbol.key, symbol))
                         }));
+                    }
+                    Some("array.new_data" | "array.init_data") => {
+                        let mut immediates = node.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+                        if let Some(symbol) = immediates
+                            .next()
+                            .and_then(|node| create_ref_symbol(db, &node, module_key, SymbolKind::TypeUse))
+                        {
+                            symbols.insert(symbol.key, symbol);
+                        }
+                        if let Some(symbol) = immediates
+                            .next()
+                            .and_then(|node| create_ref_symbol(db, &node, module_key, SymbolKind::DataRef))
+                        {
+                            symbols.insert(symbol.key, symbol);
+                        }
                     }
                     Some("struct.get" | "struct.get_s" | "struct.get_u" | "struct.set") => {
                         let mut children = node.children();
@@ -687,6 +742,13 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 def_poi.insert(symbol.key, infer_def_poi(&node));
                 symbols.insert(symbol.key, symbol);
             }
+            SyntaxKind::MODULE_FIELD_DATA => {
+                let idx = data_idx_gen.pull();
+                let symbol = create_module_level_symbol(db, &node, idx, SymbolKind::DataDef, &module);
+                datas.push((symbol.key, symbol.idx.name));
+                def_poi.insert(symbol.key, infer_def_poi(&node));
+                symbols.insert(symbol.key, symbol);
+            }
             SyntaxKind::MEM_USE => {
                 if let Some(symbol) = node
                     .first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
@@ -790,6 +852,12 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         return None;
                     }
                     &tags
+                }
+                SymbolKind::DataRef => {
+                    if symbol.region != module_key {
+                        return None;
+                    }
+                    &datas
                 }
                 _ => return None,
             };
@@ -966,6 +1034,8 @@ pub enum SymbolKind {
     FieldRef,
     TagDef,
     TagRef,
+    DataDef,
+    DataRef,
 }
 impl fmt::Display for SymbolKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -982,6 +1052,7 @@ impl fmt::Display for SymbolKind {
             SymbolKind::BlockDef | SymbolKind::BlockRef => write!(f, "label"),
             SymbolKind::FieldDef | SymbolKind::FieldRef => write!(f, "field"),
             SymbolKind::TagDef | SymbolKind::TagRef => write!(f, "tag"),
+            SymbolKind::DataDef | SymbolKind::DataRef => write!(f, "data segment"),
         }
     }
 }
@@ -999,6 +1070,7 @@ pub enum IdxKind {
     Block,
     Field,
     Tag,
+    Data,
 }
 impl From<SymbolKind> for IdxKind {
     fn from(value: SymbolKind) -> Self {
@@ -1013,6 +1085,7 @@ impl From<SymbolKind> for IdxKind {
             SymbolKind::BlockDef | SymbolKind::BlockRef => IdxKind::Block,
             SymbolKind::FieldDef | SymbolKind::FieldRef => IdxKind::Field,
             SymbolKind::TagDef | SymbolKind::TagRef => IdxKind::Tag,
+            SymbolKind::DataDef | SymbolKind::DataRef => IdxKind::Data,
         }
     }
 }
@@ -1029,6 +1102,7 @@ impl fmt::Display for IdxKind {
             IdxKind::Block => write!(f, "label"),
             IdxKind::Field => write!(f, "field"),
             IdxKind::Tag => write!(f, "tag"),
+            IdxKind::Data => write!(f, "data segment"),
         }
     }
 }

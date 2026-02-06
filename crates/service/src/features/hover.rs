@@ -36,7 +36,8 @@ impl LanguageService {
                     | SymbolKind::TableRef
                     | SymbolKind::BlockRef
                     | SymbolKind::FieldRef
-                    | SymbolKind::TagRef => symbol_table
+                    | SymbolKind::TagRef
+                    | SymbolKind::DataRef => symbol_table
                         .find_def(key)
                         .and_then(|symbol| create_def_hover(self, document, &root, symbol))
                         .map(|contents| Hover {
@@ -52,7 +53,8 @@ impl LanguageService {
                     | SymbolKind::TableDef
                     | SymbolKind::BlockDef
                     | SymbolKind::FieldDef
-                    | SymbolKind::TagDef => symbol_table
+                    | SymbolKind::TagDef
+                    | SymbolKind::DataDef => symbol_table
                         .symbols
                         .get(&key)
                         .and_then(|symbol| create_def_hover(self, document, &root, symbol))
@@ -166,6 +168,7 @@ fn create_def_hover(
         SymbolKind::BlockDef => Some(create_block_hover(db, symbol, document)),
         SymbolKind::FieldDef => Some(create_field_def_hover(db, symbol, document)),
         SymbolKind::TagDef => Some(create_tag_def_hover(db, symbol, document)),
+        SymbolKind::DataDef => Some(create_data_def_hover(db, symbol)),
         _ => None,
     }
 }
@@ -370,6 +373,18 @@ fn create_tag_def_hover(db: &dyn salsa::Database, symbol: &Symbol, document: Doc
         symbol.idx.name,
         types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green),
     );
+    MarkupContent {
+        kind: MarkupKind::Markdown,
+        value: format!("```wat\n{content}\n```"),
+    }
+}
+
+fn create_data_def_hover(db: &dyn salsa::Database, symbol: &Symbol) -> MarkupContent {
+    let mut content = "(data".to_string();
+    if let Some(name) = symbol.idx.name {
+        let _ = write!(&mut content, " {}", name.ident(db));
+    }
+    content.push(')');
     MarkupContent {
         kind: MarkupKind::Markdown,
         value: format!("```wat\n{content}\n```"),

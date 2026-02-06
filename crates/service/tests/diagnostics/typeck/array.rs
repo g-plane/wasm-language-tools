@@ -76,7 +76,8 @@ fn new_data() {
   (func (result (ref $vec))
     (array.new_data $vec $d
       (i32.const 1)
-      (i32.const 3))))
+      (i32.const 3)))
+  (data $d))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

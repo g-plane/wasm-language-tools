@@ -492,7 +492,8 @@ fn memory_init() {
     i32.const 0
     i32.const 0
     i32.const 0
-    memory.init 0.0 0.0))
+    memory.init 0.0 0.0)
+  (data))
 "#;
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

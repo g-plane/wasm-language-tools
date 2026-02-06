@@ -33,7 +33,8 @@ impl LanguageService {
             let token = helpers::syntax::find_token(&root, line_index.convert(params.position)?)?;
 
             let cmp_ctx = get_cmp_ctx(&token)?;
-            Some(get_cmp_list(db, cmp_ctx, &token, document, line_index, &root))
+            let items = get_cmp_list(db, cmp_ctx, &token, document, line_index, &root);
+            if items.is_empty() { None } else { Some(items) }
         })
         .flatten()
     }
@@ -502,7 +503,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<SmallVec<[CmpCtx; 4]>> {
         SyntaxKind::MEM_PAGE_SIZE => ctx.push(CmpCtx::MemPageSize),
         _ => {}
     }
-    if ctx.is_empty() { None } else { Some(ctx) }
+    Some(ctx)
 }
 fn add_cmp_ctx_for_immediates(
     instr_name: &str,
@@ -544,8 +545,13 @@ fn add_cmp_ctx_for_immediates(
             Some(("memory", "size" | "grow" | "fill" | "copy")) => ctx.push(CmpCtx::Memory),
             Some(("memory", "init")) => {
                 if is_current_first_immediate {
-                    ctx.push(CmpCtx::Memory);
+                    ctx.extend([CmpCtx::Memory, CmpCtx::Data]);
+                } else {
+                    ctx.push(CmpCtx::Data);
                 }
+            }
+            Some(("data", "drop")) => {
+                ctx.push(CmpCtx::Data);
             }
             Some((_, snd)) if snd.starts_with("load") || snd.starts_with("store") => {
                 if is_current_first_immediate {
@@ -571,6 +577,11 @@ fn add_cmp_ctx_for_immediates(
             Some(("array", snd)) if snd != "len" => {
                 if is_current_first_immediate {
                     ctx.push(CmpCtx::TypeDef(Some(PreferredType::Array)));
+                } else {
+                    match snd {
+                        "new_data" | "init_data" => ctx.push(CmpCtx::Data),
+                        _ => {}
+                    }
                 }
             }
             Some(("ref", "null")) => {
@@ -622,6 +633,7 @@ enum CmpCtx {
     AddrType,
     ShapeDescriptor,
     Tag,
+    Data,
     MemPageSize,
     Annotation,
     KeywordModule,
@@ -1131,6 +1143,41 @@ fn get_cmp_list(
                             ..Default::default()
                         }),
                         detail: Some(types_analyzer::render_header(db, "tag", symbol.idx.name, sig)),
+                        tags: if deprecation.contains_key(&symbol.key) {
+                            Some(vec![CompletionItemTag::Deprecated])
+                        } else {
+                            None
+                        },
+                        ..Default::default()
+                    }
+                }));
+            }
+            CmpCtx::Data => {
+                let Some(module) = token.parent_ancestors().find(|node| node.kind() == SyntaxKind::MODULE) else {
+                    return items;
+                };
+                let deprecation = deprecation::get_deprecation(db, document);
+                items.extend(symbol_table.get_declared(module, SymbolKind::DataDef).map(|symbol| {
+                    let label = symbol.idx.render(db).to_string();
+                    CompletionItem {
+                        label: label.clone(),
+                        kind: Some(CompletionItemKind::Variable),
+                        text_edit: if token.kind().is_trivia() {
+                            None
+                        } else {
+                            Some(Union2::A(TextEdit {
+                                range: line_index.convert(token.text_range()),
+                                new_text: label,
+                            }))
+                        },
+                        label_details: Some(CompletionItemLabelDetails {
+                            detail: Some(if let Some(name) = symbol.idx.name {
+                                format!("(data {})", name.ident(db))
+                            } else {
+                                "(data)".into()
+                            }),
+                            ..Default::default()
+                        }),
                         tags: if deprecation.contains_key(&symbol.key) {
                             Some(vec![CompletionItemTag::Deprecated])
                         } else {

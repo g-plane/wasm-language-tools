@@ -53,7 +53,8 @@ impl LanguageService {
                             | SymbolKind::MemoryDef
                             | SymbolKind::TableDef
                             | SymbolKind::FieldDef
-                            | SymbolKind::TagDef => Some(
+                            | SymbolKind::TagDef
+                            | SymbolKind::DataDef => Some(
                                 symbol_table
                                     .find_references_on_def(symbol, true)
                                     .filter_map(|symbol| create_symbol_highlight(symbol, &root, line_index))
@@ -66,7 +67,8 @@ impl LanguageService {
                             | SymbolKind::MemoryRef
                             | SymbolKind::TableRef
                             | SymbolKind::FieldRef
-                            | SymbolKind::TagRef => Some(
+                            | SymbolKind::TagRef
+                            | SymbolKind::DataRef => Some(
                                 symbol_table
                                     .find_references_on_ref(symbol, true)
                                     .filter_map(|symbol| create_symbol_highlight(symbol, &root, line_index))
@@ -147,8 +149,9 @@ fn get_highlight_kind_of_symbol(symbol: &Symbol, root: &SyntaxNode) -> Option<Do
         | SymbolKind::TableDef
         | SymbolKind::BlockDef
         | SymbolKind::FieldDef
-        | SymbolKind::TagDef => Some(DocumentHighlightKind::Write),
-        SymbolKind::Call | SymbolKind::TypeUse | SymbolKind::MemoryRef | SymbolKind::BlockRef => {
+        | SymbolKind::TagDef
+        | SymbolKind::DataDef => Some(DocumentHighlightKind::Write),
+        SymbolKind::Call | SymbolKind::TypeUse | SymbolKind::MemoryRef | SymbolKind::BlockRef | SymbolKind::DataRef => {
             Some(DocumentHighlightKind::Read)
         }
         SymbolKind::LocalRef

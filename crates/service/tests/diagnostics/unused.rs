@@ -293,7 +293,7 @@ fn memory_used() {
 (module
   (memory (export "") 0)
   (memory $m 0)
-  (data (memory $m)))
+  (data $_ (memory $m)))
 "#;
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
@@ -446,6 +446,35 @@ fn tag_used() {
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
     disable_other_lints(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn data_unused() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (data)
+  (data $data))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn data_used() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (data $data)
+  (func $_
+    data.drop $data))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }

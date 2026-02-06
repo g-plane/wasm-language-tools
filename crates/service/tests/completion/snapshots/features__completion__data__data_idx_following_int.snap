@@ -1,0 +1,46 @@
+---
+source: crates/service/tests/completion/data.rs
+expression: response
+---
+[
+  {
+    "label": "$d",
+    "labelDetails": {
+      "detail": "(data $d)"
+    },
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 15
+        },
+        "end": {
+          "line": 5,
+          "character": 16
+        }
+      },
+      "newText": "$d"
+    }
+  },
+  {
+    "label": "1",
+    "labelDetails": {
+      "detail": "(data)"
+    },
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 15
+        },
+        "end": {
+          "line": 5,
+          "character": 16
+        }
+      },
+      "newText": "1"
+    }
+  }
+]

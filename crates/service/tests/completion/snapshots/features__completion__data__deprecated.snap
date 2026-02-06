@@ -1,0 +1,16 @@
+---
+source: crates/service/tests/completion/data.rs
+expression: response
+---
+[
+  {
+    "label": "$d",
+    "labelDetails": {
+      "detail": "(data $d)"
+    },
+    "kind": 6,
+    "tags": [
+      1
+    ]
+  }
+]

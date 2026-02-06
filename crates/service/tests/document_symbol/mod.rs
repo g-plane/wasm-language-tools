@@ -20,6 +20,7 @@ fn symbols() {
     (table $table 1 funcref)
     (type (struct (field i32 (ref 0)) (field $field (mut i32))))
     (tag $tag)
+    (data $data)
 )
 
 (module
@@ -35,6 +36,8 @@ fn symbols() {
     (table 1 funcref)
     (@deprecated)
     (tag)
+    (@deprecated)
+    (data)
 )
 "#;
     let mut service = LanguageService::default();

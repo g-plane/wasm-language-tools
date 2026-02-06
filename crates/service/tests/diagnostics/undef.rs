@@ -327,6 +327,47 @@ fn tag_undefined() {
 }
 
 #[test]
+fn data_defined() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory 0)
+  (data $data)
+  (func
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.init $data
+    data.drop $data))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn data_undefined() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory 0)
+  (func
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.init $data
+    data.drop $data))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn export() {
     let uri = "untitled:test".to_string();
     let source = "

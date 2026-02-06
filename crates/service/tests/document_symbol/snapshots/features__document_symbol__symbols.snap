@@ -12,7 +12,7 @@ expression: response
         "character": 0
       },
       "end": {
-        "line": 15,
+        "line": 16,
         "character": 1
       }
     },
@@ -499,6 +499,30 @@ expression: response
             "character": 13
           }
         }
+      },
+      {
+        "name": "$data",
+        "kind": 13,
+        "range": {
+          "start": {
+            "line": 15,
+            "character": 4
+          },
+          "end": {
+            "line": 15,
+            "character": 16
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 15,
+            "character": 10
+          },
+          "end": {
+            "line": 15,
+            "character": 15
+          }
+        }
       }
     ]
   },
@@ -507,21 +531,21 @@ expression: response
     "kind": 2,
     "range": {
       "start": {
-        "line": 17,
+        "line": 18,
         "character": 0
       },
       "end": {
-        "line": 30,
+        "line": 33,
         "character": 1
       }
     },
     "selectionRange": {
       "start": {
-        "line": 17,
+        "line": 18,
         "character": 1
       },
       "end": {
-        "line": 17,
+        "line": 18,
         "character": 7
       }
     },
@@ -534,21 +558,21 @@ expression: response
         ],
         "range": {
           "start": {
-            "line": 19,
+            "line": 20,
             "character": 4
           },
           "end": {
-            "line": 19,
+            "line": 20,
             "character": 10
           }
         },
         "selectionRange": {
           "start": {
-            "line": 19,
+            "line": 20,
             "character": 5
           },
           "end": {
-            "line": 19,
+            "line": 20,
             "character": 9
           }
         }
@@ -562,21 +586,21 @@ expression: response
         ],
         "range": {
           "start": {
-            "line": 21,
+            "line": 22,
             "character": 4
           },
           "end": {
-            "line": 21,
+            "line": 22,
             "character": 17
           }
         },
         "selectionRange": {
           "start": {
-            "line": 21,
+            "line": 22,
             "character": 5
           },
           "end": {
-            "line": 21,
+            "line": 22,
             "character": 9
           }
         }
@@ -590,21 +614,21 @@ expression: response
         ],
         "range": {
           "start": {
-            "line": 23,
+            "line": 24,
             "character": 4
           },
           "end": {
-            "line": 23,
+            "line": 24,
             "character": 16
           }
         },
         "selectionRange": {
           "start": {
-            "line": 23,
+            "line": 24,
             "character": 5
           },
           "end": {
-            "line": 23,
+            "line": 24,
             "character": 11
           }
         }
@@ -617,21 +641,21 @@ expression: response
         ],
         "range": {
           "start": {
-            "line": 25,
+            "line": 26,
             "character": 4
           },
           "end": {
-            "line": 25,
+            "line": 26,
             "character": 14
           }
         },
         "selectionRange": {
           "start": {
-            "line": 25,
+            "line": 26,
             "character": 5
           },
           "end": {
-            "line": 25,
+            "line": 26,
             "character": 11
           }
         }
@@ -644,21 +668,21 @@ expression: response
         ],
         "range": {
           "start": {
-            "line": 27,
+            "line": 28,
             "character": 4
           },
           "end": {
-            "line": 27,
+            "line": 28,
             "character": 21
           }
         },
         "selectionRange": {
           "start": {
-            "line": 27,
+            "line": 28,
             "character": 5
           },
           "end": {
-            "line": 27,
+            "line": 28,
             "character": 10
           }
         }
@@ -671,22 +695,49 @@ expression: response
         ],
         "range": {
           "start": {
-            "line": 29,
+            "line": 30,
             "character": 4
           },
           "end": {
-            "line": 29,
+            "line": 30,
             "character": 9
           }
         },
         "selectionRange": {
           "start": {
-            "line": 29,
+            "line": 30,
             "character": 5
           },
           "end": {
-            "line": 29,
+            "line": 30,
             "character": 8
+          }
+        }
+      },
+      {
+        "name": "data segment 0",
+        "kind": 13,
+        "tags": [
+          1
+        ],
+        "range": {
+          "start": {
+            "line": 32,
+            "character": 4
+          },
+          "end": {
+            "line": 32,
+            "character": 10
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 32,
+            "character": 5
+          },
+          "end": {
+            "line": 32,
+            "character": 9
           }
         }
       }

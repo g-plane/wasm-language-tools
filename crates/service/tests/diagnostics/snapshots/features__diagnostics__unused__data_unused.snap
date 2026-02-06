@@ -1,0 +1,47 @@
+---
+source: crates/service/tests/diagnostics/unused.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 3
+        },
+        "end": {
+          "line": 2,
+          "character": 7
+        }
+      },
+      "severity": 2,
+      "code": "unused",
+      "source": "wat",
+      "message": "data segment `0` is never used",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 8
+        },
+        "end": {
+          "line": 3,
+          "character": 13
+        }
+      },
+      "severity": 2,
+      "code": "unused",
+      "source": "wat",
+      "message": "data segment `$data` is never used",
+      "tags": [
+        1
+      ]
+    }
+  ]
+}

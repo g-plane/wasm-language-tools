@@ -1,0 +1,21 @@
+---
+source: crates/service/tests/completion/array.rs
+expression: response
+---
+[
+  {
+    "label": "$a",
+    "kind": 8,
+    "sortText": "1"
+  },
+  {
+    "label": "1",
+    "kind": 8,
+    "sortText": "0"
+  },
+  {
+    "label": "$b",
+    "kind": 8,
+    "sortText": "0"
+  }
+]

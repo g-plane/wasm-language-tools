@@ -45,7 +45,8 @@ impl LanguageService {
             | SymbolKind::MemoryDef
             | SymbolKind::TableDef
             | SymbolKind::FieldDef
-            | SymbolKind::TagDef => Some(
+            | SymbolKind::TagDef
+            | SymbolKind::DataDef => Some(
                 symbol_table
                     .find_references_on_def(symbol, params.context.include_declaration)
                     .map(|symbol| {
@@ -68,7 +69,8 @@ impl LanguageService {
             | SymbolKind::MemoryRef
             | SymbolKind::TableRef
             | SymbolKind::FieldRef
-            | SymbolKind::TagRef => Some(
+            | SymbolKind::TagRef
+            | SymbolKind::DataRef => Some(
                 symbol_table
                     .find_references_on_ref(symbol, params.context.include_declaration)
                     .map(|symbol| {

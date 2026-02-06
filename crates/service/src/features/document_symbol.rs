@@ -121,7 +121,7 @@ impl LanguageService {
                                 },
                             ))
                         }
-                        SymbolKind::MemoryDef | SymbolKind::TableDef | SymbolKind::TagDef => {
+                        SymbolKind::MemoryDef | SymbolKind::TableDef | SymbolKind::TagDef | SymbolKind::DataDef => {
                             let range = line_index.convert(symbol.key.text_range());
                             Some((
                                 symbol.key,
@@ -164,7 +164,8 @@ impl LanguageService {
                         | SymbolKind::BlockDef
                         | SymbolKind::BlockRef
                         | SymbolKind::FieldRef
-                        | SymbolKind::TagRef => None,
+                        | SymbolKind::TagRef
+                        | SymbolKind::DataRef => None,
                     }
                 })
                 .collect::<FxHashMap<_, _>>();

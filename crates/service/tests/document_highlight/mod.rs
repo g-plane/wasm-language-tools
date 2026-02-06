@@ -779,3 +779,79 @@ fn shape_descriptor() {
     let response = service.document_highlight(create_params(uri, 4, 18));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn data() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (data $data)
+  (func
+    data.drop $data
+    memory.init $data
+    array.init_data 0 $data
+    array.new_data 0 $data))
+(module
+  (data $data))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.document_highlight(create_params(uri, 2, 10));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn data_ref_int() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (data $data)
+  (func
+    data.drop 0
+    memory.init 0
+    array.init_data 0 0
+    array.new_data 0 0))
+(module
+  (data $data))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.document_highlight(create_params(uri, 6, 22));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn data_ref_ident() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (data $data)
+  (func
+    data.drop $data
+    memory.init $data
+    array.init_data 0 $data
+    array.new_data 0 $data))
+(module
+  (data $data))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.document_highlight(create_params(uri, 5, 18));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn data_ref_undefined() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    data.drop $data))
+(module
+  (data $data))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.document_highlight(create_params(uri, 3, 18));
+    assert!(response.unwrap().is_empty());
+}

@@ -2,6 +2,7 @@ use lspt::{Position, ReferenceContext, ReferenceParams, TextDocumentIdentifier};
 use wat_service::LanguageService;
 
 mod block;
+mod data;
 mod field;
 mod func;
 mod global;

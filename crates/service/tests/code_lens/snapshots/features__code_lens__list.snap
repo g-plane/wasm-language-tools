@@ -114,5 +114,21 @@ expression: response
       "kind": "tag",
       "uri": "untitled:test"
     }
+  },
+  {
+    "range": {
+      "start": {
+        "line": 11,
+        "character": 2
+      },
+      "end": {
+        "line": 11,
+        "character": 8
+      }
+    },
+    "data": {
+      "kind": "data",
+      "uri": "untitled:test"
+    }
   }
 ]
