@@ -51,10 +51,12 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         num: None,
                         name: Some(InternIdent::new(db, token.text())),
                     }),
-                    SyntaxKind::UNSIGNED_INT | SyntaxKind::INT => token.text().parse().ok().map(|num| Idx {
-                        num: Some(num),
-                        name: None,
-                    }),
+                    SyntaxKind::UNSIGNED_INT | SyntaxKind::INT => {
+                        helpers::parse_u32(token.text()).ok().map(|num| Idx {
+                            num: Some(num),
+                            name: None,
+                        })
+                    }
                     _ => None,
                 },
                 _ => None,

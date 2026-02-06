@@ -1,6 +1,7 @@
 use super::Diagnostic;
+use crate::helpers;
 use rowan::ast::support;
-use std::num::{IntErrorKind, ParseIntError};
+use std::num::IntErrorKind;
 use wat_syntax::{
     SyntaxKind, SyntaxNode, SyntaxToken,
     ast::{Limits, MemPageSize},
@@ -12,7 +13,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) -> Option<()>
     let limits = support::child::<Limits>(node)?;
     let page_size = if let Some(token) =
         support::child::<MemPageSize>(node).and_then(|page_size| page_size.unsigned_int_token())
-        && let Ok(page_size) = parse_u32(token.text())
+        && let Ok(page_size) = helpers::parse_u32(token.text())
     {
         if page_size == 1 || page_size == 65536 {
             page_size
@@ -35,7 +36,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) -> Option<()>
     };
 
     let min_token = limits.min()?;
-    let min = match parse_u32(min_token.text()) {
+    let min = match helpers::parse_u32(min_token.text()) {
         Ok(min) => {
             if min > upper_bound {
                 diagnostics.push(report_overflow(&min_token, upper_bound));
@@ -49,7 +50,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) -> Option<()>
         Err(_) => return None,
     };
     if let Some(max_token) = limits.max() {
-        let max = match parse_u32(max_token.text()) {
+        let max = match helpers::parse_u32(max_token.text()) {
             Ok(max) => {
                 if max > upper_bound {
                     diagnostics.push(report_overflow(&max_token, upper_bound));
@@ -87,14 +88,5 @@ fn report_overflow(token: &SyntaxToken, upper_bound: u32) -> Diagnostic {
         code: DIAGNOSTIC_CODE.into(),
         message: format!("memory size can't be greater than {upper_bound}"),
         ..Default::default()
-    }
-}
-
-fn parse_u32(s: &str) -> Result<u32, ParseIntError> {
-    let s = s.replace('_', "");
-    if let Some(s) = s.strip_prefix("0x") {
-        u32::from_str_radix(s, 16)
-    } else {
-        s.parse()
     }
 }

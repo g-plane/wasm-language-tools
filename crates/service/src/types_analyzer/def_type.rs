@@ -6,6 +6,7 @@ use super::{
 use crate::{
     binder::{SymbolKey, SymbolKind, SymbolTable},
     document::Document,
+    helpers,
     idx::{Idx, InternIdent},
 };
 use rowan::{TextRange, ast::AstNode};
@@ -33,7 +34,9 @@ pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Def
                         .map(|key| Inherits {
                             symbol: *key,
                             idx: Idx {
-                                num: index.unsigned_int_token().and_then(|int| int.text().parse().ok()),
+                                num: index
+                                    .unsigned_int_token()
+                                    .and_then(|int| helpers::parse_u32(int.text()).ok()),
                                 name: index.ident_token().map(|ident| InternIdent::new(db, ident.text())),
                             },
                         });

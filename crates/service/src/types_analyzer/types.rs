@@ -2,6 +2,7 @@ use super::def_type::{CompositeType, get_def_types};
 use crate::{
     binder::{SymbolKind, SymbolTable},
     document::Document,
+    helpers,
     idx::{Idx, InternIdent},
     types_analyzer::{self, DefType},
 };
@@ -203,7 +204,7 @@ impl<'db> HeapType<'db> {
                 let token = node.children().next()?.into_token()?;
                 match WatLanguage::kind_from_raw(token.kind()) {
                     SyntaxKind::UNSIGNED_INT => Some(HeapType::Type(Idx {
-                        num: token.text().parse().ok(),
+                        num: helpers::parse_u32(token.text()).ok(),
                         name: None,
                     })),
                     SyntaxKind::IDENT => Some(HeapType::Type(Idx {

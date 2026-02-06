@@ -1,4 +1,4 @@
-use crate::helpers::RenderWithDb;
+use crate::helpers::{self, RenderWithDb};
 use std::fmt;
 use wat_syntax::ast::Immediate;
 
@@ -11,7 +11,7 @@ pub struct Idx<'db> {
 impl<'db> Idx<'db> {
     pub fn from_immediate(immediate: &Immediate, db: &'db dyn salsa::Database) -> Self {
         Idx {
-            num: immediate.int().and_then(|int| int.text().parse().ok()),
+            num: immediate.int().and_then(|int| helpers::parse_u32(int.text()).ok()),
             name: immediate.ident().map(|ident| InternIdent::new(db, ident.text())),
         }
     }

@@ -1,3 +1,4 @@
+use insta::assert_json_snapshot;
 use lspt::{Position, ReferenceContext, ReferenceParams, TextDocumentIdentifier};
 use wat_service::LanguageService;
 
@@ -65,4 +66,31 @@ fn ignored_tokens() {
             .find_references(create_params(uri.clone(), 4, 23, true))
             .is_none()
     );
+}
+
+#[test]
+fn hex_int_idx() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func)
+  (func)
+  (func)
+  (func)
+  (func)
+  (func)
+  (func)
+  (func)
+  (func)
+  (func)
+  (func)
+  (func)
+  (func
+    call 0xa
+    call 0xA))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.find_references(create_params(uri, 15, 11, true));
+    assert_json_snapshot!(response);
 }

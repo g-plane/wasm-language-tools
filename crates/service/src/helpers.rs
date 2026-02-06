@@ -1,6 +1,7 @@
 use line_index::{LineCol, LineIndex};
 use lspt::{Position, Range};
 use rowan::{TextRange, TextSize};
+use std::num::ParseIntError;
 
 pub use self::arena::{BumpCollectionsExt, BumpHashMap, BumpHashSet};
 
@@ -69,6 +70,15 @@ pub fn is_stack_polymorphic(instr_name: &str) -> bool {
             | "throw"
             | "throw_ref"
     )
+}
+
+pub fn parse_u32(s: &str) -> Result<u32, ParseIntError> {
+    let s = s.replace('_', "");
+    if let Some(s) = s.strip_prefix("0x") {
+        u32::from_str_radix(s, 16)
+    } else {
+        s.parse()
+    }
 }
 
 pub(crate) struct RenderWithDb<'db, T> {

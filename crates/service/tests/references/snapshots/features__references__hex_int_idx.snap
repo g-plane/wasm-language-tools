@@ -1,0 +1,45 @@
+---
+source: crates/service/tests/references/mod.rs
+expression: response
+---
+[
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 12,
+        "character": 3
+      },
+      "end": {
+        "line": 12,
+        "character": 7
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 15,
+        "character": 9
+      },
+      "end": {
+        "line": 15,
+        "character": 12
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 16,
+        "character": 9
+      },
+      "end": {
+        "line": 16,
+        "character": 12
+      }
+    }
+  }
+]

@@ -1016,10 +1016,13 @@ fn resolve_sig<'db, 'bump>(
                     let count = immediates
                         .next()
                         .and_then(|immediate| immediate.int())
-                        .and_then(|int| int.text().parse().ok())
+                        .and_then(|int| helpers::parse_u32(int.text()).ok())
                         .unwrap_or_default();
                     ResolvedSig {
-                        params: BumpVec::from_iter_in(iter::repeat_n(ty.unwrap_or(OperandType::Any), count), bump),
+                        params: BumpVec::from_iter_in(
+                            iter::repeat_n(ty.unwrap_or(OperandType::Any), count as usize),
+                            bump,
+                        ),
                         results: BumpVec::from_iter_in(
                             [OperandType::Val(ValType::Ref(RefType {
                                 heap_ty: HeapType::Type(idx),
@@ -1207,7 +1210,7 @@ fn resolve_sig<'db, 'bump>(
                         name: Some(InternIdent::new(shared.db, token.text())),
                     })),
                     SyntaxElement::Token(token) if token.kind() == SyntaxKind::INT => Some(HeapType::Type(Idx {
-                        num: token.text().parse().ok(),
+                        num: helpers::parse_u32(token.text()).ok(),
                         name: None,
                     })),
                     _ => None,
@@ -1326,7 +1329,9 @@ fn resolve_sig<'db, 'bump>(
                 .and_then(|type_use| type_use.index())
                 .map(|index| {
                     HeapType::Type(Idx {
-                        num: index.unsigned_int_token().and_then(|int| int.text().parse().ok()),
+                        num: index
+                            .unsigned_int_token()
+                            .and_then(|int| helpers::parse_u32(int.text()).ok()),
                         name: index
                             .ident_token()
                             .map(|ident| InternIdent::new(shared.db, ident.text())),
