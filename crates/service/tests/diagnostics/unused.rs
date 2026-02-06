@@ -352,6 +352,24 @@ fn memory_dot() {
 }
 
 #[test]
+fn memory_copy() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (memory 0)
+  (func $_
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    memory.copy))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
 fn table_unused() {
     let uri = "untitled:test".to_string();
     let source = r#"
@@ -380,6 +398,40 @@ fn table_used() {
   (table $table3 0 funcref)
   (elem (table 2)
     (i32.const 0) funcref))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn table_implicit() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (table 0 funcref)
+  (func $_
+    table.size
+    drop))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn table_copy() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (table 0 funcref)
+  (func $_
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    table.copy))
 "#;
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

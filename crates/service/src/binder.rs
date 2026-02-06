@@ -70,28 +70,24 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 idx_kind: kind.into(),
             })
     }
-    fn create_first_optional_ref_symbol<'db>(
+    fn create_optional_ref_symbol<'db>(
         db: &'db dyn salsa::Database,
-        node: &SyntaxNode,
+        node: Option<SyntaxNode>,
+        fallback_node: &SyntaxNode,
+        region: SymbolKey,
         kind: SymbolKind,
-    ) -> Option<Symbol<'db>> {
-        node.ancestors()
-            .find(|node| node.kind() == SyntaxKind::MODULE)
-            .map(|region| {
-                let region = SymbolKey::new(&region);
-                node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
-                    .and_then(|immediate| create_ref_symbol(db, &immediate, region, kind))
-                    .unwrap_or_else(|| Symbol {
-                        green: node.green().into(),
-                        key: SymbolKey::new(node),
-                        region,
-                        kind,
-                        idx: Idx {
-                            num: Some(0),
-                            name: None,
-                        },
-                        idx_kind: kind.into(),
-                    })
+    ) -> Symbol<'db> {
+        node.and_then(|node| create_ref_symbol(db, &node, region, kind))
+            .unwrap_or_else(|| Symbol {
+                green: fallback_node.green().into(),
+                key: SymbolKey::new(fallback_node),
+                region,
+                kind,
+                idx: Idx {
+                    num: Some(0),
+                    name: None,
+                },
+                idx_kind: kind.into(),
             })
     }
     fn create_extern_type_symbol<'db>(
@@ -477,15 +473,23 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         }
                     }
                     Some("call_indirect" | "return_call_indirect") => {
-                        if let Some(symbol) = create_first_optional_ref_symbol(db, &node, SymbolKind::TableRef) {
-                            symbols.insert(symbol.key, symbol);
-                        }
+                        let immediate = node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE);
+                        let symbol = create_optional_ref_symbol(db, immediate, &node, module_key, SymbolKind::TableRef);
+                        symbols.insert(symbol.key, symbol);
                     }
-                    Some("table.get" | "table.set" | "table.size" | "table.grow" | "table.fill" | "table.copy") => {
-                        symbols.extend(node.children().filter_map(|node| {
-                            create_ref_symbol(db, &node, module_key, SymbolKind::TableRef)
-                                .map(|symbol| (symbol.key, symbol))
-                        }));
+                    Some("table.get" | "table.set" | "table.size" | "table.grow" | "table.fill") => {
+                        let immediate = node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE);
+                        let symbol = create_optional_ref_symbol(db, immediate, &node, module_key, SymbolKind::TableRef);
+                        symbols.insert(symbol.key, symbol);
+                    }
+                    Some("table.copy") => {
+                        let mut immediates = node.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+                        let dst =
+                            create_optional_ref_symbol(db, immediates.next(), &node, module_key, SymbolKind::TableRef);
+                        symbols.insert(dst.key, dst);
+                        let src =
+                            create_optional_ref_symbol(db, immediates.next(), &node, module_key, SymbolKind::TableRef);
+                        symbols.insert(src.key, src);
                     }
                     Some("table.init") => {
                         if let Some(symbol) = node
@@ -508,50 +512,31 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         | "v128.load8_lane" | "v128.load16_lane" | "v128.load32_lane" | "v128.load64_lane"
                         | "v128.store8_lane" | "v128.store16_lane" | "v128.store32_lane" | "v128.store64_lane",
                     ) => {
-                        if let Some(symbol) = create_first_optional_ref_symbol(db, &node, SymbolKind::MemoryRef) {
-                            symbols.insert(symbol.key, symbol);
-                        }
+                        let immediate = node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE);
+                        let symbol =
+                            create_optional_ref_symbol(db, immediate, &node, module_key, SymbolKind::MemoryRef);
+                        symbols.insert(symbol.key, symbol);
                     }
                     Some("memory.init") => {
                         let mut immediates = node.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
-                        if let Some(first) = immediates.next() {
-                            if let Some(second) = immediates.next() {
-                                if let Some(symbol) = create_ref_symbol(db, &first, module_key, SymbolKind::MemoryRef) {
-                                    symbols.insert(symbol.key, symbol);
-                                }
-                                if let Some(symbol) = create_ref_symbol(db, &second, module_key, SymbolKind::DataRef) {
-                                    symbols.insert(symbol.key, symbol);
-                                }
-                            } else {
-                                let key = SymbolKey::new(&node);
-                                symbols.insert(
-                                    key,
-                                    Symbol {
-                                        key,
-                                        green: node.green().into_owned(),
-                                        region: module_key,
-                                        kind: SymbolKind::MemoryRef,
-                                        idx: Idx {
-                                            num: Some(0),
-                                            name: None,
-                                        },
-                                        idx_kind: IdxKind::Memory,
-                                    },
-                                );
-                                if let Some(symbol) = create_ref_symbol(db, &first, module_key, SymbolKind::DataRef) {
-                                    symbols.insert(symbol.key, symbol);
-                                }
-                            }
-                        }
-                    }
-                    Some("memory.copy") => {
-                        if let Some(symbol) = node
-                            .children()
-                            .next()
-                            .and_then(|node| create_ref_symbol(db, &node, module_key, SymbolKind::MemoryRef))
+                        let mut first = immediates.next();
+                        if let Some(data_ref) = immediates.next().or_else(|| first.take())
+                            && let Some(symbol) = create_ref_symbol(db, &data_ref, module_key, SymbolKind::DataRef)
                         {
                             symbols.insert(symbol.key, symbol);
                         }
+                        let mem_symbol =
+                            create_optional_ref_symbol(db, first, &node, module_key, SymbolKind::MemoryRef);
+                        symbols.insert(mem_symbol.key, mem_symbol);
+                    }
+                    Some("memory.copy") => {
+                        let mut immediates = node.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+                        let dst =
+                            create_optional_ref_symbol(db, immediates.next(), &node, module_key, SymbolKind::MemoryRef);
+                        symbols.insert(dst.key, dst);
+                        let src =
+                            create_optional_ref_symbol(db, immediates.next(), &node, module_key, SymbolKind::MemoryRef);
+                        symbols.insert(src.key, src);
                     }
                     Some("data.drop") => {
                         if let Some(symbol) = node
