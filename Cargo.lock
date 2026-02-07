@@ -1146,7 +1146,7 @@ dependencies = [
 
 [[package]]
 name = "wat_formatter"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "criterion",
  "insta",
@@ -1162,7 +1162,7 @@ dependencies = [
 
 [[package]]
 name = "wat_parser"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "codespan-reporting",
  "criterion",
@@ -1174,7 +1174,7 @@ dependencies = [
 
 [[package]]
 name = "wat_server"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -1192,7 +1192,7 @@ dependencies = [
 
 [[package]]
 name = "wat_service"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "bumpalo",
  "criterion",
@@ -1216,7 +1216,7 @@ dependencies = [
 
 [[package]]
 name = "wat_syntax"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "rowan",
 ]
