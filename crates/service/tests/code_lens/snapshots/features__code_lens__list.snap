@@ -130,5 +130,21 @@ expression: response
       "kind": "data",
       "uri": "untitled:test"
     }
+  },
+  {
+    "range": {
+      "start": {
+        "line": 12,
+        "character": 2
+      },
+      "end": {
+        "line": 12,
+        "character": 8
+      }
+    },
+    "data": {
+      "kind": "elem",
+      "uri": "untitled:test"
+    }
   }
 ]

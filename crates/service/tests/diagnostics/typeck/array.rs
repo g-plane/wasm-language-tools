@@ -95,7 +95,8 @@ fn new_elem() {
   (func (result (ref $vec))
     (array.new_elem $vec $d
       (i32.const 1)
-      (i32.const 3))))
+      (i32.const 3)))
+  (elem $d 0))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

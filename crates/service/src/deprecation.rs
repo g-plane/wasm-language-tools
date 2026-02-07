@@ -19,6 +19,7 @@ pub(crate) fn get_deprecation(db: &dyn salsa::Database, document: Document) -> F
                     | SyntaxKind::TYPE_DEF
                     | SyntaxKind::MODULE_FIELD_IMPORT
                     | SyntaxKind::MODULE_FIELD_DATA
+                    | SyntaxKind::MODULE_FIELD_ELEM
             )
         })
         .chain(

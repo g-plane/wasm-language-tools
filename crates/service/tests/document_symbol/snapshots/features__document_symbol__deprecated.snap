@@ -12,7 +12,7 @@ expression: response
         "character": 0
       },
       "end": {
-        "line": 16,
+        "line": 18,
         "character": 1
       }
     },
@@ -214,6 +214,33 @@ expression: response
           },
           "end": {
             "line": 15,
+            "character": 9
+          }
+        }
+      },
+      {
+        "name": "elem segment 0",
+        "kind": 13,
+        "tags": [
+          1
+        ],
+        "range": {
+          "start": {
+            "line": 17,
+            "character": 4
+          },
+          "end": {
+            "line": 17,
+            "character": 10
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 17,
+            "character": 5
+          },
+          "end": {
+            "line": 17,
             "character": 9
           }
         }

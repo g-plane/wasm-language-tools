@@ -45,7 +45,8 @@ pub fn check(
         | SymbolKind::TableDef
         | SymbolKind::FieldDef
         | SymbolKind::TagDef
-        | SymbolKind::DataDef => {
+        | SymbolKind::DataDef
+        | SymbolKind::ElemDef => {
             if used.contains(&symbol.key) || is_prefixed_with_underscore(db, symbol) {
                 None
             } else {

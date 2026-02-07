@@ -12,7 +12,7 @@ expression: response
         "character": 0
       },
       "end": {
-        "line": 16,
+        "line": 17,
         "character": 1
       }
     },
@@ -520,6 +520,30 @@ expression: response
           },
           "end": {
             "line": 15,
+            "character": 15
+          }
+        }
+      },
+      {
+        "name": "$elem",
+        "kind": 13,
+        "range": {
+          "start": {
+            "line": 16,
+            "character": 4
+          },
+          "end": {
+            "line": 16,
+            "character": 16
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 16,
+            "character": 10
+          },
+          "end": {
+            "line": 16,
             "character": 15
           }
         }

@@ -497,3 +497,39 @@ fn data_ref() {
     let response = service.rename(create_params(uri, 4, 18, "$d")).unwrap();
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn elem_def() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (elem $elem)
+  (func
+    elem.drop $elem)
+  (elem $elem'))
+(module
+  (elem $elem))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 2, 13, "$e")).unwrap();
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn elem_ref() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (elem $elem)
+  (func
+    elem.drop $elem)
+  (elem $elem'))
+(module
+  (elem $elem))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 4, 18, "$e")).unwrap();
+    assert_json_snapshot!(response);
+}

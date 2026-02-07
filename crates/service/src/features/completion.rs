@@ -524,17 +524,16 @@ fn add_cmp_ctx_for_immediates(instr_name: &str, node: &SyntaxNode, has_leading_l
             Some(("local", _)) => ctx.push(CmpCtx::Local),
             Some(("global", _)) => ctx.push(CmpCtx::Global),
             Some(("ref", "func")) => ctx.push(CmpCtx::Func),
-            Some(("table", snd)) => {
-                if snd == "init"
-                    && node.kind() == SyntaxKind::IMMEDIATE
-                    && node
-                        .prev_sibling()
-                        .is_some_and(|prev| prev.kind() == SyntaxKind::IMMEDIATE)
-                {
-                    // elem id
+            Some(("table", "get" | "set" | "size" | "grow" | "fill" | "copy")) => ctx.push(CmpCtx::Table),
+            Some(("table", "init")) => {
+                if is_current_first_immediate {
+                    ctx.extend([CmpCtx::Table, CmpCtx::Elem]);
                 } else {
-                    ctx.push(CmpCtx::Table);
+                    ctx.push(CmpCtx::Elem);
                 }
+            }
+            Some(("elem", "drop")) => {
+                ctx.push(CmpCtx::Elem);
             }
             Some(("memory", "size" | "grow" | "fill" | "copy")) => ctx.push(CmpCtx::Memory),
             Some(("memory", "init")) => {
@@ -574,6 +573,7 @@ fn add_cmp_ctx_for_immediates(instr_name: &str, node: &SyntaxNode, has_leading_l
                 } else {
                     match snd {
                         "new_data" | "init_data" => ctx.push(CmpCtx::Data),
+                        "new_elem" | "init_elem" => ctx.push(CmpCtx::Elem),
                         _ => {}
                     }
                 }
@@ -628,6 +628,7 @@ enum CmpCtx {
     ShapeDescriptor,
     Tag,
     Data,
+    Elem,
     MemPageSize,
     Annotation,
     KeywordModule,
@@ -1169,6 +1170,41 @@ fn get_cmp_list(
                                 format!("(data {})", name.ident(db))
                             } else {
                                 "(data)".into()
+                            }),
+                            ..Default::default()
+                        }),
+                        tags: if deprecation.contains_key(&symbol.key) {
+                            Some(vec![CompletionItemTag::Deprecated])
+                        } else {
+                            None
+                        },
+                        ..Default::default()
+                    }
+                }));
+            }
+            CmpCtx::Elem => {
+                let Some(module) = token.parent_ancestors().find(|node| node.kind() == SyntaxKind::MODULE) else {
+                    return items;
+                };
+                let deprecation = deprecation::get_deprecation(db, document);
+                items.extend(symbol_table.get_declared(module, SymbolKind::ElemDef).map(|symbol| {
+                    let label = symbol.idx.render(db).to_string();
+                    CompletionItem {
+                        label: label.clone(),
+                        kind: Some(CompletionItemKind::Variable),
+                        text_edit: if token.kind().is_trivia() {
+                            None
+                        } else {
+                            Some(Union2::A(TextEdit {
+                                range: line_index.convert(token.text_range()),
+                                new_text: label,
+                            }))
+                        },
+                        label_details: Some(CompletionItemLabelDetails {
+                            detail: Some(if let Some(name) = symbol.idx.name {
+                                format!("(elem {})", name.ident(db))
+                            } else {
+                                "(elem)".into()
                             }),
                             ..Default::default()
                         }),

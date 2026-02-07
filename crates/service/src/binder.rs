@@ -197,6 +197,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
         let mut field_idx_gen = IdxGen::default();
         let mut tag_idx_gen = IdxGen::default();
         let mut data_idx_gen = IdxGen::default();
+        let mut elem_idx_gen = IdxGen::default();
 
         let mut funcs = Vec::new();
         let mut locals = Vec::new();
@@ -207,6 +208,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
         let mut fields = FxHashMap::default();
         let mut tags = Vec::new();
         let mut datas = Vec::new();
+        let mut elems = Vec::new();
         let mut indirect_params = Vec::new();
 
         module.descendants().for_each(|node| match node.kind() {
@@ -492,10 +494,21 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         symbols.insert(src.key, src);
                     }
                     Some("table.init") => {
+                        let mut immediates = node.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+                        let mut first = immediates.next();
+                        if let Some(elem_ref) = immediates.next().or_else(|| first.take())
+                            && let Some(symbol) = create_ref_symbol(db, &elem_ref, module_key, SymbolKind::ElemRef)
+                        {
+                            symbols.insert(symbol.key, symbol);
+                        }
+                        let table_symbol =
+                            create_optional_ref_symbol(db, first, &node, module_key, SymbolKind::TableRef);
+                        symbols.insert(table_symbol.key, table_symbol);
+                    }
+                    Some("elem.drop") => {
                         if let Some(symbol) = node
-                            .children()
-                            .next()
-                            .and_then(|node| create_ref_symbol(db, &node, module_key, SymbolKind::TableRef))
+                            .first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
+                            .and_then(|node| create_ref_symbol(db, &node, module_key, SymbolKind::ElemRef))
                         {
                             symbols.insert(symbol.key, symbol);
                         }
@@ -548,8 +561,8 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     }
                     Some(
                         "struct.new" | "struct.new_default" | "array.new" | "array.new_default" | "array.new_fixed"
-                        | "array.new_elem" | "array.get" | "array.get_u" | "array.get_s" | "array.set" | "array.fill"
-                        | "array.init_elem" | "call_ref" | "return_call_ref" | "ref.null",
+                        | "array.get" | "array.get_u" | "array.get_s" | "array.set" | "array.fill" | "call_ref"
+                        | "return_call_ref" | "ref.null",
                     ) => {
                         if let Some(symbol) = node
                             .first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
@@ -575,6 +588,21 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         if let Some(symbol) = immediates
                             .next()
                             .and_then(|node| create_ref_symbol(db, &node, module_key, SymbolKind::DataRef))
+                        {
+                            symbols.insert(symbol.key, symbol);
+                        }
+                    }
+                    Some("array.new_elem" | "array.init_elem") => {
+                        let mut immediates = node.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+                        if let Some(symbol) = immediates
+                            .next()
+                            .and_then(|node| create_ref_symbol(db, &node, module_key, SymbolKind::TypeUse))
+                        {
+                            symbols.insert(symbol.key, symbol);
+                        }
+                        if let Some(symbol) = immediates
+                            .next()
+                            .and_then(|node| create_ref_symbol(db, &node, module_key, SymbolKind::ElemRef))
                         {
                             symbols.insert(symbol.key, symbol);
                         }
@@ -736,6 +764,13 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 def_poi.insert(symbol.key, infer_def_poi(&node));
                 symbols.insert(symbol.key, symbol);
             }
+            SyntaxKind::MODULE_FIELD_ELEM => {
+                let idx = elem_idx_gen.pull();
+                let symbol = create_module_level_symbol(db, &node, idx, SymbolKind::ElemDef, &module);
+                elems.push((symbol.key, symbol.idx.name));
+                def_poi.insert(symbol.key, infer_def_poi(&node));
+                symbols.insert(symbol.key, symbol);
+            }
             SyntaxKind::MEM_USE => {
                 if let Some(symbol) = node
                     .first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
@@ -845,6 +880,12 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         return None;
                     }
                     &datas
+                }
+                SymbolKind::ElemRef => {
+                    if symbol.region != module_key {
+                        return None;
+                    }
+                    &elems
                 }
                 _ => return None,
             };
@@ -1023,6 +1064,8 @@ pub enum SymbolKind {
     TagRef,
     DataDef,
     DataRef,
+    ElemDef,
+    ElemRef,
 }
 impl fmt::Display for SymbolKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -1040,6 +1083,7 @@ impl fmt::Display for SymbolKind {
             SymbolKind::FieldDef | SymbolKind::FieldRef => write!(f, "field"),
             SymbolKind::TagDef | SymbolKind::TagRef => write!(f, "tag"),
             SymbolKind::DataDef | SymbolKind::DataRef => write!(f, "data segment"),
+            SymbolKind::ElemDef | SymbolKind::ElemRef => write!(f, "elem segment"),
         }
     }
 }
@@ -1058,6 +1102,7 @@ pub enum IdxKind {
     Field,
     Tag,
     Data,
+    Elem,
 }
 impl From<SymbolKind> for IdxKind {
     fn from(value: SymbolKind) -> Self {
@@ -1073,6 +1118,7 @@ impl From<SymbolKind> for IdxKind {
             SymbolKind::FieldDef | SymbolKind::FieldRef => IdxKind::Field,
             SymbolKind::TagDef | SymbolKind::TagRef => IdxKind::Tag,
             SymbolKind::DataDef | SymbolKind::DataRef => IdxKind::Data,
+            SymbolKind::ElemDef | SymbolKind::ElemRef => IdxKind::Elem,
         }
     }
 }
@@ -1090,6 +1136,7 @@ impl fmt::Display for IdxKind {
             IdxKind::Field => write!(f, "field"),
             IdxKind::Tag => write!(f, "tag"),
             IdxKind::Data => write!(f, "data segment"),
+            IdxKind::Elem => write!(f, "elem segment"),
         }
     }
 }

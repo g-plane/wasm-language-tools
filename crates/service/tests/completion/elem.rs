@@ -242,3 +242,147 @@ fn func_idxes() {
     let response = service.completion(create_params(uri, 2, 18));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn elem_idx() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (elem $e)
+  (elem)
+  (func
+    (elem.drop )))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 5, 15));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn elem_idx_following_int() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (elem $e)
+  (elem)
+  (func
+    (elem.drop 1)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 5, 16));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn elem_idx_following_dollar() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (elem $e)
+  (elem)
+  (func
+    (elem.drop $)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 5, 16));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn elem_idx_following_ident() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (elem $e)
+  (elem)
+  (func
+    (elem.drop $e)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 5, 17));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn table_init() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table $t)
+  (elem $e)
+  (func
+    (table.init )))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 5, 16));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn table_init_after_first_immediate() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table $t)
+  (elem $e)
+  (func
+    (table.init 0 )))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 5, 18));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn array_init_elem() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (elem $e)
+  (elem)
+  (func
+    (array.init_elem 0 )))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 5, 23));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn array_new_elem() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (elem $e)
+  (elem)
+  (func
+    (array.new_elem 0 )))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 5, 22));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn deprecated() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (@deprecated)
+  (elem $e)
+  (func
+    (elem.drop )))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 5, 15));
+    assert_json_snapshot!(response);
+}

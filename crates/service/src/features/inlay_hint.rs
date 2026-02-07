@@ -143,7 +143,8 @@ impl LanguageService {
                     | SymbolKind::MemoryDef
                     | SymbolKind::TableDef
                     | SymbolKind::TagDef
-                    | SymbolKind::DataDef => {
+                    | SymbolKind::DataDef
+                    | SymbolKind::ElemDef => {
                         if options.index
                             && let Idx {
                                 num: Some(num),

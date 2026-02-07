@@ -4,6 +4,7 @@ use wat_service::LanguageService;
 
 mod block;
 mod data;
+mod elem;
 mod field;
 mod func;
 mod global;

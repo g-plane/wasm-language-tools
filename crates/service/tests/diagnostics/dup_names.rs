@@ -185,6 +185,22 @@ fn data() {
 }
 
 #[test]
+fn elem() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (func)
+  (elem $_ 0)
+  (elem $_ 0))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn exports() {
     let uri = "untitled:test".to_string();
     let source = r#"

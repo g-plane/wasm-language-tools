@@ -33,6 +33,7 @@ pub fn check(
                         | SymbolKind::FieldDef
                         | SymbolKind::TagDef
                         | SymbolKind::DataDef
+                        | SymbolKind::ElemDef
                 )
             })
             .fold(BumpHashMap::new_in(bump), |mut map, symbol| {

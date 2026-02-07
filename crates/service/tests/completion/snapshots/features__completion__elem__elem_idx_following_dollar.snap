@@ -1,0 +1,46 @@
+---
+source: crates/service/tests/completion/elem.rs
+expression: response
+---
+[
+  {
+    "label": "$e",
+    "labelDetails": {
+      "detail": "(elem $e)"
+    },
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 15
+        },
+        "end": {
+          "line": 5,
+          "character": 16
+        }
+      },
+      "newText": "$e"
+    }
+  },
+  {
+    "label": "1",
+    "labelDetails": {
+      "detail": "(elem)"
+    },
+    "kind": 6,
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 15
+        },
+        "end": {
+          "line": 5,
+          "character": 16
+        }
+      },
+      "newText": "1"
+    }
+  }
+]

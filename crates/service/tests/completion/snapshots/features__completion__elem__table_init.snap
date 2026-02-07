@@ -1,0 +1,17 @@
+---
+source: crates/service/tests/completion/elem.rs
+expression: response
+---
+[
+  {
+    "label": "$t",
+    "kind": 6
+  },
+  {
+    "label": "$e",
+    "labelDetails": {
+      "detail": "(elem $e)"
+    },
+    "kind": 6
+  }
+]

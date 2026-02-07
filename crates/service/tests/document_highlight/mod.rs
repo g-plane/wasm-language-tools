@@ -517,7 +517,7 @@ fn table_ref_int() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.document_highlight(create_params(uri, 7, 17));
+    let response = service.document_highlight(create_params(uri, 10, 19));
     assert_json_snapshot!(response);
 }
 
@@ -849,6 +849,82 @@ fn data_ref_undefined() {
     data.drop $data))
 (module
   (data $data))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.document_highlight(create_params(uri, 3, 18));
+    assert!(response.unwrap().is_empty());
+}
+
+#[test]
+fn elem() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (elem $elem 0)
+  (func
+    elem.drop $elem
+    table.init $elem
+    array.init_elem 0 $elem
+    array.new_elem 0 $elem))
+(module
+  (elem $elem 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.document_highlight(create_params(uri, 2, 10));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn elem_ref_int() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (elem $elem 0)
+  (func
+    elem.drop 0
+    table.init 0
+    array.init_elem 0 0
+    array.new_elem 0 0))
+(module
+  (elem $elem 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.document_highlight(create_params(uri, 6, 22));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn elem_ref_ident() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (elem $elem 0)
+  (func
+    elem.drop $elem
+    table.init $elem
+    array.init_elem 0 $elem
+    array.new_elem 0 $elem))
+(module
+  (elem $elem 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.document_highlight(create_params(uri, 5, 18));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn elem_ref_undefined() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    elem.drop $elem))
+(module
+  (elem $elem 0))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

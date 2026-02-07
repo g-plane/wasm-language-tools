@@ -396,7 +396,7 @@ fn table_used() {
   (table $table2 (export "table") 0 funcref)
 
   (table $table3 0 funcref)
-  (elem (table 2)
+  (elem $_ (table 2)
     (i32.const 0) funcref))
 "#;
     let mut service = LanguageService::default();
@@ -524,6 +524,36 @@ fn data_used() {
   (data $data)
   (func $_
     data.drop $data))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn elem_unused() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (elem 0)
+  (elem $elem 0)
+  (func))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn elem_used() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (elem $elem 0)
+  (func $_
+    elem.drop $elem))
 "#;
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

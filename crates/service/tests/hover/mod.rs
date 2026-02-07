@@ -1110,3 +1110,59 @@ fn data_ident_idx() {
     let response = service.hover(create_params(uri, 4, 17));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn elem_decl() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (elem $e))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.hover(create_params(uri, 2, 9));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn elem_keyword() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (elem))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.hover(create_params(uri, 2, 5));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn elem_int_idx() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (elem $e)
+  (func
+    elem.drop 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.hover(create_params(uri, 4, 14));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn elem_ident_idx() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (elem $e)
+  (func
+    table.init $e))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.hover(create_params(uri, 4, 16));
+    assert_json_snapshot!(response);
+}

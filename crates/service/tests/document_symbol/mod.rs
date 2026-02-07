@@ -21,6 +21,7 @@ fn symbols() {
     (type (struct (field i32 (ref 0)) (field $field (mut i32))))
     (tag $tag)
     (data $data)
+    (elem $elem)
 )
 "#;
     let mut service = LanguageService::default();
@@ -52,6 +53,8 @@ fn deprecated() {
     (tag)
     (@deprecated)
     (data)
+    (@deprecated)
+    (elem)
 )
 "#;
     let mut service = LanguageService::default();

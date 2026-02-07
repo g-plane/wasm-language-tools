@@ -105,3 +105,39 @@ fn array_new_data() {
     let response = service.completion(create_params(uri, 7, 20));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn array_init_elem() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $a (struct))
+  (type (array))
+  (type $b (array))
+  (data $d)
+  (func
+    (array.init_elem )))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 7, 21));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn array_new_elem() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $a (struct))
+  (type (array))
+  (type $b (array))
+  (data $d)
+  (func
+    (array.new_elem )))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 7, 20));
+    assert_json_snapshot!(response);
+}

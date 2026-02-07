@@ -1,0 +1,77 @@
+---
+source: crates/service/tests/diagnostics/dup_names.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 8
+        },
+        "end": {
+          "line": 3,
+          "character": 10
+        }
+      },
+      "severity": 1,
+      "code": "duplicated-names",
+      "source": "wat",
+      "message": "duplicated elem segment name `$_` in this scope",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 8
+              },
+              "end": {
+                "line": 4,
+                "character": 10
+              }
+            }
+          },
+          "message": "already defined here as `$_`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 8
+        },
+        "end": {
+          "line": 4,
+          "character": 10
+        }
+      },
+      "severity": 1,
+      "code": "duplicated-names",
+      "source": "wat",
+      "message": "duplicated elem segment name `$_` in this scope",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 8
+              },
+              "end": {
+                "line": 3,
+                "character": 10
+              }
+            }
+          },
+          "message": "already defined here as `$_`"
+        }
+      ]
+    }
+  ]
+}

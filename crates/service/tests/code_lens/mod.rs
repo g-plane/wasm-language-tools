@@ -24,7 +24,8 @@ fn list() {
     (call $f))
   (type (struct (field (mut i32))))
   (tag)
-  (data))
+  (data)
+  (elem))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

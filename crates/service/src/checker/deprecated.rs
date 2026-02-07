@@ -36,6 +36,7 @@ pub fn check(
                     | SymbolKind::TableRef
                     | SymbolKind::TagRef
                     | SymbolKind::DataRef
+                    | SymbolKind::ElemRef
             )
         })
         .filter_map(|symbol| {

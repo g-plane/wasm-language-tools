@@ -368,6 +368,47 @@ fn data_undefined() {
 }
 
 #[test]
+fn elem_defined() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table 0 funcref)
+  (elem $elem 0)
+  (func
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    table.init $elem
+    elem.drop $elem))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn elem_undefined() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table 0 funcref)
+  (func
+    i32.const 0
+    i32.const 0
+    i32.const 0
+    table.init $elem
+    elem.drop $elem))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn export() {
     let uri = "untitled:test".to_string();
     let source = "

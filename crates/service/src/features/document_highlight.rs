@@ -54,7 +54,8 @@ impl LanguageService {
                             | SymbolKind::TableDef
                             | SymbolKind::FieldDef
                             | SymbolKind::TagDef
-                            | SymbolKind::DataDef => Some(
+                            | SymbolKind::DataDef
+                            | SymbolKind::ElemDef => Some(
                                 symbol_table
                                     .find_references_on_def(symbol, true)
                                     .filter_map(|symbol| create_symbol_highlight(symbol, &root, line_index))
@@ -68,7 +69,8 @@ impl LanguageService {
                             | SymbolKind::TableRef
                             | SymbolKind::FieldRef
                             | SymbolKind::TagRef
-                            | SymbolKind::DataRef => Some(
+                            | SymbolKind::DataRef
+                            | SymbolKind::ElemRef => Some(
                                 symbol_table
                                     .find_references_on_ref(symbol, true)
                                     .filter_map(|symbol| create_symbol_highlight(symbol, &root, line_index))
@@ -150,10 +152,14 @@ fn get_highlight_kind_of_symbol(symbol: &Symbol, root: &SyntaxNode) -> Option<Do
         | SymbolKind::BlockDef
         | SymbolKind::FieldDef
         | SymbolKind::TagDef
-        | SymbolKind::DataDef => Some(DocumentHighlightKind::Write),
-        SymbolKind::Call | SymbolKind::TypeUse | SymbolKind::MemoryRef | SymbolKind::BlockRef | SymbolKind::DataRef => {
-            Some(DocumentHighlightKind::Read)
-        }
+        | SymbolKind::DataDef
+        | SymbolKind::ElemDef => Some(DocumentHighlightKind::Write),
+        SymbolKind::Call
+        | SymbolKind::TypeUse
+        | SymbolKind::MemoryRef
+        | SymbolKind::BlockRef
+        | SymbolKind::DataRef
+        | SymbolKind::ElemRef => Some(DocumentHighlightKind::Read),
         SymbolKind::LocalRef
         | SymbolKind::GlobalRef
         | SymbolKind::TableRef

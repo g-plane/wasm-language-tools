@@ -20,7 +20,8 @@ pub fn check(db: &dyn salsa::Database, diagnostics: &mut Vec<Diagnostic>, symbol
                 | SymbolKind::BlockDef
                 | SymbolKind::FieldDef
                 | SymbolKind::TagDef
-                | SymbolKind::DataDef => false,
+                | SymbolKind::DataDef
+                | SymbolKind::ElemDef => false,
                 SymbolKind::Call
                 | SymbolKind::LocalRef
                 | SymbolKind::TypeUse
@@ -30,7 +31,8 @@ pub fn check(db: &dyn salsa::Database, diagnostics: &mut Vec<Diagnostic>, symbol
                 | SymbolKind::FieldRef
                 | SymbolKind::BlockRef
                 | SymbolKind::TagRef
-                | SymbolKind::DataRef => !symbol_table.resolved.contains_key(&symbol.key),
+                | SymbolKind::DataRef
+                | SymbolKind::ElemRef => !symbol_table.resolved.contains_key(&symbol.key),
             })
             .map(|symbol| Diagnostic {
                 range: symbol.key.text_range(),
