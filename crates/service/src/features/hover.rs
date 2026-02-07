@@ -4,6 +4,7 @@ use crate::{
     data_set,
     document::Document,
     helpers::{self, LineIndexExt},
+    mutability,
     types_analyzer::{self, CompositeType, DefType, RefType},
 };
 use lspt::{Hover, HoverParams, MarkupContent, MarkupKind, Union3};
@@ -11,7 +12,7 @@ use rowan::ast::{AstNode, support};
 use std::fmt::Write;
 use wat_syntax::{
     SyntaxKind, SyntaxNode,
-    ast::{GlobalType, Limits, MemType, PlainInstr, TableType},
+    ast::{Limits, MemType, PlainInstr, TableType},
 };
 
 impl LanguageService {
@@ -161,10 +162,10 @@ fn create_def_hover(
         SymbolKind::Param | SymbolKind::Local => Some(create_param_or_local_hover(db, symbol)),
         SymbolKind::Func => Some(MarkupContent {
             kind: MarkupKind::Markdown,
-            value: create_func_hover(db, document, symbol.clone(), root),
+            value: create_func_hover(db, document, symbol, root),
         }),
         SymbolKind::Type => Some(create_type_def_hover(db, document, symbol)),
-        SymbolKind::GlobalDef => Some(create_global_def_hover(db, symbol, root)),
+        SymbolKind::GlobalDef => Some(create_global_def_hover(db, document, symbol)),
         SymbolKind::MemoryDef => Some(create_memory_def_hover(db, symbol, root)),
         SymbolKind::TableDef => Some(create_table_def_hover(db, symbol, root)),
         SymbolKind::BlockDef => Some(create_block_hover(db, symbol, document)),
@@ -176,7 +177,7 @@ fn create_def_hover(
     }
 }
 
-fn create_func_hover(db: &dyn salsa::Database, document: Document, symbol: Symbol, root: &SyntaxNode) -> String {
+fn create_func_hover(db: &dyn salsa::Database, document: Document, symbol: &Symbol, root: &SyntaxNode) -> String {
     let node = symbol.key.to_node(root);
     let doc = helpers::syntax::get_doc_comment(&node);
     let mut content = format!(
@@ -220,25 +221,25 @@ fn create_param_or_local_hover(db: &dyn salsa::Database, symbol: &Symbol) -> Mar
     }
 }
 
-fn create_global_def_hover(db: &dyn salsa::Database, symbol: &Symbol, root: &SyntaxNode) -> MarkupContent {
+fn create_global_def_hover(db: &dyn salsa::Database, document: Document, symbol: &Symbol) -> MarkupContent {
     let mut content = "(global".to_string();
     if let Some(name) = symbol.idx.name {
         content.push(' ');
         content.push_str(name.ident(db));
     }
-    let node = symbol.key.to_node(root);
-    if let Some(global_type) = support::child::<GlobalType>(&node) {
-        let mutable = global_type.mut_keyword().is_some();
-        if mutable {
-            content.push_str(" (mut");
-        }
-        if let Some(val_type) = global_type.val_type() {
-            content.push(' ');
-            content.push_str(&val_type.syntax().to_string());
-        }
-        if mutable {
-            content.push(')');
-        }
+    let mutable = mutability::get_mutabilities(db, document)
+        .get(&symbol.key)
+        .and_then(|mutability| mutability.mut_keyword)
+        .is_some();
+    if mutable {
+        content.push_str(" (mut");
+    }
+    if let Some(ty) = types_analyzer::extract_global_type(db, &symbol.green) {
+        content.push(' ');
+        let _ = write!(&mut content, "{}", ty.render(db));
+    }
+    if mutable {
+        content.push(')');
     }
     content.push(')');
     MarkupContent {
