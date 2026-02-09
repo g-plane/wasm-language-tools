@@ -31,7 +31,7 @@ Smart, zero-config tooling for confident WebAssembly development:
 - 💡 **Full Editor Experience**  \
   Code completion, hover, go-to-definition, find references, rename and more work out of the box in VS Code, Zed, Neovim, Emacs, and Helix.
 
-*New to WebAssembly tooling? Start coding with confidence—errors become guidance, not frustration.*
+*New to WebAssembly tooling? Start coding with confidence — errors become guidance, not frustration.*
 
 ## Editor Features
 
@@ -175,7 +175,7 @@ Smart, zero-config tooling for confident WebAssembly development:
 
 ### Try it Online
 
-Open [vscode.dev](https://vscode.dev/), then search and install the `gplane.wasm-language-tools` extension.
+Open [vscode.dev](https://vscode.dev/) or [github.dev](https://github.dev/), then search and install the `gplane.wasm-language-tools` extension.
 After installed, open or create a ".wat" file to try it out.
 
 ### Editor Support
