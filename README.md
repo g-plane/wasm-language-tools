@@ -2,7 +2,7 @@
 <h1 align="center">WebAssembly Language Tools</h1>
 
 WebAssembly Language Tools aims to provide and improve the editing experience of WebAssembly Text Format.
-It also provides an out-of-the-box formatter (a.k.a. pretty printer) for WebAssembly Text Format.
+It delivers deep and smart static analysis, precise type checking, and full-featured editor integration — plus a configurable formatter — making WebAssembly development fast, safe, and joyful.
 
 <picture>
   <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/475a0cbb-adaf-47f1-9277-1080c1e9a92e">
@@ -10,10 +10,30 @@ It also provides an out-of-the-box formatter (a.k.a. pretty printer) for WebAsse
   <img src="https://github.com/user-attachments/assets/475a0cbb-adaf-47f1-9277-1080c1e9a92e" />
 </picture>
 
-[Wasm 3.0](https://webassembly.org/news/2025-09-17-wasm-3.0/) is supported.
-Visit [WebAssembly Features Status](https://webassembly.org/features/?categories=tools) page for details about the supported features.
+## Why WebAssembly Language Tools?
 
-## 📌 Features
+Smart, zero-config tooling for confident WebAssembly development:
+
+- 🌐 **WebAssembly 3.0 Ready**  \
+  Full core spec support (GC, exceptions, etc.) and ongoing Phase 4 & 3 proposals — code with tomorrow's standards today.
+- 🔍 **Deep Semantic Checks**  \
+  Powered by Control Flow Analysis (CFA) for precise unreachable code detection, along with checks for uninitialized locals, written-but-never-read locals, and undefined and unused items.
+- ⚖️ **Precise Type Safety**  \
+  Comprehensive type checking with friendly error messages and subtyping relationship validation.
+- 🔒 **Mutability Guard**  \
+  Catches accidental mutations of immutables and redundant mutable declarations.
+- 🎨 **Highly Configurable Formatter**  \
+  Works out of the box while offering more than 10 formatting options for flexible and personalized code style.
+- 🔧 **Smart Code Actions**  \
+  Provides around 20 practical code actions to assist with quick fixes, refactoring, and code improvements.
+- ⚡ **Near-instant Feedback**  \
+  Deeply tuned and heavily optimized — silky smooth even on huge modules.
+- 💡 **Full Editor Experience**  \
+  Code completion, hover, go-to-definition, find references, rename and more work out of the box in VS Code, Zed, Neovim, Emacs, and Helix.
+
+*New to WebAssembly tooling? Start coding with confidence—errors become guidance, not frustration.*
+
+## Editor Features
 
 <details>
   <summary>Code Completion</summary>
@@ -151,7 +171,7 @@ Visit [WebAssembly Features Status](https://webassembly.org/features/?categories
   </picture>
 </details>
 
-## 🍵 Usage
+## Usage
 
 ### Try it Online
 
@@ -174,11 +194,11 @@ We've provided pre-built binaries on [GitHub Releases](https://github.com/g-plan
 You can download it according to your platform, then extract it from the compressed file.
 Or, read the [documentation](https://wasm-language-tools.netlify.app/guide/getting-started/executable.html) for alternative installation methods.
 
-## 📚 Documentation
+## Documentation
 
 Please visit the [documentation website](https://wasm-language-tools.netlify.app/) for configuration and diagnostics explanation.
 
-## 📜 License
+## License
 
 MIT License
 
