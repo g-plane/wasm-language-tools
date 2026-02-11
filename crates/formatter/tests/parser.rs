@@ -1,8 +1,10 @@
 use insta::{Settings, assert_snapshot, glob};
-use rowan::ast::AstNode;
 use std::{fs, path::Path};
 use wat_formatter::{config::FormatOptions, format};
-use wat_syntax::{SyntaxNode, ast::Root};
+use wat_syntax::{
+    SyntaxNode,
+    ast::{AstNode, Root},
+};
 
 #[test]
 fn parser_fixture_snapshot() {

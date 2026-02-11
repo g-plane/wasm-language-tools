@@ -1,8 +1,7 @@
 use super::{GreenElement, is_id_char};
 use crate::error::{Message, SyntaxError};
-use rowan::{GreenToken, TextRange, TextSize};
 use std::mem;
-use wat_syntax::SyntaxKind;
+use wat_syntax::{GreenToken, SyntaxKind, TextRange, TextSize};
 
 #[derive(Clone, Debug)]
 pub(super) struct Token<'s> {
@@ -11,7 +10,7 @@ pub(super) struct Token<'s> {
 }
 impl From<Token<'_>> for GreenElement {
     fn from(token: Token<'_>) -> Self {
-        GreenElement::Token(GreenToken::new(token.kind.into(), token.text))
+        GreenElement::Token(GreenToken::new(token.kind, token.text))
     }
 }
 

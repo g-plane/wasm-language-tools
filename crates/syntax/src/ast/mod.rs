@@ -1,12 +1,70 @@
 //! Abstract Syntax Tree, layered on top of untyped `SyntaxNode`s.
 
+use self::support::children;
 pub use self::{instr::*, module::*, ty::*};
-use super::{SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage};
-use rowan::ast::{AstChildren, AstNode, support::children};
+use crate::{SyntaxKind, SyntaxNode, SyntaxNodeChildren};
+use std::{iter, marker::PhantomData};
 
 mod instr;
 mod module;
 mod ty;
+
+pub trait AstNode {
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized;
+
+    fn cast(node: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized;
+
+    fn syntax(&self) -> &SyntaxNode;
+}
+
+pub mod support {
+    use super::{AstChildren, AstNode};
+    use crate::{SyntaxKind, SyntaxNode, SyntaxToken, green::GreenChild};
+
+    pub fn child<N: AstNode>(parent: &SyntaxNode) -> Option<N> {
+        parent.first_child_by_kind(N::can_cast).and_then(N::cast)
+    }
+    pub fn children<N: AstNode>(parent: &SyntaxNode) -> AstChildren<N> {
+        AstChildren::new(parent)
+    }
+    pub fn token(parent: &SyntaxNode, kind: SyntaxKind) -> Option<SyntaxToken> {
+        parent
+            .green()
+            .slice()
+            .iter()
+            .enumerate()
+            .find_map(|(i, child)| match child {
+                GreenChild::Token { offset, token } if token.kind() == kind => {
+                    Some(parent.new_token(i as u32, token, *offset))
+                }
+                _ => None,
+            })
+    }
+}
+
+pub struct AstChildren<N: AstNode> {
+    inner: SyntaxNodeChildren,
+    _marker: PhantomData<N>,
+}
+impl<N: AstNode> AstChildren<N> {
+    pub(crate) fn new(parent: &SyntaxNode) -> Self {
+        Self {
+            inner: parent.children(),
+            _marker: PhantomData,
+        }
+    }
+}
+impl<N: AstNode> Iterator for AstChildren<N> {
+    type Item = N;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.find_map(N::cast)
+    }
+}
+impl<N: AstNode> iter::FusedIterator for AstChildren<N> {}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Root {
@@ -19,7 +77,6 @@ impl Root {
     }
 }
 impl AstNode for Root {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where

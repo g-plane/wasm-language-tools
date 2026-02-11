@@ -1,7 +1,6 @@
 use super::{GreenElement, Parser, builder::NodeMark, green, node};
 use crate::error::Message;
-use rowan::GreenNode;
-use wat_syntax::SyntaxKind::*;
+use wat_syntax::{GreenNode, SyntaxKind::*};
 
 impl Parser<'_> {
     fn parse_data(&mut self) -> Option<GreenNode> {

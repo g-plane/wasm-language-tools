@@ -1,7 +1,9 @@
-use rowan::ast::AstNode;
 use std::{env, error::Error, fs, io};
 use wat_formatter::{config::FormatOptions, format};
-use wat_syntax::{SyntaxNode, ast::Root};
+use wat_syntax::{
+    SyntaxNode,
+    ast::{AstNode, Root},
+};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let file_path = env::args().nth(1).unwrap();

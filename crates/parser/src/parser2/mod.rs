@@ -1,7 +1,6 @@
 use self::lexer::Lexer;
 use crate::error::SyntaxError;
-use rowan::{GreenNode, GreenToken, NodeOrToken};
-use wat_syntax::SyntaxKind;
+use wat_syntax::{GreenNode, GreenToken, NodeOrToken, SyntaxKind};
 
 mod builder;
 mod green;
@@ -64,10 +63,9 @@ where
     I: IntoIterator<Item = GreenElement>,
     I::IntoIter: ExactSizeIterator,
 {
-    GreenNode::new(kind.into(), children)
+    GreenNode::new(kind, children)
 }
 
-#[derive(Debug)]
 struct Parser<'s> {
     source: &'s str,
     lexer: Lexer<'s>,

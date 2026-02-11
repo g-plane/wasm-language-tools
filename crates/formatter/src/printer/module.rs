@@ -1,6 +1,6 @@
 use super::*;
-use rowan::ast::{AstChildren, AstNode};
 use tiny_pretty::Doc;
+use wat_syntax::ast::{AstChildren, AstNode};
 
 impl DocGen for Data {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
@@ -1193,7 +1193,7 @@ impl DocGen for TypeUse {
 
 fn format_extern_idx<N>(node: &N, ctx: &Ctx) -> Doc<'static>
 where
-    N: AstNode<Language = WatLanguage>,
+    N: AstNode,
 {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];

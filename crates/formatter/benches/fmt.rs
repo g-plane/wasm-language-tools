@@ -1,6 +1,8 @@
 use criterion::{Criterion, criterion_group, criterion_main};
-use rowan::ast::AstNode;
-use wat_syntax::{SyntaxNode, ast::Root};
+use wat_syntax::{
+    SyntaxNode,
+    ast::{AstNode, Root},
+};
 
 static CODE: &str = r#"(module
     (func $f1 (param $p1 i32) (param $p2 i32) (result i32)

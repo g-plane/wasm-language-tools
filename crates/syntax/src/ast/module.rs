@@ -1,15 +1,10 @@
 use super::{
-    SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage,
+    AstChildren, AstNode,
     instr::Instr,
+    support::*,
     ty::{ExternType, GlobalType, MemType, Param, RefType, Result, SubType, TableType, ValType},
 };
-use rowan::{
-    NodeOrToken,
-    ast::{
-        AstChildren, AstNode,
-        support::{child, children, token},
-    },
-};
+use crate::{NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Data {
@@ -37,7 +32,6 @@ impl Data {
     }
 }
 impl AstNode for Data {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -89,7 +83,6 @@ impl Elem {
     }
 }
 impl AstNode for Elem {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -137,7 +130,6 @@ impl ElemExpr {
     }
 }
 impl AstNode for ElemExpr {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -185,7 +177,6 @@ impl ElemList {
     }
 }
 impl AstNode for ElemList {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -233,7 +224,6 @@ impl Export {
     }
 }
 impl AstNode for Export {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -267,7 +257,6 @@ pub enum ExternIdx {
     Tag(ExternIdxTag),
 }
 impl AstNode for ExternIdx {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -331,7 +320,6 @@ impl ExternIdxFunc {
     }
 }
 impl AstNode for ExternIdxFunc {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -379,7 +367,6 @@ impl ExternIdxGlobal {
     }
 }
 impl AstNode for ExternIdxGlobal {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -427,7 +414,6 @@ impl ExternIdxMemory {
     }
 }
 impl AstNode for ExternIdxMemory {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -475,7 +461,6 @@ impl ExternIdxTable {
     }
 }
 impl AstNode for ExternIdxTable {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -523,7 +508,6 @@ impl ExternIdxTag {
     }
 }
 impl AstNode for ExternIdxTag {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -575,7 +559,6 @@ impl Import {
     }
 }
 impl AstNode for Import {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -615,7 +598,6 @@ impl Index {
     }
 }
 impl AstNode for Index {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -667,7 +649,6 @@ impl Local {
     }
 }
 impl AstNode for Local {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -715,7 +696,6 @@ impl MemUse {
     }
 }
 impl AstNode for MemUse {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -767,7 +747,6 @@ impl Module {
     }
 }
 impl AstNode for Module {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -808,7 +787,6 @@ pub enum ModuleField {
     RecType(RecType),
 }
 impl AstNode for ModuleField {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -908,7 +886,6 @@ impl ModuleFieldData {
     }
 }
 impl AstNode for ModuleFieldData {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -975,7 +952,6 @@ impl ModuleFieldElem {
     }
 }
 impl AstNode for ModuleFieldElem {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1027,7 +1003,6 @@ impl ModuleFieldExport {
     }
 }
 impl AstNode for ModuleFieldExport {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1095,7 +1070,6 @@ impl ModuleFieldFunc {
     }
 }
 impl AstNode for ModuleFieldFunc {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1159,7 +1133,6 @@ impl ModuleFieldGlobal {
     }
 }
 impl AstNode for ModuleFieldGlobal {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1215,7 +1188,6 @@ impl ModuleFieldImport {
     }
 }
 impl AstNode for ModuleFieldImport {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1279,7 +1251,6 @@ impl ModuleFieldMemory {
     }
 }
 impl AstNode for ModuleFieldMemory {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1327,7 +1298,6 @@ impl ModuleFieldStart {
     }
 }
 impl AstNode for ModuleFieldStart {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1399,7 +1369,6 @@ impl ModuleFieldTable {
     }
 }
 impl AstNode for ModuleFieldTable {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1459,7 +1428,6 @@ impl ModuleFieldTag {
     }
 }
 impl AstNode for ModuleFieldTag {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1495,7 +1463,6 @@ impl ModuleName {
     }
 }
 impl AstNode for ModuleName {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1531,7 +1498,6 @@ impl Name {
     }
 }
 impl AstNode for Name {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1579,7 +1545,6 @@ impl Offset {
     }
 }
 impl AstNode for Offset {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1627,7 +1592,6 @@ impl RecType {
     }
 }
 impl AstNode for RecType {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1675,7 +1639,6 @@ impl TableUse {
     }
 }
 impl AstNode for TableUse {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1727,7 +1690,6 @@ impl TypeDef {
     }
 }
 impl AstNode for TypeDef {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1783,7 +1745,6 @@ impl TypeUse {
     }
 }
 impl AstNode for TypeUse {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where

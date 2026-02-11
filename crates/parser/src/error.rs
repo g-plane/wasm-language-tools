@@ -1,5 +1,5 @@
-use rowan::TextRange;
 use std::fmt;
+use wat_syntax::TextRange;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 /// The syntax error comes with location and message.

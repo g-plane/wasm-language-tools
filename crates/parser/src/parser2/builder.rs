@@ -1,6 +1,5 @@
 use super::{GreenElement, Parser, lexer};
-use rowan::GreenNode;
-use wat_syntax::SyntaxKind;
+use wat_syntax::{GreenNode, SyntaxKind};
 
 impl<'s> Parser<'s> {
     pub(super) fn start_node(&self) -> NodeMark {
@@ -8,7 +7,7 @@ impl<'s> Parser<'s> {
     }
 
     pub(super) fn finish_node(&mut self, kind: SyntaxKind, mark: NodeMark) -> GreenNode {
-        GreenNode::new(kind.into(), self.elements.drain(mark.0..))
+        GreenNode::new(kind, self.elements.drain(mark.0..))
     }
 
     pub(super) fn add_child<T>(&mut self, node_or_token: T)

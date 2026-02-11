@@ -1,8 +1,10 @@
 use insta::{Settings, assert_snapshot, glob};
-use rowan::ast::AstNode;
 use std::{collections::HashMap, fs, path::Path};
 use wat_formatter::{config::FormatOptions, format};
-use wat_syntax::{SyntaxNode, ast::Root};
+use wat_syntax::{
+    SyntaxNode,
+    ast::{AstNode, Root},
+};
 
 #[test]
 fn fmt_snapshot() {

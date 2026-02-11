@@ -5,9 +5,11 @@ use self::{
     printer::{Ctx, DocGen, format_node},
 };
 use line_index::LineIndex;
-use rowan::{TextRange, ast::AstNode};
 use tiny_pretty::{IndentKind, PrintOptions};
-use wat_syntax::{SyntaxElement, ast::Root};
+use wat_syntax::{
+    SyntaxElement, TextRange,
+    ast::{AstNode, Root},
+};
 
 pub mod config;
 mod printer;

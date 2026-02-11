@@ -36,7 +36,7 @@ ROOT@0..3370
     ANNOT_START@87..92 "(@\"a\""
     ANNOT_END@92..93 ")"
     WHITESPACE@93..96 "\n  "
-    ANNOT_START@96..131 "(@\" @ asd\\2a 045 \\\" f ..."
+    ANNOT_START@96..131 "(@\" @ asd\\2a 045 \\\" fdaf \\t \\u{45}\""
     ANNOT_END@131..132 ")"
     WHITESPACE@132..136 "\n\n  "
     ANNOT_START@136..139 "(@a"

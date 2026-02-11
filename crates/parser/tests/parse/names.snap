@@ -6,7 +6,7 @@ ROOT@0..26351
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
-    LINE_COMMENT@10..63 ";; Test that we can u ..."
+    LINE_COMMENT@10..63 ";; Test that we can use the empty string as a symbol."
     WHITESPACE@63..66 "\n  "
     MODULE_FIELD_FUNC@66..111
       L_PAREN@66..67 "("
@@ -38,7 +38,7 @@ ROOT@0..26351
         R_PAREN@109..110 ")"
       R_PAREN@110..111 ")"
     WHITESPACE@111..115 "\n\n  "
-    LINE_COMMENT@115..168 ";; Test that we can u ..."
+    LINE_COMMENT@115..168 ";; Test that we can use names beginning with a digit."
     WHITESPACE@168..171 "\n  "
     MODULE_FIELD_FUNC@171..217
       L_PAREN@171..172 "("
@@ -70,7 +70,7 @@ ROOT@0..26351
         R_PAREN@215..216 ")"
       R_PAREN@216..217 ")"
     WHITESPACE@217..221 "\n\n  "
-    LINE_COMMENT@221..273 ";; Test that we can u ..."
+    LINE_COMMENT@221..273 ";; Test that we can use names beginning with a dash."
     WHITESPACE@273..276 "\n  "
     MODULE_FIELD_FUNC@276..323
       L_PAREN@276..277 "("
@@ -102,7 +102,7 @@ ROOT@0..26351
         R_PAREN@321..322 ")"
       R_PAREN@322..323 ")"
     WHITESPACE@323..327 "\n\n  "
-    LINE_COMMENT@327..386 ";; Test that we can u ..."
+    LINE_COMMENT@327..386 ";; Test that we can use names beginning with an underscore."
     WHITESPACE@386..389 "\n  "
     MODULE_FIELD_FUNC@389..435
       L_PAREN@389..390 "("
@@ -134,7 +134,7 @@ ROOT@0..26351
         R_PAREN@433..434 ")"
       R_PAREN@434..435 ")"
     WHITESPACE@435..439 "\n\n  "
-    LINE_COMMENT@439..498 ";; Test that we can u ..."
+    LINE_COMMENT@439..498 ";; Test that we can use names beginning with a dollar sign."
     WHITESPACE@498..501 "\n  "
     MODULE_FIELD_FUNC@501..547
       L_PAREN@501..502 "("
@@ -166,7 +166,7 @@ ROOT@0..26351
         R_PAREN@545..546 ")"
       R_PAREN@546..547 ")"
     WHITESPACE@547..551 "\n\n  "
-    LINE_COMMENT@551..607 ";; Test that we can u ..."
+    LINE_COMMENT@551..607 ";; Test that we can use names beginning with an at sign."
     WHITESPACE@607..610 "\n  "
     MODULE_FIELD_FUNC@610..656
       L_PAREN@610..611 "("
@@ -198,7 +198,7 @@ ROOT@0..26351
         R_PAREN@654..655 ")"
       R_PAREN@655..656 ")"
     WHITESPACE@656..660 "\n\n  "
-    LINE_COMMENT@660..707 ";; Test that we can u ..."
+    LINE_COMMENT@660..707 ";; Test that we can use non-alphanumeric names."
     WHITESPACE@707..710 "\n  "
     MODULE_FIELD_FUNC@710..790
       L_PAREN@710..711 "("
@@ -209,7 +209,7 @@ ROOT@0..26351
         KEYWORD@717..723 "export"
         WHITESPACE@723..724 " "
         NAME@724..761
-          STRING@724..761 "\"~!@#$%^&*()_+`-={}|[ ..."
+          STRING@724..761 "\"~!@#$%^&*()_+`-={}|[]\\\\:\\\";'<>?,./ \""
         R_PAREN@761..762 ")"
       WHITESPACE@762..763 " "
       TYPE_USE@763..775
@@ -230,7 +230,7 @@ ROOT@0..26351
         R_PAREN@788..789 ")"
       R_PAREN@789..790 ")"
     WHITESPACE@790..794 "\n\n  "
-    LINE_COMMENT@794..856 ";; Test that we can u ..."
+    LINE_COMMENT@794..856 ";; Test that we can use names that have special meaning in JS."
     WHITESPACE@856..859 "\n  "
     MODULE_FIELD_FUNC@859..907
       L_PAREN@859..860 "("
@@ -322,7 +322,7 @@ ROOT@0..26351
         R_PAREN@1011..1012 ")"
       R_PAREN@1012..1013 ")"
     WHITESPACE@1013..1017 "\n\n  "
-    LINE_COMMENT@1017..1076 ";; Test that we can u ..."
+    LINE_COMMENT@1017..1076 ";; Test that we can use common libc names without conflict."
     WHITESPACE@1076..1079 "\n  "
     MODULE_FIELD_FUNC@1079..1131
       L_PAREN@1079..1080 "("
@@ -354,7 +354,7 @@ ROOT@0..26351
         R_PAREN@1129..1130 ")"
       R_PAREN@1130..1131 ")"
     WHITESPACE@1131..1135 "\n\n  "
-    LINE_COMMENT@1135..1199 ";; Test that we can u ..."
+    LINE_COMMENT@1135..1199 ";; Test that we can use some libc hidden names without conflict."
     WHITESPACE@1199..1202 "\n  "
     MODULE_FIELD_FUNC@1202..1255
       L_PAREN@1202..1203 "("
@@ -416,7 +416,7 @@ ROOT@0..26351
         R_PAREN@1310..1311 ")"
       R_PAREN@1311..1312 ")"
     WHITESPACE@1312..1316 "\n\n  "
-    LINE_COMMENT@1316..1354 ";; Test that names ar ..."
+    LINE_COMMENT@1316..1354 ";; Test that names are case-sensitive."
     WHITESPACE@1354..1357 "\n  "
     MODULE_FIELD_FUNC@1357..1404
       L_PAREN@1357..1358 "("
@@ -478,7 +478,7 @@ ROOT@0..26351
         R_PAREN@1452..1453 ")"
       R_PAREN@1453..1454 ")"
     WHITESPACE@1454..1458 "\n\n  "
-    LINE_COMMENT@1458..1519 ";; Test that UTF-8 BO ..."
+    LINE_COMMENT@1458..1519 ";; Test that UTF-8 BOM code points can appear in identifiers."
     WHITESPACE@1519..1522 "\n  "
     MODULE_FIELD_FUNC@1522..1571
       L_PAREN@1522..1523 "("
@@ -510,9 +510,9 @@ ROOT@0..26351
         R_PAREN@1569..1570 ")"
       R_PAREN@1570..1571 ")"
     WHITESPACE@1571..1575 "\n\n  "
-    LINE_COMMENT@1575..1646 ";; Test that Unicode  ..."
+    LINE_COMMENT@1575..1646 ";; Test that Unicode normalization is not applied. These function names"
     WHITESPACE@1646..1649 "\n  "
-    LINE_COMMENT@1649..1720 ";; contain different  ..."
+    LINE_COMMENT@1649..1720 ";; contain different codepoints which normalize to the same thing under"
     WHITESPACE@1720..1723 "\n  "
     LINE_COMMENT@1723..1737 ";; NFC or NFD."
     WHITESPACE@1737..1740 "\n  "
@@ -606,11 +606,11 @@ ROOT@0..26351
         R_PAREN@1890..1891 ")"
       R_PAREN@1891..1892 ")"
     WHITESPACE@1892..1896 "\n\n  "
-    LINE_COMMENT@1896..1966 ";; Test that Unicode  ..."
+    LINE_COMMENT@1896..1966 ";; Test that Unicode compatibility normalization is not applied. These"
     WHITESPACE@1966..1969 "\n  "
-    LINE_COMMENT@1969..2038 ";; function names con ..."
+    LINE_COMMENT@1969..2038 ";; function names contain different codepoints which normalize to the"
     WHITESPACE@2038..2041 "\n  "
-    LINE_COMMENT@2041..2074 ";; same thing under N ..."
+    LINE_COMMENT@2041..2074 ";; same thing under NFKC or NFKD."
     WHITESPACE@2074..2077 "\n  "
     MODULE_FIELD_FUNC@2077..2126
       L_PAREN@2077..2078 "("
@@ -702,7 +702,7 @@ ROOT@0..26351
         R_PAREN@2229..2230 ")"
       R_PAREN@2230..2231 ")"
     WHITESPACE@2231..2235 "\n\n  "
-    LINE_COMMENT@2235..2264 ";; Test the C0 contro ..."
+    LINE_COMMENT@2235..2264 ";; Test the C0 control codes."
     WHITESPACE@2264..2267 "\n  "
     MODULE_FIELD_FUNC@2267..2361
       L_PAREN@2267..2268 "("
@@ -713,7 +713,7 @@ ROOT@0..26351
         KEYWORD@2274..2280 "export"
         WHITESPACE@2280..2281 " "
         NAME@2281..2331
-          STRING@2281..2331 "\"\\00\\01\\02\\03\\04\\05\\0 ..."
+          STRING@2281..2331 "\"\\00\\01\\02\\03\\04\\05\\06\\07\\08\\09\\0a\\0b\\0c\\0d\\0e\\0f\""
         R_PAREN@2331..2332 ")"
       WHITESPACE@2332..2333 " "
       TYPE_USE@2333..2345
@@ -743,7 +743,7 @@ ROOT@0..26351
         KEYWORD@2371..2377 "export"
         WHITESPACE@2377..2378 " "
         NAME@2378..2428
-          STRING@2378..2428 "\"\\10\\11\\12\\13\\14\\15\\1 ..."
+          STRING@2378..2428 "\"\\10\\11\\12\\13\\14\\15\\16\\17\\18\\19\\1a\\1b\\1c\\1d\\1e\\1f\""
         R_PAREN@2428..2429 ")"
       WHITESPACE@2429..2430 " "
       TYPE_USE@2430..2442
@@ -764,7 +764,7 @@ ROOT@0..26351
         R_PAREN@2456..2457 ")"
       R_PAREN@2457..2458 ")"
     WHITESPACE@2458..2461 "\n  "
-    LINE_COMMENT@2461..2497 ";; Test miscellaneous ..."
+    LINE_COMMENT@2461..2497 ";; Test miscellaneous control codes."
     WHITESPACE@2497..2500 "\n  "
     MODULE_FIELD_FUNC@2500..2550
       L_PAREN@2500..2501 "("
@@ -796,7 +796,7 @@ ROOT@0..26351
         R_PAREN@2548..2549 ")"
       R_PAREN@2549..2550 ")"
     WHITESPACE@2550..2553 "\n  "
-    LINE_COMMENT@2553..2582 ";; Test the C1 contro ..."
+    LINE_COMMENT@2553..2582 ";; Test the C1 control codes."
     WHITESPACE@2582..2585 "\n  "
     MODULE_FIELD_FUNC@2585..2727
       L_PAREN@2585..2586 "("
@@ -807,7 +807,7 @@ ROOT@0..26351
         KEYWORD@2592..2598 "export"
         WHITESPACE@2598..2599 " "
         NAME@2599..2697
-          STRING@2599..2697 "\"\\c2\\80\\c2\\81\\c2\\82\\c ..."
+          STRING@2599..2697 "\"\\c2\\80\\c2\\81\\c2\\82\\c2\\83\\c2\\84\\c2\\85\\c2\\86\\c2\\87\\c2\\88\\c2\\89\\c2\\8a\\c2\\8b\\c2\\8c\\c2\\8d\\c2\\8e\\c2\\8f\""
         R_PAREN@2697..2698 ")"
       WHITESPACE@2698..2699 " "
       TYPE_USE@2699..2711
@@ -837,7 +837,7 @@ ROOT@0..26351
         KEYWORD@2737..2743 "export"
         WHITESPACE@2743..2744 " "
         NAME@2744..2842
-          STRING@2744..2842 "\"\\c2\\90\\c2\\91\\c2\\92\\c ..."
+          STRING@2744..2842 "\"\\c2\\90\\c2\\91\\c2\\92\\c2\\93\\c2\\94\\c2\\95\\c2\\96\\c2\\97\\c2\\98\\c2\\99\\c2\\9a\\c2\\9b\\c2\\9c\\c2\\9d\\c2\\9e\\c2\\9f\""
         R_PAREN@2842..2843 ")"
       WHITESPACE@2843..2844 " "
       TYPE_USE@2844..2856
@@ -858,7 +858,7 @@ ROOT@0..26351
         R_PAREN@2870..2871 ")"
       R_PAREN@2871..2872 ")"
     WHITESPACE@2872..2875 "\n  "
-    LINE_COMMENT@2875..2904 ";; Test the Unicode S ..."
+    LINE_COMMENT@2875..2904 ";; Test the Unicode Specials."
     WHITESPACE@2904..2907 "\n  "
     MODULE_FIELD_FUNC@2907..3025
       L_PAREN@2907..2908 "("
@@ -869,7 +869,7 @@ ROOT@0..26351
         KEYWORD@2914..2920 "export"
         WHITESPACE@2920..2921 " "
         NAME@2921..2995
-          STRING@2921..2995 "\"\\ef\\bf\\b0\\ef\\bf\\b1\\e ..."
+          STRING@2921..2995 "\"\\ef\\bf\\b0\\ef\\bf\\b1\\ef\\bf\\b2\\ef\\bf\\b3\\ef\\bf\\b4\\ef\\bf\\b5\\ef\\bf\\b6\\ef\\bf\\b7\""
         R_PAREN@2995..2996 ")"
       WHITESPACE@2996..2997 " "
       TYPE_USE@2997..3009
@@ -899,7 +899,7 @@ ROOT@0..26351
         KEYWORD@3035..3041 "export"
         WHITESPACE@3041..3042 " "
         NAME@3042..3116
-          STRING@3042..3116 "\"\\ef\\bf\\b8\\ef\\bf\\b9\\e ..."
+          STRING@3042..3116 "\"\\ef\\bf\\b8\\ef\\bf\\b9\\ef\\bf\\ba\\ef\\bf\\bb\\ef\\bf\\bc\\ef\\bf\\bd\\ef\\bf\\be\\ef\\bf\\bf\""
         R_PAREN@3116..3117 ")"
       WHITESPACE@3117..3118 " "
       TYPE_USE@3118..3130
@@ -920,9 +920,9 @@ ROOT@0..26351
         R_PAREN@3144..3145 ")"
       R_PAREN@3145..3146 ")"
     WHITESPACE@3146..3150 "\n\n  "
-    LINE_COMMENT@3150..3224 ";; Test that the cont ..."
+    LINE_COMMENT@3150..3224 ";; Test that the control pictures are distinct from the control codes they"
     WHITESPACE@3224..3227 "\n  "
-    LINE_COMMENT@3227..3301 ";; depict. These corr ..."
+    LINE_COMMENT@3227..3301 ";; depict. These correspond to the C0 and miscellaneous control code tests"
     WHITESPACE@3301..3304 "\n  "
     LINE_COMMENT@3304..3313 ";; above."
     WHITESPACE@3313..3316 "\n  "
@@ -935,7 +935,7 @@ ROOT@0..26351
         KEYWORD@3323..3329 "export"
         WHITESPACE@3329..3330 " "
         NAME@3330..3380
-          STRING@3330..3380 "\"␀␁␂␃␄␅␆ ..."
+          STRING@3330..3380 "\"␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏\""
         R_PAREN@3380..3381 ")"
       WHITESPACE@3381..3382 " "
       TYPE_USE@3382..3394
@@ -965,7 +965,7 @@ ROOT@0..26351
         KEYWORD@3420..3426 "export"
         WHITESPACE@3426..3427 " "
         NAME@3427..3477
-          STRING@3427..3477 "\"␐␑␒␓␔␕␖ ..."
+          STRING@3427..3477 "\"␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟\""
         R_PAREN@3477..3478 ")"
       WHITESPACE@3478..3479 " "
       TYPE_USE@3479..3491
@@ -1016,9 +1016,9 @@ ROOT@0..26351
         R_PAREN@3560..3561 ")"
       R_PAREN@3561..3562 ")"
     WHITESPACE@3562..3566 "\n\n  "
-    LINE_COMMENT@3566..3636 ";; Test the Unicode S ..."
+    LINE_COMMENT@3566..3636 ";; Test the Unicode Specials in non-escaped form (excluding U+FFFE and"
     WHITESPACE@3636..3639 "\n  "
-    LINE_COMMENT@3639..3709 ";; U+FFFF, so that ge ..."
+    LINE_COMMENT@3639..3709 ";; U+FFFF, so that generic tools don't detect this file as non-UTF-8)."
     WHITESPACE@3709..3712 "\n  "
     MODULE_FIELD_FUNC@3712..3800
       L_PAREN@3712..3713 "("
@@ -1029,7 +1029,7 @@ ROOT@0..26351
         KEYWORD@3719..3725 "export"
         WHITESPACE@3725..3726 " "
         NAME@3726..3770
-          STRING@3726..3770 "\"\u{fff0}\u{fff1}\u{fff2}\u{fff3}\u{fff4}\u{fff5}\u{fff6} ..."
+          STRING@3726..3770 "\"\u{fff0}\u{fff1}\u{fff2}\u{fff3}\u{fff4}\u{fff5}\u{fff6}\u{fff7}\u{fff8}\u{fff9}\u{fffa}\u{fffb}￼�\""
         R_PAREN@3770..3771 ")"
       WHITESPACE@3771..3772 " "
       TYPE_USE@3772..3784
@@ -1050,7 +1050,7 @@ ROOT@0..26351
         R_PAREN@3798..3799 ")"
       R_PAREN@3799..3800 ")"
     WHITESPACE@3800..3804 "\n\n  "
-    LINE_COMMENT@3804..3834 ";; Test a bare ZWJ co ..."
+    LINE_COMMENT@3804..3834 ";; Test a bare ZWJ code point."
     WHITESPACE@3834..3837 "\n  "
     MODULE_FIELD_FUNC@3837..3886
       L_PAREN@3837..3838 "("
@@ -1082,7 +1082,7 @@ ROOT@0..26351
         R_PAREN@3884..3885 ")"
       R_PAREN@3885..3886 ")"
     WHITESPACE@3886..3889 "\n  "
-    LINE_COMMENT@3889..3920 ";; Test a bare ZWNJ c ..."
+    LINE_COMMENT@3889..3920 ";; Test a bare ZWNJ code point."
     WHITESPACE@3920..3923 "\n  "
     MODULE_FIELD_FUNC@3923..3972
       L_PAREN@3923..3924 "("
@@ -1114,7 +1114,7 @@ ROOT@0..26351
         R_PAREN@3970..3971 ")"
       R_PAREN@3971..3972 ")"
     WHITESPACE@3972..3976 "\n\n  "
-    LINE_COMMENT@3976..4016 ";; Test various bare  ..."
+    LINE_COMMENT@3976..4016 ";; Test various bare joiner code points."
     WHITESPACE@4016..4019 "\n  "
     MODULE_FIELD_FUNC@4019..4067
       L_PAREN@4019..4020 "("
@@ -1266,11 +1266,11 @@ ROOT@0..26351
         R_PAREN@4274..4275 ")"
       R_PAREN@4275..4276 ")"
     WHITESPACE@4276..4280 "\n\n  "
-    LINE_COMMENT@4280..4351 ";; Test various inter ..."
+    LINE_COMMENT@4280..4351 ";; Test various interesting code points: reverse BOM, zero-width space,"
     WHITESPACE@4351..4354 "\n  "
-    LINE_COMMENT@4354..4416 ";; no-break space, so ..."
+    LINE_COMMENT@4354..4416 ";; no-break space, soft hyphen, word joiner, ogham space mark,"
     WHITESPACE@4416..4419 "\n  "
-    LINE_COMMENT@4419..4469 ";; right-to-left over ..."
+    LINE_COMMENT@4419..4469 ";; right-to-left override, left-to-right override."
     WHITESPACE@4469..4472 "\n  "
     MODULE_FIELD_FUNC@4472..4540
       L_PAREN@4472..4473 "("
@@ -1302,15 +1302,15 @@ ROOT@0..26351
         R_PAREN@4538..4539 ")"
       R_PAREN@4539..4540 ")"
     WHITESPACE@4540..4544 "\n\n  "
-    LINE_COMMENT@4544..4621 ";; Test more interest ..."
+    LINE_COMMENT@4544..4621 ";; Test more interesting code points: left-to-right mark, right-to-left mark,"
     WHITESPACE@4621..4624 "\n  "
-    LINE_COMMENT@4624..4684 ";; non-breaking hyphe ..."
+    LINE_COMMENT@4624..4684 ";; non-breaking hyphen, line separator, paragraph separator,"
     WHITESPACE@4684..4687 "\n  "
-    LINE_COMMENT@4687..4739 ";; left-to-right embe ..."
+    LINE_COMMENT@4687..4739 ";; left-to-right embedding, right-to-left embedding,"
     WHITESPACE@4739..4742 "\n  "
-    LINE_COMMENT@4742..4818 ";; pop directional fo ..."
+    LINE_COMMENT@4742..4818 ";; pop directional formatting, narrow no-break space, left-to-right isolate,"
     WHITESPACE@4818..4821 "\n  "
-    LINE_COMMENT@4821..4893 ";; right-to-left isol ..."
+    LINE_COMMENT@4821..4893 ";; right-to-left isolate, first strong isolate, pop directional isolate."
     WHITESPACE@4893..4896 "\n  "
     MODULE_FIELD_FUNC@4896..4981
       L_PAREN@4896..4897 "("
@@ -1321,7 +1321,7 @@ ROOT@0..26351
         KEYWORD@4903..4909 "export"
         WHITESPACE@4909..4910 " "
         NAME@4910..4951
-          STRING@4910..4951 "\"\u{200e}\u{200f}‑\u{2028}\u{2029}\u{202a}\u{202b} ..."
+          STRING@4910..4951 "\"\u{200e}\u{200f}‑\u{2028}\u{2029}\u{202a}\u{202b}\u{202c}\u{202f}\u{2066}\u{2067}\u{2068}\u{2069}\""
         R_PAREN@4951..4952 ")"
       WHITESPACE@4952..4953 " "
       TYPE_USE@4953..4965
@@ -1342,11 +1342,11 @@ ROOT@0..26351
         R_PAREN@4979..4980 ")"
       R_PAREN@4980..4981 ")"
     WHITESPACE@4981..4985 "\n\n  "
-    LINE_COMMENT@4985..5049 ";; Test some deprecat ..."
+    LINE_COMMENT@4985..5049 ";; Test some deprecated code points: inhibit symmetric swapping,"
     WHITESPACE@5049..5052 "\n  "
-    LINE_COMMENT@5052..5112 ";; activate symmetric ..."
+    LINE_COMMENT@5052..5112 ";; activate symmetric swapping, inhibit arabic form shaping,"
     WHITESPACE@5112..5115 "\n  "
-    LINE_COMMENT@5115..5192 ";; activate arabic fo ..."
+    LINE_COMMENT@5115..5192 ";; activate arabic form shaping, national digit shapes, nominal digit shapes."
     WHITESPACE@5192..5195 "\n  "
     MODULE_FIELD_FUNC@5195..5259
       L_PAREN@5195..5196 "("
@@ -1378,7 +1378,7 @@ ROOT@0..26351
         R_PAREN@5257..5258 ")"
       R_PAREN@5258..5259 ")"
     WHITESPACE@5259..5263 "\n\n  "
-    LINE_COMMENT@5263..5304 ";; Test \"invisible\" o ..."
+    LINE_COMMENT@5263..5304 ";; Test \"invisible\" operator code points."
     WHITESPACE@5304..5307 "\n  "
     MODULE_FIELD_FUNC@5307..5365
       L_PAREN@5307..5308 "("
@@ -1410,7 +1410,7 @@ ROOT@0..26351
         R_PAREN@5363..5364 ")"
       R_PAREN@5364..5365 ")"
     WHITESPACE@5365..5369 "\n\n  "
-    LINE_COMMENT@5369..5424 ";; Test that code poi ..."
+    LINE_COMMENT@5369..5424 ";; Test that code points outside the BMP are supported."
     WHITESPACE@5424..5427 "\n  "
     MODULE_FIELD_FUNC@5427..5485
       L_PAREN@5427..5428 "("
@@ -1442,7 +1442,7 @@ ROOT@0..26351
         R_PAREN@5483..5484 ")"
       R_PAREN@5484..5485 ")"
     WHITESPACE@5485..5489 "\n\n  "
-    LINE_COMMENT@5489..5560 ";; Test that WebAssem ..."
+    LINE_COMMENT@5489..5560 ";; Test that WebAssembly implementations cope in the presence of Zalgo."
     WHITESPACE@5560..5563 "\n  "
     MODULE_FIELD_FUNC@5563..5866
       L_PAREN@5563..5564 "("
@@ -1453,7 +1453,7 @@ ROOT@0..26351
         KEYWORD@5570..5576 "export"
         WHITESPACE@5576..5577 " "
         NAME@5577..5836
-          STRING@5577..5836 "\"Z\u{30f}\u{346}\u{306}\u{35b}\u{34c}\u{334}\u{358}\u{35e}\u{347}\u{32b} ..."
+          STRING@5577..5836 "\"Z\u{30f}\u{346}\u{306}\u{35b}\u{34c}\u{334}\u{358}\u{35e}\u{347}\u{32b}\u{325}\u{32a}\u{353}\u{348}\u{354}\u{34e}\u{317}\u{31e}\u{33a}\u{32f}\u{331}\u{31e}\u{319}\u{331}\u{31c}\u{316}\u{320}a\u{357}\u{368}\u{30e}\u{304}\u{306}\u{357}\u{33f}\u{361}\u{35f}\u{340}\u{336}\u{341}\u{325}\u{330}\u{333}\u{32d}\u{359}\u{332}\u{331}\u{339}\u{31d}\u{34e}\u{33c}l\u{344}\u{34a}\u{31a}\u{357}\u{366}\u{344}\u{36b}\u{307}\u{341}\u{336}\u{337}\u{349}\u{329}\u{339}\u{32b}\u{31d}\u{356}\u{345}\u{319}\u{332}\u{33c}\u{347}\u{35a}\u{34d}\u{32e}\u{34e}\u{325}\u{345}\u{31e}g\u{343}\u{310}\u{305}\u{36e}\u{314}\u{310}\u{30e}\u{302}\u{30f}\u{33e}\u{34a}\u{30d}\u{34b}\u{34a}\u{367}\u{301}\u{306}\u{366}\u{35e}\u{336}\u{355}\u{354}\u{35a}\u{329}o\u{34b}\u{314}\u{350}\u{36a}\u{369}\u{321}\u{34f}\u{322}\u{327}\u{341}\u{32b}\u{319}\u{324}\u{32e}\u{356}\u{359}\u{353}\u{33a}\u{31c}\u{329}\u{33c}\u{318}\u{320}\""
         R_PAREN@5836..5837 ")"
       WHITESPACE@5837..5838 " "
       TYPE_USE@5838..5850
@@ -1474,7 +1474,7 @@ ROOT@0..26351
         R_PAREN@5864..5865 ")"
       R_PAREN@5865..5866 ")"
     WHITESPACE@5866..5870 "\n\n  "
-    LINE_COMMENT@5870..5904 ";; Test Hangul filler ..."
+    LINE_COMMENT@5870..5904 ";; Test Hangul filler code points."
     WHITESPACE@5904..5907 "\n  "
     MODULE_FIELD_FUNC@5907..5965
       L_PAREN@5907..5908 "("
@@ -1506,7 +1506,7 @@ ROOT@0..26351
         R_PAREN@5963..5964 ")"
       R_PAREN@5964..5965 ")"
     WHITESPACE@5965..5969 "\n\n  "
-    LINE_COMMENT@5969..6038 ";; Test variation sel ..."
+    LINE_COMMENT@5969..6038 ";; Test variation selectors (which are also ID_Continue code points)."
     WHITESPACE@6038..6041 "\n  "
     MODULE_FIELD_FUNC@6041..6090
       L_PAREN@6041..6042 "("
@@ -1628,7 +1628,7 @@ ROOT@0..26351
         R_PAREN@6246..6247 ")"
       R_PAREN@6247..6248 ")"
     WHITESPACE@6248..6252 "\n\n  "
-    LINE_COMMENT@6252..6295 ";; Test an uncombined ..."
+    LINE_COMMENT@6252..6295 ";; Test an uncombined combining code point."
     WHITESPACE@6295..6298 "\n  "
     MODULE_FIELD_FUNC@6298..6346
       L_PAREN@6298..6299 "("
@@ -1660,15 +1660,15 @@ ROOT@0..26351
         R_PAREN@6344..6345 ")"
       R_PAREN@6345..6346 ")"
     WHITESPACE@6346..6350 "\n\n  "
-    LINE_COMMENT@6350..6427 ";; Test that numerous ..."
+    LINE_COMMENT@6350..6427 ";; Test that numerous different present and historical representations of the"
     WHITESPACE@6427..6430 "\n  "
-    LINE_COMMENT@6430..6491 ";; \"newline\" concept  ..."
+    LINE_COMMENT@6430..6491 ";; \"newline\" concept are distinct. Tests largely inspired by:"
     WHITESPACE@6491..6494 "\n  "
-    LINE_COMMENT@6494..6552 ";;   https://en.wikip ..."
+    LINE_COMMENT@6494..6552 ";;   https://en.wikipedia.org/wiki/Newline#Representations"
     WHITESPACE@6552..6555 "\n  "
-    LINE_COMMENT@6555..6609 ";;   https://en.wikip ..."
+    LINE_COMMENT@6555..6609 ";;   https://en.wikipedia.org/wiki/Newline#Unicode and"
     WHITESPACE@6609..6612 "\n  "
-    LINE_COMMENT@6612..6685 ";;   https://en.wikip ..."
+    LINE_COMMENT@6612..6685 ";;   https://en.wikipedia.org/wiki/Newline#Reverse_and_partial_line_feeds"
     WHITESPACE@6685..6688 "\n  "
     MODULE_FIELD_FUNC@6688..6737
       L_PAREN@6688..6689 "("
@@ -2360,7 +2360,7 @@ ROOT@0..26351
         R_PAREN@7897..7898 ")"
       R_PAREN@7898..7899 ")"
     WHITESPACE@7899..7903 "\n\n  "
-    LINE_COMMENT@7903..7977 ";; Test that non-char ..."
+    LINE_COMMENT@7903..7977 ";; Test that non-characters are not replaced by the replacement character."
     WHITESPACE@7977..7980 "\n  "
     MODULE_FIELD_FUNC@7980..8029
       L_PAREN@7980..7981 "("
@@ -4372,9 +4372,9 @@ ROOT@0..26351
         R_PAREN@11993..11994 ")"
       R_PAREN@11994..11995 ")"
     WHITESPACE@11995..11999 "\n\n  "
-    LINE_COMMENT@11999..12061 ";; Test an interroban ..."
+    LINE_COMMENT@11999..12061 ";; Test an interrobang with combining diacritical marks above."
     WHITESPACE@12061..12064 "\n  "
-    LINE_COMMENT@12064..12089 ";; https://xkcd.com/1 ..."
+    LINE_COMMENT@12064..12089 ";; https://xkcd.com/1209/"
     WHITESPACE@12089..12092 "\n  "
     MODULE_FIELD_FUNC@12092..12148
       L_PAREN@12092..12093 "("
@@ -4406,7 +4406,7 @@ ROOT@0..26351
         R_PAREN@12146..12147 ")"
       R_PAREN@12147..12148 ")"
     WHITESPACE@12148..12152 "\n\n  "
-    LINE_COMMENT@12152..12209 ";; Test that RLM/LRM  ..."
+    LINE_COMMENT@12152..12209 ";; Test that RLM/LRM don't change the logical byte order."
     WHITESPACE@12209..12212 "\n  "
     MODULE_FIELD_FUNC@12212..12262
       L_PAREN@12212..12213 "("
@@ -4558,7 +4558,7 @@ ROOT@0..26351
         R_PAREN@12490..12491 ")"
       R_PAREN@12491..12492 ")"
     WHITESPACE@12492..12496 "\n\n  "
-    LINE_COMMENT@12496..12547 ";; Test that Unicode  ..."
+    LINE_COMMENT@12496..12547 ";; Test that Unicode font variations are preserved."
     WHITESPACE@12547..12550 "\n  "
     MODULE_FIELD_FUNC@12550..12601
       L_PAREN@12550..12551 "("
@@ -4980,11 +4980,11 @@ ROOT@0..26351
         R_PAREN@13300..13301 ")"
       R_PAREN@13301..13302 ")"
     WHITESPACE@13302..13306 "\n\n  "
-    LINE_COMMENT@13306..13370 ";; Test that various  ..."
+    LINE_COMMENT@13306..13370 ";; Test that various additional letter variations are preserved."
     WHITESPACE@13370..13373 "\n  "
-    LINE_COMMENT@13373..13444 ";; (U+0040, U+0061, U ..."
+    LINE_COMMENT@13373..13444 ";; (U+0040, U+0061, U+0041, U+00C5, U+0041 U+030A, U+212B, and the font"
     WHITESPACE@13444..13447 "\n  "
-    LINE_COMMENT@13447..13480 ";; variations are cov ..."
+    LINE_COMMENT@13447..13480 ";; variations are covered above.)"
     WHITESPACE@13480..13483 "\n  "
     MODULE_FIELD_FUNC@13483..13533
       L_PAREN@13483..13484 "("
@@ -12096,7 +12096,7 @@ ROOT@0..26351
         R_PAREN@26082..26083 ")"
       R_PAREN@26083..26084 ")"
     WHITESPACE@26084..26088 "\n\n  "
-    LINE_COMMENT@26088..26142 ";; Test unmatched \"cl ..."
+    LINE_COMMENT@26088..26142 ";; Test unmatched \"closing\" and \"opening\" code points."
     WHITESPACE@26142..26145 "\n  "
     MODULE_FIELD_FUNC@26145..26348
       L_PAREN@26145..26146 "("
@@ -12107,7 +12107,7 @@ ROOT@0..26351
         KEYWORD@26152..26158 "export"
         WHITESPACE@26158..26159 " "
         NAME@26159..26317
-          STRING@26159..26317 "\")˺˼𔗏\u{1d174}\u{1d176}\u{1d178} ..."
+          STRING@26159..26317 "\")˺˼𔗏\u{1d174}\u{1d176}\u{1d178}\u{1d17a}⁾₎❩❫⟯﴿︶﹚）｠\u{e0029}❳❵⟧⟩⟫⟭⦈⦊⦖⸣⸥︘︸︺︼︾﹀﹂﹄﹈﹜﹞］｝｣\u{e005d}\u{e007d}»’”›❯\""
         R_PAREN@26317..26318 ")"
       WHITESPACE@26318..26319 " "
       TYPE_USE@26319..26331

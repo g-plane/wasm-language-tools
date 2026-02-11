@@ -1328,9 +1328,9 @@ ROOT@0..2705
       R_PAREN@2072..2073 ")"
     R_PAREN@2073..2074 ")"
   WHITESPACE@2074..2075 "\n"
-  LINE_COMMENT@2075..2103 ";; No multiple memori ..."
+  LINE_COMMENT@2075..2103 ";; No multiple memories yet."
   WHITESPACE@2103..2104 "\n"
-  LINE_COMMENT@2104..2185 ";; (module (memory 0) ..."
+  LINE_COMMENT@2104..2185 ";; (module (memory 0) (memory 0) (export \"a\" (memory 0)) (export \"b\" (memory 1)))"
   WHITESPACE@2185..2187 "\n\n"
   MODULE@2187..2219
     L_PAREN@2187..2188 "("

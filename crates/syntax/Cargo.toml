@@ -9,7 +9,8 @@ edition = "2024"
 keywords = ["wasm"]
 
 [dependencies]
-rowan = { workspace = true }
+text-size = "1.1"
+triomphe = "0.1"
 
 [lints.clippy]
 dbg_macro = "warn"

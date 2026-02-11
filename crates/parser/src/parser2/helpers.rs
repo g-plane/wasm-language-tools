@@ -1,7 +1,6 @@
 use super::{GreenElement, Parser, green, lexer::Token};
 use crate::error::{Message, SyntaxError};
-use rowan::{TextRange, TextSize};
-use wat_syntax::SyntaxKind;
+use wat_syntax::{SyntaxKind, TextRange, TextSize};
 
 impl<'s> Parser<'s> {
     #[must_use]

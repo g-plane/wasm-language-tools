@@ -569,7 +569,7 @@ ROOT@0..3407
                                                   NUM_TYPE@1089..1092
                                                     TYPE_KEYWORD@1089..1092 "i32"
                                                   R_PAREN@1092..1093 ")"
-                                              WHITESPACE@1093..1118 "\n                     ..."
+                                              WHITESPACE@1093..1118 "\n                        "
                                               BLOCK_LOOP@1118..2247
                                                 L_PAREN@1118..1119 "("
                                                 KEYWORD@1119..1123 "loop"
@@ -595,7 +595,7 @@ ROOT@0..3407
                                                       NUM_TYPE@1152..1155
                                                         TYPE_KEYWORD@1152..1155 "i32"
                                                       R_PAREN@1155..1156 ")"
-                                                  WHITESPACE@1156..1183 "\n                     ..."
+                                                  WHITESPACE@1156..1183 "\n                          "
                                                   BLOCK_LOOP@1183..2220
                                                     L_PAREN@1183..1184 "("
                                                     KEYWORD@1184..1188 "loop"
@@ -621,7 +621,7 @@ ROOT@0..3407
                                                           NUM_TYPE@1217..1220
                                                             TYPE_KEYWORD@1217..1220 "i32"
                                                           R_PAREN@1220..1221 ")"
-                                                      WHITESPACE@1221..1250 "\n                     ..."
+                                                      WHITESPACE@1221..1250 "\n                            "
                                                       BLOCK_LOOP@1250..2191
                                                         L_PAREN@1250..1251 "("
                                                         KEYWORD@1251..1255 "loop"
@@ -647,7 +647,7 @@ ROOT@0..3407
                                                               NUM_TYPE@1284..1287
                                                                 TYPE_KEYWORD@1284..1287 "i32"
                                                               R_PAREN@1287..1288 ")"
-                                                          WHITESPACE@1288..1319 "\n                     ..."
+                                                          WHITESPACE@1288..1319 "\n                              "
                                                           BLOCK_LOOP@1319..2160
                                                             L_PAREN@1319..1320 "("
                                                             KEYWORD@1320..1324 "loop"
@@ -673,7 +673,7 @@ ROOT@0..3407
                                                                   NUM_TYPE@1353..1356
                                                                     TYPE_KEYWORD@1353..1356 "i32"
                                                                   R_PAREN@1356..1357 ")"
-                                                              WHITESPACE@1357..1390 "\n                     ..."
+                                                              WHITESPACE@1357..1390 "\n                                "
                                                               BLOCK_LOOP@1390..2127
                                                                 L_PAREN@1390..1391 "("
                                                                 KEYWORD@1391..1395 "loop"
@@ -699,7 +699,7 @@ ROOT@0..3407
                                                                       NUM_TYPE@1424..1427
                                                                         TYPE_KEYWORD@1424..1427 "i32"
                                                                       R_PAREN@1427..1428 ")"
-                                                                  WHITESPACE@1428..1463 "\n                     ..."
+                                                                  WHITESPACE@1428..1463 "\n                                  "
                                                                   BLOCK_LOOP@1463..2092
                                                                     L_PAREN@1463..1464 "("
                                                                     KEYWORD@1464..1468 "loop"
@@ -725,7 +725,7 @@ ROOT@0..3407
                                                                           NUM_TYPE@1497..1500
                                                                             TYPE_KEYWORD@1497..1500 "i32"
                                                                           R_PAREN@1500..1501 ")"
-                                                                      WHITESPACE@1501..1538 "\n                     ..."
+                                                                      WHITESPACE@1501..1538 "\n                                    "
                                                                       BLOCK_LOOP@1538..2055
                                                                         L_PAREN@1538..1539 "("
                                                                         KEYWORD@1539..1543 "loop"
@@ -751,7 +751,7 @@ ROOT@0..3407
                                                                               NUM_TYPE@1572..1575
                                                                                 TYPE_KEYWORD@1572..1575 "i32"
                                                                               R_PAREN@1575..1576 ")"
-                                                                          WHITESPACE@1576..1615 "\n                     ..."
+                                                                          WHITESPACE@1576..1615 "\n                                      "
                                                                           BLOCK_LOOP@1615..2016
                                                                             L_PAREN@1615..1616 "("
                                                                             KEYWORD@1616..1620 "loop"
@@ -777,7 +777,7 @@ ROOT@0..3407
                                                                                   NUM_TYPE@1649..1652
                                                                                     TYPE_KEYWORD@1649..1652 "i32"
                                                                                   R_PAREN@1652..1653 ")"
-                                                                              WHITESPACE@1653..1694 "\n                     ..."
+                                                                              WHITESPACE@1653..1694 "\n                                        "
                                                                               BLOCK_LOOP@1694..1975
                                                                                 L_PAREN@1694..1695 "("
                                                                                 KEYWORD@1695..1699 "loop"
@@ -803,7 +803,7 @@ ROOT@0..3407
                                                                                       NUM_TYPE@1728..1731
                                                                                         TYPE_KEYWORD@1728..1731 "i32"
                                                                                       R_PAREN@1731..1732 ")"
-                                                                                  WHITESPACE@1732..1775 "\n                     ..."
+                                                                                  WHITESPACE@1732..1775 "\n                                          "
                                                                                   BLOCK_LOOP@1775..1932
                                                                                     L_PAREN@1775..1776 "("
                                                                                     KEYWORD@1776..1780 "loop"
@@ -829,7 +829,7 @@ ROOT@0..3407
                                                                                           NUM_TYPE@1809..1812
                                                                                             TYPE_KEYWORD@1809..1812 "i32"
                                                                                           R_PAREN@1812..1813 ")"
-                                                                                      WHITESPACE@1813..1858 "\n                     ..."
+                                                                                      WHITESPACE@1813..1858 "\n                                            "
                                                                                       PLAIN_INSTR@1858..1871
                                                                                         L_PAREN@1858..1859 "("
                                                                                         INSTR_NAME@1859..1863 "call"
@@ -845,34 +845,34 @@ ROOT@0..3407
                                                                                         IMMEDIATE@1883..1886
                                                                                           INT@1883..1886 "150"
                                                                                         R_PAREN@1886..1887 ")"
-                                                                                      WHITESPACE@1887..1930 "\n                     ..."
+                                                                                      WHITESPACE@1887..1930 "\n                                          "
                                                                                       R_PAREN@1930..1931 ")"
                                                                                     R_PAREN@1931..1932 ")"
-                                                                                  WHITESPACE@1932..1973 "\n                     ..."
+                                                                                  WHITESPACE@1932..1973 "\n                                        "
                                                                                   R_PAREN@1973..1974 ")"
                                                                                 R_PAREN@1974..1975 ")"
-                                                                              WHITESPACE@1975..2014 "\n                     ..."
+                                                                              WHITESPACE@1975..2014 "\n                                      "
                                                                               R_PAREN@2014..2015 ")"
                                                                             R_PAREN@2015..2016 ")"
-                                                                          WHITESPACE@2016..2053 "\n                     ..."
+                                                                          WHITESPACE@2016..2053 "\n                                    "
                                                                           R_PAREN@2053..2054 ")"
                                                                         R_PAREN@2054..2055 ")"
-                                                                      WHITESPACE@2055..2090 "\n                     ..."
+                                                                      WHITESPACE@2055..2090 "\n                                  "
                                                                       R_PAREN@2090..2091 ")"
                                                                     R_PAREN@2091..2092 ")"
-                                                                  WHITESPACE@2092..2125 "\n                     ..."
+                                                                  WHITESPACE@2092..2125 "\n                                "
                                                                   R_PAREN@2125..2126 ")"
                                                                 R_PAREN@2126..2127 ")"
-                                                              WHITESPACE@2127..2158 "\n                     ..."
+                                                              WHITESPACE@2127..2158 "\n                              "
                                                               R_PAREN@2158..2159 ")"
                                                             R_PAREN@2159..2160 ")"
-                                                          WHITESPACE@2160..2189 "\n                     ..."
+                                                          WHITESPACE@2160..2189 "\n                            "
                                                           R_PAREN@2189..2190 ")"
                                                         R_PAREN@2190..2191 ")"
-                                                      WHITESPACE@2191..2218 "\n                     ..."
+                                                      WHITESPACE@2191..2218 "\n                          "
                                                       R_PAREN@2218..2219 ")"
                                                     R_PAREN@2219..2220 ")"
-                                                  WHITESPACE@2220..2245 "\n                     ..."
+                                                  WHITESPACE@2220..2245 "\n                        "
                                                   R_PAREN@2245..2246 ")"
                                                 R_PAREN@2246..2247 ")"
                                               WHITESPACE@2247..2270 "\n                      "

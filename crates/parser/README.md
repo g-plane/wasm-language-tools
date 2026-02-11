@@ -22,8 +22,7 @@ so the [`parse`] function returns a tuple which contains the CST and syntax erro
 You can access syntax errors like this:
 
 ```rust
-use rowan::TextSize;
-use wat_syntax::SyntaxKind;
+use wat_syntax::{SyntaxKind, TextSize};
 
 let input = "(module";
 let (tree, errors) = wat_parser::parse(input);

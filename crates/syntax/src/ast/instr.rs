@@ -1,15 +1,10 @@
 use super::{
-    SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage,
+    AstChildren, AstNode,
     module::{Index, TypeUse},
+    support::*,
     ty::{HeapType, RefType},
 };
-use rowan::{
-    NodeOrToken,
-    ast::{
-        AstChildren, AstNode,
-        support::{child, children, token},
-    },
-};
+use crate::{NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BlockBlock {
@@ -59,7 +54,6 @@ impl BlockBlock {
     }
 }
 impl AstNode for BlockBlock {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -140,7 +134,6 @@ impl BlockIf {
     }
 }
 impl AstNode for BlockIf {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -192,7 +185,6 @@ impl BlockIfElse {
     }
 }
 impl AstNode for BlockIfElse {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -244,7 +236,6 @@ impl BlockIfThen {
     }
 }
 impl AstNode for BlockIfThen {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -277,7 +268,6 @@ pub enum BlockInstr {
     TryTable(BlockTryTable),
 }
 impl AstNode for BlockInstr {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -360,7 +350,6 @@ impl BlockLoop {
     }
 }
 impl AstNode for BlockLoop {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -437,7 +426,6 @@ impl BlockTryTable {
     }
 }
 impl AstNode for BlockTryTable {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -468,7 +456,6 @@ pub enum Cat {
     CatchAll(CatchAll),
 }
 impl AstNode for Cat {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -523,7 +510,6 @@ impl Catch {
     }
 }
 impl AstNode for Catch {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -571,7 +557,6 @@ impl CatchAll {
     }
 }
 impl AstNode for CatchAll {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -602,7 +587,6 @@ pub enum Instr {
     Plain(PlainInstr),
 }
 impl AstNode for Instr {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -683,7 +667,6 @@ impl Immediate {
     }
 }
 impl AstNode for Immediate {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -727,7 +710,6 @@ impl MemArg {
     }
 }
 impl AstNode for MemArg {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -779,7 +761,6 @@ impl PlainInstr {
     }
 }
 impl AstNode for PlainInstr {
-    type Language = WatLanguage;
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where

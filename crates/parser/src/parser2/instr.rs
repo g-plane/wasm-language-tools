@@ -1,7 +1,10 @@
 use super::{GreenElement, Parser, builder::NodeMark, green, lexer::Token, node};
 use crate::error::{Message, SyntaxError};
-use rowan::{GreenNode, TextRange};
-use wat_syntax::SyntaxKind::{self, *};
+use wat_syntax::{
+    GreenNode,
+    SyntaxKind::{self, *},
+    TextRange,
+};
 
 impl Parser<'_> {
     fn parse_block_if_folded(&mut self, mark: NodeMark) -> Option<GreenNode> {

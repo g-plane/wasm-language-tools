@@ -28,7 +28,7 @@ ROOT@0..566
             INT@40..41 "0"
           R_PAREN@41..42 ")"
       WHITESPACE@42..43 " "
-      STRING@43..71 "\"abcdefghijklmnopqrst ..."
+      STRING@43..71 "\"abcdefghijklmnopqrstuvwxyz\""
       R_PAREN@71..72 ")"
     WHITESPACE@72..76 "\n\n  "
     MODULE_FIELD_FUNC@76..203

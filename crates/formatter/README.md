@@ -10,9 +10,8 @@ The [`format()`] function only accepts parsed syntax tree,
 so you should use the parser to parse source code first.
 
 ```rust
-use rowan::ast::AstNode;
 use wat_formatter::format;
-use wat_syntax::{SyntaxNode, ast::Root};
+use wat_syntax::{SyntaxNode, ast::{AstNode, Root}};
 
 let input = "( module )";
 let (tree, _) = wat_parser::parse(input);
@@ -38,9 +37,8 @@ Notes:
 
 ```rust
 use line_index::LineIndex;
-use rowan::{ast::AstNode, TextRange, TextSize};
 use wat_formatter::format_range;
-use wat_syntax::{SyntaxNode, ast::Root};
+use wat_syntax::{SyntaxNode, TextRange, TextSize, ast::{AstNode, Root}};
 
 let input = "( module ( func ) )";
 let line_index = LineIndex::new(input);

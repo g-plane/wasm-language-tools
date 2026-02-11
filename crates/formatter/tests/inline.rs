@@ -1,6 +1,8 @@
-use rowan::ast::AstNode;
 use wat_formatter::format;
-use wat_syntax::{SyntaxNode, ast::Root};
+use wat_syntax::{
+    SyntaxNode,
+    ast::{AstNode, Root},
+};
 
 #[test]
 fn new_line() {

@@ -157,7 +157,7 @@ ROOT@0..9339
         KEYWORD@392..398 "export"
         WHITESPACE@398..399 " "
         NAME@399..435
-          STRING@399..435 "\"f32.informally_known ..."
+          STRING@399..435 "\"f32.informally_known_as_plain_snan\""
         R_PAREN@435..436 ")"
       WHITESPACE@436..437 " "
       TYPE_USE@437..449
@@ -810,7 +810,7 @@ ROOT@0..9339
           INSTR_NAME@2178..2187 "f32.const"
           WHITESPACE@2187..2188 " "
           IMMEDIATE@2188..2216
-            INT@2188..2216 "0x1_0000_0000_0000_00 ..."
+            INT@2188..2216 "0x1_0000_0000_0000_0000_0000"
           R_PAREN@2216..2217 ")"
         R_PAREN@2217..2218 ")"
       R_PAREN@2218..2219 ")"
@@ -1267,7 +1267,7 @@ ROOT@0..9339
           INSTR_NAME@3482..3491 "f32.const"
           WHITESPACE@3491..3492 " "
           IMMEDIATE@3492..3519
-            INT@3492..3519 "100_000_000_000_000_0 ..."
+            INT@3492..3519 "100_000_000_000_000_000_000"
           R_PAREN@3519..3520 ")"
         R_PAREN@3520..3521 ")"
       R_PAREN@3521..3522 ")"
@@ -1342,7 +1342,7 @@ ROOT@0..9339
         R_PAREN@3723..3724 ")"
       R_PAREN@3724..3725 ")"
     WHITESPACE@3725..3729 "\n\n  "
-    LINE_COMMENT@3729..3785 ";; https://twitter.co ..."
+    LINE_COMMENT@3729..3785 ";; https://twitter.com/Archivd/status/994637336506912768"
     WHITESPACE@3785..3788 "\n  "
     MODULE_FIELD_FUNC@3788..3888
       L_PAREN@3788..3789 "("
@@ -1353,7 +1353,7 @@ ROOT@0..9339
         KEYWORD@3795..3801 "export"
         WHITESPACE@3801..3802 " "
         NAME@3802..3827
-          STRING@3802..3827 "\"f32_dec.root_beer_fl ..."
+          STRING@3802..3827 "\"f32_dec.root_beer_float\""
         R_PAREN@3827..3828 ")"
       WHITESPACE@3828..3829 " "
       TYPE_USE@3829..3841
@@ -1530,7 +1530,7 @@ ROOT@0..9339
         KEYWORD@4281..4287 "export"
         WHITESPACE@4287..4288 " "
         NAME@4288..4324
-          STRING@4288..4324 "\"f64.informally_known ..."
+          STRING@4288..4324 "\"f64.informally_known_as_plain_snan\""
         R_PAREN@4324..4325 ")"
       WHITESPACE@4325..4326 " "
       TYPE_USE@4326..4338
@@ -2183,7 +2183,7 @@ ROOT@0..9339
           INSTR_NAME@6142..6151 "f64.const"
           WHITESPACE@6151..6152 " "
           IMMEDIATE@6152..6180
-            INT@6152..6180 "0x1_0000_0000_0000_00 ..."
+            INT@6152..6180 "0x1_0000_0000_0000_0000_0000"
           R_PAREN@6180..6181 ")"
         R_PAREN@6181..6182 ")"
       R_PAREN@6182..6183 ")"
@@ -2258,7 +2258,7 @@ ROOT@0..9339
         R_PAREN@6379..6380 ")"
       R_PAREN@6380..6381 ")"
     WHITESPACE@6381..6385 "\n\n  "
-    LINE_COMMENT@6385..6417 ";; f64 numbers in dec ..."
+    LINE_COMMENT@6385..6417 ";; f64 numbers in decimal format"
     WHITESPACE@6417..6420 "\n  "
     MODULE_FIELD_FUNC@6420..6503
       L_PAREN@6420..6421 "("
@@ -2640,7 +2640,7 @@ ROOT@0..9339
           INSTR_NAME@7487..7496 "f64.const"
           WHITESPACE@7496..7497 " "
           IMMEDIATE@7497..7524
-            INT@7497..7524 "100_000_000_000_000_0 ..."
+            INT@7497..7524 "100_000_000_000_000_000_000"
           R_PAREN@7524..7525 ")"
         R_PAREN@7525..7526 ")"
       R_PAREN@7526..7527 ")"
@@ -2715,7 +2715,7 @@ ROOT@0..9339
         R_PAREN@7728..7729 ")"
       R_PAREN@7729..7730 ")"
     WHITESPACE@7730..7734 "\n\n  "
-    LINE_COMMENT@7734..7790 ";; https://twitter.co ..."
+    LINE_COMMENT@7734..7790 ";; https://twitter.com/Archivd/status/994637336506912768"
     WHITESPACE@7790..7793 "\n  "
     MODULE_FIELD_FUNC@7793..7893
       L_PAREN@7793..7794 "("
@@ -2726,7 +2726,7 @@ ROOT@0..9339
         KEYWORD@7800..7806 "export"
         WHITESPACE@7806..7807 " "
         NAME@7807..7832
-          STRING@7807..7832 "\"f64_dec.root_beer_fl ..."
+          STRING@7807..7832 "\"f64_dec.root_beer_float\""
         R_PAREN@7832..7833 ")"
       WHITESPACE@7833..7834 " "
       TYPE_USE@7834..7846

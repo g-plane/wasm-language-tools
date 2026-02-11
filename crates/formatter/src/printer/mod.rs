@@ -1,11 +1,7 @@
 use crate::config::{FormatOptions, LanguageOptions, MultiLine, WrapBefore};
-use rowan::{
-    Direction, NodeOrToken,
-    ast::{AstChildren, AstNode, support},
-};
 use std::iter;
 use tiny_pretty::Doc;
-use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, WatLanguage, ast::*};
+use wat_syntax::{NodeOrToken, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, ast::*};
 
 mod instr;
 mod module;
@@ -25,7 +21,7 @@ impl<'a> Ctx<'a> {
 
     pub(crate) fn format_right_paren<N>(&self, node: &N) -> Doc<'static>
     where
-        N: AstNode<Language = WatLanguage>,
+        N: AstNode,
     {
         let node = node.syntax();
         let docs = if node
@@ -37,7 +33,7 @@ impl<'a> Ctx<'a> {
             .or_else(|| support::token(node, SyntaxKind::R_PAREN))
             .and_then(|token| {
                 token
-                    .siblings_with_tokens(Direction::Prev)
+                    .prev_siblings_with_tokens()
                     .skip(1)
                     .map_while(|node_or_token| node_or_token.into_token())
                     .find(|token| token.kind() != SyntaxKind::WHITESPACE)
@@ -156,7 +152,7 @@ impl DocGen for Root {
                         docs.push(format_block_comment(token.text(), ctx));
                     }
                     SyntaxKind::WHITESPACE => {
-                        if token.index() > 0 && children.peek().is_some() {
+                        if token.has_prev_sibling_or_token() && children.peek().is_some() {
                             match token.text().chars().filter(|c| *c == '\n').count() {
                                 0 => {
                                     if prev_kind == SyntaxKind::LINE_COMMENT {
@@ -188,11 +184,11 @@ impl DocGen for Root {
 
 fn format_trivias_after_node<N>(node: N, ctx: &Ctx) -> Vec<Doc<'static>>
 where
-    N: AstNode<Language = WatLanguage>,
+    N: AstNode,
 {
     let trivias = node
         .syntax()
-        .siblings_with_tokens(Direction::Next)
+        .next_siblings_with_tokens()
         .skip(1)
         .map_while(into_formattable_trivia)
         .collect::<Vec<_>>();
@@ -230,7 +226,7 @@ where
 }
 fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>> {
     let trivias = token
-        .siblings_with_tokens(Direction::Next)
+        .next_siblings_with_tokens()
         .skip(1)
         .map_while(into_formattable_trivia)
         .skip_while(|current| token.kind() == SyntaxKind::L_PAREN && current.kind() == SyntaxKind::WHITESPACE)
@@ -271,11 +267,14 @@ fn into_formattable_trivia(node_or_token: SyntaxElement) -> Option<SyntaxToken> 
         | SyntaxKind::ANNOT_ELEM
         | SyntaxKind::ANNOT_END => Some(token),
         SyntaxKind::WHITESPACE
-            if token.next_token().is_none_or(|token| match token.kind() {
-                SyntaxKind::R_PAREN => false,
-                SyntaxKind::KEYWORD => token.text() != "end",
-                _ => true,
-            }) =>
+            if token
+                .next_sibling_or_token()
+                .and_then(NodeOrToken::into_token)
+                .is_none_or(|token| match token.kind() {
+                    SyntaxKind::R_PAREN => false,
+                    SyntaxKind::KEYWORD => token.text() != "end",
+                    _ => true,
+                }) =>
         {
             Some(token)
         }
@@ -352,7 +351,7 @@ fn should_ignore(node: &SyntaxNode, ctx: &Ctx) -> bool {
 
 fn wrap_before<N>(children: &mut iter::Peekable<AstChildren<N>>, option: WrapBefore) -> Doc<'static>
 where
-    N: AstNode<Language = WatLanguage> + Clone,
+    N: AstNode + Clone,
 {
     match option {
         WrapBefore::Never => Doc::space(),
@@ -370,7 +369,7 @@ where
 
 fn whitespace_of_multi_line<N>(option: MultiLine, first: Option<&N>) -> Doc<'static>
 where
-    N: AstNode<Language = WatLanguage>,
+    N: AstNode,
 {
     match option {
         MultiLine::Never => Doc::space(),
@@ -379,7 +378,7 @@ where
             if first.is_some_and(|first| {
                 first
                     .syntax()
-                    .siblings_with_tokens(Direction::Next)
+                    .next_siblings_with_tokens()
                     .skip(1)
                     .map_while(NodeOrToken::into_token)
                     .any(|token| token.text().contains('\n'))

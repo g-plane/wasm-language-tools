@@ -1,6 +1,5 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[expect(non_camel_case_types)]
-#[repr(u16)]
 /// Syntax kind enum for nodes and tokens.
 pub enum SyntaxKind {
     // SyntaxToken
@@ -121,11 +120,5 @@ impl SyntaxKind {
     /// Checks if it is punctuation.
     pub fn is_punc(self) -> bool {
         matches!(self, SyntaxKind::L_PAREN | SyntaxKind::R_PAREN)
-    }
-}
-
-impl From<SyntaxKind> for rowan::SyntaxKind {
-    fn from(kind: SyntaxKind) -> Self {
-        Self(kind as u16)
     }
 }

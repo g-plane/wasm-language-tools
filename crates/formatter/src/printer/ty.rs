@@ -1,9 +1,10 @@
 use super::*;
 use tiny_pretty::Doc;
+use wat_syntax::NodeOrToken;
 
 impl DocGen for AddrType {
     fn doc(&self, _: &Ctx) -> Doc<'static> {
-        if let Some(token) = self.syntax().first_token() {
+        if let Some(token) = self.syntax().first_child_or_token().and_then(NodeOrToken::into_token) {
             Doc::text(token.text().to_string())
         } else {
             Doc::nil()
@@ -637,8 +638,8 @@ impl DocGen for VecType {
 
 fn format_extern_type<N, Ty>(node: &N, ty: Option<Ty>, ctx: &Ctx) -> Doc<'static>
 where
-    N: AstNode<Language = WatLanguage>,
-    Ty: AstNode<Language = WatLanguage> + DocGen,
+    N: AstNode,
+    Ty: AstNode + DocGen,
 {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];

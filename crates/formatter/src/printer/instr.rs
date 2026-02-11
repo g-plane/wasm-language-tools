@@ -1,7 +1,7 @@
 use super::*;
-use rowan::ast::AstNode;
 use std::mem;
 use tiny_pretty::Doc;
+use wat_syntax::{NodeOrToken, ast::AstNode};
 
 impl DocGen for BlockBlock {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
@@ -465,7 +465,7 @@ impl DocGen for Immediate {
             heap_type.doc(ctx)
         } else if let Some(ref_type) = self.ref_type() {
             ref_type.doc(ctx)
-        } else if let Some(token) = self.syntax().first_token() {
+        } else if let Some(token) = self.syntax().first_child_or_token().and_then(NodeOrToken::into_token) {
             Doc::text(token.to_string())
         } else {
             Doc::nil()
