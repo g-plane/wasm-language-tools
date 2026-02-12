@@ -1,10 +1,9 @@
 use super::Diagnostic;
 use crate::helpers;
-use rowan::ast::support;
 use std::num::IntErrorKind;
 use wat_syntax::{
     SyntaxKind, SyntaxNode, SyntaxToken,
-    ast::{Limits, MemPageSize},
+    ast::{Limits, MemPageSize, support},
 };
 
 const DIAGNOSTIC_CODE: &str = "mem-type";

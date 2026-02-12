@@ -2,10 +2,12 @@ use crate::{helpers::LineIndexExt, uri::InternUri};
 use itertools::Itertools;
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
-use rowan::ast::AstNode;
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
-use wat_syntax::{SyntaxNode, ast::PlainInstr};
+use wat_syntax::{
+    SyntaxNode,
+    ast::{AstNode, PlainInstr},
+};
 
 pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
     let instr = PlainInstr::cast(node.clone())?;

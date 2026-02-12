@@ -1,7 +1,6 @@
 use crate::{LanguageService, helpers::LineIndexExt};
 use lspt::{FoldingRange, FoldingRangeKind, FoldingRangeParams};
-use rowan::ast::support;
-use wat_syntax::SyntaxKind;
+use wat_syntax::{SyntaxKind, ast::support};
 
 impl LanguageService {
     /// Handler for `textDocument/foldingRange` request.

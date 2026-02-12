@@ -1,9 +1,8 @@
 use crate::{binder::SymbolKey, document::Document, helpers::LineIndexExt, imex, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
-use rowan::{TextRange, ast::support};
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr};
+use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange, ast::support};
 
 pub fn act(
     db: &dyn salsa::Database,

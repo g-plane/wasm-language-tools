@@ -9,9 +9,8 @@ use crate::{
 use bumpalo::{Bump, collections::Vec as BumpVec};
 use lspt::DiagnosticSeverity;
 use petgraph::graph::NodeIndex;
-use rowan::ast::SyntaxNodePtr;
 use std::cell::Cell;
-use wat_syntax::SyntaxNode;
+use wat_syntax::{SyntaxNode, SyntaxNodePtr};
 
 const DIAGNOSTIC_CODE: &str = "unread";
 

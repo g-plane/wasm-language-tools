@@ -8,7 +8,7 @@ use crate::{
 };
 use bumpalo::Bump;
 use lspt::{DiagnosticSeverity, DiagnosticTag};
-use rowan::TextRange;
+use wat_syntax::TextRange;
 
 const DIAGNOSTIC_CODE: &str = "unused";
 

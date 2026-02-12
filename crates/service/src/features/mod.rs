@@ -20,8 +20,7 @@ mod type_hierarchy;
 pub(crate) use self::semantic_tokens::{SemanticTokenType, SemanticTokenTypes};
 use crate::{document::Document, helpers::LineIndexExt};
 use lspt::Position;
-use rowan::TokenAtOffset;
-use wat_syntax::{SyntaxNode, SyntaxToken};
+use wat_syntax::{SyntaxNode, SyntaxToken, TokenAtOffset};
 
 fn find_meaningful_token(
     db: &dyn salsa::Database,

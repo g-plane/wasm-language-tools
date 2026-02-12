@@ -1,10 +1,9 @@
 use super::Diagnostic;
 use crate::data_set::CONST_INSTRS;
-use rowan::{
-    TextRange, WalkEvent,
-    ast::{AstNode, support},
+use wat_syntax::{
+    SyntaxKind, SyntaxNode, TextRange,
+    ast::{AstNode, Instr, support},
 };
-use wat_syntax::{SyntaxKind, SyntaxNode, ast::Instr};
 
 const DIAGNOSTIC_CODE: &str = "const-expr";
 
@@ -19,11 +18,8 @@ pub fn check(node: &SyntaxNode) -> Option<Diagnostic> {
                 first = Some(instr.clone());
             }
             last = Some(instr.clone());
-            let mut preorder = instr.preorder();
-            while let Some(walk_event) = preorder.next() {
-                let WalkEvent::Enter(node) = walk_event else {
-                    continue;
-                };
+            let mut descendants = instr.descendants();
+            while let Some(node) = descendants.next() {
                 match node.kind() {
                     SyntaxKind::BLOCK_BLOCK
                     | SyntaxKind::BLOCK_LOOP
@@ -41,7 +37,7 @@ pub fn check(node: &SyntaxNode) -> Option<Diagnostic> {
                         }
                     }
                     _ => {
-                        preorder.skip_subtree();
+                        descendants.skip_subtree();
                     }
                 }
             }

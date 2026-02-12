@@ -3,39 +3,37 @@ use super::{
     types::{FieldType, Fields, ValType},
 };
 use crate::idx::{Idx, IdxGen, InternIdent};
-use rowan::{GreenNodeData, Language, NodeOrToken, ast::AstNode};
 use std::ops::ControlFlow;
 use wat_syntax::{
-    SyntaxKind, WatLanguage,
-    ast::{StructType, ValType as AstValType},
+    GreenNode, NodeOrToken, SyntaxKind,
+    ast::{AstNode, StructType, ValType as AstValType},
 };
 
-pub(crate) fn extract_type<'db>(db: &'db dyn salsa::Database, green: &GreenNodeData) -> Option<ValType<'db>> {
+pub(crate) fn extract_type<'db>(db: &'db dyn salsa::Database, green: &GreenNode) -> Option<ValType<'db>> {
     ValType::from_green(green, db).or_else(|| {
         green.children().find_map(|child| match child {
-            NodeOrToken::Node(node) if AstValType::can_cast(WatLanguage::kind_from_raw(node.kind())) => {
-                ValType::from_green(node, db)
-            }
+            NodeOrToken::Node(node) if AstValType::can_cast(node.kind()) => ValType::from_green(node, db),
             _ => None,
         })
     })
 }
 
-pub(crate) fn extract_global_type<'db>(db: &'db dyn salsa::Database, green: &GreenNodeData) -> Option<ValType<'db>> {
+pub(crate) fn extract_global_type<'db>(db: &'db dyn salsa::Database, green: &GreenNode) -> Option<ValType<'db>> {
     green
         .children()
         .find_map(|child| match child {
-            NodeOrToken::Node(node) if node.kind() == SyntaxKind::GLOBAL_TYPE.into() => Some(node),
+            NodeOrToken::Node(node) if node.kind() == SyntaxKind::GLOBAL_TYPE => Some(node),
             _ => None,
         })
         .and_then(|global_type| extract_type(db, global_type))
 }
 
-pub(crate) fn extract_sig<'db>(db: &'db dyn salsa::Database, node: &GreenNodeData) -> Signature<'db> {
+pub(crate) fn extract_sig<'db>(db: &'db dyn salsa::Database, node: &GreenNode) -> Signature<'db> {
     let mut params = Vec::with_capacity(1);
     let mut results = Vec::with_capacity(1);
-    node.children().filter_map(|child| child.into_node()).for_each(|node| {
-        match WatLanguage::kind_from_raw(node.kind()) {
+    node.children()
+        .filter_map(|child| child.into_node())
+        .for_each(|node| match node.kind() {
             SyntaxKind::PARAM => {
                 let mut ident = None;
                 let _ = node.children().try_for_each(|child| match child {
@@ -51,7 +49,7 @@ pub(crate) fn extract_sig<'db>(db: &'db dyn salsa::Database, node: &GreenNodeDat
                             ControlFlow::Continue(())
                         }
                     }
-                    NodeOrToken::Token(token) if token.kind() == SyntaxKind::IDENT.into() => {
+                    NodeOrToken::Token(token) if token.kind() == SyntaxKind::IDENT => {
                         ident = Some(InternIdent::new(db, token.text()));
                         ControlFlow::Continue(())
                     }
@@ -63,8 +61,7 @@ pub(crate) fn extract_sig<'db>(db: &'db dyn salsa::Database, node: &GreenNodeDat
                     .filter_map(|child| child.into_node().and_then(|node| ValType::from_green(node, db))),
             ),
             _ => {}
-        }
-    });
+        });
     Signature { params, results }
 }
 

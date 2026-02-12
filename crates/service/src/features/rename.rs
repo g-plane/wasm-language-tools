@@ -6,11 +6,10 @@ use crate::{
     idx::InternIdent,
 };
 use lspt::{PrepareRenameParams, PrepareRenameResult, RenameParams, TextEdit, WorkspaceEdit};
-use rowan::ast::support;
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_parser::is_id_char;
-use wat_syntax::{SyntaxKind, SyntaxToken};
+use wat_syntax::{SyntaxKind, SyntaxToken, ast::support};
 
 const ERR_INVALID_IDENTIFIER: &str = "not a valid identifier";
 const ERR_CANT_BE_RENAMED: &str = "This can't be renamed.";
@@ -53,7 +52,7 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
 
         let old_name = InternIdent::new(self, ident_token.text());
-        let symbol_key = SymbolKey::new(&ident_token.parent()?);
+        let symbol_key = SymbolKey::new(&ident_token.parent());
         let symbol = symbol_table.symbols.get(&symbol_key)?;
         let text_edits = symbol_table
             .symbols

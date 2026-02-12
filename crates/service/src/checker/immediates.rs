@@ -1,7 +1,6 @@
 use super::{Diagnostic, FastPlainInstr};
-use rowan::{GreenNodeData, Language, NodeOrToken};
 use std::iter::Peekable;
-use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, WatLanguage};
+use wat_syntax::{GreenNode, NodeOrToken, SyntaxKind, SyntaxNode, SyntaxNodePtr};
 
 const DIAGNOSTIC_CODE: &str = "immediates";
 
@@ -12,7 +11,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
     let mut immediates = green
         .children()
         .filter_map(|node_or_token| match node_or_token {
-            NodeOrToken::Node(node) if node.kind() == SyntaxKind::IMMEDIATE.into() => Some(node),
+            NodeOrToken::Node(node) if node.kind() == SyntaxKind::IMMEDIATE => Some(node),
             _ => None,
         })
         .zip(instr.immediates.iter())
@@ -47,7 +46,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
             if let Some((node, ptr)) = immediates.next() {
                 'a: {
                     let Some(type_use) = node.children().find_map(|node_or_token| match node_or_token {
-                        NodeOrToken::Node(node) if node.kind() == SyntaxKind::TYPE_USE.into() => Some(node),
+                        NodeOrToken::Node(node) if node.kind() == SyntaxKind::TYPE_USE => Some(node),
                         _ => None,
                     }) else {
                         diagnostics.push(Diagnostic {
@@ -60,7 +59,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
                     };
                     let mut children = type_use.children().filter_map(NodeOrToken::into_node);
                     if children.next().is_some_and(|child| {
-                        child.kind() == SyntaxKind::RESULT.into()
+                        child.kind() == SyntaxKind::RESULT
                             && child.children().filter_map(NodeOrToken::into_node).count() == 1
                     }) && children.next().is_none()
                     {
@@ -87,10 +86,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
                 immediates
                     .filter(|(node, _)| {
                         !node.children().next().is_some_and(|node_or_token| {
-                            matches!(
-                                WatLanguage::kind_from_raw(node_or_token.kind()),
-                                SyntaxKind::IDENT | SyntaxKind::INT
-                            )
+                            matches!(node_or_token.kind(), SyntaxKind::IDENT | SyntaxKind::INT)
                         })
                     })
                     .map(|(_, ptr)| Diagnostic {
@@ -202,8 +198,8 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
                 instr,
             );
             if let Some((allow_float, expected_count)) = node
-                .first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
-                .and_then(|immediate| immediate.first_token())
+                .first_child_by_kind(|kind| kind == SyntaxKind::IMMEDIATE)
+                .and_then(|immediate| immediate.first_child_or_token().and_then(NodeOrToken::into_token))
                 .filter(|token| token.kind() == SyntaxKind::SHAPE_DESCRIPTOR)
                 .as_ref()
                 .and_then(|token| token.text().split_once('x'))
@@ -429,16 +425,14 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
 
 fn check_immediate<'a, const REQUIRED: bool>(
     diagnostics: &mut Vec<Diagnostic>,
-    immediates: &mut Peekable<impl Iterator<Item = (&'a GreenNodeData, &'a SyntaxNodePtr)>>,
+    immediates: &mut Peekable<impl Iterator<Item = (&'a GreenNode, &'a SyntaxNodePtr)>>,
     expected: impl SyntaxKindCmp,
     description: &'static str,
     instr: &FastPlainInstr,
 ) {
-    let immediate = immediates.peek().and_then(|(node, ptr)| {
-        node.children()
-            .next()
-            .map(|node_or_token| (WatLanguage::kind_from_raw(node_or_token.kind()), ptr))
-    });
+    let immediate = immediates
+        .peek()
+        .and_then(|(node, ptr)| node.children().next().map(|node_or_token| (node_or_token.kind(), ptr)));
     if let Some((kind, ptr)) = immediate {
         if expected.cmp(kind) {
             immediates.next();

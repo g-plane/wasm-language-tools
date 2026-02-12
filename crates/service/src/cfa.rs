@@ -4,13 +4,9 @@ use crate::{
     idx::InternIdent,
 };
 use petgraph::graph::{Graph, NodeIndex};
-use rowan::{
-    GreenToken,
-    ast::{AstNode, support},
-};
 use wat_syntax::{
-    SyntaxKind, SyntaxNode, SyntaxNodePtr, WatLanguage,
-    ast::{BlockInstr, Cat, Instr},
+    GreenToken, SyntaxKind, SyntaxNode, SyntaxNodePtr,
+    ast::{AstNode, BlockInstr, Cat, Instr, support},
 };
 
 #[salsa::tracked(returns(ref))]
@@ -212,10 +208,7 @@ impl<'db> Builder<'db> {
         }
     }
 
-    fn find_jump_target<N>(&self, node: N) -> Option<NodeIndex>
-    where
-        N: AstNode<Language = WatLanguage>,
-    {
+    fn find_jump_target<N: AstNode>(&self, node: N) -> Option<NodeIndex> {
         self.symbol_table
             .symbols
             .get(&SymbolKey::new(node.syntax()))

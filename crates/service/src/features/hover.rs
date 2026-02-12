@@ -8,11 +8,10 @@ use crate::{
     types_analyzer::{self, CompositeType, DefType, RefType},
 };
 use lspt::{Hover, HoverParams, MarkupContent, MarkupKind, Union3};
-use rowan::ast::{AstNode, support};
 use std::fmt::Write;
 use wat_syntax::{
     SyntaxKind, SyntaxNode,
-    ast::{Limits, MemType, PlainInstr, TableType},
+    ast::{AstNode, Limits, MemType, PlainInstr, TableType, support},
 };
 
 impl LanguageService {
@@ -26,7 +25,7 @@ impl LanguageService {
 
         match token.kind() {
             SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
-                let parent = token.parent()?;
+                let parent = token.parent();
                 let key = SymbolKey::new(&parent);
                 symbol_table.symbols.get(&key).and_then(|symbol| match symbol.kind {
                     SymbolKind::Call
@@ -79,7 +78,7 @@ impl LanguageService {
                 })
             }
             SyntaxKind::KEYWORD => {
-                let node = token.parent()?;
+                let node = token.parent();
                 let node = if node.kind() == SyntaxKind::REF_TYPE {
                     node.parent()?
                 } else {
@@ -102,7 +101,7 @@ impl LanguageService {
                 let name = token.text();
                 match name {
                     "select" => {
-                        let parent = token.parent().and_then(PlainInstr::cast)?;
+                        let parent = PlainInstr::cast(token.parent())?;
                         if parent.immediates().count() > 0 {
                             Some(0x1C)
                         } else {
@@ -110,12 +109,12 @@ impl LanguageService {
                         }
                     }
                     "ref.test" => {
-                        let parent = token.parent().and_then(PlainInstr::cast)?;
+                        let parent = PlainInstr::cast(token.parent())?;
                         if parent
                             .immediates()
                             .next()
                             .and_then(|immediate| immediate.ref_type())
-                            .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), self))
+                            .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), self))
                             .is_some_and(|ty| ty.nullable)
                         {
                             Some(0xFB15)
@@ -124,12 +123,12 @@ impl LanguageService {
                         }
                     }
                     "ref.cast" => {
-                        let parent = token.parent().and_then(PlainInstr::cast)?;
+                        let parent = PlainInstr::cast(token.parent())?;
                         if parent
                             .immediates()
                             .next()
                             .and_then(|immediate| immediate.ref_type())
-                            .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), self))
+                            .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), self))
                             .is_some_and(|ty| ty.nullable)
                         {
                             Some(0xFB17)
@@ -285,7 +284,7 @@ fn create_table_def_hover(db: &dyn salsa::Database, symbol: &Symbol, root: &Synt
         }
         if let Some(ref_type) = table_type
             .ref_type()
-            .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), db))
+            .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), db))
         {
             content.push(' ');
             let _ = write!(content, "{}", ref_type.render(db));

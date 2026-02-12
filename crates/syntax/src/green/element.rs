@@ -1,7 +1,7 @@
 use crate::{GreenNode, GreenToken, NodeOrToken, SyntaxKind};
 use text_size::TextSize;
 
-impl NodeOrToken<GreenNode, GreenToken> {
+impl<'a> NodeOrToken<&'a GreenNode, &'a GreenToken> {
     #[inline]
     pub fn kind(&self) -> SyntaxKind {
         match self {

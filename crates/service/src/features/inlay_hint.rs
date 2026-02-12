@@ -7,8 +7,7 @@ use crate::{
     uri::InternUri,
 };
 use lspt::{InlayHint, InlayHintKind, InlayHintParams, Union2};
-use rowan::ast::support;
-use wat_syntax::SyntaxKind;
+use wat_syntax::{SyntaxKind, ast::support};
 
 impl LanguageService {
     /// Handler for `textDocument/inlayHint` request.

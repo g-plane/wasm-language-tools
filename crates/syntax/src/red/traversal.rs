@@ -2,12 +2,14 @@ use crate::{NodeOrToken, SyntaxElement, SyntaxNode};
 use std::iter::FusedIterator;
 
 pub struct Descendants {
+    start: SyntaxNode,
     next: Option<SyntaxNode>,
     child_entered: bool,
 }
 impl Descendants {
     pub(crate) fn new(start: SyntaxNode) -> Self {
         Self {
+            start: start.clone(),
             next: Some(start),
             child_entered: false,
         }
@@ -22,7 +24,9 @@ impl Descendants {
     }
     fn exit_parent(&self, current: &SyntaxNode) -> Option<SyntaxNode> {
         let mut parent = current.parent();
-        while let Some(p) = parent {
+        while let Some(p) = parent
+            && p != self.start
+        {
             let next = p.next_sibling();
             if next.is_some() {
                 return next;
@@ -39,7 +43,7 @@ impl Iterator for Descendants {
             if let Some(child) = next.first_child() {
                 self.next = Some(child);
                 self.child_entered = true;
-            } else {
+            } else if next != &self.start {
                 self.next = next.next_sibling().or_else(|| self.exit_parent(next));
                 self.child_entered = false;
             }
@@ -49,14 +53,23 @@ impl Iterator for Descendants {
 impl FusedIterator for Descendants {}
 
 pub struct DescendantsWithTokens {
-    pub(crate) next: Option<SyntaxElement>,
+    start: SyntaxNode,
+    next: Option<SyntaxElement>,
 }
 impl DescendantsWithTokens {
     pub(crate) fn new(start: SyntaxElement) -> Self {
-        Self { next: Some(start) }
+        Self {
+            start: match &start {
+                NodeOrToken::Node(node) => node.clone(),
+                NodeOrToken::Token(token) => token.parent(),
+            },
+            next: Some(start),
+        }
     }
     fn exit_parent(&mut self, mut parent: Option<SyntaxNode>) -> Option<SyntaxElement> {
-        while let Some(p) = parent {
+        while let Some(p) = parent
+            && p != self.start
+        {
             let next = p.next_sibling_or_token();
             if next.is_some() {
                 return next;

@@ -8,11 +8,10 @@ use crate::{
     document::Document,
     idx::InternIdent,
 };
-use rowan::{
-    GreenNodeData, NodeOrToken,
-    ast::{AstNode, support},
+use wat_syntax::{
+    GreenNode, NodeOrToken, SyntaxKind, SyntaxNodePtr,
+    ast::{AstNode, TypeUse, support},
 };
-use wat_syntax::{SyntaxKind, SyntaxNodePtr, ast::TypeUse};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash, salsa::Update)]
 pub(crate) struct Signature<'db> {
@@ -82,19 +81,19 @@ pub(crate) fn get_func_sig<'db>(
     db: &'db dyn salsa::Database,
     document: Document,
     key: SymbolKey,
-    green: &GreenNodeData,
+    green: &GreenNode,
 ) -> Signature<'db> {
     green
         .children()
         .find_map(|child| match child {
-            NodeOrToken::Node(node) if node.kind() == SyntaxKind::TYPE_USE.into() => Some(node),
+            NodeOrToken::Node(node) if node.kind() == SyntaxKind::TYPE_USE => Some(node),
             _ => None,
         })
         .and_then(|type_use| {
-            if type_use.children().any(|child| {
-                let kind = child.kind();
-                kind == SyntaxKind::PARAM.into() || kind == SyntaxKind::RESULT.into()
-            }) {
+            if type_use
+                .children()
+                .any(|child| matches!(child.kind(), SyntaxKind::PARAM | SyntaxKind::RESULT))
+            {
                 Some(extract_sig(db, type_use))
             } else {
                 let node = key.to_node(&document.root_tree(db));
@@ -114,12 +113,12 @@ pub(crate) fn get_type_use_sig<'db>(
     db: &'db dyn salsa::Database,
     document: Document,
     ptr: SyntaxNodePtr,
-    type_use: &GreenNodeData,
+    type_use: &GreenNode,
 ) -> Signature<'db> {
-    if type_use.children().any(|child| {
-        let kind = child.kind();
-        kind == SyntaxKind::PARAM.into() || kind == SyntaxKind::RESULT.into()
-    }) {
+    if type_use
+        .children()
+        .any(|child| matches!(child.kind(), SyntaxKind::PARAM | SyntaxKind::RESULT))
+    {
         extract_sig(db, type_use)
     } else {
         let symbol_table = SymbolTable::of(db, document);

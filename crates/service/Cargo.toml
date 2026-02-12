@@ -18,7 +18,6 @@ line-index = { workspace = true }
 lspt = { workspace = true }
 parking_lot = "0.12"
 petgraph = "0.8"
-rowan = { workspace = true }
 rustc-hash = { workspace = true }
 salsa = "0.25"
 serde = { workspace = true }

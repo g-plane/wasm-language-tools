@@ -5,12 +5,11 @@ use crate::{
 };
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, Range, TextEdit, WorkspaceEdit};
-use rowan::ast::AstNode;
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_syntax::{
     SyntaxNode,
-    ast::{CompType, TypeDef, TypeUse},
+    ast::{AstNode, CompType, TypeDef, TypeUse},
 };
 
 pub fn act(

@@ -1,7 +1,6 @@
 use crate::{binder::SymbolKey, document::Document};
-use rowan::{Direction, NodeOrToken};
 use rustc_hash::FxHashMap;
-use wat_syntax::SyntaxKind;
+use wat_syntax::{NodeOrToken, SyntaxKind};
 
 #[salsa::tracked(returns(ref))]
 pub(crate) fn get_deprecation(db: &dyn salsa::Database, document: Document) -> FxHashMap<SymbolKey, Option<String>> {
@@ -30,7 +29,7 @@ pub(crate) fn get_deprecation(db: &dyn salsa::Database, document: Document) -> F
         )
         .filter_map(|node| {
             let key = if node.kind() == SyntaxKind::MODULE_FIELD_IMPORT {
-                SymbolKey::new(&node.first_child_by_kind(&|kind| {
+                SymbolKey::new(&node.first_child_by_kind(|kind| {
                     matches!(
                         kind,
                         SyntaxKind::EXTERN_TYPE_FUNC
@@ -43,7 +42,7 @@ pub(crate) fn get_deprecation(db: &dyn salsa::Database, document: Document) -> F
             } else {
                 SymbolKey::new(&node)
             };
-            node.siblings_with_tokens(Direction::Prev)
+            node.prev_siblings_with_tokens()
                 .skip(1)
                 .map_while(|node_or_token| match node_or_token {
                     NodeOrToken::Token(token) if token.kind().is_trivia() => Some(token),
@@ -59,7 +58,7 @@ pub(crate) fn get_deprecation(db: &dyn salsa::Database, document: Document) -> F
                 })
                 .map(|annot_start| {
                     let reason = annot_start
-                        .siblings_with_tokens(Direction::Next)
+                        .next_siblings_with_tokens()
                         .map_while(|node_or_token| match node_or_token {
                             NodeOrToken::Token(token) if token.kind().is_trivia() => Some(token),
                             _ => None,

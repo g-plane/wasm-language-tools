@@ -3,14 +3,10 @@ use crate::{
     document::Document,
 };
 use indexmap::IndexMap;
-use rowan::{
-    TextRange,
-    ast::{AstNode, support},
-};
 use rustc_hash::FxBuildHasher;
 use wat_syntax::{
-    SyntaxKind,
-    ast::{CompType, ExternTypeGlobal, FieldType, ModuleFieldGlobal, PlainInstr, TypeDef},
+    SyntaxKind, TextRange,
+    ast::{AstNode, CompType, ExternTypeGlobal, FieldType, ModuleFieldGlobal, PlainInstr, TypeDef, support},
 };
 
 #[salsa::tracked(returns(ref))]

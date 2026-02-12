@@ -7,11 +7,10 @@ use crate::{
         get_type_use_sig, resolve_br_types,
     },
 };
-use rowan::{
-    Language, NodeOrToken,
-    ast::{AstNode, support},
+use wat_syntax::{
+    NodeOrToken, SyntaxKind, SyntaxNode, SyntaxNodePtr,
+    ast::{AstNode, Immediate, support},
 };
-use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, WatLanguage, ast::Immediate};
 
 const DIAGNOSTIC_CODE: &str = "type-misuse";
 
@@ -122,9 +121,9 @@ pub fn check(
                     return None;
                 };
                 let rt1_node = immediates.next()?;
-                let rt1 = RefType::from_green(&rt1_node.ref_type()?.syntax().green(), db)?;
+                let rt1 = RefType::from_green(rt1_node.ref_type()?.syntax().green(), db)?;
                 let rt2_node = immediates.next()?;
-                let rt2 = RefType::from_green(&rt2_node.ref_type()?.syntax().green(), db)?;
+                let rt2 = RefType::from_green(rt2_node.ref_type()?.syntax().green(), db)?;
                 if !rt2.matches(&rt1, db, document, module_id) {
                     diagnostics.push(Diagnostic {
                         range: rt2_node.syntax().text_range(),
@@ -175,9 +174,9 @@ pub fn check(
                     return None;
                 };
                 let rt1_node = immediates.next()?;
-                let rt1 = RefType::from_green(&rt1_node.ref_type()?.syntax().green(), db)?;
+                let rt1 = RefType::from_green(rt1_node.ref_type()?.syntax().green(), db)?;
                 let rt2_node = immediates.next()?;
-                let rt2 = RefType::from_green(&rt2_node.ref_type()?.syntax().green(), db)?;
+                let rt2 = RefType::from_green(rt2_node.ref_type()?.syntax().green(), db)?;
                 if !rt2.matches(&rt1, db, document, module_id) {
                     diagnostics.push(Diagnostic {
                         range: rt2_node.syntax().text_range(),
@@ -218,7 +217,7 @@ pub fn check(
                 }
             }
             "return_call" => {
-                if let Some(immediate) = node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
+                if let Some(immediate) = node.first_child_by_kind(|kind| kind == SyntaxKind::IMMEDIATE)
                     && let Some(diagnostic) = symbol_table
                         .find_def(SymbolKey::new(&immediate))
                         .map(|func| get_func_sig(db, document, func.key, &func.green))
@@ -235,7 +234,7 @@ pub fn check(
                 {
                     diagnostics.push(diagnostic);
                 }
-                if let Some(immediate) = node.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)
+                if let Some(immediate) = node.first_child_by_kind(|kind| kind == SyntaxKind::IMMEDIATE)
                     && let Some(diagnostic) = symbol_table
                         .resolved
                         .get(&SymbolKey::new(&immediate))
@@ -254,14 +253,14 @@ pub fn check(
                 }
                 if let Some(type_use) = node
                     .children()
-                    .find_map(|immediate| immediate.first_child_by_kind(&|kind| kind == SyntaxKind::TYPE_USE))
+                    .find_map(|immediate| immediate.first_child_by_kind(|kind| kind == SyntaxKind::TYPE_USE))
                     && let Some(diagnostic) = check_return_call_result_type(
                         db,
                         document,
                         module_id,
                         node,
                         &type_use,
-                        &get_type_use_sig(db, document, SyntaxNodePtr::new(&type_use), &type_use.green()).results,
+                        &get_type_use_sig(db, document, SyntaxNodePtr::new(&type_use), type_use.green()).results,
                     )
                 {
                     diagnostics.push(diagnostic);
@@ -304,7 +303,11 @@ fn check_table_ref_type(
     if let Some(ref_key) = support::children::<Immediate>(node)
         .find(|immediate| {
             matches!(
-                immediate.syntax().first_token().map(|token| token.kind()),
+                immediate
+                    .syntax()
+                    .first_child_or_token()
+                    .and_then(NodeOrToken::into_token)
+                    .map(|token| token.kind()),
                 Some(SyntaxKind::INT | SyntaxKind::UNSIGNED_INT | SyntaxKind::IDENT)
             )
         })
@@ -315,11 +318,11 @@ fn check_table_ref_type(
             .and_then(|symbol| {
                 symbol.green.children().find_map(|child| {
                     if let NodeOrToken::Node(node) = child {
-                        match WatLanguage::kind_from_raw(node.kind()) {
+                        match node.kind() {
                             SyntaxKind::REF_TYPE => Some(node),
                             SyntaxKind::TABLE_TYPE => node.children().find_map(|child| {
                                 if let NodeOrToken::Node(node) = child
-                                    && node.kind() == SyntaxKind::REF_TYPE.into()
+                                    && node.kind() == SyntaxKind::REF_TYPE
                                 {
                                     Some(node)
                                 } else {
@@ -371,7 +374,7 @@ fn check_return_call_result_type(
     let func = instr
         .ancestors()
         .find(|ancestor| ancestor.kind() == SyntaxKind::MODULE_FIELD_FUNC)?;
-    let expected = get_func_sig(db, document, SymbolKey::new(&func), &func.green()).results;
+    let expected = get_func_sig(db, document, SymbolKey::new(&func), func.green()).results;
     if actual.len() == expected.len()
         && actual
             .iter()

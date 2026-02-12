@@ -39,6 +39,15 @@ impl GreenToken {
     }
 }
 
+impl fmt::Debug for GreenToken {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("GreenToken")
+            .field("kind", &self.kind())
+            .field("text", &self.text())
+            .finish()
+    }
+}
+
 impl fmt::Display for GreenToken {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.text().fmt(f)

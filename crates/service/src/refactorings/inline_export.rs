@@ -5,9 +5,8 @@ use crate::{
 };
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
-use rowan::{TextRange, ast::support};
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::{SyntaxKind, SyntaxNode, TextRange, ast::support};
 
 pub fn act(
     db: &dyn salsa::Database,
@@ -37,7 +36,7 @@ pub fn act(
                 )),
                 new_text: format!(
                     " (export {})",
-                    node.first_child_by_kind(&|kind| kind == SyntaxKind::NAME)?.text(),
+                    node.first_child_by_kind(|kind| kind == SyntaxKind::NAME)?,
                 ),
             },
         ],

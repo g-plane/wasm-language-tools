@@ -57,7 +57,7 @@ impl GreenNode {
     }
 
     #[inline]
-    pub fn children(&self) -> impl Iterator<Item = NodeOrToken<&GreenNode, &GreenToken>> {
+    pub fn children(&self) -> impl Iterator<Item = NodeOrToken<&GreenNode, &GreenToken>> + Clone {
         self.data.slice.iter().map(|child| match child {
             GreenChild::Node { node, .. } => NodeOrToken::Node(node),
             GreenChild::Token { token, .. } => NodeOrToken::Token(token),
@@ -79,6 +79,16 @@ impl GreenNode {
             GreenChild::Token { token, .. } => token.clone().into(),
         });
         GreenNode::new(self.data.header.header.kind, children)
+    }
+}
+
+impl fmt::Debug for GreenNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("GreenNode")
+            .field("kind", &self.kind())
+            .field("text_len", &self.text_len())
+            .field("children_len", &self.slice().len())
+            .finish()
     }
 }
 

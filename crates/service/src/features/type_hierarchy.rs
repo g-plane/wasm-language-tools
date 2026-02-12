@@ -18,7 +18,7 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
 
         let token = super::find_meaningful_token(self, document, &root, params.position)?;
-        let parent_range = token.parent()?.text_range();
+        let parent_range = token.parent().text_range();
 
         symbol_table.symbols.values().find_map(|symbol| match symbol.kind {
             SymbolKind::Type if symbol.key.text_range() == parent_range => Some(vec![TypeHierarchyItem {

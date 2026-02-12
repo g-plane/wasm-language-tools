@@ -3,9 +3,8 @@ use crate::{
     document::Document,
     helpers,
 };
-use rowan::TextRange;
 use rustc_hash::FxHashMap;
-use wat_syntax::{SyntaxKind, SyntaxNodePtr};
+use wat_syntax::{SyntaxKind, SyntaxNodePtr, TextRange};
 
 #[salsa::tracked(returns(ref))]
 pub(crate) fn get_imports(db: &dyn salsa::Database, document: Document) -> Vec<SymbolKey> {
@@ -45,7 +44,7 @@ pub(crate) fn get_exports(db: &dyn salsa::Database, document: Document) -> Expor
             let mut exports = Vec::new();
             module.children().for_each(|module_field| {
                 if module_field.kind() == SyntaxKind::MODULE_FIELD_EXPORT {
-                    if let Some(name) = module_field.first_child_by_kind(&|kind| kind == SyntaxKind::NAME)
+                    if let Some(name) = module_field.first_child_by_kind(|kind| kind == SyntaxKind::NAME)
                         && let Some(def_key) = helpers::syntax::extract_index_from_export(&module_field)
                             .and_then(|index| symbol_table.resolved.get(&SymbolKey::new(&index)))
                     {
@@ -60,7 +59,7 @@ pub(crate) fn get_exports(db: &dyn salsa::Database, document: Document) -> Expor
                         module_field
                             .children()
                             .filter(|child| child.kind() == SyntaxKind::EXPORT)
-                            .filter_map(|export| export.first_child_by_kind(&|kind| kind == SyntaxKind::NAME))
+                            .filter_map(|export| export.first_child_by_kind(|kind| kind == SyntaxKind::NAME))
                             .map(|name| Export {
                                 def_key: SymbolKey::new(&module_field),
                                 name: name.to_string(),

@@ -15,10 +15,10 @@ pub fn check(
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) {
-    let Some(type_use) = node.first_child_by_kind(&|kind| kind == SyntaxKind::TYPE_USE) else {
+    let Some(type_use) = node.first_child_by_kind(|kind| kind == SyntaxKind::TYPE_USE) else {
         return;
     };
-    if let Some(index) = type_use.first_child_by_kind(&|kind| kind == SyntaxKind::INDEX) {
+    if let Some(index) = type_use.first_child_by_kind(|kind| kind == SyntaxKind::INDEX) {
         let def_types = types_analyzer::get_def_types(db, document);
         if symbol_table
             .resolved
@@ -34,7 +34,7 @@ pub fn check(
             });
         }
     }
-    let sig = types_analyzer::get_type_use_sig(db, document, SyntaxNodePtr::new(&type_use), &type_use.green());
+    let sig = types_analyzer::get_type_use_sig(db, document, SyntaxNodePtr::new(&type_use), type_use.green());
     if !sig.results.is_empty() {
         diagnostics.push(Diagnostic {
             range: type_use.text_range(),

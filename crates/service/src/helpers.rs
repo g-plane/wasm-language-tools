@@ -1,7 +1,7 @@
 use line_index::{LineCol, LineIndex};
 use lspt::{Position, Range};
-use rowan::{TextRange, TextSize};
 use std::num::ParseIntError;
+use wat_syntax::{TextRange, TextSize};
 
 pub use self::arena::{BumpCollectionsExt, BumpHashMap, BumpHashSet};
 
@@ -11,7 +11,7 @@ pub trait LineIndexExt<In> {
 }
 impl LineIndexExt<TextSize> for LineIndex {
     type Out = Position;
-    /// Convert rowan offset to LSP position.
+    /// Convert syntax tree offset to LSP position.
     fn convert(&self, input: TextSize) -> Self::Out {
         let line_col = self.line_col(input);
         Position {
@@ -22,7 +22,7 @@ impl LineIndexExt<TextSize> for LineIndex {
 }
 impl LineIndexExt<TextRange> for LineIndex {
     type Out = Range;
-    /// Convert rowan range to LSP range.
+    /// Convert syntax tree range to LSP range.
     fn convert(&self, input: TextRange) -> Self::Out {
         Range {
             start: self.convert(input.start()),
@@ -32,7 +32,7 @@ impl LineIndexExt<TextRange> for LineIndex {
 }
 impl LineIndexExt<Position> for LineIndex {
     type Out = Option<TextSize>;
-    /// Convert LSP position to rowan offset.
+    /// Convert LSP position to syntax tree offset.
     fn convert(&self, input: Position) -> Self::Out {
         self.offset(LineCol {
             line: input.line,
@@ -42,7 +42,7 @@ impl LineIndexExt<Position> for LineIndex {
 }
 impl LineIndexExt<Range> for LineIndex {
     type Out = Option<TextRange>;
-    /// Convert LSP range to rowan range.
+    /// Convert LSP range to syntax tree range.
     fn convert(&self, input: Range) -> Self::Out {
         self.offset(LineCol {
             line: input.start.line,
@@ -88,21 +88,17 @@ pub(crate) struct RenderWithDb<'db, T> {
 
 pub(crate) mod syntax {
     use crate::binder::Symbol;
-    use rowan::{
-        Direction, TextSize, TokenAtOffset,
-        ast::{AstNode, support},
-    };
     use std::ops::ControlFlow;
     use wat_syntax::{
-        SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken,
-        ast::{CompType, ExternIdx, TypeDef},
+        SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, TextSize, TokenAtOffset,
+        ast::{AstNode, CompType, ExternIdx, TypeDef, support},
     };
 
     /// Pick the `$idx` part from `(func (type $idx) ...)`.
     /// It will return `None` if there're inlined params or results.
     pub fn pick_type_idx_from_func(func: &SyntaxNode) -> Option<SyntaxNode> {
         if let ControlFlow::Continue(Some(index)) = func
-            .first_child_by_kind(&|kind| kind == SyntaxKind::TYPE_USE)
+            .first_child_by_kind(|kind| kind == SyntaxKind::TYPE_USE)
             .into_iter()
             .flat_map(|type_use| type_use.children())
             .try_fold(None, |r, child| match child.kind() {
@@ -119,8 +115,8 @@ pub(crate) mod syntax {
 
     pub fn extract_index_from_export(module_field_export: &SyntaxNode) -> Option<SyntaxNode> {
         module_field_export
-            .first_child_by_kind(&ExternIdx::can_cast)
-            .and_then(|extern_idx| extern_idx.first_child_by_kind(&|kind| kind == SyntaxKind::INDEX))
+            .first_child_by_kind(ExternIdx::can_cast)
+            .and_then(|extern_idx| extern_idx.first_child_by_kind(|kind| kind == SyntaxKind::INDEX))
     }
 
     pub fn is_call(node: &SyntaxNode) -> bool {
@@ -148,7 +144,7 @@ pub(crate) mod syntax {
     }
 
     pub fn get_doc_comment(node: &SyntaxNode) -> String {
-        node.siblings_with_tokens(Direction::Prev)
+        node.prev_siblings_with_tokens()
             .skip(1)
             .map_while(|node_or_token| match node_or_token {
                 SyntaxElement::Token(token) if token.kind().is_trivia() => Some(token),

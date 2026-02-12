@@ -4,10 +4,9 @@ use crate::{
     document::Document,
     types_analyzer::RefType,
 };
-use rowan::ast::AstNode;
 use wat_syntax::{
     SyntaxNode,
-    ast::{ModuleFieldElem, ModuleFieldTable},
+    ast::{AstNode, ModuleFieldElem, ModuleFieldTable},
 };
 
 const DIAGNOSTIC_CODE: &str = "elem-type";
@@ -28,9 +27,9 @@ pub fn check(
             .to_node(root),
     )?;
     let table_ref_type_node = table.table_type()?.ref_type()?;
-    let table_ref_type = RefType::from_green(&table_ref_type_node.syntax().green(), db)?;
+    let table_ref_type = RefType::from_green(table_ref_type_node.syntax().green(), db)?;
     let elem_ref_type_node = elem.elem_list()?.ref_type()?;
-    let elem_ref_type = RefType::from_green(&elem_ref_type_node.syntax().green(), db)?;
+    let elem_ref_type = RefType::from_green(elem_ref_type_node.syntax().green(), db)?;
     if elem_ref_type.matches(&table_ref_type, db, document, module_id) {
         None
     } else {

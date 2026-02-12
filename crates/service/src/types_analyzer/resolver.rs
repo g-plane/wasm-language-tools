@@ -9,8 +9,10 @@ use crate::{
     document::Document,
     idx::Idx,
 };
-use rowan::ast::{AstNode, support};
-use wat_syntax::{SyntaxKind, SyntaxNode, ast::Immediate};
+use wat_syntax::{
+    SyntaxKind, SyntaxNode,
+    ast::{AstNode, Immediate, support},
+};
 
 pub(crate) fn resolve_param_types<'db>(
     db: &'db dyn salsa::Database,
@@ -22,7 +24,7 @@ pub(crate) fn resolve_param_types<'db>(
     let instr_name = instr_name.text();
     if matches!(instr_name, "call" | "return_call") {
         let symbol_table = SymbolTable::of(db, document);
-        let idx = instr.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)?;
+        let idx = instr.first_child_by_kind(|kind| kind == SyntaxKind::IMMEDIATE)?;
         let func = symbol_table.find_def(SymbolKey::new(&idx))?;
         Some(
             get_func_sig(db, document, func.key, &func.green)

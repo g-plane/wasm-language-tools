@@ -1,10 +1,9 @@
 use crate::{helpers::LineIndexExt, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionContext, CodeActionKind, TextEdit, Union2, WorkspaceEdit};
-use rowan::ast::support;
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode, ast::support};
 
 pub fn act(
     db: &dyn salsa::Database,
@@ -32,7 +31,8 @@ pub fn act(
         new_text: "".into(),
     });
     if let Some(whitespace) = mut_token
-        .next_token()
+        .next_sibling_or_token()
+        .and_then(NodeOrToken::into_token)
         .filter(|token| token.kind() == SyntaxKind::WHITESPACE)
     {
         text_edits.push(TextEdit {

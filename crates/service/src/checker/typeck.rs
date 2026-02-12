@@ -14,14 +14,10 @@ use crate::{
 };
 use bumpalo::{Bump, collections::Vec as BumpVec};
 use itertools::{EitherOrBoth, Itertools};
-use rowan::{
-    TextRange,
-    ast::{AstNode, support},
-};
 use std::iter;
 use wat_syntax::{
-    SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodePtr,
-    ast::{BlockInstr, ElemList, Instr, ModuleFieldFunc, ModuleFieldTable, PlainInstr},
+    SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange,
+    ast::{AstNode, BlockInstr, ElemList, Instr, ModuleFieldFunc, ModuleFieldTable, PlainInstr, support},
 };
 
 const DIAGNOSTIC_CODE: &str = "type-check";
@@ -37,7 +33,7 @@ pub fn check_func(
 ) {
     {
         let results = BumpVec::from_iter_in(
-            get_func_sig(db, document, SymbolKey::new(node), &node.green())
+            get_func_sig(db, document, SymbolKey::new(node), node.green())
                 .results
                 .into_iter()
                 .map(OperandType::Val),
@@ -73,7 +69,7 @@ pub fn check_global(
     node: &SyntaxNode,
     bump: &mut Bump,
 ) {
-    let ty = extract_global_type(db, &node.green())
+    let ty = extract_global_type(db, node.green())
         .map(OperandType::Val)
         .unwrap_or(OperandType::Any);
     check_block_like(
@@ -111,7 +107,7 @@ pub fn check_table(
                 .ref_type()
                 .or_else(|| table.table_type().and_then(|table_type| table_type.ref_type()))
         })
-        .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), db))
+        .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), db))
     else {
         return;
     };
@@ -176,7 +172,7 @@ pub fn check_elem_list(
 ) {
     let Some(ref_type) = ElemList::cast(node.clone())
         .and_then(|elem_list| elem_list.ref_type())
-        .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), db))
+        .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), db))
     else {
         return;
     };
@@ -272,7 +268,7 @@ fn check_instr<'db, 'bump>(
         }
         Instr::Block(block_instr) => {
             let node = block_instr.syntax();
-            let signature = get_func_sig(shared.db, shared.document, SymbolKey::new(node), &node.green());
+            let signature = get_func_sig(shared.db, shared.document, SymbolKey::new(node), node.green());
             let init_stack = signature
                 .params
                 .iter()
@@ -612,7 +608,7 @@ fn resolve_sig<'db, 'bump>(
                 .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
                 .map(|func| {
                     BumpVec::from_iter_in(
-                        get_func_sig(shared.db, shared.document, SymbolKey::new(&func), &func.green())
+                        get_func_sig(shared.db, shared.document, SymbolKey::new(&func), func.green())
                             .results
                             .into_iter()
                             .map(OperandType::Val),
@@ -767,11 +763,11 @@ fn resolve_sig<'db, 'bump>(
             let rt1 = immediates
                 .next()
                 .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), shared.db));
+                .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), shared.db));
             let rt2 = immediates
                 .next()
                 .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), shared.db));
+                .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), shared.db));
             let mut params = BumpVec::from_iter_in(types.iter().cloned(), bump);
             let mut results = types;
             if let Some((rt1, rt2)) = rt1.zip(rt2) {
@@ -798,11 +794,11 @@ fn resolve_sig<'db, 'bump>(
             let rt1 = immediates
                 .next()
                 .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), shared.db));
+                .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), shared.db));
             let rt2 = immediates
                 .next()
                 .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), shared.db));
+                .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), shared.db));
             let mut params = BumpVec::from_iter_in(types.iter().cloned(), bump);
             let mut results = types;
             if let Some((rt1, rt2)) = rt1.zip(rt2) {
@@ -840,7 +836,7 @@ fn resolve_sig<'db, 'bump>(
                 .map(|type_use| {
                     let node = type_use.syntax();
                     ResolvedSig::from_func_sig_in(
-                        get_type_use_sig(shared.db, shared.document, SyntaxNodePtr::new(node), &node.green()),
+                        get_type_use_sig(shared.db, shared.document, SyntaxNodePtr::new(node), node.green()),
                         bump,
                     )
                 })
@@ -1203,7 +1199,7 @@ fn resolve_sig<'db, 'bump>(
                 .and_then(|immediate| immediate.syntax().first_child_or_token())
                 .and_then(|element| match element {
                     SyntaxElement::Node(node) if node.kind() == SyntaxKind::HEAP_TYPE => {
-                        HeapType::from_green(&node.green(), shared.db)
+                        HeapType::from_green(node.green(), shared.db)
                     }
                     SyntaxElement::Token(token) if token.kind() == SyntaxKind::IDENT => Some(HeapType::Type(Idx {
                         num: None,
@@ -1273,7 +1269,7 @@ fn resolve_sig<'db, 'bump>(
                 .immediates()
                 .next()
                 .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), shared.db))
+                .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), shared.db))
                 .and_then(|ref_type| {
                     ref_type
                         .heap_ty
@@ -1296,7 +1292,7 @@ fn resolve_sig<'db, 'bump>(
                 .immediates()
                 .next()
                 .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| RefType::from_green(&ref_type.syntax().green(), shared.db))
+                .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), shared.db))
                 .unwrap_or(RefType {
                     heap_ty: HeapType::Any,
                     nullable: true,
@@ -1403,7 +1399,7 @@ impl ReportRange<'_> {
                 Instr::Plain(plain_instr) => plain_instr.syntax().text_range(),
                 Instr::Block(block_instr) => block_instr
                     .syntax()
-                    .first_child_by_kind(&|kind| kind == SyntaxKind::TYPE_USE)
+                    .first_child_by_kind(|kind| kind == SyntaxKind::TYPE_USE)
                     .map(|type_use| type_use.text_range())
                     .unwrap_or_else(|| block_instr.syntax().text_range()),
             },

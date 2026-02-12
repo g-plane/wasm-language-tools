@@ -1,7 +1,9 @@
 use super::Diagnostic;
 use crate::{binder::SymbolTable, document::Document, types_analyzer};
-use rowan::ast::AstNode;
-use wat_syntax::{SyntaxNode, ast::TypeDef};
+use wat_syntax::{
+    SyntaxNode,
+    ast::{AstNode, TypeDef},
+};
 
 const DIAGNOSTIC_CODE: &str = "subtyping";
 

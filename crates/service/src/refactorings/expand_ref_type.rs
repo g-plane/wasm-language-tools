@@ -1,9 +1,8 @@
 use crate::{helpers::LineIndexExt, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
-use rowan::ast::support;
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::{SyntaxKind, SyntaxNode, ast::support};
 
 pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
     let token = support::token(node, SyntaxKind::TYPE_KEYWORD)?;

@@ -8,11 +8,10 @@ use crate::{
 use lspt::{
     MarkupContent, MarkupKind, ParameterInformation, SignatureHelp, SignatureHelpParams, SignatureInformation, Union2,
 };
-use rowan::{Direction, ast::AstNode};
 use std::fmt::Write;
 use wat_syntax::{
     SyntaxElement, SyntaxKind, SyntaxNodePtr,
-    ast::{Instr, PlainInstr},
+    ast::{AstNode, Instr, PlainInstr},
 };
 
 impl LanguageService {
@@ -27,9 +26,9 @@ impl LanguageService {
             let token = helpers::syntax::find_token(&root, line_index.convert(params.position)?)?;
             let (node, instr, is_next) = if token.kind() == SyntaxKind::ERROR {
                 (
-                    token.parent()?,
+                    token.parent(),
                     token
-                        .siblings_with_tokens(Direction::Prev)
+                        .prev_siblings_with_tokens()
                         .skip(1)
                         .find_map(|sibling| match sibling {
                             SyntaxElement::Node(node) => Instr::cast(node),
@@ -38,7 +37,7 @@ impl LanguageService {
                     true,
                 )
             } else {
-                let instr = token.parent()?;
+                let instr = token.parent();
                 (instr.parent()?, Instr::cast(instr), false)
             };
             let parent_instr = PlainInstr::cast(node.clone())?;
@@ -55,7 +54,7 @@ impl LanguageService {
                     let type_use = parent_instr.immediates().find_map(|immediate| immediate.type_use())?;
                     let type_use = type_use.syntax();
                     let mut sig =
-                        types_analyzer::get_type_use_sig(db, document, SyntaxNodePtr::new(type_use), &type_use.green());
+                        types_analyzer::get_type_use_sig(db, document, SyntaxNodePtr::new(type_use), type_use.green());
                     sig.params.push((ValType::I32, None));
                     (sig, None)
                 }

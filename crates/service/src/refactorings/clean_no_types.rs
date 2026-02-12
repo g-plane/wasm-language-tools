@@ -1,9 +1,8 @@
 use crate::{helpers::LineIndexExt, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
-use rowan::NodeOrToken;
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode};
 
 pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
     let kind = match node.kind() {

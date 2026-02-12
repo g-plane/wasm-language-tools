@@ -9,9 +9,11 @@ use crate::{
     helpers,
     idx::{Idx, InternIdent},
 };
-use rowan::{TextRange, ast::AstNode};
 use rustc_hash::FxHashMap;
-use wat_syntax::ast::{CompType, ModuleField, Root, TypeDef};
+use wat_syntax::{
+    TextRange,
+    ast::{AstNode, CompType, ModuleField, Root, TypeDef},
+};
 
 #[salsa::tracked(returns(ref))]
 pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> DefTypes<'_> {
@@ -43,7 +45,7 @@ pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Def
                 }
             }
             let comp = match node.sub_type()?.comp_type()? {
-                CompType::Func(func_type) => CompositeType::Func(extract_sig(db, &func_type.syntax().green())),
+                CompType::Func(func_type) => CompositeType::Func(extract_sig(db, func_type.syntax().green())),
                 CompType::Struct(struct_type) => CompositeType::Struct(extract_fields(db, &struct_type)),
                 CompType::Array(array_type) => {
                     CompositeType::Array(array_type.field_type().and_then(|node| FieldType::from_ast(&node, db)))

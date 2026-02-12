@@ -1,8 +1,10 @@
 use super::Diagnostic;
 use crate::config::LintLevel;
 use lspt::{DiagnosticSeverity, DiagnosticTag};
-use rowan::ast::{AstNode, support};
-use wat_syntax::{SyntaxKind, SyntaxNode, ast::Cat};
+use wat_syntax::{
+    SyntaxKind, SyntaxNode,
+    ast::{AstNode, Cat, support},
+};
 
 const DIAGNOSTIC_CODE: &str = "needless-try-table";
 

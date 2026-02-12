@@ -4,11 +4,10 @@ use crate::{
     config::LintLevel,
 };
 use lspt::{DiagnosticSeverity, DiagnosticTag};
-use rowan::ast::{AstNode, support};
 use rustc_hash::FxHashMap;
 use wat_syntax::{
     SyntaxNode,
-    ast::{Cat, Catch, CatchAll},
+    ast::{AstNode, Cat, Catch, CatchAll, support},
 };
 
 const DIAGNOSTIC_CODE: &str = "useless-catch";

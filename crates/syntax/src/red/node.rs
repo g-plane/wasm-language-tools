@@ -349,9 +349,6 @@ impl SyntaxNode {
     // Copied from rowan with modification.
     pub fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset {
         let range = self.data.range;
-        if !range.contains(offset) {
-            return TokenAtOffset::None;
-        }
         let relative_offset = offset - range.start();
         let mut children = self
             .green()
@@ -391,7 +388,7 @@ impl SyntaxNode {
         }
         let relative_range = range - self.data.range.start();
         let slice = self.green().slice();
-        slice
+        let i = slice
             .binary_search_by(|child| match child {
                 GreenChild::Node { offset, node } => {
                     TextRange::new(*offset, offset + node.text_len()).ordering(relative_range)
@@ -400,11 +397,23 @@ impl SyntaxNode {
                     TextRange::new(*offset, offset + token.text_len()).ordering(relative_range)
                 }
             })
-            .ok()
-            .and_then(|i| match slice.get(i)? {
-                GreenChild::Node { offset, node } => Some(self.new_child(i as u32, node, *offset).into()),
-                GreenChild::Token { offset, token } => Some(self.new_token(i as u32, token, *offset).into()),
-            })
+            .unwrap_or_else(|i| i.saturating_sub(1)); // not sure why but rowan does it
+        slice.get(i).and_then(|child| match child {
+            GreenChild::Node { offset, node } => {
+                if TextRange::new(*offset, offset + node.text_len()).contains_range(relative_range) {
+                    Some(self.new_child(i as u32, node, *offset).into())
+                } else {
+                    None
+                }
+            }
+            GreenChild::Token { offset, token } => {
+                if TextRange::new(*offset, offset + token.text_len()).contains_range(relative_range) {
+                    Some(self.new_token(i as u32, token, *offset).into())
+                } else {
+                    None
+                }
+            }
+        })
     }
 
     #[inline]

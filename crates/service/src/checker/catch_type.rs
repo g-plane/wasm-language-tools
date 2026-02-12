@@ -5,8 +5,10 @@ use crate::{
     types_analyzer::{self, HeapType, RefType, ValType},
 };
 use itertools::Itertools;
-use rowan::ast::AstNode;
-use wat_syntax::{SyntaxNode, ast::Cat};
+use wat_syntax::{
+    SyntaxNode,
+    ast::{AstNode, Cat},
+};
 
 const DIAGNOSTIC_CODE: &str = "catch-type";
 

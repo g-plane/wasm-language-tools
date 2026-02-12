@@ -6,10 +6,9 @@ use crate::{
     idx::{Idx, InternIdent},
     types_analyzer::{self, DefType},
 };
-use rowan::{GreenNodeData, Language, NodeOrToken, ast::AstNode};
 use wat_syntax::{
-    SyntaxKind, WatLanguage,
-    ast::{FieldType as AstFieldType, StorageType as AstStorageType, ValType as AstValType},
+    GreenNode, NodeOrToken, SyntaxKind,
+    ast::{AstNode, FieldType as AstFieldType, StorageType as AstStorageType, ValType as AstValType},
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, salsa::Update)]
@@ -23,11 +22,11 @@ pub(crate) enum ValType<'db> {
 }
 impl<'db> ValType<'db> {
     pub(crate) fn from_ast(node: &AstValType, db: &'db dyn salsa::Database) -> Option<Self> {
-        Self::from_green(&node.syntax().green(), db)
+        Self::from_green(node.syntax().green(), db)
     }
 
-    pub(crate) fn from_green(node: &GreenNodeData, db: &'db dyn salsa::Database) -> Option<Self> {
-        match WatLanguage::kind_from_raw(node.kind()) {
+    pub(crate) fn from_green(node: &GreenNode, db: &'db dyn salsa::Database) -> Option<Self> {
+        match node.kind() {
             SyntaxKind::NUM_TYPE => match node.children().next().and_then(|child| child.into_token())?.text() {
                 "i32" => Some(ValType::I32),
                 "i64" => Some(ValType::I64),
@@ -82,7 +81,7 @@ pub(crate) struct RefType<'db> {
     pub nullable: bool,
 }
 impl<'db> RefType<'db> {
-    pub(crate) fn from_green(node: &GreenNodeData, db: &'db dyn salsa::Database) -> Option<Self> {
+    pub(crate) fn from_green(node: &GreenNode, db: &'db dyn salsa::Database) -> Option<Self> {
         let mut children = node.children();
         match children.next().and_then(|child| child.into_token())?.text() {
             "anyref" => Some(RefType {
@@ -137,10 +136,10 @@ impl<'db> RefType<'db> {
                 let mut nullable = false;
                 for node_or_token in children {
                     match node_or_token {
-                        NodeOrToken::Node(node) if node.kind() == SyntaxKind::HEAP_TYPE.into() => {
+                        NodeOrToken::Node(node) if node.kind() == SyntaxKind::HEAP_TYPE => {
                             return HeapType::from_green(node, db).map(|heap_ty| RefType { heap_ty, nullable });
                         }
-                        NodeOrToken::Token(token) if token.kind() == SyntaxKind::MODIFIER_KEYWORD.into() => {
+                        NodeOrToken::Token(token) if token.kind() == SyntaxKind::MODIFIER_KEYWORD => {
                             nullable = true;
                         }
                         _ => {}
@@ -198,11 +197,11 @@ pub(crate) enum HeapType<'db> {
     DefFunc(Idx<'db>), // internal use
 }
 impl<'db> HeapType<'db> {
-    pub(crate) fn from_green(node: &GreenNodeData, db: &'db dyn salsa::Database) -> Option<Self> {
+    pub(crate) fn from_green(node: &GreenNode, db: &'db dyn salsa::Database) -> Option<Self> {
         match node.children().next() {
-            Some(NodeOrToken::Node(node)) if node.kind() == SyntaxKind::INDEX.into() => {
+            Some(NodeOrToken::Node(node)) if node.kind() == SyntaxKind::INDEX => {
                 let token = node.children().next()?.into_token()?;
-                match WatLanguage::kind_from_raw(token.kind()) {
+                match token.kind() {
                     SyntaxKind::UNSIGNED_INT => Some(HeapType::Type(Idx {
                         num: helpers::parse_u32(token.text()).ok(),
                         name: None,
@@ -214,7 +213,7 @@ impl<'db> HeapType<'db> {
                     _ => None,
                 }
             }
-            Some(NodeOrToken::Token(token)) if token.kind() == SyntaxKind::TYPE_KEYWORD.into() => match token.text() {
+            Some(NodeOrToken::Token(token)) if token.kind() == SyntaxKind::TYPE_KEYWORD => match token.text() {
                 "any" => Some(HeapType::Any),
                 "eq" => Some(HeapType::Eq),
                 "i31" => Some(HeapType::I31),

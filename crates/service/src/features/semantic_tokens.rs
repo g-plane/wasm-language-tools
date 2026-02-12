@@ -8,10 +8,9 @@ use crate::{
 use indexmap::IndexSet;
 use line_index::LineCol;
 use lspt::{SemanticTokens, SemanticTokensParams, SemanticTokensRangeParams};
-use rowan::ast::support;
 use rustc_hash::FxBuildHasher;
 use std::mem;
-use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken};
+use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, ast::support};
 
 impl LanguageService {
     /// Handler for `textDocument/semanticTokens/full` request.
@@ -143,7 +142,7 @@ fn compute_token_type(
         SyntaxKind::KEYWORD => token_types.get_index_of(&SemanticTokenType::Keyword),
         SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
             let parent = token.parent();
-            let grand = parent.as_ref().and_then(|parent| parent.parent());
+            let grand = parent.parent();
             if grand.as_ref().is_some_and(|grand| {
                 helpers::syntax::is_call(grand)
                     || matches!(
@@ -152,13 +151,11 @@ fn compute_token_type(
                     )
             }) {
                 token_types.get_index_of(&SemanticTokenType::Func)
-            } else if let Some(immediate) = grand
-                .filter(|grand| {
-                    support::token(grand, SyntaxKind::INSTR_NAME).is_some_and(|name| name.text().starts_with("local."))
-                })
-                .and(parent)
+            } else if grand
+                .and_then(|grand| support::token(&grand, SyntaxKind::INSTR_NAME))
+                .is_some_and(|name| name.text().starts_with("local."))
             {
-                if is_ref_of_param(&immediate, symbol_table) {
+                if is_ref_of_param(&parent, symbol_table) {
                     token_types.get_index_of(&SemanticTokenType::Param)
                 } else {
                     token_types.get_index_of(&SemanticTokenType::Var)
@@ -170,20 +167,16 @@ fn compute_token_type(
         SyntaxKind::FLOAT => token_types.get_index_of(&SemanticTokenType::Number),
         SyntaxKind::IDENT => {
             let parent = token.parent();
-            if parent.as_ref().and_then(|parent| parent.parent()).is_some_and(|grand| {
+            if parent.parent().is_some_and(|grand| {
                 helpers::syntax::is_call(&grand)
                     || matches!(
                         grand.kind(),
                         SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXTERN_IDX_FUNC | SyntaxKind::ELEM_LIST
                     )
-            }) || parent
-                .as_ref()
-                .is_some_and(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
+            }) || parent.kind() == SyntaxKind::MODULE_FIELD_FUNC
             {
                 token_types.get_index_of(&SemanticTokenType::Func)
-            } else if parent.as_ref().is_some_and(|node| node.kind() == SyntaxKind::PARAM)
-                || parent.as_ref().is_some_and(|node| is_ref_of_param(node, symbol_table))
-            {
+            } else if parent.kind() == SyntaxKind::PARAM || is_ref_of_param(&parent, symbol_table) {
                 token_types.get_index_of(&SemanticTokenType::Param)
             } else {
                 token_types.get_index_of(&SemanticTokenType::Var)
@@ -213,9 +206,7 @@ fn compute_token_modifier(
     if matches!(
         token.kind(),
         SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT
-    ) && let Some(symbol) = token
-        .parent()
-        .and_then(|node| symbol_table.symbols.get(&SymbolKey::new(&node)))
+    ) && let Some(symbol) = symbol_table.symbols.get(&SymbolKey::new(&token.parent()))
     {
         match symbol.kind {
             SymbolKind::GlobalDef | SymbolKind::Type | SymbolKind::FieldDef => {

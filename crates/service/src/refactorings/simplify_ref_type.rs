@@ -1,17 +1,16 @@
 use crate::{helpers::LineIndexExt, types_analyzer::RefType, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
-use rowan::ast::support;
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::{SyntaxKind, SyntaxNode, ast::support};
 
 pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
-    if !RefType::from_green(&node.green(), db)?.nullable {
+    if !RefType::from_green(node.green(), db)?.nullable {
         return None;
     }
 
     let token = node
-        .first_child_by_kind(&|kind| kind == SyntaxKind::HEAP_TYPE)
+        .first_child_by_kind(|kind| kind == SyntaxKind::HEAP_TYPE)
         .and_then(|heap_ty| support::token(&heap_ty, SyntaxKind::TYPE_KEYWORD))?;
     let ref_type = match token.text() {
         "any" => "anyref",

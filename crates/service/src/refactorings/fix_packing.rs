@@ -1,10 +1,9 @@
 use crate::{helpers::LineIndexExt, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionContext, CodeActionKind, Diagnostic, TextEdit, Union2, WorkspaceEdit};
-use rowan::{Direction, TextRange};
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
-use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode};
+use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode, TextRange};
 
 pub fn act(
     db: &dyn salsa::Database,
@@ -19,9 +18,9 @@ pub fn act(
         _ => false,
     })?;
     let instr_name = node
-        .siblings_with_tokens(Direction::Prev)
-        .find_map(|element| match element {
-            SyntaxElement::Token(token) if token.kind() == SyntaxKind::INSTR_NAME => Some(token),
+        .prev_siblings_with_tokens()
+        .find_map(|node_or_token| match node_or_token {
+            NodeOrToken::Token(token) if token.kind() == SyntaxKind::INSTR_NAME => Some(token),
             _ => None,
         })?;
 

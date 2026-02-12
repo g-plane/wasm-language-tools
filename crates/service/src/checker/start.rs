@@ -4,8 +4,10 @@ use crate::{
     document::Document,
     types_analyzer,
 };
-use rowan::ast::{AstNode, support};
-use wat_syntax::{SyntaxNode, ast::Index};
+use wat_syntax::{
+    SyntaxNode,
+    ast::{AstNode, Index, support},
+};
 
 const DIAGNOSTIC_CODE: &str = "start";
 

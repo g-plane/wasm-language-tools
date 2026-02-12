@@ -13,9 +13,10 @@ impl LanguageService {
         let root = document.root_tree(self);
         let token = super::find_meaningful_token(self, document, &root, params.position)?;
 
-        let parent = token
-            .parent()
-            .filter(|parent| matches!(parent.kind(), SyntaxKind::IMMEDIATE | SyntaxKind::INDEX))?;
+        let parent = token.parent();
+        if !matches!(parent.kind(), SyntaxKind::IMMEDIATE | SyntaxKind::INDEX) {
+            return None;
+        }
         let line_index = document.line_index(self);
         let symbol_table = SymbolTable::of(self, document);
         let key = SymbolKey::new(&parent);
@@ -39,7 +40,10 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
         let token = super::find_meaningful_token(self, document, &root, params.position)?;
 
-        let parent = token.parent().filter(|parent| parent.kind() == SyntaxKind::IMMEDIATE)?;
+        let parent = token.parent();
+        if !matches!(parent.kind(), SyntaxKind::IMMEDIATE | SyntaxKind::INDEX) {
+            return None;
+        }
         symbol_table
             .resolved
             .get(&SymbolKey::new(&parent))
@@ -48,15 +52,15 @@ impl LanguageService {
                     .children()
                     .find_map(|child| match child.kind() {
                         SyntaxKind::TYPE_USE | SyntaxKind::HEAP_TYPE => {
-                            child.first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)
+                            child.first_child_by_kind(|kind| kind == SyntaxKind::INDEX)
                         }
                         SyntaxKind::REF_TYPE => child
-                            .first_child_by_kind(&|kind| kind == SyntaxKind::HEAP_TYPE)
-                            .and_then(|node| node.first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)),
+                            .first_child_by_kind(|kind| kind == SyntaxKind::HEAP_TYPE)
+                            .and_then(|node| node.first_child_by_kind(|kind| kind == SyntaxKind::INDEX)),
                         SyntaxKind::GLOBAL_TYPE => child
-                            .first_child_by_kind(&|kind| kind == SyntaxKind::REF_TYPE)
-                            .and_then(|node| node.first_child_by_kind(&|kind| kind == SyntaxKind::HEAP_TYPE))
-                            .and_then(|node| node.first_child_by_kind(&|kind| kind == SyntaxKind::INDEX)),
+                            .first_child_by_kind(|kind| kind == SyntaxKind::REF_TYPE)
+                            .and_then(|node| node.first_child_by_kind(|kind| kind == SyntaxKind::HEAP_TYPE))
+                            .and_then(|node| node.first_child_by_kind(|kind| kind == SyntaxKind::INDEX)),
                         _ => None,
                     })
                     .and_then(|type_idx| symbol_table.resolved.get(&SymbolKey::new(&type_idx)))

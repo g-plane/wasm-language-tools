@@ -1,8 +1,7 @@
 use crate::{LanguageService, helpers::LineIndexExt, uri::InternUri};
 use lspt::{DocumentFormattingParams, DocumentRangeFormattingParams, FormattingOptions, TextEdit};
-use rowan::ast::AstNode;
 use wat_formatter::config::{FormatOptions, LanguageOptions, LayoutOptions};
-use wat_syntax::ast::Root;
+use wat_syntax::ast::{AstNode, Root};
 
 impl LanguageService {
     /// Handler for `textDocument/formatting` request.

@@ -1,8 +1,7 @@
 use super::Diagnostic;
 use crate::LintLevel;
 use lspt::DiagnosticSeverity;
-use rowan::ast::support;
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::{SyntaxKind, SyntaxNode, ast::support};
 
 const DIAGNOSTIC_CODE: &str = "implicit-module";
 

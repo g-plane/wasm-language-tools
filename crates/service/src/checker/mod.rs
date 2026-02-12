@@ -6,9 +6,8 @@ use crate::{
 };
 use bumpalo::{Bump, collections::Vec as BumpVec};
 use lspt::{DiagnosticRelatedInformation, DiagnosticSeverity, DiagnosticTag, Location, Union2};
-use rowan::{TextRange, WalkEvent, ast::support};
 use std::cmp::Ordering;
-use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr};
+use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange, ast::support};
 
 mod block_type;
 mod br_table_branches;
@@ -60,11 +59,8 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
         if let Some(diagnostic) = implicit_module::check(config.lint.implicit_module, &module) {
             diagnostics.push(diagnostic);
         }
-        let mut preorder = module.preorder();
-        while let Some(walk_event) = preorder.next() {
-            let WalkEvent::Enter(node) = walk_event else {
-                continue;
-            };
+        let mut descendants = module.descendants();
+        while let Some(node) = descendants.next() {
             match node.kind() {
                 SyntaxKind::MODULE_FIELD_FUNC => {
                     typeck::check_func(
@@ -248,7 +244,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                 | SyntaxKind::IMPORT
                 | SyntaxKind::EXPORT
                 | SyntaxKind::GLOBAL_TYPE => {
-                    preorder.skip_subtree();
+                    descendants.skip_subtree();
                 }
                 _ => {}
             }

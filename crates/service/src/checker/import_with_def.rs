@@ -9,7 +9,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, node: &SyntaxNode) ->
     if !imports.contains(&SymbolKey::new(node)) {
         return None;
     }
-    let first = node.first_child_by_kind(&|kind| {
+    let first = node.first_child_by_kind(|kind| {
         !matches!(
             kind,
             SyntaxKind::EXPORT
@@ -26,7 +26,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, node: &SyntaxNode) ->
         code: DIAGNOSTIC_CODE.into(),
         message: "imported item can't contain definition".into(),
         related_information: node
-            .first_child_by_kind(&|kind| kind == SyntaxKind::IMPORT)
+            .first_child_by_kind(|kind| kind == SyntaxKind::IMPORT)
             .map(|import| {
                 vec![RelatedInformation {
                     range: import.text_range(),

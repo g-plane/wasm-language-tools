@@ -4,8 +4,10 @@ use crate::{
     document::Document,
     types_analyzer::{self, CompositeType},
 };
-use rowan::ast::{AstNode, support};
-use wat_syntax::{SyntaxNode, ast::TypeUse};
+use wat_syntax::{
+    SyntaxNode,
+    ast::{AstNode, TypeUse, support},
+};
 
 const DIAGNOSTIC_CODE: &str = "block-type";
 

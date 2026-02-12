@@ -13,13 +13,9 @@ use lspt::{
     CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionItemTag, CompletionParams, MarkupContent,
     MarkupKind, TextEdit, Union2,
 };
-use rowan::{
-    Direction, NodeOrToken,
-    ast::{AstNode, support},
-};
 use wat_syntax::{
-    SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken,
-    ast::{Instr, PlainInstr, TableType},
+    NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken,
+    ast::{AstNode, Instr, PlainInstr, TableType, support},
 };
 
 impl LanguageService {
@@ -44,7 +40,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
         SyntaxKind::ANNOT_START => return Some(vec![CmpCtx::Annotation]),
         SyntaxKind::ANNOT_ELEM => {
             return match token
-                .siblings_with_tokens(Direction::Prev)
+                .prev_siblings_with_tokens()
                 .map_while(NodeOrToken::into_token)
                 .find(|token| token.kind() == SyntaxKind::ANNOT_START)
                 .as_ref()
@@ -59,20 +55,20 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
         _ => {}
     }
     let mut ctx = Vec::with_capacity(4);
-    let parent = token.parent()?;
+    let parent = token.parent();
     match parent.kind() {
         SyntaxKind::MODULE_FIELD_FUNC => {
             let prev_node = token
-                .siblings_with_tokens(Direction::Prev)
+                .prev_siblings_with_tokens()
                 .skip(1)
-                .find_map(|node_or_token| node_or_token.into_node());
+                .find_map(NodeOrToken::into_node);
             let next_node = token
-                .siblings_with_tokens(Direction::Next)
+                .next_siblings_with_tokens()
                 .skip(1)
-                .find_map(|node_or_token| node_or_token.into_node())
-                .map(|element| element.kind());
+                .find_map(NodeOrToken::into_node)
+                .map(|node| node.kind());
             if !matches!(
-                prev_node.as_ref().map(|element| element.kind()),
+                prev_node.as_ref().map(|node| node.kind()),
                 Some(
                     SyntaxKind::PLAIN_INSTR
                         | SyntaxKind::BLOCK_BLOCK
@@ -127,10 +123,10 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                             // but parser treat it as a plain instruction,
                             // so we catch this case here, though these keywords aren't instruction names.
                             let prev_node = parent
-                                .siblings_with_tokens(Direction::Prev)
+                                .prev_siblings_with_tokens()
                                 .skip(1)
-                                .find(|element| matches!(element, SyntaxElement::Node(..)))
-                                .map(|element| element.kind());
+                                .find_map(NodeOrToken::into_node)
+                                .map(|node| node.kind());
                             if !matches!(
                                 prev_node,
                                 Some(
@@ -163,10 +159,10 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                         | SyntaxKind::BLOCK_LOOP
                         | SyntaxKind::BLOCK_TRY_TABLE => {
                             let prev_node = parent
-                                .siblings_with_tokens(Direction::Prev)
+                                .prev_siblings_with_tokens()
                                 .skip(1)
-                                .find(|element| matches!(element, SyntaxElement::Node(..)))
-                                .map(|element| element.kind());
+                                .find_map(NodeOrToken::into_node)
+                                .map(|node| node.kind());
                             if !matches!(
                                 prev_node,
                                 Some(
@@ -182,7 +178,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                             }
                             match grand.kind() {
                                 SyntaxKind::BLOCK_IF => {
-                                    if !token.siblings_with_tokens(Direction::Prev).any(|sibling| {
+                                    if !token.prev_siblings_with_tokens().any(|sibling| {
                                         matches!(sibling.kind(), SyntaxKind::BLOCK_IF_THEN | SyntaxKind::BLOCK_IF_ELSE)
                                     }) {
                                         ctx.push(CmpCtx::KeywordThen);
@@ -190,7 +186,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                                 }
                                 SyntaxKind::BLOCK_TRY_TABLE => {
                                     if token
-                                        .siblings_with_tokens(Direction::Prev)
+                                        .prev_siblings_with_tokens()
                                         .all(|sibling| !Instr::can_cast(sibling.kind()))
                                     {
                                         ctx.push(CmpCtx::KeywordsCatch);
@@ -207,10 +203,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                                         ctx.push(CmpCtx::KeywordMemory);
                                     }
                                     Some(SyntaxKind::MODULE_FIELD_ELEM) => {
-                                        if !grand
-                                            .siblings(Direction::Prev)
-                                            .any(|child| child.kind() == SyntaxKind::TABLE_USE)
-                                        {
+                                        if !grand.prev_siblings().any(|child| child.kind() == SyntaxKind::TABLE_USE) {
                                             ctx.push(CmpCtx::KeywordTable);
                                         }
                                     }
@@ -240,15 +233,15 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
         SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_IF | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_TRY_TABLE => {
             if has_leading_l_paren(token) {
                 if token
-                    .siblings_with_tokens(Direction::Prev)
+                    .prev_siblings_with_tokens()
                     .skip(1)
-                    .all(|element| !matches!(element, SyntaxElement::Node(..)))
+                    .all(|node_or_token| !matches!(node_or_token, NodeOrToken::Node(..)))
                 {
                     ctx.extend([CmpCtx::KeywordParam, CmpCtx::KeywordResult, CmpCtx::KeywordType]);
                 }
                 match parent.kind() {
                     SyntaxKind::BLOCK_IF => {
-                        if !token.siblings_with_tokens(Direction::Prev).any(|sibling| {
+                        if !token.prev_siblings_with_tokens().any(|sibling| {
                             matches!(sibling.kind(), SyntaxKind::BLOCK_IF_THEN | SyntaxKind::BLOCK_IF_ELSE)
                         }) {
                             ctx.push(CmpCtx::KeywordThen);
@@ -256,7 +249,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                     }
                     SyntaxKind::BLOCK_TRY_TABLE => {
                         if token
-                            .siblings_with_tokens(Direction::Prev)
+                            .prev_siblings_with_tokens()
                             .all(|sibling| !Instr::can_cast(sibling.kind()))
                         {
                             ctx.push(CmpCtx::KeywordsCatch);
@@ -266,8 +259,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                 }
                 ctx.push(CmpCtx::Instr(false));
             } else if let Some(node) = token
-                .siblings_with_tokens(Direction::Prev)
-                .find_map(|node_or_token| node_or_token.into_node())
+                .prev_siblings_with_tokens()
+                .find_map(NodeOrToken::into_node)
                 .filter(|node| node.kind() == SyntaxKind::PLAIN_INSTR)
                 && let Some(instr_name) = support::token(&node, SyntaxKind::INSTR_NAME)
             {
@@ -358,22 +351,22 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
             if has_leading_l_paren(token) {
                 if !parent.children().any(|child| child.kind() == SyntaxKind::TABLE_USE)
                     && !token
-                        .siblings_with_tokens(Direction::Prev)
-                        .any(|element| element.kind() == SyntaxKind::OFFSET)
+                        .prev_siblings_with_tokens()
+                        .any(|node_or_token| node_or_token.kind() == SyntaxKind::OFFSET)
                 {
                     ctx.push(CmpCtx::KeywordTable);
                 }
                 ctx.extend([CmpCtx::KeywordOffset, CmpCtx::KeywordItem, CmpCtx::Instr(true)]);
             } else if parent
-                .first_child_by_kind(&|kind| kind == SyntaxKind::ELEM_LIST)
+                .first_child_by_kind(|kind| kind == SyntaxKind::ELEM_LIST)
                 .and_then(|elem_list| support::token(&elem_list, SyntaxKind::KEYWORD))
                 .is_some_and(|keyword| keyword.text() == "func")
             {
                 ctx.push(CmpCtx::Func);
             } else {
                 ctx.extend([CmpCtx::AbbrRefType, CmpCtx::KeywordFunc]);
-                if !parent.children_with_tokens().any(|element| {
-                    if let SyntaxElement::Token(token) = element {
+                if !parent.children_with_tokens().any(|node_or_token| {
+                    if let NodeOrToken::Token(token) = node_or_token {
                         token.text() == "declare"
                     } else {
                         false
@@ -417,9 +410,9 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
             if has_leading_l_paren(token) {
                 ctx.extend([CmpCtx::KeywordItem, CmpCtx::Instr(true)]);
             } else if token
-                .siblings_with_tokens(Direction::Prev)
-                .any(|element| match element {
-                    SyntaxElement::Token(token) => token.kind() == SyntaxKind::KEYWORD && token.text() == "func",
+                .prev_siblings_with_tokens()
+                .any(|node_or_token| match node_or_token {
+                    NodeOrToken::Token(token) => token.kind() == SyntaxKind::KEYWORD && token.text() == "func",
                     _ => false,
                 })
             {
@@ -489,7 +482,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
         }
         SyntaxKind::CATCH => {
             if token
-                .siblings_with_tokens(Direction::Prev)
+                .prev_siblings_with_tokens()
                 .all(|child| child.kind() != SyntaxKind::INDEX)
             {
                 ctx.push(CmpCtx::Tag);
@@ -1417,10 +1410,10 @@ fn get_cmp_list(
 fn has_leading_l_paren(token: &SyntaxToken) -> bool {
     is_l_paren(token)
         || token
-            .siblings_with_tokens(Direction::Prev)
+            .prev_siblings_with_tokens()
             .skip(1)
-            .skip_while(|element| element.kind().is_trivia())
-            .find_map(SyntaxElement::into_token)
+            .skip_while(|node_or_token| node_or_token.kind().is_trivia())
+            .find_map(NodeOrToken::into_token)
             .is_some_and(|token| is_l_paren(&token))
 }
 fn is_l_paren(token: &SyntaxToken) -> bool {

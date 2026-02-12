@@ -8,10 +8,9 @@ use line_index::LineIndex;
 use lspt::{
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams, TextDocumentContentChangeEvent,
 };
-use rowan::{GreenNode, TextSize};
 use salsa::Setter;
 use std::{cmp::Ordering, ops::Range};
-use wat_syntax::SyntaxNode;
+use wat_syntax::{GreenNode, SyntaxNode, TextSize};
 
 #[salsa::input(debug)]
 pub(crate) struct Document {

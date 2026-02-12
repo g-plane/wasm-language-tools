@@ -16,11 +16,37 @@ expression: response
                 "character": 4
               },
               "end": {
+                "line": 3,
+                "character": 7
+              }
+            },
+            "newText": ""
+          },
+          {
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 6
+              },
+              "end": {
+                "line": 5,
+                "character": 15
+              }
+            },
+            "newText": "(br_if 0)"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 15
+              },
+              "end": {
                 "line": 5,
                 "character": 16
               }
             },
-            "newText": "(br_if 0)"
+            "newText": ""
           }
         ]
       }

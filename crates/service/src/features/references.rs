@@ -23,7 +23,7 @@ impl LanguageService {
         ) {
             return None;
         }
-        let parent = token.parent()?;
+        let parent = token.parent();
         let grand = parent.parent();
         let current_node = match grand {
             Some(grand) if grand.kind() == SyntaxKind::FIELD_TYPE => grand,

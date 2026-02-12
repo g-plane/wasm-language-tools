@@ -6,9 +6,11 @@ use crate::{
     types_analyzer,
 };
 use lspt::{DocumentSymbol, DocumentSymbolParams, SymbolKind as LspSymbolKind, SymbolTag};
-use rowan::ast::AstNode;
 use rustc_hash::FxHashMap;
-use wat_syntax::{SyntaxKind, ast::ModuleFieldGlobal};
+use wat_syntax::{
+    SyntaxKind,
+    ast::{AstNode, ModuleFieldGlobal},
+};
 
 impl LanguageService {
     /// Handler for `textDocument/documentSymbol` request.

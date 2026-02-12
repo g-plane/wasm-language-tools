@@ -5,8 +5,10 @@ use crate::{
 };
 use line_index::LineIndex;
 use lspt::{DocumentHighlight, DocumentHighlightKind, DocumentHighlightParams};
-use rowan::{Direction, ast::AstNode};
-use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, ast::PlainInstr};
+use wat_syntax::{
+    NodeOrToken, SyntaxElement, SyntaxKind, SyntaxNode,
+    ast::{AstNode, PlainInstr},
+};
 
 impl LanguageService {
     /// Handler for `textDocument/documentHighlight` request.
@@ -27,8 +29,8 @@ impl LanguageService {
                     let text = token.text();
                     Some(
                         root.descendants_with_tokens()
-                            .filter_map(|element| match element {
-                                SyntaxElement::Token(other) if other.kind() == kind && other.text() == text => {
+                            .filter_map(|node_or_token| match node_or_token {
+                                NodeOrToken::Token(other) if other.kind() == kind && other.text() == text => {
                                     Some(DocumentHighlight {
                                         range: line_index.convert(other.text_range()),
                                         kind: Some(DocumentHighlightKind::Text),
@@ -41,7 +43,7 @@ impl LanguageService {
                 }
                 SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
                     let symbol_table = SymbolTable::of(db, document);
-                    let key = SymbolKey::new(&token.parent()?);
+                    let key = SymbolKey::new(&token.parent());
                     if let Some(symbol) = symbol_table.symbols.get(&key) {
                         match symbol.kind {
                             SymbolKind::Module => None,
@@ -93,13 +95,13 @@ impl LanguageService {
                         let text = token.text();
                         Some(
                             root.descendants_with_tokens()
-                                .filter_map(|element| match element {
-                                    SyntaxElement::Token(other)
+                                .filter_map(|node_or_token| match node_or_token {
+                                    NodeOrToken::Token(other)
                                         if other.kind() == kind
                                             && other.text() == text
                                             && other
                                                 .parent()
-                                                .and_then(|parent| parent.parent())
+                                                .parent()
                                                 .and_then(PlainInstr::cast)
                                                 .and_then(|instr| instr.instr_name())
                                                 .is_some_and(|name| name.text().ends_with(".const")) =>
@@ -124,20 +126,21 @@ impl LanguageService {
 
 fn create_symbol_highlight(symbol: &Symbol, root: &SyntaxNode, line_index: &LineIndex) -> Option<DocumentHighlight> {
     let node = symbol.key.to_node(root);
-    node.children_with_tokens().find_map(|element| match element {
-        SyntaxElement::Token(token)
-            if matches!(
-                token.kind(),
-                SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT | SyntaxKind::TYPE_KEYWORD
-            ) =>
-        {
-            Some(DocumentHighlight {
-                range: line_index.convert(token.text_range()),
-                kind: get_highlight_kind_of_symbol(symbol, root),
-            })
-        }
-        _ => None,
-    })
+    node.children_with_tokens()
+        .find_map(|node_or_token| match node_or_token {
+            NodeOrToken::Token(token)
+                if matches!(
+                    token.kind(),
+                    SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT | SyntaxKind::TYPE_KEYWORD
+                ) =>
+            {
+                Some(DocumentHighlight {
+                    range: line_index.convert(token.text_range()),
+                    kind: get_highlight_kind_of_symbol(symbol, root),
+                })
+            }
+            _ => None,
+        })
 }
 
 fn get_highlight_kind_of_symbol(symbol: &Symbol, root: &SyntaxNode) -> Option<DocumentHighlightKind> {
@@ -167,8 +170,8 @@ fn get_highlight_kind_of_symbol(symbol: &Symbol, root: &SyntaxNode) -> Option<Do
         | SymbolKind::TagRef => {
             let node = symbol.key.to_node(root);
             if node
-                .siblings_with_tokens(Direction::Prev)
-                .any(|element| is_write_access_instr(element, &node))
+                .prev_siblings_with_tokens()
+                .any(|node_or_token| is_write_access_instr(node_or_token, &node))
             {
                 Some(DocumentHighlightKind::Write)
             } else {
@@ -179,17 +182,17 @@ fn get_highlight_kind_of_symbol(symbol: &Symbol, root: &SyntaxNode) -> Option<Do
     }
 }
 
-fn is_write_access_instr(element: SyntaxElement, node: &SyntaxNode) -> bool {
-    if let SyntaxElement::Token(token) = element {
+fn is_write_access_instr(node_or_token: SyntaxElement, node: &SyntaxNode) -> bool {
+    if let NodeOrToken::Token(token) = node_or_token {
         if token.kind() != SyntaxKind::INSTR_NAME {
             return false;
         }
         let text = token.text();
         if text == "table.copy" {
             // The first immediate in `table.copy` is the destination table.
-            node.siblings_with_tokens(Direction::Prev)
+            node.prev_siblings_with_tokens()
                 .skip(1)
-                .all(|element| element.kind() != SyntaxKind::IMMEDIATE)
+                .all(|node_or_token| node_or_token.kind() != SyntaxKind::IMMEDIATE)
         } else {
             matches!(
                 text,

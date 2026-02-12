@@ -8,12 +8,8 @@ use crate::{
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use petgraph::visit::Dfs;
-use rowan::{
-    NodeOrToken,
-    ast::{SyntaxNodePtr, support},
-};
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode, SyntaxNodePtr, ast::support};
 
 pub fn act(
     db: &dyn salsa::Database,
@@ -65,7 +61,7 @@ pub fn act(
     if symbol_table
         .resolved
         .get(&SymbolKey::new(
-            &call_instr.first_child_by_kind(&|kind| kind == SyntaxKind::IMMEDIATE)?,
+            &call_instr.first_child_by_kind(|kind| kind == SyntaxKind::IMMEDIATE)?,
         ))
         .is_none_or(|def_key| *def_key != SymbolKey::new(&func))
     {

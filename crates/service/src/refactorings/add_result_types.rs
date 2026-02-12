@@ -1,10 +1,9 @@
 use crate::{helpers::LineIndexExt, uri::InternUri};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionContext, CodeActionKind, TextEdit, Union2, WorkspaceEdit};
-use rowan::{NodeOrToken, TextRange, ast::support};
 use rustc_hash::FxBuildHasher;
 use std::{collections::HashMap, ops::ControlFlow};
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode, TextRange, ast::support};
 
 pub fn act(
     db: &dyn salsa::Database,
@@ -51,7 +50,7 @@ pub fn act(
             range
         }
         SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_TRY_TABLE => node
-            .first_child_by_kind(&|kind| kind == SyntaxKind::TYPE_USE)
+            .first_child_by_kind(|kind| kind == SyntaxKind::TYPE_USE)
             .map(|child| child.text_range())
             .or_else(|| {
                 support::token(node, SyntaxKind::IDENT)
@@ -61,7 +60,7 @@ pub fn act(
         SyntaxKind::BLOCK_IF_THEN => {
             let parent = node.parent()?;
             parent
-                .first_child_by_kind(&|kind| kind == SyntaxKind::TYPE_USE)
+                .first_child_by_kind(|kind| kind == SyntaxKind::TYPE_USE)
                 .map(|child| child.text_range())
                 .or_else(|| {
                     support::token(&parent, SyntaxKind::IDENT)
