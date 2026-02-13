@@ -64,7 +64,7 @@ pub fn check(
                         } else if !last.contains_range(current) {
                             ranges.push(current);
                         }
-                    } else if instr.children().any(|child| Instr::can_cast(child.kind()))
+                    } else if instr.has_child_or_token_by_kind(Instr::can_cast)
                         && let Some(instr_name) = support::token(&instr, SyntaxKind::INSTR_NAME)
                     {
                         // this can be occurred when all child instructions are from different basic blocks

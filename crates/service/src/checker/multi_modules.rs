@@ -13,8 +13,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, lint_level: LintLevel, root: &Sy
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
     diagnostics.extend(
-        root.children()
-            .filter(|child| child.kind() == SyntaxKind::MODULE)
+        root.children_by_kind(|kind| kind == SyntaxKind::MODULE)
             .skip(1)
             .map(|module| Diagnostic {
                 range: module.text_range(),

@@ -8,7 +8,6 @@ use wat_syntax::{SyntaxKind, SyntaxNodePtr, TextRange};
 
 #[salsa::tracked(returns(ref))]
 pub(crate) fn get_imports(db: &dyn salsa::Database, document: Document) -> Vec<SymbolKey> {
-    let root = document.root_tree(db);
     SymbolTable::of(db, document)
         .symbols
         .iter()
@@ -22,10 +21,7 @@ pub(crate) fn get_imports(db: &dyn salsa::Database, document: Document) -> Vec<S
             | SyntaxKind::MODULE_FIELD_GLOBAL
             | SyntaxKind::MODULE_FIELD_MEMORY
             | SyntaxKind::MODULE_FIELD_TABLE
-            | SyntaxKind::MODULE_FIELD_TAG => {
-                let node = symbol.key.to_node(&root);
-                node.children().any(|child| child.kind() == SyntaxKind::IMPORT)
-            }
+            | SyntaxKind::MODULE_FIELD_TAG => symbol.green.children().any(|child| child.kind() == SyntaxKind::IMPORT),
             _ => false,
         })
         .map(|(key, _)| *key)
@@ -57,8 +53,7 @@ pub(crate) fn get_exports(db: &dyn salsa::Database, document: Document) -> Expor
                 } else {
                     exports.extend(
                         module_field
-                            .children()
-                            .filter(|child| child.kind() == SyntaxKind::EXPORT)
+                            .children_by_kind(|kind| kind == SyntaxKind::EXPORT)
                             .filter_map(|export| export.first_child_by_kind(|kind| kind == SyntaxKind::NAME))
                             .map(|name| Export {
                                 def_key: SymbolKey::new(&module_field),

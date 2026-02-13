@@ -66,5 +66,5 @@ pub fn act(
 fn can_join(node: &SyntaxNode, kind: SyntaxKind, range: TextRange) -> bool {
     node.kind() == kind
         && range.contains_range(node.text_range())
-        && !node.children_with_tokens().any(|it| it.kind() == SyntaxKind::IDENT)
+        && !node.has_child_or_token_by_kind(|kind| kind == SyntaxKind::IDENT)
 }

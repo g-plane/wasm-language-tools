@@ -65,6 +65,11 @@ impl GreenNode {
     }
 
     #[inline]
+    pub fn children_len(&self) -> usize {
+        self.data.header.length
+    }
+
+    #[inline]
     pub(crate) fn slice(&self) -> &[GreenChild] {
         &self.data.slice
     }
@@ -87,7 +92,7 @@ impl fmt::Debug for GreenNode {
         f.debug_struct("GreenNode")
             .field("kind", &self.kind())
             .field("text_len", &self.text_len())
-            .field("children_len", &self.slice().len())
+            .field("children_len", &self.children_len())
             .finish()
     }
 }

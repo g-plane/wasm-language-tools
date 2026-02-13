@@ -16,7 +16,7 @@ pub fn check(lint_level: LintLevel, node: &SyntaxNode) -> Option<Diagnostic> {
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
     if let Some(keyword) = support::token(node, SyntaxKind::KEYWORD)
-        && !node.children().any(|child| Cat::can_cast(child.kind()))
+        && !node.has_child_or_token_by_kind(Cat::can_cast)
     {
         Some(Diagnostic {
             range: keyword.text_range(),

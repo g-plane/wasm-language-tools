@@ -116,9 +116,9 @@ impl LanguageService {
                     parameters: Some(parameters),
                     active_parameter: instr
                         .and_then(|instr| {
-                            node.children()
-                                .filter_map(Instr::cast)
-                                .position(|child| child == instr)
+                            let instr = instr.syntax();
+                            node.children_by_kind(Instr::can_cast)
+                                .position(|child| &child == instr)
                                 .map(|index| if is_next { index + 1 } else { index } as u32)
                         })
                         .or_else(|| (!signature.params.is_empty() && is_next).then_some(0)),

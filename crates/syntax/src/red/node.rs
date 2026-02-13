@@ -118,6 +118,23 @@ impl SyntaxNode {
     }
 
     #[inline]
+    pub fn children_by_kind<F>(&self, matcher: F) -> impl Iterator<Item = SyntaxNode> + use<'_, F>
+    where
+        F: Fn(SyntaxKind) -> bool,
+    {
+        self.green()
+            .slice()
+            .iter()
+            .enumerate()
+            .filter_map(move |(i, child)| match child {
+                GreenChild::Node { offset, node } if matcher(node.kind()) => {
+                    Some(self.new_child(i as u32, node, *offset))
+                }
+                _ => None,
+            })
+    }
+
+    #[inline]
     pub fn children_with_tokens(&self) -> SyntaxElementChildren {
         SyntaxElementChildren {
             parent: self.clone(),
@@ -127,6 +144,17 @@ impl SyntaxNode {
             },
             index: 0,
         }
+    }
+
+    #[inline]
+    pub fn has_child_or_token_by_kind<F>(&self, matcher: F) -> bool
+    where
+        F: Fn(SyntaxKind) -> bool,
+    {
+        self.green().slice().iter().any(|child| match child {
+            GreenChild::Node { node, .. } => matcher(node.kind()),
+            GreenChild::Token { token, .. } => matcher(token.kind()),
+        })
     }
 
     #[inline]

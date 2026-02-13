@@ -1232,7 +1232,7 @@ fn format_const_expr(
     if let Some(instr) = instrs.next() {
         if trivias.is_empty() {
             if matches!(ctx.options.wrap_before_const_expr, crate::config::WrapBefore::MultiOnly)
-                && instr.syntax().children().any(|child| Instr::can_cast(child.kind()))
+                && instr.syntax().has_child_or_token_by_kind(Instr::can_cast)
             {
                 docs.push(Doc::hard_line());
             } else {

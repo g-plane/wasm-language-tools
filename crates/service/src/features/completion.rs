@@ -215,7 +215,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                     }
                 }
                 if let Some(prev) = parent.prev_sibling().filter(|prev| {
-                    prev.kind() == SyntaxKind::PLAIN_INSTR && prev.children_with_tokens().count() == 1 // only instr name, no paren
+                    prev.kind() == SyntaxKind::PLAIN_INSTR && prev.green().children_len() == 1 // only instr name, no paren
                 }) && let Some(instr_name) = support::token(&prev, SyntaxKind::INSTR_NAME)
                 {
                     add_cmp_ctx_for_immediates(instr_name.text(), &prev, false, &mut ctx);
@@ -300,7 +300,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
             }
         }
         SyntaxKind::MODULE_FIELD_GLOBAL => {
-            if parent.children().any(|node| node.kind() == SyntaxKind::GLOBAL_TYPE) {
+            if parent.has_child_or_token_by_kind(|kind| kind == SyntaxKind::GLOBAL_TYPE) {
                 ctx.push(CmpCtx::Instr(true));
             } else if has_leading_l_paren(token) {
                 ctx.extend([CmpCtx::KeywordMut, CmpCtx::KeywordImExport, CmpCtx::KeywordRef]);
@@ -349,7 +349,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
         }
         SyntaxKind::MODULE_FIELD_ELEM => {
             if has_leading_l_paren(token) {
-                if !parent.children().any(|child| child.kind() == SyntaxKind::TABLE_USE)
+                if !parent.has_child_or_token_by_kind(|kind| kind == SyntaxKind::TABLE_USE)
                     && !token
                         .prev_siblings_with_tokens()
                         .any(|node_or_token| node_or_token.kind() == SyntaxKind::OFFSET)
@@ -365,7 +365,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                 ctx.push(CmpCtx::Func);
             } else {
                 ctx.extend([CmpCtx::AbbrRefType, CmpCtx::KeywordFunc]);
-                if !parent.children_with_tokens().any(|node_or_token| {
+                if !parent.green().children().any(|node_or_token| {
                     if let NodeOrToken::Token(token) = node_or_token {
                         token.text() == "declare"
                     } else {
@@ -1435,8 +1435,7 @@ fn guess_preferred_type<'db>(
                 .skip(1)
                 .find(|node| node.kind() == SyntaxKind::PLAIN_INSTR)?;
             let index = grand_instr
-                .children()
-                .filter(|child| child.kind() == SyntaxKind::PLAIN_INSTR)
+                .children_by_kind(|kind| kind == SyntaxKind::PLAIN_INSTR)
                 .position(|instr| instr == parent_instr)?;
             let types = types_analyzer::resolve_param_types(service, document, &grand_instr)?;
             if let Some(OperandType::Val(val_type)) = types.get(index) {

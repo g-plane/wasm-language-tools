@@ -112,7 +112,7 @@ pub fn check_table(
         return;
     };
     let ty = ValType::Ref(ref_type);
-    if ty.defaultable() && !node.children().any(|child| Instr::can_cast(child.kind())) {
+    if ty.defaultable() && !node.has_child_or_token_by_kind(Instr::can_cast) {
         return;
     }
     let ty = OperandType::Val(ty);
@@ -177,8 +177,7 @@ pub fn check_elem_list(
         return;
     };
     let ty = OperandType::Val(ValType::Ref(ref_type));
-    node.children()
-        .filter(|child| child.kind() == SyntaxKind::ELEM_EXPR)
+    node.children_by_kind(|kind| kind == SyntaxKind::ELEM_EXPR)
         .for_each(|child| {
             check_block_like(
                 diagnostics,
@@ -225,7 +224,7 @@ fn check_block_like(
         shared: &Shared<'db, 'bump>,
     ) {
         if matches!(node.kind(), SyntaxKind::PLAIN_INSTR | SyntaxKind::BLOCK_IF) {
-            node.children()
+            node.children_by_kind(Instr::can_cast)
                 .filter_map(Instr::cast)
                 .for_each(|child| unfold(child.syntax().clone(), type_stack, diagnostics, shared));
         }
@@ -233,8 +232,7 @@ fn check_block_like(
             check_instr(node, type_stack, diagnostics, shared);
         }
     }
-    node.children()
-        .filter(|child| Instr::can_cast(child.kind()))
+    node.children_by_kind(Instr::can_cast)
         .for_each(|child| unfold(child, &mut type_stack, diagnostics, shared));
 
     if let Some(diagnostic) = type_stack.check_to_bottom(expected_results, ReportRange::Last(node)) {
