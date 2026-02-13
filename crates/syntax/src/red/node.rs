@@ -370,7 +370,7 @@ impl SyntaxNode {
 
     #[inline]
     pub fn descendants_with_tokens(&self) -> DescendantsWithTokens {
-        DescendantsWithTokens::new(self.clone().into())
+        DescendantsWithTokens::new(self.clone())
     }
 
     /// Find a token in the subtree corresponding to this node, which covers the offset.

@@ -57,13 +57,10 @@ pub struct DescendantsWithTokens {
     next: Option<SyntaxElement>,
 }
 impl DescendantsWithTokens {
-    pub(crate) fn new(start: SyntaxElement) -> Self {
+    pub(crate) fn new(start: SyntaxNode) -> Self {
         Self {
-            start: match &start {
-                NodeOrToken::Node(node) => node.clone(),
-                NodeOrToken::Token(token) => token.parent(),
-            },
-            next: Some(start),
+            start: start.clone(),
+            next: Some(start.into()),
         }
     }
     fn exit_parent(&mut self, mut parent: Option<SyntaxNode>) -> Option<SyntaxElement> {
