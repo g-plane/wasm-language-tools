@@ -1,6 +1,6 @@
 use crate::{
-    Descendants, DescendantsWithTokens, GreenNode, GreenToken, NodeOrToken, SyntaxElement, SyntaxElementChildren,
-    SyntaxKind, SyntaxNodeChildren, SyntaxToken, TokenAtOffset, green::GreenChild,
+    AmberNode, Descendants, DescendantsWithTokens, GreenNode, GreenToken, NodeOrToken, SyntaxElement,
+    SyntaxElementChildren, SyntaxKind, SyntaxNodeChildren, SyntaxToken, TokenAtOffset, green::GreenChild,
 };
 use std::{fmt, ptr::NonNull, rc::Rc};
 use text_size::{TextRange, TextSize};
@@ -155,6 +155,11 @@ impl SyntaxNode {
             GreenChild::Node { node, .. } => matcher(node.kind()),
             GreenChild::Token { token, .. } => matcher(token.kind()),
         })
+    }
+
+    #[inline]
+    pub fn amber(&self) -> AmberNode<'_> {
+        self.into()
     }
 
     #[inline]

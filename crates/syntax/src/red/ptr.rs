@@ -2,8 +2,8 @@ use crate::{NodeOrToken, SyntaxKind, SyntaxNode, TextRange};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct SyntaxNodePtr {
-    kind: SyntaxKind,
-    range: TextRange,
+    pub(crate) kind: SyntaxKind,
+    pub(crate) range: TextRange,
 }
 
 impl SyntaxNodePtr {

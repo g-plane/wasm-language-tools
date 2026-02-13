@@ -1,20 +1,16 @@
 use super::{Diagnostic, FastPlainInstr};
 use std::iter::Peekable;
-use wat_syntax::{GreenNode, NodeOrToken, SyntaxKind, SyntaxNode, SyntaxNodePtr};
+use wat_syntax::{AmberNode, NodeOrToken, SyntaxKind, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "immediates";
 
 const INDEX: [SyntaxKind; 2] = [SyntaxKind::IDENT, SyntaxKind::INT];
 
 pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastPlainInstr) {
-    let green = node.green();
-    let mut immediates = green
+    let amber = node.amber();
+    let mut immediates = amber
         .children()
-        .filter_map(|node_or_token| match node_or_token {
-            NodeOrToken::Node(node) if node.kind() == SyntaxKind::IMMEDIATE => Some(node),
-            _ => None,
-        })
-        .zip(instr.immediates.iter())
+        .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
         .peekable();
 
     match instr.name {
@@ -43,14 +39,14 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
             );
         }
         "select" => {
-            if let Some((node, ptr)) = immediates.next() {
+            if let Some(node) = immediates.next() {
                 'a: {
-                    let Some(type_use) = node.children().find_map(|node_or_token| match node_or_token {
+                    let Some(type_use) = node.green().children().find_map(|node_or_token| match node_or_token {
                         NodeOrToken::Node(node) if node.kind() == SyntaxKind::TYPE_USE => Some(node),
                         _ => None,
                     }) else {
                         diagnostics.push(Diagnostic {
-                            range: ptr.text_range(),
+                            range: node.text_range(),
                             code: DIAGNOSTIC_CODE.into(),
                             message: "expected result type".into(),
                             ..Default::default()
@@ -66,7 +62,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
                         break 'a;
                     }
                     diagnostics.push(Diagnostic {
-                        range: ptr.text_range(),
+                        range: node.text_range(),
                         code: DIAGNOSTIC_CODE.into(),
                         message: "there must be exactly one result type".into(),
                         ..Default::default()
@@ -84,13 +80,13 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
             );
             diagnostics.extend(
                 immediates
-                    .filter(|(node, _)| {
-                        !node.children().next().is_some_and(|node_or_token| {
+                    .filter(|immediate| {
+                        !immediate.green().children().next().is_some_and(|node_or_token| {
                             matches!(node_or_token.kind(), SyntaxKind::IDENT | SyntaxKind::INT)
                         })
                     })
-                    .map(|(_, ptr)| Diagnostic {
-                        range: ptr.text_range(),
+                    .map(|immediate| Diagnostic {
+                        range: immediate.text_range(),
                         code: DIAGNOSTIC_CODE.into(),
                         message: "expected identifier or unsigned integer".into(),
                         ..Default::default()
@@ -270,8 +266,9 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
                     ..Default::default()
                 });
             }
-            immediates.for_each(|(node, ptr)| {
-                if node
+            immediates.for_each(|immediate| {
+                if immediate
+                    .green()
                     .children()
                     .next()
                     .and_then(NodeOrToken::into_token)
@@ -279,7 +276,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
                     .is_some_and(|idx| idx >= 32)
                 {
                     diagnostics.push(Diagnostic {
-                        range: ptr.text_range(),
+                        range: immediate.text_range(),
                         code: DIAGNOSTIC_CODE.into(),
                         message: "laneidx must be smaller than 32".into(),
                         ..Default::default()
@@ -415,8 +412,8 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
         }
         _ => {}
     }
-    diagnostics.extend(immediates.map(|(_, ptr)| Diagnostic {
-        range: ptr.text_range(),
+    diagnostics.extend(immediates.map(|immediate| Diagnostic {
+        range: immediate.text_range(),
         code: DIAGNOSTIC_CODE.into(),
         message: "unexpected immediate".into(),
         ..Default::default()
@@ -425,20 +422,24 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
 
 fn check_immediate<'a, const REQUIRED: bool>(
     diagnostics: &mut Vec<Diagnostic>,
-    immediates: &mut Peekable<impl Iterator<Item = (&'a GreenNode, &'a SyntaxNodePtr)>>,
+    immediates: &mut Peekable<impl Iterator<Item = AmberNode<'a>>>,
     expected: impl SyntaxKindCmp,
     description: &'static str,
     instr: &FastPlainInstr,
 ) {
-    let immediate = immediates
-        .peek()
-        .and_then(|(node, ptr)| node.children().next().map(|node_or_token| (node_or_token.kind(), ptr)));
-    if let Some((kind, ptr)) = immediate {
+    let immediate = immediates.peek().and_then(|immediate| {
+        immediate
+            .green()
+            .children()
+            .next()
+            .map(|node_or_token| (node_or_token.kind(), immediate.text_range()))
+    });
+    if let Some((kind, range)) = immediate {
         if expected.cmp(kind) {
             immediates.next();
         } else if REQUIRED {
             diagnostics.push(Diagnostic {
-                range: ptr.text_range(),
+                range,
                 code: DIAGNOSTIC_CODE.into(),
                 message: format!("expected {description}"),
                 ..Default::default()

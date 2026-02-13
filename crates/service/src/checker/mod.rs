@@ -331,8 +331,10 @@ impl<'bump> FastPlainInstr<'bump> {
             name: bump.alloc_str(instr_name.text()),
             name_range: instr_name.text_range(),
             immediates: BumpVec::from_iter_in(
-                node.children_by_kind(|kind| kind == SyntaxKind::IMMEDIATE)
-                    .map(|immediate| SyntaxNodePtr::new(&immediate)),
+                node.amber()
+                    .children()
+                    .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                    .map(|immediate| immediate.to_ptr()),
                 bump,
             ),
         })

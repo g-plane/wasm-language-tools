@@ -1,6 +1,6 @@
 use crate::helpers::{self, RenderWithDb};
 use std::fmt;
-use wat_syntax::ast::Immediate;
+use wat_syntax::{GreenNode, NodeOrToken, SyntaxKind};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, salsa::Update)]
 pub struct Idx<'db> {
@@ -9,11 +9,18 @@ pub struct Idx<'db> {
 }
 
 impl<'db> Idx<'db> {
-    pub fn from_immediate(immediate: &Immediate, db: &'db dyn salsa::Database) -> Self {
-        Idx {
-            num: immediate.int().and_then(|int| helpers::parse_u32(int.text()).ok()),
-            name: immediate.ident().map(|ident| InternIdent::new(db, ident.text())),
-        }
+    pub fn from_immediate(node: &GreenNode, db: &'db dyn salsa::Database) -> Option<Self> {
+        node.children().next().and_then(|child| match child {
+            NodeOrToken::Token(token) if token.kind() == SyntaxKind::INT => Some(Idx {
+                num: helpers::parse_u32(token.text()).ok(),
+                name: None,
+            }),
+            NodeOrToken::Token(token) if token.kind() == SyntaxKind::IDENT => Some(Idx {
+                num: None,
+                name: Some(InternIdent::new(db, token.text())),
+            }),
+            _ => None,
+        })
     }
 
     pub fn is_def(&self) -> bool {

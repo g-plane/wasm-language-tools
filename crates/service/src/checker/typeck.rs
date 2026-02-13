@@ -1,6 +1,6 @@
 use super::{Diagnostic, RelatedInformation};
 use crate::{
-    binder::{SymbolKey, SymbolTable},
+    binder::{SymbolKey, SymbolKind, SymbolTable},
     data_set,
     document::Document,
     helpers,
@@ -16,8 +16,8 @@ use bumpalo::{Bump, collections::Vec as BumpVec};
 use itertools::{EitherOrBoth, Itertools};
 use std::iter;
 use wat_syntax::{
-    SyntaxElement, SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange,
-    ast::{AstNode, BlockInstr, ElemList, Instr, ModuleFieldFunc, ModuleFieldTable, PlainInstr, support},
+    AmberNode, NodeOrToken, SyntaxKind, SyntaxNode, TextRange,
+    ast::{AstNode, BlockInstr, ElemList, Instr, ModuleFieldFunc, ModuleFieldTable, ValType as AstValType},
 };
 
 const DIAGNOSTIC_CODE: &str = "type-check";
@@ -48,11 +48,11 @@ pub fn check_func(
                 module_id,
                 bump,
             },
-            node,
+            node.into(),
             if imex::get_imports(db, document).contains(&SymbolKey::new(node)) {
-                results.iter().map(|ty| (ty.clone(), None)).collect()
+                BumpVec::from_iter_in(results.iter().map(|ty| (ty.clone(), None)), bump)
             } else {
-                Vec::with_capacity(2)
+                BumpVec::with_capacity_in(2, bump)
             },
             &results,
         );
@@ -81,11 +81,11 @@ pub fn check_global(
             module_id,
             bump,
         },
-        node,
+        node.into(),
         if imex::get_imports(db, document).contains(&SymbolKey::new(node)) {
-            vec![(ty.clone(), None)]
+            BumpVec::from_iter_in([(ty.clone(), None)], bump)
         } else {
-            Vec::with_capacity(1)
+            BumpVec::with_capacity_in(1, bump)
         },
         &[ty],
     );
@@ -125,11 +125,11 @@ pub fn check_table(
             module_id,
             bump,
         },
-        node,
+        node.into(),
         if imex::get_imports(db, document).contains(&SymbolKey::new(node)) {
-            vec![(ty.clone(), None)]
+            BumpVec::from_iter_in([(ty.clone(), None)], bump)
         } else {
-            Vec::with_capacity(1)
+            BumpVec::with_capacity_in(1, bump)
         },
         &[ty],
     );
@@ -154,8 +154,8 @@ pub fn check_offset(
             module_id,
             bump,
         },
-        node,
-        Vec::with_capacity(1),
+        node.into(),
+        BumpVec::with_capacity_in(1, bump),
         &[OperandType::Val(ValType::I32)],
     );
     bump.reset();
@@ -177,7 +177,9 @@ pub fn check_elem_list(
         return;
     };
     let ty = OperandType::Val(ValType::Ref(ref_type));
-    node.children_by_kind(|kind| kind == SyntaxKind::ELEM_EXPR)
+    node.amber()
+        .children()
+        .filter(|child| child.kind() == SyntaxKind::ELEM_EXPR)
         .for_each(|child| {
             check_block_like(
                 diagnostics,
@@ -188,8 +190,8 @@ pub fn check_elem_list(
                     module_id,
                     bump,
                 },
-                &child,
-                Vec::with_capacity(1),
+                child,
+                BumpVec::with_capacity_in(1, bump),
                 std::slice::from_ref(&ty),
             );
         });
@@ -207,8 +209,8 @@ struct Shared<'db, 'bump> {
 fn check_block_like(
     diagnostics: &mut Vec<Diagnostic>,
     shared: &Shared,
-    node: &SyntaxNode,
-    init_stack: Vec<(OperandType, Option<Instr>)>,
+    node: AmberNode,
+    init_stack: BumpVec<(OperandType, Option<AmberNode>)>,
     expected_results: &[OperandType],
 ) {
     let mut type_stack = TypeStack {
@@ -218,21 +220,20 @@ fn check_block_like(
     };
 
     fn unfold<'db, 'bump>(
-        node: SyntaxNode,
+        node: AmberNode<'db>,
         type_stack: &mut TypeStack<'db, 'bump>,
         diagnostics: &mut Vec<Diagnostic>,
         shared: &Shared<'db, 'bump>,
     ) {
         if matches!(node.kind(), SyntaxKind::PLAIN_INSTR | SyntaxKind::BLOCK_IF) {
-            node.children_by_kind(Instr::can_cast)
-                .filter_map(Instr::cast)
-                .for_each(|child| unfold(child.syntax().clone(), type_stack, diagnostics, shared));
+            node.children()
+                .filter(|child| Instr::can_cast(child.kind()))
+                .for_each(|child| unfold(child, type_stack, diagnostics, shared));
         }
-        if let Some(node) = Instr::cast(node) {
-            check_instr(node, type_stack, diagnostics, shared);
-        }
+        check_instr(node, type_stack, diagnostics, shared);
     }
-    node.children_by_kind(Instr::can_cast)
+    node.children()
+        .filter(|child| Instr::can_cast(child.kind()))
         .for_each(|child| unfold(child, &mut type_stack, diagnostics, shared));
 
     if let Some(diagnostic) = type_stack.check_to_bottom(expected_results, ReportRange::Last(node)) {
@@ -241,115 +242,113 @@ fn check_block_like(
 }
 
 fn check_instr<'db, 'bump>(
-    instr: Instr,
+    node: AmberNode<'db>,
     type_stack: &mut TypeStack<'db, 'bump>,
     diagnostics: &mut Vec<Diagnostic>,
     shared: &Shared<'db, 'bump>,
 ) {
-    match &instr {
-        Instr::Plain(plain_instr) => {
-            let Some(instr_name) = plain_instr.instr_name() else {
-                return;
-            };
-            let instr_name = instr_name.text();
-            let sig = resolve_sig(shared, instr_name, plain_instr, type_stack);
-            if let Some(diagnostic) = type_stack.check(&sig.params, ReportRange::Instr(&instr)) {
-                diagnostics.push(diagnostic);
-            }
-            if helpers::is_stack_polymorphic(instr_name) {
-                type_stack.has_never = true;
-                type_stack.stack.clear();
-            }
-            type_stack
-                .stack
-                .extend(sig.results.into_iter().map(|ty| (ty, Some(instr.clone()))));
+    if node.kind() == SyntaxKind::PLAIN_INSTR {
+        let Some(instr_name) = node.green().children().find_map(|node_or_token| match node_or_token {
+            NodeOrToken::Token(token) if token.kind() == SyntaxKind::INSTR_NAME => Some(token),
+            _ => None,
+        }) else {
+            return;
+        };
+        let instr_name = instr_name.text();
+        let sig = resolve_sig(shared, instr_name, node, type_stack);
+        if let Some(diagnostic) = type_stack.check(&sig.params, ReportRange::Instr(node)) {
+            diagnostics.push(diagnostic);
         }
-        Instr::Block(block_instr) => {
-            let node = block_instr.syntax();
-            let signature = get_func_sig(shared.db, shared.document, SymbolKey::new(node), node.green());
-            let init_stack = signature
+        if helpers::is_stack_polymorphic(instr_name) {
+            type_stack.has_never = true;
+            type_stack.stack.clear();
+        }
+        type_stack
+            .stack
+            .extend(sig.results.into_iter().map(|ty| (ty, Some(node))));
+    } else if BlockInstr::can_cast(node.kind()) {
+        let signature = get_func_sig(shared.db, shared.document, node.to_ptr().into(), node.green());
+        let init_stack = BumpVec::from_iter_in(
+            signature
                 .params
                 .iter()
-                .map(|(ty, ..)| (OperandType::Val(ty.clone()), Some(instr.clone())))
-                .collect();
-            let results = BumpVec::from_iter_in(signature.results.into_iter().map(OperandType::Val), shared.bump);
-            match block_instr {
-                BlockInstr::Block(..) | BlockInstr::Loop(..) | BlockInstr::TryTable(..) => {
-                    if let Some(diagnostic) = type_stack.check(
-                        &BumpVec::from_iter_in(
-                            signature.params.into_iter().map(|(ty, _)| OperandType::Val(ty)),
-                            shared.bump,
-                        ),
-                        ReportRange::Instr(&instr),
-                    ) {
-                        diagnostics.push(diagnostic);
-                    }
-                    check_block_like(diagnostics, shared, node, init_stack, &results);
+                .map(|(ty, ..)| (OperandType::Val(ty.clone()), Some(node))),
+            shared.bump,
+        );
+        let results = BumpVec::from_iter_in(signature.results.into_iter().map(OperandType::Val), shared.bump);
+        match node.kind() {
+            SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_TRY_TABLE => {
+                if let Some(diagnostic) = type_stack.check(
+                    &BumpVec::from_iter_in(
+                        signature.params.into_iter().map(|(ty, _)| OperandType::Val(ty)),
+                        shared.bump,
+                    ),
+                    ReportRange::Instr(node),
+                ) {
+                    diagnostics.push(diagnostic);
                 }
-                BlockInstr::If(block_if) => {
-                    if let Some(mut diagnostic) =
-                        type_stack.check(&[OperandType::Val(ValType::I32)], ReportRange::Keyword(node))
-                    {
-                        diagnostic.message.push_str(" for the condition of `if` block");
-                        diagnostics.push(diagnostic);
-                    }
-                    if let Some(diagnostic) = type_stack.check(
-                        &BumpVec::from_iter_in(
-                            signature.params.into_iter().map(|(ty, _)| OperandType::Val(ty)),
-                            shared.bump,
+                check_block_like(diagnostics, shared, node, init_stack, &results);
+            }
+            SyntaxKind::BLOCK_IF => {
+                if let Some(mut diagnostic) =
+                    type_stack.check(&[OperandType::Val(ValType::I32)], ReportRange::Keyword(node))
+                {
+                    diagnostic.message.push_str(" for the condition of `if` block");
+                    diagnostics.push(diagnostic);
+                }
+                if let Some(diagnostic) = type_stack.check(
+                    &BumpVec::from_iter_in(
+                        signature.params.into_iter().map(|(ty, _)| OperandType::Val(ty)),
+                        shared.bump,
+                    ),
+                    ReportRange::Instr(node),
+                ) {
+                    diagnostics.push(diagnostic);
+                }
+                let mut children = node.children();
+                if let Some(then_block) = children.find(|child| child.kind() == SyntaxKind::BLOCK_IF_THEN) {
+                    check_block_like(diagnostics, shared, then_block, init_stack.clone(), &results);
+                } else {
+                    diagnostics.push(Diagnostic {
+                        range: node.text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
+                        message: format!(
+                            "missing `then` branch with expected types {}",
+                            join_types(shared.db, results.iter(), "", shared.bump)
                         ),
-                        ReportRange::Instr(&instr),
-                    ) {
-                        diagnostics.push(diagnostic);
-                    }
-                    if let Some(then_block) = block_if.then_block() {
-                        check_block_like(diagnostics, shared, then_block.syntax(), init_stack.clone(), &results);
-                    } else {
+                        ..Default::default()
+                    });
+                }
+                if let Some(else_block) = children.find(|child| child.kind() == SyntaxKind::BLOCK_IF_ELSE) {
+                    check_block_like(diagnostics, shared, else_block, init_stack, &results);
+                } else {
+                    let mut type_stack = TypeStack {
+                        shared,
+                        stack: init_stack,
+                        has_never: false,
+                    };
+                    if type_stack.check_to_bottom(&results, ReportRange::Instr(node)).is_some() {
                         diagnostics.push(Diagnostic {
                             range: node.text_range(),
                             code: DIAGNOSTIC_CODE.into(),
                             message: format!(
-                                "missing `then` branch with expected types {}",
+                                "missing `else` branch with expected types {}",
                                 join_types(shared.db, results.iter(), "", shared.bump)
                             ),
                             ..Default::default()
                         });
                     }
-                    if let Some(else_block) = block_if.else_block() {
-                        check_block_like(diagnostics, shared, else_block.syntax(), init_stack, &results);
-                    } else {
-                        let mut type_stack = TypeStack {
-                            shared,
-                            stack: init_stack,
-                            has_never: false,
-                        };
-                        if type_stack
-                            .check_to_bottom(&results, ReportRange::Instr(&instr))
-                            .is_some()
-                        {
-                            diagnostics.push(Diagnostic {
-                                range: node.text_range(),
-                                code: DIAGNOSTIC_CODE.into(),
-                                message: format!(
-                                    "missing `else` branch with expected types {}",
-                                    join_types(shared.db, results.iter(), "", shared.bump)
-                                ),
-                                ..Default::default()
-                            });
-                        }
-                    }
                 }
             }
-            type_stack
-                .stack
-                .extend(results.into_iter().map(|ty| (ty, Some(instr.clone()))));
+            _ => {}
         }
+        type_stack.stack.extend(results.into_iter().map(|ty| (ty, Some(node))));
     }
 }
 
 struct TypeStack<'db, 'bump> {
     shared: &'bump Shared<'db, 'bump>,
-    stack: Vec<(OperandType<'db>, Option<Instr>)>,
+    stack: BumpVec<'bump, (OperandType<'db>, Option<AmberNode<'db>>)>,
     has_never: bool,
 }
 impl<'db, 'bump> TypeStack<'db, 'bump> {
@@ -371,7 +370,7 @@ impl<'db, 'bump> TypeStack<'db, 'bump> {
                     mismatch = true;
                     if let Some(related_instr) = related_instr {
                         related_information.push(RelatedInformation {
-                            range: ReportRange::Instr(related_instr).pick(),
+                            range: ReportRange::Instr(*related_instr).pick(),
                             message: format!(
                                 "expected type `{}`, found `{}`",
                                 expected.render(self.shared.db),
@@ -426,7 +425,7 @@ impl<'db, 'bump> TypeStack<'db, 'bump> {
                     mismatch = true;
                     if let Some(related_instr) = related_instr {
                         related_information.push(RelatedInformation {
-                            range: ReportRange::Instr(related_instr).pick(),
+                            range: ReportRange::Instr(*related_instr).pick(),
                             message: format!(
                                 "expected type `{}`, found `{}`",
                                 expected.render(self.shared.db),
@@ -510,15 +509,15 @@ impl<'db, 'bump> ResolvedSig<'db, 'bump> {
 fn resolve_sig<'db, 'bump>(
     shared: &Shared<'db, 'bump>,
     instr_name: &str,
-    instr: &PlainInstr,
+    instr: AmberNode<'db>,
     type_stack: &TypeStack<'db, 'bump>,
 ) -> ResolvedSig<'db, 'bump> {
     let bump = shared.bump;
     match instr_name {
         "call" | "return_call" | "throw" => instr
-            .immediates()
-            .next()
-            .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+            .children()
+            .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+            .and_then(|idx| shared.symbol_table.find_def(idx.to_ptr().into()))
             .map(|func| {
                 ResolvedSig::from_func_sig_in(get_func_sig(shared.db, shared.document, func.key, &func.green), bump)
             })
@@ -527,9 +526,9 @@ fn resolve_sig<'db, 'bump>(
             params: BumpVec::new_in(bump),
             results: BumpVec::from_iter_in(
                 [instr
-                    .immediates()
-                    .next()
-                    .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+                    .children()
+                    .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                    .and_then(|idx| shared.symbol_table.find_def(idx.to_ptr().into()))
                     .and_then(|symbol| extract_type(shared.db, &symbol.green))
                     .map_or(OperandType::Any, OperandType::Val)],
                 bump,
@@ -538,9 +537,9 @@ fn resolve_sig<'db, 'bump>(
         "local.set" => ResolvedSig {
             params: BumpVec::from_iter_in(
                 [instr
-                    .immediates()
-                    .next()
-                    .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+                    .children()
+                    .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                    .and_then(|idx| shared.symbol_table.find_def(idx.to_ptr().into()))
                     .and_then(|symbol| extract_type(shared.db, &symbol.green))
                     .map_or(OperandType::Any, OperandType::Val)],
                 bump,
@@ -549,9 +548,9 @@ fn resolve_sig<'db, 'bump>(
         },
         "local.tee" => {
             let ty = instr
-                .immediates()
-                .next()
-                .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+                .children()
+                .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                .and_then(|idx| shared.symbol_table.find_def(idx.to_ptr().into()))
                 .and_then(|symbol| extract_type(shared.db, &symbol.green))
                 .map_or(OperandType::Any, OperandType::Val);
             ResolvedSig {
@@ -563,9 +562,9 @@ fn resolve_sig<'db, 'bump>(
             params: BumpVec::new_in(bump),
             results: BumpVec::from_iter_in(
                 [instr
-                    .immediates()
-                    .next()
-                    .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+                    .children()
+                    .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                    .and_then(|idx| shared.symbol_table.find_def(idx.to_ptr().into()))
                     .and_then(|symbol| extract_global_type(shared.db, &symbol.green))
                     .map_or(OperandType::Any, OperandType::Val)],
                 bump,
@@ -574,9 +573,9 @@ fn resolve_sig<'db, 'bump>(
         "global.set" => ResolvedSig {
             params: BumpVec::from_iter_in(
                 [instr
-                    .immediates()
-                    .next()
-                    .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+                    .children()
+                    .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                    .and_then(|idx| shared.symbol_table.find_def(idx.to_ptr().into()))
                     .and_then(|symbol| extract_global_type(shared.db, &symbol.green))
                     .map_or(OperandType::Any, OperandType::Val)],
                 bump,
@@ -600,13 +599,16 @@ fn resolve_sig<'db, 'bump>(
             results: BumpVec::from_iter_in([OperandType::Val(ValType::F64)], bump),
         },
         "return" => ResolvedSig {
-            params: instr
-                .syntax()
-                .ancestors()
-                .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
+            params: shared
+                .symbol_table
+                .symbols
+                .values()
+                .find(|symbol| {
+                    symbol.kind == SymbolKind::Func && symbol.key.text_range().contains_range(instr.text_range())
+                })
                 .map(|func| {
                     BumpVec::from_iter_in(
-                        get_func_sig(shared.db, shared.document, SymbolKey::new(&func), func.green())
+                        get_func_sig(shared.db, shared.document, func.key, &func.green)
                             .results
                             .into_iter()
                             .map(OperandType::Val),
@@ -618,32 +620,18 @@ fn resolve_sig<'db, 'bump>(
         },
         "br" => ResolvedSig {
             params: instr
-                .immediates()
-                .next()
-                .and_then(|idx| {
-                    resolve_br_types(
-                        shared.db,
-                        shared.document,
-                        shared.symbol_table,
-                        SymbolKey::new(idx.syntax()),
-                    )
-                })
+                .children()
+                .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                .and_then(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, idx.to_ptr().into()))
                 .map(|types| BumpVec::from_iter_in(types, bump))
                 .unwrap_or_else(|| BumpVec::new_in(bump)),
             results: BumpVec::new_in(bump),
         },
         "br_if" => {
             let results = instr
-                .immediates()
-                .next()
-                .and_then(|idx| {
-                    resolve_br_types(
-                        shared.db,
-                        shared.document,
-                        shared.symbol_table,
-                        SymbolKey::new(idx.syntax()),
-                    )
-                })
+                .children()
+                .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                .and_then(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, idx.to_ptr().into()))
                 .map(|types| BumpVec::from_iter_in(types, bump))
                 .unwrap_or_else(|| BumpVec::new_in(bump));
             let params = BumpVec::from_iter_in(
@@ -657,16 +645,9 @@ fn resolve_sig<'db, 'bump>(
         }
         "br_table" => {
             let mut params = instr
-                .immediates()
-                .next()
-                .and_then(|idx| {
-                    resolve_br_types(
-                        shared.db,
-                        shared.document,
-                        shared.symbol_table,
-                        SymbolKey::new(idx.syntax()),
-                    )
-                })
+                .children()
+                .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                .and_then(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, idx.to_ptr().into()))
                 .map(|types| BumpVec::from_iter_in(types, bump))
                 .unwrap_or_else(|| BumpVec::new_in(bump));
             params.push(OperandType::Val(ValType::I32));
@@ -683,16 +664,9 @@ fn resolve_sig<'db, 'bump>(
                     HeapType::Any
                 };
             let mut results = instr
-                .immediates()
-                .next()
-                .and_then(|idx| {
-                    resolve_br_types(
-                        shared.db,
-                        shared.document,
-                        shared.symbol_table,
-                        SymbolKey::new(idx.syntax()),
-                    )
-                })
+                .children()
+                .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                .and_then(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, idx.to_ptr().into()))
                 .map(|types| BumpVec::from_iter_in(types, bump))
                 .unwrap_or_else(|| BumpVec::new_in(bump));
             let params = BumpVec::from_iter_in(
@@ -719,16 +693,9 @@ fn resolve_sig<'db, 'bump>(
                     HeapType::Any
                 };
             let results = instr
-                .immediates()
-                .next()
-                .and_then(|idx| {
-                    resolve_br_types(
-                        shared.db,
-                        shared.document,
-                        shared.symbol_table,
-                        SymbolKey::new(idx.syntax()),
-                    )
-                })
+                .children()
+                .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                .and_then(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, idx.to_ptr().into()))
                 .map(|types| BumpVec::from_iter_in(types, bump))
                 .unwrap_or_else(|| BumpVec::new_in(bump));
             let params = BumpVec::from_iter_in(
@@ -744,28 +711,21 @@ fn resolve_sig<'db, 'bump>(
             ResolvedSig { params, results }
         }
         "br_on_cast" => {
-            let mut immediates = instr.immediates();
+            let mut immediates = instr.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
             let mut types = immediates
                 .next()
-                .and_then(|idx| {
-                    resolve_br_types(
-                        shared.db,
-                        shared.document,
-                        shared.symbol_table,
-                        SymbolKey::new(idx.syntax()),
-                    )
-                })
+                .and_then(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, idx.to_ptr().into()))
                 .map(|types| BumpVec::from_iter_in(types, bump))
                 .unwrap_or_else(|| BumpVec::new_in(bump));
             types.pop();
             let rt1 = immediates
                 .next()
-                .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), shared.db));
+                .and_then(|immediate| immediate.children().find(|child| child.kind() == SyntaxKind::REF_TYPE))
+                .and_then(|ref_type| RefType::from_green(ref_type.green(), shared.db));
             let rt2 = immediates
                 .next()
-                .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), shared.db));
+                .and_then(|immediate| immediate.children().find(|child| child.kind() == SyntaxKind::REF_TYPE))
+                .and_then(|ref_type| RefType::from_green(ref_type.green(), shared.db));
             let mut params = BumpVec::from_iter_in(types.iter().cloned(), bump);
             let mut results = types;
             if let Some((rt1, rt2)) = rt1.zip(rt2) {
@@ -775,28 +735,21 @@ fn resolve_sig<'db, 'bump>(
             ResolvedSig { params, results }
         }
         "br_on_cast_fail" => {
-            let mut immediates = instr.immediates();
+            let mut immediates = instr.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
             let mut types = immediates
                 .next()
-                .and_then(|idx| {
-                    resolve_br_types(
-                        shared.db,
-                        shared.document,
-                        shared.symbol_table,
-                        SymbolKey::new(idx.syntax()),
-                    )
-                })
+                .and_then(|idx| resolve_br_types(shared.db, shared.document, shared.symbol_table, idx.to_ptr().into()))
                 .map(|types| BumpVec::from_iter_in(types, bump))
                 .unwrap_or_else(|| BumpVec::new_in(bump));
             types.pop();
             let rt1 = immediates
                 .next()
-                .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), shared.db));
+                .and_then(|immediate| immediate.children().find(|child| child.kind() == SyntaxKind::REF_TYPE))
+                .and_then(|ref_type| RefType::from_green(ref_type.green(), shared.db));
             let rt2 = immediates
                 .next()
-                .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), shared.db));
+                .and_then(|immediate| immediate.children().find(|child| child.kind() == SyntaxKind::REF_TYPE))
+                .and_then(|ref_type| RefType::from_green(ref_type.green(), shared.db));
             let mut params = BumpVec::from_iter_in(types.iter().cloned(), bump);
             let mut results = types;
             if let Some((rt1, rt2)) = rt1.zip(rt2) {
@@ -807,13 +760,13 @@ fn resolve_sig<'db, 'bump>(
         }
         "select" => {
             let ty = if let Some(ty) = instr
-                .immediates()
-                .next()
-                .and_then(|immediate| immediate.type_use())
-                .and_then(|type_use| type_use.results().next())
-                .and_then(|result| result.val_types().next())
+                .children()
+                .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                .and_then(|immediate| immediate.children().find(|child| child.kind() == SyntaxKind::TYPE_USE))
+                .and_then(|type_use| type_use.children().find(|child| child.kind() == SyntaxKind::RESULT))
+                .and_then(|result| result.children().find(|child| AstValType::can_cast(child.kind())))
             {
-                ValType::from_ast(&ty, shared.db).map_or(OperandType::Any, OperandType::Val)
+                ValType::from_green(ty.green(), shared.db).map_or(OperandType::Any, OperandType::Val)
             } else {
                 type_stack
                     .stack
@@ -829,12 +782,17 @@ fn resolve_sig<'db, 'bump>(
         }
         "call_indirect" | "return_call_indirect" => {
             let mut sig = instr
-                .immediates()
-                .find_map(|immediate| immediate.type_use())
-                .map(|type_use| {
-                    let node = type_use.syntax();
+                .children()
+                .find_map(|child| {
+                    if child.kind() == SyntaxKind::IMMEDIATE {
+                        child.children().find(|child| child.kind() == SyntaxKind::TYPE_USE)
+                    } else {
+                        None
+                    }
+                })
+                .map(|node| {
                     ResolvedSig::from_func_sig_in(
-                        get_type_use_sig(shared.db, shared.document, SyntaxNodePtr::new(node), node.green()),
+                        get_type_use_sig(shared.db, shared.document, node.to_ptr(), node.green()),
                         bump,
                     )
                 })
@@ -845,9 +803,9 @@ fn resolve_sig<'db, 'bump>(
         "struct.new" => {
             let def_types = get_def_types(shared.db, shared.document);
             instr
-                .immediates()
-                .next()
-                .and_then(|immediate| shared.symbol_table.resolved.get(&SymbolKey::new(immediate.syntax())))
+                .children()
+                .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                .and_then(|immediate| shared.symbol_table.resolved.get(&immediate.to_ptr().into()))
                 .and_then(|key| def_types.get(key))
                 .map(|def_type| {
                     let params = if let CompositeType::Struct(fields) = &def_type.comp {
@@ -872,9 +830,9 @@ fn resolve_sig<'db, 'bump>(
                 })
         }
         "struct.new_default" => instr
-            .immediates()
-            .next()
-            .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+            .children()
+            .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+            .and_then(|idx| shared.symbol_table.find_def(idx.to_ptr().into()))
             .map(|symbol| ResolvedSig {
                 params: BumpVec::new_in(bump),
                 results: BumpVec::from_iter_in(
@@ -890,12 +848,17 @@ fn resolve_sig<'db, 'bump>(
                 results: BumpVec::from_iter_in([OperandType::Any], bump),
             }),
         "struct.get" => {
-            let mut immediates = instr.immediates();
+            let mut immediates = instr.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
             immediates
                 .next()
                 .zip(immediates.next())
                 .and_then(|(struct_ref, field_ref)| {
-                    resolve_field_type_with_struct_idx(shared.db, shared.document, &struct_ref, &field_ref)
+                    resolve_field_type_with_struct_idx(
+                        shared.db,
+                        shared.document,
+                        struct_ref.to_ptr(),
+                        field_ref.to_ptr(),
+                    )
                 })
                 .map(|(idx, ty)| ResolvedSig {
                     params: BumpVec::from_iter_in(
@@ -914,9 +877,9 @@ fn resolve_sig<'db, 'bump>(
         }
         "struct.get_s" | "struct.get_u" => ResolvedSig {
             params: instr
-                .immediates()
-                .next()
-                .and_then(|immediate| shared.symbol_table.find_def(SymbolKey::new(immediate.syntax())))
+                .children()
+                .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                .and_then(|immediate| shared.symbol_table.find_def(immediate.to_ptr().into()))
                 .map(|symbol| {
                     BumpVec::from_iter_in(
                         [OperandType::Val(ValType::Ref(RefType {
@@ -930,12 +893,17 @@ fn resolve_sig<'db, 'bump>(
             results: BumpVec::from_iter_in([OperandType::Val(ValType::I32)], bump),
         },
         "struct.set" => {
-            let mut immediates = instr.immediates();
+            let mut immediates = instr.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
             immediates
                 .next()
                 .zip(immediates.next())
                 .and_then(|(struct_ref, field_ref)| {
-                    resolve_field_type_with_struct_idx(shared.db, shared.document, &struct_ref, &field_ref)
+                    resolve_field_type_with_struct_idx(
+                        shared.db,
+                        shared.document,
+                        struct_ref.to_ptr(),
+                        field_ref.to_ptr(),
+                    )
                 })
                 .map(|(idx, ty)| ResolvedSig {
                     params: BumpVec::from_iter_in(
@@ -957,11 +925,11 @@ fn resolve_sig<'db, 'bump>(
         }
         "array.new" => {
             let mut sig = instr
-                .immediates()
-                .next()
+                .children()
+                .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
                 .and_then(|immediate| {
                     let def_types = get_def_types(shared.db, shared.document);
-                    resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
+                    resolve_array_type_with_idx(shared.symbol_table, def_types, immediate.to_ptr())
                 })
                 .map(|(idx, ty)| ResolvedSig {
                     params: BumpVec::from_iter_in([ty.unwrap_or(OperandType::Any)], bump),
@@ -981,9 +949,9 @@ fn resolve_sig<'db, 'bump>(
             sig
         }
         "array.new_default" => instr
-            .immediates()
-            .next()
-            .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+            .children()
+            .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+            .and_then(|idx| shared.symbol_table.find_def(idx.to_ptr().into()))
             .map(|symbol| ResolvedSig {
                 params: BumpVec::from_iter_in([OperandType::Val(ValType::I32)], bump),
                 results: BumpVec::from_iter_in(
@@ -999,17 +967,25 @@ fn resolve_sig<'db, 'bump>(
                 results: BumpVec::from_iter_in([OperandType::Any], bump),
             }),
         "array.new_fixed" => {
-            let mut immediates = instr.immediates();
+            let mut immediates = instr.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
             immediates
                 .next()
                 .and_then(|immediate| {
                     let def_types = get_def_types(shared.db, shared.document);
-                    resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
+                    resolve_array_type_with_idx(shared.symbol_table, def_types, immediate.to_ptr())
                 })
                 .map(|(idx, ty)| {
                     let count = immediates
                         .next()
-                        .and_then(|immediate| immediate.int())
+                        .and_then(|immediate| {
+                            immediate
+                                .green()
+                                .children()
+                                .find_map(|node_or_token| match node_or_token {
+                                    NodeOrToken::Token(token) if token.kind() == SyntaxKind::INT => Some(token),
+                                    _ => None,
+                                })
+                        })
                         .and_then(|int| helpers::parse_u32(int.text()).ok())
                         .unwrap_or_default();
                     ResolvedSig {
@@ -1032,9 +1008,9 @@ fn resolve_sig<'db, 'bump>(
                 })
         }
         "array.new_data" | "array.new_elem" => instr
-            .immediates()
-            .next()
-            .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+            .children()
+            .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+            .and_then(|idx| shared.symbol_table.find_def(idx.to_ptr().into()))
             .map(|symbol| ResolvedSig {
                 params: BumpVec::from_iter_in(iter::repeat_n(OperandType::Val(ValType::I32), 2), bump),
                 results: BumpVec::from_iter_in(
@@ -1050,11 +1026,11 @@ fn resolve_sig<'db, 'bump>(
                 results: BumpVec::from_iter_in([OperandType::Any], bump),
             }),
         "array.get" => instr
-            .immediates()
-            .next()
+            .children()
+            .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
             .and_then(|immediate| {
                 let def_types = get_def_types(shared.db, shared.document);
-                resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
+                resolve_array_type_with_idx(shared.symbol_table, def_types, immediate.to_ptr())
             })
             .map(|(idx, ty)| ResolvedSig {
                 params: BumpVec::from_iter_in(
@@ -1074,9 +1050,9 @@ fn resolve_sig<'db, 'bump>(
                 results: BumpVec::from_iter_in([OperandType::Any], bump),
             }),
         "array.get_s" | "array.get_u" => instr
-            .immediates()
-            .next()
-            .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+            .children()
+            .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+            .and_then(|idx| shared.symbol_table.find_def(idx.to_ptr().into()))
             .map(|symbol| ResolvedSig {
                 params: BumpVec::from_iter_in(
                     [
@@ -1095,11 +1071,11 @@ fn resolve_sig<'db, 'bump>(
                 results: BumpVec::from_iter_in([OperandType::Val(ValType::I32)], bump),
             }),
         "array.set" => instr
-            .immediates()
-            .next()
+            .children()
+            .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
             .and_then(|immediate| {
                 let def_types = get_def_types(shared.db, shared.document);
-                resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
+                resolve_array_type_with_idx(shared.symbol_table, def_types, immediate.to_ptr())
             })
             .map(|(idx, ty)| ResolvedSig {
                 params: BumpVec::from_iter_in(
@@ -1117,11 +1093,11 @@ fn resolve_sig<'db, 'bump>(
             })
             .unwrap_or_else(|| ResolvedSig::new_in(bump)),
         "array.fill" => instr
-            .immediates()
-            .next()
+            .children()
+            .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
             .and_then(|immediate| {
                 let def_types = get_def_types(shared.db, shared.document);
-                resolve_array_type_with_idx(shared.symbol_table, def_types, &immediate)
+                resolve_array_type_with_idx(shared.symbol_table, def_types, immediate.to_ptr())
             })
             .map(|(idx, ty)| ResolvedSig {
                 params: BumpVec::from_iter_in(
@@ -1140,14 +1116,14 @@ fn resolve_sig<'db, 'bump>(
             })
             .unwrap_or_else(|| ResolvedSig::new_in(bump)),
         "array.copy" => {
-            let mut immediates = instr.immediates();
+            let mut immediates = instr.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
             immediates
                 .next()
-                .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+                .and_then(|idx| shared.symbol_table.find_def(idx.to_ptr().into()))
                 .zip(
                     immediates
                         .next()
-                        .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax()))),
+                        .and_then(|idx| shared.symbol_table.find_def(idx.to_ptr().into())),
                 )
                 .map(|(dst, src)| ResolvedSig {
                     params: BumpVec::from_iter_in(
@@ -1171,9 +1147,9 @@ fn resolve_sig<'db, 'bump>(
                 .unwrap_or_else(|| ResolvedSig::new_in(bump))
         }
         "array.init_data" | "array.init_elem" => instr
-            .immediates()
-            .next()
-            .and_then(|idx| shared.symbol_table.find_def(SymbolKey::new(idx.syntax())))
+            .children()
+            .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+            .and_then(|idx| shared.symbol_table.find_def(idx.to_ptr().into()))
             .map(|symbol| ResolvedSig {
                 params: BumpVec::from_iter_in(
                     [
@@ -1192,18 +1168,18 @@ fn resolve_sig<'db, 'bump>(
             .unwrap_or_else(|| ResolvedSig::new_in(bump)),
         "ref.null" => {
             let ty = instr
-                .immediates()
-                .next()
-                .and_then(|immediate| immediate.syntax().first_child_or_token())
-                .and_then(|element| match element {
-                    SyntaxElement::Node(node) if node.kind() == SyntaxKind::HEAP_TYPE => {
-                        HeapType::from_green(node.green(), shared.db)
+                .children()
+                .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                .and_then(|immediate| immediate.green().children().next())
+                .and_then(|node_or_token| match node_or_token {
+                    NodeOrToken::Node(node) if node.kind() == SyntaxKind::HEAP_TYPE => {
+                        HeapType::from_green(node, shared.db)
                     }
-                    SyntaxElement::Token(token) if token.kind() == SyntaxKind::IDENT => Some(HeapType::Type(Idx {
+                    NodeOrToken::Token(token) if token.kind() == SyntaxKind::IDENT => Some(HeapType::Type(Idx {
                         num: None,
                         name: Some(InternIdent::new(shared.db, token.text())),
                     })),
-                    SyntaxElement::Token(token) if token.kind() == SyntaxKind::INT => Some(HeapType::Type(Idx {
+                    NodeOrToken::Token(token) if token.kind() == SyntaxKind::INT => Some(HeapType::Type(Idx {
                         num: helpers::parse_u32(token.text()).ok(),
                         name: None,
                     })),
@@ -1264,10 +1240,10 @@ fn resolve_sig<'db, 'bump>(
         }
         "ref.test" => {
             let heap_ty = instr
-                .immediates()
-                .next()
-                .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), shared.db))
+                .children()
+                .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                .and_then(|immediate| immediate.children().find(|child| child.kind() == SyntaxKind::REF_TYPE))
+                .and_then(|ref_type| RefType::from_green(ref_type.green(), shared.db))
                 .and_then(|ref_type| {
                     ref_type
                         .heap_ty
@@ -1287,10 +1263,10 @@ fn resolve_sig<'db, 'bump>(
         }
         "ref.cast" => {
             let ref_type = instr
-                .immediates()
-                .next()
-                .and_then(|immediate| immediate.ref_type())
-                .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), shared.db))
+                .children()
+                .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                .and_then(|immediate| immediate.children().find(|child| child.kind() == SyntaxKind::REF_TYPE))
+                .and_then(|ref_type| RefType::from_green(ref_type.green(), shared.db))
                 .unwrap_or(RefType {
                     heap_ty: HeapType::Any,
                     nullable: true,
@@ -1311,10 +1287,10 @@ fn resolve_sig<'db, 'bump>(
             }
         }
         "ref.func" => {
-            let immediate = instr.immediates().next();
+            let immediate = instr.children().find(|child| child.kind() == SyntaxKind::IMMEDIATE);
             let heap_ty = immediate
                 .as_ref()
-                .and_then(|immediate| shared.symbol_table.resolved.get(&SymbolKey::new(immediate.syntax())))
+                .and_then(|immediate| shared.symbol_table.resolved.get(&immediate.to_ptr().into()))
                 .and_then(|key| {
                     let root = shared.document.root_tree(shared.db);
                     ModuleFieldFunc::cast(key.to_node(&root))
@@ -1331,7 +1307,11 @@ fn resolve_sig<'db, 'bump>(
                             .map(|ident| InternIdent::new(shared.db, ident.text())),
                     })
                 })
-                .or_else(|| immediate.map(|immediate| HeapType::DefFunc(Idx::from_immediate(&immediate, shared.db))));
+                .or_else(|| {
+                    immediate
+                        .and_then(|immediate| Idx::from_immediate(immediate.green(), shared.db))
+                        .map(HeapType::DefFunc)
+                });
             ResolvedSig {
                 params: BumpVec::new_in(bump),
                 results: BumpVec::from_iter_in(
@@ -1348,9 +1328,9 @@ fn resolve_sig<'db, 'bump>(
         "call_ref" | "return_call_ref" => {
             let def_types = get_def_types(shared.db, shared.document);
             instr
-                .immediates()
-                .next()
-                .and_then(|immediate| shared.symbol_table.resolved.get(&SymbolKey::new(immediate.syntax())))
+                .children()
+                .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                .and_then(|immediate| shared.symbol_table.resolved.get(&immediate.to_ptr().into()))
                 .and_then(|key| def_types.get(key))
                 .map(|def_type| {
                     let mut sig = def_type
@@ -1386,27 +1366,38 @@ fn resolve_sig<'db, 'bump>(
 }
 
 enum ReportRange<'a> {
-    Instr(&'a Instr),
-    Keyword(&'a SyntaxNode),
-    Last(&'a SyntaxNode),
+    Instr(AmberNode<'a>),
+    Keyword(AmberNode<'a>),
+    Last(AmberNode<'a>),
 }
 impl ReportRange<'_> {
     fn pick(&self) -> TextRange {
         match self {
-            ReportRange::Instr(instr) => match instr {
-                Instr::Plain(plain_instr) => plain_instr.syntax().text_range(),
-                Instr::Block(block_instr) => block_instr
-                    .syntax()
-                    .first_child_by_kind(|kind| kind == SyntaxKind::TYPE_USE)
-                    .map(|type_use| type_use.text_range())
-                    .unwrap_or_else(|| block_instr.syntax().text_range()),
-            },
-            ReportRange::Keyword(node) => support::token(node, SyntaxKind::KEYWORD)
+            ReportRange::Instr(node) => {
+                if BlockInstr::can_cast(node.kind()) {
+                    node.children()
+                        .find(|child| child.kind() == SyntaxKind::TYPE_USE)
+                        .map(|type_use| type_use.text_range())
+                        .unwrap_or_else(|| node.text_range())
+                } else {
+                    node.text_range()
+                }
+            }
+            ReportRange::Keyword(node) => node
+                .children_with_tokens()
+                .find_map(|node_or_token| match node_or_token {
+                    NodeOrToken::Token(token) if token.kind() == SyntaxKind::KEYWORD => Some(token),
+                    _ => None,
+                })
                 .map(|token| token.text_range())
                 .unwrap_or_else(|| node.text_range()),
             ReportRange::Last(node) => node
-                .last_child_or_token()
-                .map(|it| it.text_range())
+                .children_with_tokens()
+                .next_back()
+                .map(|node_or_token| match node_or_token {
+                    NodeOrToken::Node(node) => node.text_range(),
+                    NodeOrToken::Token(token) => token.text_range(),
+                })
                 .unwrap_or_else(|| node.text_range()),
         }
     }

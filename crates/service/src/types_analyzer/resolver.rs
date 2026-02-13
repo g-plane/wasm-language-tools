@@ -9,10 +9,7 @@ use crate::{
     document::Document,
     idx::Idx,
 };
-use wat_syntax::{
-    SyntaxKind, SyntaxNode,
-    ast::{AstNode, Immediate, support},
-};
+use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, ast::support};
 
 pub(crate) fn resolve_param_types<'db>(
     db: &'db dyn salsa::Database,
@@ -55,11 +52,11 @@ pub(crate) fn resolve_br_types<'db>(
 pub(crate) fn resolve_array_type_with_idx<'db>(
     symbol_table: &SymbolTable,
     def_types: &DefTypes<'db>,
-    immediate: &Immediate,
+    immediate: SyntaxNodePtr,
 ) -> Option<(Idx<'db>, Option<OperandType<'db>>)> {
     symbol_table
         .resolved
-        .get(&SymbolKey::new(immediate.syntax()))
+        .get(&immediate.into())
         .and_then(|key| def_types.get(key))
         .map(|def_type| {
             if let CompositeType::Array(field) = &def_type.comp {
@@ -105,12 +102,11 @@ pub(crate) fn resolve_field_type<'db>(
 pub(crate) fn resolve_field_type_with_struct_idx<'db>(
     db: &'db dyn salsa::Database,
     document: Document,
-    struct_ref: &Immediate,
-    field_ref: &Immediate,
+    struct_ref: SyntaxNodePtr,
+    field_ref: SyntaxNodePtr,
 ) -> Option<(Idx<'db>, Option<OperandType<'db>>)> {
     let symbol_table = SymbolTable::of(db, document);
-    let struct_def_symbol = symbol_table.find_def(SymbolKey::new(struct_ref.syntax()))?;
-    let ty =
-        resolve_field_type(db, document, SymbolKey::new(field_ref.syntax()), struct_def_symbol.key).map(|ty| ty.into());
+    let struct_def_symbol = symbol_table.find_def(struct_ref.into())?;
+    let ty = resolve_field_type(db, document, field_ref.into(), struct_def_symbol.key).map(|ty| ty.into());
     Some((struct_def_symbol.idx, ty))
 }
