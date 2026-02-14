@@ -7,7 +7,7 @@ mod traversal;
 
 pub use self::{
     element::SyntaxElement,
-    iter::{SyntaxElementChildren, SyntaxNodeChildren},
+    iter::SyntaxNodeChildren,
     node::SyntaxNode,
     ptr::SyntaxNodePtr,
     token::SyntaxToken,

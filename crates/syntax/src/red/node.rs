@@ -1,6 +1,6 @@
 use crate::{
-    AmberNode, Descendants, DescendantsWithTokens, GreenNode, GreenToken, NodeOrToken, SyntaxElement,
-    SyntaxElementChildren, SyntaxKind, SyntaxNodeChildren, SyntaxToken, TokenAtOffset, green::GreenChild,
+    AmberNode, Descendants, DescendantsWithTokens, GreenNode, GreenToken, NodeOrToken, SyntaxElement, SyntaxKind,
+    SyntaxNodeChildren, SyntaxToken, TokenAtOffset, green::GreenChild,
 };
 use std::{fmt, ptr::NonNull, rc::Rc};
 use text_size::{TextRange, TextSize};
@@ -104,15 +104,11 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn children_with_tokens(&self) -> SyntaxElementChildren {
-        SyntaxElementChildren {
-            parent: self.clone(),
-            green: match &self.data.level {
-                NodeLevel::Root { green } => NonNull::from(green),
-                NodeLevel::Child { green, .. } => *green,
-            },
-            index: 0,
-        }
+    pub fn children_with_tokens(&self) -> impl Iterator<Item = SyntaxElement> {
+        self.green().slice().iter().enumerate().map(|(i, child)| match child {
+            GreenChild::Node { offset, node } => self.new_child(i as u32, node, *offset).into(),
+            GreenChild::Token { offset, token } => self.new_token(i as u32, token, *offset).into(),
+        })
     }
 
     #[inline]

@@ -13,8 +13,8 @@ pub use self::{
     helpers::NodeOrToken,
     kind::SyntaxKind,
     red::{
-        Descendants, DescendantsWithTokens, SyntaxElement, SyntaxElementChildren, SyntaxNode, SyntaxNodeChildren,
-        SyntaxNodePtr, SyntaxToken, TokenAtOffset,
+        Descendants, DescendantsWithTokens, SyntaxElement, SyntaxNode, SyntaxNodeChildren, SyntaxNodePtr, SyntaxToken,
+        TokenAtOffset,
     },
 };
 pub use text_size::{TextRange, TextSize};
