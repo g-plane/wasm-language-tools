@@ -117,10 +117,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                             // User is probably going to type "param",
                             // but parser treat it as a plain instruction,
                             // so we catch this case here, though these keywords aren't instruction names.
-                            let prev_node = parent
-                                .prev_siblings_with_tokens()
-                                .find_map(NodeOrToken::into_node)
-                                .map(|node| node.kind());
+                            let prev_node = parent.prev_sibling().map(|node| node.kind());
                             if !matches!(
                                 prev_node,
                                 Some(
@@ -152,10 +149,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                         | SyntaxKind::BLOCK_IF
                         | SyntaxKind::BLOCK_LOOP
                         | SyntaxKind::BLOCK_TRY_TABLE => {
-                            let prev_node = parent
-                                .prev_siblings_with_tokens()
-                                .find_map(NodeOrToken::into_node)
-                                .map(|node| node.kind());
+                            let prev_node = parent.prev_sibling().map(|node| node.kind());
                             if !matches!(
                                 prev_node,
                                 Some(

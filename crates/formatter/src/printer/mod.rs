@@ -326,21 +326,25 @@ fn reflow(text: &str, docs: &mut Vec<Doc<'static>>) {
 
 fn should_ignore(node: &SyntaxNode, ctx: &Ctx) -> bool {
     // for the case that comment comes in the middle of a list of nodes
-    node.prev_sibling_or_token()
-        .and_then(|element| element.prev_sibling_or_token())
+    node.prev_consecutive_tokens()
+        .nth(1)
         .or_else(|| {
             // for the case that comment comes at the start or the end of a list of nodes
             node.parent()
                 .and_then(|parent| parent.prev_sibling_or_token())
                 .and_then(|parent| parent.prev_sibling_or_token())
+                .and_then(NodeOrToken::into_token)
         })
         .as_ref()
-        .and_then(|element| match element {
-            SyntaxElement::Token(token) if token.kind() == SyntaxKind::LINE_COMMENT => token
-                .text()
-                .strip_prefix(";;")
-                .and_then(|s| s.trim_start().strip_prefix(&ctx.options.ignore_comment_directive)),
-            _ => None,
+        .and_then(|token| {
+            if token.kind() == SyntaxKind::LINE_COMMENT {
+                token
+                    .text()
+                    .strip_prefix(";;")
+                    .and_then(|s| s.trim_start().strip_prefix(&ctx.options.ignore_comment_directive))
+            } else {
+                None
+            }
         })
         .is_some_and(|rest| rest.is_empty() || rest.starts_with(|c: char| c.is_ascii_whitespace()))
 }
