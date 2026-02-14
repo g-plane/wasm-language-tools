@@ -40,8 +40,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
         SyntaxKind::ANNOT_START => return Some(vec![CmpCtx::Annotation]),
         SyntaxKind::ANNOT_ELEM => {
             return match token
-                .prev_siblings_with_tokens()
-                .map_while(NodeOrToken::into_token)
+                .prev_consecutive_tokens()
                 .find(|token| token.kind() == SyntaxKind::ANNOT_START)
                 .as_ref()
                 .and_then(|token| token.text().strip_prefix("(@"))

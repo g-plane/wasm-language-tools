@@ -90,7 +90,7 @@ pub(crate) mod syntax {
     use crate::binder::Symbol;
     use std::ops::ControlFlow;
     use wat_syntax::{
-        SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, TextSize, TokenAtOffset,
+        SyntaxKind, SyntaxNode, SyntaxToken, TextSize, TokenAtOffset,
         ast::{AstNode, CompType, ExternIdx, TypeDef, support},
     };
 
@@ -144,12 +144,8 @@ pub(crate) mod syntax {
     }
 
     pub fn get_doc_comment(node: &SyntaxNode) -> String {
-        node.prev_siblings_with_tokens()
-            .skip(1)
-            .map_while(|node_or_token| match node_or_token {
-                SyntaxElement::Token(token) if token.kind().is_trivia() => Some(token),
-                _ => None,
-            })
+        node.prev_consecutive_tokens()
+            .take_while(|token| token.kind().is_trivia())
             .filter(|token| token.kind() == SyntaxKind::LINE_COMMENT)
             .skip_while(|token| !token.text().starts_with(";;;"))
             .take_while(|token| token.text().starts_with(";;;"))

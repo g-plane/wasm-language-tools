@@ -33,9 +33,7 @@ impl<'a> Ctx<'a> {
             .or_else(|| support::token(node, SyntaxKind::R_PAREN))
             .and_then(|token| {
                 token
-                    .prev_siblings_with_tokens()
-                    .skip(1)
-                    .map_while(|node_or_token| node_or_token.into_token())
+                    .prev_consecutive_tokens()
                     .find(|token| token.kind() != SyntaxKind::WHITESPACE)
             })
             .is_some_and(|token| token.kind() == SyntaxKind::LINE_COMMENT)
@@ -188,9 +186,8 @@ where
 {
     let trivias = node
         .syntax()
-        .next_siblings_with_tokens()
-        .skip(1)
-        .map_while(into_formattable_trivia)
+        .next_consecutive_tokens()
+        .take_while(is_formattable_trivia)
         .collect::<Vec<_>>();
     if trivias
         .iter()
@@ -226,9 +223,8 @@ where
 }
 fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>> {
     let trivias = token
-        .next_siblings_with_tokens()
-        .skip(1)
-        .map_while(into_formattable_trivia)
+        .next_consecutive_tokens()
+        .take_while(is_formattable_trivia)
         .skip_while(|current| token.kind() == SyntaxKind::L_PAREN && current.kind() == SyntaxKind::WHITESPACE)
         .collect::<Vec<_>>();
     if trivias.iter().all(|token| token.kind() == SyntaxKind::WHITESPACE) {
@@ -258,14 +254,14 @@ fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>
     docs
 }
 
-fn into_formattable_trivia(node_or_token: SyntaxElement) -> Option<SyntaxToken> {
-    node_or_token.into_token().and_then(|token| match token.kind() {
+fn is_formattable_trivia(token: &SyntaxToken) -> bool {
+    match token.kind() {
         SyntaxKind::LINE_COMMENT
         | SyntaxKind::BLOCK_COMMENT
         | SyntaxKind::ERROR
         | SyntaxKind::ANNOT_START
         | SyntaxKind::ANNOT_ELEM
-        | SyntaxKind::ANNOT_END => Some(token),
+        | SyntaxKind::ANNOT_END => true,
         SyntaxKind::WHITESPACE
             if token
                 .next_sibling_or_token()
@@ -276,10 +272,10 @@ fn into_formattable_trivia(node_or_token: SyntaxElement) -> Option<SyntaxToken> 
                     _ => true,
                 }) =>
         {
-            Some(token)
+            true
         }
-        _ => None,
-    })
+        _ => false,
+    }
 }
 
 fn format_line_comment(text: &str, ctx: &Ctx) -> Doc<'static> {
@@ -378,9 +374,7 @@ where
             if first.is_some_and(|first| {
                 first
                     .syntax()
-                    .next_siblings_with_tokens()
-                    .skip(1)
-                    .map_while(NodeOrToken::into_token)
+                    .next_consecutive_tokens()
                     .any(|token| token.text().contains('\n'))
             }) {
                 Doc::hard_line()

@@ -65,6 +65,11 @@ impl SyntaxToken {
     }
 
     #[inline]
+    pub fn next_consecutive_tokens(&self) -> impl Iterator<Item = SyntaxToken> {
+        self.data.parent.next_consecutive_tokens(self.data.index)
+    }
+
+    #[inline]
     pub fn prev_sibling_or_token(&self) -> Option<SyntaxElement> {
         self.data.parent.prev_child_or_token(self.data.index)
     }
@@ -73,6 +78,11 @@ impl SyntaxToken {
     /// Including current node.
     pub fn prev_siblings_with_tokens(&self) -> impl Iterator<Item = SyntaxElement> {
         self.data.parent.prev_children_with_tokens(self.data.index)
+    }
+
+    #[inline]
+    pub fn prev_consecutive_tokens(&self) -> impl Iterator<Item = SyntaxToken> {
+        self.data.parent.prev_consecutive_tokens(self.data.index)
     }
 
     #[inline]

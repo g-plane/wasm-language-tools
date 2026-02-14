@@ -237,6 +237,16 @@ impl SyntaxNode {
     }
 
     #[inline]
+    pub fn next_consecutive_tokens(&self) -> impl Iterator<Item = SyntaxToken> {
+        match &self.data.level {
+            NodeLevel::Root { .. } => None,
+            NodeLevel::Child { parent, .. } => Some(parent),
+        }
+        .into_iter()
+        .flat_map(|parent| parent.next_consecutive_tokens(self.data.index))
+    }
+
+    #[inline]
     pub fn prev_sibling(&self) -> Option<SyntaxNode> {
         self.prev_siblings().nth(1)
     }
@@ -269,6 +279,16 @@ impl SyntaxNode {
         }
         .into_iter()
         .flat_map(|parent| parent.prev_children_with_tokens(self.data.index))
+    }
+
+    #[inline]
+    pub fn prev_consecutive_tokens(&self) -> impl Iterator<Item = SyntaxToken> {
+        match &self.data.level {
+            NodeLevel::Root { .. } => None,
+            NodeLevel::Child { parent, .. } => Some(parent),
+        }
+        .into_iter()
+        .flat_map(|parent| parent.prev_consecutive_tokens(self.data.index))
     }
 
     #[inline]
@@ -453,6 +473,24 @@ impl NodeData {
     }
 
     #[inline]
+    pub fn next_consecutive_tokens(self: &Rc<Self>, index: u32) -> impl Iterator<Item = SyntaxToken> {
+        self.green()
+            .slice()
+            .iter()
+            .enumerate()
+            .skip(index as usize + 1)
+            .map_while(|(i, child)| match child {
+                GreenChild::Node { .. } => None,
+                GreenChild::Token { offset, token } => Some(SyntaxToken::new(
+                    i as u32,
+                    token,
+                    self.range.start() + offset,
+                    Rc::clone(self),
+                )),
+            })
+    }
+
+    #[inline]
     pub fn prev_children(self: &Rc<Self>, index: u32) -> impl Iterator<Item = SyntaxNode> {
         let slice = self.green().slice();
         slice
@@ -499,6 +537,25 @@ impl NodeData {
                 GreenChild::Token { offset, token } => {
                     SyntaxToken::new(i as u32, token, self.range.start() + offset, Rc::clone(self)).into()
                 }
+            })
+    }
+
+    #[inline]
+    pub fn prev_consecutive_tokens(self: &Rc<Self>, index: u32) -> impl Iterator<Item = SyntaxToken> {
+        let slice = self.green().slice();
+        slice
+            .iter()
+            .enumerate()
+            .rev()
+            .skip(slice.len() - index as usize)
+            .map_while(|(i, child)| match child {
+                GreenChild::Node { .. } => None,
+                GreenChild::Token { offset, token } => Some(SyntaxToken::new(
+                    i as u32,
+                    token,
+                    self.range.start() + offset,
+                    Rc::clone(self),
+                )),
             })
     }
 }
