@@ -5,37 +5,6 @@ use crate::{
 use std::{fmt, ptr::NonNull, rc::Rc};
 use text_size::{TextRange, TextSize};
 
-#[derive(PartialEq, Eq, Hash)]
-pub(crate) struct NodeData {
-    range: TextRange,
-    level: NodeLevel,
-    index: u32,
-}
-impl NodeData {
-    #[inline]
-    pub(crate) fn range(&self) -> TextRange {
-        self.range
-    }
-    #[inline]
-    pub(crate) fn green(&self) -> &GreenNode {
-        match &self.level {
-            NodeLevel::Root { green } => green,
-            NodeLevel::Child { green, .. } => unsafe { green.as_ref() },
-        }
-    }
-}
-
-#[derive(PartialEq, Eq, Hash)]
-enum NodeLevel {
-    Root {
-        green: GreenNode,
-    },
-    Child {
-        green: NonNull<GreenNode>,
-        parent: Rc<NodeData>,
-    },
-}
-
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SyntaxNode {
     pub(crate) data: Rc<NodeData>,
@@ -239,12 +208,10 @@ impl SyntaxNode {
 
     #[inline]
     pub fn next_sibling_or_token(&self) -> Option<SyntaxElement> {
-        let i = self.data.index + 1;
-        let parent = self.parent()?;
-        parent.green().slice().get(i as usize).map(|child| match child {
-            GreenChild::Node { offset, node } => parent.new_child(i, node, *offset).into(),
-            GreenChild::Token { offset, token } => parent.new_token(i, token, *offset).into(),
-        })
+        match &self.data.level {
+            NodeLevel::Root { .. } => None,
+            NodeLevel::Child { parent, .. } => parent.next_child_or_token(self.data.index),
+        }
     }
 
     #[inline]
@@ -255,23 +222,7 @@ impl SyntaxNode {
             NodeLevel::Child { parent, .. } => Some(parent),
         }
         .into_iter()
-        .flat_map(|parent| {
-            parent
-                .green()
-                .slice()
-                .iter()
-                .enumerate()
-                .skip(self.data.index as usize)
-                .filter_map(|(i, child)| match child {
-                    GreenChild::Node { offset, node } => Some(SyntaxNode::new(
-                        i as u32,
-                        node,
-                        parent.range.start() + offset,
-                        Rc::clone(parent),
-                    )),
-                    _ => None,
-                })
-        })
+        .flat_map(|parent| parent.next_children(self.data.index))
     }
 
     #[inline]
@@ -282,22 +233,7 @@ impl SyntaxNode {
             NodeLevel::Child { parent, .. } => Some(parent),
         }
         .into_iter()
-        .flat_map(|parent| {
-            parent
-                .green()
-                .slice()
-                .iter()
-                .enumerate()
-                .skip(self.data.index as usize)
-                .map(|(i, child)| match child {
-                    GreenChild::Node { offset, node } => {
-                        SyntaxNode::new(i as u32, node, parent.range.start() + offset, Rc::clone(parent)).into()
-                    }
-                    GreenChild::Token { offset, token } => {
-                        SyntaxToken::new(i as u32, token, parent.range.start() + offset, Rc::clone(parent)).into()
-                    }
-                })
-        })
+        .flat_map(|parent| parent.next_children_with_tokens(self.data.index))
     }
 
     #[inline]
@@ -307,12 +243,10 @@ impl SyntaxNode {
 
     #[inline]
     pub fn prev_sibling_or_token(&self) -> Option<SyntaxElement> {
-        let i = self.data.index.checked_sub(1)?;
-        let parent = self.parent()?;
-        parent.green().slice().get(i as usize).map(|child| match child {
-            GreenChild::Node { offset, node } => parent.new_child(i, node, *offset).into(),
-            GreenChild::Token { offset, token } => parent.new_token(i, token, *offset).into(),
-        })
+        match &self.data.level {
+            NodeLevel::Root { .. } => None,
+            NodeLevel::Child { parent, .. } => parent.prev_child_or_token(self.data.index),
+        }
     }
 
     #[inline]
@@ -323,23 +257,7 @@ impl SyntaxNode {
             NodeLevel::Child { parent, .. } => Some(parent),
         }
         .into_iter()
-        .flat_map(|parent| {
-            let slice = parent.green().slice();
-            slice
-                .iter()
-                .enumerate()
-                .rev()
-                .skip(slice.len() - self.data.index as usize - 1)
-                .filter_map(|(i, child)| match child {
-                    GreenChild::Node { offset, node } => Some(SyntaxNode::new(
-                        i as u32,
-                        node,
-                        parent.range.start() + offset,
-                        Rc::clone(parent),
-                    )),
-                    _ => None,
-                })
-        })
+        .flat_map(|parent| parent.prev_children(self.data.index))
     }
 
     #[inline]
@@ -350,22 +268,7 @@ impl SyntaxNode {
             NodeLevel::Child { parent, .. } => Some(parent),
         }
         .into_iter()
-        .flat_map(|parent| {
-            let slice = parent.green().slice();
-            slice
-                .iter()
-                .enumerate()
-                .rev()
-                .skip(slice.len() - self.data.index as usize - 1)
-                .map(|(i, child)| match child {
-                    GreenChild::Node { offset, node } => {
-                        SyntaxNode::new(i as u32, node, parent.range.start() + offset, Rc::clone(parent)).into()
-                    }
-                    GreenChild::Token { offset, token } => {
-                        SyntaxToken::new(i as u32, token, parent.range.start() + offset, Rc::clone(parent)).into()
-                    }
-                })
-        })
+        .flat_map(|parent| parent.prev_children_with_tokens(self.data.index))
     }
 
     #[inline]
@@ -483,4 +386,130 @@ impl fmt::Display for SyntaxNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.green().fmt(f)
     }
+}
+
+#[derive(PartialEq, Eq, Hash)]
+pub(crate) struct NodeData {
+    range: TextRange,
+    level: NodeLevel,
+    index: u32,
+}
+
+impl NodeData {
+    #[inline]
+    fn green(&self) -> &GreenNode {
+        match &self.level {
+            NodeLevel::Root { green } => green,
+            NodeLevel::Child { green, .. } => unsafe { green.as_ref() },
+        }
+    }
+
+    #[inline]
+    pub fn next_children(self: &Rc<Self>, index: u32) -> impl Iterator<Item = SyntaxNode> {
+        self.green()
+            .slice()
+            .iter()
+            .enumerate()
+            .skip(index as usize)
+            .filter_map(|(i, child)| match child {
+                GreenChild::Node { offset, node } => Some(SyntaxNode::new(
+                    i as u32,
+                    node,
+                    self.range.start() + offset,
+                    Rc::clone(self),
+                )),
+                _ => None,
+            })
+    }
+
+    #[inline]
+    pub fn next_child_or_token(self: &Rc<Self>, index: u32) -> Option<SyntaxElement> {
+        let i = index + 1;
+        self.green().slice().get(i as usize).map(|child| match child {
+            GreenChild::Node { offset, node } => {
+                SyntaxNode::new(i, node, self.range.start() + offset, Rc::clone(self)).into()
+            }
+            GreenChild::Token { offset, token } => {
+                SyntaxToken::new(i, token, self.range.start() + offset, Rc::clone(self)).into()
+            }
+        })
+    }
+
+    #[inline]
+    pub fn next_children_with_tokens(self: &Rc<Self>, index: u32) -> impl Iterator<Item = SyntaxElement> {
+        self.green()
+            .slice()
+            .iter()
+            .enumerate()
+            .skip(index as usize)
+            .map(|(i, child)| match child {
+                GreenChild::Node { offset, node } => {
+                    SyntaxNode::new(i as u32, node, self.range.start() + offset, Rc::clone(self)).into()
+                }
+                GreenChild::Token { offset, token } => {
+                    SyntaxToken::new(i as u32, token, self.range.start() + offset, Rc::clone(self)).into()
+                }
+            })
+    }
+
+    #[inline]
+    pub fn prev_children(self: &Rc<Self>, index: u32) -> impl Iterator<Item = SyntaxNode> {
+        let slice = self.green().slice();
+        slice
+            .iter()
+            .enumerate()
+            .rev()
+            .skip(slice.len() - index as usize - 1)
+            .filter_map(|(i, child)| match child {
+                GreenChild::Node { offset, node } => Some(SyntaxNode::new(
+                    i as u32,
+                    node,
+                    self.range.start() + offset,
+                    Rc::clone(self),
+                )),
+                _ => None,
+            })
+    }
+
+    #[inline]
+    pub fn prev_child_or_token(self: &Rc<Self>, index: u32) -> Option<SyntaxElement> {
+        let i = index.checked_sub(1)?;
+        self.green().slice().get(i as usize).map(|child| match child {
+            GreenChild::Node { offset, node } => {
+                SyntaxNode::new(i, node, self.range.start() + offset, Rc::clone(self)).into()
+            }
+            GreenChild::Token { offset, token } => {
+                SyntaxToken::new(i, token, self.range.start() + offset, Rc::clone(self)).into()
+            }
+        })
+    }
+
+    #[inline]
+    pub fn prev_children_with_tokens(self: &Rc<Self>, index: u32) -> impl Iterator<Item = SyntaxElement> {
+        let slice = self.green().slice();
+        slice
+            .iter()
+            .enumerate()
+            .rev()
+            .skip(slice.len() - index as usize - 1)
+            .map(|(i, child)| match child {
+                GreenChild::Node { offset, node } => {
+                    SyntaxNode::new(i as u32, node, self.range.start() + offset, Rc::clone(self)).into()
+                }
+                GreenChild::Token { offset, token } => {
+                    SyntaxToken::new(i as u32, token, self.range.start() + offset, Rc::clone(self)).into()
+                }
+            })
+    }
+}
+
+#[derive(PartialEq, Eq, Hash)]
+enum NodeLevel {
+    Root {
+        green: GreenNode,
+    },
+    Child {
+        green: NonNull<GreenNode>,
+        parent: Rc<NodeData>,
+    },
 }

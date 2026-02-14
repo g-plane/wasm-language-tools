@@ -1,15 +1,7 @@
 use super::node::NodeData;
-use crate::{GreenToken, SyntaxElement, SyntaxKind, SyntaxNode, green::GreenChild};
+use crate::{GreenToken, SyntaxElement, SyntaxKind, SyntaxNode};
 use std::{fmt, ptr::NonNull, rc::Rc};
 use text_size::{TextRange, TextSize};
-
-#[derive(PartialEq, Eq, Hash)]
-pub(crate) struct TokenData {
-    green: NonNull<GreenToken>,
-    range: TextRange,
-    parent: Rc<NodeData>,
-    index: u32,
-}
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SyntaxToken {
@@ -63,62 +55,24 @@ impl SyntaxToken {
 
     #[inline]
     pub fn next_sibling_or_token(&self) -> Option<SyntaxElement> {
-        let i = self.data.index + 1;
-        let parent = self.parent();
-        parent.green().slice().get(i as usize).map(|child| match child {
-            GreenChild::Node { offset, node } => parent.new_child(i, node, *offset).into(),
-            GreenChild::Token { offset, token } => parent.new_token(i, token, *offset).into(),
-        })
+        self.data.parent.next_child_or_token(self.data.index)
     }
 
     #[inline]
     /// Including current node.
     pub fn next_siblings_with_tokens(&self) -> impl Iterator<Item = SyntaxElement> {
-        let parent = &self.data.parent;
-        parent
-            .green()
-            .slice()
-            .iter()
-            .enumerate()
-            .skip(self.data.index as usize)
-            .map(|(i, child)| match child {
-                GreenChild::Node { offset, node } => {
-                    SyntaxNode::new(i as u32, node, parent.range().start() + offset, Rc::clone(parent)).into()
-                }
-                GreenChild::Token { offset, token } => {
-                    SyntaxToken::new(i as u32, token, parent.range().start() + offset, Rc::clone(parent)).into()
-                }
-            })
+        self.data.parent.next_children_with_tokens(self.data.index)
     }
 
     #[inline]
     pub fn prev_sibling_or_token(&self) -> Option<SyntaxElement> {
-        let i = self.data.index.checked_sub(1)?;
-        let parent = self.parent();
-        parent.green().slice().get(i as usize).map(|child| match child {
-            GreenChild::Node { offset, node } => parent.new_child(i, node, *offset).into(),
-            GreenChild::Token { offset, token } => parent.new_token(i, token, *offset).into(),
-        })
+        self.data.parent.prev_child_or_token(self.data.index)
     }
 
     #[inline]
     /// Including current node.
     pub fn prev_siblings_with_tokens(&self) -> impl Iterator<Item = SyntaxElement> {
-        let parent = &self.data.parent;
-        let slice = parent.green().slice();
-        slice
-            .iter()
-            .enumerate()
-            .rev()
-            .skip(slice.len() - self.data.index as usize - 1)
-            .map(|(i, child)| match child {
-                GreenChild::Node { offset, node } => {
-                    SyntaxNode::new(i as u32, node, parent.range().start() + offset, Rc::clone(parent)).into()
-                }
-                GreenChild::Token { offset, token } => {
-                    SyntaxToken::new(i as u32, token, parent.range().start() + offset, Rc::clone(parent)).into()
-                }
-            })
+        self.data.parent.prev_children_with_tokens(self.data.index)
     }
 
     #[inline]
@@ -137,4 +91,12 @@ impl fmt::Display for SyntaxToken {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.text().fmt(f)
     }
+}
+
+#[derive(PartialEq, Eq, Hash)]
+pub(crate) struct TokenData {
+    green: NonNull<GreenToken>,
+    range: TextRange,
+    parent: Rc<NodeData>,
+    index: u32,
 }
