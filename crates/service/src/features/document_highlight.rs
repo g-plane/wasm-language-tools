@@ -191,7 +191,6 @@ fn is_write_access_instr(node_or_token: SyntaxElement, node: &SyntaxNode) -> boo
         if text == "table.copy" {
             // The first immediate in `table.copy` is the destination table.
             node.prev_siblings_with_tokens()
-                .skip(1)
                 .all(|node_or_token| node_or_token.kind() != SyntaxKind::IMMEDIATE)
         } else {
             matches!(

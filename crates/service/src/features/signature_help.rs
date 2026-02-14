@@ -27,13 +27,10 @@ impl LanguageService {
             let (node, instr, is_next) = if token.kind() == SyntaxKind::ERROR {
                 (
                     token.parent(),
-                    token
-                        .prev_siblings_with_tokens()
-                        .skip(1)
-                        .find_map(|sibling| match sibling {
-                            SyntaxElement::Node(node) => Instr::cast(node),
-                            _ => None,
-                        }),
+                    token.prev_siblings_with_tokens().find_map(|sibling| match sibling {
+                        SyntaxElement::Node(node) => Instr::cast(node),
+                        _ => None,
+                    }),
                     true,
                 )
             } else {

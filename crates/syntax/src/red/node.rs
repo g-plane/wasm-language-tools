@@ -203,7 +203,7 @@ impl SyntaxNode {
 
     #[inline]
     pub fn next_sibling(&self) -> Option<SyntaxNode> {
-        self.next_siblings().nth(1)
+        self.next_siblings().next()
     }
 
     #[inline]
@@ -215,7 +215,6 @@ impl SyntaxNode {
     }
 
     #[inline]
-    /// Including current node.
     pub fn next_siblings(&self) -> impl Iterator<Item = SyntaxNode> {
         match &self.data.level {
             NodeLevel::Root { .. } => None,
@@ -226,7 +225,6 @@ impl SyntaxNode {
     }
 
     #[inline]
-    /// Including current node.
     pub fn next_siblings_with_tokens(&self) -> impl Iterator<Item = SyntaxElement> {
         match &self.data.level {
             NodeLevel::Root { .. } => None,
@@ -248,7 +246,7 @@ impl SyntaxNode {
 
     #[inline]
     pub fn prev_sibling(&self) -> Option<SyntaxNode> {
-        self.prev_siblings().nth(1)
+        self.prev_siblings().next()
     }
 
     #[inline]
@@ -260,7 +258,6 @@ impl SyntaxNode {
     }
 
     #[inline]
-    /// Including current node.
     pub fn prev_siblings(&self) -> impl Iterator<Item = SyntaxNode> {
         match &self.data.level {
             NodeLevel::Root { .. } => None,
@@ -271,7 +268,6 @@ impl SyntaxNode {
     }
 
     #[inline]
-    /// Including current node.
     pub fn prev_siblings_with_tokens(&self) -> impl Iterator<Item = SyntaxElement> {
         match &self.data.level {
             NodeLevel::Root { .. } => None,
@@ -430,7 +426,7 @@ impl NodeData {
             .slice()
             .iter()
             .enumerate()
-            .skip(index as usize)
+            .skip(index as usize + 1)
             .filter_map(|(i, child)| match child {
                 GreenChild::Node { offset, node } => Some(SyntaxNode::new(
                     i as u32,
@@ -461,7 +457,7 @@ impl NodeData {
             .slice()
             .iter()
             .enumerate()
-            .skip(index as usize)
+            .skip(index as usize + 1)
             .map(|(i, child)| match child {
                 GreenChild::Node { offset, node } => {
                     SyntaxNode::new(i as u32, node, self.range.start() + offset, Rc::clone(self)).into()
@@ -497,7 +493,7 @@ impl NodeData {
             .iter()
             .enumerate()
             .rev()
-            .skip(slice.len() - index as usize - 1)
+            .skip(slice.len() - index as usize)
             .filter_map(|(i, child)| match child {
                 GreenChild::Node { offset, node } => Some(SyntaxNode::new(
                     i as u32,
@@ -529,7 +525,7 @@ impl NodeData {
             .iter()
             .enumerate()
             .rev()
-            .skip(slice.len() - index as usize - 1)
+            .skip(slice.len() - index as usize)
             .map(|(i, child)| match child {
                 GreenChild::Node { offset, node } => {
                     SyntaxNode::new(i as u32, node, self.range.start() + offset, Rc::clone(self)).into()

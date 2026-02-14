@@ -57,13 +57,9 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
     let parent = token.parent();
     match parent.kind() {
         SyntaxKind::MODULE_FIELD_FUNC => {
-            let prev_node = token
-                .prev_siblings_with_tokens()
-                .skip(1)
-                .find_map(NodeOrToken::into_node);
+            let prev_node = token.prev_siblings_with_tokens().find_map(NodeOrToken::into_node);
             let next_node = token
                 .next_siblings_with_tokens()
-                .skip(1)
                 .find_map(NodeOrToken::into_node)
                 .map(|node| node.kind());
             if !matches!(
@@ -123,7 +119,6 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                             // so we catch this case here, though these keywords aren't instruction names.
                             let prev_node = parent
                                 .prev_siblings_with_tokens()
-                                .skip(1)
                                 .find_map(NodeOrToken::into_node)
                                 .map(|node| node.kind());
                             if !matches!(
@@ -159,7 +154,6 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                         | SyntaxKind::BLOCK_TRY_TABLE => {
                             let prev_node = parent
                                 .prev_siblings_with_tokens()
-                                .skip(1)
                                 .find_map(NodeOrToken::into_node)
                                 .map(|node| node.kind());
                             if !matches!(
@@ -233,7 +227,6 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
             if has_leading_l_paren(token) {
                 if token
                     .prev_siblings_with_tokens()
-                    .skip(1)
                     .all(|node_or_token| !matches!(node_or_token, NodeOrToken::Node(..)))
                 {
                     ctx.extend([CmpCtx::KeywordParam, CmpCtx::KeywordResult, CmpCtx::KeywordType]);
@@ -1410,7 +1403,6 @@ fn has_leading_l_paren(token: &SyntaxToken) -> bool {
     is_l_paren(token)
         || token
             .prev_siblings_with_tokens()
-            .skip(1)
             .skip_while(|node_or_token| node_or_token.kind().is_trivia())
             .find_map(NodeOrToken::into_token)
             .is_some_and(|token| is_l_paren(&token))

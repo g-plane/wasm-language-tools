@@ -59,7 +59,6 @@ impl SyntaxToken {
     }
 
     #[inline]
-    /// Including current node.
     pub fn next_siblings_with_tokens(&self) -> impl Iterator<Item = SyntaxElement> {
         self.data.parent.next_children_with_tokens(self.data.index)
     }
@@ -75,7 +74,6 @@ impl SyntaxToken {
     }
 
     #[inline]
-    /// Including current node.
     pub fn prev_siblings_with_tokens(&self) -> impl Iterator<Item = SyntaxElement> {
         self.data.parent.prev_children_with_tokens(self.data.index)
     }
