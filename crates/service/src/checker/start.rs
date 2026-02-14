@@ -1,13 +1,6 @@
 use super::Diagnostic;
-use crate::{
-    binder::{SymbolKey, SymbolTable},
-    document::Document,
-    types_analyzer,
-};
-use wat_syntax::{
-    SyntaxNode,
-    ast::{AstNode, Index, support},
-};
+use crate::{binder::SymbolTable, document::Document, types_analyzer};
+use wat_syntax::{AmberNode, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "start";
 
@@ -15,12 +8,11 @@ pub fn check(
     db: &dyn salsa::Database,
     document: Document,
     symbol_table: &SymbolTable,
-    node: &SyntaxNode,
+    node: AmberNode,
 ) -> Option<Diagnostic> {
-    let index = support::child::<Index>(node)?;
-    let index = index.syntax();
+    let index = node.children().find(|child| child.kind() == SyntaxKind::INDEX)?;
     if symbol_table
-        .find_def(SymbolKey::new(index))
+        .find_def(index.to_ptr().into())
         .map(|func| types_analyzer::get_func_sig(db, document, func.key, &func.green))
         .is_some_and(|sig| !sig.params.is_empty() || !sig.results.is_empty())
     {

@@ -4,10 +4,10 @@ use crate::{
     document::Document,
     helpers::LineIndexExt,
 };
-use bumpalo::{Bump, collections::Vec as BumpVec};
+use bumpalo::Bump;
 use lspt::{DiagnosticRelatedInformation, DiagnosticSeverity, DiagnosticTag, Location, Union2};
 use std::cmp::Ordering;
-use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange, ast::support};
+use wat_syntax::{AmberNode, AmberToken, NodeOrToken, SyntaxKind, SyntaxNode, TextRange};
 
 mod block_type;
 mod br_table_branches;
@@ -100,7 +100,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         &locals,
                         &mut bump,
                     );
-                    if let Some(diagnostic) = import_with_def::check(db, document, &node) {
+                    if let Some(diagnostic) = import_with_def::check(db, document, node.amber()) {
                         diagnostics.push(diagnostic);
                     }
                 }
@@ -117,7 +117,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                     if let Some(diagnostic) = const_expr::check(&node) {
                         diagnostics.push(diagnostic);
                     }
-                    if let Some(diagnostic) = import_with_def::check(db, document, &node) {
+                    if let Some(diagnostic) = import_with_def::check(db, document, node.amber()) {
                         diagnostics.push(diagnostic);
                     }
                 }
@@ -127,7 +127,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                     }
                 }
                 SyntaxKind::PLAIN_INSTR => {
-                    if let Some(instr) = FastPlainInstr::new(&node, &bump) {
+                    if let Some(instr) = FastPlainInstr::new(&node) {
                         if let Some(diagnostic) = unknown_instr::check(&instr) {
                             diagnostics.push(diagnostic);
                         }
@@ -144,12 +144,12 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                     bump.reset();
                 }
                 SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_IF => {
-                    if let Some(diagnostic) = block_type::check(db, document, symbol_table, &node) {
+                    if let Some(diagnostic) = block_type::check(db, document, symbol_table, node.amber()) {
                         diagnostics.push(diagnostic);
                     }
                 }
                 SyntaxKind::MODULE_FIELD_START => {
-                    if let Some(diagnostic) = start::check(db, document, symbol_table, &node) {
+                    if let Some(diagnostic) = start::check(db, document, symbol_table, node.amber()) {
                         diagnostics.push(diagnostic);
                     }
                 }
@@ -166,7 +166,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                     if let Some(diagnostic) = const_expr::check(&node) {
                         diagnostics.push(diagnostic);
                     }
-                    if let Some(diagnostic) = import_with_def::check(db, document, &node) {
+                    if let Some(diagnostic) = import_with_def::check(db, document, node.amber()) {
                         diagnostics.push(diagnostic);
                     }
                 }
@@ -176,7 +176,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                     }
                 }
                 SyntaxKind::MODULE_FIELD_MEMORY => {
-                    if let Some(diagnostic) = import_with_def::check(db, document, &node) {
+                    if let Some(diagnostic) = import_with_def::check(db, document, node.amber()) {
                         diagnostics.push(diagnostic);
                     }
                 }
@@ -215,7 +215,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                 }
                 SyntaxKind::MODULE_FIELD_TAG => {
                     tag_type::check(&mut diagnostics, db, document, symbol_table, &node);
-                    if let Some(diagnostic) = import_with_def::check(db, document, &node) {
+                    if let Some(diagnostic) = import_with_def::check(db, document, node.amber()) {
                         diagnostics.push(diagnostic);
                     }
                 }
@@ -227,7 +227,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         diagnostics.push(diagnostic);
                     }
                     useless_catch::check(&mut diagnostics, config.lint.useless_catch, symbol_table, &node);
-                    if let Some(diagnostic) = block_type::check(db, document, symbol_table, &node) {
+                    if let Some(diagnostic) = block_type::check(db, document, symbol_table, node.amber()) {
                         diagnostics.push(diagnostic);
                     }
                 }
@@ -249,7 +249,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                 _ => {}
             }
         }
-        multi_starts::check(&mut diagnostics, &module);
+        multi_starts::check(&mut diagnostics, module.amber());
     });
     undef::check(db, &mut diagnostics, symbol_table);
     dup_names::check(db, &mut diagnostics, document, symbol_table, &mut bump);
@@ -318,25 +318,20 @@ impl Default for Diagnostic {
     }
 }
 
-struct FastPlainInstr<'bump> {
-    ptr: SyntaxNodePtr,
-    name: &'bump str,
-    name_range: TextRange,
-    immediates: BumpVec<'bump, SyntaxNodePtr>,
+struct FastPlainInstr<'a> {
+    amber: AmberNode<'a>,
+    name: AmberToken<'a>,
 }
-impl<'bump> FastPlainInstr<'bump> {
-    fn new(node: &SyntaxNode, bump: &'bump Bump) -> Option<Self> {
-        support::token(node, SyntaxKind::INSTR_NAME).map(|instr_name| Self {
-            ptr: SyntaxNodePtr::new(node),
-            name: bump.alloc_str(instr_name.text()),
-            name_range: instr_name.text_range(),
-            immediates: BumpVec::from_iter_in(
-                node.amber()
-                    .children()
-                    .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
-                    .map(|immediate| immediate.to_ptr()),
-                bump,
-            ),
-        })
+impl<'a> FastPlainInstr<'a> {
+    fn new(node: &'a SyntaxNode) -> Option<Self> {
+        let amber = node.amber();
+        amber
+            .children_with_tokens()
+            .find_map(|node_or_token| match node_or_token {
+                NodeOrToken::Token(token) if token.kind() == SyntaxKind::INSTR_NAME => {
+                    Some(Self { amber, name: token })
+                }
+                _ => None,
+            })
     }
 }

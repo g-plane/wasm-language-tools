@@ -13,7 +13,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
         .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
         .peekable();
 
-    match instr.name {
+    match instr.name.text() {
         "call" | "local.get" | "local.set" | "local.tee" | "global.get" | "global.set" | "ref.func" | "data.drop"
         | "elem.drop" | "br" | "br_if" | "struct.new" | "struct.new_default" | "array.new" | "array.new_default"
         | "array.get" | "array.get_u" | "array.get_s" | "array.set" | "array.fill" | "br_on_null"
@@ -448,7 +448,7 @@ fn check_immediate<'a, const REQUIRED: bool>(
         }
     } else if REQUIRED {
         diagnostics.push(Diagnostic {
-            range: instr.name_range,
+            range: instr.name.text_range(),
             code: DIAGNOSTIC_CODE.into(),
             message: format!("missing {description}"),
             ..Default::default()

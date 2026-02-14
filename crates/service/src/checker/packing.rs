@@ -4,6 +4,7 @@ use crate::{
     document::Document,
     types_analyzer::{self, CompositeType, DefTypes, FieldType, Fields, StorageType},
 };
+use wat_syntax::SyntaxKind;
 
 const DIAGNOSTIC_CODE: &str = "packing";
 
@@ -13,7 +14,7 @@ pub fn check(
     symbol_table: &SymbolTable,
     instr: &FastPlainInstr,
 ) -> Option<Diagnostic> {
-    match instr.name {
+    match instr.name.text() {
         "struct.get" => {
             let def_types = types_analyzer::get_def_types(db, document);
             if let Some((_, symbol)) =
@@ -24,7 +25,7 @@ pub fn check(
                     code: DIAGNOSTIC_CODE.into(),
                     message: format!("field `{}` is packed", symbol.idx.render(db)),
                     related_information: Some(vec![RelatedInformation {
-                        range: instr.name_range,
+                        range: instr.name.text_range(),
                         message: "use `struct.get_s` or `struct.get_u` instead".into(),
                     }]),
                     ..Default::default()
@@ -43,7 +44,7 @@ pub fn check(
                     code: DIAGNOSTIC_CODE.into(),
                     message: format!("field `{}` is unpacked", symbol.idx.render(db)),
                     related_information: Some(vec![RelatedInformation {
-                        range: instr.name_range,
+                        range: instr.name.text_range(),
                         message: "use `struct.get` instead".into(),
                     }]),
                     ..Default::default()
@@ -60,7 +61,7 @@ pub fn check(
                     code: DIAGNOSTIC_CODE.into(),
                     message: format!("array `{}` is packed", symbol.idx.render(db)),
                     related_information: Some(vec![RelatedInformation {
-                        range: instr.name_range,
+                        range: instr.name.text_range(),
                         message: "use `array.get_s` or `array.get_u` instead".into(),
                     }]),
                     ..Default::default()
@@ -77,7 +78,7 @@ pub fn check(
                     code: DIAGNOSTIC_CODE.into(),
                     message: format!("array `{}` is unpacked", symbol.idx.render(db)),
                     related_information: Some(vec![RelatedInformation {
-                        range: instr.name_range,
+                        range: instr.name.text_range(),
                         message: "use `array.get` instead".into(),
                     }]),
                     ..Default::default()
@@ -95,10 +96,14 @@ fn find_struct_field<'db>(
     def_types: &'db DefTypes<'db>,
     instr: &FastPlainInstr,
 ) -> Option<(&'db StorageType<'db>, &'db Symbol<'db>)> {
-    let struct_def_key = symbol_table.resolved.get(&instr.immediates.first().copied()?.into())?;
+    let mut immediates = instr
+        .amber
+        .children()
+        .filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+    let struct_def_key = symbol_table.resolved.get(&immediates.next()?.to_ptr().into())?;
     let field_ref_symbol = symbol_table
         .symbols
-        .get(&SymbolKey::from(instr.immediates.get(1).copied()?))?;
+        .get(&SymbolKey::from(immediates.next()?.to_ptr()))?;
     if let Some(CompositeType::Struct(Fields(fields))) = def_types.get(struct_def_key).map(|def_type| &def_type.comp) {
         fields
             .iter()
@@ -114,7 +119,12 @@ fn find_array<'db>(
     def_types: &'db DefTypes<'db>,
     instr: &FastPlainInstr,
 ) -> Option<(&'db StorageType<'db>, &'db Symbol<'db>)> {
-    let ref_key = instr.immediates.first().copied()?.into();
+    let ref_key = instr
+        .amber
+        .children()
+        .find(|child| child.kind() == SyntaxKind::IMMEDIATE)?
+        .to_ptr()
+        .into();
     let ref_symbol = symbol_table.symbols.get(&ref_key)?;
     if let Some(CompositeType::Array(Some(FieldType { storage, .. }))) = def_types
         .get(symbol_table.resolved.get(&ref_key)?)

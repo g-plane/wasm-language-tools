@@ -32,4 +32,9 @@ impl<'a> AmberToken<'a> {
     pub fn green(&self) -> &'a GreenToken {
         self.green
     }
+
+    #[inline]
+    pub fn text(&self) -> &'a str {
+        self.green.text()
+    }
 }

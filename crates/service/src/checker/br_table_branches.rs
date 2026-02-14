@@ -5,6 +5,7 @@ use crate::{
     types_analyzer::{join_types, resolve_br_types},
 };
 use bumpalo::{Bump, collections::Vec as BumpVec};
+use wat_syntax::SyntaxKind;
 
 const DIAGNOSTIC_CODE: &str = "br-table-branches";
 
@@ -16,19 +17,24 @@ pub fn check(
     instr: &FastPlainInstr,
     bump: &Bump,
 ) -> Option<()> {
-    if instr.name != "br_table" {
+    if instr.name.text() != "br_table" {
         return None;
     }
+    let mut immediates = instr
+        .amber
+        .children()
+        .filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
     let expected = BumpVec::from_iter_in(
-        instr
-            .immediates
-            .first()
-            .copied()
-            .and_then(|immediate| resolve_br_types(db, document, symbol_table, immediate.into()))?,
+        immediates
+            .next()
+            .and_then(|immediate| resolve_br_types(db, document, symbol_table, immediate.to_ptr().into()))?,
         bump,
     );
-    diagnostics.extend(instr.immediates.get(1..)?.iter().copied().filter_map(|immediate| {
-        let received = BumpVec::from_iter_in(resolve_br_types(db, document, symbol_table, immediate.into())?, bump);
+    diagnostics.extend(immediates.filter_map(|immediate| {
+        let received = BumpVec::from_iter_in(
+            resolve_br_types(db, document, symbol_table, immediate.to_ptr().into())?,
+            bump,
+        );
         if received != expected {
             Some(Diagnostic {
                 range: immediate.text_range(),

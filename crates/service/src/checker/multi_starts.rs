@@ -1,12 +1,11 @@
 use super::Diagnostic;
-use wat_syntax::{SyntaxKind, SyntaxNode};
+use wat_syntax::{AmberNode, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "multiple-starts";
 
-pub fn check(diagnostics: &mut Vec<Diagnostic>, module: &SyntaxNode) {
+pub fn check(diagnostics: &mut Vec<Diagnostic>, module: AmberNode) {
     diagnostics.extend(
         module
-            .amber()
             .children()
             .filter(|child| child.kind() == SyntaxKind::MODULE_FIELD_START)
             .skip(1)

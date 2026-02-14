@@ -4,6 +4,7 @@ use crate::{
     document::Document,
     types_analyzer::{self, CompositeType, FieldType, Fields, StorageType},
 };
+use wat_syntax::SyntaxKind;
 
 const DIAGNOSTIC_CODE: &str = "new-non-defaultable";
 
@@ -14,11 +15,14 @@ pub fn check(
     instr: &FastPlainInstr,
 ) -> Option<Diagnostic> {
     let def_types = types_analyzer::get_def_types(db, document);
-    let immediate = instr.immediates.first().copied()?;
-    if !instr.name.ends_with(".new_default") {
+    if !instr.name.text().ends_with(".new_default") {
         return None;
     }
-    let def_symbol = symbol_table.find_def(immediate.into())?;
+    let immediate = instr
+        .amber
+        .children()
+        .find(|child| child.kind() == SyntaxKind::IMMEDIATE)?;
+    let def_symbol = symbol_table.find_def(immediate.to_ptr().into())?;
     match &def_types.get(&def_symbol.key)?.comp {
         CompositeType::Struct(Fields(fields)) => {
             let non_defaultables = fields

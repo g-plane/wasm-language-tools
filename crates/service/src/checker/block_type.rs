@@ -1,13 +1,10 @@
 use super::Diagnostic;
 use crate::{
-    binder::{SymbolKey, SymbolTable},
+    binder::SymbolTable,
     document::Document,
     types_analyzer::{self, CompositeType},
 };
-use wat_syntax::{
-    SyntaxNode,
-    ast::{AstNode, TypeUse, support},
-};
+use wat_syntax::{AmberNode, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "block-type";
 
@@ -15,14 +12,16 @@ pub fn check(
     db: &dyn salsa::Database,
     document: Document,
     symbol_table: &SymbolTable,
-    node: &SyntaxNode,
+    node: AmberNode,
 ) -> Option<Diagnostic> {
-    let index = support::child::<TypeUse>(node).and_then(|type_use| type_use.index())?;
-    let index = index.syntax();
+    let index = node
+        .children()
+        .find(|child| child.kind() == SyntaxKind::TYPE_USE)
+        .and_then(|type_use| type_use.children().find(|child| child.kind() == SyntaxKind::INDEX))?;
     let def_types = types_analyzer::get_def_types(db, document);
     if symbol_table
         .resolved
-        .get(&SymbolKey::new(index))
+        .get(&index.to_ptr().into())
         .and_then(|key| def_types.get(key))
         .is_some_and(|def_type| !matches!(def_type.comp, CompositeType::Func(..)))
     {

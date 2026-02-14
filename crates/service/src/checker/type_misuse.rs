@@ -7,10 +7,7 @@ use crate::{
         get_type_use_sig, resolve_br_types,
     },
 };
-use wat_syntax::{
-    NodeOrToken, SyntaxKind, SyntaxNode, SyntaxNodePtr,
-    ast::{AstNode, Immediate, support},
-};
+use wat_syntax::{AmberNode, NodeOrToken, SyntaxKind, SyntaxNode, SyntaxNodePtr};
 
 const DIAGNOSTIC_CODE: &str = "type-misuse";
 
@@ -23,17 +20,21 @@ pub fn check(
     node: &SyntaxNode,
     instr: &FastPlainInstr,
 ) -> Option<()> {
+    let mut immediates = instr
+        .amber
+        .children()
+        .filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
     let def_types = get_def_types(db, document);
-    match instr.name.split_once('.') {
+    match instr.name.text().split_once('.') {
         Some(("struct", _)) => {
             if let Some(diagnostic) =
-                check_type_matches("struct", *instr.immediates.first()?, db, symbol_table, def_types)
+                check_type_matches("struct", immediates.next()?.to_ptr(), db, symbol_table, def_types)
             {
                 diagnostics.push(diagnostic);
             }
         }
         Some(("array", "copy")) => {
-            let dst = *instr.immediates.first()?;
+            let dst = immediates.next()?.to_ptr();
             let dst_symbol = symbol_table.find_def(dst.into())?;
             let dst_type = match &def_types.get(&dst_symbol.key)?.comp {
                 CompositeType::Func(..) => {
@@ -47,7 +48,7 @@ pub fn check(
                 CompositeType::Array(field_type) => field_type.as_ref(),
             };
 
-            let src = *instr.immediates.get(1)?;
+            let src = immediates.next()?.to_ptr();
             let src_symbol = symbol_table.find_def(src.into())?;
             let src_type = match &def_types.get(&src_symbol.key)?.comp {
                 CompositeType::Func(..) => {
@@ -66,7 +67,7 @@ pub fn check(
                     if !src.matches(dst, db, document, module_id) =>
                 {
                     diagnostics.push(Diagnostic {
-                        range: instr.ptr.text_range(),
+                        range: node.text_range(),
                         code: DIAGNOSTIC_CODE.into(),
                         message: format!(
                             "destination array type `{}` doesn't match source array type `{}`",
@@ -91,29 +92,28 @@ pub fn check(
         }
         Some(("array", _)) => {
             if let Some(diagnostic) =
-                check_type_matches("array", *instr.immediates.first()?, db, symbol_table, def_types)
+                check_type_matches("array", immediates.next()?.to_ptr(), db, symbol_table, def_types)
             {
                 diagnostics.push(diagnostic);
             }
         }
-        _ => match instr.name {
+        _ => match instr.name.text() {
             "call_ref" => {
                 if let Some(diagnostic) =
-                    check_type_matches("func", *instr.immediates.first()?, db, symbol_table, def_types)
+                    check_type_matches("func", immediates.next()?.to_ptr(), db, symbol_table, def_types)
                 {
                     diagnostics.push(diagnostic);
                 }
             }
             "br_on_cast" => {
-                let mut immediates = support::children::<Immediate>(node);
                 let label = immediates.next()?;
-                let rt_label_type = resolve_br_types(db, document, symbol_table, SymbolKey::new(label.syntax()))
+                let rt_label_type = resolve_br_types(db, document, symbol_table, label.to_ptr().into())
                     .and_then(|mut types| types.next_back());
                 let rt_label = if let Some(OperandType::Val(ValType::Ref(rt_label))) = rt_label_type {
                     rt_label
                 } else {
                     diagnostics.push(Diagnostic {
-                        range: label.syntax().text_range(),
+                        range: label.text_range(),
                         code: DIAGNOSTIC_CODE.into(),
                         message: "the last type of this label must be a ref type".into(),
                         ..Default::default()
@@ -121,12 +121,24 @@ pub fn check(
                     return None;
                 };
                 let rt1_node = immediates.next()?;
-                let rt1 = RefType::from_green(rt1_node.ref_type()?.syntax().green(), db)?;
+                let rt1 = RefType::from_green(
+                    rt1_node
+                        .children()
+                        .find(|child| child.kind() == SyntaxKind::REF_TYPE)?
+                        .green(),
+                    db,
+                )?;
                 let rt2_node = immediates.next()?;
-                let rt2 = RefType::from_green(rt2_node.ref_type()?.syntax().green(), db)?;
+                let rt2 = RefType::from_green(
+                    rt2_node
+                        .children()
+                        .find(|child| child.kind() == SyntaxKind::REF_TYPE)?
+                        .green(),
+                    db,
+                )?;
                 if !rt2.matches(&rt1, db, document, module_id) {
                     diagnostics.push(Diagnostic {
-                        range: rt2_node.syntax().text_range(),
+                        range: rt2_node.text_range(),
                         code: DIAGNOSTIC_CODE.into(),
                         message: format!(
                             "ref type `{}` doesn't match the ref type `{}`",
@@ -134,7 +146,7 @@ pub fn check(
                             rt1.render(db),
                         ),
                         related_information: Some(vec![RelatedInformation {
-                            range: rt1_node.syntax().text_range(),
+                            range: rt1_node.text_range(),
                             message: "should match this ref type".into(),
                         }]),
                         ..Default::default()
@@ -142,7 +154,7 @@ pub fn check(
                 }
                 if !rt2.matches(&rt_label, db, document, module_id) {
                     diagnostics.push(Diagnostic {
-                        range: rt2_node.syntax().text_range(),
+                        range: rt2_node.text_range(),
                         code: DIAGNOSTIC_CODE.into(),
                         message: format!(
                             "ref type `{}` doesn't match the ref type `{}`",
@@ -150,7 +162,7 @@ pub fn check(
                             rt_label.render(db),
                         ),
                         related_information: Some(vec![RelatedInformation {
-                            range: label.syntax().text_range(),
+                            range: label.text_range(),
                             message: "should match the last ref type in the result type of this label".into(),
                         }]),
                         ..Default::default()
@@ -158,15 +170,14 @@ pub fn check(
                 }
             }
             "br_on_cast_fail" => {
-                let mut immediates = support::children::<Immediate>(node);
                 let label = immediates.next()?;
-                let rt_label_type = resolve_br_types(db, document, symbol_table, SymbolKey::new(label.syntax()))
+                let rt_label_type = resolve_br_types(db, document, symbol_table, label.to_ptr().into())
                     .and_then(|mut types| types.next_back());
                 let rt_label = if let Some(OperandType::Val(ValType::Ref(rt_label))) = rt_label_type {
                     rt_label
                 } else {
                     diagnostics.push(Diagnostic {
-                        range: label.syntax().text_range(),
+                        range: label.text_range(),
                         code: DIAGNOSTIC_CODE.into(),
                         message: "the last type of this label must be a ref type".into(),
                         ..Default::default()
@@ -174,12 +185,24 @@ pub fn check(
                     return None;
                 };
                 let rt1_node = immediates.next()?;
-                let rt1 = RefType::from_green(rt1_node.ref_type()?.syntax().green(), db)?;
+                let rt1 = RefType::from_green(
+                    rt1_node
+                        .children()
+                        .find(|child| child.kind() == SyntaxKind::REF_TYPE)?
+                        .green(),
+                    db,
+                )?;
                 let rt2_node = immediates.next()?;
-                let rt2 = RefType::from_green(rt2_node.ref_type()?.syntax().green(), db)?;
+                let rt2 = RefType::from_green(
+                    rt2_node
+                        .children()
+                        .find(|child| child.kind() == SyntaxKind::REF_TYPE)?
+                        .green(),
+                    db,
+                )?;
                 if !rt2.matches(&rt1, db, document, module_id) {
                     diagnostics.push(Diagnostic {
-                        range: rt2_node.syntax().text_range(),
+                        range: rt2_node.text_range(),
                         code: DIAGNOSTIC_CODE.into(),
                         message: format!(
                             "ref type `{}` doesn't match the ref type `{}`",
@@ -187,7 +210,7 @@ pub fn check(
                             rt1.render(db),
                         ),
                         related_information: Some(vec![RelatedInformation {
-                            range: rt1_node.syntax().text_range(),
+                            range: rt1_node.text_range(),
                             message: "should match this ref type".into(),
                         }]),
                         ..Default::default()
@@ -204,7 +227,7 @@ pub fn check(
                             rt_label.render(db),
                         ),
                         related_information: Some(vec![RelatedInformation {
-                            range: label.syntax().text_range(),
+                            range: label.text_range(),
                             message: "should match the last ref type in the result type of this label".into(),
                         }]),
                         ..Default::default()
@@ -212,55 +235,57 @@ pub fn check(
                 }
             }
             "call_indirect" => {
-                if let Some(diagnostic) = check_table_ref_type(db, document, symbol_table, module_id, node) {
+                if let Some(diagnostic) = check_table_ref_type(db, document, symbol_table, module_id, instr.amber) {
                     diagnostics.push(diagnostic);
                 }
             }
             "return_call" => {
-                if let Some(immediate) = node.first_child_by_kind(|kind| kind == SyntaxKind::IMMEDIATE)
+                if let Some(immediate) = instr
+                    .amber
+                    .children()
+                    .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
                     && let Some(diagnostic) = symbol_table
-                        .find_def(SymbolKey::new(&immediate))
+                        .find_def(immediate.to_ptr().into())
                         .map(|func| get_func_sig(db, document, func.key, &func.green))
                         .and_then(|sig| {
-                            check_return_call_result_type(db, document, module_id, node, &immediate, &sig.results)
+                            check_return_call_result_type(db, document, module_id, node, immediate, &sig.results)
                         })
                 {
                     diagnostics.push(diagnostic);
                 }
             }
             "return_call_ref" => {
-                if let Some(diagnostic) =
-                    check_type_matches("func", *instr.immediates.first()?, db, symbol_table, def_types)
-                {
+                let immediate = immediates.next()?;
+                if let Some(diagnostic) = check_type_matches("func", immediate.to_ptr(), db, symbol_table, def_types) {
                     diagnostics.push(diagnostic);
                 }
-                if let Some(immediate) = node.first_child_by_kind(|kind| kind == SyntaxKind::IMMEDIATE)
-                    && let Some(diagnostic) = symbol_table
-                        .resolved
-                        .get(&SymbolKey::new(&immediate))
-                        .and_then(|key| def_types.get(key))
-                        .and_then(|def_type| def_type.comp.as_func())
-                        .and_then(|sig| {
-                            check_return_call_result_type(db, document, module_id, node, &immediate, &sig.results)
-                        })
+                if let Some(diagnostic) = symbol_table
+                    .resolved
+                    .get(&immediate.to_ptr().into())
+                    .and_then(|key| def_types.get(key))
+                    .and_then(|def_type| def_type.comp.as_func())
+                    .and_then(|sig| {
+                        check_return_call_result_type(db, document, module_id, node, immediate, &sig.results)
+                    })
                 {
                     diagnostics.push(diagnostic);
                 }
             }
             "return_call_indirect" => {
-                if let Some(diagnostic) = check_table_ref_type(db, document, symbol_table, module_id, node) {
+                if let Some(diagnostic) = check_table_ref_type(db, document, symbol_table, module_id, instr.amber) {
                     diagnostics.push(diagnostic);
                 }
-                if let Some(type_use) = node
+                if let Some(type_use) = instr
+                    .amber
                     .children()
-                    .find_map(|immediate| immediate.first_child_by_kind(|kind| kind == SyntaxKind::TYPE_USE))
+                    .find_map(|immediate| immediate.children().find(|child| child.kind() == SyntaxKind::TYPE_USE))
                     && let Some(diagnostic) = check_return_call_result_type(
                         db,
                         document,
                         module_id,
                         node,
-                        &type_use,
-                        &get_type_use_sig(db, document, SyntaxNodePtr::new(&type_use), type_use.green()).results,
+                        type_use,
+                        &get_type_use_sig(db, document, type_use.to_ptr(), type_use.green()).results,
                     )
                 {
                     diagnostics.push(diagnostic);
@@ -298,20 +323,21 @@ fn check_table_ref_type(
     document: Document,
     symbol_table: &SymbolTable,
     module_id: u32,
-    node: &SyntaxNode,
+    node: AmberNode,
 ) -> Option<Diagnostic> {
-    if let Some(ref_key) = support::children::<Immediate>(node)
+    if let Some(ref_key) = node
+        .children()
+        .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
         .find(|immediate| {
             matches!(
                 immediate
-                    .syntax()
-                    .first_child_or_token()
-                    .and_then(NodeOrToken::into_token)
+                    .children_with_tokens()
+                    .find_map(NodeOrToken::into_token)
                     .map(|token| token.kind()),
                 Some(SyntaxKind::INT | SyntaxKind::UNSIGNED_INT | SyntaxKind::IDENT)
             )
         })
-        .map(|immediate| SymbolKey::new(immediate.syntax()))
+        .map(|immediate| immediate.to_ptr().into())
         && let Some(ref_symbol) = symbol_table.symbols.get(&ref_key)
         && symbol_table
             .find_def(ref_key)
@@ -368,7 +394,7 @@ fn check_return_call_result_type(
     document: Document,
     module_id: u32,
     instr: &SyntaxNode,
-    reported_node: &SyntaxNode,
+    reported_node: AmberNode,
     actual: &[ValType],
 ) -> Option<Diagnostic> {
     let func = instr
