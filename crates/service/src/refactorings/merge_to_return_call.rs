@@ -9,7 +9,7 @@ use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use petgraph::visit::Dfs;
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode, SyntaxNodePtr, ast::support};
+use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, ast::support};
 
 pub fn act(
     db: &dyn salsa::Database,
@@ -103,20 +103,12 @@ pub fn act(
     if let Some(instr) = &return_instr {
         text_edits.extend(
             instr
-                .children_with_tokens()
-                .filter_map(|node_or_token| match node_or_token {
-                    NodeOrToken::Token(token)
-                        if matches!(
-                            token.kind(),
-                            SyntaxKind::L_PAREN | SyntaxKind::INSTR_NAME | SyntaxKind::R_PAREN
-                        ) =>
-                    {
-                        Some(TextEdit {
-                            range: line_index.convert(token.text_range()),
-                            new_text: "".into(),
-                        })
-                    }
-                    _ => None,
+                .tokens_by_kind(|kind| {
+                    matches!(kind, SyntaxKind::L_PAREN | SyntaxKind::INSTR_NAME | SyntaxKind::R_PAREN)
+                })
+                .map(|token| TextEdit {
+                    range: line_index.convert(token.text_range()),
+                    new_text: "".into(),
                 }),
         );
     }

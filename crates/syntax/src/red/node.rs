@@ -60,6 +60,11 @@ impl SyntaxNode {
     }
 
     #[inline]
+    pub fn amber(&self) -> AmberNode<'_> {
+        self.into()
+    }
+
+    #[inline]
     pub fn parent(&self) -> Option<SyntaxNode> {
         match &self.data.level {
             NodeLevel::Root { .. } => None,
@@ -104,6 +109,23 @@ impl SyntaxNode {
     }
 
     #[inline]
+    pub fn tokens_by_kind<F>(&self, matcher: F) -> impl Iterator<Item = SyntaxToken> + use<'_, F>
+    where
+        F: Fn(SyntaxKind) -> bool,
+    {
+        self.green()
+            .slice()
+            .iter()
+            .enumerate()
+            .filter_map(move |(i, child)| match child {
+                GreenChild::Token { offset, token } if matcher(token.kind()) => {
+                    Some(self.new_token(i as u32, token, *offset))
+                }
+                _ => None,
+            })
+    }
+
+    #[inline]
     pub fn children_with_tokens(&self) -> impl Iterator<Item = SyntaxElement> {
         self.green().slice().iter().enumerate().map(|(i, child)| match child {
             GreenChild::Node { offset, node } => self.new_child(i as u32, node, *offset).into(),
@@ -120,11 +142,6 @@ impl SyntaxNode {
             GreenChild::Node { node, .. } => matcher(node.kind()),
             GreenChild::Token { token, .. } => matcher(token.kind()),
         })
-    }
-
-    #[inline]
-    pub fn amber(&self) -> AmberNode<'_> {
-        self.into()
     }
 
     #[inline]

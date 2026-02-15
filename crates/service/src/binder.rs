@@ -407,12 +407,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 symbols.insert(symbol.key, symbol);
             }
             SyntaxKind::PLAIN_INSTR => {
-                match node
-                    .children_with_tokens()
-                    .find_map(|node_or_token| match node_or_token {
-                        NodeOrToken::Token(token) if token.kind() == SyntaxKind::INSTR_NAME => Some(token),
-                        _ => None,
-                    })
+                match support::token(&node, SyntaxKind::INSTR_NAME)
                     .as_ref()
                     .map(|token| token.text())
                 {

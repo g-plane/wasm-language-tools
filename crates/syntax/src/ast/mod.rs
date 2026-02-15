@@ -23,7 +23,7 @@ pub trait AstNode {
 
 pub mod support {
     use super::{AstChildren, AstNode};
-    use crate::{SyntaxKind, SyntaxNode, SyntaxToken, green::GreenChild};
+    use crate::{SyntaxKind, SyntaxNode, SyntaxToken};
 
     pub fn child<N: AstNode>(parent: &SyntaxNode) -> Option<N> {
         parent.first_child_by_kind(N::can_cast).and_then(N::cast)
@@ -32,17 +32,7 @@ pub mod support {
         AstChildren::new(parent)
     }
     pub fn token(parent: &SyntaxNode, kind: SyntaxKind) -> Option<SyntaxToken> {
-        parent
-            .green()
-            .slice()
-            .iter()
-            .enumerate()
-            .find_map(|(i, child)| match child {
-                GreenChild::Token { offset, token } if token.kind() == kind => {
-                    Some(parent.new_token(i as u32, token, *offset))
-                }
-                _ => None,
-            })
+        parent.tokens_by_kind(|k| k == kind).next()
     }
 }
 

@@ -3,7 +3,7 @@ use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionContext, CodeActionKind, TextEdit, Union2, WorkspaceEdit};
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
-use wat_syntax::{SyntaxElement, SyntaxNode};
+use wat_syntax::SyntaxNode;
 
 pub fn act(
     db: &dyn salsa::Database,
@@ -13,13 +13,9 @@ pub fn act(
     context: &CodeActionContext,
 ) -> Option<CodeAction> {
     let text_edits = node
-        .children_with_tokens()
-        .filter_map(|node_or_token| match node_or_token {
-            SyntaxElement::Token(token) if token.kind().is_trivia() => Some(token.text_range()),
-            _ => None,
-        })
-        .map(|range| TextEdit {
-            range: line_index.convert(range),
+        .tokens_by_kind(|kind| kind.is_trivia())
+        .map(|token| TextEdit {
+            range: line_index.convert(token.text_range()),
             new_text: String::new(),
         })
         .collect::<Vec<_>>();

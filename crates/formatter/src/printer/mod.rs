@@ -264,8 +264,8 @@ fn is_formattable_trivia(token: &SyntaxToken) -> bool {
         | SyntaxKind::ANNOT_END => true,
         SyntaxKind::WHITESPACE
             if token
-                .next_sibling_or_token()
-                .and_then(NodeOrToken::into_token)
+                .next_consecutive_tokens()
+                .next()
                 .is_none_or(|token| match token.kind() {
                     SyntaxKind::R_PAREN => false,
                     SyntaxKind::KEYWORD => token.text() != "end",
