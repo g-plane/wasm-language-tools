@@ -10,7 +10,7 @@ use lspt::{
 };
 use std::fmt::Write;
 use wat_syntax::{
-    SyntaxElement, SyntaxKind, SyntaxNodePtr,
+    SyntaxKind, SyntaxNodePtr,
     ast::{AstNode, Instr, PlainInstr},
 };
 
@@ -25,14 +25,7 @@ impl LanguageService {
 
             let token = helpers::syntax::find_token(&root, line_index.convert(params.position)?)?;
             let (node, instr, is_next) = if token.kind() == SyntaxKind::ERROR {
-                (
-                    token.parent(),
-                    token.prev_siblings_with_tokens().find_map(|sibling| match sibling {
-                        SyntaxElement::Node(node) => Instr::cast(node),
-                        _ => None,
-                    }),
-                    true,
-                )
+                (token.parent(), token.prev_siblings().find_map(Instr::cast), true)
             } else {
                 let instr = token.parent();
                 (instr.parent()?, Instr::cast(instr), false)
