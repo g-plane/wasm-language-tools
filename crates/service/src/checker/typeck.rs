@@ -1394,10 +1394,7 @@ impl ReportRange<'_> {
             ReportRange::Last(node) => node
                 .children_with_tokens()
                 .next_back()
-                .map(|node_or_token| match node_or_token {
-                    NodeOrToken::Node(node) => node.text_range(),
-                    NodeOrToken::Token(token) => token.text_range(),
-                })
+                .map(|node_or_token| node_or_token.text_range())
                 .unwrap_or_else(|| node.text_range()),
         }
     }

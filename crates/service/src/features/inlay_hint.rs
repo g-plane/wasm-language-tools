@@ -7,7 +7,7 @@ use crate::{
     uri::InternUri,
 };
 use lspt::{InlayHint, InlayHintKind, InlayHintParams, Union2};
-use wat_syntax::{SyntaxKind, ast::support};
+use wat_syntax::{NodeOrToken, SyntaxKind};
 
 impl LanguageService {
     /// Handler for `textDocument/inlayHint` request.
@@ -71,7 +71,9 @@ impl LanguageService {
                             && let Some((last, name)) = symbol
                                 .key
                                 .to_node(&root)
-                                .last_child_or_token()
+                                .amber()
+                                .children_with_tokens()
+                                .next_back()
                                 .map(|last| last.text_range())
                                 .filter(|last| range.contains_range(*last))
                                 .zip(symbol.idx.name)
@@ -111,7 +113,9 @@ impl LanguageService {
                             && let Some((last, name)) = symbol
                                 .key
                                 .to_node(&root)
-                                .last_child_or_token()
+                                .amber()
+                                .children_with_tokens()
+                                .next_back()
                                 .map(|last| last.text_range())
                                 .filter(|last| range.contains_range(*last))
                                 .zip(symbol.idx.name)
@@ -170,9 +174,20 @@ impl LanguageService {
                                 name: None,
                             } = symbol.idx
                         {
-                            let end = support::token(&symbol.key.to_node(&root), SyntaxKind::KEYWORD)
-                                .filter(|token| matches!(token.text(), "param" | "local" | "field"))
-                                .map(|token| token.text_range().end())
+                            let end = symbol
+                                .key
+                                .to_node(&root)
+                                .amber()
+                                .children_with_tokens()
+                                .find_map(|node_or_token| match node_or_token {
+                                    NodeOrToken::Token(token)
+                                        if token.kind() == SyntaxKind::KEYWORD
+                                            && matches!(token.text(), "param" | "local" | "field") =>
+                                    {
+                                        Some(token.text_range().end())
+                                    }
+                                    _ => None,
+                                })
                                 .unwrap_or_else(|| symbol.key.text_range().end());
                             inlay_hints.push(InlayHint {
                                 position: line_index.convert(end),

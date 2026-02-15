@@ -76,7 +76,7 @@ impl GreenNode {
 
     #[inline]
     /// Returns current level green node.
-    pub fn replace_child(&self, index: usize, new_child: GreenNode) -> GreenNode {
+    pub(crate) fn replace_child(&self, index: usize, new_child: GreenNode) -> GreenNode {
         let mut replacement = Some(new_child);
         let children = self.data.slice.iter().enumerate().map(|(i, child)| match child {
             GreenChild::Node { .. } if i == index => replacement.take().expect("replacement has been taken").into(),
