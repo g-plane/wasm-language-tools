@@ -51,7 +51,8 @@ pub fn check(
                         } else if current.contains_range(*last) {
                             // this can be occurred for folded instructions
                             if instr
-                                .first_child_by_kind(Instr::can_cast)
+                                .children_by_kind(Instr::can_cast)
+                                .next()
                                 .is_none_or(|first| last.contains_range(first.text_range()))
                             {
                                 // current instruction is the parent of last range,

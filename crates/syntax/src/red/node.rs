@@ -92,7 +92,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn children_by_kind<F>(&self, matcher: F) -> impl Iterator<Item = SyntaxNode> + use<'_, F>
+    pub fn children_by_kind<F>(&self, matcher: F) -> impl DoubleEndedIterator<Item = SyntaxNode> + use<'_, F>
     where
         F: Fn(SyntaxKind) -> bool,
     {
@@ -109,7 +109,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn tokens_by_kind<F>(&self, matcher: F) -> impl Iterator<Item = SyntaxToken> + use<'_, F>
+    pub fn tokens_by_kind<F>(&self, matcher: F) -> impl DoubleEndedIterator<Item = SyntaxToken> + use<'_, F>
     where
         F: Fn(SyntaxKind) -> bool,
     {
@@ -126,7 +126,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn children_with_tokens(&self) -> impl Iterator<Item = SyntaxElement> {
+    pub fn children_with_tokens(&self) -> impl DoubleEndedIterator<Item = SyntaxElement> {
         self.green().slice().iter().enumerate().map(|(i, child)| match child {
             GreenChild::Node { offset, node } => self.new_child(i as u32, node, *offset).into(),
             GreenChild::Token { offset, token } => self.new_token(i as u32, token, *offset).into(),
@@ -150,23 +150,6 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn first_child_by_kind<F>(&self, matcher: F) -> Option<SyntaxNode>
-    where
-        F: Fn(SyntaxKind) -> bool,
-    {
-        self.green()
-            .slice()
-            .iter()
-            .enumerate()
-            .find_map(|(i, child)| match child {
-                GreenChild::Node { offset, node } if matcher(node.kind()) => {
-                    Some(self.new_child(i as u32, node, *offset))
-                }
-                _ => None,
-            })
-    }
-
-    #[inline]
     pub fn first_child_or_token(&self) -> Option<SyntaxElement> {
         self.green().slice().first().map(|child| match child {
             GreenChild::Node { offset, node } => self.new_child(0, node, *offset).into(),
@@ -183,24 +166,6 @@ impl SyntaxNode {
             .rev()
             .find_map(|(i, child)| match child {
                 GreenChild::Node { offset, node } => Some(self.new_child(i as u32, node, *offset)),
-                _ => None,
-            })
-    }
-
-    #[inline]
-    pub fn last_child_by_kind<F>(&self, matcher: F) -> Option<SyntaxNode>
-    where
-        F: Fn(SyntaxKind) -> bool,
-    {
-        self.green()
-            .slice()
-            .iter()
-            .enumerate()
-            .rev()
-            .find_map(|(i, child)| match child {
-                GreenChild::Node { offset, node } if matcher(node.kind()) => {
-                    Some(self.new_child(i as u32, node, *offset))
-                }
                 _ => None,
             })
     }

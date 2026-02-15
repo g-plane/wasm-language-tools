@@ -62,7 +62,9 @@ pub fn act(
     if symbol_table
         .resolved
         .get(&SymbolKey::new(
-            &call_instr.first_child_by_kind(|kind| kind == SyntaxKind::IMMEDIATE)?,
+            &call_instr
+                .children_by_kind(|kind| kind == SyntaxKind::IMMEDIATE)
+                .next()?,
         ))
         .is_none_or(|def_key| *def_key != SymbolKey::new(&func))
     {

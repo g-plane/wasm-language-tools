@@ -49,21 +49,24 @@ impl LanguageService {
             .get(&SymbolKey::new(&parent))
             .and_then(|key| {
                 key.try_to_node(&root)?
+                    .amber()
                     .children()
                     .find_map(|child| match child.kind() {
                         SyntaxKind::TYPE_USE | SyntaxKind::HEAP_TYPE => {
-                            child.first_child_by_kind(|kind| kind == SyntaxKind::INDEX)
+                            child.children().find(|child| child.kind() == SyntaxKind::INDEX)
                         }
                         SyntaxKind::REF_TYPE => child
-                            .first_child_by_kind(|kind| kind == SyntaxKind::HEAP_TYPE)
-                            .and_then(|node| node.first_child_by_kind(|kind| kind == SyntaxKind::INDEX)),
+                            .children()
+                            .find(|child| child.kind() == SyntaxKind::HEAP_TYPE)
+                            .and_then(|node| node.children().find(|child| child.kind() == SyntaxKind::INDEX)),
                         SyntaxKind::GLOBAL_TYPE => child
-                            .first_child_by_kind(|kind| kind == SyntaxKind::REF_TYPE)
-                            .and_then(|node| node.first_child_by_kind(|kind| kind == SyntaxKind::HEAP_TYPE))
-                            .and_then(|node| node.first_child_by_kind(|kind| kind == SyntaxKind::INDEX)),
+                            .children()
+                            .find(|child| child.kind() == SyntaxKind::REF_TYPE)
+                            .and_then(|node| node.children().find(|child| child.kind() == SyntaxKind::HEAP_TYPE))
+                            .and_then(|node| node.children().find(|child| child.kind() == SyntaxKind::INDEX)),
                         _ => None,
                     })
-                    .and_then(|type_idx| symbol_table.resolved.get(&SymbolKey::new(&type_idx)))
+                    .and_then(|type_idx| symbol_table.resolved.get(&type_idx.to_ptr().into()))
             })
             .and_then(|key| symbol_table.def_poi.get(key))
             .map(|range| {

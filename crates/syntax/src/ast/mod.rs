@@ -26,7 +26,7 @@ pub mod support {
     use crate::{SyntaxKind, SyntaxNode, SyntaxToken};
 
     pub fn child<N: AstNode>(parent: &SyntaxNode) -> Option<N> {
-        parent.first_child_by_kind(N::can_cast).and_then(N::cast)
+        parent.children_by_kind(N::can_cast).find_map(N::cast)
     }
     pub fn children<N: AstNode>(parent: &SyntaxNode) -> AstChildren<N> {
         AstChildren::new(parent)

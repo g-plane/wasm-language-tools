@@ -36,7 +36,7 @@ pub fn act(
                 )),
                 new_text: format!(
                     " (export {})",
-                    node.first_child_by_kind(|kind| kind == SyntaxKind::NAME)?,
+                    node.children_by_kind(|kind| kind == SyntaxKind::NAME).next()?,
                 ),
             },
         ],

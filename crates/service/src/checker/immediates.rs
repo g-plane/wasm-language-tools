@@ -194,7 +194,8 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
                 instr,
             );
             if let Some((allow_float, expected_count)) = node
-                .first_child_by_kind(|kind| kind == SyntaxKind::IMMEDIATE)
+                .children_by_kind(|kind| kind == SyntaxKind::IMMEDIATE)
+                .next()
                 .and_then(|immediate| immediate.first_child_or_token().and_then(NodeOrToken::into_token))
                 .filter(|token| token.kind() == SyntaxKind::SHAPE_DESCRIPTOR)
                 .as_ref()

@@ -29,16 +29,20 @@ pub(crate) fn get_deprecation(db: &dyn salsa::Database, document: Document) -> F
         )
         .filter_map(|node| {
             let key = if node.kind() == SyntaxKind::MODULE_FIELD_IMPORT {
-                SymbolKey::new(&node.first_child_by_kind(|kind| {
-                    matches!(
-                        kind,
-                        SyntaxKind::EXTERN_TYPE_FUNC
-                            | SyntaxKind::EXTERN_TYPE_GLOBAL
-                            | SyntaxKind::EXTERN_TYPE_MEMORY
-                            | SyntaxKind::EXTERN_TYPE_TABLE
-                            | SyntaxKind::EXTERN_TYPE_TAG
-                    )
-                })?)
+                node.amber()
+                    .children()
+                    .find(|child| {
+                        matches!(
+                            child.kind(),
+                            SyntaxKind::EXTERN_TYPE_FUNC
+                                | SyntaxKind::EXTERN_TYPE_GLOBAL
+                                | SyntaxKind::EXTERN_TYPE_MEMORY
+                                | SyntaxKind::EXTERN_TYPE_TABLE
+                                | SyntaxKind::EXTERN_TYPE_TAG
+                        )
+                    })?
+                    .to_ptr()
+                    .into()
             } else {
                 SymbolKey::new(&node)
             };
