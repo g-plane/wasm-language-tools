@@ -6,7 +6,7 @@ const DIAGNOSTIC_CODE: &str = "import-occurrence";
 
 pub fn check(db: &dyn salsa::Database, document: Document, node: &SyntaxNode) -> Option<Diagnostic> {
     let imports = imex::get_imports(db, document);
-    if node.prev_sibling().is_some_and(|prev| {
+    if node.prev_siblings().next().is_some_and(|prev| {
         matches!(
             prev.kind(),
             SyntaxKind::MODULE_FIELD_FUNC

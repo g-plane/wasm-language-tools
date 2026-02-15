@@ -114,9 +114,9 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                             // User is probably going to type "param",
                             // but parser treat it as a plain instruction,
                             // so we catch this case here, though these keywords aren't instruction names.
-                            let prev_node = parent.prev_sibling().map(|node| node.kind());
+                            let prev_node = parent.prev_siblings().next();
                             if !matches!(
-                                prev_node,
+                                prev_node.map(|node| node.kind()),
                                 Some(
                                     SyntaxKind::PLAIN_INSTR
                                         | SyntaxKind::BLOCK_BLOCK
@@ -146,9 +146,9 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                         | SyntaxKind::BLOCK_IF
                         | SyntaxKind::BLOCK_LOOP
                         | SyntaxKind::BLOCK_TRY_TABLE => {
-                            let prev_node = parent.prev_sibling().map(|node| node.kind());
+                            let prev_node = parent.prev_siblings().next();
                             if !matches!(
-                                prev_node,
+                                prev_node.map(|node| node.kind()),
                                 Some(
                                     SyntaxKind::PLAIN_INSTR
                                         | SyntaxKind::BLOCK_BLOCK
@@ -195,7 +195,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                         _ => {}
                     }
                 }
-                if let Some(prev) = parent.prev_sibling().filter(|prev| {
+                if let Some(prev) = parent.prev_siblings().next().filter(|prev| {
                     prev.kind() == SyntaxKind::PLAIN_INSTR && prev.green().children_len() == 1 // only instr name, no paren
                 }) && let Some(instr_name) = support::token(&prev, SyntaxKind::INSTR_NAME)
                 {
@@ -480,7 +480,8 @@ fn add_cmp_ctx_for_immediates(instr_name: &str, node: &SyntaxNode, has_leading_l
     } else {
         let is_current_first_immediate = node.kind() == SyntaxKind::IMMEDIATE
             && node
-                .prev_sibling()
+                .prev_siblings()
+                .next()
                 .is_none_or(|prev| prev.kind() != SyntaxKind::IMMEDIATE)
             || PlainInstr::cast(node.clone()).is_some_and(|instr| instr.immediates().count() == 0);
         match instr_name.split_once('.') {
@@ -521,7 +522,7 @@ fn add_cmp_ctx_for_immediates(instr_name: &str, node: &SyntaxNode, has_leading_l
                 }
                 if matches!(snd, "get" | "get_s" | "get_u" | "set") {
                     let first_immediate = if node.kind() == SyntaxKind::IMMEDIATE {
-                        node.prev_sibling()
+                        node.prev_siblings().next()
                     } else {
                         node.first_child()
                     };

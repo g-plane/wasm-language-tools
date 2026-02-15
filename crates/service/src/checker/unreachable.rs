@@ -42,7 +42,8 @@ pub fn check(
                     let current = instr.text_range();
                     if let Some(last) = ranges.last_mut() {
                         if instr
-                            .prev_sibling()
+                            .prev_siblings()
+                            .next()
                             .is_some_and(|prev| last.contains_range(prev.text_range()))
                         {
                             // current and previous are adjacent, so merge ranges
@@ -76,7 +77,7 @@ pub fn check(
             }
             FlowNodeKind::BlockEntry(entry) => {
                 let node = entry.to_node(root);
-                if let Some((prev, last)) = node.prev_sibling().zip(ranges.last_mut())
+                if let Some((prev, last)) = node.prev_siblings().next().zip(ranges.last_mut())
                     && last.contains_range(prev.text_range())
                 {
                     // current and previous are adjacent, so merge ranges

@@ -27,7 +27,7 @@ impl Descendants {
         while let Some(p) = parent
             && p != self.start
         {
-            let next = p.next_sibling();
+            let next = p.next_siblings().next();
             if next.is_some() {
                 return next;
             }
@@ -44,7 +44,7 @@ impl Iterator for Descendants {
                 self.next = Some(child);
                 self.child_entered = true;
             } else if next != &self.start {
-                self.next = next.next_sibling().or_else(|| self.exit_parent(next));
+                self.next = next.next_siblings().next().or_else(|| self.exit_parent(next));
                 self.child_entered = false;
             }
         })

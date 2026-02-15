@@ -198,11 +198,6 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn next_sibling(&self) -> Option<SyntaxNode> {
-        self.next_siblings().next()
-    }
-
-    #[inline]
     pub fn next_sibling_or_token(&self) -> Option<SyntaxElement> {
         match &self.data.level {
             NodeLevel::Root { .. } => None,
@@ -238,11 +233,6 @@ impl SyntaxNode {
         }
         .into_iter()
         .flat_map(|parent| parent.next_consecutive_tokens(self.data.index))
-    }
-
-    #[inline]
-    pub fn prev_sibling(&self) -> Option<SyntaxNode> {
-        self.prev_siblings().next()
     }
 
     #[inline]

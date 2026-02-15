@@ -31,7 +31,8 @@ pub fn act(
                 return None;
             }
             let next_instr = node
-                .next_sibling()
+                .next_siblings()
+                .next()
                 .filter(|node| node.kind() == SyntaxKind::PLAIN_INSTR);
             if next_instr
                 .as_ref()
@@ -45,7 +46,7 @@ pub fn act(
         "return" => {
             let prev_instr = node
                 .first_child()
-                .or_else(|| node.prev_sibling())
+                .or_else(|| node.prev_siblings().next())
                 .filter(|node| node.kind() == SyntaxKind::PLAIN_INSTR)?;
             if support::token(&prev_instr, SyntaxKind::INSTR_NAME).is_some_and(|token| token.text() != "call") {
                 return None;
