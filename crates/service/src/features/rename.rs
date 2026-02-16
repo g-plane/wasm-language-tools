@@ -9,7 +9,7 @@ use lspt::{PrepareRenameParams, PrepareRenameResult, RenameParams, TextEdit, Wor
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_parser::is_id_char;
-use wat_syntax::{SyntaxKind, SyntaxToken, ast::support};
+use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxToken};
 
 const ERR_INVALID_IDENTIFIER: &str = "not a valid identifier";
 const ERR_CANT_BE_RENAMED: &str = "This can't be renamed.";
@@ -48,7 +48,6 @@ impl LanguageService {
 
     fn rename_impl(&self, params: RenameParams, document: Document, ident_token: SyntaxToken) -> Option<WorkspaceEdit> {
         let line_index = document.line_index(self);
-        let root = document.root_tree(self);
         let symbol_table = SymbolTable::of(self, document);
 
         let old_name = InternIdent::new(self, ident_token.text());
@@ -107,7 +106,14 @@ impl LanguageService {
                 }
                 SymbolKind::Module => false,
             })
-            .filter_map(|sym| support::token(&sym.key.to_node(&root), SyntaxKind::IDENT))
+            .filter_map(|sym| {
+                sym.amber()
+                    .children_with_tokens()
+                    .find_map(|node_or_token| match node_or_token {
+                        NodeOrToken::Token(token) if token.kind() == SyntaxKind::IDENT => Some(token),
+                        _ => None,
+                    })
+            })
             .map(|token| TextEdit {
                 range: line_index.convert(token.text_range()),
                 new_text: params.new_name.clone(),

@@ -128,18 +128,24 @@ impl LanguageService {
 }
 
 fn create_symbol_highlight(symbol: &Symbol, root: &SyntaxNode, line_index: &LineIndex) -> Option<DocumentHighlight> {
-    let node = symbol.key.to_node(root);
-    node.tokens_by_kind(|kind| {
-        matches!(
-            kind,
-            SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT | SyntaxKind::TYPE_KEYWORD
-        )
-    })
-    .next()
-    .map(|token| DocumentHighlight {
-        range: line_index.convert(token.text_range()),
-        kind: get_highlight_kind_of_symbol(symbol, root),
-    })
+    symbol
+        .amber()
+        .children_with_tokens()
+        .find_map(|node_or_token| match node_or_token {
+            NodeOrToken::Token(token)
+                if matches!(
+                    token.kind(),
+                    SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT | SyntaxKind::TYPE_KEYWORD
+                ) =>
+            {
+                Some(token)
+            }
+            _ => None,
+        })
+        .map(|token| DocumentHighlight {
+            range: line_index.convert(token.text_range()),
+            kind: get_highlight_kind_of_symbol(symbol, root),
+        })
 }
 
 fn get_highlight_kind_of_symbol(symbol: &Symbol, root: &SyntaxNode) -> Option<DocumentHighlightKind> {

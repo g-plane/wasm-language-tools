@@ -1056,6 +1056,11 @@ pub struct Symbol<'db> {
     pub idx: Idx<'db>,
     pub idx_kind: IdxKind,
 }
+impl Symbol<'_> {
+    pub fn amber(&self) -> AmberNode<'_> {
+        AmberNode::new(&self.green, self.key.0.text_range().start())
+    }
+}
 impl PartialEq for Symbol<'_> {
     fn eq(&self, other: &Self) -> bool {
         self.key == other.key

@@ -20,7 +20,7 @@ impl<'a> AmberNode<'a> {
     }
 
     #[inline]
-    pub(crate) fn new(green: &'a GreenNode, start: TextSize) -> Self {
+    pub fn new(green: &'a GreenNode, start: TextSize) -> Self {
         Self {
             green,
             range: TextRange::new(start, start + green.text_len()),

@@ -45,10 +45,9 @@ impl LanguageService {
             return None;
         }
         symbol_table
-            .resolved
-            .get(&SymbolKey::new(&parent))
-            .and_then(|key| {
-                key.try_to_node(&root)?
+            .find_def(SymbolKey::new(&parent))
+            .and_then(|symbol| {
+                symbol
                     .amber()
                     .children()
                     .find_map(|child| match child.kind() {

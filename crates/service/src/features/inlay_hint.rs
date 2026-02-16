@@ -20,7 +20,6 @@ impl LanguageService {
         let config = configs.get(&uri)?.unwrap_or_global(self);
         self.with_db(|db| {
             let line_index = document.line_index(db);
-            let root = document.root_tree(db);
             let symbol_table = SymbolTable::of(db, document);
             let options = &config.inlay_hint;
 
@@ -69,8 +68,6 @@ impl LanguageService {
                     SymbolKind::Func => {
                         if options.ending
                             && let Some((last, name)) = symbol
-                                .key
-                                .to_node(&root)
                                 .amber()
                                 .children_with_tokens()
                                 .next_back()
@@ -111,8 +108,6 @@ impl LanguageService {
                     SymbolKind::BlockDef => {
                         if options.ending
                             && let Some((last, name)) = symbol
-                                .key
-                                .to_node(&root)
                                 .amber()
                                 .children_with_tokens()
                                 .next_back()
@@ -175,8 +170,6 @@ impl LanguageService {
                             } = symbol.idx
                         {
                             let end = symbol
-                                .key
-                                .to_node(&root)
                                 .amber()
                                 .children_with_tokens()
                                 .find_map(|node_or_token| match node_or_token {
