@@ -1,4 +1,4 @@
-use crate::{NodeOrToken, SyntaxKind, SyntaxNode, TextRange};
+use crate::{SyntaxKind, SyntaxNode, TextRange};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct SyntaxNodePtr {
@@ -27,11 +27,8 @@ impl SyntaxNodePtr {
 
     #[inline]
     pub fn try_to_node(&self, ancestor: &SyntaxNode) -> Option<SyntaxNode> {
-        std::iter::successors(Some(ancestor.clone()), |node| {
-            node.child_or_token_at_range(self.range)
-                .and_then(NodeOrToken::into_node)
-        })
-        .find(|it| it.text_range() == self.range && it.kind() == self.kind)
+        std::iter::successors(Some(ancestor.clone()), |node| node.child_at_range(self.range))
+            .find(|it| it.text_range() == self.range && it.kind() == self.kind)
     }
 
     #[inline]

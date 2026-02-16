@@ -7,7 +7,7 @@ use self::{
 use line_index::LineIndex;
 use tiny_pretty::{IndentKind, PrintOptions};
 use wat_syntax::{
-    SyntaxElement, TextRange,
+    TextRange,
     ast::{AstNode, Root},
 };
 
@@ -31,7 +31,7 @@ pub fn format_range(
     line_index: &LineIndex,
 ) -> Option<(String, TextRange)> {
     let mut node = root.syntax().clone();
-    while let Some(SyntaxElement::Node(it)) = node.child_or_token_at_range(range) {
+    while let Some(it) = node.child_at_range(range) {
         node = it;
     }
     let range = node.text_range();

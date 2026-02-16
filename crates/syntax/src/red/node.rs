@@ -297,7 +297,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn child_or_token_at_range(&self, range: TextRange) -> Option<SyntaxElement> {
+    pub fn child_at_range(&self, range: TextRange) -> Option<SyntaxNode> {
         if !self.data.range.contains_range(range) {
             return None;
         }
@@ -321,13 +321,7 @@ impl SyntaxNode {
                     None
                 }
             }
-            GreenChild::Token { offset, token } => {
-                if TextRange::new(*offset, offset + token.text_len()).contains_range(relative_range) {
-                    Some(self.new_token(i as u32, token, *offset).into())
-                } else {
-                    None
-                }
-            }
+            GreenChild::Token { .. } => None,
         })
     }
 

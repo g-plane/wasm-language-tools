@@ -1,6 +1,6 @@
 use crate::{LanguageService, binder::SymbolTable, helpers::LineIndexExt, refactorings::*, uri::InternUri};
 use lspt::{CodeAction, CodeActionKind, CodeActionParams};
-use wat_syntax::{NodeOrToken, SyntaxKind};
+use wat_syntax::SyntaxKind;
 
 impl LanguageService {
     /// Handler for `textDocument/codeAction` request.
@@ -35,7 +35,7 @@ impl LanguageService {
             let mut actions = vec![];
             let range = line_index.convert(params.range)?;
             let mut node = root.clone();
-            while let Some(NodeOrToken::Node(it)) = node.child_or_token_at_range(range) {
+            while let Some(it) = node.child_at_range(range) {
                 match it.kind() {
                     SyntaxKind::MODULE_FIELD_FUNC => {
                         if rewrite

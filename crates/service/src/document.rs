@@ -87,8 +87,7 @@ impl LanguageService {
                             .root_tree(self)
                             .children()
                             .find(|module| module.text_range().contains_range(range))
-                            .and_then(|module| module.child_or_token_at_range(range))
-                            .and_then(|node_or_token| node_or_token.into_node())
+                            .and_then(|module| module.child_at_range(range))
                             .filter(|node| {
                                 let node_range = node.text_range();
                                 node_range.start() <= range.start() && node_range.end() > range.end()
