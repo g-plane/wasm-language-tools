@@ -2,7 +2,7 @@ use crate::{
     LanguageService,
     binder::{SymbolKey, SymbolKind, SymbolTable},
     document::Document,
-    helpers::{self, LineIndexExt},
+    helpers::LineIndexExt,
     mutability,
 };
 use indexmap::IndexSet;
@@ -10,7 +10,7 @@ use line_index::LineCol;
 use lspt::{SemanticTokens, SemanticTokensParams, SemanticTokensRangeParams};
 use rustc_hash::FxBuildHasher;
 use std::mem;
-use wat_syntax::{SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, ast::support};
+use wat_syntax::{AmberNode, AmberToken, NodeOrToken, SyntaxKind};
 
 impl LanguageService {
     /// Handler for `textDocument/semanticTokens/full` request.
@@ -20,14 +20,12 @@ impl LanguageService {
         self.with_db(|db| {
             let mut delta_line = 0;
             let mut prev_start = 0;
+            let root = document.root(db);
             let tokens = build_tokens(
                 db,
                 token_types,
                 document,
-                document
-                    .root_tree(db)
-                    .descendants_with_tokens()
-                    .filter_map(SyntaxElement::into_token),
+                AmberNode::new_root(&root).descendant_tokens(),
                 &mut delta_line,
                 &mut prev_start,
             );
@@ -49,14 +47,13 @@ impl LanguageService {
 
             let mut delta_line = 0;
             let mut prev_start = 0;
-            let mut tokens = document
-                .root_tree(db)
-                .descendants_with_tokens()
-                .filter_map(SyntaxElement::into_token)
-                .skip_while(|token| token.text_range().end() <= start)
-                .take_while(|token| token.text_range().start() < end)
+            let root = document.root(db);
+            let mut tokens = AmberNode::new_root(&root)
+                .descendant_tokens()
+                .skip_while(|(token, ..)| token.text_range().end() <= start)
+                .take_while(|(token, ..)| token.text_range().start() < end)
                 .peekable();
-            if let Some(token) = tokens.peek() {
+            if let Some((token, ..)) = tokens.peek() {
                 LineCol {
                     line: delta_line,
                     col: prev_start,
@@ -72,18 +69,18 @@ impl LanguageService {
     }
 }
 
-fn build_tokens(
+fn build_tokens<'a>(
     db: &dyn salsa::Database,
     token_types: &SemanticTokenTypes,
     document: Document,
-    tokens: impl Iterator<Item = SyntaxToken>,
+    tokens: impl Iterator<Item = (AmberToken<'a>, AmberNode<'a>, Option<AmberNode<'a>>)>,
     delta_line: &mut u32,
     prev_start: &mut u32,
 ) -> Vec<u32> {
     let line_index = document.line_index(db);
     let symbol_table = SymbolTable::of(db, document);
     tokens
-        .filter_map(|token| {
+        .filter_map(|(token, parent, grand)| {
             match token.kind() {
                 SyntaxKind::WHITESPACE => {
                     let lines = token.text().chars().filter(|c| *c == '\n').count() as u32;
@@ -98,7 +95,7 @@ fn build_tokens(
                     None
                 }
                 _ => {
-                    let token_type = compute_token_type(token_types, &token, symbol_table)?;
+                    let token_type = compute_token_type(token_types, symbol_table, token, parent, grand)?;
                     let block_comment_lines = if token.kind() == SyntaxKind::BLOCK_COMMENT {
                         Some(token.text().chars().filter(|c| *c == '\n').count() as u32)
                     } else {
@@ -123,7 +120,7 @@ fn build_tokens(
                         // token type
                         token_type,
                         // token modifiers bitset
-                        compute_token_modifier(db, document, symbol_table, &token),
+                        compute_token_modifier(db, document, symbol_table, token, parent),
                     ])
                 }
             }
@@ -134,28 +131,27 @@ fn build_tokens(
 
 fn compute_token_type(
     token_types: &SemanticTokenTypes,
-    token: &SyntaxToken,
     symbol_table: &SymbolTable,
+    token: AmberToken,
+    parent: AmberNode,
+    grand: Option<AmberNode>,
 ) -> Option<u32> {
     match token.kind() {
         SyntaxKind::TYPE_KEYWORD => token_types.get_index_of(&SemanticTokenType::Type),
         SyntaxKind::KEYWORD => token_types.get_index_of(&SemanticTokenType::Keyword),
         SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
-            let parent = token.parent();
-            let grand = parent.parent();
-            if grand.as_ref().is_some_and(|grand| {
-                helpers::syntax::is_call(grand)
-                    || matches!(
+            let instr_name = grand.and_then(extract_instr_name);
+            if instr_name.is_some_and(is_call)
+                || grand.is_some_and(|grand| {
+                    matches!(
                         grand.kind(),
                         SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXTERN_IDX_FUNC | SyntaxKind::ELEM_LIST
                     )
-            }) {
-                token_types.get_index_of(&SemanticTokenType::Func)
-            } else if grand
-                .and_then(|grand| support::token(&grand, SyntaxKind::INSTR_NAME))
-                .is_some_and(|name| name.text().starts_with("local."))
+                })
             {
-                if is_ref_of_param(&parent, symbol_table) {
+                token_types.get_index_of(&SemanticTokenType::Func)
+            } else if instr_name.is_some_and(|name| name.starts_with("local.")) {
+                if is_ref_of_param(parent, symbol_table) {
                     token_types.get_index_of(&SemanticTokenType::Param)
                 } else {
                     token_types.get_index_of(&SemanticTokenType::Var)
@@ -166,17 +162,18 @@ fn compute_token_type(
         }
         SyntaxKind::FLOAT => token_types.get_index_of(&SemanticTokenType::Number),
         SyntaxKind::IDENT => {
-            let parent = token.parent();
-            if parent.parent().is_some_and(|grand| {
-                helpers::syntax::is_call(&grand)
-                    || matches!(
+            let instr_name = grand.and_then(extract_instr_name);
+            if instr_name.is_some_and(is_call)
+                || grand.is_some_and(|grand| {
+                    matches!(
                         grand.kind(),
                         SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXTERN_IDX_FUNC | SyntaxKind::ELEM_LIST
                     )
-            }) || parent.kind() == SyntaxKind::MODULE_FIELD_FUNC
+                })
+                || parent.kind() == SyntaxKind::MODULE_FIELD_FUNC
             {
                 token_types.get_index_of(&SemanticTokenType::Func)
-            } else if parent.kind() == SyntaxKind::PARAM || is_ref_of_param(&parent, symbol_table) {
+            } else if parent.kind() == SyntaxKind::PARAM || is_ref_of_param(parent, symbol_table) {
                 token_types.get_index_of(&SemanticTokenType::Param)
             } else {
                 token_types.get_index_of(&SemanticTokenType::Var)
@@ -201,12 +198,13 @@ fn compute_token_modifier(
     db: &dyn salsa::Database,
     document: Document,
     symbol_table: &SymbolTable,
-    token: &SyntaxToken,
+    token: AmberToken,
+    parent: AmberNode,
 ) -> u32 {
     if matches!(
         token.kind(),
         SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT
-    ) && let Some(symbol) = symbol_table.symbols.get(&SymbolKey::new(&token.parent()))
+    ) && let Some(symbol) = symbol_table.symbols.get(&SymbolKey::from(parent.to_ptr()))
     {
         match symbol.kind {
             SymbolKind::GlobalDef | SymbolKind::Type | SymbolKind::FieldDef => {
@@ -243,8 +241,19 @@ pub(crate) enum SemanticTokenType {
     Op,
 }
 
-fn is_ref_of_param(node: &SyntaxNode, symbol_table: &SymbolTable) -> bool {
+fn is_ref_of_param(node: AmberNode, symbol_table: &SymbolTable) -> bool {
     symbol_table
-        .find_def(SymbolKey::new(node))
+        .find_def(node.to_ptr().into())
         .is_some_and(|symbol| symbol.kind == SymbolKind::Param)
+}
+
+fn extract_instr_name(node: AmberNode<'_>) -> Option<&'_ str> {
+    node.green().children().find_map(|child| match child {
+        NodeOrToken::Token(token) if token.kind() == SyntaxKind::INSTR_NAME => Some(token.text()),
+        _ => None,
+    })
+}
+
+fn is_call(instr_name: &str) -> bool {
+    matches!(instr_name, "call" | "ref.func" | "return_call")
 }

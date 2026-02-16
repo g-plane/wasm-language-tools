@@ -1,6 +1,6 @@
 use crate::{
-    AmberNode, Descendants, DescendantsWithTokens, GreenNode, GreenToken, NodeOrToken, SyntaxElement, SyntaxKind,
-    SyntaxNodeChildren, SyntaxToken, TokenAtOffset, green::GreenChild,
+    AmberNode, Descendants, GreenNode, GreenToken, NodeOrToken, SyntaxElement, SyntaxKind, SyntaxNodeChildren,
+    SyntaxToken, TokenAtOffset, green::GreenChild,
 };
 use std::{fmt, ptr::NonNull, rc::Rc};
 use text_size::{TextRange, TextSize};
@@ -258,11 +258,6 @@ impl SyntaxNode {
     #[inline]
     pub fn descendants(&self) -> Descendants {
         Descendants::new(self.clone())
-    }
-
-    #[inline]
-    pub fn descendants_with_tokens(&self) -> DescendantsWithTokens {
-        DescendantsWithTokens::new(self.clone())
     }
 
     /// Find a token in the subtree corresponding to this node, which covers the offset.

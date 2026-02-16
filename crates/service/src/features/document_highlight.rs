@@ -5,10 +5,7 @@ use crate::{
 };
 use line_index::LineIndex;
 use lspt::{DocumentHighlight, DocumentHighlightKind, DocumentHighlightParams};
-use wat_syntax::{
-    NodeOrToken, SyntaxElement, SyntaxKind, SyntaxNode,
-    ast::{AstNode, PlainInstr},
-};
+use wat_syntax::{NodeOrToken, SyntaxElement, SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     /// Handler for `textDocument/documentHighlight` request.
@@ -28,15 +25,17 @@ impl LanguageService {
                 | SyntaxKind::SHAPE_DESCRIPTOR => {
                     let text = token.text();
                     Some(
-                        root.descendants_with_tokens()
-                            .filter_map(|node_or_token| match node_or_token {
-                                NodeOrToken::Token(other) if other.kind() == kind && other.text() == text => {
+                        root.amber()
+                            .descendant_tokens()
+                            .filter_map(|(other, ..)| {
+                                if other.kind() == kind && other.text() == text {
                                     Some(DocumentHighlight {
                                         range: line_index.convert(other.text_range()),
                                         kind: Some(DocumentHighlightKind::Text),
                                     })
+                                } else {
+                                    None
                                 }
-                                _ => None,
                             })
                             .collect(),
                     )
@@ -94,24 +93,28 @@ impl LanguageService {
                     } else {
                         let text = token.text();
                         Some(
-                            root.descendants_with_tokens()
-                                .filter_map(|node_or_token| match node_or_token {
-                                    NodeOrToken::Token(other)
-                                        if other.kind() == kind
-                                            && other.text() == text
-                                            && other
-                                                .parent()
-                                                .parent()
-                                                .and_then(PlainInstr::cast)
-                                                .and_then(|instr| instr.instr_name())
-                                                .is_some_and(|name| name.text().ends_with(".const")) =>
+                            root.amber()
+                                .descendant_tokens()
+                                .filter_map(|(other, _, grand)| {
+                                    if other.kind() == kind
+                                        && other.text() == text
+                                        && grand.is_some_and(|grand| {
+                                            grand.children_with_tokens().any(|node_or_token| match node_or_token {
+                                                NodeOrToken::Token(token) => {
+                                                    token.kind() == SyntaxKind::INSTR_NAME
+                                                        && token.text().ends_with(".const")
+                                                }
+                                                _ => false,
+                                            })
+                                        })
                                     {
                                         Some(DocumentHighlight {
                                             range: line_index.convert(other.text_range()),
                                             kind: Some(DocumentHighlightKind::Text),
                                         })
+                                    } else {
+                                        None
                                     }
-                                    _ => None,
                                 })
                                 .collect(),
                         )

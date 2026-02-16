@@ -1,4 +1,4 @@
-use crate::{NodeOrToken, SyntaxElement, SyntaxNode};
+use crate::SyntaxNode;
 use std::iter::FusedIterator;
 
 pub struct Descendants {
@@ -51,50 +51,6 @@ impl Iterator for Descendants {
     }
 }
 impl FusedIterator for Descendants {}
-
-pub struct DescendantsWithTokens {
-    start: SyntaxNode,
-    next: Option<SyntaxElement>,
-}
-impl DescendantsWithTokens {
-    pub(crate) fn new(start: SyntaxNode) -> Self {
-        Self {
-            start: start.clone(),
-            next: Some(start.into()),
-        }
-    }
-    fn exit_parent(&mut self, mut parent: Option<SyntaxNode>) -> Option<SyntaxElement> {
-        while let Some(p) = parent
-            && p != self.start
-        {
-            let next = p.next_sibling_or_token();
-            if next.is_some() {
-                return next;
-            }
-            parent = p.parent();
-        }
-        None
-    }
-}
-impl Iterator for DescendantsWithTokens {
-    type Item = SyntaxElement;
-    fn next(&mut self) -> Option<Self::Item> {
-        self.next.take().inspect(|next| match next {
-            NodeOrToken::Node(next) => {
-                self.next = next
-                    .first_child_or_token()
-                    .or_else(|| next.next_sibling_or_token())
-                    .or_else(|| self.exit_parent(next.parent()));
-            }
-            NodeOrToken::Token(next) => {
-                self.next = next
-                    .next_sibling_or_token()
-                    .or_else(|| self.exit_parent(Some(next.parent())));
-            }
-        })
-    }
-}
-impl FusedIterator for DescendantsWithTokens {}
 
 #[cfg(test)]
 mod tests {

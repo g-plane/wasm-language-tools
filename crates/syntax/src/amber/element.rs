@@ -18,3 +18,17 @@ impl NodeOrToken<AmberNode<'_>, AmberToken<'_>> {
         }
     }
 }
+
+impl<'a> From<AmberNode<'a>> for NodeOrToken<AmberNode<'a>, AmberToken<'a>> {
+    #[inline]
+    fn from(node: AmberNode<'a>) -> Self {
+        NodeOrToken::Node(node)
+    }
+}
+
+impl<'a> From<AmberToken<'a>> for NodeOrToken<AmberNode<'a>, AmberToken<'a>> {
+    #[inline]
+    fn from(token: AmberToken<'a>) -> Self {
+        NodeOrToken::Token(token)
+    }
+}

@@ -1,3 +1,4 @@
+use super::traversal::{DescendantToken, DescendantTokens};
 use crate::{AmberToken, GreenNode, NodeOrToken, SyntaxKind, SyntaxNode, SyntaxNodePtr, green::GreenChild};
 use text_size::{TextRange, TextSize};
 
@@ -10,6 +11,14 @@ pub struct AmberNode<'a> {
 }
 
 impl<'a> AmberNode<'a> {
+    #[inline]
+    pub fn new_root(green: &'a GreenNode) -> Self {
+        Self {
+            green,
+            range: TextRange::new(0.into(), green.text_len()),
+        }
+    }
+
     #[inline]
     pub(crate) fn new(green: &'a GreenNode, start: TextSize) -> Self {
         Self {
@@ -52,10 +61,21 @@ impl<'a> AmberNode<'a> {
     #[inline]
     pub fn children_with_tokens(&self) -> impl DoubleEndedIterator<Item = NodeOrToken<AmberNode<'a>, AmberToken<'a>>> {
         self.green.slice().iter().map(|child| match child {
-            GreenChild::Node { offset, node } => NodeOrToken::Node(AmberNode::new(node, self.range.start() + offset)),
-            GreenChild::Token { offset, token } => {
-                NodeOrToken::Token(AmberToken::new(token, self.range.start() + offset))
-            }
+            GreenChild::Node { offset, node } => AmberNode::new(node, self.range.start() + offset).into(),
+            GreenChild::Token { offset, token } => AmberToken::new(token, self.range.start() + offset).into(),
+        })
+    }
+
+    #[inline]
+    pub fn descendant_tokens(&self) -> impl Iterator<Item = DescendantToken<'a>> + 'a {
+        DescendantTokens::new(*self)
+    }
+
+    #[inline]
+    pub(crate) fn child_or_token_at(&self, index: usize) -> Option<NodeOrToken<AmberNode<'a>, AmberToken<'a>>> {
+        self.green().slice().get(index).map(|child| match child {
+            GreenChild::Node { offset, node } => AmberNode::new(node, self.range.start() + offset).into(),
+            GreenChild::Token { offset, token } => AmberToken::new(token, self.range.start() + offset).into(),
         })
     }
 }
