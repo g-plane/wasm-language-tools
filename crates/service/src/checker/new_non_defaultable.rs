@@ -18,10 +18,7 @@ pub fn check(
     if !instr.name.text().ends_with(".new_default") {
         return None;
     }
-    let immediate = instr
-        .amber
-        .children()
-        .find(|child| child.kind() == SyntaxKind::IMMEDIATE)?;
+    let immediate = instr.amber.children_by_kind(SyntaxKind::IMMEDIATE).next()?;
     let def_symbol = symbol_table.find_def(immediate.to_ptr().into())?;
     match &def_types.get(&def_symbol.key)?.comp {
         CompositeType::Struct(Fields(fields)) => {

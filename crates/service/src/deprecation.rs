@@ -30,17 +30,17 @@ pub(crate) fn get_deprecation(db: &dyn salsa::Database, document: Document) -> F
         .filter_map(|node| {
             let key = if node.kind() == SyntaxKind::MODULE_FIELD_IMPORT {
                 node.amber()
-                    .children()
-                    .find(|child| {
+                    .children_by_kind(|kind| {
                         matches!(
-                            child.kind(),
+                            kind,
                             SyntaxKind::EXTERN_TYPE_FUNC
                                 | SyntaxKind::EXTERN_TYPE_GLOBAL
                                 | SyntaxKind::EXTERN_TYPE_MEMORY
                                 | SyntaxKind::EXTERN_TYPE_TABLE
                                 | SyntaxKind::EXTERN_TYPE_TAG
                         )
-                    })?
+                    })
+                    .next()?
                     .to_ptr()
                     .into()
             } else {

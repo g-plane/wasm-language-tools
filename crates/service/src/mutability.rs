@@ -5,8 +5,8 @@ use crate::{
 use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
 use wat_syntax::{
-    SyntaxKind, TextRange,
-    ast::{AstNode, CompType, ExternTypeGlobal, FieldType, ModuleFieldGlobal, PlainInstr, TypeDef, support},
+    AmberNode, SyntaxKind, TextRange,
+    ast::{AstNode, PlainInstr},
 };
 
 #[salsa::tracked(returns(ref))]
@@ -14,75 +14,65 @@ pub(crate) fn get_mutabilities(
     db: &dyn salsa::Database,
     document: Document,
 ) -> IndexMap<SymbolKey, Mutability, FxBuildHasher> {
-    let root = document.root_tree(db);
+    fn extract_mut(node: AmberNode) -> Option<TextRange> {
+        node.tokens_by_kind(SyntaxKind::KEYWORD)
+            .find(|token| token.text() == "mut")
+            .map(|token| token.text_range())
+    }
+    fn extract_mut_from_global(node: AmberNode) -> Option<TextRange> {
+        node.children_by_kind(SyntaxKind::GLOBAL_TYPE)
+            .next()
+            .and_then(extract_mut)
+    }
+
     let symbol_table = SymbolTable::of(db, document);
     symbol_table
         .symbols
         .values()
         .filter_map(|symbol| match symbol.kind {
             SymbolKind::GlobalDef => {
-                let node = symbol.key.to_node(&root);
+                let node = symbol.amber();
                 match node.kind() {
-                    SyntaxKind::MODULE_FIELD_GLOBAL => {
-                        let global = ModuleFieldGlobal::cast(node)?;
-                        let range = global
-                            .global_type()
-                            .and_then(|global_type| global_type.mut_keyword())
-                            .map(|token| token.text_range());
-                        Some((
-                            symbol.key,
-                            Mutability {
-                                mut_keyword: range,
-                                cross_module: global.exports().count() > 0,
-                            },
-                        ))
-                    }
-                    SyntaxKind::EXTERN_TYPE_GLOBAL => {
-                        let global = ExternTypeGlobal::cast(node)?;
-                        let range = global
-                            .global_type()
-                            .and_then(|global_type| global_type.mut_keyword())
-                            .map(|token| token.text_range());
-                        Some((
-                            symbol.key,
-                            Mutability {
-                                mut_keyword: range,
-                                cross_module: true,
-                            },
-                        ))
-                    }
+                    SyntaxKind::MODULE_FIELD_GLOBAL => Some((
+                        symbol.key,
+                        Mutability {
+                            mut_keyword: extract_mut_from_global(node),
+                            cross_module: node.children_by_kind(SyntaxKind::EXPORT).count() > 0,
+                        },
+                    )),
+                    SyntaxKind::EXTERN_TYPE_GLOBAL => Some((
+                        symbol.key,
+                        Mutability {
+                            mut_keyword: extract_mut_from_global(node),
+                            cross_module: true,
+                        },
+                    )),
                     _ => None,
                 }
             }
-            SymbolKind::Type => TypeDef::cast(symbol.key.to_node(&root))
-                .and_then(|type_def| type_def.sub_type())
-                .and_then(|sub_type| sub_type.comp_type())
-                .and_then(|comp_type| {
-                    if let CompType::Array(array_type) = comp_type {
-                        array_type.field_type()
-                    } else {
-                        None
-                    }
-                })
+            SymbolKind::Type => symbol
+                .amber()
+                .children_by_kind(SyntaxKind::SUB_TYPE)
+                .next()
+                .and_then(|sub_type| sub_type.children_by_kind(SyntaxKind::ARRAY_TYPE).next())
+                .and_then(|array_type| array_type.children_by_kind(SyntaxKind::FIELD_TYPE).next())
                 .map(|field_type| {
-                    let range = field_type.mut_keyword().map(|token| token.text_range());
                     (
                         symbol.key,
                         Mutability {
-                            mut_keyword: range,
+                            mut_keyword: extract_mut(field_type),
                             cross_module: false,
                         },
                     )
                 }),
             SymbolKind::FieldDef => {
-                let node = symbol.key.to_node(&root);
+                let node = symbol.amber();
                 let range = if node.kind() == SyntaxKind::FIELD {
-                    support::child::<FieldType>(&node)
+                    node.children_by_kind(SyntaxKind::FIELD_TYPE).next()
                 } else {
-                    FieldType::cast(node)
+                    Some(node)
                 }
-                .and_then(|field_type| field_type.mut_keyword())
-                .map(|token| token.text_range());
+                .and_then(extract_mut);
                 Some((
                     symbol.key,
                     Mutability {

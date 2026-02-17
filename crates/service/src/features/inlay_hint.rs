@@ -7,7 +7,7 @@ use crate::{
     uri::InternUri,
 };
 use lspt::{InlayHint, InlayHintKind, InlayHintParams, Union2};
-use wat_syntax::{NodeOrToken, SyntaxKind};
+use wat_syntax::SyntaxKind;
 
 impl LanguageService {
     /// Handler for `textDocument/inlayHint` request.
@@ -171,15 +171,13 @@ impl LanguageService {
                         {
                             let end = symbol
                                 .amber()
-                                .children_with_tokens()
-                                .find_map(|node_or_token| match node_or_token {
-                                    NodeOrToken::Token(token)
-                                        if token.kind() == SyntaxKind::KEYWORD
-                                            && matches!(token.text(), "param" | "local" | "field") =>
-                                    {
+                                .tokens_by_kind(SyntaxKind::KEYWORD)
+                                .find_map(|token| {
+                                    if matches!(token.text(), "param" | "local" | "field") {
                                         Some(token.text_range().end())
+                                    } else {
+                                        None
                                     }
-                                    _ => None,
                                 })
                                 .unwrap_or_else(|| symbol.key.text_range().end());
                             inlay_hints.push(InlayHint {

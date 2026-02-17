@@ -6,8 +6,7 @@ const DIAGNOSTIC_CODE: &str = "multiple-starts";
 pub fn check(diagnostics: &mut Vec<Diagnostic>, module: AmberNode) {
     diagnostics.extend(
         module
-            .children()
-            .filter(|child| child.kind() == SyntaxKind::MODULE_FIELD_START)
+            .children_by_kind(SyntaxKind::MODULE_FIELD_START)
             .skip(1)
             .map(|start| Diagnostic {
                 range: start.text_range(),

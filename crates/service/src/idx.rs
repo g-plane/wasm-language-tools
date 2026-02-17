@@ -9,12 +9,14 @@ pub struct Idx<'db> {
 }
 
 impl<'db> Idx<'db> {
-    pub fn from_immediate(node: &GreenNode, db: &'db dyn salsa::Database) -> Option<Self> {
+    pub fn from_green_for_ref(node: &GreenNode, db: &'db dyn salsa::Database) -> Option<Self> {
         node.children().next().and_then(|child| match child {
-            NodeOrToken::Token(token) if token.kind() == SyntaxKind::INT => Some(Idx {
-                num: helpers::parse_u32(token.text()).ok(),
-                name: None,
-            }),
+            NodeOrToken::Token(token) if matches!(token.kind(), SyntaxKind::INT | SyntaxKind::UNSIGNED_INT) => {
+                Some(Idx {
+                    num: helpers::parse_u32(token.text()).ok(),
+                    name: None,
+                })
+            }
             NodeOrToken::Token(token) if token.kind() == SyntaxKind::IDENT => Some(Idx {
                 num: None,
                 name: Some(InternIdent::new(db, token.text())),

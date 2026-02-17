@@ -1,9 +1,6 @@
 use super::Diagnostic;
 use crate::{binder::SymbolTable, document::Document, types_analyzer};
-use wat_syntax::{
-    SyntaxNode,
-    ast::{AstNode, TypeDef},
-};
+use wat_syntax::SyntaxKind;
 
 const DIAGNOSTIC_CODE: &str = "subtyping";
 
@@ -11,7 +8,6 @@ pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
     document: Document,
-    root: &SyntaxNode,
     symbol_table: &SymbolTable,
 ) {
     let def_types = types_analyzer::get_def_types(db, document);
@@ -21,8 +17,8 @@ pub fn check(
             .filter_map(|(key, sub_type)| {
                 let inherits = sub_type.inherits.as_ref()?;
                 let super_type = def_types.get(&inherits.symbol)?;
-                let module_key = symbol_table.symbols.get(key)?.region;
-                let module_id = symbol_table.symbols.get(&module_key)?.idx.num?;
+                let def_symbol = symbol_table.symbols.get(key)?;
+                let module_id = symbol_table.symbols.get(&def_symbol.region)?.idx.num?;
 
                 if super_type
                     .idx
@@ -31,7 +27,7 @@ pub fn check(
                     .is_some_and(|(sup, sub)| sup >= sub)
                 {
                     Some((
-                        key,
+                        def_symbol,
                         format!(
                             "typeidx of super type `{}` must be smaller than type `{}`",
                             super_type.idx.render(db),
@@ -39,10 +35,10 @@ pub fn check(
                         ),
                     ))
                 } else if super_type.is_final {
-                    Some((key, format!("type `{}` is final", super_type.idx.render(db))))
+                    Some((def_symbol, format!("type `{}` is final", super_type.idx.render(db))))
                 } else if !sub_type.comp.matches(&super_type.comp, db, document, module_id) {
                     Some((
-                        key,
+                        def_symbol,
                         format!(
                             "type of `{}` doesn't match its super type `{}`",
                             sub_type.idx.render(db),
@@ -53,10 +49,16 @@ pub fn check(
                     None
                 }
             })
-            .filter_map(|(key, message)| {
-                let index = TypeDef::cast(key.to_node(root))?.sub_type()?.indexes().next()?;
+            .filter_map(|(def_symbol, message)| {
+                let range = def_symbol
+                    .amber()
+                    .children_by_kind(SyntaxKind::SUB_TYPE)
+                    .next()?
+                    .children_by_kind(SyntaxKind::INDEX)
+                    .next()?
+                    .text_range();
                 Some(Diagnostic {
-                    range: index.syntax().text_range(),
+                    range,
                     code: DIAGNOSTIC_CODE.into(),
                     message,
                     ..Default::default()

@@ -98,15 +98,9 @@ impl LanguageService {
                                 .filter_map(|(other, _, grand)| {
                                     if other.kind() == kind
                                         && other.text() == text
-                                        && grand.is_some_and(|grand| {
-                                            grand.children_with_tokens().any(|node_or_token| match node_or_token {
-                                                NodeOrToken::Token(token) => {
-                                                    token.kind() == SyntaxKind::INSTR_NAME
-                                                        && token.text().ends_with(".const")
-                                                }
-                                                _ => false,
-                                            })
-                                        })
+                                        && grand
+                                            .and_then(|grand| grand.tokens_by_kind(SyntaxKind::INSTR_NAME).next())
+                                            .is_some_and(|token| token.text().ends_with(".const"))
                                     {
                                         Some(DocumentHighlight {
                                             range: line_index.convert(other.text_range()),
@@ -130,18 +124,13 @@ impl LanguageService {
 fn create_symbol_highlight(symbol: &Symbol, root: &SyntaxNode, line_index: &LineIndex) -> Option<DocumentHighlight> {
     symbol
         .amber()
-        .children_with_tokens()
-        .find_map(|node_or_token| match node_or_token {
-            NodeOrToken::Token(token)
-                if matches!(
-                    token.kind(),
-                    SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT | SyntaxKind::TYPE_KEYWORD
-                ) =>
-            {
-                Some(token)
-            }
-            _ => None,
+        .tokens_by_kind(|kind| {
+            matches!(
+                kind,
+                SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT | SyntaxKind::TYPE_KEYWORD
+            )
         })
+        .next()
         .map(|token| DocumentHighlight {
             range: line_index.convert(token.text_range()),
             kind: get_highlight_kind_of_symbol(symbol, root),

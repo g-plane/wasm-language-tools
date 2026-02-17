@@ -9,7 +9,7 @@ use lspt::{PrepareRenameParams, PrepareRenameResult, RenameParams, TextEdit, Wor
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_parser::is_id_char;
-use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxToken};
+use wat_syntax::{SyntaxKind, SyntaxToken};
 
 const ERR_INVALID_IDENTIFIER: &str = "not a valid identifier";
 const ERR_CANT_BE_RENAMED: &str = "This can't be renamed.";
@@ -106,14 +106,7 @@ impl LanguageService {
                 }
                 SymbolKind::Module => false,
             })
-            .filter_map(|sym| {
-                sym.amber()
-                    .children_with_tokens()
-                    .find_map(|node_or_token| match node_or_token {
-                        NodeOrToken::Token(token) if token.kind() == SyntaxKind::IDENT => Some(token),
-                        _ => None,
-                    })
-            })
+            .filter_map(|sym| sym.amber().tokens_by_kind(SyntaxKind::IDENT).next())
             .map(|token| TextEdit {
                 range: line_index.convert(token.text_range()),
                 new_text: params.new_name.clone(),

@@ -10,7 +10,7 @@ pub fn check(
     symbol_table: &SymbolTable,
     node: AmberNode,
 ) -> Option<Diagnostic> {
-    let index = node.children().find(|child| child.kind() == SyntaxKind::INDEX)?;
+    let index = node.children_by_kind(SyntaxKind::INDEX).next()?;
     if symbol_table
         .find_def(index.to_ptr().into())
         .map(|func| types_analyzer::get_func_sig(db, document, func.key, &func.green))

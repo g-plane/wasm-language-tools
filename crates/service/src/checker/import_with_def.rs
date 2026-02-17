@@ -9,31 +9,30 @@ pub fn check(db: &dyn salsa::Database, document: Document, node: AmberNode) -> O
     if !imports.contains(&node.to_ptr().into()) {
         return None;
     }
-    let first = node.children().find(|child| {
-        !matches!(
-            child.kind(),
-            SyntaxKind::EXPORT
-                | SyntaxKind::IMPORT
-                | SyntaxKind::TYPE_USE
-                | SyntaxKind::GLOBAL_TYPE
-                | SyntaxKind::MEM_TYPE
-                | SyntaxKind::TABLE_TYPE
-        )
-    })?;
+    let first = node
+        .children_by_kind(|kind| {
+            !matches!(
+                kind,
+                SyntaxKind::EXPORT
+                    | SyntaxKind::IMPORT
+                    | SyntaxKind::TYPE_USE
+                    | SyntaxKind::GLOBAL_TYPE
+                    | SyntaxKind::MEM_TYPE
+                    | SyntaxKind::TABLE_TYPE
+            )
+        })
+        .next()?;
     let last = node.children().next_back()?;
     Some(Diagnostic {
         range: first.text_range().cover(last.text_range()),
         code: DIAGNOSTIC_CODE.into(),
         message: "imported item can't contain definition".into(),
-        related_information: node
-            .children()
-            .find(|child| child.kind() == SyntaxKind::IMPORT)
-            .map(|import| {
-                vec![RelatedInformation {
-                    range: import.text_range(),
-                    message: "import declared here".into(),
-                }]
-            }),
+        related_information: node.children_by_kind(SyntaxKind::IMPORT).next().map(|import| {
+            vec![RelatedInformation {
+                range: import.text_range(),
+                message: "import declared here".into(),
+            }]
+        }),
         ..Default::default()
     })
 }

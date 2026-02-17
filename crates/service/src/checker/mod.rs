@@ -7,7 +7,7 @@ use crate::{
 use bumpalo::Bump;
 use lspt::{DiagnosticRelatedInformation, DiagnosticSeverity, DiagnosticTag, Location, Union2};
 use std::cmp::Ordering;
-use wat_syntax::{AmberNode, AmberToken, NodeOrToken, SyntaxKind, SyntaxNode, TextRange};
+use wat_syntax::{AmberNode, AmberToken, SyntaxKind, SyntaxNode, TextRange};
 
 mod block_type;
 mod br_table_branches;
@@ -257,7 +257,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
     shadow::check(db, &mut diagnostics, config.lint.shadow, symbol_table, &mut bump);
     mutated_immutable::check(db, &mut diagnostics, document, symbol_table);
     needless_mut::check(db, &mut diagnostics, config.lint.needless_mut, document, symbol_table);
-    subtyping::check(&mut diagnostics, db, document, &root, symbol_table);
+    subtyping::check(&mut diagnostics, db, document, symbol_table);
     deprecated::check(&mut diagnostics, db, document, config.lint.deprecated, symbol_table);
 
     diagnostics.sort_unstable_by(|a, b| match a.code.cmp(&b.code) {
@@ -326,12 +326,8 @@ impl<'a> FastPlainInstr<'a> {
     fn new(node: &'a SyntaxNode) -> Option<Self> {
         let amber = node.amber();
         amber
-            .children_with_tokens()
-            .find_map(|node_or_token| match node_or_token {
-                NodeOrToken::Token(token) if token.kind() == SyntaxKind::INSTR_NAME => {
-                    Some(Self { amber, name: token })
-                }
-                _ => None,
-            })
+            .tokens_by_kind(SyntaxKind::INSTR_NAME)
+            .next()
+            .map(|token| Self { amber, name: token })
     }
 }

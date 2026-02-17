@@ -20,19 +20,22 @@ pub(crate) struct SymbolTable<'db> {
 fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) -> SymbolTable<'db> {
     fn create_module_level_symbol<'db>(
         db: &'db dyn salsa::Database,
-        node: &SyntaxNode,
+        node: AmberNode,
         id: u32,
         kind: SymbolKind,
-        module: &SyntaxNode,
+        module_key: SymbolKey,
     ) -> Symbol<'db> {
         Symbol {
-            key: SymbolKey::new(node),
+            key: node.to_ptr().into(),
             green: node.green().clone(),
-            region: SymbolKey::new(module),
+            region: module_key,
             kind,
             idx: Idx {
                 num: Some(id),
-                name: support::token(node, SyntaxKind::IDENT).map(|token| InternIdent::new(db, token.text())),
+                name: node
+                    .tokens_by_kind(SyntaxKind::IDENT)
+                    .next()
+                    .map(|token| InternIdent::new(db, token.text())),
             },
             idx_kind: kind.into(),
         }
@@ -214,7 +217,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
         module.descendants().for_each(|node| match node.kind() {
             SyntaxKind::MODULE_FIELD_FUNC => {
                 let func_idx = func_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, &node, func_idx, SymbolKind::Func, &module);
+                let symbol = create_module_level_symbol(db, node.amber(), func_idx, SymbolKind::Func, module_key);
                 let func_key = symbol.key;
                 funcs.push((func_key, symbol.idx.name));
                 symbols.insert(func_key, symbol);
@@ -235,7 +238,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 } else {
                     return;
                 };
-                if let Some(ident) = support::token(&node, SyntaxKind::IDENT) {
+                if let Some(ident) = node.amber().tokens_by_kind(SyntaxKind::IDENT).next() {
                     let key = SymbolKey::new(&node);
                     let idx = local_idx_gen.pull();
                     let name = InternIdent::new(db, ident.text());
@@ -260,8 +263,8 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     );
                     def_poi.insert(key, ident.text_range());
                 } else {
-                    symbols.extend(node.children_by_kind(ValType::can_cast).map(|val_type| {
-                        let key = SymbolKey::new(&val_type);
+                    symbols.extend(node.amber().children_by_kind(ValType::can_cast).map(|val_type| {
+                        let key = SymbolKey::from(val_type.to_ptr());
                         locals.push((key, None));
                         def_poi.insert(key, val_type.text_range());
                         (
@@ -287,7 +290,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 } else {
                     return;
                 };
-                if let Some(ident) = support::token(&node, SyntaxKind::IDENT) {
+                if let Some(ident) = node.amber().tokens_by_kind(SyntaxKind::IDENT).next() {
                     let key = SymbolKey::new(&node);
                     let idx = local_idx_gen.pull();
                     let name = InternIdent::new(db, ident.text());
@@ -308,8 +311,8 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     );
                     def_poi.insert(key, ident.text_range());
                 } else {
-                    symbols.extend(node.children_by_kind(ValType::can_cast).map(|val_type| {
-                        let key = SymbolKey::new(&val_type);
+                    symbols.extend(node.amber().children_by_kind(ValType::can_cast).map(|val_type| {
+                        let key = SymbolKey::from(val_type.to_ptr());
                         locals.push((key, None));
                         def_poi.insert(key, val_type.text_range());
                         (
@@ -331,7 +334,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             }
             SyntaxKind::TYPE_DEF => {
                 let type_idx = type_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, &node, type_idx, SymbolKind::Type, &module);
+                let symbol = create_module_level_symbol(db, node.amber(), type_idx, SymbolKind::Type, module_key);
                 let type_def_key = symbol.key;
                 types.push((type_def_key, symbol.idx.name));
                 symbols.insert(type_def_key, symbol);
@@ -354,7 +357,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     return;
                 };
                 let fields = fields.entry(type_def_key).or_insert_with(|| Vec::with_capacity(1));
-                if let Some(ident) = support::token(&node, SyntaxKind::IDENT) {
+                if let Some(ident) = node.amber().tokens_by_kind(SyntaxKind::IDENT).next() {
                     let key = SymbolKey::new(&node);
                     let idx = field_idx_gen.pull();
                     let name = InternIdent::new(db, ident.text());
@@ -375,44 +378,43 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     );
                     def_poi.insert(key, ident.text_range());
                 } else {
-                    symbols.extend(
-                        node.children_by_kind(SyntaxKind::FIELD_TYPE)
-                            .map(|field_type| {
-                                let key = SymbolKey::new(&field_type);
-                                fields.push((key, None));
-                                def_poi.insert(key, field_type.text_range());
-                                (
-                                    key,
-                                    Symbol {
-                                        key,
-                                        green: field_type.green().clone(),
-                                        region: type_def_key,
-                                        kind: SymbolKind::FieldDef,
-                                        idx: Idx {
-                                            num: Some(field_idx_gen.pull()),
-                                            name: None,
-                                        },
-                                        idx_kind: IdxKind::Field,
-                                    },
-                                )
-                            }),
-                    );
+                    symbols.extend(node.amber().children_by_kind(SyntaxKind::FIELD_TYPE).map(|field_type| {
+                        let key = SymbolKey::from(field_type.to_ptr());
+                        fields.push((key, None));
+                        def_poi.insert(key, field_type.text_range());
+                        (
+                            key,
+                            Symbol {
+                                key,
+                                green: field_type.green().clone(),
+                                region: type_def_key,
+                                kind: SymbolKind::FieldDef,
+                                idx: Idx {
+                                    num: Some(field_idx_gen.pull()),
+                                    name: None,
+                                },
+                                idx_kind: IdxKind::Field,
+                            },
+                        )
+                    }));
                 }
             }
             SyntaxKind::MODULE_FIELD_GLOBAL => {
                 let idx = global_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, &node, idx, SymbolKind::GlobalDef, &module);
+                let symbol = create_module_level_symbol(db, node.amber(), idx, SymbolKind::GlobalDef, module_key);
                 globals.push((symbol.key, symbol.idx.name));
                 def_poi.insert(symbol.key, infer_def_poi(&node));
                 symbols.insert(symbol.key, symbol);
             }
             SyntaxKind::PLAIN_INSTR => {
-                match support::token(&node, SyntaxKind::INSTR_NAME)
-                    .as_ref()
+                let amber = node.amber();
+                match amber
+                    .tokens_by_kind(SyntaxKind::INSTR_NAME)
+                    .next()
                     .map(|token| token.text())
                 {
                     Some("call" | "ref.func" | "return_call") => {
-                        symbols.extend(node.amber().children().filter_map(|node| {
+                        symbols.extend(amber.children().filter_map(|node| {
                             create_ref_symbol(db, node, module_key, SymbolKind::Call).map(|symbol| (symbol.key, symbol))
                         }));
                     }
@@ -424,7 +426,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                             return;
                         };
                         let region = SymbolKey::new(&func);
-                        symbols.extend(node.amber().children().filter_map(|node| {
+                        symbols.extend(amber.children().filter_map(|node| {
                             create_ref_symbol(db, node, region, SymbolKind::LocalRef)
                                 .inspect(|symbol| {
                                     if let Some((def_key, _)) = search_def(&locals, symbol.idx) {
@@ -439,7 +441,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         }));
                     }
                     Some("global.get" | "global.set") => {
-                        symbols.extend(node.amber().children().filter_map(|node| {
+                        symbols.extend(amber.children().filter_map(|node| {
                             create_ref_symbol(db, node, module_key, SymbolKind::GlobalRef)
                                 .map(|symbol| (symbol.key, symbol))
                         }));
@@ -449,7 +451,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         | "br_on_cast_fail",
                     ) => {
                         if let Some(region) = find_up_block(&node).map(|node| SymbolKey::new(&node)) {
-                            node.amber()
+                            amber
                                 .children()
                                 .filter_map(|node| create_ref_symbol(db, node, region, SymbolKind::BlockRef))
                                 .for_each(|symbol| {
@@ -461,24 +463,17 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         }
                     }
                     Some("call_indirect" | "return_call_indirect") => {
-                        let immediate = node
-                            .amber()
-                            .children()
-                            .find(|child| child.kind() == SyntaxKind::IMMEDIATE);
+                        let immediate = amber.children_by_kind(SyntaxKind::IMMEDIATE).next();
                         let symbol = create_optional_ref_symbol(db, immediate, &node, module_key, SymbolKind::TableRef);
                         symbols.insert(symbol.key, symbol);
                     }
                     Some("table.get" | "table.set" | "table.size" | "table.grow" | "table.fill") => {
-                        let immediate = node
-                            .amber()
-                            .children()
-                            .find(|child| child.kind() == SyntaxKind::IMMEDIATE);
+                        let immediate = amber.children_by_kind(SyntaxKind::IMMEDIATE).next();
                         let symbol = create_optional_ref_symbol(db, immediate, &node, module_key, SymbolKind::TableRef);
                         symbols.insert(symbol.key, symbol);
                     }
                     Some("table.copy") => {
-                        let amber = node.amber();
-                        let mut immediates = amber.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+                        let mut immediates = amber.children_by_kind(SyntaxKind::IMMEDIATE);
                         let dst =
                             create_optional_ref_symbol(db, immediates.next(), &node, module_key, SymbolKind::TableRef);
                         symbols.insert(dst.key, dst);
@@ -487,8 +482,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         symbols.insert(src.key, src);
                     }
                     Some("table.init") => {
-                        let amber = node.amber();
-                        let mut immediates = amber.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+                        let mut immediates = amber.children_by_kind(SyntaxKind::IMMEDIATE);
                         let mut first = immediates.next();
                         if let Some(elem_ref) = immediates.next().or_else(|| first.take())
                             && let Some(symbol) = create_ref_symbol(db, elem_ref, module_key, SymbolKind::ElemRef)
@@ -502,8 +496,8 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     Some("elem.drop") => {
                         if let Some(symbol) = node
                             .amber()
-                            .children()
-                            .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                            .children_by_kind(SyntaxKind::IMMEDIATE)
+                            .next()
                             .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::ElemRef))
                         {
                             symbols.insert(symbol.key, symbol);
@@ -521,17 +515,13 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         | "v128.load8_lane" | "v128.load16_lane" | "v128.load32_lane" | "v128.load64_lane"
                         | "v128.store8_lane" | "v128.store16_lane" | "v128.store32_lane" | "v128.store64_lane",
                     ) => {
-                        let immediate = node
-                            .amber()
-                            .children()
-                            .find(|child| child.kind() == SyntaxKind::IMMEDIATE);
+                        let immediate = amber.children_by_kind(SyntaxKind::IMMEDIATE).next();
                         let symbol =
                             create_optional_ref_symbol(db, immediate, &node, module_key, SymbolKind::MemoryRef);
                         symbols.insert(symbol.key, symbol);
                     }
                     Some("memory.init") => {
-                        let amber = node.amber();
-                        let mut immediates = amber.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+                        let mut immediates = amber.children_by_kind(SyntaxKind::IMMEDIATE);
                         let mut first = immediates.next();
                         if let Some(data_ref) = immediates.next().or_else(|| first.take())
                             && let Some(symbol) = create_ref_symbol(db, data_ref, module_key, SymbolKind::DataRef)
@@ -543,8 +533,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         symbols.insert(mem_symbol.key, mem_symbol);
                     }
                     Some("memory.copy") => {
-                        let amber = node.amber();
-                        let mut immediates = amber.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+                        let mut immediates = amber.children_by_kind(SyntaxKind::IMMEDIATE);
                         let dst =
                             create_optional_ref_symbol(db, immediates.next(), &node, module_key, SymbolKind::MemoryRef);
                         symbols.insert(dst.key, dst);
@@ -553,10 +542,9 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         symbols.insert(src.key, src);
                     }
                     Some("data.drop") => {
-                        if let Some(symbol) = node
-                            .amber()
-                            .children()
-                            .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                        if let Some(symbol) = amber
+                            .children_by_kind(SyntaxKind::IMMEDIATE)
+                            .next()
                             .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::DataRef))
                         {
                             symbols.insert(symbol.key, symbol);
@@ -567,24 +555,22 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         | "array.get" | "array.get_u" | "array.get_s" | "array.set" | "array.fill" | "call_ref"
                         | "return_call_ref" | "ref.null",
                     ) => {
-                        if let Some(symbol) = node
-                            .amber()
-                            .children()
-                            .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                        if let Some(symbol) = amber
+                            .children_by_kind(SyntaxKind::IMMEDIATE)
+                            .next()
                             .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TypeUse))
                         {
                             symbols.insert(symbol.key, symbol);
                         }
                     }
                     Some("array.copy") => {
-                        symbols.extend(node.amber().children().filter_map(|node| {
+                        symbols.extend(amber.children().filter_map(|node| {
                             create_ref_symbol(db, node, module_key, SymbolKind::TypeUse)
                                 .map(|symbol| (symbol.key, symbol))
                         }));
                     }
                     Some("array.new_data" | "array.init_data") => {
-                        let amber = node.amber();
-                        let mut immediates = amber.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+                        let mut immediates = amber.children_by_kind(SyntaxKind::IMMEDIATE);
                         if let Some(symbol) = immediates
                             .next()
                             .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TypeUse))
@@ -599,8 +585,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         }
                     }
                     Some("array.new_elem" | "array.init_elem") => {
-                        let amber = node.amber();
-                        let mut immediates = amber.children().filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+                        let mut immediates = amber.children_by_kind(SyntaxKind::IMMEDIATE);
                         if let Some(symbol) = immediates
                             .next()
                             .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TypeUse))
@@ -615,7 +600,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         }
                     }
                     Some("struct.get" | "struct.get_s" | "struct.get_u" | "struct.set") => {
-                        let amber = node.amber();
                         let mut children = amber.children();
                         if let Some(symbol) = children
                             .next()
@@ -635,10 +619,9 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         }
                     }
                     Some("throw") => {
-                        if let Some(symbol) = node
-                            .amber()
-                            .children()
-                            .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                        if let Some(symbol) = amber
+                            .children_by_kind(SyntaxKind::IMMEDIATE)
+                            .next()
                             .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TagRef))
                         {
                             symbols.insert(symbol.key, symbol);
@@ -666,8 +649,8 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXTERN_IDX_FUNC => {
                 if let Some(symbol) = node
                     .amber()
-                    .children()
-                    .find(|child| child.kind() == SyntaxKind::INDEX)
+                    .children_by_kind(SyntaxKind::INDEX)
+                    .next()
                     .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::Call))
                 {
                     symbols.insert(symbol.key, symbol);
@@ -676,8 +659,8 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             SyntaxKind::TYPE_USE | SyntaxKind::HEAP_TYPE | SyntaxKind::SUB_TYPE => {
                 if let Some(symbol) = node
                     .amber()
-                    .children()
-                    .find(|child| child.kind() == SyntaxKind::INDEX)
+                    .children_by_kind(SyntaxKind::INDEX)
+                    .next()
                     .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::TypeUse))
                 {
                     symbols.insert(symbol.key, symbol);
@@ -685,21 +668,21 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             }
             SyntaxKind::MODULE_FIELD_MEMORY => {
                 let idx = mem_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, &node, idx, SymbolKind::MemoryDef, &module);
+                let symbol = create_module_level_symbol(db, node.amber(), idx, SymbolKind::MemoryDef, module_key);
                 memories.push((symbol.key, symbol.idx.name));
                 def_poi.insert(symbol.key, infer_def_poi(&node));
                 symbols.insert(symbol.key, symbol);
             }
             SyntaxKind::MODULE_FIELD_TABLE => {
                 let idx = table_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, &node, idx, SymbolKind::TableDef, &module);
+                let symbol = create_module_level_symbol(db, node.amber(), idx, SymbolKind::TableDef, module_key);
                 tables.push((symbol.key, symbol.idx.name));
                 def_poi.insert(symbol.key, infer_def_poi(&node));
                 symbols.insert(symbol.key, symbol);
             }
             SyntaxKind::MODULE_FIELD_TAG => {
                 let idx = tag_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, &node, idx, SymbolKind::TagDef, &module);
+                let symbol = create_module_level_symbol(db, node.amber(), idx, SymbolKind::TagDef, module_key);
                 tags.push((symbol.key, symbol.idx.name));
                 def_poi.insert(symbol.key, infer_def_poi(&node));
                 symbols.insert(symbol.key, symbol);
@@ -707,8 +690,8 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             SyntaxKind::EXTERN_IDX_GLOBAL => {
                 if let Some(symbol) = node
                     .amber()
-                    .children()
-                    .find(|child| child.kind() == SyntaxKind::INDEX)
+                    .children_by_kind(SyntaxKind::INDEX)
+                    .next()
                     .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::GlobalRef))
                 {
                     symbols.insert(symbol.key, symbol);
@@ -717,8 +700,8 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             SyntaxKind::EXTERN_IDX_MEMORY => {
                 if let Some(symbol) = node
                     .amber()
-                    .children()
-                    .find(|child| child.kind() == SyntaxKind::INDEX)
+                    .children_by_kind(SyntaxKind::INDEX)
+                    .next()
                     .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::MemoryRef))
                 {
                     symbols.insert(symbol.key, symbol);
@@ -727,8 +710,8 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             SyntaxKind::EXTERN_IDX_TABLE | SyntaxKind::TABLE_USE => {
                 if let Some(symbol) = node
                     .amber()
-                    .children()
-                    .find(|child| child.kind() == SyntaxKind::INDEX)
+                    .children_by_kind(SyntaxKind::INDEX)
+                    .next()
                     .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::TableRef))
                 {
                     symbols.insert(symbol.key, symbol);
@@ -737,8 +720,8 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             SyntaxKind::EXTERN_IDX_TAG => {
                 if let Some(symbol) = node
                     .amber()
-                    .children()
-                    .find(|child| child.kind() == SyntaxKind::INDEX)
+                    .children_by_kind(SyntaxKind::INDEX)
+                    .next()
                     .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::TagRef))
                 {
                     symbols.insert(symbol.key, symbol);
@@ -781,14 +764,14 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             }
             SyntaxKind::MODULE_FIELD_DATA => {
                 let idx = data_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, &node, idx, SymbolKind::DataDef, &module);
+                let symbol = create_module_level_symbol(db, node.amber(), idx, SymbolKind::DataDef, module_key);
                 datas.push((symbol.key, symbol.idx.name));
                 def_poi.insert(symbol.key, infer_def_poi(&node));
                 symbols.insert(symbol.key, symbol);
             }
             SyntaxKind::MODULE_FIELD_ELEM => {
                 let idx = elem_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, &node, idx, SymbolKind::ElemDef, &module);
+                let symbol = create_module_level_symbol(db, node.amber(), idx, SymbolKind::ElemDef, module_key);
                 elems.push((symbol.key, symbol.idx.name));
                 def_poi.insert(symbol.key, infer_def_poi(&node));
                 symbols.insert(symbol.key, symbol);
@@ -796,23 +779,17 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             SyntaxKind::MEM_USE => {
                 if let Some(symbol) = node
                     .amber()
-                    .children()
-                    .find(|child| child.kind() == SyntaxKind::INDEX)
+                    .children_by_kind(SyntaxKind::INDEX)
+                    .next()
                     .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::MemoryRef))
                 {
                     symbols.insert(symbol.key, symbol);
                 }
             }
             SyntaxKind::ELEM_LIST => {
-                symbols.extend(
-                    node.amber()
-                        .children()
-                        .filter(|child| child.kind() == SyntaxKind::INDEX)
-                        .filter_map(|index| {
-                            create_ref_symbol(db, index, module_key, SymbolKind::Call)
-                                .map(|symbol| (symbol.key, symbol))
-                        }),
-                );
+                symbols.extend(node.amber().children_by_kind(SyntaxKind::INDEX).filter_map(|index| {
+                    create_ref_symbol(db, index, module_key, SymbolKind::Call).map(|symbol| (symbol.key, symbol))
+                }));
             }
             SyntaxKind::CATCH => {
                 let amber = node.amber();
@@ -844,8 +821,8 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     .map(|node| SymbolKey::new(&node))
                     && let Some(symbol) = node
                         .amber()
-                        .children()
-                        .find(|child| child.kind() == SyntaxKind::INDEX)
+                        .children_by_kind(SyntaxKind::INDEX)
+                        .next()
                         .and_then(|node| create_ref_symbol(db, node, region, SymbolKind::BlockRef))
                 {
                     if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
@@ -1063,13 +1040,14 @@ impl Symbol<'_> {
 }
 impl PartialEq for Symbol<'_> {
     fn eq(&self, other: &Self) -> bool {
-        self.key == other.key
+        self.key == other.key && self.green == other.green
     }
 }
 impl Eq for Symbol<'_> {}
 impl Hash for Symbol<'_> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.key.hash(state);
+        self.green.hash(state);
     }
 }
 

@@ -14,8 +14,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, lint_level: LintLevel, root: &Sy
     };
     diagnostics.extend(
         root.amber()
-            .children()
-            .filter(|child| child.kind() == SyntaxKind::MODULE)
+            .children_by_kind(SyntaxKind::MODULE)
             .skip(1)
             .map(|module| Diagnostic {
                 range: module.text_range(),

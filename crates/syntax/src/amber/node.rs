@@ -1,5 +1,7 @@
 use super::traversal::{DescendantToken, DescendantTokens};
-use crate::{AmberToken, GreenNode, NodeOrToken, SyntaxKind, SyntaxNode, SyntaxNodePtr, green::GreenChild};
+use crate::{
+    AmberToken, GreenNode, NodeOrToken, SyntaxKind, SyntaxKindMatch, SyntaxNode, SyntaxNodePtr, green::GreenChild,
+};
 use text_size::{TextRange, TextSize};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
@@ -55,6 +57,32 @@ impl<'a> AmberNode<'a> {
         self.green.slice().iter().filter_map(|child| match child {
             GreenChild::Node { offset, node } => Some(AmberNode::new(node, self.range.start() + offset)),
             GreenChild::Token { .. } => None,
+        })
+    }
+
+    #[inline]
+    pub fn children_by_kind<M>(&self, matcher: M) -> impl DoubleEndedIterator<Item = AmberNode<'a>> + use<'_, 'a, M>
+    where
+        M: SyntaxKindMatch,
+    {
+        self.green().slice().iter().filter_map(move |child| match child {
+            GreenChild::Node { offset, node } if matcher.matches(node.kind()) => {
+                Some(AmberNode::new(node, self.range.start() + offset))
+            }
+            _ => None,
+        })
+    }
+
+    #[inline]
+    pub fn tokens_by_kind<M>(&self, matcher: M) -> impl DoubleEndedIterator<Item = AmberToken<'a>> + use<'_, 'a, M>
+    where
+        M: SyntaxKindMatch,
+    {
+        self.green().slice().iter().filter_map(move |child| match child {
+            GreenChild::Token { offset, token } if matcher.matches(token.kind()) => {
+                Some(AmberToken::new(token, self.range.start() + offset))
+            }
+            _ => None,
         })
     }
 

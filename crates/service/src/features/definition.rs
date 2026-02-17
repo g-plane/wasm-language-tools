@@ -52,17 +52,17 @@ impl LanguageService {
                     .children()
                     .find_map(|child| match child.kind() {
                         SyntaxKind::TYPE_USE | SyntaxKind::HEAP_TYPE => {
-                            child.children().find(|child| child.kind() == SyntaxKind::INDEX)
+                            child.children_by_kind(SyntaxKind::INDEX).next()
                         }
                         SyntaxKind::REF_TYPE => child
-                            .children()
-                            .find(|child| child.kind() == SyntaxKind::HEAP_TYPE)
-                            .and_then(|node| node.children().find(|child| child.kind() == SyntaxKind::INDEX)),
+                            .children_by_kind(SyntaxKind::HEAP_TYPE)
+                            .next()
+                            .and_then(|node| node.children_by_kind(SyntaxKind::INDEX).next()),
                         SyntaxKind::GLOBAL_TYPE => child
-                            .children()
-                            .find(|child| child.kind() == SyntaxKind::REF_TYPE)
-                            .and_then(|node| node.children().find(|child| child.kind() == SyntaxKind::HEAP_TYPE))
-                            .and_then(|node| node.children().find(|child| child.kind() == SyntaxKind::INDEX)),
+                            .children_by_kind(SyntaxKind::REF_TYPE)
+                            .next()
+                            .and_then(|node| node.children_by_kind(SyntaxKind::HEAP_TYPE).next())
+                            .and_then(|node| node.children_by_kind(SyntaxKind::INDEX).next()),
                         _ => None,
                     })
                     .and_then(|type_idx| symbol_table.resolved.get(&type_idx.to_ptr().into()))

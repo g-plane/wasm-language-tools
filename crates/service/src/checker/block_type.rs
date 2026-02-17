@@ -15,9 +15,9 @@ pub fn check(
     node: AmberNode,
 ) -> Option<Diagnostic> {
     let index = node
-        .children()
-        .find(|child| child.kind() == SyntaxKind::TYPE_USE)
-        .and_then(|type_use| type_use.children().find(|child| child.kind() == SyntaxKind::INDEX))?;
+        .children_by_kind(SyntaxKind::TYPE_USE)
+        .next()
+        .and_then(|type_use| type_use.children_by_kind(SyntaxKind::INDEX).next())?;
     let def_types = types_analyzer::get_def_types(db, document);
     if symbol_table
         .resolved

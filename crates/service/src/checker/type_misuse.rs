@@ -20,10 +20,7 @@ pub fn check(
     node: &SyntaxNode,
     instr: &FastPlainInstr,
 ) -> Option<()> {
-    let mut immediates = instr
-        .amber
-        .children()
-        .filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+    let mut immediates = instr.amber.children_by_kind(SyntaxKind::IMMEDIATE);
     let def_types = get_def_types(db, document);
     match instr.name.text().split_once('.') {
         Some(("struct", _)) => {
@@ -121,21 +118,9 @@ pub fn check(
                     return None;
                 };
                 let rt1_node = immediates.next()?;
-                let rt1 = RefType::from_green(
-                    rt1_node
-                        .children()
-                        .find(|child| child.kind() == SyntaxKind::REF_TYPE)?
-                        .green(),
-                    db,
-                )?;
+                let rt1 = RefType::from_green(rt1_node.children_by_kind(SyntaxKind::REF_TYPE).next()?.green(), db)?;
                 let rt2_node = immediates.next()?;
-                let rt2 = RefType::from_green(
-                    rt2_node
-                        .children()
-                        .find(|child| child.kind() == SyntaxKind::REF_TYPE)?
-                        .green(),
-                    db,
-                )?;
+                let rt2 = RefType::from_green(rt2_node.children_by_kind(SyntaxKind::REF_TYPE).next()?.green(), db)?;
                 if !rt2.matches(&rt1, db, document, module_id) {
                     diagnostics.push(Diagnostic {
                         range: rt2_node.text_range(),
@@ -185,21 +170,9 @@ pub fn check(
                     return None;
                 };
                 let rt1_node = immediates.next()?;
-                let rt1 = RefType::from_green(
-                    rt1_node
-                        .children()
-                        .find(|child| child.kind() == SyntaxKind::REF_TYPE)?
-                        .green(),
-                    db,
-                )?;
+                let rt1 = RefType::from_green(rt1_node.children_by_kind(SyntaxKind::REF_TYPE).next()?.green(), db)?;
                 let rt2_node = immediates.next()?;
-                let rt2 = RefType::from_green(
-                    rt2_node
-                        .children()
-                        .find(|child| child.kind() == SyntaxKind::REF_TYPE)?
-                        .green(),
-                    db,
-                )?;
+                let rt2 = RefType::from_green(rt2_node.children_by_kind(SyntaxKind::REF_TYPE).next()?.green(), db)?;
                 if !rt2.matches(&rt1, db, document, module_id) {
                     diagnostics.push(Diagnostic {
                         range: rt2_node.text_range(),
@@ -240,10 +213,7 @@ pub fn check(
                 }
             }
             "return_call" => {
-                if let Some(immediate) = instr
-                    .amber
-                    .children()
-                    .find(|child| child.kind() == SyntaxKind::IMMEDIATE)
+                if let Some(immediate) = instr.amber.children_by_kind(SyntaxKind::IMMEDIATE).next()
                     && let Some(diagnostic) = symbol_table
                         .find_def(immediate.to_ptr().into())
                         .map(|func| get_func_sig(db, document, func.key, &func.green))
@@ -278,7 +248,7 @@ pub fn check(
                 if let Some(type_use) = instr
                     .amber
                     .children()
-                    .find_map(|immediate| immediate.children().find(|child| child.kind() == SyntaxKind::TYPE_USE))
+                    .find_map(|immediate| immediate.children_by_kind(SyntaxKind::TYPE_USE).next())
                     && let Some(diagnostic) = check_return_call_result_type(
                         db,
                         document,
@@ -326,16 +296,12 @@ fn check_table_ref_type(
     node: AmberNode,
 ) -> Option<Diagnostic> {
     if let Some(ref_key) = node
-        .children()
-        .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
+        .children_by_kind(SyntaxKind::IMMEDIATE)
         .find(|immediate| {
-            matches!(
-                immediate
-                    .children_with_tokens()
-                    .find_map(NodeOrToken::into_token)
-                    .map(|token| token.kind()),
-                Some(SyntaxKind::INT | SyntaxKind::UNSIGNED_INT | SyntaxKind::IDENT)
-            )
+            immediate
+                .tokens_by_kind([SyntaxKind::INT, SyntaxKind::UNSIGNED_INT, SyntaxKind::IDENT])
+                .next()
+                .is_some()
         })
         .map(|immediate| immediate.to_ptr().into())
         && let Some(ref_symbol) = symbol_table.symbols.get(&ref_key)

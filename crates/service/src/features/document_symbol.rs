@@ -3,14 +3,11 @@ use crate::{
     binder::{Symbol, SymbolKind, SymbolTable},
     deprecation,
     helpers::{self, LineIndexExt},
-    types_analyzer,
+    mutability, types_analyzer,
 };
 use lspt::{DocumentSymbol, DocumentSymbolParams, SymbolKind as LspSymbolKind, SymbolTag};
 use rustc_hash::FxHashMap;
-use wat_syntax::{
-    SyntaxKind,
-    ast::{AstNode, ModuleFieldGlobal},
-};
+use wat_syntax::SyntaxKind;
 
 impl LanguageService {
     /// Handler for `textDocument/documentSymbol` request.
@@ -99,9 +96,9 @@ impl LanguageService {
                                 DocumentSymbol {
                                     name: render_symbol_name(symbol, db),
                                     detail: types_analyzer::extract_global_type(db, &symbol.green).map(|ty| {
-                                        if ModuleFieldGlobal::cast(symbol.key.to_node(&root))
-                                            .and_then(|global| global.global_type())
-                                            .and_then(|global_type| global_type.mut_keyword())
+                                        if mutability::get_mutabilities(db, document)
+                                            .get(&symbol.key)
+                                            .and_then(|mutability| mutability.mut_keyword)
                                             .is_some()
                                         {
                                             format!("(mut {})", ty.render(db))

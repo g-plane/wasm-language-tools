@@ -96,10 +96,7 @@ fn find_struct_field<'db>(
     def_types: &'db DefTypes<'db>,
     instr: &FastPlainInstr,
 ) -> Option<(&'db StorageType<'db>, &'db Symbol<'db>)> {
-    let mut immediates = instr
-        .amber
-        .children()
-        .filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+    let mut immediates = instr.amber.children_by_kind(SyntaxKind::IMMEDIATE);
     let struct_def_key = symbol_table.resolved.get(&immediates.next()?.to_ptr().into())?;
     let field_ref_symbol = symbol_table
         .symbols
@@ -121,8 +118,8 @@ fn find_array<'db>(
 ) -> Option<(&'db StorageType<'db>, &'db Symbol<'db>)> {
     let ref_key = instr
         .amber
-        .children()
-        .find(|child| child.kind() == SyntaxKind::IMMEDIATE)?
+        .children_by_kind(SyntaxKind::IMMEDIATE)
+        .next()?
         .to_ptr()
         .into();
     let ref_symbol = symbol_table.symbols.get(&ref_key)?;

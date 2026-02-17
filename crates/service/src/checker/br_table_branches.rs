@@ -20,10 +20,7 @@ pub fn check(
     if instr.name.text() != "br_table" {
         return None;
     }
-    let mut immediates = instr
-        .amber
-        .children()
-        .filter(|child| child.kind() == SyntaxKind::IMMEDIATE);
+    let mut immediates = instr.amber.children_by_kind(SyntaxKind::IMMEDIATE);
     let expected = BumpVec::from_iter_in(
         immediates
             .next()
