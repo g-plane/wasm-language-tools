@@ -1,6 +1,6 @@
 use super::{Diagnostic, FastPlainInstr};
 use std::iter::Peekable;
-use wat_syntax::{AmberNode, NodeOrToken, SyntaxKind, SyntaxNode};
+use wat_syntax::{AmberNode, NodeOrToken, SyntaxKind, SyntaxKindMatch, SyntaxNode};
 
 const DIAGNOSTIC_CODE: &str = "immediates";
 
@@ -194,7 +194,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
                 instr,
             );
             if let Some((allow_float, expected_count)) = node
-                .children_by_kind(|kind| kind == SyntaxKind::IMMEDIATE)
+                .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|immediate| immediate.first_child_or_token().and_then(NodeOrToken::into_token))
                 .filter(|token| token.kind() == SyntaxKind::SHAPE_DESCRIPTOR)
@@ -424,7 +424,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
 fn check_immediate<'a, const REQUIRED: bool>(
     diagnostics: &mut Vec<Diagnostic>,
     immediates: &mut Peekable<impl Iterator<Item = AmberNode<'a>>>,
-    expected: impl SyntaxKindCmp,
+    expected: impl SyntaxKindMatch,
     description: &'static str,
     instr: &FastPlainInstr,
 ) {
@@ -436,7 +436,7 @@ fn check_immediate<'a, const REQUIRED: bool>(
             .map(|node_or_token| (node_or_token.kind(), immediate.text_range()))
     });
     if let Some((kind, range)) = immediate {
-        if expected.cmp(kind) {
+        if expected.matches(kind) {
             immediates.next();
         } else if REQUIRED {
             diagnostics.push(Diagnostic {
@@ -454,19 +454,5 @@ fn check_immediate<'a, const REQUIRED: bool>(
             message: format!("missing {description}"),
             ..Default::default()
         });
-    }
-}
-
-trait SyntaxKindCmp {
-    fn cmp(self, other: SyntaxKind) -> bool;
-}
-impl SyntaxKindCmp for SyntaxKind {
-    fn cmp(self, other: SyntaxKind) -> bool {
-        self == other
-    }
-}
-impl<const N: usize> SyntaxKindCmp for [SyntaxKind; N] {
-    fn cmp(self, other: SyntaxKind) -> bool {
-        self.into_iter().any(|kind| kind == other)
     }
 }

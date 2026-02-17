@@ -62,9 +62,7 @@ pub fn act(
     if symbol_table
         .resolved
         .get(&SymbolKey::new(
-            &call_instr
-                .children_by_kind(|kind| kind == SyntaxKind::IMMEDIATE)
-                .next()?,
+            &call_instr.children_by_kind(SyntaxKind::IMMEDIATE).next()?,
         ))
         .is_none_or(|def_key| *def_key != SymbolKey::new(&func))
     {
@@ -105,9 +103,7 @@ pub fn act(
     if let Some(instr) = &return_instr {
         text_edits.extend(
             instr
-                .tokens_by_kind(|kind| {
-                    matches!(kind, SyntaxKind::L_PAREN | SyntaxKind::INSTR_NAME | SyntaxKind::R_PAREN)
-                })
+                .tokens_by_kind([SyntaxKind::L_PAREN, SyntaxKind::INSTR_NAME, SyntaxKind::R_PAREN])
                 .map(|token| TextEdit {
                     range: line_index.convert(token.text_range()),
                     new_text: "".into(),

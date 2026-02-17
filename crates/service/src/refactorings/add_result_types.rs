@@ -50,7 +50,7 @@ pub fn act(
             range
         }
         SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_TRY_TABLE => node
-            .children_by_kind(|kind| kind == SyntaxKind::TYPE_USE)
+            .children_by_kind(SyntaxKind::TYPE_USE)
             .next()
             .map(|child| child.text_range())
             .or_else(|| {
@@ -61,7 +61,7 @@ pub fn act(
         SyntaxKind::BLOCK_IF_THEN => {
             let parent = node.parent()?;
             parent
-                .children_by_kind(|kind| kind == SyntaxKind::TYPE_USE)
+                .children_by_kind(SyntaxKind::TYPE_USE)
                 .next()
                 .map(|child| child.text_range())
                 .or_else(|| {

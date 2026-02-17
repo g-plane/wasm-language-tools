@@ -32,7 +32,7 @@ pub mod support {
         AstChildren::new(parent)
     }
     pub fn token(parent: &SyntaxNode, kind: SyntaxKind) -> Option<SyntaxToken> {
-        parent.tokens_by_kind(|k| k == kind).next()
+        parent.tokens_by_kind(kind).next()
     }
 }
 

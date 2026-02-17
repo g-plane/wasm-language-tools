@@ -1,6 +1,6 @@
 use crate::{
-    AmberNode, Descendants, GreenNode, GreenToken, NodeOrToken, SyntaxElement, SyntaxKind, SyntaxNodeChildren,
-    SyntaxToken, TokenAtOffset, green::GreenChild,
+    AmberNode, Descendants, GreenNode, GreenToken, NodeOrToken, SyntaxElement, SyntaxKind, SyntaxKindMatch,
+    SyntaxNodeChildren, SyntaxToken, TokenAtOffset, green::GreenChild,
 };
 use std::{fmt, ptr::NonNull, rc::Rc};
 use text_size::{TextRange, TextSize};
@@ -92,16 +92,16 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn children_by_kind<F>(&self, matcher: F) -> impl DoubleEndedIterator<Item = SyntaxNode> + use<'_, F>
+    pub fn children_by_kind<M>(&self, matcher: M) -> impl DoubleEndedIterator<Item = SyntaxNode> + use<'_, M>
     where
-        F: Fn(SyntaxKind) -> bool,
+        M: SyntaxKindMatch,
     {
         self.green()
             .slice()
             .iter()
             .enumerate()
             .filter_map(move |(i, child)| match child {
-                GreenChild::Node { offset, node } if matcher(node.kind()) => {
+                GreenChild::Node { offset, node } if matcher.matches(node.kind()) => {
                     Some(self.new_child(i as u32, node, *offset))
                 }
                 _ => None,
@@ -109,16 +109,16 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn tokens_by_kind<F>(&self, matcher: F) -> impl DoubleEndedIterator<Item = SyntaxToken> + use<'_, F>
+    pub fn tokens_by_kind<M>(&self, matcher: M) -> impl DoubleEndedIterator<Item = SyntaxToken> + use<'_, M>
     where
-        F: Fn(SyntaxKind) -> bool,
+        M: SyntaxKindMatch,
     {
         self.green()
             .slice()
             .iter()
             .enumerate()
             .filter_map(move |(i, child)| match child {
-                GreenChild::Token { offset, token } if matcher(token.kind()) => {
+                GreenChild::Token { offset, token } if matcher.matches(token.kind()) => {
                     Some(self.new_token(i as u32, token, *offset))
                 }
                 _ => None,
@@ -134,13 +134,13 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn has_child_or_token_by_kind<F>(&self, matcher: F) -> bool
+    pub fn has_child_or_token_by_kind<M>(&self, matcher: M) -> bool
     where
-        F: Fn(SyntaxKind) -> bool,
+        M: SyntaxKindMatch,
     {
         self.green().slice().iter().any(|child| match child {
-            GreenChild::Node { node, .. } => matcher(node.kind()),
-            GreenChild::Token { token, .. } => matcher(token.kind()),
+            GreenChild::Node { node, .. } => matcher.matches(node.kind()),
+            GreenChild::Token { token, .. } => matcher.matches(token.kind()),
         })
     }
 

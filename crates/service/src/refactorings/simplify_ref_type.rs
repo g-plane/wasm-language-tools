@@ -10,7 +10,7 @@ pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, nod
     }
 
     let token = node
-        .children_by_kind(|kind| kind == SyntaxKind::HEAP_TYPE)
+        .children_by_kind(SyntaxKind::HEAP_TYPE)
         .next()
         .and_then(|heap_ty| support::token(&heap_ty, SyntaxKind::TYPE_KEYWORD))?;
     let ref_type = match token.text() {

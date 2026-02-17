@@ -15,10 +15,10 @@ pub fn check(
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) {
-    let Some(type_use) = node.children_by_kind(|kind| kind == SyntaxKind::TYPE_USE).next() else {
+    let Some(type_use) = node.children_by_kind(SyntaxKind::TYPE_USE).next() else {
         return;
     };
-    if let Some(index) = type_use.children_by_kind(|kind| kind == SyntaxKind::INDEX).next() {
+    if let Some(index) = type_use.children_by_kind(SyntaxKind::INDEX).next() {
         let def_types = types_analyzer::get_def_types(db, document);
         if symbol_table
             .resolved

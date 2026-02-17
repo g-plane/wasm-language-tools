@@ -273,7 +273,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
             }
         }
         SyntaxKind::MODULE_FIELD_GLOBAL => {
-            if parent.has_child_or_token_by_kind(|kind| kind == SyntaxKind::GLOBAL_TYPE) {
+            if parent.has_child_or_token_by_kind(SyntaxKind::GLOBAL_TYPE) {
                 ctx.push(CmpCtx::Instr(true));
             } else if has_leading_l_paren(token) {
                 ctx.extend([CmpCtx::KeywordMut, CmpCtx::KeywordImExport, CmpCtx::KeywordRef]);
@@ -322,7 +322,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
         }
         SyntaxKind::MODULE_FIELD_ELEM => {
             if has_leading_l_paren(token) {
-                if !parent.has_child_or_token_by_kind(|kind| kind == SyntaxKind::TABLE_USE)
+                if !parent.has_child_or_token_by_kind(SyntaxKind::TABLE_USE)
                     && !token
                         .prev_siblings()
                         .any(|sibling| sibling.kind() == SyntaxKind::OFFSET)
@@ -331,7 +331,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                 }
                 ctx.extend([CmpCtx::KeywordOffset, CmpCtx::KeywordItem, CmpCtx::Instr(true)]);
             } else if parent
-                .children_by_kind(|kind| kind == SyntaxKind::ELEM_LIST)
+                .children_by_kind(SyntaxKind::ELEM_LIST)
                 .next()
                 .and_then(|elem_list| support::token(&elem_list, SyntaxKind::KEYWORD))
                 .is_some_and(|keyword| keyword.text() == "func")
@@ -1406,7 +1406,7 @@ fn guess_preferred_type<'db>(
                 .skip(1)
                 .find(|node| node.kind() == SyntaxKind::PLAIN_INSTR)?;
             let index = grand_instr
-                .children_by_kind(|kind| kind == SyntaxKind::PLAIN_INSTR)
+                .children_by_kind(SyntaxKind::PLAIN_INSTR)
                 .position(|instr| instr == parent_instr)?;
             let types = types_analyzer::resolve_param_types(service, document, &grand_instr)?;
             if let Some(OperandType::Val(val_type)) = types.get(index) {

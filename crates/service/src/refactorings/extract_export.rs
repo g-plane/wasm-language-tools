@@ -32,7 +32,7 @@ pub fn act(
                 range: line_index.convert(TextRange::empty(last_module_field.text_range().end())),
                 new_text: format!(
                     "\n  (export {} ({} {}))",
-                    node.children_by_kind(|kind| kind == SyntaxKind::NAME).next()?,
+                    node.children_by_kind(SyntaxKind::NAME).next()?,
                     def_symbol.kind,
                     def_symbol.idx.render(db),
                 ),

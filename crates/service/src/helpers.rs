@@ -98,7 +98,7 @@ pub(crate) mod syntax {
     /// It will return `None` if there're inlined params or results.
     pub fn pick_type_idx_from_func(func: &SyntaxNode) -> Option<SyntaxNode> {
         if let ControlFlow::Continue(Some(index)) = func
-            .children_by_kind(|kind| kind == SyntaxKind::TYPE_USE)
+            .children_by_kind(SyntaxKind::TYPE_USE)
             .next()
             .into_iter()
             .flat_map(|type_use| type_use.children())
@@ -118,7 +118,7 @@ pub(crate) mod syntax {
         module_field_export
             .children_by_kind(ExternIdx::can_cast)
             .next()
-            .and_then(|extern_idx| extern_idx.children_by_kind(|kind| kind == SyntaxKind::INDEX).next())
+            .and_then(|extern_idx| extern_idx.children_by_kind(SyntaxKind::INDEX).next())
     }
 
     pub fn is_call(node: &SyntaxNode) -> bool {

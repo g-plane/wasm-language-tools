@@ -376,7 +376,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     def_poi.insert(key, ident.text_range());
                 } else {
                     symbols.extend(
-                        node.children_by_kind(|kind| kind == SyntaxKind::FIELD_TYPE)
+                        node.children_by_kind(SyntaxKind::FIELD_TYPE)
                             .map(|field_type| {
                                 let key = SymbolKey::new(&field_type);
                                 fields.push((key, None));

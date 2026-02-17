@@ -122,3 +122,28 @@ impl SyntaxKind {
         matches!(self, SyntaxKind::L_PAREN | SyntaxKind::R_PAREN)
     }
 }
+
+pub trait SyntaxKindMatch {
+    fn matches(&self, kind: SyntaxKind) -> bool;
+}
+impl SyntaxKindMatch for SyntaxKind {
+    #[inline]
+    fn matches(&self, kind: SyntaxKind) -> bool {
+        *self == kind
+    }
+}
+impl<F> SyntaxKindMatch for F
+where
+    F: Fn(SyntaxKind) -> bool,
+{
+    #[inline]
+    fn matches(&self, kind: SyntaxKind) -> bool {
+        self(kind)
+    }
+}
+impl<const N: usize> SyntaxKindMatch for [SyntaxKind; N] {
+    #[inline]
+    fn matches(&self, kind: SyntaxKind) -> bool {
+        self.contains(&kind)
+    }
+}

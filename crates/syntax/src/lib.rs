@@ -11,7 +11,7 @@ pub use self::{
     amber::{AmberNode, AmberToken},
     green::{GreenNode, GreenToken},
     helpers::NodeOrToken,
-    kind::SyntaxKind,
+    kind::{SyntaxKind, SyntaxKindMatch},
     red::{Descendants, SyntaxElement, SyntaxNode, SyntaxNodeChildren, SyntaxNodePtr, SyntaxToken, TokenAtOffset},
 };
 pub use text_size::{TextRange, TextSize};
