@@ -23,17 +23,16 @@ impl<'a> Ctx<'a> {
     where
         N: AstNode,
     {
-        let node = node.syntax();
-        let docs = if node
-            .last_child_or_token()
-            .and_then(|node_or_token| match node_or_token {
+        let node = node.syntax().amber();
+        let mut nodes_or_tokens = node.children_with_tokens().rev();
+        let docs = if nodes_or_tokens
+            .find_map(|node_or_token| match node_or_token {
                 NodeOrToken::Token(token) if token.kind() == SyntaxKind::R_PAREN => Some(token),
                 _ => None,
             })
-            .or_else(|| support::token(node, SyntaxKind::R_PAREN))
-            .and_then(|token| {
-                token
-                    .prev_consecutive_tokens()
+            .and_then(|_| {
+                nodes_or_tokens
+                    .map_while(NodeOrToken::into_token)
                     .find(|token| token.kind() != SyntaxKind::WHITESPACE)
             })
             .is_some_and(|token| token.kind() == SyntaxKind::LINE_COMMENT)
