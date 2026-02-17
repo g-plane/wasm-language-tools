@@ -1,8 +1,8 @@
 use super::Diagnostic;
 use crate::data_set::CONST_INSTRS;
 use wat_syntax::{
-    SyntaxKind, SyntaxNode, TextRange,
-    ast::{AstNode, Instr, support},
+    AmberNode, SyntaxKind, SyntaxNode, TextRange,
+    ast::{AstNode, Instr},
 };
 
 const DIAGNOSTIC_CODE: &str = "const-expr";
@@ -11,34 +11,12 @@ pub fn check(node: &SyntaxNode) -> Option<Diagnostic> {
     let mut first = None;
     let mut last = None;
     let mut is_const = true;
-    node.children_by_kind(Instr::can_cast).for_each(|instr| {
+    node.amber().children_by_kind(Instr::can_cast).for_each(|instr| {
         if first.is_none() {
-            first = Some(instr.clone());
+            first = Some(instr);
         }
-        last = Some(instr.clone());
-        let mut descendants = instr.descendants();
-        while let Some(node) = descendants.next() {
-            match node.kind() {
-                SyntaxKind::BLOCK_BLOCK
-                | SyntaxKind::BLOCK_LOOP
-                | SyntaxKind::BLOCK_IF
-                | SyntaxKind::BLOCK_TRY_TABLE => {
-                    is_const = false;
-                    break;
-                }
-                SyntaxKind::PLAIN_INSTR => {
-                    if support::token(&node, SyntaxKind::INSTR_NAME)
-                        .is_some_and(|instr_name| !CONST_INSTRS.contains(&instr_name.text()))
-                    {
-                        is_const = false;
-                        break;
-                    }
-                }
-                _ => {
-                    descendants.skip_subtree();
-                }
-            }
-        }
+        last = Some(instr);
+        is_const &= check_instr(instr);
     });
     if !is_const
         && let Some(first) = first
@@ -53,4 +31,12 @@ pub fn check(node: &SyntaxNode) -> Option<Diagnostic> {
     } else {
         None
     }
+}
+
+fn check_instr(instr: AmberNode) -> bool {
+    instr
+        .tokens_by_kind(SyntaxKind::INSTR_NAME)
+        .next()
+        .is_some_and(|instr_name| CONST_INSTRS.contains(&instr_name.text()))
+        && instr.children_by_kind(Instr::can_cast).all(check_instr)
 }
