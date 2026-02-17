@@ -7,7 +7,7 @@ use crate::{
 use bumpalo::Bump;
 use lspt::{DiagnosticRelatedInformation, DiagnosticSeverity, DiagnosticTag, Location, Union2};
 use std::cmp::Ordering;
-use wat_syntax::{AmberNode, AmberToken, SyntaxKind, SyntaxNode, TextRange};
+use wat_syntax::{AmberNode, AmberToken, SyntaxKind, TextRange};
 
 mod block_type;
 mod br_table_branches;
@@ -61,6 +61,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
         }
         let mut descendants = module.descendants();
         while let Some(node) = descendants.next() {
+            let amber = node.amber();
             match node.kind() {
                 SyntaxKind::MODULE_FIELD_FUNC => {
                     typeck::check_func(
@@ -69,7 +70,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         document,
                         symbol_table,
                         module_id,
-                        &node,
+                        amber,
                         &mut bump,
                     );
                     unreachable::check(
@@ -100,7 +101,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         &locals,
                         &mut bump,
                     );
-                    if let Some(diagnostic) = import_with_def::check(db, document, node.amber()) {
+                    if let Some(diagnostic) = import_with_def::check(db, document, amber) {
                         diagnostics.push(diagnostic);
                     }
                 }
@@ -111,13 +112,13 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         document,
                         symbol_table,
                         module_id,
-                        &node,
+                        amber,
                         &mut bump,
                     );
-                    if let Some(diagnostic) = const_expr::check(&node) {
+                    if let Some(diagnostic) = const_expr::check(amber) {
                         diagnostics.push(diagnostic);
                     }
-                    if let Some(diagnostic) = import_with_def::check(db, document, node.amber()) {
+                    if let Some(diagnostic) = import_with_def::check(db, document, amber) {
                         diagnostics.push(diagnostic);
                     }
                 }
@@ -127,7 +128,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                     }
                 }
                 SyntaxKind::PLAIN_INSTR => {
-                    if let Some(instr) = FastPlainInstr::new(&node) {
+                    if let Some(instr) = FastPlainInstr::new(amber) {
                         if let Some(diagnostic) = unknown_instr::check(&instr) {
                             diagnostics.push(diagnostic);
                         }
@@ -144,12 +145,12 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                     bump.reset();
                 }
                 SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_IF => {
-                    if let Some(diagnostic) = block_type::check(db, document, symbol_table, node.amber()) {
+                    if let Some(diagnostic) = block_type::check(db, document, symbol_table, amber) {
                         diagnostics.push(diagnostic);
                     }
                 }
                 SyntaxKind::MODULE_FIELD_START => {
-                    if let Some(diagnostic) = start::check(db, document, symbol_table, node.amber()) {
+                    if let Some(diagnostic) = start::check(db, document, symbol_table, amber) {
                         diagnostics.push(diagnostic);
                     }
                 }
@@ -160,13 +161,13 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         document,
                         symbol_table,
                         module_id,
-                        &node,
+                        amber,
                         &mut bump,
                     );
-                    if let Some(diagnostic) = const_expr::check(&node) {
+                    if let Some(diagnostic) = const_expr::check(amber) {
                         diagnostics.push(diagnostic);
                     }
-                    if let Some(diagnostic) = import_with_def::check(db, document, node.amber()) {
+                    if let Some(diagnostic) = import_with_def::check(db, document, amber) {
                         diagnostics.push(diagnostic);
                     }
                 }
@@ -176,7 +177,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                     }
                 }
                 SyntaxKind::MODULE_FIELD_MEMORY => {
-                    if let Some(diagnostic) = import_with_def::check(db, document, node.amber()) {
+                    if let Some(diagnostic) = import_with_def::check(db, document, amber) {
                         diagnostics.push(diagnostic);
                     }
                 }
@@ -190,10 +191,10 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         document,
                         symbol_table,
                         module_id,
-                        &node,
+                        amber,
                         &mut bump,
                     );
-                    if let Some(diagnostic) = const_expr::check(&node) {
+                    if let Some(diagnostic) = const_expr::check(amber) {
                         diagnostics.push(diagnostic);
                     }
                 }
@@ -204,18 +205,18 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         document,
                         symbol_table,
                         module_id,
-                        &node,
+                        amber,
                         &mut bump,
                     );
                 }
                 SyntaxKind::ELEM_EXPR => {
-                    if let Some(diagnostic) = const_expr::check(&node) {
+                    if let Some(diagnostic) = const_expr::check(amber) {
                         diagnostics.push(diagnostic);
                     }
                 }
                 SyntaxKind::MODULE_FIELD_TAG => {
                     tag_type::check(&mut diagnostics, db, document, symbol_table, &node);
-                    if let Some(diagnostic) = import_with_def::check(db, document, node.amber()) {
+                    if let Some(diagnostic) = import_with_def::check(db, document, amber) {
                         diagnostics.push(diagnostic);
                     }
                 }
@@ -227,7 +228,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         diagnostics.push(diagnostic);
                     }
                     useless_catch::check(&mut diagnostics, config.lint.useless_catch, symbol_table, &node);
-                    if let Some(diagnostic) = block_type::check(db, document, symbol_table, node.amber()) {
+                    if let Some(diagnostic) = block_type::check(db, document, symbol_table, amber) {
                         diagnostics.push(diagnostic);
                     }
                 }
@@ -323,11 +324,10 @@ struct FastPlainInstr<'a> {
     name: AmberToken<'a>,
 }
 impl<'a> FastPlainInstr<'a> {
-    fn new(node: &'a SyntaxNode) -> Option<Self> {
-        let amber = node.amber();
-        amber
-            .tokens_by_kind(SyntaxKind::INSTR_NAME)
-            .next()
-            .map(|token| Self { amber, name: token })
+    fn new(node: AmberNode<'a>) -> Option<Self> {
+        node.tokens_by_kind(SyntaxKind::INSTR_NAME).next().map(|token| Self {
+            amber: node,
+            name: token,
+        })
     }
 }

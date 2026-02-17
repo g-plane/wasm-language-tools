@@ -1,17 +1,17 @@
 use super::Diagnostic;
 use crate::data_set::CONST_INSTRS;
 use wat_syntax::{
-    AmberNode, SyntaxKind, SyntaxNode, TextRange,
+    AmberNode, SyntaxKind, TextRange,
     ast::{AstNode, Instr},
 };
 
 const DIAGNOSTIC_CODE: &str = "const-expr";
 
-pub fn check(node: &SyntaxNode) -> Option<Diagnostic> {
+pub fn check(node: AmberNode) -> Option<Diagnostic> {
     let mut first = None;
     let mut last = None;
     let mut is_const = true;
-    node.amber().children_by_kind(Instr::can_cast).for_each(|instr| {
+    node.children_by_kind(Instr::can_cast).for_each(|instr| {
         if first.is_none() {
             first = Some(instr);
         }

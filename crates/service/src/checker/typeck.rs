@@ -1,6 +1,6 @@
 use super::{Diagnostic, RelatedInformation};
 use crate::{
-    binder::{SymbolKey, SymbolKind, SymbolTable},
+    binder::{SymbolKind, SymbolTable},
     data_set,
     document::Document,
     helpers,
@@ -16,8 +16,8 @@ use bumpalo::{Bump, collections::Vec as BumpVec};
 use itertools::{EitherOrBoth, Itertools};
 use std::iter;
 use wat_syntax::{
-    AmberNode, NodeOrToken, SyntaxKind, SyntaxNode, TextRange,
-    ast::{AstNode, BlockInstr, ElemList, Instr, ModuleFieldTable, ValType as AstValType},
+    AmberNode, NodeOrToken, SyntaxKind, TextRange,
+    ast::{AstNode, BlockInstr, Instr, ValType as AstValType},
 };
 
 const DIAGNOSTIC_CODE: &str = "type-check";
@@ -28,12 +28,13 @@ pub fn check_func(
     document: Document,
     symbol_table: &SymbolTable,
     module_id: u32,
-    node: &SyntaxNode,
+    node: AmberNode,
     bump: &mut Bump,
 ) {
     {
+        let func_key = node.to_ptr().into();
         let results = BumpVec::from_iter_in(
-            get_func_sig(db, document, SymbolKey::new(node), node.green())
+            get_func_sig(db, document, func_key, node.green())
                 .results
                 .into_iter()
                 .map(OperandType::Val),
@@ -48,8 +49,8 @@ pub fn check_func(
                 module_id,
                 bump,
             },
-            node.into(),
-            if imex::get_imports(db, document).contains(&SymbolKey::new(node)) {
+            node,
+            if imex::get_imports(db, document).contains(&func_key) {
                 BumpVec::from_iter_in(results.iter().map(|ty| (ty.clone(), None)), bump)
             } else {
                 BumpVec::with_capacity_in(2, bump)
@@ -66,7 +67,7 @@ pub fn check_global(
     document: Document,
     symbol_table: &SymbolTable,
     module_id: u32,
-    node: &SyntaxNode,
+    node: AmberNode,
     bump: &mut Bump,
 ) {
     let ty = extract_global_type(db, node.green())
@@ -81,8 +82,8 @@ pub fn check_global(
             module_id,
             bump,
         },
-        node.into(),
-        if imex::get_imports(db, document).contains(&SymbolKey::new(node)) {
+        node,
+        if imex::get_imports(db, document).contains(&node.to_ptr().into()) {
             BumpVec::from_iter_in([(ty.clone(), None)], bump)
         } else {
             BumpVec::with_capacity_in(1, bump)
@@ -98,21 +99,21 @@ pub fn check_table(
     document: Document,
     symbol_table: &SymbolTable,
     module_id: u32,
-    node: &SyntaxNode,
+    node: AmberNode,
     bump: &mut Bump,
 ) {
-    let Some(ref_type) = ModuleFieldTable::cast(node.clone())
-        .and_then(|table| {
-            table
-                .ref_type()
-                .or_else(|| table.table_type().and_then(|table_type| table_type.ref_type()))
-        })
-        .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), db))
+    let Some(ref_type) = node
+        .children_by_kind(SyntaxKind::TABLE_TYPE)
+        .next()
+        .unwrap_or(node)
+        .children_by_kind(SyntaxKind::REF_TYPE)
+        .next()
+        .and_then(|ref_type| RefType::from_green(ref_type.green(), db))
     else {
         return;
     };
     let ty = ValType::Ref(ref_type);
-    if ty.defaultable() && !node.has_child_or_token_by_kind(Instr::can_cast) {
+    if ty.defaultable() && node.children_by_kind(Instr::can_cast).next().is_none() {
         return;
     }
     let ty = OperandType::Val(ty);
@@ -125,8 +126,8 @@ pub fn check_table(
             module_id,
             bump,
         },
-        node.into(),
-        if imex::get_imports(db, document).contains(&SymbolKey::new(node)) {
+        node,
+        if imex::get_imports(db, document).contains(&node.to_ptr().into()) {
             BumpVec::from_iter_in([(ty.clone(), None)], bump)
         } else {
             BumpVec::with_capacity_in(1, bump)
@@ -142,7 +143,7 @@ pub fn check_offset(
     document: Document,
     symbol_table: &SymbolTable,
     module_id: u32,
-    node: &SyntaxNode,
+    node: AmberNode,
     bump: &mut Bump,
 ) {
     check_block_like(
@@ -154,7 +155,7 @@ pub fn check_offset(
             module_id,
             bump,
         },
-        node.into(),
+        node,
         BumpVec::with_capacity_in(1, bump),
         &[OperandType::Val(ValType::I32)],
     );
@@ -167,17 +168,18 @@ pub fn check_elem_list(
     document: Document,
     symbol_table: &SymbolTable,
     module_id: u32,
-    node: &SyntaxNode,
+    node: AmberNode,
     bump: &mut Bump,
 ) {
-    let Some(ref_type) = ElemList::cast(node.clone())
-        .and_then(|elem_list| elem_list.ref_type())
-        .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), db))
+    let Some(ref_type) = node
+        .children_by_kind(SyntaxKind::REF_TYPE)
+        .next()
+        .and_then(|ref_type| RefType::from_green(ref_type.green(), db))
     else {
         return;
     };
     let ty = OperandType::Val(ValType::Ref(ref_type));
-    node.amber().children_by_kind(SyntaxKind::ELEM_EXPR).for_each(|child| {
+    node.children_by_kind(SyntaxKind::ELEM_EXPR).for_each(|child| {
         check_block_like(
             diagnostics,
             &Shared {
