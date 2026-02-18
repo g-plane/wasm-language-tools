@@ -316,7 +316,7 @@ impl SyntaxNode {
         slice.get(i).and_then(|child| match child {
             GreenChild::Node { offset, node } => {
                 if TextRange::new(*offset, offset + node.text_len()).contains_range(relative_range) {
-                    Some(self.new_child(i as u32, node, *offset).into())
+                    Some(self.new_child(i as u32, node, *offset))
                 } else {
                     None
                 }

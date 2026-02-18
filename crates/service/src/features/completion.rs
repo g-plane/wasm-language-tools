@@ -78,9 +78,9 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                     CmpCtx::KeywordLocal,
                 ]);
             } else if let Some(node) = prev_node.as_ref().filter(|prev| prev.kind() == SyntaxKind::PLAIN_INSTR)
-                && let Some(instr_name) = support::token(node, SyntaxKind::INSTR_NAME)
+                && let Some(instr_name) = get_instr_name(node)
             {
-                add_cmp_ctx_for_immediates(instr_name.text(), node, has_leading_l_paren(token), &mut ctx);
+                add_cmp_ctx_for_immediates(instr_name, node, has_leading_l_paren(token), &mut ctx);
             }
             if !token.text().starts_with('$')
                 && matches!(
@@ -136,10 +136,10 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                             }
                         }
                         SyntaxKind::PLAIN_INSTR => {
-                            if let Some(instr_name) = support::token(&grand, SyntaxKind::INSTR_NAME)
+                            if let Some(instr_name) = get_instr_name(&grand)
                                 && has_leading_l_paren(token)
                             {
-                                add_cmp_ctx_for_immediates(instr_name.text(), &grand, true, &mut ctx);
+                                add_cmp_ctx_for_immediates(instr_name, &grand, true, &mut ctx);
                             }
                         }
                         SyntaxKind::BLOCK_BLOCK
@@ -197,18 +197,18 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                 }
                 if let Some(prev) = parent.prev_siblings().next().filter(|prev| {
                     prev.kind() == SyntaxKind::PLAIN_INSTR && prev.green().children_len() == 1 // only instr name, no paren
-                }) && let Some(instr_name) = support::token(&prev, SyntaxKind::INSTR_NAME)
+                }) && let Some(instr_name) = get_instr_name(&prev)
                 {
-                    add_cmp_ctx_for_immediates(instr_name.text(), &prev, false, &mut ctx);
+                    add_cmp_ctx_for_immediates(instr_name, &prev, false, &mut ctx);
                 }
             } else if has_leading_l_paren(token) {
                 ctx.push(CmpCtx::Instr(is_under_const(&parent)));
-                if let Some(instr_name) = support::token(&parent, SyntaxKind::INSTR_NAME) {
-                    add_cmp_ctx_for_immediates(instr_name.text(), &parent, true, &mut ctx);
+                if let Some(instr_name) = get_instr_name(&parent) {
+                    add_cmp_ctx_for_immediates(instr_name, &parent, true, &mut ctx);
                 }
             } else {
-                let instr_name = support::token(&parent, SyntaxKind::INSTR_NAME)?;
-                add_cmp_ctx_for_immediates(instr_name.text(), &parent, false, &mut ctx);
+                let instr_name = get_instr_name(&parent)?;
+                add_cmp_ctx_for_immediates(instr_name, &parent, false, &mut ctx);
             }
         }
         SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_IF | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_TRY_TABLE => {
@@ -235,15 +235,15 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
             } else if let Some(node) = token
                 .prev_siblings()
                 .find(|sibling| sibling.kind() == SyntaxKind::PLAIN_INSTR)
-                && let Some(instr_name) = support::token(&node, SyntaxKind::INSTR_NAME)
+                && let Some(instr_name) = get_instr_name(&node)
             {
-                add_cmp_ctx_for_immediates(instr_name.text(), &node, false, &mut ctx);
+                add_cmp_ctx_for_immediates(instr_name, &node, false, &mut ctx);
             }
         }
         SyntaxKind::IMMEDIATE => {
             let instr = parent.ancestors().find(|node| node.kind() == SyntaxKind::PLAIN_INSTR)?;
-            let instr_name = support::token(&instr, SyntaxKind::INSTR_NAME)?;
-            add_cmp_ctx_for_immediates(instr_name.text(), &parent, false, &mut ctx);
+            let instr_name = get_instr_name(&instr)?;
+            add_cmp_ctx_for_immediates(instr_name, &parent, false, &mut ctx);
         }
         SyntaxKind::PARAM | SyntaxKind::RESULT | SyntaxKind::LOCAL | SyntaxKind::GLOBAL_TYPE => {
             if has_leading_l_paren(token) {
@@ -1390,6 +1390,13 @@ fn has_leading_l_paren(token: &SyntaxToken) -> bool {
 fn is_l_paren(token: &SyntaxToken) -> bool {
     let kind = token.kind();
     kind == SyntaxKind::L_PAREN || kind == SyntaxKind::ERROR && token.text() == "("
+}
+
+fn get_instr_name(node: &SyntaxNode) -> Option<&str> {
+    node.green().children().find_map(|node_or_token| match node_or_token {
+        NodeOrToken::Token(token) if token.kind() == SyntaxKind::INSTR_NAME => Some(token.text()),
+        _ => None,
+    })
 }
 
 fn guess_preferred_type<'db>(
