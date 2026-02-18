@@ -18,12 +18,12 @@ impl DocGen for ArrayType {
         let mut trivias = vec![];
         if let Some(l_paren) = self.l_paren_token() {
             docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren, ctx);
+            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
         }
         if let Some(keyword) = self.keyword() {
             docs.append(&mut trivias);
             docs.push(Doc::text("array"));
-            trivias = format_trivias_after_token(keyword, ctx);
+            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
         }
         if let Some(field_type) = self.field_type() {
             if trivias.is_empty() {
@@ -32,7 +32,7 @@ impl DocGen for ArrayType {
                 docs.append(&mut trivias);
             }
             docs.push(field_type.doc(ctx));
-            trivias = format_trivias_after_node(field_type, ctx);
+            trivias = format_trivias_after_node(field_type.syntax().amber(), self.syntax().amber(), ctx);
         }
         docs.append(&mut trivias);
         Doc::list(docs)
@@ -100,12 +100,12 @@ impl DocGen for Field {
         let mut trivias = vec![];
         if let Some(l_paren) = self.l_paren_token() {
             docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren, ctx);
+            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
         }
         if let Some(keyword) = self.keyword() {
             docs.append(&mut trivias);
             docs.push(Doc::text("field"));
-            trivias = format_trivias_after_token(keyword, ctx);
+            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
         }
         if let Some(ident) = self.ident_token() {
             if trivias.is_empty() {
@@ -114,7 +114,7 @@ impl DocGen for Field {
                 docs.append(&mut trivias);
             }
             docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident, ctx);
+            trivias = format_trivias_after_token(ident.amber(), self.syntax().amber(), ctx);
         }
         self.field_types().for_each(|field_type| {
             if trivias.is_empty() {
@@ -123,7 +123,7 @@ impl DocGen for Field {
                 docs.append(&mut trivias);
             }
             docs.push(field_type.doc(ctx));
-            trivias = format_trivias_after_node(field_type, ctx);
+            trivias = format_trivias_after_node(field_type.syntax().amber(), self.syntax().amber(), ctx);
         });
         docs.append(&mut trivias);
         Doc::list(docs)
@@ -138,11 +138,11 @@ impl DocGen for FieldType {
         if let Some(l_paren) = self.l_paren_token() {
             let mut docs = Vec::with_capacity(2);
             docs.push(Doc::text("("));
-            let mut trivias = format_trivias_after_token(l_paren, ctx);
+            let mut trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
             if let Some(keyword) = self.mut_keyword() {
                 docs.append(&mut trivias);
                 docs.push(Doc::text("mut"));
-                trivias = format_trivias_after_token(keyword, ctx);
+                trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
             }
             if let Some(ty) = self.storage_type() {
                 if trivias.is_empty() {
@@ -151,7 +151,7 @@ impl DocGen for FieldType {
                     docs.append(&mut trivias);
                 }
                 docs.push(ty.doc(ctx));
-                trivias = format_trivias_after_node(ty, ctx);
+                trivias = format_trivias_after_node(ty.syntax().amber(), self.syntax().amber(), ctx);
             }
             docs.append(&mut trivias);
             Doc::list(docs)
@@ -172,12 +172,12 @@ impl DocGen for FuncType {
         let mut trivias = vec![];
         if let Some(l_paren) = self.l_paren_token() {
             docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren, ctx);
+            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
         }
         if let Some(keyword) = self.keyword() {
             docs.append(&mut trivias);
             docs.push(Doc::text("func"));
-            trivias = format_trivias_after_token(keyword, ctx);
+            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
         }
         self.params().for_each(|param| {
             if trivias.is_empty() {
@@ -186,7 +186,7 @@ impl DocGen for FuncType {
                 docs.append(&mut trivias);
             }
             docs.push(param.doc(ctx));
-            trivias = format_trivias_after_node(param, ctx);
+            trivias = format_trivias_after_node(param.syntax().amber(), self.syntax().amber(), ctx);
         });
         self.results().for_each(|result| {
             if trivias.is_empty() {
@@ -195,7 +195,7 @@ impl DocGen for FuncType {
                 docs.append(&mut trivias);
             }
             docs.push(result.doc(ctx));
-            trivias = format_trivias_after_node(result, ctx);
+            trivias = format_trivias_after_node(result.syntax().amber(), self.syntax().amber(), ctx);
         });
         docs.append(&mut trivias);
         Doc::list(docs)
@@ -210,11 +210,11 @@ impl DocGen for GlobalType {
         if let Some(l_paren) = self.l_paren_token() {
             let mut docs = Vec::with_capacity(2);
             docs.push(Doc::text("("));
-            let mut trivias = format_trivias_after_token(l_paren, ctx);
+            let mut trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
             if let Some(keyword) = self.mut_keyword() {
                 docs.append(&mut trivias);
                 docs.push(Doc::text("mut"));
-                trivias = format_trivias_after_token(keyword, ctx);
+                trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
             }
             if let Some(ty) = self.val_type() {
                 if trivias.is_empty() {
@@ -223,7 +223,7 @@ impl DocGen for GlobalType {
                     docs.append(&mut trivias);
                 }
                 docs.push(ty.doc(ctx));
-                trivias = format_trivias_after_node(ty, ctx);
+                trivias = format_trivias_after_node(ty.syntax().amber(), self.syntax().amber(), ctx);
             }
             docs.append(&mut trivias);
             Doc::list(docs)
@@ -256,7 +256,7 @@ impl DocGen for Limits {
         let mut trivias = vec![];
         if let Some(min) = self.min() {
             docs.push(Doc::text(min.to_string()));
-            trivias = format_trivias_after_token(min, ctx);
+            trivias = format_trivias_after_token(min.amber(), self.syntax().amber(), ctx);
         }
         if let Some(max) = self.max() {
             if trivias.is_empty() {
@@ -276,12 +276,12 @@ impl DocGen for MemPageSize {
         let mut trivias = vec![];
         if let Some(l_paren) = self.l_paren_token() {
             docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren, ctx);
+            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
         }
         if let Some(keyword) = self.keyword() {
             docs.append(&mut trivias);
             docs.push(Doc::text("pagesize"));
-            trivias = format_trivias_after_token(keyword, ctx);
+            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
         }
         if let Some(unsigned_int) = self.unsigned_int_token() {
             if trivias.is_empty() {
@@ -290,7 +290,7 @@ impl DocGen for MemPageSize {
                 docs.append(&mut trivias);
             }
             docs.push(Doc::text(unsigned_int.to_string()));
-            trivias = format_trivias_after_token(unsigned_int, ctx);
+            trivias = format_trivias_after_token(unsigned_int.amber(), self.syntax().amber(), ctx);
         }
         docs.append(&mut trivias);
         Doc::list(docs)
@@ -306,7 +306,7 @@ impl DocGen for MemType {
         let mut trivias = vec![];
         if let Some(addr_type) = self.addr_type() {
             docs.push(addr_type.doc(ctx));
-            trivias = format_trivias_after_node(addr_type, ctx);
+            trivias = format_trivias_after_node(addr_type.syntax().amber(), self.syntax().amber(), ctx);
         }
         if let Some(limits) = self.limits() {
             if trivias.is_empty() && !docs.is_empty() {
@@ -315,7 +315,7 @@ impl DocGen for MemType {
                 docs.append(&mut trivias);
             }
             docs.push(limits.doc(ctx));
-            trivias = format_trivias_after_node(limits, ctx);
+            trivias = format_trivias_after_node(limits.syntax().amber(), self.syntax().amber(), ctx);
         }
         if let Some(share) = self.share_keyword() {
             if trivias.is_empty() {
@@ -324,7 +324,7 @@ impl DocGen for MemType {
                 docs.append(&mut trivias);
             }
             docs.push(Doc::text(share.to_string()));
-            trivias = format_trivias_after_token(share, ctx);
+            trivias = format_trivias_after_token(share.amber(), self.syntax().amber(), ctx);
         }
         if let Some(mem_page_size) = self.mem_page_size() {
             if trivias.is_empty() {
@@ -364,12 +364,12 @@ impl DocGen for Param {
         let mut trivias = vec![];
         if let Some(l_paren) = self.l_paren_token() {
             docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren, ctx);
+            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
         }
         if let Some(keyword) = self.keyword() {
             docs.append(&mut trivias);
             docs.push(Doc::text("param"));
-            trivias = format_trivias_after_token(keyword, ctx);
+            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
         }
         if let Some(ident) = self.ident_token() {
             if trivias.is_empty() {
@@ -378,7 +378,7 @@ impl DocGen for Param {
                 docs.append(&mut trivias);
             }
             docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident, ctx);
+            trivias = format_trivias_after_token(ident.amber(), self.syntax().amber(), ctx);
         }
         self.val_types().for_each(|val_type| {
             if trivias.is_empty() {
@@ -387,7 +387,7 @@ impl DocGen for Param {
                 docs.append(&mut trivias);
             }
             docs.push(val_type.doc(ctx));
-            trivias = format_trivias_after_node(val_type, ctx);
+            trivias = format_trivias_after_node(val_type.syntax().amber(), self.syntax().amber(), ctx);
         });
         docs.append(&mut trivias);
         Doc::list(docs)
@@ -402,11 +402,11 @@ impl DocGen for RefType {
         if let Some(l_paren) = self.l_paren_token() {
             let mut docs = Vec::with_capacity(2);
             docs.push(Doc::text("("));
-            let mut trivias = format_trivias_after_token(l_paren, ctx);
+            let mut trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
             if let Some(keyword) = self.keyword() {
                 docs.append(&mut trivias);
                 docs.push(Doc::text("ref"));
-                trivias = format_trivias_after_token(keyword, ctx);
+                trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
             }
             if let Some(keyword) = self.null_keyword() {
                 if trivias.is_empty() {
@@ -415,7 +415,7 @@ impl DocGen for RefType {
                     docs.append(&mut trivias);
                 }
                 docs.push(Doc::text("null"));
-                trivias = format_trivias_after_token(keyword, ctx);
+                trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
             }
             if let Some(heap_type) = self.heap_type() {
                 if trivias.is_empty() {
@@ -424,7 +424,7 @@ impl DocGen for RefType {
                     docs.append(&mut trivias);
                 }
                 docs.push(heap_type.doc(ctx));
-                trivias = format_trivias_after_node(heap_type, ctx);
+                trivias = format_trivias_after_node(heap_type.syntax().amber(), self.syntax().amber(), ctx);
             }
             docs.append(&mut trivias);
             Doc::list(docs)
@@ -445,12 +445,12 @@ impl DocGen for Result {
         let mut trivias = vec![];
         if let Some(l_paren) = self.l_paren_token() {
             docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren, ctx);
+            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
         }
         if let Some(keyword) = self.keyword() {
             docs.append(&mut trivias);
             docs.push(Doc::text("result"));
-            trivias = format_trivias_after_token(keyword, ctx);
+            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
         }
         self.val_types().for_each(|val_type| {
             if trivias.is_empty() {
@@ -459,7 +459,7 @@ impl DocGen for Result {
                 docs.append(&mut trivias);
             }
             docs.push(val_type.doc(ctx));
-            trivias = format_trivias_after_node(val_type, ctx);
+            trivias = format_trivias_after_node(val_type.syntax().amber(), self.syntax().amber(), ctx);
         });
         docs.append(&mut trivias);
         Doc::list(docs)
@@ -484,12 +484,12 @@ impl DocGen for StructType {
         let mut trivias = vec![];
         if let Some(l_paren) = self.l_paren_token() {
             docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren, ctx);
+            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
         }
         if let Some(keyword) = self.keyword() {
             docs.append(&mut trivias);
             docs.push(Doc::text("struct"));
-            trivias = format_trivias_after_token(keyword, ctx);
+            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
         }
         let mut fields = self.fields().peekable();
         let mut fields_docs = Vec::with_capacity(1);
@@ -501,7 +501,7 @@ impl DocGen for StructType {
                 docs.append(&mut trivias);
             }
             fields_docs.push(field.doc(ctx));
-            trivias = format_trivias_after_node(field, ctx);
+            trivias = format_trivias_after_node(field.syntax().amber(), self.syntax().amber(), ctx);
         }
         fields.for_each(|field| {
             if trivias.is_empty() {
@@ -510,7 +510,7 @@ impl DocGen for StructType {
                 fields_docs.append(&mut trivias);
             }
             fields_docs.push(field.doc(ctx));
-            trivias = format_trivias_after_node(field, ctx);
+            trivias = format_trivias_after_node(field.syntax().amber(), self.syntax().amber(), ctx);
         });
         docs.push(Doc::list(fields_docs).group());
         docs.append(&mut trivias);
@@ -526,11 +526,11 @@ impl DocGen for SubType {
         if let Some(l_paren) = self.l_paren_token() {
             let mut docs = Vec::with_capacity(2);
             docs.push(Doc::text("("));
-            let mut trivias = format_trivias_after_token(l_paren, ctx);
+            let mut trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
             if let Some(keyword) = self.keyword() {
                 docs.append(&mut trivias);
                 docs.push(Doc::text("sub"));
-                trivias = format_trivias_after_token(keyword, ctx);
+                trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
             }
             if let Some(keyword) = self.final_keyword() {
                 if trivias.is_empty() {
@@ -539,7 +539,7 @@ impl DocGen for SubType {
                     docs.append(&mut trivias);
                 }
                 docs.push(Doc::text("final"));
-                trivias = format_trivias_after_token(keyword, ctx);
+                trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
             }
             self.indexes().for_each(|index| {
                 if trivias.is_empty() {
@@ -548,7 +548,7 @@ impl DocGen for SubType {
                     docs.append(&mut trivias);
                 }
                 docs.push(index.doc(ctx));
-                trivias = format_trivias_after_node(index, ctx);
+                trivias = format_trivias_after_node(index.syntax().amber(), self.syntax().amber(), ctx);
             });
             if let Some(ty) = self.comp_type() {
                 if trivias.is_empty() {
@@ -572,7 +572,7 @@ impl DocGen for SubType {
                     docs.append(&mut trivias);
                 }
                 docs.push(ty.doc(ctx));
-                trivias = format_trivias_after_node(ty, ctx);
+                trivias = format_trivias_after_node(ty.syntax().amber(), self.syntax().amber(), ctx);
             }
             docs.append(&mut trivias);
             Doc::list(docs)
@@ -593,7 +593,7 @@ impl DocGen for TableType {
         let mut trivias = vec![];
         if let Some(addr_type) = self.addr_type() {
             docs.push(addr_type.doc(ctx));
-            trivias = format_trivias_after_node(addr_type, ctx);
+            trivias = format_trivias_after_node(addr_type.syntax().amber(), self.syntax().amber(), ctx);
         }
         if let Some(limits) = self.limits() {
             if trivias.is_empty() && !docs.is_empty() {
@@ -602,7 +602,7 @@ impl DocGen for TableType {
                 docs.append(&mut trivias);
             }
             docs.push(limits.doc(ctx));
-            trivias = format_trivias_after_node(limits, ctx);
+            trivias = format_trivias_after_node(limits.syntax().amber(), self.syntax().amber(), ctx);
         }
         if let Some(ref_type) = self.ref_type() {
             if trivias.is_empty() {
@@ -645,12 +645,12 @@ where
     let mut trivias = vec![];
     if let Some(l_paren) = support::token(node.syntax(), SyntaxKind::L_PAREN) {
         docs.push(Doc::text("("));
-        trivias = format_trivias_after_token(l_paren, ctx);
+        trivias = format_trivias_after_token(l_paren.amber(), node.syntax().amber(), ctx);
     }
     if let Some(keyword) = support::token(node.syntax(), SyntaxKind::KEYWORD) {
         docs.append(&mut trivias);
         docs.push(Doc::text(keyword.text().to_string()));
-        trivias = format_trivias_after_token(keyword, ctx);
+        trivias = format_trivias_after_token(keyword.amber(), node.syntax().amber(), ctx);
     }
     if let Some(ident) = support::token(node.syntax(), SyntaxKind::IDENT) {
         if trivias.is_empty() {
@@ -659,7 +659,7 @@ where
             docs.append(&mut trivias);
         }
         docs.push(Doc::text(ident.to_string()));
-        trivias = format_trivias_after_token(ident, ctx);
+        trivias = format_trivias_after_token(ident.amber(), node.syntax().amber(), ctx);
     }
     if let Some(ty) = ty {
         if trivias.is_empty() {
@@ -668,7 +668,7 @@ where
             docs.append(&mut trivias);
         }
         docs.push(ty.doc(ctx));
-        trivias = format_trivias_after_node(ty, ctx);
+        trivias = format_trivias_after_node(ty.syntax().amber(), node.syntax().amber(), ctx);
     }
     docs.append(&mut trivias);
     Doc::list(docs)

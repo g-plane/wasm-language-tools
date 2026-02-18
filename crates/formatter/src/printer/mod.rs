@@ -1,7 +1,7 @@
 use crate::config::{FormatOptions, LanguageOptions, MultiLine, WrapBefore};
 use std::iter;
 use tiny_pretty::Doc;
-use wat_syntax::{NodeOrToken, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, ast::*};
+use wat_syntax::{AmberNode, AmberToken, NodeOrToken, SyntaxElement, SyntaxKind, SyntaxNode, ast::*};
 
 mod instr;
 mod module;
@@ -179,15 +179,33 @@ impl DocGen for Root {
     }
 }
 
-fn format_trivias_after_node<N>(node: N, ctx: &Ctx) -> Vec<Doc<'static>>
-where
-    N: AstNode,
-{
-    let trivias = node
-        .syntax()
-        .next_consecutive_tokens()
-        .take_while(is_formattable_trivia)
-        .collect::<Vec<_>>();
+fn format_trivias_after_node(node: AmberNode, parent: AmberNode, ctx: &Ctx) -> Vec<Doc<'static>> {
+    let mut tokens = parent
+        .children_with_tokens()
+        .skip_while(|node_or_token| node_or_token.text_range().start() <= node.text_range().start())
+        .map_while(NodeOrToken::into_token)
+        .peekable();
+    let mut trivias = Vec::with_capacity(1);
+    while let Some(token) = tokens.next() {
+        match token.kind() {
+            SyntaxKind::LINE_COMMENT
+            | SyntaxKind::BLOCK_COMMENT
+            | SyntaxKind::ERROR
+            | SyntaxKind::ANNOT_START
+            | SyntaxKind::ANNOT_ELEM
+            | SyntaxKind::ANNOT_END => trivias.push(token),
+            SyntaxKind::WHITESPACE
+                if tokens.peek().is_none_or(|token| match token.kind() {
+                    SyntaxKind::R_PAREN => false,
+                    SyntaxKind::KEYWORD => token.text() != "end",
+                    _ => true,
+                }) =>
+            {
+                trivias.push(token);
+            }
+            _ => break,
+        }
+    }
     if trivias
         .iter()
         .all(|token| token.kind() == SyntaxKind::WHITESPACE && token.text().chars().filter(|c| *c == '\n').count() < 2)
@@ -214,18 +232,44 @@ where
             }
         },
         SyntaxKind::ERROR | SyntaxKind::ANNOT_START | SyntaxKind::ANNOT_ELEM | SyntaxKind::ANNOT_END => {
-            docs.push(Doc::text(token.to_string()));
+            docs.push(Doc::text(token.text().to_string()));
         }
         _ => {}
     });
     docs
 }
-fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>> {
-    let trivias = token
-        .next_consecutive_tokens()
-        .take_while(is_formattable_trivia)
-        .skip_while(|current| token.kind() == SyntaxKind::L_PAREN && current.kind() == SyntaxKind::WHITESPACE)
-        .collect::<Vec<_>>();
+fn format_trivias_after_token(token: AmberToken, parent: AmberNode, ctx: &Ctx) -> Vec<Doc<'static>> {
+    let mut tokens = parent
+        .children_with_tokens()
+        .skip_while(|node_or_token| node_or_token.text_range().start() <= token.text_range().start())
+        .map_while(NodeOrToken::into_token)
+        .peekable();
+    let mut trivias = Vec::with_capacity(1);
+    while let Some(current) = tokens.next() {
+        match current.kind() {
+            SyntaxKind::LINE_COMMENT
+            | SyntaxKind::BLOCK_COMMENT
+            | SyntaxKind::ERROR
+            | SyntaxKind::ANNOT_START
+            | SyntaxKind::ANNOT_ELEM
+            | SyntaxKind::ANNOT_END => trivias.push(current),
+            SyntaxKind::WHITESPACE
+                if tokens.peek().is_none_or(|token| match token.kind() {
+                    SyntaxKind::R_PAREN => false,
+                    SyntaxKind::KEYWORD => token.text() != "end",
+                    _ => true,
+                }) =>
+            {
+                if !(token.kind() == SyntaxKind::L_PAREN
+                    && current.kind() == SyntaxKind::WHITESPACE
+                    && trivias.is_empty())
+                {
+                    trivias.push(current);
+                }
+            }
+            _ => break,
+        }
+    }
     if trivias.iter().all(|token| token.kind() == SyntaxKind::WHITESPACE) {
         return vec![];
     }
@@ -246,35 +290,11 @@ fn format_trivias_after_token(token: SyntaxToken, ctx: &Ctx) -> Vec<Doc<'static>
             }
         },
         SyntaxKind::ERROR | SyntaxKind::ANNOT_START | SyntaxKind::ANNOT_ELEM | SyntaxKind::ANNOT_END => {
-            docs.push(Doc::text(token.to_string()));
+            docs.push(Doc::text(token.text().to_string()));
         }
         _ => {}
     });
     docs
-}
-
-fn is_formattable_trivia(token: &SyntaxToken) -> bool {
-    match token.kind() {
-        SyntaxKind::LINE_COMMENT
-        | SyntaxKind::BLOCK_COMMENT
-        | SyntaxKind::ERROR
-        | SyntaxKind::ANNOT_START
-        | SyntaxKind::ANNOT_ELEM
-        | SyntaxKind::ANNOT_END => true,
-        SyntaxKind::WHITESPACE
-            if token
-                .next_consecutive_tokens()
-                .next()
-                .is_none_or(|token| match token.kind() {
-                    SyntaxKind::R_PAREN => false,
-                    SyntaxKind::KEYWORD => token.text() != "end",
-                    _ => true,
-                }) =>
-        {
-            true
-        }
-        _ => false,
-    }
 }
 
 fn format_line_comment(text: &str, ctx: &Ctx) -> Doc<'static> {

@@ -1,4 +1,4 @@
-use crate::{GreenToken, SyntaxKind};
+use crate::{GreenToken, SyntaxKind, SyntaxToken};
 use text_size::{TextRange, TextSize};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
@@ -36,5 +36,15 @@ impl<'a> AmberToken<'a> {
     #[inline]
     pub fn text(&self) -> &'a str {
         self.green.text()
+    }
+}
+
+impl<'a> From<&'a SyntaxToken> for AmberToken<'a> {
+    #[inline]
+    fn from(token: &'a SyntaxToken) -> Self {
+        Self {
+            green: token.green(),
+            range: token.text_range(),
+        }
     }
 }

@@ -1,5 +1,5 @@
 use super::node::NodeData;
-use crate::{GreenToken, SyntaxElement, SyntaxKind, SyntaxNode};
+use crate::{AmberToken, GreenToken, SyntaxElement, SyntaxKind, SyntaxNode};
 use std::{fmt, ptr::NonNull, rc::Rc};
 use text_size::{TextRange, TextSize};
 
@@ -39,6 +39,11 @@ impl SyntaxToken {
     #[inline]
     pub fn green(&self) -> &GreenToken {
         unsafe { self.data.green.as_ref() }
+    }
+
+    #[inline]
+    pub fn amber(&self) -> AmberToken<'_> {
+        self.into()
     }
 
     #[inline]
