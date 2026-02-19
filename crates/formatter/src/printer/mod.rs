@@ -1,3 +1,4 @@
+use self::{instr::*, module::*, ty::*};
 use crate::config::{FormatOptions, LanguageOptions, MultiLine, WrapBefore};
 use std::iter;
 use tiny_pretty::Doc;
@@ -19,11 +20,7 @@ impl<'a> Ctx<'a> {
         }
     }
 
-    pub(crate) fn format_right_paren<N>(&self, node: &N) -> Doc<'static>
-    where
-        N: AstNode,
-    {
-        let node = node.syntax().amber();
+    pub(crate) fn format_right_paren(&self, node: AmberNode) -> Doc<'static> {
         let mut nodes_or_tokens = node.children_with_tokens().rev();
         let docs = if nodes_or_tokens
             .find_map(|node_or_token| match node_or_token {
@@ -49,73 +46,73 @@ impl<'a> Ctx<'a> {
 
 pub(crate) fn format_node(node: SyntaxNode, ctx: &Ctx) -> Option<Doc<'static>> {
     match node.kind() {
-        SyntaxKind::MODULE_NAME => ModuleName::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::NAME => Name::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::NUM_TYPE => NumType::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::VEC_TYPE => VecType::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::REF_TYPE => RefType::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::HEAP_TYPE => HeapType::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::PACKED_TYPE => PackedType::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::FIELD_TYPE => FieldType::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::STRUCT_TYPE => StructType::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::ARRAY_TYPE => ArrayType::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::FUNC_TYPE => FuncType::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::PARAM => Param::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::RESULT => Result::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::FIELD => Field::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::SUB_TYPE => SubType::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::TABLE_TYPE => TableType::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::MEM_TYPE => MemType::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::ADDR_TYPE => AddrType::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::GLOBAL_TYPE => GlobalType::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::PLAIN_INSTR => PlainInstr::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::BLOCK_BLOCK => BlockBlock::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::BLOCK_LOOP => BlockLoop::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::BLOCK_IF => BlockIf::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::BLOCK_IF_THEN => BlockIfThen::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::BLOCK_IF_ELSE => BlockIfElse::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::BLOCK_TRY_TABLE => BlockTryTable::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::CATCH => Catch::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::CATCH_ALL => CatchAll::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::MEM_ARG => MemArg::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::IMMEDIATE => Immediate::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::TYPE_USE => TypeUse::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::LIMITS => Limits::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::IMPORT => Import::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::EXPORT => Export::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::EXTERN_TYPE_FUNC => ExternTypeFunc::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::EXTERN_TYPE_TABLE => ExternTypeTable::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::EXTERN_TYPE_MEMORY => ExternTypeMemory::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::EXTERN_TYPE_GLOBAL => ExternTypeGlobal::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::EXTERN_TYPE_TAG => ExternTypeTag::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::EXTERN_IDX_FUNC => ExternIdxFunc::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::EXTERN_IDX_TABLE => ExternIdxTable::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::EXTERN_IDX_MEMORY => ExternIdxMemory::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::EXTERN_IDX_GLOBAL => ExternIdxGlobal::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::EXTERN_IDX_TAG => ExternIdxTag::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::INDEX => Index::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::LOCAL => Local::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::MEM_PAGE_SIZE => MemPageSize::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::MEM_USE => MemUse::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::OFFSET => Offset::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::ELEM => Elem::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::ELEM_LIST => ElemList::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::ELEM_EXPR => ElemExpr::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::TABLE_USE => TableUse::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::DATA => Data::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::MODULE_NAME => Some(format_module_name(node.amber())),
+        SyntaxKind::NAME => Some(format_name(node.amber())),
+        SyntaxKind::NUM_TYPE => Some(format_num_type(node.amber())),
+        SyntaxKind::VEC_TYPE => Some(format_vec_type(node.amber())),
+        SyntaxKind::REF_TYPE => Some(format_ref_type(node.amber(), ctx)),
+        SyntaxKind::HEAP_TYPE => Some(format_heap_type(node.amber())),
+        SyntaxKind::PACKED_TYPE => Some(format_packed_type(node.amber())),
+        SyntaxKind::FIELD_TYPE => Some(format_field_type(node.amber(), ctx)),
+        SyntaxKind::STRUCT_TYPE => Some(format_struct_type(node.amber(), ctx)),
+        SyntaxKind::ARRAY_TYPE => Some(format_array_type(node.amber(), ctx)),
+        SyntaxKind::FUNC_TYPE => Some(format_func_type(node.amber(), ctx)),
+        SyntaxKind::PARAM => Some(format_param(node.amber(), ctx)),
+        SyntaxKind::RESULT => Some(format_result(node.amber(), ctx)),
+        SyntaxKind::FIELD => Some(format_field(node.amber(), ctx)),
+        SyntaxKind::SUB_TYPE => Some(format_sub_type(node.amber(), ctx)),
+        SyntaxKind::TABLE_TYPE => Some(format_table_type(node.amber(), ctx)),
+        SyntaxKind::MEM_TYPE => Some(format_mem_type(node.amber(), ctx)),
+        SyntaxKind::ADDR_TYPE => Some(format_addr_type(node.amber())),
+        SyntaxKind::GLOBAL_TYPE => Some(format_global_type(node.amber(), ctx)),
+        SyntaxKind::PLAIN_INSTR => Some(format_plain_instr(node.amber(), ctx)),
+        SyntaxKind::BLOCK_BLOCK => Some(format_block_block(node.amber(), ctx)),
+        SyntaxKind::BLOCK_LOOP => Some(format_block_loop(node.amber(), ctx)),
+        SyntaxKind::BLOCK_IF => Some(format_block_if(node.amber(), ctx)),
+        SyntaxKind::BLOCK_IF_THEN => Some(format_block_if_then(node.amber(), ctx)),
+        SyntaxKind::BLOCK_IF_ELSE => Some(format_block_if_else(node.amber(), ctx)),
+        SyntaxKind::BLOCK_TRY_TABLE => Some(format_block_try_table(node.amber(), ctx)),
+        SyntaxKind::CATCH => Some(format_catch(node.amber(), ctx)),
+        SyntaxKind::CATCH_ALL => Some(format_catch_all(node.amber(), ctx)),
+        SyntaxKind::MEM_ARG => Some(format_mem_arg(node.amber())),
+        SyntaxKind::IMMEDIATE => Some(format_immediate(node.amber(), ctx)),
+        SyntaxKind::TYPE_USE => Some(format_type_use(node.amber(), ctx)),
+        SyntaxKind::LIMITS => Some(format_limits(node.amber(), ctx)),
+        SyntaxKind::IMPORT => Some(format_import(node.amber(), ctx)),
+        SyntaxKind::EXPORT => Some(format_export(node.amber(), ctx)),
+        SyntaxKind::EXTERN_TYPE_FUNC => Some(format_extern_type_func(node.amber(), ctx)),
+        SyntaxKind::EXTERN_TYPE_TABLE => Some(format_extern_type_table(node.amber(), ctx)),
+        SyntaxKind::EXTERN_TYPE_MEMORY => Some(format_extern_type_memory(node.amber(), ctx)),
+        SyntaxKind::EXTERN_TYPE_GLOBAL => Some(format_extern_type_global(node.amber(), ctx)),
+        SyntaxKind::EXTERN_TYPE_TAG => Some(format_extern_type_tag(node.amber(), ctx)),
+        SyntaxKind::EXTERN_IDX_FUNC => Some(format_extern_idx(node.amber(), ctx)),
+        SyntaxKind::EXTERN_IDX_TABLE => Some(format_extern_idx(node.amber(), ctx)),
+        SyntaxKind::EXTERN_IDX_MEMORY => Some(format_extern_idx(node.amber(), ctx)),
+        SyntaxKind::EXTERN_IDX_GLOBAL => Some(format_extern_idx(node.amber(), ctx)),
+        SyntaxKind::EXTERN_IDX_TAG => Some(format_extern_idx(node.amber(), ctx)),
+        SyntaxKind::INDEX => Some(format_index(node.amber())),
+        SyntaxKind::LOCAL => Some(format_local(node.amber(), ctx)),
+        SyntaxKind::MEM_PAGE_SIZE => Some(format_mem_page_size(node.amber(), ctx)),
+        SyntaxKind::MEM_USE => Some(format_mem_use(node.amber(), ctx)),
+        SyntaxKind::OFFSET => Some(format_offset(node.amber(), ctx)),
+        SyntaxKind::ELEM => Some(format_elem(node.amber(), ctx)),
+        SyntaxKind::ELEM_LIST => Some(format_elem_list(node.amber(), ctx)),
+        SyntaxKind::ELEM_EXPR => Some(format_elem_expr(node.amber(), ctx)),
+        SyntaxKind::TABLE_USE => Some(format_table_use(node.amber(), ctx)),
+        SyntaxKind::DATA => Some(format_data(node.amber(), ctx)),
         SyntaxKind::MODULE => Module::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::MODULE_FIELD_DATA => ModuleFieldData::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::MODULE_FIELD_ELEM => ModuleFieldElem::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::MODULE_FIELD_EXPORT => ModuleFieldExport::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::MODULE_FIELD_FUNC => ModuleFieldFunc::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::MODULE_FIELD_GLOBAL => ModuleFieldGlobal::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::MODULE_FIELD_IMPORT => ModuleFieldImport::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::MODULE_FIELD_MEMORY => ModuleFieldMemory::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::MODULE_FIELD_START => ModuleFieldStart::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::MODULE_FIELD_TABLE => ModuleFieldTable::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::MODULE_FIELD_TAG => ModuleFieldTag::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::TYPE_DEF => TypeDef::cast(node).map(|node| node.doc(ctx)),
-        SyntaxKind::REC_TYPE => RecType::cast(node).map(|node| node.doc(ctx)),
+        SyntaxKind::MODULE_FIELD_DATA => Some(format_module_field_data(node.amber(), ctx)),
+        SyntaxKind::MODULE_FIELD_ELEM => Some(format_module_field_elem(node.amber(), ctx)),
+        SyntaxKind::MODULE_FIELD_EXPORT => Some(format_module_field_export(node.amber(), ctx)),
+        SyntaxKind::MODULE_FIELD_FUNC => Some(format_module_field_func(node.amber(), ctx)),
+        SyntaxKind::MODULE_FIELD_GLOBAL => Some(format_module_field_global(node.amber(), ctx)),
+        SyntaxKind::MODULE_FIELD_IMPORT => Some(format_module_field_import(node.amber(), ctx)),
+        SyntaxKind::MODULE_FIELD_MEMORY => Some(format_module_field_memory(node.amber(), ctx)),
+        SyntaxKind::MODULE_FIELD_START => Some(format_module_field_start(node.amber(), ctx)),
+        SyntaxKind::MODULE_FIELD_TABLE => Some(format_module_field_table(node.amber(), ctx)),
+        SyntaxKind::MODULE_FIELD_TAG => Some(format_module_field_tag(node.amber(), ctx)),
+        SyntaxKind::TYPE_DEF => Some(format_type_def(node.amber(), ctx)),
+        SyntaxKind::REC_TYPE => Some(format_rec_type(node.amber(), ctx)),
         SyntaxKind::ROOT => Root::cast(node).map(|node| node.doc(ctx)),
         _ => None,
     }
@@ -368,9 +365,9 @@ fn should_ignore(node: &SyntaxNode, ctx: &Ctx) -> bool {
         .is_some_and(|rest| rest.is_empty() || rest.starts_with(|c: char| c.is_ascii_whitespace()))
 }
 
-fn wrap_before<N>(children: &mut iter::Peekable<AstChildren<N>>, option: WrapBefore) -> Doc<'static>
+fn wrap_before<I>(children: &mut iter::Peekable<I>, option: WrapBefore) -> Doc<'static>
 where
-    N: AstNode + Clone,
+    I: Iterator,
 {
     match option {
         WrapBefore::Never => Doc::space(),
@@ -386,18 +383,16 @@ where
     }
 }
 
-fn whitespace_of_multi_line<N>(option: MultiLine, first: Option<&N>) -> Doc<'static>
-where
-    N: AstNode,
-{
+fn whitespace_of_multi_line(option: MultiLine, first: Option<AmberNode>, parent: AmberNode) -> Doc<'static> {
     match option {
         MultiLine::Never => Doc::space(),
         MultiLine::Overflow => Doc::line_or_space(),
         MultiLine::Smart => {
             if first.is_some_and(|first| {
-                first
-                    .syntax()
-                    .next_consecutive_tokens()
+                parent
+                    .children_with_tokens()
+                    .skip_while(|node_or_token| node_or_token.text_range().start() <= first.text_range().start())
+                    .map_while(NodeOrToken::into_token)
                     .any(|token| token.text().contains('\n'))
             }) {
                 Doc::hard_line()

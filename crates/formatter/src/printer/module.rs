@@ -1,325 +1,269 @@
 use super::*;
 use tiny_pretty::Doc;
-use wat_syntax::ast::{AstChildren, AstNode};
+use wat_syntax::{SyntaxKind::*, ast::AstNode};
 
-impl DocGen for Data {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("data"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        self.string_tokens().for_each(|string| {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(string.to_string()));
-            trivias = format_trivias_after_token(string.amber(), self.syntax().amber(), ctx);
-        });
-        docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
+pub(crate) fn format_data(data: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = data.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, data, ctx);
     }
-}
-
-impl DocGen for Elem {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("elem"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        self.indexes().for_each(|index| {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(index.doc(ctx));
-            trivias = format_trivias_after_node(index.syntax().amber(), self.syntax().amber(), ctx);
-        });
-        self.elem_exprs().for_each(|elem_expr| {
-            let has_keyword = elem_expr.keyword().is_some();
-            if trivias.is_empty() && has_keyword {
-                docs.push(Doc::hard_line());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(elem_expr.doc(ctx));
-            trivias = format_trivias_after_node(elem_expr.syntax().amber(), self.syntax().amber(), ctx);
-        });
+    if let Some(keyword) = data.tokens_by_kind(KEYWORD).next() {
         docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
+        docs.push(Doc::text("data"));
+        trivias = format_trivias_after_token(keyword, data, ctx);
     }
-}
-
-impl DocGen for ElemExpr {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("item"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        format_const_expr(self.instrs(), self.syntax().amber(), ctx, &mut docs, &mut trivias);
-        if self.r_paren_token().is_some() {
-            docs.append(&mut trivias);
-            Doc::list(docs)
-                .nest(ctx.indent_width)
-                .append(ctx.format_right_paren(self))
-                .group()
+    data.tokens_by_kind(STRING).for_each(|string| {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
         } else {
-            Doc::list(docs)
-        }
-    }
-}
-
-impl DocGen for ElemList {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(keyword) = self.func_keyword() {
-            docs.push(Doc::text("func"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        self.indexes().for_each(|index| {
-            if trivias.is_empty() {
-                if !docs.is_empty() {
-                    docs.push(Doc::space());
-                }
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(index.doc(ctx));
-            trivias = format_trivias_after_node(index.syntax().amber(), self.syntax().amber(), ctx);
-        });
-        if let Some(ref_type) = self.ref_type() {
-            docs.push(ref_type.doc(ctx));
-            trivias = format_trivias_after_node(ref_type.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        self.elem_exprs().for_each(|elem_expr| {
-            let has_keyword = elem_expr.keyword().is_some();
-            if trivias.is_empty() && has_keyword {
-                docs.push(Doc::hard_line());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(elem_expr.doc(ctx));
-            trivias = format_trivias_after_node(elem_expr.syntax().amber(), self.syntax().amber(), ctx);
-        });
-        docs.append(&mut trivias);
-        Doc::list(docs)
-    }
-}
-
-impl DocGen for Export {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
             docs.append(&mut trivias);
-            docs.push(Doc::text("export"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
         }
-        if let Some(name) = self.name() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(name.doc(ctx));
-            trivias = format_trivias_after_node(name.syntax().amber(), self.syntax().amber(), ctx);
+        docs.push(Doc::text(string.text().to_string()));
+        trivias = format_trivias_after_token(string, data, ctx);
+    });
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(data))
+        .group()
+}
+
+pub(crate) fn format_elem(elem: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = elem.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, elem, ctx);
+    }
+    if let Some(keyword) = elem.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("elem"));
+        trivias = format_trivias_after_token(keyword, elem, ctx);
+    }
+    elem.children_by_kind(INDEX).for_each(|index| {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
         }
+        docs.push(format_index(index));
+        trivias = format_trivias_after_node(index, elem, ctx);
+    });
+    elem.children_by_kind(ELEM_EXPR).for_each(|elem_expr| {
+        let has_keyword = elem_expr.tokens_by_kind(KEYWORD).next().is_some();
+        if trivias.is_empty() && has_keyword {
+            docs.push(Doc::hard_line());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_elem_expr(elem_expr, ctx));
+        trivias = format_trivias_after_node(elem_expr, elem, ctx);
+    });
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(elem))
+        .group()
+}
+
+pub(crate) fn format_elem_expr(elem_expr: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = elem_expr.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, elem_expr, ctx);
+    }
+    if let Some(keyword) = elem_expr.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("item"));
+        trivias = format_trivias_after_token(keyword, elem_expr, ctx);
+    }
+    format_const_expr(elem_expr, ctx, &mut docs, &mut trivias);
+    if elem_expr.tokens_by_kind(R_PAREN).next().is_some() {
         docs.append(&mut trivias);
         Doc::list(docs)
             .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
+            .append(ctx.format_right_paren(elem_expr))
             .group()
-    }
-}
-
-impl DocGen for ExternIdx {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        match self {
-            ExternIdx::Func(extern_idx_func) => extern_idx_func.doc(ctx),
-            ExternIdx::Global(extern_idx_global) => extern_idx_global.doc(ctx),
-            ExternIdx::Memory(extern_idx_memory) => extern_idx_memory.doc(ctx),
-            ExternIdx::Table(extern_idx_table) => extern_idx_table.doc(ctx),
-            ExternIdx::Tag(extern_idx_tag) => extern_idx_tag.doc(ctx),
-        }
-    }
-}
-
-impl DocGen for ExternIdxFunc {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        format_extern_idx(self, ctx)
-    }
-}
-
-impl DocGen for ExternIdxGlobal {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        format_extern_idx(self, ctx)
-    }
-}
-
-impl DocGen for ExternIdxMemory {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        format_extern_idx(self, ctx)
-    }
-}
-
-impl DocGen for ExternIdxTable {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        format_extern_idx(self, ctx)
-    }
-}
-
-impl DocGen for ExternIdxTag {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        format_extern_idx(self, ctx)
-    }
-}
-
-impl DocGen for Import {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("import"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(module_name) = self.module_name() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(module_name.doc(ctx));
-            trivias = format_trivias_after_node(module_name.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(name) = self.name() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(name.doc(ctx));
-            trivias = format_trivias_after_node(name.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        docs.append(&mut trivias);
+    } else {
         Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
     }
 }
 
-impl DocGen for Index {
-    fn doc(&self, _: &Ctx) -> Doc<'static> {
-        Doc::text(self.syntax().to_string())
+pub(crate) fn format_elem_list(elem_list: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(keyword) = elem_list.tokens_by_kind(KEYWORD).next() {
+        docs.push(Doc::text("func"));
+        trivias = format_trivias_after_token(keyword, elem_list, ctx);
     }
-}
-
-impl DocGen for Local {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
+    elem_list.children_by_kind(INDEX).for_each(|index| {
+        if trivias.is_empty() {
+            if !docs.is_empty() {
+                docs.push(Doc::space());
+            }
+        } else {
             docs.append(&mut trivias);
-            docs.push(Doc::text("local"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
         }
-        if let Some(ident) = self.ident_token() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident.amber(), self.syntax().amber(), ctx);
+        docs.push(format_index(index));
+        trivias = format_trivias_after_node(index, elem_list, ctx);
+    });
+    if let Some(ref_type) = elem_list.children_by_kind(REF_TYPE).next() {
+        docs.push(format_ref_type(ref_type, ctx));
+        trivias = format_trivias_after_node(ref_type, elem_list, ctx);
+    }
+    elem_list.children_by_kind(ELEM_EXPR).for_each(|elem_expr| {
+        let has_keyword = elem_expr.tokens_by_kind(KEYWORD).next().is_some();
+        if trivias.is_empty() && has_keyword {
+            docs.push(Doc::hard_line());
+        } else {
+            docs.append(&mut trivias);
         }
-        self.val_types().for_each(|val_type| {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(val_type.doc(ctx));
-            trivias = format_trivias_after_node(val_type.syntax().amber(), self.syntax().amber(), ctx);
-        });
+        docs.push(format_elem_expr(elem_expr, ctx));
+        trivias = format_trivias_after_node(elem_expr, elem_list, ctx);
+    });
+    docs.append(&mut trivias);
+    Doc::list(docs)
+}
+
+pub(crate) fn format_export(export: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = export.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, export, ctx);
+    }
+    if let Some(keyword) = export.tokens_by_kind(KEYWORD).next() {
         docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
+        docs.push(Doc::text("export"));
+        trivias = format_trivias_after_token(keyword, export, ctx);
+    }
+    if let Some(name) = export.children_by_kind(NAME).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_name(name));
+        trivias = format_trivias_after_node(name, export, ctx);
+    }
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(export))
+        .group()
+}
+
+pub(crate) fn format_import(import: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = import.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, import, ctx);
+    }
+    if let Some(keyword) = import.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("import"));
+        trivias = format_trivias_after_token(keyword, import, ctx);
+    }
+    if let Some(module_name) = import.children_by_kind(MODULE_NAME).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_module_name(module_name));
+        trivias = format_trivias_after_node(module_name, import, ctx);
+    }
+    if let Some(name) = import.children_by_kind(NAME).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_name(name));
+        trivias = format_trivias_after_node(name, import, ctx);
+    }
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(import))
+        .group()
+}
+
+pub(crate) fn format_index(index: AmberNode) -> Doc<'static> {
+    if let Some(token) = index.children_with_tokens().next().and_then(NodeOrToken::into_token) {
+        Doc::text(token.text().to_string())
+    } else {
+        Doc::nil()
     }
 }
 
-impl DocGen for MemUse {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("memory"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(index) = self.index() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(index.doc(ctx));
-            trivias = format_trivias_after_node(index.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
+pub(crate) fn format_local(local: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = local.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, local, ctx);
     }
+    if let Some(keyword) = local.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("local"));
+        trivias = format_trivias_after_token(keyword, local, ctx);
+    }
+    if let Some(ident) = local.tokens_by_kind(IDENT).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(Doc::text(ident.text().to_string()));
+        trivias = format_trivias_after_token(ident, local, ctx);
+    }
+    local.children_by_kind(ValType::can_cast).for_each(|val_type| {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_val_type(val_type, ctx));
+        trivias = format_trivias_after_node(val_type, local, ctx);
+    });
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(local))
+        .group()
+}
+
+pub(crate) fn format_mem_use(mem_use: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = mem_use.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, mem_use, ctx);
+    }
+    if let Some(keyword) = mem_use.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("memory"));
+        trivias = format_trivias_after_token(keyword, mem_use, ctx);
+    }
+    if let Some(index) = mem_use.children_by_kind(INDEX).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_index(index));
+        trivias = format_trivias_after_node(index, mem_use, ctx);
+    }
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(mem_use))
+        .group()
 }
 
 impl DocGen for Module {
@@ -365,7 +309,7 @@ impl DocGen for Module {
         if is_explicit_module {
             Doc::list(docs)
                 .nest(ctx.indent_width)
-                .append(ctx.format_right_paren(self))
+                .append(ctx.format_right_paren(self.syntax().amber()))
                 .group()
         } else {
             Doc::list(docs)
@@ -376,864 +320,852 @@ impl DocGen for Module {
 impl DocGen for ModuleField {
     fn doc(&self, ctx: &Ctx) -> Doc<'static> {
         match self {
-            ModuleField::Data(module_field_data) => module_field_data.doc(ctx),
-            ModuleField::Elem(module_field_elem) => module_field_elem.doc(ctx),
-            ModuleField::Export(module_field_export) => module_field_export.doc(ctx),
-            ModuleField::Func(module_field_func) => module_field_func.doc(ctx),
-            ModuleField::Global(module_field_global) => module_field_global.doc(ctx),
-            ModuleField::Import(module_field_import) => module_field_import.doc(ctx),
-            ModuleField::Memory(module_field_memory) => module_field_memory.doc(ctx),
-            ModuleField::Start(module_field_start) => module_field_start.doc(ctx),
-            ModuleField::Table(module_field_table) => module_field_table.doc(ctx),
-            ModuleField::Tag(module_field_tag) => module_field_tag.doc(ctx),
-            ModuleField::Type(type_def) => type_def.doc(ctx),
-            ModuleField::RecType(rec_type) => rec_type.doc(ctx),
+            ModuleField::Data(module_field_data) => format_module_field_data(module_field_data.syntax().amber(), ctx),
+            ModuleField::Elem(module_field_elem) => format_module_field_elem(module_field_elem.syntax().amber(), ctx),
+            ModuleField::Export(module_field_export) => {
+                format_module_field_export(module_field_export.syntax().amber(), ctx)
+            }
+            ModuleField::Func(module_field_func) => format_module_field_func(module_field_func.syntax().amber(), ctx),
+            ModuleField::Global(module_field_global) => {
+                format_module_field_global(module_field_global.syntax().amber(), ctx)
+            }
+            ModuleField::Import(module_field_import) => {
+                format_module_field_import(module_field_import.syntax().amber(), ctx)
+            }
+            ModuleField::Memory(module_field_memory) => {
+                format_module_field_memory(module_field_memory.syntax().amber(), ctx)
+            }
+            ModuleField::Start(module_field_start) => {
+                format_module_field_start(module_field_start.syntax().amber(), ctx)
+            }
+            ModuleField::Table(module_field_table) => {
+                format_module_field_table(module_field_table.syntax().amber(), ctx)
+            }
+            ModuleField::Tag(module_field_tag) => format_module_field_tag(module_field_tag.syntax().amber(), ctx),
+            ModuleField::Type(type_def) => format_type_def(type_def.syntax().amber(), ctx),
+            ModuleField::RecType(rec_type) => format_rec_type(rec_type.syntax().amber(), ctx),
         }
     }
 }
 
-impl DocGen for ModuleFieldData {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("data"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(ident) = self.ident_token() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(mem_use) = self.mem_use() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(mem_use.doc(ctx));
-            trivias = format_trivias_after_node(mem_use.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(offset) = self.offset() {
-            let has_keyword = offset.keyword().is_some();
-            if trivias.is_empty() && has_keyword {
-                docs.push(Doc::hard_line());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(offset.doc(ctx));
-            trivias = format_trivias_after_node(offset.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        self.string_tokens().for_each(|string| {
-            if trivias.is_empty() {
-                docs.push(Doc::soft_line());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(string.to_string()));
-            trivias = format_trivias_after_token(string.amber(), self.syntax().amber(), ctx);
-        });
-        docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
-    }
-}
-
-impl DocGen for ModuleFieldElem {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("elem"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(ident) = self.ident_token() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.declare_keyword() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text("declare"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(table_use) = self.table_use() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(table_use.doc(ctx));
-            trivias = format_trivias_after_node(table_use.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(offset) = self.offset() {
-            let has_keyword = offset.keyword().is_some();
-            if trivias.is_empty() && has_keyword {
-                docs.push(Doc::hard_line());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(offset.doc(ctx));
-            trivias = format_trivias_after_node(offset.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(elem_list) = self.elem_list() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(elem_list.doc(ctx));
-            trivias = format_trivias_after_node(elem_list.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
-    }
-}
-
-impl DocGen for ModuleFieldExport {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("export"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(name) = self.name() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(name.doc(ctx));
-            trivias = format_trivias_after_node(name.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(extern_idx) = self.extern_idx() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(extern_idx.doc(ctx));
-            trivias = format_trivias_after_node(extern_idx.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
-    }
-}
-
-impl DocGen for ModuleFieldFunc {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("func"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(ident) = self.ident_token() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident.amber(), self.syntax().amber(), ctx);
-        }
-        self.exports().for_each(|export| {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(export.doc(ctx));
-            trivias = format_trivias_after_node(export.syntax().amber(), self.syntax().amber(), ctx);
-        });
-        if let Some(import) = self.import() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(import.doc(ctx));
-            trivias = format_trivias_after_node(import.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(type_use) = self.type_use() {
-            if trivias.is_empty() {
-                if type_use.keyword().is_some() {
-                    docs.push(Doc::space());
-                } else {
-                    docs.push(Doc::soft_line());
-                }
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(type_use.doc(ctx));
-            trivias = format_trivias_after_node(type_use.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        let mut locals = self.locals().peekable();
-        let mut locals_docs = Vec::with_capacity(1);
-        let ws_of_multi_line = whitespace_of_multi_line(ctx.options.multi_line_locals, locals.peek());
-        if let Some(local) = locals.next() {
-            if trivias.is_empty() {
-                docs.push(wrap_before(&mut locals, ctx.options.wrap_before_locals));
-            } else {
-                docs.append(&mut trivias);
-            }
-            locals_docs.push(local.doc(ctx));
-            trivias = format_trivias_after_node(local.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        locals.for_each(|local| {
-            if trivias.is_empty() {
-                locals_docs.push(ws_of_multi_line.clone());
-            } else {
-                locals_docs.append(&mut trivias);
-            }
-            locals_docs.push(local.doc(ctx));
-            trivias = format_trivias_after_node(local.syntax().amber(), self.syntax().amber(), ctx);
-        });
-        docs.push(Doc::list(locals_docs).group());
-        self.instrs().for_each(|instr| {
-            if trivias.is_empty() {
-                docs.push(Doc::hard_line());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(instr.doc(ctx));
-            trivias = format_trivias_after_node(instr.syntax().amber(), self.syntax().amber(), ctx);
-        });
-        docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
-    }
-}
-
-impl DocGen for ModuleFieldGlobal {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("global"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(ident) = self.ident_token() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident.amber(), self.syntax().amber(), ctx);
-        }
-        self.exports().for_each(|export| {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(export.doc(ctx));
-            trivias = format_trivias_after_node(export.syntax().amber(), self.syntax().amber(), ctx);
-        });
-        if let Some(import) = self.import() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(import.doc(ctx));
-            trivias = format_trivias_after_node(import.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(global_type) = self.global_type() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(global_type.doc(ctx));
-            trivias = format_trivias_after_node(global_type.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        format_const_expr(self.instrs(), self.syntax().amber(), ctx, &mut docs, &mut trivias);
-        docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
-    }
-}
-
-impl DocGen for ModuleFieldImport {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("import"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(module_name) = self.module_name() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(module_name.doc(ctx));
-            trivias = format_trivias_after_node(module_name.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(name) = self.name() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(name.doc(ctx));
-            trivias = format_trivias_after_node(name.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(extern_type) = self.extern_type() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(extern_type.doc(ctx));
-            trivias = format_trivias_after_node(extern_type.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
-    }
-}
-
-impl DocGen for ModuleFieldMemory {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("memory"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(ident) = self.ident_token() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident.amber(), self.syntax().amber(), ctx);
-        }
-        self.exports().for_each(|export| {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(export.doc(ctx));
-            trivias = format_trivias_after_node(export.syntax().amber(), self.syntax().amber(), ctx);
-        });
-        if let Some(import) = self.import() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(import.doc(ctx));
-            trivias = format_trivias_after_node(import.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(mem_type) = self.mem_type() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(mem_type.doc(ctx));
-            trivias = format_trivias_after_node(mem_type.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(data) = self.data() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(data.doc(ctx));
-            trivias = format_trivias_after_node(data.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
-    }
-}
-
-impl DocGen for ModuleFieldStart {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("start"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(index) = self.index() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(index.doc(ctx));
-            trivias = format_trivias_after_node(index.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
-    }
-}
-
-impl DocGen for ModuleFieldTable {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("table"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(ident) = self.ident_token() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident.amber(), self.syntax().amber(), ctx);
-        }
-        self.exports().for_each(|export| {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(export.doc(ctx));
-            trivias = format_trivias_after_node(export.syntax().amber(), self.syntax().amber(), ctx);
-        });
-        if let Some(import) = self.import() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(import.doc(ctx));
-            trivias = format_trivias_after_node(import.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(table_type) = self.table_type() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(table_type.doc(ctx));
-            trivias = format_trivias_after_node(table_type.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(ref_type) = self.ref_type() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(ref_type.doc(ctx));
-            trivias = format_trivias_after_node(ref_type.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(elem) = self.elem() {
-            if trivias.is_empty() {
-                docs.push(Doc::line_or_space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(elem.doc(ctx));
-            trivias = format_trivias_after_node(elem.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        format_const_expr(self.instrs(), self.syntax().amber(), ctx, &mut docs, &mut trivias);
-        docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
-    }
-}
-
-impl DocGen for ModuleFieldTag {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("tag"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(ident) = self.ident_token() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident.amber(), self.syntax().amber(), ctx);
-        }
-        self.exports().for_each(|export| {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(export.doc(ctx));
-            trivias = format_trivias_after_node(export.syntax().amber(), self.syntax().amber(), ctx);
-        });
-        if let Some(import) = self.import() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(import.doc(ctx));
-            trivias = format_trivias_after_node(import.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(type_use) = self.type_use() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(type_use.doc(ctx));
-            trivias = format_trivias_after_node(type_use.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
-    }
-}
-
-impl DocGen for ModuleName {
-    fn doc(&self, _: &Ctx) -> Doc<'static> {
-        Doc::text(self.syntax().to_string())
-    }
-}
-
-impl DocGen for Name {
-    fn doc(&self, _: &Ctx) -> Doc<'static> {
-        Doc::text(self.syntax().to_string())
-    }
-}
-
-impl DocGen for Offset {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("offset"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        format_const_expr(self.instrs(), self.syntax().amber(), ctx, &mut docs, &mut trivias);
-        if self.r_paren_token().is_some() {
-            docs.append(&mut trivias);
-            Doc::list(docs)
-                .nest(ctx.indent_width)
-                .append(ctx.format_right_paren(self))
-                .group()
-        } else {
-            Doc::list(docs)
-        }
-    }
-}
-
-impl DocGen for RecType {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("rec"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        self.type_defs().for_each(|type_def| {
-            if trivias.is_empty() {
-                docs.push(Doc::hard_line());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(type_def.doc(ctx));
-            trivias = format_trivias_after_node(type_def.syntax().amber(), self.syntax().amber(), ctx);
-        });
-        docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
-    }
-}
-
-impl DocGen for TableUse {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("table"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(index) = self.index() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(index.doc(ctx));
-            trivias = format_trivias_after_node(index.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
-    }
-}
-
-impl DocGen for TypeDef {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("type"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(ident) = self.ident_token() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(sub_type) = self.sub_type() {
-            if trivias.is_empty() {
-                docs.push(Doc::line_or_space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(sub_type.doc(ctx));
-            trivias = format_trivias_after_node(sub_type.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        docs.append(&mut trivias);
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(self))
-            .group()
-    }
-}
-
-impl DocGen for TypeUse {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("type"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(index) = self.index() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(index.doc(ctx));
-            trivias = format_trivias_after_node(index.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(r_paren) = self.r_paren_token() {
-            docs.append(&mut trivias);
-            docs.push(ctx.format_right_paren(self).group());
-            trivias = format_trivias_after_token(r_paren.amber(), self.syntax().amber(), ctx);
-        }
-
-        let mut params = self.params();
-        if let Some(param) = params.next() {
-            if trivias.is_empty() && !docs.is_empty() {
-                docs.push(Doc::soft_line());
-            } else if self.l_paren_token().is_some() {
-                docs.append(&mut trivias);
-            }
-            docs.push(param.doc(ctx));
-            trivias = format_trivias_after_node(param.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        params.for_each(|param| {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(param.doc(ctx));
-            trivias = format_trivias_after_node(param.syntax().amber(), self.syntax().amber(), ctx);
-        });
-        let mut results = self.results();
-        if let Some(result) = results.next() {
-            if trivias.is_empty() && !docs.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(result.doc(ctx));
-            trivias = format_trivias_after_node(result.syntax().amber(), self.syntax().amber(), ctx);
-        }
-        results.for_each(|result| {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(result.doc(ctx));
-            trivias = format_trivias_after_node(result.syntax().amber(), self.syntax().amber(), ctx);
-        });
-
-        Doc::list(docs)
-    }
-}
-
-fn format_extern_idx<N>(node: &N, ctx: &Ctx) -> Doc<'static>
-where
-    N: AstNode,
-{
+pub(crate) fn format_module_field_data(module_field_data: AmberNode, ctx: &Ctx) -> Doc<'static> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
-    if let Some(l_paren) = support::token(node.syntax(), SyntaxKind::L_PAREN) {
+    if let Some(l_paren) = module_field_data.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
-        trivias = format_trivias_after_token(l_paren.amber(), node.syntax().amber(), ctx);
+        trivias = format_trivias_after_token(l_paren, module_field_data, ctx);
     }
-    if let Some(keyword) = support::token(node.syntax(), SyntaxKind::KEYWORD) {
+    if let Some(keyword) = module_field_data.tokens_by_kind(KEYWORD).next() {
         docs.append(&mut trivias);
-        docs.push(Doc::text(keyword.to_string()));
-        trivias = format_trivias_after_token(keyword.amber(), node.syntax().amber(), ctx);
+        docs.push(Doc::text("data"));
+        trivias = format_trivias_after_token(keyword, module_field_data, ctx);
     }
-    if let Some(index) = support::child::<Index>(node.syntax()) {
+    if let Some(ident) = module_field_data.tokens_by_kind(IDENT).next() {
         if trivias.is_empty() {
             docs.push(Doc::space());
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(index.doc(ctx));
-        trivias = format_trivias_after_node(index.syntax().amber(), node.syntax().amber(), ctx);
+        docs.push(Doc::text(ident.text().to_string()));
+        trivias = format_trivias_after_token(ident, module_field_data, ctx);
+    }
+    if let Some(mem_use) = module_field_data.children_by_kind(MEM_USE).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_mem_use(mem_use, ctx));
+        trivias = format_trivias_after_node(mem_use, module_field_data, ctx);
+    }
+    if let Some(offset) = module_field_data.children_by_kind(OFFSET).next() {
+        let has_keyword = offset.tokens_by_kind(KEYWORD).next().is_some();
+        if trivias.is_empty() && has_keyword {
+            docs.push(Doc::hard_line());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_offset(offset, ctx));
+        trivias = format_trivias_after_node(offset, module_field_data, ctx);
+    }
+    module_field_data.tokens_by_kind(STRING).for_each(|string| {
+        if trivias.is_empty() {
+            docs.push(Doc::soft_line());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(Doc::text(string.text().to_string()));
+        trivias = format_trivias_after_token(string, module_field_data, ctx);
+    });
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(module_field_data))
+        .group()
+}
+
+pub(crate) fn format_module_field_elem(module_field_elem: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = module_field_elem.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, module_field_elem, ctx);
+    }
+    if let Some(keyword) = module_field_elem.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("elem"));
+        trivias = format_trivias_after_token(keyword, module_field_elem, ctx);
+    }
+    if let Some(ident) = module_field_elem.tokens_by_kind(IDENT).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(Doc::text(ident.text().to_string()));
+        trivias = format_trivias_after_token(ident, module_field_elem, ctx);
+    }
+    if let Some(keyword) = module_field_elem
+        .tokens_by_kind(KEYWORD)
+        .find(|token| token.text() == "declare")
+    {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(Doc::text("declare"));
+        trivias = format_trivias_after_token(keyword, module_field_elem, ctx);
+    }
+    if let Some(table_use) = module_field_elem.children_by_kind(TABLE_USE).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_table_use(table_use, ctx));
+        trivias = format_trivias_after_node(table_use, module_field_elem, ctx);
+    }
+    if let Some(offset) = module_field_elem.children_by_kind(OFFSET).next() {
+        let has_keyword = offset.tokens_by_kind(KEYWORD).next().is_some();
+        if trivias.is_empty() && has_keyword {
+            docs.push(Doc::hard_line());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_offset(offset, ctx));
+        trivias = format_trivias_after_node(offset, module_field_elem, ctx);
+    }
+    if let Some(elem_list) = module_field_elem.children_by_kind(ELEM_LIST).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_elem_list(elem_list, ctx));
+        trivias = format_trivias_after_node(elem_list, module_field_elem, ctx);
     }
     docs.append(&mut trivias);
     Doc::list(docs)
         .nest(ctx.indent_width)
-        .append(ctx.format_right_paren(node))
+        .append(ctx.format_right_paren(module_field_elem))
         .group()
 }
 
-fn format_const_expr(
-    instrs: AstChildren<Instr>,
-    parent: AmberNode,
-    ctx: &Ctx,
-    docs: &mut Vec<Doc<'static>>,
-    trivias: &mut Vec<Doc<'static>>,
-) {
-    let mut instrs = instrs.peekable();
+pub(crate) fn format_module_field_export(module_field_export: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = module_field_export.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, module_field_export, ctx);
+    }
+    if let Some(keyword) = module_field_export.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("export"));
+        trivias = format_trivias_after_token(keyword, module_field_export, ctx);
+    }
+    if let Some(name) = module_field_export.children_by_kind(NAME).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_name(name));
+        trivias = format_trivias_after_node(name, module_field_export, ctx);
+    }
+    if let Some(extern_idx) = module_field_export.children_by_kind(ExternIdx::can_cast).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_extern_idx(extern_idx, ctx));
+        trivias = format_trivias_after_node(extern_idx, module_field_export, ctx);
+    }
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(module_field_export))
+        .group()
+}
+
+pub(crate) fn format_module_field_func(module_field_func: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = module_field_func.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, module_field_func, ctx);
+    }
+    if let Some(keyword) = module_field_func.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("func"));
+        trivias = format_trivias_after_token(keyword, module_field_func, ctx);
+    }
+    if let Some(ident) = module_field_func.tokens_by_kind(IDENT).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(Doc::text(ident.text().to_string()));
+        trivias = format_trivias_after_token(ident, module_field_func, ctx);
+    }
+    module_field_func.children_by_kind(EXPORT).for_each(|export| {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_export(export, ctx));
+        trivias = format_trivias_after_node(export, module_field_func, ctx);
+    });
+    if let Some(import) = module_field_func.children_by_kind(IMPORT).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_import(import, ctx));
+        trivias = format_trivias_after_node(import, module_field_func, ctx);
+    }
+    if let Some(type_use) = module_field_func.children_by_kind(TYPE_USE).next() {
+        if trivias.is_empty() {
+            if type_use.tokens_by_kind(KEYWORD).next().is_some() {
+                docs.push(Doc::space());
+            } else {
+                docs.push(Doc::soft_line());
+            }
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_type_use(type_use, ctx));
+        trivias = format_trivias_after_node(type_use, module_field_func, ctx);
+    }
+    let mut locals = module_field_func.children_by_kind(LOCAL).peekable();
+    let mut locals_docs = Vec::with_capacity(1);
+    let ws_of_multi_line =
+        whitespace_of_multi_line(ctx.options.multi_line_locals, locals.peek().copied(), module_field_func);
+    if let Some(local) = locals.next() {
+        if trivias.is_empty() {
+            docs.push(wrap_before(&mut locals, ctx.options.wrap_before_locals));
+        } else {
+            docs.append(&mut trivias);
+        }
+        locals_docs.push(format_local(local, ctx));
+        trivias = format_trivias_after_node(local, module_field_func, ctx);
+    }
+    locals.for_each(|local| {
+        if trivias.is_empty() {
+            locals_docs.push(ws_of_multi_line.clone());
+        } else {
+            locals_docs.append(&mut trivias);
+        }
+        locals_docs.push(format_local(local, ctx));
+        trivias = format_trivias_after_node(local, module_field_func, ctx);
+    });
+    docs.push(Doc::list(locals_docs).group());
+    module_field_func.children_by_kind(Instr::can_cast).for_each(|instr| {
+        if trivias.is_empty() {
+            docs.push(Doc::hard_line());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_instr(instr, ctx));
+        trivias = format_trivias_after_node(instr, module_field_func, ctx);
+    });
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(module_field_func))
+        .group()
+}
+
+pub(crate) fn format_module_field_global(module_field_global: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = module_field_global.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, module_field_global, ctx);
+    }
+    if let Some(keyword) = module_field_global.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("global"));
+        trivias = format_trivias_after_token(keyword, module_field_global, ctx);
+    }
+    if let Some(ident) = module_field_global.tokens_by_kind(IDENT).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(Doc::text(ident.text().to_string()));
+        trivias = format_trivias_after_token(ident, module_field_global, ctx);
+    }
+    module_field_global.children_by_kind(EXPORT).for_each(|export| {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_export(export, ctx));
+        trivias = format_trivias_after_node(export, module_field_global, ctx);
+    });
+    if let Some(import) = module_field_global.children_by_kind(IMPORT).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_import(import, ctx));
+        trivias = format_trivias_after_node(import, module_field_global, ctx);
+    }
+    if let Some(global_type) = module_field_global.children_by_kind(GLOBAL_TYPE).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_global_type(global_type, ctx));
+        trivias = format_trivias_after_node(global_type, module_field_global, ctx);
+    }
+    format_const_expr(module_field_global, ctx, &mut docs, &mut trivias);
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(module_field_global))
+        .group()
+}
+
+pub(crate) fn format_module_field_import(module_field_import: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = module_field_import.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, module_field_import, ctx);
+    }
+    if let Some(keyword) = module_field_import.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("import"));
+        trivias = format_trivias_after_token(keyword, module_field_import, ctx);
+    }
+    if let Some(module_name) = module_field_import.children_by_kind(MODULE_NAME).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_module_name(module_name));
+        trivias = format_trivias_after_node(module_name, module_field_import, ctx);
+    }
+    if let Some(name) = module_field_import.children_by_kind(NAME).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_name(name));
+        trivias = format_trivias_after_node(name, module_field_import, ctx);
+    }
+    if let Some(extern_type) = module_field_import.children_by_kind(ExternType::can_cast).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        match extern_type.kind() {
+            EXTERN_TYPE_FUNC => docs.push(format_extern_type_func(extern_type, ctx)),
+            EXTERN_TYPE_GLOBAL => docs.push(format_extern_type_global(extern_type, ctx)),
+            EXTERN_TYPE_MEMORY => docs.push(format_extern_type_memory(extern_type, ctx)),
+            EXTERN_TYPE_TABLE => docs.push(format_extern_type_table(extern_type, ctx)),
+            EXTERN_TYPE_TAG => docs.push(format_extern_type_tag(extern_type, ctx)),
+            _ => {}
+        }
+        trivias = format_trivias_after_node(extern_type, module_field_import, ctx);
+    }
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(module_field_import))
+        .group()
+}
+
+pub(crate) fn format_module_field_memory(module_field_memory: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = module_field_memory.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, module_field_memory, ctx);
+    }
+    if let Some(keyword) = module_field_memory.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("memory"));
+        trivias = format_trivias_after_token(keyword, module_field_memory, ctx);
+    }
+    if let Some(ident) = module_field_memory.tokens_by_kind(IDENT).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(Doc::text(ident.text().to_string()));
+        trivias = format_trivias_after_token(ident, module_field_memory, ctx);
+    }
+    module_field_memory.children_by_kind(EXPORT).for_each(|export| {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_export(export, ctx));
+        trivias = format_trivias_after_node(export, module_field_memory, ctx);
+    });
+    if let Some(import) = module_field_memory.children_by_kind(IMPORT).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_import(import, ctx));
+        trivias = format_trivias_after_node(import, module_field_memory, ctx);
+    }
+    if let Some(mem_type) = module_field_memory.children_by_kind(MEM_TYPE).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_mem_type(mem_type, ctx));
+        trivias = format_trivias_after_node(mem_type, module_field_memory, ctx);
+    }
+    if let Some(data) = module_field_memory.children_by_kind(DATA).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_data(data, ctx));
+        trivias = format_trivias_after_node(data, module_field_memory, ctx);
+    }
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(module_field_memory))
+        .group()
+}
+
+pub(crate) fn format_module_field_start(module_field_start: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = module_field_start.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, module_field_start, ctx);
+    }
+    if let Some(keyword) = module_field_start.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("start"));
+        trivias = format_trivias_after_token(keyword, module_field_start, ctx);
+    }
+    if let Some(index) = module_field_start.children_by_kind(INDEX).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_index(index));
+        trivias = format_trivias_after_node(index, module_field_start, ctx);
+    }
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(module_field_start))
+        .group()
+}
+
+pub(crate) fn format_module_field_table(module_field_table: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = module_field_table.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, module_field_table, ctx);
+    }
+    if let Some(keyword) = module_field_table.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("table"));
+        trivias = format_trivias_after_token(keyword, module_field_table, ctx);
+    }
+    if let Some(ident) = module_field_table.tokens_by_kind(IDENT).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(Doc::text(ident.text().to_string()));
+        trivias = format_trivias_after_token(ident, module_field_table, ctx);
+    }
+    module_field_table.children_by_kind(EXPORT).for_each(|export| {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_export(export, ctx));
+        trivias = format_trivias_after_node(export, module_field_table, ctx);
+    });
+    if let Some(import) = module_field_table.children_by_kind(IMPORT).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_import(import, ctx));
+        trivias = format_trivias_after_node(import, module_field_table, ctx);
+    }
+    if let Some(table_type) = module_field_table.children_by_kind(TABLE_TYPE).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_table_type(table_type, ctx));
+        trivias = format_trivias_after_node(table_type, module_field_table, ctx);
+    }
+    if let Some(ref_type) = module_field_table.children_by_kind(REF_TYPE).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_ref_type(ref_type, ctx));
+        trivias = format_trivias_after_node(ref_type, module_field_table, ctx);
+    }
+    if let Some(elem) = module_field_table.children_by_kind(ELEM).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::line_or_space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_elem(elem, ctx));
+        trivias = format_trivias_after_node(elem, module_field_table, ctx);
+    }
+    format_const_expr(module_field_table, ctx, &mut docs, &mut trivias);
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(module_field_table))
+        .group()
+}
+
+pub(crate) fn format_module_field_tag(module_field_tag: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = module_field_tag.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, module_field_tag, ctx);
+    }
+    if let Some(keyword) = module_field_tag.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("tag"));
+        trivias = format_trivias_after_token(keyword, module_field_tag, ctx);
+    }
+    if let Some(ident) = module_field_tag.tokens_by_kind(IDENT).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(Doc::text(ident.text().to_string()));
+        trivias = format_trivias_after_token(ident, module_field_tag, ctx);
+    }
+    module_field_tag.children_by_kind(EXPORT).for_each(|export| {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_export(export, ctx));
+        trivias = format_trivias_after_node(export, module_field_tag, ctx);
+    });
+    if let Some(import) = module_field_tag.children_by_kind(IMPORT).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_import(import, ctx));
+        trivias = format_trivias_after_node(import, module_field_tag, ctx);
+    }
+    if let Some(type_use) = module_field_tag.children_by_kind(TYPE_USE).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_type_use(type_use, ctx));
+        trivias = format_trivias_after_node(type_use, module_field_tag, ctx);
+    }
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(module_field_tag))
+        .group()
+}
+
+pub(crate) fn format_module_name(module_name: AmberNode) -> Doc<'static> {
+    if let Some(string) = module_name.tokens_by_kind(STRING).next() {
+        Doc::text(string.text().to_string())
+    } else {
+        Doc::nil()
+    }
+}
+
+pub(crate) fn format_name(name: AmberNode) -> Doc<'static> {
+    if let Some(string) = name.tokens_by_kind(STRING).next() {
+        Doc::text(string.text().to_string())
+    } else {
+        Doc::nil()
+    }
+}
+
+pub(crate) fn format_offset(offset: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = offset.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, offset, ctx);
+    }
+    if let Some(keyword) = offset.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("offset"));
+        trivias = format_trivias_after_token(keyword, offset, ctx);
+    }
+    format_const_expr(offset, ctx, &mut docs, &mut trivias);
+    if offset.tokens_by_kind(R_PAREN).next().is_some() {
+        docs.append(&mut trivias);
+        Doc::list(docs)
+            .nest(ctx.indent_width)
+            .append(ctx.format_right_paren(offset))
+            .group()
+    } else {
+        Doc::list(docs)
+    }
+}
+
+pub(crate) fn format_rec_type(rec_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = rec_type.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, rec_type, ctx);
+    }
+    if let Some(keyword) = rec_type.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("rec"));
+        trivias = format_trivias_after_token(keyword, rec_type, ctx);
+    }
+    rec_type.children_by_kind(TYPE_DEF).for_each(|type_def| {
+        if trivias.is_empty() {
+            docs.push(Doc::hard_line());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_type_def(type_def, ctx));
+        trivias = format_trivias_after_node(type_def, rec_type, ctx);
+    });
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(rec_type))
+        .group()
+}
+
+pub(crate) fn format_table_use(table_use: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = table_use.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, table_use, ctx);
+    }
+    if let Some(keyword) = table_use.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("table"));
+        trivias = format_trivias_after_token(keyword, table_use, ctx);
+    }
+    if let Some(index) = table_use.children_by_kind(INDEX).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_index(index));
+        trivias = format_trivias_after_node(index, table_use, ctx);
+    }
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(table_use))
+        .group()
+}
+
+pub(crate) fn format_type_def(type_def: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = type_def.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, type_def, ctx);
+    }
+    if let Some(keyword) = type_def.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("type"));
+        trivias = format_trivias_after_token(keyword, type_def, ctx);
+    }
+    if let Some(ident) = type_def.tokens_by_kind(IDENT).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(Doc::text(ident.text().to_string()));
+        trivias = format_trivias_after_token(ident, type_def, ctx);
+    }
+    if let Some(sub_type) = type_def.children_by_kind(SUB_TYPE).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::line_or_space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_sub_type(sub_type, ctx));
+        trivias = format_trivias_after_node(sub_type, type_def, ctx);
+    }
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(type_def))
+        .group()
+}
+
+pub(crate) fn format_type_use(type_use: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = type_use.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, type_use, ctx);
+    }
+    if let Some(keyword) = type_use.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("type"));
+        trivias = format_trivias_after_token(keyword, type_use, ctx);
+    }
+    if let Some(index) = type_use.children_by_kind(INDEX).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_index(index));
+        trivias = format_trivias_after_node(index, type_use, ctx);
+    }
+    if let Some(r_paren) = type_use.tokens_by_kind(R_PAREN).next() {
+        docs.append(&mut trivias);
+        docs.push(ctx.format_right_paren(type_use).group());
+        trivias = format_trivias_after_token(r_paren, type_use, ctx);
+    }
+
+    let mut params = type_use.children_by_kind(PARAM);
+    if let Some(param) = params.next() {
+        if trivias.is_empty() && !docs.is_empty() {
+            docs.push(Doc::soft_line());
+        } else if type_use.tokens_by_kind(L_PAREN).next().is_some() {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_param(param, ctx));
+        trivias = format_trivias_after_node(param, type_use, ctx);
+    }
+    params.for_each(|param| {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_param(param, ctx));
+        trivias = format_trivias_after_node(param, type_use, ctx);
+    });
+    let mut results = type_use.children_by_kind(RESULT);
+    if let Some(result) = results.next() {
+        if trivias.is_empty() && !docs.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_result(result, ctx));
+        trivias = format_trivias_after_node(result, type_use, ctx);
+    }
+    results.for_each(|result| {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_result(result, ctx));
+        trivias = format_trivias_after_node(result, type_use, ctx);
+    });
+
+    Doc::list(docs)
+}
+
+pub(crate) fn format_extern_idx(extern_idx: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    if let Some(l_paren) = extern_idx.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, extern_idx, ctx);
+    }
+    if let Some(keyword) = extern_idx.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text(keyword.text().to_string()));
+        trivias = format_trivias_after_token(keyword, extern_idx, ctx);
+    }
+    if let Some(index) = extern_idx.children_by_kind(INDEX).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_index(index));
+        trivias = format_trivias_after_node(index, extern_idx, ctx);
+    }
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(extern_idx))
+        .group()
+}
+
+fn format_const_expr(parent: AmberNode, ctx: &Ctx, docs: &mut Vec<Doc<'static>>, trivias: &mut Vec<Doc<'static>>) {
+    let mut instrs = parent.children_by_kind(Instr::can_cast).peekable();
     if let Some(instr) = instrs.next() {
         if trivias.is_empty() {
             if matches!(ctx.options.wrap_before_const_expr, crate::config::WrapBefore::MultiOnly)
-                && instr.syntax().has_child_or_token_by_kind(Instr::can_cast)
+                && instr.children_by_kind(Instr::can_cast).next().is_some()
             {
                 docs.push(Doc::hard_line());
             } else {
@@ -1242,8 +1174,8 @@ fn format_const_expr(
         } else {
             docs.append(trivias);
         }
-        docs.push(instr.doc(ctx));
-        *trivias = format_trivias_after_node(instr.syntax().amber(), parent, ctx);
+        docs.push(format_instr(instr, ctx));
+        *trivias = format_trivias_after_node(instr, parent, ctx);
     }
     instrs.for_each(|instr| {
         if trivias.is_empty() {
@@ -1251,7 +1183,7 @@ fn format_const_expr(
         } else {
             docs.append(trivias);
         }
-        docs.push(instr.doc(ctx));
-        *trivias = format_trivias_after_node(instr.syntax().amber(), parent, ctx);
+        docs.push(format_instr(instr, ctx));
+        *trivias = format_trivias_after_node(instr, parent, ctx);
     });
 }
