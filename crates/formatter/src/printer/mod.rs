@@ -44,7 +44,7 @@ impl<'a> Ctx<'a> {
     }
 }
 
-pub(crate) fn format_node(node: AmberNode, ctx: &Ctx) -> Option<Doc<'static>> {
+pub(crate) fn format_node<'a>(node: AmberNode<'a>, ctx: &Ctx) -> Option<Doc<'a>> {
     match node.kind() {
         SyntaxKind::MODULE_NAME => Some(format_module_name(node)),
         SyntaxKind::NAME => Some(format_name(node)),
@@ -118,7 +118,7 @@ pub(crate) fn format_node(node: AmberNode, ctx: &Ctx) -> Option<Doc<'static>> {
     }
 }
 
-pub(crate) fn format_root(root: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_root<'a>(root: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
 
     let mut nodes_or_tokens = root.children_with_tokens().enumerate().peekable();
@@ -128,7 +128,7 @@ pub(crate) fn format_root(root: AmberNode, ctx: &Ctx) -> Doc<'static> {
         match node_or_token {
             NodeOrToken::Node(module) => {
                 if should_ignore(module, root, ctx) {
-                    reflow(&module.green().to_string(), &mut docs);
+                    reflow(module.green().to_string(), &mut docs);
                 } else {
                     docs.push(format_module(module, ctx));
                 }
@@ -160,7 +160,7 @@ pub(crate) fn format_root(root: AmberNode, ctx: &Ctx) -> Doc<'static> {
                         }
                     }
                 }
-                _ => docs.push(Doc::text(token.text().to_string())),
+                _ => docs.push(Doc::text(token.text())),
             },
         }
         prev_kind = kind;
@@ -170,7 +170,7 @@ pub(crate) fn format_root(root: AmberNode, ctx: &Ctx) -> Doc<'static> {
     Doc::list(docs)
 }
 
-fn format_trivias_after_node(node: AmberNode, parent: AmberNode, ctx: &Ctx) -> Vec<Doc<'static>> {
+fn format_trivias_after_node<'a>(node: AmberNode<'a>, parent: AmberNode<'a>, ctx: &Ctx) -> Vec<Doc<'a>> {
     let mut tokens = parent
         .children_with_tokens()
         .skip_while(|node_or_token| node_or_token.text_range().start() <= node.text_range().start())
@@ -223,13 +223,13 @@ fn format_trivias_after_node(node: AmberNode, parent: AmberNode, ctx: &Ctx) -> V
             }
         },
         SyntaxKind::ERROR | SyntaxKind::ANNOT_START | SyntaxKind::ANNOT_ELEM | SyntaxKind::ANNOT_END => {
-            docs.push(Doc::text(token.text().to_string()));
+            docs.push(Doc::text(token.text()));
         }
         _ => {}
     });
     docs
 }
-fn format_trivias_after_token(token: AmberToken, parent: AmberNode, ctx: &Ctx) -> Vec<Doc<'static>> {
+fn format_trivias_after_token<'a>(token: AmberToken<'a>, parent: AmberNode<'a>, ctx: &Ctx) -> Vec<Doc<'a>> {
     let mut tokens = parent
         .children_with_tokens()
         .skip_while(|node_or_token| node_or_token.text_range().start() <= token.text_range().start())
@@ -281,27 +281,27 @@ fn format_trivias_after_token(token: AmberToken, parent: AmberNode, ctx: &Ctx) -
             }
         },
         SyntaxKind::ERROR | SyntaxKind::ANNOT_START | SyntaxKind::ANNOT_ELEM | SyntaxKind::ANNOT_END => {
-            docs.push(Doc::text(token.text().to_string()));
+            docs.push(Doc::text(token.text()));
         }
         _ => {}
     });
     docs
 }
 
-fn format_line_comment(text: &str, ctx: &Ctx) -> Doc<'static> {
+fn format_line_comment<'a>(text: &'a str, ctx: &Ctx) -> Doc<'a> {
     if ctx.options.format_comments {
         let content = text.strip_prefix(";;").expect("line comment must start with `;;`");
         if content.is_empty() || content.starts_with([' ', '\t']) {
-            Doc::text(text.to_owned())
+            Doc::text(text)
         } else {
             Doc::text(format!(";; {content}"))
         }
     } else {
-        Doc::text(text.to_owned())
+        Doc::text(text)
     }
 }
 
-fn format_block_comment(text: &str, ctx: &Ctx) -> Doc<'static> {
+fn format_block_comment<'a>(text: &'a str, ctx: &Ctx) -> Doc<'a> {
     if ctx.options.format_comments {
         let content = text
             .strip_prefix("(;")
@@ -310,7 +310,7 @@ fn format_block_comment(text: &str, ctx: &Ctx) -> Doc<'static> {
         let has_leading_ws = content.starts_with([' ', '\t']);
         let has_trailing_ws = content.ends_with([' ', '\t']);
         if content.is_empty() || has_leading_ws && has_trailing_ws {
-            Doc::text(text.to_owned())
+            Doc::text(text)
         } else if has_leading_ws {
             Doc::text(format!("(;{content} ;)"))
         } else if has_trailing_ws {
@@ -319,11 +319,11 @@ fn format_block_comment(text: &str, ctx: &Ctx) -> Doc<'static> {
             Doc::text(format!("(; {content} ;)"))
         }
     } else {
-        Doc::text(text.to_owned())
+        Doc::text(text)
     }
 }
 
-fn reflow(text: &str, docs: &mut Vec<Doc<'static>>) {
+fn reflow(text: String, docs: &mut Vec<Doc>) {
     let mut lines = text.lines();
     if let Some(line) = lines.next() {
         docs.push(Doc::text(line.to_owned()));

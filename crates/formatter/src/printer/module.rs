@@ -2,7 +2,7 @@ use super::*;
 use tiny_pretty::Doc;
 use wat_syntax::{SyntaxKind::*, ast::AstNode};
 
-pub(crate) fn format_data(data: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_data<'a>(data: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = data.tokens_by_kind(L_PAREN).next() {
@@ -20,7 +20,7 @@ pub(crate) fn format_data(data: AmberNode, ctx: &Ctx) -> Doc<'static> {
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(string.text().to_string()));
+        docs.push(Doc::text(string.text()));
         trivias = format_trivias_after_token(string, data, ctx);
     });
     docs.append(&mut trivias);
@@ -30,7 +30,7 @@ pub(crate) fn format_data(data: AmberNode, ctx: &Ctx) -> Doc<'static> {
         .group()
 }
 
-pub(crate) fn format_elem(elem: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_elem<'a>(elem: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = elem.tokens_by_kind(L_PAREN).next() {
@@ -68,7 +68,7 @@ pub(crate) fn format_elem(elem: AmberNode, ctx: &Ctx) -> Doc<'static> {
         .group()
 }
 
-pub(crate) fn format_elem_expr(elem_expr: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_elem_expr<'a>(elem_expr: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = elem_expr.tokens_by_kind(L_PAREN).next() {
@@ -92,7 +92,7 @@ pub(crate) fn format_elem_expr(elem_expr: AmberNode, ctx: &Ctx) -> Doc<'static> 
     }
 }
 
-pub(crate) fn format_elem_list(elem_list: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_elem_list<'a>(elem_list: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(keyword) = elem_list.tokens_by_kind(KEYWORD).next() {
@@ -128,7 +128,7 @@ pub(crate) fn format_elem_list(elem_list: AmberNode, ctx: &Ctx) -> Doc<'static> 
     Doc::list(docs)
 }
 
-pub(crate) fn format_export(export: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_export<'a>(export: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = export.tokens_by_kind(L_PAREN).next() {
@@ -156,7 +156,7 @@ pub(crate) fn format_export(export: AmberNode, ctx: &Ctx) -> Doc<'static> {
         .group()
 }
 
-pub(crate) fn format_import(import: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_import<'a>(import: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = import.tokens_by_kind(L_PAREN).next() {
@@ -193,15 +193,15 @@ pub(crate) fn format_import(import: AmberNode, ctx: &Ctx) -> Doc<'static> {
         .group()
 }
 
-pub(crate) fn format_index(index: AmberNode) -> Doc<'static> {
+pub(crate) fn format_index<'a>(index: AmberNode<'a>) -> Doc<'a> {
     if let Some(token) = index.children_with_tokens().next().and_then(NodeOrToken::into_token) {
-        Doc::text(token.text().to_string())
+        Doc::text(token.text())
     } else {
         Doc::nil()
     }
 }
 
-pub(crate) fn format_local(local: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_local<'a>(local: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = local.tokens_by_kind(L_PAREN).next() {
@@ -219,7 +219,7 @@ pub(crate) fn format_local(local: AmberNode, ctx: &Ctx) -> Doc<'static> {
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, local, ctx);
     }
     local.children_by_kind(ValType::can_cast).for_each(|val_type| {
@@ -238,7 +238,7 @@ pub(crate) fn format_local(local: AmberNode, ctx: &Ctx) -> Doc<'static> {
         .group()
 }
 
-pub(crate) fn format_mem_use(mem_use: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_mem_use<'a>(mem_use: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = mem_use.tokens_by_kind(L_PAREN).next() {
@@ -266,7 +266,7 @@ pub(crate) fn format_mem_use(mem_use: AmberNode, ctx: &Ctx) -> Doc<'static> {
         .group()
 }
 
-pub(crate) fn format_module(module: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_module<'a>(module: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     let mut is_explicit_module = true;
@@ -287,7 +287,7 @@ pub(crate) fn format_module(module: AmberNode, ctx: &Ctx) -> Doc<'static> {
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, module, ctx);
     }
     module.children_by_kind(ModuleField::can_cast).for_each(|module_field| {
@@ -297,7 +297,7 @@ pub(crate) fn format_module(module: AmberNode, ctx: &Ctx) -> Doc<'static> {
             docs.append(&mut trivias);
         }
         if should_ignore(module_field, module, ctx) {
-            reflow(&module_field.green().to_string(), &mut docs);
+            reflow(module_field.green().to_string(), &mut docs);
         } else {
             match module_field.kind() {
                 MODULE_FIELD_DATA => docs.push(format_module_field_data(module_field, ctx)),
@@ -328,7 +328,7 @@ pub(crate) fn format_module(module: AmberNode, ctx: &Ctx) -> Doc<'static> {
     }
 }
 
-pub(crate) fn format_module_field_data(module_field_data: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_module_field_data<'a>(module_field_data: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = module_field_data.tokens_by_kind(L_PAREN).next() {
@@ -346,7 +346,7 @@ pub(crate) fn format_module_field_data(module_field_data: AmberNode, ctx: &Ctx) 
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, module_field_data, ctx);
     }
     if let Some(mem_use) = module_field_data.children_by_kind(MEM_USE).next() {
@@ -374,7 +374,7 @@ pub(crate) fn format_module_field_data(module_field_data: AmberNode, ctx: &Ctx) 
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(string.text().to_string()));
+        docs.push(Doc::text(string.text()));
         trivias = format_trivias_after_token(string, module_field_data, ctx);
     });
     docs.append(&mut trivias);
@@ -384,7 +384,7 @@ pub(crate) fn format_module_field_data(module_field_data: AmberNode, ctx: &Ctx) 
         .group()
 }
 
-pub(crate) fn format_module_field_elem(module_field_elem: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_module_field_elem<'a>(module_field_elem: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = module_field_elem.tokens_by_kind(L_PAREN).next() {
@@ -402,7 +402,7 @@ pub(crate) fn format_module_field_elem(module_field_elem: AmberNode, ctx: &Ctx) 
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, module_field_elem, ctx);
     }
     if let Some(keyword) = module_field_elem
@@ -452,7 +452,7 @@ pub(crate) fn format_module_field_elem(module_field_elem: AmberNode, ctx: &Ctx) 
         .group()
 }
 
-pub(crate) fn format_module_field_export(module_field_export: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_module_field_export<'a>(module_field_export: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = module_field_export.tokens_by_kind(L_PAREN).next() {
@@ -489,7 +489,7 @@ pub(crate) fn format_module_field_export(module_field_export: AmberNode, ctx: &C
         .group()
 }
 
-pub(crate) fn format_module_field_func(module_field_func: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_module_field_func<'a>(module_field_func: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = module_field_func.tokens_by_kind(L_PAREN).next() {
@@ -507,7 +507,7 @@ pub(crate) fn format_module_field_func(module_field_func: AmberNode, ctx: &Ctx) 
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, module_field_func, ctx);
     }
     module_field_func.children_by_kind(EXPORT).for_each(|export| {
@@ -580,7 +580,7 @@ pub(crate) fn format_module_field_func(module_field_func: AmberNode, ctx: &Ctx) 
         .group()
 }
 
-pub(crate) fn format_module_field_global(module_field_global: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_module_field_global<'a>(module_field_global: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = module_field_global.tokens_by_kind(L_PAREN).next() {
@@ -598,7 +598,7 @@ pub(crate) fn format_module_field_global(module_field_global: AmberNode, ctx: &C
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, module_field_global, ctx);
     }
     module_field_global.children_by_kind(EXPORT).for_each(|export| {
@@ -636,7 +636,7 @@ pub(crate) fn format_module_field_global(module_field_global: AmberNode, ctx: &C
         .group()
 }
 
-pub(crate) fn format_module_field_import(module_field_import: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_module_field_import<'a>(module_field_import: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = module_field_import.tokens_by_kind(L_PAREN).next() {
@@ -689,7 +689,7 @@ pub(crate) fn format_module_field_import(module_field_import: AmberNode, ctx: &C
         .group()
 }
 
-pub(crate) fn format_module_field_memory(module_field_memory: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_module_field_memory<'a>(module_field_memory: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = module_field_memory.tokens_by_kind(L_PAREN).next() {
@@ -707,7 +707,7 @@ pub(crate) fn format_module_field_memory(module_field_memory: AmberNode, ctx: &C
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, module_field_memory, ctx);
     }
     module_field_memory.children_by_kind(EXPORT).for_each(|export| {
@@ -753,7 +753,7 @@ pub(crate) fn format_module_field_memory(module_field_memory: AmberNode, ctx: &C
         .group()
 }
 
-pub(crate) fn format_module_field_start(module_field_start: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_module_field_start<'a>(module_field_start: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = module_field_start.tokens_by_kind(L_PAREN).next() {
@@ -781,7 +781,7 @@ pub(crate) fn format_module_field_start(module_field_start: AmberNode, ctx: &Ctx
         .group()
 }
 
-pub(crate) fn format_module_field_table(module_field_table: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_module_field_table<'a>(module_field_table: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = module_field_table.tokens_by_kind(L_PAREN).next() {
@@ -799,7 +799,7 @@ pub(crate) fn format_module_field_table(module_field_table: AmberNode, ctx: &Ctx
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, module_field_table, ctx);
     }
     module_field_table.children_by_kind(EXPORT).for_each(|export| {
@@ -855,7 +855,7 @@ pub(crate) fn format_module_field_table(module_field_table: AmberNode, ctx: &Ctx
         .group()
 }
 
-pub(crate) fn format_module_field_tag(module_field_tag: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_module_field_tag<'a>(module_field_tag: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = module_field_tag.tokens_by_kind(L_PAREN).next() {
@@ -873,7 +873,7 @@ pub(crate) fn format_module_field_tag(module_field_tag: AmberNode, ctx: &Ctx) ->
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, module_field_tag, ctx);
     }
     module_field_tag.children_by_kind(EXPORT).for_each(|export| {
@@ -910,23 +910,23 @@ pub(crate) fn format_module_field_tag(module_field_tag: AmberNode, ctx: &Ctx) ->
         .group()
 }
 
-pub(crate) fn format_module_name(module_name: AmberNode) -> Doc<'static> {
+pub(crate) fn format_module_name<'a>(module_name: AmberNode<'a>) -> Doc<'a> {
     if let Some(string) = module_name.tokens_by_kind(STRING).next() {
-        Doc::text(string.text().to_string())
+        Doc::text(string.text())
     } else {
         Doc::nil()
     }
 }
 
-pub(crate) fn format_name(name: AmberNode) -> Doc<'static> {
+pub(crate) fn format_name<'a>(name: AmberNode<'a>) -> Doc<'a> {
     if let Some(string) = name.tokens_by_kind(STRING).next() {
-        Doc::text(string.text().to_string())
+        Doc::text(string.text())
     } else {
         Doc::nil()
     }
 }
 
-pub(crate) fn format_offset(offset: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_offset<'a>(offset: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = offset.tokens_by_kind(L_PAREN).next() {
@@ -950,7 +950,7 @@ pub(crate) fn format_offset(offset: AmberNode, ctx: &Ctx) -> Doc<'static> {
     }
 }
 
-pub(crate) fn format_rec_type(rec_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_rec_type<'a>(rec_type: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = rec_type.tokens_by_kind(L_PAREN).next() {
@@ -978,7 +978,7 @@ pub(crate) fn format_rec_type(rec_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
         .group()
 }
 
-pub(crate) fn format_table_use(table_use: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_table_use<'a>(table_use: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = table_use.tokens_by_kind(L_PAREN).next() {
@@ -1006,7 +1006,7 @@ pub(crate) fn format_table_use(table_use: AmberNode, ctx: &Ctx) -> Doc<'static> 
         .group()
 }
 
-pub(crate) fn format_type_def(type_def: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_type_def<'a>(type_def: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = type_def.tokens_by_kind(L_PAREN).next() {
@@ -1024,7 +1024,7 @@ pub(crate) fn format_type_def(type_def: AmberNode, ctx: &Ctx) -> Doc<'static> {
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, type_def, ctx);
     }
     if let Some(sub_type) = type_def.children_by_kind(SUB_TYPE).next() {
@@ -1043,7 +1043,7 @@ pub(crate) fn format_type_def(type_def: AmberNode, ctx: &Ctx) -> Doc<'static> {
         .group()
 }
 
-pub(crate) fn format_type_use(type_use: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_type_use<'a>(type_use: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = type_use.tokens_by_kind(L_PAREN).next() {
@@ -1112,7 +1112,7 @@ pub(crate) fn format_type_use(type_use: AmberNode, ctx: &Ctx) -> Doc<'static> {
     Doc::list(docs)
 }
 
-pub(crate) fn format_extern_idx(extern_idx: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_extern_idx<'a>(extern_idx: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = extern_idx.tokens_by_kind(L_PAREN).next() {
@@ -1121,7 +1121,7 @@ pub(crate) fn format_extern_idx(extern_idx: AmberNode, ctx: &Ctx) -> Doc<'static
     }
     if let Some(keyword) = extern_idx.tokens_by_kind(KEYWORD).next() {
         docs.append(&mut trivias);
-        docs.push(Doc::text(keyword.text().to_string()));
+        docs.push(Doc::text(keyword.text()));
         trivias = format_trivias_after_token(keyword, extern_idx, ctx);
     }
     if let Some(index) = extern_idx.children_by_kind(INDEX).next() {
@@ -1140,7 +1140,7 @@ pub(crate) fn format_extern_idx(extern_idx: AmberNode, ctx: &Ctx) -> Doc<'static
         .group()
 }
 
-fn format_const_expr(parent: AmberNode, ctx: &Ctx, docs: &mut Vec<Doc<'static>>, trivias: &mut Vec<Doc<'static>>) {
+fn format_const_expr<'a>(parent: AmberNode<'a>, ctx: &Ctx, docs: &mut Vec<Doc<'a>>, trivias: &mut Vec<Doc<'a>>) {
     let mut instrs = parent.children_by_kind(Instr::can_cast).peekable();
     if let Some(instr) = instrs.next() {
         if trivias.is_empty() {

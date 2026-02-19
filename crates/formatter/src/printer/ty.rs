@@ -2,19 +2,19 @@ use super::*;
 use tiny_pretty::Doc;
 use wat_syntax::{NodeOrToken, SyntaxKind::*};
 
-pub(crate) fn format_addr_type(addr_type: AmberNode) -> Doc<'static> {
+pub(crate) fn format_addr_type<'a>(addr_type: AmberNode<'a>) -> Doc<'a> {
     if let Some(token) = addr_type
         .children_with_tokens()
         .next()
         .and_then(NodeOrToken::into_token)
     {
-        Doc::text(token.text().to_string())
+        Doc::text(token.text())
     } else {
         Doc::nil()
     }
 }
 
-pub(crate) fn format_array_type(array_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_array_type<'a>(array_type: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = array_type.tokens_by_kind(L_PAREN).next() {
@@ -42,7 +42,7 @@ pub(crate) fn format_array_type(array_type: AmberNode, ctx: &Ctx) -> Doc<'static
         .group()
 }
 
-pub(crate) fn format_comp_type(comp_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_comp_type<'a>(comp_type: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     match comp_type.kind() {
         FUNC_TYPE => format_func_type(comp_type, ctx),
         STRUCT_TYPE => format_struct_type(comp_type, ctx),
@@ -51,7 +51,7 @@ pub(crate) fn format_comp_type(comp_type: AmberNode, ctx: &Ctx) -> Doc<'static> 
     }
 }
 
-pub(crate) fn format_extern_type_func(func: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_extern_type_func<'a>(func: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     format_extern_type(
         func,
         func.children_by_kind(TYPE_USE)
@@ -61,7 +61,7 @@ pub(crate) fn format_extern_type_func(func: AmberNode, ctx: &Ctx) -> Doc<'static
     )
 }
 
-pub(crate) fn format_extern_type_global(global: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_extern_type_global<'a>(global: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     format_extern_type(
         global,
         global
@@ -72,7 +72,7 @@ pub(crate) fn format_extern_type_global(global: AmberNode, ctx: &Ctx) -> Doc<'st
     )
 }
 
-pub(crate) fn format_extern_type_memory(memory: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_extern_type_memory<'a>(memory: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     format_extern_type(
         memory,
         memory
@@ -83,7 +83,7 @@ pub(crate) fn format_extern_type_memory(memory: AmberNode, ctx: &Ctx) -> Doc<'st
     )
 }
 
-pub(crate) fn format_extern_type_table(table: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_extern_type_table<'a>(table: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     format_extern_type(
         table,
         table
@@ -94,7 +94,7 @@ pub(crate) fn format_extern_type_table(table: AmberNode, ctx: &Ctx) -> Doc<'stat
     )
 }
 
-pub(crate) fn format_extern_type_tag(tag: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_extern_type_tag<'a>(tag: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     format_extern_type(
         tag,
         tag.children_by_kind(TYPE_USE)
@@ -104,7 +104,7 @@ pub(crate) fn format_extern_type_tag(tag: AmberNode, ctx: &Ctx) -> Doc<'static> 
     )
 }
 
-pub(crate) fn format_field(field: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_field<'a>(field: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = field.tokens_by_kind(L_PAREN).next() {
@@ -122,7 +122,7 @@ pub(crate) fn format_field(field: AmberNode, ctx: &Ctx) -> Doc<'static> {
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, field, ctx);
     }
     field.children_by_kind(FIELD_TYPE).for_each(|field_type| {
@@ -141,7 +141,7 @@ pub(crate) fn format_field(field: AmberNode, ctx: &Ctx) -> Doc<'static> {
         .group()
 }
 
-pub(crate) fn format_field_type(field_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_field_type<'a>(field_type: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     if let Some(l_paren) = field_type.tokens_by_kind(L_PAREN).next() {
         let mut docs = Vec::with_capacity(2);
         docs.push(Doc::text("("));
@@ -172,7 +172,7 @@ pub(crate) fn format_field_type(field_type: AmberNode, ctx: &Ctx) -> Doc<'static
     }
 }
 
-pub(crate) fn format_func_type(func_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_func_type<'a>(func_type: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = func_type.tokens_by_kind(L_PAREN).next() {
@@ -209,7 +209,7 @@ pub(crate) fn format_func_type(func_type: AmberNode, ctx: &Ctx) -> Doc<'static> 
         .group()
 }
 
-pub(crate) fn format_global_type(global_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_global_type<'a>(global_type: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     if let Some(l_paren) = global_type.tokens_by_kind(L_PAREN).next() {
         let mut docs = Vec::with_capacity(2);
         docs.push(Doc::text("("));
@@ -240,9 +240,9 @@ pub(crate) fn format_global_type(global_type: AmberNode, ctx: &Ctx) -> Doc<'stat
     }
 }
 
-pub(crate) fn format_heap_type(heap_type: AmberNode) -> Doc<'static> {
+pub(crate) fn format_heap_type<'a>(heap_type: AmberNode<'a>) -> Doc<'a> {
     if let Some(type_keyword) = heap_type.tokens_by_kind(TYPE_KEYWORD).next() {
-        Doc::text(type_keyword.text().to_string())
+        Doc::text(type_keyword.text())
     } else if let Some(index) = heap_type.children_by_kind(INDEX).next() {
         format_index(index)
     } else {
@@ -250,12 +250,12 @@ pub(crate) fn format_heap_type(heap_type: AmberNode) -> Doc<'static> {
     }
 }
 
-pub(crate) fn format_limits(limits: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_limits<'a>(limits: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     let mut uints = limits.tokens_by_kind(UNSIGNED_INT);
     if let Some(min) = uints.next() {
-        docs.push(Doc::text(min.text().to_string()));
+        docs.push(Doc::text(min.text()));
         trivias = format_trivias_after_token(min, limits, ctx);
     }
     if let Some(max) = uints.next() {
@@ -264,12 +264,12 @@ pub(crate) fn format_limits(limits: AmberNode, ctx: &Ctx) -> Doc<'static> {
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(max.text().to_string()));
+        docs.push(Doc::text(max.text()));
     }
     Doc::list(docs)
 }
 
-pub(crate) fn format_mem_page_size(mem_page_size: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_mem_page_size<'a>(mem_page_size: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(5);
     let mut trivias = vec![];
     if let Some(l_paren) = mem_page_size.tokens_by_kind(L_PAREN).next() {
@@ -287,7 +287,7 @@ pub(crate) fn format_mem_page_size(mem_page_size: AmberNode, ctx: &Ctx) -> Doc<'
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(unsigned_int.text().to_string()));
+        docs.push(Doc::text(unsigned_int.text()));
         trivias = format_trivias_after_token(unsigned_int, mem_page_size, ctx);
     }
     docs.append(&mut trivias);
@@ -297,7 +297,7 @@ pub(crate) fn format_mem_page_size(mem_page_size: AmberNode, ctx: &Ctx) -> Doc<'
         .group()
 }
 
-pub(crate) fn format_mem_type(mem_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_mem_type<'a>(mem_type: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(addr_type) = mem_type.children_by_kind(ADDR_TYPE).next() {
@@ -319,7 +319,7 @@ pub(crate) fn format_mem_type(mem_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(share.text().to_string()));
+        docs.push(Doc::text(share.text()));
         trivias = format_trivias_after_token(share, mem_type, ctx);
     }
     if let Some(mem_page_size) = mem_type.children_by_kind(MEM_PAGE_SIZE).next() {
@@ -333,15 +333,23 @@ pub(crate) fn format_mem_type(mem_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
     Doc::list(docs)
 }
 
-pub(crate) fn format_num_type(num_type: AmberNode) -> Doc<'static> {
-    Doc::text(num_type.green().to_string())
+pub(crate) fn format_num_type<'a>(num_type: AmberNode<'a>) -> Doc<'a> {
+    if let Some(token) = num_type.tokens_by_kind(TYPE_KEYWORD).next() {
+        Doc::text(token.text())
+    } else {
+        Doc::nil()
+    }
 }
 
-pub(crate) fn format_packed_type(packed_type: AmberNode) -> Doc<'static> {
-    Doc::text(packed_type.green().to_string())
+pub(crate) fn format_packed_type<'a>(packed_type: AmberNode<'a>) -> Doc<'a> {
+    if let Some(token) = packed_type.tokens_by_kind(TYPE_KEYWORD).next() {
+        Doc::text(token.text())
+    } else {
+        Doc::nil()
+    }
 }
 
-pub(crate) fn format_param(param: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_param<'a>(param: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = param.tokens_by_kind(L_PAREN).next() {
@@ -359,7 +367,7 @@ pub(crate) fn format_param(param: AmberNode, ctx: &Ctx) -> Doc<'static> {
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, param, ctx);
     }
     param.children_by_kind(ValType::can_cast).for_each(|val_type| {
@@ -378,7 +386,7 @@ pub(crate) fn format_param(param: AmberNode, ctx: &Ctx) -> Doc<'static> {
         .group()
 }
 
-pub(crate) fn format_ref_type(ref_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_ref_type<'a>(ref_type: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     if let Some(l_paren) = ref_type.tokens_by_kind(L_PAREN).next() {
         let mut docs = Vec::with_capacity(2);
         docs.push(Doc::text("("));
@@ -412,13 +420,13 @@ pub(crate) fn format_ref_type(ref_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
             .append(ctx.format_right_paren(ref_type))
             .group()
     } else if let Some(type_keyword) = ref_type.tokens_by_kind(TYPE_KEYWORD).next() {
-        Doc::text(type_keyword.text().to_string())
+        Doc::text(type_keyword.text())
     } else {
         Doc::nil()
     }
 }
 
-pub(crate) fn format_result(result: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_result<'a>(result: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = result.tokens_by_kind(L_PAREN).next() {
@@ -446,7 +454,7 @@ pub(crate) fn format_result(result: AmberNode, ctx: &Ctx) -> Doc<'static> {
         .group()
 }
 
-pub(crate) fn format_storage_type(storage_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_storage_type<'a>(storage_type: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     if storage_type.kind() == PACKED_TYPE {
         format_packed_type(storage_type)
     } else {
@@ -454,7 +462,7 @@ pub(crate) fn format_storage_type(storage_type: AmberNode, ctx: &Ctx) -> Doc<'st
     }
 }
 
-pub(crate) fn format_struct_type(struct_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_struct_type<'a>(struct_type: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = struct_type.tokens_by_kind(L_PAREN).next() {
@@ -495,7 +503,7 @@ pub(crate) fn format_struct_type(struct_type: AmberNode, ctx: &Ctx) -> Doc<'stat
         .group()
 }
 
-pub(crate) fn format_sub_type(sub_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_sub_type<'a>(sub_type: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     if let Some(l_paren) = sub_type.tokens_by_kind(L_PAREN).next() {
         let mut docs = Vec::with_capacity(2);
         docs.push(Doc::text("("));
@@ -559,7 +567,7 @@ pub(crate) fn format_sub_type(sub_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
     }
 }
 
-pub(crate) fn format_table_type(table_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_table_type<'a>(table_type: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(addr_type) = table_type.children_by_kind(ADDR_TYPE).next() {
@@ -586,7 +594,7 @@ pub(crate) fn format_table_type(table_type: AmberNode, ctx: &Ctx) -> Doc<'static
     Doc::list(docs)
 }
 
-pub(crate) fn format_val_type(val_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_val_type<'a>(val_type: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     match val_type.kind() {
         NUM_TYPE => format_num_type(val_type),
         VEC_TYPE => format_vec_type(val_type),
@@ -595,11 +603,15 @@ pub(crate) fn format_val_type(val_type: AmberNode, ctx: &Ctx) -> Doc<'static> {
     }
 }
 
-pub(crate) fn format_vec_type(vec_type: AmberNode) -> Doc<'static> {
-    Doc::text(vec_type.green().to_string())
+pub(crate) fn format_vec_type<'a>(vec_type: AmberNode<'a>) -> Doc<'a> {
+    if let Some(token) = vec_type.tokens_by_kind(TYPE_KEYWORD).next() {
+        Doc::text(token.text())
+    } else {
+        Doc::nil()
+    }
 }
 
-fn format_extern_type(node: AmberNode, ty: Option<(AmberNode, Doc<'static>)>, ctx: &Ctx) -> Doc<'static> {
+fn format_extern_type<'a>(node: AmberNode<'a>, ty: Option<(AmberNode<'a>, Doc<'a>)>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = node.tokens_by_kind(L_PAREN).next() {
@@ -608,7 +620,7 @@ fn format_extern_type(node: AmberNode, ty: Option<(AmberNode, Doc<'static>)>, ct
     }
     if let Some(keyword) = node.tokens_by_kind(KEYWORD).next() {
         docs.append(&mut trivias);
-        docs.push(Doc::text(keyword.text().to_string()));
+        docs.push(Doc::text(keyword.text()));
         trivias = format_trivias_after_token(keyword, node, ctx);
     }
     if let Some(ident) = node.tokens_by_kind(IDENT).next() {
@@ -617,7 +629,7 @@ fn format_extern_type(node: AmberNode, ty: Option<(AmberNode, Doc<'static>)>, ct
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, node, ctx);
     }
     if let Some((ty, doc)) = ty {

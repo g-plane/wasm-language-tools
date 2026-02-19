@@ -3,7 +3,7 @@ use std::mem;
 use tiny_pretty::Doc;
 use wat_syntax::{NodeOrToken, SyntaxKind::*, ast::AstNode};
 
-pub(crate) fn format_block_block(block_block: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_block_block<'a>(block_block: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = block_block.tokens_by_kind(L_PAREN).next() {
@@ -21,7 +21,7 @@ pub(crate) fn format_block_block(block_block: AmberNode, ctx: &Ctx) -> Doc<'stat
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, block_block, ctx);
     }
     if let Some(type_use) = block_block.children_by_kind(TYPE_USE).next() {
@@ -58,13 +58,13 @@ pub(crate) fn format_block_block(block_block: AmberNode, ctx: &Ctx) -> Doc<'stat
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(Doc::text(ident.text().to_string()));
+            docs.push(Doc::text(ident.text()));
         }
     }
     Doc::list(docs).group()
 }
 
-pub(crate) fn format_block_if(block_if: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_block_if<'a>(block_if: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = block_if.tokens_by_kind(L_PAREN).next() {
@@ -82,7 +82,7 @@ pub(crate) fn format_block_if(block_if: AmberNode, ctx: &Ctx) -> Doc<'static> {
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, block_if, ctx);
     }
     if let Some(type_use) = block_if.children_by_kind(TYPE_USE).next() {
@@ -139,13 +139,13 @@ pub(crate) fn format_block_if(block_if: AmberNode, ctx: &Ctx) -> Doc<'static> {
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(Doc::text(ident.text().to_string()));
+            docs.push(Doc::text(ident.text()));
         }
         Doc::list(docs)
     }
 }
 
-pub(crate) fn format_block_if_else(block_if_else: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_block_if_else<'a>(block_if_else: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = block_if_else.tokens_by_kind(L_PAREN).next() {
@@ -163,7 +163,7 @@ pub(crate) fn format_block_if_else(block_if_else: AmberNode, ctx: &Ctx) -> Doc<'
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, block_if_else, ctx);
     }
     block_if_else.children_by_kind(Instr::can_cast).for_each(|instr| {
@@ -184,7 +184,7 @@ pub(crate) fn format_block_if_else(block_if_else: AmberNode, ctx: &Ctx) -> Doc<'
     }
 }
 
-pub(crate) fn format_block_if_then(block_if_then: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_block_if_then<'a>(block_if_then: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = block_if_then.tokens_by_kind(L_PAREN).next() {
@@ -202,7 +202,7 @@ pub(crate) fn format_block_if_then(block_if_then: AmberNode, ctx: &Ctx) -> Doc<'
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, block_if_then, ctx);
     }
     block_if_then.children_by_kind(Instr::can_cast).for_each(|instr| {
@@ -223,7 +223,7 @@ pub(crate) fn format_block_if_then(block_if_then: AmberNode, ctx: &Ctx) -> Doc<'
     }
 }
 
-pub(crate) fn format_block_loop(block_loop: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_block_loop<'a>(block_loop: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = block_loop.tokens_by_kind(L_PAREN).next() {
@@ -241,7 +241,7 @@ pub(crate) fn format_block_loop(block_loop: AmberNode, ctx: &Ctx) -> Doc<'static
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, block_loop, ctx);
     }
     if let Some(type_use) = block_loop.children_by_kind(TYPE_USE).next() {
@@ -278,13 +278,13 @@ pub(crate) fn format_block_loop(block_loop: AmberNode, ctx: &Ctx) -> Doc<'static
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(Doc::text(ident.text().to_string()));
+            docs.push(Doc::text(ident.text()));
         }
     }
     Doc::list(docs).group()
 }
 
-pub(crate) fn format_block_try_table(block_try_table: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_block_try_table<'a>(block_try_table: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = block_try_table.tokens_by_kind(L_PAREN).next() {
@@ -302,7 +302,7 @@ pub(crate) fn format_block_try_table(block_try_table: AmberNode, ctx: &Ctx) -> D
         } else {
             docs.append(&mut trivias);
         }
-        docs.push(Doc::text(ident.text().to_string()));
+        docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, block_try_table, ctx);
     }
     if let Some(type_use) = block_try_table.children_by_kind(TYPE_USE).next() {
@@ -355,13 +355,13 @@ pub(crate) fn format_block_try_table(block_try_table: AmberNode, ctx: &Ctx) -> D
             } else {
                 docs.append(&mut trivias);
             }
-            docs.push(Doc::text(ident.text().to_string()));
+            docs.push(Doc::text(ident.text()));
         }
     }
     Doc::list(docs).group()
 }
 
-pub(crate) fn format_catch(catch: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_catch<'a>(catch: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = catch.tokens_by_kind(L_PAREN).next() {
@@ -370,7 +370,7 @@ pub(crate) fn format_catch(catch: AmberNode, ctx: &Ctx) -> Doc<'static> {
     }
     if let Some(keyword) = catch.tokens_by_kind(KEYWORD).next() {
         docs.append(&mut trivias);
-        docs.push(Doc::text(keyword.text().to_string()));
+        docs.push(Doc::text(keyword.text()));
         trivias = format_trivias_after_token(keyword, catch, ctx);
     }
     let mut indexes = catch.children_by_kind(INDEX);
@@ -399,7 +399,7 @@ pub(crate) fn format_catch(catch: AmberNode, ctx: &Ctx) -> Doc<'static> {
         .group()
 }
 
-pub(crate) fn format_catch_all(catch_all: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_catch_all<'a>(catch_all: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = catch_all.tokens_by_kind(L_PAREN).next() {
@@ -408,7 +408,7 @@ pub(crate) fn format_catch_all(catch_all: AmberNode, ctx: &Ctx) -> Doc<'static> 
     }
     if let Some(keyword) = catch_all.tokens_by_kind(KEYWORD).next() {
         docs.append(&mut trivias);
-        docs.push(Doc::text(keyword.text().to_string()));
+        docs.push(Doc::text(keyword.text()));
         trivias = format_trivias_after_token(keyword, catch_all, ctx);
     }
     if let Some(label_index) = catch_all.children_by_kind(INDEX).next() {
@@ -427,7 +427,7 @@ pub(crate) fn format_catch_all(catch_all: AmberNode, ctx: &Ctx) -> Doc<'static> 
         .group()
 }
 
-pub(crate) fn format_immediate(immediate: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_immediate<'a>(immediate: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     match immediate.children_with_tokens().next() {
         Some(NodeOrToken::Node(node)) => match node.kind() {
             TYPE_USE => format_type_use(node, ctx),
@@ -436,12 +436,12 @@ pub(crate) fn format_immediate(immediate: AmberNode, ctx: &Ctx) -> Doc<'static> 
             REF_TYPE => format_ref_type(node, ctx),
             _ => Doc::nil(),
         },
-        Some(NodeOrToken::Token(token)) => Doc::text(token.text().to_string()),
+        Some(NodeOrToken::Token(token)) => Doc::text(token.text()),
         None => Doc::nil(),
     }
 }
 
-pub(crate) fn format_instr(instr: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_instr<'a>(instr: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     match instr.kind() {
         PLAIN_INSTR => format_plain_instr(instr, ctx),
         BLOCK_BLOCK => format_block_block(instr, ctx),
@@ -452,19 +452,19 @@ pub(crate) fn format_instr(instr: AmberNode, ctx: &Ctx) -> Doc<'static> {
     }
 }
 
-pub(crate) fn format_mem_arg(mem_arg: AmberNode) -> Doc<'static> {
+pub(crate) fn format_mem_arg<'a>(mem_arg: AmberNode<'a>) -> Doc<'a> {
     let mut docs = Vec::with_capacity(3);
     if let Some(keyword) = mem_arg.tokens_by_kind(MEM_ARG_KEYWORD).next() {
-        docs.push(Doc::text(keyword.text().to_string()));
+        docs.push(Doc::text(keyword.text()));
     }
     docs.push(Doc::text("="));
     if let Some(unsigned_int) = mem_arg.tokens_by_kind(UNSIGNED_INT).next() {
-        docs.push(Doc::text(unsigned_int.text().to_string()));
+        docs.push(Doc::text(unsigned_int.text()));
     }
     Doc::list(docs)
 }
 
-pub(crate) fn format_plain_instr(plain_instr: AmberNode, ctx: &Ctx) -> Doc<'static> {
+pub(crate) fn format_plain_instr<'a>(plain_instr: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     let mut docs = Vec::with_capacity(2);
     let mut trivias = vec![];
     if let Some(l_paren) = plain_instr.tokens_by_kind(L_PAREN).next() {
@@ -473,7 +473,7 @@ pub(crate) fn format_plain_instr(plain_instr: AmberNode, ctx: &Ctx) -> Doc<'stat
     }
     if let Some(instr_name) = plain_instr.tokens_by_kind(INSTR_NAME).next() {
         docs.append(&mut trivias);
-        docs.push(Doc::text(instr_name.text().to_string()));
+        docs.push(Doc::text(instr_name.text()));
         trivias = format_trivias_after_token(instr_name, plain_instr, ctx);
     }
     plain_instr.children_by_kind(IMMEDIATE).for_each(|immediate| {
