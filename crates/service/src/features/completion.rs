@@ -28,7 +28,7 @@ impl LanguageService {
             let token = helpers::syntax::find_token(&root, line_index.convert(params.position)?)?;
 
             let cmp_ctx = get_cmp_ctx(&token)?;
-            let items = get_cmp_list(db, cmp_ctx, &token, document, line_index, &root);
+            let items = get_cmp_list(db, cmp_ctx, &token, document, line_index);
             if items.is_empty() { None } else { Some(items) }
         })
         .flatten()
@@ -639,7 +639,6 @@ fn get_cmp_list(
     token: &SyntaxToken,
     document: Document,
     line_index: &LineIndex,
-    root: &SyntaxNode,
 ) -> Vec<CompletionItem> {
     let symbol_table = SymbolTable::of(db, document);
     ctx.into_iter().fold(Vec::with_capacity(2), |mut items, ctx| {
@@ -792,10 +791,12 @@ fn get_cmp_list(
                             ),
                             ..Default::default()
                         }),
-                        documentation: Some(Union2::B(MarkupContent {
-                            kind: MarkupKind::Markdown,
-                            value: helpers::syntax::get_doc_comment(&symbol.key.to_node(root)),
-                        })),
+                        documentation: helpers::get_doc_comment(symbol, symbol_table).map(|value| {
+                            Union2::B(MarkupContent {
+                                kind: MarkupKind::Markdown,
+                                value,
+                            })
+                        }),
                         tags: if deprecation.contains_key(&symbol.key) {
                             Some(vec![CompletionItemTag::Deprecated])
                         } else {

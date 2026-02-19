@@ -1,7 +1,8 @@
+use crate::binder::{Symbol, SymbolTable};
 use line_index::{LineCol, LineIndex};
 use lspt::{Position, Range};
 use std::num::ParseIntError;
-use wat_syntax::{TextRange, TextSize};
+use wat_syntax::{NodeOrToken, SyntaxKind, TextRange, TextSize};
 
 pub use self::arena::{BumpCollectionsExt, BumpHashMap, BumpHashSet};
 
@@ -81,6 +82,33 @@ pub fn parse_u32(s: &str) -> Result<u32, ParseIntError> {
     }
 }
 
+pub fn get_doc_comment(def_symbol: &Symbol, symbol_table: &SymbolTable) -> Option<String> {
+    let node = def_symbol.amber();
+    symbol_table.symbols.get(&def_symbol.region).map(|module| {
+        module
+            .amber()
+            .children_with_tokens()
+            .rev()
+            .skip_while(|node_or_token| node_or_token.text_range().start() >= node.text_range().start())
+            .map_while(|node_or_token| match node_or_token {
+                NodeOrToken::Token(token) if token.kind().is_trivia() => Some(token),
+                _ => None,
+            })
+            .filter(|token| token.kind() == SyntaxKind::LINE_COMMENT)
+            .skip_while(|token| !token.text().starts_with(";;;"))
+            .take_while(|token| token.text().starts_with(";;;"))
+            .fold(String::new(), |mut doc, comment| {
+                if !doc.is_empty() {
+                    doc.insert(0, '\n');
+                }
+                if let Some(text) = comment.text().strip_prefix(";;;") {
+                    doc.insert_str(0, text.strip_prefix([' ', '\t']).unwrap_or(text));
+                }
+                doc
+            })
+    })
+}
+
 pub(crate) struct RenderWithDb<'db, T> {
     pub value: T,
     pub db: &'db dyn salsa::Database,
@@ -143,23 +171,6 @@ pub(crate) mod syntax {
             TokenAtOffset::Single(token) => Some(token),
             TokenAtOffset::Between(left, _) => Some(left),
         }
-    }
-
-    pub fn get_doc_comment(node: &SyntaxNode) -> String {
-        node.prev_consecutive_tokens()
-            .take_while(|token| token.kind().is_trivia())
-            .filter(|token| token.kind() == SyntaxKind::LINE_COMMENT)
-            .skip_while(|token| !token.text().starts_with(";;;"))
-            .take_while(|token| token.text().starts_with(";;;"))
-            .fold(String::new(), |mut doc, comment| {
-                if !doc.is_empty() {
-                    doc.insert(0, '\n');
-                }
-                if let Some(text) = comment.text().strip_prefix(";;;") {
-                    doc.insert_str(0, text.strip_prefix([' ', '\t']).unwrap_or(text));
-                }
-                doc
-            })
     }
 }
 

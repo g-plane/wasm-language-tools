@@ -40,7 +40,7 @@ impl LanguageService {
                     | SymbolKind::DataRef
                     | SymbolKind::ElemRef => symbol_table
                         .find_def(key)
-                        .and_then(|symbol| create_def_hover(self, document, &root, symbol))
+                        .and_then(|symbol| create_def_hover(self, document, &root, symbol_table, symbol))
                         .map(|contents| Hover {
                             contents: Union3::A(contents),
                             range: Some(line_index.convert(token.text_range())),
@@ -59,7 +59,7 @@ impl LanguageService {
                     | SymbolKind::ElemDef => symbol_table
                         .symbols
                         .get(&key)
-                        .and_then(|symbol| create_def_hover(self, document, &root, symbol))
+                        .and_then(|symbol| create_def_hover(self, document, &root, symbol_table, symbol))
                         .map(|contents| Hover {
                             contents: Union3::A(contents),
                             range: Some(line_index.convert(token.text_range())),
@@ -87,7 +87,7 @@ impl LanguageService {
                 symbol_table
                     .symbols
                     .get(&SymbolKey::new(&node))
-                    .and_then(|symbol| create_def_hover(self, document, &root, symbol))
+                    .and_then(|symbol| create_def_hover(self, document, &root, symbol_table, symbol))
                     .map(|contents| Hover {
                         contents: Union3::A(contents),
                         range: Some(line_index.convert(if matches!(token.text(), "mut" | "ref") {
@@ -155,13 +155,14 @@ fn create_def_hover(
     db: &dyn salsa::Database,
     document: Document,
     root: &SyntaxNode,
+    symbol_table: &SymbolTable,
     symbol: &Symbol,
 ) -> Option<MarkupContent> {
     match symbol.kind {
         SymbolKind::Param | SymbolKind::Local => Some(create_param_or_local_hover(db, symbol)),
         SymbolKind::Func => Some(MarkupContent {
             kind: MarkupKind::Markdown,
-            value: create_func_hover(db, document, symbol, root),
+            value: create_func_hover(db, document, symbol_table, symbol),
         }),
         SymbolKind::Type => Some(create_type_def_hover(db, document, symbol)),
         SymbolKind::GlobalDef => Some(create_global_def_hover(db, document, symbol)),
@@ -176,9 +177,13 @@ fn create_def_hover(
     }
 }
 
-fn create_func_hover(db: &dyn salsa::Database, document: Document, symbol: &Symbol, root: &SyntaxNode) -> String {
-    let node = symbol.key.to_node(root);
-    let doc = helpers::syntax::get_doc_comment(&node);
+fn create_func_hover(
+    db: &dyn salsa::Database,
+    document: Document,
+    symbol_table: &SymbolTable,
+    symbol: &Symbol,
+) -> String {
+    let doc = helpers::get_doc_comment(symbol, symbol_table).filter(|doc| !doc.is_empty());
     let mut content = format!(
         "```wat\n{}\n```",
         types_analyzer::render_func_header(
@@ -187,7 +192,7 @@ fn create_func_hover(db: &dyn salsa::Database, document: Document, symbol: &Symb
             types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green)
         )
     );
-    if !doc.is_empty() {
+    if let Some(doc) = doc {
         content.push_str("\n---\n");
         content.push_str(&doc);
     }

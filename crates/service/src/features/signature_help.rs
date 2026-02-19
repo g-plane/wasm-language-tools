@@ -97,12 +97,14 @@ impl LanguageService {
             Some(SignatureHelp {
                 signatures: vec![SignatureInformation {
                     label,
-                    documentation: func.map(|func| {
-                        Union2::B(MarkupContent {
-                            kind: MarkupKind::Markdown,
-                            value: helpers::syntax::get_doc_comment(&func.key.to_node(&root)),
-                        })
-                    }),
+                    documentation: func
+                        .and_then(|func| helpers::get_doc_comment(func, symbol_table))
+                        .map(|value| {
+                            Union2::B(MarkupContent {
+                                kind: MarkupKind::Markdown,
+                                value,
+                            })
+                        }),
                     parameters: Some(parameters),
                     active_parameter: instr
                         .and_then(|instr| {
