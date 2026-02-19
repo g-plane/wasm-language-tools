@@ -14,8 +14,7 @@ use wat_formatter::format;
 use wat_syntax::{SyntaxNode, ast::{AstNode, Root}};
 
 let input = "( module )";
-let (tree, _) = wat_parser::parse(input);
-let root = Root::cast(SyntaxNode::new_root(tree)).unwrap();
+let (root, _) = wat_parser::parse(input);
 assert_eq!("(module)\n", format(&root, &Default::default()));
 ```
 

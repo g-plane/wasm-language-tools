@@ -266,85 +266,65 @@ pub(crate) fn format_mem_use(mem_use: AmberNode, ctx: &Ctx) -> Doc<'static> {
         .group()
 }
 
-impl DocGen for Module {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        let mut docs = Vec::with_capacity(2);
-        let mut trivias = vec![];
-        let mut is_explicit_module = true;
-        if let Some(l_paren) = self.l_paren_token() {
-            docs.push(Doc::text("("));
-            trivias = format_trivias_after_token(l_paren.amber(), self.syntax().amber(), ctx);
-        } else {
-            is_explicit_module = false;
-        }
-        if let Some(keyword) = self.keyword() {
-            docs.append(&mut trivias);
-            docs.push(Doc::text("module"));
-            trivias = format_trivias_after_token(keyword.amber(), self.syntax().amber(), ctx);
-        }
-        if let Some(ident) = self.ident_token() {
-            if trivias.is_empty() {
-                docs.push(Doc::space());
-            } else {
-                docs.append(&mut trivias);
-            }
-            docs.push(Doc::text(ident.to_string()));
-            trivias = format_trivias_after_token(ident.amber(), self.syntax().amber(), ctx);
-        }
-        self.module_fields().for_each(|module_field| {
-            if trivias.is_empty() && (!docs.is_empty() || !docs.is_empty()) {
-                docs.push(Doc::hard_line());
-            } else {
-                docs.append(&mut trivias);
-            }
-            let node = module_field.syntax();
-            if should_ignore(node, ctx) {
-                reflow(&node.to_string(), &mut docs);
-            } else {
-                docs.push(module_field.doc(ctx));
-            }
-            trivias = format_trivias_after_node(module_field.syntax().amber(), self.syntax().amber(), ctx);
-        });
-        docs.append(&mut trivias);
-        if is_explicit_module {
-            Doc::list(docs)
-                .nest(ctx.indent_width)
-                .append(ctx.format_right_paren(self.syntax().amber()))
-                .group()
-        } else {
-            Doc::list(docs)
-        }
+pub(crate) fn format_module(module: AmberNode, ctx: &Ctx) -> Doc<'static> {
+    let mut docs = Vec::with_capacity(2);
+    let mut trivias = vec![];
+    let mut is_explicit_module = true;
+    if let Some(l_paren) = module.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, module, ctx);
+    } else {
+        is_explicit_module = false;
     }
-}
-
-impl DocGen for ModuleField {
-    fn doc(&self, ctx: &Ctx) -> Doc<'static> {
-        match self {
-            ModuleField::Data(module_field_data) => format_module_field_data(module_field_data.syntax().amber(), ctx),
-            ModuleField::Elem(module_field_elem) => format_module_field_elem(module_field_elem.syntax().amber(), ctx),
-            ModuleField::Export(module_field_export) => {
-                format_module_field_export(module_field_export.syntax().amber(), ctx)
-            }
-            ModuleField::Func(module_field_func) => format_module_field_func(module_field_func.syntax().amber(), ctx),
-            ModuleField::Global(module_field_global) => {
-                format_module_field_global(module_field_global.syntax().amber(), ctx)
-            }
-            ModuleField::Import(module_field_import) => {
-                format_module_field_import(module_field_import.syntax().amber(), ctx)
-            }
-            ModuleField::Memory(module_field_memory) => {
-                format_module_field_memory(module_field_memory.syntax().amber(), ctx)
-            }
-            ModuleField::Start(module_field_start) => {
-                format_module_field_start(module_field_start.syntax().amber(), ctx)
-            }
-            ModuleField::Table(module_field_table) => {
-                format_module_field_table(module_field_table.syntax().amber(), ctx)
-            }
-            ModuleField::Tag(module_field_tag) => format_module_field_tag(module_field_tag.syntax().amber(), ctx),
-            ModuleField::Type(type_def) => format_type_def(type_def.syntax().amber(), ctx),
-            ModuleField::RecType(rec_type) => format_rec_type(rec_type.syntax().amber(), ctx),
+    if let Some(keyword) = module.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("module"));
+        trivias = format_trivias_after_token(keyword, module, ctx);
+    }
+    if let Some(ident) = module.tokens_by_kind(IDENT).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
         }
+        docs.push(Doc::text(ident.text().to_string()));
+        trivias = format_trivias_after_token(ident, module, ctx);
+    }
+    module.children_by_kind(ModuleField::can_cast).for_each(|module_field| {
+        if trivias.is_empty() && (!docs.is_empty() || !docs.is_empty()) {
+            docs.push(Doc::hard_line());
+        } else {
+            docs.append(&mut trivias);
+        }
+        if should_ignore(module_field, module, ctx) {
+            reflow(&module_field.green().to_string(), &mut docs);
+        } else {
+            match module_field.kind() {
+                MODULE_FIELD_DATA => docs.push(format_module_field_data(module_field, ctx)),
+                MODULE_FIELD_ELEM => docs.push(format_module_field_elem(module_field, ctx)),
+                MODULE_FIELD_EXPORT => docs.push(format_module_field_export(module_field, ctx)),
+                MODULE_FIELD_FUNC => docs.push(format_module_field_func(module_field, ctx)),
+                MODULE_FIELD_GLOBAL => docs.push(format_module_field_global(module_field, ctx)),
+                MODULE_FIELD_IMPORT => docs.push(format_module_field_import(module_field, ctx)),
+                MODULE_FIELD_MEMORY => docs.push(format_module_field_memory(module_field, ctx)),
+                MODULE_FIELD_START => docs.push(format_module_field_start(module_field, ctx)),
+                MODULE_FIELD_TABLE => docs.push(format_module_field_table(module_field, ctx)),
+                MODULE_FIELD_TAG => docs.push(format_module_field_tag(module_field, ctx)),
+                TYPE_DEF => docs.push(format_type_def(module_field, ctx)),
+                REC_TYPE => docs.push(format_rec_type(module_field, ctx)),
+                _ => {}
+            }
+        }
+        trivias = format_trivias_after_node(module_field, module, ctx);
+    });
+    docs.append(&mut trivias);
+    if is_explicit_module {
+        Doc::list(docs)
+            .nest(ctx.indent_width)
+            .append(ctx.format_right_paren(module))
+            .group()
+    } else {
+        Doc::list(docs)
     }
 }
 

@@ -97,11 +97,6 @@ impl SyntaxToken {
     pub fn prev_consecutive_tokens(&self) -> impl Iterator<Item = SyntaxToken> {
         self.data.parent.prev_consecutive_tokens(self.data.index)
     }
-
-    #[inline]
-    pub fn has_prev_sibling_or_token(&self) -> bool {
-        self.data.index > 0
-    }
 }
 
 impl fmt::Debug for SyntaxToken {

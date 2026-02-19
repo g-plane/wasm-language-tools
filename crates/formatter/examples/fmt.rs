@@ -1,9 +1,5 @@
 use std::{env, error::Error, fs, io};
 use wat_formatter::{config::FormatOptions, format};
-use wat_syntax::{
-    SyntaxNode,
-    ast::{AstNode, Root},
-};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let file_path = env::args().nth(1).unwrap();
@@ -19,7 +15,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     };
 
-    let (tree, _) = wat_parser::parse(&input);
-    print!("{}", format(&Root::cast(SyntaxNode::new_root(tree)).unwrap(), &options));
+    let (root, _) = wat_parser::parse(&input);
+    print!("{}", format(&root, &options));
     Ok(())
 }

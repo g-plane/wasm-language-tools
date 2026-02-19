@@ -1,7 +1,10 @@
 use crate::{LanguageService, helpers::LineIndexExt, uri::InternUri};
 use lspt::{DocumentFormattingParams, DocumentRangeFormattingParams, FormattingOptions, TextEdit};
 use wat_formatter::config::{FormatOptions, LanguageOptions, LayoutOptions};
-use wat_syntax::ast::{AstNode, Root};
+use wat_syntax::{
+    TextRange,
+    ast::{AstNode, Root},
+};
 
 impl LanguageService {
     /// Handler for `textDocument/formatting` request.
@@ -11,10 +14,10 @@ impl LanguageService {
         let configs = self.configs.read();
         let config = configs.get(&uri)?.unwrap_or_global(self);
         let line_index = document.line_index(self);
-        let root = Root::cast(document.root_tree(self))?;
+        let root = document.root(self);
         let formatted = wat_formatter::format(&root, &build_options(&params.options, config.format.clone()));
         let text_edit = TextEdit {
-            range: line_index.convert(root.syntax().text_range()),
+            range: line_index.convert(TextRange::new(0.into(), root.text_len())),
             new_text: formatted,
         };
         Some(vec![text_edit])

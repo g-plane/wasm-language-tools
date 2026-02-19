@@ -1,10 +1,6 @@
 use insta::{Settings, assert_snapshot, glob};
 use std::{collections::HashMap, fs, path::Path};
 use wat_formatter::{config::FormatOptions, format};
-use wat_syntax::{
-    SyntaxNode,
-    ast::{AstNode, Root},
-};
 
 #[test]
 fn fmt_snapshot() {
@@ -34,20 +30,20 @@ fn fmt_snapshot() {
 }
 
 fn run_format_test(path: &Path, input: &str, options: &FormatOptions) -> String {
-    let (tree, _) = wat_parser::parse(input);
-    let output = format(&Root::cast(SyntaxNode::new_root(tree)).unwrap(), options);
+    let (root, _) = wat_parser::parse(input);
+    let output = format(&root, options);
 
     assert!(!output.starts_with('\n'), "'{}' has leading newline", path.display());
     assert!(!output.contains(" \n"), "'{}' has trailing whitespaces", path.display());
 
-    let (tree, errors) = wat_parser::parse(&output);
+    let (root, errors) = wat_parser::parse(&output);
     assert!(
         errors.is_empty(),
         "syntax error in stability test '{}': {:?}",
         path.display(),
         errors
     );
-    let regression_format = format(&Root::cast(SyntaxNode::new_root(tree)).unwrap(), options);
+    let regression_format = format(&root, options);
     similar_asserts::assert_eq!(output, regression_format, "'{}' format is unstable", path.display());
 
     output

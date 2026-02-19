@@ -2,12 +2,12 @@
 
 use self::{
     config::FormatOptions,
-    printer::{Ctx, DocGen, format_node},
+    printer::{Ctx, format_node, format_root},
 };
 use line_index::LineIndex;
 use tiny_pretty::{IndentKind, PrintOptions};
 use wat_syntax::{
-    TextRange,
+    AmberNode, GreenNode, TextRange,
     ast::{AstNode, Root},
 };
 
@@ -15,9 +15,9 @@ pub mod config;
 mod printer;
 
 /// Print the given concrete syntax tree.
-pub fn format(root: &Root, options: &FormatOptions) -> String {
+pub fn format(root: &GreenNode, options: &FormatOptions) -> String {
     let ctx = Ctx::new(options);
-    tiny_pretty::print(&root.doc(&ctx), &build_options(options))
+    tiny_pretty::print(&format_root(AmberNode::new_root(root), &ctx), &build_options(options))
 }
 
 /// Print a specific range from a root syntax tree.
@@ -38,7 +38,7 @@ pub fn format_range(
     let col = line_index.line_col(range.start()).col as usize;
 
     let ctx = Ctx::new(options);
-    let doc = format_node(node, &ctx)?.nest(col);
+    let doc = format_node(node.amber(), &ctx)?.nest(col);
     Some((tiny_pretty::print(&doc, &build_options(options)), range))
 }
 

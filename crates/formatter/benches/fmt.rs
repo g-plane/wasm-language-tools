@@ -1,8 +1,4 @@
 use criterion::{Criterion, criterion_group, criterion_main};
-use wat_syntax::{
-    SyntaxNode,
-    ast::{AstNode, Root},
-};
 
 static CODE: &str = r#"(module
     (func $f1 (param $p1 i32) (param $p2 i32) (result i32)
@@ -36,8 +32,7 @@ static CODE: &str = r#"(module
 
 fn bench_fmt(c: &mut Criterion) {
     c.bench_function("fmt", |b| {
-        let (tree, _) = wat_parser::parse(CODE);
-        let root = Root::cast(SyntaxNode::new_root(tree)).unwrap();
+        let (root, _) = wat_parser::parse(CODE);
         b.iter(|| {
             let _ = wat_formatter::format(&root, &Default::default());
         });
