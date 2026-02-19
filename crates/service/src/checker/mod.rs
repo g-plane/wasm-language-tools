@@ -78,7 +78,6 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         db,
                         document,
                         config.lint.unreachable,
-                        &root,
                         &node,
                         &mut bump,
                     );

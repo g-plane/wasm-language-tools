@@ -18,7 +18,6 @@ pub fn check(
     db: &dyn salsa::Database,
     document: Document,
     lint_level: LintLevel,
-    root: &SyntaxNode,
     node: &SyntaxNode,
     bump: &mut Bump,
 ) {
@@ -31,14 +30,16 @@ pub fn check(
 
     let cfg = cfa::analyze(db, document, SyntaxNodePtr::new(node));
     let mut ranges = BumpVec::<TextRange>::new_in(bump);
-    cfg.graph.raw_nodes().iter().for_each(|node| {
-        if !node.weight.unreachable {
+    cfg.graph.raw_nodes().iter().for_each(|raw_node| {
+        if !raw_node.weight.unreachable {
             return;
         }
-        match &node.weight.kind {
+        match &raw_node.weight.kind {
             FlowNodeKind::BasicBlock(bb) => {
                 bb.0.iter().for_each(|instr| {
-                    let instr = instr.ptr.to_node(root);
+                    let Some(instr) = instr.ptr.try_to_node(node) else {
+                        return;
+                    };
                     let current = instr.text_range();
                     if let Some(last) = ranges.last_mut() {
                         if instr
@@ -51,6 +52,7 @@ pub fn check(
                         } else if current.contains_range(*last) {
                             // this can be occurred for folded instructions
                             if instr
+                                .amber()
                                 .children_by_kind(Instr::can_cast)
                                 .next()
                                 .is_none_or(|first| last.contains_range(first.text_range()))
@@ -58,7 +60,8 @@ pub fn check(
                                 // current instruction is the parent of last range,
                                 // and all children are from the same basic block with current instruction
                                 *last = current;
-                            } else if let Some(instr_name) = support::token(&instr, SyntaxKind::INSTR_NAME) {
+                            } else if let Some(instr_name) = instr.amber().tokens_by_kind(SyntaxKind::INSTR_NAME).next()
+                            {
                                 // if there're child instructions from different basic blocks,
                                 // only mark the instruction name as unreachable
                                 ranges.push(instr_name.text_range());
@@ -77,7 +80,9 @@ pub fn check(
                 });
             }
             FlowNodeKind::BlockEntry(entry) => {
-                let node = entry.to_node(root);
+                let Some(node) = entry.try_to_node(node) else {
+                    return;
+                };
                 if let Some((prev, last)) = node.prev_siblings().next().zip(ranges.last_mut())
                     && last.contains_range(prev.text_range())
                 {
