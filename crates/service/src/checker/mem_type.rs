@@ -1,17 +1,16 @@
 use super::Diagnostic;
 use crate::helpers;
 use std::num::IntErrorKind;
-use wat_syntax::{
-    SyntaxKind, SyntaxNode, SyntaxToken,
-    ast::{Limits, MemPageSize, support},
-};
+use wat_syntax::{AmberNode, AmberToken, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "mem-type";
 
-pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) -> Option<()> {
-    let limits = support::child::<Limits>(node)?;
-    let page_size = if let Some(token) =
-        support::child::<MemPageSize>(node).and_then(|page_size| page_size.unsigned_int_token())
+pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode) -> Option<()> {
+    let limits = node.children_by_kind(SyntaxKind::LIMITS).next()?;
+    let page_size = if let Some(token) = node
+        .children_by_kind(SyntaxKind::MEM_PAGE_SIZE)
+        .next()
+        .and_then(|page_size| page_size.tokens_by_kind(SyntaxKind::UNSIGNED_INT).next())
         && let Ok(page_size) = helpers::parse_u32(token.text())
     {
         if page_size == 1 || page_size == 65536 {
@@ -34,30 +33,31 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) -> Option<()>
         (2u64.pow(32) / page_size as u64) as u32
     };
 
-    let min_token = limits.min()?;
+    let mut uints = limits.tokens_by_kind(SyntaxKind::UNSIGNED_INT);
+    let min_token = uints.next()?;
     let min = match helpers::parse_u32(min_token.text()) {
         Ok(min) => {
             if min > upper_bound {
-                diagnostics.push(report_overflow(&min_token, upper_bound));
+                diagnostics.push(report_overflow(min_token, upper_bound));
             }
             min
         }
         Err(error) if error.kind() == &IntErrorKind::PosOverflow => {
-            diagnostics.push(report_overflow(&min_token, upper_bound));
+            diagnostics.push(report_overflow(min_token, upper_bound));
             upper_bound
         }
         Err(_) => return None,
     };
-    if let Some(max_token) = limits.max() {
+    if let Some(max_token) = uints.next() {
         let max = match helpers::parse_u32(max_token.text()) {
             Ok(max) => {
                 if max > upper_bound {
-                    diagnostics.push(report_overflow(&max_token, upper_bound));
+                    diagnostics.push(report_overflow(max_token, upper_bound));
                 }
                 max
             }
             Err(error) if error.kind() == &IntErrorKind::PosOverflow => {
-                diagnostics.push(report_overflow(&max_token, upper_bound));
+                diagnostics.push(report_overflow(max_token, upper_bound));
                 upper_bound
             }
             Err(_) => return None,
@@ -70,7 +70,10 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) -> Option<()>
                 ..Default::default()
             });
         }
-    } else if let Some(token) = support::token(node, SyntaxKind::KEYWORD).filter(|token| token.text() == "shared") {
+    } else if let Some(token) = node
+        .tokens_by_kind(SyntaxKind::KEYWORD)
+        .find(|token| token.text() == "shared")
+    {
         diagnostics.push(Diagnostic {
             range: token.text_range(),
             code: DIAGNOSTIC_CODE.into(),
@@ -81,7 +84,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode) -> Option<()>
     Some(())
 }
 
-fn report_overflow(token: &SyntaxToken, upper_bound: u32) -> Diagnostic {
+fn report_overflow(token: AmberToken, upper_bound: u32) -> Diagnostic {
     Diagnostic {
         range: token.text_range(),
         code: DIAGNOSTIC_CODE.into(),

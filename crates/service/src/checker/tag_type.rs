@@ -1,10 +1,10 @@
 use super::Diagnostic;
 use crate::{
-    binder::{SymbolKey, SymbolTable},
+    binder::SymbolTable,
     document::Document,
     types_analyzer::{self, CompositeType},
 };
-use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr};
+use wat_syntax::{AmberNode, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "tag-type";
 
@@ -13,7 +13,7 @@ pub fn check(
     db: &dyn salsa::Database,
     document: Document,
     symbol_table: &SymbolTable,
-    node: &SyntaxNode,
+    node: AmberNode,
 ) {
     let Some(type_use) = node.children_by_kind(SyntaxKind::TYPE_USE).next() else {
         return;
@@ -22,7 +22,7 @@ pub fn check(
         let def_types = types_analyzer::get_def_types(db, document);
         if symbol_table
             .resolved
-            .get(&SymbolKey::new(&index))
+            .get(&index.to_ptr().into())
             .and_then(|def_key| def_types.get(def_key))
             .is_some_and(|def_type| !matches!(def_type.comp, CompositeType::Func(..)))
         {
@@ -34,7 +34,7 @@ pub fn check(
             });
         }
     }
-    let sig = types_analyzer::get_type_use_sig(db, document, SyntaxNodePtr::new(&type_use), type_use.green());
+    let sig = types_analyzer::get_type_use_sig(db, document, type_use.to_ptr(), type_use.green());
     if !sig.results.is_empty() {
         diagnostics.push(Diagnostic {
             range: type_use.text_range(),

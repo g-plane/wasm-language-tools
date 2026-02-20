@@ -1,13 +1,13 @@
 use super::{Diagnostic, FastPlainInstr, RelatedInformation};
 use crate::{
-    binder::{Symbol, SymbolKey, SymbolTable},
+    binder::{Symbol, SymbolKind, SymbolTable},
     document::Document,
     types_analyzer::{
         CompositeType, DefTypes, FieldType, HeapType, OperandType, RefType, ValType, get_def_types, get_func_sig,
         get_type_use_sig, resolve_br_types,
     },
 };
-use wat_syntax::{AmberNode, NodeOrToken, SyntaxKind, SyntaxNode, SyntaxNodePtr};
+use wat_syntax::{AmberNode, NodeOrToken, SyntaxKind, SyntaxNodePtr};
 
 const DIAGNOSTIC_CODE: &str = "type-misuse";
 
@@ -17,10 +17,10 @@ pub fn check(
     document: Document,
     symbol_table: &SymbolTable,
     module_id: u32,
-    node: &SyntaxNode,
+    node: AmberNode,
     instr: &FastPlainInstr,
 ) -> Option<()> {
-    let mut immediates = instr.amber.children_by_kind(SyntaxKind::IMMEDIATE);
+    let mut immediates = node.children_by_kind(SyntaxKind::IMMEDIATE);
     let def_types = get_def_types(db, document);
     match instr.name.text().split_once('.') {
         Some(("struct", _)) => {
@@ -208,17 +208,25 @@ pub fn check(
                 }
             }
             "call_indirect" => {
-                if let Some(diagnostic) = check_table_ref_type(db, document, symbol_table, module_id, instr.amber) {
+                if let Some(diagnostic) = check_table_ref_type(db, document, symbol_table, module_id, node) {
                     diagnostics.push(diagnostic);
                 }
             }
             "return_call" => {
-                if let Some(immediate) = instr.amber.children_by_kind(SyntaxKind::IMMEDIATE).next()
+                if let Some(immediate) = node.children_by_kind(SyntaxKind::IMMEDIATE).next()
                     && let Some(diagnostic) = symbol_table
                         .find_def(immediate.to_ptr().into())
                         .map(|func| get_func_sig(db, document, func.key, &func.green))
                         .and_then(|sig| {
-                            check_return_call_result_type(db, document, module_id, node, immediate, &sig.results)
+                            check_return_call_result_type(
+                                db,
+                                document,
+                                symbol_table,
+                                module_id,
+                                node,
+                                immediate,
+                                &sig.results,
+                            )
                         })
                 {
                     diagnostics.push(diagnostic);
@@ -235,23 +243,31 @@ pub fn check(
                     .and_then(|key| def_types.get(key))
                     .and_then(|def_type| def_type.comp.as_func())
                     .and_then(|sig| {
-                        check_return_call_result_type(db, document, module_id, node, immediate, &sig.results)
+                        check_return_call_result_type(
+                            db,
+                            document,
+                            symbol_table,
+                            module_id,
+                            node,
+                            immediate,
+                            &sig.results,
+                        )
                     })
                 {
                     diagnostics.push(diagnostic);
                 }
             }
             "return_call_indirect" => {
-                if let Some(diagnostic) = check_table_ref_type(db, document, symbol_table, module_id, instr.amber) {
+                if let Some(diagnostic) = check_table_ref_type(db, document, symbol_table, module_id, node) {
                     diagnostics.push(diagnostic);
                 }
-                if let Some(type_use) = instr
-                    .amber
+                if let Some(type_use) = node
                     .children()
                     .find_map(|immediate| immediate.children_by_kind(SyntaxKind::TYPE_USE).next())
                     && let Some(diagnostic) = check_return_call_result_type(
                         db,
                         document,
+                        symbol_table,
                         module_id,
                         node,
                         type_use,
@@ -358,15 +374,17 @@ fn check_table_ref_type(
 fn check_return_call_result_type(
     db: &dyn salsa::Database,
     document: Document,
+    symbol_table: &SymbolTable,
     module_id: u32,
-    instr: &SyntaxNode,
+    instr: AmberNode,
     reported_node: AmberNode,
     actual: &[ValType],
 ) -> Option<Diagnostic> {
-    let func = instr
-        .ancestors()
-        .find(|ancestor| ancestor.kind() == SyntaxKind::MODULE_FIELD_FUNC)?;
-    let expected = get_func_sig(db, document, SymbolKey::new(&func), func.green()).results;
+    let func = symbol_table
+        .symbols
+        .values()
+        .find(|symbol| symbol.kind == SymbolKind::Func && symbol.key.text_range().contains_range(instr.text_range()))?;
+    let expected = get_func_sig(db, document, func.key, &func.green).results;
     if actual.len() == expected.len()
         && actual
             .iter()

@@ -10,7 +10,7 @@ use bumpalo::{Bump, collections::Vec as BumpVec};
 use lspt::DiagnosticSeverity;
 use petgraph::graph::NodeIndex;
 use std::cell::Cell;
-use wat_syntax::{SyntaxNode, SyntaxNodePtr};
+use wat_syntax::AmberNode;
 
 const DIAGNOSTIC_CODE: &str = "unread";
 
@@ -21,7 +21,7 @@ pub fn check(
     document: Document,
     lint_level: LintLevel,
     symbol_table: &SymbolTable,
-    node: &SyntaxNode,
+    node: AmberNode,
     locals: &[&Symbol],
     bump: &mut Bump,
 ) {
@@ -36,7 +36,7 @@ pub fn check(
     if locals.is_empty() {
         return;
     }
-    let cfg = cfa::analyze(db, document, SyntaxNodePtr::new(node));
+    let cfg = cfa::analyze(db, document, node.to_ptr());
     locals.iter().for_each(|local| {
         check_local(diagnostics, db, severity, local, symbol_table, cfg, bump);
         bump.reset();

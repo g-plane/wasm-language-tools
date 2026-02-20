@@ -9,7 +9,7 @@ use crate::{
 use bumpalo::Bump;
 use petgraph::graph::NodeIndex;
 use std::cell::Cell;
-use wat_syntax::{SyntaxNode, SyntaxNodePtr};
+use wat_syntax::AmberNode;
 
 const DIAGNOSTIC_CODE: &str = "uninit";
 
@@ -18,7 +18,7 @@ pub fn check(
     db: &dyn salsa::Database,
     document: Document,
     symbol_table: &SymbolTable,
-    node: &SyntaxNode,
+    node: AmberNode,
     locals: &[&Symbol],
     bump: &mut Bump,
 ) {
@@ -26,7 +26,7 @@ pub fn check(
     if locals.is_empty() {
         return;
     }
-    let cfg = cfa::analyze(db, document, SyntaxNodePtr::new(node));
+    let cfg = cfa::analyze(db, document, node.to_ptr());
     locals
         .iter()
         .filter(|local| types_analyzer::extract_type(db, &local.green).is_some_and(|ty| !ty.defaultable()))

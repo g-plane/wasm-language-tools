@@ -1,14 +1,13 @@
 use super::{Diagnostic, FastPlainInstr};
 use std::iter::Peekable;
-use wat_syntax::{AmberNode, NodeOrToken, SyntaxKind, SyntaxKindMatch, SyntaxNode};
+use wat_syntax::{AmberNode, NodeOrToken, SyntaxKind, SyntaxKindMatch};
 
 const DIAGNOSTIC_CODE: &str = "immediates";
 
 const INDEX: [SyntaxKind; 2] = [SyntaxKind::IDENT, SyntaxKind::INT];
 
-pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastPlainInstr) {
-    let amber = node.amber();
-    let mut immediates = amber
+pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr: &FastPlainInstr) {
+    let mut immediates = node
         .children()
         .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
         .peekable();
@@ -196,7 +195,12 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: &SyntaxNode, instr: &FastP
             if let Some((allow_float, expected_count)) = node
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
-                .and_then(|immediate| immediate.first_child_or_token().and_then(NodeOrToken::into_token))
+                .and_then(|immediate| {
+                    immediate
+                        .children_with_tokens()
+                        .next()
+                        .and_then(NodeOrToken::into_token)
+                })
                 .filter(|token| token.kind() == SyntaxKind::SHAPE_DESCRIPTOR)
                 .as_ref()
                 .and_then(|token| token.text().split_once('x'))
