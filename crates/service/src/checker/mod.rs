@@ -121,11 +121,6 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         diagnostics.push(diagnostic);
                     }
                 }
-                SyntaxKind::MODULE_FIELD_IMPORT => {
-                    if let Some(diagnostic) = import_occur::check(db, document, &node) {
-                        diagnostics.push(diagnostic);
-                    }
-                }
                 SyntaxKind::PLAIN_INSTR => {
                     if let Some(instr) = FastPlainInstr::new(amber) {
                         if let Some(diagnostic) = unknown_instr::check(&instr) {
@@ -250,6 +245,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
             }
         }
         multi_starts::check(&mut diagnostics, module.amber());
+        import_occur::check(&mut diagnostics, db, document, module.amber());
     });
     undef::check(db, &mut diagnostics, symbol_table);
     dup_names::check(db, &mut diagnostics, document, symbol_table, &mut bump);

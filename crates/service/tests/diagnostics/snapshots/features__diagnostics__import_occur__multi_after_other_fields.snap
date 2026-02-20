@@ -20,6 +20,22 @@ expression: response
       "code": "import-occurrence",
       "source": "wat",
       "message": "import must occur before all non-import definitions"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 2
+        },
+        "end": {
+          "line": 4,
+          "character": 25
+        }
+      },
+      "severity": 1,
+      "code": "import-occurrence",
+      "source": "wat",
+      "message": "import must occur before all non-import definitions"
     }
   ]
 }
