@@ -7,7 +7,7 @@ use crate::{
 use bumpalo::Bump;
 use lspt::{DiagnosticRelatedInformation, DiagnosticSeverity, DiagnosticTag, Location, Union2};
 use std::cmp::Ordering;
-use wat_syntax::{AmberNode, AmberToken, SyntaxKind, TextRange};
+use wat_syntax::{AmberNode, AmberToken, SyntaxKind, SyntaxNode, TextRange};
 
 mod block_type;
 mod br_table_branches;
@@ -55,83 +55,79 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
     syntax::check(db, &mut diagnostics, document);
     multi_modules::check(&mut diagnostics, config.lint.multi_modules, &root);
     root.children().enumerate().for_each(|(module_id, module)| {
-        let module_id = module_id as u32;
         if let Some(diagnostic) = implicit_module::check(config.lint.implicit_module, &module) {
             diagnostics.push(diagnostic);
         }
-        let mut descendants = module.descendants();
-        while let Some(node) = descendants.next() {
-            let amber = node.amber();
+        visit_node(
+            &mut diagnostics,
+            db,
+            document,
+            config,
+            symbol_table,
+            &module,
+            module_id as u32,
+            module.amber(),
+            &mut bump,
+        );
+        #[expect(clippy::too_many_arguments)]
+        fn visit_node(
+            diagnostics: &mut Vec<Diagnostic>,
+            db: &dyn salsa::Database,
+            document: Document,
+            config: &ServiceConfig,
+            symbol_table: &SymbolTable,
+            module: &SyntaxNode,
+            module_id: u32,
+            node: AmberNode,
+            bump: &mut Bump,
+        ) {
             match node.kind() {
                 SyntaxKind::MODULE_FIELD_FUNC => {
-                    typeck::check_func(
-                        &mut diagnostics,
-                        db,
-                        document,
-                        symbol_table,
-                        module_id,
-                        amber,
-                        &mut bump,
-                    );
-                    unreachable::check(
-                        &mut diagnostics,
-                        db,
-                        document,
-                        config.lint.unreachable,
-                        &node,
-                        &mut bump,
-                    );
+                    typeck::check_func(diagnostics, db, document, symbol_table, module_id, node, bump);
+                    unreachable::check(diagnostics, db, document, config.lint.unreachable, module, node, bump);
                     let locals = symbol_table
                         .symbols
                         .values()
                         .filter(|symbol| {
                             symbol.kind == SymbolKind::Local
-                                && amber.text_range().contains_range(symbol.key.text_range())
+                                && node.text_range().contains_range(symbol.key.text_range())
                         })
                         .collect::<Vec<_>>();
-                    uninit::check(&mut diagnostics, db, document, symbol_table, amber, &locals, &mut bump);
+                    uninit::check(diagnostics, db, document, symbol_table, node, &locals, bump);
                     unread::check(
-                        &mut diagnostics,
+                        diagnostics,
                         db,
                         document,
                         config.lint.unread,
                         symbol_table,
-                        amber,
+                        node,
                         &locals,
-                        &mut bump,
+                        bump,
                     );
-                    if let Some(diagnostic) = import_with_def::check(db, document, amber) {
+                    if let Some(diagnostic) = import_with_def::check(db, document, node) {
                         diagnostics.push(diagnostic);
                     }
                 }
                 SyntaxKind::MODULE_FIELD_GLOBAL => {
-                    typeck::check_global(
-                        &mut diagnostics,
-                        db,
-                        document,
-                        symbol_table,
-                        module_id,
-                        amber,
-                        &mut bump,
-                    );
-                    if let Some(diagnostic) = const_expr::check(amber) {
+                    typeck::check_global(diagnostics, db, document, symbol_table, module_id, node, bump);
+                    if let Some(diagnostic) = const_expr::check(node) {
                         diagnostics.push(diagnostic);
                     }
-                    if let Some(diagnostic) = import_with_def::check(db, document, amber) {
+                    if let Some(diagnostic) = import_with_def::check(db, document, node) {
                         diagnostics.push(diagnostic);
                     }
                 }
                 SyntaxKind::PLAIN_INSTR => {
-                    if let Some(instr) = FastPlainInstr::new(amber) {
+                    if let Some(instr) = FastPlainInstr::new(node) {
                         if let Some(diagnostic) = unknown_instr::check(&instr) {
                             diagnostics.push(diagnostic);
                         }
-                        immediates::check(&mut diagnostics, amber, &instr);
-                        br_table_branches::check(&mut diagnostics, db, document, symbol_table, &instr, &bump);
+                        immediates::check(diagnostics, node, &instr);
+                        br_table_branches::check(diagnostics, db, document, symbol_table, &instr, bump);
                         if let Some(diagnostic) = packing::check(db, document, symbol_table, &instr) {
                             diagnostics.push(diagnostic);
                         }
-                        type_misuse::check(db, &mut diagnostics, document, symbol_table, module_id, amber, &instr);
+                        type_misuse::check(db, diagnostics, document, symbol_table, module_id, node, &instr);
                         if let Some(diagnostic) = new_non_defaultable::check(db, document, symbol_table, &instr) {
                             diagnostics.push(diagnostic);
                         }
@@ -139,95 +135,71 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                     bump.reset();
                 }
                 SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_IF => {
-                    if let Some(diagnostic) = block_type::check(db, document, symbol_table, amber) {
+                    if let Some(diagnostic) = block_type::check(db, document, symbol_table, node) {
                         diagnostics.push(diagnostic);
                     }
                 }
                 SyntaxKind::MODULE_FIELD_START => {
-                    if let Some(diagnostic) = start::check(db, document, symbol_table, amber) {
+                    if let Some(diagnostic) = start::check(db, document, symbol_table, node) {
                         diagnostics.push(diagnostic);
                     }
                 }
                 SyntaxKind::MODULE_FIELD_TABLE => {
-                    typeck::check_table(
-                        &mut diagnostics,
-                        db,
-                        document,
-                        symbol_table,
-                        module_id,
-                        amber,
-                        &mut bump,
-                    );
-                    if let Some(diagnostic) = const_expr::check(amber) {
+                    typeck::check_table(diagnostics, db, document, symbol_table, module_id, node, bump);
+                    if let Some(diagnostic) = const_expr::check(node) {
                         diagnostics.push(diagnostic);
                     }
-                    if let Some(diagnostic) = import_with_def::check(db, document, amber) {
+                    if let Some(diagnostic) = import_with_def::check(db, document, node) {
                         diagnostics.push(diagnostic);
                     }
                 }
                 SyntaxKind::MODULE_FIELD_ELEM => {
-                    if let Some(diagnostic) = elem_type::check(db, document, symbol_table, module_id, amber) {
+                    if let Some(diagnostic) = elem_type::check(db, document, symbol_table, module_id, node) {
                         diagnostics.push(diagnostic);
                     }
                 }
                 SyntaxKind::MODULE_FIELD_MEMORY => {
-                    if let Some(diagnostic) = import_with_def::check(db, document, amber) {
+                    if let Some(diagnostic) = import_with_def::check(db, document, node) {
                         diagnostics.push(diagnostic);
                     }
                 }
                 SyntaxKind::MEM_TYPE => {
-                    mem_type::check(&mut diagnostics, amber);
+                    mem_type::check(diagnostics, node);
                 }
                 SyntaxKind::OFFSET => {
-                    typeck::check_offset(
-                        &mut diagnostics,
-                        db,
-                        document,
-                        symbol_table,
-                        module_id,
-                        amber,
-                        &mut bump,
-                    );
-                    if let Some(diagnostic) = const_expr::check(amber) {
+                    typeck::check_offset(diagnostics, db, document, symbol_table, module_id, node, bump);
+                    if let Some(diagnostic) = const_expr::check(node) {
                         diagnostics.push(diagnostic);
                     }
                 }
                 SyntaxKind::ELEM_LIST => {
-                    typeck::check_elem_list(
-                        &mut diagnostics,
-                        db,
-                        document,
-                        symbol_table,
-                        module_id,
-                        amber,
-                        &mut bump,
-                    );
+                    typeck::check_elem_list(diagnostics, db, document, symbol_table, module_id, node, bump);
                 }
                 SyntaxKind::ELEM_EXPR => {
-                    if let Some(diagnostic) = const_expr::check(amber) {
+                    if let Some(diagnostic) = const_expr::check(node) {
                         diagnostics.push(diagnostic);
                     }
                 }
                 SyntaxKind::MODULE_FIELD_TAG => {
-                    tag_type::check(&mut diagnostics, db, document, symbol_table, amber);
-                    if let Some(diagnostic) = import_with_def::check(db, document, amber) {
+                    tag_type::check(diagnostics, db, document, symbol_table, node);
+                    if let Some(diagnostic) = import_with_def::check(db, document, node) {
                         diagnostics.push(diagnostic);
                     }
                 }
                 SyntaxKind::EXTERN_TYPE_TAG => {
-                    tag_type::check(&mut diagnostics, db, document, symbol_table, amber);
+                    tag_type::check(diagnostics, db, document, symbol_table, node);
                 }
                 SyntaxKind::BLOCK_TRY_TABLE => {
-                    if let Some(diagnostic) = needless_try_table::check(config.lint.needless_try_table, amber) {
+                    if let Some(diagnostic) = needless_try_table::check(config.lint.needless_try_table, node) {
                         diagnostics.push(diagnostic);
                     }
-                    useless_catch::check(&mut diagnostics, config.lint.useless_catch, symbol_table, amber);
-                    if let Some(diagnostic) = block_type::check(db, document, symbol_table, amber) {
+                    useless_catch::check(diagnostics, config.lint.useless_catch, symbol_table, node);
+                    if let Some(diagnostic) = block_type::check(db, document, symbol_table, node) {
                         diagnostics.push(diagnostic);
                     }
                 }
                 SyntaxKind::CATCH | SyntaxKind::CATCH_ALL => {
-                    if let Some(diagnostic) = catch_type::check(db, document, symbol_table, module_id, amber) {
+                    if let Some(diagnostic) = catch_type::check(db, document, symbol_table, module_id, node) {
                         diagnostics.push(diagnostic);
                     }
                 }
@@ -239,10 +211,23 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                 | SyntaxKind::IMPORT
                 | SyntaxKind::EXPORT
                 | SyntaxKind::GLOBAL_TYPE => {
-                    descendants.skip_subtree();
+                    return;
                 }
                 _ => {}
             }
+            node.children().for_each(|child| {
+                visit_node(
+                    diagnostics,
+                    db,
+                    document,
+                    config,
+                    symbol_table,
+                    module,
+                    module_id,
+                    child,
+                    bump,
+                );
+            });
         }
         multi_starts::check(&mut diagnostics, module.amber());
         import_occur::check(&mut diagnostics, db, document, module.amber());

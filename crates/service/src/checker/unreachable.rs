@@ -7,7 +7,7 @@ use crate::{
 use bumpalo::{Bump, collections::Vec as BumpVec};
 use lspt::{DiagnosticSeverity, DiagnosticTag};
 use wat_syntax::{
-    SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange,
+    AmberNode, SyntaxKind, SyntaxNode, TextRange,
     ast::{AstNode, Instr, support},
 };
 
@@ -18,7 +18,8 @@ pub fn check(
     db: &dyn salsa::Database,
     document: Document,
     lint_level: LintLevel,
-    node: &SyntaxNode,
+    module: &SyntaxNode,
+    node: AmberNode,
     bump: &mut Bump,
 ) {
     let severity = match lint_level {
@@ -28,7 +29,7 @@ pub fn check(
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
 
-    let cfg = cfa::analyze(db, document, SyntaxNodePtr::new(node));
+    let cfg = cfa::analyze(db, document, node.to_ptr());
     let mut ranges = BumpVec::<TextRange>::new_in(bump);
     cfg.graph.raw_nodes().iter().for_each(|raw_node| {
         if !raw_node.weight.unreachable {
@@ -37,7 +38,7 @@ pub fn check(
         match &raw_node.weight.kind {
             FlowNodeKind::BasicBlock(bb) => {
                 bb.0.iter().for_each(|instr| {
-                    let Some(instr) = instr.ptr.try_to_node(node) else {
+                    let Some(instr) = instr.ptr.try_to_node(module) else {
                         return;
                     };
                     let current = instr.text_range();
@@ -80,7 +81,7 @@ pub fn check(
                 });
             }
             FlowNodeKind::BlockEntry(entry) => {
-                let Some(node) = entry.try_to_node(node) else {
+                let Some(node) = entry.try_to_node(module) else {
                     return;
                 };
                 if let Some((prev, last)) = node.prev_siblings().next().zip(ranges.last_mut())

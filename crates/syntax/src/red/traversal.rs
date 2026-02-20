@@ -14,14 +14,6 @@ impl Descendants {
             child_entered: false,
         }
     }
-    /// This should be considered as optimization only, no semantics guaranteed.
-    pub fn skip_subtree(&mut self) {
-        if self.child_entered
-            && let Some(next) = &self.next
-        {
-            self.next = self.exit_parent(next);
-        }
-    }
     fn exit_parent(&self, current: &SyntaxNode) -> Option<SyntaxNode> {
         let mut parent = current.parent();
         while let Some(p) = parent
@@ -51,55 +43,3 @@ impl Iterator for Descendants {
     }
 }
 impl FusedIterator for Descendants {}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::{GreenNode, GreenToken, SyntaxKind::*};
-
-    #[test]
-    fn skip_subtree_in_deepest_node() {
-        let green = GreenNode::new(
-            ROOT,
-            [
-                GreenNode::new(
-                    MODULE,
-                    [GreenNode::new(
-                        MODULE_FIELD_FUNC,
-                        [GreenNode::new(PLAIN_INSTR, [GreenToken::new(INSTR_NAME, "local.get").into()]).into()],
-                    )
-                    .into()],
-                )
-                .into(),
-                GreenNode::new(MODULE, [GreenToken::new(KEYWORD, "module").into()]).into(),
-            ],
-        );
-        let mut descendants = SyntaxNode::new_root(green).descendants();
-        assert_eq!(descendants.next().unwrap().kind(), ROOT);
-        assert_eq!(descendants.next().unwrap().kind(), MODULE);
-        assert_eq!(descendants.next().unwrap().kind(), MODULE_FIELD_FUNC);
-        descendants.skip_subtree();
-        assert_eq!(descendants.next().unwrap().kind(), MODULE);
-        assert!(descendants.next().is_none());
-    }
-
-    #[test]
-    fn skip_subtree_for_zero_children() {
-        let green = GreenNode::new(
-            MODULE,
-            [
-                GreenNode::new(MODULE_FIELD_FUNC, [GreenToken::new(KEYWORD, "func").into()]).into(),
-                GreenNode::new(MODULE_FIELD_DATA, [GreenToken::new(KEYWORD, "data").into()]).into(),
-                GreenNode::new(MODULE_FIELD_GLOBAL, [GreenToken::new(KEYWORD, "global").into()]).into(),
-            ],
-        )
-        .into();
-        let mut descendants = SyntaxNode::new_root(green).descendants();
-        assert_eq!(descendants.next().unwrap().kind(), MODULE);
-        assert_eq!(descendants.next().unwrap().kind(), MODULE_FIELD_FUNC);
-        descendants.skip_subtree();
-        assert_eq!(descendants.next().unwrap().kind(), MODULE_FIELD_DATA);
-        assert_eq!(descendants.next().unwrap().kind(), MODULE_FIELD_GLOBAL);
-        assert!(descendants.next().is_none());
-    }
-}
