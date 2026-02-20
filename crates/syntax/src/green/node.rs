@@ -2,7 +2,7 @@ use super::{GreenChild, GreenHead};
 use crate::{GreenToken, NodeOrToken, SyntaxKind};
 use std::fmt;
 use text_size::TextSize;
-use triomphe::{Arc, ThinArc};
+use triomphe::{Arc, HeaderWithLength, ThinArc, UniqueArc};
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GreenNode {
@@ -16,32 +16,37 @@ impl GreenNode {
         I: IntoIterator<Item = NodeOrToken<GreenNode, GreenToken>>,
         I::IntoIter: ExactSizeIterator,
     {
-        let mut text_len: TextSize = 0.into();
-        let children = children.into_iter().map(|node_or_token| match node_or_token {
-            NodeOrToken::Node(node) => {
-                let offset = text_len;
-                text_len += node.text_len();
-                GreenChild::Node { offset, node }
-            }
-            NodeOrToken::Token(token) => {
-                let offset = text_len;
-                text_len += token.text_len();
-                GreenChild::Token { offset, token }
-            }
-        });
-
-        let data = ThinArc::from_header_and_iter(
-            GreenHead {
-                kind,
-                text_len: 0.into(),
-            },
-            children,
+        let children = children.into_iter();
+        let mut data = UniqueArc::from_header_and_uninit_slice(
+            HeaderWithLength::new(
+                GreenHead {
+                    kind,
+                    text_len: 0.into(),
+                },
+                children.len(),
+            ),
+            children.len(),
         );
-        let data = {
-            let mut data = Arc::from_thin(data);
-            Arc::get_mut(&mut data).unwrap().header.header.text_len = text_len;
-            Arc::into_thin(data)
-        };
+        let text_len = data
+            .slice
+            .iter_mut()
+            .zip(children)
+            .fold(0.into(), |offset, (slot, node_or_token)| match node_or_token {
+                NodeOrToken::Node(node) => {
+                    let total_text_len = offset + node.text_len();
+                    slot.write(GreenChild::Node { offset, node });
+                    total_text_len
+                }
+                NodeOrToken::Token(token) => {
+                    let total_text_len = offset + token.text_len();
+                    slot.write(GreenChild::Token { offset, token });
+                    total_text_len
+                }
+            });
+        data.header.header.text_len = text_len;
+
+        // SAFETY: all data has been written to slice
+        let data = unsafe { Arc::into_thin(data.assume_init_slice_with_header().shareable()) };
 
         GreenNode { data }
     }
