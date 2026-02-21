@@ -1,12 +1,10 @@
-use super::{Diagnostic, RelatedInformation};
-use crate::{document::Document, imex};
+use super::{Diagnostic, DiagnosticCtx, RelatedInformation};
 use wat_syntax::{AmberNode, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "import-with-def";
 
-pub fn check(db: &dyn salsa::Database, document: Document, node: AmberNode) -> Option<Diagnostic> {
-    let imports = imex::get_imports(db, document);
-    if !imports.contains(&node.to_ptr().into()) {
+pub fn check(ctx: &mut DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
+    if !ctx.imports.contains(&node.to_ptr().into()) {
         return None;
     }
     let first = node

@@ -1,5 +1,5 @@
 use super::Diagnostic;
-use crate::{binder::SymbolTable, document::Document, types_analyzer};
+use crate::{binder::SymbolTable, document::Document, types_analyzer::DefTypes};
 use wat_syntax::SyntaxKind;
 
 const DIAGNOSTIC_CODE: &str = "subtyping";
@@ -9,8 +9,8 @@ pub fn check(
     db: &dyn salsa::Database,
     document: Document,
     symbol_table: &SymbolTable,
+    def_types: &DefTypes,
 ) {
-    let def_types = types_analyzer::get_def_types(db, document);
     diagnostics.extend(
         def_types
             .iter()

@@ -1,8 +1,7 @@
-use super::Diagnostic;
+use super::{Diagnostic, DiagnosticCtx};
 use crate::{
     binder::{Symbol, SymbolKey, SymbolTable},
     cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeKind},
-    document::Document,
     helpers::{BumpCollectionsExt, BumpHashMap},
     types_analyzer,
 };
@@ -13,26 +12,18 @@ use wat_syntax::AmberNode;
 
 const DIAGNOSTIC_CODE: &str = "uninit";
 
-pub fn check(
-    diagnostics: &mut Vec<Diagnostic>,
-    db: &dyn salsa::Database,
-    document: Document,
-    symbol_table: &SymbolTable,
-    node: AmberNode,
-    locals: &[&Symbol],
-    bump: &mut Bump,
-) {
+pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, node: AmberNode, locals: &[&Symbol]) {
     // avoid expensive analysis if there are no locals
     if locals.is_empty() {
         return;
     }
-    let cfg = cfa::analyze(db, document, node.to_ptr());
+    let cfg = cfa::analyze(ctx.db, ctx.document, node.to_ptr());
     locals
         .iter()
-        .filter(|local| types_analyzer::extract_type(db, &local.green).is_some_and(|ty| !ty.defaultable()))
+        .filter(|local| types_analyzer::extract_type(ctx.db, &local.green).is_some_and(|ty| !ty.defaultable()))
         .for_each(|local| {
-            check_local(diagnostics, db, local, symbol_table, cfg, bump);
-            bump.reset();
+            check_local(diagnostics, ctx.db, local, ctx.symbol_table, cfg, ctx.bump);
+            ctx.bump.reset();
         });
 }
 

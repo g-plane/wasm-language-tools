@@ -1,9 +1,8 @@
-use super::Diagnostic;
+use super::{Diagnostic, DiagnosticCtx};
 use crate::{
     binder::{Symbol, SymbolKey, SymbolTable},
     cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeKind},
     config::LintLevel,
-    document::Document,
     helpers::{BumpCollectionsExt, BumpHashMap},
 };
 use bumpalo::{Bump, collections::Vec as BumpVec};
@@ -14,16 +13,12 @@ use wat_syntax::AmberNode;
 
 const DIAGNOSTIC_CODE: &str = "unread";
 
-#[expect(clippy::too_many_arguments)]
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
-    db: &dyn salsa::Database,
-    document: Document,
+    ctx: &mut DiagnosticCtx,
     lint_level: LintLevel,
-    symbol_table: &SymbolTable,
     node: AmberNode,
     locals: &[&Symbol],
-    bump: &mut Bump,
 ) {
     let severity = match lint_level {
         LintLevel::Allow => return,
@@ -36,10 +31,10 @@ pub fn check(
     if locals.is_empty() {
         return;
     }
-    let cfg = cfa::analyze(db, document, node.to_ptr());
+    let cfg = cfa::analyze(ctx.db, ctx.document, node.to_ptr());
     locals.iter().for_each(|local| {
-        check_local(diagnostics, db, severity, local, symbol_table, cfg, bump);
-        bump.reset();
+        check_local(diagnostics, ctx.db, severity, local, ctx.symbol_table, cfg, ctx.bump);
+        ctx.bump.reset();
     });
 }
 

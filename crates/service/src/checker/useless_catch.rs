@@ -1,5 +1,5 @@
-use super::{Diagnostic, RelatedInformation};
-use crate::{binder::SymbolTable, config::LintLevel};
+use super::{Diagnostic, DiagnosticCtx, RelatedInformation};
+use crate::config::LintLevel;
 use lspt::{DiagnosticSeverity, DiagnosticTag};
 use rustc_hash::FxHashMap;
 use wat_syntax::{
@@ -9,7 +9,7 @@ use wat_syntax::{
 
 const DIAGNOSTIC_CODE: &str = "useless-catch";
 
-pub fn check(diagnostics: &mut Vec<Diagnostic>, lint_level: LintLevel, symbol_table: &SymbolTable, node: AmberNode) {
+pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &DiagnosticCtx, lint_level: LintLevel, node: AmberNode) {
     let severity = match lint_level {
         LintLevel::Allow => return,
         LintLevel::Hint => DiagnosticSeverity::Hint,
@@ -23,7 +23,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, lint_level: LintLevel, symbol_ta
             if let Some(def_key) = cat
                 .children_by_kind(SyntaxKind::INDEX)
                 .next()
-                .and_then(|index| symbol_table.resolved.get(&index.to_ptr().into()))
+                .and_then(|index| ctx.symbol_table.resolved.get(&index.to_ptr().into()))
             {
                 let matched = match (matches.get(def_key), &default_match) {
                     (Some(catch), Some(catch_all)) => {

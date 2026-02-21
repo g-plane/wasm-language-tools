@@ -1,36 +1,30 @@
-use super::{Diagnostic, FastPlainInstr};
-use crate::{
-    binder::SymbolTable,
-    document::Document,
-    types_analyzer::{join_types, resolve_br_types},
-};
-use bumpalo::{Bump, collections::Vec as BumpVec};
-use wat_syntax::SyntaxKind;
+use super::{Diagnostic, DiagnosticCtx};
+use crate::types_analyzer::{join_types, resolve_br_types};
+use bumpalo::collections::Vec as BumpVec;
+use wat_syntax::{AmberNode, AmberToken, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "br-table-branches";
 
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
-    db: &dyn salsa::Database,
-    document: Document,
-    symbol_table: &SymbolTable,
-    instr: &FastPlainInstr,
-    bump: &Bump,
+    ctx: &DiagnosticCtx,
+    node: AmberNode,
+    instr_name: AmberToken,
 ) -> Option<()> {
-    if instr.name.text() != "br_table" {
+    if instr_name.text() != "br_table" {
         return None;
     }
-    let mut immediates = instr.amber.children_by_kind(SyntaxKind::IMMEDIATE);
+    let mut immediates = node.children_by_kind(SyntaxKind::IMMEDIATE);
     let expected = BumpVec::from_iter_in(
-        immediates
-            .next()
-            .and_then(|immediate| resolve_br_types(db, document, symbol_table, immediate.to_ptr().into()))?,
-        bump,
+        immediates.next().and_then(|immediate| {
+            resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, immediate.to_ptr().into())
+        })?,
+        ctx.bump,
     );
     diagnostics.extend(immediates.filter_map(|immediate| {
         let received = BumpVec::from_iter_in(
-            resolve_br_types(db, document, symbol_table, immediate.to_ptr().into())?,
-            bump,
+            resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, immediate.to_ptr().into())?,
+            ctx.bump,
         );
         if received != expected {
             Some(Diagnostic {
@@ -38,8 +32,8 @@ pub fn check(
                 code: DIAGNOSTIC_CODE.into(),
                 message: format!(
                     "type mismatch in `br_table`: expected {}, found {}",
-                    join_types(db, expected.iter(), "", bump),
-                    join_types(db, received.iter(), "", bump),
+                    join_types(ctx.db, expected.iter(), "", ctx.bump),
+                    join_types(ctx.db, received.iter(), "", ctx.bump),
                 ),
                 ..Default::default()
             })

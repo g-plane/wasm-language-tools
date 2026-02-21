@@ -1,26 +1,19 @@
-use super::{Diagnostic, FastPlainInstr, RelatedInformation};
+use super::{Diagnostic, DiagnosticCtx, RelatedInformation};
 use crate::{
-    binder::{SymbolKind, SymbolTable},
-    document::Document,
-    types_analyzer::{self, CompositeType, FieldType, Fields, StorageType},
+    binder::SymbolKind,
+    types_analyzer::{CompositeType, FieldType, Fields, StorageType},
 };
-use wat_syntax::SyntaxKind;
+use wat_syntax::{AmberNode, AmberToken, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "new-non-defaultable";
 
-pub fn check(
-    db: &dyn salsa::Database,
-    document: Document,
-    symbol_table: &SymbolTable,
-    instr: &FastPlainInstr,
-) -> Option<Diagnostic> {
-    let def_types = types_analyzer::get_def_types(db, document);
-    if !instr.name.text().ends_with(".new_default") {
+pub fn check(ctx: &DiagnosticCtx, node: AmberNode, instr_name: AmberToken) -> Option<Diagnostic> {
+    if !instr_name.text().ends_with(".new_default") {
         return None;
     }
-    let immediate = instr.amber.children_by_kind(SyntaxKind::IMMEDIATE).next()?;
-    let def_symbol = symbol_table.find_def(immediate.to_ptr().into())?;
-    match &def_types.get(&def_symbol.key)?.comp {
+    let immediate = node.children_by_kind(SyntaxKind::IMMEDIATE).next()?;
+    let def_symbol = ctx.symbol_table.find_def(immediate.to_ptr().into())?;
+    match &ctx.def_types.get(&def_symbol.key)?.comp {
         CompositeType::Struct(Fields(fields)) => {
             let non_defaultables = fields
                 .iter()
@@ -41,12 +34,12 @@ pub fn check(
                 Some(Diagnostic {
                     range: immediate.text_range(),
                     code: DIAGNOSTIC_CODE.into(),
-                    message: format!("struct type `{}` is not defaultable", def_symbol.idx.render(db)),
+                    message: format!("struct type `{}` is not defaultable", def_symbol.idx.render(ctx.db)),
                     related_information: Some(
                         non_defaultables
                             .into_iter()
                             .filter_map(|idx| {
-                                symbol_table
+                                ctx.symbol_table
                                     .symbols
                                     .values()
                                     .find(|symbol| {
@@ -56,7 +49,10 @@ pub fn check(
                                     })
                                     .map(|symbol| RelatedInformation {
                                         range: symbol.key.text_range(),
-                                        message: format!("field type `{}` is not defaultable", symbol.idx.render(db)),
+                                        message: format!(
+                                            "field type `{}` is not defaultable",
+                                            symbol.idx.render(ctx.db)
+                                        ),
                                     })
                             })
                             .collect(),
@@ -71,7 +67,7 @@ pub fn check(
         })) if !ty.defaultable() => Some(Diagnostic {
             range: immediate.text_range(),
             code: DIAGNOSTIC_CODE.into(),
-            message: format!("array type `{}` is not defaultable", def_symbol.idx.render(db)),
+            message: format!("array type `{}` is not defaultable", def_symbol.idx.render(ctx.db)),
             ..Default::default()
         }),
         _ => None,

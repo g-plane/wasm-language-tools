@@ -1,27 +1,18 @@
-use super::Diagnostic;
+use super::{Diagnostic, DiagnosticCtx};
 use crate::{
     LintLevel,
     cfa::{self, FlowNodeKind},
-    document::Document,
 };
-use bumpalo::{Bump, collections::Vec as BumpVec};
+use bumpalo::collections::Vec as BumpVec;
 use lspt::{DiagnosticSeverity, DiagnosticTag};
 use wat_syntax::{
-    AmberNode, SyntaxKind, SyntaxNode, TextRange,
+    AmberNode, SyntaxKind, TextRange,
     ast::{AstNode, Instr, support},
 };
 
 const DIAGNOSTIC_CODE: &str = "unreachable";
 
-pub fn check(
-    diagnostics: &mut Vec<Diagnostic>,
-    db: &dyn salsa::Database,
-    document: Document,
-    lint_level: LintLevel,
-    module: &SyntaxNode,
-    node: AmberNode,
-    bump: &mut Bump,
-) {
+pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, lint_level: LintLevel, node: AmberNode) {
     let severity = match lint_level {
         LintLevel::Allow => return,
         LintLevel::Hint => DiagnosticSeverity::Hint,
@@ -29,8 +20,8 @@ pub fn check(
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
 
-    let cfg = cfa::analyze(db, document, node.to_ptr());
-    let mut ranges = BumpVec::<TextRange>::new_in(bump);
+    let cfg = cfa::analyze(ctx.db, ctx.document, node.to_ptr());
+    let mut ranges = BumpVec::<TextRange>::new_in(ctx.bump);
     cfg.graph.raw_nodes().iter().for_each(|raw_node| {
         if !raw_node.weight.unreachable {
             return;
@@ -38,7 +29,7 @@ pub fn check(
         match &raw_node.weight.kind {
             FlowNodeKind::BasicBlock(bb) => {
                 bb.0.iter().for_each(|instr| {
-                    let Some(instr) = instr.ptr.try_to_node(module) else {
+                    let Some(instr) = instr.ptr.try_to_node(ctx.module) else {
                         return;
                     };
                     let current = instr.text_range();
@@ -81,7 +72,7 @@ pub fn check(
                 });
             }
             FlowNodeKind::BlockEntry(entry) => {
-                let Some(node) = entry.try_to_node(module) else {
+                let Some(node) = entry.try_to_node(ctx.module) else {
                     return;
                 };
                 if let Some((prev, last)) = node.prev_siblings().next().zip(ranges.last_mut())
@@ -105,5 +96,5 @@ pub fn check(
         ..Default::default()
     }));
 
-    bump.reset();
+    ctx.bump.reset();
 }

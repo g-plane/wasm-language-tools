@@ -1,7 +1,7 @@
 use super::Diagnostic;
 use crate::{
     LintLevel,
-    binder::{Symbol, SymbolKind, SymbolTable},
+    binder::{Symbol, SymbolKey, SymbolKind, SymbolTable},
     document::Document,
     helpers::{BumpCollectionsExt, BumpHashSet},
     imex,
@@ -18,6 +18,7 @@ pub fn check(
     document: Document,
     lint_level: LintLevel,
     symbol_table: &SymbolTable,
+    imports: &[SymbolKey],
     bump: &Bump,
 ) {
     let severity = match lint_level {
@@ -26,7 +27,6 @@ pub fn check(
         LintLevel::Warn => DiagnosticSeverity::Warning,
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
-    let imports = imex::get_imports(db, document);
     let exports = imex::get_exports(db, document);
     let used = BumpHashSet::from_iter_in(
         symbol_table.resolved.values().copied().chain(
