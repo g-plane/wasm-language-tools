@@ -1,7 +1,7 @@
 use crate::{NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken, TokenAtOffset};
 use text_size::{TextRange, TextSize};
 
-pub type SyntaxElement = NodeOrToken<SyntaxNode, SyntaxToken>;
+pub(crate) type SyntaxElement = NodeOrToken<SyntaxNode, SyntaxToken>;
 
 impl SyntaxElement {
     #[inline]

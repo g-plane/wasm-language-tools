@@ -1,5 +1,5 @@
-use super::node::NodeData;
-use crate::{AmberToken, GreenToken, SyntaxElement, SyntaxKind, SyntaxNode};
+use super::{element::SyntaxElement, node::NodeData};
+use crate::{AmberToken, GreenToken, SyntaxKind, SyntaxNode};
 use std::{fmt, ptr::NonNull, rc::Rc};
 use text_size::{TextRange, TextSize};
 

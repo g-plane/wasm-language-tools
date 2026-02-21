@@ -12,6 +12,6 @@ pub use self::{
     green::{GreenNode, GreenToken},
     helpers::NodeOrToken,
     kind::{SyntaxKind, SyntaxKindMatch},
-    red::{Descendants, SyntaxElement, SyntaxNode, SyntaxNodeChildren, SyntaxNodePtr, SyntaxToken, TokenAtOffset},
+    red::{Descendants, SyntaxNode, SyntaxNodeChildren, SyntaxNodePtr, SyntaxToken, TokenAtOffset},
 };
 pub use text_size::{TextRange, TextSize};

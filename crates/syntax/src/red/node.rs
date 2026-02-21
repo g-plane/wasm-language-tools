@@ -1,6 +1,7 @@
+use super::element::SyntaxElement;
 use crate::{
-    AmberNode, Descendants, GreenNode, GreenToken, NodeOrToken, SyntaxElement, SyntaxKind, SyntaxKindMatch,
-    SyntaxNodeChildren, SyntaxToken, TokenAtOffset, green::GreenChild,
+    AmberNode, Descendants, GreenNode, GreenToken, NodeOrToken, SyntaxKind, SyntaxKindMatch, SyntaxNodeChildren,
+    SyntaxToken, TokenAtOffset, green::GreenChild,
 };
 use std::{fmt, ptr::NonNull, rc::Rc};
 use text_size::{TextRange, TextSize};

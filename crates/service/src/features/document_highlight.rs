@@ -5,7 +5,7 @@ use crate::{
 };
 use line_index::LineIndex;
 use lspt::{DocumentHighlight, DocumentHighlightKind, DocumentHighlightParams};
-use wat_syntax::{NodeOrToken, SyntaxElement, SyntaxKind, SyntaxNode};
+use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken};
 
 impl LanguageService {
     /// Handler for `textDocument/documentHighlight` request.
@@ -165,7 +165,12 @@ fn get_highlight_kind_of_symbol(symbol: &Symbol, root: &SyntaxNode) -> Option<Do
             let node = symbol.key.to_node(root);
             if node
                 .prev_siblings_with_tokens()
-                .any(|node_or_token| is_write_access_instr(node_or_token, &node))
+                .any(|node_or_token| match node_or_token {
+                    NodeOrToken::Token(token) => {
+                        token.kind() == SyntaxKind::INSTR_NAME && is_write_access_instr(token, &node)
+                    }
+                    _ => false,
+                })
             {
                 Some(DocumentHighlightKind::Write)
             } else {
@@ -176,29 +181,22 @@ fn get_highlight_kind_of_symbol(symbol: &Symbol, root: &SyntaxNode) -> Option<Do
     }
 }
 
-fn is_write_access_instr(node_or_token: SyntaxElement, node: &SyntaxNode) -> bool {
-    if let NodeOrToken::Token(token) = node_or_token {
-        if token.kind() != SyntaxKind::INSTR_NAME {
-            return false;
-        }
-        let text = token.text();
-        if text == "table.copy" {
-            // The first immediate in `table.copy` is the destination table.
-            node.prev_siblings().all(|node| node.kind() != SyntaxKind::IMMEDIATE)
-        } else {
-            matches!(
-                text,
-                "local.set"
-                    | "local.tee"
-                    | "global.set"
-                    | "table.init"
-                    | "table.set"
-                    | "table.grow"
-                    | "table.fill"
-                    | "struct.set"
-            )
-        }
+fn is_write_access_instr(token: SyntaxToken, node: &SyntaxNode) -> bool {
+    let text = token.text();
+    if text == "table.copy" {
+        // The first immediate in `table.copy` is the destination table.
+        node.prev_siblings().all(|node| node.kind() != SyntaxKind::IMMEDIATE)
     } else {
-        false
+        matches!(
+            text,
+            "local.set"
+                | "local.tee"
+                | "global.set"
+                | "table.init"
+                | "table.set"
+                | "table.grow"
+                | "table.fill"
+                | "struct.set"
+        )
     }
 }
