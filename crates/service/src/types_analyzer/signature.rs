@@ -8,10 +8,7 @@ use crate::{
     document::Document,
     idx::InternIdent,
 };
-use wat_syntax::{
-    GreenNode, NodeOrToken, SyntaxKind, SyntaxNodePtr,
-    ast::{AstNode, TypeUse, support},
-};
+use wat_syntax::{AmberNode, GreenNode, NodeOrToken, SyntaxKind, SyntaxNodePtr};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash, salsa::Update)]
 pub(crate) struct Signature<'db> {
@@ -96,12 +93,13 @@ pub(crate) fn get_func_sig<'db>(
             {
                 Some(extract_sig(db, type_use))
             } else {
-                let node = key.to_node(&document.root_tree(db));
                 let symbol_table = SymbolTable::of(db, document);
                 let def_types = get_def_types(db, document);
-                support::child::<TypeUse>(&node)
-                    .and_then(|type_use| type_use.index())
-                    .and_then(|idx| symbol_table.resolved.get(&SymbolKey::new(idx.syntax())))
+                AmberNode::new(green, key.text_range().start())
+                    .children_by_kind(SyntaxKind::TYPE_USE)
+                    .next()
+                    .and_then(|type_use| type_use.children_by_kind(SyntaxKind::INDEX).next())
+                    .and_then(|idx| symbol_table.resolved.get(&idx.to_ptr().into()))
                     .and_then(|def_key| def_types.get(def_key))
                     .and_then(|def_type| def_type.comp.as_func().cloned())
             }
@@ -123,9 +121,10 @@ pub(crate) fn get_type_use_sig<'db>(
     } else {
         let symbol_table = SymbolTable::of(db, document);
         let def_types = get_def_types(db, document);
-        TypeUse::cast(ptr.to_node(&document.root_tree(db)))
-            .and_then(|type_use| type_use.index())
-            .and_then(|idx| symbol_table.resolved.get(&SymbolKey::new(idx.syntax())))
+        AmberNode::new(type_use, ptr.text_range().start())
+            .children_by_kind(SyntaxKind::INDEX)
+            .next()
+            .and_then(|idx| symbol_table.resolved.get(&idx.to_ptr().into()))
             .and_then(|def_key| def_types.get(def_key))
             .and_then(|def_type| def_type.comp.as_func().cloned())
             .unwrap_or_default()
