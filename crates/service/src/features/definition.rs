@@ -1,8 +1,4 @@
-use crate::{
-    LanguageService,
-    binder::{SymbolKey, SymbolTable},
-    helpers::LineIndexExt,
-};
+use crate::{LanguageService, binder::SymbolTable, helpers::LineIndexExt};
 use lspt::{Declaration, DeclarationParams, Definition, DefinitionParams, Location, TypeDefinitionParams, Union2};
 use wat_syntax::SyntaxKind;
 
@@ -10,19 +6,19 @@ impl LanguageService {
     /// Handler for `textDocument/definition` request.
     pub fn goto_definition(&self, params: DefinitionParams) -> Option<Definition> {
         let document = self.get_document(&params.text_document.uri)?;
-        let root = document.root_tree(self);
-        let token = super::find_meaningful_token(self, document, &root, params.position)?;
-
-        let parent = token.parent();
-        if !matches!(parent.kind(), SyntaxKind::IMMEDIATE | SyntaxKind::INDEX) {
-            return None;
-        }
         let line_index = document.line_index(self);
+        let position = line_index.convert(params.position)?;
         let symbol_table = SymbolTable::of(self, document);
-        let key = SymbolKey::new(&parent);
         symbol_table
             .resolved
-            .get(&key)
+            .iter()
+            .find_map(|(ref_key, def_key)| {
+                if ref_key.text_range().contains_inclusive(position) {
+                    Some(def_key)
+                } else {
+                    None
+                }
+            })
             .and_then(|key| symbol_table.def_poi.get(key))
             .map(|range| {
                 Union2::A(Location {
@@ -36,16 +32,18 @@ impl LanguageService {
     pub fn goto_type_definition(&self, params: TypeDefinitionParams) -> Option<Definition> {
         let document = self.get_document(&params.text_document.uri)?;
         let line_index = document.line_index(self);
-        let root = document.root_tree(self);
+        let position = line_index.convert(params.position)?;
         let symbol_table = SymbolTable::of(self, document);
-        let token = super::find_meaningful_token(self, document, &root, params.position)?;
-
-        let parent = token.parent();
-        if !matches!(parent.kind(), SyntaxKind::IMMEDIATE | SyntaxKind::INDEX) {
-            return None;
-        }
         symbol_table
-            .find_def(SymbolKey::new(&parent))
+            .resolved
+            .iter()
+            .find_map(|(ref_key, def_key)| {
+                if ref_key.text_range().contains_inclusive(position) {
+                    symbol_table.symbols.get(def_key)
+                } else {
+                    None
+                }
+            })
             .and_then(|symbol| {
                 symbol
                     .amber()
