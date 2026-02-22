@@ -3,7 +3,7 @@ use super::{
     module::{Index, TypeUse},
     support::*,
 };
-use crate::{NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken};
+use crate::{SyntaxKind, SyntaxNode, SyntaxToken};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct AddrType {
@@ -676,13 +676,7 @@ impl Limits {
     }
     #[inline]
     pub fn max(&self) -> Option<SyntaxToken> {
-        self.syntax
-            .children_with_tokens()
-            .filter_map(|it| match it {
-                NodeOrToken::Token(token) if token.kind() == SyntaxKind::UNSIGNED_INT => Some(token),
-                _ => None,
-            })
-            .nth(1)
+        self.syntax.tokens_by_kind(SyntaxKind::UNSIGNED_INT).nth(1)
     }
 }
 impl AstNode for Limits {
@@ -1127,10 +1121,9 @@ impl SubType {
     }
     #[inline]
     pub fn final_keyword(&self) -> Option<SyntaxToken> {
-        self.syntax.children_with_tokens().find_map(|it| match it {
-            NodeOrToken::Token(token) if token.kind() == SyntaxKind::KEYWORD && token.text() == "final" => Some(token),
-            _ => None,
-        })
+        self.syntax
+            .tokens_by_kind(SyntaxKind::KEYWORD)
+            .find(|token| token.text() == "final")
     }
     #[inline]
     pub fn indexes(&self) -> AstChildren<Index> {

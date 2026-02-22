@@ -4,7 +4,7 @@ use super::{
     support::*,
     ty::{HeapType, RefType},
 };
-use crate::{NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken};
+use crate::{SyntaxKind, SyntaxNode, SyntaxToken};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BlockBlock {
@@ -38,19 +38,12 @@ impl BlockBlock {
     #[inline]
     pub fn end_keyword(&self) -> Option<SyntaxToken> {
         self.syntax
-            .children_with_tokens()
-            .filter_map(|it| it.into_token())
-            .find(|it| it.kind() == SyntaxKind::KEYWORD && it.text() == "end")
+            .tokens_by_kind(SyntaxKind::KEYWORD)
+            .find(|token| token.text() == "end")
     }
     #[inline]
     pub fn end_ident_token(&self) -> Option<SyntaxToken> {
-        self.syntax
-            .children_with_tokens()
-            .filter_map(|it| match it {
-                NodeOrToken::Token(token) if token.kind() == SyntaxKind::IDENT => Some(token),
-                _ => None,
-            })
-            .nth(1)
+        self.syntax.tokens_by_kind(SyntaxKind::IDENT).nth(1)
     }
 }
 impl AstNode for BlockBlock {
@@ -118,19 +111,12 @@ impl BlockIf {
     #[inline]
     pub fn end_keyword(&self) -> Option<SyntaxToken> {
         self.syntax
-            .children_with_tokens()
-            .filter_map(|it| it.into_token())
-            .find(|it| it.kind() == SyntaxKind::KEYWORD && it.text() == "end")
+            .tokens_by_kind(SyntaxKind::KEYWORD)
+            .find(|token| token.text() == "end")
     }
     #[inline]
     pub fn end_ident_token(&self) -> Option<SyntaxToken> {
-        self.syntax
-            .children_with_tokens()
-            .filter_map(|it| match it {
-                NodeOrToken::Token(token) if token.kind() == SyntaxKind::IDENT => Some(token),
-                _ => None,
-            })
-            .nth(1)
+        self.syntax.tokens_by_kind(SyntaxKind::IDENT).nth(1)
     }
 }
 impl AstNode for BlockIf {
@@ -334,19 +320,12 @@ impl BlockLoop {
     #[inline]
     pub fn end_keyword(&self) -> Option<SyntaxToken> {
         self.syntax
-            .children_with_tokens()
-            .filter_map(|it| it.into_token())
-            .find(|it| it.kind() == SyntaxKind::KEYWORD && it.text() == "end")
+            .tokens_by_kind(SyntaxKind::KEYWORD)
+            .find(|token| token.text() == "end")
     }
     #[inline]
     pub fn end_ident_token(&self) -> Option<SyntaxToken> {
-        self.syntax
-            .children_with_tokens()
-            .filter_map(|it| match it {
-                NodeOrToken::Token(token) if token.kind() == SyntaxKind::IDENT => Some(token),
-                _ => None,
-            })
-            .nth(1)
+        self.syntax.tokens_by_kind(SyntaxKind::IDENT).nth(1)
     }
 }
 impl AstNode for BlockLoop {
@@ -410,19 +389,12 @@ impl BlockTryTable {
     #[inline]
     pub fn end_keyword(&self) -> Option<SyntaxToken> {
         self.syntax
-            .children_with_tokens()
-            .filter_map(|it| it.into_token())
-            .find(|it| it.kind() == SyntaxKind::KEYWORD && it.text() == "end")
+            .tokens_by_kind(SyntaxKind::KEYWORD)
+            .find(|token| token.text() == "end")
     }
     #[inline]
     pub fn end_ident_token(&self) -> Option<SyntaxToken> {
-        self.syntax
-            .children_with_tokens()
-            .filter_map(|it| match it {
-                NodeOrToken::Token(token) if token.kind() == SyntaxKind::IDENT => Some(token),
-                _ => None,
-            })
-            .nth(1)
+        self.syntax.tokens_by_kind(SyntaxKind::IDENT).nth(1)
     }
 }
 impl AstNode for BlockTryTable {

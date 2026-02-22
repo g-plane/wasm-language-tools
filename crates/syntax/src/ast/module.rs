@@ -4,7 +4,7 @@ use super::{
     support::*,
     ty::{ExternType, GlobalType, MemType, Param, RefType, Result, SubType, TableType, ValType},
 };
-use crate::{NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken};
+use crate::{SyntaxKind, SyntaxNode, SyntaxToken};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Data {
@@ -21,10 +21,7 @@ impl Data {
     }
     #[inline]
     pub fn string_tokens(&self) -> impl Iterator<Item = SyntaxToken> {
-        self.syntax.children_with_tokens().filter_map(|it| match it {
-            NodeOrToken::Token(it) if it.kind() == SyntaxKind::STRING => Some(it),
-            _ => None,
-        })
+        self.syntax.tokens_by_kind(SyntaxKind::STRING)
     }
     #[inline]
     pub fn r_paren_token(&self) -> Option<SyntaxToken> {
@@ -875,10 +872,7 @@ impl ModuleFieldData {
     }
     #[inline]
     pub fn string_tokens(&self) -> impl Iterator<Item = SyntaxToken> {
-        self.syntax.children_with_tokens().filter_map(|it| match it {
-            NodeOrToken::Token(it) if it.kind() == SyntaxKind::STRING => Some(it),
-            _ => None,
-        })
+        self.syntax.tokens_by_kind(SyntaxKind::STRING)
     }
     #[inline]
     pub fn r_paren_token(&self) -> Option<SyntaxToken> {
@@ -930,9 +924,8 @@ impl ModuleFieldElem {
     #[inline]
     pub fn declare_keyword(&self) -> Option<SyntaxToken> {
         self.syntax
-            .children_with_tokens()
-            .filter_map(|it| it.into_token())
-            .find(|it| it.kind() == SyntaxKind::KEYWORD && it.text() == "declare")
+            .tokens_by_kind(SyntaxKind::KEYWORD)
+            .find(|token| token.text() == "declare")
     }
     #[inline]
     pub fn table_use(&self) -> Option<TableUse> {
