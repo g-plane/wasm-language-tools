@@ -45,7 +45,8 @@ pub fn act(
         }
         "return" => {
             let prev_instr = node
-                .first_child()
+                .children()
+                .next()
                 .or_else(|| node.prev_siblings().next())
                 .filter(|node| node.kind() == SyntaxKind::PLAIN_INSTR)?;
             if support::token(&prev_instr, SyntaxKind::INSTR_NAME).is_some_and(|token| token.text() != "call") {

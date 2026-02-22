@@ -169,9 +169,7 @@ impl LanguageService {
                         }
                     }
                     SyntaxKind::EXPORT => {
-                        if extract
-                            && let Some(action) = extract_export::act(db, uri, line_index, &root, symbol_table, &it)
-                        {
+                        if extract && let Some(action) = extract_export::act(db, uri, line_index, symbol_table, &it) {
                             actions.push(action);
                         }
                     }

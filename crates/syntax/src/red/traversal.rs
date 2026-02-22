@@ -32,7 +32,7 @@ impl Iterator for Descendants {
     type Item = SyntaxNode;
     fn next(&mut self) -> Option<Self::Item> {
         self.next.take().inspect(|next| {
-            if let Some(child) = next.first_child() {
+            if let Some(child) = next.children().next() {
                 self.next = Some(child);
                 self.child_entered = true;
             } else if next != &self.start {

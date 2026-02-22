@@ -168,41 +168,6 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn first_child(&self) -> Option<SyntaxNode> {
-        self.children().next()
-    }
-
-    #[inline]
-    pub fn first_child_or_token(&self) -> Option<SyntaxElement> {
-        self.green().slice().first().map(|child| match child {
-            GreenChild::Node { offset, node } => self.new_child(0, node, *offset).into(),
-            GreenChild::Token { offset, token } => self.new_token(0, token, *offset).into(),
-        })
-    }
-
-    #[inline]
-    pub fn last_child(&self) -> Option<SyntaxNode> {
-        self.green()
-            .slice()
-            .iter()
-            .enumerate()
-            .rev()
-            .find_map(|(i, child)| match child {
-                GreenChild::Node { offset, node } => Some(self.new_child(i as u32, node, *offset)),
-                _ => None,
-            })
-    }
-
-    #[inline]
-    pub fn last_child_or_token(&self) -> Option<SyntaxElement> {
-        let slice = self.green().slice();
-        slice.last().map(|child| match child {
-            GreenChild::Node { offset, node } => self.new_child(slice.len() as u32 - 1, node, *offset).into(),
-            GreenChild::Token { offset, token } => self.new_token(slice.len() as u32 - 1, token, *offset).into(),
-        })
-    }
-
-    #[inline]
     /// Nodes that come immediately after this node.
     ///
     /// If you want to iterate over both nodes and tokens, use [`next_siblings_with_tokens`](Self::next_siblings_with_tokens) instead.

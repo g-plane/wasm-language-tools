@@ -525,7 +525,7 @@ fn add_cmp_ctx_for_immediates(instr_name: &str, node: &SyntaxNode, has_leading_l
                     let first_immediate = if node.kind() == SyntaxKind::IMMEDIATE {
                         node.prev_siblings().next()
                     } else {
-                        node.first_child()
+                        node.children().next()
                     };
                     if let Some(immediate) = first_immediate {
                         ctx.push(CmpCtx::Field(SymbolKey::new(&immediate)));

@@ -12,13 +12,17 @@ pub fn act(
     db: &dyn salsa::Database,
     uri: InternUri,
     line_index: &LineIndex,
-    root: &SyntaxNode,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) -> Option<CodeAction> {
     let parent = node.parent()?;
     let def_symbol = symbol_table.symbols.get(&SymbolKey::new(&parent))?;
-    let last_module_field = def_symbol.region.try_to_node(root)?.last_child()?;
+    let last_module_field = symbol_table
+        .symbols
+        .get(&def_symbol.region)?
+        .amber()
+        .children()
+        .next_back()?;
 
     let mut changes = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(

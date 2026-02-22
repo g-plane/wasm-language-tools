@@ -31,7 +31,7 @@ pub fn act(
     let CompType::Func(func_type) = TypeDef::cast(type_def_key.to_node(root))?.sub_type()?.comp_type()? else {
         return None;
     };
-    func_type.syntax().first_child()?; // skip empty func type
+    func_type.syntax().children().next()?; // skip empty func type
     let mut new_text = String::with_capacity(8);
     for node in func_type.syntax().children() {
         new_text.push(' ');
