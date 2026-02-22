@@ -16,7 +16,7 @@ impl GreenNode {
         I: IntoIterator<Item = NodeOrToken<GreenNode, GreenToken>>,
         I::IntoIter: ExactSizeIterator,
     {
-        let children = children.into_iter();
+        let mut children = children.into_iter();
         let mut data = UniqueArc::from_header_and_uninit_slice(
             HeaderWithLength::new(
                 GreenHead {
@@ -27,23 +27,31 @@ impl GreenNode {
             ),
             children.len(),
         );
-        let text_len = data
-            .slice
-            .iter_mut()
-            .zip(children)
-            .fold(0.into(), |offset, (slot, node_or_token)| match node_or_token {
+        let mut slots = data.slice.iter_mut();
+        let mut total_text_len = 0.into();
+        while let Some((slot, node_or_token)) = slots.next().zip(children.next()) {
+            match node_or_token {
                 NodeOrToken::Node(node) => {
-                    let total_text_len = offset + node.text_len();
-                    slot.write(GreenChild::Node { offset, node });
-                    total_text_len
+                    let text_len = node.text_len();
+                    slot.write(GreenChild::Node {
+                        offset: total_text_len,
+                        node,
+                    });
+                    total_text_len += text_len;
                 }
                 NodeOrToken::Token(token) => {
-                    let total_text_len = offset + token.text_len();
-                    slot.write(GreenChild::Token { offset, token });
-                    total_text_len
+                    let text_len = token.text_len();
+                    slot.write(GreenChild::Token {
+                        offset: total_text_len,
+                        token,
+                    });
+                    total_text_len += text_len;
                 }
-            });
-        data.header.header.text_len = text_len;
+            }
+        }
+        assert!(slots.next().is_none(), "incorrect children exact size iterator");
+        assert!(children.next().is_none(), "incorrect children exact size iterator");
+        data.header.header.text_len = total_text_len;
 
         // SAFETY: all data has been written to slice
         let data = unsafe { Arc::into_thin(data.assume_init_slice_with_header().shareable()) };
