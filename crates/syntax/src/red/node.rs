@@ -1,18 +1,20 @@
-use super::element::SyntaxElement;
+use super::{element::SyntaxElement, traversal::Descendants};
 use crate::{
-    AmberNode, Descendants, GreenNode, GreenToken, NodeOrToken, SyntaxKind, SyntaxKindMatch, SyntaxNodeChildren,
-    SyntaxToken, TokenAtOffset, green::GreenChild,
+    AmberNode, GreenNode, GreenToken, NodeOrToken, SyntaxKind, SyntaxKindMatch, SyntaxNodeChildren, SyntaxToken,
+    TokenAtOffset, green::GreenChild,
 };
 use std::{fmt, ptr::NonNull, rc::Rc};
 use text_size::{TextRange, TextSize};
 
 #[derive(Clone, PartialEq, Eq, Hash)]
+/// Node in the red syntax tree.
 pub struct SyntaxNode {
     pub(crate) data: Rc<NodeData>,
 }
 
 impl SyntaxNode {
     #[inline]
+    /// Build a new syntax tree on top of a green tree.
     pub fn new_root(green: GreenNode) -> Self {
         SyntaxNode {
             data: Rc::new(NodeData {
@@ -46,26 +48,31 @@ impl SyntaxNode {
     }
 
     #[inline]
+    /// Kind of this node.
     pub fn kind(&self) -> SyntaxKind {
         self.green().kind()
     }
 
     #[inline]
+    /// The range that this node covers in the original text.
     pub fn text_range(&self) -> TextRange {
         self.data.range
     }
 
     #[inline]
+    /// The underlying green node of this red node.
     pub fn green(&self) -> &GreenNode {
         self.data.green()
     }
 
     #[inline]
+    /// The corresponding amber node of this red node.
     pub fn amber(&self) -> AmberNode<'_> {
         self.into()
     }
 
     #[inline]
+    /// Parent of this node. It returns `None` if this node is the root.
     pub fn parent(&self) -> Option<SyntaxNode> {
         match &self.data.level {
             NodeLevel::Root { .. } => None,
@@ -76,11 +83,18 @@ impl SyntaxNode {
     }
 
     #[inline]
+    /// Iterator along the chain of parents of this node.
     pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode> {
         std::iter::successors(Some(self.clone()), SyntaxNode::parent)
     }
 
     #[inline]
+    /// Iterator over the children nodes of this node.
+    ///
+    /// If you want to iterate over both nodes and tokens, use [`children_with_tokens`](Self::children_with_tokens) instead.
+    ///
+    /// Though you can filter specific kinds of children on this iterator manually,
+    /// it is more efficient to use [`children_by_kind`](Self::children_by_kind) instead.
     pub fn children(&self) -> SyntaxNodeChildren {
         SyntaxNodeChildren {
             parent: self.clone(),
@@ -93,6 +107,8 @@ impl SyntaxNode {
     }
 
     #[inline]
+    /// Iterator over specific kinds of children nodes of this node.
+    /// This is more efficient than filtering with [`children`](Self::children) manually.
     pub fn children_by_kind<M>(&self, matcher: M) -> impl DoubleEndedIterator<Item = SyntaxNode> + use<'_, M>
     where
         M: SyntaxKindMatch,
@@ -110,6 +126,7 @@ impl SyntaxNode {
     }
 
     #[inline]
+    /// Iterator over specific kinds of children tokens of this node.
     pub fn tokens_by_kind<M>(&self, matcher: M) -> impl DoubleEndedIterator<Item = SyntaxToken> + use<'_, M>
     where
         M: SyntaxKindMatch,
@@ -127,6 +144,7 @@ impl SyntaxNode {
     }
 
     #[inline]
+    /// Iterator over the children nodes and tokens of this node.
     pub fn children_with_tokens(&self) -> impl DoubleEndedIterator<Item = SyntaxElement> {
         self.green().slice().iter().enumerate().map(|(i, child)| match child {
             GreenChild::Node { offset, node } => self.new_child(i as u32, node, *offset).into(),
@@ -135,6 +153,10 @@ impl SyntaxNode {
     }
 
     #[inline]
+    /// Check if this node has specific kinds of children nodes or tokens.
+    ///
+    /// This is an efficient alternative to `node.children_with_tokens().any(...)`
+    /// since it won't create any nodes or tokens.
     pub fn has_child_or_token_by_kind<M>(&self, matcher: M) -> bool
     where
         M: SyntaxKindMatch,
@@ -181,14 +203,11 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn next_sibling_or_token(&self) -> Option<SyntaxElement> {
-        match &self.data.level {
-            NodeLevel::Root { .. } => None,
-            NodeLevel::Child { parent, .. } => parent.next_child_or_token(self.data.index),
-        }
-    }
-
-    #[inline]
+    /// Nodes that come immediately after this node.
+    ///
+    /// If you want to iterate over both nodes and tokens, use [`next_siblings_with_tokens`](Self::next_siblings_with_tokens) instead.
+    ///
+    /// Unlike rowan, the iterator doesn't contain the current node itself.
     pub fn next_siblings(&self) -> impl Iterator<Item = SyntaxNode> {
         match &self.data.level {
             NodeLevel::Root { .. } => None,
@@ -199,6 +218,18 @@ impl SyntaxNode {
     }
 
     #[inline]
+    /// Node or token that comes immediately after this node.
+    pub fn next_sibling_or_token(&self) -> Option<SyntaxElement> {
+        match &self.data.level {
+            NodeLevel::Root { .. } => None,
+            NodeLevel::Child { parent, .. } => parent.next_child_or_token(self.data.index),
+        }
+    }
+
+    #[inline]
+    /// Nodes and tokens that come immediately after this node.
+    ///
+    /// Unlike rowan, the iterator doesn't contain the current node itself.
     pub fn next_siblings_with_tokens(&self) -> impl Iterator<Item = SyntaxElement> {
         match &self.data.level {
             NodeLevel::Root { .. } => None,
@@ -209,6 +240,7 @@ impl SyntaxNode {
     }
 
     #[inline]
+    /// Consecutive tokens sequence that come immediately after this node without any nodes in between.
     pub fn next_consecutive_tokens(&self) -> impl Iterator<Item = SyntaxToken> {
         match &self.data.level {
             NodeLevel::Root { .. } => None,
@@ -219,14 +251,11 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn prev_sibling_or_token(&self) -> Option<SyntaxElement> {
-        match &self.data.level {
-            NodeLevel::Root { .. } => None,
-            NodeLevel::Child { parent, .. } => parent.prev_child_or_token(self.data.index),
-        }
-    }
-
-    #[inline]
+    /// Nodes that come immediately before this node.
+    ///
+    /// If you want to iterate over both nodes and tokens, use [`prev_siblings_with_tokens`](Self::prev_siblings_with_tokens) instead.
+    ///
+    /// Unlike rowan, the iterator doesn't contain the current node itself.
     pub fn prev_siblings(&self) -> impl Iterator<Item = SyntaxNode> {
         match &self.data.level {
             NodeLevel::Root { .. } => None,
@@ -237,6 +266,18 @@ impl SyntaxNode {
     }
 
     #[inline]
+    /// Node or token that comes immediately before this node.
+    pub fn prev_sibling_or_token(&self) -> Option<SyntaxElement> {
+        match &self.data.level {
+            NodeLevel::Root { .. } => None,
+            NodeLevel::Child { parent, .. } => parent.prev_child_or_token(self.data.index),
+        }
+    }
+
+    #[inline]
+    /// Nodes and tokens that come immediately before this node.
+    ///
+    /// Unlike rowan, the iterator doesn't contain the current node itself.
     pub fn prev_siblings_with_tokens(&self) -> impl Iterator<Item = SyntaxElement> {
         match &self.data.level {
             NodeLevel::Root { .. } => None,
@@ -247,6 +288,7 @@ impl SyntaxNode {
     }
 
     #[inline]
+    /// Consecutive tokens sequence that come immediately before this node without any nodes in between.
     pub fn prev_consecutive_tokens(&self) -> impl Iterator<Item = SyntaxToken> {
         match &self.data.level {
             NodeLevel::Root { .. } => None,
@@ -257,7 +299,8 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn descendants(&self) -> Descendants {
+    /// Iterator over all nodes in the subtree, including this node itself.
+    pub fn descendants(&self) -> impl Iterator<Item = SyntaxNode> {
         Descendants::new(self.clone())
     }
 
@@ -298,6 +341,7 @@ impl SyntaxNode {
     }
 
     #[inline]
+    /// Find a child node that intersects with the given range.
     pub fn child_at_range(&self, range: TextRange) -> Option<SyntaxNode> {
         if !self.data.range.contains_range(range) {
             return None;
@@ -327,7 +371,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    /// Returns new *root* green node with replaced node.
+    /// Replace this node with new green node. It returns new *root* green node with replaced node.
     pub fn replace_with(&self, replacement: GreenNode) -> GreenNode {
         match &self.data.level {
             NodeLevel::Root { .. } => replacement,

@@ -1,7 +1,7 @@
 use crate::SyntaxNode;
 use std::iter::FusedIterator;
 
-pub struct Descendants {
+pub(crate) struct Descendants {
     start: SyntaxNode,
     next: Option<SyntaxNode>,
     child_entered: bool,

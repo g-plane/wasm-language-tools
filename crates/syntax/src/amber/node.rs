@@ -5,8 +5,11 @@ use crate::{
 use text_size::{TextRange, TextSize};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
-/// `AmberNode` is a lightweight version of [`SyntaxNode`](crate::SyntaxNode) that doesn't allocate on the heap.
-/// It's pretty cheaper than `SyntaxNode`, but you can't visit parent and siblings.
+/// Node in the amber syntax tree.
+///
+/// It's a lightweight version of [`SyntaxNode`](crate::SyntaxNode) without access to parent and siblings.
+/// It's much cheaper than [`SyntaxNode`](crate::SyntaxNode) to create and use.
+/// This is preferred to use for better performance if you don't need to visit parent and siblings.
 pub struct AmberNode<'a> {
     green: &'a GreenNode,
     range: TextRange,
@@ -14,6 +17,7 @@ pub struct AmberNode<'a> {
 
 impl<'a> AmberNode<'a> {
     #[inline]
+    /// Build a new syntax tree on top of a green tree.
     pub fn new_root(green: &'a GreenNode) -> Self {
         Self {
             green,
@@ -22,6 +26,9 @@ impl<'a> AmberNode<'a> {
     }
 
     #[inline]
+    /// Create a new amber node with the given green node based on the offset.
+    ///
+    /// Note that passing wrong offset can cause unexpectedly incorrect syntax tree. Be careful.
     pub fn new(green: &'a GreenNode, start: TextSize) -> Self {
         Self {
             green,
@@ -30,21 +37,25 @@ impl<'a> AmberNode<'a> {
     }
 
     #[inline]
+    /// Kind of this node.
     pub fn kind(&self) -> SyntaxKind {
         self.green.kind()
     }
 
     #[inline]
+    /// The range that this node covers in the original text.
     pub fn text_range(&self) -> TextRange {
         self.range
     }
 
     #[inline]
+    /// The underlying green node of this amber node.
     pub fn green(&self) -> &'a GreenNode {
         self.green
     }
 
     #[inline]
+    /// The corresponding [`SyntaxNodePtr`](crate::SyntaxNodePtr) of this amber node.
     pub fn to_ptr(&self) -> SyntaxNodePtr {
         SyntaxNodePtr {
             kind: self.green.kind(),
@@ -53,6 +64,9 @@ impl<'a> AmberNode<'a> {
     }
 
     #[inline]
+    /// Iterator over the children nodes of this node.
+    ///
+    /// If you want to iterate over both nodes and tokens, use [`children_with_tokens`](Self::children_with_tokens) instead.
     pub fn children(&self) -> impl DoubleEndedIterator<Item = AmberNode<'a>> + Clone {
         self.green.slice().iter().filter_map(|child| match child {
             GreenChild::Node { offset, node } => Some(AmberNode::new(node, self.range.start() + offset)),
@@ -61,6 +75,7 @@ impl<'a> AmberNode<'a> {
     }
 
     #[inline]
+    /// Iterator over specific kinds of children nodes of this node.
     pub fn children_by_kind<M>(&self, matcher: M) -> impl DoubleEndedIterator<Item = AmberNode<'a>> + use<'_, 'a, M>
     where
         M: SyntaxKindMatch,
@@ -74,6 +89,7 @@ impl<'a> AmberNode<'a> {
     }
 
     #[inline]
+    /// Iterator over specific kinds of children tokens of this node.
     pub fn tokens_by_kind<M>(&self, matcher: M) -> impl DoubleEndedIterator<Item = AmberToken<'a>> + use<'_, 'a, M>
     where
         M: SyntaxKindMatch,
@@ -87,6 +103,7 @@ impl<'a> AmberNode<'a> {
     }
 
     #[inline]
+    /// Iterator over the children nodes and tokens of this node.
     pub fn children_with_tokens(&self) -> impl DoubleEndedIterator<Item = NodeOrToken<AmberNode<'a>, AmberToken<'a>>> {
         self.green.slice().iter().map(|child| match child {
             GreenChild::Node { offset, node } => AmberNode::new(node, self.range.start() + offset).into(),
@@ -95,6 +112,12 @@ impl<'a> AmberNode<'a> {
     }
 
     #[inline]
+    /// Iterator over all tokens in the subtree.
+    ///
+    /// The iterator yields a three-component tuple:
+    /// 1. current token
+    /// 2. the parent of current token
+    /// 3. the grandparent of current token
     pub fn descendant_tokens(&self) -> impl Iterator<Item = DescendantToken<'a>> + 'a {
         DescendantTokens::new(*self)
     }

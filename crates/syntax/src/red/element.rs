@@ -21,30 +21,6 @@ impl SyntaxElement {
     }
 
     #[inline]
-    pub fn parent(&self) -> Option<SyntaxNode> {
-        match self {
-            NodeOrToken::Node(node) => node.parent(),
-            NodeOrToken::Token(token) => Some(token.parent()),
-        }
-    }
-
-    #[inline]
-    pub fn next_sibling_or_token(&self) -> Option<SyntaxElement> {
-        match self {
-            NodeOrToken::Node(node) => node.next_sibling_or_token(),
-            NodeOrToken::Token(token) => token.next_sibling_or_token(),
-        }
-    }
-
-    #[inline]
-    pub fn prev_sibling_or_token(&self) -> Option<SyntaxElement> {
-        match self {
-            NodeOrToken::Node(node) => node.prev_sibling_or_token(),
-            NodeOrToken::Token(token) => token.prev_sibling_or_token(),
-        }
-    }
-
-    #[inline]
     pub(crate) fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset {
         match self {
             NodeOrToken::Node(node) => node.token_at_offset(offset),

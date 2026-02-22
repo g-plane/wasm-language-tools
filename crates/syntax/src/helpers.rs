@@ -1,4 +1,5 @@
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
+/// Type that represents tree element which may be either a node or a token.
 pub enum NodeOrToken<N, T> {
     Node(N),
     Token(T),

@@ -123,6 +123,7 @@ impl SyntaxKind {
     }
 }
 
+/// Trait for matching syntax kinds, used in `*_by_kind` methods.
 pub trait SyntaxKindMatch {
     fn matches(&self, kind: SyntaxKind) -> bool;
 }

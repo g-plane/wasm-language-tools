@@ -5,12 +5,14 @@ use text_size::TextSize;
 use triomphe::{Arc, HeaderWithLength, ThinArc, UniqueArc};
 
 #[derive(Clone, PartialEq, Eq, Hash)]
+/// Node in the green syntax tree.
 pub struct GreenNode {
     data: ThinArc<GreenHead, GreenChild>,
 }
 
 impl GreenNode {
     #[inline]
+    /// Create specified kind of green node with given children.
     pub fn new<I>(kind: SyntaxKind, children: I) -> GreenNode
     where
         I: IntoIterator<Item = NodeOrToken<GreenNode, GreenToken>>,
@@ -60,16 +62,19 @@ impl GreenNode {
     }
 
     #[inline]
+    /// Kind of this node.
     pub fn kind(&self) -> SyntaxKind {
         self.data.header.header.kind
     }
 
     #[inline]
+    /// Total length of text that this node covers.
     pub fn text_len(&self) -> TextSize {
         self.data.header.header.text_len
     }
 
     #[inline]
+    /// Iterator over the children nodes and tokens of this node.
     pub fn children(&self) -> impl Iterator<Item = NodeOrToken<&GreenNode, &GreenToken>> + Clone {
         self.data.slice.iter().map(|child| match child {
             GreenChild::Node { node, .. } => NodeOrToken::Node(node),
@@ -78,6 +83,7 @@ impl GreenNode {
     }
 
     #[inline]
+    /// Number of children of this node.
     pub fn children_len(&self) -> usize {
         self.data.header.length
     }
