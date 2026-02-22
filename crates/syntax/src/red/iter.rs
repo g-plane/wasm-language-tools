@@ -1,6 +1,7 @@
 use crate::{GreenNode, SyntaxNode, green::GreenChild};
 use std::{iter::FusedIterator, ptr::NonNull};
 
+/// The iterator over the child nodes of a [`SyntaxNode`](crate::SyntaxNode).
 pub struct SyntaxNodeChildren {
     pub(super) parent: SyntaxNode,
     pub(super) green: NonNull<GreenNode>,

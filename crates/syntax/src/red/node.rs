@@ -89,7 +89,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    /// Iterator over the children nodes of this node.
+    /// Iterator over the child nodes of this node.
     ///
     /// If you want to iterate over both nodes and tokens, use [`children_with_tokens`](Self::children_with_tokens) instead.
     ///
@@ -107,7 +107,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    /// Iterator over specific kinds of children nodes of this node.
+    /// Iterator over specific kinds of child nodes of this node.
     /// This is more efficient than filtering with [`children`](Self::children) manually.
     pub fn children_by_kind<M>(&self, matcher: M) -> impl DoubleEndedIterator<Item = SyntaxNode> + use<'_, M>
     where
@@ -126,7 +126,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    /// Iterator over specific kinds of children tokens of this node.
+    /// Iterator over specific kinds of child tokens of this node.
     pub fn tokens_by_kind<M>(&self, matcher: M) -> impl DoubleEndedIterator<Item = SyntaxToken> + use<'_, M>
     where
         M: SyntaxKindMatch,
@@ -144,7 +144,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    /// Iterator over the children nodes and tokens of this node.
+    /// Iterator over the child nodes and tokens of this node.
     pub fn children_with_tokens(&self) -> impl DoubleEndedIterator<Item = SyntaxElement> {
         self.green().slice().iter().enumerate().map(|(i, child)| match child {
             GreenChild::Node { offset, node } => self.new_child(i as u32, node, *offset).into(),
@@ -153,7 +153,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    /// Check if this node has specific kinds of children nodes or tokens.
+    /// Check if this node has specific kinds of child nodes or tokens.
     ///
     /// This is an efficient alternative to `node.children_with_tokens().any(...)`
     /// since it won't create any nodes or tokens.

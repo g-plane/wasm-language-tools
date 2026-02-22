@@ -74,7 +74,7 @@ impl GreenNode {
     }
 
     #[inline]
-    /// Iterator over the children nodes and tokens of this node.
+    /// Iterator over the child nodes and tokens of this node.
     pub fn children(&self) -> impl Iterator<Item = NodeOrToken<&GreenNode, &GreenToken>> + Clone {
         self.data.slice.iter().map(|child| match child {
             GreenChild::Node { node, .. } => NodeOrToken::Node(node),
@@ -83,7 +83,7 @@ impl GreenNode {
     }
 
     #[inline]
-    /// Number of children of this node.
+    /// Number of child nodes and tokens of this node.
     pub fn children_len(&self) -> usize {
         self.data.header.length
     }
