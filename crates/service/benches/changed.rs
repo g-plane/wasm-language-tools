@@ -96,7 +96,6 @@ pub fn changed_text_bench(c: &mut Criterion) {
                             end: Position { line, character: col },
                         },
                         text: char.to_string(),
-                        ..Default::default()
                     })],
                 });
                 let completions = service.completion(black_box(CompletionParams {

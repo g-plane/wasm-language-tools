@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - run: cargo clippy
+      - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test
 
   server:

@@ -248,7 +248,6 @@ mod tests {
                     end: Position { line: 1, character: 8 },
                 },
                 text: "(func (param $x) (param i32))".into(),
-                ..Default::default()
             })],
         });
         let mut diagnostics = service
@@ -314,7 +313,6 @@ mod tests {
                     end: Position { line: 1, character: 8 },
                 },
                 text: "".into(),
-                ..Default::default()
             })],
         });
         let mut diagnostics = service
@@ -389,7 +387,6 @@ mod tests {
                     end: Position { line: 3, character: 9 },
                 },
                 text: "(type (func))".into(),
-                ..Default::default()
             })],
         });
         assert!(
@@ -464,7 +461,6 @@ mod tests {
                         end: Position { line: 1, character: 18 },
                     },
                     text: "\n   ".into(),
-                    ..Default::default()
                 }),
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
@@ -472,7 +468,6 @@ mod tests {
                         end: Position { line: 4, character: 20 },
                     },
                     text: "\n     ".into(),
-                    ..Default::default()
                 }),
             ],
         });
@@ -506,7 +501,6 @@ mod tests {
                         end: Position { line: 2, character: 3 },
                     },
                     text: "f".into(),
-                    ..Default::default()
                 }),
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
@@ -514,7 +508,6 @@ mod tests {
                         end: Position { line: 5, character: 5 },
                     },
                     text: "f".into(),
-                    ..Default::default()
                 }),
             ],
         });
@@ -530,7 +523,6 @@ mod tests {
                         end: Position { line: 2, character: 4 },
                     },
                     text: "f32".into(),
-                    ..Default::default()
                 }),
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
@@ -538,7 +530,6 @@ mod tests {
                         end: Position { line: 5, character: 6 },
                     },
                     text: "f32".into(),
-                    ..Default::default()
                 }),
             ],
         });
@@ -637,7 +628,6 @@ mod tests {
                         end: Position { line: 3, character: 0 },
                     },
                     text: "".into(),
-                    ..Default::default()
                 }),
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
@@ -645,7 +635,6 @@ mod tests {
                         end: Position { line: 6, character: 0 },
                     },
                     text: "".into(),
-                    ..Default::default()
                 }),
             ],
         });
@@ -757,7 +746,6 @@ mod tests {
                         end: Position { line: 3, character: 20 },
                     },
                     text: "\n      ".into(),
-                    ..Default::default()
                 }),
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
@@ -765,7 +753,6 @@ mod tests {
                         end: Position { line: 1, character: 18 },
                     },
                     text: "\n    ".into(),
-                    ..Default::default()
                 }),
             ],
         });
@@ -799,7 +786,6 @@ mod tests {
                         end: Position { line: 5, character: 6 },
                     },
                     text: "f".into(),
-                    ..Default::default()
                 }),
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
@@ -807,7 +793,6 @@ mod tests {
                         end: Position { line: 2, character: 4 },
                     },
                     text: "f".into(),
-                    ..Default::default()
                 }),
             ],
         });
@@ -823,7 +808,6 @@ mod tests {
                         end: Position { line: 5, character: 7 },
                     },
                     text: "f32".into(),
-                    ..Default::default()
                 }),
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
@@ -831,7 +815,6 @@ mod tests {
                         end: Position { line: 2, character: 5 },
                     },
                     text: "f32".into(),
-                    ..Default::default()
                 }),
             ],
         });
@@ -930,7 +913,6 @@ mod tests {
                         end: Position { line: 7, character: 0 },
                     },
                     text: "".into(),
-                    ..Default::default()
                 }),
                 TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
                     range: Range {
@@ -938,7 +920,6 @@ mod tests {
                         end: Position { line: 3, character: 0 },
                     },
                     text: "".into(),
-                    ..Default::default()
                 }),
             ],
         });
@@ -1022,7 +1003,6 @@ mod tests {
                     end: Position { line: 2, character: 9 },
                 },
                 text: ";".into(),
-                ..Default::default()
             })],
         });
         // should not panic
@@ -1059,7 +1039,6 @@ mod tests {
                     end: Position { line: 1, character: 27 },
                 },
                 text: "s".into(),
-                ..Default::default()
             })],
         });
     }

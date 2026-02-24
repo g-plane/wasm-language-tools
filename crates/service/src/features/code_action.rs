@@ -17,20 +17,14 @@ impl LanguageService {
             let mut rewrite = params.context.only.is_none();
             let mut inline = params.context.only.is_none();
             let mut extract = params.context.only.is_none();
-            params
-                .context
-                .only
-                .iter()
-                .flatten()
-                .cloned()
-                .for_each(|kind| match kind {
-                    CodeActionKind::QuickFix => quickfix = true,
-                    CodeActionKind::Refactor => refactor = true,
-                    CodeActionKind::RefactorRewrite => rewrite = true,
-                    CodeActionKind::RefactorInline => inline = true,
-                    CodeActionKind::RefactorExtract => extract = true,
-                    _ => {}
-                });
+            params.context.only.iter().flatten().for_each(|kind| match kind {
+                CodeActionKind::QuickFix => quickfix = true,
+                CodeActionKind::Refactor => refactor = true,
+                CodeActionKind::RefactorRewrite => rewrite = true,
+                CodeActionKind::RefactorInline => inline = true,
+                CodeActionKind::RefactorExtract => extract = true,
+                _ => {}
+            });
 
             let mut actions = vec![];
             let range = line_index.convert(params.range)?;
