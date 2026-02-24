@@ -154,7 +154,10 @@ pub(crate) mod syntax {
     }
 
     pub fn infer_type_def_symbol_detail(symbol: &Symbol, root: &SyntaxNode) -> Option<String> {
-        TypeDef::cast(symbol.key.to_node(root))
+        symbol
+            .key
+            .to_node(root)
+            .and_then(TypeDef::cast)
             .and_then(|node| node.sub_type())
             .and_then(|sub_type| sub_type.comp_type())
             .map(|comp_type| match comp_type {

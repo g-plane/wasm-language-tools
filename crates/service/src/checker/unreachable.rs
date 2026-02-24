@@ -29,7 +29,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, lint_le
         match &raw_node.weight.kind {
             FlowNodeKind::BasicBlock(bb) => {
                 bb.0.iter().for_each(|instr| {
-                    let Some(instr) = instr.ptr.try_to_node(ctx.module) else {
+                    let Some(instr) = instr.ptr.to_node(ctx.module) else {
                         return;
                     };
                     let current = instr.text_range();
@@ -72,7 +72,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, lint_le
                 });
             }
             FlowNodeKind::BlockEntry(entry) => {
-                let Some(node) = entry.try_to_node(ctx.module) else {
+                let Some(node) = entry.to_node(ctx.module) else {
                     return;
                 };
                 if let Some((prev, last)) = node.prev_siblings().next().zip(ranges.last_mut())

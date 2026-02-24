@@ -258,8 +258,10 @@ fn create_memory_def_hover(db: &dyn salsa::Database, symbol: &Symbol, root: &Syn
         content.push(' ');
         content.push_str(name.ident(db));
     }
-    let node = symbol.key.to_node(root);
-    if let Some(limits) = support::child::<MemType>(&node)
+    if let Some(limits) = symbol
+        .key
+        .to_node(root)
+        .and_then(|node| support::child::<MemType>(&node))
         .and_then(|mem_type| mem_type.limits())
         .and_then(|limits| render_limits(&limits))
     {
@@ -281,8 +283,11 @@ fn create_table_def_hover(db: &dyn salsa::Database, symbol: &Symbol, root: &Synt
         content.push(' ');
         content.push_str(name.ident(db));
     }
-    let node = symbol.key.to_node(root);
-    if let Some(table_type) = support::child::<TableType>(&node) {
+    if let Some(table_type) = symbol
+        .key
+        .to_node(root)
+        .and_then(|node| support::child::<TableType>(&node))
+    {
         if let Some(limits) = table_type.limits().and_then(|limits| render_limits(&limits)) {
             content.push(' ');
             content.push_str(&limits);

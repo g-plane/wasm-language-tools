@@ -24,7 +24,7 @@ pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Def
         .values()
         .filter(|symbol| symbol.kind == SymbolKind::Type)
         .filter_map(|symbol| {
-            let node = TypeDef::cast(symbol.key.to_node(&root))?;
+            let node = symbol.key.to_node(&root).and_then(TypeDef::cast)?;
             let mut is_final = false;
             let mut inherits = None;
             if let Some(sub_type) = node.sub_type() {

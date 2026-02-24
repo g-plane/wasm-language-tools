@@ -31,15 +31,8 @@ impl SyntaxNodePtr {
 
     #[inline]
     /// Resolve this pointer to a [`SyntaxNode`](crate::SyntaxNode) under the given ancestor node.
-    pub fn try_to_node(&self, ancestor: &SyntaxNode) -> Option<SyntaxNode> {
+    pub fn to_node(&self, ancestor: &SyntaxNode) -> Option<SyntaxNode> {
         std::iter::successors(Some(ancestor.clone()), |node| node.child_at_range(self.range))
             .find(|it| it.text_range() == self.range && it.kind() == self.kind)
-    }
-
-    #[inline]
-    /// Like [`try_to_node`](Self::try_to_node), but panics when the node can't be resolved.
-    pub fn to_node(&self, ancestor: &SyntaxNode) -> SyntaxNode {
-        self.try_to_node(ancestor)
-            .unwrap_or_else(|| panic!("can't resolve {self:?}"))
     }
 }

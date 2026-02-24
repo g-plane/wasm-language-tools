@@ -104,7 +104,7 @@ pub(crate) fn get_mutation_actions(
         .values()
         .filter_map(|symbol| match symbol.kind {
             SymbolKind::GlobalRef => {
-                let parent = symbol.key.to_node(&root).parent()?;
+                let parent = symbol.key.to_node(&root)?.parent()?;
                 let kind = match parent.kind() {
                     SyntaxKind::PLAIN_INSTR => match PlainInstr::cast(parent)?.instr_name()?.text() {
                         "global.get" => MutationActionKind::Get,
@@ -118,7 +118,7 @@ pub(crate) fn get_mutation_actions(
                 Some((symbol.key, MutationAction { target, kind }))
             }
             SymbolKind::FieldRef => {
-                let parent = symbol.key.to_node(&root).parent()?;
+                let parent = symbol.key.to_node(&root)?.parent()?;
                 let kind = match PlainInstr::cast(parent)?.instr_name()?.text() {
                     "struct.get" | "struct.get_s" | "struct.get_u" => MutationActionKind::Get,
                     "struct.set" => MutationActionKind::Set,
@@ -128,7 +128,7 @@ pub(crate) fn get_mutation_actions(
                 Some((symbol.key, MutationAction { target, kind }))
             }
             SymbolKind::TypeUse => {
-                let current_node = symbol.key.to_node(&root);
+                let current_node = symbol.key.to_node(&root)?;
                 let parent = current_node.parent()?;
                 let kind = match PlainInstr::cast(parent.clone())?.instr_name()?.text() {
                     "array.get" | "array.get_s" | "array.get_u" => MutationActionKind::Get,

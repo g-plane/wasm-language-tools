@@ -162,7 +162,7 @@ fn get_highlight_kind_of_symbol(symbol: &Symbol, root: &SyntaxNode) -> Option<Do
         | SymbolKind::TableRef
         | SymbolKind::FieldRef
         | SymbolKind::TagRef => {
-            let node = symbol.key.to_node(root);
+            let node = symbol.key.to_node(root)?;
             if node
                 .prev_siblings_with_tokens()
                 .any(|node_or_token| match node_or_token {

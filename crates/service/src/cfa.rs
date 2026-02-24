@@ -12,7 +12,7 @@ use wat_syntax::{
 #[salsa::tracked(returns(ref))]
 pub fn analyze(db: &dyn salsa::Database, document: Document, ptr: SyntaxNodePtr) -> ControlFlowGraph {
     let root = document.root_tree(db);
-    Builder::new(db, document).build(ptr.to_node(&root))
+    Builder::new(db, document).build(ptr.to_node(&root).expect("invalid ptr in control flow analysis"))
 }
 
 struct Builder<'db> {
