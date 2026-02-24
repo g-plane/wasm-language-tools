@@ -513,7 +513,7 @@ pub(crate) fn format_sub_type<'a>(sub_type: AmberNode<'a>, ctx: &Ctx) -> Doc<'a>
             docs.push(Doc::text("sub"));
             trivias = format_trivias_after_token(keyword, sub_type, ctx);
         }
-        if let Some(keyword) = sub_type.tokens_by_kind(KEYWORD).find(|token| token.text() == "final") {
+        if let Some(keyword) = sub_type.tokens_by_kind(MODIFIER_KEYWORD).next() {
             if trivias.is_empty() {
                 docs.push(Doc::space());
             } else {

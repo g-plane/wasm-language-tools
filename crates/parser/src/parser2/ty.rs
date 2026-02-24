@@ -349,8 +349,13 @@ impl Parser<'_> {
             }
             "sub" => {
                 self.add_child(green::KW_SUB.clone());
-                if let Some(keyword) = self.try_parse_with_trivias(|parser| parser.lexer.keyword("final")) {
-                    self.add_child(keyword);
+                if let Some(modifier_keyword) = self.try_parse_with_trivias(|parser| {
+                    parser
+                        .lexer
+                        .next(MODIFIER_KEYWORD)
+                        .filter(|token| token.text == "final")
+                }) {
+                    self.add_child(modifier_keyword);
                 }
 
                 while let Some(index) = self.try_parse_with_trivias(Self::parse_index) {

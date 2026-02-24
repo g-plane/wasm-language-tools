@@ -127,7 +127,7 @@ ROOT@0..214
         L_PAREN@192..193 "("
         KEYWORD@193..196 "sub"
         WHITESPACE@196..197 " "
-        KEYWORD@197..202 "final"
+        MODIFIER_KEYWORD@197..202 "final"
         WHITESPACE@202..203 " "
         FUNC_TYPE@203..209
           L_PAREN@203..204 "("

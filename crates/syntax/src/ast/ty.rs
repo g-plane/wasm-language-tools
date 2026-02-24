@@ -1121,9 +1121,7 @@ impl SubType {
     }
     #[inline]
     pub fn final_keyword(&self) -> Option<SyntaxToken> {
-        self.syntax
-            .tokens_by_kind(SyntaxKind::KEYWORD)
-            .find(|token| token.text() == "final")
+        self.syntax.tokens_by_kind(SyntaxKind::MODIFIER_KEYWORD).next()
     }
     #[inline]
     pub fn indexes(&self) -> AstChildren<Index> {
