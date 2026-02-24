@@ -67,6 +67,7 @@ export default defineConfig({
           },
           { text: 'Undefined', link: '/diagnostics/undef' },
           { text: 'Unused', link: '/diagnostics/unused' },
+          { text: 'Unread Locals', link: '/diagnostics/unread' },
           { text: 'Unreachable', link: '/diagnostics/unreachable' },
           { text: 'Uninitialized', link: '/diagnostics/uninit' },
           { text: 'Mutated Immutable', link: '/diagnostics/mutated-immutable' },
