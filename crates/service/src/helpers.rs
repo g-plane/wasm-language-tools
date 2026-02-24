@@ -123,7 +123,7 @@ pub(crate) mod syntax {
     use std::ops::ControlFlow;
     use wat_syntax::{
         SyntaxKind, SyntaxNode, SyntaxToken, TextSize, TokenAtOffset,
-        ast::{AstNode, CompType, ExternIdx, TypeDef, support},
+        ast::{AstNode, CompType, ExternIdx, TypeDef},
     };
 
     /// Pick the `$idx` part from `(func (type $idx) ...)`.
@@ -151,11 +151,6 @@ pub(crate) mod syntax {
             .children_by_kind(ExternIdx::can_cast)
             .next()
             .and_then(|extern_idx| extern_idx.children_by_kind(SyntaxKind::INDEX).next())
-    }
-
-    pub fn is_call(node: &SyntaxNode) -> bool {
-        support::token(node, SyntaxKind::INSTR_NAME)
-            .is_some_and(|token| matches!(token.text(), "call" | "ref.func" | "return_call"))
     }
 
     pub fn infer_type_def_symbol_detail(symbol: &Symbol, root: &SyntaxNode) -> Option<String> {

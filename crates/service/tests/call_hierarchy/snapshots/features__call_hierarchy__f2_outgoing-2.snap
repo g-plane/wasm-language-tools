@@ -34,11 +34,11 @@ expression: outgoing_calls
       {
         "start": {
           "line": 3,
-          "character": 14
+          "character": 20
         },
         "end": {
           "line": 3,
-          "character": 24
+          "character": 23
         }
       }
     ]
@@ -74,11 +74,11 @@ expression: outgoing_calls
       {
         "start": {
           "line": 3,
-          "character": 25
+          "character": 31
         },
         "end": {
           "line": 3,
-          "character": 35
+          "character": 34
         }
       }
     ]

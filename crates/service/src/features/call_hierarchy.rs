@@ -1,14 +1,13 @@
 use crate::{
     LanguageService,
-    binder::{SymbolKey, SymbolKind, SymbolTable},
-    helpers::{self, LineIndexExt},
+    binder::{SymbolKind, SymbolTable},
+    helpers::LineIndexExt,
     types_analyzer,
 };
 use lspt::{
     CallHierarchyIncomingCall, CallHierarchyIncomingCallsParams, CallHierarchyItem, CallHierarchyOutgoingCall,
     CallHierarchyOutgoingCallsParams, CallHierarchyPrepareParams, SymbolKind as LspSymbolKind,
 };
-use wat_syntax::SyntaxKind;
 
 impl LanguageService {
     /// Handler for `textDocument/prepareCallHierarchy` request.
@@ -76,63 +75,52 @@ impl LanguageService {
         params: CallHierarchyIncomingCallsParams,
     ) -> Option<Vec<CallHierarchyIncomingCall>> {
         let document = self.get_document(&params.item.uri)?;
-        let root = document.root_tree(self);
-        let symbol_table = SymbolTable::of(self, document);
-
         let line_index = document.line_index(self);
+        let symbol_table = SymbolTable::of(self, document);
         let callee_def_range = line_index.convert(params.item.range)?;
-        let callee_def = symbol_table
-            .symbols
-            .values()
-            .find(|symbol| symbol.key.text_range() == callee_def_range)?;
-        let items = symbol_table
-            .symbols
-            .values()
-            .filter(|symbol| {
-                symbol.kind == SymbolKind::Call
-                    && symbol.idx.is_defined_by(&callee_def.idx)
-                    && callee_def.region == symbol.region
-            })
-            .filter_map(|call_symbol| {
-                call_symbol
-                    .key
-                    .to_node(&root)
-                    .ancestors()
-                    .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
-                    .and_then(|node| symbol_table.symbols.get(&SymbolKey::new(&node)))
-                    .map(|symbol| (call_symbol, symbol))
-            })
-            .map(|(call_symbol, func_symbol)| {
-                let plain_instr_range = call_symbol
-                    .key
-                    .to_node(&root)
-                    .parent()
-                    .map(|call| line_index.convert(call.text_range()));
-                CallHierarchyIncomingCall {
-                    from: CallHierarchyItem {
-                        name: func_symbol.idx.render(self).to_string(),
-                        kind: LspSymbolKind::Function,
-                        tags: None,
-                        detail: Some(types_analyzer::render_func_header(
-                            self,
-                            func_symbol.idx.name,
-                            types_analyzer::get_func_sig(self, document, func_symbol.key, &func_symbol.green),
-                        )),
-                        uri: params.item.uri.clone(),
-                        range: line_index.convert(func_symbol.key.text_range()),
-                        selection_range: line_index.convert(
-                            symbol_table
-                                .def_poi
-                                .get(&func_symbol.key)
-                                .copied()
-                                .unwrap_or_else(|| func_symbol.key.text_range()),
-                        ),
-                        data: None,
-                    },
-                    from_ranges: plain_instr_range.into_iter().collect(),
+        let mut items = symbol_table
+            .resolved
+            .iter()
+            .filter_map(|(ref_key, def_key)| {
+                if def_key.text_range() == callee_def_range {
+                    Some(ref_key)
+                } else {
+                    None
                 }
             })
-            .collect();
+            .filter_map(|call_key| {
+                symbol_table
+                    .symbols
+                    .values()
+                    .find(|symbol| {
+                        symbol.kind == SymbolKind::Func && symbol.key.text_range().contains_range(call_key.text_range())
+                    })
+                    .map(|symbol| CallHierarchyIncomingCall {
+                        from: CallHierarchyItem {
+                            name: symbol.idx.render(self).to_string(),
+                            kind: LspSymbolKind::Function,
+                            tags: None,
+                            detail: Some(types_analyzer::render_func_header(
+                                self,
+                                symbol.idx.name,
+                                types_analyzer::get_func_sig(self, document, symbol.key, &symbol.green),
+                            )),
+                            uri: params.item.uri.clone(),
+                            range: line_index.convert(symbol.key.text_range()),
+                            selection_range: line_index.convert(
+                                symbol_table
+                                    .def_poi
+                                    .get(&symbol.key)
+                                    .copied()
+                                    .unwrap_or_else(|| symbol.key.text_range()),
+                            ),
+                            data: None,
+                        },
+                        from_ranges: vec![line_index.convert(call_key.text_range())],
+                    })
+            })
+            .collect::<Vec<_>>();
+        items.sort_unstable_by_key(|item| item.from.range.start);
         Some(items)
     }
 
@@ -142,51 +130,39 @@ impl LanguageService {
         params: CallHierarchyOutgoingCallsParams,
     ) -> Option<Vec<CallHierarchyOutgoingCall>> {
         let document = self.get_document(&params.item.uri)?;
-        let root = &document.root_tree(self);
-        let symbol_table = SymbolTable::of(self, document);
-
         let line_index = document.line_index(self);
+        let symbol_table = SymbolTable::of(self, document);
         let call_def_range = line_index.convert(params.item.range)?;
-        let call_def_symbol = symbol_table
+        let mut items = symbol_table
             .symbols
             .values()
-            .find(|symbol| symbol.key.text_range() == call_def_range)?;
-        let func = call_def_symbol.key.to_node(root);
-        let items = func
-            .descendants()
-            .filter(|node| node.kind() == SyntaxKind::PLAIN_INSTR && helpers::syntax::is_call(node))
-            .flat_map(|node| {
-                let plain_instr_range = line_index.convert(node.text_range());
-                let uri = &params.item.uri;
-                node.children()
-                    .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
-                    .filter_map(|immediate| symbol_table.find_def(SymbolKey::new(&immediate)))
-                    .filter(|symbol| symbol.kind == SymbolKind::Func)
-                    .map(move |func_symbol| CallHierarchyOutgoingCall {
-                        to: CallHierarchyItem {
-                            name: func_symbol.idx.render(self).to_string(),
-                            kind: LspSymbolKind::Function,
-                            tags: None,
-                            detail: Some(types_analyzer::render_func_header(
-                                self,
-                                func_symbol.idx.name,
-                                types_analyzer::get_func_sig(self, document, func_symbol.key, &func_symbol.green),
-                            )),
-                            uri: uri.clone(),
-                            range: line_index.convert(func_symbol.key.text_range()),
-                            selection_range: line_index.convert(
-                                symbol_table
-                                    .def_poi
-                                    .get(&func_symbol.key)
-                                    .copied()
-                                    .unwrap_or_else(|| func_symbol.key.text_range()),
-                            ),
-                            data: None,
-                        },
-                        from_ranges: vec![plain_instr_range],
-                    })
+            .filter(|symbol| symbol.kind == SymbolKind::Call && call_def_range.contains_range(symbol.key.text_range()))
+            .filter_map(|symbol| symbol_table.find_def(symbol.key).map(|def_symbol| (def_symbol, symbol)))
+            .map(|(def_symbol, ref_symbol)| CallHierarchyOutgoingCall {
+                to: CallHierarchyItem {
+                    name: def_symbol.idx.render(self).to_string(),
+                    kind: LspSymbolKind::Function,
+                    tags: None,
+                    detail: Some(types_analyzer::render_func_header(
+                        self,
+                        def_symbol.idx.name,
+                        types_analyzer::get_func_sig(self, document, def_symbol.key, &def_symbol.green),
+                    )),
+                    uri: params.item.uri.clone(),
+                    range: line_index.convert(def_symbol.key.text_range()),
+                    selection_range: line_index.convert(
+                        symbol_table
+                            .def_poi
+                            .get(&def_symbol.key)
+                            .copied()
+                            .unwrap_or_else(|| def_symbol.key.text_range()),
+                    ),
+                    data: None,
+                },
+                from_ranges: vec![line_index.convert(ref_symbol.key.text_range())],
             })
-            .collect();
+            .collect::<Vec<_>>();
+        items.sort_unstable_by_key(|item| item.to.range.start);
         Some(items)
     }
 }
