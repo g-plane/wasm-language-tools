@@ -31,7 +31,9 @@ impl GreenNode {
         );
         let mut slots = data.slice.iter_mut();
         let mut total_text_len = 0.into();
-        while let Some((slot, node_or_token)) = slots.next().zip(children.next()) {
+        while let Some(slot) = slots.next()
+            && let Some(node_or_token) = children.next()
+        {
             match node_or_token {
                 NodeOrToken::Node(node) => {
                     let text_len = node.text_len();
