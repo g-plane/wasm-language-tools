@@ -16,7 +16,7 @@ pub(crate) fn get_mutabilities(
 ) -> IndexMap<SymbolKey, Mutability, FxBuildHasher> {
     fn extract_mut(node: AmberNode) -> Option<TextRange> {
         node.tokens_by_kind(SyntaxKind::KEYWORD)
-            .find(|token| token.text() == "mut")
+            .next()
             .map(|token| token.text_range())
     }
     fn extract_mut_from_global(node: AmberNode) -> Option<TextRange> {

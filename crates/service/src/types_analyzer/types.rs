@@ -8,7 +8,7 @@ use crate::{
 };
 use wat_syntax::{
     GreenNode, NodeOrToken, SyntaxKind,
-    ast::{AstNode, FieldType as AstFieldType, StorageType as AstStorageType, ValType as AstValType},
+    ast::{AstNode, FieldType as AstFieldType, StorageType as AstStorageType},
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, salsa::Update)]
@@ -21,10 +21,6 @@ pub(crate) enum ValType<'db> {
     Ref(RefType<'db>),
 }
 impl<'db> ValType<'db> {
-    pub(crate) fn from_ast(node: &AstValType, db: &'db dyn salsa::Database) -> Option<Self> {
-        Self::from_green(node.syntax().green(), db)
-    }
-
     pub(crate) fn from_green(node: &GreenNode, db: &'db dyn salsa::Database) -> Option<Self> {
         match node.kind() {
             SyntaxKind::NUM_TYPE => match node.children().next().and_then(|child| child.into_token())?.text() {
@@ -546,7 +542,7 @@ pub(crate) enum StorageType<'db> {
 impl<'db> StorageType<'db> {
     fn from_ast(node: &AstStorageType, db: &'db dyn salsa::Database) -> Option<Self> {
         match node {
-            AstStorageType::Val(ty) => ValType::from_ast(ty, db).map(StorageType::Val),
+            AstStorageType::Val(ty) => ValType::from_green(ty.syntax().green(), db).map(StorageType::Val),
             AstStorageType::Packed(ty) => ty.type_keyword().and_then(|type_keyword| match type_keyword.text() {
                 "i8" => Some(StorageType::PackedI8),
                 "i16" => Some(StorageType::PackedI16),
