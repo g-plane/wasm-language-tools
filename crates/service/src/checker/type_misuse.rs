@@ -245,6 +245,30 @@ pub fn check(
                     diagnostics.push(diagnostic);
                 }
             }
+            "throw" => {
+                if let Some(immediate) = immediates.next()
+                    && let Some(symbol) = ctx.symbol_table.find_def(immediate.to_ptr().into())
+                    && !get_func_sig(ctx.db, ctx.document, symbol.key, &symbol.green)
+                        .results
+                        .is_empty()
+                {
+                    diagnostics.push(Diagnostic {
+                        range: immediate.text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
+                        message: format!(
+                            "result types of exception tag `{}` must be empty",
+                            symbol.idx.render(ctx.db)
+                        ),
+                        related_information: ctx.symbol_table.def_poi.get(&symbol.key).map(|range| {
+                            vec![RelatedInformation {
+                                range: *range,
+                                message: format!("tag `{}` defined here", symbol.idx.render(ctx.db)),
+                            }]
+                        }),
+                        ..Default::default()
+                    });
+                }
+            }
             _ => {}
         },
     }

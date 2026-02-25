@@ -1,5 +1,5 @@
 use super::{Diagnostic, DiagnosticCtx};
-use crate::types_analyzer::{self, CompositeType};
+use crate::types_analyzer::CompositeType;
 use wat_syntax::{AmberNode, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "tag-type";
@@ -20,15 +20,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &DiagnosticCtx, node: Amber
             range: index.text_range(),
             code: DIAGNOSTIC_CODE.into(),
             message: "tag type must be function type".into(),
-            ..Default::default()
-        });
-    }
-    let sig = types_analyzer::get_type_use_sig(ctx.db, ctx.document, type_use.to_ptr(), type_use.green());
-    if !sig.results.is_empty() {
-        diagnostics.push(Diagnostic {
-            range: type_use.text_range(),
-            code: DIAGNOSTIC_CODE.into(),
-            message: "tag type's result type must be empty".into(),
             ..Default::default()
         });
     }

@@ -1,0 +1,43 @@
+---
+source: crates/service/tests/diagnostics/type_misuse.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 27
+        },
+        "end": {
+          "line": 3,
+          "character": 28
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "result types of exception tag `0` must be empty",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 3
+              },
+              "end": {
+                "line": 2,
+                "character": 6
+              }
+            }
+          },
+          "message": "tag `0` defined here"
+        }
+      ]
+    }
+  ]
+}

@@ -262,3 +262,18 @@ fn return_call_result_type() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn throw_with_results() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (tag (result i32))
+  (func (result i32) throw 0))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
