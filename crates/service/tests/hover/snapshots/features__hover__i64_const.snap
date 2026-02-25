@@ -1,0 +1,20 @@
+---
+source: crates/service/tests/hover/mod.rs
+expression: response
+---
+{
+  "contents": {
+    "kind": "markdown",
+    "value": "```wat\ni64\n```\n---\n- Dec: `18`\n- Hex: `0x12`\n- Bin: `0b10010`"
+  },
+  "range": {
+    "start": {
+      "line": 3,
+      "character": 14
+    },
+    "end": {
+      "line": 3,
+      "character": 17
+    }
+  }
+}

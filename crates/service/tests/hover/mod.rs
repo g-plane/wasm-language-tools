@@ -1166,3 +1166,45 @@ fn elem_ident_idx() {
     let response = service.hover(create_params(uri, 4, 16));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn i32_const() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    i32.const 18))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.hover(create_params(uri, 3, 16));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn i32_const_negative() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    i32.const -18))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.hover(create_params(uri, 3, 16));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn i64_const() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    i64.const +18))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.hover(create_params(uri, 3, 16));
+    assert_json_snapshot!(response);
+}

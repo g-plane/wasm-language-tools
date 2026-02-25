@@ -10,7 +10,7 @@ use crate::{
 use lspt::{Hover, HoverParams, MarkupContent, MarkupKind, Union3};
 use std::fmt::Write;
 use wat_syntax::{
-    SyntaxKind, SyntaxNode,
+    NodeOrToken, SyntaxKind, SyntaxNode,
     ast::{AstNode, Limits, MemType, PlainInstr, TableType, support},
 };
 
@@ -24,48 +24,59 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
 
         match token.kind() {
-            SyntaxKind::IDENT | SyntaxKind::INT | SyntaxKind::UNSIGNED_INT => {
-                let parent = token.parent();
-                let key = SymbolKey::new(&parent);
-                symbol_table.symbols.get(&key).and_then(|symbol| match symbol.kind {
-                    SymbolKind::Call
-                    | SymbolKind::LocalRef
-                    | SymbolKind::TypeUse
-                    | SymbolKind::GlobalRef
-                    | SymbolKind::MemoryRef
-                    | SymbolKind::TableRef
-                    | SymbolKind::BlockRef
-                    | SymbolKind::FieldRef
-                    | SymbolKind::TagRef
-                    | SymbolKind::DataRef
-                    | SymbolKind::ElemRef => symbol_table
-                        .find_def(key)
-                        .and_then(|symbol| create_def_hover(self, document, &root, symbol_table, symbol))
-                        .map(|contents| Hover {
-                            contents: Union3::A(contents),
-                            range: Some(line_index.convert(token.text_range())),
-                        }),
-                    SymbolKind::Func
-                    | SymbolKind::Param
-                    | SymbolKind::Local
-                    | SymbolKind::Type
-                    | SymbolKind::GlobalDef
-                    | SymbolKind::MemoryDef
-                    | SymbolKind::TableDef
-                    | SymbolKind::BlockDef
-                    | SymbolKind::FieldDef
-                    | SymbolKind::TagDef
-                    | SymbolKind::DataDef
-                    | SymbolKind::ElemDef => symbol_table
-                        .symbols
-                        .get(&key)
-                        .and_then(|symbol| create_def_hover(self, document, &root, symbol_table, symbol))
-                        .map(|contents| Hover {
-                            contents: Union3::A(contents),
-                            range: Some(line_index.convert(token.text_range())),
-                        }),
-                    SymbolKind::Module => None,
+            SyntaxKind::IDENT | SyntaxKind::UNSIGNED_INT => {
+                create_symbol_hover(self, document, &root, symbol_table, &token.parent()).map(|contents| Hover {
+                    contents: Union3::A(contents),
+                    range: Some(line_index.convert(token.text_range())),
                 })
+            }
+            SyntaxKind::INT => {
+                let parent = token.parent();
+                create_symbol_hover(self, document, &root, symbol_table, &parent)
+                    .or_else(|| {
+                        if let Some(is_i32) =
+                            parent
+                                .prev_siblings_with_tokens()
+                                .find_map(|node_or_token| match node_or_token {
+                                    NodeOrToken::Token(token) if token.kind() == SyntaxKind::INSTR_NAME => {
+                                        token.text().split_once('.').and_then(|(left, right)| {
+                                            if right == "const" {
+                                                match left {
+                                                    "i32" => Some(true),
+                                                    "i64" => Some(false),
+                                                    _ => None,
+                                                }
+                                            } else {
+                                                None
+                                            }
+                                        })
+                                    }
+                                    _ => None,
+                                })
+                        {
+                            let text = token.text();
+                            let (sign, value) = if let Some(rest) = text.strip_prefix('-') {
+                                ("-", helpers::parse_u32(rest).ok()?)
+                            } else if let Some(rest) = text.strip_prefix('+') {
+                                ("", helpers::parse_u32(rest).ok()?)
+                            } else {
+                                ("", helpers::parse_u32(text).ok()?)
+                            };
+                            Some(MarkupContent {
+                                kind: MarkupKind::Markdown,
+                                value: format!(
+                                    "```wat\n{}\n```\n---\n- Dec: `{sign}{value}`\n- Hex: `{sign}0x{value:X}`\n- Bin: `{sign}0b{value:b}`",
+                                    if is_i32 { "i32" } else { "i64" },
+                                ),
+                            })
+                        } else {
+                            None
+                        }
+                    })
+                    .map(|contents| Hover {
+                        contents: Union3::A(contents),
+                        range: Some(line_index.convert(token.text_range())),
+                    })
             }
             SyntaxKind::TYPE_KEYWORD => {
                 let ty = token.text();
@@ -84,18 +95,14 @@ impl LanguageService {
                 } else {
                     node
                 };
-                symbol_table
-                    .symbols
-                    .get(&SymbolKey::new(&node))
-                    .and_then(|symbol| create_def_hover(self, document, &root, symbol_table, symbol))
-                    .map(|contents| Hover {
-                        contents: Union3::A(contents),
-                        range: Some(line_index.convert(if matches!(token.text(), "mut" | "ref") {
-                            node.text_range()
-                        } else {
-                            token.text_range()
-                        })),
-                    })
+                create_symbol_hover(self, document, &root, symbol_table, &node).map(|contents| Hover {
+                    contents: Union3::A(contents),
+                    range: Some(line_index.convert(if matches!(token.text(), "mut" | "ref") {
+                        node.text_range()
+                    } else {
+                        token.text_range()
+                    })),
+                })
             }
             SyntaxKind::INSTR_NAME => {
                 let name = token.text();
@@ -151,30 +158,63 @@ impl LanguageService {
     }
 }
 
-fn create_def_hover(
+fn create_symbol_hover(
     db: &dyn salsa::Database,
     document: Document,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
-    symbol: &Symbol,
+    node: &SyntaxNode,
 ) -> Option<MarkupContent> {
-    match symbol.kind {
-        SymbolKind::Param | SymbolKind::Local => Some(create_param_or_local_hover(db, symbol)),
-        SymbolKind::Func => Some(MarkupContent {
-            kind: MarkupKind::Markdown,
-            value: create_func_hover(db, document, symbol_table, symbol),
-        }),
-        SymbolKind::Type => Some(create_type_def_hover(db, document, symbol)),
-        SymbolKind::GlobalDef => Some(create_global_def_hover(db, document, symbol)),
-        SymbolKind::MemoryDef => Some(create_memory_def_hover(db, symbol, root)),
-        SymbolKind::TableDef => Some(create_table_def_hover(db, symbol, root)),
-        SymbolKind::BlockDef => Some(create_block_hover(db, symbol, document)),
-        SymbolKind::FieldDef => Some(create_field_def_hover(db, symbol, document)),
-        SymbolKind::TagDef => Some(create_tag_def_hover(db, symbol, document)),
-        SymbolKind::DataDef => Some(create_data_def_hover(db, symbol)),
-        SymbolKind::ElemDef => Some(create_elem_def_hover(db, symbol)),
-        _ => None,
-    }
+    symbol_table
+        .symbols
+        .get(&SymbolKey::new(node))
+        .and_then(|symbol| match symbol.kind {
+            SymbolKind::Param | SymbolKind::Local => Some(create_param_or_local_hover(db, symbol)),
+            SymbolKind::LocalRef => symbol_table
+                .find_def(symbol.key)
+                .map(|symbol| create_param_or_local_hover(db, symbol)),
+            SymbolKind::Func => Some(create_func_hover(db, document, symbol_table, symbol)),
+            SymbolKind::Call => symbol_table
+                .find_def(symbol.key)
+                .map(|symbol| create_func_hover(db, document, symbol_table, symbol)),
+            SymbolKind::Type => Some(create_type_def_hover(db, document, symbol)),
+            SymbolKind::TypeUse => symbol_table
+                .find_def(symbol.key)
+                .map(|symbol| create_type_def_hover(db, document, symbol)),
+            SymbolKind::GlobalDef => Some(create_global_def_hover(db, document, symbol)),
+            SymbolKind::GlobalRef => symbol_table
+                .find_def(symbol.key)
+                .map(|symbol| create_global_def_hover(db, document, symbol)),
+            SymbolKind::MemoryDef => Some(create_memory_def_hover(db, symbol, root)),
+            SymbolKind::MemoryRef => symbol_table
+                .find_def(symbol.key)
+                .map(|symbol| create_memory_def_hover(db, symbol, root)),
+            SymbolKind::TableDef => Some(create_table_def_hover(db, symbol, root)),
+            SymbolKind::TableRef => symbol_table
+                .find_def(symbol.key)
+                .map(|symbol| create_table_def_hover(db, symbol, root)),
+            SymbolKind::BlockDef => Some(create_block_hover(db, symbol, document)),
+            SymbolKind::BlockRef => symbol_table
+                .find_def(symbol.key)
+                .map(|symbol| create_block_hover(db, symbol, document)),
+            SymbolKind::FieldDef => Some(create_field_def_hover(db, symbol, document)),
+            SymbolKind::FieldRef => symbol_table
+                .find_def(symbol.key)
+                .map(|symbol| create_field_def_hover(db, symbol, document)),
+            SymbolKind::TagDef => Some(create_tag_def_hover(db, symbol, document)),
+            SymbolKind::TagRef => symbol_table
+                .find_def(symbol.key)
+                .map(|symbol| create_tag_def_hover(db, symbol, document)),
+            SymbolKind::DataDef => Some(create_data_def_hover(db, symbol)),
+            SymbolKind::DataRef => symbol_table
+                .find_def(symbol.key)
+                .map(|symbol| create_data_def_hover(db, symbol)),
+            SymbolKind::ElemDef => Some(create_elem_def_hover(db, symbol)),
+            SymbolKind::ElemRef => symbol_table
+                .find_def(symbol.key)
+                .map(|symbol| create_elem_def_hover(db, symbol)),
+            SymbolKind::Module => None,
+        })
 }
 
 fn create_func_hover(
@@ -182,7 +222,7 @@ fn create_func_hover(
     document: Document,
     symbol_table: &SymbolTable,
     symbol: &Symbol,
-) -> String {
+) -> MarkupContent {
     let doc = helpers::get_doc_comment(symbol, symbol_table).filter(|doc| !doc.is_empty());
     let mut content = format!(
         "```wat\n{}\n```",
@@ -196,7 +236,10 @@ fn create_func_hover(
         content.push_str("\n---\n");
         content.push_str(&doc);
     }
-    content
+    MarkupContent {
+        kind: MarkupKind::Markdown,
+        value: content,
+    }
 }
 
 fn create_param_or_local_hover(db: &dyn salsa::Database, symbol: &Symbol) -> MarkupContent {
