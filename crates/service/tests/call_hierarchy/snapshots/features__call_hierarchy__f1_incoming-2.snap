@@ -7,25 +7,28 @@ expression: incoming_calls
     "from": {
       "name": "$f2",
       "kind": 12,
+      "tags": [
+        1
+      ],
       "detail": "(func $f2)",
       "uri": "untitled:test",
       "range": {
         "start": {
-          "line": 3,
+          "line": 4,
           "character": 4
         },
         "end": {
-          "line": 3,
+          "line": 4,
           "character": 36
         }
       },
       "selectionRange": {
         "start": {
-          "line": 3,
+          "line": 4,
           "character": 10
         },
         "end": {
-          "line": 3,
+          "line": 4,
           "character": 13
         }
       }
@@ -33,11 +36,11 @@ expression: incoming_calls
     "fromRanges": [
       {
         "start": {
-          "line": 3,
+          "line": 4,
           "character": 20
         },
         "end": {
-          "line": 3,
+          "line": 4,
           "character": 23
         }
       }
@@ -51,21 +54,21 @@ expression: incoming_calls
       "uri": "untitled:test",
       "range": {
         "start": {
-          "line": 4,
+          "line": 5,
           "character": 4
         },
         "end": {
-          "line": 4,
+          "line": 5,
           "character": 47
         }
       },
       "selectionRange": {
         "start": {
-          "line": 4,
+          "line": 5,
           "character": 10
         },
         "end": {
-          "line": 4,
+          "line": 5,
           "character": 13
         }
       }
@@ -73,11 +76,11 @@ expression: incoming_calls
     "fromRanges": [
       {
         "start": {
-          "line": 4,
+          "line": 5,
           "character": 20
         },
         "end": {
-          "line": 4,
+          "line": 5,
           "character": 23
         }
       }

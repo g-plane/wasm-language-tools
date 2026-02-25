@@ -6,25 +6,28 @@ expression: prepare
   {
     "name": "$f2",
     "kind": 12,
+    "tags": [
+      1
+    ],
     "detail": "(func $f2)",
     "uri": "untitled:test",
     "range": {
       "start": {
-        "line": 3,
+        "line": 4,
         "character": 4
       },
       "end": {
-        "line": 3,
+        "line": 4,
         "character": 36
       }
     },
     "selectionRange": {
       "start": {
-        "line": 3,
+        "line": 4,
         "character": 10
       },
       "end": {
-        "line": 3,
+        "line": 4,
         "character": 13
       }
     }

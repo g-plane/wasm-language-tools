@@ -1,12 +1,13 @@
 use crate::{
     LanguageService,
     binder::{SymbolKind, SymbolTable},
+    deprecation,
     helpers::LineIndexExt,
     types_analyzer,
 };
 use lspt::{
     CallHierarchyIncomingCall, CallHierarchyIncomingCallsParams, CallHierarchyItem, CallHierarchyOutgoingCall,
-    CallHierarchyOutgoingCallsParams, CallHierarchyPrepareParams, SymbolKind as LspSymbolKind,
+    CallHierarchyOutgoingCallsParams, CallHierarchyPrepareParams, SymbolKind as LspSymbolKind, SymbolTag,
 };
 
 impl LanguageService {
@@ -16,6 +17,7 @@ impl LanguageService {
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
         let symbol_table = SymbolTable::of(self, document);
+        let deprecation = deprecation::get_deprecation(self, document);
 
         let token = super::find_meaningful_token(self, document, &root, params.position)?;
         let parent_range = token.parent().text_range();
@@ -24,7 +26,11 @@ impl LanguageService {
             SymbolKind::Func if symbol.key.text_range() == parent_range => Some(vec![CallHierarchyItem {
                 name: symbol.idx.render(self).to_string(),
                 kind: LspSymbolKind::Function,
-                tags: None,
+                tags: if deprecation.get(&symbol.key).is_some() {
+                    Some(vec![SymbolTag::Deprecated])
+                } else {
+                    None
+                },
                 detail: Some(types_analyzer::render_func_header(
                     self,
                     symbol.idx.name,
@@ -46,7 +52,11 @@ impl LanguageService {
                     vec![CallHierarchyItem {
                         name: symbol.idx.render(self).to_string(),
                         kind: LspSymbolKind::Function,
-                        tags: None,
+                        tags: if deprecation.get(&symbol.key).is_some() {
+                            Some(vec![SymbolTag::Deprecated])
+                        } else {
+                            None
+                        },
                         detail: Some(types_analyzer::render_func_header(
                             self,
                             symbol.idx.name,
@@ -77,6 +87,7 @@ impl LanguageService {
         let document = self.get_document(&params.item.uri)?;
         let line_index = document.line_index(self);
         let symbol_table = SymbolTable::of(self, document);
+        let deprecation = deprecation::get_deprecation(self, document);
         let callee_def_range = line_index.convert(params.item.range)?;
         let mut items = symbol_table
             .resolved
@@ -99,7 +110,11 @@ impl LanguageService {
                         from: CallHierarchyItem {
                             name: symbol.idx.render(self).to_string(),
                             kind: LspSymbolKind::Function,
-                            tags: None,
+                            tags: if deprecation.get(&symbol.key).is_some() {
+                                Some(vec![SymbolTag::Deprecated])
+                            } else {
+                                None
+                            },
                             detail: Some(types_analyzer::render_func_header(
                                 self,
                                 symbol.idx.name,
@@ -132,6 +147,7 @@ impl LanguageService {
         let document = self.get_document(&params.item.uri)?;
         let line_index = document.line_index(self);
         let symbol_table = SymbolTable::of(self, document);
+        let deprecation = deprecation::get_deprecation(self, document);
         let call_def_range = line_index.convert(params.item.range)?;
         let mut items = symbol_table
             .symbols
@@ -142,7 +158,11 @@ impl LanguageService {
                 to: CallHierarchyItem {
                     name: def_symbol.idx.render(self).to_string(),
                     kind: LspSymbolKind::Function,
-                    tags: None,
+                    tags: if deprecation.get(&def_symbol.key).is_some() {
+                        Some(vec![SymbolTag::Deprecated])
+                    } else {
+                        None
+                    },
                     detail: Some(types_analyzer::render_func_header(
                         self,
                         def_symbol.idx.name,

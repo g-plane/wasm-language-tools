@@ -8,6 +8,7 @@ use wat_service::LanguageService;
 const SOURCE: &str = "
 (module
     (func $f1)
+    (@deprecated)
     (func $f2 (call $f1) (call $f2))
     (func $f3 (call $f1) (call $f2) (call $f3))
 )
@@ -39,7 +40,7 @@ fn f2_incoming() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position { line: 3, character: 33 },
+        position: Position { line: 4, character: 33 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
@@ -58,7 +59,7 @@ fn f3_incoming() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position { line: 4, character: 12 },
+        position: Position { line: 5, character: 12 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
@@ -96,7 +97,7 @@ fn f2_outgoing() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position { line: 3, character: 33 },
+        position: Position { line: 4, character: 33 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
@@ -115,7 +116,7 @@ fn f3_outgoing() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_call_hierarchy(CallHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position { line: 4, character: 12 },
+        position: Position { line: 5, character: 12 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
