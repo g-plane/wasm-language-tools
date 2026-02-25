@@ -259,7 +259,7 @@ mod tests {
                 partial_result_token: None,
             })
             .items;
-        diagnostics.sort_by_key(|diagnostic| diagnostic.range.start);
+        diagnostics.sort_unstable_by_key(|diagnostic| diagnostic.range.start);
         let mut diagnostics = diagnostics.into_iter().filter(|diagnostic| {
             if let Some(Union2::B(code)) = &diagnostic.code {
                 code == "syntax" || code.starts_with("syntax/")
@@ -324,7 +324,7 @@ mod tests {
                 partial_result_token: None,
             })
             .items;
-        diagnostics.sort_by_key(|diagnostic| diagnostic.range.start);
+        diagnostics.sort_unstable_by_key(|diagnostic| diagnostic.range.start);
         let mut diagnostics = diagnostics.into_iter().filter(|diagnostic| {
             if let Some(Union2::B(code)) = &diagnostic.code {
                 code == "syntax"

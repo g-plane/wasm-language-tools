@@ -180,7 +180,7 @@ impl LanguageService {
                         symbols_map.remove(&symbol.key).zip(symbols_map.get_mut(&symbol.region))
                     {
                         if let Some(children) = &mut lsp_symbol.children {
-                            children.sort_by_key(|symbol| symbol.range.start);
+                            children.sort_unstable_by_key(|symbol| symbol.range.start);
                         }
                         parent
                             .children
@@ -192,14 +192,14 @@ impl LanguageService {
                 .into_values()
                 .filter_map(|mut lsp_symbol| {
                     if let Some(children) = &mut lsp_symbol.children {
-                        children.sort_by_key(|symbol| symbol.range.start);
+                        children.sort_unstable_by_key(|symbol| symbol.range.start);
                         Some(lsp_symbol)
                     } else {
                         None
                     }
                 })
                 .collect::<Vec<_>>();
-            lsp_symbols.sort_by_key(|symbol| symbol.range.start);
+            lsp_symbols.sort_unstable_by_key(|symbol| symbol.range.start);
             lsp_symbols
         })
     }
