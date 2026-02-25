@@ -1196,6 +1196,20 @@ fn i32_const_negative() {
 }
 
 #[test]
+fn i32_const_hex() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    i32.const +0xfA))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.hover(create_params(uri, 3, 16));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn i64_const() {
     let uri = "untitled:test".to_string();
     let source = "

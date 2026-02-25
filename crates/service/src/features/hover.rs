@@ -55,13 +55,14 @@ impl LanguageService {
                                 })
                         {
                             let text = token.text();
-                            let (sign, value) = if let Some(rest) = text.strip_prefix('-') {
-                                ("-", helpers::parse_u32(rest).ok()?)
+                            let (sign, rest) = if let Some(rest) = text.strip_prefix('-') {
+                                ("-", rest)
                             } else if let Some(rest) = text.strip_prefix('+') {
-                                ("", helpers::parse_u32(rest).ok()?)
+                                ("", rest)
                             } else {
-                                ("", helpers::parse_u32(text).ok()?)
+                                ("", text)
                             };
+                            let value = helpers::parse_u32(rest).ok()?;
                             Some(MarkupContent {
                                 kind: MarkupKind::Markdown,
                                 value: format!(
