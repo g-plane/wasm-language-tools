@@ -1,11 +1,12 @@
 use crate::{
     LanguageService,
     binder::{SymbolKind, SymbolTable},
+    deprecation,
     helpers::LineIndexExt,
     types_analyzer::{self, CompositeType},
 };
 use lspt::{
-    SymbolKind as LspSymbolKind, TypeHierarchyItem, TypeHierarchyPrepareParams, TypeHierarchySubtypesParams,
+    SymbolKind as LspSymbolKind, SymbolTag, TypeHierarchyItem, TypeHierarchyPrepareParams, TypeHierarchySubtypesParams,
     TypeHierarchySupertypesParams,
 };
 
@@ -17,6 +18,7 @@ impl LanguageService {
         let root = document.root_tree(self);
         let symbol_table = SymbolTable::of(self, document);
         let def_types = types_analyzer::get_def_types(self, document);
+        let deprecation = deprecation::get_deprecation(self, document);
 
         let token = super::find_meaningful_token(self, document, &root, params.position)?;
         let parent_range = token.parent().text_range();
@@ -25,7 +27,11 @@ impl LanguageService {
             SymbolKind::Type if symbol.key.text_range() == parent_range => Some(vec![TypeHierarchyItem {
                 name: symbol.idx.render(self).to_string(),
                 kind: LspSymbolKind::Class,
-                tags: None,
+                tags: if deprecation.contains_key(&symbol.key) {
+                    Some(vec![SymbolTag::Deprecated])
+                } else {
+                    None
+                },
                 detail: def_types.get(&symbol.key).map(|def_type| match def_type.comp {
                     CompositeType::Func(..) => "func".into(),
                     CompositeType::Struct(..) => "struct".into(),
@@ -47,7 +53,11 @@ impl LanguageService {
                     vec![TypeHierarchyItem {
                         name: symbol.idx.render(self).to_string(),
                         kind: LspSymbolKind::Class,
-                        tags: None,
+                        tags: if deprecation.contains_key(&symbol.key) {
+                            Some(vec![SymbolTag::Deprecated])
+                        } else {
+                            None
+                        },
                         detail: def_types.get(&symbol.key).map(|def_type| match def_type.comp {
                             CompositeType::Func(..) => "func".into(),
                             CompositeType::Struct(..) => "struct".into(),
@@ -76,6 +86,7 @@ impl LanguageService {
         let line_index = document.line_index(self);
         let symbol_table = SymbolTable::of(self, document);
         let def_types = types_analyzer::get_def_types(self, document);
+        let deprecation = deprecation::get_deprecation(self, document);
 
         let type_def_range = line_index.convert(params.item.range)?;
         let type_def = symbol_table
@@ -91,7 +102,11 @@ impl LanguageService {
                 vec![TypeHierarchyItem {
                     name: symbol.idx.render(self).to_string(),
                     kind: LspSymbolKind::Class,
-                    tags: None,
+                    tags: if deprecation.contains_key(&symbol.key) {
+                        Some(vec![SymbolTag::Deprecated])
+                    } else {
+                        None
+                    },
                     detail: def_types.get(&symbol.key).map(|def_type| match def_type.comp {
                         CompositeType::Func(..) => "func".into(),
                         CompositeType::Struct(..) => "struct".into(),
@@ -117,6 +132,7 @@ impl LanguageService {
         let line_index = document.line_index(self);
         let symbol_table = SymbolTable::of(self, document);
         let def_types = types_analyzer::get_def_types(self, document);
+        let deprecation = deprecation::get_deprecation(self, document);
 
         let type_def_range = line_index.convert(params.item.range)?;
         let key = symbol_table
@@ -137,7 +153,11 @@ impl LanguageService {
             .map(|symbol| TypeHierarchyItem {
                 name: symbol.idx.render(self).to_string(),
                 kind: LspSymbolKind::Class,
-                tags: None,
+                tags: if deprecation.contains_key(&symbol.key) {
+                    Some(vec![SymbolTag::Deprecated])
+                } else {
+                    None
+                },
                 detail: def_types.get(&symbol.key).map(|def_type| match def_type.comp {
                     CompositeType::Func(..) => "func".into(),
                     CompositeType::Struct(..) => "struct".into(),

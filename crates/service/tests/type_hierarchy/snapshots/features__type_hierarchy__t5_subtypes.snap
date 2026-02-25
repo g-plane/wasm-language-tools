@@ -10,21 +10,21 @@ expression: prepare
     "uri": "untitled:test",
     "range": {
       "start": {
-        "line": 6,
+        "line": 7,
         "character": 2
       },
       "end": {
-        "line": 6,
+        "line": 7,
         "character": 31
       }
     },
     "selectionRange": {
       "start": {
-        "line": 6,
+        "line": 7,
         "character": 8
       },
       "end": {
-        "line": 6,
+        "line": 7,
         "character": 11
       }
     }

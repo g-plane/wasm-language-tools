@@ -6,25 +6,28 @@ expression: supertypes
   {
     "name": "$t3",
     "kind": 5,
+    "tags": [
+      1
+    ],
     "detail": "struct",
     "uri": "untitled:test",
     "range": {
       "start": {
-        "line": 4,
+        "line": 5,
         "character": 2
       },
       "end": {
-        "line": 4,
+        "line": 5,
         "character": 31
       }
     },
     "selectionRange": {
       "start": {
-        "line": 4,
+        "line": 5,
         "character": 8
       },
       "end": {
-        "line": 4,
+        "line": 5,
         "character": 11
       }
     }

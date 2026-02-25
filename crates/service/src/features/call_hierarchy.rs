@@ -26,7 +26,7 @@ impl LanguageService {
             SymbolKind::Func if symbol.key.text_range() == parent_range => Some(vec![CallHierarchyItem {
                 name: symbol.idx.render(self).to_string(),
                 kind: LspSymbolKind::Function,
-                tags: if deprecation.get(&symbol.key).is_some() {
+                tags: if deprecation.contains_key(&symbol.key) {
                     Some(vec![SymbolTag::Deprecated])
                 } else {
                     None
@@ -52,7 +52,7 @@ impl LanguageService {
                     vec![CallHierarchyItem {
                         name: symbol.idx.render(self).to_string(),
                         kind: LspSymbolKind::Function,
-                        tags: if deprecation.get(&symbol.key).is_some() {
+                        tags: if deprecation.contains_key(&symbol.key) {
                             Some(vec![SymbolTag::Deprecated])
                         } else {
                             None
@@ -110,7 +110,7 @@ impl LanguageService {
                         from: CallHierarchyItem {
                             name: symbol.idx.render(self).to_string(),
                             kind: LspSymbolKind::Function,
-                            tags: if deprecation.get(&symbol.key).is_some() {
+                            tags: if deprecation.contains_key(&symbol.key) {
                                 Some(vec![SymbolTag::Deprecated])
                             } else {
                                 None
@@ -158,7 +158,7 @@ impl LanguageService {
                 to: CallHierarchyItem {
                     name: def_symbol.idx.render(self).to_string(),
                     kind: LspSymbolKind::Function,
-                    tags: if deprecation.get(&def_symbol.key).is_some() {
+                    tags: if deprecation.contains_key(&def_symbol.key) {
                         Some(vec![SymbolTag::Deprecated])
                     } else {
                         None

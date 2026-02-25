@@ -9,6 +9,7 @@ const SOURCE: &str = "
 (module
   (type $t1 (sub (struct)))
   (type $t2 (sub $t1 (struct)))
+  (@deprecated)
   (type $t3 (sub $t2 (struct)))
   (type $t4 (sub $t3 (struct)))
   (type $t5 (sub $t3 (struct))))
@@ -59,7 +60,7 @@ fn t2_supertypes() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_type_hierarchy(TypeHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position { line: 4, character: 19 },
+        position: Position { line: 5, character: 19 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
@@ -78,7 +79,7 @@ fn t3_subtypes() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_type_hierarchy(TypeHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position { line: 5, character: 19 },
+        position: Position { line: 6, character: 19 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
@@ -97,7 +98,7 @@ fn t4_supertypes() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_type_hierarchy(TypeHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position { line: 5, character: 10 },
+        position: Position { line: 6, character: 10 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
@@ -116,7 +117,7 @@ fn t5_subtypes() {
     service.commit(&uri, SOURCE.into());
     let prepare = service.prepare_type_hierarchy(TypeHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
-        position: Position { line: 6, character: 10 },
+        position: Position { line: 7, character: 10 },
         work_done_token: Default::default(),
     });
     assert_json_snapshot!(prepare);
