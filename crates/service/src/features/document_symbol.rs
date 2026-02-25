@@ -2,8 +2,9 @@ use crate::{
     LanguageService,
     binder::{Symbol, SymbolKind, SymbolTable},
     deprecation,
-    helpers::{self, LineIndexExt},
-    mutability, types_analyzer,
+    helpers::LineIndexExt,
+    mutability,
+    types_analyzer::{self, CompositeType},
 };
 use lspt::{DocumentSymbol, DocumentSymbolParams, SymbolKind as LspSymbolKind, SymbolTag};
 use rustc_hash::FxHashMap;
@@ -15,7 +16,6 @@ impl LanguageService {
         let document = self.get_document(params.text_document.uri)?;
         self.with_db(|db| {
             let line_index = document.line_index(db);
-            let root = document.root_tree(db);
             let symbol_table = SymbolTable::of(db, document);
             let deprecation = deprecation::get_deprecation(db, document);
 
@@ -75,12 +75,17 @@ impl LanguageService {
                             ))
                         }
                         SymbolKind::Type => {
+                            let def_types = types_analyzer::get_def_types(db, document);
                             let range = line_index.convert(symbol.key.text_range());
                             Some((
                                 symbol.key,
                                 DocumentSymbol {
                                     name: render_symbol_name(symbol, db),
-                                    detail: helpers::syntax::infer_type_def_symbol_detail(symbol, &root),
+                                    detail: def_types.get(&symbol.key).map(|def_type| match def_type.comp {
+                                        CompositeType::Func(..) => "func".into(),
+                                        CompositeType::Struct(..) => "struct".into(),
+                                        CompositeType::Array(..) => "array".into(),
+                                    }),
                                     kind: LspSymbolKind::Class,
                                     tags,
                                     range,

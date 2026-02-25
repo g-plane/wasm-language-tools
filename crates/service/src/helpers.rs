@@ -119,11 +119,10 @@ pub(crate) struct RenderWithDb<'db, T> {
 }
 
 pub(crate) mod syntax {
-    use crate::binder::Symbol;
     use std::ops::ControlFlow;
     use wat_syntax::{
         SyntaxKind, SyntaxNode, SyntaxToken, TextSize, TokenAtOffset,
-        ast::{AstNode, CompType, ExternIdx, TypeDef},
+        ast::{AstNode, ExternIdx},
     };
 
     /// Pick the `$idx` part from `(func (type $idx) ...)`.
@@ -151,20 +150,6 @@ pub(crate) mod syntax {
             .children_by_kind(ExternIdx::can_cast)
             .next()
             .and_then(|extern_idx| extern_idx.children_by_kind(SyntaxKind::INDEX).next())
-    }
-
-    pub fn infer_type_def_symbol_detail(symbol: &Symbol, root: &SyntaxNode) -> Option<String> {
-        symbol
-            .key
-            .to_node(root)
-            .and_then(TypeDef::cast)
-            .and_then(|node| node.sub_type())
-            .and_then(|sub_type| sub_type.comp_type())
-            .map(|comp_type| match comp_type {
-                CompType::Array(..) => "array".into(),
-                CompType::Struct(..) => "struct".into(),
-                CompType::Func(..) => "func".into(),
-            })
     }
 
     pub fn find_token(root: &SyntaxNode, offset: TextSize) -> Option<SyntaxToken> {

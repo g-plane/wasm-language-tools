@@ -1,8 +1,8 @@
 use crate::{
     LanguageService,
     binder::{SymbolKind, SymbolTable},
-    helpers::{self, LineIndexExt},
-    types_analyzer,
+    helpers::LineIndexExt,
+    types_analyzer::{self, CompositeType},
 };
 use lspt::{
     SymbolKind as LspSymbolKind, TypeHierarchyItem, TypeHierarchyPrepareParams, TypeHierarchySubtypesParams,
@@ -16,6 +16,7 @@ impl LanguageService {
         let line_index = document.line_index(self);
         let root = document.root_tree(self);
         let symbol_table = SymbolTable::of(self, document);
+        let def_types = types_analyzer::get_def_types(self, document);
 
         let token = super::find_meaningful_token(self, document, &root, params.position)?;
         let parent_range = token.parent().text_range();
@@ -25,7 +26,11 @@ impl LanguageService {
                 name: symbol.idx.render(self).to_string(),
                 kind: LspSymbolKind::Class,
                 tags: None,
-                detail: helpers::syntax::infer_type_def_symbol_detail(symbol, &root),
+                detail: def_types.get(&symbol.key).map(|def_type| match def_type.comp {
+                    CompositeType::Func(..) => "func".into(),
+                    CompositeType::Struct(..) => "struct".into(),
+                    CompositeType::Array(..) => "array".into(),
+                }),
                 uri: params.text_document.uri.clone(),
                 range: line_index.convert(symbol.key.text_range()),
                 selection_range: line_index.convert(
@@ -43,7 +48,11 @@ impl LanguageService {
                         name: symbol.idx.render(self).to_string(),
                         kind: LspSymbolKind::Class,
                         tags: None,
-                        detail: helpers::syntax::infer_type_def_symbol_detail(symbol, &root),
+                        detail: def_types.get(&symbol.key).map(|def_type| match def_type.comp {
+                            CompositeType::Func(..) => "func".into(),
+                            CompositeType::Struct(..) => "struct".into(),
+                            CompositeType::Array(..) => "array".into(),
+                        }),
                         uri: params.text_document.uri.clone(),
                         range: line_index.convert(symbol.key.text_range()),
                         selection_range: line_index.convert(
@@ -64,11 +73,10 @@ impl LanguageService {
     /// Handler for `typeHierarchy/supertypes` request.
     pub fn type_hierarchy_supertypes(&self, params: TypeHierarchySupertypesParams) -> Option<Vec<TypeHierarchyItem>> {
         let document = self.get_document(&params.item.uri)?;
-        let root = document.root_tree(self);
+        let line_index = document.line_index(self);
         let symbol_table = SymbolTable::of(self, document);
         let def_types = types_analyzer::get_def_types(self, document);
 
-        let line_index = document.line_index(self);
         let type_def_range = line_index.convert(params.item.range)?;
         let type_def = symbol_table
             .symbols
@@ -84,7 +92,11 @@ impl LanguageService {
                     name: symbol.idx.render(self).to_string(),
                     kind: LspSymbolKind::Class,
                     tags: None,
-                    detail: helpers::syntax::infer_type_def_symbol_detail(symbol, &root),
+                    detail: def_types.get(&symbol.key).map(|def_type| match def_type.comp {
+                        CompositeType::Func(..) => "func".into(),
+                        CompositeType::Struct(..) => "struct".into(),
+                        CompositeType::Array(..) => "array".into(),
+                    }),
                     uri: params.item.uri,
                     range: line_index.convert(symbol.key.text_range()),
                     selection_range: line_index.convert(
@@ -102,11 +114,10 @@ impl LanguageService {
     /// Handler for `typeHierarchy/subtypes` request.
     pub fn type_hierarchy_subtypes(&self, params: TypeHierarchySubtypesParams) -> Option<Vec<TypeHierarchyItem>> {
         let document = self.get_document(&params.item.uri)?;
-        let root = document.root_tree(self);
+        let line_index = document.line_index(self);
         let symbol_table = SymbolTable::of(self, document);
         let def_types = types_analyzer::get_def_types(self, document);
 
-        let line_index = document.line_index(self);
         let type_def_range = line_index.convert(params.item.range)?;
         let key = symbol_table
             .symbols
@@ -127,7 +138,11 @@ impl LanguageService {
                 name: symbol.idx.render(self).to_string(),
                 kind: LspSymbolKind::Class,
                 tags: None,
-                detail: helpers::syntax::infer_type_def_symbol_detail(symbol, &root),
+                detail: def_types.get(&symbol.key).map(|def_type| match def_type.comp {
+                    CompositeType::Func(..) => "func".into(),
+                    CompositeType::Struct(..) => "struct".into(),
+                    CompositeType::Array(..) => "array".into(),
+                }),
                 uri: params.item.uri.clone(),
                 range: line_index.convert(symbol.key.text_range()),
                 selection_range: line_index.convert(
