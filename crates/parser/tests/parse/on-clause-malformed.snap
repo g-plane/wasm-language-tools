@@ -1,0 +1,106 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..124
+  MODULE@0..123
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_FUNC@10..121
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "func"
+      WHITESPACE@15..20 "\n    "
+      PLAIN_INSTR@20..33
+        L_PAREN@20..21 "("
+        INSTR_NAME@21..27 "resume"
+        WHITESPACE@27..28 " "
+        IMMEDIATE@28..32
+          ON_CLAUSE@28..32
+            L_PAREN@28..29 "("
+            KEYWORD@29..31 "on"
+            R_PAREN@31..32 ")"
+        R_PAREN@32..33 ")"
+      WHITESPACE@33..38 "\n    "
+      PLAIN_INSTR@38..58
+        L_PAREN@38..39 "("
+        INSTR_NAME@39..45 "resume"
+        WHITESPACE@45..46 " "
+        IMMEDIATE@46..57
+          ON_CLAUSE@46..57
+            L_PAREN@46..47 "("
+            KEYWORD@47..49 "on"
+            WHITESPACE@49..50 " "
+            ERROR@50..56 "switch"
+            R_PAREN@56..57 ")"
+        R_PAREN@57..58 ")"
+      WHITESPACE@58..63 "\n    "
+      PLAIN_INSTR@63..83
+        L_PAREN@63..64 "("
+        INSTR_NAME@64..70 "resume"
+        WHITESPACE@70..71 " "
+        IMMEDIATE@71..82
+          ON_CLAUSE@71..82
+            L_PAREN@71..72 "("
+            KEYWORD@72..74 "on"
+            WHITESPACE@74..75 " "
+            INDEX@75..81
+              IDENT@75..81 "$yield"
+            R_PAREN@81..82 ")"
+        R_PAREN@82..83 ")"
+      WHITESPACE@83..88 "\n    "
+      PLAIN_INSTR@88..117
+        L_PAREN@88..89 "("
+        INSTR_NAME@89..95 "resume"
+        WHITESPACE@95..96 " "
+        IMMEDIATE@96..116
+          ON_CLAUSE@96..116
+            L_PAREN@96..97 "("
+            KEYWORD@97..99 "on"
+            WHITESPACE@99..100 " "
+            INDEX@100..106
+              IDENT@100..106 "$yield"
+            WHITESPACE@106..107 " "
+            ERROR@107..115 "on_yield"
+            R_PAREN@115..116 ")"
+        R_PAREN@116..117 ")"
+      WHITESPACE@117..120 "\n  "
+      R_PAREN@120..121 ")"
+    WHITESPACE@121..122 "\n"
+    R_PAREN@122..123 ")"
+  WHITESPACE@123..124 "\n"
+
+error: expected tag index
+  ┌─ on-clause-malformed.wat:3:16
+  │
+3 │     (resume (on))
+  │                ^
+
+error: expected label index
+  ┌─ on-clause-malformed.wat:3:16
+  │
+3 │     (resume (on))
+  │                ^
+
+error: unexpected token
+  ┌─ on-clause-malformed.wat:4:17
+  │
+4 │     (resume (on switch))
+  │                 ^^^^^^
+
+error: expected label index
+  ┌─ on-clause-malformed.wat:4:23
+  │
+4 │     (resume (on switch))
+  │                       ^
+
+error: expected label index
+  ┌─ on-clause-malformed.wat:5:23
+  │
+5 │     (resume (on $yield))
+  │                       ^
+
+error: unexpected token
+  ┌─ on-clause-malformed.wat:6:24
+  │
+6 │     (resume (on $yield on_yield))
+  │                        ^^^^^^^^

@@ -1,0 +1,7 @@
+---
+source: crates/formatter/tests/parser.rs
+---
+(module
+  (type )
+  (type (sub ))
+  (func (param contref nullcontref (ref cont) (ref nocont))))

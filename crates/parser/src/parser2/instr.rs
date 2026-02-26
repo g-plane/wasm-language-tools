@@ -205,6 +205,10 @@ impl Parser<'_> {
                 self.try_parse(Self::parse_heap_type::<true>)
                     .map(|child| node(IMMEDIATE, [child]))
             })
+            .or_else(|| {
+                self.try_parse(Self::parse_on_clause)
+                    .map(|child| node(IMMEDIATE, [child.into()]))
+            })
     }
 
     pub(super) fn parse_instr(&mut self) -> Option<GreenNode> {
@@ -306,6 +310,33 @@ impl Parser<'_> {
         }
 
         Some(self.finish_node(MEM_ARG, mark))
+    }
+
+    fn parse_on_clause(&mut self) -> Option<GreenNode> {
+        let mark = self.start_node();
+        self.lexer.next(L_PAREN)?;
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
+        self.lexer.keyword("on")?;
+        self.add_child(green::KW_ON.clone());
+
+        if !self.recover(Self::parse_index) {
+            self.report_missing(Message::Name("tag index"));
+        }
+
+        if let Some(modifier_keyword) = self.try_parse_with_trivias(|parser| {
+            parser
+                .lexer
+                .next(MODIFIER_KEYWORD)
+                .filter(|token| token.text == "switch")
+        }) {
+            self.add_child(modifier_keyword);
+        } else if !self.recover(Self::parse_index) {
+            self.report_missing(Message::Name("label index"));
+        }
+
+        self.expect_right_paren();
+        Some(self.finish_node(ON_CLAUSE, mark))
     }
 
     fn parse_plain_instr_folded(&mut self, mark: NodeMark) -> Option<GreenNode> {

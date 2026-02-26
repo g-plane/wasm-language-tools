@@ -50,6 +50,7 @@ pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Def
                 CompType::Array(array_type) => {
                     CompositeType::Array(array_type.field_type().and_then(|node| FieldType::from_ast(&node, db)))
                 }
+                CompType::Cont(..) => return None,
             };
             Some((
                 symbol.key,

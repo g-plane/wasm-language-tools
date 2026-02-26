@@ -44,8 +44,20 @@ impl Parser<'_> {
                 self.add_child(green::KW_ARRAY.clone());
                 self.parse_array_type(mark)
             }
+            "cont" => {
+                self.add_child(green::KW_CONT.clone());
+                self.parse_cont_type(mark)
+            }
             _ => None,
         }
+    }
+
+    fn parse_cont_type(&mut self, mark: NodeMark) -> Option<GreenNode> {
+        if !self.recover(Self::parse_index) {
+            self.report_missing(Message::Name("index"));
+        }
+        self.expect_right_paren();
+        Some(self.finish_node(CONT_TYPE, mark))
     }
 
     pub(super) fn parse_extern_type(&mut self) -> Option<GreenNode> {
@@ -180,7 +192,7 @@ impl Parser<'_> {
             .eat(TYPE_KEYWORD)
             .and_then(|mut token| match token.text {
                 "any" | "eq" | "i31" | "struct" | "array" | "none" | "func" | "nofunc" | "exn" | "noexn" | "extern"
-                | "noextern" => Some(node(HEAP_TYPE, [token.into()]).into()),
+                | "noextern" | "cont" | "nocont" => Some(node(HEAP_TYPE, [token.into()]).into()),
                 _ => {
                     if IMMEDIATE {
                         // for better error reporting
@@ -277,7 +289,9 @@ impl Parser<'_> {
             .eat(TYPE_KEYWORD)
             .and_then(|token| match token.text {
                 "anyref" | "eqref" | "i31ref" | "structref" | "arrayref" | "nullref" | "funcref" | "nullfuncref"
-                | "exnref" | "nullexnref" | "externref" | "nullexternref" => Some(node(REF_TYPE, [token.into()])),
+                | "exnref" | "nullexnref" | "externref" | "nullexternref" | "contref" | "nullcontref" => {
+                    Some(node(REF_TYPE, [token.into()]))
+                }
                 _ => None,
             })
             .or_else(|| self.parse_ref_type_detailed())
@@ -347,6 +361,10 @@ impl Parser<'_> {
                 self.add_child(green::KW_ARRAY.clone());
                 self.parse_array_type(mark).map(|ty| node(SUB_TYPE, [ty.into()]))
             }
+            "cont" => {
+                self.add_child(green::KW_CONT.clone());
+                self.parse_cont_type(mark).map(|ty| node(SUB_TYPE, [ty.into()]))
+            }
             "sub" => {
                 self.add_child(green::KW_SUB.clone());
                 if let Some(modifier_keyword) = self.try_parse_with_trivias(|parser| {
@@ -397,7 +415,9 @@ impl Parser<'_> {
                 "f64" => green::TYPE_F64.clone(),
                 "v128" => node(VEC_TYPE, [token.into()]).into(),
                 "anyref" | "eqref" | "i31ref" | "structref" | "arrayref" | "nullref" | "funcref" | "nullfuncref"
-                | "exnref" | "nullexnref" | "externref" | "nullexternref" => node(REF_TYPE, [token.into()]).into(),
+                | "exnref" | "nullexnref" | "externref" | "nullexternref" | "contref" | "nullcontref" => {
+                    node(REF_TYPE, [token.into()]).into()
+                }
                 _ => {
                     token.kind = ERROR;
                     self.report_error_token(&token, Message::Description("invalid value type"));

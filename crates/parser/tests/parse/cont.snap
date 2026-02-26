@@ -1,0 +1,75 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..115
+  MODULE@0..114
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    TYPE_DEF@10..26
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "type"
+      WHITESPACE@15..16 " "
+      SUB_TYPE@16..25
+        CONT_TYPE@16..25
+          L_PAREN@16..17 "("
+          KEYWORD@17..21 "cont"
+          WHITESPACE@21..22 " "
+          INDEX@22..24
+            IDENT@22..24 "$f"
+          R_PAREN@24..25 ")"
+      R_PAREN@25..26 ")"
+    WHITESPACE@26..29 "\n  "
+    TYPE_DEF@29..51
+      L_PAREN@29..30 "("
+      KEYWORD@30..34 "type"
+      WHITESPACE@34..35 " "
+      SUB_TYPE@35..50
+        L_PAREN@35..36 "("
+        KEYWORD@36..39 "sub"
+        WHITESPACE@39..40 " "
+        CONT_TYPE@40..49
+          L_PAREN@40..41 "("
+          KEYWORD@41..45 "cont"
+          WHITESPACE@45..46 " "
+          INDEX@46..48
+            IDENT@46..48 "$f"
+          R_PAREN@48..49 ")"
+        R_PAREN@49..50 ")"
+      R_PAREN@50..51 ")"
+    WHITESPACE@51..54 "\n  "
+    MODULE_FIELD_FUNC@54..112
+      L_PAREN@54..55 "("
+      KEYWORD@55..59 "func"
+      WHITESPACE@59..60 " "
+      TYPE_USE@60..111
+        PARAM@60..111
+          L_PAREN@60..61 "("
+          KEYWORD@61..66 "param"
+          WHITESPACE@66..67 " "
+          REF_TYPE@67..74
+            TYPE_KEYWORD@67..74 "contref"
+          WHITESPACE@74..75 " "
+          REF_TYPE@75..86
+            TYPE_KEYWORD@75..86 "nullcontref"
+          WHITESPACE@86..87 " "
+          REF_TYPE@87..97
+            L_PAREN@87..88 "("
+            KEYWORD@88..91 "ref"
+            WHITESPACE@91..92 " "
+            HEAP_TYPE@92..96
+              TYPE_KEYWORD@92..96 "cont"
+            R_PAREN@96..97 ")"
+          WHITESPACE@97..98 " "
+          REF_TYPE@98..110
+            L_PAREN@98..99 "("
+            KEYWORD@99..102 "ref"
+            WHITESPACE@102..103 " "
+            HEAP_TYPE@103..109
+              TYPE_KEYWORD@103..109 "nocont"
+            R_PAREN@109..110 ")"
+          R_PAREN@110..111 ")"
+      R_PAREN@111..112 ")"
+    WHITESPACE@112..113 "\n"
+    R_PAREN@113..114 ")"
+  WHITESPACE@114..115 "\n"

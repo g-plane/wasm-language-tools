@@ -637,6 +637,10 @@ impl Immediate {
     pub fn ref_type(&self) -> Option<RefType> {
         child(&self.syntax)
     }
+    #[inline]
+    pub fn on_clause(&self) -> Option<OnClause> {
+        child(&self.syntax)
+    }
 }
 impl AstNode for Immediate {
     #[inline]
@@ -696,6 +700,61 @@ impl AstNode for MemArg {
     {
         if Self::can_cast(syntax.kind()) {
             Some(MemArg { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct OnClause {
+    syntax: SyntaxNode,
+}
+impl OnClause {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn tag_index(&self) -> Option<Index> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn label_index(&self) -> Option<Index> {
+        children(&self.syntax).nth(1)
+    }
+    #[inline]
+    pub fn switch_keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::MODIFIER_KEYWORD)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
+impl AstNode for OnClause {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::ON_CLAUSE
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(OnClause { syntax })
         } else {
             None
         }

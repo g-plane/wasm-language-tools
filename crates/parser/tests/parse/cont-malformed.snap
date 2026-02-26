@@ -1,0 +1,46 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..45
+  MODULE@0..44
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    TYPE_DEF@10..23
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "type"
+      WHITESPACE@15..16 " "
+      SUB_TYPE@16..22
+        CONT_TYPE@16..22
+          L_PAREN@16..17 "("
+          KEYWORD@17..21 "cont"
+          R_PAREN@21..22 ")"
+      R_PAREN@22..23 ")"
+    WHITESPACE@23..26 "\n  "
+    TYPE_DEF@26..42
+      L_PAREN@26..27 "("
+      KEYWORD@27..31 "type"
+      WHITESPACE@31..32 " "
+      SUB_TYPE@32..41
+        CONT_TYPE@32..41
+          L_PAREN@32..33 "("
+          KEYWORD@33..37 "cont"
+          WHITESPACE@37..38 " "
+          ERROR@38..40 "ft"
+          R_PAREN@40..41 ")"
+      R_PAREN@41..42 ")"
+    WHITESPACE@42..43 "\n"
+    R_PAREN@43..44 ")"
+  WHITESPACE@44..45 "\n"
+
+error: expected index
+  ┌─ cont-malformed.wat:2:14
+  │
+2 │   (type (cont))
+  │              ^
+
+error: unexpected token
+  ┌─ cont-malformed.wat:3:15
+  │
+3 │   (type (cont ft))
+  │               ^^

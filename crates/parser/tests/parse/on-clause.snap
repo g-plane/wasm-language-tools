@@ -1,0 +1,44 @@
+---
+source: crates/parser/tests/parse.rs
+---
+ROOT@0..76
+  MODULE@0..75
+    L_PAREN@0..1 "("
+    KEYWORD@1..7 "module"
+    WHITESPACE@7..10 "\n  "
+    MODULE_FIELD_FUNC@10..73
+      L_PAREN@10..11 "("
+      KEYWORD@11..15 "func"
+      WHITESPACE@15..20 "\n    "
+      PLAIN_INSTR@20..69
+        L_PAREN@20..21 "("
+        INSTR_NAME@21..27 "resume"
+        WHITESPACE@27..28 " "
+        IMMEDIATE@28..49
+          ON_CLAUSE@28..49
+            L_PAREN@28..29 "("
+            KEYWORD@29..31 "on"
+            WHITESPACE@31..32 " "
+            INDEX@32..38
+              IDENT@32..38 "$yield"
+            WHITESPACE@38..39 " "
+            INDEX@39..48
+              IDENT@39..48 "$on_yield"
+            R_PAREN@48..49 ")"
+        WHITESPACE@49..50 " "
+        IMMEDIATE@50..68
+          ON_CLAUSE@50..68
+            L_PAREN@50..51 "("
+            KEYWORD@51..53 "on"
+            WHITESPACE@53..54 " "
+            INDEX@54..60
+              IDENT@54..60 "$yield"
+            WHITESPACE@60..61 " "
+            MODIFIER_KEYWORD@61..67 "switch"
+            R_PAREN@67..68 ")"
+        R_PAREN@68..69 ")"
+      WHITESPACE@69..72 "\n  "
+      R_PAREN@72..73 ")"
+    WHITESPACE@73..74 "\n"
+    R_PAREN@74..75 ")"
+  WHITESPACE@75..76 "\n"

@@ -1,0 +1,5 @@
+(module
+  (type (cont $f))
+  (type (sub (cont $f)))
+  (func (param contref nullcontref (ref cont) (ref nocont)))
+)

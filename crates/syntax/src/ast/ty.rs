@@ -92,6 +92,7 @@ pub enum CompType {
     Array(ArrayType),
     Struct(StructType),
     Func(FuncType),
+    Cont(ContType),
 }
 impl AstNode for CompType {
     #[inline]
@@ -101,7 +102,7 @@ impl AstNode for CompType {
     {
         matches!(
             kind,
-            SyntaxKind::ARRAY_TYPE | SyntaxKind::STRUCT_TYPE | SyntaxKind::FUNC_TYPE
+            SyntaxKind::ARRAY_TYPE | SyntaxKind::STRUCT_TYPE | SyntaxKind::FUNC_TYPE | SyntaxKind::CONT_TYPE
         )
     }
     #[inline]
@@ -113,6 +114,7 @@ impl AstNode for CompType {
             SyntaxKind::ARRAY_TYPE => Some(CompType::Array(ArrayType { syntax })),
             SyntaxKind::STRUCT_TYPE => Some(CompType::Struct(StructType { syntax })),
             SyntaxKind::FUNC_TYPE => Some(CompType::Func(FuncType { syntax })),
+            SyntaxKind::CONT_TYPE => Some(CompType::Cont(ContType { syntax })),
             _ => None,
         }
     }
@@ -122,7 +124,55 @@ impl AstNode for CompType {
             CompType::Array(it) => it.syntax(),
             CompType::Struct(it) => it.syntax(),
             CompType::Func(it) => it.syntax(),
+            CompType::Cont(it) => it.syntax(),
         }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ContType {
+    syntax: SyntaxNode,
+}
+impl ContType {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn index(&self) -> Option<Index> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
+impl AstNode for ContType {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::CONT_TYPE
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(ContType { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
     }
 }
 
