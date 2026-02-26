@@ -1,8 +1,9 @@
 use super::Diagnostic;
+use crate::data_set::INSTR_OP_CODES;
 use std::iter::Peekable;
 use wat_syntax::{AmberNode, AmberToken, NodeOrToken, SyntaxKind, SyntaxKindMatch};
 
-const DIAGNOSTIC_CODE: &str = "immediates";
+const DIAGNOSTIC_CODE: &str = "plain-instr";
 
 const INDEX: [SyntaxKind; 2] = [SyntaxKind::IDENT, SyntaxKind::INT];
 
@@ -12,7 +13,8 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
         .filter(|child| child.kind() == SyntaxKind::IMMEDIATE)
         .peekable();
 
-    match instr_name.text() {
+    let name = instr_name.text();
+    match name {
         "call" | "local.get" | "local.set" | "local.tee" | "global.get" | "global.set" | "ref.func" | "data.drop"
         | "elem.drop" | "br" | "br_if" | "struct.new" | "struct.new_default" | "array.new" | "array.new_default"
         | "array.get" | "array.get_u" | "array.get_s" | "array.set" | "array.fill" | "br_on_null"
@@ -453,12 +455,21 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
         }
         _ => {}
     }
-    diagnostics.extend(immediates.map(|immediate| Diagnostic {
-        range: immediate.text_range(),
-        code: DIAGNOSTIC_CODE.into(),
-        message: "unexpected immediate".into(),
-        ..Default::default()
-    }));
+    if INSTR_OP_CODES.contains_key(name) {
+        diagnostics.extend(immediates.map(|immediate| Diagnostic {
+            range: immediate.text_range(),
+            code: DIAGNOSTIC_CODE.into(),
+            message: "unexpected immediate".into(),
+            ..Default::default()
+        }));
+    } else {
+        diagnostics.push(Diagnostic {
+            range: instr_name.text_range(),
+            code: DIAGNOSTIC_CODE.into(),
+            message: format!("unknown instruction `{name}`"),
+            ..Default::default()
+        });
+    }
 }
 
 fn check_immediate<'a, const REQUIRED: bool>(

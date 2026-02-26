@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/unknown_instr.rs
+source: crates/service/tests/diagnostics/plain_instr.rs
 expression: response
 ---
 {
@@ -17,7 +17,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "unknown-instr",
+      "code": "plain-instr",
       "source": "wat",
       "message": "unknown instruction `select.`"
     },
@@ -33,7 +33,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "unknown-instr",
+      "code": "plain-instr",
       "source": "wat",
       "message": "unknown instruction `ref.test.`"
     },
@@ -49,7 +49,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "unknown-instr",
+      "code": "plain-instr",
       "source": "wat",
       "message": "unknown instruction `ref.cast.`"
     }

@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/immediates.rs
+source: crates/service/tests/diagnostics/plain_instr.rs
 expression: response
 ---
 {
@@ -17,7 +17,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "expected 16 lane indices in `i8x16.shuffle`, found 17"
     },
@@ -33,7 +33,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "expected 16 lane indices in `i8x16.shuffle`, found 15"
     },
@@ -49,7 +49,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "laneidx must be smaller than 32"
     },
@@ -65,7 +65,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "laneidx must be smaller than 32"
     }

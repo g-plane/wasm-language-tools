@@ -1,26 +1,10 @@
 ---
-source: crates/service/tests/diagnostics/immediates.rs
+source: crates/service/tests/diagnostics/plain_instr.rs
 expression: response
 ---
 {
   "kind": "full",
   "items": [
-    {
-      "range": {
-        "start": {
-          "line": 7,
-          "character": 4
-        },
-        "end": {
-          "line": 7,
-          "character": 15
-        }
-      },
-      "severity": 1,
-      "code": "immediates",
-      "source": "wat",
-      "message": "missing identifier or unsigned integer"
-    },
     {
       "range": {
         "start": {
@@ -33,9 +17,9 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
-      "message": "expected identifier or unsigned integer"
+      "message": "unexpected immediate"
     },
     {
       "range": {
@@ -49,7 +33,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "unexpected immediate"
     },
@@ -65,9 +49,9 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
-      "message": "expected identifier or unsigned integer"
+      "message": "unexpected immediate"
     },
     {
       "range": {
@@ -81,7 +65,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "unexpected immediate"
     }

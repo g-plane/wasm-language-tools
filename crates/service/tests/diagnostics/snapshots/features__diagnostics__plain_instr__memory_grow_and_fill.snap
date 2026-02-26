@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/immediates.rs
+source: crates/service/tests/diagnostics/plain_instr.rs
 expression: response
 ---
 {
@@ -17,7 +17,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "unexpected immediate"
     },
@@ -33,7 +33,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "unexpected immediate"
     }

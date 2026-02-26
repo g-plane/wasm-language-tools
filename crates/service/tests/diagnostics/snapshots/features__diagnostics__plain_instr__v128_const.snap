@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/immediates.rs
+source: crates/service/tests/diagnostics/plain_instr.rs
 expression: response
 ---
 {
@@ -17,7 +17,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "expected shape descriptor"
     },
@@ -33,7 +33,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "unexpected immediate"
     },
@@ -49,7 +49,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "missing shape descriptor"
     },
@@ -65,7 +65,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "expected 16 integers in `v128.const`"
     },
@@ -81,7 +81,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "expected 8 integers in `v128.const`"
     },
@@ -97,7 +97,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "expected integer"
     },
@@ -113,7 +113,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "expected 4 integers in `v128.const`"
     },
@@ -129,7 +129,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "expected 2 integers in `v128.const`"
     },
@@ -145,7 +145,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "expected 4 floating-point numbers in `v128.const`"
     },
@@ -161,7 +161,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "expected floating-point number"
     },
@@ -177,7 +177,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
       "message": "expected 2 floating-point numbers in `v128.const`"
     }

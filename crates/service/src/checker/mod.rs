@@ -18,7 +18,6 @@ mod const_expr;
 mod deprecated;
 mod dup_names;
 mod elem_type;
-mod immediates;
 mod implicit_module;
 mod import_occur;
 mod import_with_def;
@@ -30,6 +29,7 @@ mod needless_mut;
 mod needless_try_table;
 mod new_non_defaultable;
 mod packing;
+mod plain_instr;
 mod shadow;
 mod start;
 mod subtyping;
@@ -39,7 +39,6 @@ mod type_misuse;
 mod typeck;
 mod undef;
 mod uninit;
-mod unknown_instr;
 mod unreachable;
 mod unread;
 mod unused;
@@ -105,10 +104,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                 }
                 SyntaxKind::PLAIN_INSTR => {
                     if let Some(instr_name) = node.tokens_by_kind(SyntaxKind::INSTR_NAME).next() {
-                        if let Some(diagnostic) = unknown_instr::check(instr_name) {
-                            diagnostics.push(diagnostic);
-                        }
-                        immediates::check(diagnostics, node, instr_name);
+                        plain_instr::check(diagnostics, node, instr_name);
                         br_table_branches::check(diagnostics, ctx, node, instr_name);
                         if let Some(diagnostic) = packing::check(ctx, node, instr_name) {
                             diagnostics.push(diagnostic);

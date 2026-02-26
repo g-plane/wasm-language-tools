@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/immediates.rs
+source: crates/service/tests/diagnostics/plain_instr.rs
 expression: response
 ---
 {
@@ -9,47 +9,79 @@ expression: response
       "range": {
         "start": {
           "line": 5,
-          "character": 14
+          "character": 20
         },
         "end": {
           "line": 5,
-          "character": 16
-        }
-      },
-      "severity": 1,
-      "code": "immediates",
-      "source": "wat",
-      "message": "expected result type"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 9,
-          "character": 14
-        },
-        "end": {
-          "line": 9,
           "character": 23
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
-      "message": "there must be exactly one result type"
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 21
+        },
+        "end": {
+          "line": 9,
+          "character": 24
+        }
+      },
+      "severity": 1,
+      "code": "plain-instr",
+      "source": "wat",
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 25
+        },
+        "end": {
+          "line": 9,
+          "character": 26
+        }
+      },
+      "severity": 1,
+      "code": "plain-instr",
+      "source": "wat",
+      "message": "unexpected immediate"
     },
     {
       "range": {
         "start": {
           "line": 13,
-          "character": 27
+          "character": 21
         },
         "end": {
           "line": 13,
-          "character": 29
+          "character": 24
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
+      "source": "wat",
+      "message": "unexpected immediate"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 25
+        },
+        "end": {
+          "line": 13,
+          "character": 33
+        }
+      },
+      "severity": 1,
+      "code": "plain-instr",
       "source": "wat",
       "message": "unexpected immediate"
     },
@@ -57,65 +89,33 @@ expression: response
       "range": {
         "start": {
           "line": 17,
-          "character": 14
+          "character": 23
         },
         "end": {
           "line": 17,
-          "character": 38
+          "character": 26
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
-      "message": "there must be exactly one result type"
+      "message": "unexpected immediate"
     },
     {
       "range": {
         "start": {
-          "line": 21,
-          "character": 14
+          "line": 20,
+          "character": 32
         },
         "end": {
-          "line": 21,
+          "line": 20,
           "character": 35
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
-      "message": "there must be exactly one result type"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 25,
-          "character": 14
-        },
-        "end": {
-          "line": 25,
-          "character": 22
-        }
-      },
-      "severity": 1,
-      "code": "immediates",
-      "source": "wat",
-      "message": "there must be exactly one result type"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 29,
-          "character": 14
-        },
-        "end": {
-          "line": 29,
-          "character": 30
-        }
-      },
-      "severity": 1,
-      "code": "immediates",
-      "source": "wat",
-      "message": "there must be exactly one result type"
+      "message": "unexpected immediate"
     }
   ]
 }

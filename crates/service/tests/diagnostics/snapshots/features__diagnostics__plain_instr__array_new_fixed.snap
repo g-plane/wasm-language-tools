@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/diagnostics/immediates.rs
+source: crates/service/tests/diagnostics/plain_instr.rs
 expression: response
 ---
 {
@@ -8,66 +8,66 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 3,
-          "character": 19
+          "line": 4,
+          "character": 4
         },
         "end": {
-          "line": 3,
-          "character": 22
+          "line": 4,
+          "character": 19
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
-      "message": "expected integer"
+      "message": "missing identifier or unsigned integer"
     },
     {
       "range": {
         "start": {
           "line": 4,
-          "character": 19
+          "character": 4
         },
         "end": {
           "line": 4,
-          "character": 22
+          "character": 19
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
-      "message": "expected integer"
+      "message": "missing unsigned integer"
     },
     {
       "range": {
         "start": {
           "line": 5,
-          "character": 9
+          "character": 4
         },
         "end": {
           "line": 5,
-          "character": 18
+          "character": 19
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
-      "message": "missing integer"
+      "message": "missing unsigned integer"
     },
     {
       "range": {
         "start": {
-          "line": 6,
-          "character": 9
+          "line": 7,
+          "character": 23
         },
         "end": {
-          "line": 6,
-          "character": 18
+          "line": 7,
+          "character": 25
         }
       },
       "severity": 1,
-      "code": "immediates",
+      "code": "plain-instr",
       "source": "wat",
-      "message": "missing integer"
+      "message": "expected unsigned integer"
     }
   ]
 }
