@@ -625,3 +625,29 @@ fn exception() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn on_clause() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $ft (func))
+  (type $ct (cont $ft))
+  (tag $gen (param i32))
+
+  (func
+    (local $c (ref $ct))
+    (loop $loop
+      (block $on_gen (result i32 (ref $ct))
+        (resume $ct (on $gen $on_gen)
+          (local.get $c))
+        (return))
+      (local.set $c)
+      (br $loop))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    disable_other_lints(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}

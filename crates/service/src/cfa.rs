@@ -108,6 +108,20 @@ impl<'db> Builder<'db> {
                         }
                         false
                     }
+                    "resume" | "resume_throw" | "resume_throw_ref" => {
+                        if let Some(bb) = self.add_basic_block() {
+                            for index in plain
+                                .immediates()
+                                .filter_map(|immediate| immediate.on_clause())
+                                .filter_map(|on_clause| on_clause.label_index())
+                            {
+                                if let Some(target) = self.find_jump_target(index) {
+                                    self.graph.add_edge(bb, target, ());
+                                }
+                            }
+                        }
+                        false
+                    }
                     _ => false,
                 };
 
