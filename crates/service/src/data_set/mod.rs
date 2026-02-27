@@ -2,7 +2,7 @@ pub(crate) use instr_meta::*;
 
 mod instr_meta;
 
-pub(crate) static INSTR_NAMES: [&str; 567] = [
+pub(crate) static INSTR_NAMES: [&str; 574] = [
     "unreachable",
     "nop",
     "block",
@@ -196,6 +196,13 @@ pub(crate) static INSTR_NAMES: [&str; 567] = [
     "ref.as_non_null",
     "br_on_null",
     "br_on_non_null",
+    "cont.new",
+    "cont.bind",
+    "suspend",
+    "resume",
+    "resume_throw",
+    "resume_throw_ref",
+    "switch",
     "struct.new",
     "struct.new_default",
     "struct.get",

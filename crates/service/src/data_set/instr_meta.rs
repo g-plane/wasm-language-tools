@@ -3430,7 +3430,7 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
 });
 
 pub(crate) static INSTR_OP_CODES: LazyLock<FxHashMap<&'static str, u32>> = LazyLock::new(|| {
-    let mut map = HashMap::with_capacity_and_hasher(570, FxBuildHasher);
+    let mut map = HashMap::with_capacity_and_hasher(577, FxBuildHasher);
     map.insert("unreachable", 0x00);
     map.insert("nop", 0x01);
     map.insert("block", 0x02);
@@ -3624,6 +3624,13 @@ pub(crate) static INSTR_OP_CODES: LazyLock<FxHashMap<&'static str, u32>> = LazyL
     map.insert("ref.as_non_null", 0xD4);
     map.insert("br_on_null", 0xD5);
     map.insert("br_on_non_null", 0xD6);
+    map.insert("cont.new", 0xE0);
+    map.insert("cont.bind", 0xE1);
+    map.insert("suspend", 0xE2);
+    map.insert("resume", 0xE3);
+    map.insert("resume_throw", 0xE4);
+    map.insert("resume_throw_ref", 0xE5);
+    map.insert("switch", 0xE6);
     map.insert("struct.new", 0xFB00);
     map.insert("struct.new_default", 0xFB01);
     map.insert("struct.get", 0xFB02);

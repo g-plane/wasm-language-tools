@@ -18,7 +18,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
         "call" | "local.get" | "local.set" | "local.tee" | "global.get" | "global.set" | "ref.func" | "data.drop"
         | "elem.drop" | "br" | "br_if" | "struct.new" | "struct.new_default" | "array.new" | "array.new_default"
         | "array.get" | "array.get_u" | "array.get_s" | "array.set" | "array.fill" | "br_on_null"
-        | "br_on_non_null" | "call_ref" | "return_call" | "return_call_ref" | "throw" => {
+        | "br_on_non_null" | "call_ref" | "return_call" | "return_call_ref" | "throw" | "cont.new" | "suspend" => {
             check_immediate::<true>(
                 diagnostics,
                 &mut immediates,
@@ -112,7 +112,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
             );
         }
         "struct.get" | "struct.get_u" | "struct.get_s" | "struct.set" | "array.new_data" | "array.new_elem"
-        | "array.copy" | "array.init_data" | "array.init_elem" => {
+        | "array.copy" | "array.init_data" | "array.init_elem" | "cont.bind" | "switch" => {
             check_immediate::<true>(
                 diagnostics,
                 &mut immediates,
@@ -452,6 +452,65 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
                 "memory argument",
                 instr_name,
             );
+        }
+        "resume" | "resume_throw_ref" => {
+            check_immediate::<true>(
+                diagnostics,
+                &mut immediates,
+                INDEX,
+                "identifier or unsigned integer",
+                instr_name,
+            );
+            diagnostics.extend(
+                immediates
+                    .filter(|immediate| {
+                        !immediate
+                            .green()
+                            .children()
+                            .next()
+                            .is_some_and(|node_or_token| matches!(node_or_token.kind(), SyntaxKind::ON_CLAUSE))
+                    })
+                    .map(|immediate| Diagnostic {
+                        range: immediate.text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
+                        message: "expected `on` handler clause".into(),
+                        ..Default::default()
+                    }),
+            );
+            return;
+        }
+        "resume_throw" => {
+            check_immediate::<true>(
+                diagnostics,
+                &mut immediates,
+                INDEX,
+                "identifier or unsigned integer",
+                instr_name,
+            );
+            check_immediate::<true>(
+                diagnostics,
+                &mut immediates,
+                INDEX,
+                "identifier or unsigned integer",
+                instr_name,
+            );
+            diagnostics.extend(
+                immediates
+                    .filter(|immediate| {
+                        !immediate
+                            .green()
+                            .children()
+                            .next()
+                            .is_some_and(|node_or_token| matches!(node_or_token.kind(), SyntaxKind::ON_CLAUSE))
+                    })
+                    .map(|immediate| Diagnostic {
+                        range: immediate.text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
+                        message: "expected `on` handler clause".into(),
+                        ..Default::default()
+                    }),
+            );
+            return;
         }
         _ => {}
     }

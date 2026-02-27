@@ -665,6 +665,27 @@ fn v128_const() {
 }
 
 #[test]
+fn on_clause() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (tag $e)
+  (type $ft (func))
+  (type $ct (cont $ft))
+  (func
+    (resume $ct)
+    (resume $ct $e)
+    (resume_throw $ct (on $e 0) $e)
+    (resume_throw_ref $ct (on $e 0) $e)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn expected_instr() {
     let uri = "untitled:test".to_string();
     let source = "(module (func (result i32) (i32.add 1 (i32.const 0))))";

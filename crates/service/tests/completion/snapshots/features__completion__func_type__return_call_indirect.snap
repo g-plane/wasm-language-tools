@@ -786,6 +786,34 @@ expression: response
     "kind": 24
   },
   {
+    "label": "cont.new",
+    "kind": 24
+  },
+  {
+    "label": "cont.bind",
+    "kind": 24
+  },
+  {
+    "label": "suspend",
+    "kind": 24
+  },
+  {
+    "label": "resume",
+    "kind": 24
+  },
+  {
+    "label": "resume_throw",
+    "kind": 24
+  },
+  {
+    "label": "resume_throw_ref",
+    "kind": 24
+  },
+  {
+    "label": "switch",
+    "kind": 24
+  },
+  {
     "label": "struct.new",
     "kind": 24
   },

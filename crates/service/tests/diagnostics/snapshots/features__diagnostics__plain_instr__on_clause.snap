@@ -1,0 +1,73 @@
+---
+source: crates/service/tests/diagnostics/plain_instr.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 16
+        },
+        "end": {
+          "line": 7,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "plain-instr",
+      "source": "wat",
+      "message": "expected `on` handler clause"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 22
+        },
+        "end": {
+          "line": 8,
+          "character": 31
+        }
+      },
+      "severity": 1,
+      "code": "plain-instr",
+      "source": "wat",
+      "message": "expected identifier or unsigned integer"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 32
+        },
+        "end": {
+          "line": 8,
+          "character": 34
+        }
+      },
+      "severity": 1,
+      "code": "plain-instr",
+      "source": "wat",
+      "message": "expected `on` handler clause"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 36
+        },
+        "end": {
+          "line": 9,
+          "character": 38
+        }
+      },
+      "severity": 1,
+      "code": "plain-instr",
+      "source": "wat",
+      "message": "expected `on` handler clause"
+    }
+  ]
+}
