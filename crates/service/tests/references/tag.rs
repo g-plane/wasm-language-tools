@@ -11,7 +11,11 @@ fn def_int_idx() {
   (func
     try_table (catch 0 0)
       throw 0
-    end))
+    end)
+  (func
+    suspend 0
+    resume_throw 0 0 (on 0 0)
+    switch 0 0))
 (module
   (tag))
 ";
@@ -32,7 +36,11 @@ fn def_ident_idx() {
   (func
     try_table (catch $e 0)
       throw $e
-    end))
+    end)
+  (func
+    suspend $e
+    resume_throw $ct $e (on $e $label)
+    switch $ct $e))
 (module
   (tag $e))
 ";
@@ -53,7 +61,11 @@ fn ref_int_idx() {
   (func
     try_table (catch 0 0)
       throw 0
-    end))
+    end)
+  (func
+    suspend 0
+    resume_throw 0 0 (on 0 0)
+    switch 0 0))
 (module
   (tag))
 ";
@@ -74,7 +86,11 @@ fn ref_ident_idx() {
   (func
     try_table (catch $e 0)
       throw $e
-    end))
+    end)
+  (func
+    suspend $e
+    resume_throw $ct $e (on $e $label)
+    switch $ct $e))
 (module
   (tag $e))
 ";

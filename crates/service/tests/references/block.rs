@@ -144,3 +144,21 @@ fn catch() {
     let ref_1 = service.find_references(create_params(uri.clone(), 4, 43, true));
     assert_json_snapshot!(ref_1);
 }
+
+#[test]
+fn on_clause() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (tag)
+  (type (func))
+  (type (cont 0))
+  (func
+    (block
+      (resume 1 (on 0 0)))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.find_references(create_params(uri.clone(), 7, 23, true));
+    assert_json_snapshot!(response);
+}

@@ -1,6 +1,6 @@
 ---
-source: crates/service/tests/references/tag.rs
-expression: exclude_decl
+source: crates/service/tests/references/ty.rs
+expression: include_decl
 ---
 [
   {
@@ -8,11 +8,11 @@ expression: exclude_decl
     "range": {
       "start": {
         "line": 4,
-        "character": 21
+        "character": 3
       },
       "end": {
         "line": 4,
-        "character": 22
+        "character": 7
       }
     }
   },
@@ -20,12 +20,38 @@ expression: exclude_decl
     "uri": "untitled:test",
     "range": {
       "start": {
-        "line": 5,
-        "character": 12
+        "line": 6,
+        "character": 14
       },
       "end": {
-        "line": 5,
-        "character": 13
+        "line": 6,
+        "character": 15
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 7,
+        "character": 15
+      },
+      "end": {
+        "line": 7,
+        "character": 16
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 7,
+        "character": 17
+      },
+      "end": {
+        "line": 7,
+        "character": 18
       }
     }
   },
@@ -46,25 +72,12 @@ expression: exclude_decl
     "uri": "untitled:test",
     "range": {
       "start": {
+        "line": 9,
+        "character": 18
+      },
+      "end": {
         "line": 9,
         "character": 19
-      },
-      "end": {
-        "line": 9,
-        "character": 20
-      }
-    }
-  },
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
-        "line": 9,
-        "character": 25
-      },
-      "end": {
-        "line": 9,
-        "character": 26
       }
     }
   },
@@ -73,11 +86,24 @@ expression: exclude_decl
     "range": {
       "start": {
         "line": 10,
+        "character": 22
+      },
+      "end": {
+        "line": 10,
+        "character": 23
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 11,
+        "character": 12
+      },
+      "end": {
+        "line": 11,
         "character": 13
-      },
-      "end": {
-        "line": 10,
-        "character": 14
       }
     }
   }

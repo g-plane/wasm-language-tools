@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/references/tag.rs
+source: crates/service/tests/references/ty.rs
 expression: include_decl
 ---
 [
@@ -7,25 +7,12 @@ expression: include_decl
     "uri": "untitled:test",
     "range": {
       "start": {
-        "line": 2,
-        "character": 7
-      },
-      "end": {
-        "line": 2,
-        "character": 9
-      }
-    }
-  },
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
         "line": 4,
-        "character": 21
+        "character": 8
       },
       "end": {
         "line": 4,
-        "character": 23
+        "character": 11
       }
     }
   },
@@ -33,25 +20,12 @@ expression: include_decl
     "uri": "untitled:test",
     "range": {
       "start": {
-        "line": 5,
-        "character": 12
-      },
-      "end": {
-        "line": 5,
+        "line": 6,
         "character": 14
-      }
-    }
-  },
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
-        "line": 8,
-        "character": 12
       },
       "end": {
-        "line": 8,
-        "character": 14
+        "line": 6,
+        "character": 17
       }
     }
   },
@@ -59,38 +33,77 @@ expression: include_decl
     "uri": "untitled:test",
     "range": {
       "start": {
-        "line": 9,
-        "character": 21
-      },
-      "end": {
-        "line": 9,
-        "character": 23
-      }
-    }
-  },
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
-        "line": 9,
-        "character": 28
-      },
-      "end": {
-        "line": 9,
-        "character": 30
-      }
-    }
-  },
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
-        "line": 10,
+        "line": 7,
         "character": 15
       },
       "end": {
+        "line": 7,
+        "character": 18
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 7,
+        "character": 19
+      },
+      "end": {
+        "line": 7,
+        "character": 22
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 8,
+        "character": 12
+      },
+      "end": {
+        "line": 8,
+        "character": 15
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 9,
+        "character": 18
+      },
+      "end": {
+        "line": 9,
+        "character": 21
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
         "line": 10,
-        "character": 17
+        "character": 22
+      },
+      "end": {
+        "line": 10,
+        "character": 25
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 11,
+        "character": 12
+      },
+      "end": {
+        "line": 11,
+        "character": 15
       }
     }
   }

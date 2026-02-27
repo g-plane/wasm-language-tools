@@ -7,12 +7,12 @@ expression: exclude_decl
     "uri": "untitled:test",
     "range": {
       "start": {
-        "line": 3,
-        "character": 16
+        "line": 6,
+        "character": 14
       },
       "end": {
-        "line": 3,
-        "character": 17
+        "line": 6,
+        "character": 15
       }
     }
   },
@@ -20,64 +20,77 @@ expression: exclude_decl
     "uri": "untitled:test",
     "range": {
       "start": {
-        "line": 4,
-        "character": 16
-      },
-      "end": {
-        "line": 4,
-        "character": 21
-      }
-    }
-  },
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
-        "line": 5,
+        "line": 7,
         "character": 15
       },
       "end": {
-        "line": 5,
-        "character": 20
-      }
-    }
-  },
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
-        "line": 5,
-        "character": 39
-      },
-      "end": {
-        "line": 5,
-        "character": 44
-      }
-    }
-  },
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
-        "line": 6,
-        "character": 20
-      },
-      "end": {
-        "line": 6,
-        "character": 25
-      }
-    }
-  },
-  {
-    "uri": "untitled:test",
-    "range": {
-      "start": {
         "line": 7,
         "character": 16
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 7,
+        "character": 17
       },
       "end": {
         "line": 7,
-        "character": 21
+        "character": 18
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 8,
+        "character": 12
+      },
+      "end": {
+        "line": 8,
+        "character": 13
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 9,
+        "character": 18
+      },
+      "end": {
+        "line": 9,
+        "character": 19
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 10,
+        "character": 22
+      },
+      "end": {
+        "line": 10,
+        "character": 23
+      }
+    }
+  },
+  {
+    "uri": "untitled:test",
+    "range": {
+      "start": {
+        "line": 11,
+        "character": 12
+      },
+      "end": {
+        "line": 11,
+        "character": 13
       }
     }
   }

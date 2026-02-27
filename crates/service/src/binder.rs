@@ -555,7 +555,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     Some(
                         "struct.new" | "struct.new_default" | "array.new" | "array.new_default" | "array.new_fixed"
                         | "array.get" | "array.get_u" | "array.get_s" | "array.set" | "array.fill" | "call_ref"
-                        | "return_call_ref" | "ref.null",
+                        | "return_call_ref" | "ref.null" | "cont.new" | "resume" | "resume_throw_ref",
                     ) => {
                         if let Some(symbol) = amber
                             .children_by_kind(SyntaxKind::IMMEDIATE)
@@ -565,7 +565,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                             symbols.insert(symbol.key, symbol);
                         }
                     }
-                    Some("array.copy") => {
+                    Some("array.copy" | "cont.bind") => {
                         symbols.extend(amber.children().filter_map(|node| {
                             create_ref_symbol(db, node, module_key, SymbolKind::TypeUse)
                                 .map(|symbol| (symbol.key, symbol))
@@ -620,9 +620,24 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                             }
                         }
                     }
-                    Some("throw") => {
+                    Some("throw" | "suspend") => {
                         if let Some(symbol) = amber
                             .children_by_kind(SyntaxKind::IMMEDIATE)
+                            .next()
+                            .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TagRef))
+                        {
+                            symbols.insert(symbol.key, symbol);
+                        }
+                    }
+                    Some("resume_throw" | "switch") => {
+                        let mut immediates = amber.children_by_kind(SyntaxKind::IMMEDIATE);
+                        if let Some(symbol) = immediates
+                            .next()
+                            .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TypeUse))
+                        {
+                            symbols.insert(symbol.key, symbol);
+                        }
+                        if let Some(symbol) = immediates
                             .next()
                             .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TagRef))
                         {
@@ -658,7 +673,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     symbols.insert(symbol.key, symbol);
                 }
             }
-            SyntaxKind::TYPE_USE | SyntaxKind::HEAP_TYPE | SyntaxKind::SUB_TYPE => {
+            SyntaxKind::TYPE_USE | SyntaxKind::HEAP_TYPE | SyntaxKind::SUB_TYPE | SyntaxKind::CONT_TYPE => {
                 if let Some(symbol) = node
                     .amber()
                     .children_by_kind(SyntaxKind::INDEX)
@@ -826,6 +841,25 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         .children_by_kind(SyntaxKind::INDEX)
                         .next()
                         .and_then(|node| create_ref_symbol(db, node, region, SymbolKind::BlockRef))
+                {
+                    if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
+                        resolved.insert(symbol.key, def_key);
+                    }
+                    symbols.insert(symbol.key, symbol);
+                }
+            }
+            SyntaxKind::ON_CLAUSE => {
+                let amber = node.amber();
+                let mut indexes = amber.children_by_kind(SyntaxKind::INDEX);
+                if let Some(symbol) = indexes
+                    .next()
+                    .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TagRef))
+                {
+                    symbols.insert(symbol.key, symbol);
+                }
+                if let Some(index) = indexes.next()
+                    && let Some(region) = find_up_block(&node).map(|node| SymbolKey::new(&node))
+                    && let Some(symbol) = create_ref_symbol(db, index, region, SymbolKind::BlockRef)
                 {
                     if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
                         resolved.insert(symbol.key, def_key);
