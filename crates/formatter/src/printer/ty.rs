@@ -47,8 +47,37 @@ pub(crate) fn format_comp_type<'a>(comp_type: AmberNode<'a>, ctx: &Ctx) -> Doc<'
         FUNC_TYPE => format_func_type(comp_type, ctx),
         STRUCT_TYPE => format_struct_type(comp_type, ctx),
         ARRAY_TYPE => format_array_type(comp_type, ctx),
+        CONT_TYPE => format_cont_type(comp_type, ctx),
         _ => Doc::nil(),
     }
+}
+
+pub(crate) fn format_cont_type<'a>(cont_type: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
+    let mut docs = Vec::with_capacity(5);
+    let mut trivias = vec![];
+    if let Some(l_paren) = cont_type.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, cont_type, ctx);
+    }
+    if let Some(keyword) = cont_type.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("cont"));
+        trivias = format_trivias_after_token(keyword, cont_type, ctx);
+    }
+    if let Some(index) = cont_type.children_by_kind(INDEX).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_index(index));
+        trivias = format_trivias_after_node(index, cont_type, ctx);
+    }
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(cont_type))
+        .group()
 }
 
 pub(crate) fn format_extern_type_func<'a>(func: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {

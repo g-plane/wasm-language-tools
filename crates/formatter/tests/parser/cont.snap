@@ -2,6 +2,6 @@
 source: crates/formatter/tests/parser.rs
 ---
 (module
-  (type )
-  (type (sub ))
+  (type (cont $f))
+  (type (sub (cont $f)))
   (func (param contref nullcontref (ref cont) (ref nocont))))

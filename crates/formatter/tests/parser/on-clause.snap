@@ -3,4 +3,4 @@ source: crates/formatter/tests/parser.rs
 ---
 (module
   (func
-    (resume  )))
+    (resume (on $yield $on_yield) (on $yield switch))))

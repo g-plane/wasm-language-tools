@@ -2,5 +2,5 @@
 source: crates/formatter/tests/parser.rs
 ---
 (module
-  (type )
-  (type ))
+  (type (cont))
+  (type (cont ft)))

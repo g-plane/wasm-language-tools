@@ -3,7 +3,7 @@ source: crates/formatter/tests/parser.rs
 ---
 (module
   (func
-    (resume )
-    (resume )
-    (resume )
-    (resume )))
+    (resume (on))
+    (resume (on switch))
+    (resume (on $yield))
+    (resume (on $yield on_yield))))

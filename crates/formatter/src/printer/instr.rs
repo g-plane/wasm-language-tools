@@ -434,6 +434,7 @@ pub(crate) fn format_immediate<'a>(immediate: AmberNode<'a>, ctx: &Ctx) -> Doc<'
             MEM_ARG => format_mem_arg(node),
             HEAP_TYPE => format_heap_type(node),
             REF_TYPE => format_ref_type(node, ctx),
+            ON_CLAUSE => format_on_clause(node, ctx),
             _ => Doc::nil(),
         },
         Some(NodeOrToken::Token(token)) => Doc::text(token.text()),
@@ -462,6 +463,43 @@ pub(crate) fn format_mem_arg<'a>(mem_arg: AmberNode<'a>) -> Doc<'a> {
         docs.push(Doc::text(unsigned_int.text()));
     }
     Doc::list(docs)
+}
+
+pub(crate) fn format_on_clause<'a>(on_clause: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
+    let mut docs = Vec::with_capacity(7);
+    let mut trivias = vec![];
+    if let Some(l_paren) = on_clause.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::text("("));
+        trivias = format_trivias_after_token(l_paren, on_clause, ctx);
+    }
+    if let Some(keyword) = on_clause.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("on"));
+        trivias = format_trivias_after_token(keyword, on_clause, ctx);
+    }
+    on_clause.children_by_kind(INDEX).for_each(|index| {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_index(index));
+        trivias = format_trivias_after_node(index, on_clause, ctx);
+    });
+    if let Some(modifier_keyword) = on_clause.tokens_by_kind(MODIFIER_KEYWORD).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(Doc::text("switch"));
+        trivias = format_trivias_after_token(modifier_keyword, on_clause, ctx);
+    }
+    docs.append(&mut trivias);
+    Doc::list(docs)
+        .nest(ctx.indent_width)
+        .append(ctx.format_right_paren(on_clause))
+        .group()
 }
 
 pub(crate) fn format_plain_instr<'a>(plain_instr: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
