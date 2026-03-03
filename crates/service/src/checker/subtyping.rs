@@ -40,7 +40,7 @@ pub fn check(
                     Some((
                         def_symbol,
                         format!(
-                            "type of `{}` doesn't match its super type `{}`",
+                            "type `{}` doesn't match its super type `{}`",
                             sub_type.idx.render(db),
                             super_type.idx.render(db),
                         ),

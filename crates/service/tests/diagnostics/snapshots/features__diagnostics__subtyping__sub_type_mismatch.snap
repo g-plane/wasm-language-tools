@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "subtyping",
       "source": "wat",
-      "message": "type of `$s0` doesn't match its super type `$a0`"
+      "message": "type `$s0` doesn't match its super type `$a0`"
     },
     {
       "range": {
@@ -35,7 +35,7 @@ expression: response
       "severity": 1,
       "code": "subtyping",
       "source": "wat",
-      "message": "type of `$s1` doesn't match its super type `$f1`"
+      "message": "type `$s1` doesn't match its super type `$f1`"
     },
     {
       "range": {
@@ -51,7 +51,7 @@ expression: response
       "severity": 1,
       "code": "subtyping",
       "source": "wat",
-      "message": "type of `$a2` doesn't match its super type `$s2`"
+      "message": "type `$a2` doesn't match its super type `$s2`"
     },
     {
       "range": {
@@ -67,7 +67,7 @@ expression: response
       "severity": 1,
       "code": "subtyping",
       "source": "wat",
-      "message": "type of `$a3` doesn't match its super type `$f3`"
+      "message": "type `$a3` doesn't match its super type `$f3`"
     },
     {
       "range": {
@@ -83,7 +83,7 @@ expression: response
       "severity": 1,
       "code": "subtyping",
       "source": "wat",
-      "message": "type of `$f4` doesn't match its super type `$s4`"
+      "message": "type `$f4` doesn't match its super type `$s4`"
     },
     {
       "range": {
@@ -99,7 +99,7 @@ expression: response
       "severity": 1,
       "code": "subtyping",
       "source": "wat",
-      "message": "type of `$f5` doesn't match its super type `$a5`"
+      "message": "type `$f5` doesn't match its super type `$a5`"
     },
     {
       "range": {
@@ -115,7 +115,7 @@ expression: response
       "severity": 1,
       "code": "subtyping",
       "source": "wat",
-      "message": "type of `$a6'` doesn't match its super type `$a6`"
+      "message": "type `$a6'` doesn't match its super type `$a6`"
     },
     {
       "range": {
@@ -131,7 +131,7 @@ expression: response
       "severity": 1,
       "code": "subtyping",
       "source": "wat",
-      "message": "type of `$s7'` doesn't match its super type `$s7`"
+      "message": "type `$s7'` doesn't match its super type `$s7`"
     },
     {
       "range": {
@@ -147,7 +147,7 @@ expression: response
       "severity": 1,
       "code": "subtyping",
       "source": "wat",
-      "message": "type of `$f8'` doesn't match its super type `$f8`"
+      "message": "type `$f8'` doesn't match its super type `$f8`"
     }
   ]
 }
