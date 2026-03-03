@@ -997,6 +997,51 @@ fn field_ident_idx() {
 }
 
 #[test]
+fn cont_type() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $ct (cont $ft))
+  (type $ft (func (param i32) (result i32)))
+  (func (param (ref $ct)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.hover(create_params(uri, 4, 22));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn cont_type_with_empty_signature() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $ct (cont $ft))
+  (type $ft (func))
+  (func (param (ref $ct)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.hover(create_params(uri, 4, 22));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn cont_type_with_non_func() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $ct (cont $ft))
+  (type $ft (struct))
+  (func (param (ref $ct)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.hover(create_params(uri, 4, 22));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn tag_decl() {
     let uri = "untitled:test".to_string();
     let source = "

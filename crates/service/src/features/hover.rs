@@ -5,7 +5,7 @@ use crate::{
     document::Document,
     helpers::{self, LineIndexExt},
     mutability,
-    types_analyzer::{self, CompositeType, DefType, RefType},
+    types_analyzer::{self, CompositeType, DefType, HeapType, RefType},
 };
 use lspt::{Hover, HoverParams, MarkupContent, MarkupKind, Union3};
 use std::fmt::Write;
@@ -178,10 +178,10 @@ fn create_symbol_hover(
             SymbolKind::Call => symbol_table
                 .find_def(symbol.key)
                 .map(|symbol| create_func_hover(db, document, symbol_table, symbol)),
-            SymbolKind::Type => Some(create_type_def_hover(db, document, symbol)),
+            SymbolKind::Type => Some(create_type_def_hover(db, document, symbol_table, symbol)),
             SymbolKind::TypeUse => symbol_table
                 .find_def(symbol.key)
-                .map(|symbol| create_type_def_hover(db, document, symbol)),
+                .map(|symbol| create_type_def_hover(db, document, symbol_table, symbol)),
             SymbolKind::GlobalDef => Some(create_global_def_hover(db, document, symbol)),
             SymbolKind::GlobalRef => symbol_table
                 .find_def(symbol.key)
@@ -351,9 +351,15 @@ fn create_table_def_hover(db: &dyn salsa::Database, symbol: &Symbol, root: &Synt
     }
 }
 
-fn create_type_def_hover(db: &dyn salsa::Database, document: Document, symbol: &Symbol) -> MarkupContent {
+fn create_type_def_hover(
+    db: &dyn salsa::Database,
+    document: Document,
+    symbol_table: &SymbolTable,
+    symbol: &Symbol,
+) -> MarkupContent {
     let def_types = types_analyzer::get_def_types(db, document);
     let mut content = "(type".to_string();
+    let mut appendix = None;
     if let Some(name) = symbol.idx.name {
         content.push(' ');
         content.push_str(name.ident(db));
@@ -387,13 +393,34 @@ fn create_type_def_hover(db: &dyn salsa::Database, document: Document, symbol: &
             }
             CompositeType::Cont(heap_ty) => {
                 let _ = write!(content, "(cont {})", heap_ty.render(db));
+                if let HeapType::Type(idx) = heap_ty
+                    && let Some(sig) =
+                        types_analyzer::try_deref_cont_to_func(symbol_table, def_types, comp, symbol.region)
+                {
+                    appendix = Some(format!(
+                        "where `{}`:\n```wat\n(type (func{}{}))\n```",
+                        idx.render(db),
+                        if sig.params.is_empty() && sig.results.is_empty() {
+                            ""
+                        } else {
+                            " "
+                        },
+                        sig.render(db),
+                    ));
+                }
             }
         }
     }
     content.push(')');
+
+    let mut value = format!("```wat\n{content}\n```");
+    if let Some(appendix) = appendix {
+        value.push('\n');
+        value.push_str(&appendix);
+    }
     MarkupContent {
         kind: MarkupKind::Markdown,
-        value: format!("```wat\n{content}\n```"),
+        value,
     }
 }
 
