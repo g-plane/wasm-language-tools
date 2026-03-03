@@ -1,0 +1,78 @@
+---
+source: crates/service/tests/diagnostics/typeck/cont.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 45,
+          "character": 4
+        },
+        "end": {
+          "line": 45,
+          "character": 25
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null $ct0)], found [(ref $ct1)]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 44,
+                "character": 4
+              },
+              "end": {
+                "line": 44,
+                "character": 22
+              }
+            }
+          },
+          "message": "expected type `(ref null $ct0)`, found `(ref $ct1)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 54,
+          "character": 4
+        },
+        "end": {
+          "line": 54,
+          "character": 44
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, (ref null $ct1)], found [(ref $ct1)]"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 65,
+          "character": 2
+        },
+        "end": {
+          "line": 65,
+          "character": 3
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [i32] at the end",
+      "data": [
+        "i32"
+      ]
+    }
+  ]
+}

@@ -385,6 +385,9 @@ fn create_type_def_hover(db: &dyn salsa::Database, document: Document, symbol: &
                 }
                 content.push(')');
             }
+            CompositeType::Cont(heap_ty) => {
+                let _ = write!(content, "(cont {})", heap_ty.render(db));
+            }
         }
     }
     content.push(')');

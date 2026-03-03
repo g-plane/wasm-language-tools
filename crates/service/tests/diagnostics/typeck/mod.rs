@@ -9,6 +9,7 @@ mod block_loop;
 mod br;
 mod call;
 mod call_indirect;
+mod cont;
 mod drop;
 mod elem;
 mod exception;

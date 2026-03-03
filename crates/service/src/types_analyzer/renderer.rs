@@ -131,29 +131,43 @@ impl Display for RenderWithDb<'_, &RefType<'_>> {
         if self.value.nullable {
             write!(f, "null ")?;
         }
-        match self.value.heap_ty {
+        write!(f, "{})", self.value.heap_ty.render(self.db))
+    }
+}
+
+impl<'db> HeapType<'db> {
+    pub(crate) fn render(&self, db: &'db dyn salsa::Database) -> RenderWithDb<'db, &Self> {
+        RenderWithDb { value: self, db }
+    }
+}
+impl Display for RenderWithDb<'_, &HeapType<'_>> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.value {
             HeapType::Type(idx) | HeapType::DefFunc(idx) => {
                 if let Some(name) = idx.name {
-                    write!(f, "{}", name.ident(self.db))?;
+                    write!(f, "{}", name.ident(self.db))
                 } else if let Some(num) = idx.num {
-                    write!(f, "{num}")?;
+                    write!(f, "{num}")
+                } else {
+                    Ok(())
                 }
             }
-            HeapType::Any => write!(f, "any")?,
-            HeapType::Eq => write!(f, "eq")?,
-            HeapType::I31 => write!(f, "i31")?,
-            HeapType::Struct => write!(f, "struct")?,
-            HeapType::Array => write!(f, "array")?,
-            HeapType::None => write!(f, "none")?,
-            HeapType::Func => write!(f, "func")?,
-            HeapType::NoFunc => write!(f, "nofunc")?,
-            HeapType::Exn => write!(f, "exn")?,
-            HeapType::NoExn => write!(f, "noexn")?,
-            HeapType::Extern => write!(f, "extern")?,
-            HeapType::NoExtern => write!(f, "noextern")?,
+            HeapType::Any => write!(f, "any"),
+            HeapType::Eq => write!(f, "eq"),
+            HeapType::I31 => write!(f, "i31"),
+            HeapType::Struct => write!(f, "struct"),
+            HeapType::Array => write!(f, "array"),
+            HeapType::None => write!(f, "none"),
+            HeapType::Func => write!(f, "func"),
+            HeapType::NoFunc => write!(f, "nofunc"),
+            HeapType::Exn => write!(f, "exn"),
+            HeapType::NoExn => write!(f, "noexn"),
+            HeapType::Extern => write!(f, "extern"),
+            HeapType::NoExtern => write!(f, "noextern"),
+            HeapType::Cont => write!(f, "cont"),
+            HeapType::NoCont => write!(f, "nocont"),
             HeapType::Rec(..) => unreachable!("rec type is only for internal use"),
         }
-        write!(f, ")")
     }
 }
 

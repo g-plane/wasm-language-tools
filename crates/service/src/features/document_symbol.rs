@@ -85,6 +85,7 @@ impl LanguageService {
                                         CompositeType::Func(..) => "func".into(),
                                         CompositeType::Struct(..) => "struct".into(),
                                         CompositeType::Array(..) => "array".into(),
+                                        CompositeType::Cont(..) => "cont".into(),
                                     }),
                                     kind: LspSymbolKind::Class,
                                     tags,

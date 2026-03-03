@@ -1,0 +1,179 @@
+---
+source: crates/service/tests/diagnostics/typeck/cont.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 34,
+          "character": 4
+        },
+        "end": {
+          "line": 34,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref nocont)], found [(ref cont)]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 34,
+                "character": 19
+              },
+              "end": {
+                "line": 34,
+                "character": 34
+              }
+            }
+          },
+          "message": "expected type `(ref nocont)`, found `(ref cont)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 37,
+          "character": 4
+        },
+        "end": {
+          "line": 37,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref nocont)], found [(ref $ct1)]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 37,
+                "character": 19
+              },
+              "end": {
+                "line": 37,
+                "character": 34
+              }
+            }
+          },
+          "message": "expected type `(ref nocont)`, found `(ref $ct1)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 40,
+          "character": 4
+        },
+        "end": {
+          "line": 40,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref $ct1)], found [(ref cont)]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 40,
+                "character": 19
+              },
+              "end": {
+                "line": 40,
+                "character": 34
+              }
+            }
+          },
+          "message": "expected type `(ref $ct1)`, found `(ref cont)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 43,
+          "character": 4
+        },
+        "end": {
+          "line": 43,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref $ct1)], found [(ref null $ct1)]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 43,
+                "character": 19
+              },
+              "end": {
+                "line": 43,
+                "character": 34
+              }
+            }
+          },
+          "message": "expected type `(ref $ct1)`, found `(ref null $ct1)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 46,
+          "character": 4
+        },
+        "end": {
+          "line": 46,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref $ct2)], found [(ref $ct1)]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 46,
+                "character": 19
+              },
+              "end": {
+                "line": 46,
+                "character": 34
+              }
+            }
+          },
+          "message": "expected type `(ref $ct2)`, found `(ref $ct1)`"
+        }
+      ]
+    }
+  ]
+}

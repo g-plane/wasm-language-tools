@@ -1,0 +1,59 @@
+---
+source: crates/service/tests/diagnostics/typeck/cont.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 15,
+          "character": 4
+        },
+        "end": {
+          "line": 15,
+          "character": 33
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i64, i32], found [i64]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 15,
+                "character": 17
+              },
+              "end": {
+                "line": 15,
+                "character": 32
+              }
+            }
+          },
+          "message": "expected type `i32`, found `i64`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 23,
+          "character": 2
+        },
+        "end": {
+          "line": 23,
+          "character": 3
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, i64], found [i64, i32, i64] at the end"
+    }
+  ]
+}

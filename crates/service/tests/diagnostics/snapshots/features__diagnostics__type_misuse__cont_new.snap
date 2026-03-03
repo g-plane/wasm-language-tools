@@ -1,0 +1,43 @@
+---
+source: crates/service/tests/diagnostics/type_misuse.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 14
+        },
+        "end": {
+          "line": 7,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "expected type is cont, but type of `$ft1` is func",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 2
+              },
+              "end": {
+                "line": 2,
+                "character": 45
+              }
+            }
+          },
+          "message": "func type defined here"
+        }
+      ]
+    }
+  ]
+}

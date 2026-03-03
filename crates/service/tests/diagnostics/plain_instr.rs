@@ -672,11 +672,11 @@ fn on_clause() {
   (tag $e)
   (type $ft (func))
   (type $ct (cont $ft))
-  (func
-    (resume $ct)
-    (resume $ct $e)
-    (resume_throw $ct (on $e 0) $e)
-    (resume_throw_ref $ct (on $e 0) $e)))
+  (func (param (ref $ft) (ref exn))
+    (resume $ct (cont.new $ct (local.get 0)))
+    (resume $ct $e(cont.new $ct (local.get 0)))
+    (resume_throw $ct (on $e 0) $e (cont.new $ct (local.get 0)))
+    (resume_throw_ref $ct (on $e 0) $e (local.get 1) (cont.new $ct (local.get 0)))))
 "#;
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

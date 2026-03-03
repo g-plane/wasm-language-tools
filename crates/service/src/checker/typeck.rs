@@ -1,12 +1,12 @@
 use super::{Diagnostic, DiagnosticCtx, RelatedInformation};
 use crate::{
-    binder::SymbolKind,
+    binder::{SymbolKey, SymbolKind},
     data_set, helpers,
     idx::{Idx, InternIdent},
     types_analyzer::{
         CompositeType, HeapType, OperandType, RefType, Signature, ValType, extract_global_type, extract_type,
         get_func_sig, get_type_use_sig, join_types, resolve_array_type_with_idx, resolve_br_types,
-        resolve_field_type_with_struct_idx,
+        resolve_field_type_with_struct_idx, try_deref_cont_to_func,
     },
 };
 use bumpalo::{Bump, collections::Vec as BumpVec};
@@ -420,7 +420,7 @@ fn resolve_sig<'db, 'bump>(
 ) -> ResolvedSig<'db, 'bump> {
     let bump = &ctx.bump;
     match instr_name {
-        "call" | "return_call" | "throw" => instr
+        "call" | "return_call" | "throw" | "suspend" => instr
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
             .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
@@ -1203,6 +1203,195 @@ fn resolve_sig<'db, 'bump>(
                 sig
             })
             .unwrap_or_else(|| ResolvedSig::new_in(bump)),
+        "cont.new" => instr
+            .children_by_kind(SyntaxKind::IMMEDIATE)
+            .next()
+            .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.to_ptr().into()))
+            .and_then(|key| ctx.def_types.get(key))
+            .map(|def_type| {
+                let param = if let CompositeType::Cont(heap_ty) = &def_type.comp {
+                    OperandType::Val(ValType::Ref(RefType {
+                        heap_ty: heap_ty.clone(),
+                        nullable: true,
+                    }))
+                } else {
+                    OperandType::Any
+                };
+                ResolvedSig {
+                    params: BumpVec::from_iter_in([param], bump),
+                    results: BumpVec::from_iter_in(
+                        [OperandType::Val(ValType::Ref(RefType {
+                            heap_ty: HeapType::Type(def_type.idx),
+                            nullable: false,
+                        }))],
+                        bump,
+                    ),
+                }
+            })
+            .unwrap_or_else(|| ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Any], bump),
+                results: BumpVec::from_iter_in([OperandType::Any], bump),
+            }),
+        "cont.bind" => {
+            let mut immediates = instr.children_by_kind(SyntaxKind::IMMEDIATE);
+            immediates
+                .next()
+                .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.to_ptr().into()))
+                .and_then(|key| ctx.def_types.get(key))
+                .zip(
+                    immediates
+                        .next()
+                        .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.to_ptr().into()))
+                        .and_then(|key| ctx.def_types.get(key)),
+                )
+                .map(|(fst, snd)| {
+                    let module = SymbolKey::new(ctx.module);
+                    let applied = if let Some(fst_sig) =
+                        try_deref_cont_to_func(ctx.symbol_table, ctx.def_types, &fst.comp, module)
+                        && let Some(snd_sig) =
+                            try_deref_cont_to_func(ctx.symbol_table, ctx.def_types, &snd.comp, module)
+                    {
+                        fst_sig
+                            .params
+                            .get(0..fst_sig.params.len().saturating_sub(snd_sig.params.len()))
+                    } else {
+                        None
+                    };
+                    ResolvedSig {
+                        params: BumpVec::from_iter_in(
+                            applied
+                                .into_iter()
+                                .flatten()
+                                .map(|(ty, _)| OperandType::Val(ty.clone()))
+                                .chain(iter::once(OperandType::Val(ValType::Ref(RefType {
+                                    heap_ty: HeapType::Type(fst.idx),
+                                    nullable: true,
+                                })))),
+                            bump,
+                        ),
+                        results: BumpVec::from_iter_in(
+                            [OperandType::Val(ValType::Ref(RefType {
+                                heap_ty: HeapType::Type(snd.idx),
+                                nullable: false,
+                            }))],
+                            bump,
+                        ),
+                    }
+                })
+                .unwrap_or_else(|| ResolvedSig {
+                    params: BumpVec::from_iter_in([OperandType::Any], bump),
+                    results: BumpVec::from_iter_in([OperandType::Any], bump),
+                })
+        }
+        "resume" => instr
+            .children_by_kind(SyntaxKind::IMMEDIATE)
+            .next()
+            .and_then(|immediate| ctx.symbol_table.resolved.get(&immediate.to_ptr().into()))
+            .and_then(|key| ctx.def_types.get(key))
+            .and_then(|def_type| {
+                try_deref_cont_to_func(
+                    ctx.symbol_table,
+                    ctx.def_types,
+                    &def_type.comp,
+                    SymbolKey::new(ctx.module),
+                )
+                .map(|sig| {
+                    let mut sig = ResolvedSig::from_func_sig_in(sig.clone(), bump);
+                    sig.params.push(OperandType::Val(ValType::Ref(RefType {
+                        heap_ty: HeapType::Type(def_type.idx),
+                        nullable: true,
+                    })));
+                    sig
+                })
+            })
+            .unwrap_or_else(|| ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Any], bump),
+                results: BumpVec::new_in(bump),
+            }),
+        "resume_throw" => {
+            let mut immediates = instr.children_by_kind(SyntaxKind::IMMEDIATE);
+            let ct = immediates
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()));
+            let params = BumpVec::from_iter_in(
+                immediates
+                    .next()
+                    .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                    .into_iter()
+                    .flat_map(|symbol| {
+                        get_func_sig(ctx.db, ctx.document, symbol.key, &symbol.green)
+                            .params
+                            .into_iter()
+                            .map(|(ty, _)| OperandType::Val(ty.clone()))
+                    })
+                    .chain(ct.map(|symbol| {
+                        OperandType::Val(ValType::Ref(RefType {
+                            heap_ty: HeapType::Type(symbol.idx),
+                            nullable: true,
+                        }))
+                    })),
+                bump,
+            );
+            let results = ct
+                .and_then(|symbol| ctx.def_types.get(&symbol.key))
+                .and_then(|def_type| {
+                    try_deref_cont_to_func(
+                        ctx.symbol_table,
+                        ctx.def_types,
+                        &def_type.comp,
+                        SymbolKey::new(ctx.module),
+                    )
+                })
+                .map(|sig| BumpVec::from_iter_in(sig.results.iter().map(|ty| OperandType::Val(ty.clone())), bump))
+                .unwrap_or_else(|| BumpVec::new_in(bump));
+            ResolvedSig { params, results }
+        }
+        "resume_throw_ref" => instr
+            .children_by_kind(SyntaxKind::IMMEDIATE)
+            .next()
+            .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+            .map(|symbol| {
+                let params = BumpVec::from_iter_in(
+                    [
+                        OperandType::Val(ValType::Ref(RefType {
+                            heap_ty: HeapType::Exn,
+                            nullable: true,
+                        })),
+                        OperandType::Val(ValType::Ref(RefType {
+                            heap_ty: HeapType::Type(symbol.idx),
+                            nullable: true,
+                        })),
+                    ],
+                    bump,
+                );
+                let results = ctx
+                    .def_types
+                    .get(&symbol.key)
+                    .and_then(|def_type| {
+                        try_deref_cont_to_func(
+                            ctx.symbol_table,
+                            ctx.def_types,
+                            &def_type.comp,
+                            SymbolKey::new(ctx.module),
+                        )
+                    })
+                    .map(|sig| BumpVec::from_iter_in(sig.results.iter().map(|ty| OperandType::Val(ty.clone())), bump))
+                    .unwrap_or_else(|| BumpVec::new_in(bump));
+                ResolvedSig { params, results }
+            })
+            .unwrap_or_else(|| ResolvedSig {
+                params: BumpVec::from_iter_in(
+                    [
+                        OperandType::Val(ValType::Ref(RefType {
+                            heap_ty: HeapType::Exn,
+                            nullable: true,
+                        })),
+                        OperandType::Any,
+                    ],
+                    bump,
+                ),
+                results: BumpVec::new_in(bump),
+            }),
         _ => data_set::INSTR_SIG
             .get(instr_name)
             .map(|sig| ResolvedSig {

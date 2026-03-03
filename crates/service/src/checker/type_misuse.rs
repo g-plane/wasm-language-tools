@@ -1,9 +1,9 @@
 use super::{Diagnostic, DiagnosticCtx, RelatedInformation};
 use crate::{
-    binder::{Symbol, SymbolKind},
+    binder::{Symbol, SymbolKey, SymbolKind},
     types_analyzer::{
-        CompositeType, FieldType, HeapType, OperandType, RefType, ValType, get_func_sig, get_type_use_sig,
-        resolve_br_types,
+        CompositeType, FieldType, HeapType, OperandType, RefType, Signature, ValType, find_comp_type_by_idx,
+        get_func_sig, get_type_use_sig, resolve_br_types,
     },
 };
 use wat_syntax::{AmberNode, AmberToken, NodeOrToken, SyntaxKind, SyntaxNodePtr};
@@ -36,6 +36,10 @@ pub fn check(
                     None
                 }
                 CompositeType::Array(field_type) => field_type.as_ref(),
+                CompositeType::Cont(..) => {
+                    diagnostics.push(build_diagnostic("array", "cont", dst, dst_symbol, ctx.db));
+                    None
+                }
             };
 
             let src = immediates.next()?.to_ptr();
@@ -50,6 +54,10 @@ pub fn check(
                     None
                 }
                 CompositeType::Array(field_type) => field_type.as_ref(),
+                CompositeType::Cont(..) => {
+                    diagnostics.push(build_diagnostic("array", "cont", src, src_symbol, ctx.db));
+                    None
+                }
             };
 
             match (dst_type, src_type) {
@@ -83,6 +91,130 @@ pub fn check(
         Some(("array", _)) => {
             if let Some(diagnostic) = check_type_matches(ctx, "array", immediates.next()?.to_ptr()) {
                 diagnostics.push(diagnostic);
+            }
+        }
+        Some(("cont", "new")) => {
+            if let Some(diagnostic) = check_type_matches(ctx, "cont", immediates.next()?.to_ptr()) {
+                diagnostics.push(diagnostic);
+            }
+        }
+        Some(("cont", "bind")) => {
+            let module = SymbolKey::new(ctx.module);
+            let fst = immediates.next()?.to_ptr();
+            let fst_symbol = ctx.symbol_table.find_def(fst.into())?;
+            let fst_sig = match &ctx.def_types.get(&fst_symbol.key)?.comp {
+                CompositeType::Func(..) => {
+                    diagnostics.push(build_diagnostic("cont", "func", fst, fst_symbol, ctx.db));
+                    None
+                }
+                CompositeType::Struct(..) => {
+                    diagnostics.push(build_diagnostic("cont", "struct", fst, fst_symbol, ctx.db));
+                    None
+                }
+                CompositeType::Array(..) => {
+                    diagnostics.push(build_diagnostic("cont", "array", fst, fst_symbol, ctx.db));
+                    None
+                }
+                CompositeType::Cont(HeapType::Type(idx)) => {
+                    find_comp_type_by_idx(ctx.symbol_table, ctx.def_types, *idx, module)
+                        .and_then(CompositeType::as_func)
+                }
+                CompositeType::Cont(..) => None,
+            };
+
+            let snd = immediates.next()?.to_ptr();
+            let snd_symbol = ctx.symbol_table.find_def(snd.into())?;
+            let snd_sig = match &ctx.def_types.get(&snd_symbol.key)?.comp {
+                CompositeType::Func(..) => {
+                    diagnostics.push(build_diagnostic("cont", "func", snd, snd_symbol, ctx.db));
+                    None
+                }
+                CompositeType::Struct(..) => {
+                    diagnostics.push(build_diagnostic("cont", "struct", snd, snd_symbol, ctx.db));
+                    None
+                }
+                CompositeType::Array(..) => {
+                    diagnostics.push(build_diagnostic("cont", "array", snd, snd_symbol, ctx.db));
+                    None
+                }
+                CompositeType::Cont(HeapType::Type(idx)) => {
+                    find_comp_type_by_idx(ctx.symbol_table, ctx.def_types, *idx, module)
+                        .and_then(CompositeType::as_func)
+                }
+                CompositeType::Cont(..) => None,
+            };
+
+            if let (Some(fst_sig), Some(snd_sig)) = (fst_sig, snd_sig) {
+                if let Some(params) = fst_sig
+                    .params
+                    .len()
+                    .checked_sub(snd_sig.params.len())
+                    .and_then(|i| fst_sig.params.get(i..))
+                {
+                    let partial = Signature {
+                        params: params.to_owned(),
+                        results: fst_sig.results.clone(),
+                    };
+                    if !partial.matches(snd_sig, ctx.db, ctx.document, ctx.module_id) {
+                        diagnostics.push(Diagnostic {
+                            range: node.text_range(),
+                            code: DIAGNOSTIC_CODE.into(),
+                            message: format!(
+                                "cont type `{}` must match cont type `{}` in continuation types",
+                                fst_symbol.idx.render(ctx.db),
+                                snd_symbol.idx.render(ctx.db),
+                            ),
+                            related_information: Some(vec![
+                                RelatedInformation {
+                                    range: fst_symbol.key.text_range(),
+                                    message: format!(
+                                        "cont type `{}` defined with: {}",
+                                        fst_symbol.idx.render(ctx.db),
+                                        fst_sig.render_compact(ctx.db),
+                                    ),
+                                },
+                                RelatedInformation {
+                                    range: snd_symbol.key.text_range(),
+                                    message: format!(
+                                        "cont type `{}` defined with: {}",
+                                        snd_symbol.idx.render(ctx.db),
+                                        snd_sig.render_compact(ctx.db),
+                                    ),
+                                },
+                            ]),
+                            ..Default::default()
+                        });
+                    }
+                } else {
+                    diagnostics.push(Diagnostic {
+                        range: node.text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
+                        message: format!(
+                            "cont type `{}` must match cont type `{}` in continuation arguments",
+                            fst_symbol.idx.render(ctx.db),
+                            snd_symbol.idx.render(ctx.db),
+                        ),
+                        related_information: Some(vec![
+                            RelatedInformation {
+                                range: fst_symbol.key.text_range(),
+                                message: format!(
+                                    "cont type `{}` defined with: {}",
+                                    fst_symbol.idx.render(ctx.db),
+                                    fst_sig.render_compact(ctx.db),
+                                ),
+                            },
+                            RelatedInformation {
+                                range: snd_symbol.key.text_range(),
+                                message: format!(
+                                    "cont type `{}` defined with: {}",
+                                    snd_symbol.idx.render(ctx.db),
+                                    snd_sig.render_compact(ctx.db),
+                                ),
+                            },
+                        ]),
+                        ..Default::default()
+                    });
+                }
             }
         }
         _ => match instr_name.text() {
@@ -269,6 +401,30 @@ pub fn check(
                     });
                 }
             }
+            "resume" => {
+                let ct = immediates.next()?.to_ptr();
+                let ct_symbol = ctx.symbol_table.find_def(ct.into())?;
+                match &ctx.def_types.get(&ct_symbol.key)?.comp {
+                    CompositeType::Func(..) => {
+                        diagnostics.push(build_diagnostic("cont", "func", ct, ct_symbol, ctx.db));
+                    }
+                    CompositeType::Struct(..) => {
+                        diagnostics.push(build_diagnostic("cont", "struct", ct, ct_symbol, ctx.db));
+                    }
+                    CompositeType::Array(..) => {
+                        diagnostics.push(build_diagnostic("cont", "array", ct, ct_symbol, ctx.db));
+                    }
+                    CompositeType::Cont(HeapType::Type(idx)) => {
+                        let ct_sig =
+                            find_comp_type_by_idx(ctx.symbol_table, ctx.def_types, *idx, SymbolKey::new(ctx.module))?
+                                .as_func()?;
+                        diagnostics.extend(
+                            immediates.filter_map(|immediate| check_on_clause(ctx, immediate, &ct_sig.results)),
+                        );
+                    }
+                    CompositeType::Cont(..) => {}
+                }
+            }
             _ => {}
         },
     }
@@ -286,6 +442,7 @@ fn check_type_matches(
         CompositeType::Func(..) => "func",
         CompositeType::Struct(..) => "struct",
         CompositeType::Array(..) => "array",
+        CompositeType::Cont(..) => "cont",
     };
     if kind == expected_kind {
         None
@@ -384,6 +541,131 @@ fn check_return_call_result_type(
     }
 }
 
+fn check_on_clause(ctx: &DiagnosticCtx, immediate: AmberNode, ct_results: &[ValType]) -> Option<Diagnostic> {
+    let module = SymbolKey::new(ctx.module);
+    let on_clause = immediate.children_by_kind(SyntaxKind::ON_CLAUSE).next()?;
+    let mut indexes = on_clause.children_by_kind(SyntaxKind::INDEX);
+    let tag_ref_symbol = ctx
+        .symbol_table
+        .symbols
+        .get(&SymbolKey::from(indexes.next()?.to_ptr()))?;
+    let tag_def_symbol = ctx.symbol_table.find_def(tag_ref_symbol.key)?;
+    let tag_sig = get_func_sig(ctx.db, ctx.document, tag_def_symbol.key, &tag_def_symbol.green);
+    if let Some(label_index) = indexes.next() {
+        let block_symbol = ctx.symbol_table.find_def(label_index.to_ptr().into())?;
+        let block_sig = get_func_sig(ctx.db, ctx.document, block_symbol.key, &block_symbol.green);
+        if let Some((
+            ValType::Ref(RefType {
+                heap_ty: HeapType::Type(cont_idx),
+                ..
+            }),
+            block_results_rest,
+        )) = block_sig.results.split_last()
+            && let cont_in_block = ctx.symbol_table.symbols.values().find(|symbol| {
+                symbol.kind == SymbolKind::Type && symbol.region == module && cont_idx.is_defined_by(&symbol.idx)
+            })?
+            && let CompositeType::Cont(HeapType::Type(ft_idx)) = ctx.def_types.get(&cont_in_block.key)?.comp
+        {
+            if tag_sig.params.len() != block_results_rest.len()
+                || tag_sig
+                    .params
+                    .iter()
+                    .map(|(ty, _)| ty)
+                    .zip(block_results_rest)
+                    .any(|(a, b)| !a.matches(b, ctx.db, ctx.document, ctx.module_id))
+            {
+                return Some(Diagnostic {
+                    range: label_index.text_range(),
+                    code: DIAGNOSTIC_CODE.into(),
+                    message: format!(
+                        "param types of tag `{}` must match result types of label `{}`",
+                        tag_ref_symbol.idx.render(ctx.db),
+                        label_index.green(),
+                    ),
+                    related_information: block_symbol.amber().children_by_kind(SyntaxKind::TYPE_USE).next().map(
+                        |type_use| {
+                            vec![
+                                RelatedInformation {
+                                    range: tag_def_symbol.key.text_range(),
+                                    message: format!("tag `{}` defined here", tag_ref_symbol.idx.render(ctx.db)),
+                                },
+                                RelatedInformation {
+                                    range: type_use.text_range(),
+                                    message: format!("type of label `{}` defined here", label_index.green()),
+                                },
+                            ]
+                        },
+                    ),
+                    ..Default::default()
+                });
+            }
+            let ct_sig = find_comp_type_by_idx(ctx.symbol_table, ctx.def_types, ft_idx, module)?.as_func()?;
+            let tmp = Signature {
+                params: tag_sig.results.iter().map(|ty| (ty.clone(), None)).collect(),
+                results: ct_results.to_owned(),
+            };
+            if tmp.matches(ct_sig, ctx.db, ctx.document, ctx.module_id) {
+                None
+            } else {
+                Some(Diagnostic {
+                    range: label_index.text_range(),
+                    code: DIAGNOSTIC_CODE.into(),
+                    message: format!(
+                        "result types of tag `{}` must match result types of cont type `{}`",
+                        tag_ref_symbol.idx.render(ctx.db),
+                        cont_idx.render(ctx.db),
+                    ),
+                    related_information: Some(vec![
+                        RelatedInformation {
+                            range: tag_def_symbol.key.text_range(),
+                            message: format!("tag `{}` defined here", tag_ref_symbol.idx.render(ctx.db)),
+                        },
+                        RelatedInformation {
+                            range: cont_in_block.key.text_range(),
+                            message: format!("cont type `{}` defined here", cont_idx.render(ctx.db)),
+                        },
+                    ]),
+                    ..Default::default()
+                })
+            }
+        } else {
+            Some(Diagnostic {
+                range: label_index.text_range(),
+                code: DIAGNOSTIC_CODE.into(),
+                message: format!(
+                    "last result type of label `{}` must be continuation reference type",
+                    label_index.green()
+                ),
+                related_information: block_symbol.amber().children_by_kind(SyntaxKind::TYPE_USE).next().map(
+                    |type_use| {
+                        vec![RelatedInformation {
+                            range: type_use.text_range(),
+                            message: format!("type of label `{}` declared here", label_index.green()),
+                        }]
+                    },
+                ),
+                ..Default::default()
+            })
+        }
+    } else if tag_sig.params.is_empty() {
+        None
+    } else {
+        Some(Diagnostic {
+            range: tag_ref_symbol.key.text_range(),
+            code: DIAGNOSTIC_CODE.into(),
+            message: format!(
+                "param types of tag `{}` must be empty",
+                tag_ref_symbol.idx.render(ctx.db),
+            ),
+            related_information: Some(vec![RelatedInformation {
+                range: tag_def_symbol.key.text_range(),
+                message: format!("tag `{}` defined here", tag_ref_symbol.idx.render(ctx.db)),
+            }]),
+            ..Default::default()
+        })
+    }
+}
+
 fn build_diagnostic(
     expected_kind: &'static str,
     actual_kind: &str,
@@ -391,8 +673,8 @@ fn build_diagnostic(
     def_symbol: &Symbol,
     db: &dyn salsa::Database,
 ) -> Diagnostic {
-    debug_assert!(matches!(expected_kind, "func" | "struct" | "array"));
-    debug_assert!(matches!(actual_kind, "func" | "struct" | "array"));
+    debug_assert!(matches!(expected_kind, "func" | "struct" | "array" | "cont"));
+    debug_assert!(matches!(actual_kind, "func" | "struct" | "array" | "cont"));
     Diagnostic {
         range: ptr.text_range(),
         code: DIAGNOSTIC_CODE.into(),

@@ -277,3 +277,222 @@ fn throw_with_results() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn cont_new() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $ft1 (func (param i32) (result i32)))
+  (type $ct1 (cont $ft1))
+
+  (func (param $x (ref null $ct1))
+    (local.get $x)
+    (cont.new $ft1)
+    (drop)
+  )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn cont_bind() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $ft0 (func (result i32)))
+  (type $ct0 (cont $ft0))
+
+  (type $ft1 (func (param i32) (result i32)))
+  (type $ct1 (cont $ft1))
+
+  (type $ft2 (func (param i64 i32) (result i32)))
+  (type $ct2 (cont $ft2))
+
+  (type $ft1_alt (func (param i64) (result i32)))
+  (type $ct1_alt (cont $ft1_alt))
+
+  (type $ft1_alt2 (func (param i32) (result i64)))
+  (type $ct1_alt2 (cont $ft1_alt2))
+
+  (func
+    (param $p_ft0 (ref $ft0))
+    ;; error: non-continuation type on cont.bind
+    (local.get $p_ft0)
+    (cont.bind $ft0 $ft0)
+    (drop)
+  )
+
+  (func
+    (param $p_ct2 (ref $ct2))
+    ;; error: two continuation types not agreeing on arg types
+    (i64.const 123)
+    (local.get $p_ct2)
+    (cont.bind $ct2 $ct1_alt)
+    (drop)
+  )
+
+  (func
+    (param $p_ct2 (ref $ct2))
+    ;; error: two continuation types not agreeing on return types
+    (i64.const 123)
+    (local.get $p_ct2)
+    (cont.bind $ct2 $ct1_alt2)
+    (drop)
+  )
+
+  (func
+    (param $p_ct0 (ref $ct0))
+    ;; error: trying to go from 0 to 1 args
+    (local.get $p_ct0)
+    (cont.bind $ct0 $ct1)
+    (drop)
+  )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn resume() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $ft0 (func))
+  (type $ct0 (cont $ft0))
+
+  (type $ft1 (func (param f32) (result f64)))
+  (type $ct1 (cont $ft1))
+
+  (type $ft2 (func (param i64) (result f64)))
+  (type $ct2 (cont $ft2))
+
+  (type $ft3 (func (param i32) (result f64)))
+  (type $ct3 (cont $ft3))
+
+  (type $ft4 (func (param i32)))
+  (type $ct4 (cont $ft4))
+
+  (tag $t0)
+  (tag $t1)
+  (tag $t2 (param i32) (result i64))
+  (tag $t3 (param i64) (result i32))
+  (tag $t4 (param i32))
+
+  ;; Multiple tags, all types handled correctly
+  (func (param $x (ref $ct1)) (result f64)
+    (block $handler0 (result i32 (ref $ct2))
+      (block $handler1 (result i64 (ref $ct3))
+        (f32.const 1.23)
+        (local.get $x)
+        (resume $ct1 (on $t2 $handler0) (on $t3 $handler1))
+        (return)
+      )
+      (unreachable)
+    )
+    (unreachable)
+  )
+
+  ;; Same as above, but we provide two handlers for the same tag
+  (func (param $x (ref $ct1)) (result f64)
+    (block $handler0 (result i32 (ref $ct2))
+      (block $handler1 (result i32 (ref $ct2))
+        (f32.const 1.23)
+        (local.get $x)
+        (resume $ct1 (on $t2 $handler0) (on $t2 $handler1))
+        (return)
+      )
+      (unreachable)
+    )
+    (unreachable)
+  )
+
+  ;; Nothing wrong with using the same handler block for multiple tags
+  (func (param $x (ref $ct0))
+    (block $handler (result (ref null $ct0))
+      (local.get $x)
+      (resume $ct0 (on $t0 $handler) (on $t1 $handler))
+      (return)
+    )
+    (unreachable)
+  )
+
+  (func (param $x (ref $ct0))
+    (local.get $x)
+    (resume $ft0)
+  )
+
+  (func (param $x (ref $ct0))
+    (block $handler (result (ref $ft0))
+      (local.get $x)
+      (resume $ct0 (on $t0 $handler))
+      (return)
+    )
+    (unreachable)
+  )
+
+  (func
+    (param $p (ref $ct0))
+    (block $handler (result (ref $ct0))
+      ;; error: handler block has insufficient number of results
+      (local.get $p)
+      (resume $ct0 (on $t4 $handler))
+      (return)
+    )
+    (unreachable)
+  )
+
+  (func
+    (param $p (ref $ct0))
+    (block $handler (result i32 i32 (ref $ct0))
+      ;; error: handler block has too many results
+      (local.get $p)
+      (resume $ct0 (on $t4 $handler))
+      (return)
+    )
+    (unreachable)
+  )
+
+  (func
+    (param $p (ref $ct0))
+    (block $handler (result i64 (ref $ct0))
+      ;; error: type mismatch in non-continuation handler result type
+      (local.get $p)
+      (resume $ct0 (on $t4 $handler))
+      (return)
+    )
+    (unreachable)
+  )
+
+  (func
+    (param $p (ref $ct0))
+    (block $handler (result i32 (ref $ct4))
+      ;; error: type mismatch in continuation handler result type
+      (local.get $p)
+      (resume $ct0 (on $t4 $handler))
+      (return)
+    )
+    (unreachable)
+  )
+
+  (func (param $p (ref $ct0))
+    (local.get $p)
+    (resume $ct0 (on $t4 switch))
+  )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

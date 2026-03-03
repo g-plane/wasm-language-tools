@@ -1,0 +1,311 @@
+---
+source: crates/service/tests/diagnostics/type_misuse.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 63,
+          "character": 12
+        },
+        "end": {
+          "line": 63,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "expected type is cont, but type of `$ft0` is func",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 2
+              },
+              "end": {
+                "line": 2,
+                "character": 20
+              }
+            }
+          },
+          "message": "func type defined here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 69,
+          "character": 27
+        },
+        "end": {
+          "line": 69,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "last result type of label `$handler` must be continuation reference type",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 67,
+                "character": 20
+              },
+              "end": {
+                "line": 67,
+                "character": 39
+              }
+            }
+          },
+          "message": "type of label `$handler` declared here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 80,
+          "character": 27
+        },
+        "end": {
+          "line": 80,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "param types of tag `$t4` must match result types of label `$handler`",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 21,
+                "character": 2
+              },
+              "end": {
+                "line": 21,
+                "character": 23
+              }
+            }
+          },
+          "message": "tag `$t4` defined here"
+        },
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 77,
+                "character": 20
+              },
+              "end": {
+                "line": 77,
+                "character": 39
+              }
+            }
+          },
+          "message": "type of label `$handler` defined here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 91,
+          "character": 27
+        },
+        "end": {
+          "line": 91,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "param types of tag `$t4` must match result types of label `$handler`",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 21,
+                "character": 2
+              },
+              "end": {
+                "line": 21,
+                "character": 23
+              }
+            }
+          },
+          "message": "tag `$t4` defined here"
+        },
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 88,
+                "character": 20
+              },
+              "end": {
+                "line": 88,
+                "character": 47
+              }
+            }
+          },
+          "message": "type of label `$handler` defined here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 102,
+          "character": 27
+        },
+        "end": {
+          "line": 102,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "param types of tag `$t4` must match result types of label `$handler`",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 21,
+                "character": 2
+              },
+              "end": {
+                "line": 21,
+                "character": 23
+              }
+            }
+          },
+          "message": "tag `$t4` defined here"
+        },
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 99,
+                "character": 20
+              },
+              "end": {
+                "line": 99,
+                "character": 43
+              }
+            }
+          },
+          "message": "type of label `$handler` defined here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 113,
+          "character": 27
+        },
+        "end": {
+          "line": 113,
+          "character": 35
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "result types of tag `$t4` must match result types of cont type `$ct4`",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 21,
+                "character": 2
+              },
+              "end": {
+                "line": 21,
+                "character": 23
+              }
+            }
+          },
+          "message": "tag `$t4` defined here"
+        },
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 15,
+                "character": 2
+              },
+              "end": {
+                "line": 15,
+                "character": 25
+              }
+            }
+          },
+          "message": "cont type `$ct4` defined here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 121,
+          "character": 21
+        },
+        "end": {
+          "line": 121,
+          "character": 24
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "param types of tag `$t4` must be empty",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 21,
+                "character": 2
+              },
+              "end": {
+                "line": 21,
+                "character": 23
+              }
+            }
+          },
+          "message": "tag `$t4` defined here"
+        }
+      ]
+    }
+  ]
+}

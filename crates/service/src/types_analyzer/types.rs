@@ -1,4 +1,4 @@
-use super::def_type::{CompositeType, get_def_types};
+use super::def_type::{CompositeType, find_comp_type_by_idx, get_def_types};
 use crate::{
     binder::{SymbolKind, SymbolTable},
     document::Document,
@@ -128,6 +128,14 @@ impl<'db> RefType<'db> {
                 heap_ty: HeapType::NoExtern,
                 nullable: true,
             }),
+            "contref" => Some(RefType {
+                heap_ty: HeapType::Cont,
+                nullable: true,
+            }),
+            "nullcontref" => Some(RefType {
+                heap_ty: HeapType::NoCont,
+                nullable: true,
+            }),
             _ => {
                 let mut nullable = false;
                 for node_or_token in children {
@@ -189,6 +197,8 @@ pub(crate) enum HeapType<'db> {
     NoExn,
     Extern,
     NoExtern,
+    Cont,
+    NoCont,
     Rec(u32),          // internal use, not actually a valid heap type
     DefFunc(Idx<'db>), // internal use
 }
@@ -222,6 +232,8 @@ impl<'db> HeapType<'db> {
                 "noexn" => Some(HeapType::NoExn),
                 "extern" => Some(HeapType::Extern),
                 "noextern" => Some(HeapType::NoExtern),
+                "cont" => Some(HeapType::Cont),
+                "nocont" => Some(HeapType::NoCont),
                 _ => None,
             },
             _ => None,
@@ -282,19 +294,13 @@ impl<'db> HeapType<'db> {
                 };
                 let def_types = get_def_types(db, document);
                 #[expect(clippy::match_like_matches_macro)]
-                symbol_table
-                    .symbols
-                    .values()
-                    .find(|symbol| {
-                        symbol.kind == SymbolKind::Type && symbol.region == module.key && a.is_defined_by(&symbol.idx)
-                    })
-                    .and_then(|symbol| def_types.get(&symbol.key))
-                    .is_some_and(|def_type| match (&def_type.comp, b) {
-                        (CompositeType::Struct(..), HeapType::Any | HeapType::Eq | HeapType::Struct) => true,
-                        (CompositeType::Array(..), HeapType::Any | HeapType::Eq | HeapType::Array) => true,
-                        (CompositeType::Func(..), HeapType::Func) => true,
-                        _ => false,
-                    })
+                find_comp_type_by_idx(symbol_table, def_types, a, module.key).is_some_and(|comp| match (comp, b) {
+                    (CompositeType::Struct(..), HeapType::Any | HeapType::Eq | HeapType::Struct) => true,
+                    (CompositeType::Array(..), HeapType::Any | HeapType::Eq | HeapType::Array) => true,
+                    (CompositeType::Func(..), HeapType::Func) => true,
+                    (CompositeType::Cont(..), HeapType::Cont) => true,
+                    _ => false,
+                })
             }
             (HeapType::DefFunc(a), &HeapType::Type(mut b)) => {
                 if b.is_def() {
@@ -345,6 +351,7 @@ impl<'db> HeapType<'db> {
             (HeapType::NoFunc, other) => other.matches(&HeapType::Func, db, document, module_id),
             (HeapType::NoExn, other) => other.matches(&HeapType::Exn, db, document, module_id),
             (HeapType::NoExtern, other) => other.matches(&HeapType::Extern, db, document, module_id),
+            (HeapType::NoCont, other) => other.matches(&HeapType::Cont, db, document, module_id),
             (a, b) => a == b,
         }
     }
@@ -398,6 +405,7 @@ impl<'db> HeapType<'db> {
             HeapType::Func | HeapType::NoFunc => Some(HeapType::Func),
             HeapType::Exn | HeapType::NoExn => Some(HeapType::Exn),
             HeapType::Extern | HeapType::NoExtern => Some(HeapType::Extern),
+            HeapType::Cont | HeapType::NoCont => Some(HeapType::Cont),
             HeapType::Type(idx) => {
                 let mut idx = *idx;
                 if idx.is_def() {
@@ -406,19 +414,13 @@ impl<'db> HeapType<'db> {
                 let symbol_table = SymbolTable::of(db, document);
                 let module = symbol_table.find_module(module_id)?;
                 let def_types = get_def_types(db, document);
-                symbol_table
-                    .symbols
-                    .values()
-                    .find(|symbol| {
-                        symbol.kind == SymbolKind::Type && symbol.region == module.key && idx.is_defined_by(&symbol.idx)
-                    })
-                    .and_then(|symbol| def_types.get(&symbol.key))
-                    .map(|def_type| match &def_type.comp {
-                        CompositeType::Struct(..) | CompositeType::Array(..) => HeapType::Struct,
-                        CompositeType::Func(..) => HeapType::Func,
-                    })
+                find_comp_type_by_idx(symbol_table, def_types, idx, module.key).map(|comp| match comp {
+                    CompositeType::Struct(..) | CompositeType::Array(..) => HeapType::Struct,
+                    CompositeType::Func(..) => HeapType::Func,
+                    CompositeType::Cont(..) => HeapType::Cont,
+                })
             }
-            HeapType::Rec(..) | HeapType::DefFunc(..) => unreachable!(),
+            HeapType::Rec(..) | HeapType::DefFunc(..) => None,
         }
     }
 }

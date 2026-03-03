@@ -6,8 +6,7 @@ use super::{
 use crate::{
     binder::{SymbolKey, SymbolKind, SymbolTable},
     document::Document,
-    helpers,
-    idx::{Idx, InternIdent},
+    idx::Idx,
 };
 use rustc_hash::FxHashMap;
 use wat_syntax::{
@@ -30,18 +29,10 @@ pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Def
             if let Some(sub_type) = node.sub_type() {
                 is_final = sub_type.keyword().is_none() || sub_type.final_keyword().is_some();
                 if let Some(index) = sub_type.indexes().next() {
-                    inherits = symbol_table
-                        .resolved
-                        .get(&SymbolKey::new(index.syntax()))
-                        .map(|key| Inherits {
-                            symbol: *key,
-                            idx: Idx {
-                                num: index
-                                    .unsigned_int_token()
-                                    .and_then(|int| helpers::parse_u32(int.text()).ok()),
-                                name: index.ident_token().map(|ident| InternIdent::new(db, ident.text())),
-                            },
-                        });
+                    let index = index.syntax();
+                    inherits = symbol_table.resolved.get(&SymbolKey::new(index)).and_then(|key| {
+                        Idx::from_green_for_ref(index.green(), db).map(|idx| Inherits { symbol: *key, idx })
+                    });
                 }
             }
             let comp = match node.sub_type()?.comp_type()? {
@@ -50,7 +41,10 @@ pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Def
                 CompType::Array(array_type) => {
                     CompositeType::Array(array_type.field_type().and_then(|node| FieldType::from_ast(&node, db)))
                 }
-                CompType::Cont(..) => return None,
+                CompType::Cont(cont_type) => CompositeType::Cont(HeapType::Type(Idx::from_green_for_ref(
+                    cont_type.index()?.syntax().green(),
+                    db,
+                )?)),
             };
             Some((
                 symbol.key,
@@ -139,6 +133,7 @@ pub(crate) enum CompositeType<'db> {
     Func(Signature<'db>),
     Struct(Fields<'db>),
     Array(Option<FieldType<'db>>),
+    Cont(HeapType<'db>),
 }
 impl<'db> CompositeType<'db> {
     pub(crate) fn matches(
@@ -152,6 +147,7 @@ impl<'db> CompositeType<'db> {
             (CompositeType::Func(a), CompositeType::Func(b)) => a.matches(b, db, document, module_id),
             (CompositeType::Struct(a), CompositeType::Struct(b)) => a.matches(b, db, document, module_id),
             (CompositeType::Array(Some(a)), CompositeType::Array(Some(b))) => a.matches(b, db, document, module_id),
+            (CompositeType::Cont(a), CompositeType::Cont(b)) => a.matches(b, db, document, module_id),
             _ => false,
         }
     }
@@ -167,6 +163,7 @@ impl<'db> CompositeType<'db> {
             (CompositeType::Func(a), CompositeType::Func(b)) => a.type_equals(b, db, document, module_id),
             (CompositeType::Struct(a), CompositeType::Struct(b)) => a.type_equals(b, db, document, module_id),
             (CompositeType::Array(Some(a)), CompositeType::Array(Some(b))) => a.type_equals(b, db, document, module_id),
+            (CompositeType::Cont(a), CompositeType::Cont(b)) => a.type_equals(b, db, document, module_id),
             _ => false,
         }
     }
@@ -265,7 +262,7 @@ impl RecTypeGroup {
 /// If they're in the given recursive types group, substitute it with its index in that rec group.
 /// If not, substitute it with a numeric-only idx for better comparison in later use.
 ///
-/// This function will return Err if its typeidx is greater than all types in the rec group
+/// This function will return `Err` if its typeidx is greater than all types in the rec group
 /// (defined after the rec group).
 /// This case is invalid according to WasmGC spec so this behaivor makes sense.
 /// Additionally, this will prevent typeidx resolution infinite loop,
@@ -313,6 +310,7 @@ fn substitute_def_type<'db>(
             }
             Ok(())
         }
+        CompositeType::Cont(heap_ty) => substitute_heap_type(heap_ty, symbol_table, module, rec_group),
     }
 }
 fn substitute_heap_type<'db>(
@@ -336,4 +334,31 @@ fn substitute_heap_type<'db>(
         }
     }
     Ok(())
+}
+
+pub(crate) fn find_comp_type_by_idx<'db>(
+    symbol_table: &'db SymbolTable<'db>,
+    def_types: &'db DefTypes<'db>,
+    idx: Idx<'db>,
+    module: SymbolKey,
+) -> Option<&'db CompositeType<'db>> {
+    symbol_table
+        .symbols
+        .values()
+        .find(|symbol| symbol.kind == SymbolKind::Type && symbol.region == module && idx.is_defined_by(&symbol.idx))
+        .and_then(|symbol| def_types.get(&symbol.key))
+        .map(|def_type| &def_type.comp)
+}
+
+pub(crate) fn try_deref_cont_to_func<'db>(
+    symbol_table: &'db SymbolTable<'db>,
+    def_types: &'db DefTypes<'db>,
+    comp: &CompositeType<'db>,
+    module: SymbolKey,
+) -> Option<&'db Signature<'db>> {
+    if let CompositeType::Cont(HeapType::Type(idx)) = comp {
+        find_comp_type_by_idx(symbol_table, def_types, *idx, module).and_then(CompositeType::as_func)
+    } else {
+        None
+    }
 }
