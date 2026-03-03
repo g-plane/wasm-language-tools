@@ -93,6 +93,11 @@ pub fn check(
                 diagnostics.push(diagnostic);
             }
         }
+        Some(("ref", "test" | "cast")) => {
+            if let Some(diagnostic) = immediates.next().and_then(|immediate| check_cast(ctx, node, immediate)) {
+                diagnostics.push(diagnostic);
+            }
+        }
         Some(("cont", "new")) => {
             if let Some(diagnostic) = check_type_matches(ctx, "cont", immediates.next()?.to_ptr()) {
                 diagnostics.push(diagnostic);
@@ -274,6 +279,12 @@ pub fn check(
                         ..Default::default()
                     });
                 }
+                if let Some(diagnostic) = check_cast(ctx, node, rt1_node) {
+                    diagnostics.push(diagnostic);
+                }
+                if let Some(diagnostic) = check_cast(ctx, node, rt2_node) {
+                    diagnostics.push(diagnostic);
+                }
             }
             "br_on_cast_fail" => {
                 let label = immediates.next()?;
@@ -326,6 +337,12 @@ pub fn check(
                         }]),
                         ..Default::default()
                     });
+                }
+                if let Some(diagnostic) = check_cast(ctx, node, rt1_node) {
+                    diagnostics.push(diagnostic);
+                }
+                if let Some(diagnostic) = check_cast(ctx, node, rt2_node) {
+                    diagnostics.push(diagnostic);
                 }
             }
             "call_indirect" => {
@@ -663,6 +680,28 @@ fn check_on_clause(ctx: &DiagnosticCtx, immediate: AmberNode, ct_results: &[ValT
             }]),
             ..Default::default()
         })
+    }
+}
+
+fn check_cast(ctx: &DiagnosticCtx, instr: AmberNode, immediate: AmberNode) -> Option<Diagnostic> {
+    let ref_type = RefType::from_green(immediate.children_by_kind(SyntaxKind::REF_TYPE).next()?.green(), ctx.db)?;
+    let is_cont = match ref_type.heap_ty {
+        HeapType::Cont | HeapType::NoCont => true,
+        HeapType::Type(idx) => matches!(
+            find_comp_type_by_idx(ctx.symbol_table, ctx.def_types, idx, SymbolKey::new(ctx.module))?,
+            CompositeType::Cont(..)
+        ),
+        _ => false,
+    };
+    if is_cont {
+        Some(Diagnostic {
+            range: instr.text_range(),
+            code: DIAGNOSTIC_CODE.into(),
+            message: format!("cannot cast to continuation type `{}`", ref_type.render(ctx.db)),
+            ..Default::default()
+        })
+    } else {
+        None
     }
 }
 

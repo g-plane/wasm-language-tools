@@ -496,3 +496,46 @@ fn resume() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn cast_to_cont() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $f (func))
+  (type $c (cont $f))
+
+  (func (drop (ref.test contref (unreachable))))
+  (func (drop (ref.test nullcontref (unreachable))))
+  (func (drop (ref.test (ref $c) (unreachable))))
+
+  (func (drop (ref.cast contref (unreachable))))
+  (func (drop (ref.cast nullcontref (unreachable))))
+  (func (drop (ref.cast (ref $c) (unreachable))))
+
+  (func
+    (block (result contref) (br_on_cast 0 contref contref (unreachable)))
+    (drop))
+  (func
+    (block (result contref) (br_on_cast 0 nullcontref nullcontref (unreachable)))
+    (drop))
+  (func
+    (block (result contref) (br_on_cast 0 (ref $c) (ref $c) (unreachable)))
+    (drop))
+
+  (func
+    (block (result contref) (br_on_cast_fail 0 contref contref (unreachable)))
+    (drop))
+  (func
+    (block (result contref) (br_on_cast_fail 0 nullcontref nullcontref (unreachable)))
+    (drop))
+  (func
+    (block (result contref) (br_on_cast_fail 0 (ref $c) (ref $c) (unreachable)))
+    (drop)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
