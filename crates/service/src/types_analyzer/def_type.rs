@@ -78,9 +78,6 @@ impl<'db> DefType<'db> {
         document: Document,
         module_id: u32,
     ) -> bool {
-        if !self.comp.type_equals(&other.comp, db, document, module_id) {
-            return false;
-        }
         if self.is_final != other.is_final {
             return false;
         }
