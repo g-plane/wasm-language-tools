@@ -63,6 +63,60 @@ fn wasmfx_types() {
 }
 
 #[test]
+fn subtyping() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $f (func))
+
+  (type $ft1 (sub (func (param (ref $f)) (result (ref func)))))
+  (type $ct1 (sub (cont $ft1)))
+
+  (type $ft2 (func (param (ref any)) (result (ref func))))
+  (type $ct2 (cont $ft2))
+
+  (type $ft3 (sub $ft1 (func (param (ref func)) (result (ref $f)))))
+  (type $ct3 (cont $ft3))
+
+  (type $ft4 (func (param (ref func)) (result (ref $f))))
+  (type $ct4 (cont $ft4))
+
+  (type $ct_sub (sub $ct1 (cont $ft3)))
+  (func (param $p1 (ref $ct1)) (param $p2 (ref $ct_sub))
+    ;; ok: (ref $ct_sub) <: (ref $ct1)
+    (local.set $p1
+      (local.get $p2)))
+
+  (func (param $p1 (ref $ct1)) (param $p2 (ref $ct4))
+    ;; Error $ct4 and $ct1 have generally compatible types,
+    ;; but have not declared $ft4 <: ft1 or $ct4 <: $ct1
+    ;; Thus, $ct4 </: $ct1.
+    (local.set $p1
+      (local.get $p2)))
+
+  (func (param $p1 (ref $ct1))
+    ;;(param $p2 (ref $ct2))
+    (param $p3 (ref $ct3))
+    ;; Error $ct3 and $ct1 have generally compatible types,
+    ;; (in particular: declared $ft3 <: ft1,
+    ;; but have not declared $ct3 <: $ct1
+    ;; $ct3 </: $ct1
+    (local.set $p1
+      (local.get $p3)))
+
+  (func (param $p_any (ref any)) (param $p_cont (ref cont))
+    ;; Error: cont </: any
+    (local.set $p_any
+      (local.get $p_cont))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn cont_new() {
     let uri = "untitled:test".to_string();
     let source = "

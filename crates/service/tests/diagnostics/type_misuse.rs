@@ -363,6 +363,130 @@ fn cont_bind() {
 }
 
 #[test]
+fn cont_bind_subtyping1() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module $non_final
+  (type $ft1 (func (param i32) (result (ref func))))
+  (type $ct1 (sub (cont $ft1)))
+
+  (type $ft0 (func (result (ref func))))
+  (type $ct0 (sub (cont $ft0)))
+
+  (func (param $x (ref $ct1))
+    (i32.const 123)
+    (local.get $x)
+    ;; Smoke test: using non-final types here
+    (cont.bind $ct1 $ct0)
+    (drop)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn cont_bind_subtyping2() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module $subtyping
+  (type $f (func))
+
+  (type $ft0_sup (func (result (ref func))))
+  (type $ct0_sup (cont $ft0_sup))
+
+  (type $ft1 (func (param i32) (result (ref $f))))
+  (type $ct1 (cont $ft1))
+
+  (func (param $x (ref $ct1))
+    (i32.const 123)
+    (local.get $x)
+    ;; Okay: The most natural second continuation type would be $ct0.
+    ;; But we have (func (result (ref $f))) <: (func (result (ref $func)))
+    ;; This holds without us needing to declare any subtyping relations at all.
+    (cont.bind $ct1 $ct0_sup)
+    (drop)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn cont_bind_recursive1() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module $recursive
+  (rec
+    (type $ft0 (func (result (ref $ct_rec))))
+    (type $ft1 (func (param i32) (result (ref $ct_rec))))
+    (type $ct_rec (cont $ft1)))
+  (type $ct0 (cont $ft0))
+
+  (rec
+    (type $ft0' (func (result (ref $ct_rec'))))
+    (type $ft1' (func (param i32) (result (ref $ct_rec'))))
+    (type $ct_rec' (cont $ft1')))
+  (type $ct1 (cont $ft1'))
+
+  ;; Okay: Some simple test where the types involved in cont.bind
+  ;; are part of a recursion group
+  ;; (more concretely: two equivalent recursion groups)
+  (func (param $x (ref $ct1))
+    (i32.const 123)
+    (local.get $x)
+    (cont.bind $ct1 $ct0)
+    (drop)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn cont_bind_recursive2() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module $recursive_subtyping
+  ;; We define types such that $ft0 <: $ft0_sup and $ct_rec <: $ct_rec_sup
+  (rec
+    (type $ft0_sup (sub (func (result (ref $ct_rec_sup)))))
+    (type $ft0 (sub $ft0_sup (func (result (ref $ct_rec)))))
+    (type $ft1 (sub (func (param i32) (result (ref $ct_rec)))))
+
+    (type $ct_rec_sup (sub (cont $ft0_sup)))
+    (type $ct_rec (sub $ct_rec_sup (cont $ft0))))
+
+  (type $ct0_sup (cont $ft0_sup))
+  (type $ct0 (cont $ft0))
+  (type $ct1 (cont $ft1))
+
+  (func (param $x (ref $ct1))
+    (i32.const 123)
+    (local.get $x)
+    (cont.bind $ct1 $ct0)
+    (drop)
+
+    (i32.const 123)
+    (local.get $x)
+    ;; Okay: We have (func (result (ref $ct_rec))) <: (func (result (ref $ct_rec_sup)))
+    (cont.bind $ct1 $ct0_sup)
+    (drop)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
 fn resume() {
     let uri = "untitled:test".to_string();
     let source = "
@@ -489,6 +613,109 @@ fn resume() {
     (resume $ct0 (on $t4 switch))
   )
 )
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn resume_subtyping1() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $ft0 (func))
+  (type $ct0 (cont $ft0))
+
+  (type $ft_sup (func (param (ref $ft0))))
+  (type $ct_sup (cont $ft_sup))
+
+  (type $ft_sub (func (param (ref func))))
+  (type $ct_sub (cont $ft_sub)) ;; unused
+
+  (tag $t (result (ref func)))
+
+  (func (param $p (ref $ct0))
+    ;; Here we test subtyping with respect to the continuations received by handlers.
+    ;;
+    ;; The most 'straightforward' type of the continuation in $handler would be (ref $ct_sub).
+    ;; Instead, we use $ct_sup. According to the spec, we neither need
+    ;; to declare $ft_sub <: $ft_sup or $ct_sub <: $ct_sup for this to work. We
+    ;; have (func (param (ref func))) <: (func (param (ref $ft0))), which is
+    ;; sufficient
+    (block $handler (result (ref $ct_sup))
+      (local.get $p)
+      (resume $ct0 (on $t $handler))
+      (return))
+    (unreachable)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn resume_subtyping2() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $ft0 (func))
+  (type $ct0 (cont $ft0))
+
+  (tag $t (param (ref $ft0)))
+
+  (func (param $p (ref $ct0))
+    ;; Here we test subtyping with respect to the payloads received by handlers.
+    ;; Instead of just (ref $ft0), then handler takes func.
+    (block $handler (result (ref func) (ref $ct0))
+      (local.get $p)
+      (resume $ct0 (on $t $handler))
+      (return))
+    (unreachable)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn resume_subtyping3() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $ft0 (func))
+  (type $ct0 (cont $ft0))
+
+  (type $ft_sup (sub (func (param (ref $ft0)))))
+  (type $ct_sup (sub (cont $ft_sup)))
+
+  (type $ft_sub (sub $ft_sup (func (param (ref func)))))
+  (type $ct_sub (cont $ft_sub))
+
+  (tag $t (param (ref $ct_sub)))
+
+  (func (param $p (ref $ct0))
+
+    ;; This is similar above, but this time we use a continuation as payload.
+    ;; But we did not actually declare $ct_sub <: $ct_sub.
+    ;;
+    ;; This is mostly just to check the following:
+    ;; For the continuation received by every handler, we see through the
+    ;; continuation type and do structural subtyping on the underlying
+    ;; function type.
+    ;; However, for continuations that are just payloads ($ct_sup here), we do
+    ;; ordinary nominal subtyping.
+    (block $handler (result (ref $ct_sup) (ref $ct0))
+      (local.get $p)
+      (resume $ct0 (on $t $handler))
+      (return))
+    (unreachable)))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

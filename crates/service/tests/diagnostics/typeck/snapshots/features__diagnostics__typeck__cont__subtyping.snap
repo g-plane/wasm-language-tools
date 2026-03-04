@@ -1,0 +1,111 @@
+---
+source: crates/service/tests/diagnostics/typeck/cont.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 26,
+          "character": 4
+        },
+        "end": {
+          "line": 27,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref $ct1)], found [(ref $ct4)]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 27,
+                "character": 6
+              },
+              "end": {
+                "line": 27,
+                "character": 21
+              }
+            }
+          },
+          "message": "expected type `(ref $ct1)`, found `(ref $ct4)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 36,
+          "character": 4
+        },
+        "end": {
+          "line": 37,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref $ct1)], found [(ref $ct3)]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 37,
+                "character": 6
+              },
+              "end": {
+                "line": 37,
+                "character": 21
+              }
+            }
+          },
+          "message": "expected type `(ref $ct1)`, found `(ref $ct3)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 41,
+          "character": 4
+        },
+        "end": {
+          "line": 42,
+          "character": 26
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref any)], found [(ref cont)]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 42,
+                "character": 6
+              },
+              "end": {
+                "line": 42,
+                "character": 25
+              }
+            }
+          },
+          "message": "expected type `(ref any)`, found `(ref cont)`"
+        }
+      ]
+    }
+  ]
+}

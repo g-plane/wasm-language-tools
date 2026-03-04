@@ -134,3 +134,31 @@ fn idx() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn cont() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $f (func))
+
+  (type $ft1 (sub (func (param (ref $f)) (result (ref func)))))
+  (type $ct1 (sub (cont $ft1)))
+
+  (type $ft2 (func (param (ref any)) (result (ref func))))
+
+  (type $ft3 (sub $ft1 (func (param (ref func)) (result (ref $f)))))
+  (type $ft4 (func (param (ref func)) (result (ref $f))))
+
+  ;; ok: Continuation types are covariant, have declared $ft3 <: $ft1
+  (type (sub $ct1 (cont $ft3)))
+
+  ;; Error: $ft4 and ft1 have compatible types, but have not declared $ft4 <: ft1
+  (type (sub $ct1 (cont $ft4))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
