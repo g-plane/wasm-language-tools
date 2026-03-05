@@ -442,6 +442,11 @@ pub fn check(
                     CompositeType::Cont(..) => {}
                 }
             }
+            "resume_throw" | "resume_throw_ref" => {
+                if let Some(diagnostic) = check_type_matches(ctx, "cont", immediates.next()?.to_ptr()) {
+                    diagnostics.push(diagnostic);
+                }
+            }
             _ => {}
         },
     }

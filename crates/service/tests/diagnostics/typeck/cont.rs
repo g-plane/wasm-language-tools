@@ -147,6 +147,11 @@ fn cont_new() {
     (local.get $x)
     (cont.new $ct1)
   )
+
+  (func (param $x (ref $ft2)) (result (ref $ct1))
+    (local.get $x)
+    (cont.new $ct1)
+  )
 )
 ";
     let mut service = LanguageService::default();
@@ -348,6 +353,61 @@ fn suspend() {
     (suspend $t2 (i64.const 123) (i32.const 123))
   )
 )
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn resume_throw() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $ft (func))
+  (type $ct (cont $ft))
+  (tag $exn)
+  (tag $exn_i32 (param i32))
+  (func
+    (i64.const 0)
+    (resume_throw $ct $exn_i32
+      (ref.null $ct)) ;; null continuation
+    (unreachable))
+  (func
+    (ref.null $ct)
+    (i32.const 0)
+    (resume_throw $ct $exn) ;; exception tag does not take parameter
+    (unreachable))
+  (func
+    (resume_throw $ct $exn_i32
+      (ref.null $ct)) ;; missing exception payload
+    (unreachable)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn resume_throw_ref() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $ft (func))
+  (type $ct (cont $ft))
+  (func
+    (i64.const 0)
+    (resume_throw_ref $ct
+      (ref.null $ct)) ;; expecting an exception ref
+    (unreachable))
+  (func
+    (resume_throw_ref $ct
+      (ref.null $ct)) ;; expecting an exception ref
+    (unreachable)))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

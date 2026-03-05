@@ -512,6 +512,11 @@ fn resume() {
   (tag $t3 (param i64) (result i32))
   (tag $t4 (param i32))
 
+  (func
+    (resume $ft0
+      (ref.null $ct0))
+    (unreachable))
+
   ;; Multiple tags, all types handled correctly
   (func (param $x (ref $ct1)) (result f64)
     (block $handler0 (result i32 (ref $ct2))
@@ -759,6 +764,26 @@ fn cast_to_cont() {
   (func
     (block (result contref) (br_on_cast_fail 0 (ref $c) (ref $c) (unreachable)))
     (drop)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn resume_throw() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $ft (func))
+  (type $ct (cont $ft))
+  (tag $exn)
+  (func
+    (resume_throw $ft $exn
+      (ref.null $ct))
+    (unreachable)))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

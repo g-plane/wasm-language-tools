@@ -8,11 +8,11 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 63,
+          "line": 24,
           "character": 12
         },
         "end": {
-          "line": 63,
+          "line": 24,
           "character": 16
         }
       },
@@ -42,11 +42,45 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 69,
+          "line": 68,
+          "character": 12
+        },
+        "end": {
+          "line": 68,
+          "character": 16
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "expected type is cont, but type of `$ft0` is func",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 2
+              },
+              "end": {
+                "line": 2,
+                "character": 20
+              }
+            }
+          },
+          "message": "func type defined here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 74,
           "character": 27
         },
         "end": {
-          "line": 69,
+          "line": 74,
           "character": 35
         }
       },
@@ -60,11 +94,11 @@ expression: response
             "uri": "untitled:test",
             "range": {
               "start": {
-                "line": 67,
+                "line": 72,
                 "character": 20
               },
               "end": {
-                "line": 67,
+                "line": 72,
                 "character": 39
               }
             }
@@ -76,11 +110,11 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 80,
+          "line": 85,
           "character": 27
         },
         "end": {
-          "line": 80,
+          "line": 85,
           "character": 35
         }
       },
@@ -110,11 +144,11 @@ expression: response
             "uri": "untitled:test",
             "range": {
               "start": {
-                "line": 77,
+                "line": 82,
                 "character": 20
               },
               "end": {
-                "line": 77,
+                "line": 82,
                 "character": 39
               }
             }
@@ -126,11 +160,11 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 91,
+          "line": 96,
           "character": 27
         },
         "end": {
-          "line": 91,
+          "line": 96,
           "character": 35
         }
       },
@@ -160,11 +194,11 @@ expression: response
             "uri": "untitled:test",
             "range": {
               "start": {
-                "line": 88,
+                "line": 93,
                 "character": 20
               },
               "end": {
-                "line": 88,
+                "line": 93,
                 "character": 47
               }
             }
@@ -176,11 +210,11 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 102,
+          "line": 107,
           "character": 27
         },
         "end": {
-          "line": 102,
+          "line": 107,
           "character": 35
         }
       },
@@ -210,11 +244,11 @@ expression: response
             "uri": "untitled:test",
             "range": {
               "start": {
-                "line": 99,
+                "line": 104,
                 "character": 20
               },
               "end": {
-                "line": 99,
+                "line": 104,
                 "character": 43
               }
             }
@@ -226,11 +260,11 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 113,
+          "line": 118,
           "character": 27
         },
         "end": {
-          "line": 113,
+          "line": 118,
           "character": 35
         }
       },
@@ -276,11 +310,11 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 121,
+          "line": 126,
           "character": 21
         },
         "end": {
-          "line": 121,
+          "line": 126,
           "character": 24
         }
       },
