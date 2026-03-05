@@ -418,7 +418,7 @@ pub fn check(
                     });
                 }
             }
-            "resume" => {
+            "resume" | "resume_throw" | "resume_throw_ref" => {
                 let ct = immediates.next()?.to_ptr();
                 let ct_symbol = ctx.symbol_table.find_def(ct.into())?;
                 match &ctx.def_types.get(&ct_symbol.key)?.comp {
@@ -440,11 +440,6 @@ pub fn check(
                         );
                     }
                     CompositeType::Cont(..) => {}
-                }
-            }
-            "resume_throw" | "resume_throw_ref" => {
-                if let Some(diagnostic) = check_type_matches(ctx, "cont", immediates.next()?.to_ptr()) {
-                    diagnostics.push(diagnostic);
                 }
             }
             _ => {}
@@ -565,6 +560,8 @@ fn check_return_call_result_type(
 
 fn check_on_clause(ctx: &DiagnosticCtx, immediate: AmberNode, ct_results: &[ValType]) -> Option<Diagnostic> {
     let module = SymbolKey::new(ctx.module);
+    // Though `resume_throw` will run this check for the second immediate which is tagidx,
+    // it won't report diagnostic because there're no `ON_CLAUSE` children.
     let on_clause = immediate.children_by_kind(SyntaxKind::ON_CLAUSE).next()?;
     let mut indexes = on_clause.children_by_kind(SyntaxKind::INDEX);
     let tag_ref_symbol = ctx
