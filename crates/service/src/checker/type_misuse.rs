@@ -666,7 +666,7 @@ fn check_on_clause(ctx: &DiagnosticCtx, immediate: AmberNode, ct_results: &[ValT
                 ..Default::default()
             })
         }
-    } else if tag_sig.params.is_empty() {
+    } else if on_clause.tokens_by_kind(SyntaxKind::MODIFIER_KEYWORD).next().is_none() || tag_sig.params.is_empty() {
         None
     } else {
         Some(Diagnostic {
