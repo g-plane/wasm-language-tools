@@ -1,0 +1,77 @@
+---
+source: crates/service/tests/diagnostics/cont_type.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 19
+        },
+        "end": {
+          "line": 2,
+          "character": 23
+        }
+      },
+      "severity": 1,
+      "code": "cont-type",
+      "source": "wat",
+      "message": "type `$ct1` must be a function type",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 2
+              },
+              "end": {
+                "line": 2,
+                "character": 25
+              }
+            }
+          },
+          "message": "type `$ct1` defined here"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 19
+        },
+        "end": {
+          "line": 6,
+          "character": 22
+        }
+      },
+      "severity": 1,
+      "code": "cont-type",
+      "source": "wat",
+      "message": "type `$s0` must be a function type",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 4
+              },
+              "end": {
+                "line": 4,
+                "character": 67
+              }
+            }
+          },
+          "message": "type `$s0` defined here"
+        }
+      ]
+    }
+  ]
+}

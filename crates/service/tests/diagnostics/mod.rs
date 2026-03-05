@@ -7,6 +7,7 @@ mod block_type;
 mod br_table_branches;
 mod catch_type;
 mod const_expr;
+mod cont_type;
 mod deprecated;
 mod dup_names;
 mod elem_type;

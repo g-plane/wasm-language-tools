@@ -15,6 +15,7 @@ mod block_type;
 mod br_table_branches;
 mod catch_type;
 mod const_expr;
+mod cont_type;
 mod deprecated;
 mod dup_names;
 mod elem_type;
@@ -185,9 +186,15 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         diagnostics.push(diagnostic);
                     }
                 }
+                SyntaxKind::CONT_TYPE => {
+                    if let Some(diagnostic) = cont_type::check(ctx, node) {
+                        diagnostics.push(diagnostic);
+                    }
+                }
                 SyntaxKind::IMMEDIATE
-                | SyntaxKind::TYPE_DEF
-                | SyntaxKind::REC_TYPE
+                | SyntaxKind::FUNC_TYPE
+                | SyntaxKind::STRUCT_TYPE
+                | SyntaxKind::ARRAY_TYPE
                 | SyntaxKind::TYPE_USE
                 | SyntaxKind::LOCAL
                 | SyntaxKind::IMPORT
