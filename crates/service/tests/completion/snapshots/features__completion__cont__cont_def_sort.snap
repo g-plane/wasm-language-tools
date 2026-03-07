@@ -1,0 +1,114 @@
+---
+source: crates/service/tests/completion/cont.rs
+expression: response
+---
+[
+  {
+    "label": "$ft1",
+    "kind": 8,
+    "sortText": "0",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 19
+        },
+        "end": {
+          "line": 7,
+          "character": 20
+        }
+      },
+      "newText": "$ft1"
+    }
+  },
+  {
+    "label": "$ct1",
+    "kind": 8,
+    "sortText": "1",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 19
+        },
+        "end": {
+          "line": 7,
+          "character": 20
+        }
+      },
+      "newText": "$ct1"
+    }
+  },
+  {
+    "label": "$ft2",
+    "kind": 8,
+    "sortText": "0",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 19
+        },
+        "end": {
+          "line": 7,
+          "character": 20
+        }
+      },
+      "newText": "$ft2"
+    }
+  },
+  {
+    "label": "$ct2",
+    "kind": 8,
+    "sortText": "1",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 19
+        },
+        "end": {
+          "line": 7,
+          "character": 20
+        }
+      },
+      "newText": "$ct2"
+    }
+  },
+  {
+    "label": "$ft3",
+    "kind": 8,
+    "sortText": "0",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 19
+        },
+        "end": {
+          "line": 7,
+          "character": 20
+        }
+      },
+      "newText": "$ft3"
+    }
+  },
+  {
+    "label": "$ct3",
+    "kind": 8,
+    "sortText": "1",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 19
+        },
+        "end": {
+          "line": 7,
+          "character": 20
+        }
+      },
+      "newText": "$ct3"
+    }
+  }
+]

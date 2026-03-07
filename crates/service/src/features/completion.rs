@@ -269,6 +269,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                 SyntaxKind::EXTERN_IDX_MEMORY => ctx.push(CmpCtx::Memory),
                 SyntaxKind::EXTERN_IDX_TABLE => ctx.push(CmpCtx::Table),
                 SyntaxKind::EXTERN_IDX_TAG => ctx.push(CmpCtx::Tag),
+                SyntaxKind::CONT_TYPE => ctx.push(CmpCtx::TypeDef(Some(PreferredType::Func))),
                 _ => {}
             }
         }
@@ -464,6 +465,7 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
         SyntaxKind::CATCH_ALL => ctx.push(CmpCtx::Block),
         SyntaxKind::EXTERN_IDX_TAG => ctx.push(CmpCtx::Tag),
         SyntaxKind::MEM_PAGE_SIZE => ctx.push(CmpCtx::MemPageSize),
+        SyntaxKind::CONT_TYPE => ctx.push(CmpCtx::TypeDef(Some(PreferredType::Func))),
         _ => {}
     }
     Some(ctx)
@@ -825,18 +827,21 @@ fn get_cmp_list(
                                 new_text: label,
                             }))
                         },
-                        sort_text: preferred_type.as_ref().and_then(|preferred_type| {
-                            def_types.get(&symbol.key).map(|def_type| {
-                                if let (CompositeType::Func(..), PreferredType::Func)
-                                | (CompositeType::Array(..), PreferredType::Array)
-                                | (CompositeType::Struct(..), PreferredType::Struct) =
-                                    (&def_type.comp, preferred_type)
-                                {
-                                    "0".into()
-                                } else {
-                                    "1".into()
-                                }
-                            })
+                        sort_text: preferred_type.as_ref().map(|preferred_type| {
+                            def_types
+                                .get(&symbol.key)
+                                .map(|def_type| {
+                                    if let (CompositeType::Func(..), PreferredType::Func)
+                                    | (CompositeType::Array(..), PreferredType::Array)
+                                    | (CompositeType::Struct(..), PreferredType::Struct) =
+                                        (&def_type.comp, preferred_type)
+                                    {
+                                        "0".into()
+                                    } else {
+                                        "1".into()
+                                    }
+                                })
+                                .unwrap_or_else(|| "1".into())
                         }),
                         tags: if deprecation.contains_key(&symbol.key) {
                             Some(vec![CompletionItemTag::Deprecated])

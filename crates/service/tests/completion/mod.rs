@@ -3,6 +3,7 @@ use lspt::{CompletionParams, Position, TextDocumentIdentifier};
 mod annotation;
 mod array;
 mod block;
+mod cont;
 mod data;
 mod elem;
 mod field;

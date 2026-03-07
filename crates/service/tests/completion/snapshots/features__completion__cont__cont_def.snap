@@ -1,0 +1,26 @@
+---
+source: crates/service/tests/completion/cont.rs
+expression: response
+---
+[
+  {
+    "label": "0",
+    "kind": 8,
+    "sortText": "0"
+  },
+  {
+    "label": "$ct1",
+    "kind": 8,
+    "sortText": "1"
+  },
+  {
+    "label": "$ft2",
+    "kind": 8,
+    "sortText": "0"
+  },
+  {
+    "label": "3",
+    "kind": 8,
+    "sortText": "1"
+  }
+]
