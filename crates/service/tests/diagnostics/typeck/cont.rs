@@ -415,3 +415,134 @@ fn resume_throw_ref() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn switch1() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (rec
+    (type $ft (func (param (ref null $ct))))
+    (type $ct (cont $ft)))
+  (type $ft2 (func))
+  (type $ct2 (cont $ft2))
+
+  (tag $swap)
+  (func (type $ft)
+    (switch $ct $swap
+      (cont.new $ct2
+        (ref.null $ft2)))
+    (drop)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn switch2() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (rec
+    (type $ft (func (param i32) (param (ref null $ct))))
+    (type $ct (cont $ft)))
+
+  (tag $swap)
+  (func (type $ft)
+    (switch $ct $swap
+      (i64.const 0)
+      (local.get 1))
+    (drop)
+    (drop)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn switch3() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (rec
+    (type $ft (func (param (ref $ct))))
+    (type $ct (cont $ft)))
+  (tag $t (param i32))
+
+  (func (param $k (ref $ct))
+    (switch $ct $t)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn unfolded() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $ft (func))
+  (type $ct (cont $ft))
+  (rec
+    (type $ft2 (func (param (ref null $ct2))))
+    (type $ct2 (cont $ft2)))
+
+  (tag $yield (param i32))
+  (tag $swap)
+
+  (func (result (ref $ct))
+    ref.null $ft
+    cont.new $ct)
+  (func (param (ref $ct)) (result (ref $ct))
+    local.get 0
+    cont.bind $ct $ct)
+
+  (func
+    block
+      suspend $swap
+    end)
+
+  (func (param $k (ref $ct)) (result i32)
+    (local.get $k)
+    block $on_yield (param (ref $ct)) (result i32 (ref $ct))
+      resume $ct (on $yield $on_yield)
+      i32.const 42
+      return
+    end
+    local.set $k)
+  (func (param $k (ref $ct))
+    local.get $k
+    resume $ct)
+  (func (param $k (ref $ct)) (result i32)
+    block $on_yield (result i32 (ref $ct))
+      i32.const 42
+      local.get $k
+      resume_throw $ct $yield
+      i32.const 42
+      return
+    end
+    local.set $k)
+  (func (param $k (ref $ct))
+    i32.const 42
+    local.get $k
+    resume_throw $ct $yield)
+
+  (func (param $k (ref $ct2)) (result (ref null $ct2))
+    local.get $k
+    switch $ct2 $swap))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}

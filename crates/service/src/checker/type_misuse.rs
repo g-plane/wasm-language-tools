@@ -442,6 +442,145 @@ pub fn check(
                     CompositeType::Cont(..) => {}
                 }
             }
+            "switch" => {
+                let module = SymbolKey::new(ctx.module);
+                let ct = immediates.next()?.to_ptr();
+                let ct_ref_symbol = ctx.symbol_table.symbols.get(&SymbolKey::from(ct))?;
+                let ct_def_symbol = ctx.symbol_table.find_def(ct_ref_symbol.key)?;
+                let ct_sig = match &ctx.def_types.get(&ct_def_symbol.key)?.comp {
+                    CompositeType::Func(..) => {
+                        diagnostics.push(build_diagnostic("cont", "func", ct, ct_def_symbol, ctx.db));
+                        None
+                    }
+                    CompositeType::Struct(..) => {
+                        diagnostics.push(build_diagnostic("cont", "struct", ct, ct_def_symbol, ctx.db));
+                        None
+                    }
+                    CompositeType::Array(..) => {
+                        diagnostics.push(build_diagnostic("cont", "array", ct, ct_def_symbol, ctx.db));
+                        None
+                    }
+                    CompositeType::Cont(HeapType::Type(idx)) => {
+                        find_comp_type_by_idx(ctx.symbol_table, ctx.def_types, *idx, module)
+                            .and_then(CompositeType::as_func)
+                    }
+                    CompositeType::Cont(..) => None,
+                }?;
+
+                let tag_ref_symbol = ctx
+                    .symbol_table
+                    .symbols
+                    .get(&SymbolKey::from(immediates.next()?.to_ptr()))?;
+                let tag_def_symbol = ctx.symbol_table.find_def(tag_ref_symbol.key)?;
+                let tag_sig = get_func_sig(ctx.db, ctx.document, tag_def_symbol.key, &tag_def_symbol.green);
+                if !tag_sig.params.is_empty() {
+                    diagnostics.push(Diagnostic {
+                        range: tag_ref_symbol.key.text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
+                        message: format!(
+                            "param types of tag `{}` must be empty when used in `switch`",
+                            tag_ref_symbol.idx.render(ctx.db),
+                        ),
+                        related_information: Some(vec![RelatedInformation {
+                            range: tag_def_symbol.key.text_range(),
+                            message: format!("tag `{}` defined here", tag_ref_symbol.idx.render(ctx.db)),
+                        }]),
+                        ..Default::default()
+                    });
+                }
+                if ct_sig.results.len() != tag_sig.results.len()
+                    || ct_sig
+                        .results
+                        .iter()
+                        .zip(&tag_sig.results)
+                        .any(|(a, b)| !a.matches(b, ctx.db, ctx.document, ctx.module_id))
+                {
+                    diagnostics.push(Diagnostic {
+                        range: tag_ref_symbol.key.text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
+                        message: format!(
+                            "result types of cont type `{}` must match result types of tag `{}`",
+                            ct_ref_symbol.idx.render(ctx.db),
+                            tag_ref_symbol.idx.render(ctx.db),
+                        ),
+                        related_information: Some(vec![
+                            RelatedInformation {
+                                range: ct_def_symbol.key.text_range(),
+                                message: format!("cont type `{}` defined here", ct_ref_symbol.idx.render(ctx.db)),
+                            },
+                            RelatedInformation {
+                                range: tag_def_symbol.key.text_range(),
+                                message: format!("tag `{}` defined here", tag_ref_symbol.idx.render(ctx.db)),
+                            },
+                        ]),
+                        ..Default::default()
+                    });
+                }
+
+                if let Some((
+                    ValType::Ref(RefType {
+                        heap_ty: HeapType::Type(cont_idx),
+                        ..
+                    }),
+                    _,
+                )) = ct_sig.params.last()
+                    && let CompositeType::Cont(HeapType::Type(ft_idx)) =
+                        find_comp_type_by_idx(ctx.symbol_table, ctx.def_types, *cont_idx, module)?
+                    && let CompositeType::Func(last_ct_sig) =
+                        find_comp_type_by_idx(ctx.symbol_table, ctx.def_types, *ft_idx, module)?
+                {
+                    if tag_sig.results.len() != last_ct_sig.results.len()
+                        || tag_sig
+                            .results
+                            .iter()
+                            .zip(&last_ct_sig.results)
+                            .any(|(a, b)| !a.matches(b, ctx.db, ctx.document, ctx.module_id))
+                    {
+                        diagnostics.push(Diagnostic {
+                            range: tag_ref_symbol.key.text_range(),
+                            code: DIAGNOSTIC_CODE.into(),
+                            message: format!(
+                                "result types of tag `{}` must match result types of cont type `{}`",
+                                tag_ref_symbol.idx.render(ctx.db),
+                                cont_idx.render(ctx.db),
+                            ),
+                            related_information: ctx
+                                .symbol_table
+                                .find_def_by_idx(*cont_idx, SymbolKind::Type, module)
+                                .map(|cont_def_symbol| {
+                                    vec![
+                                        RelatedInformation {
+                                            range: tag_def_symbol.key.text_range(),
+                                            message: format!(
+                                                "tag `{}` defined here",
+                                                tag_ref_symbol.idx.render(ctx.db)
+                                            ),
+                                        },
+                                        RelatedInformation {
+                                            range: cont_def_symbol.key.text_range(),
+                                            message: format!("cont type `{}` defined here", cont_idx.render(ctx.db)),
+                                        },
+                                    ]
+                                }),
+                            ..Default::default()
+                        });
+                    }
+                } else {
+                    diagnostics.push(Diagnostic {
+                        range: ct_ref_symbol.key.text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
+                        message: format!(
+                            "last param type of cont type `{}` must be continuation reference type",
+                            ct_ref_symbol.idx.render(ctx.db)
+                        ),
+                        related_information: Some(vec![RelatedInformation {
+                            range: ct_def_symbol.key.text_range(),
+                            message: format!("cont type `{}` defined here", ct_ref_symbol.idx.render(ctx.db)),
+                        }]),
+                        ..Default::default()
+                    });
+                }
+            }
             _ => {}
         },
     }

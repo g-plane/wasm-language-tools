@@ -1,0 +1,78 @@
+---
+source: crates/service/tests/diagnostics/typeck/cont.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 4
+        },
+        "end": {
+          "line": 8,
+          "character": 19
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null $ct)], found []"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 19
+        },
+        "end": {
+          "line": 8,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [], found [(ref $ct)] at the end",
+      "data": [
+        "(ref $ct)"
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 16
+        },
+        "end": {
+          "line": 8,
+          "character": 18
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "param types of tag `$t` must be empty when used in `switch`",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 22
+              }
+            }
+          },
+          "message": "tag `$t` defined here"
+        }
+      ]
+    }
+  ]
+}

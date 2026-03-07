@@ -5,8 +5,8 @@ use crate::{
     idx::{Idx, InternIdent},
     types_analyzer::{
         CompositeType, HeapType, OperandType, RefType, Signature, ValType, extract_global_type, extract_type,
-        get_func_sig, get_type_use_sig, join_types, resolve_array_type_with_idx, resolve_br_types,
-        resolve_field_type_with_struct_idx, try_deref_cont_to_func,
+        find_comp_type_by_idx, get_func_sig, get_type_use_sig, join_types, resolve_array_type_with_idx,
+        resolve_br_types, resolve_field_type_with_struct_idx, try_deref_cont_to_func,
     },
 };
 use bumpalo::{Bump, collections::Vec as BumpVec};
@@ -1392,6 +1392,52 @@ fn resolve_sig<'db, 'bump>(
                 ),
                 results: BumpVec::new_in(bump),
             }),
+        "switch" => {
+            let module = SymbolKey::new(ctx.module);
+            instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .and_then(|def_symbol| {
+                    ctx.def_types
+                        .get(&def_symbol.key)
+                        .and_then(|def_type| {
+                            try_deref_cont_to_func(ctx.symbol_table, ctx.def_types, &def_type.comp, module)
+                        })
+                        .and_then(|sig| sig.params.split_last())
+                        .map(|((last, _), lead)| {
+                            let params = BumpVec::from_iter_in(
+                                lead.iter()
+                                    .map(|(ty, _)| OperandType::Val(ty.clone()))
+                                    .chain(iter::once(OperandType::Val(ValType::Ref(RefType {
+                                        heap_ty: HeapType::Type(def_symbol.idx),
+                                        nullable: true,
+                                    })))),
+                                bump,
+                            );
+                            let results = if let ValType::Ref(RefType {
+                                heap_ty: HeapType::Type(idx),
+                                ..
+                            }) = last
+                                && let Some(comp) = find_comp_type_by_idx(ctx.symbol_table, ctx.def_types, *idx, module)
+                                && let Some(last_ct_sig) =
+                                    try_deref_cont_to_func(ctx.symbol_table, ctx.def_types, comp, module)
+                            {
+                                BumpVec::from_iter_in(
+                                    last_ct_sig.params.iter().map(|(ty, _)| OperandType::Val(ty.clone())),
+                                    bump,
+                                )
+                            } else {
+                                BumpVec::new_in(bump)
+                            };
+                            ResolvedSig { params, results }
+                        })
+                })
+                .unwrap_or_else(|| ResolvedSig {
+                    params: BumpVec::from_iter_in([OperandType::Any], bump),
+                    results: BumpVec::new_in(bump),
+                })
+        }
         _ => data_set::INSTR_SIG
             .get(instr_name)
             .map(|sig| ResolvedSig {

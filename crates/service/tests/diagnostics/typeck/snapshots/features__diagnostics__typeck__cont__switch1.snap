@@ -1,0 +1,43 @@
+---
+source: crates/service/tests/diagnostics/typeck/cont.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 4
+        },
+        "end": {
+          "line": 12,
+          "character": 25
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null $ct)], found [(ref $ct2)]",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 11,
+                "character": 6
+              },
+              "end": {
+                "line": 12,
+                "character": 24
+              }
+            }
+          },
+          "message": "expected type `(ref null $ct)`, found `(ref $ct2)`"
+        }
+      ]
+    }
+  ]
+}

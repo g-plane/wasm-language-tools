@@ -791,3 +791,50 @@ fn resume_throw() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn switch() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $ft1 (func (param i32)))
+  (type $ct1 (cont $ft1))
+  (type $ft2 (func (param (ref null $ct3)) (result i32)))
+  (type $ct2 (cont $ft2))
+  (type $ft3 (func (result i32)))
+  (type $ct3 (cont $ft3))
+
+  (tag $t1)
+  (tag $t2 (result i32))
+  (tag $t3 (result i64))
+
+  (func $f1 (param i32))
+  (func $f2 (param (ref null $ct3)) (result i32)
+    i32.const 0)
+
+  (func
+    ref.func $f1
+    cont.new $ct1
+    switch $ft1 $t1)
+
+  (func
+    ref.func $f1
+    cont.new $ct1
+    switch $ct1 $t1)
+
+  (func
+    ref.func $f2
+    cont.new $ct2
+    switch $ct2 $t2)
+
+  (func
+    ref.func $f2
+    cont.new $ct2
+    switch $ct2 $t3))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

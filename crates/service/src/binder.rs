@@ -970,6 +970,17 @@ impl<'db> SymbolTable<'db> {
         self.resolved.get(&key).and_then(|def_key| self.symbols.get(def_key))
     }
 
+    pub fn find_def_by_idx(
+        &'db self,
+        idx: Idx<'db>,
+        def_kind: SymbolKind,
+        region: SymbolKey,
+    ) -> Option<&'db Symbol<'db>> {
+        self.symbols
+            .values()
+            .find(|symbol| symbol.kind == def_kind && symbol.region == region && idx.is_defined_by(&symbol.idx))
+    }
+
     pub fn get_declared(&self, node: SyntaxNode, kind: SymbolKind) -> impl Iterator<Item = &Symbol<'db>> {
         let key = SymbolKey::new(&node);
         self.symbols
