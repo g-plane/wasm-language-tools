@@ -83,3 +83,147 @@ fn cont_def_sort() {
     let response = service.completion(create_params(uri, 7, 20));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn cont_new() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func cont.new )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 17));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn cont_new_following_int() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func cont.new 2)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 18));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn cont_new_following_dollar() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func cont.new $)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 18));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn cont_new_following_ident() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func cont.new $x)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 19));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn cont_bind() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func cont.bind $ct1 )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 23));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn cont_bind_following_int() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func cont.bind $ct1 2)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 24));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn cont_bind_following_dollar() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func cont.bind 2 $)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 21));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn cont_bind_following_ident() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func cont.bind 2 $x)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 22));
+    assert_json_snapshot!(response);
+}

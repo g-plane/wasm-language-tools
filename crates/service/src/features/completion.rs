@@ -553,6 +553,7 @@ fn add_cmp_ctx_for_immediates(instr_name: &str, node: &SyntaxNode, has_leading_l
                     ctx.push(CmpCtx::ShapeDescriptor);
                 }
             }
+            Some(("cont", "new" | "bind")) => ctx.push(CmpCtx::TypeDef(Some(PreferredType::Cont))),
             None => match instr_name {
                 "call" | "return_call" => ctx.push(CmpCtx::Func),
                 "br" | "br_if" | "br_table" | "br_on_null" | "br_on_non_null" => {
@@ -633,6 +634,7 @@ enum PreferredType {
     Func,
     Array,
     Struct,
+    Cont,
 }
 
 fn get_cmp_list(
@@ -833,7 +835,8 @@ fn get_cmp_list(
                                 .map(|def_type| {
                                     if let (CompositeType::Func(..), PreferredType::Func)
                                     | (CompositeType::Array(..), PreferredType::Array)
-                                    | (CompositeType::Struct(..), PreferredType::Struct) =
+                                    | (CompositeType::Struct(..), PreferredType::Struct)
+                                    | (CompositeType::Cont(..), PreferredType::Cont) =
                                         (&def_type.comp, preferred_type)
                                     {
                                         "0".into()

@@ -1,0 +1,78 @@
+---
+source: crates/service/tests/completion/cont.rs
+expression: response
+---
+[
+  {
+    "label": "$arr",
+    "kind": 8,
+    "sortText": "1",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 17
+        },
+        "end": {
+          "line": 6,
+          "character": 19
+        }
+      },
+      "newText": "$arr"
+    }
+  },
+  {
+    "label": "$ft1",
+    "kind": 8,
+    "sortText": "1",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 17
+        },
+        "end": {
+          "line": 6,
+          "character": 19
+        }
+      },
+      "newText": "$ft1"
+    }
+  },
+  {
+    "label": "$ct1",
+    "kind": 8,
+    "sortText": "0",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 17
+        },
+        "end": {
+          "line": 6,
+          "character": 19
+        }
+      },
+      "newText": "$ct1"
+    }
+  },
+  {
+    "label": "3",
+    "kind": 8,
+    "sortText": "0",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 17
+        },
+        "end": {
+          "line": 6,
+          "character": 19
+        }
+      },
+      "newText": "3"
+    }
+  }
+]
