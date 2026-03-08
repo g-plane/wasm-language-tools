@@ -478,6 +478,7 @@ fn add_cmp_ctx_for_immediates(instr_name: &str, node: &SyntaxNode, has_leading_l
                 ctx.extend([CmpCtx::KeywordType, CmpCtx::KeywordParam, CmpCtx::KeywordResult]);
             }
             "ref.test" | "ref.cast" => ctx.push(CmpCtx::KeywordRef),
+            "resume" | "resume_throw" | "resume_throw_ref" => ctx.push(CmpCtx::KeywordOn),
             _ => {}
         }
     } else {
@@ -570,6 +571,7 @@ fn add_cmp_ctx_for_immediates(instr_name: &str, node: &SyntaxNode, has_leading_l
                     ctx.push(CmpCtx::TypeDef(Some(PreferredType::Func)));
                 }
                 "throw" => ctx.push(CmpCtx::Tag),
+                "resume" | "resume_throw_ref" => ctx.push(CmpCtx::TypeDef(Some(PreferredType::Cont))),
                 _ => {}
             },
             _ => {}
@@ -626,6 +628,7 @@ enum CmpCtx {
     KeywordsCatch,
     KeywordsShare,
     KeywordPagesize,
+    KeywordOn,
     AnnotationCompilationPriority,
     AnnotationInstrFreq,
     AnnotationCallTargets,
@@ -1359,6 +1362,11 @@ fn get_cmp_list(
             })),
             CmpCtx::KeywordPagesize => items.push(CompletionItem {
                 label: "pagesize".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordOn => items.push(CompletionItem {
+                label: "on".to_string(),
                 kind: Some(CompletionItemKind::Keyword),
                 ..Default::default()
             }),
