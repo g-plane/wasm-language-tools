@@ -5,7 +5,7 @@ expression: response
 {
   "contents": {
     "kind": "markdown",
-    "value": "```wat\n(type $ct (cont $ft))\n```\nwhere `$ft`:\n```wat\n(type (func (param i32) (result i32)))\n```"
+    "value": "```wat\n(type $ct (cont $ft))\n```\nwhere [`$ft`](untitled:test#4,9):\n```wat\n(type (func (param i32) (result i32)))\n```"
   },
   "range": {
     "start": {

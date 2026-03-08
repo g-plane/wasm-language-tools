@@ -394,12 +394,20 @@ fn create_type_def_hover(
             CompositeType::Cont(heap_ty) => {
                 let _ = write!(content, "(cont {})", heap_ty.render(db));
                 if let HeapType::Type(idx) = heap_ty
-                    && let Some(sig) =
-                        types_analyzer::try_deref_cont_to_func(symbol_table, def_types, comp, symbol.region)
+                    && let Some(def_symbol) = symbol_table.find_def_by_idx(*idx, SymbolKind::Type, symbol.region)
+                    && let Some(poi) = symbol_table.def_poi.get(&def_symbol.key)
+                    && let Some(sig) = def_types
+                        .get(&def_symbol.key)
+                        .and_then(|def_type| def_type.comp.as_func())
                 {
+                    let line_index = document.line_index(db);
+                    let pos = line_index.convert(poi.start());
                     appendix = Some(format!(
-                        "where `{}`:\n```wat\n(type (func{}{}))\n```",
+                        "where [`{}`]({}#{},{}):\n```wat\n(type (func{}{}))\n```",
                         idx.render(db),
+                        document.uri(db).raw(db),
+                        pos.line + 1,
+                        pos.character + 1,
                         if sig.params.is_empty() && sig.results.is_empty() {
                             ""
                         } else {
