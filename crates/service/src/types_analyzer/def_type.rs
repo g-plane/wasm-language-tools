@@ -266,7 +266,7 @@ impl RecTypeGroup {
 /// because this ensures that resolution is backward only.
 fn substitute_def_type<'db>(
     def_type: &mut DefType<'db>,
-    symbol_table: &SymbolTable<'db>,
+    symbol_table: &'db SymbolTable<'db>,
     module: SymbolKey,
     rec_group: &RecTypeGroup,
 ) -> Result<(), ()> {
@@ -312,15 +312,12 @@ fn substitute_def_type<'db>(
 }
 fn substitute_heap_type<'db>(
     heap_type: &mut HeapType<'db>,
-    symbol_table: &SymbolTable<'db>,
+    symbol_table: &'db SymbolTable<'db>,
     module: SymbolKey,
     rec_group: &RecTypeGroup,
 ) -> Result<(), ()> {
     if let HeapType::Type(idx) = heap_type
-        && let Some(symbol) = symbol_table
-            .symbols
-            .values()
-            .find(|symbol| symbol.kind == SymbolKind::Type && symbol.region == module && idx.is_defined_by(&symbol.idx))
+        && let Some(symbol) = symbol_table.find_def_by_idx(*idx, SymbolKind::Type, module)
     {
         if let Some(i) = rec_group.type_defs.iter().position(|key| *key == symbol.key) {
             *heap_type = HeapType::Rec(i as u32);

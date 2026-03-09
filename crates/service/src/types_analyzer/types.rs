@@ -264,14 +264,8 @@ impl<'db> HeapType<'db> {
                 };
                 let def_types = get_def_types(db, document);
                 symbol_table
-                    .symbols
-                    .values()
-                    .find(|symbol| {
-                        symbol.kind == SymbolKind::Type && symbol.region == module.key && a.is_defined_by(&symbol.idx)
-                    })
-                    .zip(symbol_table.symbols.values().find(|symbol| {
-                        symbol.kind == SymbolKind::Type && symbol.region == module.key && b.is_defined_by(&symbol.idx)
-                    }))
+                    .find_def_by_idx(a, SymbolKind::Type, module.key)
+                    .zip(symbol_table.find_def_by_idx(b, SymbolKind::Type, module.key))
                     .map(|(a, b)| (a.key, b.key))
                     .is_some_and(|(a, b)| {
                         a == b
@@ -318,21 +312,11 @@ impl<'db> HeapType<'db> {
                         ..
                     },
                 )) = symbol_table
-                    .symbols
-                    .values()
-                    .find(|symbol| {
-                        symbol.kind == SymbolKind::Func && symbol.region == module.key && a.is_defined_by(&symbol.idx)
-                    })
+                    .find_def_by_idx(*a, SymbolKind::Func, module.key)
                     .map(|symbol| types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green))
                     .zip(
                         symbol_table
-                            .symbols
-                            .values()
-                            .find(|symbol| {
-                                symbol.kind == SymbolKind::Type
-                                    && symbol.region == module.key
-                                    && b.is_defined_by(&symbol.idx)
-                            })
+                            .find_def_by_idx(b, SymbolKind::Type, module.key)
                             .filter(|symbol| {
                                 types_analyzer::get_rec_type_groups(db, document)
                                     .iter()
@@ -376,14 +360,8 @@ impl<'db> HeapType<'db> {
             };
             let def_types = get_def_types(db, document);
             symbol_table
-                .symbols
-                .values()
-                .find(|symbol| {
-                    symbol.kind == SymbolKind::Type && symbol.region == module.key && a.is_defined_by(&symbol.idx)
-                })
-                .zip(symbol_table.symbols.values().find(|symbol| {
-                    symbol.kind == SymbolKind::Type && symbol.region == module.key && b.is_defined_by(&symbol.idx)
-                }))
+                .find_def_by_idx(a, SymbolKind::Type, module.key)
+                .zip(symbol_table.find_def_by_idx(b, SymbolKind::Type, module.key))
                 .map(|(a, b)| (a.key, b.key))
                 .is_some_and(|(a, b)| {
                     a == b

@@ -719,9 +719,7 @@ fn check_on_clause(ctx: &DiagnosticCtx, immediate: AmberNode, ct_results: &[ValT
             }),
             block_results_rest,
         )) = block_sig.results.split_last()
-            && let cont_in_block = ctx.symbol_table.symbols.values().find(|symbol| {
-                symbol.kind == SymbolKind::Type && symbol.region == module && cont_idx.is_defined_by(&symbol.idx)
-            })?
+            && let cont_in_block = ctx.symbol_table.find_def_by_idx(*cont_idx, SymbolKind::Type, module)?
             && let CompositeType::Cont(HeapType::Type(ft_idx)) = ctx.def_types.get(&cont_in_block.key)?.comp
         {
             if tag_sig.params.len() != block_results_rest.len()
