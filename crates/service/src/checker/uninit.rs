@@ -79,7 +79,13 @@ fn hydrate_block_marks(cfg: &ControlFlowGraph, block_marks: &mut BumpHashMap<Nod
             let initialized = cfg
                 .graph
                 .neighbors_directed(*node_index, petgraph::Direction::Incoming)
-                .filter_map(|node_index| block_marks.get(&node_index))
+                .filter(|incoming| {
+                    // ignore loop back for assuming the first iteration
+                    cfg.graph
+                        .edges_connecting(*incoming, *node_index)
+                        .any(|edge| !edge.weight().loop_back)
+                })
+                .filter_map(|incoming| block_marks.get(&incoming))
                 .map(|mark| mark.out.get())
                 .reduce(|acc, cur| acc && cur)
                 .unwrap_or_default();

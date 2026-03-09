@@ -8,6 +8,22 @@ expression: response
     {
       "range": {
         "start": {
+          "line": 64,
+          "character": 19
+        },
+        "end": {
+          "line": 64,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "uninit",
+      "source": "wat",
+      "message": "local `1` is read before being initialized"
+    },
+    {
+      "range": {
+        "start": {
           "line": 6,
           "character": 4
         },

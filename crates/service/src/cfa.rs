@@ -18,7 +18,7 @@ pub fn analyze(db: &dyn salsa::Database, document: Document, ptr: SyntaxNodePtr)
 struct Builder<'db> {
     db: &'db dyn salsa::Database,
     symbol_table: &'db SymbolTable<'db>,
-    graph: Graph<FlowNode, ()>,
+    graph: Graph<FlowNode, FlowEdge>,
     block_stack: Vec<(NodeIndex, Option<InternIdent<'db>>)>,
     current: Option<NodeIndex>,
     bb_instrs: Vec<BasicBlockInstr>,
@@ -84,7 +84,7 @@ impl<'db> Builder<'db> {
                     }
                     "return" | "return_call" | "return_call_indirect" | "return_call_ref" => {
                         if let Some((bb, (exit, _))) = self.add_basic_block().zip(self.block_stack.first()) {
-                            self.graph.add_edge(bb, *exit, ());
+                            self.graph.add_edge(bb, *exit, FlowEdge { loop_back: false });
                         }
                         true
                     }
@@ -92,7 +92,13 @@ impl<'db> Builder<'db> {
                         if let Some(bb) = self.add_basic_block() {
                             for immediate in plain.immediates() {
                                 if let Some(target) = self.find_jump_target(immediate) {
-                                    self.graph.add_edge(bb, target, ());
+                                    self.graph.add_edge(
+                                        bb,
+                                        target,
+                                        FlowEdge {
+                                            loop_back: self.is_loop_entry(target),
+                                        },
+                                    );
                                 }
                             }
                         }
@@ -104,7 +110,13 @@ impl<'db> Builder<'db> {
                             .next()
                             .and_then(|immediate| self.find_jump_target(immediate));
                         if let Some((bb, target)) = self.add_basic_block().zip(target) {
-                            self.graph.add_edge(bb, target, ());
+                            self.graph.add_edge(
+                                bb,
+                                target,
+                                FlowEdge {
+                                    loop_back: self.is_loop_entry(target),
+                                },
+                            );
                         }
                         false
                     }
@@ -116,7 +128,13 @@ impl<'db> Builder<'db> {
                                 .filter_map(|on_clause| on_clause.label_index())
                             {
                                 if let Some(target) = self.find_jump_target(index) {
-                                    self.graph.add_edge(bb, target, ());
+                                    self.graph.add_edge(
+                                        bb,
+                                        target,
+                                        FlowEdge {
+                                            loop_back: self.is_loop_entry(target),
+                                        },
+                                    );
                                 }
                             }
                         }
@@ -172,7 +190,8 @@ impl<'db> Builder<'db> {
                         if let Some(else_block) = block_if.else_block() {
                             self.visit_block_like(else_block.syntax(), block_exit);
                         } else if let Some(condition) = condition {
-                            self.graph.add_edge(condition, block_exit, ());
+                            self.graph
+                                .add_edge(condition, block_exit, FlowEdge { loop_back: false });
                         }
                     }
                     BlockInstr::TryTable(block_try_table) => {
@@ -181,7 +200,7 @@ impl<'db> Builder<'db> {
                             Cat::CatchAll(catch_all) => catch_all.label_index(),
                         }) {
                             if let Some(target) = self.find_jump_target(index) {
-                                self.graph.add_edge(block_entry, target, ());
+                                self.graph.add_edge(block_entry, target, FlowEdge { loop_back: false });
                             }
                         }
                         self.block_stack.push((block_exit, ident));
@@ -218,7 +237,7 @@ impl<'db> Builder<'db> {
 
     fn connect_current_to(&mut self, node_index: NodeIndex) {
         if let Some(current) = self.current {
-            self.graph.add_edge(current, node_index, ());
+            self.graph.add_edge(current, node_index, FlowEdge { loop_back: false });
         }
     }
 
@@ -258,6 +277,18 @@ impl<'db> Builder<'db> {
             flow_node.unreachable = self.unreachable;
         }
     }
+
+    fn is_loop_entry(&self, node_index: NodeIndex) -> bool {
+        if let Some(FlowNode {
+            kind: FlowNodeKind::BlockEntry(ptr),
+            ..
+        }) = self.graph.node_weight(node_index)
+        {
+            ptr.kind() == SyntaxKind::BLOCK_LOOP
+        } else {
+            false
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -293,9 +324,14 @@ pub struct BasicBlockInstr {
     pub immediates: Vec<SyntaxNodePtr>,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct FlowEdge {
+    pub loop_back: bool,
+}
+
 #[derive(Clone)]
 pub struct ControlFlowGraph {
-    pub graph: Graph<FlowNode, ()>,
+    pub graph: Graph<FlowNode, FlowEdge>,
     pub entry: NodeIndex,
 }
 impl PartialEq for ControlFlowGraph {
