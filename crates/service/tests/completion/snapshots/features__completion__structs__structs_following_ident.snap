@@ -5,6 +5,9 @@ expression: response
 [
   {
     "label": "$a",
+    "labelDetails": {
+      "detail": "(array)"
+    },
     "kind": 8,
     "sortText": "1",
     "textEdit": {
@@ -23,6 +26,9 @@ expression: response
   },
   {
     "label": "1",
+    "labelDetails": {
+      "detail": "(struct)"
+    },
     "kind": 8,
     "sortText": "0",
     "textEdit": {
@@ -41,6 +47,9 @@ expression: response
   },
   {
     "label": "$b",
+    "labelDetails": {
+      "detail": "(struct)"
+    },
     "kind": 8,
     "sortText": "0",
     "textEdit": {

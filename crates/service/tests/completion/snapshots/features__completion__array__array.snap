@@ -5,16 +5,25 @@ expression: response
 [
   {
     "label": "$a",
+    "labelDetails": {
+      "detail": "(struct)"
+    },
     "kind": 8,
     "sortText": "1"
   },
   {
     "label": "1",
+    "labelDetails": {
+      "detail": "(array)"
+    },
     "kind": 8,
     "sortText": "0"
   },
   {
     "label": "$b",
+    "labelDetails": {
+      "detail": "(array)"
+    },
     "kind": 8,
     "sortText": "0"
   },

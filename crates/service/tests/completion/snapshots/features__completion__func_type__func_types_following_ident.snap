@@ -5,6 +5,9 @@ expression: response
 [
   {
     "label": "0",
+    "labelDetails": {
+      "detail": "(func)"
+    },
     "kind": 8,
     "sortText": "0",
     "textEdit": {
@@ -23,6 +26,9 @@ expression: response
   },
   {
     "label": "$type",
+    "labelDetails": {
+      "detail": "(func)"
+    },
     "kind": 8,
     "sortText": "0",
     "textEdit": {

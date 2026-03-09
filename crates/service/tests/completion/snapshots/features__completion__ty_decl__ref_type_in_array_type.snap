@@ -5,6 +5,9 @@ expression: response
 [
   {
     "label": "$t",
+    "labelDetails": {
+      "detail": "(array)"
+    },
     "kind": 8
   },
   {

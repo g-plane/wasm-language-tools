@@ -5,16 +5,25 @@ expression: response
 [
   {
     "label": "0",
+    "labelDetails": {
+      "detail": "(func)"
+    },
     "kind": 8,
     "sortText": "0"
   },
   {
     "label": "$ct1",
+    "labelDetails": {
+      "detail": "(cont)"
+    },
     "kind": 8,
     "sortText": "1"
   },
   {
     "label": "$ft2",
+    "labelDetails": {
+      "detail": "(func)"
+    },
     "kind": 8,
     "sortText": "0"
   },

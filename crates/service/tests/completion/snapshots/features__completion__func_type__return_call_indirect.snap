@@ -5,11 +5,17 @@ expression: response
 [
   {
     "label": "0",
+    "labelDetails": {
+      "detail": "(struct)"
+    },
     "kind": 8,
     "sortText": "1"
   },
   {
     "label": "1",
+    "labelDetails": {
+      "detail": "(func)"
+    },
     "kind": 8,
     "sortText": "0"
   },

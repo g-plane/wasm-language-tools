@@ -5,6 +5,9 @@ expression: response
 [
   {
     "label": "$ft1",
+    "labelDetails": {
+      "detail": "(func)"
+    },
     "kind": 8,
     "sortText": "0",
     "textEdit": {
@@ -23,6 +26,9 @@ expression: response
   },
   {
     "label": "$ct1",
+    "labelDetails": {
+      "detail": "(cont)"
+    },
     "kind": 8,
     "sortText": "1",
     "textEdit": {
@@ -41,6 +47,9 @@ expression: response
   },
   {
     "label": "$ft2",
+    "labelDetails": {
+      "detail": "(func)"
+    },
     "kind": 8,
     "sortText": "0",
     "textEdit": {
@@ -59,6 +68,9 @@ expression: response
   },
   {
     "label": "$ct2",
+    "labelDetails": {
+      "detail": "(cont)"
+    },
     "kind": 8,
     "sortText": "1",
     "textEdit": {
@@ -77,6 +89,9 @@ expression: response
   },
   {
     "label": "$ft3",
+    "labelDetails": {
+      "detail": "(func)"
+    },
     "kind": 8,
     "sortText": "0",
     "textEdit": {

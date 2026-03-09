@@ -846,6 +846,7 @@ fn get_cmp_list(
                 let deprecation = deprecation::get_deprecation(db, document);
                 items.extend(symbol_table.get_declared(module, SymbolKind::Type).map(|symbol| {
                     let label = symbol.idx.render(db).to_string();
+                    let comp_type = def_types.get(&symbol.key).map(|def_type| &def_type.comp);
                     CompletionItem {
                         label: label.clone(),
                         kind: Some(CompletionItemKind::Interface),
@@ -857,15 +858,22 @@ fn get_cmp_list(
                                 new_text: label,
                             }))
                         },
+                        label_details: comp_type.map(|comp_type| CompletionItemLabelDetails {
+                            detail: match comp_type {
+                                CompositeType::Func(..) => Some("(func)".into()),
+                                CompositeType::Struct(..) => Some("(struct)".into()),
+                                CompositeType::Array(..) => Some("(array)".into()),
+                                CompositeType::Cont(..) => Some("(cont)".into()),
+                            },
+                            ..Default::default()
+                        }),
                         sort_text: preferred_type.as_ref().map(|preferred_type| {
-                            def_types
-                                .get(&symbol.key)
-                                .map(|def_type| {
+                            comp_type
+                                .map(|comp_type| {
                                     if let (CompositeType::Func(..), PreferredType::Func)
                                     | (CompositeType::Array(..), PreferredType::Array)
                                     | (CompositeType::Struct(..), PreferredType::Struct)
-                                    | (CompositeType::Cont(..), PreferredType::Cont) =
-                                        (&def_type.comp, preferred_type)
+                                    | (CompositeType::Cont(..), PreferredType::Cont) = (comp_type, preferred_type)
                                     {
                                         "0".into()
                                     } else {

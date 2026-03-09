@@ -5,6 +5,9 @@ expression: response
 [
   {
     "label": "0",
+    "labelDetails": {
+      "detail": "(func)"
+    },
     "kind": 8,
     "tags": [
       1
@@ -13,6 +16,9 @@ expression: response
   },
   {
     "label": "$t",
+    "labelDetails": {
+      "detail": "(func)"
+    },
     "kind": 8,
     "tags": [
       1

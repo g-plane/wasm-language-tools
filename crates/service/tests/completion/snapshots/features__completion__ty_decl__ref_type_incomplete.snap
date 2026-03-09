@@ -5,6 +5,9 @@ expression: response
 [
   {
     "label": "$t",
+    "labelDetails": {
+      "detail": "(struct)"
+    },
     "kind": 8,
     "textEdit": {
       "range": {
