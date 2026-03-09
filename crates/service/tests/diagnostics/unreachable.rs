@@ -440,24 +440,7 @@ fn infinite_loop() {
         (br $incr_loop)
         (br_if $incr_loop_break
           (local.get $x))))
-    (nop))
-
-  (type (func))
-  (func (param (ref 0))
-    (local (ref 0))
-    local.get 0
-    local.set 1
-    (loop
-      local.get 1
-      br 0))
-  (func (param (ref 0))
-    (local (ref 0))
-    (loop
-      (block
-        (local.get 1) ;; `1` is initialized in second iteration but not in first iteration
-        (local.set 1
-          (local.get 0))
-        (br 1)))))
+    (nop)))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

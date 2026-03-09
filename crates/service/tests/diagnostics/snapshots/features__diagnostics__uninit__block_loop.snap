@@ -20,6 +20,22 @@ expression: response
       "code": "uninit",
       "source": "wat",
       "message": "local `1` is read before being initialized"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 26,
+          "character": 19
+        },
+        "end": {
+          "line": 26,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "uninit",
+      "source": "wat",
+      "message": "local `1` is read before being initialized"
     }
   ]
 }
