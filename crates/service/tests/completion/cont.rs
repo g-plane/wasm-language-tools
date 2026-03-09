@@ -551,3 +551,83 @@ fn resume_throw_ref_following_paren_folded() {
     let response = service.completion(create_params(uri, 6, 27));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn suspend() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func suspend )
+  (tag)
+  (tag $exn)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 16));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn suspend_following_int() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func suspend 1)
+  (tag)
+  (tag $exn)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 17));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn suspend_following_dollar() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func suspend $)
+  (tag)
+  (tag $exn)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 17));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn suspend_following_ident() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func suspend $x)
+  (tag)
+  (tag $exn)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 18));
+    assert_json_snapshot!(response);
+}

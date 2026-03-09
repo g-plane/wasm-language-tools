@@ -570,7 +570,7 @@ fn add_cmp_ctx_for_immediates(instr_name: &str, node: &SyntaxNode, has_leading_l
                 "call_ref" | "return_call_ref" => {
                     ctx.push(CmpCtx::TypeDef(Some(PreferredType::Func)));
                 }
-                "throw" => ctx.push(CmpCtx::Tag),
+                "throw" | "suspend" => ctx.push(CmpCtx::Tag),
                 "resume" | "resume_throw_ref" => ctx.push(CmpCtx::TypeDef(Some(PreferredType::Cont))),
                 "resume_throw" => {
                     if is_current_first_immediate {
