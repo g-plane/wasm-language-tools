@@ -631,3 +631,163 @@ fn suspend_following_ident() {
     let response = service.completion(create_params(uri, 6, 18));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn switch() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func switch )
+  (tag)
+  (tag $exn)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 15));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn switch_following_int() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func switch 1)
+  (tag)
+  (tag $exn)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 16));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn switch_following_dollar() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func switch $)
+  (tag)
+  (tag $exn)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 16));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn switch_following_ident() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func switch $x)
+  (tag)
+  (tag $exn)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 17));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn switch_after_first() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func switch $x )
+  (tag)
+  (tag $exn)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 18));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn switch_after_first_following_int() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func switch $x 1)
+  (tag)
+  (tag $exn)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 19));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn switch_after_first_following_dollar() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func switch $x $)
+  (tag)
+  (tag $exn)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 19));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn switch_after_first_following_ident() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $arr (array i32))
+  (type $ft1 (func))
+  (type $ct1 (cont $ft1))
+  (type (cont $ft1))
+  (func switch $x $x)
+  (tag)
+  (tag $exn)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 6, 20));
+    assert_json_snapshot!(response);
+}
