@@ -405,10 +405,7 @@ pub(crate) fn format_module_field_elem<'a>(module_field_elem: AmberNode<'a>, ctx
         docs.push(Doc::text(ident.text()));
         trivias = format_trivias_after_token(ident, module_field_elem, ctx);
     }
-    if let Some(keyword) = module_field_elem
-        .tokens_by_kind(KEYWORD)
-        .find(|token| token.text() == "declare")
-    {
+    if let Some(keyword) = module_field_elem.tokens_by_kind(MODIFIER_KEYWORD).next() {
         if trivias.is_empty() {
             docs.push(Doc::space());
         } else {

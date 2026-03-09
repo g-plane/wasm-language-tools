@@ -401,8 +401,13 @@ impl Parser<'_> {
 
     fn parse_module_field_elem(&mut self, mark: NodeMark) -> GreenNode {
         self.eat(IDENT);
-        if let Some(keyword) = self.try_parse_with_trivias(|parser| parser.lexer.keyword("declare")) {
-            self.add_child(keyword);
+        if let Some(modifier_keyword) = self.try_parse_with_trivias(|parser| {
+            parser
+                .lexer
+                .next(MODIFIER_KEYWORD)
+                .filter(|token| token.text == "declare")
+        }) {
+            self.add_child(modifier_keyword);
             if !self.recover(Self::parse_elem_list) {
                 self.report_missing(Message::Name("elem list"));
             }

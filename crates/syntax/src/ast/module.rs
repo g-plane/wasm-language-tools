@@ -923,9 +923,7 @@ impl ModuleFieldElem {
     }
     #[inline]
     pub fn declare_keyword(&self) -> Option<SyntaxToken> {
-        self.syntax
-            .tokens_by_kind(SyntaxKind::KEYWORD)
-            .find(|token| token.text() == "declare")
+        self.syntax.tokens_by_kind(SyntaxKind::MODIFIER_KEYWORD).next()
     }
     #[inline]
     pub fn table_use(&self) -> Option<TableUse> {
