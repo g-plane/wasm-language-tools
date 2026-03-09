@@ -791,3 +791,156 @@ fn switch_after_first_following_ident() {
     let response = service.completion(create_params(uri, 6, 20));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn on() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (block $on_yield
+      resume (on )))
+  (tag)
+  (tag $yield))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 4, 17));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn on_following_int() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (block $on_yield
+      resume (on 0)))
+  (tag)
+  (tag $yield))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 4, 18));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn on_following_dollar() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (block $on_yield
+      resume (on $)))
+  (tag)
+  (tag $yield))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 4, 18));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn on_following_ident() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (block $on_yield
+      resume (on $x)))
+  (tag)
+  (tag $yield))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 4, 19));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn on_after_tag() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (block $on_yield
+      resume (on 9 )))
+  (tag)
+  (tag $yield))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 4, 19));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn on_after_tag_following_int() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (block $on_yield
+      resume (on 9 0)))
+  (tag)
+  (tag $yield))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 4, 20));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn on_after_tag_following_dollar() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (block $on_yield
+      resume (on 9 $)))
+  (tag)
+  (tag $yield))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 4, 20));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn on_after_tag_following_ident() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (block $on_yield
+      resume (on 9 $x)))
+  (tag)
+  (tag $yield))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 4, 21));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn on_after_tag_incomplete_keyword() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    (block $on_yield
+      resume (on 9 s)))
+  (tag)
+  (tag $yield))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 4, 20));
+    assert_json_snapshot!(response);
+}

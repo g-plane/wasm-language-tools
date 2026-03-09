@@ -1,0 +1,48 @@
+---
+source: crates/service/tests/completion/cont.rs
+expression: response
+---
+[
+  {
+    "label": "0",
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(tag)",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 17
+        },
+        "end": {
+          "line": 4,
+          "character": 18
+        }
+      },
+      "newText": "0"
+    }
+  },
+  {
+    "label": "$yield",
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(tag $yield)",
+    "textEdit": {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 17
+        },
+        "end": {
+          "line": 4,
+          "character": 18
+        }
+      },
+      "newText": "$yield"
+    }
+  }
+]

@@ -270,6 +270,16 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                 SyntaxKind::EXTERN_IDX_TABLE => ctx.push(CmpCtx::Table),
                 SyntaxKind::EXTERN_IDX_TAG => ctx.push(CmpCtx::Tag),
                 SyntaxKind::CONT_TYPE => ctx.push(CmpCtx::TypeDef(Some(PreferredType::Func))),
+                SyntaxKind::ON_CLAUSE => {
+                    if parent
+                        .prev_siblings()
+                        .all(|sibling| sibling.kind() != SyntaxKind::INDEX)
+                    {
+                        ctx.push(CmpCtx::Tag);
+                    } else {
+                        ctx.extend([CmpCtx::Block, CmpCtx::KeywordSwitch]);
+                    }
+                }
                 _ => {}
             }
         }
@@ -466,6 +476,13 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
         SyntaxKind::EXTERN_IDX_TAG => ctx.push(CmpCtx::Tag),
         SyntaxKind::MEM_PAGE_SIZE => ctx.push(CmpCtx::MemPageSize),
         SyntaxKind::CONT_TYPE => ctx.push(CmpCtx::TypeDef(Some(PreferredType::Func))),
+        SyntaxKind::ON_CLAUSE => {
+            if token.prev_siblings().all(|sibling| sibling.kind() != SyntaxKind::INDEX) {
+                ctx.push(CmpCtx::Tag);
+            } else {
+                ctx.extend([CmpCtx::Block, CmpCtx::KeywordSwitch]);
+            }
+        }
         _ => {}
     }
     Some(ctx)
@@ -636,6 +653,7 @@ enum CmpCtx {
     KeywordsShare,
     KeywordPagesize,
     KeywordOn,
+    KeywordSwitch,
     AnnotationCompilationPriority,
     AnnotationInstrFreq,
     AnnotationCallTargets,
@@ -1374,6 +1392,11 @@ fn get_cmp_list(
             }),
             CmpCtx::KeywordOn => items.push(CompletionItem {
                 label: "on".to_string(),
+                kind: Some(CompletionItemKind::Keyword),
+                ..Default::default()
+            }),
+            CmpCtx::KeywordSwitch => items.push(CompletionItem {
+                label: "switch".to_string(),
                 kind: Some(CompletionItemKind::Keyword),
                 ..Default::default()
             }),

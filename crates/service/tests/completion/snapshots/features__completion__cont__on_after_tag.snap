@@ -1,0 +1,26 @@
+---
+source: crates/service/tests/completion/cont.rs
+expression: response
+---
+[
+  {
+    "label": "$on_yield",
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(block $on_yield)"
+  },
+  {
+    "label": "1",
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(func)"
+  },
+  {
+    "label": "switch",
+    "kind": 14
+  }
+]

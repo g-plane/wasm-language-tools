@@ -1,0 +1,22 @@
+---
+source: crates/service/tests/completion/cont.rs
+expression: response
+---
+[
+  {
+    "label": "0",
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(tag)"
+  },
+  {
+    "label": "$yield",
+    "labelDetails": {
+      "description": "[]"
+    },
+    "kind": 6,
+    "detail": "(tag $yield)"
+  }
+]
