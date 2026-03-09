@@ -787,11 +787,13 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 symbols.insert(symbol.key, symbol);
             }
             SyntaxKind::MODULE_FIELD_ELEM => {
-                let idx = elem_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, node.amber(), idx, SymbolKind::ElemDef, module_key);
-                elems.push((symbol.key, symbol.idx.name));
-                def_poi.insert(symbol.key, infer_def_poi(&node));
-                symbols.insert(symbol.key, symbol);
+                if node.tokens_by_kind(SyntaxKind::MODIFIER_KEYWORD).next().is_none() {
+                    let idx = elem_idx_gen.pull();
+                    let symbol = create_module_level_symbol(db, node.amber(), idx, SymbolKind::ElemDef, module_key);
+                    elems.push((symbol.key, symbol.idx.name));
+                    def_poi.insert(symbol.key, infer_def_poi(&node));
+                    symbols.insert(symbol.key, symbol);
+                }
             }
             SyntaxKind::MEM_USE => {
                 if let Some(symbol) = node

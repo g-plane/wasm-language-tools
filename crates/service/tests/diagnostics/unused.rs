@@ -562,6 +562,20 @@ fn elem_used() {
 }
 
 #[test]
+fn elem_declare() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (elem declare func $f)
+  (func $f))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
 fn call_indirect_implicit() {
     let uri = "untitled:test".to_string();
     let source = r#"
