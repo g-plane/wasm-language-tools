@@ -10,7 +10,7 @@ keywords = ["wasm"]
 exclude = ["/tests"]
 
 [dependencies]
-bumpalo = { version = "3.19", features = ["collections", "allocator-api2"] }
+bumpalo = { version = "3.20", features = ["collections", "allocator-api2"] }
 hashbrown = { version = "0.16", default-features = false, features = ["inline-more", "allocator-api2"] }
 indexmap = "2.13"
 itertools = "0.14"
@@ -19,7 +19,7 @@ lspt = { workspace = true }
 parking_lot = "0.12"
 petgraph = "0.8"
 rustc-hash = { workspace = true }
-salsa = "0.25"
+salsa = "0.26"
 serde = { workspace = true }
 serde_json = { workspace = true }
 wat_formatter = { path = "../formatter", version = "0.9" }
