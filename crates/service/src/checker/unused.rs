@@ -8,7 +8,7 @@ use crate::{
 };
 use bumpalo::Bump;
 use lspt::{DiagnosticSeverity, DiagnosticTag};
-use wat_syntax::TextRange;
+use wat_syntax::{SyntaxKind, TextRange};
 
 const DIAGNOSTIC_CODE: &str = "unused";
 
@@ -57,7 +57,10 @@ pub fn check(
             }
         }
         SymbolKind::Param => {
-            if used.contains(&symbol.key) || is_prefixed_with_underscore(db, symbol) || imports.contains(&symbol.region)
+            if used.contains(&symbol.key)
+                || is_prefixed_with_underscore(db, symbol)
+                || imports.contains(&symbol.region)
+                || symbol.region.kind() == SyntaxKind::TYPE_DEF
             {
                 None
             } else {

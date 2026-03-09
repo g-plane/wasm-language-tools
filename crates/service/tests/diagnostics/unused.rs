@@ -126,14 +126,12 @@ fn param_via_type_def() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-  (type (func (param $a i32) (param $b i32) (result i32)))
-  (func $_ (type 0)
-    (local.get 1)))
+  (type $_ (func (param $a i32) (param $b i32) (result i32))))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
     let response = service.pull_diagnostics(create_params(uri));
-    assert_json_snapshot!(response);
+    assert!(response.items.is_empty());
 }
 
 #[test]
