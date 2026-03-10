@@ -4,9 +4,9 @@ use crate::{
     data_set, helpers,
     idx::{Idx, InternIdent},
     types_analyzer::{
-        CompositeType, HeapType, OperandType, RefType, Signature, ValType, extract_global_type, extract_type,
-        find_comp_type_by_idx, get_func_sig, get_type_use_sig, join_types, resolve_array_type_with_idx,
-        resolve_br_types, resolve_field_type_with_struct_idx, try_deref_cont_to_func,
+        CompositeType, HeapType, NamedSig, OperandType, RefType, Sig, ValType, extract_global_type, extract_type,
+        find_comp_type_by_idx, join_types, resolve_array_type_with_idx, resolve_br_types,
+        resolve_field_type_with_struct_idx, try_deref_cont_to_func,
     },
 };
 use bumpalo::{Bump, collections::Vec as BumpVec};
@@ -23,7 +23,7 @@ pub fn check_func(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, no
     {
         let func_key = node.to_ptr().into();
         let results = BumpVec::from_iter_in(
-            get_func_sig(ctx.db, ctx.document, func_key, node.green())
+            Sig::from_func(ctx.db, ctx.document, node)
                 .results
                 .into_iter()
                 .map(OperandType::Val),
@@ -180,22 +180,19 @@ fn check_instr<'db, 'bump>(
             .stack
             .extend(sig.results.into_iter().map(|ty| (ty, Some(node))));
     } else if BlockInstr::can_cast(node.kind()) {
-        let signature = get_func_sig(ctx.db, ctx.document, node.to_ptr().into(), node.green());
+        let signature = Sig::from_func(ctx.db, ctx.document, node);
         let init_stack = BumpVec::from_iter_in(
             signature
                 .params
                 .iter()
-                .map(|(ty, ..)| (OperandType::Val(ty.clone()), Some(node))),
+                .map(|ty| (OperandType::Val(ty.clone()), Some(node))),
             ctx.bump,
         );
         let results = BumpVec::from_iter_in(signature.results.into_iter().map(OperandType::Val), ctx.bump);
         match node.kind() {
             SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_TRY_TABLE => {
                 if let Some(diagnostic) = type_stack.check(
-                    &BumpVec::from_iter_in(
-                        signature.params.into_iter().map(|(ty, _)| OperandType::Val(ty)),
-                        ctx.bump,
-                    ),
+                    &BumpVec::from_iter_in(signature.params.into_iter().map(OperandType::Val), ctx.bump),
                     ReportRange::Instr(node),
                 ) {
                     diagnostics.push(diagnostic);
@@ -210,10 +207,7 @@ fn check_instr<'db, 'bump>(
                     diagnostics.push(diagnostic);
                 }
                 if let Some(diagnostic) = type_stack.check(
-                    &BumpVec::from_iter_in(
-                        signature.params.into_iter().map(|(ty, _)| OperandType::Val(ty)),
-                        ctx.bump,
-                    ),
+                    &BumpVec::from_iter_in(signature.params.into_iter().map(OperandType::Val), ctx.bump),
                     ReportRange::Instr(node),
                 ) {
                     diagnostics.push(diagnostic);
@@ -405,7 +399,13 @@ impl<'db, 'bump> ResolvedSig<'db, 'bump> {
             results: BumpVec::new_in(bump),
         }
     }
-    fn from_func_sig_in(sig: Signature<'db>, bump: &'bump Bump) -> Self {
+    fn from_sig_in(sig: Sig<'db>, bump: &'bump Bump) -> Self {
+        Self {
+            params: BumpVec::from_iter_in(sig.params.into_iter().map(OperandType::Val), bump),
+            results: BumpVec::from_iter_in(sig.results.into_iter().map(OperandType::Val), bump),
+        }
+    }
+    fn from_named_sig_in(sig: NamedSig<'db>, bump: &'bump Bump) -> Self {
         Self {
             params: BumpVec::from_iter_in(sig.params.into_iter().map(|(ty, _)| OperandType::Val(ty)), bump),
             results: BumpVec::from_iter_in(sig.results.into_iter().map(OperandType::Val), bump),
@@ -424,7 +424,7 @@ fn resolve_sig<'db, 'bump>(
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
             .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
-            .map(|func| ResolvedSig::from_func_sig_in(get_func_sig(ctx.db, ctx.document, func.key, &func.green), bump))
+            .map(|func| ResolvedSig::from_sig_in(Sig::from_func(ctx.db, ctx.document, func.amber()), bump))
             .unwrap_or_else(|| ResolvedSig::new_in(bump)),
         "local.get" => ResolvedSig {
             params: BumpVec::new_in(bump),
@@ -512,7 +512,7 @@ fn resolve_sig<'db, 'bump>(
                 })
                 .map(|func| {
                     BumpVec::from_iter_in(
-                        get_func_sig(ctx.db, ctx.document, func.key, &func.green)
+                        Sig::from_func(ctx.db, ctx.document, func.amber())
                             .results
                             .into_iter()
                             .map(OperandType::Val),
@@ -688,12 +688,7 @@ fn resolve_sig<'db, 'bump>(
             let mut sig = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .find_map(|child| child.children_by_kind(SyntaxKind::TYPE_USE).next())
-                .map(|node| {
-                    ResolvedSig::from_func_sig_in(
-                        get_type_use_sig(ctx.db, ctx.document, node.to_ptr(), node.green()),
-                        bump,
-                    )
-                })
+                .map(|node| ResolvedSig::from_sig_in(Sig::from_type_use(ctx.db, ctx.document, node), bump))
                 .unwrap_or_else(|| ResolvedSig::new_in(bump));
             sig.params.push(OperandType::Val(ValType::I32));
             sig
@@ -1296,7 +1291,7 @@ fn resolve_sig<'db, 'bump>(
                     SymbolKey::new(ctx.module),
                 )
                 .map(|sig| {
-                    let mut sig = ResolvedSig::from_func_sig_in(sig.clone(), bump);
+                    let mut sig = ResolvedSig::from_named_sig_in(sig.clone(), bump);
                     sig.params.push(OperandType::Val(ValType::Ref(RefType {
                         heap_ty: HeapType::Type(def_type.idx),
                         nullable: true,
@@ -1319,10 +1314,10 @@ fn resolve_sig<'db, 'bump>(
                     .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
                     .into_iter()
                     .flat_map(|symbol| {
-                        get_func_sig(ctx.db, ctx.document, symbol.key, &symbol.green)
+                        Sig::from_func(ctx.db, ctx.document, symbol.amber())
                             .params
                             .into_iter()
-                            .map(|(ty, _)| OperandType::Val(ty.clone()))
+                            .map(OperandType::Val)
                     })
                     .chain(ct.map(|symbol| {
                         OperandType::Val(ValType::Ref(RefType {

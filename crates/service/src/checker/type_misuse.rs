@@ -2,8 +2,8 @@ use super::{Diagnostic, DiagnosticCtx, RelatedInformation};
 use crate::{
     binder::{Symbol, SymbolKey, SymbolKind},
     types_analyzer::{
-        CompositeType, FieldType, HeapType, OperandType, RefType, Signature, ValType, find_comp_type_by_idx,
-        get_func_sig, get_type_use_sig, resolve_br_types,
+        CompositeType, FieldType, HeapType, NamedSig, OperandType, RefType, Sig, ValType, find_comp_type_by_idx,
+        resolve_br_types,
     },
 };
 use wat_syntax::{AmberNode, AmberToken, NodeOrToken, SyntaxKind, SyntaxNodePtr};
@@ -156,7 +156,7 @@ pub fn check(
                     .checked_sub(snd_sig.params.len())
                     .and_then(|i| fst_sig.params.get(i..))
                 {
-                    let partial = Signature {
+                    let partial = NamedSig {
                         params: params.to_owned(),
                         results: fst_sig.results.clone(),
                     };
@@ -355,7 +355,7 @@ pub fn check(
                     && let Some(diagnostic) = ctx
                         .symbol_table
                         .find_def(immediate.to_ptr().into())
-                        .map(|func| get_func_sig(ctx.db, ctx.document, func.key, &func.green))
+                        .map(|func| Sig::from_func(ctx.db, ctx.document, func.amber()))
                         .and_then(|sig| check_return_call_result_type(ctx, node, immediate, &sig.results))
                 {
                     diagnostics.push(diagnostic);
@@ -388,7 +388,7 @@ pub fn check(
                         ctx,
                         node,
                         type_use,
-                        &get_type_use_sig(ctx.db, ctx.document, type_use.to_ptr(), type_use.green()).results,
+                        &Sig::from_type_use(ctx.db, ctx.document, type_use).results,
                     )
                 {
                     diagnostics.push(diagnostic);
@@ -397,9 +397,7 @@ pub fn check(
             "throw" => {
                 if let Some(immediate) = immediates.next()
                     && let Some(symbol) = ctx.symbol_table.find_def(immediate.to_ptr().into())
-                    && !get_func_sig(ctx.db, ctx.document, symbol.key, &symbol.green)
-                        .results
-                        .is_empty()
+                    && !Sig::from_func(ctx.db, ctx.document, symbol.amber()).results.is_empty()
                 {
                     diagnostics.push(Diagnostic {
                         range: immediate.text_range(),
@@ -472,7 +470,7 @@ pub fn check(
                     .symbols
                     .get(&SymbolKey::from(immediates.next()?.to_ptr()))?;
                 let tag_def_symbol = ctx.symbol_table.find_def(tag_ref_symbol.key)?;
-                let tag_sig = get_func_sig(ctx.db, ctx.document, tag_def_symbol.key, &tag_def_symbol.green);
+                let tag_sig = Sig::from_func(ctx.db, ctx.document, tag_def_symbol.amber());
                 if !tag_sig.params.is_empty() {
                     diagnostics.push(Diagnostic {
                         range: tag_ref_symbol.key.text_range(),
@@ -679,7 +677,7 @@ fn check_return_call_result_type(
         ctx.symbol_table.symbols.values().find(|symbol| {
             symbol.kind == SymbolKind::Func && symbol.key.text_range().contains_range(instr.text_range())
         })?;
-    let expected = get_func_sig(ctx.db, ctx.document, func.key, &func.green).results;
+    let expected = Sig::from_func(ctx.db, ctx.document, func.amber()).results;
     if actual.len() == expected.len()
         && actual
             .iter()
@@ -708,10 +706,10 @@ fn check_on_clause(ctx: &DiagnosticCtx, immediate: AmberNode, ct_results: &[ValT
         .symbols
         .get(&SymbolKey::from(indexes.next()?.to_ptr()))?;
     let tag_def_symbol = ctx.symbol_table.find_def(tag_ref_symbol.key)?;
-    let tag_sig = get_func_sig(ctx.db, ctx.document, tag_def_symbol.key, &tag_def_symbol.green);
+    let tag_sig = Sig::from_func(ctx.db, ctx.document, tag_def_symbol.amber());
     if let Some(label_index) = indexes.next() {
         let block_symbol = ctx.symbol_table.find_def(label_index.to_ptr().into())?;
-        let block_sig = get_func_sig(ctx.db, ctx.document, block_symbol.key, &block_symbol.green);
+        let block_sig = Sig::from_func(ctx.db, ctx.document, block_symbol.amber());
         if let Some((
             ValType::Ref(RefType {
                 heap_ty: HeapType::Type(cont_idx),
@@ -726,7 +724,6 @@ fn check_on_clause(ctx: &DiagnosticCtx, immediate: AmberNode, ct_results: &[ValT
                 || tag_sig
                     .params
                     .iter()
-                    .map(|(ty, _)| ty)
                     .zip(block_results_rest)
                     .any(|(a, b)| !a.matches(b, ctx.db, ctx.document, ctx.module_id))
             {
@@ -756,7 +753,7 @@ fn check_on_clause(ctx: &DiagnosticCtx, immediate: AmberNode, ct_results: &[ValT
                 });
             }
             let ct_sig = find_comp_type_by_idx(ctx.symbol_table, ctx.def_types, ft_idx, module)?.as_func()?;
-            let tmp = Signature {
+            let tmp = NamedSig {
                 params: tag_sig.results.iter().map(|ty| (ty.clone(), None)).collect(),
                 results: ct_results.to_owned(),
             };

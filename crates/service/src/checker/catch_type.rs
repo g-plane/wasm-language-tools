@@ -1,7 +1,7 @@
 use super::{Diagnostic, DiagnosticCtx};
 use crate::{
     binder::SymbolKey,
-    types_analyzer::{self, HeapType, RefType, ValType},
+    types_analyzer::{HeapType, RefType, Sig, ValType},
 };
 use itertools::Itertools;
 use wat_syntax::{AmberNode, SyntaxKind};
@@ -13,10 +13,9 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
         SyntaxKind::CATCH => {
             let mut indexes = node.children_by_kind(SyntaxKind::INDEX);
             let tag = ctx.symbol_table.find_def(indexes.next()?.to_ptr().into())?;
-            let mut results = types_analyzer::get_func_sig(ctx.db, ctx.document, tag.key, &tag.green)
+            let mut results = Sig::from_func(ctx.db, ctx.document, tag.amber())
                 .params
                 .into_iter()
-                .map(|(ty, _)| ty)
                 .collect::<Vec<_>>();
             if node.tokens_by_kind(SyntaxKind::KEYWORD).next()?.text() == "catch_ref" {
                 results.push(ValType::Ref(RefType {
@@ -41,7 +40,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
     };
     let ref_key = SymbolKey::from(label_index.to_ptr());
     let block = ctx.symbol_table.find_def(ref_key)?;
-    let block_sig = types_analyzer::get_func_sig(ctx.db, ctx.document, block.key, &block.green);
+    let block_sig = Sig::from_func(ctx.db, ctx.document, block.amber());
     if results.len() != block_sig.results.len()
         || !results
             .iter()

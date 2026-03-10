@@ -1,5 +1,5 @@
 use super::{
-    signature::Signature,
+    signature::NamedSig,
     types::{FieldType, Fields, HeapType, OperandType, RefType, StorageType, ValType},
 };
 use crate::{helpers::RenderWithDb, idx::InternIdent};
@@ -7,7 +7,7 @@ use bumpalo::{Bump, collections::String as BumpString};
 use std::fmt::{self, Display, Write};
 use wat_syntax::SyntaxKind;
 
-impl<'db> Signature<'db> {
+impl<'db> NamedSig<'db> {
     pub(crate) fn render(&self, db: &'db dyn salsa::Database) -> RenderWithDb<'db, (&Self, bool)> {
         RenderWithDb {
             value: (self, false),
@@ -21,7 +21,7 @@ impl<'db> Signature<'db> {
         }
     }
 }
-impl Display for RenderWithDb<'_, (&Signature<'_>, bool)> {
+impl Display for RenderWithDb<'_, (&NamedSig<'_>, bool)> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.value.1 {
             write!(f, "[")?;
@@ -72,7 +72,7 @@ impl Display for RenderWithDb<'_, (&Signature<'_>, bool)> {
 pub(crate) fn render_func_header<'db>(
     db: &'db dyn salsa::Database,
     name: Option<InternIdent<'db>>,
-    signature: Signature<'db>,
+    signature: NamedSig<'db>,
 ) -> String {
     render_header(db, "func", name, signature)
 }
@@ -81,7 +81,7 @@ pub(crate) fn render_block_header<'db>(
     db: &'db dyn salsa::Database,
     kind: SyntaxKind,
     name: Option<InternIdent<'db>>,
-    signature: Signature<'db>,
+    signature: NamedSig<'db>,
 ) -> String {
     render_header(
         db,
@@ -101,7 +101,7 @@ pub(crate) fn render_header<'db>(
     db: &'db dyn salsa::Database,
     keyword: &str,
     name: Option<InternIdent<'db>>,
-    signature: Signature<'db>,
+    signature: NamedSig<'db>,
 ) -> String {
     let mut content = format!("({keyword}");
     if let Some(name) = name {

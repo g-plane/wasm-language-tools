@@ -1,6 +1,6 @@
 use super::{
     def_type::{CompositeType, DefType, DefTypes, get_def_types},
-    signature::get_func_sig,
+    signature::Sig,
     types::{FieldType, Fields, OperandType},
 };
 use crate::{
@@ -24,10 +24,10 @@ pub(crate) fn resolve_param_types<'db>(
         let idx = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()?;
         let func = symbol_table.find_def(SymbolKey::new(&idx))?;
         Some(
-            get_func_sig(db, document, func.key, &func.green)
+            Sig::from_func(db, document, func.amber())
                 .params
                 .into_iter()
-                .map(|(ty, ..)| OperandType::Val(ty))
+                .map(OperandType::Val)
                 .collect(),
         )
     } else {
@@ -42,7 +42,7 @@ pub(crate) fn resolve_br_types<'db>(
     ref_key: SymbolKey,
 ) -> Option<impl DoubleEndedIterator<Item = OperandType<'db>> + use<'db>> {
     symbol_table.find_def(ref_key).map(|def_symbol| {
-        get_func_sig(db, document, def_symbol.key, &def_symbol.green)
+        Sig::from_func(db, document, def_symbol.amber())
             .results
             .into_iter()
             .map(OperandType::Val)

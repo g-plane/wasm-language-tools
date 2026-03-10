@@ -1,5 +1,5 @@
 use super::{
-    signature::Signature,
+    signature::NamedSig,
     types::{FieldType, Fields, ValType},
 };
 use crate::idx::{Idx, IdxGen, InternIdent};
@@ -28,7 +28,7 @@ pub(crate) fn extract_global_type<'db>(db: &'db dyn salsa::Database, green: &Gre
         .and_then(|global_type| extract_type(db, global_type))
 }
 
-pub(crate) fn extract_sig<'db>(db: &'db dyn salsa::Database, node: &GreenNode) -> Signature<'db> {
+pub(crate) fn extract_sig<'db>(db: &'db dyn salsa::Database, node: &GreenNode) -> NamedSig<'db> {
     let mut params = Vec::with_capacity(1);
     let mut results = Vec::with_capacity(1);
     node.children()
@@ -62,7 +62,7 @@ pub(crate) fn extract_sig<'db>(db: &'db dyn salsa::Database, node: &GreenNode) -
             ),
             _ => {}
         });
-    Signature { params, results }
+    NamedSig { params, results }
 }
 
 pub(super) fn extract_fields<'db>(db: &'db dyn salsa::Database, struct_ty: &StructType) -> Fields<'db> {

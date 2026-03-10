@@ -1,6 +1,6 @@
 use super::{
     extractor::{extract_fields, extract_sig},
-    signature::Signature,
+    signature::NamedSig,
     types::{FieldType, Fields, HeapType, RefType, StorageType, ValType},
 };
 use crate::{
@@ -127,7 +127,7 @@ pub(crate) struct Inherits<'db> {
 
 #[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
 pub(crate) enum CompositeType<'db> {
-    Func(Signature<'db>),
+    Func(NamedSig<'db>),
     Struct(Fields<'db>),
     Array(Option<FieldType<'db>>),
     Cont(HeapType<'db>),
@@ -165,7 +165,7 @@ impl<'db> CompositeType<'db> {
         }
     }
 
-    pub(crate) fn as_func(&self) -> Option<&Signature<'db>> {
+    pub(crate) fn as_func(&self) -> Option<&NamedSig<'db>> {
         if let CompositeType::Func(sig) = self {
             Some(sig)
         } else {
@@ -349,7 +349,7 @@ pub(crate) fn try_deref_cont_to_func<'db>(
     def_types: &'db DefTypes<'db>,
     comp: &CompositeType<'db>,
     module: SymbolKey,
-) -> Option<&'db Signature<'db>> {
+) -> Option<&'db NamedSig<'db>> {
     if let CompositeType::Cont(HeapType::Type(idx)) = comp {
         find_comp_type_by_idx(symbol_table, def_types, *idx, module).and_then(CompositeType::as_func)
     } else {
