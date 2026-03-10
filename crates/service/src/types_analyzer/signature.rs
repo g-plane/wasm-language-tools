@@ -3,12 +3,8 @@ use super::{
     extractor::extract_sig,
     types::{OperandType, ValType},
 };
-use crate::{
-    binder::{SymbolKey, SymbolTable},
-    document::Document,
-    idx::InternIdent,
-};
-use wat_syntax::{AmberNode, GreenNode, NodeOrToken, SyntaxKind, SyntaxNodePtr};
+use crate::{binder::SymbolTable, document::Document, idx::InternIdent};
+use wat_syntax::{AmberNode, SyntaxKind};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash, salsa::Update)]
 pub(crate) struct NamedSig<'db> {
@@ -16,6 +12,32 @@ pub(crate) struct NamedSig<'db> {
     pub(crate) results: Vec<ValType<'db>>,
 }
 impl<'db> NamedSig<'db> {
+    pub(crate) fn from_func(db: &'db dyn salsa::Database, document: Document, node: AmberNode<'_>) -> Self {
+        node.children_by_kind(SyntaxKind::TYPE_USE)
+            .next()
+            .map(|type_use| Self::from_type_use(db, document, type_use))
+            .unwrap_or_default()
+    }
+
+    pub(crate) fn from_type_use(db: &'db dyn salsa::Database, document: Document, node: AmberNode<'_>) -> Self {
+        if node
+            .children_by_kind(|kind| matches!(kind, SyntaxKind::PARAM | SyntaxKind::RESULT))
+            .next()
+            .is_some()
+        {
+            extract_sig(db, node.green())
+        } else {
+            let symbol_table = SymbolTable::of(db, document);
+            let def_types = get_def_types(db, document);
+            node.children_by_kind(SyntaxKind::INDEX)
+                .next()
+                .and_then(|idx| symbol_table.resolved.get(&idx.to_ptr().into()))
+                .and_then(|def_key| def_types.get(def_key))
+                .and_then(|def_type| def_type.comp.as_func().cloned())
+                .unwrap_or_default()
+        }
+    }
+
     pub(crate) fn matches(
         &self,
         other: &Self,
@@ -118,69 +140,11 @@ pub(crate) struct ResolvedSig<'db> {
     pub(crate) params: Vec<OperandType<'db>>,
     pub(crate) results: Vec<OperandType<'db>>,
 }
-
 impl<'db> From<NamedSig<'db>> for ResolvedSig<'db> {
     fn from(sig: NamedSig<'db>) -> Self {
         ResolvedSig {
             params: sig.params.into_iter().map(|(ty, _)| OperandType::Val(ty)).collect(),
             results: sig.results.into_iter().map(OperandType::Val).collect(),
         }
-    }
-}
-
-pub(crate) fn get_func_sig<'db>(
-    db: &'db dyn salsa::Database,
-    document: Document,
-    key: SymbolKey,
-    green: &GreenNode,
-) -> NamedSig<'db> {
-    green
-        .children()
-        .find_map(|child| match child {
-            NodeOrToken::Node(node) if node.kind() == SyntaxKind::TYPE_USE => Some(node),
-            _ => None,
-        })
-        .and_then(|type_use| {
-            if type_use
-                .children()
-                .any(|child| matches!(child.kind(), SyntaxKind::PARAM | SyntaxKind::RESULT))
-            {
-                Some(extract_sig(db, type_use))
-            } else {
-                let symbol_table = SymbolTable::of(db, document);
-                let def_types = get_def_types(db, document);
-                AmberNode::new(green, key.text_range().start())
-                    .children_by_kind(SyntaxKind::TYPE_USE)
-                    .next()
-                    .and_then(|type_use| type_use.children_by_kind(SyntaxKind::INDEX).next())
-                    .and_then(|idx| symbol_table.resolved.get(&idx.to_ptr().into()))
-                    .and_then(|def_key| def_types.get(def_key))
-                    .and_then(|def_type| def_type.comp.as_func().cloned())
-            }
-        })
-        .unwrap_or_default()
-}
-
-pub(crate) fn get_type_use_sig<'db>(
-    db: &'db dyn salsa::Database,
-    document: Document,
-    ptr: SyntaxNodePtr,
-    type_use: &GreenNode,
-) -> NamedSig<'db> {
-    if type_use
-        .children()
-        .any(|child| matches!(child.kind(), SyntaxKind::PARAM | SyntaxKind::RESULT))
-    {
-        extract_sig(db, type_use)
-    } else {
-        let symbol_table = SymbolTable::of(db, document);
-        let def_types = get_def_types(db, document);
-        AmberNode::new(type_use, ptr.text_range().start())
-            .children_by_kind(SyntaxKind::INDEX)
-            .next()
-            .and_then(|idx| symbol_table.resolved.get(&idx.to_ptr().into()))
-            .and_then(|def_key| def_types.get(def_key))
-            .and_then(|def_type| def_type.comp.as_func().cloned())
-            .unwrap_or_default()
     }
 }

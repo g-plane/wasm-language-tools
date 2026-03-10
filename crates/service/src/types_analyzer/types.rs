@@ -1,10 +1,12 @@
-use super::def_type::{CompositeType, find_comp_type_by_idx, get_def_types};
+use super::{
+    def_type::{CompositeType, DefType, find_comp_type_by_idx, get_def_types, get_rec_type_groups},
+    signature::NamedSig,
+};
 use crate::{
     binder::{SymbolKind, SymbolTable},
     document::Document,
     helpers,
     idx::{Idx, InternIdent},
-    types_analyzer::{self, DefType},
 };
 use wat_syntax::{
     GreenNode, NodeOrToken, SyntaxKind,
@@ -313,12 +315,12 @@ impl<'db> HeapType<'db> {
                     },
                 )) = symbol_table
                     .find_def_by_idx(*a, SymbolKind::Func, module.key)
-                    .map(|symbol| types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green))
+                    .map(|symbol| NamedSig::from_func(db, document, symbol.amber()))
                     .zip(
                         symbol_table
                             .find_def_by_idx(b, SymbolKind::Type, module.key)
                             .filter(|symbol| {
-                                types_analyzer::get_rec_type_groups(db, document)
+                                get_rec_type_groups(db, document)
                                     .iter()
                                     .find(|group| group.type_defs.contains(&symbol.key))
                                     .is_none_or(|group| group.type_defs.len() <= 1)

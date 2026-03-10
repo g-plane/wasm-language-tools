@@ -3,14 +3,14 @@ use crate::{
     binder::{Symbol, SymbolKey, SymbolTable},
     helpers::{self, LineIndexExt},
     idx::Idx,
-    types_analyzer::{self, ValType},
+    types_analyzer::{NamedSig, ValType},
 };
 use lspt::{
     MarkupContent, MarkupKind, ParameterInformation, SignatureHelp, SignatureHelpParams, SignatureInformation, Union2,
 };
 use std::fmt::Write;
 use wat_syntax::{
-    SyntaxKind, SyntaxNodePtr,
+    SyntaxKind,
     ast::{AstNode, Instr, PlainInstr},
 };
 
@@ -35,16 +35,12 @@ impl LanguageService {
                 "call" | "return_call" => {
                     let first_immediate = parent_instr.immediates().next()?;
                     let func = symbol_table.find_def(SymbolKey::new(first_immediate.syntax()))?;
-                    (
-                        types_analyzer::get_func_sig(db, document, func.key, &func.green),
-                        Some(func),
-                    )
+                    (NamedSig::from_func(db, document, func.amber()), Some(func))
                 }
                 "call_indirect" | "return_call_indirect" => {
                     let type_use = parent_instr.immediates().find_map(|immediate| immediate.type_use())?;
                     let type_use = type_use.syntax();
-                    let mut sig =
-                        types_analyzer::get_type_use_sig(db, document, SyntaxNodePtr::new(type_use), type_use.green());
+                    let mut sig = NamedSig::from_type_use(db, document, type_use.into());
                     sig.params.push((ValType::I32, None));
                     (sig, None)
                 }

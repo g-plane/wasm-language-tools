@@ -5,7 +5,7 @@ use crate::{
     document::Document,
     helpers::{self, LineIndexExt},
     mutability,
-    types_analyzer::{self, CompositeType, DefType, HeapType, RefType},
+    types_analyzer::{self, CompositeType, DefType, HeapType, NamedSig, RefType},
 };
 use lspt::{Hover, HoverParams, MarkupContent, MarkupKind, Union3};
 use std::fmt::Write;
@@ -227,11 +227,7 @@ fn create_func_hover(
     let doc = helpers::get_doc_comment(symbol, symbol_table).filter(|doc| !doc.is_empty());
     let mut content = format!(
         "```wat\n{}\n```",
-        types_analyzer::render_func_header(
-            db,
-            symbol.idx.name,
-            types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green)
-        )
+        types_analyzer::render_func_header(db, symbol.idx.name, NamedSig::from_func(db, document, symbol.amber()))
     );
     if let Some(doc) = doc {
         content.push_str("\n---\n");
@@ -437,7 +433,7 @@ fn create_block_hover(db: &dyn salsa::Database, symbol: &Symbol, document: Docum
         db,
         symbol.key.kind(),
         symbol.idx.name,
-        types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green),
+        NamedSig::from_func(db, document, symbol.amber()),
     );
     MarkupContent {
         kind: MarkupKind::Markdown,
@@ -466,7 +462,7 @@ fn create_tag_def_hover(db: &dyn salsa::Database, symbol: &Symbol, document: Doc
         db,
         "tag",
         symbol.idx.name,
-        types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green),
+        NamedSig::from_func(db, document, symbol.amber()),
     );
     MarkupContent {
         kind: MarkupKind::Markdown,

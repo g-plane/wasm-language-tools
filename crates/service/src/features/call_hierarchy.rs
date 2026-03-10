@@ -3,7 +3,7 @@ use crate::{
     binder::{SymbolKind, SymbolTable},
     deprecation,
     helpers::LineIndexExt,
-    types_analyzer,
+    types_analyzer::{self, NamedSig},
 };
 use lspt::{
     CallHierarchyIncomingCall, CallHierarchyIncomingCallsParams, CallHierarchyItem, CallHierarchyOutgoingCall,
@@ -34,7 +34,7 @@ impl LanguageService {
                 detail: Some(types_analyzer::render_func_header(
                     self,
                     symbol.idx.name,
-                    types_analyzer::get_func_sig(self, document, symbol.key, &symbol.green),
+                    NamedSig::from_func(self, document, symbol.amber()),
                 )),
                 uri: params.text_document.uri.clone(),
                 range: line_index.convert(symbol.key.text_range()),
@@ -60,7 +60,7 @@ impl LanguageService {
                         detail: Some(types_analyzer::render_func_header(
                             self,
                             symbol.idx.name,
-                            types_analyzer::get_func_sig(self, document, symbol.key, &symbol.green),
+                            NamedSig::from_func(self, document, symbol.amber()),
                         )),
                         uri: params.text_document.uri.clone(),
                         range: line_index.convert(symbol.key.text_range()),
@@ -118,7 +118,7 @@ impl LanguageService {
                             detail: Some(types_analyzer::render_func_header(
                                 self,
                                 symbol.idx.name,
-                                types_analyzer::get_func_sig(self, document, symbol.key, &symbol.green),
+                                NamedSig::from_func(self, document, symbol.amber()),
                             )),
                             uri: params.item.uri.clone(),
                             range: line_index.convert(symbol.key.text_range()),
@@ -166,7 +166,7 @@ impl LanguageService {
                     detail: Some(types_analyzer::render_func_header(
                         self,
                         def_symbol.idx.name,
-                        types_analyzer::get_func_sig(self, document, def_symbol.key, &def_symbol.green),
+                        NamedSig::from_func(self, document, def_symbol.amber()),
                     )),
                     uri: params.item.uri.clone(),
                     range: line_index.convert(def_symbol.key.text_range()),

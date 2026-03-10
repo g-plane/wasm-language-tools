@@ -5,7 +5,7 @@ use crate::{
     document::Document,
     helpers::{self, LineIndexExt},
     idx::Idx,
-    types_analyzer::{self, CompositeType, Fields, OperandType, ValType},
+    types_analyzer::{self, CompositeType, Fields, NamedSig, OperandType, ValType},
 };
 use itertools::Itertools;
 use line_index::LineIndex;
@@ -813,11 +813,11 @@ fn get_cmp_list(
                         detail: Some(types_analyzer::render_func_header(
                             db,
                             symbol.idx.name,
-                            types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green),
+                            NamedSig::from_func(db, document, symbol.amber()),
                         )),
                         label_details: Some(CompletionItemLabelDetails {
                             description: Some(
-                                types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green)
+                                NamedSig::from_func(db, document, symbol.amber())
                                     .render_compact(db)
                                     .to_string(),
                             ),
@@ -1016,7 +1016,7 @@ fn get_cmp_list(
                                 name: symbol.idx.name,
                             };
                             let label = idx.render(db).to_string();
-                            let sig = types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green);
+                            let sig = NamedSig::from_func(db, document, symbol.amber());
                             CompletionItem {
                                 label: label.clone(),
                                 kind: Some(CompletionItemKind::Variable),
@@ -1128,7 +1128,7 @@ fn get_cmp_list(
                 let deprecation = deprecation::get_deprecation(db, document);
                 items.extend(symbol_table.get_declared(module, SymbolKind::TagDef).map(|symbol| {
                     let label = symbol.idx.render(db).to_string();
-                    let sig = types_analyzer::get_func_sig(db, document, symbol.key, &symbol.green);
+                    let sig = NamedSig::from_func(db, document, symbol.amber());
                     CompletionItem {
                         label: label.clone(),
                         kind: Some(CompletionItemKind::Variable),
