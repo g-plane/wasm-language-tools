@@ -145,7 +145,12 @@ fn results_correct() {
     loop (result i32 i32)
       i32.const 0
       i32.const 0
-    end))
+    end)
+  (func
+    loop (result i32)
+      br 0
+    end
+    drop))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

@@ -42,10 +42,15 @@ pub(crate) fn resolve_br_types<'db>(
     ref_key: SymbolKey,
 ) -> Option<impl DoubleEndedIterator<Item = OperandType<'db>> + use<'db>> {
     symbol_table.find_def(ref_key).map(|def_symbol| {
-        Sig::from_func(db, document, def_symbol.amber())
-            .results
-            .into_iter()
-            .map(OperandType::Val)
+        let node = def_symbol.amber();
+        let sig = Sig::from_func(db, document, node);
+        if node.kind() == SyntaxKind::BLOCK_LOOP {
+            sig.params
+        } else {
+            sig.results
+        }
+        .into_iter()
+        .map(OperandType::Val)
     })
 }
 
