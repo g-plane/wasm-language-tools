@@ -1,7 +1,7 @@
 {
   "name": "@wasm-language-tools/wasm",
   "description": "WebAssembly binding of WebAssembly Language Tools.",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "author": "Pig Fang <g-plane@hotmail.com>",
   "repository": "g-plane/wasm-language-tools",
   "license": "MIT",
