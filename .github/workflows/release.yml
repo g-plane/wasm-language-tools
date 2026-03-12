@@ -96,6 +96,10 @@ jobs:
       - run: |
           cargo build -p binding_wasm --target wasm32-unknown-unknown --release
           wasm-bindgen --out-dir=bindings/pkg --target=web --omit-default-module-path target/wasm32-unknown-unknown/release/binding_wasm.wasm
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+          run_install: true
       - uses: actions/setup-node@v6
         with:
           registry-url: "https://registry.npmjs.org"
