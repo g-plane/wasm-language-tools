@@ -44,14 +44,20 @@ pub struct LanguageService {
     serializer: Serializer,
 }
 
+impl Default for LanguageService {
+    fn default() -> Self {
+        Self {
+            inner: wat_service::LanguageService::default(),
+            serializer: Serializer::json_compatible(),
+        }
+    }
+}
+
 #[wasm_bindgen(js_class = LanguageService)]
 impl LanguageService {
     #[wasm_bindgen(constructor)]
     pub fn new() -> LanguageService {
-        LanguageService {
-            inner: wat_service::LanguageService::default(),
-            serializer: Serializer::json_compatible(),
-        }
+        LanguageService::default()
     }
 
     #[wasm_bindgen(js_name = "getOpenedUris", unchecked_return_type = "string[]")]
