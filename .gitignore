@@ -1,5 +1,7 @@
 /target
 .vscode
+bindings/pkg/**/*
+!bindings/pkg/package.json
 
 node_modules/
 docs/.vitepress/cache/

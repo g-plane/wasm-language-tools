@@ -1,0 +1,22 @@
+[package]
+name = "binding_wasm"
+version = "0.0.0"
+description = "WebAssembly binding of WebAssembly Language Tools."
+authors = ["Pig Fang <g-plane@hotmail.com>"]
+repository = "https://github.com/g-plane/wasm-language-tools"
+license = "MIT"
+edition = "2024"
+keywords = ["wasm"]
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+serde = { workspace = true }
+serde-wasm-bindgen = "0.6"
+wasm-bindgen = "0.2"
+wat_service = { path = "../crates/service", version = "0.10" }
+
+[lints.clippy]
+dbg_macro = "warn"

@@ -83,8 +83,27 @@ jobs:
           files: |
             wat_server-${{ matrix.name }}.zip
 
+  npm:
+    permissions:
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: rustup target add wasm32-unknown-unknown
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-bindgen
+      - run: |
+          cargo build -p binding_wasm --target wasm32-unknown-unknown --release
+          wasm-bindgen --out-dir=bindings/pkg --target=web --omit-default-module-path target/wasm32-unknown-unknown/release/binding_wasm.wasm
+      - uses: actions/setup-node@v6
+        with:
+          registry-url: "https://registry.npmjs.org"
+          node-version: "24"
+      - run: pnpm -F=@wasm-language-tools/wasm publish
+
   vscode:
-    needs: [crates, github]
+    needs: [npm, github]
     runs-on: ubuntu-latest
     steps:
       - shell: pwsh

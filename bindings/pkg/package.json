@@ -1,0 +1,19 @@
+{
+  "name": "@wasm-language-tools/wasm",
+  "description": "WebAssembly binding of WebAssembly Language Tools.",
+  "version": "0.0.0",
+  "author": "Pig Fang <g-plane@hotmail.com>",
+  "repository": "g-plane/wasm-language-tools",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": "./binding_wasm.js",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "vscode-languageserver-protocol": "^3.17.5"
+  }
+}
