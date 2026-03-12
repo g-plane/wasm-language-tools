@@ -104,7 +104,7 @@ jobs:
         with:
           registry-url: "https://registry.npmjs.org"
           node-version: "24"
-      - run: pnpm -F=@wasm-language-tools/wasm publish
+      - run: pnpm -F=@wasm-language-tools/wasm publish --no-git-checks
 
   vscode:
     needs: [npm, github]
