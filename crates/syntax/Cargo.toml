@@ -12,5 +12,5 @@ keywords = ["wasm"]
 text-size = "1.1"
 triomphe = "0.1"
 
-[lints.clippy]
-dbg_macro = "warn"
+[lints]
+workspace = true

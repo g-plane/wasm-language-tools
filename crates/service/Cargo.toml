@@ -30,8 +30,8 @@ wat_syntax = { path = "../syntax", version = "0.10" }
 criterion = { workspace = true }
 insta = { workspace = true }
 
-[lints.clippy]
-dbg_macro = "warn"
+[lints]
+workspace = true
 
 [[bench]]
 name = "unchanged"

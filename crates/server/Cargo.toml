@@ -42,5 +42,5 @@ pkg-url = "{ repo }/releases/download/v{ version }/{ name }-arm64-alpine{ archiv
 [package.metadata.binstall.overrides.x86_64-pc-windows-gnu]
 pkg-url = "{ repo }/releases/download/v{ version }/{ name }-x86_64-windows{ archive-suffix }"
 
-[lints.clippy]
-dbg_macro = "warn"
+[lints]
+workspace = true

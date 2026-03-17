@@ -26,5 +26,5 @@ wat_parser = { path = "../parser", version = "0.10" }
 name = "fmt"
 harness = false
 
-[lints.clippy]
-dbg_macro = "warn"
+[lints]
+workspace = true

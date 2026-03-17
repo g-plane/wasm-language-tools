@@ -18,5 +18,5 @@ serde-wasm-bindgen = "0.6"
 wasm-bindgen = "0.2"
 wat_service = { path = "../crates/service", version = "0.10" }
 
-[lints.clippy]
-dbg_macro = "warn"
+[lints]
+workspace = true
