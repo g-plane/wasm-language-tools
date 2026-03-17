@@ -14,4 +14,3 @@ similar-asserts = "1.7"
 
 [workspace.lints.clippy]
 dbg_macro = "warn"
-unnecessary_trailing_comma = "deny"
