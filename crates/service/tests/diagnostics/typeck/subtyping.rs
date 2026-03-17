@@ -282,3 +282,29 @@ fn ref_func2() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn invalid_abstract() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func (param (ref null nofunc)) (result (ref null none)) (local.get 0))
+  (func (param (ref null nofunc)) (result (ref null any)) (local.get 0))
+  (func (param (ref null none)) (result (ref null nofunc)) (local.get 0))
+  (func (param (ref null none)) (result (ref null func)) (local.get 0))
+  (func (param (ref null none)) (result (ref null noextern)) (local.get 0))
+  (func (param (ref null none)) (result (ref null extern)) (local.get 0))
+  (func (param (ref null noextern)) (result (ref null none)) (local.get 0))
+  (func (param (ref null noextern)) (result (ref null any)) (local.get 0))
+  (func (param (ref null nofunc)) (result (ref null noextern)) (local.get 0))
+  (func (param (ref null nofunc)) (result (ref null extern)) (local.get 0))
+  (func (param (ref null noextern)) (result (ref null nofunc)) (local.get 0))
+  (func (param (ref null noextern)) (result (ref null func)) (local.get 0))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

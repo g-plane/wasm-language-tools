@@ -1,0 +1,417 @@
+---
+source: crates/service/tests/diagnostics/typeck/subtyping.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 72
+        },
+        "end": {
+          "line": 2,
+          "character": 73
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null none)], found [(ref null nofunc)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 59
+              },
+              "end": {
+                "line": 2,
+                "character": 72
+              }
+            }
+          },
+          "message": "expected type `(ref null none)`, found `(ref null nofunc)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 71
+        },
+        "end": {
+          "line": 3,
+          "character": 72
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null any)], found [(ref null nofunc)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 58
+              },
+              "end": {
+                "line": 3,
+                "character": 71
+              }
+            }
+          },
+          "message": "expected type `(ref null any)`, found `(ref null nofunc)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 72
+        },
+        "end": {
+          "line": 4,
+          "character": 73
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null nofunc)], found [(ref null none)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 59
+              },
+              "end": {
+                "line": 4,
+                "character": 72
+              }
+            }
+          },
+          "message": "expected type `(ref null nofunc)`, found `(ref null none)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 70
+        },
+        "end": {
+          "line": 5,
+          "character": 71
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null func)], found [(ref null none)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 57
+              },
+              "end": {
+                "line": 5,
+                "character": 70
+              }
+            }
+          },
+          "message": "expected type `(ref null func)`, found `(ref null none)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 74
+        },
+        "end": {
+          "line": 6,
+          "character": 75
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null noextern)], found [(ref null none)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 6,
+                "character": 61
+              },
+              "end": {
+                "line": 6,
+                "character": 74
+              }
+            }
+          },
+          "message": "expected type `(ref null noextern)`, found `(ref null none)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 72
+        },
+        "end": {
+          "line": 7,
+          "character": 73
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null extern)], found [(ref null none)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 7,
+                "character": 59
+              },
+              "end": {
+                "line": 7,
+                "character": 72
+              }
+            }
+          },
+          "message": "expected type `(ref null extern)`, found `(ref null none)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 74
+        },
+        "end": {
+          "line": 8,
+          "character": 75
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null none)], found [(ref null noextern)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 8,
+                "character": 61
+              },
+              "end": {
+                "line": 8,
+                "character": 74
+              }
+            }
+          },
+          "message": "expected type `(ref null none)`, found `(ref null noextern)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 73
+        },
+        "end": {
+          "line": 9,
+          "character": 74
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null any)], found [(ref null noextern)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 9,
+                "character": 60
+              },
+              "end": {
+                "line": 9,
+                "character": 73
+              }
+            }
+          },
+          "message": "expected type `(ref null any)`, found `(ref null noextern)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 76
+        },
+        "end": {
+          "line": 10,
+          "character": 77
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null noextern)], found [(ref null nofunc)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 10,
+                "character": 63
+              },
+              "end": {
+                "line": 10,
+                "character": 76
+              }
+            }
+          },
+          "message": "expected type `(ref null noextern)`, found `(ref null nofunc)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 11,
+          "character": 74
+        },
+        "end": {
+          "line": 11,
+          "character": 75
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null extern)], found [(ref null nofunc)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 11,
+                "character": 61
+              },
+              "end": {
+                "line": 11,
+                "character": 74
+              }
+            }
+          },
+          "message": "expected type `(ref null extern)`, found `(ref null nofunc)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 12,
+          "character": 76
+        },
+        "end": {
+          "line": 12,
+          "character": 77
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null nofunc)], found [(ref null noextern)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 12,
+                "character": 63
+              },
+              "end": {
+                "line": 12,
+                "character": 76
+              }
+            }
+          },
+          "message": "expected type `(ref null nofunc)`, found `(ref null noextern)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 74
+        },
+        "end": {
+          "line": 13,
+          "character": 75
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [(ref null func)], found [(ref null noextern)] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 13,
+                "character": 61
+              },
+              "end": {
+                "line": 13,
+                "character": 74
+              }
+            }
+          },
+          "message": "expected type `(ref null func)`, found `(ref null noextern)`"
+        }
+      ]
+    }
+  ]
+}
