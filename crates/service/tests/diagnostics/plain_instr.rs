@@ -145,20 +145,20 @@ fn mem_arg_correct() {
     i32.load 0
     drop
     i32.const 0
-    f32.load 0 offset=0
+    f32.load 0 offset=1
     drop
     i32.const 0
-    i64.load 0 align=0
+    i64.load 0 align=1
     drop
     i32.const 0
     f64.load
     drop
     i32.const 0
-    v128.load offset=0
+    v128.load offset=1
     drop
     i32.const 0
     i32.const 0
-    i32.store align=0)
+    i32.store align=1)
   (memory 1))
 ";
     let mut service = LanguageService::default();
@@ -191,7 +191,7 @@ fn v128_load_store_incorrect() {
     v128.store8_lane 0 0.0
     i32.const 0
     local.get 0
-    v128.store16_lane 0 align=0 0.0)
+    v128.store16_lane 0 align=1 0.0)
   (memory 1))
 ";
     let mut service = LanguageService::default();
@@ -213,25 +213,25 @@ fn v128_load_store_correct() {
     drop
     i32.const 0
     local.get 0
-    v128.load16_lane 0 offset=0
+    v128.load16_lane 0 offset=1
     drop
     i32.const 0
     local.get 0
-    v128.load32_lane 0 align=0
+    v128.load32_lane 0 align=1
     drop
     i32.const 0
     local.get 0
-    v128.load64_lane 0 align=0 1
+    v128.load64_lane 0 align=1 1
     drop
     i32.const 0
     local.get 0
     v128.store8_lane
     i32.const 0
     local.get 0
-    v128.store16_lane offset=0
+    v128.store16_lane offset=1
     i32.const 0
     local.get 0
-    v128.store32_lane align=0 1)
+    v128.store32_lane align=1 1)
   (memory 1))
 ";
     let mut service = LanguageService::default();

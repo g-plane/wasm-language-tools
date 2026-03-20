@@ -1,0 +1,57 @@
+---
+source: crates/service/tests/diagnostics/mem_arg.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 27
+        },
+        "end": {
+          "line": 3,
+          "character": 34
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be power-of-two"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 24
+        },
+        "end": {
+          "line": 4,
+          "character": 31
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be power-of-two"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 19
+        },
+        "end": {
+          "line": 5,
+          "character": 26
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "alignment must be power-of-two"
+    }
+  ]
+}

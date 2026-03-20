@@ -100,3 +100,32 @@ pub(super) fn extract_fields<'db>(db: &'db dyn salsa::Database, struct_ty: &Stru
         acc
     }))
 }
+
+pub(crate) fn extract_addr_type(node: &GreenNode) -> ValType<'_> {
+    node.children()
+        .find_map(|node_or_token| match node_or_token {
+            NodeOrToken::Node(node) if matches!(node.kind(), SyntaxKind::MEM_TYPE | SyntaxKind::TABLE_TYPE) => {
+                Some(node)
+            }
+            _ => None,
+        })
+        .and_then(|node| {
+            node.children().find_map(|node_or_token| match node_or_token {
+                NodeOrToken::Node(node) if node.kind() == SyntaxKind::ADDR_TYPE => Some(node),
+                _ => None,
+            })
+        })
+        .and_then(|node| {
+            node.children().find_map(|node_or_token| match node_or_token {
+                NodeOrToken::Token(token) if token.kind() == SyntaxKind::TYPE_KEYWORD => Some(token),
+                _ => None,
+            })
+        })
+        .map_or(ValType::I32, |token| {
+            if token.text() == "i64" {
+                ValType::I64
+            } else {
+                ValType::I32
+            }
+        })
+}

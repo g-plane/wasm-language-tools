@@ -1,6 +1,6 @@
 pub(crate) use self::{
     def_type::{CompositeType, DefType, DefTypes, find_comp_type_by_idx, get_def_types, try_deref_cont_to_func},
-    extractor::{extract_global_type, extract_type},
+    extractor::{extract_addr_type, extract_global_type, extract_type},
     renderer::{join_types, render_block_header, render_func_header, render_header},
     resolver::resolve_field_type,
     resolver::{

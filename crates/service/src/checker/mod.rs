@@ -22,6 +22,7 @@ mod elem_type;
 mod implicit_module;
 mod import_occur;
 mod import_with_def;
+mod mem_arg;
 mod mem_type;
 mod multi_modules;
 mod multi_starts;
@@ -112,6 +113,9 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         }
                         type_misuse::check(diagnostics, ctx, node, instr_name);
                         if let Some(diagnostic) = new_non_defaultable::check(ctx, node, instr_name) {
+                            diagnostics.push(diagnostic);
+                        }
+                        if let Some(diagnostic) = mem_arg::check(ctx, node, instr_name) {
                             diagnostics.push(diagnostic);
                         }
                     }

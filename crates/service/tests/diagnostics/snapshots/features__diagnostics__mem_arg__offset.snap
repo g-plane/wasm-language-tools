@@ -1,0 +1,161 @@
+---
+source: crates/service/tests/diagnostics/mem_arg.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 24
+        },
+        "end": {
+          "line": 3,
+          "character": 41
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "offset is out of range",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 2
+              },
+              "end": {
+                "line": 2,
+                "character": 12
+              }
+            }
+          },
+          "message": "memory `0` defined here uses `i32` address type"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 6,
+          "character": 13
+        },
+        "end": {
+          "line": 6,
+          "character": 41
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "offset is out of range",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 2
+              },
+              "end": {
+                "line": 2,
+                "character": 12
+              }
+            }
+          },
+          "message": "memory `0` defined here uses `i32` address type"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 9,
+          "character": 25
+        },
+        "end": {
+          "line": 9,
+          "character": 42
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "offset is out of range",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 2
+              },
+              "end": {
+                "line": 2,
+                "character": 12
+              }
+            }
+          },
+          "message": "memory `0` defined here uses `i32` address type"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 20
+        },
+        "end": {
+          "line": 10,
+          "character": 37
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "offset is out of range",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 2
+              },
+              "end": {
+                "line": 2,
+                "character": 12
+              }
+            }
+          },
+          "message": "memory `0` defined here uses `i32` address type"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 16,
+          "character": 24
+        },
+        "end": {
+          "line": 16,
+          "character": 25
+        }
+      },
+      "severity": 1,
+      "code": "undef",
+      "source": "wat",
+      "message": "cannot find memory `2` in this scope"
+    }
+  ]
+}
