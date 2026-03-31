@@ -89,6 +89,19 @@ fn different_kinds() {
 }
 
 #[test]
+fn module() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module $m1)
+(module $m2)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 1, 10, "$m")).unwrap();
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn func() {
     let uri = "untitled:test".to_string();
     let source = "

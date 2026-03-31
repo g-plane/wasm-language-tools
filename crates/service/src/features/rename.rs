@@ -77,7 +77,8 @@ impl LanguageService {
                 | SymbolKind::DataDef
                 | SymbolKind::DataRef
                 | SymbolKind::ElemDef
-                | SymbolKind::ElemRef => {
+                | SymbolKind::ElemRef
+                | SymbolKind::Module => {
                     sym.region == symbol.region
                         && sym.idx_kind == symbol.idx_kind
                         && sym.idx.name.is_some_and(|name| name == old_name)
@@ -104,7 +105,6 @@ impl LanguageService {
                         false
                     }
                 }
-                SymbolKind::Module => false,
             })
             .filter_map(|sym| sym.amber().tokens_by_kind(SyntaxKind::IDENT).next())
             .map(|token| TextEdit {

@@ -187,7 +187,11 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 kind: SymbolKind::Module,
                 idx: Idx {
                     num: Some(module_id as u32),
-                    name: None,
+                    name: module
+                        .amber()
+                        .tokens_by_kind(SyntaxKind::IDENT)
+                        .next()
+                        .map(|token| InternIdent::new(db, token.text())),
                 },
                 idx_kind: IdxKind::Module,
             },

@@ -4,7 +4,7 @@ expression: response
 ---
 [
   {
-    "name": "module",
+    "name": "module 0",
     "kind": 2,
     "range": {
       "start": {

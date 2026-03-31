@@ -34,7 +34,7 @@ impl LanguageService {
                         SymbolKind::Module => Some((
                             symbol.key,
                             DocumentSymbol {
-                                name: "module".into(),
+                                name: render_symbol_name(symbol, db),
                                 detail: None,
                                 kind: LspSymbolKind::Module,
                                 tags,

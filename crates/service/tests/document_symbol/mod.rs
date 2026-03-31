@@ -6,7 +6,7 @@ use wat_service::LanguageService;
 fn symbols() {
     let uri = "untitled:test".to_string();
     let source = r#"
-(module
+(module $m
     (func $func (param $p i32) (local $l1 i32) (local $l2 f32) (local (ref 0)))
     (func (type 0))
     (type (func))
