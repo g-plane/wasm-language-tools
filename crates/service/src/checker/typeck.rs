@@ -29,14 +29,20 @@ pub fn check_func(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, no
                 .map(OperandType::Val),
             ctx.bump,
         );
+        let imported = ctx.imports.contains(&func_key);
         check_block_like(
             diagnostics,
             ctx,
             node,
-            if ctx.imports.contains(&func_key) {
-                BumpVec::from_iter_in(results.iter().map(|ty| (ty.clone(), None)), ctx.bump)
+            if imported {
+                BumpVec::from_iter_in(results.iter().cloned(), ctx.bump)
             } else {
                 BumpVec::with_capacity_in(2, ctx.bump)
+            },
+            if imported {
+                BumpVec::from_iter_in(iter::repeat_n(None, results.len()), ctx.bump)
+            } else {
+                BumpVec::new_in(ctx.bump)
             },
             &results,
         );
@@ -48,14 +54,20 @@ pub fn check_global(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, 
     let ty = extract_global_type(ctx.db, node.green())
         .map(OperandType::Val)
         .unwrap_or(OperandType::Any);
+    let imported = ctx.imports.contains(&node.to_ptr().into());
     check_block_like(
         diagnostics,
         ctx,
         node,
-        if ctx.imports.contains(&node.to_ptr().into()) {
-            BumpVec::from_iter_in([(ty.clone(), None)], ctx.bump)
+        if imported {
+            BumpVec::from_iter_in([ty.clone()], ctx.bump)
         } else {
             BumpVec::with_capacity_in(1, ctx.bump)
+        },
+        if imported {
+            BumpVec::from_iter_in([None], ctx.bump)
+        } else {
+            BumpVec::new_in(ctx.bump)
         },
         &[ty],
     );
@@ -78,14 +90,20 @@ pub fn check_table(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, n
         return;
     }
     let ty = OperandType::Val(ty);
+    let imported = ctx.imports.contains(&node.to_ptr().into());
     check_block_like(
         diagnostics,
         ctx,
         node,
-        if ctx.imports.contains(&node.to_ptr().into()) {
-            BumpVec::from_iter_in([(ty.clone(), None)], ctx.bump)
+        if imported {
+            BumpVec::from_iter_in([ty.clone()], ctx.bump)
         } else {
             BumpVec::with_capacity_in(1, ctx.bump)
+        },
+        if imported {
+            BumpVec::from_iter_in([None], ctx.bump)
+        } else {
+            BumpVec::new_in(ctx.bump)
         },
         &[ty],
     );
@@ -97,6 +115,7 @@ pub fn check_offset(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, 
         diagnostics,
         ctx,
         node,
+        BumpVec::with_capacity_in(1, ctx.bump),
         BumpVec::with_capacity_in(1, ctx.bump),
         &[OperandType::Val(ValType::I32)],
     );
@@ -118,6 +137,7 @@ pub fn check_elem_list(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCt
             ctx,
             child,
             BumpVec::with_capacity_in(1, ctx.bump),
+            BumpVec::with_capacity_in(1, ctx.bump),
             std::slice::from_ref(&ty),
         );
     });
@@ -128,12 +148,14 @@ fn check_block_like(
     diagnostics: &mut Vec<Diagnostic>,
     ctx: &DiagnosticCtx,
     node: AmberNode,
-    init_stack: BumpVec<(OperandType, Option<AmberNode>)>,
+    init_stack: BumpVec<OperandType>,
+    init_producers: BumpVec<Option<AmberNode>>,
     expected_results: &[OperandType],
 ) {
     let mut type_stack = TypeStack {
         ctx,
         stack: init_stack,
+        producers: init_producers,
         has_never: false,
     };
 
@@ -168,27 +190,25 @@ fn check_instr<'db, 'bump>(
             return;
         };
         let instr_name = instr_name.text();
-        let sig = resolve_sig(ctx, instr_name, node, type_stack);
+        let mut sig = resolve_sig(ctx, instr_name, node, &type_stack.stack);
         if let Some(diagnostic) = type_stack.check(&sig.params, ReportRange::Instr(node)) {
             diagnostics.push(diagnostic);
         }
         if helpers::is_stack_polymorphic(instr_name) {
             type_stack.has_never = true;
             type_stack.stack.clear();
+            type_stack.producers.clear();
         }
         type_stack
-            .stack
-            .extend(sig.results.into_iter().map(|ty| (ty, Some(node))));
+            .producers
+            .extend(iter::repeat_n(Some(node), sig.results.len()));
+        type_stack.stack.append(&mut sig.results);
     } else if BlockInstr::can_cast(node.kind()) {
         let signature = Sig::from_func(ctx.db, ctx.document, node);
-        let init_stack = BumpVec::from_iter_in(
-            signature
-                .params
-                .iter()
-                .map(|ty| (OperandType::Val(ty.clone()), Some(node))),
-            ctx.bump,
-        );
-        let results = BumpVec::from_iter_in(signature.results.into_iter().map(OperandType::Val), ctx.bump);
+        let init_stack =
+            BumpVec::from_iter_in(signature.params.iter().map(|ty| OperandType::Val(ty.clone())), ctx.bump);
+        let init_producers = BumpVec::from_iter_in(iter::repeat_n(Some(node), signature.params.len()), ctx.bump);
+        let mut results = BumpVec::from_iter_in(signature.results.into_iter().map(OperandType::Val), ctx.bump);
         match node.kind() {
             SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_TRY_TABLE => {
                 if let Some(diagnostic) = type_stack.check(
@@ -197,7 +217,7 @@ fn check_instr<'db, 'bump>(
                 ) {
                     diagnostics.push(diagnostic);
                 }
-                check_block_like(diagnostics, ctx, node, init_stack, &results);
+                check_block_like(diagnostics, ctx, node, init_stack, init_producers, &results);
             }
             SyntaxKind::BLOCK_IF => {
                 if let Some(mut diagnostic) =
@@ -214,7 +234,14 @@ fn check_instr<'db, 'bump>(
                 }
                 let mut children = node.children();
                 if let Some(then_block) = children.find(|child| child.kind() == SyntaxKind::BLOCK_IF_THEN) {
-                    check_block_like(diagnostics, ctx, then_block, init_stack.clone(), &results);
+                    check_block_like(
+                        diagnostics,
+                        ctx,
+                        then_block,
+                        init_stack.clone(),
+                        BumpVec::from_iter_in(init_producers.iter().cloned(), ctx.bump),
+                        &results,
+                    );
                 } else {
                     diagnostics.push(Diagnostic {
                         range: node.text_range(),
@@ -227,11 +254,12 @@ fn check_instr<'db, 'bump>(
                     });
                 }
                 if let Some(else_block) = children.find(|child| child.kind() == SyntaxKind::BLOCK_IF_ELSE) {
-                    check_block_like(diagnostics, ctx, else_block, init_stack, &results);
+                    check_block_like(diagnostics, ctx, else_block, init_stack, init_producers, &results);
                 } else {
                     let mut type_stack = TypeStack {
                         ctx,
                         stack: init_stack,
+                        producers: init_producers,
                         has_never: false,
                     };
                     if type_stack.check_to_bottom(&results, ReportRange::Instr(node)).is_some() {
@@ -249,13 +277,15 @@ fn check_instr<'db, 'bump>(
             }
             _ => {}
         }
-        type_stack.stack.extend(results.into_iter().map(|ty| (ty, Some(node))));
+        type_stack.producers.extend(iter::repeat_n(Some(node), results.len()));
+        type_stack.stack.append(&mut results);
     }
 }
 
 struct TypeStack<'db, 'bump> {
     ctx: &'db DiagnosticCtx<'db, 'bump>,
-    stack: BumpVec<'bump, (OperandType<'db>, Option<AmberNode<'db>>)>,
+    stack: BumpVec<'bump, OperandType<'db>>,
+    producers: BumpVec<'bump, Option<AmberNode<'db>>>,
     has_never: bool,
 }
 impl<'db, 'bump> TypeStack<'db, 'bump> {
@@ -268,7 +298,7 @@ impl<'db, 'bump> TypeStack<'db, 'bump> {
         expected
             .iter()
             .rev()
-            .zip_longest(pops.iter().rev())
+            .zip_longest(pops.iter().zip(self.producers.drain(rest_len..)).rev())
             .for_each(|pair| match pair {
                 EitherOrBoth::Both(expected, (received, related_instr)) => {
                     if received.matches(expected, self.ctx.db, self.ctx.document, self.ctx.module_id) {
@@ -277,7 +307,7 @@ impl<'db, 'bump> TypeStack<'db, 'bump> {
                     mismatch = true;
                     if let Some(related_instr) = related_instr {
                         related_information.push(RelatedInformation {
-                            range: ReportRange::Instr(*related_instr).pick(),
+                            range: ReportRange::Instr(related_instr).pick(),
                             message: format!(
                                 "expected type `{}`, found `{}`",
                                 expected.render(self.ctx.db),
@@ -300,7 +330,7 @@ impl<'db, 'bump> TypeStack<'db, 'bump> {
                     join_types(self.ctx.db, expected.iter(), "", self.ctx.bump),
                     join_types(
                         self.ctx.db,
-                        pops.iter().map(|(ty, _)| ty),
+                        pops.iter(),
                         if self.stack.len() > pops.len() { "... " } else { "" },
                         self.ctx.bump,
                     ),
@@ -323,7 +353,7 @@ impl<'db, 'bump> TypeStack<'db, 'bump> {
         expected
             .iter()
             .rev()
-            .zip_longest(self.stack.iter().rev())
+            .zip_longest(self.stack.iter().zip(&self.producers).rev())
             .for_each(|pair| match pair {
                 EitherOrBoth::Both(expected, (received, related_instr)) => {
                     if received.matches(expected, self.ctx.db, self.ctx.document, self.ctx.module_id) {
@@ -356,7 +386,7 @@ impl<'db, 'bump> TypeStack<'db, 'bump> {
                 message: format!(
                     "expected types {}, found {}{}",
                     join_types(self.ctx.db, expected.iter(), "", self.ctx.bump),
-                    join_types(self.ctx.db, self.stack.iter().map(|(ty, _)| ty), "", self.ctx.bump),
+                    join_types(self.ctx.db, self.stack.iter(), "", self.ctx.bump),
                     if let ReportRange::Last(..) = report_range {
                         " at the end"
                     } else {
@@ -371,7 +401,7 @@ impl<'db, 'bump> TypeStack<'db, 'bump> {
                 data: if expected.is_empty() {
                     self.stack
                         .iter()
-                        .map(|(ty, _)| match ty {
+                        .map(|ty| match ty {
                             OperandType::Val(ty) => Some(serde_json::Value::String(ty.render(self.ctx.db).to_string())),
                             OperandType::Any => None,
                         })
@@ -416,7 +446,7 @@ fn resolve_sig<'db, 'bump>(
     ctx: &'db DiagnosticCtx<'db, 'bump>,
     instr_name: &str,
     instr: AmberNode<'db>,
-    type_stack: &TypeStack<'db, 'bump>,
+    stack: &[OperandType<'db>],
 ) -> ResolvedSig<'db, 'bump> {
     let bump = &ctx.bump;
     match instr_name {
@@ -561,12 +591,11 @@ fn resolve_sig<'db, 'bump>(
             }
         }
         "br_on_null" => {
-            let heap_ty =
-                if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) = type_stack.stack.last() {
-                    heap_ty.clone()
-                } else {
-                    HeapType::Any
-                };
+            let heap_ty = if let Some(OperandType::Val(ValType::Ref(RefType { heap_ty, .. }))) = stack.last() {
+                heap_ty.clone()
+            } else {
+                HeapType::Any
+            };
             let mut results = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
@@ -590,12 +619,11 @@ fn resolve_sig<'db, 'bump>(
             ResolvedSig { params, results }
         }
         "br_on_non_null" => {
-            let heap_ty =
-                if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) = type_stack.stack.last() {
-                    heap_ty.clone()
-                } else {
-                    HeapType::Any
-                };
+            let heap_ty = if let Some(OperandType::Val(ValType::Ref(RefType { heap_ty, .. }))) = stack.last() {
+                heap_ty.clone()
+            } else {
+                HeapType::Any
+            };
             let results = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
@@ -672,12 +700,11 @@ fn resolve_sig<'db, 'bump>(
             {
                 ValType::from_green(ty.green(), ctx.db).map_or(OperandType::Any, OperandType::Val)
             } else {
-                type_stack
-                    .stack
+                stack
                     .len()
                     .checked_sub(2)
-                    .and_then(|i| type_stack.stack.get(i))
-                    .map_or(OperandType::Any, |(ty, _)| ty.clone())
+                    .and_then(|i| stack.get(i))
+                    .map_or(OperandType::Any, |ty| ty.clone())
             };
             ResolvedSig {
                 params: BumpVec::from_iter_in([ty.clone(), ty.clone(), OperandType::Val(ValType::I32)], bump),
@@ -1062,12 +1089,11 @@ fn resolve_sig<'db, 'bump>(
             }
         }
         "ref.is_null" => {
-            let heap_ty =
-                if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) = type_stack.stack.last() {
-                    heap_ty.clone()
-                } else {
-                    HeapType::Any
-                };
+            let heap_ty = if let Some(OperandType::Val(ValType::Ref(RefType { heap_ty, .. }))) = stack.last() {
+                heap_ty.clone()
+            } else {
+                HeapType::Any
+            };
             ResolvedSig {
                 params: BumpVec::from_iter_in(
                     [OperandType::Val(ValType::Ref(RefType {
@@ -1080,12 +1106,11 @@ fn resolve_sig<'db, 'bump>(
             }
         }
         "ref.as_non_null" => {
-            let heap_ty =
-                if let Some((OperandType::Val(ValType::Ref(RefType { heap_ty, .. })), _)) = type_stack.stack.last() {
-                    heap_ty.clone()
-                } else {
-                    HeapType::Any
-                };
+            let heap_ty = if let Some(OperandType::Val(ValType::Ref(RefType { heap_ty, .. }))) = stack.last() {
+                heap_ty.clone()
+            } else {
+                HeapType::Any
+            };
             ResolvedSig {
                 params: BumpVec::from_iter_in(
                     [OperandType::Val(ValType::Ref(RefType {
