@@ -1,22 +1,57 @@
+use std::fmt;
 use serde::{Deserialize, Serialize, ser::SerializeStruct};
 use serde_json::Value;
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[serde(transparent)]
+pub struct RequestId(IdRepr);
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[serde(untagged)]
+enum IdRepr {
+    U32(u32),
+    String(String),
+}
+
+impl From<u32> for RequestId {
+    fn from(id: u32) -> RequestId {
+        RequestId(IdRepr::U32(id))
+    }
+}
+
+impl From<String> for RequestId {
+    fn from(id: String) -> RequestId {
+        RequestId(IdRepr::String(id))
+    }
+}
+
+impl fmt::Display for RequestId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.0 {
+            IdRepr::U32(it) => fmt::Display::fmt(it, f),
+            // Use debug to make it clear that `92` and `"92"` are
+            // different, and to reduce WTF factor if the sever uses `" "` as an
+            // ID.
+            IdRepr::String(it) => fmt::Debug::fmt(it, f),
+        }
+    }
+}
 
 #[derive(Clone, Debug, Deserialize)]
 #[serde(untagged)]
 pub enum Message {
     Request {
-        id: u32,
+        id: RequestId,
         method: String,
         #[serde(default)]
         params: Value,
     },
     OkResponse {
-        id: u32,
+        id: RequestId,
         #[serde(default)]
         result: Value,
     },
     ErrResponse {
-        id: u32,
+        id: RequestId,
         error: ResponseError,
     },
     Notification {
