@@ -122,7 +122,7 @@ To view all available configurations, please refer to [the documentation of lsp-
 ### Eglot
 
 > [!NOTE]
-> It's required to install Eglot from GNU-devel ELPA.
+> Eglot 1.22 is required.
 
 [Eglot](https://elpa.gnu.org/packages/doc/eglot.html) has built-in support for WebAssembly Language Tools.
 
