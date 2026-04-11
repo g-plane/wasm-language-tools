@@ -24,7 +24,11 @@ impl SentRequests {
     {
         let id = self.next_id();
         self.callbacks.insert(id, Box::new(callback));
-        Message::Request { id, method, params }
+        Message::Request {
+            id: lspt::Union2::A(id),
+            method,
+            params,
+        }
     }
 
     pub fn remove(&mut self, id: u32) -> Option<Callback> {
