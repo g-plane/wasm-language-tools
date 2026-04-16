@@ -5,8 +5,9 @@ use crate::{
     document::Document,
     helpers::{self, LineIndexExt},
     mutability,
-    types_analyzer::{self, CompositeType, DefType, HeapType, NamedSig, RefType},
+    types_analyzer::{self, CompositeType, DefType, HeapType, InstrSigResolverCtx, NamedSig, RefType},
 };
+use bumpalo::Bump;
 use lspt::{Hover, HoverParams, MarkupContent, MarkupKind, Union3};
 use std::fmt::Write;
 use wat_syntax::{
@@ -146,12 +147,64 @@ impl LanguageService {
                     }
                     name => data_set::INSTR_OP_CODES.get(name).copied(),
                 }
-                .map(|code| Hover {
-                    contents: Union3::A(MarkupContent {
-                        kind: MarkupKind::Markdown,
-                        value: format!("```wat\n{name}\n```\nBinary Opcode: {}", format_op_code(code)),
-                    }),
-                    range: Some(line_index.convert(token.text_range())),
+                .map(|code| {
+                    let mut contents = format!("```wat\n{name}\n```\n\n**Binary opcode**: `{}`", format_op_code(code));
+
+                    let bump = Bump::new();
+                    let parent = token.parent();
+                    if let Some((module_id, module)) = root
+                        .children_by_kind(SyntaxKind::MODULE)
+                        .enumerate()
+                        .find(|(_, module)| module.text_range().contains_range(token.text_range()))
+                        && let Some(outer_block) = parent.ancestors().find(|ancestor| {
+                            matches!(
+                                ancestor.kind(),
+                                SyntaxKind::MODULE_FIELD_FUNC
+                                    | SyntaxKind::BLOCK_BLOCK
+                                    | SyntaxKind::BLOCK_LOOP
+                                    | SyntaxKind::BLOCK_IF_THEN
+                                    | SyntaxKind::BLOCK_IF_ELSE
+                                    | SyntaxKind::BLOCK_TRY_TABLE
+                            )
+                        })
+                        && let Some((stack, sig)) = types_analyzer::perform_types_till(
+                            parent.amber(),
+                            &outer_block,
+                            &InstrSigResolverCtx {
+                                db: self,
+                                document,
+                                symbol_table,
+                                def_types: types_analyzer::get_def_types(self, document),
+                                module: &module,
+                                module_id: module_id as u32,
+                                bump: &bump,
+                            },
+                        )
+                    {
+                        let _ = write!(
+                            contents,
+                            "\n\n```wat\n{} -> {}\n```",
+                            types_analyzer::join_types(self, &sig.params, "", &bump),
+                            types_analyzer::join_types(self, &sig.results, "", &bump),
+                        );
+                        let _ = write!(
+                            contents,
+                            "\n\n---\n\n**Stack before**: `{}`",
+                            if let Some([_, types @ ..]) = stack.last_chunk::<8>() {
+                                types_analyzer::join_types(self, types, "... ", &bump)
+                            } else {
+                                types_analyzer::join_types(self, &stack, "", &bump)
+                            }
+                        );
+                    }
+
+                    Hover {
+                        contents: Union3::A(MarkupContent {
+                            kind: MarkupKind::Markdown,
+                            value: contents,
+                        }),
+                        range: Some(line_index.convert(token.text_range())),
+                    }
                 })
             }
             _ => None,

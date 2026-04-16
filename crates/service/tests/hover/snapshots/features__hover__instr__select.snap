@@ -1,11 +1,11 @@
 ---
-source: crates/service/tests/hover/mod.rs
+source: crates/service/tests/hover/instr.rs
 expression: response
 ---
 {
   "contents": {
     "kind": "markdown",
-    "value": "```wat\nselect\n```\nBinary Opcode: 0x1B"
+    "value": "```wat\nselect\n```\n\n**Binary opcode**: `0x1B`\n\n```wat\n[any, any, i32] -> [any]\n```\n\n---\n\n**Stack before**: `[]`"
   },
   "range": {
     "start": {

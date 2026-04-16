@@ -54,7 +54,7 @@ pub(crate) fn resolve_br_types<'db>(
     })
 }
 
-pub(crate) fn resolve_array_type_with_idx<'db>(
+pub(super) fn resolve_array_type_with_idx<'db>(
     symbol_table: &SymbolTable,
     def_types: &DefTypes<'db>,
     immediate: SyntaxNodePtr,
@@ -104,7 +104,7 @@ pub(crate) fn resolve_field_type<'db>(
     }
 }
 
-pub(crate) fn resolve_field_type_with_struct_idx<'db>(
+pub(super) fn resolve_field_type_with_struct_idx<'db>(
     db: &'db dyn salsa::Database,
     document: Document,
     struct_ref: SyntaxNodePtr,

@@ -1,0 +1,20 @@
+---
+source: crates/service/tests/hover/instr.rs
+expression: response
+---
+{
+  "contents": {
+    "kind": "markdown",
+    "value": "```wat\nnop\n```\n\n**Binary opcode**: `0x01`\n\n```wat\n[] -> []\n```\n\n---\n\n**Stack before**: `[f32, f64]`"
+  },
+  "range": {
+    "start": {
+      "line": 5,
+      "character": 5
+    },
+    "end": {
+      "line": 5,
+      "character": 8
+    }
+  }
+}

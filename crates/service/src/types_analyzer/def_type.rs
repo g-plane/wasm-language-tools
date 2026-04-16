@@ -344,7 +344,7 @@ pub(crate) fn find_comp_type_by_idx<'db>(
         .map(|def_type| &def_type.comp)
 }
 
-pub(crate) fn try_deref_cont_to_func<'db>(
+pub(super) fn try_deref_cont_to_func<'db>(
     symbol_table: &'db SymbolTable<'db>,
     def_types: &'db DefTypes<'db>,
     comp: &CompositeType<'db>,

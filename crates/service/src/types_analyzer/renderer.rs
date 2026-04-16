@@ -250,13 +250,15 @@ impl Display for RenderWithDb<'_, &Fields<'_>> {
 
 pub(crate) fn join_types<'db, 'bump, I>(
     db: &'db dyn salsa::Database,
-    mut types: I,
+    types: I,
     prefix: &str,
     bump: &'bump Bump,
 ) -> BumpString<'bump>
 where
-    I: Iterator<Item = &'db OperandType<'db>> + ExactSizeIterator,
+    I: IntoIterator<Item = &'db OperandType<'db>>,
+    I::IntoIter: ExactSizeIterator,
 {
+    let mut types = types.into_iter();
     if let Some(first) = types.next() {
         let mut bs = BumpString::with_capacity_in(2 + prefix.len() + 5 * types.len(), bump);
         bs.push('[');

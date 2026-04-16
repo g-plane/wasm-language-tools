@@ -29,13 +29,6 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
         },
     );
     map.insert(
-        "drop",
-        ResolvedSig {
-            params: vec![Any],
-            results: vec![],
-        },
-    );
-    map.insert(
         "local.get",
         ResolvedSig {
             params: vec![],
