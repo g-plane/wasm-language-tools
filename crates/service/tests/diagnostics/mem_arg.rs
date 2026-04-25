@@ -160,7 +160,7 @@ fn offset() {
   (func (v128.store offset=4294967296 (i32.const 0) (v128.const i32x4 0 0 0 0)))
 
   (memory i64 1)
-  (func (drop (i32.load 1 offset=4294967296 (i32.const 0))))
+  (func (drop (i32.load 1 offset=4294967296 (i64.const 0))))
 
   ;; ignore undefined memory
   (func (drop (i32.load 2 offset=4294967296 (i32.const 0))))

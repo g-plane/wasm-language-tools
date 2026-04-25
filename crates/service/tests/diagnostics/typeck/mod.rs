@@ -2,6 +2,7 @@ use super::*;
 use insta::assert_json_snapshot;
 use wat_service::LanguageService;
 
+mod addr_type;
 mod array;
 mod block;
 mod block_if;

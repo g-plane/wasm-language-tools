@@ -1,6 +1,6 @@
 use super::{
     def_type::{CompositeType, DefTypes, find_comp_type_by_idx, try_deref_cont_to_func},
-    extractor::{extract_global_type, extract_type},
+    extractor::{extract_addr_type, extract_global_type, extract_type},
     resolver::{resolve_array_type_with_idx, resolve_br_types, resolve_field_type_with_struct_idx},
     signature::{NamedSig, Sig},
     types::{HeapType, OperandType, RefType, ValType},
@@ -1038,6 +1038,212 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                     params: BumpVec::from_iter_in([OperandType::Any], bump),
                     results: BumpVec::new_in(bump),
                 })
+        }
+        "i32.load" | "i32.load8_s" | "i32.load8_u" | "i32.load16_s" | "i32.load16_u" => {
+            let at = instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Val(at)], bump),
+                results: BumpVec::from_iter_in([OperandType::Val(ValType::I32)], bump),
+            }
+        }
+        "i64.load" | "i64.load8_s" | "i64.load8_u" | "i64.load16_s" | "i64.load16_u" | "i64.load32_s"
+        | "i64.load32_u" => {
+            let at = instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Val(at)], bump),
+                results: BumpVec::from_iter_in([OperandType::Val(ValType::I64)], bump),
+            }
+        }
+        "f32.load" => {
+            let at = instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Val(at)], bump),
+                results: BumpVec::from_iter_in([OperandType::Val(ValType::F32)], bump),
+            }
+        }
+        "f64.load" => {
+            let at = instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Val(at)], bump),
+                results: BumpVec::from_iter_in([OperandType::Val(ValType::F64)], bump),
+            }
+        }
+        "i32.store" | "i32.store8" | "i32.store16" => {
+            let at = instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Val(at), OperandType::Val(ValType::I32)], bump),
+                results: BumpVec::new_in(bump),
+            }
+        }
+        "i64.store" | "i64.store8" | "i64.store16" | "i64.store32" => {
+            let at = instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Val(at), OperandType::Val(ValType::I64)], bump),
+                results: BumpVec::new_in(bump),
+            }
+        }
+        "f32.store" => {
+            let at = instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Val(at), OperandType::Val(ValType::F32)], bump),
+                results: BumpVec::new_in(bump),
+            }
+        }
+        "f64.store" => {
+            let at = instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Val(at), OperandType::Val(ValType::F64)], bump),
+                results: BumpVec::new_in(bump),
+            }
+        }
+        "memory.size" => {
+            let at = instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            ResolvedSig {
+                params: BumpVec::new_in(bump),
+                results: BumpVec::from_iter_in([OperandType::Val(at)], bump),
+            }
+        }
+        "memory.grow" => {
+            let at = instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Val(at.clone())], bump),
+                results: BumpVec::from_iter_in([OperandType::Val(at)], bump),
+            }
+        }
+        "memory.init" => {
+            let at = instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            ResolvedSig {
+                params: BumpVec::from_iter_in(
+                    [
+                        OperandType::Val(at),
+                        OperandType::Val(ValType::I32),
+                        OperandType::Val(ValType::I32),
+                    ],
+                    bump,
+                ),
+                results: BumpVec::new_in(bump),
+            }
+        }
+        "memory.copy" => {
+            let mut immediates = instr.children_by_kind(SyntaxKind::IMMEDIATE);
+            let at1 = immediates
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            let at2 = immediates
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            // i32 is less than i64, so if either is i32, the min is i32. Otherwise, it's i64.
+            let min = if at1 == ValType::I32 || at2 == ValType::I32 {
+                ValType::I32
+            } else {
+                ValType::I64
+            };
+            ResolvedSig {
+                params: BumpVec::from_iter_in(
+                    [OperandType::Val(at1), OperandType::Val(at2), OperandType::Val(min)],
+                    bump,
+                ),
+                results: BumpVec::new_in(bump),
+            }
+        }
+        "memory.fill" => {
+            let at = instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            ResolvedSig {
+                params: BumpVec::from_iter_in(
+                    [
+                        OperandType::Val(at.clone()),
+                        OperandType::Val(ValType::I32),
+                        OperandType::Val(at),
+                    ],
+                    bump,
+                ),
+                results: BumpVec::new_in(bump),
+            }
+        }
+        "v128.load" | "v128.load8x8_s" | "v128.load8x8_u" | "v128.load16x4_s" | "v128.load16x4_u"
+        | "v128.load32x2_s" | "v128.load32x2_u" | "v128.load8_splat" | "v128.load16_splat" | "v128.load32_splat"
+        | "v128.load64_splat" | "v128.load32_zero" | "v128.load64_zero" => {
+            let at = instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Val(at)], bump),
+                results: BumpVec::from_iter_in([OperandType::Val(ValType::V128)], bump),
+            }
+        }
+        "v128.store" | "v128.store8_lane" | "v128.store16_lane" | "v128.store32_lane" | "v128.store64_lane" => {
+            let at = instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Val(at), OperandType::Val(ValType::V128)], bump),
+                results: BumpVec::new_in(bump),
+            }
+        }
+        "v128.load8_lane" | "v128.load16_lane" | "v128.load32_lane" | "v128.load64_lane" => {
+            let at = instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Val(at), OperandType::Val(ValType::V128)], bump),
+                results: BumpVec::from_iter_in([OperandType::Val(ValType::V128)], bump),
+            }
         }
         _ => data_set::INSTR_SIG
             .get(instr_name)
