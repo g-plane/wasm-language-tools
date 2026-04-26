@@ -369,29 +369,22 @@ fn create_memory_def_hover(db: &dyn salsa::Database, symbol: &Symbol, root: &Syn
 }
 
 fn create_table_def_hover(db: &dyn salsa::Database, symbol: &Symbol, root: &SyntaxNode) -> MarkupContent {
-    use crate::types_analyzer::RefType;
-
     let mut content = "(table".to_string();
     if let Some(name) = symbol.idx.name {
         content.push(' ');
         content.push_str(name.ident(db));
     }
-    if let Some(table_type) = symbol
+    if let Some(limits) = symbol
         .key
         .to_node(root)
         .and_then(|node| support::child::<TableType>(&node))
+        .and_then(|table_type| table_type.limits())
+        .and_then(|limits| render_limits(&limits))
     {
-        if let Some(limits) = table_type.limits().and_then(|limits| render_limits(&limits)) {
-            content.push(' ');
-            content.push_str(&limits);
-        }
-        if let Some(ref_type) = table_type
-            .ref_type()
-            .and_then(|ref_type| RefType::from_green(ref_type.syntax().green(), db))
-        {
-            content.push(' ');
-            let _ = write!(content, "{}", ref_type.render(db));
-        }
+        let _ = write!(&mut content, " {limits}");
+    }
+    if let Some(ref_type) = types_analyzer::extract_table_ref_type(db, &symbol.green) {
+        let _ = write!(content, " {}", ref_type.render(db));
     }
     content.push(')');
     MarkupContent {

@@ -2,11 +2,11 @@ use super::{Diagnostic, DiagnosticCtx, RelatedInformation};
 use crate::{
     binder::{Symbol, SymbolKey, SymbolKind},
     types_analyzer::{
-        CompositeType, FieldType, HeapType, NamedSig, OperandType, RefType, Sig, ValType, find_comp_type_by_idx,
-        resolve_br_types,
+        CompositeType, FieldType, HeapType, NamedSig, OperandType, RefType, Sig, ValType, extract_table_ref_type,
+        find_comp_type_by_idx, resolve_br_types,
     },
 };
-use wat_syntax::{AmberNode, AmberToken, NodeOrToken, SyntaxKind, SyntaxNodePtr};
+use wat_syntax::{AmberNode, AmberToken, SyntaxKind, SyntaxNodePtr};
 
 const DIAGNOSTIC_CODE: &str = "type-misuse";
 
@@ -619,28 +619,7 @@ fn check_table_ref_type(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnost
         && ctx
             .symbol_table
             .find_def(ref_key)
-            .and_then(|symbol| {
-                symbol.green.children().find_map(|child| {
-                    if let NodeOrToken::Node(node) = child {
-                        match node.kind() {
-                            SyntaxKind::REF_TYPE => Some(node),
-                            SyntaxKind::TABLE_TYPE => node.children().find_map(|child| {
-                                if let NodeOrToken::Node(node) = child
-                                    && node.kind() == SyntaxKind::REF_TYPE
-                                {
-                                    Some(node)
-                                } else {
-                                    None
-                                }
-                            }),
-                            _ => None,
-                        }
-                    } else {
-                        None
-                    }
-                })
-            })
-            .and_then(|green| RefType::from_green(green, ctx.db))
+            .and_then(|symbol| extract_table_ref_type(ctx.db, &symbol.green))
             .is_some_and(|ty| {
                 !ty.matches(
                     &RefType {

@@ -2,7 +2,8 @@ use super::{Diagnostic, DiagnosticCtx, RelatedInformation};
 use crate::{
     helpers,
     types_analyzer::{
-        InstrSigResolverCtx, OperandType, RefType, Sig, ValType, extract_global_type, join_types, resolve_instr_sig,
+        InstrSigResolverCtx, OperandType, RefType, Sig, ValType, extract_global_type, extract_table_ref_type,
+        join_types, resolve_instr_sig,
     },
 };
 use bumpalo::collections::Vec as BumpVec;
@@ -71,14 +72,7 @@ pub fn check_global(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, 
 }
 
 pub fn check_table(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, node: AmberNode) {
-    let Some(ref_type) = node
-        .children_by_kind(SyntaxKind::TABLE_TYPE)
-        .next()
-        .unwrap_or(node)
-        .children_by_kind(SyntaxKind::REF_TYPE)
-        .next()
-        .and_then(|ref_type| RefType::from_green(ref_type.green(), ctx.db))
-    else {
+    let Some(ref_type) = extract_table_ref_type(ctx.db, node.green()) else {
         return;
     };
     let ty = ValType::Ref(ref_type);

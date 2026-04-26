@@ -1,6 +1,6 @@
 use super::{
     signature::NamedSig,
-    types::{FieldType, Fields, ValType},
+    types::{FieldType, Fields, RefType, ValType},
 };
 use crate::idx::{Idx, IdxGen, InternIdent};
 use std::ops::ControlFlow;
@@ -128,4 +128,20 @@ pub(crate) fn extract_addr_type(node: &GreenNode) -> ValType<'_> {
                 ValType::I32
             }
         })
+}
+
+pub(crate) fn extract_table_ref_type<'db>(db: &'db dyn salsa::Database, node: &GreenNode) -> Option<RefType<'db>> {
+    node.children()
+        .find_map(|child| match child {
+            NodeOrToken::Node(node) => match node.kind() {
+                SyntaxKind::REF_TYPE => Some(node),
+                SyntaxKind::TABLE_TYPE => node.children().find_map(|child| match child {
+                    NodeOrToken::Node(node) if node.kind() == SyntaxKind::REF_TYPE => Some(node),
+                    _ => None,
+                }),
+                _ => None,
+            },
+            NodeOrToken::Token(..) => None,
+        })
+        .and_then(|node| RefType::from_green(node, db))
 }
