@@ -331,3 +331,154 @@ fn v128_load_lane() {
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
+
+#[test]
+fn table_get() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table i32 0 structref)
+  (table i64 0 arrayref)
+  (func (result structref arrayref)
+    (table.get
+      (i32.const 0))
+    (table.get 1
+      (i64.const 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn table_set() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table i32 0 structref)
+  (table i64 0 arrayref)
+  (func (param structref arrayref)
+    (table.set
+      (i32.const 0)
+      (local.get 0))
+    (table.set 1
+      (i64.const 0)
+      (local.get 1))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn table_init() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table i32 0 externref)
+  (table i64 0 externref)
+  (func
+    (table.init 0
+      (i32.const 0)
+      (i32.const 0)
+      (i32.const 0))
+    (table.init 1 0
+      (i64.const 0)
+      (i32.const 0)
+      (i32.const 0)))
+  (elem 0))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn table_copy() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table i32 0 anyref)
+  (table i64 0 anyref)
+  (func
+    (table.copy (i32.const 0) (i32.const 0) (i32.const 0))
+    (table.copy 0 1 (i32.const 0) (i64.const 0) (i32.const 0))
+    (table.copy 1 0 (i64.const 0) (i32.const 0) (i32.const 0))
+    (table.copy 1 1 (i64.const 0) (i64.const 0) (i64.const 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn table_grow() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table i32 0 structref)
+  (table i64 0 arrayref)
+  (func (param structref arrayref) (result i32 i64)
+    (table.grow
+      (local.get 0)
+      (i32.const 0))
+    (table.grow 1
+      (local.get 1)
+      (i64.const 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn table_size() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table i32 0 externref)
+  (table i64 0 externref)
+  (func (result i32 i64)
+    (table.size)
+    (table.size 1)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
+fn table_fill() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table i32 0 structref)
+  (table i64 0 arrayref)
+  (func (param structref arrayref)
+    (table.fill
+      (i32.const 0)
+      (local.get 0)
+      (i32.const 0))
+    (table.fill 1
+      (i64.const 0)
+      (local.get 1)
+      (i64.const 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}

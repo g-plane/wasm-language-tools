@@ -3,7 +3,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::{collections::HashMap, sync::LazyLock};
 
 pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = LazyLock::new(|| {
-    let mut map = HashMap::with_capacity_and_hasher(467, FxBuildHasher);
+    let mut map = HashMap::with_capacity_and_hasher(460, FxBuildHasher);
     map.insert(
         "unreachable",
         ResolvedSig {
@@ -60,20 +60,6 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
         "global.set",
         ResolvedSig {
             params: vec![Any],
-            results: vec![],
-        },
-    );
-    map.insert(
-        "table.get",
-        ResolvedSig {
-            params: vec![Val(I32)],
-            results: vec![Any],
-        },
-    );
-    map.insert(
-        "table.set",
-        ResolvedSig {
-            params: vec![Val(I32), Any],
             results: vec![],
         },
     );
@@ -1146,44 +1132,9 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
         },
     );
     map.insert(
-        "table.init",
-        ResolvedSig {
-            params: vec![Val(I32), Val(I32), Val(I32)],
-            results: vec![],
-        },
-    );
-    map.insert(
         "elem.drop",
         ResolvedSig {
             params: vec![],
-            results: vec![],
-        },
-    );
-    map.insert(
-        "table.copy",
-        ResolvedSig {
-            params: vec![Val(I32), Val(I32), Val(I32)],
-            results: vec![],
-        },
-    );
-    map.insert(
-        "table.grow",
-        ResolvedSig {
-            params: vec![Any, Val(I32)],
-            results: vec![Val(I32)],
-        },
-    );
-    map.insert(
-        "table.size",
-        ResolvedSig {
-            params: vec![],
-            results: vec![Val(I32)],
-        },
-    );
-    map.insert(
-        "table.fill",
-        ResolvedSig {
-            params: vec![Val(I32), Any, Val(I32)],
             results: vec![],
         },
     );

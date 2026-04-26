@@ -1,6 +1,6 @@
 use super::{
     def_type::{CompositeType, DefTypes, find_comp_type_by_idx, try_deref_cont_to_func},
-    extractor::{extract_addr_type, extract_global_type, extract_type},
+    extractor::{extract_addr_type, extract_global_type, extract_table_ref_type, extract_type},
     resolver::{resolve_array_type_with_idx, resolve_br_types, resolve_field_type_with_struct_idx},
     signature::{NamedSig, Sig},
     types::{HeapType, OperandType, RefType, ValType},
@@ -1128,7 +1128,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 results: BumpVec::new_in(bump),
             }
         }
-        "memory.size" => {
+        "memory.size" | "table.size" => {
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
@@ -1150,7 +1150,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 results: BumpVec::from_iter_in([OperandType::Val(at)], bump),
             }
         }
-        "memory.init" => {
+        "memory.init" | "table.init" => {
             let at = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
@@ -1168,7 +1168,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 results: BumpVec::new_in(bump),
             }
         }
-        "memory.copy" => {
+        "memory.copy" | "table.copy" => {
             let mut immediates = instr.children_by_kind(SyntaxKind::IMMEDIATE);
             let at1 = immediates
                 .next()
@@ -1245,6 +1245,81 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 results: BumpVec::from_iter_in([OperandType::Val(ValType::V128)], bump),
             }
         }
+        "table.get" => instr
+            .children_by_kind(SyntaxKind::IMMEDIATE)
+            .next()
+            .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+            .map(|symbol| {
+                let at = extract_addr_type(&symbol.green);
+                let ref_type = extract_table_ref_type(ctx.db, &symbol.green)
+                    .map_or(OperandType::Any, |ref_type| OperandType::Val(ValType::Ref(ref_type)));
+                ResolvedSig {
+                    params: BumpVec::from_iter_in([OperandType::Val(at)], bump),
+                    results: BumpVec::from_iter_in([ref_type], bump),
+                }
+            })
+            .unwrap_or_else(|| ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Val(ValType::I32)], bump),
+                results: BumpVec::from_iter_in([OperandType::Any], bump),
+            }),
+        "table.set" => instr
+            .children_by_kind(SyntaxKind::IMMEDIATE)
+            .next()
+            .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+            .map(|symbol| {
+                let at = extract_addr_type(&symbol.green);
+                let ref_type = extract_table_ref_type(ctx.db, &symbol.green)
+                    .map_or(OperandType::Any, |ref_type| OperandType::Val(ValType::Ref(ref_type)));
+                ResolvedSig {
+                    params: BumpVec::from_iter_in([OperandType::Val(at), ref_type], bump),
+                    results: BumpVec::new_in(bump),
+                }
+            })
+            .unwrap_or_else(|| ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Val(ValType::I32), OperandType::Any], bump),
+                results: BumpVec::new_in(bump),
+            }),
+        "table.grow" => instr
+            .children_by_kind(SyntaxKind::IMMEDIATE)
+            .next()
+            .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+            .map(|symbol| {
+                let at = extract_addr_type(&symbol.green);
+                let ref_type = extract_table_ref_type(ctx.db, &symbol.green)
+                    .map_or(OperandType::Any, |ref_type| OperandType::Val(ValType::Ref(ref_type)));
+                ResolvedSig {
+                    params: BumpVec::from_iter_in([ref_type, OperandType::Val(at.clone())], bump),
+                    results: BumpVec::from_iter_in([OperandType::Val(at)], bump),
+                }
+            })
+            .unwrap_or_else(|| ResolvedSig {
+                params: BumpVec::from_iter_in([OperandType::Any, OperandType::Val(ValType::I32)], bump),
+                results: BumpVec::from_iter_in([OperandType::Val(ValType::I32)], bump),
+            }),
+        "table.fill" => instr
+            .children_by_kind(SyntaxKind::IMMEDIATE)
+            .next()
+            .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+            .map(|symbol| {
+                let at = extract_addr_type(&symbol.green);
+                let ref_type = extract_table_ref_type(ctx.db, &symbol.green)
+                    .map_or(OperandType::Any, |ref_type| OperandType::Val(ValType::Ref(ref_type)));
+                ResolvedSig {
+                    params: BumpVec::from_iter_in([OperandType::Val(at.clone()), ref_type, OperandType::Val(at)], bump),
+                    results: BumpVec::new_in(bump),
+                }
+            })
+            .unwrap_or_else(|| ResolvedSig {
+                params: BumpVec::from_iter_in(
+                    [
+                        OperandType::Val(ValType::I32),
+                        OperandType::Any,
+                        OperandType::Val(ValType::I32),
+                    ],
+                    bump,
+                ),
+                results: BumpVec::new_in(bump),
+            }),
         _ => data_set::INSTR_SIG
             .get(instr_name)
             .map(|sig| ResolvedSig {
