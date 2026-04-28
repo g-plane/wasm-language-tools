@@ -22,6 +22,7 @@ mod elem_type;
 mod implicit_module;
 mod import_occur;
 mod import_with_def;
+mod lane;
 mod mem_arg;
 mod mem_type;
 mod multi_modules;
@@ -116,6 +117,9 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                             diagnostics.push(diagnostic);
                         }
                         if let Some(diagnostic) = mem_arg::check(ctx, node, instr_name) {
+                            diagnostics.push(diagnostic);
+                        }
+                        if let Some(diagnostic) = lane::check(node, instr_name) {
                             diagnostics.push(diagnostic);
                         }
                     }

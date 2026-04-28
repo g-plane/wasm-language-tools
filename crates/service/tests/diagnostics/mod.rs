@@ -14,6 +14,7 @@ mod elem_type;
 mod implicit_module;
 mod import_occur;
 mod import_with_def;
+mod lane;
 mod mem_arg;
 mod mem_type;
 mod multi_modules;
