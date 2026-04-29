@@ -156,17 +156,7 @@ impl LanguageService {
                         .children_by_kind(SyntaxKind::MODULE)
                         .enumerate()
                         .find(|(_, module)| module.text_range().contains_range(token.text_range()))
-                        && let Some(outer_block) = parent.ancestors().find(|ancestor| {
-                            matches!(
-                                ancestor.kind(),
-                                SyntaxKind::MODULE_FIELD_FUNC
-                                    | SyntaxKind::BLOCK_BLOCK
-                                    | SyntaxKind::BLOCK_LOOP
-                                    | SyntaxKind::BLOCK_IF_THEN
-                                    | SyntaxKind::BLOCK_IF_ELSE
-                                    | SyntaxKind::BLOCK_TRY_TABLE
-                            )
-                        })
+                        && let Some(outer_block) = helpers::syntax::find_outer_block_for_types(&parent)
                         && let Some((stack, sig)) = types_analyzer::perform_types_till(
                             parent.amber(),
                             &outer_block,

@@ -1,9 +1,10 @@
 use super::{Diagnostic, DiagnosticCtx, RelatedInformation};
 use crate::{
     binder::{Symbol, SymbolKey, SymbolKind},
+    helpers,
     types_analyzer::{
-        CompositeType, FieldType, HeapType, NamedSig, OperandType, RefType, Sig, ValType, extract_table_ref_type,
-        find_comp_type_by_idx, resolve_br_types,
+        CompositeType, FieldType, HeapType, InstrSigResolverCtx, NamedSig, OperandType, RefType, Sig, ValType,
+        extract_table_ref_type, find_comp_type_by_idx, perform_types_till, resolve_br_types,
     },
 };
 use wat_syntax::{AmberNode, AmberToken, SyntaxKind, SyntaxNodePtr};
@@ -577,6 +578,50 @@ pub fn check(
                         }]),
                         ..Default::default()
                     });
+                }
+            }
+            "select" => {
+                if immediates.next().is_none()
+                    && let Some(outer_block) = node
+                        .to_ptr()
+                        .to_node(ctx.module)
+                        .and_then(|node| helpers::syntax::find_outer_block_for_types(&node))
+                    && let Some((stack, _)) = perform_types_till(
+                        node,
+                        &outer_block,
+                        &InstrSigResolverCtx {
+                            db: ctx.db,
+                            document: ctx.document,
+                            symbol_table: ctx.symbol_table,
+                            def_types: ctx.def_types,
+                            module: ctx.module,
+                            module_id: ctx.module_id,
+                            bump: ctx.bump,
+                        },
+                    )
+                {
+                    const BASE_MSG: &str = "second type from stack top must be number type or vector type";
+                    match stack.len().checked_sub(2).and_then(|i| stack.get(i)) {
+                        Some(OperandType::Val(
+                            ValType::I32 | ValType::I64 | ValType::F32 | ValType::F64 | ValType::V128,
+                        )) => {}
+                        Some(ty) => {
+                            diagnostics.push(Diagnostic {
+                                range: node.text_range(),
+                                code: DIAGNOSTIC_CODE.into(),
+                                message: format!("{BASE_MSG} but found `{}`", ty.render(ctx.db)),
+                                ..Default::default()
+                            });
+                        }
+                        None => {
+                            diagnostics.push(Diagnostic {
+                                range: node.text_range(),
+                                code: DIAGNOSTIC_CODE.into(),
+                                message: BASE_MSG.into(),
+                                ..Default::default()
+                            });
+                        }
+                    }
                 }
             }
             _ => {}

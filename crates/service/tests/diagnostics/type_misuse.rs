@@ -838,3 +838,25 @@ fn switch() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn select() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    i32.const 0
+    select
+    drop)
+  (func (param arrayref)
+    local.get 0
+    i32.const 0
+    select
+    drop))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

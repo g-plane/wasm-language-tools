@@ -159,6 +159,20 @@ pub(crate) mod syntax {
             TokenAtOffset::Between(left, _) => Some(left),
         }
     }
+
+    pub fn find_outer_block_for_types(node: &SyntaxNode) -> Option<SyntaxNode> {
+        node.ancestors().find(|ancestor| {
+            matches!(
+                ancestor.kind(),
+                SyntaxKind::MODULE_FIELD_FUNC
+                    | SyntaxKind::BLOCK_BLOCK
+                    | SyntaxKind::BLOCK_LOOP
+                    | SyntaxKind::BLOCK_IF_THEN
+                    | SyntaxKind::BLOCK_IF_ELSE
+                    | SyntaxKind::BLOCK_TRY_TABLE
+            )
+        })
+    }
 }
 
 pub(crate) mod arena {
