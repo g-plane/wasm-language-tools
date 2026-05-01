@@ -69,9 +69,9 @@ pub fn check(
                         range: node.text_range(),
                         code: DIAGNOSTIC_CODE.into(),
                         message: format!(
-                            "destination array type `{}` doesn't match source array type `{}`",
-                            dst_symbol.idx.render(ctx.db),
+                            "source array type `{}` doesn't match destination array type `{}`",
                             src_symbol.idx.render(ctx.db),
+                            dst_symbol.idx.render(ctx.db),
                         ),
                         related_information: Some(vec![
                             RelatedInformation {

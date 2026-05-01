@@ -255,7 +255,7 @@ expression: response
       "severity": 1,
       "code": "type-misuse",
       "source": "wat",
-      "message": "destination array type `$dst_array` doesn't match source array type `$src_array`",
+      "message": "source array type `$src_array` doesn't match destination array type `$dst_array`",
       "relatedInformation": [
         {
           "location": {
