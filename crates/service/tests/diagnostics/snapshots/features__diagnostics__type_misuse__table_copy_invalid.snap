@@ -1,0 +1,59 @@
+---
+source: crates/service/tests/diagnostics/type_misuse.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 4
+        },
+        "end": {
+          "line": 8,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "ref type `(ref null func)` of source table `$t1` doesn't match ref type `(ref null extern)` of destination table `$t2`",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 2
+              },
+              "end": {
+                "line": 2,
+                "character": 24
+              }
+            }
+          },
+          "message": "destination table defined here"
+        },
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 3,
+                "character": 2
+              },
+              "end": {
+                "line": 3,
+                "character": 26
+              }
+            }
+          },
+          "message": "source table defined here"
+        }
+      ]
+    }
+  ]
+}

@@ -902,3 +902,45 @@ fn br_on_non_null() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn table_copy_invalid() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (table $t1 10 funcref)
+  (table $t2 10 externref)
+  (func
+    (table.copy $t1 $t2
+      (i32.const 0)
+      (i32.const 1)
+      (i32.const 2))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn table_copy_valid() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $t (func))
+  (table $t1 10 (ref null func))
+  (table $t2 10 (ref null $t))
+  (elem $el funcref)
+  (func
+    (table.init $t1 $el (i32.const 0) (i32.const 1) (i32.const 2))
+    (table.copy $t1 $t2 (i32.const 0) (i32.const 1) (i32.const 2))
+  )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}

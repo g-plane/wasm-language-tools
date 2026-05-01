@@ -223,6 +223,40 @@ pub fn check(
                 }
             }
         }
+        Some(("table", "copy")) => {
+            let dst = immediates.next()?.to_ptr();
+            let dst_symbol = ctx.symbol_table.find_def(dst.into())?;
+            let dst_type = extract_table_ref_type(ctx.db, &dst_symbol.green)?;
+
+            let src = immediates.next()?.to_ptr();
+            let src_symbol = ctx.symbol_table.find_def(src.into())?;
+            let src_type = extract_table_ref_type(ctx.db, &src_symbol.green)?;
+
+            if !src_type.matches(&dst_type, ctx.db, ctx.document, ctx.module_id) {
+                diagnostics.push(Diagnostic {
+                    range: node.text_range(),
+                    code: DIAGNOSTIC_CODE.into(),
+                    message: format!(
+                        "ref type `{}` of source table `{}` doesn't match ref type `{}` of destination table `{}`",
+                        dst_type.render(ctx.db),
+                        dst_symbol.idx.render(ctx.db),
+                        src_type.render(ctx.db),
+                        src_symbol.idx.render(ctx.db),
+                    ),
+                    related_information: Some(vec![
+                        RelatedInformation {
+                            range: dst_symbol.key.text_range(),
+                            message: "destination table defined here".into(),
+                        },
+                        RelatedInformation {
+                            range: src_symbol.key.text_range(),
+                            message: "source table defined here".into(),
+                        },
+                    ]),
+                    ..Default::default()
+                });
+            }
+        }
         _ => match instr_name.text() {
             "call_ref" => {
                 if let Some(diagnostic) = check_type_matches(ctx, "func", immediates.next()?.to_ptr()) {
