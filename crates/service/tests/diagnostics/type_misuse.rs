@@ -860,3 +860,45 @@ fn select() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn br_on_null() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    block $l
+      br_on_null $l
+      drop
+    end
+    block $l (result i32)
+      i32.const 0
+      br_on_null $l
+      drop
+    end
+    drop))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn br_on_non_null() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    block $l
+      i32.const 0
+      br_on_non_null $l
+    end))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

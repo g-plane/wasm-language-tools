@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/type_misuse.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 21
+        },
+        "end": {
+          "line": 5,
+          "character": 23
+        }
+      },
+      "severity": 1,
+      "code": "type-misuse",
+      "source": "wat",
+      "message": "the last type of label `$l` must be ref type"
+    }
+  ]
+}

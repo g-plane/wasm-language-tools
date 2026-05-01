@@ -200,27 +200,22 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             ResolvedSig { params, results }
         }
         "br_on_non_null" => {
-            let heap_ty = if let Some(OperandType::Val(ValType::Ref(RefType { heap_ty, .. }))) = stack.last() {
-                heap_ty.clone()
-            } else {
-                HeapType::Any
-            };
-            let results = instr
+            let mut params = instr
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|idx| resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, idx.to_ptr().into()))
                 .map(|types| BumpVec::from_iter_in(types, bump))
                 .unwrap_or_else(|| BumpVec::new_in(bump));
-            let params = BumpVec::from_iter_in(
-                results
-                    .iter()
-                    .cloned()
-                    .chain(iter::once(OperandType::Val(ValType::Ref(RefType {
-                        heap_ty,
-                        nullable: true,
-                    })))),
-                bump,
-            );
+            let last = if let Some(OperandType::Val(ValType::Ref(RefType { heap_ty, .. }))) = params.pop() {
+                OperandType::Val(ValType::Ref(RefType {
+                    heap_ty,
+                    nullable: true,
+                }))
+            } else {
+                OperandType::Any
+            };
+            let results = BumpVec::from_iter_in(params.iter().cloned(), bump);
+            params.push(last);
             ResolvedSig { params, results }
         }
         "br_on_cast" => {

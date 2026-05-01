@@ -468,18 +468,20 @@ fn br_on_non_null() {
 (module
   (type $vec (struct))
   (func (param $v (ref $vec))
-    block $l (result i32)
+    block $l (result i32 (ref $vec))
       local.get $v
       i32.const 0
       br_on_non_null $l
     end
+    drop
     drop)
   (func (param $v (ref $vec))
-    block $l (result i32)
+    block $l (result i32 (ref $vec))
       i32.const 0
       local.get $v
       br_on_non_null $l
     end
+    drop
     drop))
 ";
     let mut service = LanguageService::default();

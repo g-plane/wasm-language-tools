@@ -229,6 +229,65 @@ pub fn check(
                     diagnostics.push(diagnostic);
                 }
             }
+            "br_on_null" => {
+                if let Some(outer_block) = node
+                    .to_ptr()
+                    .to_node(ctx.module)
+                    .and_then(|node| helpers::syntax::find_outer_block_for_types(&node))
+                    && let Some((stack, _)) = perform_types_till(
+                        node,
+                        &outer_block,
+                        &InstrSigResolverCtx {
+                            db: ctx.db,
+                            document: ctx.document,
+                            symbol_table: ctx.symbol_table,
+                            def_types: ctx.def_types,
+                            module: ctx.module,
+                            module_id: ctx.module_id,
+                            bump: ctx.bump,
+                        },
+                    )
+                {
+                    const BASE_MSG: &str = "first type from stack top must be ref type";
+                    match stack.last() {
+                        Some(OperandType::Val(ValType::Ref(..))) => {}
+                        Some(ty) => {
+                            diagnostics.push(Diagnostic {
+                                range: node.text_range(),
+                                code: DIAGNOSTIC_CODE.into(),
+                                message: format!("{BASE_MSG} but found `{}`", ty.render(ctx.db)),
+                                ..Default::default()
+                            });
+                        }
+                        None => {
+                            diagnostics.push(Diagnostic {
+                                range: node.text_range(),
+                                code: DIAGNOSTIC_CODE.into(),
+                                message: BASE_MSG.into(),
+                                ..Default::default()
+                            });
+                        }
+                    }
+                }
+            }
+            "br_on_non_null" => {
+                let immediate = immediates.next()?.to_ptr();
+                let last = resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, immediate.into())
+                    .and_then(|mut types| types.next_back());
+                if !matches!(last, Some(OperandType::Val(ValType::Ref(..))))
+                    && let Some(symbol) = ctx.symbol_table.symbols.get(&SymbolKey::from(immediate))
+                {
+                    diagnostics.push(Diagnostic {
+                        range: immediate.text_range(),
+                        code: DIAGNOSTIC_CODE.into(),
+                        message: format!(
+                            "the last type of label `{}` must be ref type",
+                            symbol.idx.render(ctx.db),
+                        ),
+                        ..Default::default()
+                    });
+                }
+            }
             "br_on_cast" => {
                 let label = immediates.next()?;
                 let rt_label_type = resolve_br_types(ctx.db, ctx.document, ctx.symbol_table, label.to_ptr().into())

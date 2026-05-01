@@ -69,10 +69,12 @@ fn simple_reachable() {
     end
     nop)
   (func (param (ref null $s))
-    block $l
+    block $l (result (ref null $s))
       local.get 0
       br_on_non_null $l
+      ref.null $s
     end
+    drop
     nop))
 ";
     let mut service = LanguageService::default();

@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "type-check",
       "source": "wat",
-      "message": "expected types [i32, (ref null any)], found [(ref $vec), i32]",
+      "message": "expected types [i32, (ref null $vec)], found [(ref $vec), i32]",
       "relatedInformation": [
         {
           "location": {
@@ -35,7 +35,7 @@ expression: response
               }
             }
           },
-          "message": "expected type `(ref null any)`, found `i32`"
+          "message": "expected type `(ref null $vec)`, found `i32`"
         },
         {
           "location": {
@@ -52,6 +52,74 @@ expression: response
             }
           },
           "message": "expected type `i32`, found `(ref $vec)`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 8,
+          "character": 4
+        },
+        "end": {
+          "line": 8,
+          "character": 7
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, (ref $vec)], found [i32] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 7,
+                "character": 6
+              },
+              "end": {
+                "line": 7,
+                "character": 23
+              }
+            }
+          },
+          "message": "expected type `(ref $vec)`, found `i32`"
+        }
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 16,
+          "character": 4
+        },
+        "end": {
+          "line": 16,
+          "character": 7
+        }
+      },
+      "severity": 1,
+      "code": "type-check",
+      "source": "wat",
+      "message": "expected types [i32, (ref $vec)], found [i32] at the end",
+      "relatedInformation": [
+        {
+          "location": {
+            "uri": "untitled:test",
+            "range": {
+              "start": {
+                "line": 15,
+                "character": 6
+              },
+              "end": {
+                "line": 15,
+                "character": 23
+              }
+            }
+          },
+          "message": "expected type `(ref $vec)`, found `i32`"
         }
       ]
     }
