@@ -55,7 +55,13 @@ fn correct() {
   (func (result f64)
     f32.const 0
     i32.const 0
-    call_indirect (param f32) (result f64)))
+    call_indirect (param f32) (result f64))
+
+  (table i64 0 funcref)
+  (func (result f64)
+    f32.const 0
+    i64.const 0
+    call_indirect 1 (type 0)))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

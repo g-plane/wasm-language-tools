@@ -293,7 +293,17 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .find_map(|child| child.children_by_kind(SyntaxKind::TYPE_USE).next())
                 .map(|node| ResolvedSig::from_sig_in(Sig::from_type_use(ctx.db, ctx.document, node), bump))
                 .unwrap_or_else(|| ResolvedSig::new_in(bump));
-            sig.params.push(OperandType::Val(ValType::I32));
+            let at = instr
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .find(|immediate| {
+                    immediate
+                        .tokens_by_kind([SyntaxKind::INT, SyntaxKind::UNSIGNED_INT, SyntaxKind::IDENT])
+                        .next()
+                        .is_some()
+                })
+                .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+            sig.params.push(OperandType::Val(at));
             sig
         }
         "struct.new" => instr
