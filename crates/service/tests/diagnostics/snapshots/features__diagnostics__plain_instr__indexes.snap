@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "plain-instr",
       "source": "wat",
-      "message": "unexpected immediate"
+      "message": "expected identifier or unsigned integer"
     },
     {
       "range": {
@@ -35,7 +35,7 @@ expression: response
       "severity": 1,
       "code": "plain-instr",
       "source": "wat",
-      "message": "unexpected immediate"
+      "message": "expected identifier or unsigned integer"
     },
     {
       "range": {
