@@ -390,7 +390,7 @@ fn table_init() {
       (i64.const 0)
       (i32.const 0)
       (i32.const 0)))
-  (elem 0))
+  (elem externref))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

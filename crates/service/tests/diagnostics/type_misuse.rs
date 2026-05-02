@@ -944,3 +944,34 @@ fn table_copy_valid() {
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
+
+#[test]
+fn table_init() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func $f)
+  (table $t1 1 externref)
+  (elem $e1 funcref
+    (ref.func $f))
+  (func
+    (table.init $e1
+      (i32.const 0)
+      (i32.const 0)
+      (i32.const 1)))
+
+  (table $t2 1 funcref)
+  (elem $e2 externref
+    (ref.null extern))
+  (func
+    (table.init $t2 $e2
+      (i32.const 0)
+      (i32.const 0)
+      (i32.const 1))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

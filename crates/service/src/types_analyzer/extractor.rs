@@ -1,6 +1,6 @@
 use super::{
     signature::NamedSig,
-    types::{FieldType, Fields, RefType, ValType},
+    types::{FieldType, Fields, HeapType, RefType, ValType},
 };
 use crate::idx::{Idx, IdxGen, InternIdent};
 use std::ops::ControlFlow;
@@ -144,4 +144,24 @@ pub(crate) fn extract_table_ref_type<'db>(db: &'db dyn salsa::Database, node: &G
             NodeOrToken::Token(..) => None,
         })
         .and_then(|node| RefType::from_green(node, db))
+}
+
+pub(crate) fn extract_elem_ref_type<'db>(db: &'db dyn salsa::Database, node: &GreenNode) -> Option<RefType<'db>> {
+    node.children()
+        .find_map(|child| match child {
+            NodeOrToken::Node(node) if node.kind() == SyntaxKind::ELEM_LIST => Some(node),
+            _ => None,
+        })
+        .map(|node| {
+            node.children()
+                .find_map(|child| match child {
+                    NodeOrToken::Node(node) if node.kind() == SyntaxKind::REF_TYPE => Some(node),
+                    _ => None,
+                })
+                .and_then(|node| RefType::from_green(node, db))
+                .unwrap_or(RefType {
+                    heap_ty: HeapType::Func,
+                    nullable: false,
+                })
+        })
 }

@@ -2,9 +2,10 @@ use super::{Diagnostic, DiagnosticCtx, RelatedInformation};
 use crate::{
     binder::{Symbol, SymbolKey, SymbolKind},
     helpers,
+    idx::Idx,
     types_analyzer::{
         CompositeType, FieldType, HeapType, InstrSigResolverCtx, NamedSig, OperandType, RefType, Sig, ValType,
-        extract_table_ref_type, find_comp_type_by_idx, perform_types_till, resolve_br_types,
+        extract_elem_ref_type, extract_table_ref_type, find_comp_type_by_idx, perform_types_till, resolve_br_types,
     },
 };
 use wat_syntax::{AmberNode, AmberToken, SyntaxKind, SyntaxNodePtr};
@@ -251,6 +252,51 @@ pub fn check(
                         RelatedInformation {
                             range: src_symbol.key.text_range(),
                             message: "source table defined here".into(),
+                        },
+                    ]),
+                    ..Default::default()
+                });
+            }
+        }
+        Some(("table", "init")) => {
+            let symbol = ctx.symbol_table.find_def(immediates.next()?.to_ptr().into())?;
+            let (table_symbol, table_type, elem_symbol, elem_type) = if symbol.kind == SymbolKind::TableDef {
+                let table_type = extract_table_ref_type(ctx.db, &symbol.green)?;
+                let elem_symbol = ctx.symbol_table.find_def(immediates.next()?.to_ptr().into())?;
+                let elem_type = extract_elem_ref_type(ctx.db, &elem_symbol.green)?;
+                (symbol, table_type, elem_symbol, elem_type)
+            } else {
+                let table_symbol = ctx.symbol_table.find_def_by_idx(
+                    Idx {
+                        num: Some(0),
+                        name: None,
+                    },
+                    SymbolKind::TableDef,
+                    SymbolKey::new(ctx.module),
+                )?;
+                let table_type = extract_table_ref_type(ctx.db, &table_symbol.green)?;
+                let elem_type = extract_elem_ref_type(ctx.db, &symbol.green)?;
+                (table_symbol, table_type, symbol, elem_type)
+            };
+            if !elem_type.matches(&table_type, ctx.db, ctx.document, ctx.module_id) {
+                diagnostics.push(Diagnostic {
+                    range: node.text_range(),
+                    code: DIAGNOSTIC_CODE.into(),
+                    message: format!(
+                        "ref type `{}` of element segment `{}` doesn't match ref type `{}` of table `{}`",
+                        elem_type.render(ctx.db),
+                        elem_symbol.idx.render(ctx.db),
+                        table_type.render(ctx.db),
+                        table_symbol.idx.render(ctx.db),
+                    ),
+                    related_information: Some(vec![
+                        RelatedInformation {
+                            range: table_symbol.key.text_range(),
+                            message: format!("table `{}` defined here", table_symbol.idx.render(ctx.db)),
+                        },
+                        RelatedInformation {
+                            range: elem_symbol.key.text_range(),
+                            message: format!("element segment `{}` defined here", elem_symbol.idx.render(ctx.db)),
                         },
                     ]),
                     ..Default::default()
