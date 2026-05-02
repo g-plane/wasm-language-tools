@@ -35,7 +35,7 @@ expression: response
               }
             }
           },
-          "message": "destination table defined here"
+          "message": "destination table `$t1` defined here"
         },
         {
           "location": {
@@ -51,7 +51,7 @@ expression: response
               }
             }
           },
-          "message": "source table defined here"
+          "message": "source table `$t2` defined here"
         }
       ]
     }

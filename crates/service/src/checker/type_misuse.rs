@@ -77,11 +77,14 @@ pub fn check(
                         related_information: Some(vec![
                             RelatedInformation {
                                 range: dst_symbol.key.text_range(),
-                                message: "destination array type defined here".into(),
+                                message: format!(
+                                    "destination array type `{}` defined here",
+                                    dst_symbol.idx.render(ctx.db),
+                                ),
                             },
                             RelatedInformation {
                                 range: src_symbol.key.text_range(),
-                                message: "source array type defined here".into(),
+                                message: format!("source array type `{}` defined here", src_symbol.idx.render(ctx.db)),
                             },
                         ]),
                         ..Default::default()
@@ -247,11 +250,11 @@ pub fn check(
                     related_information: Some(vec![
                         RelatedInformation {
                             range: dst_symbol.key.text_range(),
-                            message: "destination table defined here".into(),
+                            message: format!("destination table `{}` defined here", dst_symbol.idx.render(ctx.db)),
                         },
                         RelatedInformation {
                             range: src_symbol.key.text_range(),
-                            message: "source table defined here".into(),
+                            message: format!("source table `{}` defined here", src_symbol.idx.render(ctx.db)),
                         },
                     ]),
                     ..Default::default()
