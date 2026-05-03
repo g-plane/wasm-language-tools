@@ -4,8 +4,9 @@ use crate::{
     helpers,
     idx::Idx,
     types_analyzer::{
-        CompositeType, FieldType, HeapType, InstrSigResolverCtx, NamedSig, OperandType, RefType, Sig, ValType,
-        extract_elem_ref_type, extract_table_ref_type, find_comp_type_by_idx, perform_types_till, resolve_br_types,
+        CompositeType, FieldType, HeapType, InstrSigResolverCtx, NamedSig, OperandType, RefType, Sig, StorageType,
+        ValType, extract_elem_ref_type, extract_table_ref_type, find_comp_type_by_idx, perform_types_till,
+        resolve_br_types,
     },
 };
 use wat_syntax::{AmberNode, AmberToken, SyntaxKind, SyntaxNodePtr};
@@ -138,6 +139,44 @@ pub fn check(
                             message: format!("element segment `{}` defined here", elem_symbol.idx.render(ctx.db)),
                         },
                     ]),
+                    ..Default::default()
+                });
+            }
+        }
+        Some(("array", "new_data" | "init_data")) => {
+            let array = immediates.next()?.to_ptr();
+            let array_symbol = ctx.symbol_table.find_def(array.into())?;
+            let FieldType {
+                storage: array_type, ..
+            } = match &ctx.def_types.get(&array_symbol.key)?.comp {
+                CompositeType::Func(..) => {
+                    diagnostics.push(build_diagnostic("array", "func", array, array_symbol, ctx.db));
+                    None
+                }
+                CompositeType::Struct(..) => {
+                    diagnostics.push(build_diagnostic("array", "struct", array, array_symbol, ctx.db));
+                    None
+                }
+                CompositeType::Array(field_type) => field_type.as_ref(),
+                CompositeType::Cont(..) => {
+                    diagnostics.push(build_diagnostic("array", "cont", array, array_symbol, ctx.db));
+                    None
+                }
+            }?;
+            if !matches!(
+                array_type,
+                StorageType::Val(ValType::I32 | ValType::I64 | ValType::F32 | ValType::F64 | ValType::V128)
+                    | StorageType::PackedI8
+                    | StorageType::PackedI16
+            ) {
+                diagnostics.push(Diagnostic {
+                    range: array.text_range(),
+                    code: DIAGNOSTIC_CODE.into(),
+                    message: format!(
+                        "array type `{}` must be number type or vector type but found `{}`",
+                        array_symbol.idx.render(ctx.db),
+                        array_type.render(ctx.db),
+                    ),
                     ..Default::default()
                 });
             }

@@ -1006,3 +1006,28 @@ fn array_elem() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn array_data() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (type $a (array (mut funcref)))
+  (data $d1 \"a\")
+  (func (param $1 (ref $a))
+    (array.init_data $a $d1
+      (local.get $1)
+      (i32.const 0)
+      (i32.const 0)
+      (i32.const 0)))
+  (func (result (ref $a))
+    (array.new_data $a $d1
+      (i32.const 0)
+      (i32.const 0))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

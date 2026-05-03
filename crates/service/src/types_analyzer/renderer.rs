@@ -213,11 +213,7 @@ impl Display for RenderWithDb<'_, &FieldType<'_>> {
         if self.value.mutable {
             write!(f, "(mut ")?;
         }
-        match &self.value.storage {
-            StorageType::Val(ty) => write!(f, "{}", ty.render(self.db))?,
-            StorageType::PackedI8 => write!(f, "i8")?,
-            StorageType::PackedI16 => write!(f, "i16")?,
-        }
+        self.value.storage.render(self.db).fmt(f)?;
         if self.value.mutable {
             write!(f, ")")?;
         }
@@ -245,6 +241,21 @@ impl Display for RenderWithDb<'_, &Fields<'_>> {
             Ok(false)
         })?;
         Ok(())
+    }
+}
+
+impl<'db> StorageType<'db> {
+    pub(crate) fn render(&self, db: &'db dyn salsa::Database) -> RenderWithDb<'db, &Self> {
+        RenderWithDb { value: self, db }
+    }
+}
+impl Display for RenderWithDb<'_, &StorageType<'_>> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.value {
+            StorageType::Val(ty) => write!(f, "{}", ty.render(self.db)),
+            StorageType::PackedI8 => write!(f, "i8"),
+            StorageType::PackedI16 => write!(f, "i16"),
+        }
     }
 }
 

@@ -229,7 +229,8 @@ fn array_update() {
     let source = "
 (module
   (type (array (mut externref)))
-  (func (param (ref 0))
+  (type (array (mut i8)))
+  (func (param (ref 0) (ref 1))
     local.get 0
     i32.const 0
     ref.null extern
@@ -241,11 +242,11 @@ fn array_update() {
     i32.const 0
     array.fill 0
 
-    local.get 0
+    local.get 1
     i32.const 0
     i32.const 0
     i32.const 0
-    array.init_data 0 0
+    array.init_data 1 0
 
     local.get 0
     i32.const 0
