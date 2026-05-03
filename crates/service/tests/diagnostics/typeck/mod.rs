@@ -239,3 +239,51 @@ fn excessive_at_end() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn any_convert_extern() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    any.convert_extern
+    drop)
+  (func (param (ref null array))
+    local.get 0
+    any.convert_extern
+    drop)
+  (func (param (ref array))
+    local.get 0
+    any.convert_extern
+    drop))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn extern_convert_any() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+    extern.convert_any
+    drop)
+  (func (param (ref null array))
+    local.get 0
+    extern.convert_any
+    drop)
+  (func (param (ref array))
+    local.get 0
+    extern.convert_any
+    drop))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

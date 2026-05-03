@@ -1331,6 +1331,52 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 ),
                 results: BumpVec::new_in(bump),
             }),
+        "any.convert_extern" => {
+            let nullable = if let Some(OperandType::Val(ValType::Ref(RefType { nullable, .. }))) = stack.last() {
+                *nullable
+            } else {
+                true
+            };
+            ResolvedSig {
+                params: BumpVec::from_iter_in(
+                    [OperandType::Val(ValType::Ref(RefType {
+                        heap_ty: HeapType::Extern,
+                        nullable,
+                    }))],
+                    bump,
+                ),
+                results: BumpVec::from_iter_in(
+                    [OperandType::Val(ValType::Ref(RefType {
+                        heap_ty: HeapType::Any,
+                        nullable,
+                    }))],
+                    bump,
+                ),
+            }
+        }
+        "extern.convert_any" => {
+            let nullable = if let Some(OperandType::Val(ValType::Ref(RefType { nullable, .. }))) = stack.last() {
+                *nullable
+            } else {
+                true
+            };
+            ResolvedSig {
+                params: BumpVec::from_iter_in(
+                    [OperandType::Val(ValType::Ref(RefType {
+                        heap_ty: HeapType::Any,
+                        nullable,
+                    }))],
+                    bump,
+                ),
+                results: BumpVec::from_iter_in(
+                    [OperandType::Val(ValType::Ref(RefType {
+                        heap_ty: HeapType::Extern,
+                        nullable,
+                    }))],
+                    bump,
+                ),
+            }
+        }
         _ => data_set::INSTR_SIG
             .get(instr_name)
             .map(|sig| ResolvedSig {

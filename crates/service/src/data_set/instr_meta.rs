@@ -3,7 +3,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::{collections::HashMap, sync::LazyLock};
 
 pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = LazyLock::new(|| {
-    let mut map = HashMap::with_capacity_and_hasher(460, FxBuildHasher);
+    let mut map = HashMap::with_capacity_and_hasher(458, FxBuildHasher);
     map.insert(
         "unreachable",
         ResolvedSig {
@@ -1010,32 +1010,6 @@ pub(crate) static INSTR_SIG: LazyLock<FxHashMap<&'static str, ResolvedSig>> = La
                 nullable: true,
             }))],
             results: vec![Val(I32)],
-        },
-    );
-    map.insert(
-        "any.convert_extern",
-        ResolvedSig {
-            params: vec![Val(Ref(RefType {
-                heap_ty: HeapType::Extern,
-                nullable: true,
-            }))],
-            results: vec![Val(Ref(RefType {
-                heap_ty: HeapType::Any,
-                nullable: true,
-            }))],
-        },
-    );
-    map.insert(
-        "extern.convert_any",
-        ResolvedSig {
-            params: vec![Val(Ref(RefType {
-                heap_ty: HeapType::Any,
-                nullable: true,
-            }))],
-            results: vec![Val(Ref(RefType {
-                heap_ty: HeapType::Extern,
-                nullable: true,
-            }))],
         },
     );
     map.insert(
