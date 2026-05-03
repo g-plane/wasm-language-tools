@@ -91,12 +91,12 @@ fn new_elem() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-  (type $vec (array f32))
+  (type $vec (array externref))
   (func (result (ref $vec))
     (array.new_elem $vec $d
       (i32.const 1)
       (i32.const 3)))
-  (elem $d 0))
+  (elem $d externref))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

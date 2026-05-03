@@ -93,6 +93,55 @@ pub fn check(
                 _ => {}
             }
         }
+        Some(("array", "new_elem" | "init_elem")) => {
+            let array = immediates.next()?.to_ptr();
+            let array_symbol = ctx.symbol_table.find_def(array.into())?;
+            let array_type = match &ctx.def_types.get(&array_symbol.key)?.comp {
+                CompositeType::Func(..) => {
+                    diagnostics.push(build_diagnostic("array", "func", array, array_symbol, ctx.db));
+                    None
+                }
+                CompositeType::Struct(..) => {
+                    diagnostics.push(build_diagnostic("array", "struct", array, array_symbol, ctx.db));
+                    None
+                }
+                CompositeType::Array(field_type) => field_type.as_ref(),
+                CompositeType::Cont(..) => {
+                    diagnostics.push(build_diagnostic("array", "cont", array, array_symbol, ctx.db));
+                    None
+                }
+            }?
+            .clone()
+            .into();
+
+            let elem_symbol = ctx.symbol_table.find_def(immediates.next()?.to_ptr().into())?;
+            let elem_type = extract_elem_ref_type(ctx.db, &elem_symbol.green)?;
+
+            if !ValType::Ref(elem_type.clone()).matches(&array_type, ctx.db, ctx.document, ctx.module_id) {
+                diagnostics.push(Diagnostic {
+                    range: node.text_range(),
+                    code: DIAGNOSTIC_CODE.into(),
+                    message: format!(
+                        "ref type `{}` of element segment `{}` doesn't match ref type `{}` of array type `{}`",
+                        elem_type.render(ctx.db),
+                        elem_symbol.idx.render(ctx.db),
+                        array_type.render(ctx.db),
+                        array_symbol.idx.render(ctx.db),
+                    ),
+                    related_information: Some(vec![
+                        RelatedInformation {
+                            range: array_symbol.key.text_range(),
+                            message: format!("array type `{}` defined here", array_symbol.idx.render(ctx.db)),
+                        },
+                        RelatedInformation {
+                            range: elem_symbol.key.text_range(),
+                            message: format!("element segment `{}` defined here", elem_symbol.idx.render(ctx.db)),
+                        },
+                    ]),
+                    ..Default::default()
+                });
+            }
+        }
         Some(("array", _)) => {
             if let Some(diagnostic) = check_type_matches(ctx, "array", immediates.next()?.to_ptr()) {
                 diagnostics.push(diagnostic);

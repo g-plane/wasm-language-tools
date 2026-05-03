@@ -65,7 +65,12 @@ pub(super) fn resolve_array_type_with_idx<'db>(
         .and_then(|key| def_types.get(key))
         .map(|def_type| {
             if let CompositeType::Array(field) = &def_type.comp {
-                (def_type.idx, field.as_ref().map(|field| field.storage.clone().into()))
+                (
+                    def_type.idx,
+                    field
+                        .as_ref()
+                        .map(|field| OperandType::Val(field.storage.clone().into())),
+                )
             } else {
                 (def_type.idx, None)
             }
@@ -112,6 +117,7 @@ pub(super) fn resolve_field_type_with_struct_idx<'db>(
 ) -> Option<(Idx<'db>, Option<OperandType<'db>>)> {
     let symbol_table = SymbolTable::of(db, document);
     let struct_def_symbol = symbol_table.find_def(struct_ref.into())?;
-    let ty = resolve_field_type(db, document, field_ref.into(), struct_def_symbol.key).map(|ty| ty.into());
+    let ty =
+        resolve_field_type(db, document, field_ref.into(), struct_def_symbol.key).map(|ty| OperandType::Val(ty.into()));
     Some((struct_def_symbol.idx, ty))
 }

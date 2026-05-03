@@ -228,16 +228,16 @@ fn array_update() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-  (type (array (mut i32)))
+  (type (array (mut externref)))
   (func (param (ref 0))
     local.get 0
     i32.const 0
-    i32.const 0
+    ref.null extern
     array.set 0
 
     local.get 0
     i32.const 0
-    i32.const 0
+    ref.null extern
     i32.const 0
     array.fill 0
 
@@ -253,7 +253,7 @@ fn array_update() {
     i32.const 0
     array.init_elem 0 0)
   (data)
-  (elem 0))
+  (elem externref))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

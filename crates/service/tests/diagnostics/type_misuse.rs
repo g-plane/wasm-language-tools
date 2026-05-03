@@ -975,3 +975,34 @@ fn table_init() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn array_elem() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func $f)
+  (elem $e1 funcref
+    (ref.func $f))
+  (type $a1 (array (mut externref)))
+  (func (result (ref $a1))
+    (array.new_elem $a1 $e1
+      (i32.const 0)
+      (i32.const 1)))
+
+  (type $a2 (array (mut funcref)))
+  (elem $e2 externref
+    (ref.null extern))
+  (func
+    (array.init_elem $a2 $e2
+      (ref.null $a2)
+      (i32.const 0)
+      (i32.const 0)
+      (i32.const 1))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

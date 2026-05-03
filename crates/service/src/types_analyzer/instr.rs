@@ -313,7 +313,13 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             .and_then(|key| ctx.def_types.get(key))
             .map(|def_type| {
                 let params = if let CompositeType::Struct(fields) = &def_type.comp {
-                    BumpVec::from_iter_in(fields.0.iter().map(|(field, _)| field.storage.clone().into()), bump)
+                    BumpVec::from_iter_in(
+                        fields
+                            .0
+                            .iter()
+                            .map(|(field, _)| OperandType::Val(field.storage.clone().into())),
+                        bump,
+                    )
                 } else {
                     BumpVec::new_in(bump)
                 };

@@ -72,6 +72,19 @@ impl<'db> ValType<'db> {
         }
     }
 }
+impl<'db> From<StorageType<'db>> for ValType<'db> {
+    fn from(value: StorageType<'db>) -> Self {
+        match value {
+            StorageType::Val(ty) => ty,
+            StorageType::PackedI8 | StorageType::PackedI16 => ValType::I32,
+        }
+    }
+}
+impl<'db> From<FieldType<'db>> for ValType<'db> {
+    fn from(value: FieldType<'db>) -> Self {
+        value.storage.into()
+    }
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, salsa::Update)]
 pub(crate) struct RefType<'db> {
@@ -422,19 +435,6 @@ impl<'db> OperandType<'db> {
             (OperandType::Val(sub), OperandType::Val(sup)) => sub.matches(sup, db, document, module_id),
             (OperandType::Any, _) | (_, OperandType::Any) => true,
         }
-    }
-}
-impl<'db> From<StorageType<'db>> for OperandType<'db> {
-    fn from(value: StorageType<'db>) -> Self {
-        match value {
-            StorageType::Val(ty) => OperandType::Val(ty),
-            StorageType::PackedI8 | StorageType::PackedI16 => OperandType::Val(ValType::I32),
-        }
-    }
-}
-impl<'db> From<FieldType<'db>> for OperandType<'db> {
-    fn from(value: FieldType<'db>) -> Self {
-        value.storage.into()
     }
 }
 
