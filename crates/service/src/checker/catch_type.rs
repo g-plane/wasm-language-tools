@@ -14,10 +14,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
         SyntaxKind::CATCH => {
             let mut indexes = node.children_by_kind(SyntaxKind::INDEX);
             let tag = ctx.symbol_table.find_def(indexes.next()?.to_ptr().into())?;
-            let mut results = BumpVec::from_iter_in(
-                Sig::from_func(ctx.db, ctx.document, tag.amber()).params.into_iter(),
-                ctx.bump,
-            );
+            let mut results = BumpVec::from_iter_in(Sig::from_func(ctx.db, ctx.document, tag.amber()).params, ctx.bump);
             if node.tokens_by_kind(SyntaxKind::KEYWORD).next()?.text() == "catch_ref" {
                 results.push(ValType::Ref(RefType {
                     heap_ty: HeapType::Exn,
