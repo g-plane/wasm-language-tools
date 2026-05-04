@@ -5,7 +5,7 @@ use wat_syntax::{AmberNode, AmberToken, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "lane";
 
-pub fn check(node: AmberNode, instr_name: AmberToken) -> Option<Diagnostic> {
+pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: AmberToken) -> Option<()> {
     match instr_name.text().split_once('.')? {
         ("v128", right) => {
             let n = right
@@ -17,29 +17,59 @@ pub fn check(node: AmberNode, instr_name: AmberToken) -> Option<Diagnostic> {
             let max = 128 / n;
             let mut immediates = node.children_by_kind(SyntaxKind::IMMEDIATE);
             let second = immediates.nth(1);
-            immediates
+            if let Some(diagnostic) = immediates
                 .next()
                 .or(second)
                 .and_then(|immediate| check_immediate(immediate, max))
+            {
+                diagnostics.push(diagnostic);
+            }
         }
-        ("i8x16", "extract_lane_s" | "extract_lane_u" | "replace_lane") => node
-            .children_by_kind(SyntaxKind::IMMEDIATE)
-            .next()
-            .and_then(|immediate| check_immediate(immediate, 16)),
-        ("i16x8", "extract_lane_s" | "extract_lane_u" | "replace_lane") => node
-            .children_by_kind(SyntaxKind::IMMEDIATE)
-            .next()
-            .and_then(|immediate| check_immediate(immediate, 8)),
-        ("i32x4" | "f32x4", "extract_lane" | "replace_lane") => node
-            .children_by_kind(SyntaxKind::IMMEDIATE)
-            .next()
-            .and_then(|immediate| check_immediate(immediate, 4)),
-        ("i64x2" | "f64x2", "extract_lane" | "replace_lane") => node
-            .children_by_kind(SyntaxKind::IMMEDIATE)
-            .next()
-            .and_then(|immediate| check_immediate(immediate, 2)),
-        _ => None,
+        ("i8x16", "extract_lane_s" | "extract_lane_u" | "replace_lane") => {
+            if let Some(diagnostic) = node
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| check_immediate(immediate, 16))
+            {
+                diagnostics.push(diagnostic);
+            }
+        }
+        ("i16x8", "extract_lane_s" | "extract_lane_u" | "replace_lane") => {
+            if let Some(diagnostic) = node
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| check_immediate(immediate, 8))
+            {
+                diagnostics.push(diagnostic);
+            }
+        }
+        ("i32x4" | "f32x4", "extract_lane" | "replace_lane") => {
+            if let Some(diagnostic) = node
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| check_immediate(immediate, 4))
+            {
+                diagnostics.push(diagnostic);
+            }
+        }
+        ("i64x2" | "f64x2", "extract_lane" | "replace_lane") => {
+            if let Some(diagnostic) = node
+                .children_by_kind(SyntaxKind::IMMEDIATE)
+                .next()
+                .and_then(|immediate| check_immediate(immediate, 2))
+            {
+                diagnostics.push(diagnostic);
+            }
+        }
+        ("i8x16", "shuffle") => {
+            diagnostics.extend(
+                node.children_by_kind(SyntaxKind::IMMEDIATE)
+                    .filter_map(|immediate| check_immediate(immediate, 32)),
+            );
+        }
+        _ => {}
     }
+    None
 }
 
 fn check_immediate(immediate: AmberNode, max: u32) -> Option<Diagnostic> {

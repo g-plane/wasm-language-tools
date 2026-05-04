@@ -119,9 +119,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                         if let Some(diagnostic) = mem_arg::check(ctx, node, instr_name) {
                             diagnostics.push(diagnostic);
                         }
-                        if let Some(diagnostic) = lane::check(node, instr_name) {
-                            diagnostics.push(diagnostic);
-                        }
+                        lane::check(diagnostics, node, instr_name);
                     }
                     ctx.bump.reset();
                 }

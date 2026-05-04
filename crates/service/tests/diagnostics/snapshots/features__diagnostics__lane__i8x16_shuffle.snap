@@ -1,0 +1,41 @@
+---
+source: crates/service/tests/diagnostics/lane.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 51
+        },
+        "end": {
+          "line": 3,
+          "character": 53
+        }
+      },
+      "severity": 1,
+      "code": "lane",
+      "source": "wat",
+      "message": "lane index must be less than 32"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 54
+        },
+        "end": {
+          "line": 3,
+          "character": 57
+        }
+      },
+      "severity": 1,
+      "code": "lane",
+      "source": "wat",
+      "message": "lane index must be less than 32"
+    }
+  ]
+}

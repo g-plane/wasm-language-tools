@@ -115,3 +115,20 @@ fn uint() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn i8x16_shuffle() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func (result v128)
+    (i8x16.shuffle 0 1 2 3 4 5 6 7 8 9 10 11 12 13 32 255
+      (v128.const i8x16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0)
+      (v128.const i8x16 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    calm(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

@@ -36,38 +36,6 @@ expression: response
       "code": "plain-instr",
       "source": "wat",
       "message": "expected 16 lane indices in `i8x16.shuffle`, found 15"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 17,
-          "character": 18
-        },
-        "end": {
-          "line": 17,
-          "character": 20
-        }
-      },
-      "severity": 1,
-      "code": "plain-instr",
-      "source": "wat",
-      "message": "laneidx must be smaller than 32"
-    },
-    {
-      "range": {
-        "start": {
-          "line": 17,
-          "character": 54
-        },
-        "end": {
-          "line": 17,
-          "character": 56
-        }
-      },
-      "severity": 1,
-      "code": "plain-instr",
-      "source": "wat",
-      "message": "laneidx must be smaller than 32"
     }
   ]
 }

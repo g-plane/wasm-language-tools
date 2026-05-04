@@ -303,7 +303,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
             );
         }
         "i8x16.shuffle" => {
-            let immediates_count = immediates.clone().count();
+            let immediates_count = immediates.count();
             if immediates_count != 16 {
                 diagnostics.push(Diagnostic {
                     range: node.text_range(),
@@ -312,23 +312,6 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
                     ..Default::default()
                 });
             }
-            immediates.for_each(|immediate| {
-                if immediate
-                    .green()
-                    .children()
-                    .next()
-                    .and_then(NodeOrToken::into_token)
-                    .and_then(|token| token.text().parse::<u8>().ok())
-                    .is_some_and(|idx| idx >= 32)
-                {
-                    diagnostics.push(Diagnostic {
-                        range: immediate.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
-                        message: "laneidx must be smaller than 32".into(),
-                        ..Default::default()
-                    });
-                }
-            });
             return;
         }
         "v128.load8_lane" | "v128.load16_lane" | "v128.load32_lane" | "v128.load64_lane" | "v128.store8_lane"
