@@ -8,7 +8,8 @@ fn overflow() {
     let source = "
 (module
   (memory 1000000 1000000)
-  (memory 99999999999999999999999 99999999999999999999999))
+  (memory 99999999999999999999999 99999999999999999999999)
+  (memory i64 9999999999 99999999999999999999999))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
@@ -77,10 +78,11 @@ fn invalid_page_size() {
 #[test]
 fn page_size_1() {
     let uri = "untitled:test".to_string();
-    let source = "
+    let source = r#"
 (module
+  (import "" "" (memory i64 9999999999 99999999999999999999999 (pagesize 1)))
   (memory 99999999999999999999999 99999999999999999999991 (pagesize 1)))
-";
+"#;
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
     calm(&mut service, &uri);
@@ -91,10 +93,11 @@ fn page_size_1() {
 #[test]
 fn page_size_65536() {
     let uri = "untitled:test".to_string();
-    let source = "
+    let source = r#"
 (module
+  (import "" "" (memory i64 9999999999 99999999999999999999999 (pagesize 65536)))
   (memory 100000 110000 (pagesize 65536)))
-";
+"#;
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
     calm(&mut service, &uri);

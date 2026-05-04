@@ -36,6 +36,22 @@ expression: response
       "code": "mem-type",
       "source": "wat",
       "message": "memory size can't be greater than 4294967295"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 25
+        },
+        "end": {
+          "line": 4,
+          "character": 48
+        }
+      },
+      "severity": 1,
+      "code": "mem-type",
+      "source": "wat",
+      "message": "memory size can't be greater than 18446744073709551615"
     }
   ]
 }

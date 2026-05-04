@@ -9,10 +9,26 @@ expression: response
       "range": {
         "start": {
           "line": 2,
-          "character": 10
+          "character": 39
         },
         "end": {
           "line": 2,
+          "character": 62
+        }
+      },
+      "severity": 1,
+      "code": "mem-type",
+      "source": "wat",
+      "message": "memory size can't be greater than 18446744073709551615"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 10
+        },
+        "end": {
+          "line": 3,
           "character": 33
         }
       },
@@ -24,11 +40,11 @@ expression: response
     {
       "range": {
         "start": {
-          "line": 2,
+          "line": 3,
           "character": 34
         },
         "end": {
-          "line": 2,
+          "line": 3,
           "character": 57
         }
       },

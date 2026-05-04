@@ -1,5 +1,8 @@
 use super::Diagnostic;
-use crate::helpers;
+use crate::{
+    helpers,
+    types_analyzer::{self, ValType},
+};
 use std::num::IntErrorKind;
 use wat_syntax::{AmberNode, AmberToken, SyntaxKind};
 
@@ -27,15 +30,27 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode) -> Option<()> {
     } else {
         1
     };
-    let upper_bound = if page_size == 1 {
-        u32::MAX
-    } else {
-        (2u64.pow(32) / page_size as u64) as u32
+    let upper_bound = match types_analyzer::extract_addr_type(node.green()) {
+        ValType::I32 => {
+            if page_size == 1 {
+                u32::MAX as u64
+            } else {
+                2u64.pow(32) / page_size as u64
+            }
+        }
+        ValType::I64 => {
+            if page_size == 1 {
+                u64::MAX
+            } else {
+                (2u128.pow(64) / page_size as u128) as u64
+            }
+        }
+        _ => return None,
     };
 
     let mut uints = limits.tokens_by_kind(SyntaxKind::UNSIGNED_INT);
     let min_token = uints.next()?;
-    let min = match helpers::parse_u32(min_token.text()) {
+    let min = match helpers::parse_u64(min_token.text()) {
         Ok(min) => {
             if min > upper_bound {
                 diagnostics.push(report_overflow(min_token, upper_bound));
@@ -49,7 +64,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode) -> Option<()> {
         Err(_) => return None,
     };
     if let Some(max_token) = uints.next() {
-        let max = match helpers::parse_u32(max_token.text()) {
+        let max = match helpers::parse_u64(max_token.text()) {
             Ok(max) => {
                 if max > upper_bound {
                     diagnostics.push(report_overflow(max_token, upper_bound));
@@ -84,7 +99,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode) -> Option<()> {
     Some(())
 }
 
-fn report_overflow(token: AmberToken, upper_bound: u32) -> Diagnostic {
+fn report_overflow(token: AmberToken, upper_bound: u64) -> Diagnostic {
     Diagnostic {
         range: token.text_range(),
         code: DIAGNOSTIC_CODE.into(),
