@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "catch-type",
       "source": "wat",
-      "message": "result type [(ref exn)] should match result type of block `0`"
+      "message": "result type `[(ref exn)]` should match result type of block `0`"
     },
     {
       "range": {
@@ -35,7 +35,7 @@ expression: response
       "severity": 1,
       "code": "catch-type",
       "source": "wat",
-      "message": "result type [] should match result type of block `0`"
+      "message": "result type `[]` should match result type of block `0`"
     },
     {
       "range": {
@@ -51,7 +51,7 @@ expression: response
       "severity": 1,
       "code": "catch-type",
       "source": "wat",
-      "message": "result type [(ref exn)] should match result type of block `0`"
+      "message": "result type `[(ref exn)]` should match result type of block `0`"
     },
     {
       "range": {
@@ -67,7 +67,7 @@ expression: response
       "severity": 1,
       "code": "catch-type",
       "source": "wat",
-      "message": "result type [] should match result type of block `0`"
+      "message": "result type `[]` should match result type of block `0`"
     },
     {
       "range": {
@@ -83,7 +83,7 @@ expression: response
       "severity": 1,
       "code": "catch-type",
       "source": "wat",
-      "message": "result type [i64, (ref exn)] should match result type of block `0`"
+      "message": "result type `[i64, (ref exn)]` should match result type of block `0`"
     },
     {
       "range": {
@@ -99,7 +99,7 @@ expression: response
       "severity": 1,
       "code": "catch-type",
       "source": "wat",
-      "message": "result type [(ref null $t)] should match result type of block `$l`"
+      "message": "result type `[(ref null $t)]` should match result type of block `$l`"
     },
     {
       "range": {
@@ -115,7 +115,7 @@ expression: response
       "severity": 1,
       "code": "catch-type",
       "source": "wat",
-      "message": "result type [(ref null $t), (ref exn)] should match result type of block `$l`"
+      "message": "result type `[(ref null $t), (ref exn)]` should match result type of block `$l`"
     },
     {
       "range": {

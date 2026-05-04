@@ -3,6 +3,7 @@ use crate::{
     binder::SymbolKey,
     types_analyzer::{HeapType, RefType, Sig, ValType},
 };
+use bumpalo::collections::Vec as BumpVec;
 use itertools::Itertools;
 use wat_syntax::{AmberNode, SyntaxKind};
 
@@ -13,10 +14,10 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
         SyntaxKind::CATCH => {
             let mut indexes = node.children_by_kind(SyntaxKind::INDEX);
             let tag = ctx.symbol_table.find_def(indexes.next()?.to_ptr().into())?;
-            let mut results = Sig::from_func(ctx.db, ctx.document, tag.amber())
-                .params
-                .into_iter()
-                .collect::<Vec<_>>();
+            let mut results = BumpVec::from_iter_in(
+                Sig::from_func(ctx.db, ctx.document, tag.amber()).params.into_iter(),
+                ctx.bump,
+            );
             if node.tokens_by_kind(SyntaxKind::KEYWORD).next()?.text() == "catch_ref" {
                 results.push(ValType::Ref(RefType {
                     heap_ty: HeapType::Exn,
@@ -27,11 +28,14 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
         }
         SyntaxKind::CATCH_ALL => {
             let results = match node.tokens_by_kind(SyntaxKind::KEYWORD).next()?.text() {
-                "catch_all" => vec![],
-                "catch_all_ref" => vec![ValType::Ref(RefType {
-                    heap_ty: HeapType::Exn,
-                    nullable: false,
-                })],
+                "catch_all" => BumpVec::new_in(ctx.bump),
+                "catch_all_ref" => BumpVec::from_iter_in(
+                    [ValType::Ref(RefType {
+                        heap_ty: HeapType::Exn,
+                        nullable: false,
+                    })],
+                    ctx.bump,
+                ),
                 _ => unreachable!(),
             };
             (node.children_by_kind(SyntaxKind::INDEX).next()?, results)
@@ -51,7 +55,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
             range: label_index.text_range(),
             code: DIAGNOSTIC_CODE.into(),
             message: format!(
-                "result type [{}] should match result type of block `{}`",
+                "result type `[{}]` should match result type of block `{}`",
                 results.iter().map(|ty| ty.render(ctx.db)).join(", "),
                 ctx.symbol_table.symbols.get(&ref_key)?.idx.render(ctx.db),
             ),
