@@ -74,15 +74,26 @@ pub fn is_stack_polymorphic(instr_name: &str) -> bool {
 }
 
 pub fn parse_u32(s: &str) -> Result<u32, ParseIntError> {
-    let s = if s.contains('_') {
-        Cow::from(s.replace('_', ""))
-    } else {
-        Cow::from(s)
-    };
+    let s = clean_underscores(s);
     if let Some(s) = s.strip_prefix("0x") {
         u32::from_str_radix(s, 16)
     } else {
         s.parse()
+    }
+}
+pub fn parse_u64(s: &str) -> Result<u64, ParseIntError> {
+    let s = clean_underscores(s);
+    if let Some(s) = s.strip_prefix("0x") {
+        u64::from_str_radix(s, 16)
+    } else {
+        s.parse()
+    }
+}
+fn clean_underscores(s: &str) -> Cow<'_, str> {
+    if s.contains('_') {
+        Cow::from(s.replace('_', ""))
+    } else {
+        Cow::from(s)
     }
 }
 

@@ -37,6 +37,7 @@ mod shadow;
 mod start;
 mod subtyping;
 mod syntax;
+mod table_type;
 mod tag_type;
 mod type_misuse;
 mod typeck;
@@ -154,6 +155,9 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                 }
                 SyntaxKind::MEM_TYPE => {
                     mem_type::check(diagnostics, node);
+                }
+                SyntaxKind::TABLE_TYPE => {
+                    table_type::check(diagnostics, node);
                 }
                 SyntaxKind::OFFSET => {
                     typeck::check_offset(diagnostics, ctx, node);

@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/table_type.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 11
+        },
+        "end": {
+          "line": 2,
+          "character": 12
+        }
+      },
+      "severity": 1,
+      "code": "table-type",
+      "source": "wat",
+      "message": "maximum size must be greater than minimum size"
+    }
+  ]
+}
