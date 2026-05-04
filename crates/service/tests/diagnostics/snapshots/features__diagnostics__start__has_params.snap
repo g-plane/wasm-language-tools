@@ -19,7 +19,7 @@ expression: response
       "severity": 1,
       "code": "start",
       "source": "wat",
-      "message": "start function must be type of [] -> []"
+      "message": "start function must be type of `[] -> []`"
     }
   ]
 }

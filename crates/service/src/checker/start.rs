@@ -15,7 +15,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
         Some(Diagnostic {
             range: index.text_range(),
             code: DIAGNOSTIC_CODE.into(),
-            message: "start function must be type of [] -> []".into(),
+            message: "start function must be type of `[] -> []`".into(),
             ..Default::default()
         })
     } else {
