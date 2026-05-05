@@ -116,6 +116,11 @@ jobs:
         with:
           version: 10
           run_install: true
+      - shell: pwsh
+        run: |
+          $pkg = Get-Content ./bindings/pkg/package.json | ConvertFrom-Json
+          $pkg.version = (cargo pkgid -p wat_server) -replace '^.*@', ''
+          ConvertTo-Json $pkg | Set-Content ./bindings/pkg/package.json
       - uses: actions/setup-node@v6
         with:
           registry-url: "https://registry.npmjs.org"
