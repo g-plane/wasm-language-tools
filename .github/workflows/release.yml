@@ -121,22 +121,3 @@ jobs:
           registry-url: "https://registry.npmjs.org"
           node-version: "24"
       - run: pnpm -F=@wasm-language-tools/wasm publish --no-git-checks
-
-  vscode:
-    needs: [npm, github]
-    runs-on: ubuntu-latest
-    steps:
-      - shell: pwsh
-        run: |
-          $headers = @{
-            "Accept" = "application/vnd.github+json"
-            "Authorization" = "Bearer ${{ secrets.VSCODE_EXT_REPO_TOKEN }}"
-            "X-GitHub-Api-Version" = "2022-11-28"
-          }
-          $body = @{
-            "ref" = "main"
-            "inputs" = @{
-              "semver" = "minor"
-            }
-          } | ConvertTo-Json
-          Invoke-WebRequest -Uri "https://api.github.com/repos/g-plane/vscode-wasm/actions/workflows/release.yml/dispatches" -Method Post -Headers $headers -Body $body
