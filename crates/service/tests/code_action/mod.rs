@@ -1,5 +1,6 @@
 use lspt::{CodeActionContext, CodeActionParams, Position, Range, TextDocumentIdentifier};
 
+mod add_omitted_idx;
 mod add_result_types;
 mod br_if_to_if_br;
 mod clean_no_types;

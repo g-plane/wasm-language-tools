@@ -57,6 +57,9 @@ impl LanguageService {
                                 actions.push(action);
                             }
                         }
+                        if quickfix && let Some(action) = add_omitted_idx::act(db, uri, line_index, symbol_table, &it) {
+                            actions.push(action);
+                        }
                     }
                     SyntaxKind::PARAM => {
                         if rewrite && let Some(action) = split_types::act(db, uri, line_index, &it, SyntaxKind::PARAM) {

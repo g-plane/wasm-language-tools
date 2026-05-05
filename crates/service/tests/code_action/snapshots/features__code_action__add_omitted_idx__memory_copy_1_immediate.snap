@@ -1,0 +1,29 @@
+---
+source: crates/service/tests/code_action/add_omitted_idx.rs
+expression: response
+---
+[
+  {
+    "title": "Add memory idx for `memory.copy`",
+    "kind": "quickfix",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 15
+              },
+              "end": {
+                "line": 4,
+                "character": 15
+              }
+            },
+            "newText": " $m"
+          }
+        ]
+      }
+    }
+  }
+]

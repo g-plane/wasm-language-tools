@@ -1,0 +1,29 @@
+---
+source: crates/service/tests/code_action/add_omitted_idx.rs
+expression: response
+---
+[
+  {
+    "title": "Add memory idx for `i64.load32_s`",
+    "kind": "quickfix",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 16
+              },
+              "end": {
+                "line": 4,
+                "character": 16
+              }
+            },
+            "newText": " $m"
+          }
+        ]
+      }
+    }
+  }
+]
