@@ -1,3 +1,5 @@
+name: vscode-extension
+
 on:
   release:
     types: [published]
