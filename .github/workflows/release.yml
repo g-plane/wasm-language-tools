@@ -105,7 +105,7 @@ jobs:
       - run: rustup target add wasm32-unknown-unknown
       - uses: taiki-e/install-action@v2
         with:
-          tool: wasm-bindgen
+          tool: wasm-bindgen@0.2.120
       - run: |
           cargo build -p binding_wasm --target wasm32-unknown-unknown --release
           wasm-bindgen --out-dir=bindings/pkg --target=web --omit-default-module-path target/wasm32-unknown-unknown/release/binding_wasm.wasm
