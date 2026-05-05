@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 2
-      - uses: rust-lang/crates-io-auth-action@v1
+      - uses: rust-lang/crates-io-auth-action@v1.0.4
         id: cratesio-auth
       - name: Publish crates
         run: |
@@ -95,6 +95,9 @@ jobs:
       - run: gh release upload ${{ github.ref_name }} wat_server-${{ matrix.name }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/attest@v4
+        with:
+          subject-path: wat_server-${{ matrix.name }}.zip
 
   npm:
     permissions:
@@ -109,9 +112,9 @@ jobs:
       - run: |
           cargo build -p binding_wasm --target wasm32-unknown-unknown --release
           wasm-bindgen --out-dir=bindings/pkg --target=web --omit-default-module-path target/wasm32-unknown-unknown/release/binding_wasm.wasm
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
-          version: latest
+          version: 10
           run_install: true
       - uses: actions/setup-node@v6
         with:
