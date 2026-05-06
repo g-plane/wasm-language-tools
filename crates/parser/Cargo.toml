@@ -11,7 +11,7 @@ keywords = ["wasm", "parser"]
 exclude = ["/tests"]
 
 [dependencies]
-wat_syntax = { path = "../syntax", version = "0.10" }
+wat_syntax = { workspace = true }
 
 [dev-dependencies]
 codespan-reporting = "0.13"

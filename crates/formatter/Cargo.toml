@@ -13,14 +13,14 @@ exclude = ["/tests"]
 line-index = { workspace = true }
 serde = { workspace = true }
 tiny_pretty = "0.2"
-wat_syntax = { path = "../syntax", version = "0.10" }
+wat_syntax = { workspace = true }
 
 [dev-dependencies]
 criterion = { workspace = true }
 insta = { workspace = true }
 serde_json = { workspace = true }
 similar-asserts = { workspace = true }
-wat_parser = { path = "../parser", version = "0.10" }
+wat_parser = { workspace = true }
 
 [[bench]]
 name = "fmt"

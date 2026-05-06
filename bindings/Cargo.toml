@@ -15,8 +15,8 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 serde = { workspace = true }
 serde-wasm-bindgen = "0.6"
-wasm-bindgen = "0.2.120" # don't forget to update "npm" job in .github/workflows/release.yml
-wat_service = { path = "../crates/service", version = "0.10" }
+wasm-bindgen = "=0.2.120" # don't forget to update "npm" job in .github/workflows/release.yml
+wat_service = { workspace = true }
 
 [lints]
 workspace = true

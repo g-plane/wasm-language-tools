@@ -11,8 +11,8 @@ exclude = ["/tests"]
 
 [dependencies]
 bumpalo = { version = "3.20", features = ["collections", "allocator-api2"] }
-hashbrown = { version = "0.16", default-features = false, features = ["inline-more", "allocator-api2"] }
-indexmap = "2.13"
+hashbrown = { version = "0.17", default-features = false, features = ["inline-more", "allocator-api2"] }
+indexmap = "2.14"
 itertools = "0.14"
 line-index = { workspace = true }
 lspt = { workspace = true }
@@ -22,9 +22,9 @@ rustc-hash = { workspace = true }
 salsa = "0.26"
 serde = { workspace = true }
 serde_json = { workspace = true }
-wat_formatter = { path = "../formatter", version = "0.10" }
-wat_parser = { path = "../parser", version = "0.10" }
-wat_syntax = { path = "../syntax", version = "0.10" }
+wat_formatter = { workspace = true }
+wat_parser = { workspace = true }
+wat_syntax = { workspace = true }
 
 [dev-dependencies]
 criterion = { workspace = true }

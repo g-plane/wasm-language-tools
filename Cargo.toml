@@ -4,13 +4,18 @@ resolver = "3"
 
 [workspace.dependencies]
 criterion = "0.8"
-insta = { version = "1.46", features = ["glob", "json"] }
+insta = { version = "1.47", features = ["glob", "json"] }
 line-index = "0.1"
 lspt = "0.3"
 rustc-hash = "2.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-similar-asserts = "1.7"
+similar-asserts = "2.0"
+wat_formatter = { path = "crates/formatter", version = "0.10" }
+wat_parser = { path = "crates/parser", version = "0.10" }
+wat_server = { path = "crates/server", version = "0.10" }
+wat_service = { path = "crates/service", version = "0.10" }
+wat_syntax = { path = "crates/syntax", version = "0.10" }
 
 [workspace.lints.clippy]
 dbg_macro = "warn"
