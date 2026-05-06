@@ -175,7 +175,7 @@ impl<'db> CompositeType<'db> {
 }
 
 #[salsa::tracked(returns(ref))]
-pub(crate) fn get_rec_type_groups<'db>(db: &'db dyn salsa::Database, document: Document) -> Vec<RecTypeGroup> {
+pub(crate) fn get_rec_type_groups(db: &dyn salsa::Database, document: Document) -> Vec<RecTypeGroup> {
     let root = Root::cast(document.root_tree(db)).expect("expected root tree");
     let symbol_table = SymbolTable::of(db, document);
     root.modules()
