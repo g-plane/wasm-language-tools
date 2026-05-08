@@ -10,7 +10,11 @@
     "access": "public"
   },
   "exports": {
-    ".": "./binding_wasm.js",
+    ".": {
+      "import": "./binding_wasm.js",
+      "types": "./binding_wasm.d.ts"
+    },
+    "./binding_wasm_bg.wasm": "./binding_wasm_bg.wasm",
     "./package.json": "./package.json"
   },
   "dependencies": {
