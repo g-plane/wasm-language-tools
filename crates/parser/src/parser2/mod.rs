@@ -10,7 +10,7 @@ mod lexer;
 mod module;
 mod ty;
 
-/// Parse the code into a rowan green node.
+/// Parse the code into green node.
 pub fn parse(source: &str) -> (GreenNode, Vec<SyntaxError>) {
     let mut parser = Parser::new(source);
     (parser.parse_root(), parser.errors)
