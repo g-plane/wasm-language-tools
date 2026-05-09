@@ -1,4 +1,8 @@
-use crate::{LanguageService, binder::SymbolTable, helpers::LineIndexExt};
+use crate::{
+    LanguageService,
+    binder::{SymbolKey, SymbolTable},
+    helpers::LineIndexExt,
+};
 use lspt::{Declaration, DeclarationParams, Definition, DefinitionParams, Location, TypeDefinitionParams, Union2};
 use wat_syntax::SyntaxKind;
 
@@ -11,15 +15,19 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
         symbol_table
             .resolved
-            .iter()
-            .find_map(|(ref_key, def_key)| {
-                if ref_key.text_range().contains_inclusive(position) {
-                    Some(def_key)
+            .keys()
+            .fold::<Option<&SymbolKey>, _>(None, |acc, ref_key| {
+                // find deepest ref-symbol node
+                if ref_key.text_range().contains_inclusive(position)
+                    && acc.is_none_or(|acc| acc.text_range().contains_range(ref_key.text_range()))
+                {
+                    Some(ref_key)
                 } else {
-                    None
+                    acc
                 }
             })
-            .and_then(|key| symbol_table.def_poi.get(key))
+            .and_then(|ref_key| symbol_table.resolved.get(ref_key))
+            .and_then(|def_key| symbol_table.def_poi.get(def_key))
             .map(|range| {
                 Union2::A(Location {
                     uri: params.text_document.uri.clone(),
@@ -36,14 +44,18 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
         symbol_table
             .resolved
-            .iter()
-            .find_map(|(ref_key, def_key)| {
-                if ref_key.text_range().contains_inclusive(position) {
-                    symbol_table.symbols.get(def_key)
+            .keys()
+            .fold::<Option<&SymbolKey>, _>(None, |acc, ref_key| {
+                // find deepest ref-symbol node
+                if ref_key.text_range().contains_inclusive(position)
+                    && acc.is_none_or(|acc| acc.text_range().contains_range(ref_key.text_range()))
+                {
+                    Some(ref_key)
                 } else {
-                    None
+                    acc
                 }
             })
+            .and_then(|ref_key| symbol_table.find_def(*ref_key))
             .and_then(|symbol| {
                 symbol
                     .amber()

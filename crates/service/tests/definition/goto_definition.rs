@@ -643,3 +643,20 @@ fn func_as_block() {
     let response = service.goto_definition(create_params(uri, 3, 7));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn nesting_ref_node() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory 1)
+  (func (param $x v128)
+    (v128.store8_lane offset=0 0xF
+      (i32.const 0)
+      (local.get $x))))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.goto_definition(create_params(uri, 6, 19));
+    assert_json_snapshot!(response);
+}
