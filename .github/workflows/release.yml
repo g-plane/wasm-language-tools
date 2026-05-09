@@ -34,25 +34,8 @@ jobs:
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.cratesio-auth.outputs.token }}
 
-  draft-github:
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - run: gh release create ${{ github.ref_name }} --verify-tag --draft --title ${{ github.ref_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  github:
-    needs: draft-github
-    permissions:
-      contents: write
-      id-token: write
-      attestations: write
-      artifact-metadata: write
+  build:
     strategy:
-      fail-fast: false
       matrix:
         include:
           - name: x86_64-macos
@@ -88,16 +71,40 @@ jobs:
           cargo build --target=${{ matrix.target }} --release
           if (Test-Path ./target/${{ matrix.target }}/release/wat_server.exe) {
             7z a wat_server-${{ matrix.name }}.zip ./target/${{ matrix.target }}/release/wat_server.exe
+            Copy-Item ./target/${{ matrix.target }}/release/wat_server.exe ./wat_server-${{ matrix.name }}.exe
           }
           elseif (Test-Path ./target/${{ matrix.target }}/release/wat_server) {
             7z a wat_server-${{ matrix.name }}.zip ./target/${{ matrix.target }}/release/wat_server
+            Copy-Item ./target/${{ matrix.target }}/release/wat_server ./wat_server-${{ matrix.name }}
           }
-      - run: gh release upload ${{ github.ref_name }} wat_server-${{ matrix.name }}.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: wat_server-${{ matrix.name }}
+          path: |
+            wat_server-${{ matrix.name }}
+            wat_server-${{ matrix.name }}.exe
+            wat_server-${{ matrix.name }}.zip
+
+  github:
+    needs: build
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: wat_server-*
+          merge-multiple: true
+          path: dist
       - uses: actions/attest@v4
         with:
-          subject-path: wat_server-${{ matrix.name }}.zip
+          subject-path: dist/*
+      - run: gh release create ${{ github.ref_name }} dist/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   npm:
     permissions:
@@ -126,3 +133,22 @@ jobs:
           registry-url: "https://registry.npmjs.org"
           node-version: "24"
       - run: pnpm -F=@wasm-language-tools/wasm publish --no-git-checks
+
+  vscode:
+    needs: [github, npm]
+    runs-on: ubuntu-latest
+    steps:
+      - shell: pwsh
+        run: |
+          $headers = @{
+            "Accept" = "application/vnd.github+json"
+            "Authorization" = "Bearer ${{ secrets.VSCODE_EXT_REPO_TOKEN }}"
+            "X-GitHub-Api-Version" = "2022-11-28"
+          }
+          $body = @{
+            "ref" = "main"
+            "inputs" = @{
+              "semver" = "minor"
+            }
+          } | ConvertTo-Json
+          Invoke-WebRequest -Uri "https://api.github.com/repos/g-plane/vscode-wasm/actions/workflows/release.yml/dispatches" -Method Post -Headers $headers -Body $body
