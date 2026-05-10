@@ -1315,7 +1315,7 @@ dependencies = [
 
 [[package]]
 name = "wat_server"
-version = "0.10.6"
+version = "0.10.7"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -1333,7 +1333,7 @@ dependencies = [
 
 [[package]]
 name = "wat_service"
-version = "0.10.5"
+version = "0.10.7"
 dependencies = [
  "bumpalo",
  "criterion",
