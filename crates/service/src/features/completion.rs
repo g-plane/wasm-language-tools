@@ -97,10 +97,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                 ctx.push(CmpCtx::Instr(false));
             }
         }
-        SyntaxKind::TYPE_DEF => {
-            if has_leading_l_paren(token) {
-                ctx.extend([CmpCtx::KeywordsCompType, CmpCtx::KeywordSub]);
-            }
+        SyntaxKind::TYPE_DEF if has_leading_l_paren(token) => {
+            ctx.extend([CmpCtx::KeywordsCompType, CmpCtx::KeywordSub]);
         }
         SyntaxKind::PLAIN_INSTR => {
             if token.kind() == SyntaxKind::INSTR_NAME {
@@ -161,35 +159,33 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                                 ctx.extend([CmpCtx::KeywordParam, CmpCtx::KeywordResult, CmpCtx::KeywordType]);
                             }
                             match grand.kind() {
-                                SyntaxKind::BLOCK_IF => {
+                                SyntaxKind::BLOCK_IF
                                     if !token.prev_siblings().any(|sibling| {
                                         matches!(sibling.kind(), SyntaxKind::BLOCK_IF_THEN | SyntaxKind::BLOCK_IF_ELSE)
-                                    }) {
-                                        ctx.push(CmpCtx::KeywordThen);
-                                    }
+                                    }) =>
+                                {
+                                    ctx.push(CmpCtx::KeywordThen);
                                 }
-                                SyntaxKind::BLOCK_TRY_TABLE => {
-                                    if token.prev_siblings().all(|sibling| !Instr::can_cast(sibling.kind())) {
-                                        ctx.push(CmpCtx::KeywordsCatch);
-                                    }
+                                SyntaxKind::BLOCK_TRY_TABLE
+                                    if token.prev_siblings().all(|sibling| !Instr::can_cast(sibling.kind())) =>
+                                {
+                                    ctx.push(CmpCtx::KeywordsCatch);
                                 }
                                 _ => {}
                             }
                         }
-                        SyntaxKind::OFFSET => {
-                            if support::token(&grand, SyntaxKind::KEYWORD).is_none() {
-                                ctx.push(CmpCtx::KeywordOffset);
-                                match grand.parent().map(|node| node.kind()) {
-                                    Some(SyntaxKind::MODULE_FIELD_DATA) => {
-                                        ctx.push(CmpCtx::KeywordMemory);
-                                    }
-                                    Some(SyntaxKind::MODULE_FIELD_ELEM) => {
-                                        if !grand.prev_siblings().any(|child| child.kind() == SyntaxKind::TABLE_USE) {
-                                            ctx.push(CmpCtx::KeywordTable);
-                                        }
-                                    }
-                                    _ => {}
+                        SyntaxKind::OFFSET if support::token(&grand, SyntaxKind::KEYWORD).is_none() => {
+                            ctx.push(CmpCtx::KeywordOffset);
+                            match grand.parent().map(|node| node.kind()) {
+                                Some(SyntaxKind::MODULE_FIELD_DATA) => {
+                                    ctx.push(CmpCtx::KeywordMemory);
                                 }
+                                Some(SyntaxKind::MODULE_FIELD_ELEM)
+                                    if !grand.prev_siblings().any(|child| child.kind() == SyntaxKind::TABLE_USE) =>
+                                {
+                                    ctx.push(CmpCtx::KeywordTable);
+                                }
+                                _ => {}
                             }
                         }
                         _ => {}
@@ -217,17 +213,17 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                     ctx.extend([CmpCtx::KeywordParam, CmpCtx::KeywordResult, CmpCtx::KeywordType]);
                 }
                 match parent.kind() {
-                    SyntaxKind::BLOCK_IF => {
+                    SyntaxKind::BLOCK_IF
                         if !token.prev_siblings().any(|sibling| {
                             matches!(sibling.kind(), SyntaxKind::BLOCK_IF_THEN | SyntaxKind::BLOCK_IF_ELSE)
-                        }) {
-                            ctx.push(CmpCtx::KeywordThen);
-                        }
+                        }) =>
+                    {
+                        ctx.push(CmpCtx::KeywordThen);
                     }
-                    SyntaxKind::BLOCK_TRY_TABLE => {
-                        if token.prev_siblings().all(|sibling| !Instr::can_cast(sibling.kind())) {
-                            ctx.push(CmpCtx::KeywordsCatch);
-                        }
+                    SyntaxKind::BLOCK_TRY_TABLE
+                        if token.prev_siblings().all(|sibling| !Instr::can_cast(sibling.kind())) =>
+                    {
+                        ctx.push(CmpCtx::KeywordsCatch);
                     }
                     _ => {}
                 }
@@ -253,10 +249,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
             }
         }
         SyntaxKind::TYPE_USE => ctx.push(CmpCtx::TypeDef(Some(PreferredType::Func))),
-        SyntaxKind::FUNC_TYPE => {
-            if has_leading_l_paren(token) {
-                ctx.extend([CmpCtx::KeywordParam, CmpCtx::KeywordResult]);
-            }
+        SyntaxKind::FUNC_TYPE if has_leading_l_paren(token) => {
+            ctx.extend([CmpCtx::KeywordParam, CmpCtx::KeywordResult]);
         }
         SyntaxKind::INDEX => {
             let grand = parent.parent()?;
@@ -292,10 +286,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                 ctx.extend([CmpCtx::NumTypeVecType, CmpCtx::AbbrRefType]);
             }
         }
-        SyntaxKind::MODULE_FIELD_EXPORT | SyntaxKind::MODULE_FIELD_IMPORT => {
-            if has_leading_l_paren(token) {
-                ctx.push(CmpCtx::KeywordPortDesc);
-            }
+        SyntaxKind::MODULE_FIELD_EXPORT | SyntaxKind::MODULE_FIELD_IMPORT if has_leading_l_paren(token) => {
+            ctx.push(CmpCtx::KeywordPortDesc);
         }
         SyntaxKind::MODULE_FIELD_TABLE => {
             if support::child::<TableType>(&parent)
@@ -326,10 +318,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                 ctx.extend([CmpCtx::AddrType, CmpCtx::KeywordsShare]);
             }
         }
-        SyntaxKind::MODULE_FIELD_DATA => {
-            if has_leading_l_paren(token) {
-                ctx.extend([CmpCtx::KeywordMemory, CmpCtx::KeywordOffset, CmpCtx::Instr(true)]);
-            }
+        SyntaxKind::MODULE_FIELD_DATA if has_leading_l_paren(token) => {
+            ctx.extend([CmpCtx::KeywordMemory, CmpCtx::KeywordOffset, CmpCtx::Instr(true)]);
         }
         SyntaxKind::MODULE_FIELD_ELEM => {
             if has_leading_l_paren(token) {
@@ -371,10 +361,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                 ctx.push(CmpCtx::AbbrRefType);
             }
         }
-        SyntaxKind::EXTERN_TYPE_FUNC => {
-            if has_leading_l_paren(token) {
-                ctx.extend([CmpCtx::KeywordParam, CmpCtx::KeywordResult, CmpCtx::KeywordType]);
-            }
+        SyntaxKind::EXTERN_TYPE_FUNC if has_leading_l_paren(token) => {
+            ctx.extend([CmpCtx::KeywordParam, CmpCtx::KeywordResult, CmpCtx::KeywordType]);
         }
         SyntaxKind::EXTERN_TYPE_GLOBAL => {
             if has_leading_l_paren(token) {
@@ -406,15 +394,11 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
         }
         SyntaxKind::ADDR_TYPE => ctx.push(CmpCtx::AddrType),
         SyntaxKind::TABLE_USE => ctx.push(CmpCtx::Table),
-        SyntaxKind::MODULE => {
-            if has_leading_l_paren(token) {
-                ctx.push(CmpCtx::KeywordsModuleField);
-            }
+        SyntaxKind::MODULE if has_leading_l_paren(token) => {
+            ctx.push(CmpCtx::KeywordsModuleField);
         }
-        SyntaxKind::ROOT => {
-            if has_leading_l_paren(token) {
-                ctx.push(CmpCtx::KeywordModule);
-            }
+        SyntaxKind::ROOT if has_leading_l_paren(token) => {
+            ctx.push(CmpCtx::KeywordModule);
         }
         SyntaxKind::SUB_TYPE => {
             if has_leading_l_paren(token) {
@@ -423,10 +407,8 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                 ctx.extend([CmpCtx::TypeDef(None), CmpCtx::KeywordFinal]);
             }
         }
-        SyntaxKind::STRUCT_TYPE => {
-            if has_leading_l_paren(token) {
-                ctx.push(CmpCtx::KeywordField);
-            }
+        SyntaxKind::STRUCT_TYPE if has_leading_l_paren(token) => {
+            ctx.push(CmpCtx::KeywordField);
         }
         SyntaxKind::FIELD | SyntaxKind::ARRAY_TYPE => {
             if has_leading_l_paren(token) {
@@ -445,25 +427,19 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
         SyntaxKind::REF_TYPE => {
             ctx.extend([CmpCtx::TypeDef(None), CmpCtx::KeywordNull, CmpCtx::AbsHeapType]);
         }
-        SyntaxKind::REC_TYPE => {
-            if has_leading_l_paren(token) {
-                ctx.push(CmpCtx::KeywordType);
-            }
+        SyntaxKind::REC_TYPE if has_leading_l_paren(token) => {
+            ctx.push(CmpCtx::KeywordType);
         }
-        SyntaxKind::MODULE_FIELD_TAG => {
-            if has_leading_l_paren(token) {
-                ctx.extend([
-                    CmpCtx::KeywordImExport,
-                    CmpCtx::KeywordType,
-                    CmpCtx::KeywordParam,
-                    CmpCtx::KeywordResult,
-                ]);
-            }
+        SyntaxKind::MODULE_FIELD_TAG if has_leading_l_paren(token) => {
+            ctx.extend([
+                CmpCtx::KeywordImExport,
+                CmpCtx::KeywordType,
+                CmpCtx::KeywordParam,
+                CmpCtx::KeywordResult,
+            ]);
         }
-        SyntaxKind::EXTERN_TYPE_TAG => {
-            if has_leading_l_paren(token) {
-                ctx.extend([CmpCtx::KeywordType, CmpCtx::KeywordParam, CmpCtx::KeywordResult]);
-            }
+        SyntaxKind::EXTERN_TYPE_TAG if has_leading_l_paren(token) => {
+            ctx.extend([CmpCtx::KeywordType, CmpCtx::KeywordParam, CmpCtx::KeywordResult]);
         }
         SyntaxKind::CATCH => {
             if token.prev_siblings().all(|sibling| sibling.kind() != SyntaxKind::INDEX) {
@@ -566,10 +542,8 @@ fn add_cmp_ctx_for_immediates(instr_name: &str, node: &SyntaxNode, has_leading_l
             Some(("ref", "null")) => {
                 ctx.extend([CmpCtx::TypeDef(None), CmpCtx::AbsHeapType]);
             }
-            Some(("v128", "const")) => {
-                if is_current_first_immediate {
-                    ctx.push(CmpCtx::ShapeDescriptor);
-                }
+            Some(("v128", "const")) if is_current_first_immediate => {
+                ctx.push(CmpCtx::ShapeDescriptor);
             }
             Some(("cont", "new" | "bind")) => ctx.push(CmpCtx::TypeDef(Some(PreferredType::Cont))),
             None => match instr_name {

@@ -177,25 +177,23 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
                 instr_name,
             );
         }
-        "memory.copy" | "table.copy" => {
-            if immediates.peek().is_some() {
-                check_immediate(
-                    diagnostics,
-                    &mut immediates,
-                    INDEX,
-                    "identifier or unsigned integer",
-                    true,
-                    instr_name,
-                );
-                check_immediate(
-                    diagnostics,
-                    &mut immediates,
-                    INDEX,
-                    "identifier or unsigned integer",
-                    true,
-                    instr_name,
-                );
-            }
+        "memory.copy" | "table.copy" if immediates.peek().is_some() => {
+            check_immediate(
+                diagnostics,
+                &mut immediates,
+                INDEX,
+                "identifier or unsigned integer",
+                true,
+                instr_name,
+            );
+            check_immediate(
+                diagnostics,
+                &mut immediates,
+                INDEX,
+                "identifier or unsigned integer",
+                true,
+                instr_name,
+            );
         }
         "memory.init" | "table.init" => {
             check_immediate(

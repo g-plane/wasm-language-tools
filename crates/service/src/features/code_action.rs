@@ -155,14 +155,12 @@ impl LanguageService {
                             actions.push(action);
                         }
                     }
-                    SyntaxKind::REF_TYPE => {
-                        if rewrite {
-                            if let Some(action) = expand_ref_type::act(db, uri, line_index, &it) {
-                                actions.push(action);
-                            }
-                            if let Some(action) = simplify_ref_type::act(db, uri, line_index, &it) {
-                                actions.push(action);
-                            }
+                    SyntaxKind::REF_TYPE if rewrite => {
+                        if let Some(action) = expand_ref_type::act(db, uri, line_index, &it) {
+                            actions.push(action);
+                        }
+                        if let Some(action) = simplify_ref_type::act(db, uri, line_index, &it) {
+                            actions.push(action);
                         }
                     }
                     SyntaxKind::EXPORT => {
