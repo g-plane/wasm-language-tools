@@ -10,9 +10,10 @@ keywords = ["wasm", "formatter"]
 exclude = ["/tests"]
 
 [dependencies]
+bumpalo = { workspace = true }
 line-index = { workspace = true }
 serde = { workspace = true }
-tiny_pretty = "0.2"
+tiny_pretty = "0.3"
 wat_syntax = { workspace = true }
 
 [dev-dependencies]

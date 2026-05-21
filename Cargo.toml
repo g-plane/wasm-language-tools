@@ -3,6 +3,7 @@ members = ["bindings", "crates/*"]
 resolver = "3"
 
 [workspace.dependencies]
+bumpalo = { version = "3.20", features = ["collections", "allocator-api2"] }
 criterion = "0.8"
 insta = { version = "1.47", features = ["glob", "json"] }
 line-index = "0.1"

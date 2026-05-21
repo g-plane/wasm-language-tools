@@ -10,7 +10,7 @@ keywords = ["wasm"]
 exclude = ["/tests"]
 
 [dependencies]
-bumpalo = { version = "3.20", features = ["collections", "allocator-api2"] }
+bumpalo = { workspace = true }
 hashbrown = { version = "0.17", default-features = false, features = ["inline-more", "allocator-api2"] }
 indexmap = "2.14"
 itertools = "0.14"

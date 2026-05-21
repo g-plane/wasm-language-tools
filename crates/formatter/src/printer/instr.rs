@@ -1,11 +1,11 @@
 use super::*;
-use std::mem;
+use bumpalo::collections::Vec as BumpVec;
 use tiny_pretty::Doc;
 use wat_syntax::{NodeOrToken, SyntaxKind::*, ast::AstNode};
 
-pub(crate) fn format_block_block<'a>(block_block: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
-    let mut docs = Vec::with_capacity(2);
-    let mut trivias = vec![];
+pub(crate) fn format_block_block<'a>(block_block: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+    let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
+    let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = block_block.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
         trivias = format_trivias_after_token(l_paren, block_block, ctx);
@@ -43,7 +43,7 @@ pub(crate) fn format_block_block<'a>(block_block: AmberNode<'a>, ctx: &Ctx) -> D
         trivias = format_trivias_after_node(instr, block_block, ctx);
     });
     docs.append(&mut trivias);
-    let mut docs = vec![Doc::list(docs).nest(ctx.indent_width)];
+    let mut docs = BumpVec::from_iter_in([Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width)], &ctx.bump);
     if block_block.tokens_by_kind(R_PAREN).next().is_some() {
         docs.push(ctx.format_right_paren(block_block));
     } else {
@@ -61,12 +61,12 @@ pub(crate) fn format_block_block<'a>(block_block: AmberNode<'a>, ctx: &Ctx) -> D
             docs.push(Doc::text(ident.text()));
         }
     }
-    Doc::list(docs).group()
+    Doc::slice(docs.into_bump_slice()).group()
 }
 
-pub(crate) fn format_block_if<'a>(block_if: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
-    let mut docs = Vec::with_capacity(2);
-    let mut trivias = vec![];
+pub(crate) fn format_block_if<'a>(block_if: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+    let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
+    let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = block_if.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
         trivias = format_trivias_after_token(l_paren, block_if, ctx);
@@ -121,12 +121,14 @@ pub(crate) fn format_block_if<'a>(block_if: AmberNode<'a>, ctx: &Ctx) -> Doc<'a>
         docs.push(format_block_if_else(else_block, ctx));
         trivias = format_trivias_after_node(else_block, block_if, ctx);
     }
-    docs.push(Doc::list(mem::take(&mut trivias)).nest(ctx.indent_width));
+    docs.push(Doc::slice(trivias.into_bump_slice()).nest(ctx.indent_width));
+    trivias = BumpVec::new_in(&ctx.bump);
     if block_if.tokens_by_kind(R_PAREN).next().is_some() {
-        Doc::list(docs)
-            .nest(ctx.indent_width)
-            .append(ctx.format_right_paren(block_if))
-            .group()
+        Doc::slice(ctx.bump.alloc_slice_fill_iter([
+            Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
+            ctx.format_right_paren(block_if),
+        ]))
+        .group()
     } else {
         if let Some(keyword) = block_if.tokens_by_kind(KEYWORD).find(|token| token.text() == "end") {
             docs.push(Doc::hard_line());
@@ -141,13 +143,13 @@ pub(crate) fn format_block_if<'a>(block_if: AmberNode<'a>, ctx: &Ctx) -> Doc<'a>
             }
             docs.push(Doc::text(ident.text()));
         }
-        Doc::list(docs)
+        Doc::slice(docs.into_bump_slice())
     }
 }
 
-pub(crate) fn format_block_if_else<'a>(block_if_else: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
-    let mut docs = Vec::with_capacity(2);
-    let mut trivias = vec![];
+pub(crate) fn format_block_if_else<'a>(block_if_else: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+    let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
+    let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = block_if_else.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
         trivias = format_trivias_after_token(l_paren, block_if_else, ctx);
@@ -176,17 +178,21 @@ pub(crate) fn format_block_if_else<'a>(block_if_else: AmberNode<'a>, ctx: &Ctx) 
         trivias = format_trivias_after_node(instr, block_if_else, ctx);
     });
     docs.append(&mut trivias);
-    let doc = Doc::list(docs).nest(ctx.indent_width);
+    let doc = Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width);
     if block_if_else.tokens_by_kind(R_PAREN).next().is_some() {
-        doc.append(ctx.format_right_paren(block_if_else)).group()
+        Doc::slice(
+            ctx.bump
+                .alloc_slice_fill_iter([doc, ctx.format_right_paren(block_if_else)]),
+        )
+        .group()
     } else {
         doc
     }
 }
 
-pub(crate) fn format_block_if_then<'a>(block_if_then: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
-    let mut docs = Vec::with_capacity(2);
-    let mut trivias = vec![];
+pub(crate) fn format_block_if_then<'a>(block_if_then: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+    let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
+    let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = block_if_then.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
         trivias = format_trivias_after_token(l_paren, block_if_then, ctx);
@@ -215,17 +221,21 @@ pub(crate) fn format_block_if_then<'a>(block_if_then: AmberNode<'a>, ctx: &Ctx) 
         trivias = format_trivias_after_node(instr, block_if_then, ctx);
     });
     docs.append(&mut trivias);
-    let doc = Doc::list(docs).nest(ctx.indent_width);
+    let doc = Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width);
     if block_if_then.tokens_by_kind(R_PAREN).next().is_some() {
-        doc.append(ctx.format_right_paren(block_if_then)).group()
+        Doc::slice(
+            ctx.bump
+                .alloc_slice_fill_iter([doc, ctx.format_right_paren(block_if_then)]),
+        )
+        .group()
     } else {
         doc
     }
 }
 
-pub(crate) fn format_block_loop<'a>(block_loop: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
-    let mut docs = Vec::with_capacity(2);
-    let mut trivias = vec![];
+pub(crate) fn format_block_loop<'a>(block_loop: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+    let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
+    let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = block_loop.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
         trivias = format_trivias_after_token(l_paren, block_loop, ctx);
@@ -263,7 +273,7 @@ pub(crate) fn format_block_loop<'a>(block_loop: AmberNode<'a>, ctx: &Ctx) -> Doc
         trivias = format_trivias_after_node(instr, block_loop, ctx);
     });
     docs.append(&mut trivias);
-    let mut docs = vec![Doc::list(docs).nest(ctx.indent_width)];
+    let mut docs = BumpVec::from_iter_in([Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width)], &ctx.bump);
     if block_loop.tokens_by_kind(R_PAREN).next().is_some() {
         docs.push(ctx.format_right_paren(block_loop));
     } else {
@@ -281,12 +291,12 @@ pub(crate) fn format_block_loop<'a>(block_loop: AmberNode<'a>, ctx: &Ctx) -> Doc
             docs.push(Doc::text(ident.text()));
         }
     }
-    Doc::list(docs).group()
+    Doc::slice(docs.into_bump_slice()).group()
 }
 
-pub(crate) fn format_block_try_table<'a>(block_try_table: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
-    let mut docs = Vec::with_capacity(2);
-    let mut trivias = vec![];
+pub(crate) fn format_block_try_table<'a>(block_try_table: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+    let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
+    let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = block_try_table.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
         trivias = format_trivias_after_token(l_paren, block_try_table, ctx);
@@ -337,7 +347,7 @@ pub(crate) fn format_block_try_table<'a>(block_try_table: AmberNode<'a>, ctx: &C
         trivias = format_trivias_after_node(instr, block_try_table, ctx);
     });
     docs.append(&mut trivias);
-    let mut docs = vec![Doc::list(docs).nest(ctx.indent_width)];
+    let mut docs = BumpVec::from_iter_in([Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width)], &ctx.bump);
     if block_try_table.tokens_by_kind(R_PAREN).next().is_some() {
         docs.push(ctx.format_right_paren(block_try_table));
     } else {
@@ -358,12 +368,12 @@ pub(crate) fn format_block_try_table<'a>(block_try_table: AmberNode<'a>, ctx: &C
             docs.push(Doc::text(ident.text()));
         }
     }
-    Doc::list(docs).group()
+    Doc::slice(docs.into_bump_slice()).group()
 }
 
-pub(crate) fn format_catch<'a>(catch: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
-    let mut docs = Vec::with_capacity(2);
-    let mut trivias = vec![];
+pub(crate) fn format_catch<'a>(catch: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+    let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
+    let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = catch.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
         trivias = format_trivias_after_token(l_paren, catch, ctx);
@@ -393,15 +403,16 @@ pub(crate) fn format_catch<'a>(catch: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
         trivias = format_trivias_after_node(label_index, catch, ctx);
     }
     docs.append(&mut trivias);
-    Doc::list(docs)
-        .nest(ctx.indent_width)
-        .append(ctx.format_right_paren(catch))
-        .group()
+    Doc::slice(ctx.bump.alloc_slice_fill_iter([
+        Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
+        ctx.format_right_paren(catch),
+    ]))
+    .group()
 }
 
-pub(crate) fn format_catch_all<'a>(catch_all: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
-    let mut docs = Vec::with_capacity(2);
-    let mut trivias = vec![];
+pub(crate) fn format_catch_all<'a>(catch_all: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+    let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
+    let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = catch_all.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
         trivias = format_trivias_after_token(l_paren, catch_all, ctx);
@@ -421,17 +432,18 @@ pub(crate) fn format_catch_all<'a>(catch_all: AmberNode<'a>, ctx: &Ctx) -> Doc<'
         trivias = format_trivias_after_node(label_index, catch_all, ctx);
     }
     docs.append(&mut trivias);
-    Doc::list(docs)
-        .nest(ctx.indent_width)
-        .append(ctx.format_right_paren(catch_all))
-        .group()
+    Doc::slice(ctx.bump.alloc_slice_fill_iter([
+        Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
+        ctx.format_right_paren(catch_all),
+    ]))
+    .group()
 }
 
-pub(crate) fn format_immediate<'a>(immediate: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
+pub(crate) fn format_immediate<'a>(immediate: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
     match immediate.children_with_tokens().next() {
         Some(NodeOrToken::Node(node)) => match node.kind() {
             TYPE_USE => format_type_use(node, ctx),
-            MEM_ARG => format_mem_arg(node),
+            MEM_ARG => format_mem_arg(node, ctx),
             HEAP_TYPE => format_heap_type(node),
             REF_TYPE => format_ref_type(node, ctx),
             ON_CLAUSE => format_on_clause(node, ctx),
@@ -442,7 +454,7 @@ pub(crate) fn format_immediate<'a>(immediate: AmberNode<'a>, ctx: &Ctx) -> Doc<'
     }
 }
 
-pub(crate) fn format_instr<'a>(instr: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
+pub(crate) fn format_instr<'a>(instr: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
     match instr.kind() {
         PLAIN_INSTR => format_plain_instr(instr, ctx),
         BLOCK_BLOCK => format_block_block(instr, ctx),
@@ -453,8 +465,8 @@ pub(crate) fn format_instr<'a>(instr: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     }
 }
 
-pub(crate) fn format_mem_arg<'a>(mem_arg: AmberNode<'a>) -> Doc<'a> {
-    let mut docs = Vec::with_capacity(3);
+pub(crate) fn format_mem_arg<'a>(mem_arg: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+    let mut docs = BumpVec::with_capacity_in(3, &ctx.bump);
     if let Some(keyword) = mem_arg.tokens_by_kind(MEM_ARG_KEYWORD).next() {
         docs.push(Doc::text(keyword.text()));
     }
@@ -462,12 +474,12 @@ pub(crate) fn format_mem_arg<'a>(mem_arg: AmberNode<'a>) -> Doc<'a> {
     if let Some(unsigned_int) = mem_arg.tokens_by_kind(UNSIGNED_INT).next() {
         docs.push(Doc::text(unsigned_int.text()));
     }
-    Doc::list(docs)
+    Doc::slice(docs.into_bump_slice())
 }
 
-pub(crate) fn format_on_clause<'a>(on_clause: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
-    let mut docs = Vec::with_capacity(7);
-    let mut trivias = vec![];
+pub(crate) fn format_on_clause<'a>(on_clause: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+    let mut docs = BumpVec::with_capacity_in(7, &ctx.bump);
+    let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = on_clause.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
         trivias = format_trivias_after_token(l_paren, on_clause, ctx);
@@ -496,15 +508,16 @@ pub(crate) fn format_on_clause<'a>(on_clause: AmberNode<'a>, ctx: &Ctx) -> Doc<'
         trivias = format_trivias_after_token(modifier_keyword, on_clause, ctx);
     }
     docs.append(&mut trivias);
-    Doc::list(docs)
-        .nest(ctx.indent_width)
-        .append(ctx.format_right_paren(on_clause))
-        .group()
+    Doc::slice(ctx.bump.alloc_slice_fill_iter([
+        Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
+        ctx.format_right_paren(on_clause),
+    ]))
+    .group()
 }
 
-pub(crate) fn format_plain_instr<'a>(plain_instr: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
-    let mut docs = Vec::with_capacity(2);
-    let mut trivias = vec![];
+pub(crate) fn format_plain_instr<'a>(plain_instr: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+    let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
+    let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = plain_instr.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
         trivias = format_trivias_after_token(l_paren, plain_instr, ctx);
@@ -533,9 +546,13 @@ pub(crate) fn format_plain_instr<'a>(plain_instr: AmberNode<'a>, ctx: &Ctx) -> D
         trivias = format_trivias_after_node(instr, plain_instr, ctx);
     });
     docs.append(&mut trivias);
-    let doc = Doc::list(docs).nest(ctx.indent_width);
+    let doc = Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width);
     if plain_instr.tokens_by_kind(R_PAREN).next().is_some() {
-        doc.append(ctx.format_right_paren(plain_instr)).group()
+        Doc::slice(
+            ctx.bump
+                .alloc_slice_fill_iter([doc, ctx.format_right_paren(plain_instr)]),
+        )
+        .group()
     } else {
         doc
     }

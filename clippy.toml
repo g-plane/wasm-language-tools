@@ -1,0 +1,5 @@
+disallowed-methods = [
+    { path = "tiny_pretty::Doc::append", reason = "avoid creating `Vec` implicitly" },
+    { path = "tiny_pretty::Doc::concat", reason = "avoid creating `Vec` implicitly" },
+    { path = "tiny_pretty::Doc::list", reason = "avoid creating `Vec` implicitly" },
+]

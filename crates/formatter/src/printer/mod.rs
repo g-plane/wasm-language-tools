@@ -1,5 +1,6 @@
 use self::{instr::*, module::*, ty::*};
 use crate::config::{FormatOptions, LanguageOptions, MultiLine, WrapBefore};
+use bumpalo::{Bump, collections::Vec as BumpVec};
 use std::iter;
 use tiny_pretty::Doc;
 use wat_syntax::{AmberNode, AmberToken, NodeOrToken, SyntaxKind, ast::*};
@@ -9,18 +10,20 @@ mod module;
 mod ty;
 
 pub(super) struct Ctx<'a> {
-    pub indent_width: usize,
-    pub options: &'a LanguageOptions,
+    indent_width: usize,
+    options: &'a LanguageOptions,
+    bump: Bump,
 }
 impl<'a> Ctx<'a> {
     pub(crate) fn new(options: &'a FormatOptions) -> Self {
         Self {
             indent_width: options.layout.indent_width,
             options: &options.language,
+            bump: Bump::new(),
         }
     }
 
-    pub(crate) fn format_right_paren(&self, node: AmberNode) -> Doc<'static> {
+    pub(crate) fn format_right_paren(&self, node: AmberNode) -> Doc<'_> {
         let mut nodes_or_tokens = node.children_with_tokens().rev();
         let docs = if nodes_or_tokens
             .find_map(|node_or_token| match node_or_token {
@@ -34,17 +37,17 @@ impl<'a> Ctx<'a> {
             })
             .is_some_and(|token| token.kind() == SyntaxKind::LINE_COMMENT)
         {
-            vec![Doc::hard_line(), Doc::text(")")]
+            self.bump.alloc_slice_fill_iter([Doc::hard_line(), Doc::text(")")])
         } else if self.options.split_closing_parens {
-            vec![Doc::line_or_nil(), Doc::text(")")]
+            self.bump.alloc_slice_fill_iter([Doc::line_or_nil(), Doc::text(")")])
         } else {
-            vec![Doc::text(")")]
+            self.bump.alloc_slice_fill_iter([Doc::text(")")])
         };
-        Doc::list(docs)
+        Doc::slice(docs)
     }
 }
 
-pub(crate) fn format_node<'a>(node: AmberNode<'a>, ctx: &Ctx) -> Option<Doc<'a>> {
+pub(crate) fn format_node<'a>(node: AmberNode<'a>, ctx: &'a Ctx) -> Option<Doc<'a>> {
     match node.kind() {
         SyntaxKind::MODULE_NAME => Some(format_module_name(node)),
         SyntaxKind::NAME => Some(format_name(node)),
@@ -75,7 +78,7 @@ pub(crate) fn format_node<'a>(node: AmberNode<'a>, ctx: &Ctx) -> Option<Doc<'a>>
         SyntaxKind::BLOCK_TRY_TABLE => Some(format_block_try_table(node, ctx)),
         SyntaxKind::CATCH => Some(format_catch(node, ctx)),
         SyntaxKind::CATCH_ALL => Some(format_catch_all(node, ctx)),
-        SyntaxKind::MEM_ARG => Some(format_mem_arg(node)),
+        SyntaxKind::MEM_ARG => Some(format_mem_arg(node, ctx)),
         SyntaxKind::ON_CLAUSE => Some(format_on_clause(node, ctx)),
         SyntaxKind::IMMEDIATE => Some(format_immediate(node, ctx)),
         SyntaxKind::TYPE_USE => Some(format_type_use(node, ctx)),
@@ -120,8 +123,8 @@ pub(crate) fn format_node<'a>(node: AmberNode<'a>, ctx: &Ctx) -> Option<Doc<'a>>
     }
 }
 
-pub(crate) fn format_root<'a>(root: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
-    let mut docs = Vec::with_capacity(2);
+pub(crate) fn format_root<'a>(root: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+    let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
 
     let mut nodes_or_tokens = root.children_with_tokens().enumerate().peekable();
     let mut prev_kind = SyntaxKind::WHITESPACE;
@@ -169,16 +172,16 @@ pub(crate) fn format_root<'a>(root: AmberNode<'a>, ctx: &Ctx) -> Doc<'a> {
     }
 
     docs.push(Doc::hard_line());
-    Doc::list(docs)
+    Doc::slice(docs.into_bump_slice())
 }
 
-fn format_trivias_after_node<'a>(node: AmberNode<'a>, parent: AmberNode<'a>, ctx: &Ctx) -> Vec<Doc<'a>> {
+fn format_trivias_after_node<'a>(node: AmberNode<'a>, parent: AmberNode<'a>, ctx: &'a Ctx) -> BumpVec<'a, Doc<'a>> {
     let mut tokens = parent
         .children_with_tokens()
         .skip_while(|node_or_token| node_or_token.text_range().start() <= node.text_range().start())
         .map_while(NodeOrToken::into_token)
         .peekable();
-    let mut trivias = Vec::with_capacity(1);
+    let mut trivias = BumpVec::with_capacity_in(1, &ctx.bump);
     while let Some(token) = tokens.next() {
         match token.kind() {
             SyntaxKind::LINE_COMMENT
@@ -203,9 +206,9 @@ fn format_trivias_after_node<'a>(node: AmberNode<'a>, parent: AmberNode<'a>, ctx
         .iter()
         .all(|token| token.kind() == SyntaxKind::WHITESPACE && token.text().chars().filter(|c| *c == '\n').count() < 2)
     {
-        return vec![];
+        return BumpVec::new_in(&ctx.bump);
     }
-    let mut docs = Vec::with_capacity(trivias.len());
+    let mut docs = BumpVec::with_capacity_in(trivias.len(), &ctx.bump);
     if trivias.first().is_some_and(|token| token.kind().is_comment()) {
         docs.push(Doc::soft_line());
     }
@@ -231,13 +234,13 @@ fn format_trivias_after_node<'a>(node: AmberNode<'a>, parent: AmberNode<'a>, ctx
     });
     docs
 }
-fn format_trivias_after_token<'a>(token: AmberToken<'a>, parent: AmberNode<'a>, ctx: &Ctx) -> Vec<Doc<'a>> {
+fn format_trivias_after_token<'a>(token: AmberToken<'a>, parent: AmberNode<'a>, ctx: &'a Ctx) -> BumpVec<'a, Doc<'a>> {
     let mut tokens = parent
         .children_with_tokens()
         .skip_while(|node_or_token| node_or_token.text_range().start() <= token.text_range().start())
         .map_while(NodeOrToken::into_token)
         .peekable();
-    let mut trivias = Vec::with_capacity(1);
+    let mut trivias = BumpVec::with_capacity_in(1, &ctx.bump);
     while let Some(current) = tokens.next() {
         match current.kind() {
             SyntaxKind::LINE_COMMENT
@@ -264,9 +267,9 @@ fn format_trivias_after_token<'a>(token: AmberToken<'a>, parent: AmberNode<'a>, 
         }
     }
     if trivias.iter().all(|token| token.kind() == SyntaxKind::WHITESPACE) {
-        return vec![];
+        return BumpVec::new_in(&ctx.bump);
     }
-    let mut docs = Vec::with_capacity(trivias.len());
+    let mut docs = BumpVec::with_capacity_in(trivias.len(), &ctx.bump);
     trivias.iter().for_each(|token| match token.kind() {
         SyntaxKind::LINE_COMMENT => {
             docs.push(format_line_comment(token.text(), ctx));
@@ -325,7 +328,7 @@ fn format_block_comment<'a>(text: &'a str, ctx: &Ctx) -> Doc<'a> {
     }
 }
 
-fn reflow(text: String, docs: &mut Vec<Doc>) {
+fn reflow(text: String, docs: &mut BumpVec<Doc>) {
     let mut lines = text.lines();
     if let Some(line) = lines.next() {
         docs.push(Doc::text(line.to_owned()));
@@ -356,7 +359,7 @@ fn should_ignore(node: AmberNode, parent: AmberNode, ctx: &Ctx) -> bool {
         .is_some_and(|rest| rest.is_empty() || rest.starts_with(|c: char| c.is_ascii_whitespace()))
 }
 
-fn wrap_before<I>(children: &mut iter::Peekable<I>, option: WrapBefore) -> Doc<'static>
+fn wrap_before<'a, I>(children: &mut iter::Peekable<I>, option: WrapBefore) -> Doc<'a>
 where
     I: Iterator,
 {
@@ -374,7 +377,7 @@ where
     }
 }
 
-fn whitespace_of_multi_line(option: MultiLine, first: Option<AmberNode>, parent: AmberNode) -> Doc<'static> {
+fn whitespace_of_multi_line<'a>(option: MultiLine, first: Option<AmberNode>, parent: AmberNode) -> Doc<'a> {
     match option {
         MultiLine::Never => Doc::space(),
         MultiLine::Overflow => Doc::line_or_space(),
