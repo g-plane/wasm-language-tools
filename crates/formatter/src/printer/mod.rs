@@ -45,6 +45,129 @@ impl<'a> Ctx<'a> {
         };
         Doc::slice(docs)
     }
+
+    fn format_trivias_after_node<'b>(&self, node: AmberNode<'b>, parent: AmberNode<'b>, docs: &mut BumpVec<Doc<'b>>) {
+        debug_assert!(docs.is_empty());
+        let mut tokens = parent
+            .children_with_tokens()
+            .skip_while(|node_or_token| node_or_token.text_range().start() <= node.text_range().start())
+            .map_while(NodeOrToken::into_token)
+            .peekable();
+        let mut trivias = BumpVec::with_capacity_in(1, &self.bump);
+        while let Some(token) = tokens.next() {
+            match token.kind() {
+                SyntaxKind::LINE_COMMENT
+                | SyntaxKind::BLOCK_COMMENT
+                | SyntaxKind::ERROR
+                | SyntaxKind::ANNOT_START
+                | SyntaxKind::ANNOT_ELEM
+                | SyntaxKind::ANNOT_END => trivias.push(token),
+                SyntaxKind::WHITESPACE
+                    if tokens.peek().is_none_or(|token| match token.kind() {
+                        SyntaxKind::R_PAREN => false,
+                        SyntaxKind::KEYWORD => token.text() != "end",
+                        _ => true,
+                    }) =>
+                {
+                    trivias.push(token);
+                }
+                _ => break,
+            }
+        }
+        if trivias.iter().all(|token| {
+            token.kind() == SyntaxKind::WHITESPACE && token.text().chars().filter(|c| *c == '\n').count() < 2
+        }) {
+            return;
+        }
+        docs.reserve(trivias.len());
+        if trivias.first().is_some_and(|token| token.kind().is_comment()) {
+            docs.push(Doc::soft_line());
+        }
+        trivias.iter().for_each(|token| match token.kind() {
+            SyntaxKind::LINE_COMMENT => {
+                docs.push(format_line_comment(token.text(), self));
+            }
+            SyntaxKind::BLOCK_COMMENT => {
+                docs.push(format_block_comment(token.text(), self));
+            }
+            SyntaxKind::WHITESPACE => match token.text().chars().filter(|c| *c == '\n').count() {
+                0 => docs.push(Doc::space()),
+                1 => docs.push(Doc::hard_line()),
+                _ => {
+                    docs.push(Doc::empty_line());
+                    docs.push(Doc::hard_line());
+                }
+            },
+            SyntaxKind::ERROR | SyntaxKind::ANNOT_START | SyntaxKind::ANNOT_ELEM | SyntaxKind::ANNOT_END => {
+                docs.push(Doc::text(token.text()));
+            }
+            _ => {}
+        });
+    }
+
+    fn format_trivias_after_token<'b>(
+        &self,
+        token: AmberToken<'b>,
+        parent: AmberNode<'b>,
+        docs: &mut BumpVec<Doc<'b>>,
+    ) {
+        debug_assert!(docs.is_empty());
+        let mut tokens = parent
+            .children_with_tokens()
+            .skip_while(|node_or_token| node_or_token.text_range().start() <= token.text_range().start())
+            .map_while(NodeOrToken::into_token)
+            .peekable();
+        let mut trivias = BumpVec::with_capacity_in(1, &self.bump);
+        while let Some(current) = tokens.next() {
+            match current.kind() {
+                SyntaxKind::LINE_COMMENT
+                | SyntaxKind::BLOCK_COMMENT
+                | SyntaxKind::ERROR
+                | SyntaxKind::ANNOT_START
+                | SyntaxKind::ANNOT_ELEM
+                | SyntaxKind::ANNOT_END => trivias.push(current),
+                SyntaxKind::WHITESPACE
+                    if tokens.peek().is_none_or(|token| match token.kind() {
+                        SyntaxKind::R_PAREN => false,
+                        SyntaxKind::KEYWORD => token.text() != "end",
+                        _ => true,
+                    }) =>
+                {
+                    if !(token.kind() == SyntaxKind::L_PAREN
+                        && current.kind() == SyntaxKind::WHITESPACE
+                        && trivias.is_empty())
+                    {
+                        trivias.push(current);
+                    }
+                }
+                _ => break,
+            }
+        }
+        if trivias.iter().all(|token| token.kind() == SyntaxKind::WHITESPACE) {
+            return;
+        }
+        docs.reserve(trivias.len());
+        trivias.iter().for_each(|token| match token.kind() {
+            SyntaxKind::LINE_COMMENT => {
+                docs.push(format_line_comment(token.text(), self));
+            }
+            SyntaxKind::BLOCK_COMMENT => {
+                docs.push(format_block_comment(token.text(), self));
+            }
+            SyntaxKind::WHITESPACE => match token.text().chars().filter(|c| *c == '\n').count() {
+                0 => docs.push(Doc::space()),
+                1 => docs.push(Doc::hard_line()),
+                _ => {
+                    docs.push(Doc::empty_line());
+                    docs.push(Doc::hard_line());
+                }
+            },
+            SyntaxKind::ERROR | SyntaxKind::ANNOT_START | SyntaxKind::ANNOT_ELEM | SyntaxKind::ANNOT_END => {
+                docs.push(Doc::text(token.text()));
+            }
+            _ => {}
+        });
+    }
 }
 
 pub(crate) fn format_node<'a>(node: AmberNode<'a>, ctx: &'a Ctx) -> Option<Doc<'a>> {
@@ -173,124 +296,6 @@ pub(crate) fn format_root<'a>(root: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
 
     docs.push(Doc::hard_line());
     Doc::slice(docs.into_bump_slice())
-}
-
-fn format_trivias_after_node<'a>(node: AmberNode<'a>, parent: AmberNode<'a>, ctx: &'a Ctx) -> BumpVec<'a, Doc<'a>> {
-    let mut tokens = parent
-        .children_with_tokens()
-        .skip_while(|node_or_token| node_or_token.text_range().start() <= node.text_range().start())
-        .map_while(NodeOrToken::into_token)
-        .peekable();
-    let mut trivias = BumpVec::with_capacity_in(1, &ctx.bump);
-    while let Some(token) = tokens.next() {
-        match token.kind() {
-            SyntaxKind::LINE_COMMENT
-            | SyntaxKind::BLOCK_COMMENT
-            | SyntaxKind::ERROR
-            | SyntaxKind::ANNOT_START
-            | SyntaxKind::ANNOT_ELEM
-            | SyntaxKind::ANNOT_END => trivias.push(token),
-            SyntaxKind::WHITESPACE
-                if tokens.peek().is_none_or(|token| match token.kind() {
-                    SyntaxKind::R_PAREN => false,
-                    SyntaxKind::KEYWORD => token.text() != "end",
-                    _ => true,
-                }) =>
-            {
-                trivias.push(token);
-            }
-            _ => break,
-        }
-    }
-    if trivias
-        .iter()
-        .all(|token| token.kind() == SyntaxKind::WHITESPACE && token.text().chars().filter(|c| *c == '\n').count() < 2)
-    {
-        return BumpVec::new_in(&ctx.bump);
-    }
-    let mut docs = BumpVec::with_capacity_in(trivias.len(), &ctx.bump);
-    if trivias.first().is_some_and(|token| token.kind().is_comment()) {
-        docs.push(Doc::soft_line());
-    }
-    trivias.iter().for_each(|token| match token.kind() {
-        SyntaxKind::LINE_COMMENT => {
-            docs.push(format_line_comment(token.text(), ctx));
-        }
-        SyntaxKind::BLOCK_COMMENT => {
-            docs.push(format_block_comment(token.text(), ctx));
-        }
-        SyntaxKind::WHITESPACE => match token.text().chars().filter(|c| *c == '\n').count() {
-            0 => docs.push(Doc::space()),
-            1 => docs.push(Doc::hard_line()),
-            _ => {
-                docs.push(Doc::empty_line());
-                docs.push(Doc::hard_line());
-            }
-        },
-        SyntaxKind::ERROR | SyntaxKind::ANNOT_START | SyntaxKind::ANNOT_ELEM | SyntaxKind::ANNOT_END => {
-            docs.push(Doc::text(token.text()));
-        }
-        _ => {}
-    });
-    docs
-}
-fn format_trivias_after_token<'a>(token: AmberToken<'a>, parent: AmberNode<'a>, ctx: &'a Ctx) -> BumpVec<'a, Doc<'a>> {
-    let mut tokens = parent
-        .children_with_tokens()
-        .skip_while(|node_or_token| node_or_token.text_range().start() <= token.text_range().start())
-        .map_while(NodeOrToken::into_token)
-        .peekable();
-    let mut trivias = BumpVec::with_capacity_in(1, &ctx.bump);
-    while let Some(current) = tokens.next() {
-        match current.kind() {
-            SyntaxKind::LINE_COMMENT
-            | SyntaxKind::BLOCK_COMMENT
-            | SyntaxKind::ERROR
-            | SyntaxKind::ANNOT_START
-            | SyntaxKind::ANNOT_ELEM
-            | SyntaxKind::ANNOT_END => trivias.push(current),
-            SyntaxKind::WHITESPACE
-                if tokens.peek().is_none_or(|token| match token.kind() {
-                    SyntaxKind::R_PAREN => false,
-                    SyntaxKind::KEYWORD => token.text() != "end",
-                    _ => true,
-                }) =>
-            {
-                if !(token.kind() == SyntaxKind::L_PAREN
-                    && current.kind() == SyntaxKind::WHITESPACE
-                    && trivias.is_empty())
-                {
-                    trivias.push(current);
-                }
-            }
-            _ => break,
-        }
-    }
-    if trivias.iter().all(|token| token.kind() == SyntaxKind::WHITESPACE) {
-        return BumpVec::new_in(&ctx.bump);
-    }
-    let mut docs = BumpVec::with_capacity_in(trivias.len(), &ctx.bump);
-    trivias.iter().for_each(|token| match token.kind() {
-        SyntaxKind::LINE_COMMENT => {
-            docs.push(format_line_comment(token.text(), ctx));
-        }
-        SyntaxKind::BLOCK_COMMENT => {
-            docs.push(format_block_comment(token.text(), ctx));
-        }
-        SyntaxKind::WHITESPACE => match token.text().chars().filter(|c| *c == '\n').count() {
-            0 => docs.push(Doc::space()),
-            1 => docs.push(Doc::hard_line()),
-            _ => {
-                docs.push(Doc::empty_line());
-                docs.push(Doc::hard_line());
-            }
-        },
-        SyntaxKind::ERROR | SyntaxKind::ANNOT_START | SyntaxKind::ANNOT_ELEM | SyntaxKind::ANNOT_END => {
-            docs.push(Doc::text(token.text()));
-        }
-        _ => {}
-    });
-    docs
 }
 
 fn format_line_comment<'a>(text: &'a str, ctx: &Ctx) -> Doc<'a> {

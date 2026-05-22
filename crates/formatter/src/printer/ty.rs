@@ -19,12 +19,12 @@ pub(crate) fn format_array_type<'a>(array_type: AmberNode<'a>, ctx: &'a Ctx) -> 
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = array_type.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
-        trivias = format_trivias_after_token(l_paren, array_type, ctx);
+        ctx.format_trivias_after_token(l_paren, array_type, &mut trivias);
     }
     if let Some(keyword) = array_type.tokens_by_kind(KEYWORD).next() {
         docs.append(&mut trivias);
         docs.push(Doc::text("array"));
-        trivias = format_trivias_after_token(keyword, array_type, ctx);
+        ctx.format_trivias_after_token(keyword, array_type, &mut trivias);
     }
     if let Some(field_type) = array_type.children_by_kind(FIELD_TYPE).next() {
         if trivias.is_empty() {
@@ -33,7 +33,7 @@ pub(crate) fn format_array_type<'a>(array_type: AmberNode<'a>, ctx: &'a Ctx) -> 
             docs.append(&mut trivias);
         }
         docs.push(format_field_type(field_type, ctx));
-        trivias = format_trivias_after_node(field_type, array_type, ctx);
+        ctx.format_trivias_after_node(field_type, array_type, &mut trivias);
     }
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
@@ -58,12 +58,12 @@ pub(crate) fn format_cont_type<'a>(cont_type: AmberNode<'a>, ctx: &'a Ctx) -> Do
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = cont_type.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
-        trivias = format_trivias_after_token(l_paren, cont_type, ctx);
+        ctx.format_trivias_after_token(l_paren, cont_type, &mut trivias);
     }
     if let Some(keyword) = cont_type.tokens_by_kind(KEYWORD).next() {
         docs.append(&mut trivias);
         docs.push(Doc::text("cont"));
-        trivias = format_trivias_after_token(keyword, cont_type, ctx);
+        ctx.format_trivias_after_token(keyword, cont_type, &mut trivias);
     }
     if let Some(index) = cont_type.children_by_kind(INDEX).next() {
         if trivias.is_empty() {
@@ -72,7 +72,7 @@ pub(crate) fn format_cont_type<'a>(cont_type: AmberNode<'a>, ctx: &'a Ctx) -> Do
             docs.append(&mut trivias);
         }
         docs.push(format_index(index));
-        trivias = format_trivias_after_node(index, cont_type, ctx);
+        ctx.format_trivias_after_node(index, cont_type, &mut trivias);
     }
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
@@ -140,12 +140,12 @@ pub(crate) fn format_field<'a>(field: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = field.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
-        trivias = format_trivias_after_token(l_paren, field, ctx);
+        ctx.format_trivias_after_token(l_paren, field, &mut trivias);
     }
     if let Some(keyword) = field.tokens_by_kind(KEYWORD).next() {
         docs.append(&mut trivias);
         docs.push(Doc::text("field"));
-        trivias = format_trivias_after_token(keyword, field, ctx);
+        ctx.format_trivias_after_token(keyword, field, &mut trivias);
     }
     if let Some(ident) = field.tokens_by_kind(IDENT).next() {
         if trivias.is_empty() {
@@ -154,7 +154,7 @@ pub(crate) fn format_field<'a>(field: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
             docs.append(&mut trivias);
         }
         docs.push(Doc::text(ident.text()));
-        trivias = format_trivias_after_token(ident, field, ctx);
+        ctx.format_trivias_after_token(ident, field, &mut trivias);
     }
     field.children_by_kind(FIELD_TYPE).for_each(|field_type| {
         if trivias.is_empty() {
@@ -163,7 +163,7 @@ pub(crate) fn format_field<'a>(field: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
             docs.append(&mut trivias);
         }
         docs.push(format_field_type(field_type, ctx));
-        trivias = format_trivias_after_node(field_type, field, ctx);
+        ctx.format_trivias_after_node(field_type, field, &mut trivias);
     });
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
@@ -177,11 +177,12 @@ pub(crate) fn format_field_type<'a>(field_type: AmberNode<'a>, ctx: &'a Ctx) -> 
     if let Some(l_paren) = field_type.tokens_by_kind(L_PAREN).next() {
         let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
         docs.push(Doc::text("("));
-        let mut trivias = format_trivias_after_token(l_paren, field_type, ctx);
+        let mut trivias = BumpVec::new_in(&ctx.bump);
+        ctx.format_trivias_after_token(l_paren, field_type, &mut trivias);
         if let Some(keyword) = field_type.tokens_by_kind(KEYWORD).next() {
             docs.append(&mut trivias);
             docs.push(Doc::text("mut"));
-            trivias = format_trivias_after_token(keyword, field_type, ctx);
+            ctx.format_trivias_after_token(keyword, field_type, &mut trivias);
         }
         if let Some(ty) = field_type.children_by_kind(StorageType::can_cast).next() {
             if trivias.is_empty() {
@@ -190,7 +191,7 @@ pub(crate) fn format_field_type<'a>(field_type: AmberNode<'a>, ctx: &'a Ctx) -> 
                 docs.append(&mut trivias);
             }
             docs.push(format_storage_type(ty, ctx));
-            trivias = format_trivias_after_node(ty, field_type, ctx);
+            ctx.format_trivias_after_node(ty, field_type, &mut trivias);
         }
         docs.append(&mut trivias);
         Doc::slice(ctx.bump.alloc_slice_fill_iter([
@@ -210,12 +211,12 @@ pub(crate) fn format_func_type<'a>(func_type: AmberNode<'a>, ctx: &'a Ctx) -> Do
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = func_type.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
-        trivias = format_trivias_after_token(l_paren, func_type, ctx);
+        ctx.format_trivias_after_token(l_paren, func_type, &mut trivias);
     }
     if let Some(keyword) = func_type.tokens_by_kind(KEYWORD).next() {
         docs.append(&mut trivias);
         docs.push(Doc::text("func"));
-        trivias = format_trivias_after_token(keyword, func_type, ctx);
+        ctx.format_trivias_after_token(keyword, func_type, &mut trivias);
     }
     func_type.children_by_kind(PARAM).for_each(|param| {
         if trivias.is_empty() {
@@ -224,7 +225,7 @@ pub(crate) fn format_func_type<'a>(func_type: AmberNode<'a>, ctx: &'a Ctx) -> Do
             docs.append(&mut trivias);
         }
         docs.push(format_param(param, ctx));
-        trivias = format_trivias_after_node(param, func_type, ctx);
+        ctx.format_trivias_after_node(param, func_type, &mut trivias);
     });
     func_type.children_by_kind(RESULT).for_each(|result| {
         if trivias.is_empty() {
@@ -233,7 +234,7 @@ pub(crate) fn format_func_type<'a>(func_type: AmberNode<'a>, ctx: &'a Ctx) -> Do
             docs.append(&mut trivias);
         }
         docs.push(format_result(result, ctx));
-        trivias = format_trivias_after_node(result, func_type, ctx);
+        ctx.format_trivias_after_node(result, func_type, &mut trivias);
     });
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
@@ -247,11 +248,12 @@ pub(crate) fn format_global_type<'a>(global_type: AmberNode<'a>, ctx: &'a Ctx) -
     if let Some(l_paren) = global_type.tokens_by_kind(L_PAREN).next() {
         let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
         docs.push(Doc::text("("));
-        let mut trivias = format_trivias_after_token(l_paren, global_type, ctx);
+        let mut trivias = BumpVec::new_in(&ctx.bump);
+        ctx.format_trivias_after_token(l_paren, global_type, &mut trivias);
         if let Some(keyword) = global_type.tokens_by_kind(KEYWORD).next() {
             docs.append(&mut trivias);
             docs.push(Doc::text("mut"));
-            trivias = format_trivias_after_token(keyword, global_type, ctx);
+            ctx.format_trivias_after_token(keyword, global_type, &mut trivias);
         }
         if let Some(ty) = global_type.children_by_kind(ValType::can_cast).next() {
             if trivias.is_empty() {
@@ -260,7 +262,7 @@ pub(crate) fn format_global_type<'a>(global_type: AmberNode<'a>, ctx: &'a Ctx) -
                 docs.append(&mut trivias);
             }
             docs.push(format_val_type(ty, ctx));
-            trivias = format_trivias_after_node(ty, global_type, ctx);
+            ctx.format_trivias_after_node(ty, global_type, &mut trivias);
         }
         docs.append(&mut trivias);
         Doc::slice(ctx.bump.alloc_slice_fill_iter([
@@ -291,7 +293,7 @@ pub(crate) fn format_limits<'a>(limits: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> 
     let mut uints = limits.tokens_by_kind(UNSIGNED_INT);
     if let Some(min) = uints.next() {
         docs.push(Doc::text(min.text()));
-        trivias = format_trivias_after_token(min, limits, ctx);
+        ctx.format_trivias_after_token(min, limits, &mut trivias);
     }
     if let Some(max) = uints.next() {
         if trivias.is_empty() {
@@ -309,12 +311,12 @@ pub(crate) fn format_mem_page_size<'a>(mem_page_size: AmberNode<'a>, ctx: &'a Ct
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = mem_page_size.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
-        trivias = format_trivias_after_token(l_paren, mem_page_size, ctx);
+        ctx.format_trivias_after_token(l_paren, mem_page_size, &mut trivias);
     }
     if let Some(keyword) = mem_page_size.tokens_by_kind(KEYWORD).next() {
         docs.append(&mut trivias);
         docs.push(Doc::text("pagesize"));
-        trivias = format_trivias_after_token(keyword, mem_page_size, ctx);
+        ctx.format_trivias_after_token(keyword, mem_page_size, &mut trivias);
     }
     if let Some(unsigned_int) = mem_page_size.tokens_by_kind(UNSIGNED_INT).next() {
         if trivias.is_empty() {
@@ -323,7 +325,7 @@ pub(crate) fn format_mem_page_size<'a>(mem_page_size: AmberNode<'a>, ctx: &'a Ct
             docs.append(&mut trivias);
         }
         docs.push(Doc::text(unsigned_int.text()));
-        trivias = format_trivias_after_token(unsigned_int, mem_page_size, ctx);
+        ctx.format_trivias_after_token(unsigned_int, mem_page_size, &mut trivias);
     }
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
@@ -338,7 +340,7 @@ pub(crate) fn format_mem_type<'a>(mem_type: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(addr_type) = mem_type.children_by_kind(ADDR_TYPE).next() {
         docs.push(format_addr_type(addr_type));
-        trivias = format_trivias_after_node(addr_type, mem_type, ctx);
+        ctx.format_trivias_after_node(addr_type, mem_type, &mut trivias);
     }
     if let Some(limits) = mem_type.children_by_kind(LIMITS).next() {
         if trivias.is_empty() && !docs.is_empty() {
@@ -347,7 +349,7 @@ pub(crate) fn format_mem_type<'a>(mem_type: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
             docs.append(&mut trivias);
         }
         docs.push(format_limits(limits, ctx));
-        trivias = format_trivias_after_node(limits, mem_type, ctx);
+        ctx.format_trivias_after_node(limits, mem_type, &mut trivias);
     }
     if let Some(share) = mem_type.tokens_by_kind(KEYWORD).next() {
         if trivias.is_empty() {
@@ -356,7 +358,7 @@ pub(crate) fn format_mem_type<'a>(mem_type: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
             docs.append(&mut trivias);
         }
         docs.push(Doc::text(share.text()));
-        trivias = format_trivias_after_token(share, mem_type, ctx);
+        ctx.format_trivias_after_token(share, mem_type, &mut trivias);
     }
     if let Some(mem_page_size) = mem_type.children_by_kind(MEM_PAGE_SIZE).next() {
         if trivias.is_empty() {
@@ -390,12 +392,12 @@ pub(crate) fn format_param<'a>(param: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = param.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
-        trivias = format_trivias_after_token(l_paren, param, ctx);
+        ctx.format_trivias_after_token(l_paren, param, &mut trivias);
     }
     if let Some(keyword) = param.tokens_by_kind(KEYWORD).next() {
         docs.append(&mut trivias);
         docs.push(Doc::text("param"));
-        trivias = format_trivias_after_token(keyword, param, ctx);
+        ctx.format_trivias_after_token(keyword, param, &mut trivias);
     }
     if let Some(ident) = param.tokens_by_kind(IDENT).next() {
         if trivias.is_empty() {
@@ -404,7 +406,7 @@ pub(crate) fn format_param<'a>(param: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
             docs.append(&mut trivias);
         }
         docs.push(Doc::text(ident.text()));
-        trivias = format_trivias_after_token(ident, param, ctx);
+        ctx.format_trivias_after_token(ident, param, &mut trivias);
     }
     param.children_by_kind(ValType::can_cast).for_each(|val_type| {
         if trivias.is_empty() {
@@ -413,7 +415,7 @@ pub(crate) fn format_param<'a>(param: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
             docs.append(&mut trivias);
         }
         docs.push(format_val_type(val_type, ctx));
-        trivias = format_trivias_after_node(val_type, param, ctx);
+        ctx.format_trivias_after_node(val_type, param, &mut trivias);
     });
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
@@ -427,11 +429,12 @@ pub(crate) fn format_ref_type<'a>(ref_type: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
     if let Some(l_paren) = ref_type.tokens_by_kind(L_PAREN).next() {
         let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
         docs.push(Doc::text("("));
-        let mut trivias = format_trivias_after_token(l_paren, ref_type, ctx);
+        let mut trivias = BumpVec::new_in(&ctx.bump);
+        ctx.format_trivias_after_token(l_paren, ref_type, &mut trivias);
         if let Some(keyword) = ref_type.tokens_by_kind(KEYWORD).next() {
             docs.append(&mut trivias);
             docs.push(Doc::text("ref"));
-            trivias = format_trivias_after_token(keyword, ref_type, ctx);
+            ctx.format_trivias_after_token(keyword, ref_type, &mut trivias);
         }
         if let Some(keyword) = ref_type.tokens_by_kind(MODIFIER_KEYWORD).next() {
             if trivias.is_empty() {
@@ -440,7 +443,7 @@ pub(crate) fn format_ref_type<'a>(ref_type: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
                 docs.append(&mut trivias);
             }
             docs.push(Doc::text("null"));
-            trivias = format_trivias_after_token(keyword, ref_type, ctx);
+            ctx.format_trivias_after_token(keyword, ref_type, &mut trivias);
         }
         if let Some(heap_type) = ref_type.children_by_kind(HEAP_TYPE).next() {
             if trivias.is_empty() {
@@ -449,7 +452,7 @@ pub(crate) fn format_ref_type<'a>(ref_type: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
                 docs.append(&mut trivias);
             }
             docs.push(format_heap_type(heap_type));
-            trivias = format_trivias_after_node(heap_type, ref_type, ctx);
+            ctx.format_trivias_after_node(heap_type, ref_type, &mut trivias);
         }
         docs.append(&mut trivias);
         Doc::slice(ctx.bump.alloc_slice_fill_iter([
@@ -469,12 +472,12 @@ pub(crate) fn format_result<'a>(result: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> 
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = result.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
-        trivias = format_trivias_after_token(l_paren, result, ctx);
+        ctx.format_trivias_after_token(l_paren, result, &mut trivias);
     }
     if let Some(keyword) = result.tokens_by_kind(KEYWORD).next() {
         docs.append(&mut trivias);
         docs.push(Doc::text("result"));
-        trivias = format_trivias_after_token(keyword, result, ctx);
+        ctx.format_trivias_after_token(keyword, result, &mut trivias);
     }
     result.children_by_kind(ValType::can_cast).for_each(|val_type| {
         if trivias.is_empty() {
@@ -483,7 +486,7 @@ pub(crate) fn format_result<'a>(result: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> 
             docs.append(&mut trivias);
         }
         docs.push(format_val_type(val_type, ctx));
-        trivias = format_trivias_after_node(val_type, result, ctx);
+        ctx.format_trivias_after_node(val_type, result, &mut trivias);
     });
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
@@ -506,12 +509,12 @@ pub(crate) fn format_struct_type<'a>(struct_type: AmberNode<'a>, ctx: &'a Ctx) -
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = struct_type.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
-        trivias = format_trivias_after_token(l_paren, struct_type, ctx);
+        ctx.format_trivias_after_token(l_paren, struct_type, &mut trivias);
     }
     if let Some(keyword) = struct_type.tokens_by_kind(KEYWORD).next() {
         docs.append(&mut trivias);
         docs.push(Doc::text("struct"));
-        trivias = format_trivias_after_token(keyword, struct_type, ctx);
+        ctx.format_trivias_after_token(keyword, struct_type, &mut trivias);
     }
     let mut fields = struct_type.children_by_kind(FIELD).peekable();
     let mut fields_docs = BumpVec::with_capacity_in(1, &ctx.bump);
@@ -523,7 +526,7 @@ pub(crate) fn format_struct_type<'a>(struct_type: AmberNode<'a>, ctx: &'a Ctx) -
             docs.append(&mut trivias);
         }
         fields_docs.push(format_field(field, ctx));
-        trivias = format_trivias_after_node(field, struct_type, ctx);
+        ctx.format_trivias_after_node(field, struct_type, &mut trivias);
     }
     fields.for_each(|field| {
         if trivias.is_empty() {
@@ -532,7 +535,7 @@ pub(crate) fn format_struct_type<'a>(struct_type: AmberNode<'a>, ctx: &'a Ctx) -
             fields_docs.append(&mut trivias);
         }
         fields_docs.push(format_field(field, ctx));
-        trivias = format_trivias_after_node(field, struct_type, ctx);
+        ctx.format_trivias_after_node(field, struct_type, &mut trivias);
     });
     docs.push(Doc::slice(fields_docs.into_bump_slice()).group());
     docs.append(&mut trivias);
@@ -547,11 +550,12 @@ pub(crate) fn format_sub_type<'a>(sub_type: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
     if let Some(l_paren) = sub_type.tokens_by_kind(L_PAREN).next() {
         let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
         docs.push(Doc::text("("));
-        let mut trivias = format_trivias_after_token(l_paren, sub_type, ctx);
+        let mut trivias = BumpVec::new_in(&ctx.bump);
+        ctx.format_trivias_after_token(l_paren, sub_type, &mut trivias);
         if let Some(keyword) = sub_type.tokens_by_kind(KEYWORD).next() {
             docs.append(&mut trivias);
             docs.push(Doc::text("sub"));
-            trivias = format_trivias_after_token(keyword, sub_type, ctx);
+            ctx.format_trivias_after_token(keyword, sub_type, &mut trivias);
         }
         if let Some(keyword) = sub_type.tokens_by_kind(MODIFIER_KEYWORD).next() {
             if trivias.is_empty() {
@@ -560,7 +564,7 @@ pub(crate) fn format_sub_type<'a>(sub_type: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
                 docs.append(&mut trivias);
             }
             docs.push(Doc::text("final"));
-            trivias = format_trivias_after_token(keyword, sub_type, ctx);
+            ctx.format_trivias_after_token(keyword, sub_type, &mut trivias);
         }
         sub_type.children_by_kind(INDEX).for_each(|index| {
             if trivias.is_empty() {
@@ -569,7 +573,7 @@ pub(crate) fn format_sub_type<'a>(sub_type: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
                 docs.append(&mut trivias);
             }
             docs.push(format_index(index));
-            trivias = format_trivias_after_node(index, sub_type, ctx);
+            ctx.format_trivias_after_node(index, sub_type, &mut trivias);
         });
         if let Some(ty) = sub_type.children_by_kind(CompType::can_cast).next() {
             if trivias.is_empty() {
@@ -593,7 +597,7 @@ pub(crate) fn format_sub_type<'a>(sub_type: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
                 docs.append(&mut trivias);
             }
             docs.push(format_comp_type(ty, ctx));
-            trivias = format_trivias_after_node(ty, sub_type, ctx);
+            ctx.format_trivias_after_node(ty, sub_type, &mut trivias);
         }
         docs.append(&mut trivias);
         Doc::slice(ctx.bump.alloc_slice_fill_iter([
@@ -613,7 +617,7 @@ pub(crate) fn format_table_type<'a>(table_type: AmberNode<'a>, ctx: &'a Ctx) -> 
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(addr_type) = table_type.children_by_kind(ADDR_TYPE).next() {
         docs.push(format_addr_type(addr_type));
-        trivias = format_trivias_after_node(addr_type, table_type, ctx);
+        ctx.format_trivias_after_node(addr_type, table_type, &mut trivias);
     }
     if let Some(limits) = table_type.children_by_kind(LIMITS).next() {
         if trivias.is_empty() && !docs.is_empty() {
@@ -622,7 +626,7 @@ pub(crate) fn format_table_type<'a>(table_type: AmberNode<'a>, ctx: &'a Ctx) -> 
             docs.append(&mut trivias);
         }
         docs.push(format_limits(limits, ctx));
-        trivias = format_trivias_after_node(limits, table_type, ctx);
+        ctx.format_trivias_after_node(limits, table_type, &mut trivias);
     }
     if let Some(ref_type) = table_type.children_by_kind(REF_TYPE).next() {
         if trivias.is_empty() {
@@ -657,12 +661,12 @@ fn format_extern_type<'a>(node: AmberNode<'a>, ty: Option<(AmberNode<'a>, Doc<'a
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = node.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
-        trivias = format_trivias_after_token(l_paren, node, ctx);
+        ctx.format_trivias_after_token(l_paren, node, &mut trivias);
     }
     if let Some(keyword) = node.tokens_by_kind(KEYWORD).next() {
         docs.append(&mut trivias);
         docs.push(Doc::text(keyword.text()));
-        trivias = format_trivias_after_token(keyword, node, ctx);
+        ctx.format_trivias_after_token(keyword, node, &mut trivias);
     }
     if let Some(ident) = node.tokens_by_kind(IDENT).next() {
         if trivias.is_empty() {
@@ -671,7 +675,7 @@ fn format_extern_type<'a>(node: AmberNode<'a>, ty: Option<(AmberNode<'a>, Doc<'a
             docs.append(&mut trivias);
         }
         docs.push(Doc::text(ident.text()));
-        trivias = format_trivias_after_token(ident, node, ctx);
+        ctx.format_trivias_after_token(ident, node, &mut trivias);
     }
     if let Some((ty, doc)) = ty {
         if trivias.is_empty() {
@@ -680,7 +684,7 @@ fn format_extern_type<'a>(node: AmberNode<'a>, ty: Option<(AmberNode<'a>, Doc<'a
             docs.append(&mut trivias);
         }
         docs.push(doc);
-        trivias = format_trivias_after_node(ty, node, ctx);
+        ctx.format_trivias_after_node(ty, node, &mut trivias);
     }
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
