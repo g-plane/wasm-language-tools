@@ -133,10 +133,7 @@ impl<'a> Ctx<'a> {
                         _ => true,
                     }) =>
                 {
-                    if !(token.kind() == SyntaxKind::L_PAREN
-                        && current.kind() == SyntaxKind::WHITESPACE
-                        && trivias.is_empty())
-                    {
+                    if !(token.kind() == SyntaxKind::L_PAREN && trivias.is_empty()) {
                         trivias.push(current);
                     }
                 }

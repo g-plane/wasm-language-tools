@@ -299,7 +299,7 @@ pub(crate) fn format_module<'a>(module: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> 
         ctx.format_trivias_after_token(ident, module, &mut trivias);
     }
     module.children_by_kind(ModuleField::can_cast).for_each(|module_field| {
-        if trivias.is_empty() && (!docs.is_empty() || !docs.is_empty()) {
+        if trivias.is_empty() && !docs.is_empty() {
             docs.push(Doc::hard_line());
         } else {
             docs.append(&mut trivias);
