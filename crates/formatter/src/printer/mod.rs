@@ -270,7 +270,6 @@ pub(crate) fn format_root<'a>(root: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
                                 }
                             }
                             1 => docs.push(Doc::hard_line()),
-
                             _ => docs.extend([Doc::empty_line(), Doc::hard_line()]),
                         }
                     }

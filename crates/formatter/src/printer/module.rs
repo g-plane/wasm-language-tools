@@ -579,9 +579,8 @@ pub(crate) fn format_module_field_func<'a>(module_field_func: AmberNode<'a>, ctx
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-        ctx.format_right_paren(module_field_func),
+        ctx.format_right_paren_after_instr(module_field_func),
     ]))
-    .group()
 }
 
 pub(crate) fn format_module_field_global<'a>(module_field_global: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
@@ -911,9 +910,8 @@ pub(crate) fn format_module_field_tag<'a>(module_field_tag: AmberNode<'a>, ctx: 
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-        ctx.format_right_paren(module_field_tag),
+        ctx.format_right_paren_on_same_line(module_field_tag),
     ]))
-    .group()
 }
 
 pub(crate) fn format_module_name<'a>(module_name: AmberNode<'a>) -> Doc<'a> {
