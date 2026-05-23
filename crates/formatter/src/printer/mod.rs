@@ -48,61 +48,56 @@ impl<'a> Ctx<'a> {
 
     fn format_trivias_after_node<'b>(&self, node: AmberNode<'b>, parent: AmberNode<'b>, docs: &mut BumpVec<Doc<'b>>) {
         debug_assert!(docs.is_empty());
+        docs.reserve(1);
         let mut tokens = parent
             .children_with_tokens()
             .skip_while(|node_or_token| node_or_token.text_range().start() <= node.text_range().start())
             .map_while(NodeOrToken::into_token)
             .peekable();
-        let mut trivias = BumpVec::with_capacity_in(1, &self.bump);
+        let mut whitespace_only = true;
         while let Some(token) = tokens.next() {
             match token.kind() {
-                SyntaxKind::LINE_COMMENT
-                | SyntaxKind::BLOCK_COMMENT
-                | SyntaxKind::ERROR
-                | SyntaxKind::ANNOT_START
-                | SyntaxKind::ANNOT_ELEM
-                | SyntaxKind::ANNOT_END => trivias.push(token),
+                SyntaxKind::LINE_COMMENT => {
+                    whitespace_only = false;
+                    if docs.is_empty() {
+                        docs.push(Doc::soft_line());
+                    }
+                    docs.push(format_line_comment(token.text(), self));
+                }
+                SyntaxKind::BLOCK_COMMENT => {
+                    whitespace_only = false;
+                    if docs.is_empty() {
+                        docs.push(Doc::soft_line());
+                    }
+                    docs.push(format_block_comment(token.text(), self));
+                }
                 SyntaxKind::WHITESPACE
-                    if tokens.peek().is_none_or(|token| match token.kind() {
-                        SyntaxKind::R_PAREN => false,
-                        SyntaxKind::KEYWORD => token.text() != "end",
-                        _ => true,
-                    }) =>
+                    if match tokens.peek() {
+                        Some(token) => match token.kind() {
+                            SyntaxKind::R_PAREN => false,
+                            SyntaxKind::KEYWORD => token.text() != "end",
+                            _ => true,
+                        },
+                        None => token.text().bytes().filter(|b| *b == b'\n').count() > 1 || !whitespace_only, // for whitespace after comments but before another node
+                    } =>
                 {
-                    trivias.push(token);
+                    match token.text().bytes().filter(|b| *b == b'\n').count() {
+                        0 => docs.push(Doc::space()),
+                        1 => docs.push(Doc::hard_line()),
+                        _ => {
+                            whitespace_only = false;
+                            docs.push(Doc::empty_line());
+                            docs.push(Doc::hard_line());
+                        }
+                    }
+                }
+                SyntaxKind::ERROR | SyntaxKind::ANNOT_START | SyntaxKind::ANNOT_ELEM | SyntaxKind::ANNOT_END => {
+                    whitespace_only = false;
+                    docs.push(Doc::text(token.text()));
                 }
                 _ => break,
             }
         }
-        if trivias.iter().all(|token| {
-            token.kind() == SyntaxKind::WHITESPACE && token.text().chars().filter(|c| *c == '\n').count() < 2
-        }) {
-            return;
-        }
-        docs.reserve(trivias.len());
-        if trivias.first().is_some_and(|token| token.kind().is_comment()) {
-            docs.push(Doc::soft_line());
-        }
-        trivias.iter().for_each(|token| match token.kind() {
-            SyntaxKind::LINE_COMMENT => {
-                docs.push(format_line_comment(token.text(), self));
-            }
-            SyntaxKind::BLOCK_COMMENT => {
-                docs.push(format_block_comment(token.text(), self));
-            }
-            SyntaxKind::WHITESPACE => match token.text().chars().filter(|c| *c == '\n').count() {
-                0 => docs.push(Doc::space()),
-                1 => docs.push(Doc::hard_line()),
-                _ => {
-                    docs.push(Doc::empty_line());
-                    docs.push(Doc::hard_line());
-                }
-            },
-            SyntaxKind::ERROR | SyntaxKind::ANNOT_START | SyntaxKind::ANNOT_ELEM | SyntaxKind::ANNOT_END => {
-                docs.push(Doc::text(token.text()));
-            }
-            _ => {}
-        });
     }
 
     fn format_trivias_after_token<'b>(
@@ -112,58 +107,51 @@ impl<'a> Ctx<'a> {
         docs: &mut BumpVec<Doc<'b>>,
     ) {
         debug_assert!(docs.is_empty());
+        docs.reserve(1);
         let mut tokens = parent
             .children_with_tokens()
             .skip_while(|node_or_token| node_or_token.text_range().start() <= token.text_range().start())
             .map_while(NodeOrToken::into_token)
             .peekable();
-        let mut trivias = BumpVec::with_capacity_in(1, &self.bump);
+        let mut whitespace_only = true;
         while let Some(current) = tokens.next() {
             match current.kind() {
-                SyntaxKind::LINE_COMMENT
-                | SyntaxKind::BLOCK_COMMENT
-                | SyntaxKind::ERROR
-                | SyntaxKind::ANNOT_START
-                | SyntaxKind::ANNOT_ELEM
-                | SyntaxKind::ANNOT_END => trivias.push(current),
+                SyntaxKind::LINE_COMMENT => {
+                    whitespace_only = false;
+                    docs.push(format_line_comment(current.text(), self));
+                }
+                SyntaxKind::BLOCK_COMMENT => {
+                    whitespace_only = false;
+                    docs.push(format_block_comment(current.text(), self));
+                }
                 SyntaxKind::WHITESPACE
-                    if tokens.peek().is_none_or(|token| match token.kind() {
-                        SyntaxKind::R_PAREN => false,
-                        SyntaxKind::KEYWORD => token.text() != "end",
-                        _ => true,
-                    }) =>
+                    if match tokens.peek() {
+                        Some(token) => match token.kind() {
+                            SyntaxKind::R_PAREN => false,
+                            SyntaxKind::KEYWORD => token.text() != "end",
+                            _ => true,
+                        },
+                        None => !whitespace_only, // for whitespace after comments but before another node
+                    } =>
                 {
-                    if !(token.kind() == SyntaxKind::L_PAREN && trivias.is_empty()) {
-                        trivias.push(current);
+                    if !(token.kind() == SyntaxKind::L_PAREN && whitespace_only) {
+                        match current.text().bytes().filter(|b| *b == b'\n').count() {
+                            0 => docs.push(Doc::space()),
+                            1 => docs.push(Doc::hard_line()),
+                            _ => {
+                                docs.push(Doc::empty_line());
+                                docs.push(Doc::hard_line());
+                            }
+                        }
                     }
+                }
+                SyntaxKind::ERROR | SyntaxKind::ANNOT_START | SyntaxKind::ANNOT_ELEM | SyntaxKind::ANNOT_END => {
+                    whitespace_only = false;
+                    docs.push(Doc::text(current.text()));
                 }
                 _ => break,
             }
         }
-        if trivias.iter().all(|token| token.kind() == SyntaxKind::WHITESPACE) {
-            return;
-        }
-        docs.reserve(trivias.len());
-        trivias.iter().for_each(|token| match token.kind() {
-            SyntaxKind::LINE_COMMENT => {
-                docs.push(format_line_comment(token.text(), self));
-            }
-            SyntaxKind::BLOCK_COMMENT => {
-                docs.push(format_block_comment(token.text(), self));
-            }
-            SyntaxKind::WHITESPACE => match token.text().chars().filter(|c| *c == '\n').count() {
-                0 => docs.push(Doc::space()),
-                1 => docs.push(Doc::hard_line()),
-                _ => {
-                    docs.push(Doc::empty_line());
-                    docs.push(Doc::hard_line());
-                }
-            },
-            SyntaxKind::ERROR | SyntaxKind::ANNOT_START | SyntaxKind::ANNOT_ELEM | SyntaxKind::ANNOT_END => {
-                docs.push(Doc::text(token.text()));
-            }
-            _ => {}
-        });
     }
 }
 
