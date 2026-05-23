@@ -267,7 +267,7 @@ pub(crate) fn format_root<'a>(root: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
                 }
                 SyntaxKind::WHITESPACE => {
                     if index > 0 && nodes_or_tokens.peek().is_some() {
-                        match token.text().chars().filter(|c| *c == '\n').count() {
+                        match token.text().bytes().filter(|b| *b == b'\n').count() {
                             0 => {
                                 if prev_kind == SyntaxKind::LINE_COMMENT {
                                     docs.push(Doc::hard_line());
@@ -275,13 +275,9 @@ pub(crate) fn format_root<'a>(root: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
                                     docs.push(Doc::space());
                                 }
                             }
-                            1 => {
-                                docs.push(Doc::hard_line());
-                            }
-                            _ => {
-                                docs.push(Doc::empty_line());
-                                docs.push(Doc::hard_line());
-                            }
+                            1 => docs.push(Doc::hard_line()),
+
+                            _ => docs.extend([Doc::empty_line(), Doc::hard_line()]),
                         }
                     }
                 }
