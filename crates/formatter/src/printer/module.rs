@@ -27,9 +27,8 @@ pub(crate) fn format_data<'a>(data: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-        ctx.format_right_paren(data),
+        ctx.format_right_paren_on_same_line(data),
     ]))
-    .group()
 }
 
 pub(crate) fn format_elem<'a>(elem: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
@@ -156,9 +155,8 @@ pub(crate) fn format_export<'a>(export: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> 
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-        ctx.format_right_paren(export),
+        ctx.format_right_paren_on_same_line(export),
     ]))
-    .group()
 }
 
 pub(crate) fn format_import<'a>(import: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
@@ -194,9 +192,8 @@ pub(crate) fn format_import<'a>(import: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> 
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-        ctx.format_right_paren(import),
+        ctx.format_right_paren_on_same_line(import),
     ]))
-    .group()
 }
 
 pub(crate) fn format_index<'a>(index: AmberNode<'a>) -> Doc<'a> {
@@ -240,9 +237,8 @@ pub(crate) fn format_local<'a>(local: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-        ctx.format_right_paren(local),
+        ctx.format_right_paren_on_same_line(local),
     ]))
-    .group()
 }
 
 pub(crate) fn format_mem_use<'a>(mem_use: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
@@ -269,9 +265,8 @@ pub(crate) fn format_mem_use<'a>(mem_use: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-        ctx.format_right_paren(mem_use),
+        ctx.format_right_paren_on_same_line(mem_use),
     ]))
-    .group()
 }
 
 pub(crate) fn format_module<'a>(module: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
@@ -493,9 +488,8 @@ pub(crate) fn format_module_field_export<'a>(module_field_export: AmberNode<'a>,
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-        ctx.format_right_paren(module_field_export),
+        ctx.format_right_paren_on_same_line(module_field_export),
     ]))
-    .group()
 }
 
 pub(crate) fn format_module_field_func<'a>(module_field_func: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
@@ -642,9 +636,8 @@ pub(crate) fn format_module_field_global<'a>(module_field_global: AmberNode<'a>,
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-        ctx.format_right_paren(module_field_global),
+        ctx.format_right_paren_after_instr(module_field_global),
     ]))
-    .group()
 }
 
 pub(crate) fn format_module_field_import<'a>(module_field_import: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
@@ -696,9 +689,8 @@ pub(crate) fn format_module_field_import<'a>(module_field_import: AmberNode<'a>,
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-        ctx.format_right_paren(module_field_import),
+        ctx.format_right_paren_on_same_line(module_field_import),
     ]))
-    .group()
 }
 
 pub(crate) fn format_module_field_memory<'a>(module_field_memory: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
@@ -761,9 +753,8 @@ pub(crate) fn format_module_field_memory<'a>(module_field_memory: AmberNode<'a>,
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-        ctx.format_right_paren(module_field_memory),
+        ctx.format_right_paren_on_same_line(module_field_memory),
     ]))
-    .group()
 }
 
 pub(crate) fn format_module_field_start<'a>(module_field_start: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
@@ -790,9 +781,8 @@ pub(crate) fn format_module_field_start<'a>(module_field_start: AmberNode<'a>, c
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-        ctx.format_right_paren(module_field_start),
+        ctx.format_right_paren_on_same_line(module_field_start),
     ]))
-    .group()
 }
 
 pub(crate) fn format_module_field_table<'a>(module_field_table: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
@@ -1020,9 +1010,8 @@ pub(crate) fn format_table_use<'a>(table_use: AmberNode<'a>, ctx: &'a Ctx) -> Do
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-        ctx.format_right_paren(table_use),
+        ctx.format_right_paren_on_same_line(table_use),
     ]))
-    .group()
 }
 
 pub(crate) fn format_type_def<'a>(type_def: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
@@ -1086,7 +1075,7 @@ pub(crate) fn format_type_use<'a>(type_use: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
     }
     if let Some(r_paren) = type_use.tokens_by_kind(R_PAREN).next() {
         docs.append(&mut trivias);
-        docs.push(ctx.format_right_paren(type_use).group());
+        docs.push(ctx.format_right_paren_on_same_line(type_use));
         ctx.format_trivias_after_token(r_paren, type_use, &mut trivias);
     }
 
@@ -1156,9 +1145,8 @@ pub(crate) fn format_extern_idx<'a>(extern_idx: AmberNode<'a>, ctx: &'a Ctx) -> 
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-        ctx.format_right_paren(extern_idx),
+        ctx.format_right_paren_on_same_line(extern_idx),
     ]))
-    .group()
 }
 
 fn format_const_expr<'a>(

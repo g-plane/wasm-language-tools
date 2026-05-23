@@ -23,23 +23,29 @@ impl<'a> Ctx<'a> {
         }
     }
 
-    pub(crate) fn format_right_paren(&self, node: AmberNode) -> Doc<'_> {
-        let mut nodes_or_tokens = node.children_with_tokens().rev();
-        let docs = if nodes_or_tokens
-            .find_map(|node_or_token| match node_or_token {
-                NodeOrToken::Token(token) if token.kind() == SyntaxKind::R_PAREN => Some(token),
-                _ => None,
-            })
-            .and_then(|_| {
-                nodes_or_tokens
-                    .map_while(NodeOrToken::into_token)
-                    .find(|token| token.kind() != SyntaxKind::WHITESPACE)
-            })
-            .is_some_and(|token| token.kind() == SyntaxKind::LINE_COMMENT)
-        {
+    fn format_right_paren(&self, node: AmberNode) -> Doc<'_> {
+        let docs = if has_line_comment_before_right_paren(node) {
             self.bump.alloc_slice_fill_iter([Doc::hard_line(), Doc::text(")")])
         } else if self.options.split_closing_parens {
             self.bump.alloc_slice_fill_iter([Doc::line_or_nil(), Doc::text(")")])
+        } else {
+            self.bump.alloc_slice_fill_iter([Doc::text(")")])
+        };
+        Doc::slice(docs)
+    }
+    fn format_right_paren_on_same_line(&self, node: AmberNode) -> Doc<'_> {
+        let docs = if has_line_comment_before_right_paren(node) {
+            self.bump.alloc_slice_fill_iter([Doc::hard_line(), Doc::text(")")])
+        } else {
+            self.bump.alloc_slice_fill_iter([Doc::text(")")])
+        };
+        Doc::slice(docs)
+    }
+    fn format_right_paren_after_instr(&self, node: AmberNode) -> Doc<'_> {
+        let docs = if self.options.split_closing_parens && node.children_by_kind(Instr::can_cast).next().is_some()
+            || has_line_comment_before_right_paren(node)
+        {
+            self.bump.alloc_slice_fill_iter([Doc::hard_line(), Doc::text(")")])
         } else {
             self.bump.alloc_slice_fill_iter([Doc::text(")")])
         };
@@ -383,4 +389,19 @@ fn whitespace_of_multi_line<'a>(option: MultiLine, first: Option<AmberNode>, par
         MultiLine::Wrap => Doc::soft_line(),
         MultiLine::Always => Doc::hard_line(),
     }
+}
+
+fn has_line_comment_before_right_paren(node: AmberNode) -> bool {
+    let mut nodes_or_tokens = node.children_with_tokens().rev();
+    nodes_or_tokens
+        .find_map(|node_or_token| match node_or_token {
+            NodeOrToken::Token(token) if token.kind() == SyntaxKind::R_PAREN => Some(token),
+            _ => None,
+        })
+        .and_then(|_| {
+            nodes_or_tokens
+                .map_while(NodeOrToken::into_token)
+                .find(|token| token.kind() != SyntaxKind::WHITESPACE)
+        })
+        .is_some_and(|token| token.kind() == SyntaxKind::LINE_COMMENT)
 }
