@@ -273,6 +273,7 @@ pub(crate) fn format_module<'a>(module: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> 
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     let mut is_explicit_module = true;
+    let mut has_module_fields = false;
     if let Some(l_paren) = module.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
         ctx.format_trivias_after_token(l_paren, module, &mut trivias);
@@ -294,6 +295,7 @@ pub(crate) fn format_module<'a>(module: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> 
         ctx.format_trivias_after_token(ident, module, &mut trivias);
     }
     module.children_by_kind(ModuleField::can_cast).for_each(|module_field| {
+        has_module_fields = true;
         if trivias.is_empty() && !docs.is_empty() {
             docs.push(Doc::hard_line());
         } else {
@@ -324,9 +326,12 @@ pub(crate) fn format_module<'a>(module: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> 
     if is_explicit_module {
         Doc::slice(ctx.bump.alloc_slice_fill_iter([
             Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-            ctx.format_right_paren(module),
+            if has_module_fields {
+                ctx.format_right_paren(module)
+            } else {
+                ctx.format_right_paren_on_same_line(module)
+            },
         ]))
-        .group()
     } else {
         Doc::slice(docs.into_bump_slice())
     }
@@ -958,6 +963,7 @@ pub(crate) fn format_offset<'a>(offset: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> 
 pub(crate) fn format_rec_type<'a>(rec_type: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
+    let mut has_type_defs = false;
     if let Some(l_paren) = rec_type.tokens_by_kind(L_PAREN).next() {
         docs.push(Doc::text("("));
         ctx.format_trivias_after_token(l_paren, rec_type, &mut trivias);
@@ -968,6 +974,7 @@ pub(crate) fn format_rec_type<'a>(rec_type: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
         ctx.format_trivias_after_token(keyword, rec_type, &mut trivias);
     }
     rec_type.children_by_kind(TYPE_DEF).for_each(|type_def| {
+        has_type_defs = true;
         if trivias.is_empty() {
             docs.push(Doc::hard_line());
         } else {
@@ -979,9 +986,12 @@ pub(crate) fn format_rec_type<'a>(rec_type: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-        ctx.format_right_paren(rec_type),
+        if has_type_defs {
+            ctx.format_right_paren(rec_type)
+        } else {
+            ctx.format_right_paren_on_same_line(rec_type)
+        },
     ]))
-    .group()
 }
 
 pub(crate) fn format_table_use<'a>(table_use: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
