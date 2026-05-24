@@ -3,7 +3,7 @@ use bumpalo::collections::Vec as BumpVec;
 use tiny_pretty::Doc;
 use wat_syntax::{SyntaxKind::*, ast::AstNode};
 
-pub(crate) fn format_data<'a>(data: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_data<'a>(data: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = data.tokens_by_kind(L_PAREN).next() {
@@ -31,7 +31,7 @@ pub(crate) fn format_data<'a>(data: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
     ]))
 }
 
-pub(crate) fn format_elem<'a>(elem: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_elem<'a>(elem: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = elem.tokens_by_kind(L_PAREN).next() {
@@ -70,7 +70,7 @@ pub(crate) fn format_elem<'a>(elem: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
     .group()
 }
 
-pub(crate) fn format_elem_expr<'a>(elem_expr: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_elem_expr<'a>(elem_expr: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = elem_expr.tokens_by_kind(L_PAREN).next() {
@@ -95,7 +95,7 @@ pub(crate) fn format_elem_expr<'a>(elem_expr: AmberNode<'a>, ctx: &'a Ctx) -> Do
     }
 }
 
-pub(crate) fn format_elem_list<'a>(elem_list: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_elem_list<'a>(elem_list: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(keyword) = elem_list.tokens_by_kind(KEYWORD).next() {
@@ -131,7 +131,7 @@ pub(crate) fn format_elem_list<'a>(elem_list: AmberNode<'a>, ctx: &'a Ctx) -> Do
     Doc::slice(docs.into_bump_slice())
 }
 
-pub(crate) fn format_export<'a>(export: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_export<'a>(export: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = export.tokens_by_kind(L_PAREN).next() {
@@ -159,7 +159,7 @@ pub(crate) fn format_export<'a>(export: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> 
     ]))
 }
 
-pub(crate) fn format_import<'a>(import: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_import<'a>(import: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = import.tokens_by_kind(L_PAREN).next() {
@@ -204,7 +204,7 @@ pub(crate) fn format_index<'a>(index: AmberNode<'a>) -> Doc<'a> {
     }
 }
 
-pub(crate) fn format_local<'a>(local: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_local<'a>(local: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = local.tokens_by_kind(L_PAREN).next() {
@@ -241,7 +241,7 @@ pub(crate) fn format_local<'a>(local: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
     ]))
 }
 
-pub(crate) fn format_mem_use<'a>(mem_use: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_mem_use<'a>(mem_use: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = mem_use.tokens_by_kind(L_PAREN).next() {
@@ -269,7 +269,7 @@ pub(crate) fn format_mem_use<'a>(mem_use: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a
     ]))
 }
 
-pub(crate) fn format_module<'a>(module: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_module<'a>(module: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     let mut is_explicit_module = true;
@@ -337,7 +337,7 @@ pub(crate) fn format_module<'a>(module: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> 
     }
 }
 
-pub(crate) fn format_module_field_data<'a>(module_field_data: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_module_field_data<'a>(module_field_data: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = module_field_data.tokens_by_kind(L_PAREN).next() {
@@ -394,7 +394,7 @@ pub(crate) fn format_module_field_data<'a>(module_field_data: AmberNode<'a>, ctx
     .group()
 }
 
-pub(crate) fn format_module_field_elem<'a>(module_field_elem: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_module_field_elem<'a>(module_field_elem: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = module_field_elem.tokens_by_kind(L_PAREN).next() {
@@ -460,7 +460,7 @@ pub(crate) fn format_module_field_elem<'a>(module_field_elem: AmberNode<'a>, ctx
     .group()
 }
 
-pub(crate) fn format_module_field_export<'a>(module_field_export: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_module_field_export<'a>(module_field_export: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = module_field_export.tokens_by_kind(L_PAREN).next() {
@@ -497,7 +497,7 @@ pub(crate) fn format_module_field_export<'a>(module_field_export: AmberNode<'a>,
     ]))
 }
 
-pub(crate) fn format_module_field_func<'a>(module_field_func: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_module_field_func<'a>(module_field_func: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = module_field_func.tokens_by_kind(L_PAREN).next() {
@@ -588,7 +588,7 @@ pub(crate) fn format_module_field_func<'a>(module_field_func: AmberNode<'a>, ctx
     ]))
 }
 
-pub(crate) fn format_module_field_global<'a>(module_field_global: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_module_field_global<'a>(module_field_global: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = module_field_global.tokens_by_kind(L_PAREN).next() {
@@ -644,7 +644,7 @@ pub(crate) fn format_module_field_global<'a>(module_field_global: AmberNode<'a>,
     ]))
 }
 
-pub(crate) fn format_module_field_import<'a>(module_field_import: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_module_field_import<'a>(module_field_import: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = module_field_import.tokens_by_kind(L_PAREN).next() {
@@ -697,7 +697,7 @@ pub(crate) fn format_module_field_import<'a>(module_field_import: AmberNode<'a>,
     ]))
 }
 
-pub(crate) fn format_module_field_memory<'a>(module_field_memory: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_module_field_memory<'a>(module_field_memory: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = module_field_memory.tokens_by_kind(L_PAREN).next() {
@@ -761,7 +761,7 @@ pub(crate) fn format_module_field_memory<'a>(module_field_memory: AmberNode<'a>,
     ]))
 }
 
-pub(crate) fn format_module_field_start<'a>(module_field_start: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_module_field_start<'a>(module_field_start: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = module_field_start.tokens_by_kind(L_PAREN).next() {
@@ -789,7 +789,7 @@ pub(crate) fn format_module_field_start<'a>(module_field_start: AmberNode<'a>, c
     ]))
 }
 
-pub(crate) fn format_module_field_table<'a>(module_field_table: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_module_field_table<'a>(module_field_table: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = module_field_table.tokens_by_kind(L_PAREN).next() {
@@ -864,7 +864,7 @@ pub(crate) fn format_module_field_table<'a>(module_field_table: AmberNode<'a>, c
     .group()
 }
 
-pub(crate) fn format_module_field_tag<'a>(module_field_tag: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_module_field_tag<'a>(module_field_tag: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = module_field_tag.tokens_by_kind(L_PAREN).next() {
@@ -935,7 +935,7 @@ pub(crate) fn format_name<'a>(name: AmberNode<'a>) -> Doc<'a> {
     }
 }
 
-pub(crate) fn format_offset<'a>(offset: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_offset<'a>(offset: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = offset.tokens_by_kind(L_PAREN).next() {
@@ -960,7 +960,7 @@ pub(crate) fn format_offset<'a>(offset: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> 
     }
 }
 
-pub(crate) fn format_rec_type<'a>(rec_type: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_rec_type<'a>(rec_type: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     let mut has_type_defs = false;
@@ -994,7 +994,7 @@ pub(crate) fn format_rec_type<'a>(rec_type: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
     ]))
 }
 
-pub(crate) fn format_table_use<'a>(table_use: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_table_use<'a>(table_use: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = table_use.tokens_by_kind(L_PAREN).next() {
@@ -1022,7 +1022,7 @@ pub(crate) fn format_table_use<'a>(table_use: AmberNode<'a>, ctx: &'a Ctx) -> Do
     ]))
 }
 
-pub(crate) fn format_type_def<'a>(type_def: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_type_def<'a>(type_def: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = type_def.tokens_by_kind(L_PAREN).next() {
@@ -1060,7 +1060,7 @@ pub(crate) fn format_type_def<'a>(type_def: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
     .group()
 }
 
-pub(crate) fn format_type_use<'a>(type_use: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_type_use<'a>(type_use: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = type_use.tokens_by_kind(L_PAREN).next() {
@@ -1129,7 +1129,7 @@ pub(crate) fn format_type_use<'a>(type_use: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
     Doc::slice(docs.into_bump_slice())
 }
 
-pub(crate) fn format_extern_idx<'a>(extern_idx: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_extern_idx<'a>(extern_idx: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = extern_idx.tokens_by_kind(L_PAREN).next() {
@@ -1159,7 +1159,7 @@ pub(crate) fn format_extern_idx<'a>(extern_idx: AmberNode<'a>, ctx: &'a Ctx) -> 
 
 fn format_const_expr<'a>(
     parent: AmberNode<'a>,
-    ctx: &'a Ctx,
+    ctx: &'a Ctx<'a>,
     docs: &mut BumpVec<'a, Doc<'a>>,
     trivias: &mut BumpVec<'a, Doc<'a>>,
 ) {

@@ -3,7 +3,7 @@ use bumpalo::collections::Vec as BumpVec;
 use tiny_pretty::Doc;
 use wat_syntax::{NodeOrToken, SyntaxKind::*, ast::AstNode};
 
-pub(crate) fn format_block_block<'a>(block_block: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_block_block<'a>(block_block: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = block_block.tokens_by_kind(L_PAREN).next() {
@@ -64,7 +64,7 @@ pub(crate) fn format_block_block<'a>(block_block: AmberNode<'a>, ctx: &'a Ctx) -
     Doc::slice(docs.into_bump_slice())
 }
 
-pub(crate) fn format_block_if<'a>(block_if: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_block_if<'a>(block_if: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = block_if.tokens_by_kind(L_PAREN).next() {
@@ -147,7 +147,7 @@ pub(crate) fn format_block_if<'a>(block_if: AmberNode<'a>, ctx: &'a Ctx) -> Doc<
     }
 }
 
-pub(crate) fn format_block_if_else<'a>(block_if_else: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_block_if_else<'a>(block_if_else: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = block_if_else.tokens_by_kind(L_PAREN).next() {
@@ -189,7 +189,7 @@ pub(crate) fn format_block_if_else<'a>(block_if_else: AmberNode<'a>, ctx: &'a Ct
     }
 }
 
-pub(crate) fn format_block_if_then<'a>(block_if_then: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_block_if_then<'a>(block_if_then: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = block_if_then.tokens_by_kind(L_PAREN).next() {
@@ -231,7 +231,7 @@ pub(crate) fn format_block_if_then<'a>(block_if_then: AmberNode<'a>, ctx: &'a Ct
     }
 }
 
-pub(crate) fn format_block_loop<'a>(block_loop: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_block_loop<'a>(block_loop: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = block_loop.tokens_by_kind(L_PAREN).next() {
@@ -292,7 +292,7 @@ pub(crate) fn format_block_loop<'a>(block_loop: AmberNode<'a>, ctx: &'a Ctx) -> 
     Doc::slice(docs.into_bump_slice())
 }
 
-pub(crate) fn format_block_try_table<'a>(block_try_table: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_block_try_table<'a>(block_try_table: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = block_try_table.tokens_by_kind(L_PAREN).next() {
@@ -369,7 +369,7 @@ pub(crate) fn format_block_try_table<'a>(block_try_table: AmberNode<'a>, ctx: &'
     Doc::slice(docs.into_bump_slice())
 }
 
-pub(crate) fn format_catch<'a>(catch: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_catch<'a>(catch: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = catch.tokens_by_kind(L_PAREN).next() {
@@ -407,7 +407,7 @@ pub(crate) fn format_catch<'a>(catch: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
     ]))
 }
 
-pub(crate) fn format_catch_all<'a>(catch_all: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_catch_all<'a>(catch_all: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = catch_all.tokens_by_kind(L_PAREN).next() {
@@ -435,7 +435,7 @@ pub(crate) fn format_catch_all<'a>(catch_all: AmberNode<'a>, ctx: &'a Ctx) -> Do
     ]))
 }
 
-pub(crate) fn format_immediate<'a>(immediate: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_immediate<'a>(immediate: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     match immediate.children_with_tokens().next() {
         Some(NodeOrToken::Node(node)) => match node.kind() {
             TYPE_USE => format_type_use(node, ctx),
@@ -450,7 +450,7 @@ pub(crate) fn format_immediate<'a>(immediate: AmberNode<'a>, ctx: &'a Ctx) -> Do
     }
 }
 
-pub(crate) fn format_instr<'a>(instr: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_instr<'a>(instr: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     match instr.kind() {
         PLAIN_INSTR => format_plain_instr(instr, ctx),
         BLOCK_BLOCK => format_block_block(instr, ctx),
@@ -461,7 +461,7 @@ pub(crate) fn format_instr<'a>(instr: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
     }
 }
 
-pub(crate) fn format_mem_arg<'a>(mem_arg: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_mem_arg<'a>(mem_arg: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(3, &ctx.bump);
     if let Some(keyword) = mem_arg.tokens_by_kind(MEM_ARG_KEYWORD).next() {
         docs.push(Doc::text(keyword.text()));
@@ -473,7 +473,7 @@ pub(crate) fn format_mem_arg<'a>(mem_arg: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a
     Doc::slice(docs.into_bump_slice())
 }
 
-pub(crate) fn format_on_clause<'a>(on_clause: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_on_clause<'a>(on_clause: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(7, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = on_clause.tokens_by_kind(L_PAREN).next() {
@@ -510,7 +510,7 @@ pub(crate) fn format_on_clause<'a>(on_clause: AmberNode<'a>, ctx: &'a Ctx) -> Do
     ]))
 }
 
-pub(crate) fn format_plain_instr<'a>(plain_instr: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_plain_instr<'a>(plain_instr: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = plain_instr.tokens_by_kind(L_PAREN).next() {

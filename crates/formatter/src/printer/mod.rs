@@ -13,6 +13,7 @@ pub(super) struct Ctx<'a> {
     indent_width: usize,
     options: &'a LanguageOptions,
     bump: Bump,
+    predefined_docs: PredefinedDocs<'a>,
 }
 impl<'a> Ctx<'a> {
     pub(crate) fn new(options: &'a FormatOptions) -> Self {
@@ -20,36 +21,34 @@ impl<'a> Ctx<'a> {
             indent_width: options.layout.indent_width,
             options: &options.language,
             bump: Bump::new(),
+            predefined_docs: PredefinedDocs::new(),
         }
     }
 
-    fn format_right_paren(&self, node: AmberNode) -> Doc<'_> {
-        let docs = if has_line_comment_before_right_paren(node) {
-            self.bump.alloc_slice_fill_iter([Doc::hard_line(), Doc::text(")")])
+    fn format_right_paren(&'a self, node: AmberNode) -> Doc<'a> {
+        if has_line_comment_before_right_paren(node) {
+            Doc::slice(&self.predefined_docs.hard_line_with_r_paren)
         } else if self.options.split_closing_parens {
-            self.bump.alloc_slice_fill_iter([Doc::line_or_nil(), Doc::text(")")])
+            Doc::slice(&self.predefined_docs.line_or_nil_with_r_paren)
         } else {
-            self.bump.alloc_slice_fill_iter([Doc::text(")")])
-        };
-        Doc::slice(docs)
+            Doc::slice(&self.predefined_docs.r_paren)
+        }
     }
-    fn format_right_paren_on_same_line(&self, node: AmberNode) -> Doc<'_> {
-        let docs = if has_line_comment_before_right_paren(node) {
-            self.bump.alloc_slice_fill_iter([Doc::hard_line(), Doc::text(")")])
+    fn format_right_paren_on_same_line(&'a self, node: AmberNode) -> Doc<'a> {
+        if has_line_comment_before_right_paren(node) {
+            Doc::slice(&self.predefined_docs.hard_line_with_r_paren)
         } else {
-            self.bump.alloc_slice_fill_iter([Doc::text(")")])
-        };
-        Doc::slice(docs)
+            Doc::slice(&self.predefined_docs.r_paren)
+        }
     }
-    fn format_right_paren_after_instr(&self, node: AmberNode) -> Doc<'_> {
-        let docs = if self.options.split_closing_parens && node.children_by_kind(Instr::can_cast).next().is_some()
+    fn format_right_paren_after_instr(&'a self, node: AmberNode) -> Doc<'a> {
+        if self.options.split_closing_parens && node.children_by_kind(Instr::can_cast).next().is_some()
             || has_line_comment_before_right_paren(node)
         {
-            self.bump.alloc_slice_fill_iter([Doc::hard_line(), Doc::text(")")])
+            Doc::slice(&self.predefined_docs.hard_line_with_r_paren)
         } else {
-            self.bump.alloc_slice_fill_iter([Doc::text(")")])
-        };
-        Doc::slice(docs)
+            Doc::slice(&self.predefined_docs.r_paren)
+        }
     }
 
     fn format_trivias_after_node<'b>(&self, node: AmberNode<'b>, parent: AmberNode<'b>, docs: &mut BumpVec<Doc<'b>>) {
@@ -161,7 +160,7 @@ impl<'a> Ctx<'a> {
     }
 }
 
-pub(crate) fn format_node<'a>(node: AmberNode<'a>, ctx: &'a Ctx) -> Option<Doc<'a>> {
+pub(crate) fn format_node<'a>(node: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Option<Doc<'a>> {
     match node.kind() {
         SyntaxKind::MODULE_NAME => Some(format_module_name(node)),
         SyntaxKind::NAME => Some(format_name(node)),
@@ -237,7 +236,7 @@ pub(crate) fn format_node<'a>(node: AmberNode<'a>, ctx: &'a Ctx) -> Option<Doc<'
     }
 }
 
-pub(crate) fn format_root<'a>(root: AmberNode<'a>, ctx: &'a Ctx) -> Doc<'a> {
+pub(crate) fn format_root<'a>(root: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
 
     let mut nodes_or_tokens = root.children_with_tokens().enumerate().peekable();
@@ -403,4 +402,19 @@ fn has_line_comment_before_right_paren(node: AmberNode) -> bool {
                 .find(|token| token.kind() != SyntaxKind::WHITESPACE)
         })
         .is_some_and(|token| token.kind() == SyntaxKind::LINE_COMMENT)
+}
+
+struct PredefinedDocs<'a> {
+    r_paren: [Doc<'a>; 1],
+    hard_line_with_r_paren: [Doc<'a>; 2],
+    line_or_nil_with_r_paren: [Doc<'a>; 2],
+}
+impl PredefinedDocs<'_> {
+    fn new() -> Self {
+        Self {
+            r_paren: [Doc::text(")")],
+            hard_line_with_r_paren: [Doc::hard_line(), Doc::text(")")],
+            line_or_nil_with_r_paren: [Doc::line_or_nil(), Doc::text(")")],
+        }
+    }
 }
