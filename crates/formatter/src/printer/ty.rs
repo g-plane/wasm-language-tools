@@ -18,7 +18,7 @@ pub(crate) fn format_array_type<'a>(array_type: AmberNode<'a>, ctx: &'a Ctx<'a>)
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = array_type.tokens_by_kind(L_PAREN).next() {
-        docs.push(Doc::text("("));
+        docs.push(Doc::char('('));
         ctx.format_trivias_after_token(l_paren, array_type, &mut trivias);
     }
     if let Some(keyword) = array_type.tokens_by_kind(KEYWORD).next() {
@@ -56,7 +56,7 @@ pub(crate) fn format_cont_type<'a>(cont_type: AmberNode<'a>, ctx: &'a Ctx<'a>) -
     let mut docs = BumpVec::with_capacity_in(5, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = cont_type.tokens_by_kind(L_PAREN).next() {
-        docs.push(Doc::text("("));
+        docs.push(Doc::char('('));
         ctx.format_trivias_after_token(l_paren, cont_type, &mut trivias);
     }
     if let Some(keyword) = cont_type.tokens_by_kind(KEYWORD).next() {
@@ -137,7 +137,7 @@ pub(crate) fn format_field<'a>(field: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = field.tokens_by_kind(L_PAREN).next() {
-        docs.push(Doc::text("("));
+        docs.push(Doc::char('('));
         ctx.format_trivias_after_token(l_paren, field, &mut trivias);
     }
     if let Some(keyword) = field.tokens_by_kind(KEYWORD).next() {
@@ -173,7 +173,7 @@ pub(crate) fn format_field<'a>(field: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a
 pub(crate) fn format_field_type<'a>(field_type: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     if let Some(l_paren) = field_type.tokens_by_kind(L_PAREN).next() {
         let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
-        docs.push(Doc::text("("));
+        docs.push(Doc::char('('));
         let mut trivias = BumpVec::new_in(&ctx.bump);
         ctx.format_trivias_after_token(l_paren, field_type, &mut trivias);
         if let Some(keyword) = field_type.tokens_by_kind(KEYWORD).next() {
@@ -206,7 +206,7 @@ pub(crate) fn format_func_type<'a>(func_type: AmberNode<'a>, ctx: &'a Ctx<'a>) -
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = func_type.tokens_by_kind(L_PAREN).next() {
-        docs.push(Doc::text("("));
+        docs.push(Doc::char('('));
         ctx.format_trivias_after_token(l_paren, func_type, &mut trivias);
     }
     if let Some(keyword) = func_type.tokens_by_kind(KEYWORD).next() {
@@ -242,7 +242,7 @@ pub(crate) fn format_func_type<'a>(func_type: AmberNode<'a>, ctx: &'a Ctx<'a>) -
 pub(crate) fn format_global_type<'a>(global_type: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     if let Some(l_paren) = global_type.tokens_by_kind(L_PAREN).next() {
         let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
-        docs.push(Doc::text("("));
+        docs.push(Doc::char('('));
         let mut trivias = BumpVec::new_in(&ctx.bump);
         ctx.format_trivias_after_token(l_paren, global_type, &mut trivias);
         if let Some(keyword) = global_type.tokens_by_kind(KEYWORD).next() {
@@ -304,7 +304,7 @@ pub(crate) fn format_mem_page_size<'a>(mem_page_size: AmberNode<'a>, ctx: &'a Ct
     let mut docs = BumpVec::with_capacity_in(5, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = mem_page_size.tokens_by_kind(L_PAREN).next() {
-        docs.push(Doc::text("("));
+        docs.push(Doc::char('('));
         ctx.format_trivias_after_token(l_paren, mem_page_size, &mut trivias);
     }
     if let Some(keyword) = mem_page_size.tokens_by_kind(KEYWORD).next() {
@@ -384,7 +384,7 @@ pub(crate) fn format_param<'a>(param: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = param.tokens_by_kind(L_PAREN).next() {
-        docs.push(Doc::text("("));
+        docs.push(Doc::char('('));
         ctx.format_trivias_after_token(l_paren, param, &mut trivias);
     }
     if let Some(keyword) = param.tokens_by_kind(KEYWORD).next() {
@@ -420,7 +420,7 @@ pub(crate) fn format_param<'a>(param: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a
 pub(crate) fn format_ref_type<'a>(ref_type: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     if let Some(l_paren) = ref_type.tokens_by_kind(L_PAREN).next() {
         let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
-        docs.push(Doc::text("("));
+        docs.push(Doc::char('('));
         let mut trivias = BumpVec::new_in(&ctx.bump);
         ctx.format_trivias_after_token(l_paren, ref_type, &mut trivias);
         if let Some(keyword) = ref_type.tokens_by_kind(KEYWORD).next() {
@@ -462,7 +462,7 @@ pub(crate) fn format_result<'a>(result: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = result.tokens_by_kind(L_PAREN).next() {
-        docs.push(Doc::text("("));
+        docs.push(Doc::char('('));
         ctx.format_trivias_after_token(l_paren, result, &mut trivias);
     }
     if let Some(keyword) = result.tokens_by_kind(KEYWORD).next() {
@@ -498,7 +498,7 @@ pub(crate) fn format_struct_type<'a>(struct_type: AmberNode<'a>, ctx: &'a Ctx<'a
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = struct_type.tokens_by_kind(L_PAREN).next() {
-        docs.push(Doc::text("("));
+        docs.push(Doc::char('('));
         ctx.format_trivias_after_token(l_paren, struct_type, &mut trivias);
     }
     if let Some(keyword) = struct_type.tokens_by_kind(KEYWORD).next() {
@@ -539,7 +539,7 @@ pub(crate) fn format_struct_type<'a>(struct_type: AmberNode<'a>, ctx: &'a Ctx<'a
 pub(crate) fn format_sub_type<'a>(sub_type: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     if let Some(l_paren) = sub_type.tokens_by_kind(L_PAREN).next() {
         let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
-        docs.push(Doc::text("("));
+        docs.push(Doc::char('('));
         let mut trivias = BumpVec::new_in(&ctx.bump);
         ctx.format_trivias_after_token(l_paren, sub_type, &mut trivias);
         if let Some(keyword) = sub_type.tokens_by_kind(KEYWORD).next() {
@@ -650,7 +650,7 @@ fn format_extern_type<'a>(node: AmberNode<'a>, ty: Option<(AmberNode<'a>, Doc<'a
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
     if let Some(l_paren) = node.tokens_by_kind(L_PAREN).next() {
-        docs.push(Doc::text("("));
+        docs.push(Doc::char('('));
         ctx.format_trivias_after_token(l_paren, node, &mut trivias);
     }
     if let Some(keyword) = node.tokens_by_kind(KEYWORD).next() {

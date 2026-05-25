@@ -412,9 +412,9 @@ struct PredefinedDocs<'a> {
 impl PredefinedDocs<'_> {
     fn new() -> Self {
         Self {
-            r_paren: [Doc::text(")")],
-            hard_line_with_r_paren: [Doc::hard_line(), Doc::text(")")],
-            line_or_nil_with_r_paren: [Doc::line_or_nil(), Doc::text(")")],
+            r_paren: [Doc::char(')')],
+            hard_line_with_r_paren: [Doc::hard_line(), Doc::char(')')],
+            line_or_nil_with_r_paren: [Doc::line_or_nil(), Doc::char(')')],
         }
     }
 }
