@@ -13,7 +13,7 @@ exclude = ["/tests"]
 bumpalo = { workspace = true }
 line-index = { workspace = true }
 serde = { workspace = true }
-tiny_pretty = "0.3"
+tiny_pretty = "0.4"
 wat_syntax = { workspace = true }
 
 [dev-dependencies]

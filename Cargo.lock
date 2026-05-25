@@ -1098,9 +1098,9 @@ checksum = "b0f7e269b48f0a7dd0146680fa24b50cc67fc0373f086a5b2f99bd084639b482"
 
 [[package]]
 name = "tiny_pretty"
-version = "0.3.1"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04eee220e23d20da16daeac8f8e8c4a3ae5e12640758c1fddb91be2e34e71f67"
+checksum = "01ddaca72c626914165b5a0faf5fde225949dad80e52ff4c9f12ec5226fc36cc"
 
 [[package]]
 name = "tinytemplate"
