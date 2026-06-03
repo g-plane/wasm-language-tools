@@ -4,17 +4,17 @@ expression: response
 ---
 [
   {
-    "title": "Add memory idx for `memory.fill`",
+    "title": "Add memory idx for `memory.init`",
     "kind": "quickfix",
     "diagnostics": [
       {
         "range": {
           "start": {
-            "line": 4,
+            "line": 5,
             "character": 4
           },
           "end": {
-            "line": 4,
+            "line": 5,
             "character": 15
           }
         },
@@ -28,11 +28,11 @@ expression: response
           {
             "range": {
               "start": {
-                "line": 4,
+                "line": 5,
                 "character": 15
               },
               "end": {
-                "line": 4,
+                "line": 5,
                 "character": 15
               }
             },

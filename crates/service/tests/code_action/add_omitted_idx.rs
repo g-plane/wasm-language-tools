@@ -394,8 +394,9 @@ fn with_diagnostic() {
     let source = "
 (module
   (memory)
+  (elem $e)
   (func
-    memory.fill)
+    memory.init $e)
   (func
     i64.load32_s))
 ";
@@ -404,14 +405,14 @@ fn with_diagnostic() {
     let response = service.code_action(CodeActionParams {
         text_document: TextDocumentIdentifier { uri },
         range: Range {
-            start: Position { line: 4, character: 10 },
-            end: Position { line: 4, character: 10 },
+            start: Position { line: 5, character: 10 },
+            end: Position { line: 5, character: 10 },
         },
         context: CodeActionContext {
             diagnostics: vec![Diagnostic {
                 range: Range {
-                    start: Position { line: 4, character: 4 },
-                    end: Position { line: 4, character: 15 },
+                    start: Position { line: 5, character: 4 },
+                    end: Position { line: 5, character: 15 },
                 },
                 code: Some(Union2::B("omitted-idx-in-instr".into())),
                 ..Default::default()
