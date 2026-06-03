@@ -23,6 +23,7 @@ mod mutated_immutable;
 mod needless_mut;
 mod needless_try_table;
 mod new_non_defaultable;
+mod omitted_idx_in_instr;
 mod packing;
 mod plain_instr;
 mod shadow;

@@ -53,6 +53,10 @@ pub struct Lints {
     #[serde(alias = "uselessCatch")]
     /// Lint for detecting useless catch clauses.
     pub useless_catch: LintLevel,
+
+    #[serde(alias = "omittedIdxInInstr")]
+    /// Lint for omitted idx in some memory and table instructions, such as `i32.load` and `table.get`.
+    pub omitted_idx_in_instr: LintLevel,
 }
 
 impl Default for Lints {
@@ -68,6 +72,7 @@ impl Default for Lints {
             needless_mut: LintLevel::Warn,
             needless_try_table: LintLevel::Warn,
             useless_catch: LintLevel::Warn,
+            omitted_idx_in_instr: LintLevel::Allow,
         }
     }
 }

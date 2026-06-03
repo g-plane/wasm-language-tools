@@ -1,5 +1,6 @@
 use super::*;
 use insta::assert_json_snapshot;
+use lspt::{Diagnostic, Union2};
 use wat_service::LanguageService;
 
 #[test]
@@ -313,4 +314,113 @@ fn table_copy_2_immediates() {
     service.commit(&uri, source.into());
     let response = service.code_action(create_params(uri, 4, 10, 4, 10));
     assert!(response.is_none());
+}
+
+#[test]
+fn unrelated_diagnostic() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory)
+  (func
+    memory.fill))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.code_action(CodeActionParams {
+        text_document: TextDocumentIdentifier { uri },
+        range: Range {
+            start: Position { line: 4, character: 10 },
+            end: Position { line: 4, character: 10 },
+        },
+        context: CodeActionContext {
+            diagnostics: vec![Diagnostic {
+                range: Range {
+                    start: Position { line: 4, character: 4 },
+                    end: Position { line: 4, character: 15 },
+                },
+                code: Some(Union2::B("undef".into())),
+                ..Default::default()
+            }],
+            only: None,
+            trigger_kind: None,
+        },
+        work_done_token: Default::default(),
+        partial_result_token: Default::default(),
+    });
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn unrelated_range() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory)
+  (func
+    memory.fill)
+  (func
+    i64.load32_s))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.code_action(CodeActionParams {
+        text_document: TextDocumentIdentifier { uri },
+        range: Range {
+            start: Position { line: 4, character: 10 },
+            end: Position { line: 4, character: 10 },
+        },
+        context: CodeActionContext {
+            diagnostics: vec![Diagnostic {
+                range: Range {
+                    start: Position { line: 6, character: 4 },
+                    end: Position { line: 6, character: 16 },
+                },
+                code: Some(Union2::B("omitted-idx-in-instr".into())),
+                ..Default::default()
+            }],
+            only: None,
+            trigger_kind: None,
+        },
+        work_done_token: Default::default(),
+        partial_result_token: Default::default(),
+    });
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn with_diagnostic() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (memory)
+  (func
+    memory.fill)
+  (func
+    i64.load32_s))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.code_action(CodeActionParams {
+        text_document: TextDocumentIdentifier { uri },
+        range: Range {
+            start: Position { line: 4, character: 10 },
+            end: Position { line: 4, character: 10 },
+        },
+        context: CodeActionContext {
+            diagnostics: vec![Diagnostic {
+                range: Range {
+                    start: Position { line: 4, character: 4 },
+                    end: Position { line: 4, character: 15 },
+                },
+                code: Some(Union2::B("omitted-idx-in-instr".into())),
+                ..Default::default()
+            }],
+            only: None,
+            trigger_kind: None,
+        },
+        work_done_token: Default::default(),
+        partial_result_token: Default::default(),
+    });
+    assert_json_snapshot!(response);
 }

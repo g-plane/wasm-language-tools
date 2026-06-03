@@ -1,0 +1,41 @@
+---
+source: crates/service/tests/diagnostics/omitted_idx_in_instr.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 4
+        },
+        "end": {
+          "line": 10,
+          "character": 13
+        }
+      },
+      "severity": 1,
+      "code": "omitted-idx-in-instr",
+      "source": "wat",
+      "message": "explicit memory idx for `f64.store` is required"
+    },
+    {
+      "range": {
+        "start": {
+          "line": 18,
+          "character": 4
+        },
+        "end": {
+          "line": 18,
+          "character": 20
+        }
+      },
+      "severity": 1,
+      "code": "omitted-idx-in-instr",
+      "source": "wat",
+      "message": "explicit memory idx for `v128.load32_lane` is required"
+    }
+  ]
+}

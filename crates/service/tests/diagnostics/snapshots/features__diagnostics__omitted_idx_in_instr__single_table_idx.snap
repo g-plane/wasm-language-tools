@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/omitted_idx_in_instr.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 4
+        },
+        "end": {
+          "line": 13,
+          "character": 14
+        }
+      },
+      "severity": 1,
+      "code": "omitted-idx-in-instr",
+      "source": "wat",
+      "message": "explicit table idx for `table.size` is required"
+    }
+  ]
+}

@@ -201,3 +201,25 @@ Any catch clauses after a `catch_all` clause will never be matched:
       end
     end))
 ```
+
+## `omittedIdxInInstr`
+
+> default: `"allow"`
+
+WebAssembly allows multiple memories and tables, but due to historical reasons, some memory and table instructions can omit the immediate that refers to the first memory or table.
+
+This lint reports such omitted memory and table indices:
+
+```wasm warning-6-5-6-14 warning-10-5-10-15
+(module
+  (memory $m 0)
+  (func
+    i32.const 0
+    f64.const 0
+    f64.store)
+
+  (table $t 0 funcref)
+  (func
+    table.size
+    drop))
+```

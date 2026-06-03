@@ -31,6 +31,7 @@ mod mutated_immutable;
 mod needless_mut;
 mod needless_try_table;
 mod new_non_defaultable;
+mod omitted_idx_in_instr;
 mod packing;
 mod plain_instr;
 mod shadow;
@@ -121,6 +122,11 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                             diagnostics.push(diagnostic);
                         }
                         lane::check(diagnostics, node, instr_name);
+                        if let Some(diagnostic) =
+                            omitted_idx_in_instr::check(ctx.config.lint.omitted_idx_in_instr, node)
+                        {
+                            diagnostics.push(diagnostic);
+                        }
                     }
                     ctx.bump.reset();
                 }

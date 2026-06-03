@@ -5,7 +5,7 @@ use crate::{
     uri::InternUri,
 };
 use line_index::LineIndex;
-use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
+use lspt::{CodeAction, CodeActionContext, CodeActionKind, TextEdit, Union2, WorkspaceEdit};
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxToken, TextRange};
@@ -16,6 +16,7 @@ pub fn act(
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
+    context: &CodeActionContext,
 ) -> Option<CodeAction> {
     let instr_name_token = node.tokens_by_kind(SyntaxKind::INSTR_NAME).next()?;
     let instr_name = instr_name_token.text();
@@ -38,6 +39,8 @@ pub fn act(
                     db,
                     uri,
                     line_index,
+                    context,
+                    node,
                     &instr_name_token,
                     format!("Add memory idx for `{instr_name}`"),
                     format!(
@@ -55,6 +58,8 @@ pub fn act(
                     db,
                     uri,
                     line_index,
+                    context,
+                    node,
                     &instr_name_token,
                     format!("Add memory idx for `{instr_name}`"),
                     format!(
@@ -84,6 +89,8 @@ pub fn act(
                 db,
                 uri,
                 line_index,
+                context,
+                node,
                 &instr_name_token,
                 format!("Add memory idx for `{instr_name}`"),
                 new_text,
@@ -95,6 +102,8 @@ pub fn act(
                     db,
                     uri,
                     line_index,
+                    context,
+                    node,
                     &instr_name_token,
                     format!("Add table idx for `{instr_name}`"),
                     format!(
@@ -112,6 +121,8 @@ pub fn act(
                     db,
                     uri,
                     line_index,
+                    context,
+                    node,
                     &instr_name_token,
                     format!("Add table idx for `{instr_name}`"),
                     format!(
@@ -141,6 +152,8 @@ pub fn act(
                 db,
                 uri,
                 line_index,
+                context,
+                node,
                 &instr_name_token,
                 format!("Add table idx for `{instr_name}`"),
                 new_text,
@@ -166,14 +179,18 @@ fn retrieve_idx<'a>(symbol_table: &'a SymbolTable, node: &SyntaxNode, kind: Symb
         .map(|symbol| symbol.idx)
 }
 
+#[allow(clippy::too_many_arguments)]
 fn build_action(
     db: &dyn salsa::Database,
     uri: InternUri,
     line_index: &LineIndex,
+    context: &CodeActionContext,
+    node: &SyntaxNode,
     instr_name_token: &SyntaxToken,
     title: String,
     new_text: String,
 ) -> CodeAction {
+    let node_lsp_range = line_index.convert(node.text_range());
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
         uri.raw(db),
@@ -189,6 +206,14 @@ fn build_action(
             changes: Some(changes),
             ..Default::default()
         }),
+        diagnostics: context
+            .diagnostics
+            .iter()
+            .find(|diagnostic| match &diagnostic.code {
+                Some(Union2::B(code)) => code == "omitted-idx-in-instr" && diagnostic.range == node_lsp_range,
+                _ => false,
+            })
+            .map(|diagnostic| vec![diagnostic.clone()]),
         ..Default::default()
     }
 }

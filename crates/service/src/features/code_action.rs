@@ -57,7 +57,10 @@ impl LanguageService {
                                 actions.push(action);
                             }
                         }
-                        if quickfix && let Some(action) = add_omitted_idx::act(db, uri, line_index, symbol_table, &it) {
+                        if quickfix
+                            && let Some(action) =
+                                add_omitted_idx::act(db, uri, line_index, symbol_table, &it, &params.context)
+                        {
                             actions.push(action);
                         }
                     }
