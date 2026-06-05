@@ -30,4 +30,23 @@
 
   ;; Tags
   (import "" "" (tag))
+
+  (import "test"
+    (item "func->11i" (func (result i32)))
+    (item "func->22f" (func (result f32)))
+  )
+  (import "test"
+    (item "global->1")
+    (item "global->20")
+    (item "global->300")
+    (item "global->4000")
+    (global i32)
+  )
+  (import "test-all"
+    (item "f" (func (result i32)))
+    (item "t" (table 3 funcref))
+    (item "m" (memory 1))
+    (item "g" (global i32))
+    (item "e" (tag (param i32)))
+  )
 )

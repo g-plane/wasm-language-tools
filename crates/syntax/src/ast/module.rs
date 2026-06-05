@@ -581,6 +581,57 @@ impl AstNode for Import {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ImportItem {
+    syntax: SyntaxNode,
+}
+impl ImportItem {
+    #[inline]
+    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::L_PAREN)
+    }
+    #[inline]
+    pub fn keyword(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::KEYWORD)
+    }
+    #[inline]
+    pub fn name(&self) -> Option<Name> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn extern_type(&self) -> Option<ExternType> {
+        child(&self.syntax)
+    }
+    #[inline]
+    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+        token(&self.syntax, SyntaxKind::R_PAREN)
+    }
+}
+impl AstNode for ImportItem {
+    #[inline]
+    fn can_cast(kind: SyntaxKind) -> bool
+    where
+        Self: Sized,
+    {
+        kind == SyntaxKind::IMPORT_ITEM
+    }
+    #[inline]
+    fn cast(syntax: SyntaxNode) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if Self::can_cast(syntax.kind()) {
+            Some(ImportItem { syntax })
+        } else {
+            None
+        }
+    }
+    #[inline]
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Index {
     syntax: SyntaxNode,
 }
@@ -1168,6 +1219,10 @@ impl ModuleFieldImport {
     #[inline]
     pub fn name(&self) -> Option<Name> {
         child(&self.syntax)
+    }
+    #[inline]
+    pub fn import_items(&self) -> AstChildren<ImportItem> {
+        children(&self.syntax)
     }
     #[inline]
     pub fn extern_type(&self) -> Option<ExternType> {

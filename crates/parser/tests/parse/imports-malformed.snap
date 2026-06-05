@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..285
-  MODULE@0..284
+ROOT@0..561
+  MODULE@0..560
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -175,9 +175,179 @@ ROOT@0..285
           STRING@276..280 "\"f2\""
         R_PAREN@280..281 ")"
       R_PAREN@281..282 ")"
-    WHITESPACE@282..283 "\n"
-    R_PAREN@283..284 ")"
-  WHITESPACE@284..285 "\n"
+    WHITESPACE@282..285 "\n  "
+    MODULE_FIELD_IMPORT@285..303
+      L_PAREN@285..286 "("
+      KEYWORD@286..292 "import"
+      WHITESPACE@292..293 " "
+      MODULE_NAME@293..295
+        STRING@293..295 "\"\""
+      WHITESPACE@295..296 " "
+      EXTERN_TYPE_FUNC@296..302
+        L_PAREN@296..297 "("
+        KEYWORD@297..301 "func"
+        R_PAREN@301..302 ")"
+      R_PAREN@302..303 ")"
+    WHITESPACE@303..306 "\n  "
+    MODULE_FIELD_IMPORT@306..325
+      L_PAREN@306..307 "("
+      KEYWORD@307..313 "import"
+      WHITESPACE@313..314 " "
+      MODULE_NAME@314..316
+        STRING@314..316 "\"\""
+      WHITESPACE@316..317 " "
+      IMPORT_ITEM@317..324
+        L_PAREN@317..318 "("
+        KEYWORD@318..322 "item"
+        WHITESPACE@322..323 " "
+        R_PAREN@323..324 ")"
+      R_PAREN@324..325 ")"
+    WHITESPACE@325..328 "\n  "
+    MODULE_FIELD_IMPORT@328..349
+      L_PAREN@328..329 "("
+      KEYWORD@329..335 "import"
+      WHITESPACE@335..336 " "
+      MODULE_NAME@336..338
+        STRING@336..338 "\"\""
+      WHITESPACE@338..339 " "
+      IMPORT_ITEM@339..348
+        L_PAREN@339..340 "("
+        KEYWORD@340..344 "item"
+        WHITESPACE@344..345 " "
+        NAME@345..347
+          STRING@345..347 "\"\""
+        R_PAREN@347..348 ")"
+      R_PAREN@348..349 ")"
+    WHITESPACE@349..352 "\n  "
+    MODULE_FIELD_IMPORT@352..377
+      L_PAREN@352..353 "("
+      KEYWORD@353..359 "import"
+      WHITESPACE@359..360 " "
+      MODULE_NAME@360..362
+        STRING@360..362 "\"\""
+      WHITESPACE@362..363 " "
+      IMPORT_ITEM@363..376
+        L_PAREN@363..364 "("
+        KEYWORD@364..368 "item"
+        WHITESPACE@368..369 " "
+        EXTERN_TYPE_FUNC@369..375
+          L_PAREN@369..370 "("
+          KEYWORD@370..374 "func"
+          R_PAREN@374..375 ")"
+        R_PAREN@375..376 ")"
+      R_PAREN@376..377 ")"
+    WHITESPACE@377..380 "\n  "
+    MODULE_FIELD_IMPORT@380..438
+      L_PAREN@380..381 "("
+      KEYWORD@381..387 "import"
+      WHITESPACE@387..388 " "
+      MODULE_NAME@388..394
+        STRING@388..394 "\"test\""
+      WHITESPACE@394..395 " "
+      IMPORT_ITEM@395..413
+        L_PAREN@395..396 "("
+        KEYWORD@396..400 "item"
+        WHITESPACE@400..401 " "
+        NAME@401..412
+          STRING@401..412 "\"global->1\""
+        R_PAREN@412..413 ")"
+      WHITESPACE@413..414 " "
+      EXTERN_TYPE_GLOBAL@414..437
+        L_PAREN@414..415 "("
+        KEYWORD@415..421 "global"
+        WHITESPACE@421..422 " "
+        ERROR@422..432 "$global->1"
+        WHITESPACE@432..433 " "
+        GLOBAL_TYPE@433..436
+          NUM_TYPE@433..436
+            TYPE_KEYWORD@433..436 "i32"
+        R_PAREN@436..437 ")"
+      R_PAREN@437..438 ")"
+    WHITESPACE@438..441 "\n  "
+    MODULE_FIELD_IMPORT@441..479
+      L_PAREN@441..442 "("
+      KEYWORD@442..448 "import"
+      WHITESPACE@448..449 " "
+      MODULE_NAME@449..451
+        STRING@449..451 "\"\""
+      WHITESPACE@451..452 " "
+      IMPORT_ITEM@452..461
+        L_PAREN@452..453 "("
+        KEYWORD@453..457 "item"
+        WHITESPACE@457..458 " "
+        NAME@458..460
+          STRING@458..460 "\"\""
+        R_PAREN@460..461 ")"
+      WHITESPACE@461..462 " "
+      IMPORT_ITEM@462..478
+        L_PAREN@462..463 "("
+        KEYWORD@463..467 "item"
+        WHITESPACE@467..468 " "
+        NAME@468..470
+          STRING@468..470 "\"\""
+        WHITESPACE@470..471 " "
+        ERROR@471..472 "("
+        ERROR@472..476 "func"
+        ERROR@476..477 ")"
+        R_PAREN@477..478 ")"
+      R_PAREN@478..479 ")"
+    WHITESPACE@479..482 "\n  "
+    MODULE_FIELD_IMPORT@482..520
+      L_PAREN@482..483 "("
+      KEYWORD@483..489 "import"
+      WHITESPACE@489..490 " "
+      MODULE_NAME@490..492
+        STRING@490..492 "\"\""
+      WHITESPACE@492..493 " "
+      IMPORT_ITEM@493..509
+        L_PAREN@493..494 "("
+        KEYWORD@494..498 "item"
+        WHITESPACE@498..499 " "
+        NAME@499..501
+          STRING@499..501 "\"\""
+        WHITESPACE@501..502 " "
+        EXTERN_TYPE_FUNC@502..508
+          L_PAREN@502..503 "("
+          KEYWORD@503..507 "func"
+          R_PAREN@507..508 ")"
+        R_PAREN@508..509 ")"
+      WHITESPACE@509..510 " "
+      IMPORT_ITEM@510..519
+        L_PAREN@510..511 "("
+        KEYWORD@511..515 "item"
+        WHITESPACE@515..516 " "
+        NAME@516..518
+          STRING@516..518 "\"\""
+        R_PAREN@518..519 ")"
+      R_PAREN@519..520 ")"
+    WHITESPACE@520..523 "\n  "
+    MODULE_FIELD_IMPORT@523..558
+      L_PAREN@523..524 "("
+      KEYWORD@524..530 "import"
+      WHITESPACE@530..531 " "
+      MODULE_NAME@531..533
+        STRING@531..533 "\"\""
+      WHITESPACE@533..534 " "
+      IMPORT_ITEM@534..550
+        L_PAREN@534..535 "("
+        KEYWORD@535..539 "item"
+        WHITESPACE@539..540 " "
+        NAME@540..542
+          STRING@540..542 "\"\""
+        WHITESPACE@542..543 " "
+        EXTERN_TYPE_FUNC@543..549
+          L_PAREN@543..544 "("
+          KEYWORD@544..548 "func"
+          R_PAREN@548..549 ")"
+        R_PAREN@549..550 ")"
+      WHITESPACE@550..551 " "
+      ERROR@551..552 "("
+      ERROR@552..556 "func"
+      ERROR@556..557 ")"
+      R_PAREN@557..558 ")"
+    WHITESPACE@558..559 "\n"
+    R_PAREN@559..560 ")"
+  WHITESPACE@560..561 "\n"
 
 error: expected import module name
   ┌─ imports-malformed.wat:2:11
@@ -292,3 +462,75 @@ error: only one import is allowed
    │
 13 │   (func (import "env" "f1") (import "env" "f2"))
    │                              ^^^^^^
+
+error: expected import name
+   ┌─ imports-malformed.wat:14:14
+   │
+14 │   (import "" (func))
+   │              ^
+
+error: expected import name
+   ┌─ imports-malformed.wat:15:20
+   │
+15 │   (import "" (item ))
+   │                    ^
+
+error: expected extern type
+   ┌─ imports-malformed.wat:15:21
+   │
+15 │   (import "" (item ))
+   │                     ^
+
+error: expected extern type
+   ┌─ imports-malformed.wat:16:23
+   │
+16 │   (import "" (item ""))
+   │                       ^
+
+error: expected import name
+   ┌─ imports-malformed.wat:17:20
+   │
+17 │   (import "" (item (func)))
+   │                    ^
+
+error: identifier is not allowed after import item
+   ┌─ imports-malformed.wat:18:45
+   │
+18 │   (import "test" (item "global->1") (global $global->1 i32))
+   │                                             ^^^^^^^^^^
+
+error: unexpected token
+   ┌─ imports-malformed.wat:19:34
+   │
+19 │   (import "" (item "") (item "" (func)))
+   │                                  ^^^^
+
+error: unexpected token
+   ┌─ imports-malformed.wat:19:38
+   │
+19 │   (import "" (item "") (item "" (func)))
+   │                                      ^
+
+error: expected extern type
+   ┌─ imports-malformed.wat:19:40
+   │
+19 │   (import "" (item "") (item "" (func)))
+   │                                        ^
+
+error: expected extern type
+   ┌─ imports-malformed.wat:20:39
+   │
+20 │   (import "" (item "" (func)) (item ""))
+   │                                       ^
+
+error: unexpected token
+   ┌─ imports-malformed.wat:21:32
+   │
+21 │   (import "" (item "" (func)) (func))
+   │                                ^^^^
+
+error: unexpected token
+   ┌─ imports-malformed.wat:21:36
+   │
+21 │   (import "" (item "" (func)) (func))
+   │                                    ^

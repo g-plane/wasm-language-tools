@@ -62,6 +62,7 @@ pub enum SyntaxKind {
     LIMITS,
     IMPORT,
     EXPORT,
+    IMPORT_ITEM,
     EXTERN_TYPE_FUNC,
     EXTERN_TYPE_TABLE,
     EXTERN_TYPE_MEMORY,

@@ -60,7 +60,7 @@ impl Parser<'_> {
         Some(self.finish_node(CONT_TYPE, mark))
     }
 
-    pub(super) fn parse_extern_type(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_extern_type(&mut self, allow_ident: bool) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
@@ -68,7 +68,7 @@ impl Parser<'_> {
         match self.lexer.next(KEYWORD)?.text {
             "func" => {
                 self.add_child(green::KW_FUNC.clone());
-                self.eat(IDENT);
+                self.parse_extern_type_ident(allow_ident);
                 if let Some(type_use) = self.try_parse_with_trivias(Self::parse_type_use) {
                     self.add_child(type_use);
                 }
@@ -77,7 +77,7 @@ impl Parser<'_> {
             }
             "global" => {
                 self.add_child(green::KW_GLOBAL.clone());
-                self.eat(IDENT);
+                self.parse_extern_type_ident(allow_ident);
                 if !self.recover(Self::parse_global_type) {
                     self.report_missing(Message::Name("global type"));
                 }
@@ -86,7 +86,7 @@ impl Parser<'_> {
             }
             "memory" => {
                 self.add_child(green::KW_MEMORY.clone());
-                self.eat(IDENT);
+                self.parse_extern_type_ident(allow_ident);
                 if !self.recover(Self::parse_mem_type) {
                     self.report_missing(Message::Name("memory type"));
                 }
@@ -95,7 +95,7 @@ impl Parser<'_> {
             }
             "table" => {
                 self.add_child(green::KW_TABLE.clone());
-                self.eat(IDENT);
+                self.parse_extern_type_ident(allow_ident);
                 if !self.recover(Self::parse_table_type) {
                     self.report_missing(Message::Name("table type"));
                 }
@@ -112,6 +112,18 @@ impl Parser<'_> {
                 Some(self.finish_node(EXTERN_TYPE_TAG, mark))
             }
             _ => None,
+        }
+    }
+    fn parse_extern_type_ident(&mut self, allow_ident: bool) {
+        if allow_ident {
+            self.eat(IDENT);
+        } else if let Some(mut token) = self.try_parse_with_trivias(|parser| parser.lexer.next(IDENT)) {
+            token.kind = ERROR;
+            self.report_error_token(
+                &token,
+                Message::Description("identifier is not allowed after import item"),
+            );
+            self.add_child(token);
         }
     }
 

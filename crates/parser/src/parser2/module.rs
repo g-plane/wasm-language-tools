@@ -127,6 +127,37 @@ impl Parser<'_> {
         self.finish_node(IMPORT, mark)
     }
 
+    fn parse_import_item(&mut self, allow_extern_type: Option<bool>) -> Option<(GreenNode, bool)> {
+        let mark = self.start_node();
+        self.lexer.next(L_PAREN)?;
+        self.add_child(green::L_PAREN.clone());
+        self.parse_trivias();
+        self.lexer.keyword("item")?;
+        self.add_child(green::KW_ITEM.clone());
+        if !self.retry(Self::parse_name) {
+            self.report_missing(Message::Name("import name"));
+        }
+        let mut has_extern_type = false;
+        match allow_extern_type {
+            Some(true) => {
+                if self.retry(|parser| parser.parse_extern_type(true)) {
+                    has_extern_type = true;
+                } else {
+                    self.report_missing(Message::Name("extern type"));
+                }
+            }
+            Some(false) => {}
+            None => {
+                if let Some(extern_type) = self.try_parse_with_trivias(|parser| parser.parse_extern_type(true)) {
+                    self.add_child(extern_type);
+                    has_extern_type = true;
+                }
+            }
+        }
+        self.expect_right_paren();
+        Some((self.finish_node(IMPORT_ITEM, mark), has_extern_type))
+    }
+
     fn parse_exports_and_import(&mut self) {
         let mut has_import = false;
         while let Some((mark, is_import)) = self.try_parse_with_trivias(|parser| {
@@ -472,11 +503,25 @@ impl Parser<'_> {
         if !self.retry(Self::parse_module_name) {
             self.report_missing(Message::Name("import module name"));
         }
-        if !self.retry(Self::parse_name) {
-            self.report_missing(Message::Name("import name"));
-        }
-        if !self.retry(Self::parse_extern_type) {
-            self.report_missing(Message::Name("extern type"));
+        if let Some((import_item, has_extern_type)) =
+            self.try_parse_with_trivias(|parser| parser.parse_import_item(None))
+        {
+            self.add_child(import_item);
+            while let Some((import_item, _)) =
+                self.try_parse_with_trivias(|parser| parser.parse_import_item(Some(has_extern_type)))
+            {
+                self.add_child(import_item);
+            }
+            if !has_extern_type && !self.retry(|parser| parser.parse_extern_type(false)) {
+                self.report_missing(Message::Name("extern type"));
+            }
+        } else {
+            if !self.retry(Self::parse_name) {
+                self.report_missing(Message::Name("import name"));
+            }
+            if !self.retry(|parser| parser.parse_extern_type(true)) {
+                self.report_missing(Message::Name("extern type"));
+            }
         }
         self.expect_right_paren();
         self.finish_node(MODULE_FIELD_IMPORT, mark)

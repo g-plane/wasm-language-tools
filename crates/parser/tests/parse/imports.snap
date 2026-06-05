@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..1115
-  MODULE@0..1114
+ROOT@0..1539
+  MODULE@0..1538
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -496,6 +496,216 @@ ROOT@0..1115
         KEYWORD@1107..1110 "tag"
         R_PAREN@1110..1111 ")"
       R_PAREN@1111..1112 ")"
-    WHITESPACE@1112..1113 "\n"
-    R_PAREN@1113..1114 ")"
-  WHITESPACE@1114..1115 "\n"
+    WHITESPACE@1112..1116 "\n\n  "
+    MODULE_FIELD_IMPORT@1116..1220
+      L_PAREN@1116..1117 "("
+      KEYWORD@1117..1123 "import"
+      WHITESPACE@1123..1124 " "
+      MODULE_NAME@1124..1130
+        STRING@1124..1130 "\"test\""
+      WHITESPACE@1130..1135 "\n    "
+      IMPORT_ITEM@1135..1173
+        L_PAREN@1135..1136 "("
+        KEYWORD@1136..1140 "item"
+        WHITESPACE@1140..1141 " "
+        NAME@1141..1152
+          STRING@1141..1152 "\"func->11i\""
+        WHITESPACE@1152..1153 " "
+        EXTERN_TYPE_FUNC@1153..1172
+          L_PAREN@1153..1154 "("
+          KEYWORD@1154..1158 "func"
+          WHITESPACE@1158..1159 " "
+          TYPE_USE@1159..1171
+            RESULT@1159..1171
+              L_PAREN@1159..1160 "("
+              KEYWORD@1160..1166 "result"
+              WHITESPACE@1166..1167 " "
+              NUM_TYPE@1167..1170
+                TYPE_KEYWORD@1167..1170 "i32"
+              R_PAREN@1170..1171 ")"
+          R_PAREN@1171..1172 ")"
+        R_PAREN@1172..1173 ")"
+      WHITESPACE@1173..1178 "\n    "
+      IMPORT_ITEM@1178..1216
+        L_PAREN@1178..1179 "("
+        KEYWORD@1179..1183 "item"
+        WHITESPACE@1183..1184 " "
+        NAME@1184..1195
+          STRING@1184..1195 "\"func->22f\""
+        WHITESPACE@1195..1196 " "
+        EXTERN_TYPE_FUNC@1196..1215
+          L_PAREN@1196..1197 "("
+          KEYWORD@1197..1201 "func"
+          WHITESPACE@1201..1202 " "
+          TYPE_USE@1202..1214
+            RESULT@1202..1214
+              L_PAREN@1202..1203 "("
+              KEYWORD@1203..1209 "result"
+              WHITESPACE@1209..1210 " "
+              NUM_TYPE@1210..1213
+                TYPE_KEYWORD@1210..1213 "f32"
+              R_PAREN@1213..1214 ")"
+          R_PAREN@1214..1215 ")"
+        R_PAREN@1215..1216 ")"
+      WHITESPACE@1216..1219 "\n  "
+      R_PAREN@1219..1220 ")"
+    WHITESPACE@1220..1223 "\n  "
+    MODULE_FIELD_IMPORT@1223..1356
+      L_PAREN@1223..1224 "("
+      KEYWORD@1224..1230 "import"
+      WHITESPACE@1230..1231 " "
+      MODULE_NAME@1231..1237
+        STRING@1231..1237 "\"test\""
+      WHITESPACE@1237..1242 "\n    "
+      IMPORT_ITEM@1242..1260
+        L_PAREN@1242..1243 "("
+        KEYWORD@1243..1247 "item"
+        WHITESPACE@1247..1248 " "
+        NAME@1248..1259
+          STRING@1248..1259 "\"global->1\""
+        R_PAREN@1259..1260 ")"
+      WHITESPACE@1260..1265 "\n    "
+      IMPORT_ITEM@1265..1284
+        L_PAREN@1265..1266 "("
+        KEYWORD@1266..1270 "item"
+        WHITESPACE@1270..1271 " "
+        NAME@1271..1283
+          STRING@1271..1283 "\"global->20\""
+        R_PAREN@1283..1284 ")"
+      WHITESPACE@1284..1289 "\n    "
+      IMPORT_ITEM@1289..1309
+        L_PAREN@1289..1290 "("
+        KEYWORD@1290..1294 "item"
+        WHITESPACE@1294..1295 " "
+        NAME@1295..1308
+          STRING@1295..1308 "\"global->300\""
+        R_PAREN@1308..1309 ")"
+      WHITESPACE@1309..1314 "\n    "
+      IMPORT_ITEM@1314..1335
+        L_PAREN@1314..1315 "("
+        KEYWORD@1315..1319 "item"
+        WHITESPACE@1319..1320 " "
+        NAME@1320..1334
+          STRING@1320..1334 "\"global->4000\""
+        R_PAREN@1334..1335 ")"
+      WHITESPACE@1335..1340 "\n    "
+      EXTERN_TYPE_GLOBAL@1340..1352
+        L_PAREN@1340..1341 "("
+        KEYWORD@1341..1347 "global"
+        WHITESPACE@1347..1348 " "
+        GLOBAL_TYPE@1348..1351
+          NUM_TYPE@1348..1351
+            TYPE_KEYWORD@1348..1351 "i32"
+        R_PAREN@1351..1352 ")"
+      WHITESPACE@1352..1355 "\n  "
+      R_PAREN@1355..1356 ")"
+    WHITESPACE@1356..1359 "\n  "
+    MODULE_FIELD_IMPORT@1359..1536
+      L_PAREN@1359..1360 "("
+      KEYWORD@1360..1366 "import"
+      WHITESPACE@1366..1367 " "
+      MODULE_NAME@1367..1377
+        STRING@1367..1377 "\"test-all\""
+      WHITESPACE@1377..1382 "\n    "
+      IMPORT_ITEM@1382..1412
+        L_PAREN@1382..1383 "("
+        KEYWORD@1383..1387 "item"
+        WHITESPACE@1387..1388 " "
+        NAME@1388..1391
+          STRING@1388..1391 "\"f\""
+        WHITESPACE@1391..1392 " "
+        EXTERN_TYPE_FUNC@1392..1411
+          L_PAREN@1392..1393 "("
+          KEYWORD@1393..1397 "func"
+          WHITESPACE@1397..1398 " "
+          TYPE_USE@1398..1410
+            RESULT@1398..1410
+              L_PAREN@1398..1399 "("
+              KEYWORD@1399..1405 "result"
+              WHITESPACE@1405..1406 " "
+              NUM_TYPE@1406..1409
+                TYPE_KEYWORD@1406..1409 "i32"
+              R_PAREN@1409..1410 ")"
+          R_PAREN@1410..1411 ")"
+        R_PAREN@1411..1412 ")"
+      WHITESPACE@1412..1417 "\n    "
+      IMPORT_ITEM@1417..1445
+        L_PAREN@1417..1418 "("
+        KEYWORD@1418..1422 "item"
+        WHITESPACE@1422..1423 " "
+        NAME@1423..1426
+          STRING@1423..1426 "\"t\""
+        WHITESPACE@1426..1427 " "
+        EXTERN_TYPE_TABLE@1427..1444
+          L_PAREN@1427..1428 "("
+          KEYWORD@1428..1433 "table"
+          WHITESPACE@1433..1434 " "
+          TABLE_TYPE@1434..1443
+            LIMITS@1434..1435
+              UNSIGNED_INT@1434..1435 "3"
+            WHITESPACE@1435..1436 " "
+            REF_TYPE@1436..1443
+              TYPE_KEYWORD@1436..1443 "funcref"
+          R_PAREN@1443..1444 ")"
+        R_PAREN@1444..1445 ")"
+      WHITESPACE@1445..1450 "\n    "
+      IMPORT_ITEM@1450..1471
+        L_PAREN@1450..1451 "("
+        KEYWORD@1451..1455 "item"
+        WHITESPACE@1455..1456 " "
+        NAME@1456..1459
+          STRING@1456..1459 "\"m\""
+        WHITESPACE@1459..1460 " "
+        EXTERN_TYPE_MEMORY@1460..1470
+          L_PAREN@1460..1461 "("
+          KEYWORD@1461..1467 "memory"
+          WHITESPACE@1467..1468 " "
+          MEM_TYPE@1468..1469
+            LIMITS@1468..1469
+              UNSIGNED_INT@1468..1469 "1"
+          R_PAREN@1469..1470 ")"
+        R_PAREN@1470..1471 ")"
+      WHITESPACE@1471..1476 "\n    "
+      IMPORT_ITEM@1476..1499
+        L_PAREN@1476..1477 "("
+        KEYWORD@1477..1481 "item"
+        WHITESPACE@1481..1482 " "
+        NAME@1482..1485
+          STRING@1482..1485 "\"g\""
+        WHITESPACE@1485..1486 " "
+        EXTERN_TYPE_GLOBAL@1486..1498
+          L_PAREN@1486..1487 "("
+          KEYWORD@1487..1493 "global"
+          WHITESPACE@1493..1494 " "
+          GLOBAL_TYPE@1494..1497
+            NUM_TYPE@1494..1497
+              TYPE_KEYWORD@1494..1497 "i32"
+          R_PAREN@1497..1498 ")"
+        R_PAREN@1498..1499 ")"
+      WHITESPACE@1499..1504 "\n    "
+      IMPORT_ITEM@1504..1532
+        L_PAREN@1504..1505 "("
+        KEYWORD@1505..1509 "item"
+        WHITESPACE@1509..1510 " "
+        NAME@1510..1513
+          STRING@1510..1513 "\"e\""
+        WHITESPACE@1513..1514 " "
+        EXTERN_TYPE_TAG@1514..1531
+          L_PAREN@1514..1515 "("
+          KEYWORD@1515..1518 "tag"
+          WHITESPACE@1518..1519 " "
+          TYPE_USE@1519..1530
+            PARAM@1519..1530
+              L_PAREN@1519..1520 "("
+              KEYWORD@1520..1525 "param"
+              WHITESPACE@1525..1526 " "
+              NUM_TYPE@1526..1529
+                TYPE_KEYWORD@1526..1529 "i32"
+              R_PAREN@1529..1530 ")"
+          R_PAREN@1530..1531 ")"
+        R_PAREN@1531..1532 ")"
+      WHITESPACE@1532..1535 "\n  "
+      R_PAREN@1535..1536 ")"
+    WHITESPACE@1536..1537 "\n"
+    R_PAREN@1537..1538 ")"
+  WHITESPACE@1538..1539 "\n"

@@ -32,4 +32,8 @@ source: crates/formatter/tests/parser.rs
   (memory (import "spectest" "memory") 1 2)
 
   ;; Tags
-  (import "" "" (tag)))
+  (import "" "" (tag))
+
+  (import "test")
+  (import "test" (global i32))
+  (import "test-all"))
