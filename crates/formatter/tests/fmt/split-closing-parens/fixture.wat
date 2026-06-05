@@ -1,4 +1,11 @@
 (module
+  (import ""
+    (item "")
+    (item "")
+    (tag))
+  (import "test"
+    (item "func->11i" (func (result i32)))
+    (item "func->22f" (func (result f32))))
   (func (export "nested") (param i32 i32) (result i32)
     (if (result i32)
       (local.get 0)

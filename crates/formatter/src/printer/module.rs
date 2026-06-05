@@ -159,6 +159,17 @@ pub(crate) fn format_export<'a>(export: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<
     ]))
 }
 
+fn format_extern_type<'a>(extern_type: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Option<Doc<'a>> {
+    match extern_type.kind() {
+        EXTERN_TYPE_FUNC => Some(format_extern_type_func(extern_type, ctx)),
+        EXTERN_TYPE_GLOBAL => Some(format_extern_type_global(extern_type, ctx)),
+        EXTERN_TYPE_MEMORY => Some(format_extern_type_memory(extern_type, ctx)),
+        EXTERN_TYPE_TABLE => Some(format_extern_type_table(extern_type, ctx)),
+        EXTERN_TYPE_TAG => Some(format_extern_type_tag(extern_type, ctx)),
+        _ => None,
+    }
+}
+
 pub(crate) fn format_import<'a>(import: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
     let mut docs = BumpVec::with_capacity_in(2, &ctx.bump);
     let mut trivias = BumpVec::new_in(&ctx.bump);
@@ -193,6 +204,45 @@ pub(crate) fn format_import<'a>(import: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
         ctx.format_right_paren_on_same_line(import),
+    ]))
+}
+
+pub(crate) fn format_import_item<'a>(import_item: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
+    let mut docs = BumpVec::with_capacity_in(5, &ctx.bump);
+    let mut trivias = BumpVec::new_in(&ctx.bump);
+    if let Some(l_paren) = import_item.tokens_by_kind(L_PAREN).next() {
+        docs.push(Doc::char('('));
+        ctx.format_trivias_after_token(l_paren, import_item, &mut trivias);
+    }
+    if let Some(keyword) = import_item.tokens_by_kind(KEYWORD).next() {
+        docs.append(&mut trivias);
+        docs.push(Doc::text("item"));
+        ctx.format_trivias_after_token(keyword, import_item, &mut trivias);
+    }
+    if let Some(name) = import_item.children_by_kind(NAME).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        docs.push(format_name(name));
+        ctx.format_trivias_after_node(name, import_item, &mut trivias);
+    }
+    if let Some(extern_type) = import_item.children_by_kind(ExternType::can_cast).next() {
+        if trivias.is_empty() {
+            docs.push(Doc::space());
+        } else {
+            docs.append(&mut trivias);
+        }
+        if let Some(doc) = format_extern_type(extern_type, ctx) {
+            docs.push(doc);
+        }
+        ctx.format_trivias_after_node(extern_type, import_item, &mut trivias);
+    }
+    docs.append(&mut trivias);
+    Doc::slice(ctx.bump.alloc_slice_fill_iter([
+        Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
+        ctx.format_right_paren_on_same_line(import_item),
     ]))
 }
 
@@ -674,27 +724,34 @@ pub(crate) fn format_module_field_import<'a>(module_field_import: AmberNode<'a>,
         docs.push(format_name(name));
         ctx.format_trivias_after_node(name, module_field_import, &mut trivias);
     }
+    module_field_import
+        .children_by_kind(IMPORT_ITEM)
+        .for_each(|import_item| {
+            if trivias.is_empty() {
+                docs.push(Doc::line_or_space());
+            } else {
+                docs.append(&mut trivias);
+            }
+            docs.push(format_import_item(import_item, ctx));
+            ctx.format_trivias_after_node(import_item, module_field_import, &mut trivias);
+        });
     if let Some(extern_type) = module_field_import.children_by_kind(ExternType::can_cast).next() {
         if trivias.is_empty() {
             docs.push(Doc::space());
         } else {
             docs.append(&mut trivias);
         }
-        match extern_type.kind() {
-            EXTERN_TYPE_FUNC => docs.push(format_extern_type_func(extern_type, ctx)),
-            EXTERN_TYPE_GLOBAL => docs.push(format_extern_type_global(extern_type, ctx)),
-            EXTERN_TYPE_MEMORY => docs.push(format_extern_type_memory(extern_type, ctx)),
-            EXTERN_TYPE_TABLE => docs.push(format_extern_type_table(extern_type, ctx)),
-            EXTERN_TYPE_TAG => docs.push(format_extern_type_tag(extern_type, ctx)),
-            _ => {}
+        if let Some(doc) = format_extern_type(extern_type, ctx) {
+            docs.push(doc);
         }
         ctx.format_trivias_after_node(extern_type, module_field_import, &mut trivias);
     }
     docs.append(&mut trivias);
     Doc::slice(ctx.bump.alloc_slice_fill_iter([
         Doc::slice(docs.into_bump_slice()).nest(ctx.indent_width),
-        ctx.format_right_paren_on_same_line(module_field_import),
+        ctx.format_right_paren(module_field_import),
     ]))
+    .group()
 }
 
 pub(crate) fn format_module_field_memory<'a>(module_field_memory: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Doc<'a> {
