@@ -12,6 +12,7 @@ mod fix_invalid_mem_arg;
 mod fix_packing;
 mod if_br_to_br_if;
 mod inline_export;
+mod inline_extern_type;
 mod inline_func_type;
 mod join_types;
 mod merge_to_return_call;

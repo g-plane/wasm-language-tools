@@ -1,0 +1,42 @@
+---
+source: crates/service/tests/code_action/inline_extern_type.rs
+expression: response
+---
+[
+  {
+    "title": "Inline extern type",
+    "kind": "refactor.inline",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 21
+              },
+              "end": {
+                "line": 2,
+                "character": 21
+              }
+            },
+            "newText": " (func (param i32))"
+          },
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 27
+              },
+              "end": {
+                "line": 2,
+                "character": 45
+              }
+            },
+            "newText": ""
+          }
+        ]
+      }
+    }
+  }
+]

@@ -193,6 +193,15 @@ impl LanguageService {
                             actions.push(action);
                         }
                     }
+                    SyntaxKind::EXTERN_TYPE_FUNC
+                    | SyntaxKind::EXTERN_TYPE_GLOBAL
+                    | SyntaxKind::EXTERN_TYPE_MEMORY
+                    | SyntaxKind::EXTERN_TYPE_TABLE
+                    | SyntaxKind::EXTERN_TYPE_TAG => {
+                        if inline && let Some(action) = inline_extern_type::act(db, uri, line_index, &it) {
+                            actions.push(action);
+                        }
+                    }
                     _ => {}
                 }
                 node = it;

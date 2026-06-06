@@ -10,6 +10,7 @@ pub mod fix_invalid_mem_arg;
 pub mod fix_packing;
 pub mod if_br_to_br_if;
 pub mod inline_export;
+pub mod inline_extern_type;
 pub mod inline_func_type;
 pub mod join_types;
 pub mod merge_to_return_call;
