@@ -127,3 +127,31 @@ fn memory_type_with_paren() {
     let response = service.completion(create_params(uri, 2, 27));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn import_item_with_paren() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+    (import "" (item ())
+)
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 2, 22));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn extern_type_after_import_item() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+    (import "" (item) ()
+)
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 2, 23));
+    assert_json_snapshot!(response);
+}

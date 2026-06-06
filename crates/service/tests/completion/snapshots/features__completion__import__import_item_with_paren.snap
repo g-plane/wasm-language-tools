@@ -22,9 +22,5 @@ expression: response
   {
     "label": "tag",
     "kind": 14
-  },
-  {
-    "label": "item",
-    "kind": 14
   }
 ]

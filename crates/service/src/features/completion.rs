@@ -287,7 +287,10 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
                 ctx.extend([CmpCtx::NumTypeVecType, CmpCtx::AbbrRefType]);
             }
         }
-        SyntaxKind::MODULE_FIELD_EXPORT | SyntaxKind::MODULE_FIELD_IMPORT if has_leading_l_paren => {
+        SyntaxKind::MODULE_FIELD_IMPORT if has_leading_l_paren => {
+            ctx.extend([CmpCtx::KeywordPortDesc, CmpCtx::KeywordItem]);
+        }
+        SyntaxKind::MODULE_FIELD_EXPORT if has_leading_l_paren => {
             ctx.push(CmpCtx::KeywordPortDesc);
         }
         SyntaxKind::MODULE_FIELD_TABLE => {
@@ -459,6 +462,9 @@ fn get_cmp_ctx(token: &SyntaxToken) -> Option<Vec<CmpCtx>> {
             } else {
                 ctx.extend([CmpCtx::Block, CmpCtx::KeywordSwitch]);
             }
+        }
+        SyntaxKind::IMPORT_ITEM if has_leading_l_paren => {
+            ctx.push(CmpCtx::KeywordPortDesc);
         }
         _ => {}
     }
