@@ -3,6 +3,7 @@ pub mod add_result_types;
 pub mod br_if_to_if_br;
 pub mod clean_no_types;
 pub mod convert_idx;
+pub mod expand_compact_import;
 pub mod expand_ref_type;
 pub mod export_as;
 pub mod extract_export;

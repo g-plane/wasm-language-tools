@@ -5,6 +5,7 @@ mod add_result_types;
 mod br_if_to_if_br;
 mod clean_no_types;
 mod convert_idx;
+mod expand_compact_import;
 mod expand_ref_type;
 mod export_as;
 mod extract_export;

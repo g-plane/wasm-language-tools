@@ -24,7 +24,7 @@ fn create_params(
         },
         context: CodeActionContext {
             diagnostics: vec![],
-            only: Some(vec![CodeActionKind::RefactorInline]),
+            only: Some(vec![CodeActionKind::RefactorRewrite]),
             trigger_kind: None,
         },
         work_done_token: Default::default(),
@@ -46,40 +46,70 @@ fn non_compact() {
 }
 
 #[test]
-fn encoding1() {
+fn no_extern_type() {
     let uri = "untitled:test".to_string();
     let source = r#"
 (module
-  (import "" (item "" (func (param i32))))
+  (import "env" (item "a") (item "b"))
 "#;
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(uri, 2, 25, 2, 25));
-    assert!(response.is_none());
-}
-
-#[test]
-fn multi() {
-    let uri = "untitled:test".to_string();
-    let source = r#"
-(module
-  (import "" (item "") (item) (item "") (func (param i32)))
-"#;
-    let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    let response = service.code_action(create_params(uri, 2, 45, 2, 45));
+    let response = service.code_action(create_params(uri, 2, 19, 2, 19));
     assert_json_snapshot!(response);
 }
 
 #[test]
-fn no_leading_ws() {
+fn missing_module_name() {
     let uri = "untitled:test".to_string();
     let source = r#"
 (module
-  (import "" (item "") (;;)(func (param i32)))
+  (import (item "a" (global i32)))
 "#;
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(uri, 2, 31, 2, 31));
+    let response = service.code_action(create_params(uri, 2, 7, 2, 7));
+    assert!(response.is_none());
+}
+
+#[test]
+fn missing_name() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "env" (item "a") (item) (global i32))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.code_action(create_params(uri, 2, 7, 2, 7));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn encoding1() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(import "env"
+    (item "f" (func (result i32)))
+    (item "t" (table 3 funcref))
+    (item "m" (memory $m 1))
+    (item "g" (global i32))
+    (item "e" (tag (param i32)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.code_action(create_params(uri, 5, 7, 5, 7));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn encoding2() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "env" (item "a") (item "b") (memory))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.code_action(create_params(uri, 2, 42, 2, 42));
     assert_json_snapshot!(response);
 }

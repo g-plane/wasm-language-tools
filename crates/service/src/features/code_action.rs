@@ -193,6 +193,11 @@ impl LanguageService {
                             actions.push(action);
                         }
                     }
+                    SyntaxKind::MODULE_FIELD_IMPORT => {
+                        if rewrite && let Some(action) = expand_compact_import::act(db, uri, line_index, &it) {
+                            actions.push(action);
+                        }
+                    }
                     SyntaxKind::EXTERN_TYPE_FUNC
                     | SyntaxKind::EXTERN_TYPE_GLOBAL
                     | SyntaxKind::EXTERN_TYPE_MEMORY

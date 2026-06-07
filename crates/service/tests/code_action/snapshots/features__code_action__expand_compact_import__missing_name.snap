@@ -1,0 +1,29 @@
+---
+source: crates/service/tests/code_action/expand_compact_import.rs
+expression: response
+---
+[
+  {
+    "title": "Expand compact import",
+    "kind": "refactor.rewrite",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 2
+              },
+              "end": {
+                "line": 2,
+                "character": 47
+              }
+            },
+            "newText": "(import \"env\" \"a\" (global i32))"
+          }
+        ]
+      }
+    }
+  }
+]

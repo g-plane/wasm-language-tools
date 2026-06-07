@@ -1,0 +1,29 @@
+---
+source: crates/service/tests/code_action/expand_compact_import.rs
+expression: response
+---
+[
+  {
+    "title": "Expand compact import",
+    "kind": "refactor.rewrite",
+    "edit": {
+      "changes": {
+        "untitled:test": [
+          {
+            "range": {
+              "start": {
+                "line": 1,
+                "character": 0
+              },
+              "end": {
+                "line": 6,
+                "character": 32
+              }
+            },
+            "newText": "(import \"env\" \"f\" (func (result i32)))\n  (import \"env\" \"t\" (table 3 funcref))\n  (import \"env\" \"m\" (memory $m 1))\n  (import \"env\" \"g\" (global i32))\n  (import \"env\" \"e\" (tag (param i32)))"
+          }
+        ]
+      }
+    }
+  }
+]
