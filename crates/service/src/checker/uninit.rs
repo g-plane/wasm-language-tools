@@ -20,7 +20,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, node: A
     let cfg = cfa::analyze(ctx.db, ctx.document, node.to_ptr());
     locals
         .iter()
-        .filter(|local| types_analyzer::extract_type(ctx.db, &local.green).is_some_and(|ty| !ty.defaultable()))
+        .filter(|local| types_analyzer::extract_type(ctx.db, &local.ty.0).is_some_and(|ty| !ty.defaultable()))
         .for_each(|local| {
             check_local(diagnostics, ctx.db, local, ctx.symbol_table, cfg, ctx.bump);
             ctx.bump.reset();

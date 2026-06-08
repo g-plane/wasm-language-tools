@@ -77,7 +77,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode, instr_name: AmberToken) -> Op
         }
         "offset" => {
             if let Some(mem_def) = mem_def
-                && types_analyzer::extract_addr_type(&mem_def.green) == ValType::I32
+                && types_analyzer::extract_addr_type(&mem_def.ty.0) == ValType::I32
                 && let Err(error) = helpers::parse_u32(mem_arg.tokens_by_kind(SyntaxKind::UNSIGNED_INT).next()?.text())
                 && error.kind() == &IntErrorKind::PosOverflow
             {

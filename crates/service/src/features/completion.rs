@@ -748,7 +748,7 @@ fn get_cmp_list(
                         })
                         .map(|symbol| {
                             let label = symbol.idx.render(db).to_string();
-                            let ty = types_analyzer::extract_type(db, &symbol.green);
+                            let ty = types_analyzer::extract_type(db, &symbol.ty.0);
                             CompletionItem {
                                 label: label.clone(),
                                 kind: Some(CompletionItemKind::Variable),
@@ -794,11 +794,11 @@ fn get_cmp_list(
                         detail: Some(types_analyzer::render_func_header(
                             db,
                             symbol.idx.name,
-                            NamedSig::from_func(db, document, symbol.amber()),
+                            NamedSig::from_func(db, document, symbol.ty()),
                         )),
                         label_details: Some(CompletionItemLabelDetails {
                             description: Some(
-                                NamedSig::from_func(db, document, symbol.amber())
+                                NamedSig::from_func(db, document, symbol.ty())
                                     .render_compact(db)
                                     .to_string(),
                             ),
@@ -880,7 +880,7 @@ fn get_cmp_list(
                 let preferred_type = guess_preferred_type(db, document, token);
                 items.extend(symbol_table.get_declared(module, SymbolKind::GlobalDef).map(|symbol| {
                     let label = symbol.idx.render(db).to_string();
-                    let ty = types_analyzer::extract_global_type(db, &symbol.green);
+                    let ty = types_analyzer::extract_global_type(db, &symbol.ty.0);
                     CompletionItem {
                         label: label.clone(),
                         kind: Some(CompletionItemKind::Variable),
@@ -997,7 +997,7 @@ fn get_cmp_list(
                                 name: symbol.idx.name,
                             };
                             let label = idx.render(db).to_string();
-                            let sig = NamedSig::from_func(db, document, symbol.amber());
+                            let sig = NamedSig::from_func(db, document, symbol.ty());
                             CompletionItem {
                                 label: label.clone(),
                                 kind: Some(CompletionItemKind::Variable),
@@ -1109,7 +1109,7 @@ fn get_cmp_list(
                 let deprecation = deprecation::get_deprecation(db, document);
                 items.extend(symbol_table.get_declared(module, SymbolKind::TagDef).map(|symbol| {
                     let label = symbol.idx.render(db).to_string();
-                    let sig = NamedSig::from_func(db, document, symbol.amber());
+                    let sig = NamedSig::from_func(db, document, symbol.ty());
                     CompletionItem {
                         label: label.clone(),
                         kind: Some(CompletionItemKind::Variable),

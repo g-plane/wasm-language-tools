@@ -11,8 +11,8 @@ use bumpalo::Bump;
 use lspt::{Hover, HoverParams, MarkupContent, MarkupKind, Union3};
 use std::fmt::Write;
 use wat_syntax::{
-    NodeOrToken, SyntaxKind, SyntaxNode,
-    ast::{AstNode, Limits, MemType, PlainInstr, TableType, support},
+    AmberNode, NodeOrToken, SyntaxKind, SyntaxNode,
+    ast::{AstNode, PlainInstr},
 };
 
 impl LanguageService {
@@ -26,14 +26,14 @@ impl LanguageService {
 
         match token.kind() {
             SyntaxKind::IDENT | SyntaxKind::UNSIGNED_INT => {
-                create_symbol_hover(self, document, &root, symbol_table, &token.parent()).map(|contents| Hover {
+                create_symbol_hover(self, document, symbol_table, &token.parent()).map(|contents| Hover {
                     contents: Union3::A(contents),
                     range: Some(line_index.convert(token.text_range())),
                 })
             }
             SyntaxKind::INT => {
                 let parent = token.parent();
-                create_symbol_hover(self, document, &root, symbol_table, &parent)
+                create_symbol_hover(self, document, symbol_table, &parent)
                     .or_else(|| {
                         if let Some(is_i32) =
                             parent
@@ -97,7 +97,7 @@ impl LanguageService {
                 } else {
                     node
                 };
-                create_symbol_hover(self, document, &root, symbol_table, &node).map(|contents| Hover {
+                create_symbol_hover(self, document, symbol_table, &node).map(|contents| Hover {
                     contents: Union3::A(contents),
                     range: Some(line_index.convert(if matches!(token.text(), "mut" | "ref") {
                         node.text_range()
@@ -205,7 +205,6 @@ impl LanguageService {
 fn create_symbol_hover(
     db: &dyn salsa::Database,
     document: Document,
-    root: &SyntaxNode,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
 ) -> Option<MarkupContent> {
@@ -229,14 +228,14 @@ fn create_symbol_hover(
             SymbolKind::GlobalRef => symbol_table
                 .find_def(symbol.key)
                 .map(|symbol| create_global_def_hover(db, document, symbol)),
-            SymbolKind::MemoryDef => Some(create_memory_def_hover(db, symbol, root)),
+            SymbolKind::MemoryDef => Some(create_memory_def_hover(db, symbol)),
             SymbolKind::MemoryRef => symbol_table
                 .find_def(symbol.key)
-                .map(|symbol| create_memory_def_hover(db, symbol, root)),
-            SymbolKind::TableDef => Some(create_table_def_hover(db, symbol, root)),
+                .map(|symbol| create_memory_def_hover(db, symbol)),
+            SymbolKind::TableDef => Some(create_table_def_hover(db, symbol)),
             SymbolKind::TableRef => symbol_table
                 .find_def(symbol.key)
-                .map(|symbol| create_table_def_hover(db, symbol, root)),
+                .map(|symbol| create_table_def_hover(db, symbol)),
             SymbolKind::BlockDef => Some(create_block_hover(db, symbol, document)),
             SymbolKind::BlockRef => symbol_table
                 .find_def(symbol.key)
@@ -270,7 +269,7 @@ fn create_func_hover(
     let doc = helpers::get_doc_comment(symbol, symbol_table).filter(|doc| !doc.is_empty());
     let mut content = format!(
         "```wat\n{}\n```",
-        types_analyzer::render_func_header(db, symbol.idx.name, NamedSig::from_func(db, document, symbol.amber()))
+        types_analyzer::render_func_header(db, symbol.idx.name, NamedSig::from_func(db, document, symbol.ty()))
     );
     if let Some(doc) = doc {
         content.push_str("\n---\n");
@@ -297,7 +296,7 @@ fn create_param_or_local_hover(db: &dyn salsa::Database, symbol: &Symbol) -> Mar
         content.push(' ');
         content.push_str(name.ident(db));
     }
-    if let Some(ty) = types_analyzer::extract_type(db, &symbol.green) {
+    if let Some(ty) = types_analyzer::extract_type(db, &symbol.ty.0) {
         content.push(' ');
         let _ = write!(content, "{}", ty.render(db));
     }
@@ -321,7 +320,7 @@ fn create_global_def_hover(db: &dyn salsa::Database, document: Document, symbol:
     if mutable {
         content.push_str(" (mut");
     }
-    if let Some(ty) = types_analyzer::extract_global_type(db, &symbol.green) {
+    if let Some(ty) = types_analyzer::extract_global_type(db, &symbol.ty.0) {
         content.push(' ');
         let _ = write!(&mut content, "{}", ty.render(db));
     }
@@ -335,18 +334,18 @@ fn create_global_def_hover(db: &dyn salsa::Database, document: Document, symbol:
     }
 }
 
-fn create_memory_def_hover(db: &dyn salsa::Database, symbol: &Symbol, root: &SyntaxNode) -> MarkupContent {
+fn create_memory_def_hover(db: &dyn salsa::Database, symbol: &Symbol) -> MarkupContent {
     let mut content = "(memory".to_string();
     if let Some(name) = symbol.idx.name {
         content.push(' ');
         content.push_str(name.ident(db));
     }
     if let Some(limits) = symbol
-        .key
-        .to_node(root)
-        .and_then(|node| support::child::<MemType>(&node))
-        .and_then(|mem_type| mem_type.limits())
-        .and_then(|limits| render_limits(&limits))
+        .ty()
+        .children_by_kind(SyntaxKind::MEM_TYPE)
+        .next()
+        .and_then(|mem_type| mem_type.children_by_kind(SyntaxKind::LIMITS).next())
+        .and_then(|limits| render_limits(limits))
     {
         content.push(' ');
         content.push_str(&limits);
@@ -358,22 +357,22 @@ fn create_memory_def_hover(db: &dyn salsa::Database, symbol: &Symbol, root: &Syn
     }
 }
 
-fn create_table_def_hover(db: &dyn salsa::Database, symbol: &Symbol, root: &SyntaxNode) -> MarkupContent {
+fn create_table_def_hover(db: &dyn salsa::Database, symbol: &Symbol) -> MarkupContent {
     let mut content = "(table".to_string();
     if let Some(name) = symbol.idx.name {
         content.push(' ');
         content.push_str(name.ident(db));
     }
     if let Some(limits) = symbol
-        .key
-        .to_node(root)
-        .and_then(|node| support::child::<TableType>(&node))
-        .and_then(|table_type| table_type.limits())
-        .and_then(|limits| render_limits(&limits))
+        .ty()
+        .children_by_kind(SyntaxKind::TABLE_TYPE)
+        .next()
+        .and_then(|table_type| table_type.children_by_kind(SyntaxKind::LIMITS).next())
+        .and_then(|limits| render_limits(limits))
     {
         let _ = write!(&mut content, " {limits}");
     }
-    if let Some(ref_type) = types_analyzer::extract_table_ref_type(db, &symbol.green) {
+    if let Some(ref_type) = types_analyzer::extract_table_ref_type(db, &symbol.ty.0) {
         let _ = write!(content, " {}", ref_type.render(db));
     }
     content.push(')');
@@ -469,7 +468,7 @@ fn create_block_hover(db: &dyn salsa::Database, symbol: &Symbol, document: Docum
         db,
         symbol.key.kind(),
         symbol.idx.name,
-        NamedSig::from_func(db, document, symbol.amber()),
+        NamedSig::from_func(db, document, symbol.ty()),
     );
     MarkupContent {
         kind: MarkupKind::Markdown,
@@ -498,7 +497,7 @@ fn create_tag_def_hover(db: &dyn salsa::Database, symbol: &Symbol, document: Doc
         db,
         "tag",
         symbol.idx.name,
-        NamedSig::from_func(db, document, symbol.amber()),
+        NamedSig::from_func(db, document, symbol.ty()),
     );
     MarkupContent {
         kind: MarkupKind::Markdown,
@@ -545,10 +544,11 @@ fn format_op_code(code: u32) -> String {
     }
 }
 
-fn render_limits(limits: &Limits) -> Option<String> {
+fn render_limits(limits: AmberNode) -> Option<String> {
     let mut content = String::with_capacity(2);
-    content.push_str(limits.min()?.text());
-    if let Some(max) = limits.max() {
+    let mut uints = limits.tokens_by_kind(SyntaxKind::UNSIGNED_INT);
+    content.push_str(uints.next()?.text());
+    if let Some(max) = uints.next() {
         content.push(' ');
         content.push_str(max.text());
     }

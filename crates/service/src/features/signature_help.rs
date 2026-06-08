@@ -35,7 +35,7 @@ impl LanguageService {
                 "call" | "return_call" => {
                     let first_immediate = parent_instr.immediates().next()?;
                     let func = symbol_table.find_def(SymbolKey::new(first_immediate.syntax()))?;
-                    (NamedSig::from_func(db, document, func.amber()), Some(func))
+                    (NamedSig::from_func(db, document, func.ty()), Some(func))
                 }
                 "call_indirect" | "return_call_indirect" => {
                     let type_use = parent_instr.immediates().find_map(|immediate| immediate.type_use())?;

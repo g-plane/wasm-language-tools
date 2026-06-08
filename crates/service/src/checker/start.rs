@@ -9,7 +9,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
     if ctx
         .symbol_table
         .find_def(index.to_ptr().into())
-        .map(|func| Sig::from_func(ctx.db, ctx.document, func.amber()))
+        .map(|func| Sig::from_func(ctx.db, ctx.document, func.ty()))
         .is_some_and(|sig| !sig.params.is_empty() || !sig.results.is_empty())
     {
         Some(Diagnostic {

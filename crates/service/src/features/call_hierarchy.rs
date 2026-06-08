@@ -34,7 +34,7 @@ impl LanguageService {
                 detail: Some(types_analyzer::render_func_header(
                     self,
                     symbol.idx.name,
-                    NamedSig::from_func(self, document, symbol.amber()),
+                    NamedSig::from_func(self, document, symbol.ty()),
                 )),
                 uri: params.text_document.uri.clone(),
                 range: line_index.convert(symbol.key.text_range()),
@@ -60,7 +60,7 @@ impl LanguageService {
                         detail: Some(types_analyzer::render_func_header(
                             self,
                             symbol.idx.name,
-                            NamedSig::from_func(self, document, symbol.amber()),
+                            NamedSig::from_func(self, document, symbol.ty()),
                         )),
                         uri: params.text_document.uri.clone(),
                         range: line_index.convert(symbol.key.text_range()),
@@ -118,7 +118,7 @@ impl LanguageService {
                             detail: Some(types_analyzer::render_func_header(
                                 self,
                                 symbol.idx.name,
-                                NamedSig::from_func(self, document, symbol.amber()),
+                                NamedSig::from_func(self, document, symbol.ty()),
                             )),
                             uri: params.item.uri.clone(),
                             range: line_index.convert(symbol.key.text_range()),
@@ -166,7 +166,7 @@ impl LanguageService {
                     detail: Some(types_analyzer::render_func_header(
                         self,
                         def_symbol.idx.name,
-                        NamedSig::from_func(self, document, def_symbol.amber()),
+                        NamedSig::from_func(self, document, def_symbol.ty()),
                     )),
                     uri: params.item.uri.clone(),
                     range: line_index.convert(def_symbol.key.text_range()),

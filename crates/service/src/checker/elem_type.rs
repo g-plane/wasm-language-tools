@@ -13,7 +13,7 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnostic> {
             .to_ptr()
             .into(),
     )?;
-    let table_ref_type = types_analyzer::extract_table_ref_type(ctx.db, &table.green)?;
+    let table_ref_type = types_analyzer::extract_table_ref_type(ctx.db, &table.ty.0)?;
     let elem_ref_type_node = node
         .children_by_kind(SyntaxKind::ELEM_LIST)
         .next()?

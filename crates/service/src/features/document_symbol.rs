@@ -64,7 +64,7 @@ impl LanguageService {
                                 symbol.key,
                                 DocumentSymbol {
                                     name: render_symbol_name(symbol, db),
-                                    detail: types_analyzer::extract_type(db, &symbol.green)
+                                    detail: types_analyzer::extract_type(db, &symbol.ty.0)
                                         .map(|ty| ty.render(db).to_string()),
                                     kind: LspSymbolKind::Variable,
                                     tags,
@@ -101,7 +101,7 @@ impl LanguageService {
                                 symbol.key,
                                 DocumentSymbol {
                                     name: render_symbol_name(symbol, db),
-                                    detail: types_analyzer::extract_global_type(db, &symbol.green).map(|ty| {
+                                    detail: types_analyzer::extract_global_type(db, &symbol.ty.0).map(|ty| {
                                         if mutability::get_mutabilities(db, document)
                                             .get(&symbol.key)
                                             .and_then(|mutability| mutability.mut_keyword)

@@ -31,7 +31,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             .children_by_kind(SyntaxKind::IMMEDIATE)
             .next()
             .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
-            .map(|func| ResolvedSig::from_sig_in(Sig::from_func(ctx.db, ctx.document, func.amber()), bump))
+            .map(|func| ResolvedSig::from_sig_in(Sig::from_func(ctx.db, ctx.document, func.ty()), bump))
             .unwrap_or_else(|| ResolvedSig::new_in(bump)),
         "local.get" => ResolvedSig {
             params: BumpVec::new_in(bump),
@@ -40,7 +40,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                     .children_by_kind(SyntaxKind::IMMEDIATE)
                     .next()
                     .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
-                    .and_then(|symbol| extract_type(ctx.db, &symbol.green))
+                    .and_then(|symbol| extract_type(ctx.db, &symbol.ty.0))
                     .map_or(OperandType::Any, OperandType::Val)],
                 bump,
             ),
@@ -51,7 +51,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                     .children_by_kind(SyntaxKind::IMMEDIATE)
                     .next()
                     .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
-                    .and_then(|symbol| extract_type(ctx.db, &symbol.green))
+                    .and_then(|symbol| extract_type(ctx.db, &symbol.ty.0))
                     .map_or(OperandType::Any, OperandType::Val)],
                 bump,
             ),
@@ -62,7 +62,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
-                .and_then(|symbol| extract_type(ctx.db, &symbol.green))
+                .and_then(|symbol| extract_type(ctx.db, &symbol.ty.0))
                 .map_or(OperandType::Any, OperandType::Val);
             ResolvedSig {
                 params: BumpVec::from_iter_in([ty.clone()], bump),
@@ -76,7 +76,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                     .children_by_kind(SyntaxKind::IMMEDIATE)
                     .next()
                     .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
-                    .and_then(|symbol| extract_global_type(ctx.db, &symbol.green))
+                    .and_then(|symbol| extract_global_type(ctx.db, &symbol.ty.0))
                     .map_or(OperandType::Any, OperandType::Val)],
                 bump,
             ),
@@ -87,7 +87,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                     .children_by_kind(SyntaxKind::IMMEDIATE)
                     .next()
                     .and_then(|idx| ctx.symbol_table.find_def(idx.to_ptr().into()))
-                    .and_then(|symbol| extract_global_type(ctx.db, &symbol.green))
+                    .and_then(|symbol| extract_global_type(ctx.db, &symbol.ty.0))
                     .map_or(OperandType::Any, OperandType::Val)],
                 bump,
             ),
@@ -119,7 +119,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 })
                 .map(|func| {
                     BumpVec::from_iter_in(
-                        Sig::from_func(ctx.db, ctx.document, func.amber())
+                        Sig::from_func(ctx.db, ctx.document, func.ty())
                             .results
                             .into_iter()
                             .map(OperandType::Val),
@@ -302,7 +302,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                         .is_some()
                 })
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             sig.params.push(OperandType::Val(at));
             sig
         }
@@ -931,7 +931,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                     .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
                     .into_iter()
                     .flat_map(|symbol| {
-                        Sig::from_func(ctx.db, ctx.document, symbol.amber())
+                        Sig::from_func(ctx.db, ctx.document, symbol.ty())
                             .params
                             .into_iter()
                             .map(OperandType::Val)
@@ -1055,7 +1055,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             ResolvedSig {
                 params: BumpVec::from_iter_in([OperandType::Val(at)], bump),
                 results: BumpVec::from_iter_in([OperandType::Val(ValType::I32)], bump),
@@ -1067,7 +1067,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             ResolvedSig {
                 params: BumpVec::from_iter_in([OperandType::Val(at)], bump),
                 results: BumpVec::from_iter_in([OperandType::Val(ValType::I64)], bump),
@@ -1078,7 +1078,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             ResolvedSig {
                 params: BumpVec::from_iter_in([OperandType::Val(at)], bump),
                 results: BumpVec::from_iter_in([OperandType::Val(ValType::F32)], bump),
@@ -1089,7 +1089,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             ResolvedSig {
                 params: BumpVec::from_iter_in([OperandType::Val(at)], bump),
                 results: BumpVec::from_iter_in([OperandType::Val(ValType::F64)], bump),
@@ -1100,7 +1100,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             ResolvedSig {
                 params: BumpVec::from_iter_in([OperandType::Val(at), OperandType::Val(ValType::I32)], bump),
                 results: BumpVec::new_in(bump),
@@ -1111,7 +1111,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             ResolvedSig {
                 params: BumpVec::from_iter_in([OperandType::Val(at), OperandType::Val(ValType::I64)], bump),
                 results: BumpVec::new_in(bump),
@@ -1122,7 +1122,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             ResolvedSig {
                 params: BumpVec::from_iter_in([OperandType::Val(at), OperandType::Val(ValType::F32)], bump),
                 results: BumpVec::new_in(bump),
@@ -1133,7 +1133,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             ResolvedSig {
                 params: BumpVec::from_iter_in([OperandType::Val(at), OperandType::Val(ValType::F64)], bump),
                 results: BumpVec::new_in(bump),
@@ -1144,7 +1144,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             ResolvedSig {
                 params: BumpVec::new_in(bump),
                 results: BumpVec::from_iter_in([OperandType::Val(at)], bump),
@@ -1155,7 +1155,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             ResolvedSig {
                 params: BumpVec::from_iter_in([OperandType::Val(at.clone())], bump),
                 results: BumpVec::from_iter_in([OperandType::Val(at)], bump),
@@ -1166,7 +1166,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             ResolvedSig {
                 params: BumpVec::from_iter_in(
                     [
@@ -1184,11 +1184,11 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             let at1 = immediates
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             let at2 = immediates
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             // i32 is less than i64, so if either is i32, the min is i32. Otherwise, it's i64.
             let min = if at1 == ValType::I32 || at2 == ValType::I32 {
                 ValType::I32
@@ -1208,7 +1208,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             ResolvedSig {
                 params: BumpVec::from_iter_in(
                     [
@@ -1228,7 +1228,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             ResolvedSig {
                 params: BumpVec::from_iter_in([OperandType::Val(at)], bump),
                 results: BumpVec::from_iter_in([OperandType::Val(ValType::V128)], bump),
@@ -1239,7 +1239,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             ResolvedSig {
                 params: BumpVec::from_iter_in([OperandType::Val(at), OperandType::Val(ValType::V128)], bump),
                 results: BumpVec::new_in(bump),
@@ -1250,7 +1250,7 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
                 .children_by_kind(SyntaxKind::IMMEDIATE)
                 .next()
                 .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
-                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.green));
+                .map_or(ValType::I32, |symbol| extract_addr_type(&symbol.ty.0));
             ResolvedSig {
                 params: BumpVec::from_iter_in([OperandType::Val(at), OperandType::Val(ValType::V128)], bump),
                 results: BumpVec::from_iter_in([OperandType::Val(ValType::V128)], bump),
@@ -1261,8 +1261,8 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             .next()
             .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
             .map(|symbol| {
-                let at = extract_addr_type(&symbol.green);
-                let ref_type = extract_table_ref_type(ctx.db, &symbol.green)
+                let at = extract_addr_type(&symbol.ty.0);
+                let ref_type = extract_table_ref_type(ctx.db, &symbol.ty.0)
                     .map_or(OperandType::Any, |ref_type| OperandType::Val(ValType::Ref(ref_type)));
                 ResolvedSig {
                     params: BumpVec::from_iter_in([OperandType::Val(at)], bump),
@@ -1278,8 +1278,8 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             .next()
             .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
             .map(|symbol| {
-                let at = extract_addr_type(&symbol.green);
-                let ref_type = extract_table_ref_type(ctx.db, &symbol.green)
+                let at = extract_addr_type(&symbol.ty.0);
+                let ref_type = extract_table_ref_type(ctx.db, &symbol.ty.0)
                     .map_or(OperandType::Any, |ref_type| OperandType::Val(ValType::Ref(ref_type)));
                 ResolvedSig {
                     params: BumpVec::from_iter_in([OperandType::Val(at), ref_type], bump),
@@ -1295,8 +1295,8 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             .next()
             .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
             .map(|symbol| {
-                let at = extract_addr_type(&symbol.green);
-                let ref_type = extract_table_ref_type(ctx.db, &symbol.green)
+                let at = extract_addr_type(&symbol.ty.0);
+                let ref_type = extract_table_ref_type(ctx.db, &symbol.ty.0)
                     .map_or(OperandType::Any, |ref_type| OperandType::Val(ValType::Ref(ref_type)));
                 ResolvedSig {
                     params: BumpVec::from_iter_in([ref_type, OperandType::Val(at.clone())], bump),
@@ -1312,8 +1312,8 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
             .next()
             .and_then(|immediate| ctx.symbol_table.find_def(immediate.to_ptr().into()))
             .map(|symbol| {
-                let at = extract_addr_type(&symbol.green);
-                let ref_type = extract_table_ref_type(ctx.db, &symbol.green)
+                let at = extract_addr_type(&symbol.ty.0);
+                let ref_type = extract_table_ref_type(ctx.db, &symbol.ty.0)
                     .map_or(OperandType::Any, |ref_type| OperandType::Val(ValType::Ref(ref_type)));
                 ResolvedSig {
                     params: BumpVec::from_iter_in([OperandType::Val(at.clone()), ref_type, OperandType::Val(at)], bump),

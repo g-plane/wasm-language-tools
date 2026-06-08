@@ -328,7 +328,7 @@ impl<'db> HeapType<'db> {
                     },
                 )) = symbol_table
                     .find_def_by_idx(*a, SymbolKind::Func, module.key)
-                    .map(|symbol| NamedSig::from_func(db, document, symbol.amber()))
+                    .map(|symbol| NamedSig::from_func(db, document, symbol.ty()))
                     .zip(
                         symbol_table
                             .find_def_by_idx(b, SymbolKind::Type, module.key)

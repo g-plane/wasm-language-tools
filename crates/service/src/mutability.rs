@@ -36,14 +36,14 @@ pub(crate) fn get_mutabilities(
                     SyntaxKind::MODULE_FIELD_GLOBAL => Some((
                         symbol.key,
                         Mutability {
-                            mut_keyword: extract_mut_from_global(node),
+                            mut_keyword: extract_mut_from_global(symbol.ty()),
                             cross_module: node.children_by_kind(SyntaxKind::EXPORT).count() > 0,
                         },
                     )),
                     SyntaxKind::EXTERN_TYPE_GLOBAL => Some((
                         symbol.key,
                         Mutability {
-                            mut_keyword: extract_mut_from_global(node),
+                            mut_keyword: extract_mut_from_global(symbol.ty()),
                             cross_module: true,
                         },
                     )),

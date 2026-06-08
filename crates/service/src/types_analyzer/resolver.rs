@@ -24,7 +24,7 @@ pub(crate) fn resolve_param_types<'db>(
         let idx = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()?;
         let func = symbol_table.find_def(SymbolKey::new(&idx))?;
         Some(
-            Sig::from_func(db, document, func.amber())
+            Sig::from_func(db, document, func.ty())
                 .params
                 .into_iter()
                 .map(OperandType::Val)
@@ -42,9 +42,8 @@ pub(crate) fn resolve_br_types<'db>(
     ref_key: SymbolKey,
 ) -> Option<impl DoubleEndedIterator<Item = OperandType<'db>> + use<'db>> {
     symbol_table.find_def(ref_key).map(|def_symbol| {
-        let node = def_symbol.amber();
-        let sig = Sig::from_func(db, document, node);
-        if node.kind() == SyntaxKind::BLOCK_LOOP {
+        let sig = Sig::from_func(db, document, def_symbol.ty());
+        if def_symbol.key.kind() == SyntaxKind::BLOCK_LOOP {
             sig.params
         } else {
             sig.results
