@@ -383,12 +383,12 @@ fn imported_global_ident_idx() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-    (import \"\" \"\" (global $global i32))
+    (import \"\" (item \"\" (global $global i32)))
     (func
         (global.get $global)
     )
 )
-(module (import \"\" \"\" (global $global i32)))
+(module (import \"\" (item \"\" (global $global i32))))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
@@ -478,10 +478,10 @@ fn imported_memory_int_idx() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-    (import \"\" \"\" (memory))
+    (import \"\" (item \"\") (memory))
     (export \"\" (memory 0))
 )
-(module (import \"\" \"\" (memory)))
+(module (import \"\" (item \"\") (memory)))
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());

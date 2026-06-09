@@ -521,6 +521,20 @@ fn memory_keyword() {
 }
 
 #[test]
+fn imported_memory() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "" (item "") (memory 1 1))
+  (func memory.size 0))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.hover(create_params(uri, 3, 21));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn table_decl() {
     let uri = "untitled:test".to_string();
     let source = "
@@ -543,6 +557,20 @@ fn table_keyword() {
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
     let response = service.hover(create_params(uri, 2, 7));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn imported_table() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "" (item "" (table $t 1 funcref)))
+  (func table.get 0))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.hover(create_params(uri, 3, 19));
     assert_json_snapshot!(response);
 }
 

@@ -1,0 +1,102 @@
+---
+source: crates/service/tests/code_lens/mod.rs
+expression: response
+---
+[
+  {
+    "range": {
+      "start": {
+        "line": 2,
+        "character": 2
+      },
+      "end": {
+        "line": 2,
+        "character": 38
+      }
+    },
+    "data": {
+      "kind": "table",
+      "uri": "untitled:test"
+    }
+  },
+  {
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 2
+      },
+      "end": {
+        "line": 3,
+        "character": 41
+      }
+    },
+    "data": {
+      "kind": "table",
+      "uri": "untitled:test"
+    }
+  },
+  {
+    "range": {
+      "start": {
+        "line": 4,
+        "character": 16
+      },
+      "end": {
+        "line": 4,
+        "character": 37
+      }
+    },
+    "data": {
+      "kind": "memory",
+      "uri": "untitled:test"
+    }
+  },
+  {
+    "range": {
+      "start": {
+        "line": 4,
+        "character": 38
+      },
+      "end": {
+        "line": 4,
+        "character": 58
+      }
+    },
+    "data": {
+      "kind": "func",
+      "uri": "untitled:test"
+    }
+  },
+  {
+    "range": {
+      "start": {
+        "line": 5,
+        "character": 16
+      },
+      "end": {
+        "line": 5,
+        "character": 27
+      }
+    },
+    "data": {
+      "kind": "global",
+      "uri": "untitled:test"
+    }
+  },
+  {
+    "range": {
+      "start": {
+        "line": 5,
+        "character": 28
+      },
+      "end": {
+        "line": 5,
+        "character": 39
+      }
+    },
+    "data": {
+      "kind": "global",
+      "uri": "untitled:test"
+    }
+  }
+]

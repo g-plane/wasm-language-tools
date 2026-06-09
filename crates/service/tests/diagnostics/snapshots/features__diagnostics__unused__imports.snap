@@ -1,0 +1,123 @@
+---
+source: crates/service/tests/diagnostics/unused.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 3
+        },
+        "end": {
+          "line": 2,
+          "character": 9
+        }
+      },
+      "severity": 2,
+      "code": "unused",
+      "source": "wat",
+      "message": "table `0` is never used",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 27
+        },
+        "end": {
+          "line": 3,
+          "character": 29
+        }
+      },
+      "severity": 2,
+      "code": "unused",
+      "source": "wat",
+      "message": "table `$t` is never used",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 17
+        },
+        "end": {
+          "line": 4,
+          "character": 21
+        }
+      },
+      "severity": 2,
+      "code": "unused",
+      "source": "wat",
+      "message": "memory `0` is never used",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 54
+        },
+        "end": {
+          "line": 4,
+          "character": 56
+        }
+      },
+      "severity": 2,
+      "code": "unused",
+      "source": "wat",
+      "message": "func `$f` is never used",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 17
+        },
+        "end": {
+          "line": 5,
+          "character": 21
+        }
+      },
+      "severity": 2,
+      "code": "unused",
+      "source": "wat",
+      "message": "global `0` is never used",
+      "tags": [
+        1
+      ]
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 29
+        },
+        "end": {
+          "line": 5,
+          "character": 33
+        }
+      },
+      "severity": 2,
+      "code": "unused",
+      "source": "wat",
+      "message": "global `1` is never used",
+      "tags": [
+        1
+      ]
+    }
+  ]
+}

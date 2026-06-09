@@ -95,3 +95,78 @@ fn hex_int_idx() {
     let response = service.find_references(create_params(uri, 15, 11, true));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn import() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "env" "d" (global i32))
+  (func
+    (global.get 0)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.find_references(create_params(uri, 2, 6, true));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn import_with_ident() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "env" "d" (global $d i32))
+  (func
+    (global.get $d)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.find_references(create_params(uri, 2, 29, true));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn compact_import_enc1() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "env" (item "d" (global i32)))
+  (func
+    (global.get 0)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.find_references(create_params(uri, 2, 20, true));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn compact_import_enc1_with_ident() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "env" (item "d" (global $d i32)))
+  (func
+    (global.get $d)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.find_references(create_params(uri, 2, 35, true));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn compact_import_enc2() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "env" (item "d") (global i32))
+  (func
+    (global.get 0)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.find_references(create_params(uri, 2, 19, true));
+    assert_json_snapshot!(response);
+}

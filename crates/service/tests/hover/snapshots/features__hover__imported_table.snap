@@ -1,0 +1,20 @@
+---
+source: crates/service/tests/hover/mod.rs
+expression: response
+---
+{
+  "contents": {
+    "kind": "markdown",
+    "value": "```wat\n(table $t 1 (ref null func))\n```"
+  },
+  "range": {
+    "start": {
+      "line": 3,
+      "character": 18
+    },
+    "end": {
+      "line": 3,
+      "character": 19
+    }
+  }
+}

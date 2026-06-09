@@ -24,10 +24,20 @@ impl LanguageService {
             return None;
         }
         let parent = token.parent();
-        let grand = parent.parent();
-        let current_node = match grand {
-            Some(grand) if grand.kind() == SyntaxKind::FIELD_TYPE => grand,
-            _ => parent,
+        let current_node = if matches!(
+            parent.kind(),
+            SyntaxKind::IMMEDIATE | SyntaxKind::INDEX | SyntaxKind::IMPORT_ITEM
+        ) {
+            parent
+        } else if let Some(grand) = parent.parent()
+            && matches!(
+                grand.kind(),
+                SyntaxKind::FIELD_TYPE | SyntaxKind::MODULE_FIELD_IMPORT | SyntaxKind::IMPORT_ITEM
+            )
+        {
+            grand
+        } else {
+            parent
         };
 
         let line_index = document.line_index(self);

@@ -27,11 +27,11 @@ expression: response
             "range": {
               "start": {
                 "line": 2,
-                "character": 16
+                "character": 2
               },
               "end": {
                 "line": 2,
-                "character": 36
+                "character": 37
               }
             }
           },

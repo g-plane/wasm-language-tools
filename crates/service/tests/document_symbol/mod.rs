@@ -22,6 +22,10 @@ fn symbols() {
     (tag $tag)
     (data $data)
     (elem $elem)
+    (import "env" "t" (table 0 funcref))
+    (import "env" "t" (table $env-t 0 funcref))
+    (import "env" (item "m" (memory 0)) (item "f" (func $env-f)))
+    (import "env" (item "g1") (item "g2") (global i64))
 )
 "#;
     let mut service = LanguageService::default();

@@ -9,7 +9,10 @@ use lspt::{PrepareRenameParams, PrepareRenameResult, RenameParams, TextEdit, Wor
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_parser::is_id_char;
-use wat_syntax::{SyntaxKind, SyntaxToken};
+use wat_syntax::{
+    SyntaxKind, SyntaxToken,
+    ast::{AstNode, ExternType},
+};
 
 const ERR_INVALID_IDENTIFIER: &str = "not a valid identifier";
 const ERR_CANT_BE_RENAMED: &str = "This can't be renamed.";
@@ -51,8 +54,13 @@ impl LanguageService {
         let symbol_table = SymbolTable::of(self, document);
 
         let old_name = InternIdent::new(self, ident_token.text());
-        let symbol_key = SymbolKey::new(&ident_token.parent());
-        let symbol = symbol_table.symbols.get(&symbol_key)?;
+        let parent = ident_token.parent();
+        let symbol = if ExternType::can_cast(parent.kind()) {
+            let range = parent.text_range();
+            symbol_table.symbols.values().find(|symbol| symbol.ty.1 == range)?
+        } else {
+            symbol_table.symbols.get(&SymbolKey::new(&parent))?
+        };
         let text_edits = symbol_table
             .symbols
             .values()
@@ -87,7 +95,7 @@ impl LanguageService {
                     symbol == *sym
                         || symbol_table
                             .resolved
-                            .get(&symbol_key)
+                            .get(&symbol.key)
                             .is_some_and(|def_key| *def_key == sym.key)
                 }
                 SymbolKind::BlockRef => {
@@ -95,9 +103,9 @@ impl LanguageService {
                         symbol_table
                             .resolved
                             .get(&sym.key)
-                            .is_some_and(|def_key| *def_key == symbol_key)
+                            .is_some_and(|def_key| *def_key == symbol.key)
                     } else if let (Some(a), Some(b)) = (
-                        symbol_table.resolved.get(&symbol_key),
+                        symbol_table.resolved.get(&symbol.key),
                         symbol_table.resolved.get(&sym.key),
                     ) {
                         a == b
@@ -106,7 +114,14 @@ impl LanguageService {
                     }
                 }
             })
-            .filter_map(|sym| sym.amber().tokens_by_kind(SyntaxKind::IDENT).next())
+            .filter_map(|sym| {
+                match sym.key.kind() {
+                    SyntaxKind::MODULE_FIELD_IMPORT | SyntaxKind::IMPORT_ITEM => sym.ty(),
+                    _ => sym.amber(),
+                }
+                .tokens_by_kind(SyntaxKind::IDENT)
+                .next()
+            })
             .map(|token| TextEdit {
                 range: line_index.convert(token.text_range()),
                 new_text: params.new_name.clone(),

@@ -931,3 +931,18 @@ fn elem_ref_undefined() {
     let response = service.document_highlight(create_params(uri, 3, 18));
     assert!(response.unwrap().is_empty());
 }
+
+#[test]
+fn imports() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "env" (item "f" (func $f)))
+  (func
+    call $f))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.document_highlight(create_params(uri, 4, 10));
+    assert_json_snapshot!(response);
+}

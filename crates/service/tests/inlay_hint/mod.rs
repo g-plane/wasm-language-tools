@@ -256,6 +256,21 @@ fn field_with_struct_changed() {
 }
 
 #[test]
+fn imports() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "env" "t" (table 0 funcref))
+  (import "env" (item "m" (memory 0)) (item "f" (func)))
+  (import "env" (item "g1") (item "g2") (global i64)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.inlay_hint(create_params(uri, 5, 0));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn types_only() {
     let uri = "untitled:test".to_string();
     let source = "

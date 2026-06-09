@@ -12,7 +12,7 @@ expression: response
         "character": 0
       },
       "end": {
-        "line": 17,
+        "line": 21,
         "character": 1
       }
     },
@@ -545,6 +545,152 @@ expression: response
           "end": {
             "line": 16,
             "character": 15
+          }
+        }
+      },
+      {
+        "name": "table 1",
+        "kind": 13,
+        "range": {
+          "start": {
+            "line": 17,
+            "character": 4
+          },
+          "end": {
+            "line": 17,
+            "character": 40
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 17,
+            "character": 5
+          },
+          "end": {
+            "line": 17,
+            "character": 11
+          }
+        }
+      },
+      {
+        "name": "$env-t",
+        "kind": 13,
+        "range": {
+          "start": {
+            "line": 18,
+            "character": 4
+          },
+          "end": {
+            "line": 18,
+            "character": 47
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 18,
+            "character": 29
+          },
+          "end": {
+            "line": 18,
+            "character": 35
+          }
+        }
+      },
+      {
+        "name": "memory 2",
+        "kind": 13,
+        "range": {
+          "start": {
+            "line": 19,
+            "character": 18
+          },
+          "end": {
+            "line": 19,
+            "character": 39
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 19,
+            "character": 19
+          },
+          "end": {
+            "line": 19,
+            "character": 23
+          }
+        }
+      },
+      {
+        "name": "$env-f",
+        "kind": 12,
+        "range": {
+          "start": {
+            "line": 19,
+            "character": 40
+          },
+          "end": {
+            "line": 19,
+            "character": 64
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 19,
+            "character": 56
+          },
+          "end": {
+            "line": 19,
+            "character": 62
+          }
+        }
+      },
+      {
+        "name": "global 2",
+        "detail": "i64",
+        "kind": 13,
+        "range": {
+          "start": {
+            "line": 20,
+            "character": 18
+          },
+          "end": {
+            "line": 20,
+            "character": 29
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 20,
+            "character": 19
+          },
+          "end": {
+            "line": 20,
+            "character": 23
+          }
+        }
+      },
+      {
+        "name": "global 3",
+        "detail": "i64",
+        "kind": 13,
+        "range": {
+          "start": {
+            "line": 20,
+            "character": 30
+          },
+          "end": {
+            "line": 20,
+            "character": 41
+          }
+        },
+        "selectionRange": {
+          "start": {
+            "line": 20,
+            "character": 31
+          },
+          "end": {
+            "line": 20,
+            "character": 35
           }
         }
       }

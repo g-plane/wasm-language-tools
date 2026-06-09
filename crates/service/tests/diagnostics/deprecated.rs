@@ -150,3 +150,29 @@ fn tag() {
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn compact_import() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "env"
+    (@deprecated)
+    (item "a")
+    (item "b") (global i32))
+  (import "env"
+    (@deprecated)
+    (item "c" (global i32))
+    (item "d" (global i32)))
+  (func
+    (drop (global.get 0))
+    (drop (global.get 1))
+    (drop (global.get 2))
+    (drop (global.get 3))))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    disable_other_lints(&mut service, &uri);
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}

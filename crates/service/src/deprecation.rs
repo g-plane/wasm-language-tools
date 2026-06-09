@@ -27,25 +27,14 @@ pub(crate) fn get_deprecation(db: &dyn salsa::Database, document: Document) -> F
                 .filter(|node| node.kind() == SyntaxKind::REC_TYPE)
                 .flat_map(|node| node.children()),
         )
+        .chain(
+            root.children()
+                .flat_map(|module| module.children())
+                .filter(|node| node.kind() == SyntaxKind::MODULE_FIELD_IMPORT)
+                .flat_map(|node| node.children())
+                .filter(|node| node.kind() == SyntaxKind::IMPORT_ITEM),
+        )
         .filter_map(|node| {
-            let key = if node.kind() == SyntaxKind::MODULE_FIELD_IMPORT {
-                node.amber()
-                    .children_by_kind(|kind| {
-                        matches!(
-                            kind,
-                            SyntaxKind::EXTERN_TYPE_FUNC
-                                | SyntaxKind::EXTERN_TYPE_GLOBAL
-                                | SyntaxKind::EXTERN_TYPE_MEMORY
-                                | SyntaxKind::EXTERN_TYPE_TABLE
-                                | SyntaxKind::EXTERN_TYPE_TAG
-                        )
-                    })
-                    .next()?
-                    .to_ptr()
-                    .into()
-            } else {
-                SymbolKey::new(&node)
-            };
             node.prev_consecutive_tokens()
                 .take_while(|token| token.kind().is_trivia())
                 .find(|token| {
@@ -71,7 +60,7 @@ pub(crate) fn get_deprecation(db: &dyn salsa::Database, document: Document) -> F
                                 None
                             }
                         });
-                    (key, reason)
+                    (SymbolKey::new(&node), reason)
                 })
         })
         .collect()

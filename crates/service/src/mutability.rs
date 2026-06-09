@@ -31,19 +31,19 @@ pub(crate) fn get_mutabilities(
         .values()
         .filter_map(|symbol| match symbol.kind {
             SymbolKind::GlobalDef => {
-                let node = symbol.amber();
-                match node.kind() {
+                let ty = symbol.ty();
+                match ty.kind() {
                     SyntaxKind::MODULE_FIELD_GLOBAL => Some((
                         symbol.key,
                         Mutability {
-                            mut_keyword: extract_mut_from_global(symbol.ty()),
-                            cross_module: node.children_by_kind(SyntaxKind::EXPORT).count() > 0,
+                            mut_keyword: extract_mut_from_global(ty),
+                            cross_module: symbol.amber().children_by_kind(SyntaxKind::EXPORT).count() > 0,
                         },
                     )),
                     SyntaxKind::EXTERN_TYPE_GLOBAL => Some((
                         symbol.key,
                         Mutability {
-                            mut_keyword: extract_mut_from_global(symbol.ty()),
+                            mut_keyword: extract_mut_from_global(ty),
                             cross_module: true,
                         },
                     )),

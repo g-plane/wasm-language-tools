@@ -1,0 +1,46 @@
+---
+source: crates/service/tests/inlay_hint/mod.rs
+expression: response
+---
+[
+  {
+    "position": {
+      "line": 2,
+      "character": 9
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 3,
+      "character": 21
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 3,
+      "character": 43
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 4,
+      "character": 21
+    },
+    "label": "(;0;)",
+    "paddingLeft": true
+  },
+  {
+    "position": {
+      "line": 4,
+      "character": 33
+    },
+    "label": "(;1;)",
+    "paddingLeft": true
+  }
+]

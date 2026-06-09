@@ -131,6 +131,16 @@ fn create_symbol_highlight(symbol: &Symbol, root: &SyntaxNode, line_index: &Line
             )
         })
         .next()
+        .or_else(|| {
+            if matches!(
+                symbol.key.kind(),
+                SyntaxKind::MODULE_FIELD_IMPORT | SyntaxKind::IMPORT_ITEM
+            ) {
+                symbol.ty().tokens_by_kind(SyntaxKind::IDENT).next()
+            } else {
+                None
+            }
+        })
         .map(|token| DocumentHighlight {
             range: line_index.convert(token.text_range()),
             kind: get_highlight_kind_of_symbol(symbol, root),

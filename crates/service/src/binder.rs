@@ -8,7 +8,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::{fmt, hash::Hash, ops::Deref};
 use wat_syntax::{
     AmberNode, GreenNode, NodeOrToken, SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange,
-    ast::{AstNode, ValType, support},
+    ast::{AstNode, ExternType, ValType, support},
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
@@ -98,22 +98,26 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
     }
     fn create_extern_type_symbol<'db>(
         db: &'db dyn salsa::Database,
-        node: &SyntaxNode,
+        node: AmberNode,
         id: u32,
         kind: SymbolKind,
         module_key: SymbolKey,
+        ty: AmberNode,
     ) -> Symbol<'db> {
         Symbol {
-            key: SymbolKey::new(node),
+            key: node.to_ptr().into(),
             green: node.green().clone(),
             region: module_key,
             kind,
             idx: Idx {
                 num: Some(id),
-                name: support::token(node, SyntaxKind::IDENT).map(|token| InternIdent::new(db, token.text())),
+                name: ty
+                    .tokens_by_kind(SyntaxKind::IDENT)
+                    .next()
+                    .map(|token| InternIdent::new(db, token.text())),
             },
             idx_kind: kind.into(),
-            ty: (node.green().clone(), node.text_range()),
+            ty: (ty.green().clone(), ty.text_range()),
         }
     }
     fn search_def<'a, 'db>(
@@ -760,40 +764,60 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     symbols.insert(symbol.key, symbol);
                 }
             }
-            SyntaxKind::EXTERN_TYPE_FUNC => {
-                let idx = func_idx_gen.pull();
-                let symbol = create_extern_type_symbol(db, &node, idx, SymbolKind::Func, module_key);
-                funcs.push((symbol.key, symbol.idx.name));
-                def_poi.insert(symbol.key, infer_def_poi(&node));
-                symbols.insert(symbol.key, symbol);
-            }
-            SyntaxKind::EXTERN_TYPE_TABLE => {
-                let idx = table_idx_gen.pull();
-                let symbol = create_extern_type_symbol(db, &node, idx, SymbolKind::TableDef, module_key);
-                tables.push((symbol.key, symbol.idx.name));
-                def_poi.insert(symbol.key, infer_def_poi(&node));
-                symbols.insert(symbol.key, symbol);
-            }
-            SyntaxKind::EXTERN_TYPE_MEMORY => {
-                let idx = mem_idx_gen.pull();
-                let symbol = create_extern_type_symbol(db, &node, idx, SymbolKind::MemoryDef, module_key);
-                memories.push((symbol.key, symbol.idx.name));
-                def_poi.insert(symbol.key, infer_def_poi(&node));
-                symbols.insert(symbol.key, symbol);
-            }
-            SyntaxKind::EXTERN_TYPE_GLOBAL => {
-                let idx = global_idx_gen.pull();
-                let symbol = create_extern_type_symbol(db, &node, idx, SymbolKind::GlobalDef, module_key);
-                globals.push((symbol.key, symbol.idx.name));
-                def_poi.insert(symbol.key, infer_def_poi(&node));
-                symbols.insert(symbol.key, symbol);
-            }
-            SyntaxKind::EXTERN_TYPE_TAG => {
-                let idx = tag_idx_gen.pull();
-                let symbol = create_extern_type_symbol(db, &node, idx, SymbolKind::TagDef, module_key);
-                tags.push((symbol.key, symbol.idx.name));
-                def_poi.insert(symbol.key, infer_def_poi(&node));
-                symbols.insert(symbol.key, symbol);
+            SyntaxKind::MODULE_FIELD_IMPORT => {
+                let extern_type = node.children_by_kind(ExternType::can_cast).next();
+                let extern_type = extern_type.as_ref().map(|node| node.amber());
+                node.amber()
+                    .children_by_kind(SyntaxKind::IMPORT_ITEM)
+                    .chain(node.has_child_or_token_by_kind(SyntaxKind::NAME).then(|| node.amber()))
+                    .filter_map(|node| {
+                        let extern_type = node.children_by_kind(ExternType::can_cast).next().or(extern_type)?;
+                        let token = extern_type
+                            .tokens_by_kind(SyntaxKind::IDENT)
+                            .next()
+                            .or_else(|| node.tokens_by_kind(SyntaxKind::KEYWORD).next())?;
+                        Some((node, extern_type, token.text_range()))
+                    })
+                    .for_each(|(node, ty, poi)| match ty.kind() {
+                        SyntaxKind::EXTERN_TYPE_FUNC => {
+                            let idx = func_idx_gen.pull();
+                            let symbol = create_extern_type_symbol(db, node, idx, SymbolKind::Func, module_key, ty);
+                            funcs.push((symbol.key, symbol.idx.name));
+                            def_poi.insert(symbol.key, poi);
+                            symbols.insert(symbol.key, symbol);
+                        }
+                        SyntaxKind::EXTERN_TYPE_GLOBAL => {
+                            let idx = global_idx_gen.pull();
+                            let symbol =
+                                create_extern_type_symbol(db, node, idx, SymbolKind::GlobalDef, module_key, ty);
+                            globals.push((symbol.key, symbol.idx.name));
+                            def_poi.insert(symbol.key, poi);
+                            symbols.insert(symbol.key, symbol);
+                        }
+                        SyntaxKind::EXTERN_TYPE_MEMORY => {
+                            let idx = mem_idx_gen.pull();
+                            let symbol =
+                                create_extern_type_symbol(db, node, idx, SymbolKind::MemoryDef, module_key, ty);
+                            memories.push((symbol.key, symbol.idx.name));
+                            def_poi.insert(symbol.key, poi);
+                            symbols.insert(symbol.key, symbol);
+                        }
+                        SyntaxKind::EXTERN_TYPE_TABLE => {
+                            let idx = table_idx_gen.pull();
+                            let symbol = create_extern_type_symbol(db, node, idx, SymbolKind::TableDef, module_key, ty);
+                            tables.push((symbol.key, symbol.idx.name));
+                            def_poi.insert(symbol.key, poi);
+                            symbols.insert(symbol.key, symbol);
+                        }
+                        SyntaxKind::EXTERN_TYPE_TAG => {
+                            let idx = tag_idx_gen.pull();
+                            let symbol = create_extern_type_symbol(db, node, idx, SymbolKind::TagDef, module_key, ty);
+                            tags.push((symbol.key, symbol.idx.name));
+                            def_poi.insert(symbol.key, poi);
+                            symbols.insert(symbol.key, symbol);
+                        }
+                        _ => {}
+                    });
             }
             SyntaxKind::MODULE_FIELD_DATA => {
                 let idx = data_idx_gen.pull();

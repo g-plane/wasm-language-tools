@@ -34,6 +34,22 @@ fn list() {
 }
 
 #[test]
+fn imports() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "env" "t" (table 0 funcref))
+  (import "env" "t" (table $t 0 funcref))
+  (import "env" (item "m" (memory 0)) (item "f" (func $f)))
+  (import "env" (item "g1") (item "g2") (global i64)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.code_lens(create_params(uri)).unwrap();
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn zero_references() {
     let uri = "untitled:test".to_string();
     let source = "

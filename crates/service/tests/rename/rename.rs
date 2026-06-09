@@ -89,6 +89,66 @@ fn different_kinds() {
 }
 
 #[test]
+fn import_def() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "env" "d" (global $d i32))
+  (func
+    (global.get $d)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 2, 29, "$a")).unwrap();
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn import_ref() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "env" "d" (global $d i32))
+  (func
+    (global.get $d)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 4, 17, "$a")).unwrap();
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn compact_import_def() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "env" (item "d" (global $d i32)))
+  (func
+    (global.get $d)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 2, 35, "$a")).unwrap();
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn compact_import_ref() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(module
+  (import "env" (item "d" (global $d i32)))
+  (func
+    (global.get $d)))
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 4, 17, "$a")).unwrap();
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn module() {
     let uri = "untitled:test".to_string();
     let source = "
