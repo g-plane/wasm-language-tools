@@ -224,7 +224,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
             node.children().for_each(|child| visit_node(diagnostics, ctx, child));
         }
         multi_starts::check(&mut diagnostics, module.amber());
-        import_occur::check(&mut diagnostics, db, document, module.amber());
+        import_occur::check(&mut diagnostics, imports, module.amber());
     });
     undef::check(db, &mut diagnostics, symbol_table);
     dup_names::check(db, &mut diagnostics, document, symbol_table, &mut bump);

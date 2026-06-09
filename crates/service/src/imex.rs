@@ -12,11 +12,7 @@ pub(crate) fn get_imports(db: &dyn salsa::Database, document: Document) -> Vec<S
         .symbols
         .iter()
         .filter(|(_, symbol)| match symbol.key.kind() {
-            SyntaxKind::EXTERN_TYPE_FUNC
-            | SyntaxKind::EXTERN_TYPE_GLOBAL
-            | SyntaxKind::EXTERN_TYPE_MEMORY
-            | SyntaxKind::EXTERN_TYPE_TABLE
-            | SyntaxKind::EXTERN_TYPE_TAG => true,
+            SyntaxKind::MODULE_FIELD_IMPORT | SyntaxKind::IMPORT_ITEM => true,
             SyntaxKind::MODULE_FIELD_FUNC
             | SyntaxKind::MODULE_FIELD_GLOBAL
             | SyntaxKind::MODULE_FIELD_MEMORY

@@ -1,5 +1,5 @@
 use super::Diagnostic;
-use crate::{document::Document, imex};
+use crate::binder::SymbolKey;
 use wat_syntax::{
     AmberNode, SyntaxKind,
     ast::{AstNode, ModuleField},
@@ -7,8 +7,7 @@ use wat_syntax::{
 
 const DIAGNOSTIC_CODE: &str = "import-occurrence";
 
-pub fn check(diagnostics: &mut Vec<Diagnostic>, db: &dyn salsa::Database, document: Document, node: AmberNode) {
-    let imports = imex::get_imports(db, document);
+pub fn check(diagnostics: &mut Vec<Diagnostic>, imports: &[SymbolKey], node: AmberNode) {
     diagnostics.extend(
         node.children_by_kind(ModuleField::can_cast)
             .scan(false, |has_non_import, child| match child.kind() {
