@@ -20,3 +20,4 @@ wat_syntax = { path = "crates/syntax", version = "0.10" }
 
 [workspace.lints.clippy]
 dbg_macro = "warn"
+unnecessary_trailing_comma = "deny"
