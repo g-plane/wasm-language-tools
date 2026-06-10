@@ -19,7 +19,7 @@ lspt = { workspace = true }
 parking_lot = "0.12"
 petgraph = "0.8"
 rustc-hash = { workspace = true }
-salsa = "0.26"
+salsa = "0.27"
 serde = { workspace = true }
 serde_json = { workspace = true }
 wat_formatter = { workspace = true }
