@@ -148,12 +148,8 @@ impl<'s> Parser<'s> {
             if let Some(token) = self.lexer.peek(SyntaxKind::L_PAREN) {
                 // a trick:
                 // if there're newlines before next left paren, we should exit from current parsing node
-                if self
-                    .elements
-                    .get(checkpoint.elements..)
-                    .into_iter()
-                    .flat_map(|slice| slice.iter())
-                    .any(|node_or_token| {
+                if let Some(slice) = self.elements.get(checkpoint.elements..)
+                    && slice.iter().any(|node_or_token| {
                         if let GreenElement::Token(token) = node_or_token {
                             token.text().contains('\n')
                         } else {

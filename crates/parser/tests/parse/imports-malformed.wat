@@ -19,4 +19,7 @@
   (import "" (item "") (item "" (func)))
   (import "" (item "" (func)) (item ""))
   (import "" (item "" (func)) (func))
+  (import ""
+    ()
+  )
 )

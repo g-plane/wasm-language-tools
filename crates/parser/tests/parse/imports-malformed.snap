@@ -1,8 +1,8 @@
 ---
 source: crates/parser/tests/parse.rs
 ---
-ROOT@0..561
-  MODULE@0..560
+ROOT@0..585
+  MODULE@0..584
     L_PAREN@0..1 "("
     KEYWORD@1..7 "module"
     WHITESPACE@7..10 "\n  "
@@ -345,9 +345,21 @@ ROOT@0..561
       ERROR@552..556 "func"
       ERROR@556..557 ")"
       R_PAREN@557..558 ")"
-    WHITESPACE@558..559 "\n"
-    R_PAREN@559..560 ")"
-  WHITESPACE@560..561 "\n"
+    WHITESPACE@558..561 "\n  "
+    MODULE_FIELD_IMPORT@561..582
+      L_PAREN@561..562 "("
+      KEYWORD@562..568 "import"
+      WHITESPACE@568..569 " "
+      MODULE_NAME@569..571
+        STRING@569..571 "\"\""
+      WHITESPACE@571..576 "\n    "
+      ERROR@576..577 "("
+      ERROR@577..578 ")"
+      WHITESPACE@578..581 "\n  "
+      R_PAREN@581..582 ")"
+    WHITESPACE@582..583 "\n"
+    R_PAREN@583..584 ")"
+  WHITESPACE@584..585 "\n"
 
 error: expected import module name
   ┌─ imports-malformed.wat:2:11
@@ -356,12 +368,6 @@ error: expected import module name
   │           ^
 
 error: expected import name
-  ┌─ imports-malformed.wat:2:11
-  │
-2 │   (import ())
-  │           ^
-
-error: expected extern type
   ┌─ imports-malformed.wat:2:11
   │
 2 │   (import ())
@@ -392,12 +398,6 @@ error: expected extern type
   │                ^
 
 error: expected import name
-  ┌─ imports-malformed.wat:5:14
-  │
-5 │   (import "" ())
-  │              ^
-
-error: expected extern type
   ┌─ imports-malformed.wat:5:14
   │
 5 │   (import "" ())
@@ -534,3 +534,15 @@ error: unexpected token
    │
 21 │   (import "" (item "" (func)) (func))
    │                                    ^
+
+error: expected import name
+   ┌─ imports-malformed.wat:23:5
+   │
+23 │     ()
+   │     ^
+
+error: unexpected token
+   ┌─ imports-malformed.wat:23:6
+   │
+23 │     ()
+   │      ^

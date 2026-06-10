@@ -129,6 +129,20 @@ fn memory_type_with_paren() {
 }
 
 #[test]
+fn paren_after_module_name() {
+    let uri = "untitled:test".to_string();
+    let source = r#"
+(import ""
+    ()
+  )
+"#;
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.completion(create_params(uri, 2, 5));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn import_item_with_paren() {
     let uri = "untitled:test".to_string();
     let source = r#"

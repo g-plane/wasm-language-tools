@@ -503,16 +503,27 @@ impl Parser<'_> {
         if !self.retry(Self::parse_module_name) {
             self.report_missing(Message::Name("import module name"));
         }
-        if let Some((import_item, has_extern_type)) =
-            self.try_parse_with_trivias(|parser| parser.parse_import_item(None))
-        {
-            self.add_child(import_item);
-            while let Some((import_item, _)) =
-                self.try_parse_with_trivias(|parser| parser.parse_import_item(Some(has_extern_type)))
+        if self.lexer.peek(L_PAREN).is_some() {
+            let mut has_extern_type_in_item = None;
+            if let Some((import_item, has_extern_type)) =
+                self.try_parse_with_trivias(|parser| parser.parse_import_item(None))
             {
+                has_extern_type_in_item = Some(has_extern_type);
                 self.add_child(import_item);
+                while let Some((import_item, _)) =
+                    self.try_parse_with_trivias(|parser| parser.parse_import_item(has_extern_type_in_item))
+                {
+                    self.add_child(import_item);
+                }
             }
-            if !has_extern_type && !self.retry(|parser| parser.parse_extern_type(false)) {
+            if has_extern_type_in_item.is_none() {
+                // we report missing "import name" instead of "import item" here
+                // because most users are likely using non-compact import
+                self.report_missing(Message::Name("import name"));
+            }
+            if matches!(has_extern_type_in_item, Some(false) | None)
+                && !self.recover(|parser| parser.parse_extern_type(false))
+            {
                 self.report_missing(Message::Name("extern type"));
             }
         } else {
