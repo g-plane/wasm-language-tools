@@ -75,13 +75,22 @@ impl LanguageService {
             if params.content_changes.len() == 1 {
                 match &*params.content_changes {
                     [TextDocumentContentChangeEvent::A(partial)] => {
-                        if partial.text.starts_with(';') {
-                            // user may be typing a comment
+                        if partial.text.bytes().all(is_safe_for_incremental) {
                             break 'single;
                         }
                         let Some(range) = document.line_index(self).convert(partial.range) else {
                             break 'single;
                         };
+                        let mut text = document.text(self);
+                        let old_start = usize::from(range.start());
+                        let old_end = usize::from(range.end());
+                        if text
+                            .as_bytes()
+                            .get(old_start..old_end)
+                            .is_none_or(|bytes| bytes.iter().all(|b| is_safe_for_incremental(*b)))
+                        {
+                            break 'single;
+                        }
                         // search the module field where code is changed
                         let Some(node) = document
                             .root_tree(self)
@@ -95,9 +104,6 @@ impl LanguageService {
                         else {
                             break 'single;
                         };
-                        let mut text = document.text(self);
-                        let old_start = usize::from(range.start());
-                        let old_end = usize::from(range.end());
                         // apply change to source text
                         text.replace_range(old_start..old_end, &partial.text);
                         // parse that module field by specifying offset with changed code
@@ -185,6 +191,14 @@ impl LanguageService {
     pub(crate) fn get_document(&self, uri: impl IntoInternUri) -> Option<Document> {
         self.documents.read().get(&uri.into_intern_uri(self)).copied()
     }
+}
+
+// allows: identifier char + whitespace + non-ASCII
+fn is_safe_for_incremental(b: u8) -> bool {
+    b.is_ascii_alphanumeric()
+        || b.is_ascii_whitespace()
+        || b.is_ascii_punctuation() && !matches!(b, b'"' | b',' | b';' | b'(' | b')' | b'[' | b']' | b'{' | b'}')
+        || !b.is_ascii()
 }
 
 #[cfg(test)]
@@ -1041,5 +1055,126 @@ mod tests {
                 text: "s".into(),
             })],
         });
+    }
+
+    #[test]
+    fn insert_and_delete_right_paren() {
+        let uri = "untitled:test".to_string();
+        let mut service = LanguageService::default();
+        service.commit(
+            &uri,
+            r#"
+(module
+  (import "env" (item "d" (global $x i32)))
+  (func
+    (global.get $x)))
+"#
+            .into(),
+        );
+
+        service.did_change(DidChangeTextDocumentParams {
+            text_document: VersionedTextDocumentIdentifier {
+                uri: uri.clone(),
+                version: 1,
+            },
+            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                range: Range {
+                    start: Position { line: 2, character: 25 },
+                    end: Position { line: 2, character: 25 },
+                },
+                text: ")".into(),
+            })],
+        });
+        let diagnostics = service.pull_diagnostics(DocumentDiagnosticParams {
+            text_document: TextDocumentIdentifier { uri: uri.clone() },
+            identifier: None,
+            previous_result_id: None,
+            work_done_token: None,
+            partial_result_token: None,
+        });
+        assert!(diagnostics.items.iter().any(|diagnostic| {
+            diagnostic
+                .message
+                .contains("identifier is not allowed after import item")
+        }));
+
+        service.did_change(DidChangeTextDocumentParams {
+            text_document: VersionedTextDocumentIdentifier {
+                uri: uri.clone(),
+                version: 1,
+            },
+            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                range: Range {
+                    start: Position { line: 2, character: 43 },
+                    end: Position { line: 2, character: 44 },
+                },
+                text: "".into(),
+            })],
+        });
+        let diagnostics = service.pull_diagnostics(DocumentDiagnosticParams {
+            text_document: TextDocumentIdentifier { uri: uri.clone() },
+            identifier: None,
+            previous_result_id: None,
+            work_done_token: None,
+            partial_result_token: None,
+        });
+        assert!(
+            diagnostics
+                .items
+                .iter()
+                .all(|diagnostic| !diagnostic.message.contains("unexpected token"))
+        );
+
+        service.did_change(DidChangeTextDocumentParams {
+            text_document: VersionedTextDocumentIdentifier {
+                uri: uri.clone(),
+                version: 1,
+            },
+            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                range: Range {
+                    start: Position { line: 2, character: 25 },
+                    end: Position { line: 2, character: 26 },
+                },
+                text: "".into(),
+            })],
+        });
+        let diagnostics = service.pull_diagnostics(DocumentDiagnosticParams {
+            text_document: TextDocumentIdentifier { uri: uri.clone() },
+            identifier: None,
+            previous_result_id: None,
+            work_done_token: None,
+            partial_result_token: None,
+        });
+        assert!(
+            diagnostics
+                .items
+                .iter()
+                .any(|diagnostic| diagnostic.message.contains("expected `)`"))
+        );
+
+        service.did_change(DidChangeTextDocumentParams {
+            text_document: VersionedTextDocumentIdentifier {
+                uri: uri.clone(),
+                version: 1,
+            },
+            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                range: Range {
+                    start: Position { line: 2, character: 42 },
+                    end: Position { line: 2, character: 42 },
+                },
+                text: ")".into(),
+            })],
+        });
+        let diagnostics = service.pull_diagnostics(DocumentDiagnosticParams {
+            text_document: TextDocumentIdentifier { uri: uri.clone() },
+            identifier: None,
+            previous_result_id: None,
+            work_done_token: None,
+            partial_result_token: None,
+        });
+        assert!(diagnostics.items.iter().all(|diagnostic| match &diagnostic.code {
+            Some(Union2::B(code)) => !code.starts_with("syntax"),
+            _ => true,
+        }));
     }
 }
