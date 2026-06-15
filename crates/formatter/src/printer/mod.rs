@@ -198,6 +198,7 @@ pub(crate) fn format_node<'a>(node: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Option<D
         SyntaxKind::LIMITS => Some(format_limits(node, ctx)),
         SyntaxKind::IMPORT => Some(format_import(node, ctx)),
         SyntaxKind::EXPORT => Some(format_export(node, ctx)),
+        SyntaxKind::IMPORT_ITEM => Some(format_import_item(node, ctx)),
         SyntaxKind::EXTERN_TYPE_FUNC => Some(format_extern_type_func(node, ctx)),
         SyntaxKind::EXTERN_TYPE_TABLE => Some(format_extern_type_table(node, ctx)),
         SyntaxKind::EXTERN_TYPE_MEMORY => Some(format_extern_type_memory(node, ctx)),
@@ -232,7 +233,27 @@ pub(crate) fn format_node<'a>(node: AmberNode<'a>, ctx: &'a Ctx<'a>) -> Option<D
         SyntaxKind::TYPE_DEF => Some(format_type_def(node, ctx)),
         SyntaxKind::REC_TYPE => Some(format_rec_type(node, ctx)),
         SyntaxKind::ROOT => Some(format_root(node, ctx)),
-        _ => None,
+        SyntaxKind::WHITESPACE
+        | SyntaxKind::LINE_COMMENT
+        | SyntaxKind::BLOCK_COMMENT
+        | SyntaxKind::L_PAREN
+        | SyntaxKind::R_PAREN
+        | SyntaxKind::KEYWORD
+        | SyntaxKind::INSTR_NAME
+        | SyntaxKind::IDENT
+        | SyntaxKind::STRING
+        | SyntaxKind::INT
+        | SyntaxKind::UNSIGNED_INT
+        | SyntaxKind::FLOAT
+        | SyntaxKind::TYPE_KEYWORD
+        | SyntaxKind::MODIFIER_KEYWORD
+        | SyntaxKind::EQ
+        | SyntaxKind::MEM_ARG_KEYWORD
+        | SyntaxKind::SHAPE_DESCRIPTOR
+        | SyntaxKind::ANNOT_START
+        | SyntaxKind::ANNOT_ELEM
+        | SyntaxKind::ANNOT_END
+        | SyntaxKind::ERROR => None,
     }
 }
 
