@@ -67,22 +67,24 @@ impl<'a> AmberNode<'a> {
     /// Iterator over the child nodes of this node.
     ///
     /// If you want to iterate over both nodes and tokens, use [`children_with_tokens`](Self::children_with_tokens) instead.
-    pub fn children(&self) -> impl DoubleEndedIterator<Item = AmberNode<'a>> + Clone {
-        self.green.slice().iter().filter_map(|child| match child {
-            GreenChild::Node { offset, node } => Some(AmberNode::new(node, self.range.start() + offset)),
+    pub fn children(&self) -> impl DoubleEndedIterator<Item = AmberNode<'a>> + Clone + use<'a> {
+        let start = self.range.start();
+        self.green.slice().iter().filter_map(move |child| match child {
+            GreenChild::Node { offset, node } => Some(AmberNode::new(node, start + offset)),
             GreenChild::Token { .. } => None,
         })
     }
 
     #[inline]
     /// Iterator over specific kinds of child nodes of this node.
-    pub fn children_by_kind<M>(&self, matcher: M) -> impl DoubleEndedIterator<Item = AmberNode<'a>> + use<'_, 'a, M>
+    pub fn children_by_kind<M>(&self, matcher: M) -> impl DoubleEndedIterator<Item = AmberNode<'a>> + use<'a, M>
     where
         M: SyntaxKindMatch,
     {
-        self.green().slice().iter().filter_map(move |child| match child {
+        let start = self.range.start();
+        self.green.slice().iter().filter_map(move |child| match child {
             GreenChild::Node { offset, node } if matcher.matches(node.kind()) => {
-                Some(AmberNode::new(node, self.range.start() + offset))
+                Some(AmberNode::new(node, start + offset))
             }
             _ => None,
         })
@@ -90,13 +92,14 @@ impl<'a> AmberNode<'a> {
 
     #[inline]
     /// Iterator over specific kinds of child tokens of this node.
-    pub fn tokens_by_kind<M>(&self, matcher: M) -> impl DoubleEndedIterator<Item = AmberToken<'a>> + use<'_, 'a, M>
+    pub fn tokens_by_kind<M>(&self, matcher: M) -> impl DoubleEndedIterator<Item = AmberToken<'a>> + use<'a, M>
     where
         M: SyntaxKindMatch,
     {
-        self.green().slice().iter().filter_map(move |child| match child {
+        let start = self.range.start();
+        self.green.slice().iter().filter_map(move |child| match child {
             GreenChild::Token { offset, token } if matcher.matches(token.kind()) => {
-                Some(AmberToken::new(token, self.range.start() + offset))
+                Some(AmberToken::new(token, start + offset))
             }
             _ => None,
         })
@@ -104,10 +107,13 @@ impl<'a> AmberNode<'a> {
 
     #[inline]
     /// Iterator over the child nodes and tokens of this node.
-    pub fn children_with_tokens(&self) -> impl DoubleEndedIterator<Item = NodeOrToken<AmberNode<'a>, AmberToken<'a>>> {
-        self.green.slice().iter().map(|child| match child {
-            GreenChild::Node { offset, node } => AmberNode::new(node, self.range.start() + offset).into(),
-            GreenChild::Token { offset, token } => AmberToken::new(token, self.range.start() + offset).into(),
+    pub fn children_with_tokens(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = NodeOrToken<AmberNode<'a>, AmberToken<'a>>> + Clone + use<'a> {
+        let start = self.range.start();
+        self.green.slice().iter().map(move |child| match child {
+            GreenChild::Node { offset, node } => AmberNode::new(node, start + offset).into(),
+            GreenChild::Token { offset, token } => AmberToken::new(token, start + offset).into(),
         })
     }
 
@@ -124,7 +130,7 @@ impl<'a> AmberNode<'a> {
 
     #[inline]
     pub(crate) fn child_or_token_at(&self, index: usize) -> Option<NodeOrToken<AmberNode<'a>, AmberToken<'a>>> {
-        self.green().slice().get(index).map(|child| match child {
+        self.green.slice().get(index).map(|child| match child {
             GreenChild::Node { offset, node } => AmberNode::new(node, self.range.start() + offset).into(),
             GreenChild::Token { offset, token } => AmberToken::new(token, self.range.start() + offset).into(),
         })
