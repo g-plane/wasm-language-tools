@@ -4,14 +4,14 @@ use crate::{
     helpers::LineIndexExt,
 };
 use lspt::{Location, ReferenceParams};
-use wat_syntax::SyntaxKind;
+use wat_syntax::{SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     /// Handler for `textDocument/references` request.
     pub fn find_references(&self, params: ReferenceParams) -> Option<Vec<Location>> {
         let uri = params.text_document.uri;
         let document = self.get_document(&uri)?;
-        let root = document.root_tree(self);
+        let root = SyntaxNode::new_root(document.root(self));
         let token = super::find_meaningful_token(self, document, &root, params.position)?;
         if !matches!(
             token.kind(),

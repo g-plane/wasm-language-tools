@@ -10,7 +10,7 @@ use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_parser::is_id_char;
 use wat_syntax::{
-    SyntaxKind, SyntaxToken,
+    SyntaxKind, SyntaxNode, SyntaxToken,
     ast::{AstNode, ExternType},
 };
 
@@ -22,7 +22,7 @@ impl LanguageService {
     pub fn prepare_rename(&self, params: PrepareRenameParams) -> Option<PrepareRenameResult> {
         let document = self.get_document(params.text_document.uri)?;
         let line_index = document.line_index(self);
-        let root = document.root_tree(self);
+        let root = SyntaxNode::new_root(document.root(self));
         let token = super::find_meaningful_token(self, document, &root, params.position)
             .filter(|token| token.kind() == SyntaxKind::IDENT)?;
         let range = line_index.convert(token.text_range());
@@ -43,7 +43,8 @@ impl LanguageService {
             return Ok(None);
         };
         // We can't assume client supports "prepareRename" so we need to check the token again.
-        let token = super::find_meaningful_token(self, document, &document.root_tree(self), params.position)
+        let root = SyntaxNode::new_root(document.root(self));
+        let token = super::find_meaningful_token(self, document, &root, params.position)
             .filter(|token| token.kind() == SyntaxKind::IDENT)
             .ok_or_else(|| ERR_CANT_BE_RENAMED.to_owned())?;
         Ok(self.rename_impl(params, document, token))

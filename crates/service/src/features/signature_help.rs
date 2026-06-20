@@ -10,7 +10,7 @@ use lspt::{
 };
 use std::fmt::Write;
 use wat_syntax::{
-    SyntaxKind,
+    SyntaxKind, SyntaxNode,
     ast::{AstNode, Instr, PlainInstr},
 };
 
@@ -20,7 +20,7 @@ impl LanguageService {
         let document = self.get_document(params.text_document.uri)?;
         self.with_db(|db| {
             let line_index = document.line_index(db);
-            let root = document.root_tree(db);
+            let root = SyntaxNode::new_root(document.root(db));
             let symbol_table = SymbolTable::of(db, document);
 
             let token = helpers::syntax::find_token(&root, line_index.convert(params.position)?)?;

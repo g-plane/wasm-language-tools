@@ -22,12 +22,12 @@ use crate::{document::Document, helpers::LineIndexExt};
 use lspt::Position;
 use wat_syntax::{SyntaxNode, SyntaxToken, TokenAtOffset};
 
-fn find_meaningful_token(
+fn find_meaningful_token<'a>(
     db: &dyn salsa::Database,
     document: Document,
-    root: &SyntaxNode,
+    root: &SyntaxNode<'a>,
     position: Position,
-) -> Option<SyntaxToken> {
+) -> Option<SyntaxToken<'a>> {
     let offset = document.line_index(db).convert(position)?;
 
     match root.token_at_offset(offset) {

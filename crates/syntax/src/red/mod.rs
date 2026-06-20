@@ -9,8 +9,8 @@ pub use self::{iter::SyntaxNodeChildren, node::SyntaxNode, ptr::SyntaxNodePtr, t
 
 #[derive(Clone, Debug)]
 /// The result type of [`SyntaxNode::token_at_offset`] method, representing there may be zero, one or two tokens at the given offset.
-pub enum TokenAtOffset {
+pub enum TokenAtOffset<'a> {
     None,
-    Single(SyntaxToken),
-    Between(SyntaxToken, SyntaxToken),
+    Single(SyntaxToken<'a>),
+    Between(SyntaxToken<'a>, SyntaxToken<'a>),
 }

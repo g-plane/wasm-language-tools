@@ -24,7 +24,7 @@ impl LanguageService {
         let document = self.get_document(params.text_document.uri)?;
         self.with_db(|db| {
             let line_index = document.line_index(db);
-            let root = document.root_tree(db);
+            let root = SyntaxNode::new_root(document.root(db));
             let token = helpers::syntax::find_token(&root, line_index.convert(params.position)?)?;
 
             let cmp_ctx = get_cmp_ctx(&token)?;
@@ -1428,7 +1428,7 @@ fn is_l_paren(token: &SyntaxToken) -> bool {
     kind == SyntaxKind::L_PAREN || kind == SyntaxKind::ERROR && token.text() == "("
 }
 
-fn get_instr_name(node: &SyntaxNode) -> Option<&str> {
+fn get_instr_name<'a>(node: &SyntaxNode<'a>) -> Option<&'a str> {
     node.green().children().find_map(|node_or_token| match node_or_token {
         NodeOrToken::Token(token) if token.kind() == SyntaxKind::INSTR_NAME => Some(token.text()),
         _ => None,

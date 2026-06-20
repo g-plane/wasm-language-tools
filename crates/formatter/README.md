@@ -42,7 +42,7 @@ use wat_syntax::{SyntaxNode, TextRange, TextSize, ast::{AstNode, Root}};
 let input = "( module ( func ) )";
 let line_index = LineIndex::new(input);
 let (tree, _) = wat_parser::parse(input);
-let root = Root::cast(SyntaxNode::new_root(tree)).unwrap();
+let root = Root::cast(SyntaxNode::new_root(&tree)).unwrap();
 let (formatted, range) = format_range(
     &root,
     &Default::default(),

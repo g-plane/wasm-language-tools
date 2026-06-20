@@ -31,7 +31,7 @@ impl SyntaxNodePtr {
 
     #[inline]
     /// Resolve this pointer to a [`SyntaxNode`](crate::SyntaxNode) under the given ancestor node.
-    pub fn to_node(&self, ancestor: &SyntaxNode) -> Option<SyntaxNode> {
+    pub fn to_node<'a>(&self, ancestor: &SyntaxNode<'a>) -> Option<SyntaxNode<'a>> {
         std::iter::successors(Some(ancestor.clone()), |node| node.child_at_range(self.range))
             .find(|it| it.text_range() == self.range && it.kind() == self.kind)
     }

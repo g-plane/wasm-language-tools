@@ -10,13 +10,13 @@ use crate::{
 };
 use rustc_hash::FxHashMap;
 use wat_syntax::{
-    TextRange,
+    SyntaxNode, TextRange,
     ast::{AstNode, CompType, ModuleField, Root, TypeDef},
 };
 
 #[salsa::tracked(returns(ref))]
 pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> DefTypes<'_> {
-    let root = document.root_tree(db);
+    let root = SyntaxNode::new_root(document.root(db));
     let symbol_table = SymbolTable::of(db, document);
     symbol_table
         .symbols
@@ -176,7 +176,7 @@ impl<'db> CompositeType<'db> {
 
 #[salsa::tracked(returns(ref))]
 pub(crate) fn get_rec_type_groups(db: &dyn salsa::Database, document: Document) -> Vec<RecTypeGroup> {
-    let root = Root::cast(document.root_tree(db)).expect("expected root tree");
+    let root = Root::cast(SyntaxNode::new_root(document.root(db))).expect("expected root tree");
     let symbol_table = SymbolTable::of(db, document);
     root.modules()
         .flat_map(|module| module.module_fields())

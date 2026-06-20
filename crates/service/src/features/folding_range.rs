@@ -1,6 +1,6 @@
 use crate::{LanguageService, helpers::LineIndexExt};
 use lspt::{FoldingRange, FoldingRangeKind, FoldingRangeParams};
-use wat_syntax::{SyntaxKind, ast::support};
+use wat_syntax::{SyntaxKind, SyntaxNode, ast::support};
 
 impl LanguageService {
     /// Handler for `textDocument/foldingRange` request.
@@ -8,8 +8,8 @@ impl LanguageService {
         let document = self.get_document(params.text_document.uri)?;
         self.with_db(|db| {
             let line_index = document.line_index(db);
-            let root = document.root_tree(db);
-            root.descendants()
+            SyntaxNode::new_root(document.root(db))
+                .descendants()
                 .filter_map(|node| {
                     support::token(&node, SyntaxKind::KEYWORD)
                         .or_else(|| support::token(&node, SyntaxKind::L_PAREN))?;

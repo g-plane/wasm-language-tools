@@ -1,9 +1,9 @@
 use crate::{NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken, TokenAtOffset};
 use text_size::{TextRange, TextSize};
 
-pub(crate) type SyntaxElement = NodeOrToken<SyntaxNode, SyntaxToken>;
+pub(crate) type SyntaxElement<'a> = NodeOrToken<SyntaxNode<'a>, SyntaxToken<'a>>;
 
-impl SyntaxElement {
+impl<'a> SyntaxElement<'a> {
     #[inline]
     pub fn kind(&self) -> SyntaxKind {
         match self {
@@ -21,7 +21,7 @@ impl SyntaxElement {
     }
 
     #[inline]
-    pub(crate) fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset {
+    pub(crate) fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset<'a> {
         match self {
             NodeOrToken::Node(node) => node.token_at_offset(offset),
             NodeOrToken::Token(token) => TokenAtOffset::Single(token.clone()),
@@ -29,15 +29,15 @@ impl SyntaxElement {
     }
 }
 
-impl From<SyntaxNode> for SyntaxElement {
+impl<'a> From<SyntaxNode<'a>> for SyntaxElement<'a> {
     #[inline]
-    fn from(node: SyntaxNode) -> Self {
+    fn from(node: SyntaxNode<'a>) -> Self {
         NodeOrToken::Node(node)
     }
 }
-impl From<SyntaxToken> for SyntaxElement {
+impl<'a> From<SyntaxToken<'a>> for SyntaxElement<'a> {
     #[inline]
-    fn from(token: SyntaxToken) -> Self {
+    fn from(token: SyntaxToken<'a>) -> Self {
         NodeOrToken::Token(token)
     }
 }

@@ -7,28 +7,28 @@ use super::{
 use crate::{SyntaxKind, SyntaxNode, SyntaxToken};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Data {
-    syntax: SyntaxNode,
+pub struct Data<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl Data {
+impl<'a> Data<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn string_tokens(&self) -> impl Iterator<Item = SyntaxToken> {
+    pub fn string_tokens(&self) -> impl Iterator<Item = SyntaxToken<'a>> {
         self.syntax.tokens_by_kind(SyntaxKind::STRING)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for Data {
+impl<'a> AstNode<'a> for Data<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -37,7 +37,7 @@ impl AstNode for Data {
         kind == SyntaxKind::DATA
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -48,38 +48,38 @@ impl AstNode for Data {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Elem {
-    syntax: SyntaxNode,
+pub struct Elem<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl Elem {
+impl<'a> Elem<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn elem_exprs(&self) -> AstChildren<ElemExpr> {
+    pub fn elem_exprs(&self) -> AstChildren<'a, ElemExpr<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn indexes(&self) -> AstChildren<Index> {
+    pub fn indexes(&self) -> AstChildren<'a, Index<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for Elem {
+impl<'a> AstNode<'a> for Elem<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -88,7 +88,7 @@ impl AstNode for Elem {
         kind == SyntaxKind::ELEM
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -99,34 +99,34 @@ impl AstNode for Elem {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ElemExpr {
-    syntax: SyntaxNode,
+pub struct ElemExpr<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ElemExpr {
+impl<'a> ElemExpr<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn instrs(&self) -> AstChildren<Instr> {
+    pub fn instrs(&self) -> AstChildren<'a, Instr<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ElemExpr {
+impl<'a> AstNode<'a> for ElemExpr<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -135,7 +135,7 @@ impl AstNode for ElemExpr {
         kind == SyntaxKind::ELEM_EXPR
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -146,34 +146,34 @@ impl AstNode for ElemExpr {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ElemList {
-    syntax: SyntaxNode,
+pub struct ElemList<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ElemList {
+impl<'a> ElemList<'a> {
     #[inline]
-    pub fn func_keyword(&self) -> Option<SyntaxToken> {
+    pub fn func_keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn indexes(&self) -> AstChildren<Index> {
+    pub fn indexes(&self) -> AstChildren<'a, Index<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn ref_type(&self) -> Option<RefType> {
+    pub fn ref_type(&self) -> Option<RefType<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn elem_exprs(&self) -> AstChildren<ElemExpr> {
+    pub fn elem_exprs(&self) -> AstChildren<'a, ElemExpr<'a>> {
         children(&self.syntax)
     }
 }
-impl AstNode for ElemList {
+impl<'a> AstNode<'a> for ElemList<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -182,7 +182,7 @@ impl AstNode for ElemList {
         kind == SyntaxKind::ELEM_LIST
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -193,34 +193,34 @@ impl AstNode for ElemList {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Export {
-    syntax: SyntaxNode,
+pub struct Export<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl Export {
+impl<'a> Export<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn name(&self) -> Option<Name> {
+    pub fn name(&self) -> Option<Name<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for Export {
+impl<'a> AstNode<'a> for Export<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -229,7 +229,7 @@ impl AstNode for Export {
         kind == SyntaxKind::EXPORT
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -240,20 +240,20 @@ impl AstNode for Export {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum ExternIdx {
-    Func(ExternIdxFunc),
-    Global(ExternIdxGlobal),
-    Memory(ExternIdxMemory),
-    Table(ExternIdxTable),
-    Tag(ExternIdxTag),
+pub enum ExternIdx<'a> {
+    Func(ExternIdxFunc<'a>),
+    Global(ExternIdxGlobal<'a>),
+    Memory(ExternIdxMemory<'a>),
+    Table(ExternIdxTable<'a>),
+    Tag(ExternIdxTag<'a>),
 }
-impl AstNode for ExternIdx {
+impl<'a> AstNode<'a> for ExternIdx<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -269,7 +269,7 @@ impl AstNode for ExternIdx {
         )
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -283,7 +283,7 @@ impl AstNode for ExternIdx {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         match self {
             ExternIdx::Func(it) => it.syntax(),
             ExternIdx::Global(it) => it.syntax(),
@@ -295,28 +295,28 @@ impl AstNode for ExternIdx {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ExternIdxFunc {
-    syntax: SyntaxNode,
+pub struct ExternIdxFunc<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ExternIdxFunc {
+impl<'a> ExternIdxFunc<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn index(&self) -> Option<Index> {
+    pub fn index(&self) -> Option<Index<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ExternIdxFunc {
+impl<'a> AstNode<'a> for ExternIdxFunc<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -325,7 +325,7 @@ impl AstNode for ExternIdxFunc {
         kind == SyntaxKind::EXTERN_IDX_FUNC
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -336,34 +336,34 @@ impl AstNode for ExternIdxFunc {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ExternIdxGlobal {
-    syntax: SyntaxNode,
+pub struct ExternIdxGlobal<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ExternIdxGlobal {
+impl<'a> ExternIdxGlobal<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn index(&self) -> Option<Index> {
+    pub fn index(&self) -> Option<Index<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ExternIdxGlobal {
+impl<'a> AstNode<'a> for ExternIdxGlobal<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -372,7 +372,7 @@ impl AstNode for ExternIdxGlobal {
         kind == SyntaxKind::EXTERN_IDX_GLOBAL
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -383,34 +383,34 @@ impl AstNode for ExternIdxGlobal {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ExternIdxMemory {
-    syntax: SyntaxNode,
+pub struct ExternIdxMemory<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ExternIdxMemory {
+impl<'a> ExternIdxMemory<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn index(&self) -> Option<Index> {
+    pub fn index(&self) -> Option<Index<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ExternIdxMemory {
+impl<'a> AstNode<'a> for ExternIdxMemory<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -419,7 +419,7 @@ impl AstNode for ExternIdxMemory {
         kind == SyntaxKind::EXTERN_IDX_MEMORY
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -430,34 +430,34 @@ impl AstNode for ExternIdxMemory {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ExternIdxTable {
-    syntax: SyntaxNode,
+pub struct ExternIdxTable<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ExternIdxTable {
+impl<'a> ExternIdxTable<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn index(&self) -> Option<Index> {
+    pub fn index(&self) -> Option<Index<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ExternIdxTable {
+impl<'a> AstNode<'a> for ExternIdxTable<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -466,7 +466,7 @@ impl AstNode for ExternIdxTable {
         kind == SyntaxKind::EXTERN_IDX_TABLE
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -477,34 +477,34 @@ impl AstNode for ExternIdxTable {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ExternIdxTag {
-    syntax: SyntaxNode,
+pub struct ExternIdxTag<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ExternIdxTag {
+impl<'a> ExternIdxTag<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn index(&self) -> Option<Index> {
+    pub fn index(&self) -> Option<Index<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ExternIdxTag {
+impl<'a> AstNode<'a> for ExternIdxTag<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -513,7 +513,7 @@ impl AstNode for ExternIdxTag {
         kind == SyntaxKind::EXTERN_IDX_TAG
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -524,38 +524,38 @@ impl AstNode for ExternIdxTag {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Import {
-    syntax: SyntaxNode,
+pub struct Import<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl Import {
+impl<'a> Import<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn module_name(&self) -> Option<ModuleName> {
+    pub fn module_name(&self) -> Option<ModuleName<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn name(&self) -> Option<Name> {
+    pub fn name(&self) -> Option<Name<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for Import {
+impl<'a> AstNode<'a> for Import<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -564,7 +564,7 @@ impl AstNode for Import {
         kind == SyntaxKind::IMPORT
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -575,38 +575,38 @@ impl AstNode for Import {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ImportItem {
-    syntax: SyntaxNode,
+pub struct ImportItem<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ImportItem {
+impl<'a> ImportItem<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn name(&self) -> Option<Name> {
+    pub fn name(&self) -> Option<Name<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn extern_type(&self) -> Option<ExternType> {
+    pub fn extern_type(&self) -> Option<ExternType<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ImportItem {
+impl<'a> AstNode<'a> for ImportItem<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -615,7 +615,7 @@ impl AstNode for ImportItem {
         kind == SyntaxKind::IMPORT_ITEM
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -626,26 +626,26 @@ impl AstNode for ImportItem {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Index {
-    syntax: SyntaxNode,
+pub struct Index<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl Index {
+impl<'a> Index<'a> {
     #[inline]
-    pub fn ident_token(&self) -> Option<SyntaxToken> {
+    pub fn ident_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn unsigned_int_token(&self) -> Option<SyntaxToken> {
+    pub fn unsigned_int_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::UNSIGNED_INT)
     }
 }
-impl AstNode for Index {
+impl<'a> AstNode<'a> for Index<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -654,7 +654,7 @@ impl AstNode for Index {
         kind == SyntaxKind::INDEX
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -665,38 +665,38 @@ impl AstNode for Index {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Local {
-    syntax: SyntaxNode,
+pub struct Local<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl Local {
+impl<'a> Local<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn ident_token(&self) -> Option<SyntaxToken> {
+    pub fn ident_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn val_types(&self) -> AstChildren<ValType> {
+    pub fn val_types(&self) -> AstChildren<'a, ValType<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for Local {
+impl<'a> AstNode<'a> for Local<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -705,7 +705,7 @@ impl AstNode for Local {
         kind == SyntaxKind::LOCAL
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -716,34 +716,34 @@ impl AstNode for Local {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct MemUse {
-    syntax: SyntaxNode,
+pub struct MemUse<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl MemUse {
+impl<'a> MemUse<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn index(&self) -> Option<Index> {
+    pub fn index(&self) -> Option<Index<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for MemUse {
+impl<'a> AstNode<'a> for MemUse<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -752,7 +752,7 @@ impl AstNode for MemUse {
         kind == SyntaxKind::MEM_USE
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -763,38 +763,38 @@ impl AstNode for MemUse {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Module {
-    syntax: SyntaxNode,
+pub struct Module<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl Module {
+impl<'a> Module<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn ident_token(&self) -> Option<SyntaxToken> {
+    pub fn ident_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn module_fields(&self) -> AstChildren<ModuleField> {
+    pub fn module_fields(&self) -> AstChildren<'a, ModuleField<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for Module {
+impl<'a> AstNode<'a> for Module<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -803,7 +803,7 @@ impl AstNode for Module {
         kind == SyntaxKind::MODULE
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -814,27 +814,27 @@ impl AstNode for Module {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum ModuleField {
-    Data(ModuleFieldData),
-    Elem(ModuleFieldElem),
-    Export(ModuleFieldExport),
-    Func(ModuleFieldFunc),
-    Global(ModuleFieldGlobal),
-    Import(ModuleFieldImport),
-    Memory(ModuleFieldMemory),
-    Start(ModuleFieldStart),
-    Table(ModuleFieldTable),
-    Tag(ModuleFieldTag),
-    Type(TypeDef),
-    RecType(RecType),
+pub enum ModuleField<'a> {
+    Data(ModuleFieldData<'a>),
+    Elem(ModuleFieldElem<'a>),
+    Export(ModuleFieldExport<'a>),
+    Func(ModuleFieldFunc<'a>),
+    Global(ModuleFieldGlobal<'a>),
+    Import(ModuleFieldImport<'a>),
+    Memory(ModuleFieldMemory<'a>),
+    Start(ModuleFieldStart<'a>),
+    Table(ModuleFieldTable<'a>),
+    Tag(ModuleFieldTag<'a>),
+    Type(TypeDef<'a>),
+    RecType(RecType<'a>),
 }
-impl AstNode for ModuleField {
+impl<'a> AstNode<'a> for ModuleField<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -857,7 +857,7 @@ impl AstNode for ModuleField {
         )
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -878,7 +878,7 @@ impl AstNode for ModuleField {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         match self {
             ModuleField::Data(it) => it.syntax(),
             ModuleField::Elem(it) => it.syntax(),
@@ -897,40 +897,40 @@ impl AstNode for ModuleField {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ModuleFieldData {
-    syntax: SyntaxNode,
+pub struct ModuleFieldData<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ModuleFieldData {
+impl<'a> ModuleFieldData<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn ident_token(&self) -> Option<SyntaxToken> {
+    pub fn ident_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn mem_use(&self) -> Option<MemUse> {
+    pub fn mem_use(&self) -> Option<MemUse<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn offset(&self) -> Option<Offset> {
+    pub fn offset(&self) -> Option<Offset<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn string_tokens(&self) -> impl Iterator<Item = SyntaxToken> {
+    pub fn string_tokens(&self) -> impl Iterator<Item = SyntaxToken<'a>> {
         self.syntax.tokens_by_kind(SyntaxKind::STRING)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ModuleFieldData {
+impl<'a> AstNode<'a> for ModuleFieldData<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -939,7 +939,7 @@ impl AstNode for ModuleFieldData {
         kind == SyntaxKind::MODULE_FIELD_DATA
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -950,50 +950,50 @@ impl AstNode for ModuleFieldData {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ModuleFieldElem {
-    syntax: SyntaxNode,
+pub struct ModuleFieldElem<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ModuleFieldElem {
+impl<'a> ModuleFieldElem<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn ident_token(&self) -> Option<SyntaxToken> {
+    pub fn ident_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn declare_keyword(&self) -> Option<SyntaxToken> {
+    pub fn declare_keyword(&self) -> Option<SyntaxToken<'a>> {
         self.syntax.tokens_by_kind(SyntaxKind::MODIFIER_KEYWORD).next()
     }
     #[inline]
-    pub fn table_use(&self) -> Option<TableUse> {
+    pub fn table_use(&self) -> Option<TableUse<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn offset(&self) -> Option<Offset> {
+    pub fn offset(&self) -> Option<Offset<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn elem_list(&self) -> Option<ElemList> {
+    pub fn elem_list(&self) -> Option<ElemList<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ModuleFieldElem {
+impl<'a> AstNode<'a> for ModuleFieldElem<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1002,7 +1002,7 @@ impl AstNode for ModuleFieldElem {
         kind == SyntaxKind::MODULE_FIELD_ELEM
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -1013,38 +1013,38 @@ impl AstNode for ModuleFieldElem {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ModuleFieldExport {
-    syntax: SyntaxNode,
+pub struct ModuleFieldExport<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ModuleFieldExport {
+impl<'a> ModuleFieldExport<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn name(&self) -> Option<Name> {
+    pub fn name(&self) -> Option<Name<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn extern_idx(&self) -> Option<ExternIdx> {
+    pub fn extern_idx(&self) -> Option<ExternIdx<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ModuleFieldExport {
+impl<'a> AstNode<'a> for ModuleFieldExport<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1053,7 +1053,7 @@ impl AstNode for ModuleFieldExport {
         kind == SyntaxKind::MODULE_FIELD_EXPORT
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -1064,54 +1064,54 @@ impl AstNode for ModuleFieldExport {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ModuleFieldFunc {
-    syntax: SyntaxNode,
+pub struct ModuleFieldFunc<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ModuleFieldFunc {
+impl<'a> ModuleFieldFunc<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn ident_token(&self) -> Option<SyntaxToken> {
+    pub fn ident_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn exports(&self) -> AstChildren<Export> {
+    pub fn exports(&self) -> AstChildren<'a, Export<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn import(&self) -> Option<Import> {
+    pub fn import(&self) -> Option<Import<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn type_use(&self) -> Option<TypeUse> {
+    pub fn type_use(&self) -> Option<TypeUse<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn locals(&self) -> AstChildren<Local> {
+    pub fn locals(&self) -> AstChildren<'a, Local<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn instrs(&self) -> AstChildren<Instr> {
+    pub fn instrs(&self) -> AstChildren<'a, Instr<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ModuleFieldFunc {
+impl<'a> AstNode<'a> for ModuleFieldFunc<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1120,7 +1120,7 @@ impl AstNode for ModuleFieldFunc {
         kind == SyntaxKind::MODULE_FIELD_FUNC
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -1131,50 +1131,50 @@ impl AstNode for ModuleFieldFunc {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ModuleFieldGlobal {
-    syntax: SyntaxNode,
+pub struct ModuleFieldGlobal<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ModuleFieldGlobal {
+impl<'a> ModuleFieldGlobal<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn ident_token(&self) -> Option<SyntaxToken> {
+    pub fn ident_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn exports(&self) -> AstChildren<Export> {
+    pub fn exports(&self) -> AstChildren<'a, Export<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn import(&self) -> Option<Import> {
+    pub fn import(&self) -> Option<Import<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn global_type(&self) -> Option<GlobalType> {
+    pub fn global_type(&self) -> Option<GlobalType<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn instrs(&self) -> AstChildren<Instr> {
+    pub fn instrs(&self) -> AstChildren<'a, Instr<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ModuleFieldGlobal {
+impl<'a> AstNode<'a> for ModuleFieldGlobal<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1183,7 +1183,7 @@ impl AstNode for ModuleFieldGlobal {
         kind == SyntaxKind::MODULE_FIELD_GLOBAL
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -1194,46 +1194,46 @@ impl AstNode for ModuleFieldGlobal {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ModuleFieldImport {
-    syntax: SyntaxNode,
+pub struct ModuleFieldImport<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ModuleFieldImport {
+impl<'a> ModuleFieldImport<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn module_name(&self) -> Option<ModuleName> {
+    pub fn module_name(&self) -> Option<ModuleName<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn name(&self) -> Option<Name> {
+    pub fn name(&self) -> Option<Name<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn import_items(&self) -> AstChildren<ImportItem> {
+    pub fn import_items(&self) -> AstChildren<'a, ImportItem<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn extern_type(&self) -> Option<ExternType> {
+    pub fn extern_type(&self) -> Option<ExternType<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ModuleFieldImport {
+impl<'a> AstNode<'a> for ModuleFieldImport<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1242,7 +1242,7 @@ impl AstNode for ModuleFieldImport {
         kind == SyntaxKind::MODULE_FIELD_IMPORT
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -1253,50 +1253,50 @@ impl AstNode for ModuleFieldImport {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ModuleFieldMemory {
-    syntax: SyntaxNode,
+pub struct ModuleFieldMemory<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ModuleFieldMemory {
+impl<'a> ModuleFieldMemory<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn ident_token(&self) -> Option<SyntaxToken> {
+    pub fn ident_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn exports(&self) -> AstChildren<Export> {
+    pub fn exports(&self) -> AstChildren<'a, Export<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn import(&self) -> Option<Import> {
+    pub fn import(&self) -> Option<Import<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn mem_type(&self) -> Option<MemType> {
+    pub fn mem_type(&self) -> Option<MemType<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn data(&self) -> Option<Data> {
+    pub fn data(&self) -> Option<Data<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ModuleFieldMemory {
+impl<'a> AstNode<'a> for ModuleFieldMemory<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1305,7 +1305,7 @@ impl AstNode for ModuleFieldMemory {
         kind == SyntaxKind::MODULE_FIELD_MEMORY
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -1316,34 +1316,34 @@ impl AstNode for ModuleFieldMemory {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ModuleFieldStart {
-    syntax: SyntaxNode,
+pub struct ModuleFieldStart<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ModuleFieldStart {
+impl<'a> ModuleFieldStart<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn index(&self) -> Option<Index> {
+    pub fn index(&self) -> Option<Index<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ModuleFieldStart {
+impl<'a> AstNode<'a> for ModuleFieldStart<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1352,7 +1352,7 @@ impl AstNode for ModuleFieldStart {
         kind == SyntaxKind::MODULE_FIELD_START
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -1363,58 +1363,58 @@ impl AstNode for ModuleFieldStart {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ModuleFieldTable {
-    syntax: SyntaxNode,
+pub struct ModuleFieldTable<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ModuleFieldTable {
+impl<'a> ModuleFieldTable<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn ident_token(&self) -> Option<SyntaxToken> {
+    pub fn ident_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn exports(&self) -> AstChildren<Export> {
+    pub fn exports(&self) -> AstChildren<'a, Export<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn import(&self) -> Option<Import> {
+    pub fn import(&self) -> Option<Import<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn table_type(&self) -> Option<TableType> {
+    pub fn table_type(&self) -> Option<TableType<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn ref_type(&self) -> Option<RefType> {
+    pub fn ref_type(&self) -> Option<RefType<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn elem(&self) -> Option<Elem> {
+    pub fn elem(&self) -> Option<Elem<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn instrs(&self) -> AstChildren<Instr> {
+    pub fn instrs(&self) -> AstChildren<'a, Instr<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ModuleFieldTable {
+impl<'a> AstNode<'a> for ModuleFieldTable<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1423,7 +1423,7 @@ impl AstNode for ModuleFieldTable {
         kind == SyntaxKind::MODULE_FIELD_TABLE
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -1434,46 +1434,46 @@ impl AstNode for ModuleFieldTable {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ModuleFieldTag {
-    syntax: SyntaxNode,
+pub struct ModuleFieldTag<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ModuleFieldTag {
+impl<'a> ModuleFieldTag<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn ident_token(&self) -> Option<SyntaxToken> {
+    pub fn ident_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn exports(&self) -> AstChildren<Export> {
+    pub fn exports(&self) -> AstChildren<'a, Export<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn import(&self) -> Option<Import> {
+    pub fn import(&self) -> Option<Import<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn type_use(&self) -> Option<TypeUse> {
+    pub fn type_use(&self) -> Option<TypeUse<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for ModuleFieldTag {
+impl<'a> AstNode<'a> for ModuleFieldTag<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1482,7 +1482,7 @@ impl AstNode for ModuleFieldTag {
         kind == SyntaxKind::MODULE_FIELD_TAG
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -1493,22 +1493,22 @@ impl AstNode for ModuleFieldTag {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ModuleName {
-    syntax: SyntaxNode,
+pub struct ModuleName<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl ModuleName {
+impl<'a> ModuleName<'a> {
     #[inline]
-    pub fn string_token(&self) -> Option<SyntaxToken> {
+    pub fn string_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::STRING)
     }
 }
-impl AstNode for ModuleName {
+impl<'a> AstNode<'a> for ModuleName<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1517,7 +1517,7 @@ impl AstNode for ModuleName {
         kind == SyntaxKind::MODULE_NAME
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -1528,22 +1528,22 @@ impl AstNode for ModuleName {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Name {
-    syntax: SyntaxNode,
+pub struct Name<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl Name {
+impl<'a> Name<'a> {
     #[inline]
-    pub fn string_token(&self) -> Option<SyntaxToken> {
+    pub fn string_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::STRING)
     }
 }
-impl AstNode for Name {
+impl<'a> AstNode<'a> for Name<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1552,7 +1552,7 @@ impl AstNode for Name {
         kind == SyntaxKind::NAME
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -1563,34 +1563,34 @@ impl AstNode for Name {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Offset {
-    syntax: SyntaxNode,
+pub struct Offset<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl Offset {
+impl<'a> Offset<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn instrs(&self) -> AstChildren<Instr> {
+    pub fn instrs(&self) -> AstChildren<'a, Instr<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for Offset {
+impl<'a> AstNode<'a> for Offset<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1599,7 +1599,7 @@ impl AstNode for Offset {
         kind == SyntaxKind::OFFSET
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -1610,34 +1610,34 @@ impl AstNode for Offset {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct RecType {
-    syntax: SyntaxNode,
+pub struct RecType<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl RecType {
+impl<'a> RecType<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn type_defs(&self) -> AstChildren<TypeDef> {
+    pub fn type_defs(&self) -> AstChildren<'a, TypeDef<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for RecType {
+impl<'a> AstNode<'a> for RecType<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1646,7 +1646,7 @@ impl AstNode for RecType {
         kind == SyntaxKind::REC_TYPE
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -1657,34 +1657,34 @@ impl AstNode for RecType {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct TableUse {
-    syntax: SyntaxNode,
+pub struct TableUse<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl TableUse {
+impl<'a> TableUse<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn index(&self) -> Option<Index> {
+    pub fn index(&self) -> Option<Index<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for TableUse {
+impl<'a> AstNode<'a> for TableUse<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1693,7 +1693,7 @@ impl AstNode for TableUse {
         kind == SyntaxKind::TABLE_USE
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -1704,38 +1704,38 @@ impl AstNode for TableUse {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct TypeDef {
-    syntax: SyntaxNode,
+pub struct TypeDef<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl TypeDef {
+impl<'a> TypeDef<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn ident_token(&self) -> Option<SyntaxToken> {
+    pub fn ident_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::IDENT)
     }
     #[inline]
-    pub fn sub_type(&self) -> Option<SubType> {
+    pub fn sub_type(&self) -> Option<SubType<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
 }
-impl AstNode for TypeDef {
+impl<'a> AstNode<'a> for TypeDef<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1744,7 +1744,7 @@ impl AstNode for TypeDef {
         kind == SyntaxKind::TYPE_DEF
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -1755,42 +1755,42 @@ impl AstNode for TypeDef {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct TypeUse {
-    syntax: SyntaxNode,
+pub struct TypeUse<'a> {
+    syntax: SyntaxNode<'a>,
 }
-impl TypeUse {
+impl<'a> TypeUse<'a> {
     #[inline]
-    pub fn l_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn l_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::L_PAREN)
     }
     #[inline]
-    pub fn keyword(&self) -> Option<SyntaxToken> {
+    pub fn keyword(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::KEYWORD)
     }
     #[inline]
-    pub fn index(&self) -> Option<Index> {
+    pub fn index(&self) -> Option<Index<'a>> {
         child(&self.syntax)
     }
     #[inline]
-    pub fn r_paren_token(&self) -> Option<SyntaxToken> {
+    pub fn r_paren_token(&self) -> Option<SyntaxToken<'a>> {
         token(&self.syntax, SyntaxKind::R_PAREN)
     }
     #[inline]
-    pub fn params(&self) -> AstChildren<Param> {
+    pub fn params(&self) -> AstChildren<'a, Param<'a>> {
         children(&self.syntax)
     }
     #[inline]
-    pub fn results(&self) -> AstChildren<Result> {
+    pub fn results(&self) -> AstChildren<'a, Result<'a>> {
         children(&self.syntax)
     }
 }
-impl AstNode for TypeUse {
+impl<'a> AstNode<'a> for TypeUse<'a> {
     #[inline]
     fn can_cast(kind: SyntaxKind) -> bool
     where
@@ -1799,7 +1799,7 @@ impl AstNode for TypeUse {
         kind == SyntaxKind::TYPE_USE
     }
     #[inline]
-    fn cast(syntax: SyntaxNode) -> Option<Self>
+    fn cast(syntax: SyntaxNode<'a>) -> Option<Self>
     where
         Self: Sized,
     {
@@ -1810,7 +1810,7 @@ impl AstNode for TypeUse {
         }
     }
     #[inline]
-    fn syntax(&self) -> &SyntaxNode {
+    fn syntax(&self) -> &SyntaxNode<'a> {
         &self.syntax
     }
 }

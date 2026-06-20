@@ -1,20 +1,20 @@
 use crate::SyntaxNode;
 use std::iter::FusedIterator;
 
-pub(crate) struct Descendants {
-    start: SyntaxNode,
-    next: Option<SyntaxNode>,
+pub(crate) struct Descendants<'a> {
+    start: SyntaxNode<'a>,
+    next: Option<SyntaxNode<'a>>,
     child_entered: bool,
 }
-impl Descendants {
-    pub(crate) fn new(start: SyntaxNode) -> Self {
+impl<'a> Descendants<'a> {
+    pub(crate) fn new(start: SyntaxNode<'a>) -> Self {
         Self {
             start: start.clone(),
             next: Some(start),
             child_entered: false,
         }
     }
-    fn exit_parent(&self, current: &SyntaxNode) -> Option<SyntaxNode> {
+    fn exit_parent(&self, current: &SyntaxNode<'a>) -> Option<SyntaxNode<'a>> {
         let mut parent = current.parent();
         while let Some(p) = parent
             && p != self.start
@@ -28,8 +28,8 @@ impl Descendants {
         None
     }
 }
-impl Iterator for Descendants {
-    type Item = SyntaxNode;
+impl<'a> Iterator for Descendants<'a> {
+    type Item = SyntaxNode<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         self.next.take().inspect(|next| {
             if let Some(child) = next.children().next() {
@@ -42,4 +42,4 @@ impl Iterator for Descendants {
         })
     }
 }
-impl FusedIterator for Descendants {}
+impl FusedIterator for Descendants<'_> {}

@@ -11,7 +11,7 @@ use wat_syntax::{
 
 #[salsa::tracked(returns(ref))]
 pub fn analyze(db: &dyn salsa::Database, document: Document, ptr: SyntaxNodePtr) -> ControlFlowGraph {
-    let root = document.root_tree(db);
+    let root = SyntaxNode::new_root(document.root(db));
     Builder::new(db, document).build(ptr.to_node(&root).expect("invalid ptr in control flow analysis"))
 }
 
@@ -241,7 +241,7 @@ impl<'db> Builder<'db> {
         }
     }
 
-    fn find_jump_target<N: AstNode>(&self, node: N) -> Option<NodeIndex> {
+    fn find_jump_target<'a, N: AstNode<'a>>(&self, node: N) -> Option<NodeIndex> {
         self.symbol_table
             .symbols
             .get(&SymbolKey::new(node.syntax()))

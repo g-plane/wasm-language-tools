@@ -18,15 +18,10 @@ pub(crate) struct Document {
     pub text: String,
     #[returns(ref)]
     pub line_index: LineIndex,
+    #[returns(ref)]
     pub root: GreenNode,
     #[returns(ref)]
     pub syntax_errors: Vec<wat_parser::SyntaxError>,
-}
-
-impl Document {
-    pub(crate) fn root_tree(self, db: &dyn salsa::Database) -> SyntaxNode {
-        SyntaxNode::new_root(self.root(db))
-    }
 }
 
 impl LanguageService {
@@ -92,8 +87,7 @@ impl LanguageService {
                             break 'single;
                         }
                         // search the module field where code is changed
-                        let Some(node) = document
-                            .root_tree(self)
+                        let Some(node) = SyntaxNode::new_root(document.root(self))
                             .children()
                             .find(|module| module.text_range().contains_range(range))
                             .and_then(|module| module.child_at_range(range))
@@ -113,6 +107,7 @@ impl LanguageService {
                         else {
                             break 'single;
                         };
+                        let replaced_root = node.replace_with(green);
 
                         let mut all_errors = document.syntax_errors(self).clone();
                         all_errors.retain_mut(|error| {
@@ -137,7 +132,7 @@ impl LanguageService {
                         let line_index = LineIndex::new(&text);
                         document.set_text(self).to(text);
                         document.set_line_index(self).to(line_index);
-                        document.set_root(self).to(node.replace_with(green));
+                        document.set_root(self).to(replaced_root);
                         document.set_syntax_errors(self).to(all_errors);
                     }
                     [TextDocumentContentChangeEvent::B(whole)] => {

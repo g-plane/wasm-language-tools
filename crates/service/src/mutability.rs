@@ -5,7 +5,7 @@ use crate::{
 use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
 use wat_syntax::{
-    AmberNode, SyntaxKind, TextRange,
+    AmberNode, SyntaxKind, SyntaxNode, TextRange,
     ast::{AstNode, PlainInstr},
 };
 
@@ -97,7 +97,7 @@ pub(crate) fn get_mutation_actions(
     db: &dyn salsa::Database,
     document: Document,
 ) -> IndexMap<SymbolKey, MutationAction, FxBuildHasher> {
-    let root = document.root_tree(db);
+    let root = SyntaxNode::new_root(document.root(db));
     let symbol_table = SymbolTable::of(db, document);
     symbol_table
         .symbols

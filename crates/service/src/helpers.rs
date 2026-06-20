@@ -138,7 +138,7 @@ pub(crate) mod syntax {
 
     /// Pick the `$idx` part from `(func (type $idx) ...)`.
     /// It will return `None` if there're inlined params or results.
-    pub fn pick_type_idx_from_func(func: &SyntaxNode) -> Option<SyntaxNode> {
+    pub fn pick_type_idx_from_func<'a>(func: &SyntaxNode<'a>) -> Option<SyntaxNode<'a>> {
         if let ControlFlow::Continue(Some(index)) = func
             .children_by_kind(SyntaxKind::TYPE_USE)
             .next()
@@ -156,14 +156,14 @@ pub(crate) mod syntax {
         }
     }
 
-    pub fn extract_index_from_export(module_field_export: &SyntaxNode) -> Option<SyntaxNode> {
+    pub fn extract_index_from_export<'a>(module_field_export: &SyntaxNode<'a>) -> Option<SyntaxNode<'a>> {
         module_field_export
             .children_by_kind(ExternIdx::can_cast)
             .next()
             .and_then(|extern_idx| extern_idx.children_by_kind(SyntaxKind::INDEX).next())
     }
 
-    pub fn find_token(root: &SyntaxNode, offset: TextSize) -> Option<SyntaxToken> {
+    pub fn find_token<'a>(root: &SyntaxNode<'a>, offset: TextSize) -> Option<SyntaxToken<'a>> {
         match root.token_at_offset(offset) {
             TokenAtOffset::None => None,
             TokenAtOffset::Single(token) => Some(token),
@@ -171,7 +171,7 @@ pub(crate) mod syntax {
         }
     }
 
-    pub fn find_outer_block_for_types(node: &SyntaxNode) -> Option<SyntaxNode> {
+    pub fn find_outer_block_for_types<'a>(node: &SyntaxNode<'a>) -> Option<SyntaxNode<'a>> {
         node.ancestors().find(|ancestor| {
             matches!(
                 ancestor.kind(),

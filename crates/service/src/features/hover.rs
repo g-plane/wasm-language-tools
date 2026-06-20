@@ -19,7 +19,7 @@ impl LanguageService {
     /// Handler for `textDocument/hover` request.
     pub fn hover(&self, params: HoverParams) -> Option<Hover> {
         let document = self.get_document(params.text_document.uri)?;
-        let root = document.root_tree(self);
+        let root = SyntaxNode::new_root(document.root(self));
         let token = super::find_meaningful_token(self, document, &root, params.position)?;
         let line_index = document.line_index(self);
         let symbol_table = SymbolTable::of(self, document);

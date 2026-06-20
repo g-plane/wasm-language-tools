@@ -13,7 +13,7 @@ fn main() {
     let path = env::args().nth(1).unwrap();
     let input = fs::read_to_string(&path).unwrap();
     let (green, errors) = wat_parser::parse(&input);
-    println!("{:#?}", SyntaxNode::new_root(green.clone()));
+    println!("{:#?}", SyntaxNode::new_root(&green));
 
     if !errors.is_empty() {
         let file = SimpleFile::new(path, &input);

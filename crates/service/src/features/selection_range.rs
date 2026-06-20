@@ -9,7 +9,7 @@ impl LanguageService {
         let document = self.get_document(params.text_document.uri)?;
         self.with_db(|db| {
             let line_index = document.line_index(db);
-            let root = document.root_tree(db);
+            let root = SyntaxNode::new_root(document.root(db));
             params
                 .positions
                 .into_iter()

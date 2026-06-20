@@ -1392,7 +1392,7 @@ pub(crate) struct InstrSigResolverCtx<'db, 'bump> {
     pub document: Document,
     pub symbol_table: &'db SymbolTable<'db>,
     pub def_types: &'db DefTypes<'db>,
-    pub module: &'db SyntaxNode,
+    pub module: &'db SyntaxNode<'db>,
     pub module_id: u32,
     pub bump: &'bump Bump,
 }

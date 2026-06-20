@@ -9,13 +9,14 @@ use lspt::{
     CallHierarchyIncomingCall, CallHierarchyIncomingCallsParams, CallHierarchyItem, CallHierarchyOutgoingCall,
     CallHierarchyOutgoingCallsParams, CallHierarchyPrepareParams, SymbolKind as LspSymbolKind, SymbolTag,
 };
+use wat_syntax::SyntaxNode;
 
 impl LanguageService {
     /// Handler for `textDocument/prepareCallHierarchy` request.
     pub fn prepare_call_hierarchy(&self, params: CallHierarchyPrepareParams) -> Option<Vec<CallHierarchyItem>> {
         let document = self.get_document(&params.text_document.uri)?;
         let line_index = document.line_index(self);
-        let root = document.root_tree(self);
+        let root = SyntaxNode::new_root(document.root(self));
         let symbol_table = SymbolTable::of(self, document);
         let deprecation = deprecation::get_deprecation(self, document);
 

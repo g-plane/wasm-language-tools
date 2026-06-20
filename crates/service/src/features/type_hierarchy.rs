@@ -9,13 +9,14 @@ use lspt::{
     SymbolKind as LspSymbolKind, SymbolTag, TypeHierarchyItem, TypeHierarchyPrepareParams, TypeHierarchySubtypesParams,
     TypeHierarchySupertypesParams,
 };
+use wat_syntax::SyntaxNode;
 
 impl LanguageService {
     /// Handler for `textDocument/prepareTypeHierarchy` request.
     pub fn prepare_type_hierarchy(&self, params: TypeHierarchyPrepareParams) -> Option<Vec<TypeHierarchyItem>> {
         let document = self.get_document(&params.text_document.uri)?;
         let line_index = document.line_index(self);
-        let root = document.root_tree(self);
+        let root = SyntaxNode::new_root(document.root(self));
         let symbol_table = SymbolTable::of(self, document);
         let def_types = types_analyzer::get_def_types(self, document);
         let deprecation = deprecation::get_deprecation(self, document);

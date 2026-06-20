@@ -137,9 +137,9 @@ impl<'a> AmberNode<'a> {
     }
 }
 
-impl<'a> From<&'a SyntaxNode> for AmberNode<'a> {
+impl<'a> From<&SyntaxNode<'a>> for AmberNode<'a> {
     #[inline]
-    fn from(node: &'a SyntaxNode) -> Self {
+    fn from(node: &SyntaxNode<'a>) -> Self {
         Self {
             green: node.green(),
             range: node.text_range(),

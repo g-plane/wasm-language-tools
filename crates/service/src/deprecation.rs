@@ -1,10 +1,10 @@
 use crate::{binder::SymbolKey, document::Document};
 use rustc_hash::FxHashMap;
-use wat_syntax::SyntaxKind;
+use wat_syntax::{SyntaxKind, SyntaxNode};
 
 #[salsa::tracked(returns(ref))]
 pub(crate) fn get_deprecation(db: &dyn salsa::Database, document: Document) -> FxHashMap<SymbolKey, Option<String>> {
-    let root = document.root_tree(db);
+    let root = SyntaxNode::new_root(document.root(db));
     root.children()
         .flat_map(|module| module.children())
         .filter(|node| {

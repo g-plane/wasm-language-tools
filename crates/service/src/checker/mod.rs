@@ -54,7 +54,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
 
     let uri = document.uri(db);
     let line_index = document.line_index(db);
-    let root = document.root_tree(db);
+    let root = SyntaxNode::new_root(document.root(db));
     let symbol_table = SymbolTable::of(db, document);
     let def_types = get_def_types(db, document);
     let imports = imex::get_imports(db, document);
@@ -308,7 +308,7 @@ struct DiagnosticCtx<'db, 'bump> {
     symbol_table: &'db SymbolTable<'db>,
     def_types: &'db DefTypes<'db>,
     imports: &'db [SymbolKey],
-    module: &'db SyntaxNode,
+    module: &'db SyntaxNode<'db>,
     module_id: u32,
     bump: &'bump mut Bump,
 }

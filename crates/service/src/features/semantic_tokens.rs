@@ -25,7 +25,7 @@ impl LanguageService {
                 db,
                 token_types,
                 document,
-                AmberNode::new_root(&root).descendant_tokens(),
+                AmberNode::new_root(root).descendant_tokens(),
                 &mut delta_line,
                 &mut prev_start,
             );
@@ -48,7 +48,7 @@ impl LanguageService {
             let mut delta_line = 0;
             let mut prev_start = 0;
             let root = document.root(db);
-            let mut tokens = AmberNode::new_root(&root)
+            let mut tokens = AmberNode::new_root(root)
                 .descendant_tokens()
                 .skip_while(|(token, ..)| token.text_range().end() <= start)
                 .take_while(|(token, ..)| token.text_range().start() < end)

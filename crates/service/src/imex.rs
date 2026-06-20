@@ -4,7 +4,7 @@ use crate::{
     helpers,
 };
 use rustc_hash::FxHashMap;
-use wat_syntax::{SyntaxKind, SyntaxNodePtr, TextRange};
+use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange};
 
 #[salsa::tracked(returns(ref))]
 pub(crate) fn get_imports(db: &dyn salsa::Database, document: Document) -> Vec<SymbolKey> {
@@ -29,8 +29,7 @@ pub(crate) type ExportMap = FxHashMap<SyntaxNodePtr, Vec<Export>>;
 #[salsa::tracked(returns(ref))]
 pub(crate) fn get_exports(db: &dyn salsa::Database, document: Document) -> ExportMap {
     let symbol_table = SymbolTable::of(db, document);
-    document
-        .root_tree(db)
+    SyntaxNode::new_root(document.root(db))
         .children()
         .map(|module| {
             let mut exports = Vec::new();

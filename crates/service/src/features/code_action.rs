@@ -1,6 +1,6 @@
 use crate::{LanguageService, binder::SymbolTable, helpers::LineIndexExt, refactorings::*, uri::InternUri};
 use lspt::{CodeAction, CodeActionKind, CodeActionParams};
-use wat_syntax::SyntaxKind;
+use wat_syntax::{SyntaxKind, SyntaxNode};
 
 impl LanguageService {
     /// Handler for `textDocument/codeAction` request.
@@ -9,7 +9,7 @@ impl LanguageService {
         let document = self.get_document(uri)?;
         self.with_db(|db| {
             let line_index = document.line_index(db);
-            let root = document.root_tree(db);
+            let root = SyntaxNode::new_root(document.root(db));
             let symbol_table = SymbolTable::of(db, document);
 
             let mut quickfix = params.context.only.is_none();

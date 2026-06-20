@@ -131,7 +131,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             })
         })
     }
-    fn find_up_block(node: &SyntaxNode) -> Option<SyntaxNode> {
+    fn find_up_block<'a>(node: &SyntaxNode<'a>) -> Option<SyntaxNode<'a>> {
         node.ancestors().skip(1).find(|node| {
             matches!(
                 node.kind(),
@@ -180,7 +180,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             .unwrap_or_else(|| node.text_range())
     }
 
-    let root = document.root_tree(db);
+    let root = SyntaxNode::new_root(document.root(db));
     let mut symbols = Symbols::with_capacity_and_hasher(8, FxBuildHasher);
     let mut resolved = FxHashMap::default();
     let mut def_poi = FxHashMap::default();

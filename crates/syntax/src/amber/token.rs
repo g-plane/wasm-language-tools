@@ -46,9 +46,9 @@ impl<'a> AmberToken<'a> {
     }
 }
 
-impl<'a> From<&'a SyntaxToken> for AmberToken<'a> {
+impl<'a> From<&SyntaxToken<'a>> for AmberToken<'a> {
     #[inline]
-    fn from(token: &'a SyntaxToken) -> Self {
+    fn from(token: &SyntaxToken<'a>) -> Self {
         Self {
             green: token.green(),
             range: token.text_range(),
