@@ -1,10 +1,10 @@
 use super::{GreenChild, GreenHead};
 use crate::{GreenToken, NodeOrToken, SyntaxKind};
-use std::fmt;
+use servo_arc::{ThinArc, UniqueArc};
+use std::{fmt, hash};
 use text_size::TextSize;
-use triomphe::{Arc, HeaderWithLength, ThinArc, UniqueArc};
 
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq)]
 /// Node in the green syntax tree.
 pub struct GreenNode {
     data: ThinArc<GreenHead, GreenChild>,
@@ -18,67 +18,54 @@ impl GreenNode {
         I: IntoIterator<Item = NodeOrToken<GreenNode, GreenToken>>,
         I::IntoIter: ExactSizeIterator,
     {
-        let mut children = children.into_iter();
-        let mut data = UniqueArc::from_header_and_uninit_slice(
-            HeaderWithLength::new(
-                GreenHead {
-                    kind,
-                    text_len: 0.into(),
-                },
-                children.len(),
-            ),
-            children.len(),
-        );
-        let mut slots = data.slice.iter_mut();
         let mut total_text_len = 0.into();
-        while let Some(slot) = slots.next()
-            && let Some(node_or_token) = children.next()
-        {
-            match node_or_token {
+        let mut data = UniqueArc::from_header_and_iter(
+            GreenHead {
+                kind,
+                text_len: 0.into(),
+            },
+            children.into_iter().map(|node_or_token| match node_or_token {
                 NodeOrToken::Node(node) => {
                     let text_len = node.text_len();
-                    slot.write(GreenChild::Node {
+                    let child = GreenChild::Node {
                         offset: total_text_len,
                         node,
-                    });
+                    };
                     total_text_len += text_len;
+                    child
                 }
                 NodeOrToken::Token(token) => {
                     let text_len = token.text_len();
-                    slot.write(GreenChild::Token {
+                    let child = GreenChild::Token {
                         offset: total_text_len,
                         token,
-                    });
+                    };
                     total_text_len += text_len;
+                    child
                 }
-            }
-        }
-        assert!(slots.next().is_none(), "incorrect children exact size iterator");
-        assert!(children.next().is_none(), "incorrect children exact size iterator");
-        data.header.header.text_len = total_text_len;
+            }),
+        );
+        data.header.text_len = total_text_len;
 
-        // SAFETY: all data has been written to slice
-        let data = unsafe { Arc::into_thin(data.assume_init_slice_with_header().shareable()) };
-
-        GreenNode { data }
+        GreenNode { data: data.shareable() }
     }
 
     #[inline]
     /// Kind of this node.
     pub fn kind(&self) -> SyntaxKind {
-        self.data.header.header.kind
+        self.data.header.kind
     }
 
     #[inline]
     /// Total length of text that this node covers.
     pub fn text_len(&self) -> TextSize {
-        self.data.header.header.text_len
+        self.data.header.text_len
     }
 
     #[inline]
     /// Iterator over the child nodes and tokens of this node.
     pub fn children(&self) -> impl Iterator<Item = NodeOrToken<&GreenNode, &GreenToken>> + Clone {
-        self.data.slice.iter().map(|child| match child {
+        self.data.slice().iter().map(|child| match child {
             GreenChild::Node { node, .. } => NodeOrToken::Node(node),
             GreenChild::Token { token, .. } => NodeOrToken::Token(token),
         })
@@ -87,24 +74,24 @@ impl GreenNode {
     #[inline]
     /// Number of child nodes and tokens of this node.
     pub fn children_len(&self) -> usize {
-        self.data.header.length
+        self.data.len()
     }
 
     #[inline]
     pub(crate) fn slice(&self) -> &[GreenChild] {
-        &self.data.slice
+        self.data.slice()
     }
 
     #[inline]
     /// Returns current level green node.
     pub(crate) fn replace_child(&self, index: usize, new_child: GreenNode) -> GreenNode {
         let mut replacement = Some(new_child);
-        let children = self.data.slice.iter().enumerate().map(|(i, child)| match child {
+        let children = self.data.slice().iter().enumerate().map(|(i, child)| match child {
             GreenChild::Node { .. } if i == index => replacement.take().expect("replacement has been taken").into(),
             GreenChild::Node { node, .. } => node.clone().into(),
             GreenChild::Token { token, .. } => token.clone().into(),
         });
-        GreenNode::new(self.data.header.header.kind, children)
+        GreenNode::new(self.data.header.kind, children)
     }
 }
 
@@ -120,9 +107,16 @@ impl fmt::Debug for GreenNode {
 
 impl fmt::Display for GreenNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.data.slice.iter().try_for_each(|child| match child {
+        self.data.slice().iter().try_for_each(|child| match child {
             GreenChild::Node { node, .. } => node.fmt(f),
             GreenChild::Token { token, .. } => token.fmt(f),
         })
+    }
+}
+
+impl hash::Hash for GreenNode {
+    fn hash<H: hash::Hasher>(&self, state: &mut H) {
+        self.data.header.hash(state);
+        self.data.slice().hash(state);
     }
 }
