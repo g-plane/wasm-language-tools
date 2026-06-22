@@ -40,7 +40,7 @@ impl GreenToken {
     #[inline]
     /// Text of this token.
     pub fn text(&self) -> &str {
-        unsafe { std::str::from_utf8_unchecked(&self.data.slice()) }
+        unsafe { std::str::from_utf8_unchecked(self.data.slice()) }
     }
 }
 
