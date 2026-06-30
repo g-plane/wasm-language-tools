@@ -29,14 +29,16 @@ impl LanguageService {
                             | SymbolKind::ElemDef
                     )
                 })
-                .map(|symbol| CodeLens {
-                    range: line_index.convert(symbol.key.text_range()),
-                    command: None,
-                    data: serde_json::to_value(CodeLensData {
-                        uri: params.text_document.uri.clone(),
-                        kind: symbol.idx_kind,
+                .filter_map(|symbol| {
+                    Some(CodeLens {
+                        range: line_index.convert(symbol.key.text_range())?,
+                        command: None,
+                        data: serde_json::to_value(CodeLensData {
+                            uri: params.text_document.uri.clone(),
+                            kind: symbol.idx_kind,
+                        })
+                        .ok(),
                     })
-                    .ok(),
                 })
                 .collect()
         })
@@ -60,16 +62,17 @@ impl LanguageService {
             .find(|symbol| symbol.idx_kind == data.kind && symbol.key.text_range() == range)?;
         let locations = symbol_table
             .find_references_on_def(def_symbol, false)
-            .map(|symbol| {
+            .filter_map(|symbol| {
                 let range = symbol_table
                     .def_poi
                     .get(&symbol.key)
                     .copied()
                     .unwrap_or_else(|| symbol.key.text_range());
-                Location {
-                    uri: data.uri.clone(),
-                    range: line_index.convert(range),
-                }
+                line_index.convert(range)
+            })
+            .map(|range| Location {
+                uri: data.uri.clone(),
+                range,
             })
             .collect::<Vec<_>>();
         Some(CodeLens {

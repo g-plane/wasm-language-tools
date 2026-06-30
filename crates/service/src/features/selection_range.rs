@@ -14,15 +14,17 @@ impl LanguageService {
                 .positions
                 .into_iter()
                 .filter_map(|position| {
-                    super::find_meaningful_token(db, document, &root, position).map(|token| {
+                    super::find_meaningful_token(db, document, &root, position).and_then(|token| {
                         let parent = token.parent();
-                        SelectionRange {
-                            range: line_index.convert(token.text_range()),
-                            parent: Some(Box::new(SelectionRange {
-                                range: line_index.convert(parent.text_range()),
-                                parent: get_parent_range(parent, line_index),
-                            })),
-                        }
+                        Some(SelectionRange {
+                            range: line_index.convert(token.text_range())?,
+                            parent: line_index.convert(parent.text_range()).map(|range| {
+                                Box::new(SelectionRange {
+                                    range,
+                                    parent: get_parent_range(parent, line_index),
+                                })
+                            }),
+                        })
                     })
                 })
                 .collect()
@@ -31,10 +33,9 @@ impl LanguageService {
 }
 
 fn get_parent_range(current: SyntaxNode, line_index: &LineIndex) -> Option<Box<SelectionRange>> {
-    current.parent().map(|parent| {
-        Box::new(SelectionRange {
-            range: line_index.convert(parent.text_range()),
-            parent: get_parent_range(parent, line_index),
-        })
-    })
+    let parent = current.parent()?;
+    Some(Box::new(SelectionRange {
+        range: line_index.convert(parent.text_range())?,
+        parent: get_parent_range(parent, line_index),
+    }))
 }

@@ -28,10 +28,11 @@ impl LanguageService {
             })
             .and_then(|ref_key| symbol_table.resolved.get(ref_key))
             .and_then(|def_key| symbol_table.def_poi.get(def_key))
+            .and_then(|range| line_index.convert(*range))
             .map(|range| {
                 Union2::A(Location {
                     uri: params.text_document.uri.clone(),
-                    range: line_index.convert(*range),
+                    range,
                 })
             })
     }
@@ -78,10 +79,11 @@ impl LanguageService {
                     .and_then(|type_idx| symbol_table.resolved.get(&type_idx.to_ptr().into()))
             })
             .and_then(|key| symbol_table.def_poi.get(key))
+            .and_then(|range| line_index.convert(*range))
             .map(|range| {
                 Union2::A(Location {
                     uri: params.text_document.uri.clone(),
-                    range: line_index.convert(*range),
+                    range,
                 })
             })
     }

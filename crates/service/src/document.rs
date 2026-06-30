@@ -1172,4 +1172,34 @@ mod tests {
             _ => true,
         }));
     }
+
+    #[test]
+    fn non_ascii() {
+        let uri = "untitled:test".to_string();
+        let mut service = LanguageService::default();
+        service.commit(
+            &uri,
+            "
+(module
+  ;; 测
+  (func $func)
+  (func
+    call $func))
+"
+            .into(),
+        );
+        service.did_change(DidChangeTextDocumentParams {
+            text_document: VersionedTextDocumentIdentifier {
+                uri: uri.clone(),
+                version: 1,
+            },
+            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                range: Range {
+                    start: Position { line: 2, character: 6 },
+                    end: Position { line: 2, character: 6 },
+                },
+                text: "试".into(),
+            })],
+        });
+    }
 }

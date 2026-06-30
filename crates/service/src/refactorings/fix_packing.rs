@@ -12,7 +12,7 @@ pub fn act(
     node: &SyntaxNode,
     context: &CodeActionContext,
 ) -> Option<Vec<CodeAction>> {
-    let node_lsp_range = line_index.convert(node.text_range());
+    let node_lsp_range = line_index.convert(node.text_range())?;
     let diagnostic = context.diagnostics.iter().find(|diagnostic| match &diagnostic.code {
         Some(Union2::B(code)) => code == "packing" && diagnostic.range == node_lsp_range,
         _ => false,
@@ -29,19 +29,21 @@ pub fn act(
         "struct.get" => Some(
             ["struct.get_s", "struct.get_u"]
                 .iter()
-                .map(|new_text| build_action(new_text, range, diagnostic, db, uri, line_index))
+                .filter_map(|new_text| build_action(new_text, range, diagnostic, db, uri, line_index))
                 .collect(),
         ),
         "struct.get_s" | "struct.get_u" => {
-            Some(vec![build_action("struct.get", range, diagnostic, db, uri, line_index)])
+            build_action("struct.get", range, diagnostic, db, uri, line_index).map(|code_action| vec![code_action])
         }
         "array.get" => Some(
             ["array.get_s", "array.get_u"]
                 .iter()
-                .map(|new_text| build_action(new_text, range, diagnostic, db, uri, line_index))
+                .filter_map(|new_text| build_action(new_text, range, diagnostic, db, uri, line_index))
                 .collect(),
         ),
-        "array.get_s" | "array.get_u" => Some(vec![build_action("array.get", range, diagnostic, db, uri, line_index)]),
+        "array.get_s" | "array.get_u" => {
+            build_action("array.get", range, diagnostic, db, uri, line_index).map(|code_action| vec![code_action])
+        }
         _ => None,
     }
 }
@@ -53,14 +55,14 @@ fn build_action(
     db: &dyn salsa::Database,
     uri: InternUri,
     line_index: &LineIndex,
-) -> CodeAction {
+) -> Option<CodeAction> {
     let text_edits = vec![TextEdit {
-        range: line_index.convert(range),
+        range: line_index.convert(range)?,
         new_text: new_text.into(),
     }];
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(uri.raw(db), text_edits);
-    CodeAction {
+    Some(CodeAction {
         title: format!("Replace instruction with `{new_text}`"),
         kind: Some(CodeActionKind::QuickFix),
         edit: Some(WorkspaceEdit {
@@ -70,5 +72,5 @@ fn build_action(
         is_preferred: Some(true),
         diagnostics: Some(vec![diagnostic.clone()]),
         ..Default::default()
-    }
+    })
 }

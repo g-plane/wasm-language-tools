@@ -42,7 +42,7 @@ pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, nod
     changes.insert(
         uri.raw(db),
         vec![TextEdit {
-            range: line_index.convert(node.text_range()),
+            range: line_index.convert(node.text_range())?,
             new_text,
         }],
     );

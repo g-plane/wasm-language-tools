@@ -33,9 +33,10 @@ impl LanguageService {
                             && let Some(ty) = symbol_table
                                 .find_def(symbol.key)
                                 .and_then(|local| types_analyzer::extract_type(db, &local.ty.0))
+                            && let Some(position) = line_index.convert(symbol.key.text_range().end())
                         {
                             inlay_hints.push(InlayHint {
-                                position: line_index.convert(symbol.key.text_range().end()),
+                                position,
                                 label: Union2::A(ty.render(db).to_string()),
                                 kind: Some(InlayHintKind::Type),
                                 text_edits: None,
@@ -52,9 +53,10 @@ impl LanguageService {
                             && let Some(ty) = symbol_table
                                 .find_def(symbol.key)
                                 .and_then(|global| types_analyzer::extract_global_type(db, &global.ty.0))
+                            && let Some(position) = line_index.convert(symbol.key.text_range().end())
                         {
                             inlay_hints.push(InlayHint {
-                                position: line_index.convert(symbol.key.text_range().end()),
+                                position,
                                 label: Union2::A(ty.render(db).to_string()),
                                 kind: Some(InlayHintKind::Type),
                                 text_edits: None,
@@ -74,9 +76,10 @@ impl LanguageService {
                                 .map(|last| last.text_range())
                                 .filter(|last| range.contains_range(*last))
                                 .zip(symbol.idx.name)
+                            && let Some(position) = line_index.convert(last.end())
                         {
                             inlay_hints.push(InlayHint {
-                                position: line_index.convert(last.end()),
+                                position,
                                 label: Union2::A(format!("(func {})", name.ident(db))),
                                 kind: None,
                                 text_edits: None,
@@ -92,9 +95,10 @@ impl LanguageService {
                                 name: None,
                             } = symbol.idx
                             && let Some(range) = symbol_table.def_poi.get(&symbol.key)
+                            && let Some(position) = line_index.convert(range.end())
                         {
                             inlay_hints.push(InlayHint {
-                                position: line_index.convert(range.end()),
+                                position,
                                 label: Union2::A(format!("(;{num};)")),
                                 kind: None,
                                 text_edits: None,
@@ -114,9 +118,10 @@ impl LanguageService {
                                 .map(|last| last.text_range())
                                 .filter(|last| range.contains_range(*last))
                                 .zip(symbol.idx.name)
+                            && let Some(position) = line_index.convert(last.end())
                         {
                             inlay_hints.push(InlayHint {
-                                position: line_index.convert(last.end()),
+                                position,
                                 label: Union2::A(format!(
                                     "({} {})",
                                     match symbol.key.kind() {
@@ -149,9 +154,10 @@ impl LanguageService {
                                 name: None,
                             } = symbol.idx
                             && let Some(range) = symbol_table.def_poi.get(&symbol.key)
+                            && let Some(position) = line_index.convert(range.end())
                         {
                             inlay_hints.push(InlayHint {
-                                position: line_index.convert(range.end()),
+                                position,
                                 label: Union2::A(format!("(;{num};)")),
                                 kind: None,
                                 text_edits: None,
@@ -168,20 +174,22 @@ impl LanguageService {
                                 num: Some(num),
                                 name: None,
                             } = symbol.idx
+                            && let Some(position) = line_index.convert(
+                                symbol
+                                    .amber()
+                                    .tokens_by_kind(SyntaxKind::KEYWORD)
+                                    .find_map(|token| {
+                                        if matches!(token.text(), "param" | "local" | "field") {
+                                            Some(token.text_range().end())
+                                        } else {
+                                            None
+                                        }
+                                    })
+                                    .unwrap_or_else(|| symbol.key.text_range().end()),
+                            )
                         {
-                            let end = symbol
-                                .amber()
-                                .tokens_by_kind(SyntaxKind::KEYWORD)
-                                .find_map(|token| {
-                                    if matches!(token.text(), "param" | "local" | "field") {
-                                        Some(token.text_range().end())
-                                    } else {
-                                        None
-                                    }
-                                })
-                                .unwrap_or_else(|| symbol.key.text_range().end());
                             inlay_hints.push(InlayHint {
-                                position: line_index.convert(end),
+                                position,
                                 label: Union2::A(format!("(;{num};)")),
                                 kind: None,
                                 text_edits: None,
@@ -197,9 +205,10 @@ impl LanguageService {
                             && range.contains_range(symbol.key.text_range())
                             && let Some(ty) =
                                 types_analyzer::resolve_field_type(db, document, symbol.key, symbol.region)
+                            && let Some(position) = line_index.convert(symbol.key.text_range().end())
                         {
                             inlay_hints.push(InlayHint {
-                                position: line_index.convert(symbol.key.text_range().end()),
+                                position,
                                 label: Union2::A(ty.render(db).to_string()),
                                 kind: Some(InlayHintKind::Type),
                                 text_edits: None,

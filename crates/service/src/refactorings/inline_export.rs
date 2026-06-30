@@ -24,7 +24,7 @@ pub fn act(
         uri.raw(db),
         vec![
             TextEdit {
-                range: line_index.convert(node.text_range()),
+                range: line_index.convert(node.text_range())?,
                 new_text: "".into(),
             },
             TextEdit {
@@ -33,7 +33,7 @@ pub fn act(
                         .or_else(|| support::token(&def_node, SyntaxKind::KEYWORD))?
                         .text_range()
                         .end(),
-                )),
+                ))?,
                 new_text: format!(" (export {})", node.children_by_kind(SyntaxKind::NAME).next()?),
             },
         ],

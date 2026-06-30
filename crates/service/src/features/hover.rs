@@ -28,7 +28,7 @@ impl LanguageService {
             SyntaxKind::IDENT | SyntaxKind::UNSIGNED_INT => {
                 create_symbol_hover(self, document, symbol_table, &token.parent()).map(|contents| Hover {
                     contents: Union3::A(contents),
-                    range: Some(line_index.convert(token.text_range())),
+                    range: line_index.convert(token.text_range()),
                 })
             }
             SyntaxKind::INT => {
@@ -77,7 +77,7 @@ impl LanguageService {
                     })
                     .map(|contents| Hover {
                         contents: Union3::A(contents),
-                        range: Some(line_index.convert(token.text_range())),
+                        range: line_index.convert(token.text_range()),
                     })
             }
             SyntaxKind::TYPE_KEYWORD => {
@@ -87,7 +87,7 @@ impl LanguageService {
                         kind: MarkupKind::Markdown,
                         value: format!("```wat\n{ty}\n```\n\n{doc}"),
                     }),
-                    range: Some(line_index.convert(token.text_range())),
+                    range: line_index.convert(token.text_range()),
                 })
             }
             SyntaxKind::KEYWORD => {
@@ -99,11 +99,11 @@ impl LanguageService {
                 };
                 create_symbol_hover(self, document, symbol_table, &node).map(|contents| Hover {
                     contents: Union3::A(contents),
-                    range: Some(line_index.convert(if matches!(token.text(), "mut" | "ref") {
+                    range: line_index.convert(if matches!(token.text(), "mut" | "ref") {
                         node.text_range()
                     } else {
                         token.text_range()
-                    })),
+                    }),
                 })
             }
             SyntaxKind::INSTR_NAME => {
@@ -193,7 +193,7 @@ impl LanguageService {
                             kind: MarkupKind::Markdown,
                             value: contents,
                         }),
-                        range: Some(line_index.convert(token.text_range())),
+                        range: line_index.convert(token.text_range()),
                     }
                 })
             }
@@ -430,9 +430,8 @@ fn create_type_def_hover(
                     && let Some(sig) = def_types
                         .get(&def_symbol.key)
                         .and_then(|def_type| def_type.comp.as_func())
+                    && let Some(pos) = document.line_index(db).convert(poi.start())
                 {
-                    let line_index = document.line_index(db);
-                    let pos = line_index.convert(poi.start());
                     appendix = Some(format!(
                         "where [`{}`]({}#{},{}):\n```wat\n(type (func{}{}))\n```",
                         idx.render(db),

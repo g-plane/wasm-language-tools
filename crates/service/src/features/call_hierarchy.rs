@@ -38,19 +38,19 @@ impl LanguageService {
                     NamedSig::from_func(self, document, symbol.ty()),
                 )),
                 uri: params.text_document.uri.clone(),
-                range: line_index.convert(symbol.key.text_range()),
+                range: line_index.convert(symbol.key.text_range())?,
                 selection_range: line_index.convert(
                     symbol_table
                         .def_poi
                         .get(&symbol.key)
                         .copied()
                         .unwrap_or_else(|| symbol.key.text_range()),
-                ),
+                )?,
                 data: None,
             }]),
             SymbolKind::Call if symbol.key.text_range() == parent_range => {
-                symbol_table.find_def(symbol.key).map(|symbol| {
-                    vec![CallHierarchyItem {
+                symbol_table.find_def(symbol.key).and_then(|symbol| {
+                    Some(vec![CallHierarchyItem {
                         name: symbol.idx.render(self).to_string(),
                         kind: LspSymbolKind::Function,
                         tags: if deprecation.contains_key(&symbol.key) {
@@ -64,16 +64,16 @@ impl LanguageService {
                             NamedSig::from_func(self, document, symbol.ty()),
                         )),
                         uri: params.text_document.uri.clone(),
-                        range: line_index.convert(symbol.key.text_range()),
+                        range: line_index.convert(symbol.key.text_range())?,
                         selection_range: line_index.convert(
                             symbol_table
                                 .def_poi
                                 .get(&symbol.key)
                                 .copied()
                                 .unwrap_or_else(|| symbol.key.text_range()),
-                        ),
+                        )?,
                         data: None,
-                    }]
+                    }])
                 })
             }
             _ => None,
@@ -107,32 +107,34 @@ impl LanguageService {
                     .find(|symbol| {
                         symbol.kind == SymbolKind::Func && symbol.key.text_range().contains_range(call_key.text_range())
                     })
-                    .map(|symbol| CallHierarchyIncomingCall {
-                        from: CallHierarchyItem {
-                            name: symbol.idx.render(self).to_string(),
-                            kind: LspSymbolKind::Function,
-                            tags: if deprecation.contains_key(&symbol.key) {
-                                Some(vec![SymbolTag::Deprecated])
-                            } else {
-                                None
+                    .and_then(|symbol| {
+                        Some(CallHierarchyIncomingCall {
+                            from: CallHierarchyItem {
+                                name: symbol.idx.render(self).to_string(),
+                                kind: LspSymbolKind::Function,
+                                tags: if deprecation.contains_key(&symbol.key) {
+                                    Some(vec![SymbolTag::Deprecated])
+                                } else {
+                                    None
+                                },
+                                detail: Some(types_analyzer::render_func_header(
+                                    self,
+                                    symbol.idx.name,
+                                    NamedSig::from_func(self, document, symbol.ty()),
+                                )),
+                                uri: params.item.uri.clone(),
+                                range: line_index.convert(symbol.key.text_range())?,
+                                selection_range: line_index.convert(
+                                    symbol_table
+                                        .def_poi
+                                        .get(&symbol.key)
+                                        .copied()
+                                        .unwrap_or_else(|| symbol.key.text_range()),
+                                )?,
+                                data: None,
                             },
-                            detail: Some(types_analyzer::render_func_header(
-                                self,
-                                symbol.idx.name,
-                                NamedSig::from_func(self, document, symbol.ty()),
-                            )),
-                            uri: params.item.uri.clone(),
-                            range: line_index.convert(symbol.key.text_range()),
-                            selection_range: line_index.convert(
-                                symbol_table
-                                    .def_poi
-                                    .get(&symbol.key)
-                                    .copied()
-                                    .unwrap_or_else(|| symbol.key.text_range()),
-                            ),
-                            data: None,
-                        },
-                        from_ranges: vec![line_index.convert(call_key.text_range())],
+                            from_ranges: vec![line_index.convert(call_key.text_range())?],
+                        })
                     })
             })
             .collect::<Vec<_>>();
@@ -155,32 +157,34 @@ impl LanguageService {
             .values()
             .filter(|symbol| symbol.kind == SymbolKind::Call && call_def_range.contains_range(symbol.key.text_range()))
             .filter_map(|symbol| symbol_table.find_def(symbol.key).map(|def_symbol| (def_symbol, symbol)))
-            .map(|(def_symbol, ref_symbol)| CallHierarchyOutgoingCall {
-                to: CallHierarchyItem {
-                    name: def_symbol.idx.render(self).to_string(),
-                    kind: LspSymbolKind::Function,
-                    tags: if deprecation.contains_key(&def_symbol.key) {
-                        Some(vec![SymbolTag::Deprecated])
-                    } else {
-                        None
+            .filter_map(|(def_symbol, ref_symbol)| {
+                Some(CallHierarchyOutgoingCall {
+                    to: CallHierarchyItem {
+                        name: def_symbol.idx.render(self).to_string(),
+                        kind: LspSymbolKind::Function,
+                        tags: if deprecation.contains_key(&def_symbol.key) {
+                            Some(vec![SymbolTag::Deprecated])
+                        } else {
+                            None
+                        },
+                        detail: Some(types_analyzer::render_func_header(
+                            self,
+                            def_symbol.idx.name,
+                            NamedSig::from_func(self, document, def_symbol.ty()),
+                        )),
+                        uri: params.item.uri.clone(),
+                        range: line_index.convert(def_symbol.key.text_range())?,
+                        selection_range: line_index.convert(
+                            symbol_table
+                                .def_poi
+                                .get(&def_symbol.key)
+                                .copied()
+                                .unwrap_or_else(|| def_symbol.key.text_range()),
+                        )?,
+                        data: None,
                     },
-                    detail: Some(types_analyzer::render_func_header(
-                        self,
-                        def_symbol.idx.name,
-                        NamedSig::from_func(self, document, def_symbol.ty()),
-                    )),
-                    uri: params.item.uri.clone(),
-                    range: line_index.convert(def_symbol.key.text_range()),
-                    selection_range: line_index.convert(
-                        symbol_table
-                            .def_poi
-                            .get(&def_symbol.key)
-                            .copied()
-                            .unwrap_or_else(|| def_symbol.key.text_range()),
-                    ),
-                    data: None,
-                },
-                from_ranges: vec![line_index.convert(ref_symbol.key.text_range())],
+                    from_ranges: vec![line_index.convert(ref_symbol.key.text_range())?],
+                })
             })
             .collect::<Vec<_>>();
         items.sort_unstable_by_key(|item| item.to.range.start);

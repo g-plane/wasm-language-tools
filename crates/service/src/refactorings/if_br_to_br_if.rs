@@ -36,25 +36,29 @@ pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, nod
 
     let mut text_edits = Vec::with_capacity(1);
     if let Some(l_paren) = block_if.l_paren_token() {
-        if let Some(keyword) = block_if.keyword() {
+        if let Some(keyword) = block_if.keyword()
+            && let Some(range) = line_index.convert(l_paren.text_range().cover(keyword.text_range()))
+        {
             text_edits.push(TextEdit {
-                range: line_index.convert(l_paren.text_range().cover(keyword.text_range())),
+                range,
                 new_text: "".into(),
             });
         }
         text_edits.push(TextEdit {
-            range: line_index.convert(then_block.syntax().text_range()),
+            range: line_index.convert(then_block.syntax().text_range())?,
             new_text: format!("(br_if {first_immediate})"),
         });
-        if let Some(r_paren) = block_if.r_paren_token() {
+        if let Some(r_paren) = block_if.r_paren_token()
+            && let Some(range) = line_index.convert(r_paren.text_range())
+        {
             text_edits.push(TextEdit {
-                range: line_index.convert(r_paren.text_range()),
+                range,
                 new_text: "".into(),
             });
         }
     } else {
         text_edits.push(TextEdit {
-            range: line_index.convert(node.text_range()),
+            range: line_index.convert(node.text_range())?,
             new_text: format!("br_if {first_immediate}"),
         });
     };

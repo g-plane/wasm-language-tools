@@ -13,7 +13,7 @@ impl LanguageService {
                 .filter_map(|node| {
                     support::token(&node, SyntaxKind::KEYWORD)
                         .or_else(|| support::token(&node, SyntaxKind::L_PAREN))?;
-                    let range = line_index.convert(node.text_range());
+                    let range = line_index.convert(node.text_range())?;
                     if range.start.line == range.end.line {
                         None
                     } else {

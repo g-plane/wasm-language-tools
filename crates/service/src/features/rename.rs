@@ -25,8 +25,7 @@ impl LanguageService {
         let root = SyntaxNode::new_root(document.root(self));
         let token = super::find_meaningful_token(self, document, &root, params.position)
             .filter(|token| token.kind() == SyntaxKind::IDENT)?;
-        let range = line_index.convert(token.text_range());
-        Some(PrepareRenameResult::A(range))
+        line_index.convert(token.text_range()).map(PrepareRenameResult::A)
     }
 
     /// Handler for `textDocument/rename` request.
@@ -122,9 +121,10 @@ impl LanguageService {
                 }
                 .tokens_by_kind(SyntaxKind::IDENT)
                 .next()
+                .and_then(|token| line_index.convert(token.text_range()))
             })
-            .map(|token| TextEdit {
-                range: line_index.convert(token.text_range()),
+            .map(|range| TextEdit {
+                range,
                 new_text: params.new_name.clone(),
             })
             .collect();

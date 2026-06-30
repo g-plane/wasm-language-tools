@@ -14,8 +14,9 @@ pub fn act(
 ) -> Option<CodeAction> {
     let text_edits = node
         .tokens_by_kind(SyntaxKind::is_trivia)
-        .map(|token| TextEdit {
-            range: line_index.convert(token.text_range()),
+        .filter_map(|token| line_index.convert(token.text_range()))
+        .map(|range| TextEdit {
+            range,
             new_text: String::new(),
         })
         .collect::<Vec<_>>();

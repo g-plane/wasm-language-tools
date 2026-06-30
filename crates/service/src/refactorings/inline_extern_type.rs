@@ -14,8 +14,9 @@ pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, nod
             import_item
                 .children_by_kind(SyntaxKind::NAME)
                 .next()
-                .map(|name| TextEdit {
-                    range: line_index.convert(TextRange::empty(name.text_range().end())),
+                .and_then(|name| line_index.convert(TextRange::empty(name.text_range().end())))
+                .map(|range| TextEdit {
+                    range,
                     new_text: new_text.clone(),
                 })
         })
@@ -31,7 +32,7 @@ pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, nod
             node.text_range()
         };
         text_edits.push(TextEdit {
-            range: line_index.convert(range),
+            range: line_index.convert(range)?,
             new_text: "".into(),
         });
         let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);

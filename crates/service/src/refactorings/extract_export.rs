@@ -29,11 +29,11 @@ pub fn act(
         uri.raw(db),
         vec![
             TextEdit {
-                range: line_index.convert(node.text_range()),
+                range: line_index.convert(node.text_range())?,
                 new_text: "".into(),
             },
             TextEdit {
-                range: line_index.convert(TextRange::empty(last_module_field.text_range().end())),
+                range: line_index.convert(TextRange::empty(last_module_field.text_range().end()))?,
                 new_text: format!(
                     "\n  (export {} ({} {}))",
                     node.children_by_kind(SyntaxKind::NAME).next()?,

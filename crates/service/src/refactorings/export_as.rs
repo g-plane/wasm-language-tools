@@ -32,7 +32,7 @@ pub fn act(
     changes.insert(
         uri.raw(db),
         vec![TextEdit {
-            range: line_index.convert(TextRange::empty(ident_token.text_range().end())),
+            range: line_index.convert(TextRange::empty(ident_token.text_range().end()))?,
             new_text: format!(" (export {name})"),
         }],
     );

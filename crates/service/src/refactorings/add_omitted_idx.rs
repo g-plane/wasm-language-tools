@@ -35,7 +35,7 @@ pub fn act(
                 .next()
                 .is_none_or(|immediate| immediate.has_child_or_token_by_kind(SyntaxKind::MEM_ARG))
             {
-                Some(build_action(
+                build_action(
                     db,
                     uri,
                     line_index,
@@ -46,14 +46,14 @@ pub fn act(
                         " {}",
                         retrieve_idx(symbol_table, node, SymbolKind::MemoryDef)?.render(db),
                     ),
-                ))
+                )
             } else {
                 None
             }
         }
         "memory.init" => {
             if node.children_by_kind(SyntaxKind::IMMEDIATE).count() < 2 {
-                Some(build_action(
+                build_action(
                     db,
                     uri,
                     line_index,
@@ -64,7 +64,7 @@ pub fn act(
                         " {}",
                         retrieve_idx(symbol_table, node, SymbolKind::MemoryDef)?.render(db),
                     ),
-                ))
+                )
             } else {
                 None
             }
@@ -83,7 +83,7 @@ pub fn act(
                 }
                 _ => return None,
             };
-            Some(build_action(
+            build_action(
                 db,
                 uri,
                 line_index,
@@ -91,11 +91,11 @@ pub fn act(
                 &instr_name_token,
                 format!("Add memory idx for `{instr_name}`"),
                 new_text,
-            ))
+            )
         }
         "table.get" | "table.set" | "table.size" | "table.grow" | "table.fill" => {
             if node.children_by_kind(SyntaxKind::IMMEDIATE).next().is_none() {
-                Some(build_action(
+                build_action(
                     db,
                     uri,
                     line_index,
@@ -106,14 +106,14 @@ pub fn act(
                         " {}",
                         retrieve_idx(symbol_table, node, SymbolKind::TableDef)?.render(db),
                     ),
-                ))
+                )
             } else {
                 None
             }
         }
         "table.init" => {
             if node.children_by_kind(SyntaxKind::IMMEDIATE).count() < 2 {
-                Some(build_action(
+                build_action(
                     db,
                     uri,
                     line_index,
@@ -124,7 +124,7 @@ pub fn act(
                         " {}",
                         retrieve_idx(symbol_table, node, SymbolKind::TableDef)?.render(db),
                     ),
-                ))
+                )
             } else {
                 None
             }
@@ -143,7 +143,7 @@ pub fn act(
                 }
                 _ => return None,
             };
-            Some(build_action(
+            build_action(
                 db,
                 uri,
                 line_index,
@@ -151,7 +151,7 @@ pub fn act(
                 &instr_name_token,
                 format!("Add table idx for `{instr_name}`"),
                 new_text,
-            ))
+            )
         }
         _ => None,
     }
@@ -181,17 +181,17 @@ fn build_action(
     instr_name_token: &SyntaxToken,
     title: String,
     new_text: String,
-) -> CodeAction {
-    let token_lsp_range = line_index.convert(instr_name_token.text_range());
+) -> Option<CodeAction> {
+    let token_lsp_range = line_index.convert(instr_name_token.text_range())?;
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
         uri.raw(db),
         vec![TextEdit {
-            range: line_index.convert(TextRange::empty(instr_name_token.text_range().end())),
+            range: line_index.convert(TextRange::empty(instr_name_token.text_range().end()))?,
             new_text,
         }],
     );
-    CodeAction {
+    Some(CodeAction {
         title,
         kind: Some(CodeActionKind::QuickFix),
         edit: Some(WorkspaceEdit {
@@ -207,5 +207,5 @@ fn build_action(
             })
             .map(|diagnostic| vec![diagnostic.clone()]),
         ..Default::default()
-    }
+    })
 }

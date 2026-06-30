@@ -12,7 +12,7 @@ pub fn act(
     node: &SyntaxNode,
     context: &CodeActionContext,
 ) -> Option<CodeAction> {
-    let end = line_index.convert(node.text_range().end());
+    let end = line_index.convert(node.text_range().end())?;
     let (types, diagnostic) = context
         .diagnostics
         .iter()
@@ -78,7 +78,7 @@ pub fn act(
     changes.insert(
         uri.raw(db),
         vec![TextEdit {
-            range: line_index.convert(TextRange::empty(end)),
+            range: line_index.convert(TextRange::empty(end))?,
             new_text: format!(" (result {})", types.join(" ")),
         }],
     );

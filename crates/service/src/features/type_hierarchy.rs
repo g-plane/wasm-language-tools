@@ -40,19 +40,19 @@ impl LanguageService {
                     CompositeType::Cont(..) => "cont".into(),
                 }),
                 uri: params.text_document.uri.clone(),
-                range: line_index.convert(symbol.key.text_range()),
+                range: line_index.convert(symbol.key.text_range())?,
                 selection_range: line_index.convert(
                     symbol_table
                         .def_poi
                         .get(&symbol.key)
                         .copied()
                         .unwrap_or_else(|| symbol.key.text_range()),
-                ),
+                )?,
                 data: None,
             }]),
             SymbolKind::TypeUse if symbol.key.text_range() == parent_range => {
-                symbol_table.find_def(symbol.key).map(|symbol| {
-                    vec![TypeHierarchyItem {
+                symbol_table.find_def(symbol.key).and_then(|symbol| {
+                    Some(vec![TypeHierarchyItem {
                         name: symbol.idx.render(self).to_string(),
                         kind: LspSymbolKind::Class,
                         tags: if deprecation.contains_key(&symbol.key) {
@@ -67,16 +67,16 @@ impl LanguageService {
                             CompositeType::Cont(..) => "cont".into(),
                         }),
                         uri: params.text_document.uri.clone(),
-                        range: line_index.convert(symbol.key.text_range()),
+                        range: line_index.convert(symbol.key.text_range())?,
                         selection_range: line_index.convert(
                             symbol_table
                                 .def_poi
                                 .get(&symbol.key)
                                 .copied()
                                 .unwrap_or_else(|| symbol.key.text_range()),
-                        ),
+                        )?,
                         data: None,
-                    }]
+                    }])
                 })
             }
             _ => None,
@@ -101,8 +101,8 @@ impl LanguageService {
             .get(&type_def.key)
             .and_then(|def_type| def_type.inherits.as_ref())
             .and_then(|inherits| symbol_table.symbols.get(&inherits.symbol))
-            .map(|symbol| {
-                vec![TypeHierarchyItem {
+            .and_then(|symbol| {
+                Some(vec![TypeHierarchyItem {
                     name: symbol.idx.render(self).to_string(),
                     kind: LspSymbolKind::Class,
                     tags: if deprecation.contains_key(&symbol.key) {
@@ -117,16 +117,16 @@ impl LanguageService {
                         CompositeType::Cont(..) => "cont".into(),
                     }),
                     uri: params.item.uri,
-                    range: line_index.convert(symbol.key.text_range()),
+                    range: line_index.convert(symbol.key.text_range())?,
                     selection_range: line_index.convert(
                         symbol_table
                             .def_poi
                             .get(&symbol.key)
                             .copied()
                             .unwrap_or_else(|| symbol.key.text_range()),
-                    ),
+                    )?,
                     data: None,
-                }]
+                }])
             })
     }
 
@@ -154,30 +154,32 @@ impl LanguageService {
                     .is_some_and(|inherits| inherits.symbol == key)
             })
             .filter_map(|(key, _)| symbol_table.symbols.get(key))
-            .map(|symbol| TypeHierarchyItem {
-                name: symbol.idx.render(self).to_string(),
-                kind: LspSymbolKind::Class,
-                tags: if deprecation.contains_key(&symbol.key) {
-                    Some(vec![SymbolTag::Deprecated])
-                } else {
-                    None
-                },
-                detail: def_types.get(&symbol.key).map(|def_type| match def_type.comp {
-                    CompositeType::Func(..) => "func".into(),
-                    CompositeType::Struct(..) => "struct".into(),
-                    CompositeType::Array(..) => "array".into(),
-                    CompositeType::Cont(..) => "cont".into(),
-                }),
-                uri: params.item.uri.clone(),
-                range: line_index.convert(symbol.key.text_range()),
-                selection_range: line_index.convert(
-                    symbol_table
-                        .def_poi
-                        .get(&symbol.key)
-                        .copied()
-                        .unwrap_or_else(|| symbol.key.text_range()),
-                ),
-                data: None,
+            .filter_map(|symbol| {
+                Some(TypeHierarchyItem {
+                    name: symbol.idx.render(self).to_string(),
+                    kind: LspSymbolKind::Class,
+                    tags: if deprecation.contains_key(&symbol.key) {
+                        Some(vec![SymbolTag::Deprecated])
+                    } else {
+                        None
+                    },
+                    detail: def_types.get(&symbol.key).map(|def_type| match def_type.comp {
+                        CompositeType::Func(..) => "func".into(),
+                        CompositeType::Struct(..) => "struct".into(),
+                        CompositeType::Array(..) => "array".into(),
+                        CompositeType::Cont(..) => "cont".into(),
+                    }),
+                    uri: params.item.uri.clone(),
+                    range: line_index.convert(symbol.key.text_range())?,
+                    selection_range: line_index.convert(
+                        symbol_table
+                            .def_poi
+                            .get(&symbol.key)
+                            .copied()
+                            .unwrap_or_else(|| symbol.key.text_range()),
+                    )?,
+                    data: None,
+                })
             })
             .collect::<Vec<_>>();
         items.sort_unstable_by_key(|item| item.range.start);

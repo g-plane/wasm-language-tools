@@ -249,27 +249,33 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
     });
     diagnostics
         .into_iter()
-        .map(|diagnostic| lspt::Diagnostic {
-            range: line_index.convert(diagnostic.range),
-            severity: Some(diagnostic.severity),
-            code: Some(Union2::B(diagnostic.code)),
-            code_description: None,
-            source: Some("wat".into()),
-            message: diagnostic.message,
-            tags: diagnostic.tags,
-            related_information: diagnostic.related_information.map(|related_information| {
-                related_information
-                    .into_iter()
-                    .map(|info| DiagnosticRelatedInformation {
-                        location: Location {
-                            uri: uri.raw(db),
-                            range: line_index.convert(info.range),
-                        },
-                        message: info.message,
-                    })
-                    .collect()
-            }),
-            data: diagnostic.data,
+        .filter_map(|diagnostic| {
+            Some(lspt::Diagnostic {
+                range: line_index.convert(diagnostic.range)?,
+                severity: Some(diagnostic.severity),
+                code: Some(Union2::B(diagnostic.code)),
+                code_description: None,
+                source: Some("wat".into()),
+                message: diagnostic.message,
+                tags: diagnostic.tags,
+                related_information: diagnostic.related_information.map(|related_information| {
+                    related_information
+                        .into_iter()
+                        .filter_map(|info| {
+                            line_index
+                                .convert(info.range)
+                                .map(|range| DiagnosticRelatedInformation {
+                                    location: Location {
+                                        uri: uri.raw(db),
+                                        range,
+                                    },
+                                    message: info.message,
+                                })
+                        })
+                        .collect()
+                }),
+                data: diagnostic.data,
+            })
         })
         .collect()
 }

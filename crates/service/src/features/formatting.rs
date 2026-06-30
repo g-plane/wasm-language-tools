@@ -17,7 +17,7 @@ impl LanguageService {
         let root = document.root(self);
         let formatted = wat_formatter::format(root, &build_options(&params.options, config.format.clone()));
         let text_edit = TextEdit {
-            range: line_index.convert(TextRange::new(0.into(), root.text_len())),
+            range: line_index.convert(TextRange::new(0.into(), root.text_len()))?,
             new_text: formatted,
         };
         Some(vec![text_edit])
@@ -38,7 +38,7 @@ impl LanguageService {
             line_index,
         )?;
         let text_edit = TextEdit {
-            range: line_index.convert(range),
+            range: line_index.convert(range)?,
             new_text: formatted,
         };
         Some(vec![text_edit])

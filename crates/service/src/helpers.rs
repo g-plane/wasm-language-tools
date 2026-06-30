@@ -1,5 +1,5 @@
 use crate::binder::{Symbol, SymbolTable};
-use line_index::{LineCol, LineIndex};
+use line_index::{LineIndex, WideEncoding, WideLineCol};
 use lspt::{Position, Range};
 use std::{borrow::Cow, num::ParseIntError};
 use wat_syntax::{NodeOrToken, SyntaxKind, TextRange, TextSize};
@@ -11,49 +11,47 @@ pub trait LineIndexExt<In> {
     fn convert(&self, input: In) -> Self::Out;
 }
 impl LineIndexExt<TextSize> for LineIndex {
-    type Out = Position;
+    type Out = Option<Position>;
     /// Convert syntax tree offset to LSP position.
     fn convert(&self, input: TextSize) -> Self::Out {
-        let line_col = self.line_col(input);
-        Position {
-            line: line_col.line,
-            character: line_col.col,
-        }
+        self.try_line_col(input)
+            .and_then(|line_col| self.to_wide(WideEncoding::Utf16, line_col))
+            .map(|wide_line_col| Position {
+                line: wide_line_col.line,
+                character: wide_line_col.col,
+            })
     }
 }
 impl LineIndexExt<TextRange> for LineIndex {
-    type Out = Range;
+    type Out = Option<Range>;
     /// Convert syntax tree range to LSP range.
     fn convert(&self, input: TextRange) -> Self::Out {
-        Range {
-            start: self.convert(input.start()),
-            end: self.convert(input.end()),
-        }
+        let start = self.convert(input.start())?;
+        let end = self.convert(input.end())?;
+        Some(Range { start, end })
     }
 }
 impl LineIndexExt<Position> for LineIndex {
     type Out = Option<TextSize>;
     /// Convert LSP position to syntax tree offset.
     fn convert(&self, input: Position) -> Self::Out {
-        self.offset(LineCol {
-            line: input.line,
-            col: input.character,
-        })
+        self.to_utf8(
+            WideEncoding::Utf16,
+            WideLineCol {
+                line: input.line,
+                col: input.character,
+            },
+        )
+        .and_then(|line_col| self.offset(line_col))
     }
 }
 impl LineIndexExt<Range> for LineIndex {
     type Out = Option<TextRange>;
     /// Convert LSP range to syntax tree range.
     fn convert(&self, input: Range) -> Self::Out {
-        self.offset(LineCol {
-            line: input.start.line,
-            col: input.start.character,
-        })
-        .zip(self.offset(LineCol {
-            line: input.end.line,
-            col: input.end.character,
-        }))
-        .map(|(start, end)| TextRange::new(start, end))
+        let start = self.convert(input.start)?;
+        let end = self.convert(input.end)?;
+        Some(TextRange::new(start, end))
     }
 }
 

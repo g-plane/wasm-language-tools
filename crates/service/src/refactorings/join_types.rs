@@ -41,7 +41,7 @@ pub fn act(
             range: line_index.convert(TextRange::new(
                 first_node.text_range().start(),
                 items.last().unwrap_or(first_node).text_range().end(),
-            )),
+            ))?,
             new_text,
         }],
     );

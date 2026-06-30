@@ -38,7 +38,7 @@ pub fn act(
         new_text.push_str(&node.to_string());
     }
 
-    let end = line_index.convert(node.text_range().end());
+    let end = line_index.convert(node.text_range().end())?;
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
         uri.raw(db),

@@ -23,8 +23,8 @@ impl LanguageService {
                 .symbols
                 .values()
                 .filter_map(|symbol| {
-                    let range = line_index.convert(symbol.key.text_range());
-                    let selection_range = line_index.convert(*symbol_table.def_poi.get(&symbol.key)?);
+                    let range = line_index.convert(symbol.key.text_range())?;
+                    let selection_range = line_index.convert(*symbol_table.def_poi.get(&symbol.key)?)?;
                     let tags = if deprecation.contains_key(&symbol.key) {
                         Some(vec![SymbolTag::Deprecated])
                     } else {
@@ -44,7 +44,7 @@ impl LanguageService {
                             },
                         )),
                         SymbolKind::Func => {
-                            let range = line_index.convert(symbol.key.text_range());
+                            let range = line_index.convert(symbol.key.text_range())?;
                             Some((
                                 symbol.key,
                                 DocumentSymbol {
@@ -59,7 +59,7 @@ impl LanguageService {
                             ))
                         }
                         SymbolKind::Local => {
-                            let range = line_index.convert(symbol.key.text_range());
+                            let range = line_index.convert(symbol.key.text_range())?;
                             Some((
                                 symbol.key,
                                 DocumentSymbol {
@@ -76,7 +76,7 @@ impl LanguageService {
                         }
                         SymbolKind::Type => {
                             let def_types = types_analyzer::get_def_types(db, document);
-                            let range = line_index.convert(symbol.key.text_range());
+                            let range = line_index.convert(symbol.key.text_range())?;
                             Some((
                                 symbol.key,
                                 DocumentSymbol {
@@ -96,7 +96,7 @@ impl LanguageService {
                             ))
                         }
                         SymbolKind::GlobalDef => {
-                            let range = line_index.convert(symbol.key.text_range());
+                            let range = line_index.convert(symbol.key.text_range())?;
                             Some((
                                 symbol.key,
                                 DocumentSymbol {
@@ -125,7 +125,7 @@ impl LanguageService {
                         | SymbolKind::TagDef
                         | SymbolKind::DataDef
                         | SymbolKind::ElemDef => {
-                            let range = line_index.convert(symbol.key.text_range());
+                            let range = line_index.convert(symbol.key.text_range())?;
                             Some((
                                 symbol.key,
                                 DocumentSymbol {
@@ -140,7 +140,7 @@ impl LanguageService {
                             ))
                         }
                         SymbolKind::FieldDef => {
-                            let range = line_index.convert(symbol.key.text_range());
+                            let range = line_index.convert(symbol.key.text_range())?;
                             Some((
                                 symbol.key,
                                 DocumentSymbol {

@@ -13,7 +13,7 @@ pub fn act(
     context: &CodeActionContext,
 ) -> Option<CodeAction> {
     let mut_token = support::token(node, SyntaxKind::KEYWORD).filter(|keyword| keyword.text() == "mut")?;
-    let token_lsp_range = line_index.convert(mut_token.text_range());
+    let token_lsp_range = line_index.convert(mut_token.text_range())?;
     let diagnostic = context.diagnostics.iter().find(|diagnostic| match &diagnostic.code {
         Some(Union2::B(code)) => code == "needless-mut" && diagnostic.range == token_lsp_range,
         _ => false,
@@ -22,7 +22,7 @@ pub fn act(
     let mut text_edits = Vec::with_capacity(4);
     if let Some(l_paren) = support::token(node, SyntaxKind::L_PAREN) {
         text_edits.push(TextEdit {
-            range: line_index.convert(l_paren.text_range()),
+            range: line_index.convert(l_paren.text_range())?,
             new_text: "".into(),
         });
     }
@@ -34,15 +34,18 @@ pub fn act(
         .next_sibling_or_token()
         .and_then(NodeOrToken::into_token)
         .filter(|token| token.kind() == SyntaxKind::WHITESPACE)
+        && let Some(range) = line_index.convert(whitespace.text_range())
     {
         text_edits.push(TextEdit {
-            range: line_index.convert(whitespace.text_range()),
+            range,
             new_text: "".into(),
         });
     }
-    if let Some(r_paren) = support::token(node, SyntaxKind::R_PAREN) {
+    if let Some(r_paren) = support::token(node, SyntaxKind::R_PAREN)
+        && let Some(range) = line_index.convert(r_paren.text_range())
+    {
         text_edits.push(TextEdit {
-            range: line_index.convert(r_paren.text_range()),
+            range,
             new_text: "".into(),
         });
     }

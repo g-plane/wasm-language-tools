@@ -755,10 +755,9 @@ fn get_cmp_list(
                                 text_edit: if token.kind().is_trivia() {
                                     None
                                 } else {
-                                    Some(Union2::A(TextEdit {
-                                        range: line_index.convert(token.text_range()),
-                                        new_text: label,
-                                    }))
+                                    line_index
+                                        .convert(token.text_range())
+                                        .map(|range| Union2::A(TextEdit { range, new_text: label }))
                                 },
                                 label_details: ty.as_ref().map(|ty| CompletionItemLabelDetails {
                                     description: Some(ty.render(db).to_string()),
@@ -786,10 +785,9 @@ fn get_cmp_list(
                         text_edit: if token.kind().is_trivia() {
                             None
                         } else {
-                            Some(Union2::A(TextEdit {
-                                range: line_index.convert(token.text_range()),
-                                new_text: label,
-                            }))
+                            line_index
+                                .convert(token.text_range())
+                                .map(|range| Union2::A(TextEdit { range, new_text: label }))
                         },
                         detail: Some(types_analyzer::render_func_header(
                             db,
@@ -834,10 +832,9 @@ fn get_cmp_list(
                         text_edit: if token.kind().is_trivia() {
                             None
                         } else {
-                            Some(Union2::A(TextEdit {
-                                range: line_index.convert(token.text_range()),
-                                new_text: label,
-                            }))
+                            line_index
+                                .convert(token.text_range())
+                                .map(|range| Union2::A(TextEdit { range, new_text: label }))
                         },
                         label_details: comp_type.map(|comp_type| CompletionItemLabelDetails {
                             detail: match comp_type {
@@ -887,10 +884,9 @@ fn get_cmp_list(
                         text_edit: if token.kind().is_trivia() {
                             None
                         } else {
-                            Some(Union2::A(TextEdit {
-                                range: line_index.convert(token.text_range()),
-                                new_text: label,
-                            }))
+                            line_index
+                                .convert(token.text_range())
+                                .map(|range| Union2::A(TextEdit { range, new_text: label }))
                         },
                         label_details: ty.as_ref().map(|ty| CompletionItemLabelDetails {
                             description: Some(ty.render(db).to_string()),
@@ -929,10 +925,9 @@ fn get_cmp_list(
                         text_edit: if token.kind().is_trivia() {
                             None
                         } else {
-                            Some(Union2::A(TextEdit {
-                                range: line_index.convert(token.text_range()),
-                                new_text: label,
-                            }))
+                            line_index
+                                .convert(token.text_range())
+                                .map(|range| Union2::A(TextEdit { range, new_text: label }))
                         },
                         tags: if deprecation.contains_key(&symbol.key) {
                             Some(vec![CompletionItemTag::Deprecated])
@@ -965,10 +960,9 @@ fn get_cmp_list(
                                 text_edit: if token.kind().is_trivia() {
                                     None
                                 } else {
-                                    Some(Union2::A(TextEdit {
-                                        range: line_index.convert(token.text_range()),
-                                        new_text: label,
-                                    }))
+                                    line_index
+                                        .convert(token.text_range())
+                                        .map(|range| Union2::A(TextEdit { range, new_text: label }))
                                 },
                                 tags: if deprecation.contains_key(&symbol.key) {
                                     Some(vec![CompletionItemTag::Deprecated])
@@ -1004,10 +998,9 @@ fn get_cmp_list(
                                 text_edit: if token.kind().is_trivia() {
                                     None
                                 } else {
-                                    Some(Union2::A(TextEdit {
-                                        range: line_index.convert(token.text_range()),
-                                        new_text: label,
-                                    }))
+                                    line_index
+                                        .convert(token.text_range())
+                                        .map(|range| Union2::A(TextEdit { range, new_text: label }))
                                 },
                                 label_details: Some(CompletionItemLabelDetails {
                                     description: Some(format!(
@@ -1043,10 +1036,9 @@ fn get_cmp_list(
                             text_edit: if token.kind().is_trivia() {
                                 None
                             } else {
-                                Some(Union2::A(TextEdit {
-                                    range: line_index.convert(token.text_range()),
-                                    new_text: label,
-                                }))
+                                line_index
+                                    .convert(token.text_range())
+                                    .map(|range| Union2::A(TextEdit { range, new_text: label }))
                             },
                             label_details: Some(CompletionItemLabelDetails {
                                 description: Some(ty.render(db).to_string()),
@@ -1116,10 +1108,9 @@ fn get_cmp_list(
                         text_edit: if token.kind().is_trivia() {
                             None
                         } else {
-                            Some(Union2::A(TextEdit {
-                                range: line_index.convert(token.text_range()),
-                                new_text: label,
-                            }))
+                            line_index
+                                .convert(token.text_range())
+                                .map(|range| Union2::A(TextEdit { range, new_text: label }))
                         },
                         label_details: Some(CompletionItemLabelDetails {
                             description: Some(format!(
@@ -1151,10 +1142,9 @@ fn get_cmp_list(
                         text_edit: if token.kind().is_trivia() {
                             None
                         } else {
-                            Some(Union2::A(TextEdit {
-                                range: line_index.convert(token.text_range()),
-                                new_text: label,
-                            }))
+                            line_index
+                                .convert(token.text_range())
+                                .map(|range| Union2::A(TextEdit { range, new_text: label }))
                         },
                         label_details: Some(CompletionItemLabelDetails {
                             detail: Some(if let Some(name) = symbol.idx.name {
@@ -1186,10 +1176,9 @@ fn get_cmp_list(
                         text_edit: if token.kind().is_trivia() {
                             None
                         } else {
-                            Some(Union2::A(TextEdit {
-                                range: line_index.convert(token.text_range()),
-                                new_text: label,
-                            }))
+                            line_index
+                                .convert(token.text_range())
+                                .map(|range| Union2::A(TextEdit { range, new_text: label }))
                         },
                         label_details: Some(CompletionItemLabelDetails {
                             detail: Some(if let Some(name) = symbol.idx.name {

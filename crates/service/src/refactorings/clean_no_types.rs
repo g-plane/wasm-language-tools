@@ -23,12 +23,13 @@ pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, nod
                 | SyntaxKind::LINE_COMMENT
                 | SyntaxKind::BLOCK_COMMENT
         ),
-    }) {
+    }) && let Some(range) = line_index.convert(node.text_range())
+    {
         let mut changes = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
         changes.insert(
             uri.raw(db),
             vec![TextEdit {
-                range: line_index.convert(node.text_range()),
+                range,
                 new_text: "".into(),
             }],
         );

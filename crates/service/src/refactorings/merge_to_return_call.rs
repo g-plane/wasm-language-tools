@@ -98,15 +98,16 @@ pub fn act(
     }
 
     let mut text_edits = vec![TextEdit {
-        range: line_index.convert(support::token(&call_instr, SyntaxKind::INSTR_NAME)?.text_range()),
+        range: line_index.convert(support::token(&call_instr, SyntaxKind::INSTR_NAME)?.text_range())?,
         new_text: "return_call".into(),
     }];
     if let Some(instr) = &return_instr {
         text_edits.extend(
             instr
                 .tokens_by_kind([SyntaxKind::L_PAREN, SyntaxKind::INSTR_NAME, SyntaxKind::R_PAREN])
-                .map(|token| TextEdit {
-                    range: line_index.convert(token.text_range()),
+                .filter_map(|token| line_index.convert(token.text_range()))
+                .map(|range| TextEdit {
+                    range,
                     new_text: "".into(),
                 }),
         );

@@ -29,8 +29,8 @@ impl LanguageService {
                             .descendant_tokens()
                             .filter_map(|(other, ..)| {
                                 if other.kind() == kind && other.text() == text {
-                                    Some(DocumentHighlight {
-                                        range: line_index.convert(other.text_range()),
+                                    line_index.convert(other.text_range()).map(|range| DocumentHighlight {
+                                        range,
                                         kind: Some(DocumentHighlightKind::Text),
                                     })
                                 } else {
@@ -102,8 +102,8 @@ impl LanguageService {
                                             .and_then(|grand| grand.tokens_by_kind(SyntaxKind::INSTR_NAME).next())
                                             .is_some_and(|token| token.text().ends_with(".const"))
                                     {
-                                        Some(DocumentHighlight {
-                                            range: line_index.convert(other.text_range()),
+                                        line_index.convert(other.text_range()).map(|range| DocumentHighlight {
+                                            range,
                                             kind: Some(DocumentHighlightKind::Text),
                                         })
                                     } else {
@@ -141,8 +141,9 @@ fn create_symbol_highlight(symbol: &Symbol, root: &SyntaxNode, line_index: &Line
                 None
             }
         })
-        .map(|token| DocumentHighlight {
-            range: line_index.convert(token.text_range()),
+        .and_then(|token| line_index.convert(token.text_range()))
+        .map(|range| DocumentHighlight {
+            range,
             kind: get_highlight_kind_of_symbol(symbol, root),
         })
 }
