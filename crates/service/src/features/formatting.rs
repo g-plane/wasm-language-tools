@@ -1,8 +1,9 @@
 use crate::{LanguageService, helpers::LineIndexExt, uri::InternUri};
 use lspt::{DocumentFormattingParams, DocumentRangeFormattingParams, FormattingOptions, TextEdit};
+use similar::{Algorithm, DiffOp};
 use wat_formatter::config::{FormatOptions, LanguageOptions, LayoutOptions};
 use wat_syntax::{
-    SyntaxNode, TextRange,
+    SyntaxNode, TextRange, TextSize,
     ast::{AstNode, Root},
 };
 
@@ -14,13 +15,58 @@ impl LanguageService {
         let configs = self.configs.read();
         let config = configs.get(&uri)?.unwrap_or_global(self);
         let line_index = document.line_index(self);
-        let root = document.root(self);
-        let formatted = wat_formatter::format(root, &build_options(&params.options, config.format.clone()));
-        let text_edit = TextEdit {
-            range: line_index.convert(TextRange::new(0.into(), root.text_len()))?,
-            new_text: formatted,
-        };
-        Some(vec![text_edit])
+        let old = document.text(self);
+        let new = wat_formatter::format(
+            document.root(self),
+            &build_options(&params.options, config.format.clone()),
+        );
+        similar::capture_diff_slices(Algorithm::Myers, old.as_bytes(), new.as_bytes())
+            .into_iter()
+            .filter_map(|diff_op| match diff_op {
+                DiffOp::Equal { .. } => None,
+                diff_op => Some(diff_op),
+            })
+            .map(|diff_op| match diff_op {
+                DiffOp::Equal { .. } => unreachable!(),
+                DiffOp::Delete { old_index, old_len, .. } => {
+                    let start = TextSize::try_from(old_index).ok()?;
+                    let end = TextSize::try_from(old_index + old_len).ok()?;
+                    line_index.convert(TextRange::new(start, end)).map(|range| TextEdit {
+                        range,
+                        new_text: String::new(),
+                    })
+                }
+                DiffOp::Insert {
+                    old_index,
+                    new_index,
+                    new_len,
+                } => {
+                    let start = TextSize::try_from(old_index).ok()?;
+                    let new_text = new.get(new_index..new_index + new_len)?.into();
+                    line_index
+                        .convert(TextRange::empty(start))
+                        .map(|range| TextEdit { range, new_text })
+                }
+                DiffOp::Replace {
+                    old_index,
+                    old_len,
+                    new_index,
+                    new_len,
+                } => {
+                    let start = TextSize::try_from(old_index).ok()?;
+                    let end = TextSize::try_from(old_index + old_len).ok()?;
+                    let new_text = new.get(new_index..new_index + new_len)?.into();
+                    line_index
+                        .convert(TextRange::new(start, end))
+                        .map(|range| TextEdit { range, new_text })
+                }
+            })
+            .collect::<Option<_>>()
+            .or_else(|| {
+                line_index
+                    .convert(TextRange::new(0.into(), TextSize::of(old)))
+                    .map(|range| vec![TextEdit { range, new_text: new }])
+            })
     }
 
     /// Handler for `textDocument/rangeFormatting` request.

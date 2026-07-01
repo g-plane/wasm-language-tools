@@ -1,5 +1,5 @@
 ---
-source: crates/service/tests/formatting/mod.rs
+source: crates/service/tests/formatting/full.rs
 expression: response
 ---
 [
@@ -10,10 +10,62 @@ expression: response
         "character": 0
       },
       "end": {
-        "line": 6,
+        "line": 1,
         "character": 0
       }
     },
-    "newText": "(module\n    (func (param i32)\n        (local.get 0)))\n"
+    "newText": ""
+  },
+  {
+    "range": {
+      "start": {
+        "line": 2,
+        "character": 2
+      },
+      "end": {
+        "line": 2,
+        "character": 2
+      }
+    },
+    "newText": "  "
+  },
+  {
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 4
+      },
+      "end": {
+        "line": 3,
+        "character": 4
+      }
+    },
+    "newText": "    "
+  },
+  {
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 17
+      },
+      "end": {
+        "line": 4,
+        "character": 2
+      }
+    },
+    "newText": ""
+  },
+  {
+    "range": {
+      "start": {
+        "line": 4,
+        "character": 3
+      },
+      "end": {
+        "line": 5,
+        "character": 0
+      }
+    },
+    "newText": ""
   }
 ]

@@ -15,6 +15,7 @@ use wat_syntax::{GreenNode, SyntaxNode, TextSize};
 #[salsa::input(debug)]
 pub(crate) struct Document {
     pub uri: InternUri,
+    #[returns(ref)]
     pub text: String,
     #[returns(ref)]
     pub line_index: LineIndex,
@@ -76,7 +77,7 @@ impl LanguageService {
                         let Some(range) = document.line_index(self).convert(partial.range) else {
                             break 'single;
                         };
-                        let mut text = document.text(self);
+                        let mut text = document.text(self).to_owned();
                         let old_start = usize::from(range.start());
                         let old_end = usize::from(range.end());
                         if text
@@ -149,7 +150,7 @@ impl LanguageService {
         }
 
         let mut line_index = document.line_index(self).clone();
-        let mut text = document.text(self);
+        let mut text = document.text(self).to_owned();
         params.content_changes.into_iter().for_each(|change| match change {
             TextDocumentContentChangeEvent::A(partial) => {
                 if let Some(range) = line_index.convert(partial.range) {

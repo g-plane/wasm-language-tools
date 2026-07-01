@@ -7,13 +7,26 @@ expression: response
     "range": {
       "start": {
         "line": 0,
-        "character": 0
+        "character": 2
+      },
+      "end": {
+        "line": 0,
+        "character": 2
+      }
+    },
+    "newText": " "
+  },
+  {
+    "range": {
+      "start": {
+        "line": 0,
+        "character": 9
       },
       "end": {
         "line": 0,
         "character": 9
       }
     },
-    "newText": ";; comment\n"
+    "newText": "\n"
   }
 ]

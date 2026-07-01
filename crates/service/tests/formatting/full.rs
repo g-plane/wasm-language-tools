@@ -105,3 +105,27 @@ fn format_comments() {
     ));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn non_ascii() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  ;; 测试abcd和中文
+  (func     $func'1a)
+  (func call $func'1a
+  )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.formatting(create_params(
+        uri,
+        FormattingOptions {
+            tab_size: 2,
+            insert_spaces: true,
+            ..Default::default()
+        },
+    ));
+    assert_json_snapshot!(response);
+}
