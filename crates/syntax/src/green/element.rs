@@ -1,5 +1,4 @@
 use crate::{GreenNode, GreenToken, NodeOrToken, SyntaxKind};
-use text_size::TextSize;
 
 impl<'a> NodeOrToken<&'a GreenNode, &'a GreenToken> {
     #[inline]
@@ -7,14 +6,6 @@ impl<'a> NodeOrToken<&'a GreenNode, &'a GreenToken> {
         match self {
             NodeOrToken::Node(node) => node.kind(),
             NodeOrToken::Token(token) => token.kind(),
-        }
-    }
-
-    #[inline]
-    pub fn text_len(&self) -> TextSize {
-        match self {
-            NodeOrToken::Node(node) => node.text_len(),
-            NodeOrToken::Token(token) => token.text_len(),
         }
     }
 }

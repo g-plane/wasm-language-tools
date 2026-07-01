@@ -57,12 +57,6 @@ impl GreenNode {
     }
 
     #[inline]
-    /// Total length of text that this node covers.
-    pub fn text_len(&self) -> TextSize {
-        self.data.header.text_len
-    }
-
-    #[inline]
     /// Iterator over the child nodes and tokens of this node.
     pub fn children(&self) -> impl Iterator<Item = NodeOrToken<&GreenNode, &GreenToken>> + Clone {
         self.data.slice().iter().map(|child| match child {
@@ -75,6 +69,12 @@ impl GreenNode {
     /// Number of child nodes and tokens of this node.
     pub fn children_len(&self) -> usize {
         self.data.len()
+    }
+
+    #[inline]
+    /// Total length of text that this node covers.
+    pub(crate) fn text_len(&self) -> TextSize {
+        self.data.header.text_len
     }
 
     #[inline]

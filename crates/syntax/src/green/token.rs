@@ -32,15 +32,15 @@ impl GreenToken {
     }
 
     #[inline]
-    /// Length of the text of this token.
-    pub fn text_len(&self) -> TextSize {
-        self.data.header.text_len
-    }
-
-    #[inline]
     /// Text of this token.
     pub fn text(&self) -> &str {
         unsafe { std::str::from_utf8_unchecked(self.data.slice()) }
+    }
+
+    #[inline]
+    /// Length of the text of this token.
+    pub(crate) fn text_len(&self) -> TextSize {
+        self.data.header.text_len
     }
 }
 
