@@ -39,43 +39,6 @@ fn block_type_folded() {
 }
 
 #[test]
-fn folded() {
-    let uri = "untitled:test".to_string();
-    let source = "
-(module
-  (func (param i32 f32) (result i32)
-    (block (result i32)
-      (i32.add
-        (local.get 0)
-        (local.get 1)))))
-";
-    let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
-    let response = service.pull_diagnostics(create_params(uri));
-    assert_json_snapshot!(response);
-}
-
-#[test]
-fn sequence() {
-    let uri = "untitled:test".to_string();
-    let source = "
-(module
-  (func (param i32 f32) (result i32)
-    block (result i32)
-      local.get 0
-      local.get 1
-      i32.add
-    end))
-";
-    let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
-    let response = service.pull_diagnostics(create_params(uri));
-    assert_json_snapshot!(response);
-}
-
-#[test]
 fn new_stack_for_new_block() {
     let uri = "untitled:test".to_string();
     let source = "

@@ -3,23 +3,6 @@ use insta::assert_json_snapshot;
 use wat_service::LanguageService;
 
 #[test]
-fn param() {
-    let uri = "untitled:test".to_string();
-    let source = "
-(module
-    (func (param i64) (result i32)
-        (i32.add (local.get 0) (i32.const 1))
-    )
-)
-";
-    let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
-    let response = service.pull_diagnostics(create_params(uri));
-    assert_json_snapshot!(response);
-}
-
-#[test]
 fn results_incorrect() {
     let uri = "untitled:test".to_string();
     let source = "

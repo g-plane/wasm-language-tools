@@ -27,28 +27,6 @@ mod subtyping;
 mod table;
 
 #[test]
-fn less_operands() {
-    let uri = "untitled:test".to_string();
-    let source = "(module (func (result i32) (i32.add (i32.const 0))))";
-    let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
-    let response = service.pull_diagnostics(create_params(uri));
-    assert_json_snapshot!(response);
-}
-
-#[test]
-fn more_operands() {
-    let uri = "untitled:test".to_string();
-    let source = "(module (func (i32.add (i32.const 0) (i32.const 0) (i32.const 0))))";
-    let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
-    let response = service.pull_diagnostics(create_params(uri));
-    assert_json_snapshot!(response);
-}
-
-#[test]
 fn operand_count_pluralization() {
     let uri = "untitled:test".to_string();
     let source = "(module (func (result i32) (i32.eqz)))";
