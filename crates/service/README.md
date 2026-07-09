@@ -1,5 +1,6 @@
-The language service of WebAssembly Language Tools.
-This is the core functionality behind the language server.
+The language service of WebAssembly Language Tools. This is the core functionality behind the language server.
+
+## Introduction
 
 The language service does nothing about IO, which means it doesn't read source files.
 Actually, it doesn't even require the source code to be a file on disk.
@@ -12,3 +13,7 @@ and call corresponding methods of the language service when receiving requests
 then send responses back to the client.
 You're free to use [`lsp-server`](https://docs.rs/lsp-server) or [`tower-lsp`](https://docs.rs/tower-lsp)
 with the language service, or do it completely by yourself as you like.
+
+## Credits
+
+Some test data are from [WebAssembly/spec](https://github.com/WebAssembly/spec) which is licensed under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).

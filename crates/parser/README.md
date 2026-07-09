@@ -29,3 +29,7 @@ let (tree, errors) = wat_parser::parse(input);
 assert_eq!(errors[0].range.start(), TextSize::from(7));
 assert!(errors[0].message.to_string().contains("expected `)`"));
 ```
+
+## Credits
+
+Some test data are from [WebAssembly/spec](https://github.com/WebAssembly/spec) which is licensed under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
