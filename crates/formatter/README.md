@@ -37,6 +37,6 @@ let input = "( module ( func ) )";
 let (tree, _) = wat_parser::parse(input);
 let root = AmberNode::new_root(&tree);
 let func = root.children().next().unwrap().children().next().unwrap();
-let formatted = format_node(func, &Default::default(), 0).unwrap();
+let formatted = format_node(func, &Default::default(), 0);
 assert_eq!("(func)", &formatted);
 ```

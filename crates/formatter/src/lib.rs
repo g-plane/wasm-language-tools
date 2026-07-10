@@ -17,10 +17,12 @@ pub fn format(root: &GreenNode, options: &FormatOptions) -> String {
 }
 
 /// Print a specific syntax node.
-pub fn format_node(node: AmberNode, options: &FormatOptions, base_indent: usize) -> Option<String> {
+pub fn format_node(node: AmberNode, options: &FormatOptions, base_indent: usize) -> String {
     let ctx = Ctx::new(options);
-    crate::printer::format_node(node, &ctx)
-        .map(|doc| tiny_pretty::print(&doc.nest(base_indent), &build_options(options)))
+    tiny_pretty::print(
+        &crate::printer::format_node(node, &ctx).nest(base_indent),
+        &build_options(options),
+    )
 }
 
 fn build_options(options: &FormatOptions) -> PrintOptions {

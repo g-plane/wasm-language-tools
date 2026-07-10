@@ -96,7 +96,7 @@ fn format_with_range(
     let node = node.amber();
     let node_start = node.text_range().start();
     let old = node.green().to_string();
-    let new = wat_formatter::format_node(node, options, line_index.convert(node_start)?.character as usize)?;
+    let new = wat_formatter::format_node(node, options, line_index.convert(node_start)?.character as usize);
     let text_edits = similar::capture_diff_slices(Algorithm::Myers, old.as_bytes(), new.as_bytes())
         .into_iter()
         .filter_map(|diff_op| match diff_op {
