@@ -129,6 +129,18 @@ impl<'a> AmberNode<'a> {
     }
 
     #[inline]
+    /// Find a child node that intersects with the given range.
+    pub fn child_at_range(&self, range: TextRange) -> Option<AmberNode<'a>> {
+        if !self.range.contains_range(range) {
+            return None;
+        }
+        let relative_range = range - self.range.start();
+        self.green
+            .child_at_range(relative_range)
+            .map(|(node, offset, _)| AmberNode::new(node, self.range.start() + offset))
+    }
+
+    #[inline]
     pub(crate) fn child_or_token_at(&self, index: usize) -> Option<NodeOrToken<AmberNode<'a>, AmberToken<'a>>> {
         self.green.slice().get(index).map(|child| match child {
             GreenChild::Node { offset, node } => AmberNode::new(node, self.range.start() + offset).into(),

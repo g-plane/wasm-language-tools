@@ -3,7 +3,7 @@ use line_index::LineIndex;
 use lspt::{DocumentFormattingParams, DocumentRangeFormattingParams, FormattingOptions, TextEdit};
 use similar::{Algorithm, DiffOp};
 use wat_formatter::config::{FormatOptions, LanguageOptions, LayoutOptions};
-use wat_syntax::{SyntaxNode, TextRange, TextSize};
+use wat_syntax::{AmberNode, TextRange, TextSize};
 
 impl LanguageService {
     /// Handler for `textDocument/formatting` request.
@@ -75,7 +75,7 @@ impl LanguageService {
         let config = configs.get(&uri)?.unwrap_or_global(self);
         let line_index = document.line_index(self);
         format_with_range(
-            SyntaxNode::new_root(document.root(self)),
+            AmberNode::new_root(document.root(self)),
             line_index.convert(params.range)?,
             &build_options(&params.options, config.format.clone()),
             line_index,
@@ -84,7 +84,7 @@ impl LanguageService {
 }
 
 fn format_with_range(
-    root: SyntaxNode,
+    root: AmberNode,
     range: TextRange,
     options: &FormatOptions,
     line_index: &LineIndex,
@@ -93,7 +93,6 @@ fn format_with_range(
     while let Some(it) = node.child_at_range(range) {
         node = it;
     }
-    let node = node.amber();
     let node_start = node.text_range().start();
     let old = node.green().to_string();
     let new = wat_formatter::format_node(node, options, line_index.convert(node_start)?.character as usize);

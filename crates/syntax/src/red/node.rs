@@ -307,27 +307,10 @@ impl<'a> SyntaxNode<'a> {
             return None;
         }
         let relative_range = range - self.data.range.start();
-        let slice = self.data.green.slice();
-        let i = slice
-            .binary_search_by(|child| match child {
-                GreenChild::Node { offset, node } => {
-                    TextRange::new(*offset, offset + node.text_len()).ordering(relative_range)
-                }
-                GreenChild::Token { offset, token } => {
-                    TextRange::new(*offset, offset + token.text_len()).ordering(relative_range)
-                }
-            })
-            .unwrap_or_else(|i| i.saturating_sub(1)); // not sure why but rowan does it
-        slice.get(i).and_then(|child| match child {
-            GreenChild::Node { offset, node } => {
-                if TextRange::new(*offset, offset + node.text_len()).contains_range(relative_range) {
-                    Some(self.new_child(i as u32, node, *offset))
-                } else {
-                    None
-                }
-            }
-            GreenChild::Token { .. } => None,
-        })
+        self.data
+            .green
+            .child_at_range(relative_range)
+            .map(|(node, offset, index)| self.new_child(index as u32, node, offset))
     }
 
     #[inline]

@@ -2,7 +2,7 @@ use super::{GreenChild, GreenHead};
 use crate::{GreenToken, NodeOrToken, SyntaxKind};
 use servo_arc::{ThinArc, UniqueArc};
 use std::{fmt, hash};
-use text_size::TextSize;
+use text_size::{TextRange, TextSize};
 
 #[derive(Clone, PartialEq, Eq)]
 /// Node in the green syntax tree.
@@ -80,6 +80,32 @@ impl GreenNode {
     #[inline]
     pub(crate) fn slice(&self) -> &[GreenChild] {
         self.data.slice()
+    }
+
+    #[inline]
+    /// Find a child node that intersects with the given range.
+    pub(crate) fn child_at_range(&self, relative_range: TextRange) -> Option<(&GreenNode, TextSize, usize)> {
+        let slice = self.data.slice();
+        let i = slice
+            .binary_search_by(|child| match child {
+                GreenChild::Node { offset, node } => {
+                    TextRange::new(*offset, offset + node.text_len()).ordering(relative_range)
+                }
+                GreenChild::Token { offset, token } => {
+                    TextRange::new(*offset, offset + token.text_len()).ordering(relative_range)
+                }
+            })
+            .unwrap_or_else(|i| i.saturating_sub(1)); // not sure why but rowan does it
+        slice.get(i).and_then(|child| match child {
+            GreenChild::Node { offset, node } => {
+                if TextRange::new(*offset, offset + node.text_len()).contains_range(relative_range) {
+                    Some((node, *offset, i))
+                } else {
+                    None
+                }
+            }
+            GreenChild::Token { .. } => None,
+        })
     }
 
     #[inline]
