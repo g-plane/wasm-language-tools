@@ -6,12 +6,12 @@ expression: response
   {
     "range": {
       "start": {
-        "line": 4,
+        "line": 11,
+        "character": 8
+      },
+      "end": {
+        "line": 11,
         "character": 11
-      },
-      "end": {
-        "line": 4,
-        "character": 15
       }
     },
     "newText": ""
@@ -19,12 +19,12 @@ expression: response
   {
     "range": {
       "start": {
-        "line": 5,
-        "character": 6
+        "line": 13,
+        "character": 0
       },
       "end": {
-        "line": 5,
-        "character": 12
+        "line": 15,
+        "character": 0
       }
     },
     "newText": ""
@@ -32,14 +32,14 @@ expression: response
   {
     "range": {
       "start": {
-        "line": 5,
-        "character": 19
+        "line": 15,
+        "character": 7
       },
       "end": {
-        "line": 5,
-        "character": 21
+        "line": 15,
+        "character": 7
       }
     },
-    "newText": ""
+    "newText": "\n"
   }
 ]

@@ -96,3 +96,143 @@ fn format_comments() {
     let response = service.range_formatting(create_params(uri, 3, 4, 3, 13));
     assert_json_snapshot!(response);
 }
+
+#[test]
+fn space1() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+
+
+
+    ;;
+
+    block      $b
+
+
+    end    $b
+
+
+
+    nop     nop
+  )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.range_formatting(create_params(uri, 11, 6, 15, 5));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn space2() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+
+
+
+    ;;
+
+    block      $b
+
+
+    end    $b
+
+
+
+    nop     nop
+  )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.range_formatting(create_params(uri, 11, 6, 15, 7));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn space3() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+
+
+
+    ;;
+
+    block      $b
+
+
+    end    $b
+
+
+
+    nop     nop
+  )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.range_formatting(create_params(uri, 11, 6, 15, 10));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn space4() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+
+
+
+    ;;
+
+    block      $b
+
+
+    end    $b
+
+
+
+    nop     nop
+  )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.range_formatting(create_params(uri, 11, 6, 15, 12));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn space5() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func
+
+
+
+    ;;
+
+    block      $b
+
+
+    end    $b
+
+
+
+    nop     nop
+  )
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.range_formatting(create_params(uri, 11, 6, 15, 15));
+    assert_json_snapshot!(response);
+}

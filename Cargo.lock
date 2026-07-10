@@ -1301,7 +1301,6 @@ dependencies = [
  "bumpalo",
  "criterion",
  "insta",
- "line-index",
  "serde",
  "serde_json",
  "similar-asserts",

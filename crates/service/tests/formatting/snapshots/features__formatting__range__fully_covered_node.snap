@@ -7,13 +7,39 @@ expression: response
     "range": {
       "start": {
         "line": 3,
-        "character": 4
+        "character": 5
       },
       "end": {
         "line": 3,
-        "character": 22
+        "character": 6
       }
     },
-    "newText": "(local.get 0)"
+    "newText": ""
+  },
+  {
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 16
+      },
+      "end": {
+        "line": 3,
+        "character": 19
+      }
+    },
+    "newText": ""
+  },
+  {
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 20
+      },
+      "end": {
+        "line": 3,
+        "character": 21
+      }
+    },
+    "newText": ""
   }
 ]

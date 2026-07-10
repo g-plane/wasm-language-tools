@@ -4,7 +4,7 @@ This formatter can format a tree that contains syntax errors.
 
 ## Usage
 
-### Full
+### Format the whole syntax tree
 
 The [`format()`] function only accepts parsed syntax tree,
 so you should use the parser to parse source code first.
@@ -20,35 +20,23 @@ assert_eq!("(module)\n", format(&root, &Default::default()));
 
 For customizing the formatting behavior, please refer to [`config`].
 
-### Range
+### Format a specific syntax node
 
-You can format only a specific range of code by calling [`format_range`] function.
-
-Beside the root syntax tree and format options,
-this function also accepts requested range and `LineIndex`.
+You can format a specific syntax node by calling [`format_node`] function.
 
 Notes:
 
-- Returned formatted string is corresponding to specific syntax node.
-  It isn't full text, so you may replace by yourself.
-- Affected range will equal or be wider than the range you give,
-  so you should use returned range when replacing, not original range.
+- Returned formatted string is related to specific syntax node, not the root syntax tree, so you may replace by yourself.
+- You may set `base_indent` to a different value other than `0` when that syntax node is indented in original source code. This can be useful in range formatting.
 
 ```rust
-use line_index::LineIndex;
-use wat_formatter::format_range;
-use wat_syntax::{SyntaxNode, TextRange, TextSize, ast::{AstNode, Root}};
+use wat_formatter::format_node;
+use wat_syntax::AmberNode;
 
 let input = "( module ( func ) )";
-let line_index = LineIndex::new(input);
 let (tree, _) = wat_parser::parse(input);
-let root = Root::cast(SyntaxNode::new_root(&tree)).unwrap();
-let (formatted, range) = format_range(
-    &root,
-    &Default::default(),
-    TextRange::new(TextSize::new(13), TextSize::new(17)),
-    &line_index,
-).unwrap();
+let root = AmberNode::new_root(&tree);
+let func = root.children().next().unwrap().children().next().unwrap();
+let formatted = format_node(func, &Default::default(), 0).unwrap();
 assert_eq!("(func)", &formatted);
-assert_eq!(TextRange::new(TextSize::new(9), TextSize::new(17)), range);
 ```

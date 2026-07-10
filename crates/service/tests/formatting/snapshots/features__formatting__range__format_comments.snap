@@ -6,14 +6,14 @@ expression: response
   {
     "range": {
       "start": {
-        "line": 2,
-        "character": 2
+        "line": 3,
+        "character": 6
       },
       "end": {
-        "line": 4,
-        "character": 3
+        "line": 3,
+        "character": 6
       }
     },
-    "newText": "(func\n    ;; comment\n  )"
+    "newText": " "
   }
 ]

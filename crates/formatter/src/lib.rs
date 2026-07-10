@@ -2,44 +2,25 @@
 
 use self::{
     config::FormatOptions,
-    printer::{Ctx, format_node, format_root},
+    printer::{Ctx, format_root},
 };
-use line_index::LineIndex;
 use tiny_pretty::{IndentKind, PrintOptions};
-use wat_syntax::{
-    AmberNode, GreenNode, TextRange,
-    ast::{AstNode, Root},
-};
+use wat_syntax::{AmberNode, GreenNode};
 
 pub mod config;
 mod printer;
 
-/// Print the given concrete syntax tree.
+/// Print the whole syntax tree.
 pub fn format(root: &GreenNode, options: &FormatOptions) -> String {
     let ctx = Ctx::new(options);
     tiny_pretty::print(&format_root(AmberNode::new_root(root), &ctx), &build_options(options))
 }
 
-/// Print a specific range from a root syntax tree.
-/// Returned string reflects specific syntax node, not full.
-/// Affected range may be wider than requested range, which will be returned.
-/// This returned range should be used when replacing text.
-pub fn format_range(
-    root: &Root,
-    options: &FormatOptions,
-    range: TextRange,
-    line_index: &LineIndex,
-) -> Option<(String, TextRange)> {
-    let mut node = root.syntax().clone();
-    while let Some(it) = node.child_at_range(range) {
-        node = it;
-    }
-    let range = node.text_range();
-    let col = line_index.line_col(range.start()).col as usize;
-
+/// Print a specific syntax node.
+pub fn format_node(node: AmberNode, options: &FormatOptions, base_indent: usize) -> Option<String> {
     let ctx = Ctx::new(options);
-    let doc = format_node(node.amber(), &ctx)?.nest(col);
-    Some((tiny_pretty::print(&doc, &build_options(options)), range))
+    crate::printer::format_node(node, &ctx)
+        .map(|doc| tiny_pretty::print(&doc.nest(base_indent), &build_options(options)))
 }
 
 fn build_options(options: &FormatOptions) -> PrintOptions {
