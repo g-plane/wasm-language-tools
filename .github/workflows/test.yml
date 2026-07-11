@@ -8,10 +8,11 @@ jobs:
     steps:
       - uses: taiki-e/install-action@v2
         with:
-          tool: dprint
+          tool: cargo-deny,dprint
       - uses: actions/checkout@v6
       - run: cargo fmt --check && dprint check
       - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo deny check licenses bans sources
       - run: cargo test
 
   server:

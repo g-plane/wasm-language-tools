@@ -1,0 +1,18 @@
+[licenses]
+allow = [
+    "MIT",
+    "Apache-2.0",
+]
+exceptions = [
+    { allow = ["Zlib"], crate = "foldhash" },
+    { allow = ["Unicode-3.0"], crate = "unicode-ident" },
+]
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+deny = []
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
