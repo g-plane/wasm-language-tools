@@ -83,6 +83,7 @@ impl LanguageService {
                 } else {
                     format!("{} references", locations.len())
                 },
+                tooltip: None,
                 command: "wasmLanguageTools.showReferences".into(),
                 arguments: Some(vec![
                     serde_json::to_value(&data.uri).ok()?,

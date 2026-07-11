@@ -1,6 +1,6 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lspt::{Diagnostic, Union2};
+use lspt::{Diagnostic, NumberOrString, StringOrMarkupContent};
 use wat_service::LanguageService;
 
 #[test]
@@ -339,8 +339,14 @@ fn unrelated_diagnostic() {
                     start: Position { line: 4, character: 4 },
                     end: Position { line: 4, character: 15 },
                 },
-                code: Some(Union2::B("undef".into())),
-                ..Default::default()
+                severity: None,
+                code: Some(NumberOrString::String("undef".into())),
+                code_description: None,
+                source: None,
+                message: StringOrMarkupContent::String("".into()),
+                tags: None,
+                related_information: None,
+                data: None,
             }],
             only: None,
             trigger_kind: None,
@@ -376,8 +382,14 @@ fn unrelated_range() {
                     start: Position { line: 6, character: 4 },
                     end: Position { line: 6, character: 16 },
                 },
-                code: Some(Union2::B("omitted-idx-in-instr".into())),
-                ..Default::default()
+                severity: None,
+                code: Some(NumberOrString::String("omitted-idx-in-instr".into())),
+                code_description: None,
+                source: None,
+                message: StringOrMarkupContent::String("".into()),
+                tags: None,
+                related_information: None,
+                data: None,
             }],
             only: None,
             trigger_kind: None,
@@ -414,8 +426,14 @@ fn with_diagnostic() {
                     start: Position { line: 5, character: 4 },
                     end: Position { line: 5, character: 15 },
                 },
-                code: Some(Union2::B("omitted-idx-in-instr".into())),
-                ..Default::default()
+                severity: None,
+                code: Some(NumberOrString::String("omitted-idx-in-instr".into())),
+                code_description: None,
+                source: None,
+                message: StringOrMarkupContent::String("".into()),
+                tags: None,
+                related_information: None,
+                data: None,
             }],
             only: None,
             trigger_kind: None,

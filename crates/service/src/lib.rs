@@ -24,10 +24,14 @@ use crate::{
 };
 use indexmap::IndexMap;
 use lspt::{
-    CodeActionKind, CodeActionOptions, CodeLensOptions, CompletionOptions, DiagnosticOptions, InitializeParams,
-    InitializeResult, RenameOptions, SemanticTokensClientCapabilities, SemanticTokensLegend, SemanticTokensOptions,
-    ServerCapabilities, ServerInfo, SignatureHelpOptions, TextDocumentClientCapabilities, TextDocumentSyncKind,
-    TextDocumentSyncOptions, Union2, Union3,
+    CallHierarchyProvider, CodeActionKind, CodeActionOptions, CodeActionProvider, CodeLensOptions, CompletionOptions,
+    DeclarationProvider, DefinitionProvider, DiagnosticOptions, DiagnosticProvider, DocumentFormattingProvider,
+    DocumentHighlightProvider, DocumentRangeFormattingProvider, DocumentSymbolProvider, FoldingRangeProvider,
+    HoverProvider, InitializeParams, InitializeResult, InlayHintProvider, ReferencesProvider, RenameOptions,
+    RenameProvider, SelectionRangeProvider, SemanticTokensClientCapabilities, SemanticTokensFull, SemanticTokensLegend,
+    SemanticTokensOptions, SemanticTokensProvider, SemanticTokensRange, ServerCapabilities, ServerInfo,
+    SignatureHelpOptions, TextDocumentClientCapabilities, TextDocumentSync, TextDocumentSyncKind,
+    TextDocumentSyncOptions, TextDocumentSyncSave, TypeDefinitionProvider, TypeHierarchyProvider,
 };
 use parking_lot::RwLock;
 use rustc_hash::{FxBuildHasher, FxHashMap};
@@ -107,8 +111,8 @@ impl LanguageService {
 
         InitializeResult {
             capabilities: ServerCapabilities {
-                call_hierarchy_provider: Some(Union3::A(true)),
-                code_action_provider: Some(Union2::B(CodeActionOptions {
+                call_hierarchy_provider: Some(CallHierarchyProvider::Bool(true)),
+                code_action_provider: Some(CodeActionProvider::Options(CodeActionOptions {
                     code_action_kinds: Some(vec![
                         CodeActionKind::QuickFix,
                         CodeActionKind::RefactorRewrite,
@@ -135,48 +139,48 @@ impl LanguageService {
                     all_commit_characters: Some(vec![")".into()]),
                     ..Default::default()
                 }),
-                definition_provider: Some(Union2::A(true)),
-                diagnostic_provider: Some(Union2::A(DiagnosticOptions {
+                definition_provider: Some(DefinitionProvider::Bool(true)),
+                diagnostic_provider: Some(DiagnosticProvider::Options(DiagnosticOptions {
                     identifier: Some("wat".into()),
                     inter_file_dependencies: false,
                     workspace_diagnostics: false,
                     ..Default::default()
                 })),
-                type_definition_provider: Some(Union3::A(true)),
-                declaration_provider: Some(Union3::A(true)),
-                document_formatting_provider: Some(Union2::A(true)),
-                document_highlight_provider: Some(Union2::A(true)),
-                document_range_formatting_provider: Some(Union2::A(true)),
-                document_symbol_provider: Some(Union2::A(true)),
-                folding_range_provider: Some(Union3::A(true)),
-                hover_provider: Some(Union2::A(true)),
-                inlay_hint_provider: Some(Union3::A(true)),
-                references_provider: Some(Union2::A(true)),
-                rename_provider: Some(Union2::B(RenameOptions {
+                type_definition_provider: Some(TypeDefinitionProvider::Bool(true)),
+                declaration_provider: Some(DeclarationProvider::Bool(true)),
+                document_formatting_provider: Some(DocumentFormattingProvider::Bool(true)),
+                document_highlight_provider: Some(DocumentHighlightProvider::Bool(true)),
+                document_range_formatting_provider: Some(DocumentRangeFormattingProvider::Bool(true)),
+                document_symbol_provider: Some(DocumentSymbolProvider::Bool(true)),
+                folding_range_provider: Some(FoldingRangeProvider::Bool(true)),
+                hover_provider: Some(HoverProvider::Bool(true)),
+                inlay_hint_provider: Some(InlayHintProvider::Bool(true)),
+                references_provider: Some(ReferencesProvider::Bool(true)),
+                rename_provider: Some(RenameProvider::Options(RenameOptions {
                     prepare_provider: Some(true),
                     work_done_progress: Default::default(),
                 })),
-                selection_range_provider: Some(Union3::A(true)),
-                semantic_tokens_provider: Some(Union2::A(SemanticTokensOptions {
+                selection_range_provider: Some(SelectionRangeProvider::Bool(true)),
+                semantic_tokens_provider: Some(SemanticTokensProvider::Options(SemanticTokensOptions {
                     legend: SemanticTokensLegend {
                         token_types: types_map.into_values().collect(),
                         token_modifiers: vec!["mutable".into()],
                     },
-                    range: Some(Union2::A(true)),
-                    full: Some(Union2::A(true)),
+                    range: Some(SemanticTokensRange::Bool(true)),
+                    full: Some(SemanticTokensFull::Bool(true)),
                     ..Default::default()
                 })),
                 signature_help_provider: Some(SignatureHelpOptions {
                     trigger_characters: Some(['(', ')'].iter().map(char::to_string).collect()),
                     ..Default::default()
                 }),
-                type_hierarchy_provider: Some(Union3::A(true)),
-                text_document_sync: Some(Union2::A(TextDocumentSyncOptions {
+                type_hierarchy_provider: Some(TypeHierarchyProvider::Bool(true)),
+                text_document_sync: Some(TextDocumentSync::Options(TextDocumentSyncOptions {
                     open_close: Some(true),
                     change: Some(TextDocumentSyncKind::Incremental),
                     will_save: Some(false),
                     will_save_wait_until: Some(false),
-                    save: Some(Union2::A(false)),
+                    save: Some(TextDocumentSyncSave::Bool(false)),
                 })),
                 ..Default::default()
             },

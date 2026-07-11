@@ -1,6 +1,6 @@
 use crate::{helpers::LineIndexExt, uri::InternUri};
 use line_index::LineIndex;
-use lspt::{CodeAction, CodeActionContext, CodeActionKind, TextEdit, Union2, WorkspaceEdit};
+use lspt::{CodeAction, CodeActionContext, CodeActionKind, NumberOrString, TextEdit, WorkspaceEdit};
 use rustc_hash::FxBuildHasher;
 use std::{collections::HashMap, ops::ControlFlow};
 use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode, TextRange, ast::support};
@@ -17,7 +17,7 @@ pub fn act(
         .diagnostics
         .iter()
         .find_map(|diagnostic| match &diagnostic.code {
-            Some(Union2::B(code)) if code == "type-check" && diagnostic.range.end == end => diagnostic
+            Some(NumberOrString::String(code)) if code == "type-check" && diagnostic.range.end == end => diagnostic
                 .data
                 .as_ref()
                 .and_then(|data| serde_json::from_value::<Vec<String>>(data.clone()).ok())

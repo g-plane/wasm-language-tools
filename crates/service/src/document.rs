@@ -70,7 +70,7 @@ impl LanguageService {
             // only do incremental parsing for single change
             if params.content_changes.len() == 1 {
                 match &*params.content_changes {
-                    [TextDocumentContentChangeEvent::A(partial)] => {
+                    [TextDocumentContentChangeEvent::Partial(partial)] => {
                         if partial.text.bytes().all(is_safe_for_incremental) {
                             break 'single;
                         }
@@ -136,7 +136,7 @@ impl LanguageService {
                         document.set_root(self).to(replaced_root);
                         document.set_syntax_errors(self).to(all_errors);
                     }
-                    [TextDocumentContentChangeEvent::B(whole)] => {
+                    [TextDocumentContentChangeEvent::WholeDocument(whole)] => {
                         let (green, errors) = wat_parser::parse(&whole.text);
                         document.set_text(self).to(whole.text.clone());
                         document.set_line_index(self).to(LineIndex::new(&whole.text));
@@ -152,13 +152,13 @@ impl LanguageService {
         let mut line_index = document.line_index(self).clone();
         let mut text = document.text(self).to_owned();
         params.content_changes.into_iter().for_each(|change| match change {
-            TextDocumentContentChangeEvent::A(partial) => {
+            TextDocumentContentChangeEvent::Partial(partial) => {
                 if let Some(range) = line_index.convert(partial.range) {
                     text.replace_range::<Range<usize>>(range.start().into()..range.end().into(), &partial.text);
                     line_index = LineIndex::new(&text);
                 }
             }
-            TextDocumentContentChangeEvent::B(whole) => {
+            TextDocumentContentChangeEvent::WholeDocument(whole) => {
                 line_index = LineIndex::new(&whole.text);
                 text = whole.text;
             }
@@ -201,10 +201,10 @@ fn is_safe_for_incremental(b: u8) -> bool {
 mod tests {
     use super::*;
     use lspt::{
-        Definition, DefinitionParams, DocumentDiagnosticParams, DocumentHighlightParams, Hover, HoverParams, Location,
-        MarkupContent, MarkupKind, Position, Range, TextDocumentContentChangePartial,
-        TextDocumentContentChangeWholeDocument, TextDocumentIdentifier, TextDocumentItem, Union2, Union3,
-        VersionedTextDocumentIdentifier,
+        Definition, DefinitionParams, DocumentDiagnosticParams, DocumentHighlightParams, Hover, HoverContents,
+        HoverParams, Location, MarkupContent, MarkupKind, NumberOrString, Position, Range, StringOrMarkupContent,
+        TextDocumentContentChangePartial, TextDocumentContentChangeWholeDocument, TextDocumentIdentifier,
+        TextDocumentItem, VersionedTextDocumentIdentifier,
     };
 
     #[test]
@@ -238,7 +238,7 @@ mod tests {
                 uri: uri.clone(),
                 version: 1,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::B(
+            content_changes: vec![TextDocumentContentChangeEvent::WholeDocument(
                 TextDocumentContentChangeWholeDocument {
                     text: "(module
   (type ) (start)
@@ -252,13 +252,15 @@ mod tests {
                 uri: uri.clone(),
                 version: 2,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
-                range: Range {
-                    start: Position { line: 1, character: 8 },
-                    end: Position { line: 1, character: 8 },
+            content_changes: vec![TextDocumentContentChangeEvent::Partial(
+                TextDocumentContentChangePartial {
+                    range: Range {
+                        start: Position { line: 1, character: 8 },
+                        end: Position { line: 1, character: 8 },
+                    },
+                    text: "(func (param $x) (param i32))".into(),
                 },
-                text: "(func (param $x) (param i32))".into(),
-            })],
+            )],
         });
         let mut diagnostics = service
             .pull_diagnostics(DocumentDiagnosticParams {
@@ -271,7 +273,7 @@ mod tests {
             .items;
         diagnostics.sort_unstable_by_key(|diagnostic| diagnostic.range.start);
         let mut diagnostics = diagnostics.into_iter().filter(|diagnostic| {
-            if let Some(Union2::B(code)) = &diagnostic.code {
+            if let Some(NumberOrString::String(code)) = &diagnostic.code {
                 code == "syntax" || code.starts_with("syntax/")
             } else {
                 false
@@ -303,7 +305,7 @@ mod tests {
                 uri: uri.clone(),
                 version: 1,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::B(
+            content_changes: vec![TextDocumentContentChangeEvent::WholeDocument(
                 TextDocumentContentChangeWholeDocument {
                     text: "(module
   (start 0) (type (func))
@@ -317,13 +319,15 @@ mod tests {
                 uri: uri.clone(),
                 version: 2,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
-                range: Range {
-                    start: Position { line: 1, character: 7 },
-                    end: Position { line: 1, character: 8 },
+            content_changes: vec![TextDocumentContentChangeEvent::Partial(
+                TextDocumentContentChangePartial {
+                    range: Range {
+                        start: Position { line: 1, character: 7 },
+                        end: Position { line: 1, character: 8 },
+                    },
+                    text: "".into(),
                 },
-                text: "".into(),
-            })],
+            )],
         });
         let mut diagnostics = service
             .pull_diagnostics(DocumentDiagnosticParams {
@@ -336,7 +340,7 @@ mod tests {
             .items;
         diagnostics.sort_unstable_by_key(|diagnostic| diagnostic.range.start);
         let mut diagnostics = diagnostics.into_iter().filter(|diagnostic| {
-            if let Some(Union2::B(code)) = &diagnostic.code {
+            if let Some(NumberOrString::String(code)) = &diagnostic.code {
                 code == "syntax"
             } else {
                 false
@@ -375,7 +379,7 @@ mod tests {
                 uri: uri.clone(),
                 version: 1,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::B(
+            content_changes: vec![TextDocumentContentChangeEvent::WholeDocument(
                 TextDocumentContentChangeWholeDocument {
                     text: "(module
   (func (result
@@ -391,13 +395,15 @@ mod tests {
                 uri: uri.clone(),
                 version: 2,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
-                range: Range {
-                    start: Position { line: 3, character: 9 },
-                    end: Position { line: 3, character: 9 },
+            content_changes: vec![TextDocumentContentChangeEvent::Partial(
+                TextDocumentContentChangePartial {
+                    range: Range {
+                        start: Position { line: 3, character: 9 },
+                        end: Position { line: 3, character: 9 },
+                    },
+                    text: "(type (func))".into(),
                 },
-                text: "(type (func))".into(),
-            })],
+            )],
         });
         assert!(
             service
@@ -411,7 +417,7 @@ mod tests {
                 .items
                 .iter()
                 .all(|diagnostic| {
-                    if let Some(Union2::B(code)) = &diagnostic.code {
+                    if let Some(NumberOrString::String(code)) = &diagnostic.code {
                         code != "syntax" && !code.starts_with("syntax/")
                     } else {
                         true
@@ -430,7 +436,7 @@ mod tests {
                 uri: uri.clone(),
                 version: 1,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::B(
+            content_changes: vec![TextDocumentContentChangeEvent::WholeDocument(
                 TextDocumentContentChangeWholeDocument {
                     text: "(module
   (func (param i32 i32))
@@ -450,7 +456,7 @@ mod tests {
                     partial_result_token: None
                 })
                 .unwrap(),
-            Definition::A(Location {
+            Definition::Location(Location {
                 range: Range {
                     start: Position { line: 3, .. },
                     ..
@@ -465,14 +471,14 @@ mod tests {
                 version: 2,
             },
             content_changes: vec![
-                TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                TextDocumentContentChangeEvent::Partial(TextDocumentContentChangePartial {
                     range: Range {
                         start: Position { line: 1, character: 18 },
                         end: Position { line: 1, character: 18 },
                     },
                     text: "\n   ".into(),
                 }),
-                TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                TextDocumentContentChangeEvent::Partial(TextDocumentContentChangePartial {
                     range: Range {
                         start: Position { line: 4, character: 20 },
                         end: Position { line: 4, character: 20 },
@@ -490,7 +496,7 @@ mod tests {
                     partial_result_token: None
                 })
                 .unwrap(),
-            Definition::A(Location {
+            Definition::Location(Location {
                 range: Range {
                     start: Position { line: 4, .. },
                     ..
@@ -505,14 +511,14 @@ mod tests {
                 version: 3,
             },
             content_changes: vec![
-                TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                TextDocumentContentChangeEvent::Partial(TextDocumentContentChangePartial {
                     range: Range {
                         start: Position { line: 2, character: 3 },
                         end: Position { line: 2, character: 3 },
                     },
                     text: "f".into(),
                 }),
-                TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                TextDocumentContentChangeEvent::Partial(TextDocumentContentChangePartial {
                     range: Range {
                         start: Position { line: 5, character: 5 },
                         end: Position { line: 5, character: 5 },
@@ -527,14 +533,14 @@ mod tests {
                 version: 4,
             },
             content_changes: vec![
-                TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                TextDocumentContentChangeEvent::Partial(TextDocumentContentChangePartial {
                     range: Range {
                         start: Position { line: 2, character: 3 },
                         end: Position { line: 2, character: 4 },
                     },
                     text: "f32".into(),
                 }),
-                TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                TextDocumentContentChangeEvent::Partial(TextDocumentContentChangePartial {
                     range: Range {
                         start: Position { line: 5, character: 5 },
                         end: Position { line: 5, character: 6 },
@@ -555,7 +561,7 @@ mod tests {
                 })
                 .unwrap(),
             Hover {
-                contents: Union3::A(MarkupContent {
+                contents: HoverContents::MarkupContent(MarkupContent {
                     kind: MarkupKind::Markdown,
                     value,
                 }),
@@ -574,7 +580,7 @@ mod tests {
                 })
                 .unwrap(),
             Hover {
-                contents: Union3::A(MarkupContent {
+                contents: HoverContents::MarkupContent(MarkupContent {
                     kind: MarkupKind::Markdown,
                     value,
                 }),
@@ -593,7 +599,7 @@ mod tests {
                 uri: uri.clone(),
                 version: 1,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::B(
+            content_changes: vec![TextDocumentContentChangeEvent::WholeDocument(
                 TextDocumentContentChangeWholeDocument {
                     text: "(module
   (func (result
@@ -617,7 +623,7 @@ mod tests {
                     partial_result_token: None
                 })
                 .unwrap(),
-            Definition::A(Location {
+            Definition::Location(Location {
                 range: Range {
                     start: Position { line: 5, .. },
                     ..
@@ -632,14 +638,14 @@ mod tests {
                 version: 2,
             },
             content_changes: vec![
-                TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                TextDocumentContentChangeEvent::Partial(TextDocumentContentChangePartial {
                     range: Range {
                         start: Position { line: 2, character: 0 },
                         end: Position { line: 3, character: 0 },
                     },
                     text: "".into(),
                 }),
-                TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                TextDocumentContentChangeEvent::Partial(TextDocumentContentChangePartial {
                     range: Range {
                         start: Position { line: 5, character: 0 },
                         end: Position { line: 6, character: 0 },
@@ -657,7 +663,7 @@ mod tests {
                     partial_result_token: None
                 })
                 .unwrap(),
-            Definition::A(Location {
+            Definition::Location(Location {
                 range: Range {
                     start: Position { line: 4, .. },
                     ..
@@ -677,7 +683,7 @@ mod tests {
                 })
                 .unwrap(),
             Hover {
-                contents: Union3::A(MarkupContent {
+                contents: HoverContents::MarkupContent(MarkupContent {
                     kind: MarkupKind::Markdown,
                     value,
                 }),
@@ -696,7 +702,7 @@ mod tests {
                 })
                 .unwrap(),
             Hover {
-                contents: Union3::A(MarkupContent {
+                contents: HoverContents::MarkupContent(MarkupContent {
                     kind: MarkupKind::Markdown,
                     value,
                 }),
@@ -715,7 +721,7 @@ mod tests {
                 uri: uri.clone(),
                 version: 1,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::B(
+            content_changes: vec![TextDocumentContentChangeEvent::WholeDocument(
                 TextDocumentContentChangeWholeDocument {
                     text: "(module
   (func (param i32 i32))
@@ -735,7 +741,7 @@ mod tests {
                     partial_result_token: None
                 })
                 .unwrap(),
-            Definition::A(Location {
+            Definition::Location(Location {
                 range: Range {
                     start: Position { line: 3, .. },
                     ..
@@ -750,14 +756,14 @@ mod tests {
                 version: 2,
             },
             content_changes: vec![
-                TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                TextDocumentContentChangeEvent::Partial(TextDocumentContentChangePartial {
                     range: Range {
                         start: Position { line: 3, character: 20 },
                         end: Position { line: 3, character: 20 },
                     },
                     text: "\n      ".into(),
                 }),
-                TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                TextDocumentContentChangeEvent::Partial(TextDocumentContentChangePartial {
                     range: Range {
                         start: Position { line: 1, character: 18 },
                         end: Position { line: 1, character: 18 },
@@ -775,7 +781,7 @@ mod tests {
                     partial_result_token: None
                 })
                 .unwrap(),
-            Definition::A(Location {
+            Definition::Location(Location {
                 range: Range {
                     start: Position { line: 4, .. },
                     ..
@@ -790,14 +796,14 @@ mod tests {
                 version: 3,
             },
             content_changes: vec![
-                TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                TextDocumentContentChangeEvent::Partial(TextDocumentContentChangePartial {
                     range: Range {
                         start: Position { line: 5, character: 6 },
                         end: Position { line: 5, character: 6 },
                     },
                     text: "f".into(),
                 }),
-                TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                TextDocumentContentChangeEvent::Partial(TextDocumentContentChangePartial {
                     range: Range {
                         start: Position { line: 2, character: 4 },
                         end: Position { line: 2, character: 4 },
@@ -812,14 +818,14 @@ mod tests {
                 version: 4,
             },
             content_changes: vec![
-                TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                TextDocumentContentChangeEvent::Partial(TextDocumentContentChangePartial {
                     range: Range {
                         start: Position { line: 5, character: 6 },
                         end: Position { line: 5, character: 7 },
                     },
                     text: "f32".into(),
                 }),
-                TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                TextDocumentContentChangeEvent::Partial(TextDocumentContentChangePartial {
                     range: Range {
                         start: Position { line: 2, character: 4 },
                         end: Position { line: 2, character: 5 },
@@ -840,7 +846,7 @@ mod tests {
                 })
                 .unwrap(),
             Hover {
-                contents: Union3::A(MarkupContent {
+                contents: HoverContents::MarkupContent(MarkupContent {
                     kind: MarkupKind::Markdown,
                     value,
                 }),
@@ -859,7 +865,7 @@ mod tests {
                 })
                 .unwrap(),
             Hover {
-                contents: Union3::A(MarkupContent {
+                contents: HoverContents::MarkupContent(MarkupContent {
                     kind: MarkupKind::Markdown,
                     value,
                 }),
@@ -878,7 +884,7 @@ mod tests {
                 uri: uri.clone(),
                 version: 1,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::B(
+            content_changes: vec![TextDocumentContentChangeEvent::WholeDocument(
                 TextDocumentContentChangeWholeDocument {
                     text: "(module
   (func (result
@@ -902,7 +908,7 @@ mod tests {
                     partial_result_token: None
                 })
                 .unwrap(),
-            Definition::A(Location {
+            Definition::Location(Location {
                 range: Range {
                     start: Position { line: 5, .. },
                     ..
@@ -917,14 +923,14 @@ mod tests {
                 version: 2,
             },
             content_changes: vec![
-                TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                TextDocumentContentChangeEvent::Partial(TextDocumentContentChangePartial {
                     range: Range {
                         start: Position { line: 6, character: 0 },
                         end: Position { line: 7, character: 0 },
                     },
                     text: "".into(),
                 }),
-                TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
+                TextDocumentContentChangeEvent::Partial(TextDocumentContentChangePartial {
                     range: Range {
                         start: Position { line: 2, character: 0 },
                         end: Position { line: 3, character: 0 },
@@ -942,7 +948,7 @@ mod tests {
                     partial_result_token: None
                 })
                 .unwrap(),
-            Definition::A(Location {
+            Definition::Location(Location {
                 range: Range {
                     start: Position { line: 4, .. },
                     ..
@@ -962,7 +968,7 @@ mod tests {
                 })
                 .unwrap(),
             Hover {
-                contents: Union3::A(MarkupContent {
+                contents: HoverContents::MarkupContent(MarkupContent {
                     kind: MarkupKind::Markdown,
                     value,
                 }),
@@ -981,7 +987,7 @@ mod tests {
                 })
                 .unwrap(),
             Hover {
-                contents: Union3::A(MarkupContent {
+                contents: HoverContents::MarkupContent(MarkupContent {
                     kind: MarkupKind::Markdown,
                     value,
                 }),
@@ -1007,13 +1013,15 @@ mod tests {
                 uri: uri.clone(),
                 version: 1,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
-                range: Range {
-                    start: Position { line: 2, character: 9 },
-                    end: Position { line: 2, character: 9 },
+            content_changes: vec![TextDocumentContentChangeEvent::Partial(
+                TextDocumentContentChangePartial {
+                    range: Range {
+                        start: Position { line: 2, character: 9 },
+                        end: Position { line: 2, character: 9 },
+                    },
+                    text: ";".into(),
                 },
-                text: ";".into(),
-            })],
+            )],
         });
         // should not panic
         service.document_highlight(DocumentHighlightParams {
@@ -1043,13 +1051,15 @@ mod tests {
                 uri: uri.clone(),
                 version: 1,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
-                range: Range {
-                    start: Position { line: 1, character: 27 },
-                    end: Position { line: 1, character: 27 },
+            content_changes: vec![TextDocumentContentChangeEvent::Partial(
+                TextDocumentContentChangePartial {
+                    range: Range {
+                        start: Position { line: 1, character: 27 },
+                        end: Position { line: 1, character: 27 },
+                    },
+                    text: "s".into(),
                 },
-                text: "s".into(),
-            })],
+            )],
         });
     }
 
@@ -1073,13 +1083,15 @@ mod tests {
                 uri: uri.clone(),
                 version: 1,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
-                range: Range {
-                    start: Position { line: 2, character: 25 },
-                    end: Position { line: 2, character: 25 },
+            content_changes: vec![TextDocumentContentChangeEvent::Partial(
+                TextDocumentContentChangePartial {
+                    range: Range {
+                        start: Position { line: 2, character: 25 },
+                        end: Position { line: 2, character: 25 },
+                    },
+                    text: ")".into(),
                 },
-                text: ")".into(),
-            })],
+            )],
         });
         let diagnostics = service.pull_diagnostics(DocumentDiagnosticParams {
             text_document: TextDocumentIdentifier { uri: uri.clone() },
@@ -1089,9 +1101,10 @@ mod tests {
             partial_result_token: None,
         });
         assert!(diagnostics.items.iter().any(|diagnostic| {
-            diagnostic
-                .message
-                .contains("identifier is not allowed after import item")
+            match &diagnostic.message {
+                StringOrMarkupContent::String(string) => string.contains("identifier is not allowed after import item"),
+                StringOrMarkupContent::MarkupContent(..) => false,
+            }
         }));
 
         service.did_change(DidChangeTextDocumentParams {
@@ -1099,13 +1112,15 @@ mod tests {
                 uri: uri.clone(),
                 version: 1,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
-                range: Range {
-                    start: Position { line: 2, character: 43 },
-                    end: Position { line: 2, character: 44 },
+            content_changes: vec![TextDocumentContentChangeEvent::Partial(
+                TextDocumentContentChangePartial {
+                    range: Range {
+                        start: Position { line: 2, character: 43 },
+                        end: Position { line: 2, character: 44 },
+                    },
+                    text: "".into(),
                 },
-                text: "".into(),
-            })],
+            )],
         });
         let diagnostics = service.pull_diagnostics(DocumentDiagnosticParams {
             text_document: TextDocumentIdentifier { uri: uri.clone() },
@@ -1114,25 +1129,25 @@ mod tests {
             work_done_token: None,
             partial_result_token: None,
         });
-        assert!(
-            diagnostics
-                .items
-                .iter()
-                .all(|diagnostic| !diagnostic.message.contains("unexpected token"))
-        );
+        assert!(diagnostics.items.iter().all(|diagnostic| match &diagnostic.message {
+            StringOrMarkupContent::String(string) => !string.contains("unexpected token"),
+            StringOrMarkupContent::MarkupContent(..) => true,
+        }));
 
         service.did_change(DidChangeTextDocumentParams {
             text_document: VersionedTextDocumentIdentifier {
                 uri: uri.clone(),
                 version: 1,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
-                range: Range {
-                    start: Position { line: 2, character: 25 },
-                    end: Position { line: 2, character: 26 },
+            content_changes: vec![TextDocumentContentChangeEvent::Partial(
+                TextDocumentContentChangePartial {
+                    range: Range {
+                        start: Position { line: 2, character: 25 },
+                        end: Position { line: 2, character: 26 },
+                    },
+                    text: "".into(),
                 },
-                text: "".into(),
-            })],
+            )],
         });
         let diagnostics = service.pull_diagnostics(DocumentDiagnosticParams {
             text_document: TextDocumentIdentifier { uri: uri.clone() },
@@ -1141,25 +1156,25 @@ mod tests {
             work_done_token: None,
             partial_result_token: None,
         });
-        assert!(
-            diagnostics
-                .items
-                .iter()
-                .any(|diagnostic| diagnostic.message.contains("expected `)`"))
-        );
+        assert!(diagnostics.items.iter().any(|diagnostic| match &diagnostic.message {
+            StringOrMarkupContent::String(string) => string.contains("expected `)`"),
+            StringOrMarkupContent::MarkupContent(..) => false,
+        }));
 
         service.did_change(DidChangeTextDocumentParams {
             text_document: VersionedTextDocumentIdentifier {
                 uri: uri.clone(),
                 version: 1,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
-                range: Range {
-                    start: Position { line: 2, character: 42 },
-                    end: Position { line: 2, character: 42 },
+            content_changes: vec![TextDocumentContentChangeEvent::Partial(
+                TextDocumentContentChangePartial {
+                    range: Range {
+                        start: Position { line: 2, character: 42 },
+                        end: Position { line: 2, character: 42 },
+                    },
+                    text: ")".into(),
                 },
-                text: ")".into(),
-            })],
+            )],
         });
         let diagnostics = service.pull_diagnostics(DocumentDiagnosticParams {
             text_document: TextDocumentIdentifier { uri: uri.clone() },
@@ -1169,7 +1184,7 @@ mod tests {
             partial_result_token: None,
         });
         assert!(diagnostics.items.iter().all(|diagnostic| match &diagnostic.code {
-            Some(Union2::B(code)) => !code.starts_with("syntax"),
+            Some(NumberOrString::String(code)) => !code.starts_with("syntax"),
             _ => true,
         }));
     }
@@ -1194,13 +1209,15 @@ mod tests {
                 uri: uri.clone(),
                 version: 1,
             },
-            content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
-                range: Range {
-                    start: Position { line: 2, character: 6 },
-                    end: Position { line: 2, character: 6 },
+            content_changes: vec![TextDocumentContentChangeEvent::Partial(
+                TextDocumentContentChangePartial {
+                    range: Range {
+                        start: Position { line: 2, character: 6 },
+                        end: Position { line: 2, character: 6 },
+                    },
+                    text: "试".into(),
                 },
-                text: "试".into(),
-            })],
+            )],
         });
     }
 }

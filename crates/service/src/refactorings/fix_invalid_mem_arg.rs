@@ -1,6 +1,8 @@
 use crate::{helpers::LineIndexExt, uri::InternUri};
 use line_index::LineIndex;
-use lspt::{CodeAction, CodeActionContext, CodeActionKind, TextEdit, Union2, WorkspaceEdit};
+use lspt::{
+    CodeAction, CodeActionContext, CodeActionKind, NumberOrString, StringOrMarkupContent, TextEdit, WorkspaceEdit,
+};
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode};
@@ -38,8 +40,10 @@ pub fn act(
                     .diagnostics
                     .iter()
                     .filter(|diagnostic| {
-                        if let Some(Union2::B(s)) = &diagnostic.code {
-                            s.starts_with("syntax") && diagnostic.message.contains("memory argument")
+                        if let Some(NumberOrString::String(code)) = &diagnostic.code
+                            && let StringOrMarkupContent::String(message) = &diagnostic.message
+                        {
+                            code.starts_with("syntax") && message.contains("memory argument")
                         } else {
                             false
                         }

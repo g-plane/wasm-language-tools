@@ -10,8 +10,8 @@ use crate::{
 use itertools::Itertools;
 use line_index::LineIndex;
 use lspt::{
-    CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionItemTag, CompletionParams, MarkupContent,
-    MarkupKind, TextEdit, Union2,
+    CompletionItem, CompletionItemKind, CompletionItemLabelDetails, CompletionItemTag, CompletionItemTextEdit,
+    CompletionParams, MarkupContent, MarkupKind, StringOrMarkupContent, TextEdit,
 };
 use wat_syntax::{
     NodeOrToken, SyntaxKind, SyntaxNode, SyntaxToken,
@@ -688,7 +688,7 @@ fn get_cmp_list(
                             label: ty.to_string(),
                             kind: Some(CompletionItemKind::Class),
                             documentation: data_set::get_value_type_description(ty).map(|desc| {
-                                Union2::B(MarkupContent {
+                                StringOrMarkupContent::MarkupContent(MarkupContent {
                                     kind: MarkupKind::Markdown,
                                     value: desc.into(),
                                 })
@@ -755,9 +755,9 @@ fn get_cmp_list(
                                 text_edit: if token.kind().is_trivia() {
                                     None
                                 } else {
-                                    line_index
-                                        .convert(token.text_range())
-                                        .map(|range| Union2::A(TextEdit { range, new_text: label }))
+                                    line_index.convert(token.text_range()).map(|range| {
+                                        CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label })
+                                    })
                                 },
                                 label_details: ty.as_ref().map(|ty| CompletionItemLabelDetails {
                                     description: Some(ty.render(db).to_string()),
@@ -787,7 +787,7 @@ fn get_cmp_list(
                         } else {
                             line_index
                                 .convert(token.text_range())
-                                .map(|range| Union2::A(TextEdit { range, new_text: label }))
+                                .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
                         },
                         detail: Some(types_analyzer::render_func_header(
                             db,
@@ -803,7 +803,7 @@ fn get_cmp_list(
                             ..Default::default()
                         }),
                         documentation: helpers::get_doc_comment(symbol, symbol_table).map(|value| {
-                            Union2::B(MarkupContent {
+                            StringOrMarkupContent::MarkupContent(MarkupContent {
                                 kind: MarkupKind::Markdown,
                                 value,
                             })
@@ -834,7 +834,7 @@ fn get_cmp_list(
                         } else {
                             line_index
                                 .convert(token.text_range())
-                                .map(|range| Union2::A(TextEdit { range, new_text: label }))
+                                .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
                         },
                         label_details: comp_type.map(|comp_type| CompletionItemLabelDetails {
                             detail: match comp_type {
@@ -886,7 +886,7 @@ fn get_cmp_list(
                         } else {
                             line_index
                                 .convert(token.text_range())
-                                .map(|range| Union2::A(TextEdit { range, new_text: label }))
+                                .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
                         },
                         label_details: ty.as_ref().map(|ty| CompletionItemLabelDetails {
                             description: Some(ty.render(db).to_string()),
@@ -927,7 +927,7 @@ fn get_cmp_list(
                         } else {
                             line_index
                                 .convert(token.text_range())
-                                .map(|range| Union2::A(TextEdit { range, new_text: label }))
+                                .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
                         },
                         tags: if deprecation.contains_key(&symbol.key) {
                             Some(vec![CompletionItemTag::Deprecated])
@@ -960,9 +960,9 @@ fn get_cmp_list(
                                 text_edit: if token.kind().is_trivia() {
                                     None
                                 } else {
-                                    line_index
-                                        .convert(token.text_range())
-                                        .map(|range| Union2::A(TextEdit { range, new_text: label }))
+                                    line_index.convert(token.text_range()).map(|range| {
+                                        CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label })
+                                    })
                                 },
                                 tags: if deprecation.contains_key(&symbol.key) {
                                     Some(vec![CompletionItemTag::Deprecated])
@@ -998,9 +998,9 @@ fn get_cmp_list(
                                 text_edit: if token.kind().is_trivia() {
                                     None
                                 } else {
-                                    line_index
-                                        .convert(token.text_range())
-                                        .map(|range| Union2::A(TextEdit { range, new_text: label }))
+                                    line_index.convert(token.text_range()).map(|range| {
+                                        CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label })
+                                    })
                                 },
                                 label_details: Some(CompletionItemLabelDetails {
                                     description: Some(format!(
@@ -1038,7 +1038,7 @@ fn get_cmp_list(
                             } else {
                                 line_index
                                     .convert(token.text_range())
-                                    .map(|range| Union2::A(TextEdit { range, new_text: label }))
+                                    .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
                             },
                             label_details: Some(CompletionItemLabelDetails {
                                 description: Some(ty.render(db).to_string()),
@@ -1075,7 +1075,7 @@ fn get_cmp_list(
                     label: ty.to_string(),
                     kind: Some(CompletionItemKind::Class),
                     documentation: data_set::get_value_type_description(ty).map(|desc| {
-                        Union2::B(MarkupContent {
+                        StringOrMarkupContent::MarkupContent(MarkupContent {
                             kind: MarkupKind::Markdown,
                             value: desc.into(),
                         })
@@ -1110,7 +1110,7 @@ fn get_cmp_list(
                         } else {
                             line_index
                                 .convert(token.text_range())
-                                .map(|range| Union2::A(TextEdit { range, new_text: label }))
+                                .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
                         },
                         label_details: Some(CompletionItemLabelDetails {
                             description: Some(format!(
@@ -1144,7 +1144,7 @@ fn get_cmp_list(
                         } else {
                             line_index
                                 .convert(token.text_range())
-                                .map(|range| Union2::A(TextEdit { range, new_text: label }))
+                                .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
                         },
                         label_details: Some(CompletionItemLabelDetails {
                             detail: Some(if let Some(name) = symbol.idx.name {
@@ -1178,7 +1178,7 @@ fn get_cmp_list(
                         } else {
                             line_index
                                 .convert(token.text_range())
-                                .map(|range| Union2::A(TextEdit { range, new_text: label }))
+                                .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
                         },
                         label_details: Some(CompletionItemLabelDetails {
                             detail: Some(if let Some(name) = symbol.idx.name {

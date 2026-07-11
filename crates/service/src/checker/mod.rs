@@ -7,7 +7,9 @@ use crate::{
     types_analyzer::{DefTypes, get_def_types},
 };
 use bumpalo::Bump;
-use lspt::{DiagnosticRelatedInformation, DiagnosticSeverity, DiagnosticTag, Location, Union2};
+use lspt::{
+    DiagnosticRelatedInformation, DiagnosticSeverity, DiagnosticTag, Location, NumberOrString, StringOrMarkupContent,
+};
 use std::cmp::Ordering;
 use wat_syntax::{AmberNode, SyntaxKind, SyntaxNode, TextRange};
 
@@ -253,10 +255,10 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
             Some(lspt::Diagnostic {
                 range: line_index.convert(diagnostic.range)?,
                 severity: Some(diagnostic.severity),
-                code: Some(Union2::B(diagnostic.code)),
+                code: Some(NumberOrString::String(diagnostic.code)),
                 code_description: None,
                 source: Some("wat".into()),
-                message: diagnostic.message,
+                message: StringOrMarkupContent::String(diagnostic.message),
                 tags: diagnostic.tags,
                 related_information: diagnostic.related_information.map(|related_information| {
                     related_information

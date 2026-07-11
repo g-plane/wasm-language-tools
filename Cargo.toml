@@ -6,7 +6,7 @@ resolver = "3"
 bumpalo = { version = "3.20", features = ["collections", "allocator-api2"] }
 criterion = "0.8"
 insta = { version = "1.47", features = ["glob", "json"] }
-lspt = "0.3"
+lspt = "0.4"
 rustc-hash = "2.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

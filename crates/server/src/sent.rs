@@ -1,5 +1,6 @@
 use crate::{message::Message, server::Server};
 use anyhow::Result;
+use lspt::NumberOrString;
 use rustc_hash::FxHashMap;
 use serde_json::Value;
 
@@ -7,12 +8,12 @@ type Callback = Box<dyn FnOnce(&mut Server, Value) -> Result<()> + 'static>;
 
 #[derive(Default)]
 pub struct SentRequests {
-    id: u32,
-    callbacks: FxHashMap<u32, Callback>,
+    id: i32,
+    callbacks: FxHashMap<i32, Callback>,
 }
 
 impl SentRequests {
-    pub fn next_id(&mut self) -> u32 {
+    pub fn next_id(&mut self) -> i32 {
         let id = self.id;
         self.id += 1;
         id
@@ -25,13 +26,13 @@ impl SentRequests {
         let id = self.next_id();
         self.callbacks.insert(id, Box::new(callback));
         Message::Request {
-            id: lspt::Union2::A(id),
+            id: NumberOrString::Integer(id),
             method,
             params,
         }
     }
 
-    pub fn remove(&mut self, id: u32) -> Option<Callback> {
+    pub fn remove(&mut self, id: i32) -> Option<Callback> {
         self.callbacks.remove(&id)
     }
 }

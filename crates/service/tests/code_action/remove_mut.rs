@@ -1,6 +1,6 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lspt::{CodeActionKind, Diagnostic, Position, Range, Union2};
+use lspt::{CodeActionKind, Diagnostic, NumberOrString, Position, Range, StringOrMarkupContent};
 use wat_service::LanguageService;
 
 fn create_params(uri: String, range: Range, token_range: Range) -> CodeActionParams {
@@ -10,8 +10,14 @@ fn create_params(uri: String, range: Range, token_range: Range) -> CodeActionPar
         context: CodeActionContext {
             diagnostics: vec![Diagnostic {
                 range: token_range,
-                code: Some(Union2::B("needless-mut".into())),
-                ..Default::default()
+                severity: None,
+                code: Some(NumberOrString::String("needless-mut".into())),
+                code_description: None,
+                source: None,
+                message: StringOrMarkupContent::String("".into()),
+                tags: None,
+                related_information: None,
+                data: None,
             }],
             only: Some(vec![CodeActionKind::QuickFix]),
             trigger_kind: None,
@@ -93,8 +99,14 @@ fn unrelated_diagnostic() {
                     start: Position { line: 2, character: 15 },
                     end: Position { line: 2, character: 15 },
                 },
-                code: Some(Union2::B("global-mut".into())),
-                ..Default::default()
+                severity: None,
+                code: Some(NumberOrString::String("global-mut".into())),
+                code_description: None,
+                source: None,
+                message: StringOrMarkupContent::String("".into()),
+                tags: None,
+                related_information: None,
+                data: None,
             }],
             only: Some(vec![CodeActionKind::QuickFix]),
             trigger_kind: None,

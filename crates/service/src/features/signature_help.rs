@@ -6,7 +6,8 @@ use crate::{
     types_analyzer::{NamedSig, ValType},
 };
 use lspt::{
-    MarkupContent, MarkupKind, ParameterInformation, SignatureHelp, SignatureHelpParams, SignatureInformation, Union2,
+    MarkupContent, MarkupKind, ParameterInformation, ParameterInformationLabel, SignatureHelp, SignatureHelpParams,
+    SignatureInformation, StringOrMarkupContent,
 };
 use std::fmt::Write;
 use wat_syntax::{
@@ -74,7 +75,7 @@ impl LanguageService {
                     let _ = write!(label, "{}", param.0.render(db));
                     label.push(')');
                     parameters.push(ParameterInformation {
-                        label: Union2::B((start as u32, label.len() as u32)),
+                        label: ParameterInformationLabel::Tuple((start as u32, label.len() as u32)),
                         documentation: None,
                     });
                     written = true;
@@ -96,7 +97,7 @@ impl LanguageService {
                     documentation: func
                         .and_then(|func| helpers::get_doc_comment(func, symbol_table))
                         .map(|value| {
-                            Union2::B(MarkupContent {
+                            StringOrMarkupContent::MarkupContent(MarkupContent {
                                 kind: MarkupKind::Markdown,
                                 value,
                             })

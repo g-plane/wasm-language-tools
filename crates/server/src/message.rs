@@ -1,24 +1,23 @@
+use lspt::NumberOrString;
 use serde::{Deserialize, Serialize, ser::SerializeStruct};
 use serde_json::Value;
-
-pub type RequestId = lspt::Union2<u32, String>;
 
 #[derive(Clone, Debug, Deserialize)]
 #[serde(untagged)]
 pub enum Message {
     Request {
-        id: RequestId,
+        id: NumberOrString,
         method: String,
         #[serde(default)]
         params: Value,
     },
     OkResponse {
-        id: RequestId,
+        id: NumberOrString,
         #[serde(default)]
         result: Value,
     },
     ErrResponse {
-        id: RequestId,
+        id: NumberOrString,
         error: ResponseError,
     },
     Notification {

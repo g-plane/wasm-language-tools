@@ -8,7 +8,7 @@ use crate::{
     types_analyzer::{self, CompositeType, DefType, HeapType, InstrSigResolverCtx, NamedSig, RefType},
 };
 use bumpalo::Bump;
-use lspt::{Hover, HoverParams, MarkupContent, MarkupKind, Union3};
+use lspt::{Hover, HoverContents, HoverParams, MarkupContent, MarkupKind};
 use std::fmt::Write;
 use wat_syntax::{
     AmberNode, NodeOrToken, SyntaxKind, SyntaxNode,
@@ -27,7 +27,7 @@ impl LanguageService {
         match token.kind() {
             SyntaxKind::IDENT | SyntaxKind::UNSIGNED_INT => {
                 create_symbol_hover(self, document, symbol_table, &token.parent()).map(|contents| Hover {
-                    contents: Union3::A(contents),
+                    contents: HoverContents::MarkupContent(contents),
                     range: line_index.convert(token.text_range()),
                 })
             }
@@ -76,14 +76,14 @@ impl LanguageService {
                         }
                     })
                     .map(|contents| Hover {
-                        contents: Union3::A(contents),
+                        contents: HoverContents::MarkupContent(contents),
                         range: line_index.convert(token.text_range()),
                     })
             }
             SyntaxKind::TYPE_KEYWORD => {
                 let ty = token.text();
                 data_set::get_value_type_description(token.text()).map(|doc| Hover {
-                    contents: Union3::A(MarkupContent {
+                    contents: HoverContents::MarkupContent(MarkupContent {
                         kind: MarkupKind::Markdown,
                         value: format!("```wat\n{ty}\n```\n\n{doc}"),
                     }),
@@ -98,7 +98,7 @@ impl LanguageService {
                     node
                 };
                 create_symbol_hover(self, document, symbol_table, &node).map(|contents| Hover {
-                    contents: Union3::A(contents),
+                    contents: HoverContents::MarkupContent(contents),
                     range: line_index.convert(if matches!(token.text(), "mut" | "ref") {
                         node.text_range()
                     } else {
@@ -189,7 +189,7 @@ impl LanguageService {
                     }
 
                     Hover {
-                        contents: Union3::A(MarkupContent {
+                        contents: HoverContents::MarkupContent(MarkupContent {
                             kind: MarkupKind::Markdown,
                             value: contents,
                         }),

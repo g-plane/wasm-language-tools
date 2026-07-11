@@ -1,6 +1,6 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lspt::{Diagnostic, Union2};
+use lspt::{Diagnostic, NumberOrString, StringOrMarkupContent};
 use wat_service::LanguageService;
 
 #[test]
@@ -72,9 +72,17 @@ fn diagnostics() {
     let mut params = create_params(uri, 2, 25, 2, 25);
     params.context = CodeActionContext {
         diagnostics: vec![Diagnostic {
-            message: "syntax error: whitespaces or comments are not allowed inside memory argument".into(),
-            code: Some(Union2::B("syntax".into())),
-            ..Default::default()
+            range: Range::default(),
+            severity: None,
+            code: Some(NumberOrString::String("syntax".into())),
+            code_description: None,
+            source: None,
+            message: StringOrMarkupContent::String(
+                "syntax error: whitespaces or comments are not allowed inside memory argument".into(),
+            ),
+            tags: None,
+            related_information: None,
+            data: None,
         }],
         ..Default::default()
     };

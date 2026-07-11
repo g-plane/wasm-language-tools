@@ -1,6 +1,6 @@
 use crate::{helpers::LineIndexExt, uri::InternUri};
 use line_index::LineIndex;
-use lspt::{CodeAction, CodeActionContext, CodeActionKind, TextEdit, Union2, WorkspaceEdit};
+use lspt::{CodeAction, CodeActionContext, CodeActionKind, NumberOrString, TextEdit, WorkspaceEdit};
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode, ast::support};
@@ -15,7 +15,7 @@ pub fn act(
     let mut_token = support::token(node, SyntaxKind::KEYWORD).filter(|keyword| keyword.text() == "mut")?;
     let token_lsp_range = line_index.convert(mut_token.text_range())?;
     let diagnostic = context.diagnostics.iter().find(|diagnostic| match &diagnostic.code {
-        Some(Union2::B(code)) => code == "needless-mut" && diagnostic.range == token_lsp_range,
+        Some(NumberOrString::String(code)) => code == "needless-mut" && diagnostic.range == token_lsp_range,
         _ => false,
     })?;
 

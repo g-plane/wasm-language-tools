@@ -90,13 +90,15 @@ pub fn changed_text_bench(c: &mut Criterion) {
                         uri: uri.clone(),
                         version: 0,
                     },
-                    content_changes: vec![TextDocumentContentChangeEvent::A(TextDocumentContentChangePartial {
-                        range: Range {
-                            start: Position { line, character: col },
-                            end: Position { line, character: col },
+                    content_changes: vec![TextDocumentContentChangeEvent::Partial(
+                        TextDocumentContentChangePartial {
+                            range: Range {
+                                start: Position { line, character: col },
+                                end: Position { line, character: col },
+                            },
+                            text: char.to_string(),
                         },
-                        text: char.to_string(),
-                    })],
+                    )],
                 });
                 let completions = service.completion(black_box(CompletionParams {
                     context: Some(CompletionContext {

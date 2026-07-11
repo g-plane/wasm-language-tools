@@ -1,6 +1,6 @@
 use super::*;
 use insta::assert_json_snapshot;
-use lspt::{Diagnostic, Position, Range, Union2};
+use lspt::{Diagnostic, NumberOrString, Position, Range, StringOrMarkupContent};
 use wat_service::LanguageService;
 
 fn create_params(uri: String, range: Range, diagnostic_range: Range) -> CodeActionParams {
@@ -10,8 +10,14 @@ fn create_params(uri: String, range: Range, diagnostic_range: Range) -> CodeActi
         context: CodeActionContext {
             diagnostics: vec![Diagnostic {
                 range: diagnostic_range,
-                code: Some(Union2::B("packing".into())),
-                ..Default::default()
+                severity: None,
+                code: Some(NumberOrString::String("packing".into())),
+                code_description: None,
+                source: None,
+                message: StringOrMarkupContent::String("".into()),
+                tags: None,
+                related_information: None,
+                data: None,
             }],
             only: None,
             trigger_kind: None,
@@ -90,8 +96,14 @@ fn unrelated_diagnostic() {
                     start: Position { line: 5, character: 18 },
                     end: Position { line: 5, character: 19 },
                 },
-                code: Some(Union2::B("undef".into())),
-                ..Default::default()
+                severity: None,
+                code: Some(NumberOrString::String("undef".into())),
+                code_description: None,
+                source: None,
+                message: StringOrMarkupContent::String("".into()),
+                tags: None,
+                related_information: None,
+                data: None,
             }],
             only: None,
             trigger_kind: None,

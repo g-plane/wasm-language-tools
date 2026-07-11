@@ -6,7 +6,7 @@ use crate::{
     types_analyzer,
     uri::InternUri,
 };
-use lspt::{InlayHint, InlayHintKind, InlayHintParams, Union2};
+use lspt::{InlayHint, InlayHintKind, InlayHintLabel, InlayHintParams};
 use wat_syntax::SyntaxKind;
 
 impl LanguageService {
@@ -37,7 +37,7 @@ impl LanguageService {
                         {
                             inlay_hints.push(InlayHint {
                                 position,
-                                label: Union2::A(ty.render(db).to_string()),
+                                label: InlayHintLabel::String(ty.render(db).to_string()),
                                 kind: Some(InlayHintKind::Type),
                                 text_edits: None,
                                 tooltip: None,
@@ -57,7 +57,7 @@ impl LanguageService {
                         {
                             inlay_hints.push(InlayHint {
                                 position,
-                                label: Union2::A(ty.render(db).to_string()),
+                                label: InlayHintLabel::String(ty.render(db).to_string()),
                                 kind: Some(InlayHintKind::Type),
                                 text_edits: None,
                                 tooltip: None,
@@ -80,7 +80,7 @@ impl LanguageService {
                         {
                             inlay_hints.push(InlayHint {
                                 position,
-                                label: Union2::A(format!("(func {})", name.ident(db))),
+                                label: InlayHintLabel::String(format!("(func {})", name.ident(db))),
                                 kind: None,
                                 text_edits: None,
                                 tooltip: None,
@@ -99,7 +99,7 @@ impl LanguageService {
                         {
                             inlay_hints.push(InlayHint {
                                 position,
-                                label: Union2::A(format!("(;{num};)")),
+                                label: InlayHintLabel::String(format!("(;{num};)")),
                                 kind: None,
                                 text_edits: None,
                                 tooltip: None,
@@ -122,7 +122,7 @@ impl LanguageService {
                         {
                             inlay_hints.push(InlayHint {
                                 position,
-                                label: Union2::A(format!(
+                                label: InlayHintLabel::String(format!(
                                     "({} {})",
                                     match symbol.key.kind() {
                                         SyntaxKind::BLOCK_IF => "if",
@@ -158,7 +158,7 @@ impl LanguageService {
                         {
                             inlay_hints.push(InlayHint {
                                 position,
-                                label: Union2::A(format!("(;{num};)")),
+                                label: InlayHintLabel::String(format!("(;{num};)")),
                                 kind: None,
                                 text_edits: None,
                                 tooltip: None,
@@ -190,7 +190,7 @@ impl LanguageService {
                         {
                             inlay_hints.push(InlayHint {
                                 position,
-                                label: Union2::A(format!("(;{num};)")),
+                                label: InlayHintLabel::String(format!("(;{num};)")),
                                 kind: None,
                                 text_edits: None,
                                 tooltip: None,
@@ -209,7 +209,7 @@ impl LanguageService {
                         {
                             inlay_hints.push(InlayHint {
                                 position,
-                                label: Union2::A(ty.render(db).to_string()),
+                                label: InlayHintLabel::String(ty.render(db).to_string()),
                                 kind: Some(InlayHintKind::Type),
                                 text_edits: None,
                                 tooltip: None,

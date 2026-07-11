@@ -3,7 +3,7 @@ use crate::{
     binder::{SymbolKey, SymbolTable},
     helpers::LineIndexExt,
 };
-use lspt::{Declaration, DeclarationParams, Definition, DefinitionParams, Location, TypeDefinitionParams, Union2};
+use lspt::{Declaration, DeclarationParams, Definition, DefinitionParams, Location, TypeDefinitionParams};
 use wat_syntax::SyntaxKind;
 
 impl LanguageService {
@@ -30,7 +30,7 @@ impl LanguageService {
             .and_then(|def_key| symbol_table.def_poi.get(def_key))
             .and_then(|range| line_index.convert(*range))
             .map(|range| {
-                Union2::A(Location {
+                Definition::Location(Location {
                     uri: params.text_document.uri.clone(),
                     range,
                 })
@@ -81,7 +81,7 @@ impl LanguageService {
             .and_then(|key| symbol_table.def_poi.get(key))
             .and_then(|range| line_index.convert(*range))
             .map(|range| {
-                Union2::A(Location {
+                Definition::Location(Location {
                     uri: params.text_document.uri.clone(),
                     range,
                 })
@@ -95,6 +95,10 @@ impl LanguageService {
             position: params.position,
             work_done_token: params.work_done_token,
             partial_result_token: params.partial_result_token,
+        })
+        .map(|definition| match definition {
+            Definition::Location(location) => Declaration::Location(location),
+            Definition::List(locations) => Declaration::List(locations),
         })
     }
 }

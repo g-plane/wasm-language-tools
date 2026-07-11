@@ -1,11 +1,11 @@
 use crate::{
-    message::{Message, RequestId, ResponseError, try_cast_notification, try_cast_request},
+    message::{Message, ResponseError, try_cast_notification, try_cast_request},
     sent::SentRequests,
     stdio,
 };
 use lspt::{
     ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams, DidChangeTextDocumentParams,
-    DidOpenTextDocumentParams, InitializeParams, Registration, RegistrationParams, Union2,
+    DidOpenTextDocumentParams, InitializeParams, NumberOrString, Registration, RegistrationParams,
     notification::{
         DidChangeConfigurationNotification, DidChangeTextDocumentNotification, DidCloseTextDocumentNotification,
         DidOpenTextDocumentNotification, ExitNotification, InitializedNotification, Notification as _,
@@ -70,7 +70,7 @@ impl Server {
                     });
                 }
                 Message::OkResponse {
-                    id: Union2::A(id),
+                    id: NumberOrString::Integer(id),
                     result,
                 } => {
                     self.handle_response(id, result)?;
@@ -112,7 +112,7 @@ impl Server {
                         Ok(..) => {
                             if self.support_register_change_config {
                                 stdio::write(Message::Request {
-                                    id: Union2::A(self.sent_requests.next_id()),
+                                    id: NumberOrString::Integer(self.sent_requests.next_id()),
                                     method: RegistrationRequest::METHOD.into(),
                                     params: serde_json::to_value(RegistrationParams {
                                         registrations: vec![Registration {
@@ -187,7 +187,12 @@ impl Server {
         Ok(())
     }
 
-    fn handle_request(service: LanguageService, id: RequestId, method: String, params: serde_json::Value) -> Message {
+    fn handle_request(
+        service: LanguageService,
+        id: NumberOrString,
+        method: String,
+        params: serde_json::Value,
+    ) -> Message {
         try_cast_request::<CallHierarchyPrepareRequest>(&method, params)
             .map(|params| {
                 params
@@ -421,7 +426,7 @@ impl Server {
             })
     }
 
-    fn handle_response(&mut self, id: u32, result: serde_json::Value) -> anyhow::Result<()> {
+    fn handle_response(&mut self, id: i32, result: serde_json::Value) -> anyhow::Result<()> {
         if let Some(callback) = self.sent_requests.remove(id) {
             callback(self, result)
         } else {
@@ -502,7 +507,7 @@ impl Server {
             .for_each(|(uri, config)| self.service.set_config(uri, config));
         if self.support_refresh_diagnostics {
             stdio::write(Message::Request {
-                id: Union2::A(self.sent_requests.next_id()),
+                id: NumberOrString::Integer(self.sent_requests.next_id()),
                 method: DiagnosticRefreshRequest::METHOD.into(),
                 params: serde_json::Value::Null,
             })?;
@@ -513,7 +518,7 @@ impl Server {
         }
         if self.support_refresh_inlay_hint {
             stdio::write(Message::Request {
-                id: Union2::A(self.sent_requests.next_id()),
+                id: NumberOrString::Integer(self.sent_requests.next_id()),
                 method: InlayHintRefreshRequest::METHOD.into(),
                 params: serde_json::Value::Null,
             })?;

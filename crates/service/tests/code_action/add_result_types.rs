@@ -1,6 +1,7 @@
 use insta::assert_json_snapshot;
 use lspt::{
-    CodeActionContext, CodeActionKind, CodeActionParams, Diagnostic, Position, Range, TextDocumentIdentifier, Union2,
+    CodeActionContext, CodeActionKind, CodeActionParams, Diagnostic, NumberOrString, Position, Range,
+    StringOrMarkupContent, TextDocumentIdentifier,
 };
 use wat_service::LanguageService;
 
@@ -18,6 +19,26 @@ fn create_params(uri: String, line: u32, col: u32, diagnostic: Diagnostic) -> Co
         },
         work_done_token: Default::default(),
         partial_result_token: Default::default(),
+    }
+}
+
+fn create_diagnostic<const N: usize>(line: u32, col: u32, data: [&'static str; N]) -> Diagnostic {
+    Diagnostic {
+        range: Range {
+            start: Position { line, character: col },
+            end: Position {
+                line,
+                character: col + 1,
+            },
+        },
+        severity: None,
+        code: Some(NumberOrString::String("type-check".into())),
+        code_description: None,
+        source: None,
+        message: StringOrMarkupContent::String("".into()),
+        tags: None,
+        related_information: None,
+        data: serde_json::to_value(data.as_slice()).ok(),
     }
 }
 
@@ -50,13 +71,18 @@ fn unrelated_diagnostic_code() {
         3,
         17,
         Diagnostic {
-            code: Some(Union2::B("typeck".into())),
             range: Range {
                 start: Position { line: 3, character: 15 },
                 end: Position { line: 3, character: 16 },
             },
+            severity: None,
+            code: Some(NumberOrString::String("typeck".into())),
+            code_description: None,
+            source: None,
+            message: StringOrMarkupContent::String("".into()),
+            tags: None,
+            related_information: None,
             data: serde_json::to_value::<Vec<String>>(vec![]).ok(),
-            ..Default::default()
         },
     ));
     assert!(response.is_none());
@@ -72,20 +98,7 @@ fn after_func_keyword() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(
-        uri,
-        3,
-        15,
-        Diagnostic {
-            code: Some(Union2::B("type-check".into())),
-            range: Range {
-                start: Position { line: 3, character: 15 },
-                end: Position { line: 3, character: 16 },
-            },
-            data: serde_json::to_value(vec!["i32".to_string()]).ok(),
-            ..Default::default()
-        },
-    ));
+    let response = service.code_action(create_params(uri, 3, 15, create_diagnostic(3, 15, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -99,20 +112,7 @@ fn after_func_ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(
-        uri,
-        3,
-        15,
-        Diagnostic {
-            code: Some(Union2::B("type-check".into())),
-            range: Range {
-                start: Position { line: 3, character: 15 },
-                end: Position { line: 3, character: 16 },
-            },
-            data: serde_json::to_value(vec!["i32".to_string()]).ok(),
-            ..Default::default()
-        },
-    ));
+    let response = service.code_action(create_params(uri, 3, 15, create_diagnostic(3, 15, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -126,20 +126,7 @@ fn after_func_export() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(
-        uri,
-        3,
-        15,
-        Diagnostic {
-            code: Some(Union2::B("type-check".into())),
-            range: Range {
-                start: Position { line: 3, character: 15 },
-                end: Position { line: 3, character: 16 },
-            },
-            data: serde_json::to_value(vec!["i32".to_string()]).ok(),
-            ..Default::default()
-        },
-    ));
+    let response = service.code_action(create_params(uri, 3, 15, create_diagnostic(3, 15, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -153,20 +140,7 @@ fn after_func_import() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(
-        uri,
-        3,
-        15,
-        Diagnostic {
-            code: Some(Union2::B("type-check".into())),
-            range: Range {
-                start: Position { line: 3, character: 15 },
-                end: Position { line: 3, character: 16 },
-            },
-            data: serde_json::to_value(vec!["i32".to_string()]).ok(),
-            ..Default::default()
-        },
-    ));
+    let response = service.code_action(create_params(uri, 3, 15, create_diagnostic(3, 15, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -180,20 +154,7 @@ fn after_func_type_use() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(
-        uri,
-        3,
-        15,
-        Diagnostic {
-            code: Some(Union2::B("type-check".into())),
-            range: Range {
-                start: Position { line: 3, character: 15 },
-                end: Position { line: 3, character: 16 },
-            },
-            data: serde_json::to_value(vec!["i32".to_string()]).ok(),
-            ..Default::default()
-        },
-    ));
+    let response = service.code_action(create_params(uri, 3, 15, create_diagnostic(3, 15, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -207,20 +168,7 @@ fn after_func_params() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(
-        uri,
-        3,
-        15,
-        Diagnostic {
-            code: Some(Union2::B("type-check".into())),
-            range: Range {
-                start: Position { line: 3, character: 15 },
-                end: Position { line: 3, character: 16 },
-            },
-            data: serde_json::to_value(vec!["i32".to_string()]).ok(),
-            ..Default::default()
-        },
-    ));
+    let response = service.code_action(create_params(uri, 3, 15, create_diagnostic(3, 15, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -234,20 +182,7 @@ fn before_func_locals() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(
-        uri,
-        3,
-        15,
-        Diagnostic {
-            code: Some(Union2::B("type-check".into())),
-            range: Range {
-                start: Position { line: 3, character: 15 },
-                end: Position { line: 3, character: 16 },
-            },
-            data: serde_json::to_value(vec!["i32".to_string()]).ok(),
-            ..Default::default()
-        },
-    ));
+    let response = service.code_action(create_params(uri, 3, 15, create_diagnostic(3, 15, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -262,20 +197,7 @@ fn after_block_keyword() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(
-        uri,
-        4,
-        17,
-        Diagnostic {
-            code: Some(Union2::B("type-check".into())),
-            range: Range {
-                start: Position { line: 4, character: 17 },
-                end: Position { line: 4, character: 18 },
-            },
-            data: serde_json::to_value(vec!["i32".to_string()]).ok(),
-            ..Default::default()
-        },
-    ));
+    let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(4, 17, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -290,20 +212,7 @@ fn after_block_ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(
-        uri,
-        4,
-        17,
-        Diagnostic {
-            code: Some(Union2::B("type-check".into())),
-            range: Range {
-                start: Position { line: 4, character: 17 },
-                end: Position { line: 4, character: 18 },
-            },
-            data: serde_json::to_value(vec!["i32".to_string()]).ok(),
-            ..Default::default()
-        },
-    ));
+    let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(4, 17, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -318,20 +227,7 @@ fn after_block_type() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(
-        uri,
-        4,
-        17,
-        Diagnostic {
-            code: Some(Union2::B("type-check".into())),
-            range: Range {
-                start: Position { line: 4, character: 17 },
-                end: Position { line: 4, character: 18 },
-            },
-            data: serde_json::to_value(vec!["i32".to_string()]).ok(),
-            ..Default::default()
-        },
-    ));
+    let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(4, 17, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -346,20 +242,7 @@ fn after_loop_keyword() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(
-        uri,
-        4,
-        17,
-        Diagnostic {
-            code: Some(Union2::B("type-check".into())),
-            range: Range {
-                start: Position { line: 4, character: 17 },
-                end: Position { line: 4, character: 18 },
-            },
-            data: serde_json::to_value(vec!["i32".to_string()]).ok(),
-            ..Default::default()
-        },
-    ));
+    let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(4, 17, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -375,20 +258,7 @@ fn after_if_keyword() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(
-        uri,
-        4,
-        17,
-        Diagnostic {
-            code: Some(Union2::B("type-check".into())),
-            range: Range {
-                start: Position { line: 5, character: 21 },
-                end: Position { line: 5, character: 22 },
-            },
-            data: serde_json::to_value(vec!["i32".to_string()]).ok(),
-            ..Default::default()
-        },
-    ));
+    let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(5, 21, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -404,20 +274,7 @@ fn after_if_ident() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(
-        uri,
-        4,
-        17,
-        Diagnostic {
-            code: Some(Union2::B("type-check".into())),
-            range: Range {
-                start: Position { line: 5, character: 21 },
-                end: Position { line: 5, character: 22 },
-            },
-            data: serde_json::to_value(vec!["i32".to_string()]).ok(),
-            ..Default::default()
-        },
-    ));
+    let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(5, 21, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -433,20 +290,7 @@ fn after_if_type_use() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(
-        uri,
-        4,
-        17,
-        Diagnostic {
-            code: Some(Union2::B("type-check".into())),
-            range: Range {
-                start: Position { line: 5, character: 21 },
-                end: Position { line: 5, character: 22 },
-            },
-            data: serde_json::to_value(vec!["i32".to_string()]).ok(),
-            ..Default::default()
-        },
-    ));
+    let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(5, 21, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -461,20 +305,7 @@ fn after_try_table_keyword() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.code_action(create_params(
-        uri,
-        4,
-        17,
-        Diagnostic {
-            code: Some(Union2::B("type-check".into())),
-            range: Range {
-                start: Position { line: 4, character: 17 },
-                end: Position { line: 4, character: 18 },
-            },
-            data: serde_json::to_value(vec!["i32".to_string()]).ok(),
-            ..Default::default()
-        },
-    ));
+    let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(4, 17, ["i32"])));
     assert_json_snapshot!(response);
 }
 
@@ -492,15 +323,7 @@ fn multi_types() {
         uri,
         3,
         15,
-        Diagnostic {
-            code: Some(Union2::B("type-check".into())),
-            range: Range {
-                start: Position { line: 3, character: 15 },
-                end: Position { line: 3, character: 16 },
-            },
-            data: serde_json::to_value(vec!["i32".to_string(), "(ref null any)".to_string()]).ok(),
-            ..Default::default()
-        },
+        create_diagnostic(3, 15, ["i32", "(ref null any)"]),
     ));
     assert_json_snapshot!(response);
 }

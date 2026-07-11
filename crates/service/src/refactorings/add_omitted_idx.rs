@@ -5,7 +5,7 @@ use crate::{
     uri::InternUri,
 };
 use line_index::LineIndex;
-use lspt::{CodeAction, CodeActionContext, CodeActionKind, TextEdit, Union2, WorkspaceEdit};
+use lspt::{CodeAction, CodeActionContext, CodeActionKind, NumberOrString, TextEdit, WorkspaceEdit};
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxToken, TextRange};
@@ -202,7 +202,9 @@ fn build_action(
             .diagnostics
             .iter()
             .find(|diagnostic| match &diagnostic.code {
-                Some(Union2::B(code)) => code == "omitted-idx-in-instr" && diagnostic.range == token_lsp_range,
+                Some(NumberOrString::String(code)) => {
+                    code == "omitted-idx-in-instr" && diagnostic.range == token_lsp_range
+                }
                 _ => false,
             })
             .map(|diagnostic| vec![diagnostic.clone()]),

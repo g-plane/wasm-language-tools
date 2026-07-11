@@ -1,6 +1,6 @@
 use crate::{helpers::LineIndexExt, uri::InternUri};
 use line_index::LineIndex;
-use lspt::{CodeAction, CodeActionContext, CodeActionKind, Diagnostic, TextEdit, Union2, WorkspaceEdit};
+use lspt::{CodeAction, CodeActionContext, CodeActionKind, Diagnostic, NumberOrString, TextEdit, WorkspaceEdit};
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode, TextRange};
@@ -14,7 +14,7 @@ pub fn act(
 ) -> Option<Vec<CodeAction>> {
     let node_lsp_range = line_index.convert(node.text_range())?;
     let diagnostic = context.diagnostics.iter().find(|diagnostic| match &diagnostic.code {
-        Some(Union2::B(code)) => code == "packing" && diagnostic.range == node_lsp_range,
+        Some(NumberOrString::String(code)) => code == "packing" && diagnostic.range == node_lsp_range,
         _ => false,
     })?;
     let instr_name = node
