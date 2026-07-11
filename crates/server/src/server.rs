@@ -15,12 +15,12 @@ use lspt::{
         CallHierarchyIncomingCallsRequest, CallHierarchyOutgoingCallsRequest, CallHierarchyPrepareRequest,
         CodeActionRequest, CodeLensRequest, CodeLensResolveRequest, CompletionRequest, ConfigurationRequest,
         DeclarationRequest, DefinitionRequest, DiagnosticRefreshRequest, DocumentDiagnosticRequest,
-        DocumentFormattingRequest, DocumentHighlightRequest, DocumentRangeFormattingRequest, DocumentSymbolRequest,
-        FoldingRangeRequest, HoverRequest, InlayHintRefreshRequest, InlayHintRequest, PrepareRenameRequest,
-        ReferencesRequest, RegistrationRequest, RenameRequest, Request as _, SelectionRangeRequest,
-        SemanticTokensRangeRequest, SemanticTokensRequest, ShutdownRequest, SignatureHelpRequest,
-        TypeDefinitionRequest, TypeHierarchyPrepareRequest, TypeHierarchySubtypesRequest,
-        TypeHierarchySupertypesRequest,
+        DocumentFormattingRequest, DocumentHighlightRequest, DocumentRangeFormattingRequest,
+        DocumentRangesFormattingRequest, DocumentSymbolRequest, FoldingRangeRequest, HoverRequest,
+        InlayHintRefreshRequest, InlayHintRequest, PrepareRenameRequest, ReferencesRequest, RegistrationRequest,
+        RenameRequest, Request as _, SelectionRangeRequest, SemanticTokensRangeRequest, SemanticTokensRequest,
+        ShutdownRequest, SignatureHelpRequest, TypeDefinitionRequest, TypeHierarchyPrepareRequest,
+        TypeHierarchySubtypesRequest, TypeHierarchySupertypesRequest,
     },
 };
 use rayon::{ThreadPool, ThreadPoolBuilder};
@@ -273,6 +273,13 @@ impl Server {
                 try_cast_request::<DocumentRangeFormattingRequest>(&method, params).map(|params| {
                     params
                         .and_then(|params| serde_json::to_value(service.range_formatting(params)))
+                        .map(|result| Message::OkResponse { id: id.clone(), result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<DocumentRangesFormattingRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.ranges_formatting(params)))
                         .map(|result| Message::OkResponse { id: id.clone(), result })
                 })
             })

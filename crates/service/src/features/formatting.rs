@@ -1,6 +1,9 @@
 use crate::{LanguageService, helpers::LineIndexExt, uri::InternUri};
 use line_index::LineIndex;
-use lspt::{DocumentFormattingParams, DocumentRangeFormattingParams, FormattingOptions, TextEdit};
+use lspt::{
+    DocumentFormattingParams, DocumentRangeFormattingParams, DocumentRangesFormattingParams, FormattingOptions,
+    TextEdit,
+};
 use similar::{Algorithm, DiffOp};
 use wat_formatter::config::{FormatOptions, LanguageOptions, LayoutOptions};
 use wat_syntax::{AmberNode, TextRange, TextSize};
@@ -79,6 +82,39 @@ impl LanguageService {
             line_index.convert(params.range)?,
             &build_options(&params.options, config.format.clone()),
             line_index,
+        )
+    }
+
+    /// Handler for `textDocument/rangesFormatting` request.
+    pub fn ranges_formatting(&self, params: DocumentRangesFormattingParams) -> Option<Vec<TextEdit>> {
+        let uri = InternUri::new(self, params.text_document.uri);
+        let document = self.get_document(uri)?;
+        let configs = self.configs.read();
+        let config = configs.get(&uri)?.unwrap_or_global(self);
+        let options = build_options(&params.options, config.format.clone());
+        let line_index = document.line_index(self);
+        let root = AmberNode::new_root(document.root(self));
+
+        let mut ranges = params
+            .ranges
+            .into_iter()
+            .filter_map(|range| line_index.convert(range))
+            .collect::<Vec<_>>();
+        ranges.sort_unstable_by(|a, b| a.ordering(*b));
+        ranges.dedup_by(|a, b| {
+            if b.contains_inclusive(a.start()) {
+                *b = b.cover(*a);
+                true
+            } else {
+                false
+            }
+        });
+        Some(
+            ranges
+                .into_iter()
+                .filter_map(|range| format_with_range(root, range, &options, line_index))
+                .flatten()
+                .collect(),
         )
     }
 }

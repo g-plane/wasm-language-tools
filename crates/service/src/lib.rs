@@ -26,11 +26,11 @@ use indexmap::IndexMap;
 use lspt::{
     CallHierarchyProvider, CodeActionKind, CodeActionOptions, CodeActionProvider, CodeLensOptions, CompletionOptions,
     DeclarationProvider, DefinitionProvider, DiagnosticOptions, DiagnosticProvider, DocumentFormattingProvider,
-    DocumentHighlightProvider, DocumentRangeFormattingProvider, DocumentSymbolProvider, FoldingRangeProvider,
-    HoverProvider, InitializeParams, InitializeResult, InlayHintProvider, ReferencesProvider, RenameOptions,
-    RenameProvider, SelectionRangeProvider, SemanticTokensClientCapabilities, SemanticTokensFull, SemanticTokensLegend,
-    SemanticTokensOptions, SemanticTokensProvider, SemanticTokensRange, ServerCapabilities, ServerInfo,
-    SignatureHelpOptions, TextDocumentClientCapabilities, TextDocumentSync, TextDocumentSyncKind,
+    DocumentHighlightProvider, DocumentRangeFormattingOptions, DocumentRangeFormattingProvider, DocumentSymbolProvider,
+    FoldingRangeProvider, HoverProvider, InitializeParams, InitializeResult, InlayHintProvider, ReferencesProvider,
+    RenameOptions, RenameProvider, SelectionRangeProvider, SemanticTokensClientCapabilities, SemanticTokensFull,
+    SemanticTokensLegend, SemanticTokensOptions, SemanticTokensProvider, SemanticTokensRange, ServerCapabilities,
+    ServerInfo, SignatureHelpOptions, TextDocumentClientCapabilities, TextDocumentSync, TextDocumentSyncKind,
     TextDocumentSyncOptions, TextDocumentSyncSave, TypeDefinitionProvider, TypeHierarchyProvider,
 };
 use parking_lot::RwLock;
@@ -150,7 +150,12 @@ impl LanguageService {
                 declaration_provider: Some(DeclarationProvider::Bool(true)),
                 document_formatting_provider: Some(DocumentFormattingProvider::Bool(true)),
                 document_highlight_provider: Some(DocumentHighlightProvider::Bool(true)),
-                document_range_formatting_provider: Some(DocumentRangeFormattingProvider::Bool(true)),
+                document_range_formatting_provider: Some(DocumentRangeFormattingProvider::Options(
+                    DocumentRangeFormattingOptions {
+                        ranges_support: Some(true),
+                        ..Default::default()
+                    },
+                )),
                 document_symbol_provider: Some(DocumentSymbolProvider::Bool(true)),
                 folding_range_provider: Some(FoldingRangeProvider::Bool(true)),
                 hover_provider: Some(HoverProvider::Bool(true)),

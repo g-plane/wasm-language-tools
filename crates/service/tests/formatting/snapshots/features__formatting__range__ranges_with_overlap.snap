@@ -1,0 +1,84 @@
+---
+source: crates/service/tests/formatting/range.rs
+expression: response
+---
+[
+  {
+    "range": {
+      "start": {
+        "line": 3,
+        "character": 9
+      },
+      "end": {
+        "line": 3,
+        "character": 12
+      }
+    },
+    "newText": ""
+  },
+  {
+    "range": {
+      "start": {
+        "line": 4,
+        "character": 7
+      },
+      "end": {
+        "line": 4,
+        "character": 7
+      }
+    },
+    "newText": "\n"
+  },
+  {
+    "range": {
+      "start": {
+        "line": 4,
+        "character": 11
+      },
+      "end": {
+        "line": 4,
+        "character": 12
+      }
+    },
+    "newText": ""
+  },
+  {
+    "range": {
+      "start": {
+        "line": 4,
+        "character": 15
+      },
+      "end": {
+        "line": 5,
+        "character": 0
+      }
+    },
+    "newText": ""
+  },
+  {
+    "range": {
+      "start": {
+        "line": 9,
+        "character": 15
+      },
+      "end": {
+        "line": 9,
+        "character": 17
+      }
+    },
+    "newText": ""
+  },
+  {
+    "range": {
+      "start": {
+        "line": 9,
+        "character": 22
+      },
+      "end": {
+        "line": 9,
+        "character": 22
+      }
+    },
+    "newText": "\n   "
+  }
+]

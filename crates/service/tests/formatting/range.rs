@@ -1,5 +1,8 @@
 use insta::assert_json_snapshot;
-use lspt::{DocumentRangeFormattingParams, FormattingOptions, Position, Range, TextDocumentIdentifier};
+use lspt::{
+    DocumentRangeFormattingParams, DocumentRangesFormattingParams, FormattingOptions, Position, Range,
+    TextDocumentIdentifier,
+};
 use wat_service::{LanguageService, ServiceConfig};
 
 fn create_params(
@@ -234,5 +237,91 @@ fn space5() {
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
     let response = service.range_formatting(create_params(uri, 11, 6, 15, 15));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn ranges() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func      $f
+    block    $b
+    end     nop
+
+
+    nop     nop
+  )
+  (global  (mut   i32) (i32.const     0))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.ranges_formatting(DocumentRangesFormattingParams {
+        text_document: TextDocumentIdentifier { uri },
+        ranges: vec![
+            Range {
+                start: Position { line: 3, character: 6 },
+                end: Position { line: 4, character: 12 },
+            },
+            Range {
+                start: Position { line: 9, character: 13 },
+                end: Position { line: 9, character: 30 },
+            },
+            Range {
+                start: Position { line: 4, character: 12 },
+                end: Position { line: 7, character: 6 },
+            },
+        ],
+        options: FormattingOptions {
+            tab_size: 2,
+            insert_spaces: true,
+            ..Default::default()
+        },
+        work_done_token: Default::default(),
+    });
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn ranges_with_overlap() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func      $f
+    block    $b
+    end     nop
+
+
+    nop     nop
+  )
+  (global  (mut   i32) (i32.const     0))
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.ranges_formatting(DocumentRangesFormattingParams {
+        text_document: TextDocumentIdentifier { uri },
+        ranges: vec![
+            Range {
+                start: Position { line: 3, character: 6 },
+                end: Position { line: 4, character: 12 },
+            },
+            Range {
+                start: Position { line: 9, character: 13 },
+                end: Position { line: 9, character: 30 },
+            },
+            Range {
+                start: Position { line: 4, character: 9 },
+                end: Position { line: 7, character: 6 },
+            },
+        ],
+        options: FormattingOptions {
+            tab_size: 2,
+            insert_spaces: true,
+            ..Default::default()
+        },
+        work_done_token: Default::default(),
+    });
     assert_json_snapshot!(response);
 }
