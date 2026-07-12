@@ -71,7 +71,7 @@ impl LanguageService {
             if params.content_changes.len() == 1 {
                 match &*params.content_changes {
                     [TextDocumentContentChangeEvent::Partial(partial)] => {
-                        if partial.text.bytes().all(is_safe_for_incremental) {
+                        if !partial.text.bytes().all(is_safe_for_incremental) {
                             break 'single;
                         }
                         let Some(range) = document.line_index(self).convert(partial.range) else {
@@ -83,7 +83,7 @@ impl LanguageService {
                         if text
                             .as_bytes()
                             .get(old_start..old_end)
-                            .is_none_or(|bytes| bytes.iter().all(|b| is_safe_for_incremental(*b)))
+                            .is_none_or(|bytes| !bytes.iter().all(|b| is_safe_for_incremental(*b)))
                         {
                             break 'single;
                         }
