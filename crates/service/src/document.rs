@@ -87,16 +87,17 @@ impl LanguageService {
                 }
                 // find the deepest node where code is changed
                 let node = find_deepest_parseable_node(SyntaxNode::new_root(document.root(self)), range);
-                let node_range = node.text_range();
+                let node_start = node.text_range().start();
+                let node_end = node.text_range().end();
                 // apply change to source text
                 text.replace_range(old_start..old_end, &partial.text);
                 // parse that node with ranged changed code
                 let (replaced_root, mut partial_errors) = if let Some((green, mut partial_errors)) = text
-                    .get(old_start..old_end + partial.text.len() - usize::from(range.len()))
+                    .get(usize::from(node_start)..usize::from(node_end) + partial.text.len() - usize::from(range.len()))
                     .and_then(|source| wat_parser::parse_as(node.kind(), source))
                 {
                     partial_errors.iter_mut().for_each(|error| {
-                        error.range += node_range.start();
+                        error.range += node_start;
                     });
                     (node.replace_with(green), partial_errors)
                 } else {
@@ -105,10 +106,7 @@ impl LanguageService {
 
                 let mut all_errors = document.syntax_errors(self).clone();
                 all_errors.retain_mut(|error| {
-                    match (
-                        node_range.start().cmp(&error.range.start()),
-                        node_range.end().cmp(&error.range.end()),
-                    ) {
+                    match (node_start.cmp(&error.range.start()), node_end.cmp(&error.range.end())) {
                         // parser has returned new syntax errors about that module field,
                         // so we need to remove old errors that belongs to that module field
                         (Ordering::Less | Ordering::Equal, Ordering::Greater | Ordering::Equal) => false,
