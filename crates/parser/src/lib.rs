@@ -5,5 +5,5 @@ mod parser2;
 
 pub use crate::{
     error::{Message, SyntaxError},
-    parser2::{is_id_char, parse, parse_partial},
+    parser2::{is_id_char, parse, parse_as},
 };

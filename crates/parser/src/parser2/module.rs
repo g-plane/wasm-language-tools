@@ -3,7 +3,7 @@ use crate::error::Message;
 use wat_syntax::{GreenNode, SyntaxKind::*};
 
 impl Parser<'_> {
-    fn parse_data(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_data(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
@@ -15,7 +15,7 @@ impl Parser<'_> {
         Some(self.finish_node(DATA, mark))
     }
 
-    fn parse_elem(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_elem(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
@@ -32,7 +32,7 @@ impl Parser<'_> {
         Some(self.finish_node(ELEM, mark))
     }
 
-    fn parse_elem_expr(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_elem_expr(&mut self) -> Option<GreenNode> {
         if let Some(mark) = self.try_parse(|parser| {
             let mark = parser.start_node();
             parser.lexer.next(L_PAREN)?;
@@ -52,7 +52,7 @@ impl Parser<'_> {
         }
     }
 
-    fn parse_elem_list(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_elem_list(&mut self) -> Option<GreenNode> {
         if let Some(node_or_token) = self
             .lexer
             .keyword("func")
@@ -80,7 +80,7 @@ impl Parser<'_> {
         self.finish_node(EXPORT, mark)
     }
 
-    fn parse_extern_idx(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_extern_idx(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
@@ -206,7 +206,7 @@ impl Parser<'_> {
             .map(|token| node(INDEX, [token.into()]))
     }
 
-    fn parse_local(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_local(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
@@ -225,7 +225,7 @@ impl Parser<'_> {
         Some(self.finish_node(LOCAL, mark))
     }
 
-    fn parse_mem_use(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_mem_use(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
@@ -602,15 +602,15 @@ impl Parser<'_> {
         self.finish_node(MODULE_FIELD_TAG, mark)
     }
 
-    fn parse_module_name(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_module_name(&mut self) -> Option<GreenNode> {
         self.expect(STRING).map(|token| node(MODULE_NAME, [token.into()]))
     }
 
-    fn parse_name(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_name(&mut self) -> Option<GreenNode> {
         self.expect(STRING).map(|token| node(NAME, [token.into()]))
     }
 
-    fn parse_offset(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_offset(&mut self) -> Option<GreenNode> {
         if let Some(mark) = self.try_parse(|parser| {
             let mark = parser.start_node();
             parser.lexer.next(L_PAREN)?;
@@ -636,7 +636,7 @@ impl Parser<'_> {
         self.finish_node(REC_TYPE, mark)
     }
 
-    fn parse_table_use(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_table_use(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());

@@ -10,7 +10,7 @@ use lspt::{
 };
 use salsa::Setter;
 use std::{cmp::Ordering, ops::Range};
-use wat_syntax::{GreenNode, SyntaxNode, TextSize};
+use wat_syntax::{GreenNode, SyntaxKind, SyntaxNode, TextRange, TextSize};
 
 #[salsa::input(debug)]
 pub(crate) struct Document {
@@ -68,84 +68,69 @@ impl LanguageService {
         };
         'single: {
             // only do incremental parsing for single change
-            if params.content_changes.len() == 1 {
-                match &*params.content_changes {
-                    [TextDocumentContentChangeEvent::Partial(partial)] => {
-                        if !partial.text.bytes().all(is_safe_for_incremental) {
-                            break 'single;
-                        }
-                        let Some(range) = document.line_index(self).convert(partial.range) else {
-                            break 'single;
-                        };
-                        let mut text = document.text(self).to_owned();
-                        let old_start = usize::from(range.start());
-                        let old_end = usize::from(range.end());
-                        if text
-                            .as_bytes()
-                            .get(old_start..old_end)
-                            .is_none_or(|bytes| !bytes.iter().all(|b| is_safe_for_incremental(*b)))
-                        {
-                            break 'single;
-                        }
-                        // search the module field where code is changed
-                        let Some(node) = SyntaxNode::new_root(document.root(self))
-                            .children()
-                            .find(|module| module.text_range().contains_range(range))
-                            .and_then(|module| module.child_at_range(range))
-                            .filter(|node| {
-                                let node_range = node.text_range();
-                                node_range.start() <= range.start() && node_range.end() > range.end()
-                            })
-                        else {
-                            break 'single;
-                        };
-                        // apply change to source text
-                        text.replace_range(old_start..old_end, &partial.text);
-                        // parse that module field by specifying offset with changed code
-                        let node_range = node.text_range();
-                        let Some((green, mut partial_errors)) =
-                            wat_parser::parse_partial(&text, node_range.start().into())
-                        else {
-                            break 'single;
-                        };
-                        let replaced_root = node.replace_with(green);
-
-                        let mut all_errors = document.syntax_errors(self).clone();
-                        all_errors.retain_mut(|error| {
-                            match (
-                                node_range.start().cmp(&error.range.start()),
-                                node_range.end().cmp(&error.range.end()),
-                            ) {
-                                // parser has returned new syntax errors about that module field,
-                                // so we need to remove old errors that belongs to that module field
-                                (Ordering::Less | Ordering::Equal, Ordering::Greater | Ordering::Equal) => false,
-                                // for syntax errors after that module field,
-                                // we need to adjust their locations
-                                (Ordering::Less | Ordering::Equal, _) => {
-                                    error.range = error.range + TextSize::of(&partial.text) - range.len();
-                                    true
-                                }
-                                _ => true,
-                            }
-                        });
-                        all_errors.append(&mut partial_errors);
-
-                        let line_index = LineIndex::new(&text);
-                        document.set_text(self).to(text);
-                        document.set_line_index(self).to(line_index);
-                        document.set_root(self).to(replaced_root);
-                        document.set_syntax_errors(self).to(all_errors);
-                    }
-                    [TextDocumentContentChangeEvent::WholeDocument(whole)] => {
-                        let (green, errors) = wat_parser::parse(&whole.text);
-                        document.set_text(self).to(whole.text.clone());
-                        document.set_line_index(self).to(LineIndex::new(&whole.text));
-                        document.set_root(self).to(green);
-                        document.set_syntax_errors(self).to(errors);
-                    }
-                    _ => break 'single,
+            if let [TextDocumentContentChangeEvent::Partial(partial)] = &*params.content_changes {
+                if !partial.text.bytes().all(is_safe_for_incremental) {
+                    break 'single;
                 }
+                let Some(range) = document.line_index(self).convert(partial.range) else {
+                    break 'single;
+                };
+                let mut text = document.text(self).to_owned();
+                let old_start = usize::from(range.start());
+                let old_end = usize::from(range.end());
+                if text
+                    .as_bytes()
+                    .get(old_start..old_end)
+                    .is_none_or(|bytes| !bytes.iter().all(|b| is_safe_for_incremental(*b)))
+                {
+                    break 'single;
+                }
+                // find the deepest node where code is changed
+                let node = find_deepest_parseable_node(SyntaxNode::new_root(document.root(self)), range);
+                let node_range = node.text_range();
+                // apply change to source text
+                text.replace_range(old_start..old_end, &partial.text);
+                // parse that node with ranged changed code
+                let (replaced_root, mut partial_errors) = if let Some((green, mut partial_errors)) = text
+                    .get(old_start..old_end + partial.text.len() - usize::from(range.len()))
+                    .and_then(|source| wat_parser::parse_as(node.kind(), source))
+                {
+                    partial_errors.iter_mut().for_each(|error| {
+                        error.range += node_range.start();
+                    });
+                    (node.replace_with(green), partial_errors)
+                } else {
+                    break 'single;
+                };
+
+                let mut all_errors = document.syntax_errors(self).clone();
+                all_errors.retain_mut(|error| {
+                    match (
+                        node_range.start().cmp(&error.range.start()),
+                        node_range.end().cmp(&error.range.end()),
+                    ) {
+                        // parser has returned new syntax errors about that module field,
+                        // so we need to remove old errors that belongs to that module field
+                        (Ordering::Less | Ordering::Equal, Ordering::Greater | Ordering::Equal) => false,
+                        // for syntax errors after that module field,
+                        // we need to adjust their locations
+                        (Ordering::Less | Ordering::Equal, _) => {
+                            error.range = error.range + TextSize::of(&partial.text) - range.len();
+                            true
+                        }
+                        _ => true,
+                    }
+                });
+                all_errors.append(&mut partial_errors);
+
+                let line_index = LineIndex::new(&text);
+                document.set_text(self).to(text);
+                document.set_line_index(self).to(line_index);
+                document.set_root(self).to(replaced_root);
+                document.set_syntax_errors(self).to(all_errors);
                 return;
+            } else {
+                break 'single;
             }
         }
 
@@ -189,6 +174,77 @@ impl LanguageService {
     }
 }
 
+fn find_deepest_parseable_node(root: SyntaxNode, range: TextRange) -> SyntaxNode {
+    let mut node = root;
+    let mut last_parseable = node.clone();
+    while let Some(it) = node.child_at_range(range) {
+        node = it;
+        if matches!(
+            node.kind(),
+            SyntaxKind::MODULE_NAME
+                | SyntaxKind::NAME
+                | SyntaxKind::REF_TYPE
+                | SyntaxKind::FIELD_TYPE
+                | SyntaxKind::STRUCT_TYPE
+                | SyntaxKind::ARRAY_TYPE
+                | SyntaxKind::FUNC_TYPE
+                | SyntaxKind::CONT_TYPE
+                | SyntaxKind::PARAM
+                | SyntaxKind::RESULT
+                | SyntaxKind::FIELD
+                | SyntaxKind::SUB_TYPE
+                | SyntaxKind::TABLE_TYPE
+                | SyntaxKind::MEM_TYPE
+                | SyntaxKind::ADDR_TYPE
+                | SyntaxKind::GLOBAL_TYPE
+                | SyntaxKind::PLAIN_INSTR
+                | SyntaxKind::BLOCK_BLOCK
+                | SyntaxKind::BLOCK_LOOP
+                | SyntaxKind::BLOCK_IF
+                | SyntaxKind::BLOCK_TRY_TABLE
+                | SyntaxKind::CATCH
+                | SyntaxKind::CATCH_ALL
+                | SyntaxKind::MEM_ARG
+                | SyntaxKind::ON_CLAUSE
+                | SyntaxKind::IMMEDIATE
+                | SyntaxKind::TYPE_USE
+                | SyntaxKind::LIMITS
+                | SyntaxKind::EXTERN_IDX_FUNC
+                | SyntaxKind::EXTERN_IDX_TABLE
+                | SyntaxKind::EXTERN_IDX_MEMORY
+                | SyntaxKind::EXTERN_IDX_GLOBAL
+                | SyntaxKind::EXTERN_IDX_TAG
+                | SyntaxKind::INDEX
+                | SyntaxKind::LOCAL
+                | SyntaxKind::MEM_PAGE_SIZE
+                | SyntaxKind::MEM_USE
+                | SyntaxKind::OFFSET
+                | SyntaxKind::ELEM
+                | SyntaxKind::ELEM_LIST
+                | SyntaxKind::ELEM_EXPR
+                | SyntaxKind::TABLE_USE
+                | SyntaxKind::DATA
+                | SyntaxKind::MODULE
+                | SyntaxKind::MODULE_FIELD_DATA
+                | SyntaxKind::MODULE_FIELD_ELEM
+                | SyntaxKind::MODULE_FIELD_EXPORT
+                | SyntaxKind::MODULE_FIELD_FUNC
+                | SyntaxKind::MODULE_FIELD_GLOBAL
+                | SyntaxKind::MODULE_FIELD_IMPORT
+                | SyntaxKind::MODULE_FIELD_MEMORY
+                | SyntaxKind::MODULE_FIELD_START
+                | SyntaxKind::MODULE_FIELD_TABLE
+                | SyntaxKind::MODULE_FIELD_TAG
+                | SyntaxKind::TYPE_DEF
+                | SyntaxKind::REC_TYPE
+                | SyntaxKind::ROOT
+        ) {
+            last_parseable = node.clone();
+        }
+    }
+    last_parseable
+}
+
 // allows: identifier char + whitespace + non-ASCII
 fn is_safe_for_incremental(b: u8) -> bool {
     b.is_ascii_alphanumeric()
@@ -201,10 +257,10 @@ fn is_safe_for_incremental(b: u8) -> bool {
 mod tests {
     use super::*;
     use lspt::{
-        Definition, DefinitionParams, DocumentDiagnosticParams, DocumentHighlightParams, Hover, HoverContents,
-        HoverParams, Location, MarkupContent, MarkupKind, NumberOrString, Position, Range, StringOrMarkupContent,
-        TextDocumentContentChangePartial, TextDocumentContentChangeWholeDocument, TextDocumentIdentifier,
-        TextDocumentItem, VersionedTextDocumentIdentifier,
+        Definition, DefinitionParams, Diagnostic, DocumentDiagnosticParams, DocumentHighlightParams, Hover,
+        HoverContents, HoverParams, Location, MarkupContent, MarkupKind, NumberOrString, Position, Range,
+        StringOrMarkupContent, TextDocumentContentChangePartial, TextDocumentContentChangeWholeDocument,
+        TextDocumentIdentifier, TextDocumentItem, VersionedTextDocumentIdentifier,
     };
 
     #[test]
@@ -1219,5 +1275,53 @@ mod tests {
                 },
             )],
         });
+    }
+
+    #[test]
+    fn new_errors_from_incremental() {
+        let uri = "untitled:test".to_string();
+        let mut service = LanguageService::default();
+        service.commit(
+            &uri,
+            "
+(module
+  (func (call )))
+"
+            .into(),
+        );
+        service.did_change(DidChangeTextDocumentParams {
+            text_document: VersionedTextDocumentIdentifier {
+                uri: uri.clone(),
+                version: 1,
+            },
+            content_changes: vec![TextDocumentContentChangeEvent::Partial(
+                TextDocumentContentChangePartial {
+                    range: Range {
+                        start: Position { line: 2, character: 14 },
+                        end: Position { line: 2, character: 14 },
+                    },
+                    text: "$".into(),
+                },
+            )],
+        });
+        let diagnostics = service.pull_diagnostics(DocumentDiagnosticParams {
+            text_document: TextDocumentIdentifier { uri: uri.clone() },
+            identifier: None,
+            previous_result_id: None,
+            work_done_token: None,
+            partial_result_token: None,
+        });
+        assert!(diagnostics.items.iter().any(|diagnostic| match diagnostic {
+            Diagnostic {
+                code: Some(NumberOrString::String(code)),
+                range:
+                    Range {
+                        start: Position { line: 2, character: 14 },
+                        end: Position { line: 2, character: 15 },
+                    },
+                ..
+            } => code.starts_with("syntax"),
+            _ => false,
+        }));
     }
 }

@@ -3,7 +3,7 @@ use crate::error::Message;
 use wat_syntax::{GreenNode, SyntaxKind::*};
 
 impl Parser<'_> {
-    fn parse_addr_type(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_addr_type(&mut self) -> Option<GreenNode> {
         self.lexer.eat(TYPE_KEYWORD).map(|mut token| {
             let token = match token.text {
                 "i32" => green::TYPE_KW_I32.clone(),
@@ -26,7 +26,7 @@ impl Parser<'_> {
         Some(self.finish_node(ARRAY_TYPE, mark))
     }
 
-    fn parse_composite_type(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_composite_type(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
@@ -127,7 +127,7 @@ impl Parser<'_> {
         }
     }
 
-    fn parse_field(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_field(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
@@ -146,7 +146,7 @@ impl Parser<'_> {
         Some(self.finish_node(FIELD, mark))
     }
 
-    fn parse_field_type(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_field_type(&mut self) -> Option<GreenNode> {
         if let Some(mark) = self.try_parse(|parser| {
             let mark = parser.start_node();
             parser.lexer.next(L_PAREN)?;
@@ -219,7 +219,7 @@ impl Parser<'_> {
             .or_else(|| self.parse_index().map(|index| node(HEAP_TYPE, [index.into()]).into()))
     }
 
-    fn parse_limits(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_limits(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         let min = self.expect(UNSIGNED_INT)?;
         self.add_child(min);
@@ -227,7 +227,7 @@ impl Parser<'_> {
         Some(self.finish_node(LIMITS, mark))
     }
 
-    fn parse_mem_page_size(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_mem_page_size(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());

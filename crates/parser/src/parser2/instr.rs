@@ -141,7 +141,7 @@ impl Parser<'_> {
         Some(self.finish_node(BLOCK_TRY_TABLE, mark))
     }
 
-    fn parse_catch(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_catch(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());
@@ -175,7 +175,7 @@ impl Parser<'_> {
         self.lexer.keyword("end").map(|_| green::KW_END.clone())
     }
 
-    fn parse_immediate(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_immediate(&mut self) -> Option<GreenNode> {
         self.lexer
             .eat(INT)
             .or_else(|| {
@@ -267,7 +267,7 @@ impl Parser<'_> {
         }
     }
 
-    fn parse_mem_arg(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_mem_arg(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         let keyword = self.lexer.next(MEM_ARG_KEYWORD)?;
         self.add_child(keyword);
@@ -312,7 +312,7 @@ impl Parser<'_> {
         Some(self.finish_node(MEM_ARG, mark))
     }
 
-    fn parse_on_clause(&mut self) -> Option<GreenNode> {
+    pub(super) fn parse_on_clause(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
         self.lexer.next(L_PAREN)?;
         self.add_child(green::L_PAREN.clone());

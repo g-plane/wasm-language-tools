@@ -32,15 +32,6 @@ impl<'s> Lexer<'s> {
         }
     }
 
-    pub fn offset_from(source: &'s str, offset: usize) -> Self {
-        Lexer {
-            source,
-            input: &source[offset..],
-            top_level: false,
-            annotation_depth: 0,
-        }
-    }
-
     pub fn checkpoint(&self) -> Checkpoint<'s> {
         Checkpoint(self.input)
     }
