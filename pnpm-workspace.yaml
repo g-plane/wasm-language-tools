@@ -1,3 +1,5 @@
 packages:
   - bindings/pkg
   - docs
+allowBuilds:
+  esbuild: false
