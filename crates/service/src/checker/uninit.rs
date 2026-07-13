@@ -8,7 +8,7 @@ use crate::{
 use bumpalo::Bump;
 use petgraph::graph::NodeIndex;
 use std::cell::Cell;
-use wat_syntax::AmberNode;
+use wat_syntax::{AmberNode, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "uninit";
 
@@ -76,19 +76,37 @@ fn hydrate_block_marks(cfg: &ControlFlowGraph, block_marks: &mut BumpHashMap<Nod
     while changed {
         changed = false;
         block_marks.iter().for_each(|(node_index, mark)| {
-            let initialized = cfg
-                .graph
-                .neighbors_directed(*node_index, petgraph::Direction::Incoming)
-                .filter(|incoming| {
-                    // ignore loop back for assuming the first iteration
-                    cfg.graph
-                        .edges_connecting(*incoming, *node_index)
-                        .any(|edge| !edge.weight().loop_back)
-                })
-                .filter_map(|incoming| block_marks.get(&incoming))
-                .map(|mark| mark.out.get())
-                .reduce(|acc, cur| acc && cur)
-                .unwrap_or_default();
+            let Some(current) = cfg.graph.node_weight(*node_index) else {
+                return;
+            };
+            let initialized =
+                cfg.graph
+                    .neighbors_directed(*node_index, petgraph::Direction::Incoming)
+                    .filter(|incoming| {
+                        // ignore loop back for assuming the first iteration
+                        if let Some(FlowNode {
+                            kind: FlowNodeKind::BasicBlock(bb),
+                            ..
+                        }) = cfg.graph.node_weight(*incoming)
+                            && let FlowNode {
+                                kind: FlowNodeKind::BlockEntry(block_entry),
+                                ..
+                            } = current
+                        {
+                            // label jumping always happens from the body of a block,
+                            // so it's safe to compare syntax text range
+                            block_entry.kind() != SyntaxKind::BLOCK_LOOP
+                                || bb.0.last().is_some_and(|instr| {
+                                    !block_entry.text_range().contains(instr.ptr.text_range().end())
+                                })
+                        } else {
+                            true
+                        }
+                    })
+                    .filter_map(|incoming| block_marks.get(&incoming))
+                    .map(|mark| mark.out.get())
+                    .reduce(|acc, cur| acc && cur)
+                    .unwrap_or_default();
             if initialized {
                 if !mark.r#in.get() {
                     mark.r#in.set(true);
