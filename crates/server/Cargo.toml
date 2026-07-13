@@ -12,7 +12,7 @@ exclude = ["/tests"]
 [dependencies]
 anyhow = "1.0"
 fern = "0.7"
-humantime = "2.3"
+humantime = "2.4"
 log = "0.4"
 lspt = { workspace = true }
 rayon = "1.12"

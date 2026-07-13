@@ -13,7 +13,7 @@ exclude = ["/tests"]
 bumpalo = { workspace = true }
 hashbrown = { version = "0.17", default-features = false, features = ["inline-more", "allocator-api2"] }
 indexmap = "2.14"
-itertools = "0.14"
+itertools = "0.15"
 line-index = "0.1"
 lspt = { workspace = true }
 parking_lot = "0.12"
