@@ -284,6 +284,14 @@ impl LanguageService {
         serde_wasm_bindgen::from_value(params)
             .and_then(|params| self.inner.range_formatting(params).serialize(&self.serializer))
     }
+    #[wasm_bindgen(js_name = "rangesFormatting", unchecked_return_type = "lsp.TextEdit[] | null")]
+    pub fn ranges_formatting(
+        &self,
+        #[wasm_bindgen(unchecked_param_type = "lsp.DocumentRangesFormattingParams")] params: JsValue,
+    ) -> Result<JsValue, Error> {
+        serde_wasm_bindgen::from_value(params)
+            .and_then(|params| self.inner.ranges_formatting(params).serialize(&self.serializer))
+    }
 
     #[wasm_bindgen(unchecked_return_type = "lsp.Hover | null")]
     pub fn hover(
@@ -395,4 +403,9 @@ impl LanguageService {
         serde_wasm_bindgen::from_value(params)
             .and_then(|params| self.inner.type_hierarchy_subtypes(params).serialize(&self.serializer))
     }
+}
+
+#[wasm_bindgen(js_name = "debugSyntaxTree")]
+pub fn debug_syntax_tree(code: String) -> String {
+    format!("{:?}", wat_parser::parse(&code).0)
 }

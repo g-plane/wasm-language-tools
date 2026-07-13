@@ -72,6 +72,7 @@ dependencies = [
  "serde",
  "serde-wasm-bindgen",
  "wasm-bindgen",
+ "wat_parser",
  "wat_service",
 ]
 
