@@ -249,7 +249,7 @@ impl<'db> Builder<'db> {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct FlowNodeId(u32);
 
 #[derive(Clone, PartialEq, Eq)]
@@ -326,6 +326,7 @@ impl ControlFlowGraph {
     }
 
     fn add_edge(&mut self, from: FlowNodeId, to: FlowNodeId) {
+        debug_assert_ne!(from, to);
         if let Some(flow_node) = self.nodes.get_mut(from.0 as usize) {
             flow_node.outgoings.push(to);
         }
