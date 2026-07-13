@@ -44,6 +44,7 @@ export default defineConfig({
           {
             text: 'Format',
             link: '/config/format',
+            collapsed: true,
             items: [
               { text: 'splitClosingParens', link: '/config/format/split-closing-parens' },
               { text: 'wrapBeforeLocals', link: '/config/format/wrap-before-locals' },
