@@ -7,7 +7,6 @@ use crate::{
 };
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
-use petgraph::visit::Dfs;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, ast::support};
 
@@ -71,28 +70,38 @@ pub fn act(
     }
 
     let cfg = cfa::analyze(db, document, SyntaxNodePtr::new(&func));
-    let bb_node_index = cfg.graph.node_indices().find(|node_index| {
-        if let Some(FlowNode {
+    let bb_flow_node = cfg.nodes().iter().find(|flow_node| {
+        if let FlowNode {
             kind: FlowNodeKind::BasicBlock(bb),
             ..
-        }) = cfg.graph.node_weight(*node_index)
+        } = flow_node
         {
             bb.contains_instr(node)
         } else {
             false
         }
     })?;
-    let mut dfs = Dfs::new(&cfg.graph, bb_node_index);
-    dfs.next(&cfg.graph); // skip the starting node
-    while let Some(next) = dfs.next(&cfg.graph) {
+    let mut pending_flow_nodes = bb_flow_node
+        .outgoings
+        .iter()
+        .filter_map(|outgoing| cfg.get_node(*outgoing))
+        .collect::<Vec<_>>();
+    while let Some(flow_node) = pending_flow_nodes.pop() {
         // make sure there're no basic blocks or block entries after the "call-return" pair
-        if !matches!(
-            cfg.graph.node_weight(next),
-            Some(FlowNode {
+        if matches!(
+            flow_node,
+            FlowNode {
                 kind: FlowNodeKind::BlockExit | FlowNodeKind::Exit,
                 ..
-            })
+            }
         ) {
+            pending_flow_nodes.extend(
+                flow_node
+                    .outgoings
+                    .iter()
+                    .filter_map(|outgoing| cfg.get_node(*outgoing)),
+            );
+        } else {
             return None;
         }
     }

@@ -3,7 +3,7 @@ use crate::{
     document::Document,
     idx::InternIdent,
 };
-use petgraph::graph::{Graph, NodeIndex};
+use smallvec::SmallVec;
 use wat_syntax::{
     GreenToken, SyntaxKind, SyntaxNode, SyntaxNodePtr,
     ast::{AstNode, BlockInstr, Cat, Instr, support},
@@ -18,9 +18,9 @@ pub fn analyze(db: &dyn salsa::Database, document: Document, ptr: SyntaxNodePtr)
 struct Builder<'db> {
     db: &'db dyn salsa::Database,
     symbol_table: &'db SymbolTable<'db>,
-    graph: Graph<FlowNode, FlowEdge>,
-    block_stack: Vec<(NodeIndex, Option<InternIdent<'db>>)>,
-    current: Option<NodeIndex>,
+    graph: ControlFlowGraph,
+    block_stack: Vec<(FlowNodeId, Option<InternIdent<'db>>)>,
+    current: Option<FlowNodeId>,
     bb_instrs: Vec<BasicBlockInstr>,
     unreachable: bool,
 }
@@ -29,7 +29,9 @@ impl<'db> Builder<'db> {
         Self {
             db,
             symbol_table: SymbolTable::of(db, document),
-            graph: Graph::new(),
+            graph: ControlFlowGraph {
+                nodes: Vec::with_capacity(16),
+            },
             block_stack: Vec::new(),
             current: None,
             bb_instrs: Vec::with_capacity(2),
@@ -38,24 +40,15 @@ impl<'db> Builder<'db> {
     }
 
     fn build(mut self, node: SyntaxNode) -> ControlFlowGraph {
-        let entry = self.graph.add_node(FlowNode {
-            kind: FlowNodeKind::Entry,
-            unreachable: false,
-        });
+        let entry = self.graph.add_node(FlowNodeKind::Entry, false);
         self.current = Some(entry);
-        let exit = self.graph.add_node(FlowNode {
-            kind: FlowNodeKind::Exit,
-            unreachable: false,
-        });
+        let exit = self.graph.add_node(FlowNodeKind::Exit, false);
 
         self.block_stack.push((exit, None));
         self.visit_block_like(&node, exit);
         self.finish_exit(exit);
 
-        ControlFlowGraph {
-            graph: self.graph,
-            entry,
-        }
+        self.graph
     }
 
     fn visit_instrs(&mut self, node: &SyntaxNode) {
@@ -84,7 +77,7 @@ impl<'db> Builder<'db> {
                     }
                     "return" | "return_call" | "return_call_indirect" | "return_call_ref" => {
                         if let Some((bb, (exit, _))) = self.add_basic_block().zip(self.block_stack.first()) {
-                            self.graph.add_edge(bb, *exit, FlowEdge { loop_back: false });
+                            self.graph.add_edge(bb, *exit);
                         }
                         true
                     }
@@ -92,13 +85,7 @@ impl<'db> Builder<'db> {
                         if let Some(bb) = self.add_basic_block() {
                             for immediate in plain.immediates() {
                                 if let Some(target) = self.find_jump_target(immediate) {
-                                    self.graph.add_edge(
-                                        bb,
-                                        target,
-                                        FlowEdge {
-                                            loop_back: self.is_loop_entry(target),
-                                        },
-                                    );
+                                    self.graph.add_edge(bb, target);
                                 }
                             }
                         }
@@ -110,13 +97,7 @@ impl<'db> Builder<'db> {
                             .next()
                             .and_then(|immediate| self.find_jump_target(immediate));
                         if let Some((bb, target)) = self.add_basic_block().zip(target) {
-                            self.graph.add_edge(
-                                bb,
-                                target,
-                                FlowEdge {
-                                    loop_back: self.is_loop_entry(target),
-                                },
-                            );
+                            self.graph.add_edge(bb, target);
                         }
                         false
                     }
@@ -128,13 +109,7 @@ impl<'db> Builder<'db> {
                                 .filter_map(|on_clause| on_clause.label_index())
                             {
                                 if let Some(target) = self.find_jump_target(index) {
-                                    self.graph.add_edge(
-                                        bb,
-                                        target,
-                                        FlowEdge {
-                                            loop_back: self.is_loop_entry(target),
-                                        },
-                                    );
+                                    self.graph.add_edge(bb, target);
                                 }
                             }
                         }
@@ -151,17 +126,14 @@ impl<'db> Builder<'db> {
             }
             Instr::Block(block) => {
                 self.add_basic_block();
-                let block_entry = self.graph.add_node(FlowNode {
-                    kind: FlowNodeKind::BlockEntry(SyntaxNodePtr::new(block.syntax())),
-                    unreachable: self.unreachable,
-                });
+                let block_entry = self.graph.add_node(
+                    FlowNodeKind::BlockEntry(SyntaxNodePtr::new(block.syntax())),
+                    self.unreachable,
+                );
                 self.connect_current_to(block_entry);
                 self.current = Some(block_entry);
 
-                let block_exit = self.graph.add_node(FlowNode {
-                    kind: FlowNodeKind::BlockExit,
-                    unreachable: false,
-                });
+                let block_exit = self.graph.add_node(FlowNodeKind::BlockExit, false);
                 let ident = support::token(block.syntax(), SyntaxKind::IDENT)
                     .map(|token| InternIdent::new(self.db, token.text()));
                 match block {
@@ -190,8 +162,7 @@ impl<'db> Builder<'db> {
                         if let Some(else_block) = block_if.else_block() {
                             self.visit_block_like(else_block.syntax(), block_exit);
                         } else if let Some(condition) = condition {
-                            self.graph
-                                .add_edge(condition, block_exit, FlowEdge { loop_back: false });
+                            self.graph.add_edge(condition, block_exit);
                         }
                     }
                     BlockInstr::TryTable(block_try_table) => {
@@ -200,7 +171,7 @@ impl<'db> Builder<'db> {
                             Cat::CatchAll(catch_all) => catch_all.label_index(),
                         }) {
                             if let Some(target) = self.find_jump_target(index) {
-                                self.graph.add_edge(block_entry, target, FlowEdge { loop_back: false });
+                                self.graph.add_edge(block_entry, target);
                             }
                         }
                         self.block_stack.push((block_exit, ident));
@@ -215,33 +186,33 @@ impl<'db> Builder<'db> {
         });
     }
 
-    fn visit_block_like(&mut self, node: &SyntaxNode, exit: NodeIndex) {
+    fn visit_block_like(&mut self, node: &SyntaxNode, exit: FlowNodeId) {
         self.visit_instrs(node);
         self.add_basic_block();
         self.connect_current_to(exit);
     }
 
-    fn add_basic_block(&mut self) -> Option<NodeIndex> {
+    fn add_basic_block(&mut self) -> Option<FlowNodeId> {
         if self.bb_instrs.is_empty() {
             None
         } else {
-            let bb = self.graph.add_node(FlowNode {
-                kind: FlowNodeKind::BasicBlock(BasicBlock(self.bb_instrs.drain(..).collect())),
-                unreachable: self.unreachable,
-            });
+            let bb = self.graph.add_node(
+                FlowNodeKind::BasicBlock(BasicBlock(self.bb_instrs.drain(..).collect())),
+                self.unreachable,
+            );
             self.connect_current_to(bb);
             self.current = Some(bb);
             Some(bb)
         }
     }
 
-    fn connect_current_to(&mut self, node_index: NodeIndex) {
+    fn connect_current_to(&mut self, node_id: FlowNodeId) {
         if let Some(current) = self.current {
-            self.graph.add_edge(current, node_index, FlowEdge { loop_back: false });
+            self.graph.add_edge(current, node_id);
         }
     }
 
-    fn find_jump_target<'a, N: AstNode<'a>>(&self, node: N) -> Option<NodeIndex> {
+    fn find_jump_target<'a, N: AstNode<'a>>(&self, node: N) -> Option<FlowNodeId> {
         self.symbol_table
             .symbols
             .get(&SymbolKey::new(node.syntax()))
@@ -261,40 +232,32 @@ impl<'db> Builder<'db> {
             .map(|(target, _)| *target)
     }
 
-    fn finish_exit(&mut self, exit: NodeIndex) {
+    fn finish_exit(&mut self, exit: FlowNodeId) {
         // If all basic blocks connecting to this exit are unreachable,
         // or no basic blocks connect to this exit, next will be unreachable.
-        self.unreachable = self
-            .graph
-            .neighbors_directed(exit, petgraph::Direction::Incoming)
-            .all(|node_index| {
+        self.unreachable = self.graph.get_node(exit).is_some_and(|flow_node| {
+            flow_node.incomings.iter().all(|node_id| {
                 matches!(
-                    self.graph.node_weight(node_index),
+                    self.graph.get_node(*node_id),
                     Some(FlowNode { unreachable: true, .. }) | None
                 )
-            });
-        if let Some(flow_node) = self.graph.node_weight_mut(exit) {
+            })
+        });
+        if let Some(flow_node) = self.graph.get_node_mut(exit) {
             flow_node.unreachable = self.unreachable;
-        }
-    }
-
-    fn is_loop_entry(&self, node_index: NodeIndex) -> bool {
-        if let Some(FlowNode {
-            kind: FlowNodeKind::BlockEntry(ptr),
-            ..
-        }) = self.graph.node_weight(node_index)
-        {
-            ptr.kind() == SyntaxKind::BLOCK_LOOP
-        } else {
-            false
         }
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+pub struct FlowNodeId(u32);
+
+#[derive(Clone, PartialEq, Eq)]
 pub struct FlowNode {
     pub kind: FlowNodeKind,
     pub unreachable: bool,
+    pub incomings: SmallVec<[FlowNodeId; 4]>,
+    pub outgoings: SmallVec<[FlowNodeId; 4]>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -324,33 +287,50 @@ pub struct BasicBlockInstr {
     pub immediates: Vec<SyntaxNodePtr>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct FlowEdge {
-    pub loop_back: bool,
+#[derive(Clone, PartialEq, Eq)]
+pub struct ControlFlowGraph {
+    nodes: Vec<FlowNode>,
 }
 
-#[derive(Clone)]
-pub struct ControlFlowGraph {
-    pub graph: Graph<FlowNode, FlowEdge>,
-    pub entry: NodeIndex,
-}
-impl PartialEq for ControlFlowGraph {
-    fn eq(&self, other: &Self) -> bool {
-        self.entry == other.entry
-            && self.graph.raw_nodes().iter().map(|node| &node.weight).eq(other
-                .graph
-                .raw_nodes()
-                .iter()
-                .map(|node| &node.weight))
-            && self
-                .graph
-                .raw_edges()
-                .iter()
-                .map(|edge| (edge.source(), edge.target(), &edge.weight))
-                .eq(other
-                    .graph
-                    .raw_edges()
-                    .iter()
-                    .map(|edge| (edge.source(), edge.target(), &edge.weight)))
+impl ControlFlowGraph {
+    #[inline]
+    pub fn nodes(&self) -> &[FlowNode] {
+        &self.nodes
+    }
+    #[inline]
+    pub fn nodes_with_ids(&self) -> impl Iterator<Item = (&FlowNode, FlowNodeId)> {
+        self.nodes
+            .iter()
+            .enumerate()
+            .map(|(i, flow_node)| (flow_node, FlowNodeId(i as u32)))
+    }
+
+    #[inline]
+    pub fn get_node(&self, id: FlowNodeId) -> Option<&FlowNode> {
+        self.nodes.get(id.0 as usize)
+    }
+    #[inline]
+    fn get_node_mut(&mut self, id: FlowNodeId) -> Option<&mut FlowNode> {
+        self.nodes.get_mut(id.0 as usize)
+    }
+
+    fn add_node(&mut self, kind: FlowNodeKind, unreachable: bool) -> FlowNodeId {
+        let id = FlowNodeId(self.nodes.len() as u32);
+        self.nodes.push(FlowNode {
+            kind,
+            unreachable,
+            incomings: SmallVec::with_capacity(4),
+            outgoings: SmallVec::with_capacity(4),
+        });
+        id
+    }
+
+    fn add_edge(&mut self, from: FlowNodeId, to: FlowNodeId) {
+        if let Some(flow_node) = self.nodes.get_mut(from.0 as usize) {
+            flow_node.outgoings.push(to);
+        }
+        if let Some(flow_node) = self.nodes.get_mut(to.0 as usize) {
+            flow_node.incomings.push(from);
+        }
     }
 }

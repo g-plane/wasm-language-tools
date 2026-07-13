@@ -1,13 +1,12 @@
 use super::{Diagnostic, DiagnosticCtx};
 use crate::{
     binder::{Symbol, SymbolKey, SymbolTable},
-    cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeKind},
+    cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeId, FlowNodeKind},
     config::LintLevel,
     helpers::{BumpCollectionsExt, BumpHashMap},
 };
 use bumpalo::{Bump, collections::Vec as BumpVec};
 use lspt::DiagnosticSeverity;
-use petgraph::graph::NodeIndex;
 use std::cell::Cell;
 use wat_syntax::AmberNode;
 
@@ -47,27 +46,26 @@ fn check_local(
     cfg: &ControlFlowGraph,
     bump: &Bump,
 ) {
-    let mut block_marks = BumpHashMap::with_capacity_in(cfg.graph.node_count(), bump);
-    block_marks.extend(cfg.graph.node_indices().filter_map(|node_index| {
-        cfg.graph.node_weight(node_index).and_then(|node| {
-            if node.unreachable {
-                None
-            } else {
-                match &node.kind {
-                    FlowNodeKind::BasicBlock(bb) => Some((node_index, BlockMark::new(bb, symbol_table, local.key))),
-                    FlowNodeKind::BlockEntry(..) | FlowNodeKind::BlockExit => Some((node_index, BlockMark::default())),
-                    _ => None,
-                }
+    let mut block_marks = BumpHashMap::with_capacity_in(cfg.nodes().len(), bump);
+    block_marks.extend(cfg.nodes_with_ids().filter_map(|(flow_node, node_id)| {
+        if flow_node.unreachable {
+            None
+        } else {
+            match &flow_node.kind {
+                FlowNodeKind::BasicBlock(bb) => Some((node_id, BlockMark::new(bb, symbol_table, local.key))),
+                FlowNodeKind::BlockEntry(..) | FlowNodeKind::BlockExit => Some((node_id, BlockMark::default())),
+                _ => None,
             }
-        })
+        }
     }));
     hydrate_block_marks(cfg, &mut block_marks);
-    cfg.graph.node_indices().for_each(|node_index| {
-        if let Some(FlowNode {
+    cfg.nodes_with_ids().for_each(|(flow_node, node_id)| {
+        if let FlowNode {
             kind: FlowNodeKind::BasicBlock(bb),
             unreachable: false,
-        }) = cfg.graph.node_weight(node_index)
-            && let Some(mark) = block_marks.get(&node_index)
+            ..
+        } = flow_node
+            && let Some(mark) = block_marks.get(&node_id)
         {
             diagnostics.extend(
                 detect_unread(bb, local.key, mark, symbol_table, bump)
@@ -84,14 +82,15 @@ fn check_local(
     });
 }
 
-fn hydrate_block_marks(cfg: &ControlFlowGraph, block_marks: &mut BumpHashMap<NodeIndex, BlockMark>) {
+fn hydrate_block_marks(cfg: &ControlFlowGraph, block_marks: &mut BumpHashMap<FlowNodeId, BlockMark>) {
     let mut changed = true;
     while changed {
         changed = false;
-        block_marks.iter().for_each(|(node_index, mark)| {
-            cfg.graph
-                .neighbors_directed(*node_index, petgraph::Direction::Outgoing)
-                .filter_map(|node_index| block_marks.get(&node_index))
+        block_marks.iter().for_each(|(node_id, mark)| {
+            cfg.get_node(*node_id)
+                .into_iter()
+                .flat_map(|flow_node| &flow_node.outgoings)
+                .filter_map(|node_id| block_marks.get(node_id))
                 .filter(|outgoing| outgoing.in_gen.get())
                 .for_each(|_| {
                     if !mark.kill && !mark.in_gen.get() {

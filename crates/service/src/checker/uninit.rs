@@ -1,12 +1,11 @@
 use super::{Diagnostic, DiagnosticCtx};
 use crate::{
     binder::{Symbol, SymbolKey, SymbolTable},
-    cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeKind},
+    cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeId, FlowNodeKind},
     helpers::{BumpCollectionsExt, BumpHashMap},
     types_analyzer,
 };
 use bumpalo::Bump;
-use petgraph::graph::NodeIndex;
 use std::cell::Cell;
 use wat_syntax::{AmberNode, SyntaxKind};
 
@@ -35,27 +34,26 @@ fn check_local(
     cfg: &ControlFlowGraph,
     bump: &Bump,
 ) {
-    let mut block_marks = BumpHashMap::with_capacity_in(cfg.graph.node_count(), bump);
-    block_marks.extend(cfg.graph.node_indices().filter_map(|node_index| {
-        cfg.graph.node_weight(node_index).and_then(|node| {
-            if node.unreachable {
-                None
-            } else {
-                match &node.kind {
-                    FlowNodeKind::BasicBlock(bb) => Some((node_index, BlockMark::new(bb, symbol_table, local.key))),
-                    FlowNodeKind::BlockEntry(..) | FlowNodeKind::BlockExit => Some((node_index, BlockMark::default())),
-                    _ => None,
-                }
+    let mut block_marks = BumpHashMap::with_capacity_in(cfg.nodes().len(), bump);
+    block_marks.extend(cfg.nodes_with_ids().filter_map(|(flow_node, node_id)| {
+        if flow_node.unreachable {
+            None
+        } else {
+            match &flow_node.kind {
+                FlowNodeKind::BasicBlock(bb) => Some((node_id, BlockMark::new(bb, symbol_table, local.key))),
+                FlowNodeKind::BlockEntry(..) | FlowNodeKind::BlockExit => Some((node_id, BlockMark::default())),
+                _ => None,
             }
-        })
+        }
     }));
     hydrate_block_marks(cfg, &mut block_marks);
-    cfg.graph.node_indices().for_each(|node_index| {
-        if let Some(FlowNode {
+    cfg.nodes_with_ids().for_each(|(flow_node, node_id)| {
+        if let FlowNode {
             kind: FlowNodeKind::BasicBlock(bb),
             unreachable: false,
-        }) = cfg.graph.node_weight(node_index)
-            && let Some(mark) = block_marks.get_mut(&node_index)
+            ..
+        } = flow_node
+            && let Some(mark) = block_marks.get_mut(&node_id)
         {
             diagnostics.extend(
                 detect_uninit(bb, local.key, mark, symbol_table)
@@ -71,42 +69,42 @@ fn check_local(
     });
 }
 
-fn hydrate_block_marks(cfg: &ControlFlowGraph, block_marks: &mut BumpHashMap<NodeIndex, BlockMark>) {
+fn hydrate_block_marks(cfg: &ControlFlowGraph, block_marks: &mut BumpHashMap<FlowNodeId, BlockMark>) {
     let mut changed = true;
     while changed {
         changed = false;
-        block_marks.iter().for_each(|(node_index, mark)| {
-            let Some(current) = cfg.graph.node_weight(*node_index) else {
+        block_marks.iter().for_each(|(node_id, mark)| {
+            let Some(current) = cfg.get_node(*node_id) else {
                 return;
             };
-            let initialized =
-                cfg.graph
-                    .neighbors_directed(*node_index, petgraph::Direction::Incoming)
-                    .filter(|incoming| {
-                        // ignore loop back for assuming the first iteration
-                        if let Some(FlowNode {
-                            kind: FlowNodeKind::BasicBlock(bb),
+            let initialized = current
+                .incomings
+                .iter()
+                .filter(|incoming| {
+                    // ignore loop back for assuming the first iteration
+                    if let Some(FlowNode {
+                        kind: FlowNodeKind::BasicBlock(BasicBlock(instrs)),
+                        ..
+                    }) = cfg.get_node(**incoming)
+                        && let FlowNode {
+                            kind: FlowNodeKind::BlockEntry(block_entry),
                             ..
-                        }) = cfg.graph.node_weight(*incoming)
-                            && let FlowNode {
-                                kind: FlowNodeKind::BlockEntry(block_entry),
-                                ..
-                            } = current
-                        {
-                            // label jumping always happens from the body of a block,
-                            // so it's safe to compare syntax text range
-                            block_entry.kind() != SyntaxKind::BLOCK_LOOP
-                                || bb.0.last().is_some_and(|instr| {
-                                    !block_entry.text_range().contains(instr.ptr.text_range().end())
-                                })
-                        } else {
-                            true
-                        }
-                    })
-                    .filter_map(|incoming| block_marks.get(&incoming))
-                    .map(|mark| mark.out.get())
-                    .reduce(|acc, cur| acc && cur)
-                    .unwrap_or_default();
+                        } = current
+                    {
+                        // label jumping always happens from the body of a block,
+                        // so it's safe to compare syntax text range
+                        block_entry.kind() != SyntaxKind::BLOCK_LOOP
+                            || instrs
+                                .last()
+                                .is_some_and(|instr| !block_entry.text_range().contains(instr.ptr.text_range().end()))
+                    } else {
+                        true
+                    }
+                })
+                .filter_map(|incoming| block_marks.get(incoming))
+                .map(|mark| mark.out.get())
+                .reduce(|acc, cur| acc && cur)
+                .unwrap_or_default();
             if initialized {
                 if !mark.r#in.get() {
                     mark.r#in.set(true);

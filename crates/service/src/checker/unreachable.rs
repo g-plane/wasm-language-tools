@@ -22,11 +22,11 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, lint_le
 
     let cfg = cfa::analyze(ctx.db, ctx.document, node.to_ptr());
     let mut ranges = BumpVec::<TextRange>::new_in(ctx.bump);
-    cfg.graph.raw_nodes().iter().for_each(|raw_node| {
-        if !raw_node.weight.unreachable {
+    cfg.nodes().iter().for_each(|raw_node| {
+        if !raw_node.unreachable {
             return;
         }
-        match &raw_node.weight.kind {
+        match &raw_node.kind {
             FlowNodeKind::BasicBlock(bb) => {
                 bb.0.iter().for_each(|instr| {
                     let Some(instr) = instr.ptr.to_node(ctx.module) else {
