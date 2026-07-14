@@ -30,6 +30,7 @@ pub fn parse(source: &str) -> (GreenNode, Vec<SyntaxError>) {
 /// use wat_syntax::SyntaxKind;
 /// assert!(parse_as(SyntaxKind::MODULE_FIELD_FUNC, "(module (func))").is_none());
 /// assert!(parse_as(SyntaxKind::MODULE_FIELD_FUNC, "(fun)").is_none());
+/// assert!(parse_as(SyntaxKind::MODULE_FIELD_FUNC, "(global i32 i32.const 0)").is_none());
 /// let (green, errors) = parse_as(SyntaxKind::MODULE_FIELD_FUNC, "(func ())").unwrap();
 /// assert_eq!(green.kind(), SyntaxKind::MODULE_FIELD_FUNC);
 /// assert!(!errors.is_empty());
@@ -123,7 +124,9 @@ pub fn parse_as(kind: SyntaxKind, source: &str) -> Option<(GreenNode, Vec<Syntax
         | SyntaxKind::ANNOT_END
         | SyntaxKind::ERROR => None,
     };
-    green.map(|green| (green, parser.errors))
+    green
+        .filter(|green| green.kind() == kind)
+        .map(|green| (green, parser.errors))
 }
 
 #[inline]
