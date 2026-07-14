@@ -178,8 +178,20 @@ impl<'s> Parser<'s> {
 
     fn parse_root(&mut self) -> GreenNode {
         let mark = self.start_node();
+        self.lexer.top_level = true;
         while self.recover(Self::parse_module) {}
         self.parse_trivias();
         self.finish_node(SyntaxKind::ROOT, mark)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn valid_right_paren_in_parse_as() {
+        let (_, errors) = parse_as(SyntaxKind::MODULE_FIELD_FUNC, "(func\n    \n  )").unwrap();
+        assert!(errors.is_empty());
     }
 }

@@ -27,7 +27,7 @@ impl<'s> Lexer<'s> {
         Lexer {
             source,
             input: source,
-            top_level: true,
+            top_level: false,
             annotation_depth: 0,
         }
     }
