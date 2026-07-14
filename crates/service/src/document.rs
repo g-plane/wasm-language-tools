@@ -175,7 +175,9 @@ impl LanguageService {
 fn find_deepest_parseable_node(root: SyntaxNode, range: TextRange) -> SyntaxNode {
     let mut node = root;
     let mut last_parseable = node.clone();
-    while let Some(it) = node.child_at_range(range) {
+    while let Some(it) = node.child_at_range(range)
+        && range.end() < it.text_range().end()
+    {
         node = it;
         if matches!(
             node.kind(),
@@ -1321,5 +1323,58 @@ mod tests {
             } => code.starts_with("syntax"),
             _ => false,
         }));
+    }
+
+    #[test]
+    fn insert_at_the_end_of_node() {
+        let uri = "untitled:test".to_string();
+        let mut service = LanguageService::default();
+        service.commit(
+            &uri,
+            "
+(module
+  (func
+    block
+  )
+)
+"
+            .into(),
+        );
+        service.did_change(DidChangeTextDocumentParams {
+            text_document: VersionedTextDocumentIdentifier {
+                uri: uri.clone(),
+                version: 1,
+            },
+            content_changes: vec![TextDocumentContentChangeEvent::Partial(
+                TextDocumentContentChangePartial {
+                    range: Range {
+                        start: Position { line: 3, character: 9 },
+                        end: Position { line: 3, character: 9 },
+                    },
+                    text: "\n    ".into(),
+                },
+            )],
+        });
+        let diagnostics = service.pull_diagnostics(DocumentDiagnosticParams {
+            text_document: TextDocumentIdentifier { uri: uri.clone() },
+            identifier: None,
+            previous_result_id: None,
+            work_done_token: None,
+            partial_result_token: None,
+        });
+        assert_eq!(
+            diagnostics
+                .items
+                .iter()
+                .filter(|diagnostic| match diagnostic {
+                    Diagnostic {
+                        code: Some(NumberOrString::String(code)),
+                        ..
+                    } => code.starts_with("syntax"),
+                    _ => false,
+                })
+                .count(),
+            1,
+        );
     }
 }
