@@ -96,11 +96,23 @@ impl LanguageService {
                     .get(usize::from(node_start)..usize::from(node_end) + partial.text.len() - usize::from(range.len()))
                     .and_then(|source| wat_parser::parse_as(node.kind(), source))
                 {
+                    log::debug!(
+                        "Incremental parsing succeeded for `{:?}@{:?}` in {}",
+                        node.kind(),
+                        node.text_range(),
+                        document.uri(self).raw(self),
+                    );
                     partial_errors.iter_mut().for_each(|error| {
                         error.range += node_start;
                     });
                     (node.replace_with(green), partial_errors)
                 } else {
+                    log::debug!(
+                        "Incremental parsing failed for `{:?}@{:?}` in {} , falling back to full parse",
+                        node.kind(),
+                        node.text_range(),
+                        document.uri(self).raw(self),
+                    );
                     break 'single;
                 };
 

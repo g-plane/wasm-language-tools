@@ -1212,6 +1212,7 @@ dependencies = [
  "insta",
  "itertools 0.15.0",
  "line-index",
+ "log",
  "lspt",
  "parking_lot",
  "rustc-hash",

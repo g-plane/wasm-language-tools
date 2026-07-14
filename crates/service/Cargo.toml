@@ -15,6 +15,7 @@ hashbrown = { version = "0.17", default-features = false, features = ["inline-mo
 indexmap = "2.14"
 itertools = "0.15"
 line-index = "0.1"
+log = { workspace = true }
 lspt = { workspace = true }
 parking_lot = "0.12"
 rustc-hash = { workspace = true }

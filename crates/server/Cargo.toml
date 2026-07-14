@@ -13,7 +13,7 @@ exclude = ["/tests"]
 anyhow = "1.0"
 fern = "0.7"
 humantime = "2.4"
-log = "0.4"
+log = { workspace = true }
 lspt = { workspace = true }
 rayon = "1.12"
 rustc-hash = { workspace = true }
