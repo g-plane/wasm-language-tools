@@ -81,12 +81,8 @@ pub fn act(
             false
         }
     })?;
-    let mut pending_flow_nodes = bb_flow_node
-        .outgoings
-        .iter()
-        .filter_map(|outgoing| cfg.get_node(*outgoing))
-        .collect::<Vec<_>>();
-    while let Some(flow_node) = pending_flow_nodes.pop() {
+    let mut pending_flow_node_ids = bb_flow_node.outgoings.to_vec();
+    while let Some(flow_node) = pending_flow_node_ids.pop().and_then(|node_id| cfg.get_node(node_id)) {
         // make sure there're no basic blocks or block entries after the "call-return" pair
         if matches!(
             flow_node,
@@ -95,12 +91,7 @@ pub fn act(
                 ..
             }
         ) {
-            pending_flow_nodes.extend(
-                flow_node
-                    .outgoings
-                    .iter()
-                    .filter_map(|outgoing| cfg.get_node(*outgoing)),
-            );
+            pending_flow_node_ids.extend_from_slice(&flow_node.outgoings);
         } else {
             return None;
         }
