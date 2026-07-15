@@ -191,66 +191,70 @@ fn find_deepest_parseable_node(root: SyntaxNode, range: TextRange) -> SyntaxNode
         && range.end() < it.text_range().end()
     {
         node = it;
-        if matches!(
-            node.kind(),
+        let parseable = match node.kind() {
             SyntaxKind::MODULE_NAME
-                | SyntaxKind::NAME
-                | SyntaxKind::REF_TYPE
-                | SyntaxKind::FIELD_TYPE
-                | SyntaxKind::STRUCT_TYPE
-                | SyntaxKind::ARRAY_TYPE
-                | SyntaxKind::FUNC_TYPE
-                | SyntaxKind::CONT_TYPE
-                | SyntaxKind::PARAM
-                | SyntaxKind::RESULT
-                | SyntaxKind::FIELD
-                | SyntaxKind::SUB_TYPE
-                | SyntaxKind::TABLE_TYPE
-                | SyntaxKind::MEM_TYPE
-                | SyntaxKind::ADDR_TYPE
-                | SyntaxKind::GLOBAL_TYPE
-                | SyntaxKind::PLAIN_INSTR
-                | SyntaxKind::BLOCK_BLOCK
-                | SyntaxKind::BLOCK_LOOP
-                | SyntaxKind::BLOCK_IF
-                | SyntaxKind::BLOCK_TRY_TABLE
-                | SyntaxKind::CATCH
-                | SyntaxKind::CATCH_ALL
-                | SyntaxKind::MEM_ARG
-                | SyntaxKind::ON_CLAUSE
-                | SyntaxKind::IMMEDIATE
-                | SyntaxKind::TYPE_USE
-                | SyntaxKind::LIMITS
-                | SyntaxKind::EXTERN_IDX_FUNC
-                | SyntaxKind::EXTERN_IDX_TABLE
-                | SyntaxKind::EXTERN_IDX_MEMORY
-                | SyntaxKind::EXTERN_IDX_GLOBAL
-                | SyntaxKind::EXTERN_IDX_TAG
-                | SyntaxKind::INDEX
-                | SyntaxKind::LOCAL
-                | SyntaxKind::MEM_PAGE_SIZE
-                | SyntaxKind::MEM_USE
-                | SyntaxKind::OFFSET
-                | SyntaxKind::ELEM
-                | SyntaxKind::ELEM_LIST
-                | SyntaxKind::ELEM_EXPR
-                | SyntaxKind::TABLE_USE
-                | SyntaxKind::DATA
-                | SyntaxKind::MODULE
-                | SyntaxKind::MODULE_FIELD_DATA
-                | SyntaxKind::MODULE_FIELD_ELEM
-                | SyntaxKind::MODULE_FIELD_EXPORT
-                | SyntaxKind::MODULE_FIELD_FUNC
-                | SyntaxKind::MODULE_FIELD_GLOBAL
-                | SyntaxKind::MODULE_FIELD_IMPORT
-                | SyntaxKind::MODULE_FIELD_MEMORY
-                | SyntaxKind::MODULE_FIELD_START
-                | SyntaxKind::MODULE_FIELD_TABLE
-                | SyntaxKind::MODULE_FIELD_TAG
-                | SyntaxKind::TYPE_DEF
-                | SyntaxKind::REC_TYPE
-                | SyntaxKind::ROOT
-        ) {
+            | SyntaxKind::NAME
+            | SyntaxKind::REF_TYPE
+            | SyntaxKind::FIELD_TYPE
+            | SyntaxKind::STRUCT_TYPE
+            | SyntaxKind::ARRAY_TYPE
+            | SyntaxKind::FUNC_TYPE
+            | SyntaxKind::CONT_TYPE
+            | SyntaxKind::PARAM
+            | SyntaxKind::RESULT
+            | SyntaxKind::FIELD
+            | SyntaxKind::SUB_TYPE
+            | SyntaxKind::TABLE_TYPE
+            | SyntaxKind::MEM_TYPE
+            | SyntaxKind::ADDR_TYPE
+            | SyntaxKind::GLOBAL_TYPE
+            | SyntaxKind::BLOCK_BLOCK
+            | SyntaxKind::BLOCK_LOOP
+            | SyntaxKind::BLOCK_IF
+            | SyntaxKind::BLOCK_TRY_TABLE
+            | SyntaxKind::CATCH
+            | SyntaxKind::CATCH_ALL
+            | SyntaxKind::MEM_ARG
+            | SyntaxKind::ON_CLAUSE
+            | SyntaxKind::IMMEDIATE
+            | SyntaxKind::TYPE_USE
+            | SyntaxKind::LIMITS
+            | SyntaxKind::EXTERN_IDX_FUNC
+            | SyntaxKind::EXTERN_IDX_TABLE
+            | SyntaxKind::EXTERN_IDX_MEMORY
+            | SyntaxKind::EXTERN_IDX_GLOBAL
+            | SyntaxKind::EXTERN_IDX_TAG
+            | SyntaxKind::INDEX
+            | SyntaxKind::LOCAL
+            | SyntaxKind::MEM_PAGE_SIZE
+            | SyntaxKind::MEM_USE
+            | SyntaxKind::OFFSET
+            | SyntaxKind::ELEM
+            | SyntaxKind::ELEM_LIST
+            | SyntaxKind::ELEM_EXPR
+            | SyntaxKind::TABLE_USE
+            | SyntaxKind::DATA
+            | SyntaxKind::MODULE
+            | SyntaxKind::MODULE_FIELD_DATA
+            | SyntaxKind::MODULE_FIELD_ELEM
+            | SyntaxKind::MODULE_FIELD_EXPORT
+            | SyntaxKind::MODULE_FIELD_FUNC
+            | SyntaxKind::MODULE_FIELD_GLOBAL
+            | SyntaxKind::MODULE_FIELD_IMPORT
+            | SyntaxKind::MODULE_FIELD_MEMORY
+            | SyntaxKind::MODULE_FIELD_START
+            | SyntaxKind::MODULE_FIELD_TABLE
+            | SyntaxKind::MODULE_FIELD_TAG
+            | SyntaxKind::TYPE_DEF
+            | SyntaxKind::REC_TYPE
+            | SyntaxKind::ROOT => true,
+            SyntaxKind::PLAIN_INSTR => {
+                // avoid code like `(param)` being parsed as unknown plain instr
+                !node.has_child_or_token_by_kind(SyntaxKind::L_PAREN)
+            }
+            _ => false,
+        };
+        if parseable {
             last_parseable = node.clone();
         }
     }
@@ -1388,5 +1392,48 @@ mod tests {
                 .count(),
             1,
         );
+    }
+
+    #[test]
+    fn skip_folded_plain_instr() {
+        let uri = "untitled:test".to_string();
+        let mut service = LanguageService::default();
+        service.commit(
+            &uri,
+            "
+(module
+  (func (para)))
+"
+            .into(),
+        );
+        service.did_change(DidChangeTextDocumentParams {
+            text_document: VersionedTextDocumentIdentifier {
+                uri: uri.clone(),
+                version: 1,
+            },
+            content_changes: vec![TextDocumentContentChangeEvent::Partial(
+                TextDocumentContentChangePartial {
+                    range: Range {
+                        start: Position { line: 2, character: 13 },
+                        end: Position { line: 2, character: 13 },
+                    },
+                    text: "m".into(),
+                },
+            )],
+        });
+        let diagnostics = service.pull_diagnostics(DocumentDiagnosticParams {
+            text_document: TextDocumentIdentifier { uri: uri.clone() },
+            identifier: None,
+            previous_result_id: None,
+            work_done_token: None,
+            partial_result_token: None,
+        });
+        assert!(diagnostics.items.iter().all(|diagnostic| match diagnostic {
+            Diagnostic {
+                code: Some(NumberOrString::String(code)),
+                ..
+            } => !code.starts_with("plain-instr"),
+            _ => false,
+        }));
     }
 }

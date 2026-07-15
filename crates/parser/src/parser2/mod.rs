@@ -55,11 +55,17 @@ pub fn parse_as(kind: SyntaxKind, source: &str) -> Option<(GreenNode, Vec<Syntax
         SyntaxKind::MEM_TYPE => parser.parse_mem_type(),
         SyntaxKind::ADDR_TYPE => parser.parse_addr_type(),
         SyntaxKind::GLOBAL_TYPE => parser.parse_global_type(),
-        SyntaxKind::PLAIN_INSTR
-        | SyntaxKind::BLOCK_BLOCK
-        | SyntaxKind::BLOCK_LOOP
-        | SyntaxKind::BLOCK_IF
-        | SyntaxKind::BLOCK_TRY_TABLE => parser.parse_instr(),
+        SyntaxKind::PLAIN_INSTR => {
+            if source.starts_with('(') {
+                // avoid code like `(param)` being parsed as unknown plain instr
+                None
+            } else {
+                parser.parse_instr()
+            }
+        }
+        SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_IF | SyntaxKind::BLOCK_TRY_TABLE => {
+            parser.parse_instr()
+        }
         SyntaxKind::BLOCK_IF_THEN | SyntaxKind::BLOCK_IF_ELSE => None,
         SyntaxKind::CATCH | SyntaxKind::CATCH_ALL => parser.parse_catch(),
         SyntaxKind::MEM_ARG => parser.parse_mem_arg(),
@@ -193,5 +199,10 @@ mod tests {
     fn valid_right_paren_in_parse_as() {
         let (_, errors) = parse_as(SyntaxKind::MODULE_FIELD_FUNC, "(func\n    \n  )").unwrap();
         assert!(errors.is_empty());
+    }
+
+    #[test]
+    fn reject_folded_plain_instr() {
+        assert!(parse_as(SyntaxKind::PLAIN_INSTR, "(param)").is_none());
     }
 }
