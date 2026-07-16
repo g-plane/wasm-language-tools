@@ -1,5 +1,7 @@
 packages:
   - bindings/pkg
   - docs
+  - playground
+
 allowBuilds:
   esbuild: false

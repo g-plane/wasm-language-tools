@@ -1,0 +1,11 @@
+{
+  "extends": "@gplane/tsconfig",
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "rootDir": ".",
+    "types": ["svelte", "vite/client"]
+  },
+  "include": ["**/*.ts", "src/**/*.svelte"]
+}

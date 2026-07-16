@@ -1,0 +1,32 @@
+{
+  "name": "playground",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check"
+  },
+  "dependencies": {
+    "@codingame/monaco-vscode-api": "^35.0.0",
+    "@codingame/monaco-vscode-editor-api": "^35.0.0",
+    "@codingame/monaco-vscode-languages-service-override": "^35.0.0",
+    "@wasm-language-tools/wasm": "workspace:*",
+    "monaco-languageclient": "^10.7.0",
+    "vscode": "npm:@codingame/monaco-vscode-extension-api@^35.0.0",
+    "vscode-languageclient": "^10.1.0",
+    "vscode-languageserver": "^10.1.0"
+  },
+  "devDependencies": {
+    "@gplane/tsconfig": "^6.4.2",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
+    "@tsconfig/svelte": "^5.0.8",
+    "@types/node": "^24.13.2",
+    "svelte": "^5.56.4",
+    "svelte-check": "^4.7.1",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.4"
+  }
+}

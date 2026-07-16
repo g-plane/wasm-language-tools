@@ -3,6 +3,7 @@
   "excludes": [
     "docs/.vitepress/cache",
     "docs/.vitepress/dist",
+    "playground/dist",
     "*.svg"
   ]
 }

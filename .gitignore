@@ -5,8 +5,8 @@ bindings/pkg/**/*
 !bindings/pkg/package.json
 
 node_modules/
-docs/.vitepress/cache/
-docs/.vitepress/dist/
+cache/
+dist/
 
 # instant PoC
 /*.wat

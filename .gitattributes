@@ -1,2 +1,3 @@
 **/*.wat linguist-detectable=false
 docs/** linguist-documentation
+playground/** linguist-documentation
