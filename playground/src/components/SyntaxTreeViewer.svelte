@@ -25,11 +25,11 @@
       readOnly: true,
       occurrencesHighlight: 'off',
     })
-    const listenerDidChangeCursorPosition = editor.onDidChangeCursorPosition((e) => {
+    const didChangeCursorPositionListener = editor.onDidChangeCursorPosition((e) => {
       sendNodeRange(e.position.lineNumber)
     })
     return () => {
-      listenerDidChangeCursorPosition.dispose()
+      didChangeCursorPositionListener.dispose()
       editor?.dispose()
     }
   })
