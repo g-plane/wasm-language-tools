@@ -1,11 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { createLanguageClient } from '../client.js'
   import { type IStandaloneCodeEditor, type ITextModel, monacoOptions } from '../shared.js'
 
-  const { monaco, wasm, defaultValue, selectedRange, onValueChange }: {
+  const { monaco, defaultValue, selectedRange, onValueChange }: {
     monaco: typeof import('@codingame/monaco-vscode-editor-api'),
-    wasm: ArrayBuffer,
     defaultValue: string,
     selectedRange: { start: number, end: number } | null,
     onValueChange: (value: string) => void,
@@ -34,9 +32,7 @@
         onValueChange(model.getValue())
       }
     })
-    const languageClient = createLanguageClient(wasm)
     return () => {
-      languageClient.dispose()
       didChangeModelContentListener.dispose()
       editor?.dispose()
       model?.dispose()
