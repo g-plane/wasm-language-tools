@@ -1,6 +1,7 @@
 use serde::Serialize;
 use serde_wasm_bindgen::{Error, Serializer};
 use wasm_bindgen::prelude::*;
+use wat_syntax::SyntaxNode;
 
 #[wasm_bindgen(typescript_custom_section)]
 const TS_APPEND_CONTENT: &'static str = r#"
@@ -408,5 +409,5 @@ impl LanguageService {
 
 #[wasm_bindgen(js_name = "debugSyntaxTree")]
 pub fn debug_syntax_tree(code: String) -> String {
-    format!("{:?}", wat_parser::parse(&code).0)
+    format!("{:?}", SyntaxNode::new_root(&wat_parser::parse(&code).0))
 }

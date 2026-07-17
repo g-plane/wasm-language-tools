@@ -74,6 +74,7 @@ dependencies = [
  "wasm-bindgen",
  "wat_parser",
  "wat_service",
+ "wat_syntax",
 ]
 
 [[package]]

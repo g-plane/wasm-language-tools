@@ -1,6 +1,7 @@
 <script lang="ts">
   import { initSync } from '@wasm-language-tools/wasm'
   import SourceEditor from './components/SourceEditor.svelte'
+  import SyntaxTreeViewer from './components/SyntaxTreeViewer.svelte'
   import { registerLanguage } from './shared.js'
 
   const monaco = import('@codingame/monaco-vscode-editor-api')
@@ -15,5 +16,14 @@
 {#await Promise.all([monaco, wasm])}
   Loading editor and language server...
 {:then [monaco, wasm]}
-  <SourceEditor {monaco} {wasm} onValueChange={(value) => sourceCode = value} />
+  <main>
+    <SourceEditor {monaco} {wasm} onValueChange={(value) => sourceCode = value} />
+    <SyntaxTreeViewer {monaco} {sourceCode} />
+  </main>
 {/await}
+
+<style>
+  main {
+    display: flex;
+  }
+</style>

@@ -3,7 +3,7 @@
   import { createLanguageClient } from '../client.js'
   import { monacoOptions } from '../shared.js'
 
-  let { monaco, wasm, onValueChange }: {
+  const { monaco, wasm, onValueChange }: {
     monaco: typeof import('@codingame/monaco-vscode-editor-api'),
     wasm: ArrayBuffer,
     onValueChange: (value: string) => void,
@@ -16,13 +16,13 @@
       value: '',
       language: 'wat',
     })
-    const listener = editor.onDidChangeModelContent(() => {
+    const didChangeModelContentListener = editor.onDidChangeModelContent(() => {
       onValueChange(editor.getValue())
     })
     const languageClient = createLanguageClient(wasm)
     return () => {
       languageClient.dispose()
-      listener.dispose()
+      didChangeModelContentListener.dispose()
       editor.dispose()
     }
   })
