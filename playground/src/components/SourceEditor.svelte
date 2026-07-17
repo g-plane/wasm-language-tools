@@ -44,6 +44,6 @@
 
 <style>
   div {
-    height: 90vh;
+    height: var(--editor-height);
   }
 </style>

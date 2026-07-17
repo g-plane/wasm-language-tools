@@ -1,4 +1,5 @@
 <script lang="ts">
+  import FormatterViewer from './components/FormatterViewer.svelte'
   import SourceEditor from './components/SourceEditor.svelte'
   import SyntaxTreeViewer from './components/SyntaxTreeViewer.svelte'
   import Tabs from './components/Tabs.svelte'
@@ -41,7 +42,9 @@
           onNodeRangeChange={(start, end) => selectedRange = { start, end }}
         />
       {/snippet}
-      {#snippet formatter()}formatter{/snippet}
+      {#snippet formatter()}
+        <FormatterViewer {monaco} {sourceCode} options={{}} />
+      {/snippet}
     </div>
   </main>
 {/await}

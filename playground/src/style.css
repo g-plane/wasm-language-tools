@@ -5,6 +5,7 @@
 
 :root {
   --primary-color: oklch(0.5494 0.2295 281.96);
+  --editor-height: 90vh;
 }
 
 body, button {
