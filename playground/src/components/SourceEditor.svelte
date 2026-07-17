@@ -44,7 +44,6 @@
 
 <style>
   div {
-    width: 50vw;
     height: 90vh;
   }
 </style>
