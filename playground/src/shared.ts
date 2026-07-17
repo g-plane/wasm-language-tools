@@ -3,9 +3,9 @@ import type * as monaco from '@codingame/monaco-vscode-editor-api'
 
 export const monacoOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
-  fontFamily: '"Cascadia Code", "JetBrains Mono", monospace',
-  fontSize: 14,
-  lineHeight: 24,
+  fontFamily: '"Google Sans Code", monospace',
+  fontSize: 16,
+  lineHeight: 28,
   tabSize: 2,
   codeLens: false,
   automaticLayout: true,
