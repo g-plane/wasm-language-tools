@@ -1,6 +1,9 @@
 import { IndentAction } from '@codingame/monaco-vscode-api/vscode/vs/editor/common/languages/languageConfiguration'
 import type * as monaco from '@codingame/monaco-vscode-editor-api'
 
+export type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor
+export type ITextModel = monaco.editor.ITextModel
+
 export const monacoOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
   fontFamily: '"Google Sans Code", monospace',

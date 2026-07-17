@@ -11,6 +11,7 @@
   wasm.then((bytes) => initSync({ module: bytes }))
 
   let sourceCode = $state('')
+  let selectedRange: { start: number, end: number } | null = $state(null)
 </script>
 
 {#await Promise.all([monaco, wasm])}
@@ -21,9 +22,14 @@
       {monaco}
       {wasm}
       defaultValue={sourceCode}
+      {selectedRange}
       onValueChange={(value) => sourceCode = value}
     />
-    <SyntaxTreeViewer {monaco} {sourceCode} />
+    <SyntaxTreeViewer
+      {monaco}
+      {sourceCode}
+      onNodeRangeChange={(start, end) => selectedRange = { start, end }}
+    />
   </main>
 {/await}
 

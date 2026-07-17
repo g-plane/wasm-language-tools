@@ -1,32 +1,45 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { createLanguageClient } from '../client.js'
-  import { monacoOptions } from '../shared.js'
+  import { type IStandaloneCodeEditor, type ITextModel, monacoOptions } from '../shared.js'
 
-  const { monaco, wasm, defaultValue, onValueChange }: {
+  const { monaco, wasm, defaultValue, selectedRange, onValueChange }: {
     monaco: typeof import('@codingame/monaco-vscode-editor-api'),
     wasm: ArrayBuffer,
     defaultValue: string,
+    selectedRange: { start: number, end: number } | null,
     onValueChange: (value: string) => void,
   } = $props()
   let el: HTMLDivElement
+  let model: ITextModel | undefined = $state()
+  let editor: IStandaloneCodeEditor | undefined = $state()
+
+  $effect(() => {
+    if (model && editor && selectedRange) {
+      const start = model.getPositionAt(selectedRange.start)
+      const end = model.getPositionAt(selectedRange.end)
+      editor.setSelection(monaco.Selection.fromPositions(start, end))
+    }
+  })
 
   onMount(() => {
-    const model = monaco.editor.createModel(
+    model = monaco.editor.createModel(
       defaultValue,
       'wat',
       monaco.Uri.parse('file:///main.wat'),
     )
-    const editor = monaco.editor.create(el, { ...monacoOptions, model })
+    editor = monaco.editor.create(el, { ...monacoOptions, model })
     const didChangeModelContentListener = editor.onDidChangeModelContent(() => {
-      onValueChange(model.getValue())
+      if (model) {
+        onValueChange(model.getValue())
+      }
     })
     const languageClient = createLanguageClient(wasm)
     return () => {
       languageClient.dispose()
       didChangeModelContentListener.dispose()
-      editor.dispose()
-      model.dispose()
+      editor?.dispose()
+      model?.dispose()
     }
   })
 </script>
