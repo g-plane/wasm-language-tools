@@ -12,19 +12,21 @@
   let el: HTMLDivElement
 
   onMount(() => {
-    const editor = monaco.editor.create(el, {
-      ...monacoOptions,
-      value: defaultValue,
-      language: 'wat',
-    })
+    const model = monaco.editor.createModel(
+      defaultValue,
+      'wat',
+      monaco.Uri.parse('file:///main.wat'),
+    )
+    const editor = monaco.editor.create(el, { ...monacoOptions, model })
     const didChangeModelContentListener = editor.onDidChangeModelContent(() => {
-      onValueChange(editor.getValue())
+      onValueChange(model.getValue())
     })
     const languageClient = createLanguageClient(wasm)
     return () => {
       languageClient.dispose()
       didChangeModelContentListener.dispose()
       editor.dispose()
+      model.dispose()
     }
   })
 </script>
