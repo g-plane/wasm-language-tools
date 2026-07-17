@@ -17,7 +17,12 @@
   Loading editor and language server...
 {:then [monaco, wasm]}
   <main>
-    <SourceEditor {monaco} {wasm} onValueChange={(value) => sourceCode = value} />
+    <SourceEditor
+      {monaco}
+      {wasm}
+      defaultValue={sourceCode}
+      onValueChange={(value) => sourceCode = value}
+    />
     <SyntaxTreeViewer {monaco} {sourceCode} />
   </main>
 {/await}

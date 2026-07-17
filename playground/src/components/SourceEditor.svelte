@@ -3,9 +3,10 @@
   import { createLanguageClient } from '../client.js'
   import { monacoOptions } from '../shared.js'
 
-  const { monaco, wasm, onValueChange }: {
+  const { monaco, wasm, defaultValue, onValueChange }: {
     monaco: typeof import('@codingame/monaco-vscode-editor-api'),
     wasm: ArrayBuffer,
+    defaultValue: string,
     onValueChange: (value: string) => void,
   } = $props()
   let el: HTMLDivElement
@@ -13,7 +14,7 @@
   onMount(() => {
     const editor = monaco.editor.create(el, {
       ...monacoOptions,
-      value: '',
+      value: defaultValue,
       language: 'wat',
     })
     const didChangeModelContentListener = editor.onDidChangeModelContent(() => {
