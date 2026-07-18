@@ -10,6 +10,7 @@
   const { tabs }: { tabs: Tab[] } = $props()
   // svelte-ignore state_referenced_locally -- default value here
   let active = $state(tabs[0]?.value ?? '')
+  const currentTab = $derived(tabs.find((tab) => tab.value === active))
 </script>
 
 <ul role="tablist">
@@ -21,11 +22,11 @@
     </li>
   {/each}
 </ul>
-{#each tabs as tab (tab.value)}
-  <div style:display={tab.value === active ? 'block' : 'none'}>
-    {@render tab.content()}
+{#if currentTab}
+  <div role="tabpanel">
+    {@render currentTab.content()}
   </div>
-{/each}
+{/if}
 
 <style>
   ul {
