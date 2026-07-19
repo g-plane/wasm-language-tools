@@ -5,7 +5,7 @@
     "moduleResolution": "bundler",
     "noEmit": true,
     "rootDir": ".",
-    "types": ["svelte", "vite/client"]
+    "types": ["svelte", "typed-query-selector", "vite/client"]
   },
   "include": ["**/*.ts", "src/**/*.svelte"]
 }

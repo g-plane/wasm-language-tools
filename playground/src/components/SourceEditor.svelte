@@ -1,12 +1,19 @@
 <script lang="ts">
+  import type { Position } from '@codingame/monaco-vscode-editor-api'
   import { onMount } from 'svelte'
-  import { type IStandaloneCodeEditor, type ITextModel, monacoOptions } from '../shared.js'
+  import {
+    type IStandaloneCodeEditor,
+    type ITextModel,
+    SOURCE_URI,
+    monacoOptions,
+  } from '../shared.js'
 
-  const { monaco, defaultValue, selectedRange, onValueChange }: {
+  const { monaco, defaultValue, selectedRange, onValueChange, onCursorPositionChange }: {
     monaco: typeof import('@codingame/monaco-vscode-editor-api'),
     defaultValue: string,
     selectedRange: { start: number, end: number } | null,
     onValueChange: (value: string) => void,
+    onCursorPositionChange: (position: Position) => void,
   } = $props()
   let el: HTMLDivElement
   let model: ITextModel | undefined = $state()
@@ -21,19 +28,19 @@
   })
 
   onMount(() => {
-    model = monaco.editor.createModel(
-      defaultValue,
-      'wat',
-      monaco.Uri.parse('file:///main.wat'),
-    )
+    model = monaco.editor.createModel(defaultValue, 'wat', monaco.Uri.parse(SOURCE_URI))
     editor = monaco.editor.create(el, { ...monacoOptions, model })
     const didChangeModelContentListener = editor.onDidChangeModelContent(() => {
       if (model) {
         onValueChange(model.getValue())
       }
     })
+    const didChangeCursorPositionListener = editor.onDidChangeCursorPosition((e) => {
+      onCursorPositionChange(e.position)
+    })
     return () => {
       didChangeModelContentListener.dispose()
+      didChangeCursorPositionListener.dispose()
       editor?.dispose()
       model?.dispose()
     }

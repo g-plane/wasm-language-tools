@@ -4,6 +4,9 @@ import type * as monaco from '@codingame/monaco-vscode-editor-api'
 export type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor
 export type ITextModel = monaco.editor.ITextModel
 
+export const SOURCE_URI = 'file:///main.wat'
+export const RE_NODE_RANGE = /(\w+)@(\d+)\.\.(\d+)/
+
 export const monacoOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
   fontFamily: '"Google Sans Code", monospace',

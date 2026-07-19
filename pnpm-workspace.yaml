@@ -5,3 +5,9 @@ packages:
 
 allowBuilds:
   esbuild: false
+
+overrides:
+  "@hpcc-js/wasm": "npm:@hpcc-js/wasm-graphviz"
+
+patchedDependencies:
+  d3-graphviz: patches/d3-graphviz.patch

@@ -4,8 +4,9 @@ use crate::{
     idx::InternIdent,
 };
 use smallvec::SmallVec;
+use std::fmt::Write;
 use wat_syntax::{
-    GreenToken, SyntaxKind, SyntaxNode, SyntaxNodePtr,
+    GreenToken, SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange,
     ast::{AstNode, BlockInstr, Cat, Instr, support},
 };
 
@@ -274,10 +275,18 @@ pub struct BasicBlock(pub Vec<BasicBlockInstr>);
 impl BasicBlock {
     pub fn contains_instr(&self, node: &SyntaxNode) -> bool {
         let end = node.text_range().end();
-        self.0
-            .first()
-            .zip(self.0.last())
-            .is_some_and(|(first, last)| first.ptr.text_range().start() < end && end <= last.ptr.text_range().end())
+        self.text_range()
+            .is_some_and(|range| range.start() < end && end <= range.end())
+    }
+    fn text_range(&self) -> Option<TextRange> {
+        self.0.first().map(|first| {
+            let first = first.ptr.text_range();
+            let (start, end) = self.0.iter().fold((first.start(), first.end()), |(start, end), instr| {
+                let range = instr.ptr.text_range();
+                (start.min(range.start()), end.max(range.end()))
+            });
+            TextRange::new(start, end)
+        })
     }
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -333,5 +342,55 @@ impl ControlFlowGraph {
         if let Some(flow_node) = self.nodes.get_mut(to.0 as usize) {
             flow_node.incomings.push(from);
         }
+    }
+
+    /// Generate a DOT representation for Graphviz.
+    pub fn generate_dot(&self) -> String {
+        let mut output = String::from("digraph {\n");
+        self.nodes.iter().enumerate().for_each(|(i, node)| {
+            match &node.kind {
+                FlowNodeKind::Entry => {
+                    let _ = write!(&mut output, "  {i} [label=\"Entry\"]");
+                }
+                FlowNodeKind::Exit => {
+                    let _ = write!(&mut output, "  {i} [label=\"Exit\"]");
+                }
+                FlowNodeKind::BasicBlock(bb) => {
+                    if let Some(range) = bb.text_range() {
+                        let _ = write!(&mut output, "  {i} [label=\"BasicBlock@{range:?}\"]");
+                    } else {
+                        let _ = write!(&mut output, "  {i} [label=\"BasicBlock\"]");
+                    }
+                }
+                FlowNodeKind::BlockEntry(ptr) => {
+                    let _ = write!(
+                        &mut output,
+                        "  {i} [label=\"BlockEntry:{:?}@{:?}\"]",
+                        ptr.kind(),
+                        ptr.text_range(),
+                    );
+                }
+                FlowNodeKind::BlockExit => {
+                    let _ = write!(&mut output, "  {i} [label=\"BlockExit\"]");
+                }
+            }
+            if node.unreachable {
+                output.push_str(" [class=\"unreachable\"]");
+            }
+            output.push('\n');
+        });
+        output.push('\n');
+        self.nodes.iter().enumerate().for_each(|(i, node)| {
+            let class = if node.unreachable {
+                " [class=\"unreachable\"]"
+            } else {
+                ""
+            };
+            node.outgoings.iter().for_each(|outgoing| {
+                let _ = writeln!(&mut output, "  {i} -> {}{class}", outgoing.0);
+            });
+        });
+        output.push('}');
+        output
     }
 }

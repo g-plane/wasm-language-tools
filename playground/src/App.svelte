@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { Position } from '@codingame/monaco-vscode-editor-api'
+  import ControlFlowGraph from './components/ControlFlowGraph.svelte'
   import FormatterViewer from './components/FormatterViewer.svelte'
   import SourceEditor from './components/SourceEditor.svelte'
   import SyntaxTreeViewer from './components/SyntaxTreeViewer.svelte'
@@ -6,14 +8,19 @@
   import { resources } from './resources.js'
 
   let sourceCode = $state('')
+  let cursorPos: Position | null = $state(null)
   let selectedRange: { start: number, end: number } | null = $state(null)
+
+  function changeSelectedRange(start: number, end: number) {
+    selectedRange = { start, end }
+  }
 </script>
 
 {#await resources}
   Loading editor and language server...
-{:then [monaco]}
+{:then [monaco, client, d3Graphviz]}
   <main>
-    <div>
+    <section>
       <Tabs
         tabs={[
           { name: 'Source', value: 'source', content: source },
@@ -25,27 +32,33 @@
           defaultValue={sourceCode}
           {selectedRange}
           onValueChange={(value) => sourceCode = value}
+          onCursorPositionChange={(position) => cursorPos = position}
         />
       {/snippet}
-    </div>
-    <div>
+    </section>
+    <section>
       <Tabs
         tabs={[
           { name: 'Syntax Tree', value: 'cst', content: cst },
           { name: 'Formatter', value: 'formatter', content: formatter },
+          { name: 'Control Flow Graph', value: 'cfg', content: cfg },
         ]}
       />
       {#snippet cst()}
-        <SyntaxTreeViewer
-          {monaco}
-          {sourceCode}
-          onNodeRangeChange={(start, end) => selectedRange = { start, end }}
-        />
+        <SyntaxTreeViewer {monaco} {sourceCode} onNodeRangeChange={changeSelectedRange} />
       {/snippet}
       {#snippet formatter()}
         <FormatterViewer {monaco} {sourceCode} options={{}} />
       {/snippet}
-    </div>
+      {#snippet cfg()}
+        <ControlFlowGraph
+          {d3Graphviz}
+          {client}
+          position={cursorPos}
+          onNodeRangeChange={changeSelectedRange}
+        />
+      {/snippet}
+    </section>
   </main>
 {/await}
 
@@ -53,7 +66,7 @@
   main {
     display: flex;
   }
-  main > div {
+  section {
     width: 50vw;
   }
 </style>

@@ -1,0 +1,33 @@
+---
+source: crates/service/tests/execute_command/generate_cfg_dot.rs
+expression: response.unwrap().as_str().unwrap()
+---
+digraph {
+  0 [label="Entry"]
+  1 [label="Exit"]
+  2 [label="BlockEntry:BLOCK_BLOCK@76..328"]
+  3 [label="BlockExit"]
+  4 [label="BlockEntry:BLOCK_LOOP@92..327"]
+  5 [label="BlockExit"] [class="unreachable"]
+  6 [label="BlockEntry:BLOCK_IF@112..326"]
+  7 [label="BlockExit"] [class="unreachable"]
+  8 [label="BasicBlock@126..140"]
+  9 [label="BasicBlock@169..176"]
+  10 [label="BasicBlock@189..230"] [class="unreachable"]
+  11 [label="BasicBlock@260..324"]
+  12 [label="BasicBlock@333..346"]
+
+  0 -> 2
+  2 -> 4
+  3 -> 12
+  4 -> 6
+  5 -> 3 [class="unreachable"]
+  6 -> 8
+  7 -> 5 [class="unreachable"]
+  8 -> 9
+  8 -> 11
+  9 -> 3
+  10 -> 7 [class="unreachable"]
+  11 -> 4
+  12 -> 1
+}

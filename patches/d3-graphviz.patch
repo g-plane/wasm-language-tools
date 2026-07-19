@@ -1,0 +1,23 @@
+diff --git a/src/dot.js b/src/dot.js
+index 97a0a7dbd3892742fa2b9e6badd4214b06579c13..9ca4c9f148a095be880251a04a676addd579d643 100644
+--- a/src/dot.js
++++ b/src/dot.js
+@@ -1,4 +1,4 @@
+-import { Graphviz } from "@hpcc-js/wasm/graphviz";
++import { Graphviz } from "@hpcc-js/wasm";
+ import * as d3 from "d3-selection";
+ import {extractAllElementsData, extractElementData, createElementWithAttributes} from "./element.js";
+ import {convertToPathData} from "./svg.js";
+diff --git a/src/graphviz.js b/src/graphviz.js
+index c4638cb0e4042844c59c52dfe4749e13999fef6e..f793a31908a89ea99dd342f474d66f36be0eede9 100644
+--- a/src/graphviz.js
++++ b/src/graphviz.js
+@@ -49,7 +49,7 @@ import {drawnNodeSelection} from "./drawNode.js";
+ import {workerCode} from "./workerCode.js";
+ import {sharedWorkerCode} from "./workerCode.js";
+ import {workerCodeBody} from "./workerCode.js";
+-import {Graphviz as hpccWasmGraphviz} from "@hpcc-js/wasm/graphviz";
++import {Graphviz as hpccWasmGraphviz} from "@hpcc-js/wasm";
+ 
+ export function Graphviz(selection, options) {
+     this._options = {

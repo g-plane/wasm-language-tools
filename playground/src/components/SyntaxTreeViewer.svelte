@@ -1,9 +1,7 @@
 <script lang="ts">
   import { debugSyntaxTree } from '@wasm-language-tools/wasm'
   import { onMount } from 'svelte'
-  import { type IStandaloneCodeEditor, monacoOptions } from '../shared.js'
-
-  const RE_NODE_RANGE = /(\w+)@(\d+)\.\.(\d+)/
+  import { type IStandaloneCodeEditor, RE_NODE_RANGE, monacoOptions } from '../shared.js'
 
   const { monaco, sourceCode, onNodeRangeChange }: {
     monaco: typeof import('@codingame/monaco-vscode-editor-api'),

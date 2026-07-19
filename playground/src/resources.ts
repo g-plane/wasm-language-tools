@@ -26,4 +26,6 @@ wasm.then((bytes) => initSync({ module: bytes }))
 const client = vscode.then(() => Promise.all([import('./client.js'), wasm]))
   .then(([{ createLanguageClient }, wasm]) => createLanguageClient(wasm))
 
-export const resources = Promise.all([monaco, client])
+const d3Graphviz = import('d3-graphviz')
+
+export const resources = Promise.all([monaco, client, d3Graphviz])

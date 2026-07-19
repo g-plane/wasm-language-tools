@@ -6,6 +6,7 @@ mod definition;
 mod diagnostics;
 mod document_highlight;
 mod document_symbol;
+mod execute_command;
 mod folding_range;
 mod formatting;
 mod hover;

@@ -16,11 +16,11 @@ use lspt::{
         CodeActionRequest, CodeLensRequest, CodeLensResolveRequest, CompletionRequest, ConfigurationRequest,
         DeclarationRequest, DefinitionRequest, DiagnosticRefreshRequest, DocumentDiagnosticRequest,
         DocumentFormattingRequest, DocumentHighlightRequest, DocumentRangeFormattingRequest,
-        DocumentRangesFormattingRequest, DocumentSymbolRequest, FoldingRangeRequest, HoverRequest,
-        InlayHintRefreshRequest, InlayHintRequest, PrepareRenameRequest, ReferencesRequest, RegistrationRequest,
-        RenameRequest, Request as _, SelectionRangeRequest, SemanticTokensRangeRequest, SemanticTokensRequest,
-        ShutdownRequest, SignatureHelpRequest, TypeDefinitionRequest, TypeHierarchyPrepareRequest,
-        TypeHierarchySubtypesRequest, TypeHierarchySupertypesRequest,
+        DocumentRangesFormattingRequest, DocumentSymbolRequest, ExecuteCommandRequest, FoldingRangeRequest,
+        HoverRequest, InlayHintRefreshRequest, InlayHintRequest, PrepareRenameRequest, ReferencesRequest,
+        RegistrationRequest, RenameRequest, Request as _, SelectionRangeRequest, SemanticTokensRangeRequest,
+        SemanticTokensRequest, ShutdownRequest, SignatureHelpRequest, TypeDefinitionRequest,
+        TypeHierarchyPrepareRequest, TypeHierarchySubtypesRequest, TypeHierarchySupertypesRequest,
     },
 };
 use rayon::{ThreadPool, ThreadPoolBuilder};
@@ -252,6 +252,13 @@ impl Server {
                 try_cast_request::<DocumentHighlightRequest>(&method, params).map(|params| {
                     params
                         .and_then(|params| serde_json::to_value(service.document_highlight(params)))
+                        .map(|result| Message::OkResponse { id: id.clone(), result })
+                })
+            })
+            .or_else(|params| {
+                try_cast_request::<ExecuteCommandRequest>(&method, params).map(|params| {
+                    params
+                        .and_then(|params| serde_json::to_value(service.execute_command(params)))
                         .map(|result| Message::OkResponse { id: id.clone(), result })
                 })
             })

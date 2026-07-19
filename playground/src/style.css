@@ -15,3 +15,11 @@ body, button {
 .monaco-highlighted-label {
   font-size: 14px;
 }
+
+g.node {
+  cursor: pointer;
+  pointer-events: all;
+}
+g:where(.node, .edge).unreachable {
+  opacity: 0.5;
+}

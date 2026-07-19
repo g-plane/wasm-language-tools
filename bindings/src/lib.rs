@@ -267,6 +267,15 @@ impl LanguageService {
             .and_then(|params| self.inner.document_symbol(params).serialize(&self.serializer))
     }
 
+    #[wasm_bindgen(js_name = "executeCommand")]
+    pub fn execute_command(
+        &self,
+        #[wasm_bindgen(unchecked_param_type = "lsp.ExecuteCommandParams")] params: JsValue,
+    ) -> Result<JsValue, Error> {
+        serde_wasm_bindgen::from_value(params)
+            .and_then(|params| self.inner.execute_command(params).serialize(&self.serializer))
+    }
+
     #[wasm_bindgen(js_name = "foldingRange", unchecked_return_type = "lsp.FoldingRange[] | null")]
     pub fn folding_range(
         &self,

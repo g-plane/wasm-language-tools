@@ -27,11 +27,11 @@ use lspt::{
     CallHierarchyProvider, CodeActionKind, CodeActionOptions, CodeActionProvider, CodeLensOptions, CompletionOptions,
     DeclarationProvider, DefinitionProvider, DiagnosticOptions, DiagnosticProvider, DocumentFormattingProvider,
     DocumentHighlightProvider, DocumentRangeFormattingOptions, DocumentRangeFormattingProvider, DocumentSymbolProvider,
-    FoldingRangeProvider, HoverProvider, InitializeParams, InitializeResult, InlayHintProvider, ReferencesProvider,
-    RenameOptions, RenameProvider, SelectionRangeProvider, SemanticTokensClientCapabilities, SemanticTokensFull,
-    SemanticTokensLegend, SemanticTokensOptions, SemanticTokensProvider, SemanticTokensRange, ServerCapabilities,
-    ServerInfo, SignatureHelpOptions, TextDocumentClientCapabilities, TextDocumentSync, TextDocumentSyncKind,
-    TextDocumentSyncOptions, TextDocumentSyncSave, TypeDefinitionProvider, TypeHierarchyProvider,
+    ExecuteCommandOptions, FoldingRangeProvider, HoverProvider, InitializeParams, InitializeResult, InlayHintProvider,
+    ReferencesProvider, RenameOptions, RenameProvider, SelectionRangeProvider, SemanticTokensClientCapabilities,
+    SemanticTokensFull, SemanticTokensLegend, SemanticTokensOptions, SemanticTokensProvider, SemanticTokensRange,
+    ServerCapabilities, ServerInfo, SignatureHelpOptions, TextDocumentClientCapabilities, TextDocumentSync,
+    TextDocumentSyncKind, TextDocumentSyncOptions, TextDocumentSyncSave, TypeDefinitionProvider, TypeHierarchyProvider,
 };
 use parking_lot::RwLock;
 use rustc_hash::{FxBuildHasher, FxHashMap};
@@ -157,6 +157,10 @@ impl LanguageService {
                     },
                 )),
                 document_symbol_provider: Some(DocumentSymbolProvider::Bool(true)),
+                execute_command_provider: Some(ExecuteCommandOptions {
+                    commands: vec!["wasmLanguageTools.__generateControlFlowGraphDot".into()],
+                    ..Default::default()
+                }),
                 folding_range_provider: Some(FoldingRangeProvider::Bool(true)),
                 hover_provider: Some(HoverProvider::Bool(true)),
                 inlay_hint_provider: Some(InlayHintProvider::Bool(true)),
