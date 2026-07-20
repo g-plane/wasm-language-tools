@@ -1,4 +1,3 @@
-import { IndentAction } from '@codingame/monaco-vscode-api/vscode/vs/editor/common/languages/languageConfiguration'
 import type * as monaco from '@codingame/monaco-vscode-editor-api'
 
 export type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor
@@ -164,21 +163,21 @@ export function registerLanguage(monaco: typeof import('@codingame/monaco-vscode
         beforeText: /^.*\([^\)]*$/,
         afterText: /^\s*\).*$/,
         action: {
-          indentAction: IndentAction.IndentOutdent,
+          indentAction: monaco.languages.IndentAction.IndentOutdent,
           appendText: '\t',
         },
       },
       {
         beforeText: /^\s*;;; /,
         action: {
-          indentAction: IndentAction.None,
+          indentAction: monaco.languages.IndentAction.None,
           appendText: ';;; ',
         },
       },
       {
         beforeText: /^\s*;;;/,
         action: {
-          indentAction: IndentAction.None,
+          indentAction: monaco.languages.IndentAction.None,
           appendText: ';;;',
         },
       },

@@ -4,6 +4,7 @@ export default defineConfig({
   title: 'WebAssembly Language Tools',
   description:
     'The set of tools that provides and improves the editing experience of WebAssembly Text Format.',
+  outDir: '../dist',
   head: [
     ['link', { rel: 'icon', href: '/logo.svg' }],
   ],
