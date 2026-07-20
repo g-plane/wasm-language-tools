@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Position } from '@codingame/monaco-vscode-editor-api'
+  import { configureDarkMode } from './color.js'
   import ControlFlowGraph from './components/ControlFlowGraph.svelte'
   import DiagnosticsList from './components/DiagnosticsList.svelte'
   import FormatterViewer from './components/FormatterViewer.svelte'
@@ -15,6 +16,8 @@
   function changeSelectedRange(start: number, end: number) {
     selectedRange = { start, end }
   }
+
+  $effect(configureDarkMode)
 </script>
 
 {#await resources}

@@ -16,7 +16,7 @@ const vscode = Promise.all([
   }
 })
 
-const monaco = vscode.then(() => import('@codingame/monaco-vscode-editor-api'))
+export const monaco = vscode.then(() => import('@codingame/monaco-vscode-editor-api'))
 monaco.then(registerLanguage)
 
 const wasm = fetch(new URL('@wasm-language-tools/wasm/binding_wasm_bg.wasm', import.meta.url))

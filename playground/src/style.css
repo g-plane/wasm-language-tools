@@ -8,13 +8,25 @@
   --editor-height: 90vh;
   --monospace: 'Google Sans Code', monospace;
 
-  --severity-error: oklch(0.57 0.191 22.22);
-  --severity-warning: oklch(0.75 0.169 91.61);
-  --severity-hint: oklch(0.7 0.07 156);
+  --severity-error: oklch(0.63 0.23 22.22);
+  --severity-warning: oklch(0.63 0.12 91.61);
+  --severity-hint: oklch(0.63 0.11 162);
 }
 
 body, button {
   font-family: 'Inter', sans-serif;
+}
+
+body.dark {
+  --severity-error: oklch(0.7 0.23 22.22);
+  --severity-warning: oklch(0.7 0.12 91.61);
+  --severity-hint: oklch(0.7 0.11 162);
+
+  --dark-color: oklch(0.17 0 0);
+  --dark-text-color: oklch(0.99 0 0);
+
+  color: var(--dark-text-color);
+  background-color: var(--dark-color);
 }
 
 .monaco-highlighted-label {
@@ -27,4 +39,13 @@ g.node {
 }
 g:where(.node, .edge).unreachable {
   opacity: 0.5;
+}
+.dark .graph > polygon {
+  fill: var(--dark-color);
+}
+.dark :where(g.node, g.edge, g.edge > polygon) {
+  fill: var(--dark-text-color);
+}
+.dark :where(g.node > ellipse, g.edge > :where(path, polygon)) {
+  stroke: var(--dark-text-color);
 }

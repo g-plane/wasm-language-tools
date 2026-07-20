@@ -46,7 +46,11 @@
     background-color: #fff;
     transition: background-color 0.2s, color 0.2s;
   }
-  button.selected, button:hover {
+  :global(.dark) button {
+    background-color: var(--dark-color);
+    color: var(--dark-text-color);
+  }
+  button:is(.selected, :hover) {
     background-color: var(--primary-color);
     color: #fff;
   }
