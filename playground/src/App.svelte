@@ -35,7 +35,7 @@
       {#snippet source()}
         <SourceEditor
           {monaco}
-          defaultValue={sourceCode}
+          value={sourceCode}
           {selectedRange}
           onValueChange={(value) => sourceCode = value}
           onCursorPositionChange={(position) => cursorPos = position}

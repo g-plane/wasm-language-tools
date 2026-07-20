@@ -8,9 +8,9 @@
     monacoOptions,
   } from '../shared.js'
 
-  const { monaco, defaultValue, selectedRange, onValueChange, onCursorPositionChange }: {
+  const { monaco, value, selectedRange, onValueChange, onCursorPositionChange }: {
     monaco: typeof import('@codingame/monaco-vscode-editor-api'),
-    defaultValue: string,
+    value: string,
     selectedRange: { start: number, end: number } | null,
     onValueChange: (value: string) => void,
     onCursorPositionChange: (position: Position) => void,
@@ -18,6 +18,12 @@
   let el: HTMLDivElement
   let model: ITextModel | undefined = $state()
   let editor: IStandaloneCodeEditor | undefined = $state()
+
+  $effect(() => {
+    if (model && value !== model.getValue()) {
+      model.setValue(value)
+    }
+  })
 
   $effect(() => {
     if (model && editor && selectedRange) {
@@ -28,7 +34,7 @@
   })
 
   onMount(() => {
-    model = monaco.editor.createModel(defaultValue, 'wat', monaco.Uri.parse(SOURCE_URI))
+    model = monaco.editor.createModel(value, 'wat', monaco.Uri.parse(SOURCE_URI))
     editor = monaco.editor.create(el, { ...monacoOptions, model })
     const didChangeModelContentListener = editor.onDidChangeModelContent(() => {
       if (model) {
