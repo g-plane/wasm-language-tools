@@ -18,7 +18,8 @@
     "monaco-languageclient": "^10.7.0",
     "vscode": "npm:@codingame/monaco-vscode-extension-api@^35.0.0",
     "vscode-languageclient": "^10.1.0",
-    "vscode-languageserver": "^10.1.0"
+    "vscode-languageserver": "^10.1.0",
+    "vscode-languageserver-protocol": "^3.18.2"
   },
   "devDependencies": {
     "@gplane/tsconfig": "^6.4.2",

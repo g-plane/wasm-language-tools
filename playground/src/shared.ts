@@ -8,7 +8,7 @@ export const RE_NODE_RANGE = /(\w+)@(\d+)\.\.(\d+)/
 
 export const monacoOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
-  fontFamily: '"Google Sans Code", monospace',
+  fontFamily: 'var(--monospace)',
   fontSize: 16,
   lineHeight: 28,
   tabSize: 2,

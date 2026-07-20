@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Position } from '@codingame/monaco-vscode-editor-api'
   import ControlFlowGraph from './components/ControlFlowGraph.svelte'
+  import DiagnosticsList from './components/DiagnosticsList.svelte'
   import FormatterViewer from './components/FormatterViewer.svelte'
   import SourceEditor from './components/SourceEditor.svelte'
   import SyntaxTreeViewer from './components/SyntaxTreeViewer.svelte'
@@ -42,6 +43,7 @@
           { name: 'Syntax Tree', value: 'cst', content: cst },
           { name: 'Formatter', value: 'formatter', content: formatter },
           { name: 'Control Flow Graph', value: 'cfg', content: cfg },
+          { name: 'Diagnostics', value: 'diagnostics', content: diagnostics },
         ]}
       />
       {#snippet cst()}
@@ -57,6 +59,9 @@
           position={cursorPos}
           onNodeRangeChange={changeSelectedRange}
         />
+      {/snippet}
+      {#snippet diagnostics()}
+        <DiagnosticsList {monaco} {client} />
       {/snippet}
     </section>
   </main>
