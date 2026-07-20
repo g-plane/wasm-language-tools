@@ -4,6 +4,7 @@
   import ControlFlowGraph from './components/ControlFlowGraph.svelte'
   import DiagnosticsList from './components/DiagnosticsList.svelte'
   import FormatterViewer from './components/FormatterViewer.svelte'
+  import Header from './components/Header.svelte'
   import SourceEditor from './components/SourceEditor.svelte'
   import SyntaxTreeViewer from './components/SyntaxTreeViewer.svelte'
   import Tabs from './components/Tabs.svelte'
@@ -20,6 +21,7 @@
   $effect(configureDarkMode)
 </script>
 
+<Header />
 {#await resources}
   Loading editor and language server...
 {:then [monaco, client, d3Graphviz]}

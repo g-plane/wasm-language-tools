@@ -5,7 +5,8 @@
 
 :root {
   --primary-color: oklch(0.5494 0.2295 281.96);
-  --editor-height: 90vh;
+  --light-color: oklch(0.98 0.01 281.96);
+  --workspace-height: calc(100vh - 2.75rem - 3rem);
   --monospace: 'Google Sans Code', monospace;
 
   --severity-error: oklch(0.63 0.23 22.22);
@@ -16,7 +17,13 @@
 body, button {
   font-family: 'Inter', sans-serif;
 }
+a {
+  text-decoration: none;
+}
 
+body {
+  background-color: var(--light-color);
+}
 body.dark {
   --severity-error: oklch(0.7 0.23 22.22);
   --severity-warning: oklch(0.7 0.12 91.61);

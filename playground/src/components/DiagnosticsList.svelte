@@ -49,6 +49,11 @@
     flex-direction: column;
     row-gap: 0.5rem;
     font-family: var(--monospace);
+    height: calc(var(--workspace-height) - 1rem * 2);
+    background-color: oklch(1 0 0);
+  }
+  :global(.dark) ul {
+    background-color: var(--dark-color);
   }
   li {
     padding: 0.15rem 0.5rem;

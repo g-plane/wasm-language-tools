@@ -64,12 +64,19 @@
 {/if}
 
 <style>
+  div {
+    height: var(--workspace-height);
+  }
   div > :global(svg) {
     width: 100%;
-    height: var(--editor-height);
+    height: 99%;
+    background-color: oklch(1 0 0);
+  }
+  :global(.dark) div > :global(svg) {
+    background-color: var(--dark-color);
   }
   section {
-    height: var(--editor-height);
+    height: var(--workspace-height);
     display: flex;
     justify-content: center;
     align-items: center;

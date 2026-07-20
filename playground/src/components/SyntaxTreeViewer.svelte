@@ -48,6 +48,6 @@
 
 <style>
   div {
-    height: var(--editor-height);
+    height: var(--workspace-height);
   }
 </style>

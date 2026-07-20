@@ -43,7 +43,7 @@
     border: none;
     border-radius: 0.5rem;
     cursor: pointer;
-    background-color: #fff;
+    background-color: var(--light-color);
     transition: background-color 0.2s, color 0.2s;
   }
   :global(.dark) button {
