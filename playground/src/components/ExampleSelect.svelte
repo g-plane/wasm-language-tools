@@ -15,7 +15,7 @@
 </script>
 
 <div class="form-item">
-  <span>Examples</span>
+  <span>Examples:</span>
   <select onchange={handleExampleChange}>
     <option value="empty">Empty</option>
     <option value="messy">Messy Code</option>
@@ -28,9 +28,9 @@
 <style>
   .form-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 1rem;
+    column-gap: 0.5rem;
   }
 
   select {

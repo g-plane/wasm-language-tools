@@ -16,7 +16,7 @@ export type FormatOptions = ServiceConfig['format'] & {
 
 export type LintLevel = 'deny' | 'warn' | 'hint' | 'allow'
 export interface ServiceConfig {
-    format?: {
+    format: {
         splitClosingParens?: boolean
         wrapBeforeLocals?: 'never' | 'overflow' | 'multiOnly' | 'always'
         wrapBeforeFields?: 'never' | 'overflow' | 'multiOnly' | 'always'
@@ -26,7 +26,7 @@ export interface ServiceConfig {
         formatComments?: boolean
         ignoreCommentDirective?: string
     }
-    lints?: {
+    lints: {
         unused?: LintLevel
         unread?: LintLevel
         shadow?: LintLevel
@@ -38,7 +38,7 @@ export interface ServiceConfig {
         needlessTryTable?: LintLevel
         uselessCatch?: LintLevel
     }
-    inlayHint?: {
+    inlayHint: {
         types?: boolean
         ending?: boolean
         index?: boolean
