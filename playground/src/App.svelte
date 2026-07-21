@@ -5,6 +5,7 @@
   import DiagnosticsList from './components/DiagnosticsList.svelte'
   import FormatterViewer from './components/FormatterViewer.svelte'
   import Header from './components/Header.svelte'
+  import Sidebar from './components/Sidebar.svelte'
   import SourceEditor from './components/SourceEditor.svelte'
   import SyntaxTreeViewer from './components/SyntaxTreeViewer.svelte'
   import Tabs from './components/Tabs.svelte'
@@ -26,6 +27,9 @@
   Loading editor and language server...
 {:then [monaco, client, d3Graphviz]}
   <main>
+    <aside>
+      <Sidebar onExampleChange={(code) => sourceCode = code} />
+    </aside>
     <section>
       <Tabs
         tabs={[
@@ -73,10 +77,13 @@
 {/await}
 
 <style>
+  aside {
+    width: 14vw;
+  }
   main {
     display: flex;
   }
   section {
-    width: 50vw;
+    width: 43vw;
   }
 </style>

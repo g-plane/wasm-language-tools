@@ -184,3 +184,92 @@ export function registerLanguage(monaco: typeof import('@codingame/monaco-vscode
     ],
   })
 }
+
+export const snippets = new Map([
+  ['empty', '(module)'],
+  [
+    'messy',
+    `(module
+  (func      $f
+    block    $b
+    end     nop
+
+
+    nop     nop
+  )
+  (global     (mut   i32) (i32.const     0))
+)`,
+  ],
+  [
+    'cf',
+    `(module
+  (global i32
+    i32.const 0)
+  (func (param (ref any)) (result (ref any)) (local (ref any))
+    block $b
+      loop $loop
+        global.get 0
+        if
+          local.get 0
+          local.set 1
+          br $b
+        else
+          br $loop
+        end
+      end
+    end
+    local.get 1)
+  (func (param (ref any)) (result (ref any)) (local (ref any))
+    (block $b
+      (loop $loop
+        (if
+          (global.get 0)
+          (then
+            (br $b)
+            (local.set 1
+              (local.get 0)))
+          (else
+            (local.set 1
+              (local.get 0))
+            (br $loop)))))
+    (local.get 1))
+  (func (param (ref any)) (result (ref any)) (local (ref any))
+    (block $b
+      (loop $loop
+        (if
+          (global.get 0)
+          (then
+            (br $loop
+              (local.set 1
+                (local.get 0))))
+          (else
+            (br $b)))))
+    (local.get 1))
+  (func (local (ref any))
+    (loop
+      br 0
+      local.get 0
+      drop)))`,
+  ],
+  [
+    'mutability',
+    `(module
+  (global i32
+    i32.const 0)
+  (global (mut i32)
+    i32.const 0)
+  (func
+    (global.set 0
+      (i32.const 0))))`,
+  ],
+  [
+    'type-check',
+    `(module
+  (rec (type $f1 (sub (func))) (type (struct (field (ref $f1)))))
+  (rec (type $f2 (sub (func))) (type (struct (field (ref $f1)))))
+  (rec (type $g1 (sub $f1 (func))) (type (struct)))
+  (rec (type $g2 (sub $f2 (func))) (type (struct)))
+  (func (param (ref $g2)) (result (ref $g1))
+    (local.get 0)))`,
+  ],
+])
