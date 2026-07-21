@@ -20,6 +20,15 @@ body, button, select {
 a {
   text-decoration: none;
 }
+button {
+  border: none;
+  cursor: pointer;
+  background-color: var(--light-color);
+}
+.dark button {
+  background-color: var(--dark-color);
+  color: var(--dark-text-color);
+}
 
 body {
   background-color: var(--light-color);

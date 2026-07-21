@@ -40,15 +40,8 @@
 
   button {
     padding: 0.5rem 1rem;
-    border: none;
     border-radius: 0.5rem;
-    cursor: pointer;
-    background-color: var(--light-color);
     transition: background-color 0.2s, color 0.2s;
-  }
-  :global(.dark) button {
-    background-color: var(--dark-color);
-    color: var(--dark-text-color);
   }
   button:is(.selected, :hover) {
     background-color: var(--primary-color);
