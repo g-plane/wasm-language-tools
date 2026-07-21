@@ -7,41 +7,41 @@ use wat_syntax::SyntaxNode;
 const TS_APPEND_CONTENT: &'static str = r#"
 import type * as lsp from 'vscode-languageserver-protocol'
 
-export type FormatOptions = Partial<ServiceConfig['format'] & {
-    printWidth: number
-    indentWidth: number
-    lineBreak: 'lf' | 'crlf'
-    useTabs: boolean
-}>
+export type FormatOptions = ServiceConfig['format'] & {
+    printWidth?: number
+    indentWidth?: number
+    lineBreak?: 'lf' | 'crlf'
+    useTabs?: boolean
+}
 
 export type LintLevel = 'deny' | 'warn' | 'hint' | 'allow'
 export interface ServiceConfig {
-    format: {
-        splitClosingParens: boolean
-        wrapBeforeLocals: 'never' | 'overflow' | 'multiOnly' | 'always'
-        wrapBeforeFields: 'never' | 'overflow' | 'multiOnly' | 'always'
-        wrapBeforeConstExpr: 'never' | 'overflow' | 'multiOnly' | 'always'
-        multiLineLocals: 'never' | 'overflow' | 'smart' | 'wrap' | 'always'
-        multiLineFields: 'never' | 'overflow' | 'smart' | 'wrap' | 'always'
-        formatComments: boolean
-        ignoreCommentDirective: string
+    format?: {
+        splitClosingParens?: boolean
+        wrapBeforeLocals?: 'never' | 'overflow' | 'multiOnly' | 'always'
+        wrapBeforeFields?: 'never' | 'overflow' | 'multiOnly' | 'always'
+        wrapBeforeConstExpr?: 'never' | 'overflow' | 'multiOnly' | 'always'
+        multiLineLocals?: 'never' | 'overflow' | 'smart' | 'wrap' | 'always'
+        multiLineFields?: 'never' | 'overflow' | 'smart' | 'wrap' | 'always'
+        formatComments?: boolean
+        ignoreCommentDirective?: string
     }
-    lints: {
-        unused: LintLevel
-        unread: LintLevel
-        shadow: LintLevel
-        implicitModule: LintLevel
-        multiModules: LintLevel
-        unreachable: LintLevel
-        deprecated: LintLevel
-        needlessMut: LintLevel
-        needlessTryTable: LintLevel
-        uselessCatch: LintLevel
+    lints?: {
+        unused?: LintLevel
+        unread?: LintLevel
+        shadow?: LintLevel
+        implicitModule?: LintLevel
+        multiModules?: LintLevel
+        unreachable?: LintLevel
+        deprecated?: LintLevel
+        needlessMut?: LintLevel
+        needlessTryTable?: LintLevel
+        uselessCatch?: LintLevel
     }
-    inlayHint: {
-        types: boolean
-        ending: boolean
-        index: boolean
+    inlayHint?: {
+        types?: boolean
+        ending?: boolean
+        index?: boolean
     }
 }
 "#;
