@@ -7,9 +7,9 @@
 
   function handleExampleChange(e: Event) {
     const target = e.currentTarget as HTMLSelectElement
-    const code = snippets.get(target.value)
-    if (code) {
-      onExampleChange(code)
+    const snippet = snippets.get(target.value)
+    if (snippet) {
+      onExampleChange(snippet.code)
     }
   }
 </script>
@@ -17,11 +17,9 @@
 <div class="form-item">
   <span>Examples:</span>
   <select onchange={handleExampleChange}>
-    <option value="empty">Empty</option>
-    <option value="messy">Messy Code</option>
-    <option value="cf">Control Flow</option>
-    <option value="mutability">Mutability</option>
-    <option value="type-check">Type Checking</option>
+    {#each snippets as snippet (snippet[0])}
+      <option value={snippet[0]}>{snippet[1].name}</option>
+    {/each}
   </select>
 </div>
 

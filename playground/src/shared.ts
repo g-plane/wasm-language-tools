@@ -186,10 +186,12 @@ export function registerLanguage(monaco: typeof import('@codingame/monaco-vscode
 }
 
 export const snippets = new Map([
-  ['empty', '(module)'],
+  ['empty', { name: 'Empty', code: '(module)' }],
   [
     'messy',
-    `(module
+    {
+      name: 'Messy Code',
+      code: `(module
   (func      $f
     block    $b
     end     nop
@@ -199,10 +201,13 @@ export const snippets = new Map([
   )
   (global     (mut   i32) (i32.const     0))
 )`,
+    },
   ],
   [
     'cf',
-    `(module
+    {
+      name: 'Control Flow',
+      code: `(module
   (global i32
     i32.const 0)
   (func (param (ref any)) (result (ref any)) (local (ref any))
@@ -250,10 +255,13 @@ export const snippets = new Map([
       br 0
       local.get 0
       drop)))`,
+    },
   ],
   [
     'mutability',
-    `(module
+    {
+      name: 'Mutability',
+      code: `(module
   (global i32
     i32.const 0)
   (global (mut i32)
@@ -261,15 +269,19 @@ export const snippets = new Map([
   (func
     (global.set 0
       (i32.const 0))))`,
+    },
   ],
   [
     'type-check',
-    `(module
+    {
+      name: 'Type Checking',
+      code: `(module
   (rec (type $f1 (sub (func))) (type (struct (field (ref $f1)))))
   (rec (type $f2 (sub (func))) (type (struct (field (ref $f1)))))
   (rec (type $g1 (sub $f1 (func))) (type (struct)))
   (rec (type $g2 (sub $f2 (func))) (type (struct)))
   (func (param (ref $g2)) (result (ref $g1))
     (local.get 0)))`,
+    },
   ],
 ])
