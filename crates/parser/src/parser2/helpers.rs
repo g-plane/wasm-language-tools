@@ -129,7 +129,7 @@ impl<'s> Parser<'s> {
 
     pub(super) fn parse_trivias(&mut self) {
         while let Some(token) = self.lexer.trivia() {
-            if token.kind == SyntaxKind::WHITESPACE && token.text.as_bytes() == [b' '] {
+            if token.kind == SyntaxKind::WHITESPACE && token.text.as_bytes() == b" " {
                 self.add_child(green::SINGLE_SPACE.clone());
             } else {
                 self.add_child(token);

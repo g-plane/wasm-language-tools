@@ -337,18 +337,16 @@ impl<'s> Lexer<'s> {
             .filter(|rest| !rest.starts_with(is_id_char))
         {
             self.input = rest;
-        } else if let Some(rest) = self
-            .input
-            .strip_prefix("nan")
-            .filter(|rest| rest.starts_with(":0x") || !rest.starts_with(is_id_char))
-        {
+        } else {
+            let rest = self
+                .input
+                .strip_prefix("nan")
+                .filter(|rest| rest.starts_with(":0x") || !rest.starts_with(is_id_char))?;
             self.input = rest;
             if let Some(rest) = rest.strip_prefix(":0x") {
                 self.input = rest;
                 valid &= self.unsigned_hex().is_some();
             }
-        } else {
-            return None;
         }
         if self.input.starts_with(is_id_char) {
             None
