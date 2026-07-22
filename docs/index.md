@@ -9,11 +9,11 @@ hero:
     alt: WebAssembly Language Tools
   actions:
     - theme: brand
-      text: Introduction
+      text: Getting Started
       link: /guide/introduction
     - theme: alt
-      text: Getting Started
-      link: /guide/getting-started/editors
+      text: Try it Online
+      link: /play/
     - theme: alt
       text: GitHub
       link: https://github.com/g-plane/wasm-language-tools

@@ -15,6 +15,7 @@ export default defineConfig({
     nav: [
       { text: 'Guide', link: '/guide/introduction', activeMatch: '/guide/' },
       { text: 'Config', link: '/config/overview', activeMatch: '/config/' },
+      { text: 'Playground', link: '/play/' },
     ],
     sidebar: [
       {

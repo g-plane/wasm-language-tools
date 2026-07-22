@@ -175,7 +175,9 @@ Smart, zero-config tooling for confident WebAssembly development:
 
 ### Try it Online
 
-Open [vscode.dev](https://vscode.dev/) or [github.dev](https://github.dev/), then search and install the `gplane.wasm-language-tools` extension.
+Please visit the [playground](https://wasm-language-tools.netlify.app/play/).
+
+To get the full experience, open [vscode.dev](https://vscode.dev/), then search and install the `gplane.wasm-language-tools` extension.
 After installed, open or create a ".wat" file to try it out.
 
 ### Editor Support
