@@ -14,6 +14,7 @@ hero:
     - theme: alt
       text: Try it Online
       link: /play/
+      target: _self
     - theme: alt
       text: GitHub
       link: https://github.com/g-plane/wasm-language-tools
