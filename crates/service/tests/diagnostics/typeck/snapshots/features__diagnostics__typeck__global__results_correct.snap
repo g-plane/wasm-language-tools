@@ -33,7 +33,7 @@ expression: response
         }
       },
       "severity": 1,
-      "code": "syntax/value-type",
+      "code": "syntax",
       "source": "wat",
       "message": "syntax error: expected value type"
     }

@@ -346,7 +346,7 @@ mod tests {
         diagnostics.sort_unstable_by_key(|diagnostic| diagnostic.range.start);
         let mut diagnostics = diagnostics.into_iter().filter(|diagnostic| {
             if let Some(NumberOrString::String(code)) = &diagnostic.code {
-                code == "syntax" || code.starts_with("syntax/")
+                code == "syntax"
             } else {
                 false
             }
@@ -490,7 +490,7 @@ mod tests {
                 .iter()
                 .all(|diagnostic| {
                     if let Some(NumberOrString::String(code)) = &diagnostic.code {
-                        code != "syntax" && !code.starts_with("syntax/")
+                        code != "syntax"
                     } else {
                         true
                     }
