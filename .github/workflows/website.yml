@@ -1,0 +1,33 @@
+name: website
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: netlify
+    steps:
+      - uses: actions/checkout@v6
+      - run: rustup target add wasm32-unknown-unknown
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-bindgen@0.2.126
+      - run: |
+          cargo build -p binding_wasm --target wasm32-unknown-unknown --release
+          wasm-bindgen --out-dir=bindings/pkg --target=web --omit-default-module-path target/wasm32-unknown-unknown/release/binding_wasm.wasm
+      - uses: pnpm/action-setup@v6
+        with:
+          version: latest
+          run_install: true
+      - run:
+          pnpm -F=docs build
+          pnpm -F=playground build
+      - name: Deploy
+        run: |
+          npm i --location=global netlify-cli
+          netlify deploy --site=b9ac343a-ddf5-4f01-9e49-5f69fadaff4a --dir=dist --prod
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
