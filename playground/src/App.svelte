@@ -31,8 +31,12 @@
   $effect(() => {
     const params = new URLSearchParams(window.location.search)
     const value = params.get('code')
-    if (value) {
-      sourceCode = decompressFromEncodedURIComponent(value)
+    if (!value) {
+      return
+    }
+    const code = decompressFromEncodedURIComponent(value)
+    if (code) {
+      sourceCode = code
     }
   })
 </script>

@@ -15,15 +15,22 @@
 
 <ul role="tablist">
   {#each tabs as tab (tab.value)}
-    <li role="tab" aria-selected={tab.value === active}>
-      <button class:selected={tab.value === active} onclick={() => active = tab.value}>
+    <li>
+      <button
+        id={`tab-${tab.value}`}
+        role="tab"
+        aria-selected={tab.value === active}
+        aria-controls={`panel-${tab.value}`}
+        class:selected={tab.value === active}
+        onclick={() => active = tab.value}
+      >
         {tab.name}
       </button>
     </li>
   {/each}
 </ul>
 {#if currentTab}
-  <div role="tabpanel">
+  <div id={`panel-${currentTab.value}`} role="tabpanel" aria-labelledby={`tab-${currentTab.value}`}>
     {@render currentTab.content()}
   </div>
 {/if}
