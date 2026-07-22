@@ -27,7 +27,7 @@
   .form-item {
     display: flex;
     align-items: center;
-    padding: 1rem;
+    padding: 0.75rem 1rem;
     column-gap: 0.5rem;
   }
 

@@ -39,7 +39,9 @@
 
 <Header onShare={handleShare} />
 {#await resources}
-  Loading editor and language server...
+  <div class="loading">
+    <p>Loading editor and language server...</p>
+  </div>
 {:then [monaco, client, d3Graphviz]}
   <main>
     <section>
@@ -83,6 +85,12 @@
 {/await}
 
 <style>
+  .loading {
+    height: var(--workspace-height);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
   main {
     display: flex;
   }
