@@ -15,6 +15,7 @@
     "@codingame/monaco-vscode-languages-service-override": "^35.0.0",
     "@wasm-language-tools/wasm": "workspace:*",
     "d3-graphviz": "^5.6.0",
+    "lz-string": "^1.5.0",
     "monaco-languageclient": "^10.7.0",
     "vscode": "npm:@codingame/monaco-vscode-extension-api@^35.0.0",
     "vscode-languageclient": "^10.1.0",

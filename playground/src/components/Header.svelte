@@ -1,6 +1,8 @@
 <script lang="ts">
   import { isDarkMode } from '../color.js'
 
+  const { onShare }: { onShare: () => void } = $props()
+
   function toggleDarkMode() {
     $isDarkMode = !$isDarkMode
   }
@@ -20,6 +22,7 @@
       >
         GitHub
       </a>
+      <button onclick={onShare}>Share</button>
     </nav>
   </div>
   <button onclick={toggleDarkMode}>{$isDarkMode ? 'Dark' : 'Light'}</button>
@@ -46,6 +49,9 @@
     display: flex;
     align-items: center;
     column-gap: 0.8rem;
+  }
+  nav button {
+    font-size: 1rem;
   }
   a, button {
     color: oklch(0 0 0);

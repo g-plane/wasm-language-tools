@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Position } from '@codingame/monaco-vscode-editor-api'
+  import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string'
   import { configureDarkMode } from './color.js'
   import ControlFlowGraph from './components/ControlFlowGraph.svelte'
   import DiagnosticsList from './components/DiagnosticsList.svelte'
@@ -20,9 +21,23 @@
   }
 
   $effect(configureDarkMode)
+
+  function handleShare() {
+    const url = new URL(window.location.href)
+    url.searchParams.set('code', compressToEncodedURIComponent(sourceCode))
+    navigator.clipboard.writeText(url.toString())
+    window.history.replaceState(null, '', url.toString())
+  }
+  $effect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const value = params.get('code')
+    if (value) {
+      sourceCode = decompressFromEncodedURIComponent(value)
+    }
+  })
 </script>
 
-<Header />
+<Header onShare={handleShare} />
 {#await resources}
   Loading editor and language server...
 {:then [monaco, client, d3Graphviz]}
