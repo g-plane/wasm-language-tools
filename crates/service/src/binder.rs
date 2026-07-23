@@ -1,8 +1,9 @@
 use crate::{
     document::Document,
-    helpers,
+    helpers::{self, BumpCollectionsExt, BumpHashMap},
     idx::{Idx, IdxGen, InternIdent},
 };
+use bumpalo::{Bump, collections::Vec as BumpVec};
 use indexmap::IndexMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::{fmt, hash::Hash, ops::Deref};
@@ -184,6 +185,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
     let mut symbols = Symbols::with_capacity_and_hasher(8, FxBuildHasher);
     let mut resolved = FxHashMap::default();
     let mut def_poi = FxHashMap::default();
+    let bump = Bump::new();
     root.children().enumerate().for_each(|(module_id, module)| {
         let module_key = SymbolKey::new(&module);
         symbols.insert(
@@ -217,17 +219,17 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
         let mut data_idx_gen = IdxGen::default();
         let mut elem_idx_gen = IdxGen::default();
 
-        let mut funcs = Vec::new();
-        let mut locals = Vec::new();
-        let mut types = Vec::new();
-        let mut globals = Vec::new();
-        let mut memories = Vec::new();
-        let mut tables = Vec::new();
-        let mut fields = FxHashMap::default();
-        let mut tags = Vec::new();
-        let mut datas = Vec::new();
-        let mut elems = Vec::new();
-        let mut indirect_params = Vec::new();
+        let mut funcs = BumpVec::new_in(&bump);
+        let mut locals = BumpVec::new_in(&bump);
+        let mut types = BumpVec::new_in(&bump);
+        let mut globals = BumpVec::new_in(&bump);
+        let mut memories = BumpVec::new_in(&bump);
+        let mut tables = BumpVec::new_in(&bump);
+        let mut fields = BumpHashMap::new_in(&bump);
+        let mut tags = BumpVec::new_in(&bump);
+        let mut datas = BumpVec::new_in(&bump);
+        let mut elems = BumpVec::new_in(&bump);
+        let mut indirect_params = BumpVec::new_in(&bump);
 
         module.descendants().for_each(|node| match node.kind() {
             SyntaxKind::MODULE_FIELD_FUNC => {
@@ -375,7 +377,9 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 } else {
                     return;
                 };
-                let fields = fields.entry(type_def_key).or_insert_with(|| Vec::with_capacity(1));
+                let fields = fields
+                    .entry(type_def_key)
+                    .or_insert_with(|| BumpVec::with_capacity_in(1, &bump));
                 if let Some(ident) = node.amber().tokens_by_kind(SyntaxKind::IDENT).next() {
                     let key = SymbolKey::new(&node);
                     let idx = field_idx_gen.pull();
