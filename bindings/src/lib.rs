@@ -349,8 +349,7 @@ impl LanguageService {
         &self,
         #[wasm_bindgen(unchecked_param_type = "lsp.RenameParams")] params: JsValue,
     ) -> Result<JsValue, Error> {
-        serde_wasm_bindgen::from_value(params)
-            .and_then(|params| self.inner.rename(params).ok().serialize(&self.serializer))
+        serde_wasm_bindgen::from_value(params).and_then(|params| self.inner.rename(params).serialize(&self.serializer))
     }
 
     #[wasm_bindgen(js_name = "selectionRange", unchecked_return_type = "lsp.SelectionRange[] | null")]

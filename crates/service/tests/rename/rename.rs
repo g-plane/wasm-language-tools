@@ -12,30 +12,6 @@ fn create_params(uri: String, line: u32, character: u32, new_name: &str) -> Rena
 }
 
 #[test]
-fn invalid_new_name() {
-    let uri = "untitled:test".to_string();
-    let source = "";
-    let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    assert_eq!(
-        service.rename(create_params(uri.clone(), 0, 0, "0")),
-        Err("Invalid name `0`: not a valid identifier.".into())
-    );
-    assert_eq!(
-        service.rename(create_params(uri.clone(), 0, 0, "abc")),
-        Err("Invalid name `abc`: not a valid identifier.".into())
-    );
-    assert_eq!(
-        service.rename(create_params(uri.clone(), 0, 0, "$")),
-        Err("Invalid name `$`: not a valid identifier.".into())
-    );
-    assert_eq!(
-        service.rename(create_params(uri.clone(), 0, 0, "$()")),
-        Err("Invalid name `$()`: not a valid identifier.".into())
-    );
-}
-
-#[test]
 fn ignored_tokens() {
     let uri = "untitled:test".to_string();
     let source = "
@@ -48,30 +24,12 @@ fn ignored_tokens() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    assert_eq!(
-        service.rename(create_params(uri.clone(), 1, 4, "$f")),
-        Err("This can't be renamed.".into())
-    );
-    assert_eq!(
-        service.rename(create_params(uri.clone(), 2, 29, "$f")),
-        Err("This can't be renamed.".into())
-    );
-    assert_eq!(
-        service.rename(create_params(uri.clone(), 3, 7, "$f")),
-        Err("This can't be renamed.".into())
-    );
-    assert_eq!(
-        service.rename(create_params(uri.clone(), 3, 18, "$f")),
-        Err("This can't be renamed.".into())
-    );
-    assert_eq!(
-        service.rename(create_params(uri.clone(), 4, 15, "$f")),
-        Err("This can't be renamed.".into())
-    );
-    assert_eq!(
-        service.rename(create_params(uri.clone(), 4, 23, "$f")),
-        Err("This can't be renamed.".into())
-    );
+    assert!(service.rename(create_params(uri.clone(), 1, 4, "$f")).is_none());
+    assert!(service.rename(create_params(uri.clone(), 2, 29, "$f")).is_none());
+    assert!(service.rename(create_params(uri.clone(), 3, 7, "$f")).is_none());
+    assert!(service.rename(create_params(uri.clone(), 3, 18, "$f")).is_none());
+    assert!(service.rename(create_params(uri.clone(), 4, 15, "$f")).is_none());
+    assert!(service.rename(create_params(uri.clone(), 4, 23, "$f")).is_none());
 }
 
 #[test]
@@ -84,7 +42,124 @@ fn different_kinds() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 2, 12, "$f")).unwrap();
+    let response = service.rename(create_params(uri, 2, 12, "$f"));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn start_with_numeric() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func $func (call $func)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 2, 12, "0"));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn start_with_alphabetic() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func $func (call $func)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 2, 12, "a"));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn dollar_only() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func $func (call $func)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 2, 12, "$"));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn contain_non_ident_chars() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func $func (call $func)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 2, 12, "$()"));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn contain_non_ident_chars_without_dollar() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func $func (call $func)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 2, 12, "()"));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn quote_only() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func $func (call $func)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 2, 12, "\"f\""));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn without_suffix_quote() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func $func (call $func)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 2, 12, "\"f"));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn quote_only_with_non_ident_chars() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func $func (call $func)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 2, 12, "\"(a)\""));
+    assert_json_snapshot!(response);
+}
+
+#[test]
+fn dollar_with_quote() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func $func (call $func)))
+";
+    let mut service = LanguageService::default();
+    service.commit(&uri, source.into());
+    let response = service.rename(create_params(uri, 2, 12, "$\"(f)\""));
     assert_json_snapshot!(response);
 }
 
@@ -99,7 +174,7 @@ fn import_def() {
 "#;
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 2, 29, "$a")).unwrap();
+    let response = service.rename(create_params(uri, 2, 29, "$a"));
     assert_json_snapshot!(response);
 }
 
@@ -114,7 +189,7 @@ fn import_ref() {
 "#;
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 4, 17, "$a")).unwrap();
+    let response = service.rename(create_params(uri, 4, 17, "$a"));
     assert_json_snapshot!(response);
 }
 
@@ -129,7 +204,7 @@ fn compact_import_def() {
 "#;
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 2, 35, "$a")).unwrap();
+    let response = service.rename(create_params(uri, 2, 35, "$a"));
     assert_json_snapshot!(response);
 }
 
@@ -144,7 +219,7 @@ fn compact_import_ref() {
 "#;
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 4, 17, "$a")).unwrap();
+    let response = service.rename(create_params(uri, 4, 17, "$a"));
     assert_json_snapshot!(response);
 }
 
@@ -157,7 +232,7 @@ fn module() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 1, 10, "$m")).unwrap();
+    let response = service.rename(create_params(uri, 1, 10, "$m"));
     assert_json_snapshot!(response);
 }
 
@@ -175,7 +250,7 @@ fn func() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 2, 14, "$f")).unwrap();
+    let response = service.rename(create_params(uri, 2, 14, "$f"));
     assert_json_snapshot!(response);
 }
 
@@ -188,7 +263,7 @@ fn func_in_implicit_module() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 2, 14, "$f")).unwrap();
+    let response = service.rename(create_params(uri, 2, 14, "$f"));
     assert_json_snapshot!(response);
 }
 
@@ -205,7 +280,7 @@ fn param() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 2, 21, "$p")).unwrap();
+    let response = service.rename(create_params(uri, 2, 21, "$p"));
     assert_json_snapshot!(response);
 }
 
@@ -222,7 +297,7 @@ fn local() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 2, 21, "$l")).unwrap();
+    let response = service.rename(create_params(uri, 2, 21, "$l"));
     assert_json_snapshot!(response);
 }
 
@@ -238,7 +313,7 @@ fn local_conflicts() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 2, 39, "$l")).unwrap();
+    let response = service.rename(create_params(uri, 2, 39, "$l"));
     assert_json_snapshot!(response);
 }
 
@@ -257,7 +332,7 @@ fn call() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 5, 14, "$f")).unwrap();
+    let response = service.rename(create_params(uri, 5, 14, "$f"));
     assert_json_snapshot!(response);
 }
 
@@ -274,7 +349,7 @@ fn param_access() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 3, 21, "$p")).unwrap();
+    let response = service.rename(create_params(uri, 3, 21, "$p"));
     assert_json_snapshot!(response);
 }
 
@@ -291,7 +366,7 @@ fn local_access() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 3, 21, "$l")).unwrap();
+    let response = service.rename(create_params(uri, 3, 21, "$l"));
     assert_json_snapshot!(response);
 }
 
@@ -308,7 +383,7 @@ fn func_type() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 2, 14, "$ty")).unwrap();
+    let response = service.rename(create_params(uri, 2, 14, "$ty"));
     assert_json_snapshot!(response);
 }
 
@@ -325,7 +400,7 @@ fn type_use() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 3, 20, "$ty")).unwrap();
+    let response = service.rename(create_params(uri, 3, 20, "$ty"));
     assert_json_snapshot!(response);
 }
 
@@ -342,7 +417,7 @@ fn global_def() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 2, 17, "$g")).unwrap();
+    let response = service.rename(create_params(uri, 2, 17, "$g"));
     assert_json_snapshot!(response);
 }
 
@@ -359,7 +434,7 @@ fn global_ref() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 3, 28, "$g")).unwrap();
+    let response = service.rename(create_params(uri, 3, 28, "$g"));
     assert_json_snapshot!(response);
 }
 
@@ -375,7 +450,7 @@ fn memory_def() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 2, 17, "$m")).unwrap();
+    let response = service.rename(create_params(uri, 2, 17, "$m"));
     assert_json_snapshot!(response);
 }
 
@@ -391,7 +466,7 @@ fn memory_ref() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 3, 28, "$m")).unwrap();
+    let response = service.rename(create_params(uri, 3, 28, "$m"));
     assert_json_snapshot!(response);
 }
 
@@ -407,7 +482,7 @@ fn table_def() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 2, 13, "$t")).unwrap();
+    let response = service.rename(create_params(uri, 2, 13, "$t"));
     assert_json_snapshot!(response);
 }
 
@@ -423,7 +498,7 @@ fn table_ref() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 4, 21, "$t")).unwrap();
+    let response = service.rename(create_params(uri, 4, 21, "$t"));
     assert_json_snapshot!(response);
 }
 
@@ -442,7 +517,7 @@ fn block_def() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 3, 16, "$b")).unwrap();
+    let response = service.rename(create_params(uri, 3, 16, "$b"));
     assert_json_snapshot!(response);
 }
 
@@ -461,7 +536,7 @@ fn block_ref() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 6, 21, "$b")).unwrap();
+    let response = service.rename(create_params(uri, 6, 21, "$b"));
     assert_json_snapshot!(response);
 }
 
@@ -478,7 +553,7 @@ fn field_def() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 2, 24, "$y")).unwrap();
+    let response = service.rename(create_params(uri, 2, 24, "$y"));
     assert_json_snapshot!(response);
 }
 
@@ -495,7 +570,7 @@ fn field_ref() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 5, 19, "$y")).unwrap();
+    let response = service.rename(create_params(uri, 5, 19, "$y"));
     assert_json_snapshot!(response);
 }
 
@@ -515,7 +590,7 @@ fn tag_def() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 2, 9, "$t")).unwrap();
+    let response = service.rename(create_params(uri, 2, 9, "$t"));
     assert_json_snapshot!(response);
 }
 
@@ -535,7 +610,7 @@ fn tag_ref() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 6, 24, "$t")).unwrap();
+    let response = service.rename(create_params(uri, 6, 24, "$t"));
     assert_json_snapshot!(response);
 }
 
@@ -551,7 +626,7 @@ fn data_def() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 2, 13, "$d")).unwrap();
+    let response = service.rename(create_params(uri, 2, 13, "$d"));
     assert_json_snapshot!(response);
 }
 
@@ -567,7 +642,7 @@ fn data_ref() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 4, 18, "$d")).unwrap();
+    let response = service.rename(create_params(uri, 4, 18, "$d"));
     assert_json_snapshot!(response);
 }
 
@@ -585,7 +660,7 @@ fn elem_def() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 2, 13, "$e")).unwrap();
+    let response = service.rename(create_params(uri, 2, 13, "$e"));
     assert_json_snapshot!(response);
 }
 
@@ -603,6 +678,6 @@ fn elem_ref() {
 ";
     let mut service = LanguageService::default();
     service.commit(&uri, source.into());
-    let response = service.rename(create_params(uri, 4, 18, "$e")).unwrap();
+    let response = service.rename(create_params(uri, 4, 18, "$e"));
     assert_json_snapshot!(response);
 }

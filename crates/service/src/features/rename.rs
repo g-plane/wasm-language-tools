@@ -1,7 +1,6 @@
 use crate::{
     LanguageService,
     binder::{SymbolKey, SymbolKind, SymbolTable},
-    document::Document,
     helpers::LineIndexExt,
     idx::InternIdent,
 };
@@ -10,12 +9,9 @@ use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_parser::is_id_char;
 use wat_syntax::{
-    SyntaxKind, SyntaxNode, SyntaxToken,
+    SyntaxKind, SyntaxNode,
     ast::{AstNode, ExternType},
 };
-
-const ERR_INVALID_IDENTIFIER: &str = "not a valid identifier";
-const ERR_CANT_BE_RENAMED: &str = "This can't be renamed.";
 
 impl LanguageService {
     /// Handler for `textDocument/prepareRename` request.
@@ -29,32 +25,36 @@ impl LanguageService {
     }
 
     /// Handler for `textDocument/rename` request.
-    pub fn rename(&self, params: RenameParams) -> Result<Option<WorkspaceEdit>, String> {
-        if !params
-            .new_name
-            .strip_prefix('$')
-            .is_some_and(|rest| !rest.is_empty() && rest.chars().all(is_id_char))
-        {
-            return Err(format!("Invalid name `{}`: {ERR_INVALID_IDENTIFIER}.", params.new_name));
+    pub fn rename(&self, params: RenameParams) -> Option<WorkspaceEdit> {
+        let mut new_name = params.new_name;
+        if !new_name.chars().all(is_id_char) || new_name.strip_prefix('$').is_some_and(str::is_empty) {
+            match new_name.as_bytes() {
+                [b'$', b'"', .., b'"'] | [b'"', .., b'"'] => {}
+                [b'$', ..] => {
+                    new_name = new_name.replace('"', "\\\"");
+                    new_name.insert(1, '"');
+                    new_name.push('"');
+                }
+                _ => {
+                    new_name = new_name.replace('"', "\\\"");
+                    new_name.insert(0, '"');
+                    new_name.push('"');
+                }
+            }
+        }
+        if !new_name.starts_with('$') {
+            new_name.insert(0, '$');
         }
 
-        let Some(document) = self.get_document(&params.text_document.uri) else {
-            return Ok(None);
-        };
-        // We can't assume client supports "prepareRename" so we need to check the token again.
+        let document = self.get_document(&params.text_document.uri)?;
         let root = SyntaxNode::new_root(document.root(self));
         let token = super::find_meaningful_token(self, document, &root, params.position)
-            .filter(|token| token.kind() == SyntaxKind::IDENT)
-            .ok_or_else(|| ERR_CANT_BE_RENAMED.to_owned())?;
-        Ok(self.rename_impl(params, document, token))
-    }
-
-    fn rename_impl(&self, params: RenameParams, document: Document, ident_token: SyntaxToken) -> Option<WorkspaceEdit> {
+            .filter(|token| token.kind() == SyntaxKind::IDENT)?;
         let line_index = document.line_index(self);
         let symbol_table = SymbolTable::of(self, document);
 
-        let old_name = InternIdent::new(self, ident_token.text());
-        let parent = ident_token.parent();
+        let old_name = InternIdent::new(self, token.text());
+        let parent = token.parent();
         let symbol = if ExternType::can_cast(parent.kind()) {
             let range = parent.text_range();
             symbol_table.symbols.values().find(|symbol| symbol.ty.1 == range)?
@@ -125,7 +125,7 @@ impl LanguageService {
             })
             .map(|range| TextEdit {
                 range,
-                new_text: params.new_name.clone(),
+                new_text: new_name.clone(),
             })
             .collect();
 

@@ -1,0 +1,36 @@
+---
+source: crates/service/tests/rename/rename.rs
+expression: response
+---
+{
+  "changes": {
+    "untitled:test": [
+      {
+        "range": {
+          "start": {
+            "line": 2,
+            "character": 8
+          },
+          "end": {
+            "line": 2,
+            "character": 13
+          }
+        },
+        "newText": "$\"(a)\""
+      },
+      {
+        "range": {
+          "start": {
+            "line": 2,
+            "character": 20
+          },
+          "end": {
+            "line": 2,
+            "character": 25
+          }
+        },
+        "newText": "$\"(a)\""
+      }
+    ]
+  }
+}

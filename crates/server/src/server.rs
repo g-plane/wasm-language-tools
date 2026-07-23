@@ -341,19 +341,9 @@ impl Server {
             })
             .or_else(|params| {
                 try_cast_request::<RenameRequest>(&method, params).map(|params| {
-                    params.and_then(|params| match service.rename(params) {
-                        Ok(result) => {
-                            serde_json::to_value(result).map(|result| Message::OkResponse { id: id.clone(), result })
-                        }
-                        Err(message) => Ok(Message::ErrResponse {
-                            id: id.clone(),
-                            error: ResponseError {
-                                code: -1,
-                                message,
-                                data: None,
-                            },
-                        }),
-                    })
+                    params
+                        .and_then(|params| serde_json::to_value(service.rename(params)))
+                        .map(|result| Message::OkResponse { id: id.clone(), result })
                 })
             })
             .or_else(|params| {
