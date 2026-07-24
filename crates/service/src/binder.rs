@@ -9,7 +9,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::{fmt, hash::Hash, ops::Deref};
 use wat_syntax::{
     AmberNode, GreenNode, NodeOrToken, SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange,
-    ast::{AstNode, ExternType, ValType, support},
+    ast::{AstNode, ExternType, ValType},
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
@@ -27,7 +27,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
         module_key: SymbolKey,
     ) -> Symbol<'db> {
         Symbol {
-            key: node.to_ptr().into(),
+            key: node.into(),
             green: node.green().clone(),
             region: module_key,
             kind,
@@ -67,7 +67,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 _ => None,
             })
             .map(|idx| Symbol {
-                key: node.to_ptr().into(),
+                key: node.into(),
                 green: node.green().clone(),
                 region,
                 kind,
@@ -79,14 +79,14 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
     fn create_optional_ref_symbol<'db>(
         db: &'db dyn salsa::Database,
         node: Option<AmberNode>,
-        fallback_node: &SyntaxNode,
+        fallback_node: AmberNode,
         region: SymbolKey,
         kind: SymbolKind,
     ) -> Symbol<'db> {
         node.and_then(|node| create_ref_symbol(db, node, region, kind))
             .unwrap_or_else(|| Symbol {
                 green: fallback_node.green().clone(),
-                key: SymbolKey::new(fallback_node),
+                key: fallback_node.into(),
                 region,
                 kind,
                 idx: Idx {
@@ -106,7 +106,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
         ty: AmberNode,
     ) -> Symbol<'db> {
         Symbol {
-            key: node.to_ptr().into(),
+            key: node.into(),
             green: node.green().clone(),
             region: module_key,
             kind,
@@ -132,17 +132,21 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             })
         })
     }
-    fn find_up_block<'a>(node: &SyntaxNode<'a>) -> Option<SyntaxNode<'a>> {
-        node.ancestors().skip(1).find(|node| {
-            matches!(
-                node.kind(),
-                SyntaxKind::BLOCK_BLOCK
-                    | SyntaxKind::BLOCK_LOOP
-                    | SyntaxKind::BLOCK_IF
-                    | SyntaxKind::BLOCK_TRY_TABLE
-                    | SyntaxKind::MODULE_FIELD_FUNC
-            )
-        })
+    fn find_up_blocks<'a>(stack: &[(AmberNode<'a>, usize)]) -> impl Iterator<Item = AmberNode<'a>> {
+        stack
+            .iter()
+            .rev()
+            .filter(|(node, _)| {
+                matches!(
+                    node.kind(),
+                    SyntaxKind::BLOCK_BLOCK
+                        | SyntaxKind::BLOCK_LOOP
+                        | SyntaxKind::BLOCK_IF
+                        | SyntaxKind::BLOCK_TRY_TABLE
+                        | SyntaxKind::MODULE_FIELD_FUNC
+                )
+            })
+            .map(|(node, _)| *node)
     }
     fn resolve_block_def(symbol: &Symbol, symbols: &Symbols) -> Option<SymbolKey> {
         let mut current = symbol;
@@ -172,8 +176,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             None
         }
     }
-    fn infer_def_poi(node: &SyntaxNode) -> TextRange {
-        let node = node.amber();
+    fn infer_def_poi(node: AmberNode) -> TextRange {
         node.tokens_by_kind(SyntaxKind::IDENT)
             .next()
             .or_else(|| node.tokens_by_kind(SyntaxKind::KEYWORD).next())
@@ -181,24 +184,23 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             .unwrap_or_else(|| node.text_range())
     }
 
-    let root = SyntaxNode::new_root(document.root(db));
+    let root = AmberNode::new_root(document.root(db));
     let mut symbols = Symbols::with_capacity_and_hasher(8, FxBuildHasher);
     let mut resolved = FxHashMap::default();
     let mut def_poi = FxHashMap::default();
     let bump = Bump::new();
     root.children().enumerate().for_each(|(module_id, module)| {
-        let module_key = SymbolKey::new(&module);
+        let module_key = module.into();
         symbols.insert(
             module_key,
             Symbol {
                 green: module.green().clone(),
                 key: module_key,
-                region: SymbolKey::new(&root),
+                region: root.into(),
                 kind: SymbolKind::Module,
                 idx: Idx {
                     num: Some(module_id as u32),
                     name: module
-                        .amber()
                         .tokens_by_kind(SyntaxKind::IDENT)
                         .next()
                         .map(|token| InternIdent::new(db, token.text())),
@@ -207,7 +209,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 ty: (module.green().clone(), module.text_range()),
             },
         );
-        def_poi.insert(module_key, infer_def_poi(&module));
+        def_poi.insert(module_key, infer_def_poi(module));
         let mut func_idx_gen = IdxGen::default();
         let mut local_idx_gen = IdxGen::default();
         let mut type_idx_gen = IdxGen::default();
@@ -231,688 +233,770 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
         let mut elems = BumpVec::new_in(&bump);
         let mut indirect_params = BumpVec::new_in(&bump);
 
-        module.descendants().for_each(|node| match node.kind() {
-            SyntaxKind::MODULE_FIELD_FUNC => {
-                let func_idx = func_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, node.amber(), func_idx, SymbolKind::Func, module_key);
-                let func_key = symbol.key;
-                funcs.push((func_key, symbol.idx.name));
-                symbols.insert(func_key, symbol);
-                def_poi.insert(func_key, infer_def_poi(&node));
-                locals.clear();
-                local_idx_gen.reset();
-            }
-            SyntaxKind::PARAM => {
-                let region = if let Some(node) =
-                    node.parent()
-                        .and_then(|node| node.parent())
-                        .and_then(|node| match node.kind() {
-                            SyntaxKind::MODULE_FIELD_FUNC => Some(node),
-                            SyntaxKind::SUB_TYPE => node.parent(),
-                            _ => None,
-                        }) {
-                    SymbolKey::new(&node)
-                } else {
-                    return;
-                };
-                if let Some(ident) = node.amber().tokens_by_kind(SyntaxKind::IDENT).next() {
-                    let key = SymbolKey::new(&node);
-                    let idx = local_idx_gen.pull();
-                    let name = InternIdent::new(db, ident.text());
-                    locals.push((key, Some(name)));
-                    symbols.insert(
-                        key,
-                        Symbol {
-                            key,
-                            green: node.green().clone(),
-                            region,
-                            kind: SymbolKind::Param,
-                            idx: Idx {
-                                num: Some(idx),
-                                name: if region.kind() == SyntaxKind::TYPE_DEF {
-                                    None
-                                } else {
-                                    Some(name)
-                                },
-                            },
-                            idx_kind: IdxKind::Local,
-                            ty: (node.green().clone(), node.text_range()),
-                        },
-                    );
-                    def_poi.insert(key, ident.text_range());
-                } else {
-                    symbols.extend(node.amber().children_by_kind(ValType::can_cast).map(|val_type| {
-                        let key = SymbolKey::from(val_type.to_ptr());
-                        locals.push((key, None));
-                        def_poi.insert(key, val_type.text_range());
-                        (
-                            key,
-                            Symbol {
-                                key,
-                                green: val_type.green().clone(),
-                                region,
-                                kind: SymbolKind::Param,
-                                idx: Idx {
-                                    num: Some(local_idx_gen.pull()),
-                                    name: None,
-                                },
-                                idx_kind: IdxKind::Local,
-                                ty: (val_type.green().clone(), val_type.text_range()),
-                            },
-                        )
-                    }));
-                }
-            }
-            SyntaxKind::LOCAL => {
-                let func_key = if let Some(func) = node.parent() {
-                    SymbolKey::new(&func)
-                } else {
-                    return;
-                };
-                if let Some(ident) = node.amber().tokens_by_kind(SyntaxKind::IDENT).next() {
-                    let key = SymbolKey::new(&node);
-                    let idx = local_idx_gen.pull();
-                    let name = InternIdent::new(db, ident.text());
-                    locals.push((key, Some(name)));
-                    symbols.insert(
-                        key,
-                        Symbol {
-                            key,
-                            green: node.green().clone(),
-                            region: func_key,
-                            kind: SymbolKind::Local,
-                            idx: Idx {
-                                num: Some(idx),
-                                name: Some(name),
-                            },
-                            idx_kind: IdxKind::Local,
-                            ty: (node.green().clone(), node.text_range()),
-                        },
-                    );
-                    def_poi.insert(key, ident.text_range());
-                } else {
-                    symbols.extend(node.amber().children_by_kind(ValType::can_cast).map(|val_type| {
-                        let key = SymbolKey::from(val_type.to_ptr());
-                        locals.push((key, None));
-                        def_poi.insert(key, val_type.text_range());
-                        (
-                            key,
-                            Symbol {
-                                key,
-                                green: val_type.green().clone(),
-                                region: func_key,
-                                kind: SymbolKind::Local,
-                                idx: Idx {
-                                    num: Some(local_idx_gen.pull()),
-                                    name: None,
-                                },
-                                idx_kind: IdxKind::Local,
-                                ty: (val_type.green().clone(), val_type.text_range()),
-                            },
-                        )
-                    }));
-                }
-            }
-            SyntaxKind::TYPE_DEF => {
-                let type_idx = type_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, node.amber(), type_idx, SymbolKind::Type, module_key);
-                let type_def_key = symbol.key;
-                types.push((type_def_key, symbol.idx.name));
-                symbols.insert(type_def_key, symbol);
-                def_poi.insert(type_def_key, infer_def_poi(&node));
-            }
-            SyntaxKind::FUNC_TYPE => {
-                locals.clear();
-                local_idx_gen.reset();
-            }
-            SyntaxKind::STRUCT_TYPE => {
-                field_idx_gen.reset();
-            }
-            SyntaxKind::FIELD => {
-                let type_def_key = if let Some(type_def) = node
-                    .ancestors()
-                    .find(|ancestor| ancestor.kind() == SyntaxKind::TYPE_DEF)
-                {
-                    SymbolKey::new(&type_def)
-                } else {
-                    return;
-                };
-                let fields = fields
-                    .entry(type_def_key)
-                    .or_insert_with(|| BumpVec::with_capacity_in(1, &bump));
-                if let Some(ident) = node.amber().tokens_by_kind(SyntaxKind::IDENT).next() {
-                    let key = SymbolKey::new(&node);
-                    let idx = field_idx_gen.pull();
-                    let name = InternIdent::new(db, ident.text());
-                    fields.push((key, Some(name)));
-                    symbols.insert(
-                        key,
-                        Symbol {
-                            key,
-                            green: node.green().clone(),
-                            region: type_def_key,
-                            kind: SymbolKind::FieldDef,
-                            idx: Idx {
-                                num: Some(idx),
-                                name: Some(name),
-                            },
-                            idx_kind: IdxKind::Field,
-                            ty: (node.green().clone(), node.text_range()),
-                        },
-                    );
-                    def_poi.insert(key, ident.text_range());
-                } else {
-                    symbols.extend(node.amber().children_by_kind(SyntaxKind::FIELD_TYPE).map(|field_type| {
-                        let key = SymbolKey::from(field_type.to_ptr());
-                        fields.push((key, None));
-                        def_poi.insert(key, field_type.text_range());
-                        (
-                            key,
-                            Symbol {
-                                key,
-                                green: field_type.green().clone(),
-                                region: type_def_key,
-                                kind: SymbolKind::FieldDef,
-                                idx: Idx {
-                                    num: Some(field_idx_gen.pull()),
-                                    name: None,
-                                },
-                                idx_kind: IdxKind::Field,
-                                ty: (field_type.green().clone(), field_type.text_range()),
-                            },
-                        )
-                    }));
-                }
-            }
-            SyntaxKind::MODULE_FIELD_GLOBAL => {
-                let idx = global_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, node.amber(), idx, SymbolKind::GlobalDef, module_key);
-                globals.push((symbol.key, symbol.idx.name));
-                def_poi.insert(symbol.key, infer_def_poi(&node));
-                symbols.insert(symbol.key, symbol);
-            }
-            SyntaxKind::PLAIN_INSTR => {
-                let amber = node.amber();
-                match amber
-                    .tokens_by_kind(SyntaxKind::INSTR_NAME)
-                    .next()
-                    .map(|token| token.text())
-                {
-                    Some("call" | "ref.func" | "return_call") => {
-                        symbols.extend(amber.children().filter_map(|node| {
-                            create_ref_symbol(db, node, module_key, SymbolKind::Call).map(|symbol| (symbol.key, symbol))
-                        }));
-                    }
-                    Some("local.get" | "local.set" | "local.tee") => {
-                        let Some(func) = node
-                            .ancestors()
-                            .find(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
-                        else {
-                            return;
-                        };
-                        let region = SymbolKey::new(&func);
-                        symbols.extend(amber.children().filter_map(|node| {
-                            create_ref_symbol(db, node, region, SymbolKind::LocalRef)
-                                .inspect(|symbol| {
-                                    if let Some((def_key, _)) = search_def(&locals, symbol.idx) {
-                                        resolved.insert(symbol.key, *def_key);
-                                    } else if let Some(num) = symbol.idx.num
-                                        && let Some(idx) = helpers::syntax::pick_type_idx_from_func(&func)
-                                    {
-                                        indirect_params.push((SymbolKey::new(&idx), symbol.key, num));
+        let mut node_stack = BumpVec::with_capacity_in(8, &bump);
+        node_stack.push((module, 0));
+        while let Some((parent, index)) = node_stack.last_mut() {
+            match parent.child_or_token_at(*index) {
+                Some(NodeOrToken::Node(node)) => {
+                    match node.kind() {
+                        SyntaxKind::MODULE_FIELD_FUNC => {
+                            let func_idx = func_idx_gen.pull();
+                            let symbol = create_module_level_symbol(db, node, func_idx, SymbolKind::Func, module_key);
+                            let func_key = symbol.key;
+                            funcs.push((func_key, symbol.idx.name));
+                            symbols.insert(func_key, symbol);
+                            def_poi.insert(func_key, infer_def_poi(node));
+                            locals.clear();
+                            local_idx_gen.reset();
+                        }
+                        SyntaxKind::PARAM => 'param: {
+                            let region = if let Some(node) = node_stack
+                                .len()
+                                .checked_sub(2)
+                                .and_then(|i| node_stack.get(i))
+                                .and_then(|(node, _)| match node.kind() {
+                                    SyntaxKind::MODULE_FIELD_FUNC => Some(node),
+                                    SyntaxKind::SUB_TYPE => node_stack
+                                        .len()
+                                        .checked_sub(3)
+                                        .and_then(|i| node_stack.get(i))
+                                        .map(|(node, _)| node),
+                                    _ => None,
+                                }) {
+                                (*node).into()
+                            } else {
+                                break 'param;
+                            };
+                            if let Some(ident) = node.tokens_by_kind(SyntaxKind::IDENT).next() {
+                                let key = node.into();
+                                let idx = local_idx_gen.pull();
+                                let name = InternIdent::new(db, ident.text());
+                                locals.push((key, Some(name)));
+                                symbols.insert(
+                                    key,
+                                    Symbol {
+                                        key,
+                                        green: node.green().clone(),
+                                        region,
+                                        kind: SymbolKind::Param,
+                                        idx: Idx {
+                                            num: Some(idx),
+                                            name: if region.kind() == SyntaxKind::TYPE_DEF {
+                                                None
+                                            } else {
+                                                Some(name)
+                                            },
+                                        },
+                                        idx_kind: IdxKind::Local,
+                                        ty: (node.green().clone(), node.text_range()),
+                                    },
+                                );
+                                def_poi.insert(key, ident.text_range());
+                            } else {
+                                symbols.extend(node.children_by_kind(ValType::can_cast).map(|val_type| {
+                                    let key = val_type.into();
+                                    locals.push((key, None));
+                                    def_poi.insert(key, val_type.text_range());
+                                    (
+                                        key,
+                                        Symbol {
+                                            key,
+                                            green: val_type.green().clone(),
+                                            region,
+                                            kind: SymbolKind::Param,
+                                            idx: Idx {
+                                                num: Some(local_idx_gen.pull()),
+                                                name: None,
+                                            },
+                                            idx_kind: IdxKind::Local,
+                                            ty: (val_type.green().clone(), val_type.text_range()),
+                                        },
+                                    )
+                                }));
+                            }
+                        }
+                        SyntaxKind::LOCAL => {
+                            let func_key = (*parent).into();
+                            if let Some(ident) = node.tokens_by_kind(SyntaxKind::IDENT).next() {
+                                let key = node.into();
+                                let idx = local_idx_gen.pull();
+                                let name = InternIdent::new(db, ident.text());
+                                locals.push((key, Some(name)));
+                                symbols.insert(
+                                    key,
+                                    Symbol {
+                                        key,
+                                        green: node.green().clone(),
+                                        region: func_key,
+                                        kind: SymbolKind::Local,
+                                        idx: Idx {
+                                            num: Some(idx),
+                                            name: Some(name),
+                                        },
+                                        idx_kind: IdxKind::Local,
+                                        ty: (node.green().clone(), node.text_range()),
+                                    },
+                                );
+                                def_poi.insert(key, ident.text_range());
+                            } else {
+                                symbols.extend(node.children_by_kind(ValType::can_cast).map(|val_type| {
+                                    let key = val_type.into();
+                                    locals.push((key, None));
+                                    def_poi.insert(key, val_type.text_range());
+                                    (
+                                        key,
+                                        Symbol {
+                                            key,
+                                            green: val_type.green().clone(),
+                                            region: func_key,
+                                            kind: SymbolKind::Local,
+                                            idx: Idx {
+                                                num: Some(local_idx_gen.pull()),
+                                                name: None,
+                                            },
+                                            idx_kind: IdxKind::Local,
+                                            ty: (val_type.green().clone(), val_type.text_range()),
+                                        },
+                                    )
+                                }));
+                            }
+                        }
+                        SyntaxKind::TYPE_DEF => {
+                            let type_idx = type_idx_gen.pull();
+                            let symbol = create_module_level_symbol(db, node, type_idx, SymbolKind::Type, module_key);
+                            let type_def_key = symbol.key;
+                            types.push((type_def_key, symbol.idx.name));
+                            symbols.insert(type_def_key, symbol);
+                            def_poi.insert(type_def_key, infer_def_poi(node));
+                        }
+                        SyntaxKind::FUNC_TYPE => {
+                            locals.clear();
+                            local_idx_gen.reset();
+                        }
+                        SyntaxKind::STRUCT_TYPE => {
+                            field_idx_gen.reset();
+                        }
+                        SyntaxKind::FIELD => 'field: {
+                            let type_def_key = if let Some((type_def, _)) = node_stack
+                                .iter()
+                                .find(|(ancestor, _)| ancestor.kind() == SyntaxKind::TYPE_DEF)
+                            {
+                                (*type_def).into()
+                            } else {
+                                break 'field;
+                            };
+                            let fields = fields
+                                .entry(type_def_key)
+                                .or_insert_with(|| BumpVec::with_capacity_in(1, &bump));
+                            if let Some(ident) = node.tokens_by_kind(SyntaxKind::IDENT).next() {
+                                let key = node.into();
+                                let idx = field_idx_gen.pull();
+                                let name = InternIdent::new(db, ident.text());
+                                fields.push((key, Some(name)));
+                                symbols.insert(
+                                    key,
+                                    Symbol {
+                                        key,
+                                        green: node.green().clone(),
+                                        region: type_def_key,
+                                        kind: SymbolKind::FieldDef,
+                                        idx: Idx {
+                                            num: Some(idx),
+                                            name: Some(name),
+                                        },
+                                        idx_kind: IdxKind::Field,
+                                        ty: (node.green().clone(), node.text_range()),
+                                    },
+                                );
+                                def_poi.insert(key, ident.text_range());
+                            } else {
+                                symbols.extend(node.children_by_kind(SyntaxKind::FIELD_TYPE).map(|field_type| {
+                                    let key = field_type.into();
+                                    fields.push((key, None));
+                                    def_poi.insert(key, field_type.text_range());
+                                    (
+                                        key,
+                                        Symbol {
+                                            key,
+                                            green: field_type.green().clone(),
+                                            region: type_def_key,
+                                            kind: SymbolKind::FieldDef,
+                                            idx: Idx {
+                                                num: Some(field_idx_gen.pull()),
+                                                name: None,
+                                            },
+                                            idx_kind: IdxKind::Field,
+                                            ty: (field_type.green().clone(), field_type.text_range()),
+                                        },
+                                    )
+                                }));
+                            }
+                        }
+                        SyntaxKind::MODULE_FIELD_GLOBAL => {
+                            let idx = global_idx_gen.pull();
+                            let symbol = create_module_level_symbol(db, node, idx, SymbolKind::GlobalDef, module_key);
+                            globals.push((symbol.key, symbol.idx.name));
+                            def_poi.insert(symbol.key, infer_def_poi(node));
+                            symbols.insert(symbol.key, symbol);
+                        }
+                        SyntaxKind::PLAIN_INSTR => 'instr: {
+                            match node
+                                .tokens_by_kind(SyntaxKind::INSTR_NAME)
+                                .next()
+                                .map(|token| token.text())
+                            {
+                                Some("call" | "ref.func" | "return_call") => {
+                                    symbols.extend(node.children().filter_map(|node| {
+                                        create_ref_symbol(db, node, module_key, SymbolKind::Call)
+                                            .map(|symbol| (symbol.key, symbol))
+                                    }));
+                                }
+                                Some("local.get" | "local.set" | "local.tee") => {
+                                    // invariant: node stack is [module, module field, ..]
+                                    // but someone can put `local.*` in global initialization expr
+                                    let Some((func, _)) = node_stack
+                                        .get(1)
+                                        .filter(|(node, _)| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)
+                                    else {
+                                        break 'instr;
+                                    };
+                                    let region = (*func).into();
+                                    symbols.extend(node.children().filter_map(|node| {
+                                        create_ref_symbol(db, node, region, SymbolKind::LocalRef)
+                                            .inspect(|symbol| {
+                                                if let Some((def_key, _)) = search_def(&locals, symbol.idx) {
+                                                    resolved.insert(symbol.key, *def_key);
+                                                } else if let Some(num) = symbol.idx.num
+                                                    && let Some(idx) = helpers::syntax::pick_type_idx_from_func(*func)
+                                                {
+                                                    indirect_params.push((idx.into(), symbol.key, num));
+                                                }
+                                            })
+                                            .map(|symbol| (symbol.key, symbol))
+                                    }));
+                                }
+                                Some("global.get" | "global.set") => {
+                                    symbols.extend(node.children().filter_map(|node| {
+                                        create_ref_symbol(db, node, module_key, SymbolKind::GlobalRef)
+                                            .map(|symbol| (symbol.key, symbol))
+                                    }));
+                                }
+                                Some(
+                                    "br" | "br_if" | "br_table" | "br_on_null" | "br_on_non_null" | "br_on_cast"
+                                    | "br_on_cast_fail",
+                                ) => {
+                                    if let Some(region) = find_up_blocks(&node_stack).next().map(|node| node.into()) {
+                                        node.children()
+                                            .filter_map(|node| {
+                                                create_ref_symbol(db, node, region, SymbolKind::BlockRef)
+                                            })
+                                            .for_each(|symbol| {
+                                                if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
+                                                    resolved.insert(symbol.key, def_key);
+                                                }
+                                                symbols.insert(symbol.key, symbol);
+                                            });
                                     }
-                                })
-                                .map(|symbol| (symbol.key, symbol))
-                        }));
-                    }
-                    Some("global.get" | "global.set") => {
-                        symbols.extend(amber.children().filter_map(|node| {
-                            create_ref_symbol(db, node, module_key, SymbolKind::GlobalRef)
-                                .map(|symbol| (symbol.key, symbol))
-                        }));
-                    }
-                    Some(
-                        "br" | "br_if" | "br_table" | "br_on_null" | "br_on_non_null" | "br_on_cast"
-                        | "br_on_cast_fail",
-                    ) => {
-                        if let Some(region) = find_up_block(&node).map(|node| SymbolKey::new(&node)) {
-                            amber
-                                .children()
-                                .filter_map(|node| create_ref_symbol(db, node, region, SymbolKind::BlockRef))
-                                .for_each(|symbol| {
-                                    if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
-                                        resolved.insert(symbol.key, def_key);
-                                    }
+                                }
+                                Some("call_indirect" | "return_call_indirect") => {
+                                    let immediate = node.children_by_kind(SyntaxKind::IMMEDIATE).next();
+                                    let symbol = create_optional_ref_symbol(
+                                        db,
+                                        immediate,
+                                        node,
+                                        module_key,
+                                        SymbolKind::TableRef,
+                                    );
                                     symbols.insert(symbol.key, symbol);
-                                });
+                                }
+                                Some("table.get" | "table.set" | "table.size" | "table.grow" | "table.fill") => {
+                                    let immediate = node.children_by_kind(SyntaxKind::IMMEDIATE).next();
+                                    let symbol = create_optional_ref_symbol(
+                                        db,
+                                        immediate,
+                                        node,
+                                        module_key,
+                                        SymbolKind::TableRef,
+                                    );
+                                    symbols.insert(symbol.key, symbol);
+                                }
+                                Some("table.copy") => {
+                                    let mut immediates = node.children_by_kind(SyntaxKind::IMMEDIATE);
+                                    let dst = create_optional_ref_symbol(
+                                        db,
+                                        immediates.next(),
+                                        node,
+                                        module_key,
+                                        SymbolKind::TableRef,
+                                    );
+                                    symbols.insert(dst.key, dst);
+                                    let src = create_optional_ref_symbol(
+                                        db,
+                                        immediates.next(),
+                                        node,
+                                        module_key,
+                                        SymbolKind::TableRef,
+                                    );
+                                    symbols.insert(src.key, src);
+                                }
+                                Some("table.init") => {
+                                    let mut immediates = node.children_by_kind(SyntaxKind::IMMEDIATE);
+                                    let mut first = immediates.next();
+                                    if let Some(elem_ref) = immediates.next().or_else(|| first.take())
+                                        && let Some(symbol) =
+                                            create_ref_symbol(db, elem_ref, module_key, SymbolKind::ElemRef)
+                                    {
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                    let table_symbol =
+                                        create_optional_ref_symbol(db, first, node, module_key, SymbolKind::TableRef);
+                                    symbols.insert(table_symbol.key, table_symbol);
+                                }
+                                Some("elem.drop") => {
+                                    if let Some(symbol) = node
+                                        .children_by_kind(SyntaxKind::IMMEDIATE)
+                                        .next()
+                                        .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::ElemRef))
+                                    {
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                }
+                                Some(
+                                    "memory.size" | "memory.grow" | "memory.fill" | "i32.load" | "i64.load"
+                                    | "f32.load" | "f64.load" | "i32.load8_s" | "i32.load8_u" | "i32.load16_s"
+                                    | "i32.load16_u" | "i64.load8_s" | "i64.load8_u" | "i64.load16_s" | "i64.load16_u"
+                                    | "i64.load32_s" | "i64.load32_u" | "i32.store" | "i64.store" | "f32.store"
+                                    | "f64.store" | "i32.store8" | "i32.store16" | "i64.store8" | "i64.store16"
+                                    | "i64.store32" | "v128.load" | "v128.load8x8_s" | "v128.load8x8_u"
+                                    | "v128.load16x4_s" | "v128.load16x4_u" | "v128.load32x2_s" | "v128.load32x2_u"
+                                    | "v128.load8_splat" | "v128.load16_splat" | "v128.load32_splat"
+                                    | "v128.load64_splat" | "v128.load32_zero" | "v128.load64_zero" | "v128.store"
+                                    | "v128.load8_lane" | "v128.load16_lane" | "v128.load32_lane" | "v128.load64_lane"
+                                    | "v128.store8_lane" | "v128.store16_lane" | "v128.store32_lane"
+                                    | "v128.store64_lane",
+                                ) => {
+                                    let immediate = node.children_by_kind(SyntaxKind::IMMEDIATE).next();
+                                    let symbol = create_optional_ref_symbol(
+                                        db,
+                                        immediate,
+                                        node,
+                                        module_key,
+                                        SymbolKind::MemoryRef,
+                                    );
+                                    symbols.insert(symbol.key, symbol);
+                                }
+                                Some("memory.init") => {
+                                    let mut immediates = node.children_by_kind(SyntaxKind::IMMEDIATE);
+                                    let mut first = immediates.next();
+                                    if let Some(data_ref) = immediates.next().or_else(|| first.take())
+                                        && let Some(symbol) =
+                                            create_ref_symbol(db, data_ref, module_key, SymbolKind::DataRef)
+                                    {
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                    let mem_symbol =
+                                        create_optional_ref_symbol(db, first, node, module_key, SymbolKind::MemoryRef);
+                                    symbols.insert(mem_symbol.key, mem_symbol);
+                                }
+                                Some("memory.copy") => {
+                                    let mut immediates = node.children_by_kind(SyntaxKind::IMMEDIATE);
+                                    let dst = create_optional_ref_symbol(
+                                        db,
+                                        immediates.next(),
+                                        node,
+                                        module_key,
+                                        SymbolKind::MemoryRef,
+                                    );
+                                    symbols.insert(dst.key, dst);
+                                    let src = create_optional_ref_symbol(
+                                        db,
+                                        immediates.next(),
+                                        node,
+                                        module_key,
+                                        SymbolKind::MemoryRef,
+                                    );
+                                    symbols.insert(src.key, src);
+                                }
+                                Some("data.drop") => {
+                                    if let Some(symbol) = node
+                                        .children_by_kind(SyntaxKind::IMMEDIATE)
+                                        .next()
+                                        .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::DataRef))
+                                    {
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                }
+                                Some(
+                                    "struct.new" | "struct.new_default" | "array.new" | "array.new_default"
+                                    | "array.new_fixed" | "array.get" | "array.get_u" | "array.get_s" | "array.set"
+                                    | "array.fill" | "call_ref" | "return_call_ref" | "ref.null" | "cont.new"
+                                    | "resume" | "resume_throw_ref",
+                                ) => {
+                                    if let Some(symbol) = node
+                                        .children_by_kind(SyntaxKind::IMMEDIATE)
+                                        .next()
+                                        .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TypeUse))
+                                    {
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                }
+                                Some("array.copy" | "cont.bind") => {
+                                    symbols.extend(node.children().filter_map(|node| {
+                                        create_ref_symbol(db, node, module_key, SymbolKind::TypeUse)
+                                            .map(|symbol| (symbol.key, symbol))
+                                    }));
+                                }
+                                Some("array.new_data" | "array.init_data") => {
+                                    let mut immediates = node.children_by_kind(SyntaxKind::IMMEDIATE);
+                                    if let Some(symbol) = immediates
+                                        .next()
+                                        .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TypeUse))
+                                    {
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                    if let Some(symbol) = immediates
+                                        .next()
+                                        .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::DataRef))
+                                    {
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                }
+                                Some("array.new_elem" | "array.init_elem") => {
+                                    let mut immediates = node.children_by_kind(SyntaxKind::IMMEDIATE);
+                                    if let Some(symbol) = immediates
+                                        .next()
+                                        .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TypeUse))
+                                    {
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                    if let Some(symbol) = immediates
+                                        .next()
+                                        .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::ElemRef))
+                                    {
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                }
+                                Some("struct.get" | "struct.get_s" | "struct.get_u" | "struct.set") => {
+                                    let mut children = node.children();
+                                    if let Some(symbol) = children
+                                        .next()
+                                        .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TypeUse))
+                                    {
+                                        let key = symbol.key;
+                                        symbols.insert(key, symbol);
+                                        if let Some(symbol) = children.next().and_then(|node| {
+                                            // The region here is temporary.
+                                            // It's used for tracking which struct it belongs to,
+                                            // and it will be replaced with the actual region later.
+                                            // If the struct it belongs to isn't defined, nothing will happen.
+                                            create_ref_symbol(db, node, key, SymbolKind::FieldRef)
+                                        }) {
+                                            symbols.insert(symbol.key, symbol);
+                                        }
+                                    }
+                                }
+                                Some("throw" | "suspend") => {
+                                    if let Some(symbol) = node
+                                        .children_by_kind(SyntaxKind::IMMEDIATE)
+                                        .next()
+                                        .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TagRef))
+                                    {
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                }
+                                Some("resume_throw" | "switch") => {
+                                    let mut immediates = node.children_by_kind(SyntaxKind::IMMEDIATE);
+                                    if let Some(symbol) = immediates
+                                        .next()
+                                        .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TypeUse))
+                                    {
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                    if let Some(symbol) = immediates
+                                        .next()
+                                        .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TagRef))
+                                    {
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                }
+                                _ => {}
+                            }
                         }
-                    }
-                    Some("call_indirect" | "return_call_indirect") => {
-                        let immediate = amber.children_by_kind(SyntaxKind::IMMEDIATE).next();
-                        let symbol = create_optional_ref_symbol(db, immediate, &node, module_key, SymbolKind::TableRef);
-                        symbols.insert(symbol.key, symbol);
-                    }
-                    Some("table.get" | "table.set" | "table.size" | "table.grow" | "table.fill") => {
-                        let immediate = amber.children_by_kind(SyntaxKind::IMMEDIATE).next();
-                        let symbol = create_optional_ref_symbol(db, immediate, &node, module_key, SymbolKind::TableRef);
-                        symbols.insert(symbol.key, symbol);
-                    }
-                    Some("table.copy") => {
-                        let mut immediates = amber.children_by_kind(SyntaxKind::IMMEDIATE);
-                        let dst =
-                            create_optional_ref_symbol(db, immediates.next(), &node, module_key, SymbolKind::TableRef);
-                        symbols.insert(dst.key, dst);
-                        let src =
-                            create_optional_ref_symbol(db, immediates.next(), &node, module_key, SymbolKind::TableRef);
-                        symbols.insert(src.key, src);
-                    }
-                    Some("table.init") => {
-                        let mut immediates = amber.children_by_kind(SyntaxKind::IMMEDIATE);
-                        let mut first = immediates.next();
-                        if let Some(elem_ref) = immediates.next().or_else(|| first.take())
-                            && let Some(symbol) = create_ref_symbol(db, elem_ref, module_key, SymbolKind::ElemRef)
-                        {
-                            symbols.insert(symbol.key, symbol);
-                        }
-                        let table_symbol =
-                            create_optional_ref_symbol(db, first, &node, module_key, SymbolKind::TableRef);
-                        symbols.insert(table_symbol.key, table_symbol);
-                    }
-                    Some("elem.drop") => {
-                        if let Some(symbol) = node
-                            .amber()
-                            .children_by_kind(SyntaxKind::IMMEDIATE)
-                            .next()
-                            .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::ElemRef))
-                        {
-                            symbols.insert(symbol.key, symbol);
-                        }
-                    }
-                    Some(
-                        "memory.size" | "memory.grow" | "memory.fill" | "i32.load" | "i64.load" | "f32.load"
-                        | "f64.load" | "i32.load8_s" | "i32.load8_u" | "i32.load16_s" | "i32.load16_u" | "i64.load8_s"
-                        | "i64.load8_u" | "i64.load16_s" | "i64.load16_u" | "i64.load32_s" | "i64.load32_u"
-                        | "i32.store" | "i64.store" | "f32.store" | "f64.store" | "i32.store8" | "i32.store16"
-                        | "i64.store8" | "i64.store16" | "i64.store32" | "v128.load" | "v128.load8x8_s"
-                        | "v128.load8x8_u" | "v128.load16x4_s" | "v128.load16x4_u" | "v128.load32x2_s"
-                        | "v128.load32x2_u" | "v128.load8_splat" | "v128.load16_splat" | "v128.load32_splat"
-                        | "v128.load64_splat" | "v128.load32_zero" | "v128.load64_zero" | "v128.store"
-                        | "v128.load8_lane" | "v128.load16_lane" | "v128.load32_lane" | "v128.load64_lane"
-                        | "v128.store8_lane" | "v128.store16_lane" | "v128.store32_lane" | "v128.store64_lane",
-                    ) => {
-                        let immediate = amber.children_by_kind(SyntaxKind::IMMEDIATE).next();
-                        let symbol =
-                            create_optional_ref_symbol(db, immediate, &node, module_key, SymbolKind::MemoryRef);
-                        symbols.insert(symbol.key, symbol);
-                    }
-                    Some("memory.init") => {
-                        let mut immediates = amber.children_by_kind(SyntaxKind::IMMEDIATE);
-                        let mut first = immediates.next();
-                        if let Some(data_ref) = immediates.next().or_else(|| first.take())
-                            && let Some(symbol) = create_ref_symbol(db, data_ref, module_key, SymbolKind::DataRef)
-                        {
-                            symbols.insert(symbol.key, symbol);
-                        }
-                        let mem_symbol =
-                            create_optional_ref_symbol(db, first, &node, module_key, SymbolKind::MemoryRef);
-                        symbols.insert(mem_symbol.key, mem_symbol);
-                    }
-                    Some("memory.copy") => {
-                        let mut immediates = amber.children_by_kind(SyntaxKind::IMMEDIATE);
-                        let dst =
-                            create_optional_ref_symbol(db, immediates.next(), &node, module_key, SymbolKind::MemoryRef);
-                        symbols.insert(dst.key, dst);
-                        let src =
-                            create_optional_ref_symbol(db, immediates.next(), &node, module_key, SymbolKind::MemoryRef);
-                        symbols.insert(src.key, src);
-                    }
-                    Some("data.drop") => {
-                        if let Some(symbol) = amber
-                            .children_by_kind(SyntaxKind::IMMEDIATE)
-                            .next()
-                            .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::DataRef))
-                        {
-                            symbols.insert(symbol.key, symbol);
-                        }
-                    }
-                    Some(
-                        "struct.new" | "struct.new_default" | "array.new" | "array.new_default" | "array.new_fixed"
-                        | "array.get" | "array.get_u" | "array.get_s" | "array.set" | "array.fill" | "call_ref"
-                        | "return_call_ref" | "ref.null" | "cont.new" | "resume" | "resume_throw_ref",
-                    ) => {
-                        if let Some(symbol) = amber
-                            .children_by_kind(SyntaxKind::IMMEDIATE)
-                            .next()
-                            .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TypeUse))
-                        {
-                            symbols.insert(symbol.key, symbol);
-                        }
-                    }
-                    Some("array.copy" | "cont.bind") => {
-                        symbols.extend(amber.children().filter_map(|node| {
-                            create_ref_symbol(db, node, module_key, SymbolKind::TypeUse)
-                                .map(|symbol| (symbol.key, symbol))
-                        }));
-                    }
-                    Some("array.new_data" | "array.init_data") => {
-                        let mut immediates = amber.children_by_kind(SyntaxKind::IMMEDIATE);
-                        if let Some(symbol) = immediates
-                            .next()
-                            .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TypeUse))
-                        {
-                            symbols.insert(symbol.key, symbol);
-                        }
-                        if let Some(symbol) = immediates
-                            .next()
-                            .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::DataRef))
-                        {
-                            symbols.insert(symbol.key, symbol);
-                        }
-                    }
-                    Some("array.new_elem" | "array.init_elem") => {
-                        let mut immediates = amber.children_by_kind(SyntaxKind::IMMEDIATE);
-                        if let Some(symbol) = immediates
-                            .next()
-                            .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TypeUse))
-                        {
-                            symbols.insert(symbol.key, symbol);
-                        }
-                        if let Some(symbol) = immediates
-                            .next()
-                            .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::ElemRef))
-                        {
-                            symbols.insert(symbol.key, symbol);
-                        }
-                    }
-                    Some("struct.get" | "struct.get_s" | "struct.get_u" | "struct.set") => {
-                        let mut children = amber.children();
-                        if let Some(symbol) = children
-                            .next()
-                            .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TypeUse))
-                        {
-                            let key = symbol.key;
-                            symbols.insert(key, symbol);
-                            if let Some(symbol) = children.next().and_then(|node| {
-                                // The region here is temporary.
-                                // It's used for tracking which struct it belongs to,
-                                // and it will be replaced with the actual region later.
-                                // If the struct it belongs to isn't defined, nothing will happen.
-                                create_ref_symbol(db, node, key, SymbolKind::FieldRef)
+                        SyntaxKind::BLOCK_BLOCK
+                        | SyntaxKind::BLOCK_IF
+                        | SyntaxKind::BLOCK_LOOP
+                        | SyntaxKind::BLOCK_TRY_TABLE => {
+                            if let Some(symbol) = find_up_blocks(&node_stack).next().map(|region| Symbol {
+                                key: node.into(),
+                                green: node.green().clone(),
+                                region: region.into(),
+                                kind: SymbolKind::BlockDef,
+                                idx: Idx {
+                                    num: Some(0), // fake ID
+                                    name: node
+                                        .tokens_by_kind(SyntaxKind::IDENT)
+                                        .next()
+                                        .map(|token| InternIdent::new(db, token.text())),
+                                },
+                                idx_kind: IdxKind::Block,
+                                ty: (node.green().clone(), node.text_range()),
                             }) {
+                                def_poi.insert(symbol.key, infer_def_poi(node));
                                 symbols.insert(symbol.key, symbol);
                             }
                         }
-                    }
-                    Some("throw" | "suspend") => {
-                        if let Some(symbol) = amber
-                            .children_by_kind(SyntaxKind::IMMEDIATE)
-                            .next()
-                            .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TagRef))
-                        {
-                            symbols.insert(symbol.key, symbol);
+                        SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXTERN_IDX_FUNC => {
+                            if let Some(symbol) = node
+                                .children_by_kind(SyntaxKind::INDEX)
+                                .next()
+                                .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::Call))
+                            {
+                                symbols.insert(symbol.key, symbol);
+                            }
                         }
-                    }
-                    Some("resume_throw" | "switch") => {
-                        let mut immediates = amber.children_by_kind(SyntaxKind::IMMEDIATE);
-                        if let Some(symbol) = immediates
-                            .next()
-                            .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TypeUse))
-                        {
-                            symbols.insert(symbol.key, symbol);
+                        SyntaxKind::TYPE_USE | SyntaxKind::HEAP_TYPE | SyntaxKind::SUB_TYPE | SyntaxKind::CONT_TYPE => {
+                            if let Some(symbol) = node
+                                .children_by_kind(SyntaxKind::INDEX)
+                                .next()
+                                .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::TypeUse))
+                            {
+                                symbols.insert(symbol.key, symbol);
+                            }
                         }
-                        if let Some(symbol) = immediates
-                            .next()
-                            .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TagRef))
-                        {
-                            symbols.insert(symbol.key, symbol);
-                        }
-                    }
-                    _ => {}
-                }
-            }
-            SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_IF | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_TRY_TABLE => {
-                if let Some(symbol) = find_up_block(&node).map(|region| Symbol {
-                    key: SymbolKey::new(&node),
-                    green: node.green().clone(),
-                    region: SymbolKey::new(&region),
-                    kind: SymbolKind::BlockDef,
-                    idx: Idx {
-                        num: Some(0), // fake ID
-                        name: support::token(&node, SyntaxKind::IDENT).map(|token| InternIdent::new(db, token.text())),
-                    },
-                    idx_kind: IdxKind::Block,
-                    ty: (node.green().clone(), node.text_range()),
-                }) {
-                    def_poi.insert(symbol.key, infer_def_poi(&node));
-                    symbols.insert(symbol.key, symbol);
-                }
-            }
-            SyntaxKind::MODULE_FIELD_START | SyntaxKind::EXTERN_IDX_FUNC => {
-                if let Some(symbol) = node
-                    .amber()
-                    .children_by_kind(SyntaxKind::INDEX)
-                    .next()
-                    .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::Call))
-                {
-                    symbols.insert(symbol.key, symbol);
-                }
-            }
-            SyntaxKind::TYPE_USE | SyntaxKind::HEAP_TYPE | SyntaxKind::SUB_TYPE | SyntaxKind::CONT_TYPE => {
-                if let Some(symbol) = node
-                    .amber()
-                    .children_by_kind(SyntaxKind::INDEX)
-                    .next()
-                    .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::TypeUse))
-                {
-                    symbols.insert(symbol.key, symbol);
-                }
-            }
-            SyntaxKind::MODULE_FIELD_MEMORY => {
-                let idx = mem_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, node.amber(), idx, SymbolKind::MemoryDef, module_key);
-                memories.push((symbol.key, symbol.idx.name));
-                def_poi.insert(symbol.key, infer_def_poi(&node));
-                symbols.insert(symbol.key, symbol);
-            }
-            SyntaxKind::MODULE_FIELD_TABLE => {
-                let idx = table_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, node.amber(), idx, SymbolKind::TableDef, module_key);
-                tables.push((symbol.key, symbol.idx.name));
-                def_poi.insert(symbol.key, infer_def_poi(&node));
-                symbols.insert(symbol.key, symbol);
-            }
-            SyntaxKind::MODULE_FIELD_TAG => {
-                let idx = tag_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, node.amber(), idx, SymbolKind::TagDef, module_key);
-                tags.push((symbol.key, symbol.idx.name));
-                def_poi.insert(symbol.key, infer_def_poi(&node));
-                symbols.insert(symbol.key, symbol);
-            }
-            SyntaxKind::EXTERN_IDX_GLOBAL => {
-                if let Some(symbol) = node
-                    .amber()
-                    .children_by_kind(SyntaxKind::INDEX)
-                    .next()
-                    .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::GlobalRef))
-                {
-                    symbols.insert(symbol.key, symbol);
-                }
-            }
-            SyntaxKind::EXTERN_IDX_MEMORY => {
-                if let Some(symbol) = node
-                    .amber()
-                    .children_by_kind(SyntaxKind::INDEX)
-                    .next()
-                    .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::MemoryRef))
-                {
-                    symbols.insert(symbol.key, symbol);
-                }
-            }
-            SyntaxKind::EXTERN_IDX_TABLE | SyntaxKind::TABLE_USE => {
-                if let Some(symbol) = node
-                    .amber()
-                    .children_by_kind(SyntaxKind::INDEX)
-                    .next()
-                    .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::TableRef))
-                {
-                    symbols.insert(symbol.key, symbol);
-                }
-            }
-            SyntaxKind::EXTERN_IDX_TAG => {
-                if let Some(symbol) = node
-                    .amber()
-                    .children_by_kind(SyntaxKind::INDEX)
-                    .next()
-                    .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::TagRef))
-                {
-                    symbols.insert(symbol.key, symbol);
-                }
-            }
-            SyntaxKind::MODULE_FIELD_IMPORT => {
-                let extern_type = node.children_by_kind(ExternType::can_cast).next();
-                let extern_type = extern_type.as_ref().map(|node| node.amber());
-                node.amber()
-                    .children_by_kind(SyntaxKind::IMPORT_ITEM)
-                    .chain(node.has_child_or_token_by_kind(SyntaxKind::NAME).then(|| node.amber()))
-                    .filter_map(|node| {
-                        let extern_type = node.children_by_kind(ExternType::can_cast).next().or(extern_type)?;
-                        let token = extern_type
-                            .tokens_by_kind(SyntaxKind::IDENT)
-                            .next()
-                            .or_else(|| node.tokens_by_kind(SyntaxKind::KEYWORD).next())?;
-                        Some((node, extern_type, token.text_range()))
-                    })
-                    .for_each(|(node, ty, poi)| match ty.kind() {
-                        SyntaxKind::EXTERN_TYPE_FUNC => {
-                            let idx = func_idx_gen.pull();
-                            let symbol = create_extern_type_symbol(db, node, idx, SymbolKind::Func, module_key, ty);
-                            funcs.push((symbol.key, symbol.idx.name));
-                            def_poi.insert(symbol.key, poi);
-                            symbols.insert(symbol.key, symbol);
-                        }
-                        SyntaxKind::EXTERN_TYPE_GLOBAL => {
-                            let idx = global_idx_gen.pull();
-                            let symbol =
-                                create_extern_type_symbol(db, node, idx, SymbolKind::GlobalDef, module_key, ty);
-                            globals.push((symbol.key, symbol.idx.name));
-                            def_poi.insert(symbol.key, poi);
-                            symbols.insert(symbol.key, symbol);
-                        }
-                        SyntaxKind::EXTERN_TYPE_MEMORY => {
+                        SyntaxKind::MODULE_FIELD_MEMORY => {
                             let idx = mem_idx_gen.pull();
-                            let symbol =
-                                create_extern_type_symbol(db, node, idx, SymbolKind::MemoryDef, module_key, ty);
+                            let symbol = create_module_level_symbol(db, node, idx, SymbolKind::MemoryDef, module_key);
                             memories.push((symbol.key, symbol.idx.name));
-                            def_poi.insert(symbol.key, poi);
+                            def_poi.insert(symbol.key, infer_def_poi(node));
                             symbols.insert(symbol.key, symbol);
                         }
-                        SyntaxKind::EXTERN_TYPE_TABLE => {
+                        SyntaxKind::MODULE_FIELD_TABLE => {
                             let idx = table_idx_gen.pull();
-                            let symbol = create_extern_type_symbol(db, node, idx, SymbolKind::TableDef, module_key, ty);
+                            let symbol = create_module_level_symbol(db, node, idx, SymbolKind::TableDef, module_key);
                             tables.push((symbol.key, symbol.idx.name));
-                            def_poi.insert(symbol.key, poi);
+                            def_poi.insert(symbol.key, infer_def_poi(node));
                             symbols.insert(symbol.key, symbol);
                         }
-                        SyntaxKind::EXTERN_TYPE_TAG => {
+                        SyntaxKind::MODULE_FIELD_TAG => {
                             let idx = tag_idx_gen.pull();
-                            let symbol = create_extern_type_symbol(db, node, idx, SymbolKind::TagDef, module_key, ty);
+                            let symbol = create_module_level_symbol(db, node, idx, SymbolKind::TagDef, module_key);
                             tags.push((symbol.key, symbol.idx.name));
-                            def_poi.insert(symbol.key, poi);
+                            def_poi.insert(symbol.key, infer_def_poi(node));
                             symbols.insert(symbol.key, symbol);
+                        }
+                        SyntaxKind::EXTERN_IDX_GLOBAL => {
+                            if let Some(symbol) = node
+                                .children_by_kind(SyntaxKind::INDEX)
+                                .next()
+                                .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::GlobalRef))
+                            {
+                                symbols.insert(symbol.key, symbol);
+                            }
+                        }
+                        SyntaxKind::EXTERN_IDX_MEMORY => {
+                            if let Some(symbol) = node
+                                .children_by_kind(SyntaxKind::INDEX)
+                                .next()
+                                .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::MemoryRef))
+                            {
+                                symbols.insert(symbol.key, symbol);
+                            }
+                        }
+                        SyntaxKind::EXTERN_IDX_TABLE | SyntaxKind::TABLE_USE => {
+                            if let Some(symbol) = node
+                                .children_by_kind(SyntaxKind::INDEX)
+                                .next()
+                                .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::TableRef))
+                            {
+                                symbols.insert(symbol.key, symbol);
+                            }
+                        }
+                        SyntaxKind::EXTERN_IDX_TAG => {
+                            if let Some(symbol) = node
+                                .children_by_kind(SyntaxKind::INDEX)
+                                .next()
+                                .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::TagRef))
+                            {
+                                symbols.insert(symbol.key, symbol);
+                            }
+                        }
+                        SyntaxKind::MODULE_FIELD_IMPORT => {
+                            let extern_type = node.children_by_kind(ExternType::can_cast).next();
+                            node.children_by_kind(SyntaxKind::IMPORT_ITEM)
+                                .chain(node.children_by_kind(SyntaxKind::NAME).next().map(|_| node))
+                                .filter_map(|node| {
+                                    let extern_type =
+                                        node.children_by_kind(ExternType::can_cast).next().or(extern_type)?;
+                                    let token = extern_type
+                                        .tokens_by_kind(SyntaxKind::IDENT)
+                                        .next()
+                                        .or_else(|| node.tokens_by_kind(SyntaxKind::KEYWORD).next())?;
+                                    Some((node, extern_type, token.text_range()))
+                                })
+                                .for_each(|(node, ty, poi)| match ty.kind() {
+                                    SyntaxKind::EXTERN_TYPE_FUNC => {
+                                        let idx = func_idx_gen.pull();
+                                        let symbol =
+                                            create_extern_type_symbol(db, node, idx, SymbolKind::Func, module_key, ty);
+                                        funcs.push((symbol.key, symbol.idx.name));
+                                        def_poi.insert(symbol.key, poi);
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                    SyntaxKind::EXTERN_TYPE_GLOBAL => {
+                                        let idx = global_idx_gen.pull();
+                                        let symbol = create_extern_type_symbol(
+                                            db,
+                                            node,
+                                            idx,
+                                            SymbolKind::GlobalDef,
+                                            module_key,
+                                            ty,
+                                        );
+                                        globals.push((symbol.key, symbol.idx.name));
+                                        def_poi.insert(symbol.key, poi);
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                    SyntaxKind::EXTERN_TYPE_MEMORY => {
+                                        let idx = mem_idx_gen.pull();
+                                        let symbol = create_extern_type_symbol(
+                                            db,
+                                            node,
+                                            idx,
+                                            SymbolKind::MemoryDef,
+                                            module_key,
+                                            ty,
+                                        );
+                                        memories.push((symbol.key, symbol.idx.name));
+                                        def_poi.insert(symbol.key, poi);
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                    SyntaxKind::EXTERN_TYPE_TABLE => {
+                                        let idx = table_idx_gen.pull();
+                                        let symbol = create_extern_type_symbol(
+                                            db,
+                                            node,
+                                            idx,
+                                            SymbolKind::TableDef,
+                                            module_key,
+                                            ty,
+                                        );
+                                        tables.push((symbol.key, symbol.idx.name));
+                                        def_poi.insert(symbol.key, poi);
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                    SyntaxKind::EXTERN_TYPE_TAG => {
+                                        let idx = tag_idx_gen.pull();
+                                        let symbol = create_extern_type_symbol(
+                                            db,
+                                            node,
+                                            idx,
+                                            SymbolKind::TagDef,
+                                            module_key,
+                                            ty,
+                                        );
+                                        tags.push((symbol.key, symbol.idx.name));
+                                        def_poi.insert(symbol.key, poi);
+                                        symbols.insert(symbol.key, symbol);
+                                    }
+                                    _ => {}
+                                });
+                        }
+                        SyntaxKind::MODULE_FIELD_DATA => {
+                            let idx = data_idx_gen.pull();
+                            let symbol = create_module_level_symbol(db, node, idx, SymbolKind::DataDef, module_key);
+                            datas.push((symbol.key, symbol.idx.name));
+                            def_poi.insert(symbol.key, infer_def_poi(node));
+                            symbols.insert(symbol.key, symbol);
+                        }
+                        SyntaxKind::MODULE_FIELD_ELEM
+                            if node.tokens_by_kind(SyntaxKind::MODIFIER_KEYWORD).next().is_none() =>
+                        {
+                            let idx = elem_idx_gen.pull();
+                            let symbol = create_module_level_symbol(db, node, idx, SymbolKind::ElemDef, module_key);
+                            elems.push((symbol.key, symbol.idx.name));
+                            def_poi.insert(symbol.key, infer_def_poi(node));
+                            symbols.insert(symbol.key, symbol);
+                        }
+                        SyntaxKind::MEM_USE => {
+                            if let Some(symbol) = node
+                                .children_by_kind(SyntaxKind::INDEX)
+                                .next()
+                                .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::MemoryRef))
+                            {
+                                symbols.insert(symbol.key, symbol);
+                            }
+                        }
+                        SyntaxKind::ELEM_LIST => {
+                            symbols.extend(node.children_by_kind(SyntaxKind::INDEX).filter_map(|index| {
+                                create_ref_symbol(db, index, module_key, SymbolKind::Call)
+                                    .map(|symbol| (symbol.key, symbol))
+                            }));
+                        }
+                        SyntaxKind::CATCH => {
+                            let mut children = node.children();
+                            if let Some(symbol) = children
+                                .next()
+                                .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TagRef))
+                            {
+                                symbols.insert(symbol.key, symbol);
+                            }
+                            if let Some(region) = find_up_blocks(&node_stack).nth(1).map(|node| node.into())
+                                && let Some(symbol) = children
+                                    .next()
+                                    .and_then(|node| create_ref_symbol(db, node, region, SymbolKind::BlockRef))
+                            {
+                                if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
+                                    resolved.insert(symbol.key, def_key);
+                                }
+                                symbols.insert(symbol.key, symbol);
+                            }
+                        }
+                        SyntaxKind::CATCH_ALL => {
+                            if let Some(region) = find_up_blocks(&node_stack).nth(1).map(|node| node.into())
+                                && let Some(symbol) = node
+                                    .children_by_kind(SyntaxKind::INDEX)
+                                    .next()
+                                    .and_then(|node| create_ref_symbol(db, node, region, SymbolKind::BlockRef))
+                            {
+                                if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
+                                    resolved.insert(symbol.key, def_key);
+                                }
+                                symbols.insert(symbol.key, symbol);
+                            }
+                        }
+                        SyntaxKind::ON_CLAUSE => {
+                            let mut indexes = node.children_by_kind(SyntaxKind::INDEX);
+                            if let Some(symbol) = indexes
+                                .next()
+                                .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TagRef))
+                            {
+                                symbols.insert(symbol.key, symbol);
+                            }
+                            if let Some(index) = indexes.next()
+                                && let Some(region) = find_up_blocks(&node_stack).next().map(|node| node.into())
+                                && let Some(symbol) = create_ref_symbol(db, index, region, SymbolKind::BlockRef)
+                            {
+                                if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
+                                    resolved.insert(symbol.key, def_key);
+                                }
+                                symbols.insert(symbol.key, symbol);
+                            }
                         }
                         _ => {}
-                    });
-            }
-            SyntaxKind::MODULE_FIELD_DATA => {
-                let idx = data_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, node.amber(), idx, SymbolKind::DataDef, module_key);
-                datas.push((symbol.key, symbol.idx.name));
-                def_poi.insert(symbol.key, infer_def_poi(&node));
-                symbols.insert(symbol.key, symbol);
-            }
-            SyntaxKind::MODULE_FIELD_ELEM if node.tokens_by_kind(SyntaxKind::MODIFIER_KEYWORD).next().is_none() => {
-                let idx = elem_idx_gen.pull();
-                let symbol = create_module_level_symbol(db, node.amber(), idx, SymbolKind::ElemDef, module_key);
-                elems.push((symbol.key, symbol.idx.name));
-                def_poi.insert(symbol.key, infer_def_poi(&node));
-                symbols.insert(symbol.key, symbol);
-            }
-            SyntaxKind::MEM_USE => {
-                if let Some(symbol) = node
-                    .amber()
-                    .children_by_kind(SyntaxKind::INDEX)
-                    .next()
-                    .and_then(|index| create_ref_symbol(db, index, module_key, SymbolKind::MemoryRef))
-                {
-                    symbols.insert(symbol.key, symbol);
-                }
-            }
-            SyntaxKind::ELEM_LIST => {
-                symbols.extend(node.amber().children_by_kind(SyntaxKind::INDEX).filter_map(|index| {
-                    create_ref_symbol(db, index, module_key, SymbolKind::Call).map(|symbol| (symbol.key, symbol))
-                }));
-            }
-            SyntaxKind::CATCH => {
-                let amber = node.amber();
-                let mut children = amber.children();
-                if let Some(symbol) = children
-                    .next()
-                    .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TagRef))
-                {
-                    symbols.insert(symbol.key, symbol);
-                }
-                if let Some(region) = node
-                    .parent()
-                    .and_then(|parent| find_up_block(&parent))
-                    .map(|node| SymbolKey::new(&node))
-                    && let Some(symbol) = children
-                        .next()
-                        .and_then(|node| create_ref_symbol(db, node, region, SymbolKind::BlockRef))
-                {
-                    if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
-                        resolved.insert(symbol.key, def_key);
                     }
-                    symbols.insert(symbol.key, symbol);
+                    node_stack.push((node, 0));
                 }
-            }
-            SyntaxKind::CATCH_ALL => {
-                if let Some(region) = node
-                    .parent()
-                    .and_then(|parent| find_up_block(&parent))
-                    .map(|node| SymbolKey::new(&node))
-                    && let Some(symbol) = node
-                        .amber()
-                        .children_by_kind(SyntaxKind::INDEX)
-                        .next()
-                        .and_then(|node| create_ref_symbol(db, node, region, SymbolKind::BlockRef))
-                {
-                    if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
-                        resolved.insert(symbol.key, def_key);
+                Some(NodeOrToken::Token(..)) => {
+                    *index += 1;
+                }
+                None => {
+                    node_stack.pop();
+                    if let Some((_, index)) = node_stack.last_mut() {
+                        *index += 1;
                     }
-                    symbols.insert(symbol.key, symbol);
                 }
             }
-            SyntaxKind::ON_CLAUSE => {
-                let amber = node.amber();
-                let mut indexes = amber.children_by_kind(SyntaxKind::INDEX);
-                if let Some(symbol) = indexes
-                    .next()
-                    .and_then(|node| create_ref_symbol(db, node, module_key, SymbolKind::TagRef))
-                {
-                    symbols.insert(symbol.key, symbol);
-                }
-                if let Some(index) = indexes.next()
-                    && let Some(region) = find_up_block(&node).map(|node| SymbolKey::new(&node))
-                    && let Some(symbol) = create_ref_symbol(db, index, region, SymbolKind::BlockRef)
-                {
-                    if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
-                        resolved.insert(symbol.key, def_key);
-                    }
-                    symbols.insert(symbol.key, symbol);
-                }
-            }
-            _ => {}
-        });
+        }
 
         resolved.extend(symbols.values().filter_map(|symbol| {
             let defs = match symbol.kind {
@@ -1104,8 +1188,15 @@ impl SymbolKey {
     }
 }
 impl From<SyntaxNodePtr> for SymbolKey {
+    #[inline]
     fn from(ptr: SyntaxNodePtr) -> Self {
         SymbolKey(ptr)
+    }
+}
+impl From<AmberNode<'_>> for SymbolKey {
+    #[inline]
+    fn from(node: AmberNode<'_>) -> Self {
+        SymbolKey(node.to_ptr())
     }
 }
 impl Deref for SymbolKey {

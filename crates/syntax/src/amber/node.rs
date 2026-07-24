@@ -141,7 +141,8 @@ impl<'a> AmberNode<'a> {
     }
 
     #[inline]
-    pub(crate) fn child_or_token_at(&self, index: usize) -> Option<NodeOrToken<AmberNode<'a>, AmberToken<'a>>> {
+    /// Get a child node or token at the given index.
+    pub fn child_or_token_at(&self, index: usize) -> Option<NodeOrToken<AmberNode<'a>, AmberToken<'a>>> {
         self.green.slice().get(index).map(|child| match child {
             GreenChild::Node { offset, node } => AmberNode::new(node, self.range.start() + offset).into(),
             GreenChild::Token { offset, token } => AmberToken::new(token, self.range.start() + offset).into(),

@@ -130,13 +130,13 @@ pub(crate) struct RenderWithDb<'db, T> {
 pub(crate) mod syntax {
     use std::ops::ControlFlow;
     use wat_syntax::{
-        SyntaxKind, SyntaxNode, SyntaxToken, TextSize, TokenAtOffset,
+        AmberNode, SyntaxKind, SyntaxNode, SyntaxToken, TextSize, TokenAtOffset,
         ast::{AstNode, ExternIdx},
     };
 
     /// Pick the `$idx` part from `(func (type $idx) ...)`.
     /// It will return `None` if there're inlined params or results.
-    pub fn pick_type_idx_from_func<'a>(func: &SyntaxNode<'a>) -> Option<SyntaxNode<'a>> {
+    pub fn pick_type_idx_from_func<'a>(func: AmberNode<'a>) -> Option<AmberNode<'a>> {
         if let ControlFlow::Continue(Some(index)) = func
             .children_by_kind(SyntaxKind::TYPE_USE)
             .next()
