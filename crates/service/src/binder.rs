@@ -148,30 +148,37 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
             })
             .map(|(node, _)| *node)
     }
-    fn resolve_block_def(symbol: &Symbol, symbols: &Symbols) -> Option<SymbolKey> {
-        let mut current = symbol;
-        let mut levels = 0;
-        while let Some(parent) = symbols
-            .values()
-            .find(|sym| sym.kind == SymbolKind::BlockDef && sym.key == current.region)
-        {
-            if symbol.idx.is_defined_by(&Idx {
-                num: Some(levels),
-                name: parent.idx.name,
-            }) {
-                return Some(parent.key);
-            }
-            current = parent;
-            levels += 1;
+    fn resolve_block_def(
+        symbol: &Symbol,
+        symbols: &Symbols,
+        node_stack: &[(AmberNode, usize)],
+        skip_current: bool,
+    ) -> Option<SymbolKey> {
+        let mut blocks = find_up_blocks(node_stack);
+        if skip_current {
+            blocks.next();
         }
-        if symbol.idx.is_defined_by(&Idx {
-            num: Some(levels),
-            name: None,
-        }) {
-            symbols
-                .values()
-                .find(|symbol| symbol.kind == SymbolKind::Func && symbol.key == current.region)
-                .map(|func_symbol| func_symbol.key)
+        if let Some(num) = symbol.idx.num {
+            blocks.nth(num as usize).map(|block| block.into())
+        } else if let Some(name) = symbol.idx.name {
+            blocks.find_map(|block| {
+                let key = SymbolKey::from(block);
+                if matches!(
+                    key.kind(),
+                    SyntaxKind::BLOCK_BLOCK
+                        | SyntaxKind::BLOCK_LOOP
+                        | SyntaxKind::BLOCK_IF
+                        | SyntaxKind::BLOCK_TRY_TABLE
+                ) && symbols
+                    .get(&key)
+                    .and_then(|other| other.idx.name)
+                    .is_some_and(|other| other == name)
+                {
+                    Some(key)
+                } else {
+                    None
+                }
+            })
         } else {
             None
         }
@@ -491,7 +498,9 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                                 create_ref_symbol(db, node, region, SymbolKind::BlockRef)
                                             })
                                             .for_each(|symbol| {
-                                                if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
+                                                if let Some(def_key) =
+                                                    resolve_block_def(&symbol, &symbols, &node_stack, false)
+                                                {
                                                     resolved.insert(symbol.key, def_key);
                                                 }
                                                 symbols.insert(symbol.key, symbol);
@@ -945,7 +954,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                     .next()
                                     .and_then(|node| create_ref_symbol(db, node, region, SymbolKind::BlockRef))
                             {
-                                if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
+                                if let Some(def_key) = resolve_block_def(&symbol, &symbols, &node_stack, true) {
                                     resolved.insert(symbol.key, def_key);
                                 }
                                 symbols.insert(symbol.key, symbol);
@@ -958,7 +967,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                     .next()
                                     .and_then(|node| create_ref_symbol(db, node, region, SymbolKind::BlockRef))
                             {
-                                if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
+                                if let Some(def_key) = resolve_block_def(&symbol, &symbols, &node_stack, true) {
                                     resolved.insert(symbol.key, def_key);
                                 }
                                 symbols.insert(symbol.key, symbol);
@@ -976,7 +985,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                 && let Some(region) = find_up_blocks(&node_stack).next().map(|node| node.into())
                                 && let Some(symbol) = create_ref_symbol(db, index, region, SymbolKind::BlockRef)
                             {
-                                if let Some(def_key) = resolve_block_def(&symbol, &symbols) {
+                                if let Some(def_key) = resolve_block_def(&symbol, &symbols, &node_stack, false) {
                                     resolved.insert(symbol.key, def_key);
                                 }
                                 symbols.insert(symbol.key, symbol);
