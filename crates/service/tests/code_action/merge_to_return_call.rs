@@ -10,7 +10,7 @@ fn unrelated_instr() {
   (func (nop))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 11, 2, 11));
     assert!(response.is_none());
 }
@@ -23,7 +23,7 @@ fn no_call() {
   (func (return))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 11, 2, 11));
     assert!(response.is_none());
 }
@@ -36,7 +36,7 @@ fn no_call_inside() {
   (func (return (nop)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 11, 2, 11));
     assert!(response.is_none());
 }
@@ -49,7 +49,7 @@ fn no_call_before() {
   (func (nop) (return))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 17, 2, 17));
     assert!(response.is_none());
 }
@@ -62,7 +62,7 @@ fn sth_else_after_call() {
   (func (call) (nop))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 12, 2, 12));
     assert!(response.is_none());
 }
@@ -75,7 +75,7 @@ fn sth_else_outside_call() {
   (func (nop (call)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 17, 2, 17));
     assert!(response.is_none());
 }
@@ -88,7 +88,7 @@ fn missing_callee() {
   (func (call)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 11, 2, 11));
     assert!(response.is_none());
 }
@@ -102,7 +102,7 @@ fn not_recursive() {
   (func))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 12, 2, 12));
     assert!(response.is_none());
 }
@@ -115,7 +115,7 @@ fn not_tail() {
   (func (call 0) (block)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 12, 2, 12));
     assert!(response.is_none());
 }
@@ -128,7 +128,7 @@ fn call_only() {
   (func (call 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 12, 2, 12));
     assert_json_snapshot!(response);
 }
@@ -142,7 +142,7 @@ fn call_before_return() {
   (export "f" (func $f)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 14, 2, 14));
     assert_json_snapshot!(response);
 }
@@ -155,7 +155,7 @@ fn call_inside_return() {
   (func (return (call 0))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 19, 2, 19));
     assert_json_snapshot!(response);
 }
@@ -169,7 +169,7 @@ fn return_after_call() {
   (export "f" (func $f)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 23, 2, 23));
     assert_json_snapshot!(response);
 }
@@ -183,7 +183,7 @@ fn return_outside_call() {
   (export "f" (func $f)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 12, 2, 12));
     assert_json_snapshot!(response);
 }
@@ -207,7 +207,7 @@ fn nested_blocks() {
     end))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 8, 18, 8, 18));
     assert_json_snapshot!(response);
 }

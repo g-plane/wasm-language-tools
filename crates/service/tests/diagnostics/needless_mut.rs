@@ -2,7 +2,7 @@ use super::*;
 use insta::assert_json_snapshot;
 use wat_service::LanguageService;
 
-fn disable_other_lints(service: &mut LanguageService, uri: &str) {
+fn disable_other_lints(service: &mut LanguageService, uri: String) {
     service.set_config(
         uri,
         Some(ServiceConfig {
@@ -25,8 +25,8 @@ fn immutable_global() {
     i32.const 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -40,8 +40,8 @@ fn inline_exported_global() {
     i32.const 0))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -56,8 +56,8 @@ fn module_field_export() {
     i32.const 0))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -74,8 +74,8 @@ fn global_set_with_int_idx() {
     i32.const 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -92,8 +92,8 @@ fn global_set_with_ident_idx() {
     i32.const 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -110,8 +110,8 @@ fn global_get_with_int_idx() {
     i32.const 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -128,8 +128,8 @@ fn global_get_with_ident_idx() {
     i32.const 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -143,8 +143,8 @@ fn unused_global() {
     i32.const 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -160,8 +160,8 @@ fn imported_global() {
     drop))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -174,8 +174,8 @@ fn immutable_array() {
   (type (array i32)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -188,8 +188,8 @@ fn unused_array() {
   (type (array (mut i32))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -217,8 +217,8 @@ fn array_get() {
     drop))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -257,8 +257,8 @@ fn array_update() {
   (elem externref))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -279,8 +279,8 @@ fn array_copy() {
     array.copy $dst $src))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -293,8 +293,8 @@ fn immutable_struct() {
   (type (struct (field i32))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -307,8 +307,8 @@ fn unused_struct() {
   (type (struct (field (mut i32)))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -331,8 +331,8 @@ fn struct_get() {
     struct.get_u $packed_s $packed_field))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -349,8 +349,8 @@ fn struct_set() {
     struct.set 0 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }

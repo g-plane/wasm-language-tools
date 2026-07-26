@@ -40,7 +40,7 @@ fn non_compact() {
   (import "" "" (func (param i32)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 19, 2, 19));
     assert!(response.is_none());
 }
@@ -53,7 +53,7 @@ fn encoding1() {
   (import "" (item "" (func (param i32))))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 25, 2, 25));
     assert!(response.is_none());
 }
@@ -66,7 +66,7 @@ fn multi() {
   (import "" (item "") (item) (item "") (func (param i32)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 45, 2, 45));
     assert_json_snapshot!(response);
 }
@@ -79,7 +79,7 @@ fn no_leading_ws() {
   (import "" (item "") (;;)(func (param i32)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 31, 2, 31));
     assert_json_snapshot!(response);
 }

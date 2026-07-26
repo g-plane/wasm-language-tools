@@ -3,7 +3,6 @@ use crate::{
     cfa::{self, FlowNode, FlowNodeKind},
     document::Document,
     helpers::LineIndexExt,
-    uri::InternUri,
 };
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
@@ -12,7 +11,7 @@ use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, ast::support};
 
 pub fn act(
     db: &dyn salsa::Database,
-    uri: InternUri,
+    uri: &str,
     document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
@@ -113,7 +112,7 @@ pub fn act(
         );
     }
     let mut changes = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
-    changes.insert(uri.raw(db), text_edits);
+    changes.insert(uri.to_owned(), text_edits);
     Some(CodeAction {
         title: if return_instr.is_some() {
             "Merge `call` and `return` to `return_call`".into()

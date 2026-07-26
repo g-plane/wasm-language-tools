@@ -18,7 +18,8 @@ use wat_syntax::{
 impl LanguageService {
     /// Handler for `textDocument/hover` request.
     pub fn hover(&self, params: HoverParams) -> Option<Hover> {
-        let document = self.get_document(params.text_document.uri)?;
+        let uri = &params.text_document.uri;
+        let document = self.get_document(uri)?;
         let root = SyntaxNode::new_root(document.root(self));
         let token = super::find_meaningful_token(self, document, &root, params.position)?;
         let line_index = document.line_index(self);
@@ -26,14 +27,14 @@ impl LanguageService {
 
         match token.kind() {
             SyntaxKind::IDENT | SyntaxKind::UNSIGNED_INT => {
-                create_symbol_hover(self, document, symbol_table, &token.parent()).map(|contents| Hover {
+                create_symbol_hover(self, uri, document, symbol_table, &token.parent()).map(|contents| Hover {
                     contents: HoverContents::MarkupContent(contents),
                     range: line_index.convert(token.text_range()),
                 })
             }
             SyntaxKind::INT => {
                 let parent = token.parent();
-                create_symbol_hover(self, document, symbol_table, &parent)
+                create_symbol_hover(self, uri, document, symbol_table, &parent)
                     .or_else(|| {
                         if let Some(is_i32) =
                             parent
@@ -97,7 +98,7 @@ impl LanguageService {
                 } else {
                     node
                 };
-                create_symbol_hover(self, document, symbol_table, &node).map(|contents| Hover {
+                create_symbol_hover(self, uri, document, symbol_table, &node).map(|contents| Hover {
                     contents: HoverContents::MarkupContent(contents),
                     range: line_index.convert(if matches!(token.text(), "mut" | "ref") {
                         node.text_range()
@@ -204,6 +205,7 @@ impl LanguageService {
 
 fn create_symbol_hover(
     db: &dyn salsa::Database,
+    uri: &str,
     document: Document,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
@@ -220,10 +222,10 @@ fn create_symbol_hover(
             SymbolKind::Call => symbol_table
                 .find_def(symbol.key)
                 .map(|symbol| create_func_hover(db, document, symbol_table, symbol)),
-            SymbolKind::Type => Some(create_type_def_hover(db, document, symbol_table, symbol)),
+            SymbolKind::Type => Some(create_type_def_hover(db, uri, document, symbol_table, symbol)),
             SymbolKind::TypeUse => symbol_table
                 .find_def(symbol.key)
-                .map(|symbol| create_type_def_hover(db, document, symbol_table, symbol)),
+                .map(|symbol| create_type_def_hover(db, uri, document, symbol_table, symbol)),
             SymbolKind::GlobalDef => Some(create_global_def_hover(db, document, symbol)),
             SymbolKind::GlobalRef => symbol_table
                 .find_def(symbol.key)
@@ -384,6 +386,7 @@ fn create_table_def_hover(db: &dyn salsa::Database, symbol: &Symbol) -> MarkupCo
 
 fn create_type_def_hover(
     db: &dyn salsa::Database,
+    uri: &str,
     document: Document,
     symbol_table: &SymbolTable,
     symbol: &Symbol,
@@ -433,9 +436,8 @@ fn create_type_def_hover(
                     && let Some(pos) = document.line_index(db).convert(poi.start())
                 {
                     appendix = Some(format!(
-                        "where [`{}`]({}#{},{}):\n```wat\n(type (func{}{}))\n```",
+                        "where [`{}`]({uri}#{},{}):\n```wat\n(type (func{}{}))\n```",
                         idx.render(db),
-                        document.uri(db).raw(db),
                         pos.line + 1,
                         pos.character + 1,
                         if sig.params.is_empty() && sig.results.is_empty() {

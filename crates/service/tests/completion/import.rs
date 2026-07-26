@@ -11,7 +11,7 @@ fn desc_keyword() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 2, 13));
     assert_json_snapshot!(response);
 }
@@ -25,7 +25,7 @@ fn table_type() {
 )
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 2, 25));
     assert_json_snapshot!(response);
 }
@@ -39,7 +39,7 @@ fn global_type() {
 )
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 2, 26));
     assert_json_snapshot!(response);
 }
@@ -53,7 +53,7 @@ fn global_type_after_paren() {
 )
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 2, 27));
     assert_json_snapshot!(response);
 }
@@ -67,7 +67,7 @@ fn global_type_after_mut() {
 )
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 2, 31));
     assert_json_snapshot!(response);
 }
@@ -81,7 +81,7 @@ fn type_use() {
 )
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 2, 25));
     assert_json_snapshot!(response);
 }
@@ -95,7 +95,7 @@ fn memory_type() {
 )
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 2, 26));
     assert_json_snapshot!(response);
 }
@@ -109,7 +109,7 @@ fn memory_type_with_share() {
 )
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 2, 27));
     assert_json_snapshot!(response);
 }
@@ -123,7 +123,7 @@ fn memory_type_with_paren() {
 )
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 2, 27));
     assert_json_snapshot!(response);
 }
@@ -137,7 +137,7 @@ fn paren_after_module_name() {
   )
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 2, 5));
     assert_json_snapshot!(response);
 }
@@ -151,7 +151,7 @@ fn import_item_with_paren() {
 )
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 2, 22));
     assert_json_snapshot!(response);
 }
@@ -165,7 +165,7 @@ fn extern_type_after_import_item() {
 )
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 2, 23));
     assert_json_snapshot!(response);
 }

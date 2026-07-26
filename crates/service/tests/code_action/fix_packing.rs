@@ -38,7 +38,7 @@ fn no_diagnostics() {
     struct.get $s 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(super::create_params(uri, 5, 19, 5, 19));
     assert!(response.is_none());
 }
@@ -57,7 +57,7 @@ fn unrelated_range() {
     struct.get $s 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range {
@@ -83,7 +83,7 @@ fn unrelated_diagnostic() {
     struct.get $s 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(CodeActionParams {
         text_document: TextDocumentIdentifier { uri },
         range: Range {
@@ -125,7 +125,7 @@ fn struct_get() {
     struct.get $s 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range {
@@ -151,7 +151,7 @@ fn struct_get_s() {
     struct.get_s $s 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range {
@@ -177,7 +177,7 @@ fn struct_get_u() {
     struct.get_u $s 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range {
@@ -203,7 +203,7 @@ fn array_get() {
     array.get 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range {
@@ -229,7 +229,7 @@ fn array_get_s() {
     array.get_s 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range {
@@ -255,7 +255,7 @@ fn array_get_u() {
     array.get_u 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range {

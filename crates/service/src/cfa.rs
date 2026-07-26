@@ -10,7 +10,7 @@ use wat_syntax::{
     ast::{AstNode, BlockInstr, Cat, Instr, support},
 };
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub fn analyze(db: &dyn salsa::Database, document: Document, ptr: SyntaxNodePtr) -> ControlFlowGraph {
     let root = SyntaxNode::new_root(document.root(db));
     Builder::new(db, document).build(ptr.to_node(&root).expect("invalid ptr in control flow analysis"))

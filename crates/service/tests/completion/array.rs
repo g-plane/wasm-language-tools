@@ -14,7 +14,7 @@ fn array() {
     array.new ))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 6, 14));
     assert_json_snapshot!(response);
 }
@@ -31,7 +31,7 @@ fn array_following_int_idx() {
     array.new 1))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 6, 15));
     assert_json_snapshot!(response);
 }
@@ -48,7 +48,7 @@ fn array_following_dollar() {
     array.new $))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 6, 15));
     assert_json_snapshot!(response);
 }
@@ -65,7 +65,7 @@ fn array_following_ident() {
     array.new $b))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 6, 16));
     assert_json_snapshot!(response);
 }
@@ -83,7 +83,7 @@ fn array_init_data() {
     (array.init_data )))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 7, 21));
     assert_json_snapshot!(response);
 }
@@ -101,7 +101,7 @@ fn array_new_data() {
     (array.new_data )))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 7, 20));
     assert_json_snapshot!(response);
 }
@@ -119,7 +119,7 @@ fn array_init_elem() {
     (array.init_elem )))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 7, 21));
     assert_json_snapshot!(response);
 }
@@ -137,7 +137,7 @@ fn array_new_elem() {
     (array.new_elem )))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.completion(create_params(uri, 7, 20));
     assert_json_snapshot!(response);
 }

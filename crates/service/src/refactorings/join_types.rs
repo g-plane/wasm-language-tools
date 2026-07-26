@@ -1,4 +1,4 @@
-use crate::{helpers::LineIndexExt, uri::InternUri};
+use crate::helpers::LineIndexExt;
 use itertools::Itertools;
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
@@ -7,8 +7,7 @@ use std::collections::HashMap;
 use wat_syntax::{SyntaxKind, SyntaxNode, TextRange};
 
 pub fn act(
-    db: &dyn salsa::Database,
-    uri: InternUri,
+    uri: &str,
     line_index: &LineIndex,
     node: &SyntaxNode,
     kind: SyntaxKind,
@@ -36,7 +35,7 @@ pub fn act(
 
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
-        uri.raw(db),
+        uri.to_owned(),
         vec![TextEdit {
             range: line_index.convert(TextRange::new(
                 first_node.text_range().start(),

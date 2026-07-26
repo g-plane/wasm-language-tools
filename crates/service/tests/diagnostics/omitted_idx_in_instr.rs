@@ -2,7 +2,7 @@ use super::*;
 use insta::assert_json_snapshot;
 use wat_service::LanguageService;
 
-fn disable_other_lints(service: &mut LanguageService, uri: &str) {
+fn disable_other_lints(service: &mut LanguageService, uri: String) {
     service.set_config(
         uri,
         Some(ServiceConfig {
@@ -41,8 +41,8 @@ fn single_memory_idx() {
     drop))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -66,8 +66,8 @@ fn memory_init() {
     memory.init 0 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -95,8 +95,8 @@ fn memory_copy() {
     memory.copy 0 $m))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -121,8 +121,8 @@ fn single_table_idx() {
     drop))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -146,8 +146,8 @@ fn table_init() {
     table.init 0 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -175,8 +175,8 @@ fn table_copy() {
     table.copy $t 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }

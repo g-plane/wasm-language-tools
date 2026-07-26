@@ -1,9 +1,4 @@
-use crate::{
-    LanguageService,
-    config::ConfigState,
-    helpers::LineIndexExt,
-    uri::{InternUri, IntoInternUri},
-};
+use crate::{LanguageService, config::ConfigState, helpers::LineIndexExt};
 use line_index::LineIndex;
 use lspt::{
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams, TextDocumentContentChangeEvent,
@@ -14,25 +9,19 @@ use wat_syntax::{GreenNode, SyntaxKind, SyntaxNode, TextRange, TextSize};
 
 #[salsa::input(debug)]
 pub(crate) struct Document {
-    pub uri: InternUri,
-    #[returns(ref)]
     pub text: String,
-    #[returns(ref)]
     pub line_index: LineIndex,
-    #[returns(ref)]
     pub root: GreenNode,
-    #[returns(ref)]
     pub syntax_errors: Vec<wat_parser::SyntaxError>,
 }
 
 impl LanguageService {
     #[inline]
     /// Commit a document to the service.
-    pub fn commit(&mut self, uri: impl AsRef<str>, text: String) {
-        let uri = InternUri::new(self, uri.as_ref());
+    pub fn commit(&mut self, uri: String, text: String) {
         let line_index = LineIndex::new(&text);
         let (green, errors) = wat_parser::parse(&text);
-        if let Some(document) = self.get_document(uri) {
+        if let Some(document) = self.get_document(&uri) {
             document.set_text(self).to(text);
             document.set_line_index(self).to(line_index);
             document.set_root(self).to(green);
@@ -40,7 +29,7 @@ impl LanguageService {
         } else {
             self.documents
                 .write()
-                .insert(uri, Document::new(self, uri, text, line_index, green, errors));
+                .insert(uri.clone(), Document::new(self, text, line_index, green, errors));
             if !self.support_pull_config {
                 self.configs.write().insert(uri, ConfigState::Inherit);
             }
@@ -49,21 +38,23 @@ impl LanguageService {
 
     /// Handler for `textDocument/didOpen` notification.
     pub fn did_open(&mut self, params: DidOpenTextDocumentParams) {
-        let uri = InternUri::new(self, params.text_document.uri);
         let line_index = LineIndex::new(&params.text_document.text);
         let (green, errors) = wat_parser::parse(&params.text_document.text);
         self.documents.write().insert(
-            uri,
-            Document::new(self, uri, params.text_document.text, line_index, green, errors),
+            params.text_document.uri.clone(),
+            Document::new(self, params.text_document.text, line_index, green, errors),
         );
         if !self.support_pull_config {
-            self.configs.write().insert(uri, ConfigState::Inherit);
+            self.configs
+                .write()
+                .insert(params.text_document.uri, ConfigState::Inherit);
         }
     }
 
     /// Handler for `textDocument/didChange` notification.
     pub fn did_change(&mut self, params: DidChangeTextDocumentParams) {
-        let Some(document) = self.get_document(params.text_document.uri) else {
+        let uri = &params.text_document.uri;
+        let Some(document) = self.get_document(uri) else {
             return;
         };
         'single: {
@@ -97,10 +88,9 @@ impl LanguageService {
                     .and_then(|source| wat_parser::parse_as(node.kind(), source))
                 {
                     log::debug!(
-                        "Incremental parsing succeeded for `{:?}@{:?}` in {}",
+                        "Incremental parsing succeeded for `{:?}@{:?}` in {uri}",
                         node.kind(),
                         node.text_range(),
-                        document.uri(self).raw(self),
                     );
                     partial_errors.iter_mut().for_each(|error| {
                         error.range += node_start;
@@ -108,10 +98,9 @@ impl LanguageService {
                     (node.replace_with(green), partial_errors)
                 } else {
                     log::debug!(
-                        "Incremental parsing failed for `{:?}@{:?}` in {} , falling back to full parse",
+                        "Incremental parsing failed for `{:?}@{:?}` in {uri} , falling back to full parse",
                         node.kind(),
                         node.text_range(),
-                        document.uri(self).raw(self),
                     );
                     break 'single;
                 };
@@ -168,19 +157,18 @@ impl LanguageService {
 
     /// Handler for `textDocument/didClose` notification.
     pub fn did_close(&mut self, params: DidCloseTextDocumentParams) {
-        let uri = InternUri::new(self, params.text_document.uri);
-        self.documents.write().remove(&uri);
-        self.configs.write().remove(&uri);
+        self.documents.write().remove(&params.text_document.uri);
+        self.configs.write().remove(&params.text_document.uri);
     }
 
     #[inline]
     /// Get URIs of all opened documents.
     pub fn get_opened_uris(&self) -> Vec<String> {
-        self.documents.read().keys().map(|uri| uri.raw(self)).collect()
+        self.documents.read().keys().cloned().collect()
     }
 
-    pub(crate) fn get_document(&self, uri: impl IntoInternUri) -> Option<Document> {
-        self.documents.read().get(&uri.into_intern_uri(self)).copied()
+    pub(crate) fn get_document(&self, uri: impl AsRef<str>) -> Option<Document> {
+        self.documents.read().get(uri.as_ref()).copied()
     }
 }
 
@@ -285,7 +273,7 @@ mod tests {
         assert!(service.get_opened_uris().is_empty());
 
         let a = "untitled://a.wat".to_string();
-        service.commit(&a, "".into());
+        service.commit(a.clone(), "".into());
         assert_eq!(service.get_opened_uris().first(), Some(&a));
 
         let b = "untitled://b.wat".to_string();
@@ -304,7 +292,7 @@ mod tests {
     fn single_cursor_in_module_field() {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
-        service.commit(&uri, "".into());
+        service.commit(uri.clone(), "".into());
         service.did_change(DidChangeTextDocumentParams {
             text_document: VersionedTextDocumentIdentifier {
                 uri: uri.clone(),
@@ -371,7 +359,7 @@ mod tests {
     fn single_cursor_to_invalid_module_field() {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
-        service.commit(&uri, "".into());
+        service.commit(uri.clone(), "".into());
         service.did_change(DidChangeTextDocumentParams {
             text_document: VersionedTextDocumentIdentifier {
                 uri: uri.clone(),
@@ -445,7 +433,7 @@ mod tests {
     fn single_cursor_out_of_module_field() {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
-        service.commit(&uri, "".into());
+        service.commit(uri.clone(), "".into());
         service.did_change(DidChangeTextDocumentParams {
             text_document: VersionedTextDocumentIdentifier {
                 uri: uri.clone(),
@@ -502,7 +490,7 @@ mod tests {
     fn multi_cursor_asc_insert_and_replace() {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
-        service.commit(&uri, "".into());
+        service.commit(uri.clone(), "".into());
         service.did_change(DidChangeTextDocumentParams {
             text_document: VersionedTextDocumentIdentifier {
                 uri: uri.clone(),
@@ -665,7 +653,7 @@ mod tests {
     fn multi_cursor_asc_delete() {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
-        service.commit(&uri, "".into());
+        service.commit(uri.clone(), "".into());
         service.did_change(DidChangeTextDocumentParams {
             text_document: VersionedTextDocumentIdentifier {
                 uri: uri.clone(),
@@ -787,7 +775,7 @@ mod tests {
     fn multi_cursor_desc_insert_and_replace() {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
-        service.commit(&uri, "".into());
+        service.commit(uri.clone(), "".into());
         service.did_change(DidChangeTextDocumentParams {
             text_document: VersionedTextDocumentIdentifier {
                 uri: uri.clone(),
@@ -950,7 +938,7 @@ mod tests {
     fn multi_cursor_desc_delete() {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
-        service.commit(&uri, "".into());
+        service.commit(uri.clone(), "".into());
         service.did_change(DidChangeTextDocumentParams {
             text_document: VersionedTextDocumentIdentifier {
                 uri: uri.clone(),
@@ -1073,7 +1061,7 @@ mod tests {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
         service.commit(
-            &uri,
+            uri.clone(),
             "
 (module
   (func (param i32) (local i32)))
@@ -1109,7 +1097,7 @@ mod tests {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
         service.commit(
-            &uri,
+            uri.clone(),
             "
 (@metadata.code.call_target )
 (module
@@ -1140,7 +1128,7 @@ mod tests {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
         service.commit(
-            &uri,
+            uri.clone(),
             r#"
 (module
   (import "env" (item "d" (global $x i32)))
@@ -1266,7 +1254,7 @@ mod tests {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
         service.commit(
-            &uri,
+            uri.clone(),
             "
 (module
   ;; 测
@@ -1298,7 +1286,7 @@ mod tests {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
         service.commit(
-            &uri,
+            uri.clone(),
             "
 (module
   (func (call )))
@@ -1346,7 +1334,7 @@ mod tests {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
         service.commit(
-            &uri,
+            uri.clone(),
             "
 (module
   (func
@@ -1399,7 +1387,7 @@ mod tests {
         let uri = "untitled:test".to_string();
         let mut service = LanguageService::default();
         service.commit(
-            &uri,
+            uri.clone(),
             "
 (module
   (func (para)))

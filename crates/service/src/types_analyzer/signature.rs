@@ -6,7 +6,7 @@ use super::{
 use crate::{binder::SymbolTable, document::Document, idx::InternIdent};
 use wat_syntax::{AmberNode, SyntaxKind};
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, salsa::Update)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, salsa::SalsaValue)]
 pub(crate) struct NamedSig<'db> {
     pub(crate) params: Vec<(ValType<'db>, Option<InternIdent<'db>>)>,
     pub(crate) results: Vec<ValType<'db>>,

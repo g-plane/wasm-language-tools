@@ -2,7 +2,7 @@ use super::*;
 use insta::assert_json_snapshot;
 use wat_service::LanguageService;
 
-fn disable_other_lints(service: &mut LanguageService, uri: &str) {
+fn disable_other_lints(service: &mut LanguageService, uri: String) {
     service.set_config(
         uri,
         Some(ServiceConfig {
@@ -34,7 +34,7 @@ fn prefixed_with_underscore() {
   (table $_t 0 funcref))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -50,7 +50,7 @@ fn imports() {
   (import "env" (item "g1") (item "g2") (global i64)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -60,7 +60,7 @@ fn func_unused() {
     let uri = "untitled:test".to_string();
     let source = "(module (func) (func $f))";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -75,7 +75,7 @@ fn func_used() {
   (func (export "")))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -88,7 +88,7 @@ fn param_unused() {
   (func (export "") (param $p i32) (param i32)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -105,7 +105,7 @@ fn param_used() {
     (drop)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -118,7 +118,7 @@ fn params_in_imported_func() {
   (func $_ (import "" "") (param i32) (param $p i32)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -132,7 +132,7 @@ fn param_is_ref_type() {
   (func (export "") (param (ref 0)) (param $p (ref 0))))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -145,7 +145,7 @@ fn param_via_type_def() {
   (type $_ (func (param $a i32) (param $b i32) (result i32))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -158,7 +158,7 @@ fn local_unused() {
   (func (export "") (local $l i32) (local i32)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -175,7 +175,7 @@ fn local_used() {
     (drop)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -189,7 +189,7 @@ fn type_unused() {
   (type $t (func)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -205,7 +205,7 @@ fn type_used() {
   (func (export "b") (type $t)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -220,7 +220,7 @@ fn struct_used() {
     (drop (struct.new 0))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -237,7 +237,7 @@ fn array_used() {
         (i32.const 1)))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -251,7 +251,7 @@ fn type_used_in_subtyping() {
   (type $_ (sub 0 (struct))))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -265,7 +265,7 @@ fn global_unused() {
   (global $g i32 i32.const 0))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -281,7 +281,7 @@ fn global_used() {
     (drop (global.get $g))))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -295,7 +295,7 @@ fn memory_unused() {
   (memory $m 0))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -310,7 +310,7 @@ fn memory_used() {
   (data $_ (memory $m)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -327,7 +327,7 @@ fn memory_implicit() {
   (memory 1))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -344,7 +344,7 @@ fn memory_explicit() {
   (memory 1))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -360,7 +360,7 @@ fn memory_dot() {
   (memory 1))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -378,7 +378,7 @@ fn memory_copy() {
     memory.copy))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -392,7 +392,7 @@ fn table_unused() {
   (table $table 0 funcref))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -414,7 +414,7 @@ fn table_used() {
     (i32.const 0) funcref))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -430,7 +430,7 @@ fn table_implicit() {
     drop))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -448,7 +448,7 @@ fn table_copy() {
     table.copy))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -461,7 +461,7 @@ fn field_unused() {
   (rec (type (struct (field $x i32) (field (ref 0))))))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -478,7 +478,7 @@ fn field_used() {
     unreachable))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -492,7 +492,7 @@ fn tag_unused() {
   (tag $e))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -510,8 +510,8 @@ fn tag_used() {
     end))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    disable_other_lints(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    disable_other_lints(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -525,7 +525,7 @@ fn data_unused() {
   (data $data))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -540,7 +540,7 @@ fn data_used() {
     data.drop $data))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -555,7 +555,7 @@ fn elem_unused() {
   (func))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -570,7 +570,7 @@ fn elem_used() {
     elem.drop $elem))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -584,7 +584,7 @@ fn elem_declare() {
   (func $f))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -601,7 +601,7 @@ fn call_indirect_implicit() {
     call_indirect (param f32)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -618,7 +618,7 @@ fn call_indirect_explicit() {
     call_indirect 0 (param f32)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }

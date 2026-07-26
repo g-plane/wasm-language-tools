@@ -91,7 +91,7 @@ pub fn diagnostics_bench(c: &mut Criterion) {
 "#;
     let uri = "untitled:test".to_string();
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
 
     c.bench_function("diagnostics", |b| {
         b.iter(|| {

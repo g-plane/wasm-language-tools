@@ -10,7 +10,7 @@ fn anyref() {
   (func (param anyref)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 18, 2, 18));
     assert_json_snapshot!(response);
 }
@@ -23,7 +23,7 @@ fn eqref() {
   (func (param eqref)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 18, 2, 18));
     assert_json_snapshot!(response);
 }
@@ -36,7 +36,7 @@ fn i31ref() {
   (func (param i31ref)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 18, 2, 18));
     assert_json_snapshot!(response);
 }
@@ -49,7 +49,7 @@ fn structref() {
   (func (param structref)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 18, 2, 18));
     assert_json_snapshot!(response);
 }
@@ -62,7 +62,7 @@ fn arrayref() {
   (func (param arrayref)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 18, 2, 18));
     assert_json_snapshot!(response);
 }
@@ -75,7 +75,7 @@ fn nullref() {
   (func (param nullref)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 18, 2, 18));
     assert_json_snapshot!(response);
 }
@@ -88,7 +88,7 @@ fn funcref() {
   (func (param funcref)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 18, 2, 18));
     assert_json_snapshot!(response);
 }
@@ -101,7 +101,7 @@ fn nullfuncref() {
   (func (param nullfuncref)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 18, 2, 18));
     assert_json_snapshot!(response);
 }
@@ -114,7 +114,7 @@ fn exnref() {
   (func (param exnref)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 18, 2, 18));
     assert_json_snapshot!(response);
 }
@@ -127,7 +127,7 @@ fn nullexnref() {
   (func (param nullexnref)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 18, 2, 18));
     assert_json_snapshot!(response);
 }
@@ -140,7 +140,7 @@ fn externref() {
   (func (param externref)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 18, 2, 18));
     assert_json_snapshot!(response);
 }
@@ -153,7 +153,7 @@ fn nullexternref() {
   (func (param nullexternref)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 18, 2, 18));
     assert_json_snapshot!(response);
 }

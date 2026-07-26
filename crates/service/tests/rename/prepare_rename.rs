@@ -22,7 +22,7 @@ fn ignored_tokens() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     assert!(service.prepare_rename(create_params(uri.clone(), 1, 4)).is_none());
     assert!(service.prepare_rename(create_params(uri.clone(), 2, 29)).is_none());
     assert!(service.prepare_rename(create_params(uri.clone(), 3, 7)).is_none());
@@ -41,7 +41,7 @@ fn ident() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.prepare_rename(create_params(uri, 2, 14));
     assert_json_snapshot!(response);
 }

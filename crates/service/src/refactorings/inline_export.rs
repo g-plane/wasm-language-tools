@@ -1,7 +1,6 @@
 use crate::{
     binder::{SymbolKey, SymbolTable},
     helpers::{self, LineIndexExt},
-    uri::InternUri,
 };
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
@@ -9,8 +8,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use wat_syntax::{SyntaxKind, SyntaxNode, TextRange, ast::support};
 
 pub fn act(
-    db: &dyn salsa::Database,
-    uri: InternUri,
+    uri: &str,
     line_index: &LineIndex,
     root: &SyntaxNode,
     symbol_table: &SymbolTable,
@@ -21,7 +19,7 @@ pub fn act(
 
     let mut changes = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
-        uri.raw(db),
+        uri.to_owned(),
         vec![
             TextEdit {
                 range: line_index.convert(node.text_range())?,

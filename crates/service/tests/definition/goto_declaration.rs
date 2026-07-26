@@ -23,7 +23,7 @@ fn ignored_tokens() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     assert!(service.goto_declaration(create_params(uri.clone(), 1, 4)).is_none());
     assert!(service.goto_declaration(create_params(uri.clone(), 2, 29)).is_none());
     assert!(service.goto_declaration(create_params(uri.clone(), 3, 7)).is_none());
@@ -43,7 +43,7 @@ fn func_not_defined() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     assert!(service.goto_declaration(create_params(uri.clone(), 3, 15)).is_none());
     assert!(service.goto_declaration(create_params(uri.clone(), 3, 25)).is_none());
 }
@@ -60,7 +60,7 @@ fn func_int_idx() {
 (module (func))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.goto_declaration(create_params(uri, 3, 15));
     assert_json_snapshot!(response);
 }
@@ -77,7 +77,7 @@ fn func_ident_idx() {
 (module (func $func))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.goto_declaration(create_params(uri, 3, 18));
     assert_json_snapshot!(response);
 }

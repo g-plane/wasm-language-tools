@@ -1,4 +1,4 @@
-use crate::{LanguageService, uri::InternUri};
+use crate::LanguageService;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -133,11 +133,10 @@ impl LanguageService {
     /// Update or insert configuration of a specific document.
     ///
     /// Set `config` to `None` to inherit global configuration.
-    pub fn set_config(&mut self, uri: impl AsRef<str>, config: Option<ServiceConfig>) {
-        self.configs.write().insert(
-            InternUri::new(self, uri.as_ref()),
-            config.map_or(ConfigState::Inherit, ConfigState::Override),
-        );
+    pub fn set_config(&mut self, uri: String, config: Option<ServiceConfig>) {
+        self.configs
+            .write()
+            .insert(uri, config.map_or(ConfigState::Inherit, ConfigState::Override));
     }
 
     #[inline]

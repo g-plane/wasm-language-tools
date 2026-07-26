@@ -12,8 +12,8 @@ fn func() {
     (block (type 0))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -28,8 +28,8 @@ fn structs() {
     (block (type 0))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -44,8 +44,8 @@ fn array() {
     (block (type 0))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -60,8 +60,8 @@ fn in_loop() {
     (loop (type 0))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -78,8 +78,8 @@ fn in_if() {
       (then))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -94,8 +94,8 @@ fn in_try_table() {
     (try_table (type 0))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }

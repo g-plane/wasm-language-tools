@@ -2,7 +2,6 @@ use crate::{
     binder::{SymbolKey, SymbolKind, SymbolTable},
     helpers::LineIndexExt,
     idx::Idx,
-    uri::InternUri,
 };
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionContext, CodeActionKind, NumberOrString, TextEdit, WorkspaceEdit};
@@ -12,7 +11,7 @@ use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxToken, TextRange};
 
 pub fn act(
     db: &dyn salsa::Database,
-    uri: InternUri,
+    uri: &str,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
@@ -36,7 +35,6 @@ pub fn act(
                 .is_none_or(|immediate| immediate.has_child_or_token_by_kind(SyntaxKind::MEM_ARG))
             {
                 build_action(
-                    db,
                     uri,
                     line_index,
                     context,
@@ -54,7 +52,6 @@ pub fn act(
         "memory.init" => {
             if node.children_by_kind(SyntaxKind::IMMEDIATE).count() < 2 {
                 build_action(
-                    db,
                     uri,
                     line_index,
                     context,
@@ -84,7 +81,6 @@ pub fn act(
                 _ => return None,
             };
             build_action(
-                db,
                 uri,
                 line_index,
                 context,
@@ -96,7 +92,6 @@ pub fn act(
         "table.get" | "table.set" | "table.size" | "table.grow" | "table.fill" => {
             if node.children_by_kind(SyntaxKind::IMMEDIATE).next().is_none() {
                 build_action(
-                    db,
                     uri,
                     line_index,
                     context,
@@ -114,7 +109,6 @@ pub fn act(
         "table.init" => {
             if node.children_by_kind(SyntaxKind::IMMEDIATE).count() < 2 {
                 build_action(
-                    db,
                     uri,
                     line_index,
                     context,
@@ -144,7 +138,6 @@ pub fn act(
                 _ => return None,
             };
             build_action(
-                db,
                 uri,
                 line_index,
                 context,
@@ -174,8 +167,7 @@ fn retrieve_idx<'a>(symbol_table: &'a SymbolTable, node: &SyntaxNode, kind: Symb
 }
 
 fn build_action(
-    db: &dyn salsa::Database,
-    uri: InternUri,
+    uri: &str,
     line_index: &LineIndex,
     context: &CodeActionContext,
     instr_name_token: &SyntaxToken,
@@ -185,7 +177,7 @@ fn build_action(
     let token_lsp_range = line_index.convert(instr_name_token.text_range())?;
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
-        uri.raw(db),
+        uri.to_owned(),
         vec![TextEdit {
             range: line_index.convert(TextRange::empty(instr_name_token.text_range().end()))?,
             new_text,

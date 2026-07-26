@@ -1,17 +1,11 @@
-use crate::{helpers::LineIndexExt, uri::InternUri};
+use crate::helpers::LineIndexExt;
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionContext, CodeActionKind, NumberOrString, TextEdit, WorkspaceEdit};
 use rustc_hash::FxBuildHasher;
 use std::collections::HashMap;
 use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode, ast::support};
 
-pub fn act(
-    db: &dyn salsa::Database,
-    uri: InternUri,
-    line_index: &LineIndex,
-    node: &SyntaxNode,
-    context: &CodeActionContext,
-) -> Option<CodeAction> {
+pub fn act(uri: &str, line_index: &LineIndex, node: &SyntaxNode, context: &CodeActionContext) -> Option<CodeAction> {
     let mut_token = support::token(node, SyntaxKind::KEYWORD).filter(|keyword| keyword.text() == "mut")?;
     let token_lsp_range = line_index.convert(mut_token.text_range())?;
     let diagnostic = context.diagnostics.iter().find(|diagnostic| match &diagnostic.code {
@@ -54,7 +48,7 @@ pub fn act(
         None
     } else {
         let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
-        changes.insert(uri.raw(db), text_edits);
+        changes.insert(uri.to_owned(), text_edits);
         Some(CodeAction {
             title: "Remove `mut`".into(),
             kind: Some(CodeActionKind::QuickFix),

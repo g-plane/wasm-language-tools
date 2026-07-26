@@ -12,7 +12,7 @@ use wat_syntax::{
     ast::{AstNode, ExternType, ValType},
 };
 
-#[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
+#[derive(Clone, Debug, PartialEq, Eq, salsa::SalsaValue)]
 pub(crate) struct SymbolTable<'db> {
     pub symbols: Symbols<'db>,
     pub resolved: FxHashMap<SymbolKey, SymbolKey>,
@@ -1182,13 +1182,13 @@ impl<'db> SymbolTable<'db> {
 }
 #[salsa::tracked]
 impl<'db> SymbolTable<'db> {
-    #[salsa::tracked(returns(ref))]
+    #[salsa::tracked]
     pub(crate) fn of(db: &'db dyn salsa::Database, document: Document) -> Self {
         create_symbol_table(db, document)
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, salsa::Update)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, salsa::SalsaValue)]
 /// Wrapper type for allowing `SyntaxNodePtr` to be stored in Salsa database.
 pub struct SymbolKey(SyntaxNodePtr);
 impl SymbolKey {
@@ -1215,7 +1215,7 @@ impl Deref for SymbolKey {
     }
 }
 
-#[derive(Clone, Debug, salsa::Update)]
+#[derive(Clone, Debug, salsa::SalsaValue)]
 pub struct Symbol<'db> {
     pub key: SymbolKey,
     pub green: GreenNode,

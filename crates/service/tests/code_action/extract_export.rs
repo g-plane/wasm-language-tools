@@ -10,7 +10,7 @@ fn no_name() {
   (func (export))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 13, 2, 13));
     assert!(response.is_none());
 }
@@ -24,7 +24,7 @@ fn ident() {
   (func))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 19, 2, 19));
     assert_json_snapshot!(response);
 }
@@ -38,7 +38,7 @@ fn func() {
   (func))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 13, 2, 13));
     assert_json_snapshot!(response);
 }
@@ -52,7 +52,7 @@ fn global() {
   (func))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 13, 2, 13));
     assert_json_snapshot!(response);
 }
@@ -66,7 +66,7 @@ fn memory() {
   (func))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 13, 2, 13));
     assert_json_snapshot!(response);
 }
@@ -80,7 +80,7 @@ fn table() {
   (func))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 13, 2, 13));
     assert_json_snapshot!(response);
 }
@@ -94,7 +94,7 @@ fn tag() {
   (func))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 13, 2, 13));
     assert_json_snapshot!(response);
 }

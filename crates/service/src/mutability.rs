@@ -9,7 +9,7 @@ use wat_syntax::{
     ast::{AstNode, PlainInstr},
 };
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub(crate) fn get_mutabilities(
     db: &dyn salsa::Database,
     document: Document,
@@ -92,7 +92,7 @@ pub(crate) struct Mutability {
     pub(crate) cross_module: bool,
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub(crate) fn get_mutation_actions(
     db: &dyn salsa::Database,
     document: Document,

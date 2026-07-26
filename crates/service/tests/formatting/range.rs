@@ -44,7 +44,7 @@ fn fully_covered_node() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.range_formatting(create_params(uri, 3, 4, 3, 22));
     assert_json_snapshot!(response);
 }
@@ -69,7 +69,7 @@ fn overlap() {
     ))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.range_formatting(create_params(uri, 4, 8, 5, 23));
     assert_json_snapshot!(response);
 }
@@ -85,9 +85,9 @@ fn format_comments() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     service.set_config(
-        &uri,
+        uri.clone(),
         Some(ServiceConfig {
             format: wat_formatter::config::LanguageOptions {
                 format_comments: true,
@@ -123,7 +123,7 @@ fn space1() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.range_formatting(create_params(uri, 11, 6, 15, 5));
     assert_json_snapshot!(response);
 }
@@ -151,7 +151,7 @@ fn space2() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.range_formatting(create_params(uri, 11, 6, 15, 7));
     assert_json_snapshot!(response);
 }
@@ -179,7 +179,7 @@ fn space3() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.range_formatting(create_params(uri, 11, 6, 15, 10));
     assert_json_snapshot!(response);
 }
@@ -207,7 +207,7 @@ fn space4() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.range_formatting(create_params(uri, 11, 6, 15, 12));
     assert_json_snapshot!(response);
 }
@@ -235,7 +235,7 @@ fn space5() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.range_formatting(create_params(uri, 11, 6, 15, 15));
     assert_json_snapshot!(response);
 }
@@ -256,7 +256,7 @@ fn ranges() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.ranges_formatting(DocumentRangesFormattingParams {
         text_document: TextDocumentIdentifier { uri },
         ranges: vec![
@@ -299,7 +299,7 @@ fn ranges_with_overlap() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.ranges_formatting(DocumentRangesFormattingParams {
         text_document: TextDocumentIdentifier { uri },
         ranges: vec![

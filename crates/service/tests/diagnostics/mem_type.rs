@@ -12,8 +12,8 @@ fn overflow() {
   (memory i64 9999999999 99999999999999999999999))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -26,8 +26,8 @@ fn less_than() {
   (memory 2 1))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -40,8 +40,8 @@ fn overflow_and_less_than() {
   (memory 99999999999999999999999 99999999999999999999991))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -55,8 +55,8 @@ fn valid() {
   (memory 2 3))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -69,8 +69,8 @@ fn invalid_page_size() {
   (memory 1 2 (pagesize 2)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -84,8 +84,8 @@ fn page_size_1() {
   (memory 99999999999999999999999 99999999999999999999991 (pagesize 1)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -99,8 +99,8 @@ fn page_size_65536() {
   (memory 100000 110000 (pagesize 65536)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -113,8 +113,8 @@ fn unshared_without_max() {
   (memory 1 unshared))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -127,8 +127,8 @@ fn unshared_with_max() {
   (memory 1 2 unshared))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -141,8 +141,8 @@ fn shared_without_max() {
   (memory 1 shared))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -155,8 +155,8 @@ fn shared_with_max() {
   (memory 1 2 shared))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }

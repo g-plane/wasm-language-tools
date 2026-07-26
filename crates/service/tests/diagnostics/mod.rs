@@ -51,7 +51,7 @@ fn create_params(uri: String) -> DocumentDiagnosticParams {
     }
 }
 
-fn calm(service: &mut LanguageService, uri: &str) {
+fn calm(service: &mut LanguageService, uri: String) {
     service.set_config(
         uri,
         Some(ServiceConfig {
@@ -87,7 +87,7 @@ fn uninit_config() {
         },
         ..Default::default()
     });
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -110,8 +110,8 @@ fn inherit_config() {
         },
         ..Default::default()
     });
-    service.commit(&uri, source.into());
-    service.set_config(&uri, None);
+    service.commit(uri.clone(), source.into());
+    service.set_config(uri.clone(), None);
     let response = service.pull_diagnostics(create_params(uri));
     assert!(!response.items.is_empty());
 }

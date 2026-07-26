@@ -13,7 +13,7 @@ use wat_syntax::{
     ast::{AstNode, FieldType as AstFieldType, StorageType as AstStorageType},
 };
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, salsa::Update)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, salsa::SalsaValue)]
 pub(crate) enum ValType<'db> {
     I32,
     I64,
@@ -86,7 +86,7 @@ impl<'db> From<FieldType<'db>> for ValType<'db> {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, salsa::Update)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, salsa::SalsaValue)]
 pub(crate) struct RefType<'db> {
     pub heap_ty: HeapType<'db>,
     pub nullable: bool,
@@ -197,7 +197,7 @@ impl<'db> RefType<'db> {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, salsa::Update)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, salsa::SalsaValue)]
 pub(crate) enum HeapType<'db> {
     Type(Idx<'db>),
     Any,
@@ -418,7 +418,7 @@ impl<'db> HeapType<'db> {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, salsa::Update)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, salsa::SalsaValue)]
 pub(crate) enum OperandType<'db> {
     Val(ValType<'db>),
     Any,
@@ -438,7 +438,7 @@ impl<'db> OperandType<'db> {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
+#[derive(Clone, Debug, PartialEq, Eq, salsa::SalsaValue)]
 pub(crate) struct Fields<'db>(pub Vec<(FieldType<'db>, Idx<'db>)>);
 impl<'db> Fields<'db> {
     pub(crate) fn matches(
@@ -472,7 +472,7 @@ impl<'db> Fields<'db> {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
+#[derive(Clone, Debug, PartialEq, Eq, salsa::SalsaValue)]
 pub(crate) struct FieldType<'db> {
     pub(crate) storage: StorageType<'db>,
     pub(crate) mutable: bool,
@@ -515,7 +515,7 @@ impl<'db> FieldType<'db> {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
+#[derive(Clone, Debug, PartialEq, Eq, salsa::SalsaValue)]
 pub(crate) enum StorageType<'db> {
     Val(ValType<'db>),
     PackedI8,

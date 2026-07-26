@@ -4,7 +4,6 @@ use crate::{
     helpers::LineIndexExt,
     idx::Idx,
     types_analyzer,
-    uri::InternUri,
 };
 use lspt::{InlayHint, InlayHintKind, InlayHintLabel, InlayHintParams};
 use wat_syntax::SyntaxKind;
@@ -12,12 +11,11 @@ use wat_syntax::SyntaxKind;
 impl LanguageService {
     /// Handler for `textDocument/inlayHint` request.
     pub fn inlay_hint(&self, params: InlayHintParams) -> Option<Vec<InlayHint>> {
-        let uri = InternUri::new(self, params.text_document.uri);
-        let document = self.get_document(uri)?;
+        let document = self.get_document(&params.text_document.uri)?;
         // Avoid inlay hints flickering if client supports pulling config and config is not ready.
         // This is similar to what we do in the checker.
         let configs = self.configs.read();
-        let config = configs.get(&uri)?.unwrap_or_global(self);
+        let config = configs.get(&params.text_document.uri)?.unwrap_or_global(self);
         self.with_db(|db| {
             let line_index = document.line_index(db);
             let symbol_table = SymbolTable::of(db, document);

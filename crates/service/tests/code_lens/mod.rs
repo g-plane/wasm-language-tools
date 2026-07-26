@@ -28,7 +28,7 @@ fn list() {
   (elem))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_lens(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -44,7 +44,7 @@ fn imports() {
   (import "env" (item "g1") (item "g2") (global i64)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_lens(create_params(uri)).unwrap();
     assert_json_snapshot!(response);
 }
@@ -57,7 +57,7 @@ fn zero_references() {
   (func))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let code_lenses = service.code_lens(create_params(uri)).unwrap();
     let response = service.code_lens_resolve(code_lenses[0].clone());
     assert_json_snapshot!(response);
@@ -73,7 +73,7 @@ fn one_reference() {
     (call 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let code_lenses = service.code_lens(create_params(uri)).unwrap();
     let response = service.code_lens_resolve(code_lenses[0].clone());
     assert_json_snapshot!(response);
@@ -90,7 +90,7 @@ fn more_references() {
     (call $f)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let code_lenses = service.code_lens(create_params(uri)).unwrap();
     let response = service.code_lens_resolve(code_lenses[0].clone());
     assert_json_snapshot!(response);

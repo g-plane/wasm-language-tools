@@ -1,4 +1,4 @@
-use crate::{LanguageService, checker, uri::InternUri};
+use crate::{LanguageService, checker};
 use lspt::{Diagnostic, DocumentDiagnosticParams, PublishDiagnosticsParams, RelatedFullDocumentDiagnosticReport};
 
 impl LanguageService {
@@ -24,18 +24,17 @@ impl LanguageService {
 }
 
 fn get_diagnostics(service: &LanguageService, uri: &str) -> Vec<Diagnostic> {
-    let uri = InternUri::new(service, uri);
     // Some clients like VS Code support pulling configuration per document.
     // In that case, we won't use global configuration,
     // but document-specific configuration may not be available if client doesn't send it yet.
     // If it isn't ready, we will skip the checker to avoid diagnostics flickering.
     let configs = service.configs.read();
     if let Some(document) = service.get_document(uri)
-        && let Some(config_state) = configs.get(&uri)
+        && let Some(config_state) = configs.get(uri)
     {
         let config = config_state.unwrap_or_global(service);
         service
-            .with_db(|db| checker::check(db, document, config))
+            .with_db(|db| checker::check(db, uri, document, config))
             .unwrap_or_default()
     } else {
         vec![]

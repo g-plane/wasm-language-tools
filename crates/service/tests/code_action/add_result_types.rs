@@ -51,7 +51,7 @@ fn no_diagnostics() {
     i32.const 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(super::create_params(uri, 3, 17, 3, 17));
     assert!(response.is_none());
 }
@@ -65,7 +65,7 @@ fn unrelated_diagnostic_code() {
     i32.const 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         3,
@@ -97,7 +97,7 @@ fn after_func_keyword() {
     i32.const 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 3, 15, create_diagnostic(3, 15, ["i32"])));
     assert_json_snapshot!(response);
 }
@@ -111,7 +111,7 @@ fn after_func_ident() {
     i32.const 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 3, 15, create_diagnostic(3, 15, ["i32"])));
     assert_json_snapshot!(response);
 }
@@ -125,7 +125,7 @@ fn after_func_export() {
     i32.const 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 3, 15, create_diagnostic(3, 15, ["i32"])));
     assert_json_snapshot!(response);
 }
@@ -139,7 +139,7 @@ fn after_func_import() {
     i32.const 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 3, 15, create_diagnostic(3, 15, ["i32"])));
     assert_json_snapshot!(response);
 }
@@ -153,7 +153,7 @@ fn after_func_type_use() {
     i32.const 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 3, 15, create_diagnostic(3, 15, ["i32"])));
     assert_json_snapshot!(response);
 }
@@ -167,7 +167,7 @@ fn after_func_params() {
     i32.const 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 3, 15, create_diagnostic(3, 15, ["i32"])));
     assert_json_snapshot!(response);
 }
@@ -181,7 +181,7 @@ fn before_func_locals() {
     i32.const 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 3, 15, create_diagnostic(3, 15, ["i32"])));
     assert_json_snapshot!(response);
 }
@@ -196,7 +196,7 @@ fn after_block_keyword() {
       i32.const 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(4, 17, ["i32"])));
     assert_json_snapshot!(response);
 }
@@ -211,7 +211,7 @@ fn after_block_ident() {
       i32.const 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(4, 17, ["i32"])));
     assert_json_snapshot!(response);
 }
@@ -226,7 +226,7 @@ fn after_block_type() {
       i32.const 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(4, 17, ["i32"])));
     assert_json_snapshot!(response);
 }
@@ -241,7 +241,7 @@ fn after_loop_keyword() {
       i32.const 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(4, 17, ["i32"])));
     assert_json_snapshot!(response);
 }
@@ -257,7 +257,7 @@ fn after_if_keyword() {
         (i32.const 0)))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(5, 21, ["i32"])));
     assert_json_snapshot!(response);
 }
@@ -273,7 +273,7 @@ fn after_if_ident() {
         (i32.const 0)))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(5, 21, ["i32"])));
     assert_json_snapshot!(response);
 }
@@ -289,7 +289,7 @@ fn after_if_type_use() {
         (i32.const 0)))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(5, 21, ["i32"])));
     assert_json_snapshot!(response);
 }
@@ -304,7 +304,7 @@ fn after_try_table_keyword() {
       i32.const 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 4, 17, create_diagnostic(4, 17, ["i32"])));
     assert_json_snapshot!(response);
 }
@@ -318,7 +318,7 @@ fn multi_types() {
     i32.const 0))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         3,

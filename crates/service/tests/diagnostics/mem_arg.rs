@@ -14,8 +14,8 @@ fn align_power_of_two() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -138,8 +138,8 @@ fn align_range() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -167,8 +167,8 @@ fn offset() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }

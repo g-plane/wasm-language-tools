@@ -1,4 +1,4 @@
-use crate::{helpers::LineIndexExt, uri::InternUri};
+use crate::helpers::LineIndexExt;
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rustc_hash::FxBuildHasher;
@@ -8,7 +8,7 @@ use wat_syntax::{
     ast::{AstNode, BlockIf, Instr},
 };
 
-pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
+pub fn act(uri: &str, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
     let block_if = BlockIf::cast(node.clone())?;
     if block_if.else_block().is_some() {
         return None;
@@ -64,7 +64,7 @@ pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, nod
     };
 
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
-    changes.insert(uri.raw(db), text_edits);
+    changes.insert(uri.to_owned(), text_edits);
     Some(CodeAction {
         title: "Convert `if` with `br` to `br_if`".into(),
         kind: Some(CodeActionKind::RefactorRewrite),

@@ -56,8 +56,8 @@ fn wasmfx_types() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -110,8 +110,8 @@ fn subtyping() {
       (local.get $p_cont))))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -155,8 +155,8 @@ fn cont_new() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -233,8 +233,8 @@ fn cont_bind() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -319,8 +319,8 @@ fn resume() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -355,8 +355,8 @@ fn suspend() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -386,8 +386,8 @@ fn resume_throw() {
     (unreachable)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -410,8 +410,8 @@ fn resume_throw_ref() {
     (unreachable)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -435,8 +435,8 @@ fn switch1() {
     (drop)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -459,8 +459,8 @@ fn switch2() {
     (drop)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -479,8 +479,8 @@ fn switch3() {
     (switch $ct $t)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }
@@ -541,8 +541,8 @@ fn unfolded() {
     switch $ct2 $swap))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }

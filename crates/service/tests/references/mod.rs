@@ -36,7 +36,7 @@ fn ignored_tokens() {
 )
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     assert!(
         service
             .find_references(create_params(uri.clone(), 1, 4, true))
@@ -91,7 +91,7 @@ fn hex_int_idx() {
     call 0xA))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.find_references(create_params(uri, 15, 11, true));
     assert_json_snapshot!(response);
 }
@@ -106,7 +106,7 @@ fn import() {
     (global.get 0)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.find_references(create_params(uri, 2, 6, true));
     assert_json_snapshot!(response);
 }
@@ -121,7 +121,7 @@ fn import_with_ident() {
     (global.get $d)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.find_references(create_params(uri, 2, 29, true));
     assert_json_snapshot!(response);
 }
@@ -136,7 +136,7 @@ fn compact_import_enc1() {
     (global.get 0)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.find_references(create_params(uri, 2, 20, true));
     assert_json_snapshot!(response);
 }
@@ -151,7 +151,7 @@ fn compact_import_enc1_with_ident() {
     (global.get $d)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.find_references(create_params(uri, 2, 35, true));
     assert_json_snapshot!(response);
 }
@@ -166,7 +166,7 @@ fn compact_import_enc2() {
     (global.get 0)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.find_references(create_params(uri, 2, 19, true));
     assert_json_snapshot!(response);
 }

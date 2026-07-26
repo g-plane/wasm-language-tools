@@ -1,4 +1,4 @@
-use crate::{binder::SymbolKey, document::Document, helpers::LineIndexExt, imex, uri::InternUri};
+use crate::{binder::SymbolKey, document::Document, helpers::LineIndexExt, imex};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rustc_hash::{FxBuildHasher, FxHashMap};
@@ -6,7 +6,7 @@ use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange, ast::support}
 
 pub fn act(
     db: &dyn salsa::Database,
-    uri: InternUri,
+    uri: &str,
     document: Document,
     line_index: &LineIndex,
     node: &SyntaxNode,
@@ -30,7 +30,7 @@ pub fn act(
     };
     let mut changes = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
-        uri.raw(db),
+        uri.to_owned(),
         vec![TextEdit {
             range: line_index.convert(TextRange::empty(ident_token.text_range().end()))?,
             new_text: format!(" (export {name})"),

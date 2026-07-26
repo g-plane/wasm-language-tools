@@ -12,8 +12,8 @@ fn correct() {
     drop))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert!(response.items.is_empty());
 }
@@ -27,8 +27,8 @@ fn incorrect() {
     drop))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
-    calm(&mut service, &uri);
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
     let response = service.pull_diagnostics(create_params(uri));
     assert_json_snapshot!(response);
 }

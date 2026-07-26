@@ -19,7 +19,7 @@ const SOURCE: &str = "
 fn t1_supertypes() {
     let uri = "untitled:test".to_string();
     let mut service = LanguageService::default();
-    service.commit(&uri, SOURCE.into());
+    service.commit(uri.clone(), SOURCE.into());
     let prepare = service.prepare_type_hierarchy(TypeHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
         position: Position { line: 2, character: 10 },
@@ -38,7 +38,7 @@ fn t1_supertypes() {
 fn t1_subtypes() {
     let uri = "untitled:test".to_string();
     let mut service = LanguageService::default();
-    service.commit(&uri, SOURCE.into());
+    service.commit(uri.clone(), SOURCE.into());
     let prepare = service.prepare_type_hierarchy(TypeHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
         position: Position { line: 2, character: 10 },
@@ -57,7 +57,7 @@ fn t1_subtypes() {
 fn t2_supertypes() {
     let uri = "untitled:test".to_string();
     let mut service = LanguageService::default();
-    service.commit(&uri, SOURCE.into());
+    service.commit(uri.clone(), SOURCE.into());
     let prepare = service.prepare_type_hierarchy(TypeHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
         position: Position { line: 5, character: 19 },
@@ -76,7 +76,7 @@ fn t2_supertypes() {
 fn t3_subtypes() {
     let uri = "untitled:test".to_string();
     let mut service = LanguageService::default();
-    service.commit(&uri, SOURCE.into());
+    service.commit(uri.clone(), SOURCE.into());
     let prepare = service.prepare_type_hierarchy(TypeHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
         position: Position { line: 6, character: 19 },
@@ -95,7 +95,7 @@ fn t3_subtypes() {
 fn t4_supertypes() {
     let uri = "untitled:test".to_string();
     let mut service = LanguageService::default();
-    service.commit(&uri, SOURCE.into());
+    service.commit(uri.clone(), SOURCE.into());
     let prepare = service.prepare_type_hierarchy(TypeHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
         position: Position { line: 6, character: 10 },
@@ -114,7 +114,7 @@ fn t4_supertypes() {
 fn t5_subtypes() {
     let uri = "untitled:test".to_string();
     let mut service = LanguageService::default();
-    service.commit(&uri, SOURCE.into());
+    service.commit(uri.clone(), SOURCE.into());
     let prepare = service.prepare_type_hierarchy(TypeHierarchyPrepareParams {
         text_document: TextDocumentIdentifier { uri },
         position: Position { line: 7, character: 10 },

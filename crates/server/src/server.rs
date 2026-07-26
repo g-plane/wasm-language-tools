@@ -508,7 +508,7 @@ impl Server {
     fn update_configs(&mut self, uris: Vec<String>, result: serde_json::Value) -> anyhow::Result<()> {
         uris.iter()
             .zip(serde_json::from_value::<Vec<_>>(result)?)
-            .for_each(|(uri, config)| self.service.set_config(uri, config));
+            .for_each(|(uri, config)| self.service.set_config(uri.clone(), config));
         if self.support_refresh_diagnostics {
             stdio::write(Message::Request {
                 id: NumberOrString::Integer(self.sent_requests.next_id()),

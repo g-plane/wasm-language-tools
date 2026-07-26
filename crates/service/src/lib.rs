@@ -14,13 +14,11 @@ mod imex;
 mod mutability;
 mod refactorings;
 mod types_analyzer;
-mod uri;
 
 pub use crate::config::*;
 use crate::{
     document::Document,
     features::{SemanticTokenType, SemanticTokenTypes},
-    uri::InternUri,
 };
 use indexmap::IndexMap;
 use lspt::{
@@ -56,9 +54,9 @@ use std::{
 pub struct LanguageService {
     storage: salsa::Storage<Self>,
     semantic_token_types: Arc<SemanticTokenTypes>,
-    documents: Arc<RwLock<FxHashMap<InternUri, Document>>>,
+    documents: Arc<RwLock<FxHashMap<String, Document>>>,
     global_config: Arc<ServiceConfig>,
-    configs: Arc<RwLock<FxHashMap<InternUri, ConfigState>>>,
+    configs: Arc<RwLock<FxHashMap<String, ConfigState>>>,
     support_pull_config: bool,
 }
 #[salsa::db]

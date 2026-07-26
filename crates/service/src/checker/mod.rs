@@ -51,10 +51,9 @@ mod unread;
 mod unused;
 mod useless_catch;
 
-pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfig) -> Vec<lspt::Diagnostic> {
+pub fn check(db: &dyn salsa::Database, uri: &str, document: Document, config: &ServiceConfig) -> Vec<lspt::Diagnostic> {
     let mut bump = Bump::with_capacity(32 * 1024);
 
-    let uri = document.uri(db);
     let line_index = document.line_index(db);
     let root = SyntaxNode::new_root(document.root(db));
     let symbol_table = SymbolTable::of(db, document);
@@ -268,7 +267,7 @@ pub fn check(db: &dyn salsa::Database, document: Document, config: &ServiceConfi
                                 .convert(info.range)
                                 .map(|range| DiagnosticRelatedInformation {
                                     location: Location {
-                                        uri: uri.raw(db),
+                                        uri: uri.to_owned(),
                                         range,
                                     },
                                     message: info.message,

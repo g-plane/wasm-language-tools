@@ -16,7 +16,7 @@ fn non_func() {
     (local.get 1)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.execute_command(ExecuteCommandParams {
         command: COMMAND.into(),
         arguments: Some(vec![
@@ -49,7 +49,7 @@ fn func() {
     (local.get 1)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.execute_command(ExecuteCommandParams {
         command: COMMAND.into(),
         arguments: Some(vec![

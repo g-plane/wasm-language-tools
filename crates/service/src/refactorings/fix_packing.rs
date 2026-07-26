@@ -1,4 +1,4 @@
-use crate::{helpers::LineIndexExt, uri::InternUri};
+use crate::helpers::LineIndexExt;
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionContext, CodeActionKind, Diagnostic, NumberOrString, TextEdit, WorkspaceEdit};
 use rustc_hash::FxBuildHasher;
@@ -6,8 +6,7 @@ use std::collections::HashMap;
 use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode, TextRange};
 
 pub fn act(
-    db: &dyn salsa::Database,
-    uri: InternUri,
+    uri: &str,
     line_index: &LineIndex,
     node: &SyntaxNode,
     context: &CodeActionContext,
@@ -29,20 +28,20 @@ pub fn act(
         "struct.get" => Some(
             ["struct.get_s", "struct.get_u"]
                 .iter()
-                .filter_map(|new_text| build_action(new_text, range, diagnostic, db, uri, line_index))
+                .filter_map(|new_text| build_action(new_text, range, diagnostic, uri, line_index))
                 .collect(),
         ),
         "struct.get_s" | "struct.get_u" => {
-            build_action("struct.get", range, diagnostic, db, uri, line_index).map(|code_action| vec![code_action])
+            build_action("struct.get", range, diagnostic, uri, line_index).map(|code_action| vec![code_action])
         }
         "array.get" => Some(
             ["array.get_s", "array.get_u"]
                 .iter()
-                .filter_map(|new_text| build_action(new_text, range, diagnostic, db, uri, line_index))
+                .filter_map(|new_text| build_action(new_text, range, diagnostic, uri, line_index))
                 .collect(),
         ),
         "array.get_s" | "array.get_u" => {
-            build_action("array.get", range, diagnostic, db, uri, line_index).map(|code_action| vec![code_action])
+            build_action("array.get", range, diagnostic, uri, line_index).map(|code_action| vec![code_action])
         }
         _ => None,
     }
@@ -52,8 +51,7 @@ fn build_action(
     new_text: &str,
     range: TextRange,
     diagnostic: &Diagnostic,
-    db: &dyn salsa::Database,
-    uri: InternUri,
+    uri: &str,
     line_index: &LineIndex,
 ) -> Option<CodeAction> {
     let text_edits = vec![TextEdit {
@@ -61,7 +59,7 @@ fn build_action(
         new_text: new_text.into(),
     }];
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
-    changes.insert(uri.raw(db), text_edits);
+    changes.insert(uri.to_owned(), text_edits);
     Some(CodeAction {
         title: format!("Replace instruction with `{new_text}`"),
         kind: Some(CodeActionKind::QuickFix),

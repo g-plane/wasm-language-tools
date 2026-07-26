@@ -40,7 +40,7 @@ fn non_compact() {
   (import "" "" (func (param i32)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 19, 2, 19));
     assert!(response.is_none());
 }
@@ -53,7 +53,7 @@ fn no_extern_type() {
   (import "env" (item "a") (item "b"))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 19, 2, 19));
     assert_json_snapshot!(response);
 }
@@ -66,7 +66,7 @@ fn missing_module_name() {
   (import (item "a" (global i32)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 7, 2, 7));
     assert!(response.is_none());
 }
@@ -79,7 +79,7 @@ fn missing_name() {
   (import "env" (item "a") (item) (global i32))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 7, 2, 7));
     assert_json_snapshot!(response);
 }
@@ -96,7 +96,7 @@ fn encoding1() {
     (item "e" (tag (param i32)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 5, 7, 5, 7));
     assert_json_snapshot!(response);
 }
@@ -109,7 +109,7 @@ fn encoding2() {
   (import "env" (item "a") (item "b") (memory))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 42, 2, 42));
     assert_json_snapshot!(response);
 }

@@ -14,7 +14,7 @@ use wat_syntax::{
     ast::{AstNode, CompType, ModuleField, Root, TypeDef},
 };
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> DefTypes<'_> {
     let root = SyntaxNode::new_root(document.root(db));
     let symbol_table = SymbolTable::of(db, document);
@@ -62,7 +62,7 @@ pub(crate) fn get_def_types(db: &dyn salsa::Database, document: Document) -> Def
 
 pub(crate) type DefTypes<'db> = FxHashMap<SymbolKey, DefType<'db>>;
 
-#[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
+#[derive(Clone, Debug, PartialEq, Eq, salsa::SalsaValue)]
 pub(crate) struct DefType<'db> {
     pub key: SymbolKey,
     pub idx: Idx<'db>,
@@ -119,13 +119,13 @@ impl<'db> DefType<'db> {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
+#[derive(Clone, Debug, PartialEq, Eq, salsa::SalsaValue)]
 pub(crate) struct Inherits<'db> {
     pub(crate) symbol: SymbolKey,
     pub(crate) idx: Idx<'db>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, salsa::Update)]
+#[derive(Clone, Debug, PartialEq, Eq, salsa::SalsaValue)]
 pub(crate) enum CompositeType<'db> {
     Func(NamedSig<'db>),
     Struct(Fields<'db>),
@@ -174,7 +174,7 @@ impl<'db> CompositeType<'db> {
     }
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub(crate) fn get_rec_type_groups(db: &dyn salsa::Database, document: Document) -> Vec<RecTypeGroup> {
     let root = Root::cast(SyntaxNode::new_root(document.root(db))).expect("expected root tree");
     let symbol_table = SymbolTable::of(db, document);

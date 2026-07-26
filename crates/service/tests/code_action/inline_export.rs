@@ -11,7 +11,7 @@ fn no_name() {
   (export (func 0)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 3, 6, 3, 6));
     assert!(response.is_none());
 }
@@ -25,7 +25,7 @@ fn missing_extern_idx() {
   (export "" (func)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 3, 6, 3, 6));
     assert!(response.is_none());
 }
@@ -38,7 +38,7 @@ fn undef() {
   (export "" (func 0)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 6, 2, 6));
     assert!(response.is_none());
 }
@@ -52,7 +52,7 @@ fn func() {
   (func $f))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 6, 2, 6));
     assert_json_snapshot!(response);
 }
@@ -66,7 +66,7 @@ fn global() {
   (global $g))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 6, 2, 6));
     assert_json_snapshot!(response);
 }
@@ -80,7 +80,7 @@ fn memory() {
   (export "" (memory 0)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 3, 6, 3, 6));
     assert_json_snapshot!(response);
 }
@@ -94,7 +94,7 @@ fn table() {
   (export "" (table 0)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 3, 6, 3, 6));
     assert_json_snapshot!(response);
 }
@@ -108,7 +108,7 @@ fn tag() {
   (export "" (tag 0)))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 3, 6, 3, 6));
     assert_json_snapshot!(response);
 }

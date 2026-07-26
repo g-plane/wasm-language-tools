@@ -19,7 +19,7 @@ log = { workspace = true }
 lspt = { workspace = true }
 parking_lot = "0.12"
 rustc-hash = { workspace = true }
-salsa = "0.27"
+salsa = "0.28"
 serde = { workspace = true }
 serde_json = { workspace = true }
 similar = "3.1"

@@ -1,10 +1,10 @@
-use crate::{helpers::LineIndexExt, types_analyzer::RefType, uri::InternUri};
+use crate::{helpers::LineIndexExt, types_analyzer::RefType};
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use wat_syntax::{SyntaxKind, SyntaxNode, ast::support};
 
-pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
+pub fn act(db: &dyn salsa::Database, uri: &str, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
     if !RefType::from_green(node.green(), db)?.nullable {
         return None;
     }
@@ -31,7 +31,7 @@ pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, nod
 
     let mut changes = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
-        uri.raw(db),
+        uri.to_owned(),
         vec![TextEdit {
             range: line_index.convert(node.text_range())?,
             new_text: ref_type.into(),

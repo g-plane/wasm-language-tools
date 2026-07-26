@@ -1,17 +1,11 @@
-use crate::{helpers::LineIndexExt, uri::InternUri};
+use crate::helpers::LineIndexExt;
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionContext, CodeActionKind, NumberOrString, TextEdit, WorkspaceEdit};
 use rustc_hash::FxBuildHasher;
 use std::{collections::HashMap, ops::ControlFlow};
 use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode, TextRange, ast::support};
 
-pub fn act(
-    db: &dyn salsa::Database,
-    uri: InternUri,
-    line_index: &LineIndex,
-    node: &SyntaxNode,
-    context: &CodeActionContext,
-) -> Option<CodeAction> {
+pub fn act(uri: &str, line_index: &LineIndex, node: &SyntaxNode, context: &CodeActionContext) -> Option<CodeAction> {
     let end = line_index.convert(node.text_range().end())?;
     let (types, diagnostic) = context
         .diagnostics
@@ -76,7 +70,7 @@ pub fn act(
 
     let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
     changes.insert(
-        uri.raw(db),
+        uri.to_owned(),
         vec![TextEdit {
             range: line_index.convert(TextRange::empty(end))?,
             new_text: format!(" (result {})", types.join(" ")),

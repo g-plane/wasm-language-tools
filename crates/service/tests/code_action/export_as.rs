@@ -10,7 +10,7 @@ fn no_ident() {
   (func)
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 6, 2, 6));
     assert!(response.is_none());
 }
@@ -23,7 +23,7 @@ fn exported_by_inline() {
   (func $f (export "func")))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 6, 2, 6));
     assert!(response.is_none());
 }
@@ -37,7 +37,7 @@ fn exported_by_module_field() {
   (export "f" (func $f))
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 6, 2, 6));
     assert!(response.is_none());
 }
@@ -50,7 +50,7 @@ fn func() {
   (func $f)
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 6, 2, 6));
     assert_json_snapshot!(response);
 }
@@ -63,7 +63,7 @@ fn global() {
   (global $g)
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 6, 2, 6));
     assert_json_snapshot!(response);
 }
@@ -76,7 +76,7 @@ fn memory() {
   (memory $m)
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 6, 2, 6));
     assert_json_snapshot!(response);
 }
@@ -89,7 +89,7 @@ fn table() {
   (table $t)
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 6, 2, 6));
     assert_json_snapshot!(response);
 }
@@ -102,7 +102,7 @@ fn tag() {
   (tag $e)
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 6, 2, 6));
     assert_json_snapshot!(response);
 }
@@ -115,7 +115,7 @@ fn quoted_ident() {
   (func $"my func")
 "#;
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(uri, 2, 6, 2, 6));
     assert_json_snapshot!(response);
 }

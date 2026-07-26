@@ -1,4 +1,4 @@
-use crate::{helpers::LineIndexExt, uri::InternUri};
+use crate::helpers::LineIndexExt;
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rustc_hash::FxBuildHasher;
@@ -8,7 +8,7 @@ use wat_syntax::{
     ast::{AstNode, ExternType},
 };
 
-pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
+pub fn act(uri: &str, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
     let module_name = node.children_by_kind(SyntaxKind::MODULE_NAME).next()?;
     let extern_type = node.children_by_kind(ExternType::can_cast).next();
     let imports = node
@@ -33,7 +33,7 @@ pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, nod
     } else {
         let mut changes = HashMap::with_capacity_and_hasher(1, FxBuildHasher);
         changes.insert(
-            uri.raw(db),
+            uri.to_owned(),
             vec![TextEdit {
                 range: line_index.convert(node.text_range())?,
                 new_text: imports.join("\n  "),

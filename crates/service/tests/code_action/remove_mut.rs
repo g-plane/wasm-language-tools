@@ -35,7 +35,7 @@ fn no_mut() {
   (global i32))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(super::create_params(uri, 2, 12, 2, 12));
     assert!(response.is_none());
 }
@@ -48,7 +48,7 @@ fn no_diagnostics() {
   (global (mut i32)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(super::create_params(uri, 2, 17, 2, 17));
     assert!(response.is_none());
 }
@@ -62,7 +62,7 @@ fn unrelated_range() {
   (global $b (mut i32)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range {
@@ -86,7 +86,7 @@ fn unrelated_diagnostic() {
   (global $b (mut i32)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(CodeActionParams {
         text_document: TextDocumentIdentifier { uri },
         range: Range {
@@ -125,7 +125,7 @@ fn simple() {
   (global $a (mut i32)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range {
@@ -148,7 +148,7 @@ fn missing_r_paren() {
   (global $a (mut i32
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range {
@@ -171,7 +171,7 @@ fn with_comments() {
   (global $a ((;a;) mut(;b;) i32)))
 ";
     let mut service = LanguageService::default();
-    service.commit(&uri, source.into());
+    service.commit(uri.clone(), source.into());
     let response = service.code_action(create_params(
         uri,
         Range {

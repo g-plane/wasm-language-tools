@@ -1,4 +1,4 @@
-use crate::{LanguageService, helpers::LineIndexExt, uri::InternUri};
+use crate::{LanguageService, helpers::LineIndexExt};
 use line_index::LineIndex;
 use lspt::{
     DocumentFormattingParams, DocumentRangeFormattingParams, DocumentRangesFormattingParams, FormattingOptions,
@@ -11,10 +11,9 @@ use wat_syntax::{AmberNode, TextRange, TextSize};
 impl LanguageService {
     /// Handler for `textDocument/formatting` request.
     pub fn formatting(&self, params: DocumentFormattingParams) -> Option<Vec<TextEdit>> {
-        let uri = InternUri::new(self, params.text_document.uri);
-        let document = self.get_document(uri)?;
+        let document = self.get_document(&params.text_document.uri)?;
         let configs = self.configs.read();
-        let config = configs.get(&uri)?.unwrap_or_global(self);
+        let config = configs.get(&params.text_document.uri)?.unwrap_or_global(self);
         let line_index = document.line_index(self);
         let old = document.text(self);
         let new = wat_formatter::format(
@@ -72,10 +71,9 @@ impl LanguageService {
 
     /// Handler for `textDocument/rangeFormatting` request.
     pub fn range_formatting(&self, params: DocumentRangeFormattingParams) -> Option<Vec<TextEdit>> {
-        let uri = InternUri::new(self, params.text_document.uri);
-        let document = self.get_document(uri)?;
+        let document = self.get_document(&params.text_document.uri)?;
         let configs = self.configs.read();
-        let config = configs.get(&uri)?.unwrap_or_global(self);
+        let config = configs.get(&params.text_document.uri)?.unwrap_or_global(self);
         let line_index = document.line_index(self);
         format_with_range(
             AmberNode::new_root(document.root(self)),
@@ -87,10 +85,9 @@ impl LanguageService {
 
     /// Handler for `textDocument/rangesFormatting` request.
     pub fn ranges_formatting(&self, params: DocumentRangesFormattingParams) -> Option<Vec<TextEdit>> {
-        let uri = InternUri::new(self, params.text_document.uri);
-        let document = self.get_document(uri)?;
+        let document = self.get_document(&params.text_document.uri)?;
         let configs = self.configs.read();
-        let config = configs.get(&uri)?.unwrap_or_global(self);
+        let config = configs.get(&params.text_document.uri)?.unwrap_or_global(self);
         let options = build_options(&params.options, config.format.clone());
         let line_index = document.line_index(self);
         let root = AmberNode::new_root(document.root(self));

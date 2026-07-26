@@ -2,7 +2,7 @@ use crate::helpers::{self, RenderWithDb};
 use std::fmt;
 use wat_syntax::{GreenNode, NodeOrToken, SyntaxKind};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, salsa::Update)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, salsa::SalsaValue)]
 pub struct Idx<'db> {
     pub num: Option<u32>,
     pub name: Option<InternIdent<'db>>,
@@ -81,7 +81,6 @@ impl fmt::Display for RenderWithDb<'_, &Idx<'_>> {
 
 #[salsa::interned(debug)]
 pub(crate) struct InternIdent<'db> {
-    #[returns(ref)]
     pub(crate) ident: String,
 }
 

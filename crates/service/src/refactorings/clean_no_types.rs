@@ -1,10 +1,10 @@
-use crate::{helpers::LineIndexExt, uri::InternUri};
+use crate::helpers::LineIndexExt;
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode};
 
-pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
+pub fn act(uri: &str, line_index: &LineIndex, node: &SyntaxNode) -> Option<CodeAction> {
     let kind = match node.kind() {
         SyntaxKind::PARAM => "param",
         SyntaxKind::RESULT => "result",
@@ -27,7 +27,7 @@ pub fn act(db: &dyn salsa::Database, uri: InternUri, line_index: &LineIndex, nod
     {
         let mut changes = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
         changes.insert(
-            uri.raw(db),
+            uri.to_owned(),
             vec![TextEdit {
                 range,
                 new_text: "".into(),
