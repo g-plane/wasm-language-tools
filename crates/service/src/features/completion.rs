@@ -777,7 +777,7 @@ fn get_cmp_list(
                     return items;
                 };
                 let deprecation = deprecation::get_deprecation(db, document);
-                items.extend(symbol_table.get_declared(module, SymbolKind::Func).map(|symbol| {
+                items.extend(symbol_table.get_declared(&module, SymbolKind::Func).map(|symbol| {
                     let label = symbol.idx.render(db).to_string();
                     CompletionItem {
                         label: label.clone(),
@@ -823,7 +823,7 @@ fn get_cmp_list(
                 };
                 let def_types = types_analyzer::get_def_types(db, document);
                 let deprecation = deprecation::get_deprecation(db, document);
-                items.extend(symbol_table.get_declared(module, SymbolKind::Type).map(|symbol| {
+                items.extend(symbol_table.get_declared(&module, SymbolKind::Type).map(|symbol| {
                     let label = symbol.idx.render(db).to_string();
                     let comp_type = def_types.get(&symbol.key).map(|def_type| &def_type.comp);
                     CompletionItem {
@@ -875,7 +875,7 @@ fn get_cmp_list(
                 };
                 let deprecation = deprecation::get_deprecation(db, document);
                 let preferred_type = guess_preferred_type(db, document, token);
-                items.extend(symbol_table.get_declared(module, SymbolKind::GlobalDef).map(|symbol| {
+                items.extend(symbol_table.get_declared(&module, SymbolKind::GlobalDef).map(|symbol| {
                     let label = symbol.idx.render(db).to_string();
                     let ty = types_analyzer::extract_global_type(db, &symbol.ty.0);
                     CompletionItem {
@@ -917,7 +917,7 @@ fn get_cmp_list(
                     return items;
                 };
                 let deprecation = deprecation::get_deprecation(db, document);
-                items.extend(symbol_table.get_declared(module, SymbolKind::MemoryDef).map(|symbol| {
+                items.extend(symbol_table.get_declared(&module, SymbolKind::MemoryDef).map(|symbol| {
                     let label = symbol.idx.render(db).to_string();
                     CompletionItem {
                         label: label.clone(),
@@ -939,40 +939,30 @@ fn get_cmp_list(
                 }));
             }
             CmpCtx::Table => {
-                let Some(module) = token
-                    .parent_ancestors()
-                    .find(|node| node.kind() == SyntaxKind::MODULE)
-                    .map(|module| SymbolKey::new(&module))
-                else {
+                let Some(module) = token.parent_ancestors().find(|node| node.kind() == SyntaxKind::MODULE) else {
                     return items;
                 };
                 let deprecation = deprecation::get_deprecation(db, document);
-                items.extend(
-                    symbol_table
-                        .symbols
-                        .values()
-                        .filter(|symbol| symbol.kind == SymbolKind::TableDef && symbol.region == module)
-                        .map(|symbol| {
-                            let label = symbol.idx.render(db).to_string();
-                            CompletionItem {
-                                label: label.clone(),
-                                kind: Some(CompletionItemKind::Variable),
-                                text_edit: if token.kind().is_trivia() {
-                                    None
-                                } else {
-                                    line_index.convert(token.text_range()).map(|range| {
-                                        CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label })
-                                    })
-                                },
-                                tags: if deprecation.contains_key(&symbol.key) {
-                                    Some(vec![CompletionItemTag::Deprecated])
-                                } else {
-                                    None
-                                },
-                                ..Default::default()
-                            }
-                        }),
-                );
+                items.extend(symbol_table.get_declared(&module, SymbolKind::TableDef).map(|symbol| {
+                    let label = symbol.idx.render(db).to_string();
+                    CompletionItem {
+                        label: label.clone(),
+                        kind: Some(CompletionItemKind::Variable),
+                        text_edit: if token.kind().is_trivia() {
+                            None
+                        } else {
+                            line_index
+                                .convert(token.text_range())
+                                .map(|range| CompletionItemTextEdit::TextEdit(TextEdit { range, new_text: label }))
+                        },
+                        tags: if deprecation.contains_key(&symbol.key) {
+                            Some(vec![CompletionItemTag::Deprecated])
+                        } else {
+                            None
+                        },
+                        ..Default::default()
+                    }
+                }));
             }
             CmpCtx::Block => {
                 items.extend(
@@ -1099,7 +1089,7 @@ fn get_cmp_list(
                     return items;
                 };
                 let deprecation = deprecation::get_deprecation(db, document);
-                items.extend(symbol_table.get_declared(module, SymbolKind::TagDef).map(|symbol| {
+                items.extend(symbol_table.get_declared(&module, SymbolKind::TagDef).map(|symbol| {
                     let label = symbol.idx.render(db).to_string();
                     let sig = NamedSig::from_func(db, document, symbol.ty());
                     CompletionItem {
@@ -1134,7 +1124,7 @@ fn get_cmp_list(
                     return items;
                 };
                 let deprecation = deprecation::get_deprecation(db, document);
-                items.extend(symbol_table.get_declared(module, SymbolKind::DataDef).map(|symbol| {
+                items.extend(symbol_table.get_declared(&module, SymbolKind::DataDef).map(|symbol| {
                     let label = symbol.idx.render(db).to_string();
                     CompletionItem {
                         label: label.clone(),
@@ -1168,7 +1158,7 @@ fn get_cmp_list(
                     return items;
                 };
                 let deprecation = deprecation::get_deprecation(db, document);
-                items.extend(symbol_table.get_declared(module, SymbolKind::ElemDef).map(|symbol| {
+                items.extend(symbol_table.get_declared(&module, SymbolKind::ElemDef).map(|symbol| {
                     let label = symbol.idx.render(db).to_string();
                     CompletionItem {
                         label: label.clone(),

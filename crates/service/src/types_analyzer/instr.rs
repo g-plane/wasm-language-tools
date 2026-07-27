@@ -6,7 +6,7 @@ use super::{
     types::{HeapType, OperandType, RefType, ValType},
 };
 use crate::{
-    binder::{SymbolKey, SymbolKind, SymbolTable},
+    binder::{SymbolKey, SymbolTable},
     data_set,
     document::Document,
     helpers,
@@ -112,11 +112,15 @@ pub(crate) fn resolve_instr_sig<'db, 'bump>(
         "return" => ResolvedSig {
             params: ctx
                 .symbol_table
-                .symbols
-                .values()
-                .find(|symbol| {
-                    symbol.kind == SymbolKind::Func && symbol.key.text_range().contains_range(instr.text_range())
+                .modules
+                .get(&SymbolKey::new(ctx.module))
+                .and_then(|module| {
+                    module
+                        .funcs
+                        .iter()
+                        .find(|key| key.text_range().contains_range(instr.text_range()))
                 })
+                .and_then(|key| ctx.symbol_table.symbols.get(key))
                 .map(|func| {
                     BumpVec::from_iter_in(
                         Sig::from_func(ctx.db, ctx.document, func.ty())

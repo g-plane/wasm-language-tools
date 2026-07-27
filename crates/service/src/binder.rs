@@ -17,6 +17,7 @@ pub(crate) struct SymbolTable<'db> {
     pub symbols: Symbols<'db>,
     pub resolved: FxHashMap<SymbolKey, SymbolKey>,
     pub def_poi: FxHashMap<SymbolKey, TextRange>,
+    pub modules: FxHashMap<SymbolKey, ModuleDefSymbols>,
 }
 fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) -> SymbolTable<'db> {
     fn create_module_level_symbol<'db>(
@@ -195,6 +196,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
     let mut symbols = Symbols::with_capacity_and_hasher(8, FxBuildHasher);
     let mut resolved = FxHashMap::default();
     let mut def_poi = FxHashMap::default();
+    let mut modules = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
     let bump = Bump::new();
     root.children().enumerate().for_each(|(module_id, module)| {
         let module_key = module.into();
@@ -1093,12 +1095,27 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     resolved.insert(param_ref_key, def_symbol.key);
                 }
             });
+
+        modules.insert(
+            module_key,
+            ModuleDefSymbols {
+                funcs: funcs.into_iter().map(|(key, _)| key).collect(),
+                types: types.into_iter().map(|(key, _)| key).collect(),
+                globals: globals.into_iter().map(|(key, _)| key).collect(),
+                memories: memories.into_iter().map(|(key, _)| key).collect(),
+                tables: tables.into_iter().map(|(key, _)| key).collect(),
+                tags: tags.into_iter().map(|(key, _)| key).collect(),
+                datas: datas.into_iter().map(|(key, _)| key).collect(),
+                elems: elems.into_iter().map(|(key, _)| key).collect(),
+            },
+        );
     });
 
     SymbolTable {
         symbols,
         resolved,
         def_poi,
+        modules,
     }
 }
 
@@ -1118,11 +1135,22 @@ impl<'db> SymbolTable<'db> {
             .find(|symbol| symbol.kind == def_kind && symbol.region == region && idx.is_defined_by(&symbol.idx))
     }
 
-    pub fn get_declared(&self, node: SyntaxNode, kind: SymbolKind) -> impl Iterator<Item = &Symbol<'db>> {
-        let key = SymbolKey::new(&node);
-        self.symbols
-            .values()
-            .filter(move |symbol| symbol.kind == kind && symbol.region == key)
+    pub fn get_declared(&self, module: &SyntaxNode, kind: SymbolKind) -> impl Iterator<Item = &Symbol<'db>> {
+        self.modules
+            .get(&SymbolKey::new(module))
+            .into_iter()
+            .flat_map(move |module| match kind {
+                SymbolKind::Func => &*module.funcs,
+                SymbolKind::Type => &*module.types,
+                SymbolKind::GlobalDef => &*module.globals,
+                SymbolKind::MemoryDef => &*module.memories,
+                SymbolKind::TableDef => &*module.tables,
+                SymbolKind::TagDef => &*module.tags,
+                SymbolKind::DataDef => &*module.datas,
+                SymbolKind::ElemDef => &*module.elems,
+                _ => &[],
+            })
+            .filter_map(|key| self.symbols.get(key))
     }
 
     pub fn find_references_on_def(
@@ -1363,3 +1391,15 @@ impl fmt::Display for IdxKind {
 }
 
 type Symbols<'db> = IndexMap<SymbolKey, Symbol<'db>, FxBuildHasher>;
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ModuleDefSymbols {
+    pub funcs: Vec<SymbolKey>,
+    pub types: Vec<SymbolKey>,
+    pub globals: Vec<SymbolKey>,
+    pub memories: Vec<SymbolKey>,
+    pub tables: Vec<SymbolKey>,
+    pub tags: Vec<SymbolKey>,
+    pub datas: Vec<SymbolKey>,
+    pub elems: Vec<SymbolKey>,
+}

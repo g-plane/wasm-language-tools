@@ -1,5 +1,5 @@
 use crate::{
-    binder::{SymbolKey, SymbolKind, SymbolTable},
+    binder::{SymbolKind, SymbolTable},
     helpers::LineIndexExt,
     idx::Idx,
 };
@@ -153,16 +153,7 @@ pub fn act(
 fn retrieve_idx<'a>(symbol_table: &'a SymbolTable, node: &SyntaxNode, kind: SymbolKind) -> Option<Idx<'a>> {
     node.ancestors()
         .find(|ancestor| ancestor.kind() == SyntaxKind::MODULE)
-        .and_then(|module| {
-            symbol_table.find_def_by_idx(
-                Idx {
-                    num: Some(0),
-                    name: None,
-                },
-                kind,
-                SymbolKey::new(&module),
-            )
-        })
+        .and_then(|module| symbol_table.get_declared(&module, kind).next())
         .map(|symbol| symbol.idx)
 }
 

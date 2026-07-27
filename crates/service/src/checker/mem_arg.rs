@@ -1,8 +1,7 @@
 use super::{Diagnostic, DiagnosticCtx, RelatedInformation};
 use crate::{
-    binder::{SymbolKey, SymbolKind},
+    binder::SymbolKey,
     helpers,
-    idx::Idx,
     types_analyzer::{self, ValType},
 };
 use std::num::IntErrorKind;
@@ -21,14 +20,12 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode, instr_name: AmberToken) -> Op
     let first = immediates.next()?;
     let (mem_def, mem_arg) = if let Some(mem_arg) = first.children_by_kind(SyntaxKind::MEM_ARG).next() {
         (
-            ctx.symbol_table.find_def_by_idx(
-                Idx {
-                    num: Some(0),
-                    name: None,
-                },
-                SymbolKind::MemoryDef,
-                SymbolKey::new(ctx.module),
-            ),
+            ctx.symbol_table
+                .modules
+                .get(&SymbolKey::new(ctx.module))?
+                .memories
+                .first()
+                .and_then(|key| ctx.symbol_table.symbols.get(key)),
             mem_arg,
         )
     } else {

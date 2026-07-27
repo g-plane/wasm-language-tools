@@ -2,7 +2,6 @@ use super::{Diagnostic, DiagnosticCtx, RelatedInformation};
 use crate::{
     binder::{Symbol, SymbolKey, SymbolKind},
     helpers,
-    idx::Idx,
     types_analyzer::{
         CompositeType, FieldType, HeapType, InstrSigResolverCtx, NamedSig, OperandType, RefType, Sig, StorageType,
         ValType, extract_elem_ref_type, extract_table_ref_type, find_comp_type_by_idx, perform_types_till,
@@ -357,14 +356,13 @@ pub fn check(
                 let elem_type = extract_elem_ref_type(ctx.db, &elem_symbol.green)?;
                 (symbol, table_type, elem_symbol, elem_type)
             } else {
-                let table_symbol = ctx.symbol_table.find_def_by_idx(
-                    Idx {
-                        num: Some(0),
-                        name: None,
-                    },
-                    SymbolKind::TableDef,
-                    SymbolKey::new(ctx.module),
-                )?;
+                let table_symbol = ctx
+                    .symbol_table
+                    .modules
+                    .get(&SymbolKey::new(ctx.module))?
+                    .tables
+                    .first()
+                    .and_then(|key| ctx.symbol_table.symbols.get(key))?;
                 let table_type = extract_table_ref_type(ctx.db, &table_symbol.ty.0)?;
                 let elem_type = extract_elem_ref_type(ctx.db, &symbol.green)?;
                 (table_symbol, table_type, symbol, elem_type)
@@ -927,10 +925,14 @@ fn check_return_call_result_type(
     reported_node: AmberNode,
     actual: &[ValType],
 ) -> Option<Diagnostic> {
-    let func =
-        ctx.symbol_table.symbols.values().find(|symbol| {
-            symbol.kind == SymbolKind::Func && symbol.key.text_range().contains_range(instr.text_range())
-        })?;
+    let func = ctx
+        .symbol_table
+        .modules
+        .get(&SymbolKey::new(ctx.module))?
+        .funcs
+        .iter()
+        .find(|key| key.text_range().contains_range(instr.text_range()))
+        .and_then(|key| ctx.symbol_table.symbols.get(key))?;
     let expected = Sig::from_func(ctx.db, ctx.document, func.ty()).results;
     if actual.len() == expected.len()
         && actual
