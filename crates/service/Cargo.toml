@@ -17,7 +17,7 @@ itertools = "0.15"
 line-index = "0.1"
 log = { workspace = true }
 lspt = { workspace = true }
-parking_lot = "0.12"
+parking_lot = { workspace = true }
 rustc-hash = { workspace = true }
 salsa = "0.28"
 serde = { workspace = true }

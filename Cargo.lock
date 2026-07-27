@@ -544,9 +544,9 @@ checksum = "0ceec5bc11778974d1bcb055b18002eba7f4b3518b6a0081b3af5f21666da9ad"
 
 [[package]]
 name = "lspt"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d26ddd8560dcafaf1516248475dea1afe2fe71a4a8a54e4106c5b59c49ef06ff"
+checksum = "fababf412a8ca1b4165b02b117eca0778289e93fba7df7a0347416cf641906b6"
 dependencies = [
  "rustc-hash",
  "serde",
@@ -1183,8 +1183,8 @@ dependencies = [
  "humantime",
  "log",
  "lspt",
+ "parking_lot",
  "predicates",
- "rayon",
  "rustc-hash",
  "serde",
  "serde_json",

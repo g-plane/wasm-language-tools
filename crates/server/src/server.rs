@@ -7,9 +7,9 @@ use lspt::{
     ConfigurationItem, ConfigurationParams, DidChangeConfigurationParams, DidChangeTextDocumentParams,
     DidOpenTextDocumentParams, InitializeParams, NumberOrString, Registration, RegistrationParams,
     notification::{
-        DidChangeConfigurationNotification, DidChangeTextDocumentNotification, DidCloseTextDocumentNotification,
-        DidOpenTextDocumentNotification, ExitNotification, InitializedNotification, Notification as _,
-        PublishDiagnosticsNotification,
+        CancelNotification, DidChangeConfigurationNotification, DidChangeTextDocumentNotification,
+        DidCloseTextDocumentNotification, DidOpenTextDocumentNotification, ExitNotification, InitializedNotification,
+        Notification as _, PublishDiagnosticsNotification,
     },
     request::{
         CallHierarchyIncomingCallsRequest, CallHierarchyOutgoingCallsRequest, CallHierarchyPrepareRequest,
@@ -23,9 +23,10 @@ use lspt::{
         TypeHierarchyPrepareRequest, TypeHierarchySubtypesRequest, TypeHierarchySupertypesRequest,
     },
 };
-use rayon::{ThreadPool, ThreadPoolBuilder};
-use std::io::StdinLock;
-use wat_service::LanguageService;
+use parking_lot::RwLock;
+use rustc_hash::FxHashMap;
+use std::{io::StdinLock, sync::Arc};
+use wat_service::{CancellationToken, LanguageService};
 
 pub struct Server {
     service: LanguageService,
@@ -35,7 +36,7 @@ pub struct Server {
     support_pull_config: bool,
     support_register_change_config: bool,
     sent_requests: SentRequests,
-    pool: ThreadPool,
+    cancellation_tokens: Arc<RwLock<FxHashMap<NumberOrString, CancellationToken>>>,
 }
 
 impl Server {
@@ -48,7 +49,7 @@ impl Server {
             support_pull_config: false,
             support_register_change_config: false,
             sent_requests: SentRequests::default(),
-            pool: ThreadPoolBuilder::new().build().unwrap(),
+            cancellation_tokens: Default::default(),
         }
     }
 
@@ -65,8 +66,13 @@ impl Server {
             match message {
                 Message::Request { id, method, params } => {
                     let service = self.service.clone();
-                    self.pool.spawn(move || {
-                        let _ = stdio::write(Self::handle_request(service, id, method, params));
+                    self.cancellation_tokens
+                        .write()
+                        .insert(id.clone(), service.cancellation_token());
+                    let cancellation_tokens = Arc::clone(&self.cancellation_tokens);
+                    std::thread::spawn(move || {
+                        let _ = stdio::write(Self::handle_request(service, id.clone(), method, params));
+                        cancellation_tokens.write().remove(&id);
                     });
                 }
                 Message::OkResponse {
@@ -125,6 +131,16 @@ impl Server {
                             }
                             continue;
                         }
+                        Err(p) => params = p,
+                    }
+                    match try_cast_notification::<CancelNotification>(&method, params) {
+                        Ok(Ok(params)) => {
+                            if let Some(token) = self.cancellation_tokens.write().remove(&params.id) {
+                                token.cancel();
+                            }
+                            continue;
+                        }
+                        Ok(Err(..)) => continue,
                         Err(p) => params = p,
                     }
                     if try_cast_notification::<ExitNotification>(&method, params).is_ok() {

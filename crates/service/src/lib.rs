@@ -33,6 +33,7 @@ use lspt::{
 };
 use parking_lot::RwLock;
 use rustc_hash::{FxBuildHasher, FxHashMap};
+pub use salsa::CancellationToken;
 use salsa::Database;
 use std::{
     panic::{AssertUnwindSafe, UnwindSafe},
@@ -196,6 +197,13 @@ impl LanguageService {
                 version: Some(env!("CARGO_PKG_VERSION").into()),
             }),
         }
+    }
+
+    /// Retrieve a cancellation token for the current language service.
+    ///
+    /// This should be called after cloning the language service.
+    pub fn cancellation_token(&self) -> CancellationToken {
+        Database::cancellation_token(self)
     }
 
     /// Run computation that may be cancelled on pending write.

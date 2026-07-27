@@ -30,6 +30,7 @@ impl LanguageService {
             let range = line_index.convert(params.range)?;
             let mut node = root.clone();
             while let Some(it) = node.child_at_range(range) {
+                db.unwind_if_revision_cancelled();
                 match it.kind() {
                     SyntaxKind::MODULE_FIELD_FUNC => {
                         if rewrite && let Some(action) = join_types::act(uri, line_index, &it, SyntaxKind::LOCAL, range)

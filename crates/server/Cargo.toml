@@ -15,7 +15,7 @@ fern = "0.7"
 humantime = "2.4"
 log = { workspace = true }
 lspt = { workspace = true }
-rayon = "1.12"
+parking_lot = { workspace = true }
 rustc-hash = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

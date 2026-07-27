@@ -66,6 +66,7 @@ impl LanguageService {
                         }
                     }
                     SymbolKind::Func => {
+                        db.unwind_if_revision_cancelled();
                         if options.ending
                             && let Some((last, name)) = symbol
                                 .amber()
