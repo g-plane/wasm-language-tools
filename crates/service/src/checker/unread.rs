@@ -30,7 +30,7 @@ pub fn check(
     if locals.is_empty() {
         return;
     }
-    let cfg = cfa::analyze(ctx.db, ctx.document, node.to_ptr());
+    let cfg = cfa::analyze(ctx.db, ctx.document, node.into());
     locals.iter().for_each(|local| {
         check_local(diagnostics, ctx.db, severity, local, ctx.symbol_table, cfg, ctx.bump);
         ctx.bump.reset();

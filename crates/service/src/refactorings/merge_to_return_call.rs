@@ -7,7 +7,7 @@ use crate::{
 use line_index::LineIndex;
 use lspt::{CodeAction, CodeActionKind, TextEdit, WorkspaceEdit};
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, ast::support};
+use wat_syntax::{SyntaxKind, SyntaxNode, ast::support};
 
 pub fn act(
     db: &dyn salsa::Database,
@@ -68,7 +68,7 @@ pub fn act(
         return None;
     }
 
-    let cfg = cfa::analyze(db, document, SyntaxNodePtr::new(&func));
+    let cfg = cfa::analyze(db, document, SymbolKey::new(&func));
     let bb_flow_node = cfg.nodes().iter().find(|flow_node| {
         if let FlowNode {
             kind: FlowNodeKind::BasicBlock(bb),

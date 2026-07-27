@@ -16,7 +16,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, node: A
     if locals.is_empty() {
         return;
     }
-    let cfg = cfa::analyze(ctx.db, ctx.document, node.to_ptr());
+    let cfg = cfa::analyze(ctx.db, ctx.document, node.into());
     locals
         .iter()
         .filter(|local| types_analyzer::extract_type(ctx.db, &local.ty.0).is_some_and(|ty| !ty.defaultable()))

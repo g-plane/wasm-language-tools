@@ -1,6 +1,6 @@
-use crate::{LanguageService, cfa, helpers::LineIndexExt};
+use crate::{LanguageService, binder::SymbolKey, cfa, helpers::LineIndexExt};
 use lspt::{ExecuteCommandParams, Position};
-use wat_syntax::{SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange};
+use wat_syntax::{SyntaxKind, SyntaxNode, TextRange};
 
 impl LanguageService {
     /// Handler for `workspace/executeCommand` request.
@@ -18,7 +18,7 @@ impl LanguageService {
                     .child_at_range(range)
                     .and_then(|module| module.child_at_range(range))
                     .filter(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)?;
-                let cfg = cfa::analyze(self, document, SyntaxNodePtr::new(&func));
+                let cfg = cfa::analyze(self, document, SymbolKey::new(&func));
                 Some(serde_json::Value::String(cfg.generate_dot()))
             }
             _ => None,
