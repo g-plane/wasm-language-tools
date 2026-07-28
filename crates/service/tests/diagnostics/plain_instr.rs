@@ -140,7 +140,7 @@ fn mem_arg_correct() {
     let uri = "untitled:test".to_string();
     let source = "
 (module
-  (func
+  (func (param v128)
     i32.const 0
     i32.load 0
     drop
@@ -158,7 +158,17 @@ fn mem_arg_correct() {
     drop
     i32.const 0
     i32.const 0
-    i32.store align=1)
+    i32.store align=1
+    i32.const 0
+    i64.load offset=60 align=4
+    drop
+    i32.const 0
+    local.get 0
+    v128.store32_lane align=2 offset=1
+    i32.const 0
+    i64.const 0
+    i64.atomic.rmw.xchg align=8 offset=1
+    drop)
   (memory 1))
 ";
     let mut service = LanguageService::default();

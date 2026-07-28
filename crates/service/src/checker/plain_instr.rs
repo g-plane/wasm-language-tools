@@ -165,6 +165,14 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
                 false,
                 instr_name,
             );
+            check_immediate(
+                diagnostics,
+                &mut immediates,
+                SyntaxKind::MEM_ARG,
+                "memory argument",
+                false,
+                instr_name,
+            );
         }
         "memory.size" | "memory.grow" | "memory.fill" | "table.get" | "table.set" | "table.grow" | "table.size"
         | "table.fill" => {
@@ -333,6 +341,14 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
             check_immediate(
                 diagnostics,
                 &mut immediates,
+                SyntaxKind::MEM_ARG,
+                "memory argument",
+                false,
+                instr_name,
+            );
+            check_immediate(
+                diagnostics,
+                &mut immediates,
                 SyntaxKind::INT,
                 "unsigned integer",
                 false,
@@ -469,6 +485,14 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, node: AmberNode, instr_name: Amb
         | "i64.atomic.rmw8.cmpxchg_u"
         | "i64.atomic.rmw16.cmpxchg_u"
         | "i64.atomic.rmw32.cmpxchg_u" => {
+            check_immediate(
+                diagnostics,
+                &mut immediates,
+                SyntaxKind::MEM_ARG,
+                "memory argument",
+                false,
+                instr_name,
+            );
             check_immediate(
                 diagnostics,
                 &mut immediates,
