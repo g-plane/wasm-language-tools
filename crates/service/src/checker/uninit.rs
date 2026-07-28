@@ -1,7 +1,8 @@
-use super::{Diagnostic, DiagnosticCtx};
+use super::Diagnostic;
 use crate::{
     binder::{Symbol, SymbolKey, SymbolTable},
     cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeId, FlowNodeKind},
+    document::Document,
     helpers::{BumpCollectionsExt, BumpHashMap},
     types_analyzer,
 };
@@ -11,29 +12,19 @@ use wat_syntax::{AmberNode, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "uninit";
 
-pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, node: AmberNode, locals: &[&Symbol]) {
-    // avoid expensive analysis if there are no locals
-    if locals.is_empty() {
-        return;
-    }
-    let cfg = cfa::analyze(ctx.db, ctx.document, node.into());
-    locals
-        .iter()
-        .filter(|local| types_analyzer::extract_type(ctx.db, &local.ty.0).is_some_and(|ty| !ty.defaultable()))
-        .for_each(|local| {
-            check_local(diagnostics, ctx.db, local, ctx.symbol_table, cfg, ctx.bump);
-            ctx.bump.reset();
-        });
-}
-
-fn check_local(
+pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
-    local: &Symbol,
+    document: Document,
     symbol_table: &SymbolTable,
-    cfg: &ControlFlowGraph,
+    func: AmberNode,
+    local: &Symbol,
     bump: &Bump,
 ) {
+    if types_analyzer::extract_type(db, &local.ty.0).is_none_or(|ty| ty.defaultable()) {
+        return;
+    }
+    let cfg = cfa::analyze(db, document, func.into());
     let mut block_marks = BumpHashMap::with_capacity_in(cfg.nodes().len(), bump);
     block_marks.extend(cfg.nodes_with_ids().filter_map(|(flow_node, node_id)| {
         if flow_node.unreachable {

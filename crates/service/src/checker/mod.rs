@@ -84,17 +84,6 @@ pub fn check(db: &dyn salsa::Database, uri: &str, document: Document, config: &S
                 SyntaxKind::MODULE_FIELD_FUNC => {
                     typeck::check_func(diagnostics, ctx, node);
                     unreachable::check(diagnostics, ctx, ctx.config.lint.unreachable, node);
-                    let locals = ctx
-                        .symbol_table
-                        .symbols
-                        .values()
-                        .filter(|symbol| {
-                            symbol.kind == SymbolKind::Local
-                                && node.text_range().contains_range(symbol.key.text_range())
-                        })
-                        .collect::<Vec<_>>();
-                    uninit::check(diagnostics, ctx, node, &locals);
-                    unread::check(diagnostics, ctx, ctx.config.lint.unread, node, &locals);
                     if let Some(diagnostic) = import_with_def::check(ctx, node) {
                         diagnostics.push(diagnostic);
                     }
@@ -227,6 +216,30 @@ pub fn check(db: &dyn salsa::Database, uri: &str, document: Document, config: &S
         multi_starts::check(&mut diagnostics, module.amber());
         import_occur::check(&mut diagnostics, imports, module.amber());
     });
+    symbol_table
+        .symbols
+        .values()
+        .filter(|symbol| symbol.kind == SymbolKind::Local)
+        .filter_map(|symbol| {
+            symbol_table
+                .symbols
+                .get(&symbol.region)
+                .map(|func| (symbol, func.amber()))
+        })
+        .for_each(|(local, func)| {
+            uninit::check(&mut diagnostics, db, document, symbol_table, func, local, &bump);
+            unread::check(
+                &mut diagnostics,
+                db,
+                document,
+                config.lint.unread,
+                symbol_table,
+                func,
+                local,
+                &bump,
+            );
+            bump.reset();
+        });
     undef::check(db, &mut diagnostics, symbol_table);
     dup_names::check(db, &mut diagnostics, document, symbol_table, &mut bump);
     unused::check(

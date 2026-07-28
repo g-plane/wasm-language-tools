@@ -1,8 +1,9 @@
-use super::{Diagnostic, DiagnosticCtx};
+use super::Diagnostic;
 use crate::{
     binder::{Symbol, SymbolKey, SymbolTable},
     cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeId, FlowNodeKind},
     config::LintLevel,
+    document::Document,
     helpers::{BumpCollectionsExt, BumpHashMap},
 };
 use bumpalo::{Bump, collections::Vec as BumpVec};
@@ -12,12 +13,16 @@ use wat_syntax::AmberNode;
 
 const DIAGNOSTIC_CODE: &str = "unread";
 
+#[expect(clippy::too_many_arguments)]
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
-    ctx: &mut DiagnosticCtx,
+    db: &dyn salsa::Database,
+    document: Document,
     lint_level: LintLevel,
-    node: AmberNode,
-    locals: &[&Symbol],
+    symbol_table: &SymbolTable,
+    func: AmberNode,
+    local: &Symbol,
+    bump: &Bump,
 ) {
     let severity = match lint_level {
         LintLevel::Allow => return,
@@ -26,26 +31,8 @@ pub fn check(
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
 
-    // avoid expensive analysis if there are no locals
-    if locals.is_empty() {
-        return;
-    }
-    let cfg = cfa::analyze(ctx.db, ctx.document, node.into());
-    locals.iter().for_each(|local| {
-        check_local(diagnostics, ctx.db, severity, local, ctx.symbol_table, cfg, ctx.bump);
-        ctx.bump.reset();
-    });
-}
+    let cfg = cfa::analyze(db, document, func.into());
 
-fn check_local(
-    diagnostics: &mut Vec<Diagnostic>,
-    db: &dyn salsa::Database,
-    severity: DiagnosticSeverity,
-    local: &Symbol,
-    symbol_table: &SymbolTable,
-    cfg: &ControlFlowGraph,
-    bump: &Bump,
-) {
     let mut block_marks = BumpHashMap::with_capacity_in(cfg.nodes().len(), bump);
     block_marks.extend(cfg.nodes_with_ids().filter_map(|(flow_node, node_id)| {
         if flow_node.unreachable {
