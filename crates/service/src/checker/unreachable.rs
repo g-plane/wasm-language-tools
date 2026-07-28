@@ -12,8 +12,8 @@ use wat_syntax::{
 
 const DIAGNOSTIC_CODE: &str = "unreachable";
 
-pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, lint_level: LintLevel, node: AmberNode) {
-    let severity = match lint_level {
+pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, node: AmberNode) {
+    let severity = match ctx.config.lint.unreachable {
         LintLevel::Allow => return,
         LintLevel::Hint => DiagnosticSeverity::Hint,
         LintLevel::Warn => DiagnosticSeverity::Warning,

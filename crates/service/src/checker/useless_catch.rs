@@ -9,8 +9,8 @@ use wat_syntax::{
 
 const DIAGNOSTIC_CODE: &str = "useless-catch";
 
-pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &DiagnosticCtx, lint_level: LintLevel, node: AmberNode) {
-    let severity = match lint_level {
+pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &DiagnosticCtx, node: AmberNode) {
+    let severity = match ctx.config.lint.useless_catch {
         LintLevel::Allow => return,
         LintLevel::Hint => DiagnosticSeverity::Hint,
         LintLevel::Warn => DiagnosticSeverity::Warning,

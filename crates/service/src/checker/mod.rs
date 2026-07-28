@@ -11,7 +11,7 @@ use lspt::{
     DiagnosticRelatedInformation, DiagnosticSeverity, DiagnosticTag, Location, NumberOrString, StringOrMarkupContent,
 };
 use std::cmp::Ordering;
-use wat_syntax::{AmberNode, SyntaxKind, SyntaxNode, TextRange};
+use wat_syntax::{NodeOrToken, SyntaxKind, SyntaxNode, TextRange};
 
 mod block_type;
 mod br_table_branches;
@@ -78,138 +78,155 @@ pub fn check(db: &dyn salsa::Database, uri: &str, document: Document, config: &S
             module_id: module_id as u32,
             bump: &mut bump,
         };
-        visit_node(&mut diagnostics, &mut ctx, module.amber());
-        fn visit_node(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, node: AmberNode) {
-            match node.kind() {
-                SyntaxKind::MODULE_FIELD_FUNC => {
-                    typeck::check_func(diagnostics, ctx, node);
-                    unreachable::check(diagnostics, ctx, ctx.config.lint.unreachable, node);
-                    if let Some(diagnostic) = import_with_def::check(ctx, node) {
-                        diagnostics.push(diagnostic);
-                    }
-                }
-                SyntaxKind::MODULE_FIELD_GLOBAL => {
-                    typeck::check_global(diagnostics, ctx, node);
-                    if let Some(diagnostic) = const_expr::check(node) {
-                        diagnostics.push(diagnostic);
-                    }
-                    if let Some(diagnostic) = import_with_def::check(ctx, node) {
-                        diagnostics.push(diagnostic);
-                    }
-                }
-                SyntaxKind::PLAIN_INSTR => {
-                    if let Some(instr_name) = node.tokens_by_kind(SyntaxKind::INSTR_NAME).next() {
-                        plain_instr::check(diagnostics, node, instr_name);
-                        br_table_branches::check(diagnostics, ctx, node, instr_name);
-                        if let Some(diagnostic) = packing::check(ctx, node, instr_name) {
-                            diagnostics.push(diagnostic);
+        let mut node_stack = Vec::with_capacity(20);
+        node_stack.push((module.amber(), 0));
+        while let Some((parent, index)) = node_stack.last_mut() {
+            match parent.child_or_token_at(*index) {
+                Some(NodeOrToken::Node(node)) => {
+                    match node.kind() {
+                        SyntaxKind::MODULE_FIELD_FUNC => {
+                            typeck::check_func(&mut diagnostics, &mut ctx, node);
+                            unreachable::check(&mut diagnostics, &mut ctx, node);
+                            if let Some(diagnostic) = import_with_def::check(&mut ctx, node) {
+                                diagnostics.push(diagnostic);
+                            }
                         }
-                        type_misuse::check(diagnostics, ctx, node, instr_name);
-                        if let Some(diagnostic) = new_non_defaultable::check(ctx, node, instr_name) {
-                            diagnostics.push(diagnostic);
+                        SyntaxKind::MODULE_FIELD_GLOBAL => {
+                            typeck::check_global(&mut diagnostics, &mut ctx, node);
+                            if let Some(diagnostic) = const_expr::check(node) {
+                                diagnostics.push(diagnostic);
+                            }
+                            if let Some(diagnostic) = import_with_def::check(&mut ctx, node) {
+                                diagnostics.push(diagnostic);
+                            }
                         }
-                        mem_arg::check(diagnostics, ctx, node, instr_name);
-                        lane::check(diagnostics, node, instr_name);
-                        if let Some(diagnostic) =
-                            omitted_idx_in_instr::check(ctx.config.lint.omitted_idx_in_instr, node)
-                        {
-                            diagnostics.push(diagnostic);
+                        SyntaxKind::PLAIN_INSTR => {
+                            if let Some(instr_name) = node.tokens_by_kind(SyntaxKind::INSTR_NAME).next() {
+                                plain_instr::check(&mut diagnostics, node, instr_name);
+                                br_table_branches::check(&mut diagnostics, &ctx, node, instr_name);
+                                if let Some(diagnostic) = packing::check(&ctx, node, instr_name) {
+                                    diagnostics.push(diagnostic);
+                                }
+                                type_misuse::check(&mut diagnostics, &ctx, node, instr_name);
+                                if let Some(diagnostic) = new_non_defaultable::check(&ctx, node, instr_name) {
+                                    diagnostics.push(diagnostic);
+                                }
+                                mem_arg::check(&mut diagnostics, &ctx, node, instr_name);
+                                lane::check(&mut diagnostics, node, instr_name);
+                                if let Some(diagnostic) =
+                                    omitted_idx_in_instr::check(ctx.config.lint.omitted_idx_in_instr, node)
+                                {
+                                    diagnostics.push(diagnostic);
+                                }
+                            }
+                            ctx.bump.reset();
                         }
+                        SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_IF => {
+                            if let Some(diagnostic) = block_type::check(&ctx, node) {
+                                diagnostics.push(diagnostic);
+                            }
+                        }
+                        SyntaxKind::MODULE_FIELD_START => {
+                            if let Some(diagnostic) = start::check(&ctx, node) {
+                                diagnostics.push(diagnostic);
+                            }
+                        }
+                        SyntaxKind::MODULE_FIELD_TABLE => {
+                            typeck::check_table(&mut diagnostics, &mut ctx, node);
+                            if let Some(diagnostic) = const_expr::check(node) {
+                                diagnostics.push(diagnostic);
+                            }
+                            if let Some(diagnostic) = import_with_def::check(&mut ctx, node) {
+                                diagnostics.push(diagnostic);
+                            }
+                        }
+                        SyntaxKind::MODULE_FIELD_ELEM => {
+                            if let Some(diagnostic) = elem_type::check(&ctx, node) {
+                                diagnostics.push(diagnostic);
+                            }
+                        }
+                        SyntaxKind::MODULE_FIELD_MEMORY => {
+                            if let Some(diagnostic) = import_with_def::check(&mut ctx, node) {
+                                diagnostics.push(diagnostic);
+                            }
+                        }
+                        SyntaxKind::MEM_TYPE => {
+                            mem_type::check(&mut diagnostics, node);
+                        }
+                        SyntaxKind::TABLE_TYPE => {
+                            table_type::check(&mut diagnostics, node);
+                        }
+                        SyntaxKind::OFFSET => {
+                            typeck::check_offset(&mut diagnostics, &mut ctx, node);
+                            if let Some(diagnostic) = const_expr::check(node) {
+                                diagnostics.push(diagnostic);
+                            }
+                        }
+                        SyntaxKind::ELEM_LIST => {
+                            typeck::check_elem_list(&mut diagnostics, &mut ctx, node);
+                        }
+                        SyntaxKind::ELEM_EXPR => {
+                            if let Some(diagnostic) = const_expr::check(node) {
+                                diagnostics.push(diagnostic);
+                            }
+                        }
+                        SyntaxKind::MODULE_FIELD_TAG => {
+                            tag_type::check(&mut diagnostics, &ctx, node);
+                            if let Some(diagnostic) = import_with_def::check(&mut ctx, node) {
+                                diagnostics.push(diagnostic);
+                            }
+                        }
+                        SyntaxKind::EXTERN_TYPE_TAG => {
+                            tag_type::check(&mut diagnostics, &ctx, node);
+                        }
+                        SyntaxKind::BLOCK_TRY_TABLE => {
+                            if let Some(diagnostic) =
+                                needless_try_table::check(ctx.config.lint.needless_try_table, node)
+                            {
+                                diagnostics.push(diagnostic);
+                            }
+                            useless_catch::check(&mut diagnostics, &ctx, node);
+                            if let Some(diagnostic) = block_type::check(&ctx, node) {
+                                diagnostics.push(diagnostic);
+                            }
+                        }
+                        SyntaxKind::CATCH | SyntaxKind::CATCH_ALL => {
+                            if let Some(diagnostic) = catch_type::check(&ctx, node) {
+                                diagnostics.push(diagnostic);
+                            }
+                        }
+                        SyntaxKind::CONT_TYPE => {
+                            if let Some(diagnostic) = cont_type::check(&ctx, node) {
+                                diagnostics.push(diagnostic);
+                            }
+                        }
+                        SyntaxKind::IMMEDIATE
+                        | SyntaxKind::FUNC_TYPE
+                        | SyntaxKind::STRUCT_TYPE
+                        | SyntaxKind::ARRAY_TYPE
+                        | SyntaxKind::TYPE_USE
+                        | SyntaxKind::LOCAL
+                        | SyntaxKind::IMPORT
+                        | SyntaxKind::EXPORT
+                        | SyntaxKind::GLOBAL_TYPE
+                        | SyntaxKind::MODULE_FIELD_EXPORT => {
+                            *index += 1;
+                            continue;
+                        }
+                        _ => {}
                     }
-                    ctx.bump.reset();
+                    node_stack.push((node, 0));
                 }
-                SyntaxKind::BLOCK_BLOCK | SyntaxKind::BLOCK_LOOP | SyntaxKind::BLOCK_IF => {
-                    if let Some(diagnostic) = block_type::check(ctx, node) {
-                        diagnostics.push(diagnostic);
+                Some(NodeOrToken::Token(..)) => {
+                    *index += 1;
+                }
+                None => {
+                    node_stack.pop();
+                    if let Some((_, index)) = node_stack.last_mut() {
+                        *index += 1;
                     }
                 }
-                SyntaxKind::MODULE_FIELD_START => {
-                    if let Some(diagnostic) = start::check(ctx, node) {
-                        diagnostics.push(diagnostic);
-                    }
-                }
-                SyntaxKind::MODULE_FIELD_TABLE => {
-                    typeck::check_table(diagnostics, ctx, node);
-                    if let Some(diagnostic) = const_expr::check(node) {
-                        diagnostics.push(diagnostic);
-                    }
-                    if let Some(diagnostic) = import_with_def::check(ctx, node) {
-                        diagnostics.push(diagnostic);
-                    }
-                }
-                SyntaxKind::MODULE_FIELD_ELEM => {
-                    if let Some(diagnostic) = elem_type::check(ctx, node) {
-                        diagnostics.push(diagnostic);
-                    }
-                }
-                SyntaxKind::MODULE_FIELD_MEMORY => {
-                    if let Some(diagnostic) = import_with_def::check(ctx, node) {
-                        diagnostics.push(diagnostic);
-                    }
-                }
-                SyntaxKind::MEM_TYPE => {
-                    mem_type::check(diagnostics, node);
-                }
-                SyntaxKind::TABLE_TYPE => {
-                    table_type::check(diagnostics, node);
-                }
-                SyntaxKind::OFFSET => {
-                    typeck::check_offset(diagnostics, ctx, node);
-                    if let Some(diagnostic) = const_expr::check(node) {
-                        diagnostics.push(diagnostic);
-                    }
-                }
-                SyntaxKind::ELEM_LIST => {
-                    typeck::check_elem_list(diagnostics, ctx, node);
-                }
-                SyntaxKind::ELEM_EXPR => {
-                    if let Some(diagnostic) = const_expr::check(node) {
-                        diagnostics.push(diagnostic);
-                    }
-                }
-                SyntaxKind::MODULE_FIELD_TAG => {
-                    tag_type::check(diagnostics, ctx, node);
-                    if let Some(diagnostic) = import_with_def::check(ctx, node) {
-                        diagnostics.push(diagnostic);
-                    }
-                }
-                SyntaxKind::EXTERN_TYPE_TAG => {
-                    tag_type::check(diagnostics, ctx, node);
-                }
-                SyntaxKind::BLOCK_TRY_TABLE => {
-                    if let Some(diagnostic) = needless_try_table::check(ctx.config.lint.needless_try_table, node) {
-                        diagnostics.push(diagnostic);
-                    }
-                    useless_catch::check(diagnostics, ctx, ctx.config.lint.useless_catch, node);
-                    if let Some(diagnostic) = block_type::check(ctx, node) {
-                        diagnostics.push(diagnostic);
-                    }
-                }
-                SyntaxKind::CATCH | SyntaxKind::CATCH_ALL => {
-                    if let Some(diagnostic) = catch_type::check(ctx, node) {
-                        diagnostics.push(diagnostic);
-                    }
-                }
-                SyntaxKind::CONT_TYPE => {
-                    if let Some(diagnostic) = cont_type::check(ctx, node) {
-                        diagnostics.push(diagnostic);
-                    }
-                }
-                SyntaxKind::IMMEDIATE
-                | SyntaxKind::FUNC_TYPE
-                | SyntaxKind::STRUCT_TYPE
-                | SyntaxKind::ARRAY_TYPE
-                | SyntaxKind::TYPE_USE
-                | SyntaxKind::LOCAL
-                | SyntaxKind::IMPORT
-                | SyntaxKind::EXPORT
-                | SyntaxKind::GLOBAL_TYPE
-                | SyntaxKind::MODULE_FIELD_EXPORT => {
-                    return;
-                }
-                _ => {}
             }
-            node.children().for_each(|child| visit_node(diagnostics, ctx, child));
         }
         multi_starts::check(&mut diagnostics, module.amber());
         import_occur::check(&mut diagnostics, imports, module.amber());
