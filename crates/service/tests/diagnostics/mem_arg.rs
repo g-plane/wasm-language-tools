@@ -145,6 +145,17 @@ fn align_range() {
 }
 
 #[test]
+fn align_range_valid() {
+    let uri = "untitled:test".to_string();
+    let source = "(module (memory 0) (func (drop (i64.load align=8 (i32.const 0)))))";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert!(response.items.is_empty());
+}
+
+#[test]
 fn offset() {
     let uri = "untitled:test".to_string();
     let source = "

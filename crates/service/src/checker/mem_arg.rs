@@ -50,26 +50,22 @@ pub fn check(ctx: &DiagnosticCtx, node: AmberNode, instr_name: AmberToken) -> Op
                 _ => return None,
             };
             let align = helpers::parse_u32(mem_arg.tokens_by_kind(SyntaxKind::UNSIGNED_INT).next()?.text()).ok()?;
-            if align.is_power_of_two() {
-                if let Some(alignment) = 1u32.checked_shl(align)
-                    && alignment <= ty_size
-                {
-                    None
-                } else {
-                    Some(Diagnostic {
-                        range: mem_arg.text_range(),
-                        code: DIAGNOSTIC_CODE.into(),
-                        message: format!("alignment must be between 1 and {ty_size} inclusively"),
-                        ..Default::default()
-                    })
-                }
-            } else {
+            if !align.is_power_of_two() {
                 Some(Diagnostic {
                     range: mem_arg.text_range(),
                     code: DIAGNOSTIC_CODE.into(),
                     message: "alignment must be power-of-two".into(),
                     ..Default::default()
                 })
+            } else if align > ty_size {
+                Some(Diagnostic {
+                    range: mem_arg.text_range(),
+                    code: DIAGNOSTIC_CODE.into(),
+                    message: format!("alignment must be between 1 and {ty_size} inclusively"),
+                    ..Default::default()
+                })
+            } else {
+                None
             }
         }
         "offset" => {
