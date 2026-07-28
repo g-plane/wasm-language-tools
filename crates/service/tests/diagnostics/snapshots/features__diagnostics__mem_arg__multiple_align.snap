@@ -1,0 +1,25 @@
+---
+source: crates/service/tests/diagnostics/mem_arg.rs
+expression: response
+---
+{
+  "kind": "full",
+  "items": [
+    {
+      "range": {
+        "start": {
+          "line": 2,
+          "character": 27
+        },
+        "end": {
+          "line": 2,
+          "character": 34
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "multiple alignments are not allowed"
+    }
+  ]
+}

@@ -144,6 +144,22 @@ expression: response
     {
       "range": {
         "start": {
+          "line": 18,
+          "character": 33
+        },
+        "end": {
+          "line": 18,
+          "character": 41
+        }
+      },
+      "severity": 1,
+      "code": "mem-arg",
+      "source": "wat",
+      "message": "multiple offsets are not allowed"
+    },
+    {
+      "range": {
+        "start": {
           "line": 16,
           "character": 24
         },

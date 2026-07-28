@@ -145,6 +145,22 @@ fn align_range() {
 }
 
 #[test]
+fn multiple_align() {
+    let uri = "untitled:test".to_string();
+    let source = "
+(module
+  (func (i64.store align=1 align=2 (i32.const 0) (i64.const 0)))
+  (memory 0)
+)
+";
+    let mut service = LanguageService::default();
+    service.commit(uri.clone(), source.into());
+    calm(&mut service, uri.clone());
+    let response = service.pull_diagnostics(create_params(uri));
+    assert_json_snapshot!(response);
+}
+
+#[test]
 fn align_range_valid() {
     let uri = "untitled:test".to_string();
     let source = "(module (memory 0) (func (drop (i64.load align=8 (i32.const 0)))))";
@@ -175,6 +191,8 @@ fn offset() {
 
   ;; ignore undefined memory
   (func (drop (i32.load 2 offset=4294967296 (i32.const 0))))
+
+  (func (drop (i32.load offset=1 offset=2 (i32.const 0))))
 )
 ";
     let mut service = LanguageService::default();

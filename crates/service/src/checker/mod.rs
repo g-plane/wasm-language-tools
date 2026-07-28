@@ -108,9 +108,7 @@ pub fn check(db: &dyn salsa::Database, uri: &str, document: Document, config: &S
                         if let Some(diagnostic) = new_non_defaultable::check(ctx, node, instr_name) {
                             diagnostics.push(diagnostic);
                         }
-                        if let Some(diagnostic) = mem_arg::check(ctx, node, instr_name) {
-                            diagnostics.push(diagnostic);
-                        }
+                        mem_arg::check(diagnostics, ctx, node, instr_name);
                         lane::check(diagnostics, node, instr_name);
                         if let Some(diagnostic) =
                             omitted_idx_in_instr::check(ctx.config.lint.omitted_idx_in_instr, node)
