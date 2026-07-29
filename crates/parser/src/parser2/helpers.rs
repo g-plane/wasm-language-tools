@@ -1,5 +1,6 @@
 use super::{GreenElement, Parser, green, lexer::Token};
 use crate::error::{Message, SyntaxError};
+use std::ops::ControlFlow;
 use wat_syntax::{SyntaxKind, TextRange, TextSize};
 
 impl<'s> Parser<'s> {
@@ -129,8 +130,24 @@ impl<'s> Parser<'s> {
 
     pub(super) fn parse_trivias(&mut self) {
         while let Some(token) = self.lexer.trivia() {
-            if token.kind == SyntaxKind::WHITESPACE && token.text.as_bytes() == b" " {
-                self.add_child(green::SINGLE_SPACE.clone());
+            if token.kind == SyntaxKind::WHITESPACE {
+                if token.text.as_bytes() == b" " {
+                    self.add_child(green::SINGLE_SPACE.clone());
+                } else if let Some(rest) = token.text.strip_prefix('\n')
+                    && let ControlFlow::Continue(count) = rest.bytes().try_fold(0usize, |count, b| {
+                        if count > 70 || b != b' ' {
+                            ControlFlow::Break(())
+                        } else {
+                            ControlFlow::Continue(count + 1)
+                        }
+                    })
+                    && count.is_multiple_of(2)
+                    && let Some(token) = green::INDENT.get(count / 2)
+                {
+                    self.add_child(token.clone());
+                } else {
+                    self.add_child(token);
+                }
             } else {
                 self.add_child(token);
             }

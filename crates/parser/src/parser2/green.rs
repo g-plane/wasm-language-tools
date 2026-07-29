@@ -7,6 +7,11 @@ pub static R_PAREN: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(Sy
 pub static EQ: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxKind::EQ, "=").into());
 
 pub static SINGLE_SPACE: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxKind::WHITESPACE, " ").into());
+pub static INDENT: LazyLock<Vec<GreenElement>> = LazyLock::new(|| {
+    (0..36)
+        .map(|i| GreenToken::new(SyntaxKind::WHITESPACE, &format!("\n{}", "  ".repeat(i))).into())
+        .collect()
+});
 
 pub static KW_FUNC: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxKind::KEYWORD, "func").into());
 pub static KW_GLOBAL: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxKind::KEYWORD, "global").into());
