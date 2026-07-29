@@ -178,17 +178,36 @@ impl Parser<'_> {
     pub(super) fn parse_immediate(&mut self) -> Option<GreenNode> {
         self.lexer
             .eat(INT)
-            .or_else(|| {
-                self.lexer.eat(FLOAT).inspect(|token| {
-                    if token.kind == ERROR {
-                        self.report_error_token(token, Message::Description("invalid float literal"));
-                    }
-                })
+            .map(|token| match token.text.as_bytes() {
+                b"0" => green::IMMEDIATE_INT_0.clone(),
+                b"1" => green::IMMEDIATE_INT_1.clone(),
+                b"2" => green::IMMEDIATE_INT_2.clone(),
+                b"3" => green::IMMEDIATE_INT_3.clone(),
+                b"4" => green::IMMEDIATE_INT_4.clone(),
+                b"5" => green::IMMEDIATE_INT_5.clone(),
+                b"6" => green::IMMEDIATE_INT_6.clone(),
+                b"7" => green::IMMEDIATE_INT_7.clone(),
+                b"8" => green::IMMEDIATE_INT_8.clone(),
+                b"9" => green::IMMEDIATE_INT_9.clone(),
+                _ => node(IMMEDIATE, [token.into()]),
             })
-            .or_else(|| self.lexer.eat(IDENT))
-            .or_else(|| self.lexer.eat(STRING))
-            .or_else(|| self.lexer.eat(SHAPE_DESCRIPTOR))
-            .map(|token| node(IMMEDIATE, [token.into()]))
+            .or_else(|| {
+                self.lexer
+                    .eat(FLOAT)
+                    .inspect(|token| {
+                        if token.kind == ERROR {
+                            self.report_error_token(token, Message::Description("invalid float literal"));
+                        }
+                    })
+                    .map(|token| node(IMMEDIATE, [token.into()]))
+            })
+            .or_else(|| self.lexer.eat(IDENT).map(|token| node(IMMEDIATE, [token.into()])))
+            .or_else(|| self.lexer.eat(STRING).map(|token| node(IMMEDIATE, [token.into()])))
+            .or_else(|| {
+                self.lexer
+                    .eat(SHAPE_DESCRIPTOR)
+                    .map(|token| node(IMMEDIATE, [token.into()]))
+            })
             .or_else(|| {
                 self.try_parse(Self::parse_ref_type)
                     .map(|child| node(IMMEDIATE, [child.into()]))
@@ -235,7 +254,7 @@ impl Parser<'_> {
                     self.parse_block_try_table_folded(mark)
                 }
                 _ => {
-                    self.add_child(token);
+                    self.recognize_instr_name(token);
                     self.parse_plain_instr_folded(mark)
                 }
             }
@@ -260,7 +279,7 @@ impl Parser<'_> {
                     self.parse_block_try_table_sequence(mark)
                 }
                 _ => {
-                    self.add_child(token);
+                    self.recognize_instr_name(token);
                     self.parse_plain_instr_sequence(mark)
                 }
             }
@@ -269,17 +288,24 @@ impl Parser<'_> {
 
     pub(super) fn parse_mem_arg(&mut self) -> Option<GreenNode> {
         let mark = self.start_node();
-        let keyword = self.lexer.next(MEM_ARG_KEYWORD)?;
-        self.add_child(keyword);
+        match self.lexer.next(MEM_ARG_KEYWORD)?.text {
+            "offset" => self.add_child(green::MEM_ARG_KW_OFFSET.clone()),
+            "align" => self.add_child(green::MEM_ARG_KW_ALIGN.clone()),
+            _ => return None,
+        }
 
         const MSG: &str = "whitespaces or comments are not allowed inside memory argument";
 
         let before_trivias = self.lexer.checkpoint().at(self.source);
-        if let Some((after_trivias, eq)) = self.try_parse_with_trivias(|parser| {
+        if let Some(after_trivias) = self.try_parse_with_trivias(|parser| {
             let after_trivias = parser.lexer.checkpoint().at(parser.source);
-            parser.lexer.next(EQ).map(|eq| (after_trivias, eq))
+            if parser.lexer.next(EQ).is_some() {
+                Some(after_trivias)
+            } else {
+                None
+            }
         }) {
-            self.add_child(eq);
+            self.add_child(green::EQ.clone());
             if after_trivias > before_trivias {
                 self.errors.push(SyntaxError {
                     range: TextRange::new(before_trivias, after_trivias),
@@ -382,6 +408,25 @@ impl Parser<'_> {
         while self.recover(Self::parse_instr) {}
         self.expect_right_paren();
         Some(self.finish_node(BLOCK_IF_THEN, mark))
+    }
+
+    fn recognize_instr_name(&mut self, token: Token) {
+        match token.text {
+            "local.get" => self.add_child(green::INSTR_LOCAL_GET.clone()),
+            "i32.const" => self.add_child(green::INSTR_I32_CONST.clone()),
+            "i32.add" => self.add_child(green::INSTR_I32_ADD.clone()),
+            "i32.load" => self.add_child(green::INSTR_I32_LOAD.clone()),
+            "local.set" => self.add_child(green::INSTR_LOCAL_SET.clone()),
+            "local.tee" => self.add_child(green::INSTR_LOCAL_TEE.clone()),
+            "call" => self.add_child(green::INSTR_CALL.clone()),
+            "br" => self.add_child(green::INSTR_BR.clone()),
+            "br_if" => self.add_child(green::INSTR_BR_IF.clone()),
+            "i32.store" => self.add_child(green::INSTR_I32_STORE.clone()),
+            "i64.const" => self.add_child(green::INSTR_I64_CONST.clone()),
+            "i64.load" => self.add_child(green::INSTR_I64_LOAD.clone()),
+            "i64.store" => self.add_child(green::INSTR_I64_STORE.clone()),
+            _ => self.add_child(token),
+        }
     }
 
     fn should_exit_block_if_cond(&mut self) -> bool {

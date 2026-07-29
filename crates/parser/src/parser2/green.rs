@@ -1,9 +1,10 @@
 use super::{GreenElement, node};
 use std::sync::LazyLock;
-use wat_syntax::{GreenToken, SyntaxKind};
+use wat_syntax::{GreenNode, GreenToken, SyntaxKind};
 
 pub static L_PAREN: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxKind::L_PAREN, "(").into());
 pub static R_PAREN: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxKind::R_PAREN, ")").into());
+pub static EQ: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxKind::EQ, "=").into());
 
 pub static SINGLE_SPACE: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxKind::WHITESPACE, " ").into());
 
@@ -66,3 +67,55 @@ pub static TYPE_F64: LazyLock<GreenElement> = LazyLock::new(|| {
 
 pub static MODIFIER_KW_NULL: LazyLock<GreenElement> =
     LazyLock::new(|| GreenToken::new(SyntaxKind::MODIFIER_KEYWORD, "null").into());
+
+pub static MEM_ARG_KW_OFFSET: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::MEM_ARG_KEYWORD, "offset").into());
+pub static MEM_ARG_KW_ALIGN: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::MEM_ARG_KEYWORD, "align").into());
+
+pub static INSTR_LOCAL_GET: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::INSTR_NAME, "local.get").into());
+pub static INSTR_LOCAL_SET: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::INSTR_NAME, "local.set").into());
+pub static INSTR_LOCAL_TEE: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::INSTR_NAME, "local.tee").into());
+pub static INSTR_CALL: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::INSTR_NAME, "call").into());
+pub static INSTR_BR: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxKind::INSTR_NAME, "br").into());
+pub static INSTR_BR_IF: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::INSTR_NAME, "br_if").into());
+pub static INSTR_I32_CONST: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::INSTR_NAME, "i32.const").into());
+pub static INSTR_I32_ADD: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::INSTR_NAME, "i32.add").into());
+pub static INSTR_I32_LOAD: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::INSTR_NAME, "i32.load").into());
+pub static INSTR_I32_STORE: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::INSTR_NAME, "i32.store").into());
+pub static INSTR_I64_CONST: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::INSTR_NAME, "i64.const").into());
+pub static INSTR_I64_LOAD: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::INSTR_NAME, "i64.load").into());
+pub static INSTR_I64_STORE: LazyLock<GreenElement> =
+    LazyLock::new(|| GreenToken::new(SyntaxKind::INSTR_NAME, "i64.store").into());
+
+pub static IMMEDIATE_INT_0: LazyLock<GreenNode> =
+    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "0").into()]));
+pub static IMMEDIATE_INT_1: LazyLock<GreenNode> =
+    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "1").into()]));
+pub static IMMEDIATE_INT_2: LazyLock<GreenNode> =
+    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "2").into()]));
+pub static IMMEDIATE_INT_3: LazyLock<GreenNode> =
+    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "3").into()]));
+pub static IMMEDIATE_INT_4: LazyLock<GreenNode> =
+    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "4").into()]));
+pub static IMMEDIATE_INT_5: LazyLock<GreenNode> =
+    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "5").into()]));
+pub static IMMEDIATE_INT_6: LazyLock<GreenNode> =
+    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "6").into()]));
+pub static IMMEDIATE_INT_7: LazyLock<GreenNode> =
+    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "7").into()]));
+pub static IMMEDIATE_INT_8: LazyLock<GreenNode> =
+    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "8").into()]));
+pub static IMMEDIATE_INT_9: LazyLock<GreenNode> =
+    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "9").into()]));
