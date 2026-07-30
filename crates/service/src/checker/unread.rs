@@ -100,7 +100,7 @@ fn detect_unread(
     symbol_table: &SymbolTable,
     bump: &Bump,
 ) -> impl Iterator<Item = SymbolKey> {
-    let mut set = BumpVec::with_capacity_in(1, bump);
+    let mut set = BumpVec::<Option<SymbolKey>>::with_capacity_in(1, bump);
     bb.0.iter()
         .map(|instr| AmberNode::new(&instr.green, instr.range.start()))
         .for_each(|instr| {
@@ -110,12 +110,13 @@ fn detect_unread(
                 .map(|token| token.text())
             {
                 Some("local.get") => {
-                    if let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
+                    if let Some(last) = set.last_mut()
+                        && last.is_some()
+                        && let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
                         && symbol_table
                             .resolved
                             .get(&immediate.into())
                             .is_some_and(|key| *key == def_key)
-                        && let Some(last) = set.last_mut()
                     {
                         *last = None;
                     }
@@ -160,12 +161,12 @@ impl BlockMark {
                     .map(|token| token.text())
                 {
                     Some("local.get") => {
-                        if let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
+                        if !kill
+                            && let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
                             && symbol_table
                                 .resolved
                                 .get(&immediate.into())
                                 .is_some_and(|key| *key == def_key)
-                            && !kill
                         {
                             r#gen = true;
                         }
