@@ -3,6 +3,7 @@ use crate::{
     document::Document,
     idx::{Idx, InternIdent},
 };
+use bumpalo::{Bump, collections::Vec as BumpVec};
 use smallvec::SmallVec;
 use std::fmt::Write;
 use wat_syntax::{
@@ -12,7 +13,8 @@ use wat_syntax::{
 
 #[salsa::tracked]
 pub fn analyze(db: &dyn salsa::Database, document: Document, key: SymbolKey) -> ControlFlowGraph {
-    Builder::new(db).build(
+    let bump = Bump::with_capacity(4096);
+    Builder::new(db, &bump).build(
         SymbolTable::of(db, document)
             .symbols
             .get(&key)
@@ -21,24 +23,24 @@ pub fn analyze(db: &dyn salsa::Database, document: Document, key: SymbolKey) -> 
     )
 }
 
-struct Builder<'db> {
+struct Builder<'db, 'bump> {
     db: &'db dyn salsa::Database,
     graph: ControlFlowGraph,
-    block_stack: Vec<(FlowNodeId, Option<InternIdent<'db>>)>,
+    block_stack: BumpVec<'bump, (FlowNodeId, Option<InternIdent<'db>>)>,
     current: Option<FlowNodeId>,
-    bb_instrs: Vec<BasicBlockInstr>,
+    bb_instrs: BumpVec<'bump, BasicBlockInstr>,
     unreachable: bool,
 }
-impl<'db> Builder<'db> {
-    fn new(db: &'db dyn salsa::Database) -> Self {
+impl<'db, 'bump> Builder<'db, 'bump> {
+    fn new(db: &'db dyn salsa::Database, bump: &'bump Bump) -> Self {
         Self {
             db,
             graph: ControlFlowGraph {
                 nodes: Vec::with_capacity(16),
             },
-            block_stack: Vec::new(),
+            block_stack: BumpVec::with_capacity_in(8, bump),
             current: None,
-            bb_instrs: Vec::with_capacity(2),
+            bb_instrs: BumpVec::with_capacity_in(16, bump),
             unreachable: false,
         }
     }
