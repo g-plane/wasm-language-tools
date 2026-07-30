@@ -29,7 +29,10 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, node: A
         match &raw_node.kind {
             FlowNodeKind::BasicBlock(bb) => {
                 bb.0.iter().for_each(|instr| {
-                    let Some(instr) = instr.ptr.to_node(ctx.module) else {
+                    let Some(instr) = AmberNode::new(&instr.green, instr.range.start())
+                        .to_ptr()
+                        .to_node(ctx.module)
+                    else {
                         return;
                     };
                     let current = instr.text_range();

@@ -6,7 +6,7 @@ use crate::{
 use smallvec::SmallVec;
 use std::fmt::Write;
 use wat_syntax::{
-    AmberNode, GreenToken, SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange,
+    AmberNode, GreenNode, SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange,
     ast::{AstNode, Cat, Instr},
 };
 
@@ -67,12 +67,8 @@ impl<'db> Builder<'db> {
                     let instr_name = instr_name.green();
 
                     self.bb_instrs.push(BasicBlockInstr {
-                        ptr: instr.to_ptr(),
-                        name: instr_name.to_owned(),
-                        immediates: instr
-                            .children_by_kind(SyntaxKind::IMMEDIATE)
-                            .map(|immediate| immediate.to_ptr())
-                            .collect(),
+                        green: instr.green().clone(),
+                        range: instr.text_range(),
                     });
 
                     let unreachable = match instr_name.text() {
@@ -292,20 +288,20 @@ impl BasicBlock {
     }
     fn text_range(&self) -> Option<TextRange> {
         self.0.first().map(|first| {
-            let first = first.ptr.text_range();
-            let (start, end) = self.0.iter().fold((first.start(), first.end()), |(start, end), instr| {
-                let range = instr.ptr.text_range();
-                (start.min(range.start()), end.max(range.end()))
-            });
+            let (start, end) = self
+                .0
+                .iter()
+                .fold((first.range.start(), first.range.end()), |(start, end), instr| {
+                    (start.min(instr.range.start()), end.max(instr.range.end()))
+                });
             TextRange::new(start, end)
         })
     }
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BasicBlockInstr {
-    pub ptr: SyntaxNodePtr,
-    pub name: GreenToken,
-    pub immediates: Vec<SyntaxNodePtr>,
+    pub green: GreenNode,
+    pub range: TextRange,
 }
 
 #[derive(Clone, PartialEq, Eq)]

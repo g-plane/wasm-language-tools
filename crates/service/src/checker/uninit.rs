@@ -87,7 +87,7 @@ fn hydrate_block_marks(cfg: &ControlFlowGraph, block_marks: &mut BumpHashMap<Flo
                         block_entry.kind() != SyntaxKind::BLOCK_LOOP
                             || instrs
                                 .last()
-                                .is_some_and(|instr| !block_entry.text_range().contains(instr.ptr.text_range().end()))
+                                .is_some_and(|instr| !block_entry.text_range().contains(instr.range.end()))
                     } else {
                         true
                     }
@@ -116,33 +116,37 @@ fn detect_uninit(
     mark: &mut BlockMark,
     symbol_table: &SymbolTable,
 ) -> impl Iterator<Item = SymbolKey> {
-    bb.0.iter().filter_map(move |instr| match instr.name.text() {
-        "local.get" => {
-            if let Some(immediate) = instr.immediates.first().copied()
-                && symbol_table
-                    .resolved
-                    .get(&immediate.into())
-                    .is_some_and(|key| *key == def_key)
-                && !mark.r#in.get()
-            {
-                Some(immediate.into())
-            } else {
-                None
-            }
-        }
-        "local.set" | "local.tee" => {
-            if let Some(immediate) = instr.immediates.first().copied()
-                && symbol_table
-                    .resolved
-                    .get(&immediate.into())
-                    .is_some_and(|key| *key == def_key)
-            {
-                *mark.r#in.get_mut() = true;
-            }
-            None
-        }
-        _ => None,
-    })
+    bb.0.iter()
+        .map(|instr| AmberNode::new(&instr.green, instr.range.start()))
+        .filter_map(
+            move |instr| match instr.tokens_by_kind(SyntaxKind::INSTR_NAME).next()?.text() {
+                "local.get" => {
+                    if let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
+                        && symbol_table
+                            .resolved
+                            .get(&immediate.into())
+                            .is_some_and(|key| *key == def_key)
+                        && !mark.r#in.get()
+                    {
+                        Some(immediate.into())
+                    } else {
+                        None
+                    }
+                }
+                "local.set" | "local.tee" => {
+                    if let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
+                        && symbol_table
+                            .resolved
+                            .get(&immediate.into())
+                            .is_some_and(|key| *key == def_key)
+                    {
+                        *mark.r#in.get_mut() = true;
+                    }
+                    None
+                }
+                _ => None,
+            },
+        )
 }
 
 #[derive(Default)]
@@ -156,12 +160,20 @@ impl BlockMark {
             r#in: Cell::new(false),
             out: Cell::new(
                 bb.0.iter()
-                    .filter(|instr| matches!(instr.name.text(), "local.set" | "local.tee"))
+                    .map(|instr| AmberNode::new(&instr.green, instr.range.start()))
+                    .filter(|instr| {
+                        matches!(
+                            instr
+                                .tokens_by_kind(SyntaxKind::INSTR_NAME)
+                                .next()
+                                .map(|token| token.text()),
+                            Some("local.set" | "local.tee")
+                        )
+                    })
                     .any(|instr| {
                         instr
-                            .immediates
-                            .first()
-                            .copied()
+                            .children_by_kind(SyntaxKind::IMMEDIATE)
+                            .next()
                             .and_then(|immediate| symbol_table.resolved.get(&immediate.into()))
                             .is_some_and(|key| *key == def_key)
                     }),
