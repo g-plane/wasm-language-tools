@@ -1,7 +1,7 @@
 use super::{GreenChild, GreenHead};
 use crate::{GreenToken, NodeOrToken, SyntaxKind};
 use servo_arc::{ThinArc, UniqueArc};
-use std::{fmt, hash};
+use std::{fmt, hash, ptr::NonNull};
 use text_size::{TextRange, TextSize};
 
 #[derive(Clone, PartialEq, Eq)]
@@ -118,6 +118,12 @@ impl GreenNode {
             GreenChild::Token { token, .. } => token.clone().into(),
         });
         GreenNode::new(self.data.header.kind, children)
+    }
+
+    #[inline]
+    /// Returns a raw ptr to the underlying data.
+    pub fn raw_ptr(&self) -> NonNull<()> {
+        self.data.raw_ptr()
     }
 }
 

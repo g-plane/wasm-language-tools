@@ -49,9 +49,7 @@ impl LanguageService {
                             if let Some(action) = br_if_to_if_br::act(uri, line_index, &it) {
                                 actions.push(action);
                             }
-                            if let Some(action) =
-                                merge_to_return_call::act(db, uri, document, line_index, symbol_table, &it)
-                            {
+                            if let Some(action) = merge_to_return_call::act(db, uri, line_index, symbol_table, &it) {
                                 actions.push(action);
                             }
                         }

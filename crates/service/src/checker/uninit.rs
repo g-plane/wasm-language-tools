@@ -2,7 +2,6 @@ use super::Diagnostic;
 use crate::{
     binder::{Symbol, SymbolKey, SymbolTable},
     cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeId, FlowNodeKind},
-    document::Document,
     helpers::{BumpCollectionsExt, BumpHashMap},
     types_analyzer,
 };
@@ -15,7 +14,6 @@ const DIAGNOSTIC_CODE: &str = "uninit";
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
-    document: Document,
     symbol_table: &SymbolTable,
     func: AmberNode,
     local: &Symbol,
@@ -24,7 +22,7 @@ pub fn check(
     if types_analyzer::extract_type(db, &local.ty.0).is_none_or(|ty| ty.defaultable()) {
         return;
     }
-    let cfg = cfa::analyze(db, document, func.into());
+    let cfg = cfa::analyze(db, func.green().clone().into(), func.text_range());
     let mut block_marks = BumpHashMap::with_capacity_in(cfg.nodes().len(), bump);
     block_marks.extend(cfg.nodes_with_ids().filter_map(|(flow_node, node_id)| {
         if flow_node.unreachable {

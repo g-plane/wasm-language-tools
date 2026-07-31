@@ -1,6 +1,5 @@
 use crate::{
-    binder::{SymbolKey, SymbolTable},
-    document::Document,
+    helpers::syntax::GreenNodeKey,
     idx::{Idx, InternIdent},
 };
 use bumpalo::{Bump, collections::Vec as BumpVec};
@@ -12,15 +11,9 @@ use wat_syntax::{
 };
 
 #[salsa::tracked]
-pub fn analyze(db: &dyn salsa::Database, document: Document, key: SymbolKey) -> ControlFlowGraph {
+pub fn analyze(db: &dyn salsa::Database, green: GreenNodeKey, range: TextRange) -> ControlFlowGraph {
     let bump = Bump::with_capacity(4096);
-    Builder::new(db, &bump).build(
-        SymbolTable::of(db, document)
-            .symbols
-            .get(&key)
-            .expect("invalid symbol key to build control flow analysis")
-            .amber(),
-    )
+    Builder::new(db, &bump).build(AmberNode::new(&green, range.start()))
 }
 
 struct Builder<'db, 'bump> {
@@ -281,7 +274,7 @@ pub enum FlowNodeKind {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct BasicBlock(pub Vec<BasicBlockInstr>);
+pub struct BasicBlock(pub Box<[BasicBlockInstr]>);
 impl BasicBlock {
     pub fn contains_instr(&self, node: &SyntaxNode) -> bool {
         let end = node.text_range().end();

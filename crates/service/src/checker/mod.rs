@@ -242,11 +242,10 @@ pub fn check(db: &dyn salsa::Database, uri: &str, document: Document, config: &S
                 .map(|func| (symbol, func.amber()))
         })
         .for_each(|(local, func)| {
-            uninit::check(&mut diagnostics, db, document, symbol_table, func, local, &bump);
+            uninit::check(&mut diagnostics, db, symbol_table, func, local, &bump);
             unread::check(
                 &mut diagnostics,
                 db,
-                document,
                 config.lint.unread,
                 symbol_table,
                 func,

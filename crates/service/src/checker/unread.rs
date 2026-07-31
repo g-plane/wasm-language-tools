@@ -3,7 +3,6 @@ use crate::{
     binder::{Symbol, SymbolKey, SymbolTable},
     cfa::{self, BasicBlock, ControlFlowGraph, FlowNode, FlowNodeId, FlowNodeKind},
     config::LintLevel,
-    document::Document,
     helpers::{BumpCollectionsExt, BumpHashMap},
 };
 use bumpalo::{Bump, collections::Vec as BumpVec};
@@ -13,11 +12,9 @@ use wat_syntax::{AmberNode, SyntaxKind};
 
 const DIAGNOSTIC_CODE: &str = "unread";
 
-#[expect(clippy::too_many_arguments)]
 pub fn check(
     diagnostics: &mut Vec<Diagnostic>,
     db: &dyn salsa::Database,
-    document: Document,
     lint_level: LintLevel,
     symbol_table: &SymbolTable,
     func: AmberNode,
@@ -31,7 +28,7 @@ pub fn check(
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
 
-    let cfg = cfa::analyze(db, document, func.into());
+    let cfg = cfa::analyze(db, func.green().clone().into(), func.text_range());
 
     let mut block_marks = BumpHashMap::with_capacity_in(cfg.nodes().len(), bump);
     block_marks.extend(cfg.nodes_with_ids().filter_map(|(flow_node, node_id)| {

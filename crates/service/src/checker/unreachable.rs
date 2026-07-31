@@ -20,7 +20,7 @@ pub fn check(diagnostics: &mut Vec<Diagnostic>, ctx: &mut DiagnosticCtx, node: A
         LintLevel::Deny => DiagnosticSeverity::Error,
     };
 
-    let cfg = cfa::analyze(ctx.db, ctx.document, node.into());
+    let cfg = cfa::analyze(ctx.db, node.green().clone().into(), node.text_range());
     let mut ranges = BumpVec::<TextRange>::new_in(ctx.bump);
     cfg.nodes().iter().for_each(|raw_node| {
         if !raw_node.unreachable {

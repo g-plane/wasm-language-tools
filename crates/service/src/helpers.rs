@@ -128,9 +128,12 @@ pub(crate) struct RenderWithDb<'db, T> {
 }
 
 pub(crate) mod syntax {
-    use std::ops::ControlFlow;
+    use std::{
+        hash::Hash,
+        ops::{ControlFlow, Deref},
+    };
     use wat_syntax::{
-        AmberNode, SyntaxKind, SyntaxNode, SyntaxToken, TextSize, TokenAtOffset,
+        AmberNode, GreenNode, SyntaxKind, SyntaxNode, SyntaxToken, TextSize, TokenAtOffset,
         ast::{AstNode, ExternIdx},
     };
 
@@ -181,6 +184,32 @@ pub(crate) mod syntax {
                     | SyntaxKind::BLOCK_TRY_TABLE
             )
         })
+    }
+
+    #[derive(Clone)]
+    /// Wrapper type for `GreenNode` that implements `Hash` and `Eq` based on ptr for Salsa tracked query.
+    pub struct GreenNodeKey(GreenNode);
+    impl Deref for GreenNodeKey {
+        type Target = GreenNode;
+        fn deref(&self) -> &Self::Target {
+            &self.0
+        }
+    }
+    impl PartialEq for GreenNodeKey {
+        fn eq(&self, other: &Self) -> bool {
+            self.0.raw_ptr() == other.0.raw_ptr()
+        }
+    }
+    impl Eq for GreenNodeKey {}
+    impl Hash for GreenNodeKey {
+        fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+            self.0.raw_ptr().hash(state);
+        }
+    }
+    impl From<GreenNode> for GreenNodeKey {
+        fn from(node: GreenNode) -> Self {
+            Self(node)
+        }
     }
 }
 

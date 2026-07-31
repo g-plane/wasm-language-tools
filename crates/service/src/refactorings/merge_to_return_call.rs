@@ -1,7 +1,6 @@
 use crate::{
     binder::{SymbolKey, SymbolTable},
     cfa::{self, FlowNode, FlowNodeKind},
-    document::Document,
     helpers::LineIndexExt,
 };
 use line_index::LineIndex;
@@ -12,7 +11,6 @@ use wat_syntax::{SyntaxKind, SyntaxNode, ast::support};
 pub fn act(
     db: &dyn salsa::Database,
     uri: &str,
-    document: Document,
     line_index: &LineIndex,
     symbol_table: &SymbolTable,
     node: &SyntaxNode,
@@ -68,7 +66,7 @@ pub fn act(
         return None;
     }
 
-    let cfg = cfa::analyze(db, document, SymbolKey::new(&func));
+    let cfg = cfa::analyze(db, func.green().clone().into(), func.text_range());
     let bb_flow_node = cfg.nodes().iter().find(|flow_node| {
         if let FlowNode {
             kind: FlowNodeKind::BasicBlock(bb),

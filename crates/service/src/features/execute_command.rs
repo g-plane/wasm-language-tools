@@ -1,4 +1,4 @@
-use crate::{LanguageService, binder::SymbolKey, cfa, helpers::LineIndexExt};
+use crate::{LanguageService, cfa, helpers::LineIndexExt};
 use lspt::{ExecuteCommandParams, Position};
 use wat_syntax::{SyntaxKind, SyntaxNode, TextRange};
 
@@ -18,7 +18,7 @@ impl LanguageService {
                     .child_at_range(range)
                     .and_then(|module| module.child_at_range(range))
                     .filter(|node| node.kind() == SyntaxKind::MODULE_FIELD_FUNC)?;
-                let cfg = cfa::analyze(self, document, SymbolKey::new(&func));
+                let cfg = cfa::analyze(self, func.green().clone().into(), func.text_range());
                 Some(serde_json::Value::String(cfg.generate_dot()))
             }
             _ => None,
