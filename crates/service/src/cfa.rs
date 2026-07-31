@@ -276,6 +276,11 @@ pub enum FlowNodeKind {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BasicBlock(pub Box<[BasicBlockInstr]>);
 impl BasicBlock {
+    pub fn instrs(&self) -> impl Iterator<Item = AmberNode<'_>> {
+        self.0
+            .iter()
+            .map(|instr| AmberNode::new(&instr.green, instr.range.start()))
+    }
     pub fn contains_instr(&self, node: &SyntaxNode) -> bool {
         let end = node.text_range().end();
         self.text_range()

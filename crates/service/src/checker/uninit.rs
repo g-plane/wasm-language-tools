@@ -114,37 +114,35 @@ fn detect_uninit(
     mark: &mut BlockMark,
     symbol_table: &SymbolTable,
 ) -> impl Iterator<Item = SymbolKey> {
-    bb.0.iter()
-        .map(|instr| AmberNode::new(&instr.green, instr.range.start()))
-        .filter_map(
-            move |instr| match instr.tokens_by_kind(SyntaxKind::INSTR_NAME).next()?.text() {
-                "local.get" => {
-                    if let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
-                        && symbol_table
-                            .resolved
-                            .get(&immediate.into())
-                            .is_some_and(|key| *key == def_key)
-                        && !mark.r#in.get()
-                    {
-                        Some(immediate.into())
-                    } else {
-                        None
-                    }
-                }
-                "local.set" | "local.tee" => {
-                    if let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
-                        && symbol_table
-                            .resolved
-                            .get(&immediate.into())
-                            .is_some_and(|key| *key == def_key)
-                    {
-                        *mark.r#in.get_mut() = true;
-                    }
+    bb.instrs().filter_map(
+        move |instr| match instr.tokens_by_kind(SyntaxKind::INSTR_NAME).next()?.text() {
+            "local.get" => {
+                if let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
+                    && symbol_table
+                        .resolved
+                        .get(&immediate.into())
+                        .is_some_and(|key| *key == def_key)
+                    && !mark.r#in.get()
+                {
+                    Some(immediate.into())
+                } else {
                     None
                 }
-                _ => None,
-            },
-        )
+            }
+            "local.set" | "local.tee" => {
+                if let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
+                    && symbol_table
+                        .resolved
+                        .get(&immediate.into())
+                        .is_some_and(|key| *key == def_key)
+                {
+                    *mark.r#in.get_mut() = true;
+                }
+                None
+            }
+            _ => None,
+        },
+    )
 }
 
 #[derive(Default)]
@@ -157,8 +155,7 @@ impl BlockMark {
         Self {
             r#in: Cell::new(false),
             out: Cell::new(
-                bb.0.iter()
-                    .map(|instr| AmberNode::new(&instr.green, instr.range.start()))
+                bb.instrs()
                     .filter(|instr| {
                         matches!(
                             instr

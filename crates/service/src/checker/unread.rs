@@ -98,39 +98,37 @@ fn detect_unread(
     bump: &Bump,
 ) -> impl Iterator<Item = SymbolKey> {
     let mut set = BumpVec::<Option<SymbolKey>>::with_capacity_in(1, bump);
-    bb.0.iter()
-        .map(|instr| AmberNode::new(&instr.green, instr.range.start()))
-        .for_each(|instr| {
-            match instr
-                .tokens_by_kind(SyntaxKind::INSTR_NAME)
-                .next()
-                .map(|token| token.text())
-            {
-                Some("local.get") => {
-                    if let Some(last) = set.last_mut()
-                        && last.is_some()
-                        && let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
-                        && symbol_table
-                            .resolved
-                            .get(&immediate.into())
-                            .is_some_and(|key| *key == def_key)
-                    {
-                        *last = None;
-                    }
+    bb.instrs().for_each(|instr| {
+        match instr
+            .tokens_by_kind(SyntaxKind::INSTR_NAME)
+            .next()
+            .map(|token| token.text())
+        {
+            Some("local.get") => {
+                if let Some(last) = set.last_mut()
+                    && last.is_some()
+                    && let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
+                    && symbol_table
+                        .resolved
+                        .get(&immediate.into())
+                        .is_some_and(|key| *key == def_key)
+                {
+                    *last = None;
                 }
-                Some("local.set" | "local.tee") => {
-                    if let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
-                        && symbol_table
-                            .resolved
-                            .get(&immediate.into())
-                            .is_some_and(|key| *key == def_key)
-                    {
-                        set.push(Some(immediate.into()));
-                    }
-                }
-                _ => {}
             }
-        });
+            Some("local.set" | "local.tee") => {
+                if let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
+                    && symbol_table
+                        .resolved
+                        .get(&immediate.into())
+                        .is_some_and(|key| *key == def_key)
+                {
+                    set.push(Some(immediate.into()));
+                }
+            }
+            _ => {}
+        }
+    });
     if mark.out_gen.get()
         && let Some(last) = set.last_mut()
     {
@@ -149,38 +147,36 @@ impl BlockMark {
     fn new(bb: &BasicBlock, symbol_table: &SymbolTable, def_key: SymbolKey) -> Self {
         let mut r#gen = false;
         let mut kill = false;
-        bb.0.iter()
-            .map(|instr| AmberNode::new(&instr.green, instr.range.start()))
-            .for_each(|instr| {
-                match instr
-                    .tokens_by_kind(SyntaxKind::INSTR_NAME)
-                    .next()
-                    .map(|token| token.text())
-                {
-                    Some("local.get") => {
-                        if !kill
-                            && let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
-                            && symbol_table
-                                .resolved
-                                .get(&immediate.into())
-                                .is_some_and(|key| *key == def_key)
-                        {
-                            r#gen = true;
-                        }
+        bb.instrs().for_each(|instr| {
+            match instr
+                .tokens_by_kind(SyntaxKind::INSTR_NAME)
+                .next()
+                .map(|token| token.text())
+            {
+                Some("local.get") => {
+                    if !kill
+                        && let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
+                        && symbol_table
+                            .resolved
+                            .get(&immediate.into())
+                            .is_some_and(|key| *key == def_key)
+                    {
+                        r#gen = true;
                     }
-                    Some("local.set" | "local.tee") => {
-                        if let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
-                            && symbol_table
-                                .resolved
-                                .get(&immediate.into())
-                                .is_some_and(|key| *key == def_key)
-                        {
-                            kill = true;
-                        }
-                    }
-                    _ => {}
                 }
-            });
+                Some("local.set" | "local.tee") => {
+                    if let Some(immediate) = instr.children_by_kind(SyntaxKind::IMMEDIATE).next()
+                        && symbol_table
+                            .resolved
+                            .get(&immediate.into())
+                            .is_some_and(|key| *key == def_key)
+                    {
+                        kill = true;
+                    }
+                }
+                _ => {}
+            }
+        });
         Self {
             in_gen: Cell::new(r#gen),
             out_gen: Cell::new(r#gen),
