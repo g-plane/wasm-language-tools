@@ -90,10 +90,6 @@ fn build_tokens<'a>(
                     }
                     None
                 }
-                SyntaxKind::ERROR => {
-                    *prev_start = line_index.line_col(token.text_range().start()).col;
-                    None
-                }
                 _ => {
                     let token_type = compute_token_type(token_types, symbol_table, token, parent, grand)?;
                     let block_comment_lines = if token.kind() == SyntaxKind::BLOCK_COMMENT {
