@@ -111,23 +111,15 @@ pub static INSTR_I64_LOAD: LazyLock<GreenElement> =
 pub static INSTR_I64_STORE: LazyLock<GreenElement> =
     LazyLock::new(|| GreenToken::new(SyntaxKind::INSTR_NAME, "i64.store").into());
 
-pub static IMMEDIATE_INT_0: LazyLock<GreenNode> =
-    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "0").into()]));
-pub static IMMEDIATE_INT_1: LazyLock<GreenNode> =
-    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "1").into()]));
-pub static IMMEDIATE_INT_2: LazyLock<GreenNode> =
-    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "2").into()]));
-pub static IMMEDIATE_INT_3: LazyLock<GreenNode> =
-    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "3").into()]));
-pub static IMMEDIATE_INT_4: LazyLock<GreenNode> =
-    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "4").into()]));
-pub static IMMEDIATE_INT_5: LazyLock<GreenNode> =
-    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "5").into()]));
-pub static IMMEDIATE_INT_6: LazyLock<GreenNode> =
-    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "6").into()]));
-pub static IMMEDIATE_INT_7: LazyLock<GreenNode> =
-    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "7").into()]));
-pub static IMMEDIATE_INT_8: LazyLock<GreenNode> =
-    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "8").into()]));
-pub static IMMEDIATE_INT_9: LazyLock<GreenNode> =
-    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "9").into()]));
+pub static IMMEDIATE_INT_NEG_ONE: LazyLock<GreenNode> =
+    LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "-1").into()]));
+pub static IMMEDIATE_INT: LazyLock<Vec<GreenNode>> = LazyLock::new(|| {
+    (0..=255u8)
+        .map(|i| {
+            GreenNode::new(
+                SyntaxKind::IMMEDIATE,
+                [GreenToken::new(SyntaxKind::INT, &format!("{i}")).into()],
+            )
+        })
+        .collect()
+});

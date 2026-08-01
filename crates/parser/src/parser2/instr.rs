@@ -178,18 +178,18 @@ impl Parser<'_> {
     pub(super) fn parse_immediate(&mut self) -> Option<GreenNode> {
         self.lexer
             .eat(INT)
-            .map(|token| match token.text.as_bytes() {
-                b"0" => green::IMMEDIATE_INT_0.clone(),
-                b"1" => green::IMMEDIATE_INT_1.clone(),
-                b"2" => green::IMMEDIATE_INT_2.clone(),
-                b"3" => green::IMMEDIATE_INT_3.clone(),
-                b"4" => green::IMMEDIATE_INT_4.clone(),
-                b"5" => green::IMMEDIATE_INT_5.clone(),
-                b"6" => green::IMMEDIATE_INT_6.clone(),
-                b"7" => green::IMMEDIATE_INT_7.clone(),
-                b"8" => green::IMMEDIATE_INT_8.clone(),
-                b"9" => green::IMMEDIATE_INT_9.clone(),
-                _ => node(IMMEDIATE, [token.into()]),
+            .map(|token| {
+                if token.text.bytes().all(|b| b.is_ascii_digit())
+                    && (token.text == "0" || !token.text.starts_with('0'))
+                    && let Ok(i) = token.text.parse::<u8>()
+                    && let Some(node) = green::IMMEDIATE_INT.get(i as usize)
+                {
+                    node.clone()
+                } else if token.text == "-1" {
+                    green::IMMEDIATE_INT_NEG_ONE.clone()
+                } else {
+                    node(IMMEDIATE, [token.into()])
+                }
             })
             .or_else(|| {
                 self.lexer
