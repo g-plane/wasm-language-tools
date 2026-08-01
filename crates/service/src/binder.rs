@@ -6,6 +6,7 @@ use crate::{
 use bumpalo::{Bump, collections::Vec as BumpVec};
 use indexmap::IndexMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
+use smallvec::SmallVec;
 use std::{fmt, hash::Hash, ops::Deref};
 use wat_syntax::{
     AmberNode, GreenNode, NodeOrToken, SyntaxKind, SyntaxNode, SyntaxNodePtr, TextRange,
@@ -1397,8 +1398,8 @@ pub struct ModuleDefSymbols {
     pub funcs: Vec<SymbolKey>,
     pub types: Vec<SymbolKey>,
     pub globals: Vec<SymbolKey>,
-    pub memories: Vec<SymbolKey>,
-    pub tables: Vec<SymbolKey>,
+    pub memories: SmallVec<[SymbolKey; 1]>,
+    pub tables: SmallVec<[SymbolKey; 1]>,
     pub tags: Vec<SymbolKey>,
     pub datas: Vec<SymbolKey>,
     pub elems: Vec<SymbolKey>,
