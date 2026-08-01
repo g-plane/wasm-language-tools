@@ -19,7 +19,7 @@ log = { workspace = true }
 lspt = { workspace = true }
 parking_lot = { workspace = true }
 rustc-hash = { workspace = true }
-salsa = "0.28"
+salsa = { version = "0.28", default-features = false, features = ["macros", "inventory"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 similar = "3.1"

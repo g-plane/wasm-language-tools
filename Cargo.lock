@@ -818,7 +818,6 @@ dependencies = [
  "inventory",
  "parking_lot",
  "portable-atomic",
- "rayon",
  "rustc-hash",
  "salsa-macro-rules",
  "salsa-macros",
