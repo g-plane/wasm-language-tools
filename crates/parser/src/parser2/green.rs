@@ -8,8 +8,15 @@ pub static EQ: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxK
 
 pub static SINGLE_SPACE: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxKind::WHITESPACE, " ").into());
 pub static INDENT: LazyLock<Vec<GreenElement>> = LazyLock::new(|| {
-    (0..36)
-        .map(|i| GreenToken::new(SyntaxKind::WHITESPACE, &format!("\n{}", "  ".repeat(i))).into())
+    (0..501)
+        .map(|i| {
+            let mut s = String::with_capacity(i * 2 + 1);
+            s.push('\n');
+            for _ in 0..i {
+                s.push_str("  ");
+            }
+            GreenToken::new(SyntaxKind::WHITESPACE, &s).into()
+        })
         .collect()
 });
 

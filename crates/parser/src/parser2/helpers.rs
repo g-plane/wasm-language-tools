@@ -135,7 +135,7 @@ impl<'s> Parser<'s> {
                     self.add_child(green::SINGLE_SPACE.clone());
                 } else if let Some(rest) = token.text.strip_prefix('\n')
                     && let ControlFlow::Continue(count) = rest.bytes().try_fold(0usize, |count, b| {
-                        if count > 70 || b != b' ' {
+                        if count > 1000 || b != b' ' {
                             ControlFlow::Break(())
                         } else {
                             ControlFlow::Continue(count + 1)
