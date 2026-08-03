@@ -39,6 +39,11 @@ impl<'s> Lexer<'s> {
         self.input = checkpoint.0;
     }
 
+    /// Retrieve text between the given checkpoint and current cursor.
+    pub fn look_back(&self, checkpoint: Checkpoint<'s>) -> Option<&'s str> {
+        checkpoint.0.get(..checkpoint.0.len() - self.input.len())
+    }
+
     /// Move and advance the lexer for single token. If it doesn't match, raise a syntax error.
     pub fn expect(&mut self, kind: SyntaxKind) -> Result<Token<'s>, Option<SyntaxError>> {
         self.eat(kind).ok_or_else(|| {

@@ -1,4 +1,10 @@
-use super::{GreenElement, Parser, builder::NodeMark, green, lexer::Token, node};
+use super::{
+    GreenElement, Parser,
+    builder::{Checkpoint, NodeMark},
+    green, helpers,
+    lexer::Token,
+    node,
+};
 use crate::error::{Message, SyntaxError};
 use wat_syntax::{
     GreenNode,
@@ -179,9 +185,7 @@ impl Parser<'_> {
         self.lexer
             .eat(INT)
             .map(|token| {
-                if token.text.bytes().all(|b| b.is_ascii_digit())
-                    && (token.text == "0" || !token.text.starts_with('0'))
-                    && let Ok(i) = token.text.parse::<u8>()
+                if let Some(i) = helpers::parse_small_int(token.text)
                     && let Some(node) = green::IMMEDIATE_INT.get(i as usize)
                 {
                     node.clone()
@@ -260,6 +264,7 @@ impl Parser<'_> {
             }
         } else {
             let mark = self.start_node();
+            let checkpoint = self.checkpoint();
             let token = self.expect(INSTR_NAME)?;
             match token.text {
                 "if" => {
@@ -280,7 +285,7 @@ impl Parser<'_> {
                 }
                 _ => {
                     self.recognize_instr_name(token);
-                    self.parse_plain_instr_sequence(mark)
+                    self.parse_plain_instr_sequence(mark, checkpoint)
                 }
             }
         }
@@ -381,7 +386,7 @@ impl Parser<'_> {
         Some(self.finish_node(PLAIN_INSTR, mark))
     }
 
-    fn parse_plain_instr_sequence(&mut self, mark: NodeMark) -> Option<GreenNode> {
+    fn parse_plain_instr_sequence(&mut self, mark: NodeMark, checkpoint: Checkpoint) -> Option<GreenNode> {
         while let Some(node) = self.try_parse_with_trivias(|parser| {
             if parser
                 .lexer
@@ -395,7 +400,27 @@ impl Parser<'_> {
         }) {
             self.add_child(node);
         }
-        Some(self.finish_node(PLAIN_INSTR, mark))
+        if let Some((instr_name, immediate)) = self.lexer.look_back(checkpoint.lexer).and_then(|s| s.split_once(' '))
+            && let Some(i) = helpers::parse_small_int(immediate)
+        {
+            match instr_name {
+                "local.get" => {
+                    self.elements.truncate(checkpoint.elements);
+                    green::LOCAL_GET.get(i as usize).cloned()
+                }
+                "local.set" => {
+                    self.elements.truncate(checkpoint.elements);
+                    green::LOCAL_SET.get(i as usize).cloned()
+                }
+                "local.tee" => {
+                    self.elements.truncate(checkpoint.elements);
+                    green::LOCAL_TEE.get(i as usize).cloned()
+                }
+                _ => Some(self.finish_node(PLAIN_INSTR, mark)),
+            }
+        } else {
+            Some(self.finish_node(PLAIN_INSTR, mark))
+        }
     }
 
     fn parse_then_block(&mut self) -> Option<GreenNode> {

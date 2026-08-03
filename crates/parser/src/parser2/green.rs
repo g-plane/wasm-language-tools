@@ -123,3 +123,37 @@ pub static IMMEDIATE_INT: LazyLock<Vec<GreenNode>> = LazyLock::new(|| {
         })
         .collect()
 });
+
+pub static LOCAL_GET: LazyLock<Vec<GreenNode>> = LazyLock::new(|| {
+    IMMEDIATE_INT
+        .iter()
+        .map(|i| {
+            GreenNode::new(
+                SyntaxKind::PLAIN_INSTR,
+                [INSTR_LOCAL_GET.clone(), SINGLE_SPACE.clone(), i.clone().into()],
+            )
+        })
+        .collect()
+});
+pub static LOCAL_SET: LazyLock<Vec<GreenNode>> = LazyLock::new(|| {
+    IMMEDIATE_INT
+        .iter()
+        .map(|i| {
+            GreenNode::new(
+                SyntaxKind::PLAIN_INSTR,
+                [INSTR_LOCAL_SET.clone(), SINGLE_SPACE.clone(), i.clone().into()],
+            )
+        })
+        .collect()
+});
+pub static LOCAL_TEE: LazyLock<Vec<GreenNode>> = LazyLock::new(|| {
+    IMMEDIATE_INT
+        .iter()
+        .map(|i| {
+            GreenNode::new(
+                SyntaxKind::PLAIN_INSTR,
+                [INSTR_LOCAL_TEE.clone(), SINGLE_SPACE.clone(), i.clone().into()],
+            )
+        })
+        .collect()
+});
