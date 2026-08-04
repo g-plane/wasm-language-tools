@@ -224,9 +224,13 @@ impl<'s> Parser<'s> {
     }
 }
 
-pub(super) fn parse_small_int(s: &str) -> Option<u8> {
-    if s.bytes().all(|b| b.is_ascii_digit()) && (s == "0" || !s.starts_with('0')) {
-        s.parse().ok()
+pub(super) fn parse_small_int(s: &str) -> Option<usize> {
+    if s.bytes().all(|b| b.is_ascii_digit())
+        && (s == "0" || !s.starts_with('0'))
+        && let Ok(value) = s.parse()
+        && value <= 500
+    {
+        Some(value)
     } else {
         None
     }

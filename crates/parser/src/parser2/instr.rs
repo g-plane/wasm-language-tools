@@ -186,7 +186,7 @@ impl Parser<'_> {
             .eat(INT)
             .map(|token| {
                 if let Some(i) = helpers::parse_small_int(token.text)
-                    && let Some(node) = green::IMMEDIATE_INT.get(i as usize)
+                    && let Some(node) = green::IMMEDIATE_INT.get(i)
                 {
                     node.clone()
                 } else if token.text == "-1" {
@@ -400,24 +400,40 @@ impl Parser<'_> {
         }) {
             self.add_child(node);
         }
-        if let Some((instr_name, immediate)) = self.lexer.look_back(checkpoint.lexer).and_then(|s| s.split_once(' '))
+        let look_back = self.lexer.look_back(checkpoint.lexer);
+        if let Some((instr_name, immediate)) = look_back.and_then(|s| s.split_once(' '))
             && let Some(i) = helpers::parse_small_int(immediate)
         {
             match instr_name {
                 "local.get" => {
                     self.elements.truncate(checkpoint.elements);
-                    green::LOCAL_GET.get(i as usize).cloned()
+                    green::LOCAL_GET.get(i).cloned()
+                }
+                "i32.const" => {
+                    self.elements.truncate(checkpoint.elements);
+                    green::I32_CONST.get(i).cloned()
                 }
                 "local.set" => {
                     self.elements.truncate(checkpoint.elements);
-                    green::LOCAL_SET.get(i as usize).cloned()
+                    green::LOCAL_SET.get(i).cloned()
                 }
                 "local.tee" => {
                     self.elements.truncate(checkpoint.elements);
-                    green::LOCAL_TEE.get(i as usize).cloned()
+                    green::LOCAL_TEE.get(i).cloned()
+                }
+                "br" => {
+                    self.elements.truncate(checkpoint.elements);
+                    green::BR.get(i).cloned()
+                }
+                "br_if" => {
+                    self.elements.truncate(checkpoint.elements);
+                    green::BR_IF.get(i).cloned()
                 }
                 _ => Some(self.finish_node(PLAIN_INSTR, mark)),
             }
+        } else if let Some("i32.add") = look_back {
+            self.elements.truncate(checkpoint.elements);
+            Some(green::I32_ADD.clone())
         } else {
             Some(self.finish_node(PLAIN_INSTR, mark))
         }

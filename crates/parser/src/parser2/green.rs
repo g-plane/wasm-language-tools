@@ -8,7 +8,7 @@ pub static EQ: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxK
 
 pub static SINGLE_SPACE: LazyLock<GreenElement> = LazyLock::new(|| GreenToken::new(SyntaxKind::WHITESPACE, " ").into());
 pub static INDENT: LazyLock<Vec<GreenElement>> = LazyLock::new(|| {
-    (0..501)
+    (0..=500)
         .map(|i| {
             let mut s = String::with_capacity(i * 2 + 1);
             s.push('\n');
@@ -114,7 +114,7 @@ pub static INSTR_I64_STORE: LazyLock<GreenElement> =
 pub static IMMEDIATE_INT_NEG_ONE: LazyLock<GreenNode> =
     LazyLock::new(|| GreenNode::new(SyntaxKind::IMMEDIATE, [GreenToken::new(SyntaxKind::INT, "-1").into()]));
 pub static IMMEDIATE_INT: LazyLock<Vec<GreenNode>> = LazyLock::new(|| {
-    (0..=255u8)
+    (0..=500u16)
         .map(|i| {
             GreenNode::new(
                 SyntaxKind::IMMEDIATE,
@@ -157,3 +157,38 @@ pub static LOCAL_TEE: LazyLock<Vec<GreenNode>> = LazyLock::new(|| {
         })
         .collect()
 });
+pub static BR: LazyLock<Vec<GreenNode>> = LazyLock::new(|| {
+    IMMEDIATE_INT
+        .iter()
+        .map(|i| {
+            GreenNode::new(
+                SyntaxKind::PLAIN_INSTR,
+                [INSTR_BR.clone(), SINGLE_SPACE.clone(), i.clone().into()],
+            )
+        })
+        .collect()
+});
+pub static BR_IF: LazyLock<Vec<GreenNode>> = LazyLock::new(|| {
+    IMMEDIATE_INT
+        .iter()
+        .map(|i| {
+            GreenNode::new(
+                SyntaxKind::PLAIN_INSTR,
+                [INSTR_BR_IF.clone(), SINGLE_SPACE.clone(), i.clone().into()],
+            )
+        })
+        .collect()
+});
+pub static I32_CONST: LazyLock<Vec<GreenNode>> = LazyLock::new(|| {
+    IMMEDIATE_INT
+        .iter()
+        .map(|i| {
+            GreenNode::new(
+                SyntaxKind::PLAIN_INSTR,
+                [INSTR_I32_CONST.clone(), SINGLE_SPACE.clone(), i.clone().into()],
+            )
+        })
+        .collect()
+});
+pub static I32_ADD: LazyLock<GreenNode> =
+    LazyLock::new(|| GreenNode::new(SyntaxKind::PLAIN_INSTR, [INSTR_I32_ADD.clone()]));
