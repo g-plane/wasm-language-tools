@@ -1,4 +1,4 @@
-use super::{GreenElement, Parser, builder::NodeMark, green, node};
+use super::{GreenElement, Parser, builder::NodeMark, green};
 use crate::error::Message;
 use wat_syntax::{GreenNode, SyntaxKind::*};
 
@@ -46,7 +46,8 @@ impl Parser<'_> {
             self.expect_right_paren();
             Some(self.finish_node(ELEM_EXPR, mark))
         } else if self.lexer.peek(L_PAREN).is_some() {
-            self.parse_instr().map(|instr| node(ELEM_EXPR, [instr.into()]))
+            self.parse_instr()
+                .map(|instr| GreenNode::new(ELEM_EXPR, [instr.into()]))
         } else {
             None
         }
@@ -203,7 +204,7 @@ impl Parser<'_> {
         self.lexer
             .eat(IDENT)
             .or_else(|| self.lexer.eat(UNSIGNED_INT))
-            .map(|token| node(INDEX, [token.into()]))
+            .map(|token| GreenNode::new(INDEX, [token.into()]))
     }
 
     pub(super) fn parse_local(&mut self) -> Option<GreenNode> {
@@ -603,11 +604,12 @@ impl Parser<'_> {
     }
 
     pub(super) fn parse_module_name(&mut self) -> Option<GreenNode> {
-        self.expect(STRING).map(|token| node(MODULE_NAME, [token.into()]))
+        self.expect(STRING)
+            .map(|token| GreenNode::new(MODULE_NAME, [token.into()]))
     }
 
     pub(super) fn parse_name(&mut self) -> Option<GreenNode> {
-        self.expect(STRING).map(|token| node(NAME, [token.into()]))
+        self.expect(STRING).map(|token| GreenNode::new(NAME, [token.into()]))
     }
 
     pub(super) fn parse_offset(&mut self) -> Option<GreenNode> {
@@ -624,7 +626,7 @@ impl Parser<'_> {
             self.expect_right_paren();
             Some(self.finish_node(OFFSET, mark))
         } else if self.lexer.peek(L_PAREN).is_some() {
-            self.parse_instr().map(|instr| node(OFFSET, [instr.into()]))
+            self.parse_instr().map(|instr| GreenNode::new(OFFSET, [instr.into()]))
         } else {
             None
         }

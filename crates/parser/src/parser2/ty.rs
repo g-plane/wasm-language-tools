@@ -1,4 +1,4 @@
-use super::{GreenElement, Parser, builder::NodeMark, green, node};
+use super::{GreenElement, Parser, builder::NodeMark, green};
 use crate::error::Message;
 use wat_syntax::{GreenNode, SyntaxKind::*};
 
@@ -14,7 +14,7 @@ impl Parser<'_> {
                     token.into()
                 }
             };
-            node(ADDR_TYPE, [token])
+            GreenNode::new(ADDR_TYPE, [token])
         })
     }
 
@@ -163,7 +163,7 @@ impl Parser<'_> {
             Some(self.finish_node(FIELD_TYPE, mark))
         } else {
             self.parse_storage_type()
-                .map(|storage_type| node(FIELD_TYPE, [storage_type]))
+                .map(|storage_type| GreenNode::new(FIELD_TYPE, [storage_type]))
         }
     }
 
@@ -195,7 +195,7 @@ impl Parser<'_> {
             Some(self.finish_node(GLOBAL_TYPE, mark))
         } else {
             self.parse_value_type()
-                .map(|value_type| node(GLOBAL_TYPE, [value_type]))
+                .map(|value_type| GreenNode::new(GLOBAL_TYPE, [value_type]))
         }
     }
 
@@ -204,7 +204,7 @@ impl Parser<'_> {
             .eat(TYPE_KEYWORD)
             .and_then(|mut token| match token.text {
                 "any" | "eq" | "i31" | "struct" | "array" | "none" | "func" | "nofunc" | "exn" | "noexn" | "extern"
-                | "noextern" | "cont" | "nocont" => Some(node(HEAP_TYPE, [token.into()]).into()),
+                | "noextern" | "cont" | "nocont" => Some(GreenNode::new(HEAP_TYPE, [token.into()]).into()),
                 _ => {
                     if IMMEDIATE {
                         // for better error reporting
@@ -216,7 +216,10 @@ impl Parser<'_> {
                     }
                 }
             })
-            .or_else(|| self.parse_index().map(|index| node(HEAP_TYPE, [index.into()]).into()))
+            .or_else(|| {
+                self.parse_index()
+                    .map(|index| GreenNode::new(HEAP_TYPE, [index.into()]).into())
+            })
     }
 
     pub(super) fn parse_limits(&mut self) -> Option<GreenNode> {
@@ -272,7 +275,7 @@ impl Parser<'_> {
 
     fn parse_packed_type(&mut self) -> Option<GreenElement> {
         self.lexer.next(TYPE_KEYWORD).and_then(|token| match token.text {
-            "i8" | "i16" => Some(node(PACKED_TYPE, [token.into()]).into()),
+            "i8" | "i16" => Some(GreenNode::new(PACKED_TYPE, [token.into()]).into()),
             _ => None,
         })
     }
@@ -302,7 +305,7 @@ impl Parser<'_> {
             .and_then(|token| match token.text {
                 "anyref" | "eqref" | "i31ref" | "structref" | "arrayref" | "nullref" | "funcref" | "nullfuncref"
                 | "exnref" | "nullexnref" | "externref" | "nullexternref" | "contref" | "nullcontref" => {
-                    Some(node(REF_TYPE, [token.into()]))
+                    Some(GreenNode::new(REF_TYPE, [token.into()]))
                 }
                 _ => None,
             })
@@ -363,19 +366,23 @@ impl Parser<'_> {
         match self.lexer.next(KEYWORD)?.text {
             "func" => {
                 self.add_child(green::KW_FUNC.clone());
-                self.parse_func_type(mark).map(|ty| node(SUB_TYPE, [ty.into()]))
+                self.parse_func_type(mark)
+                    .map(|ty| GreenNode::new(SUB_TYPE, [ty.into()]))
             }
             "struct" => {
                 self.add_child(green::KW_STRUCT.clone());
-                self.parse_struct_type(mark).map(|ty| node(SUB_TYPE, [ty.into()]))
+                self.parse_struct_type(mark)
+                    .map(|ty| GreenNode::new(SUB_TYPE, [ty.into()]))
             }
             "array" => {
                 self.add_child(green::KW_ARRAY.clone());
-                self.parse_array_type(mark).map(|ty| node(SUB_TYPE, [ty.into()]))
+                self.parse_array_type(mark)
+                    .map(|ty| GreenNode::new(SUB_TYPE, [ty.into()]))
             }
             "cont" => {
                 self.add_child(green::KW_CONT.clone());
-                self.parse_cont_type(mark).map(|ty| node(SUB_TYPE, [ty.into()]))
+                self.parse_cont_type(mark)
+                    .map(|ty| GreenNode::new(SUB_TYPE, [ty.into()]))
             }
             "sub" => {
                 self.add_child(green::KW_SUB.clone());
@@ -425,10 +432,10 @@ impl Parser<'_> {
                 "i64" => green::TYPE_I64.clone(),
                 "f32" => green::TYPE_F32.clone(),
                 "f64" => green::TYPE_F64.clone(),
-                "v128" => node(VEC_TYPE, [token.into()]).into(),
+                "v128" => GreenNode::new(VEC_TYPE, [token.into()]).into(),
                 "anyref" | "eqref" | "i31ref" | "structref" | "arrayref" | "nullref" | "funcref" | "nullfuncref"
                 | "exnref" | "nullexnref" | "externref" | "nullexternref" | "contref" | "nullcontref" => {
-                    node(REF_TYPE, [token.into()]).into()
+                    GreenNode::new(REF_TYPE, [token.into()]).into()
                 }
                 _ => {
                     token.kind = ERROR;

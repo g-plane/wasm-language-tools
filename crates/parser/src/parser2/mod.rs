@@ -157,14 +157,6 @@ pub fn is_id_char(c: char) -> bool {
 
 type GreenElement = NodeOrToken<GreenNode, GreenToken>;
 
-fn node<I>(kind: SyntaxKind, children: I) -> GreenNode
-where
-    I: IntoIterator<Item = GreenElement>,
-    I::IntoIter: ExactSizeIterator,
-{
-    GreenNode::new(kind, children)
-}
-
 struct Parser<'s> {
     source: &'s str,
     lexer: Lexer<'s>,

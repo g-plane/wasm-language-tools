@@ -3,7 +3,6 @@ use super::{
     builder::{Checkpoint, NodeMark},
     green, helpers,
     lexer::Token,
-    node,
 };
 use crate::error::{Message, SyntaxError};
 use wat_syntax::{
@@ -192,7 +191,7 @@ impl Parser<'_> {
                 } else if token.text == "-1" {
                     green::IMMEDIATE_INT_NEG_ONE.clone()
                 } else {
-                    node(IMMEDIATE, [token.into()])
+                    GreenNode::new(IMMEDIATE, [token.into()])
                 }
             })
             .or_else(|| {
@@ -203,34 +202,42 @@ impl Parser<'_> {
                             self.report_error_token(token, Message::Description("invalid float literal"));
                         }
                     })
-                    .map(|token| node(IMMEDIATE, [token.into()]))
+                    .map(|token| GreenNode::new(IMMEDIATE, [token.into()]))
             })
-            .or_else(|| self.lexer.eat(IDENT).map(|token| node(IMMEDIATE, [token.into()])))
-            .or_else(|| self.lexer.eat(STRING).map(|token| node(IMMEDIATE, [token.into()])))
+            .or_else(|| {
+                self.lexer
+                    .eat(IDENT)
+                    .map(|token| GreenNode::new(IMMEDIATE, [token.into()]))
+            })
+            .or_else(|| {
+                self.lexer
+                    .eat(STRING)
+                    .map(|token| GreenNode::new(IMMEDIATE, [token.into()]))
+            })
             .or_else(|| {
                 self.lexer
                     .eat(SHAPE_DESCRIPTOR)
-                    .map(|token| node(IMMEDIATE, [token.into()]))
+                    .map(|token| GreenNode::new(IMMEDIATE, [token.into()]))
             })
             .or_else(|| {
                 self.try_parse(Self::parse_ref_type)
-                    .map(|child| node(IMMEDIATE, [child.into()]))
+                    .map(|child| GreenNode::new(IMMEDIATE, [child.into()]))
             })
             .or_else(|| {
                 self.try_parse(Self::parse_type_use)
-                    .map(|child| node(IMMEDIATE, [child.into()]))
+                    .map(|child| GreenNode::new(IMMEDIATE, [child.into()]))
             })
             .or_else(|| {
                 self.try_parse(Self::parse_mem_arg)
-                    .map(|child| node(IMMEDIATE, [child.into()]))
+                    .map(|child| GreenNode::new(IMMEDIATE, [child.into()]))
             })
             .or_else(|| {
                 self.try_parse(Self::parse_heap_type::<true>)
-                    .map(|child| node(IMMEDIATE, [child]))
+                    .map(|child| GreenNode::new(IMMEDIATE, [child]))
             })
             .or_else(|| {
                 self.try_parse(Self::parse_on_clause)
-                    .map(|child| node(IMMEDIATE, [child.into()]))
+                    .map(|child| GreenNode::new(IMMEDIATE, [child.into()]))
             })
     }
 

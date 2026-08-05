@@ -1,4 +1,4 @@
-use super::{GreenElement, node};
+use super::GreenElement;
 use std::sync::LazyLock;
 use wat_syntax::{GreenNode, GreenToken, SyntaxKind};
 
@@ -59,18 +59,18 @@ pub static TYPE_KW_I32: LazyLock<GreenElement> =
 pub static TYPE_KW_I64: LazyLock<GreenElement> =
     LazyLock::new(|| GreenToken::new(SyntaxKind::TYPE_KEYWORD, "i64").into());
 pub static TYPE_I32: LazyLock<GreenElement> =
-    LazyLock::new(|| node(SyntaxKind::NUM_TYPE, [TYPE_KW_I32.clone()]).into());
+    LazyLock::new(|| GreenNode::new(SyntaxKind::NUM_TYPE, [TYPE_KW_I32.clone()]).into());
 pub static TYPE_I64: LazyLock<GreenElement> =
-    LazyLock::new(|| node(SyntaxKind::NUM_TYPE, [TYPE_KW_I64.clone()]).into());
+    LazyLock::new(|| GreenNode::new(SyntaxKind::NUM_TYPE, [TYPE_KW_I64.clone()]).into());
 pub static TYPE_F32: LazyLock<GreenElement> = LazyLock::new(|| {
-    node(
+    GreenNode::new(
         SyntaxKind::NUM_TYPE,
         [GreenToken::new(SyntaxKind::TYPE_KEYWORD, "f32").into()],
     )
     .into()
 });
 pub static TYPE_F64: LazyLock<GreenElement> = LazyLock::new(|| {
-    node(
+    GreenNode::new(
         SyntaxKind::NUM_TYPE,
         [GreenToken::new(SyntaxKind::TYPE_KEYWORD, "f64").into()],
     )
