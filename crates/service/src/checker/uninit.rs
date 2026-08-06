@@ -19,7 +19,7 @@ pub fn check(
     local: &Symbol,
     bump: &Bump,
 ) {
-    if types_analyzer::extract_type(db, &local.ty.0).is_none_or(|ty| ty.defaultable()) {
+    if types_analyzer::extract_type(db, &local.green).is_none_or(|ty| ty.defaultable()) {
         return;
     }
     let cfg = cfa::analyze(db, func.green().clone().into(), func.text_range());

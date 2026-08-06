@@ -59,7 +59,9 @@ impl LanguageService {
                             | SymbolKind::ElemDef => Some(
                                 symbol_table
                                     .find_references_on_def(symbol, true)
-                                    .filter_map(|symbol| create_symbol_highlight(symbol, &root, line_index))
+                                    .filter_map(|symbol| {
+                                        create_symbol_highlight(symbol, &root, line_index, symbol_table)
+                                    })
                                     .collect(),
                             ),
                             SymbolKind::Call
@@ -74,19 +76,25 @@ impl LanguageService {
                             | SymbolKind::ElemRef => Some(
                                 symbol_table
                                     .find_references_on_ref(symbol, true)
-                                    .filter_map(|symbol| create_symbol_highlight(symbol, &root, line_index))
+                                    .filter_map(|symbol| {
+                                        create_symbol_highlight(symbol, &root, line_index, symbol_table)
+                                    })
                                     .collect(),
                             ),
                             SymbolKind::BlockDef => Some(
                                 symbol_table
                                     .find_block_references(key, true)
-                                    .filter_map(|symbol| create_symbol_highlight(symbol, &root, line_index))
+                                    .filter_map(|symbol| {
+                                        create_symbol_highlight(symbol, &root, line_index, symbol_table)
+                                    })
                                     .collect(),
                             ),
                             SymbolKind::BlockRef => symbol_table.resolved.get(&key).map(|def_key| {
                                 symbol_table
                                     .find_block_references(*def_key, true)
-                                    .filter_map(|symbol| create_symbol_highlight(symbol, &root, line_index))
+                                    .filter_map(|symbol| {
+                                        create_symbol_highlight(symbol, &root, line_index, symbol_table)
+                                    })
                                     .collect()
                             }),
                         }
@@ -121,7 +129,12 @@ impl LanguageService {
     }
 }
 
-fn create_symbol_highlight(symbol: &Symbol, root: &SyntaxNode, line_index: &LineIndex) -> Option<DocumentHighlight> {
+fn create_symbol_highlight(
+    symbol: &Symbol,
+    root: &SyntaxNode,
+    line_index: &LineIndex,
+    symbol_table: &SymbolTable,
+) -> Option<DocumentHighlight> {
     symbol
         .amber()
         .tokens_by_kind(|kind| {
@@ -136,7 +149,10 @@ fn create_symbol_highlight(symbol: &Symbol, root: &SyntaxNode, line_index: &Line
                 symbol.key.kind(),
                 SyntaxKind::MODULE_FIELD_IMPORT | SyntaxKind::IMPORT_ITEM
             ) {
-                symbol.ty().tokens_by_kind(SyntaxKind::IDENT).next()
+                symbol_table
+                    .get_type_node_of(symbol)
+                    .tokens_by_kind(SyntaxKind::IDENT)
+                    .next()
             } else {
                 None
             }

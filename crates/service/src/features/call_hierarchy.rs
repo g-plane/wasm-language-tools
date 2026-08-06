@@ -35,7 +35,7 @@ impl LanguageService {
                 detail: Some(types_analyzer::render_func_header(
                     self,
                     symbol.idx.name,
-                    NamedSig::from_func(self, document, symbol.ty()),
+                    NamedSig::from_func(self, document, symbol_table.get_type_node_of(symbol)),
                 )),
                 uri: params.text_document.uri.clone(),
                 range: line_index.convert(symbol.key.text_range())?,
@@ -61,7 +61,7 @@ impl LanguageService {
                         detail: Some(types_analyzer::render_func_header(
                             self,
                             symbol.idx.name,
-                            NamedSig::from_func(self, document, symbol.ty()),
+                            NamedSig::from_func(self, document, symbol_table.get_type_node_of(symbol)),
                         )),
                         uri: params.text_document.uri.clone(),
                         range: line_index.convert(symbol.key.text_range())?,
@@ -120,7 +120,7 @@ impl LanguageService {
                                 detail: Some(types_analyzer::render_func_header(
                                     self,
                                     symbol.idx.name,
-                                    NamedSig::from_func(self, document, symbol.ty()),
+                                    NamedSig::from_func(self, document, symbol_table.get_type_node_of(symbol)),
                                 )),
                                 uri: params.item.uri.clone(),
                                 range: line_index.convert(symbol.key.text_range())?,
@@ -170,7 +170,7 @@ impl LanguageService {
                         detail: Some(types_analyzer::render_func_header(
                             self,
                             def_symbol.idx.name,
-                            NamedSig::from_func(self, document, def_symbol.ty()),
+                            NamedSig::from_func(self, document, symbol_table.get_type_node_of(def_symbol)),
                         )),
                         uri: params.item.uri.clone(),
                         range: line_index.convert(def_symbol.key.text_range())?,

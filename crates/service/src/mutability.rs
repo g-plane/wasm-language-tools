@@ -31,7 +31,7 @@ pub(crate) fn get_mutabilities(
         .values()
         .filter_map(|symbol| match symbol.kind {
             SymbolKind::GlobalDef => {
-                let ty = symbol.ty();
+                let ty = symbol_table.get_type_node_of(symbol);
                 match ty.kind() {
                     SyntaxKind::MODULE_FIELD_GLOBAL => Some((
                         symbol.key,

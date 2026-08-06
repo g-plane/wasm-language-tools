@@ -57,7 +57,16 @@ impl LanguageService {
         let parent = token.parent();
         let symbol = if ExternType::can_cast(parent.kind()) {
             let range = parent.text_range();
-            symbol_table.symbols.values().find(|symbol| symbol.ty.1 == range)?
+            symbol_table.symbols.values().find(|symbol| {
+                matches!(
+                    symbol.kind,
+                    SymbolKind::Func
+                        | SymbolKind::GlobalDef
+                        | SymbolKind::MemoryDef
+                        | SymbolKind::TableDef
+                        | SymbolKind::TagDef
+                ) && symbol_table.get_type_node_of(symbol).text_range() == range
+            })?
         } else {
             symbol_table.symbols.get(&SymbolKey::new(&parent))?
         };
@@ -117,7 +126,7 @@ impl LanguageService {
             })
             .filter_map(|sym| {
                 match sym.key.kind() {
-                    SyntaxKind::MODULE_FIELD_IMPORT | SyntaxKind::IMPORT_ITEM => sym.ty(),
+                    SyntaxKind::MODULE_FIELD_IMPORT | SyntaxKind::IMPORT_ITEM => symbol_table.get_type_node_of(sym),
                     _ => sym.amber(),
                 }
                 .tokens_by_kind(SyntaxKind::IDENT)

@@ -317,11 +317,11 @@ pub fn check(
         Some(("table", "copy")) => {
             let dst = immediates.next()?.to_ptr();
             let dst_symbol = ctx.symbol_table.find_def(dst.into())?;
-            let dst_type = extract_table_ref_type(ctx.db, &dst_symbol.ty.0)?;
+            let dst_type = extract_table_ref_type(ctx.db, ctx.symbol_table.get_type_node_of(dst_symbol).green())?;
 
             let src = immediates.next()?.to_ptr();
             let src_symbol = ctx.symbol_table.find_def(src.into())?;
-            let src_type = extract_table_ref_type(ctx.db, &src_symbol.ty.0)?;
+            let src_type = extract_table_ref_type(ctx.db, ctx.symbol_table.get_type_node_of(src_symbol).green())?;
 
             if !src_type.matches(&dst_type, ctx.db, ctx.document, ctx.module_id) {
                 diagnostics.push(Diagnostic {
@@ -351,7 +351,7 @@ pub fn check(
         Some(("table", "init")) => {
             let symbol = ctx.symbol_table.find_def(immediates.next()?.to_ptr().into())?;
             let (table_symbol, table_type, elem_symbol, elem_type) = if symbol.kind == SymbolKind::TableDef {
-                let table_type = extract_table_ref_type(ctx.db, &symbol.ty.0)?;
+                let table_type = extract_table_ref_type(ctx.db, ctx.symbol_table.get_type_node_of(symbol).green())?;
                 let elem_symbol = ctx.symbol_table.find_def(immediates.next()?.to_ptr().into())?;
                 let elem_type = extract_elem_ref_type(ctx.db, &elem_symbol.green)?;
                 (symbol, table_type, elem_symbol, elem_type)
@@ -363,7 +363,8 @@ pub fn check(
                     .tables
                     .first()
                     .and_then(|key| ctx.symbol_table.symbols.get(key))?;
-                let table_type = extract_table_ref_type(ctx.db, &table_symbol.ty.0)?;
+                let table_type =
+                    extract_table_ref_type(ctx.db, ctx.symbol_table.get_type_node_of(table_symbol).green())?;
                 let elem_type = extract_elem_ref_type(ctx.db, &symbol.green)?;
                 (table_symbol, table_type, symbol, elem_type)
             };
@@ -584,7 +585,7 @@ pub fn check(
                     && let Some(diagnostic) = ctx
                         .symbol_table
                         .find_def(immediate.to_ptr().into())
-                        .map(|func| Sig::from_func(ctx.db, ctx.document, func.ty()))
+                        .map(|func| Sig::from_func(ctx.db, ctx.document, ctx.symbol_table.get_type_node_of(func)))
                         .and_then(|sig| check_return_call_result_type(ctx, node, immediate, &sig.results))
                 {
                     diagnostics.push(diagnostic);
@@ -626,7 +627,9 @@ pub fn check(
             "throw" => {
                 if let Some(immediate) = immediates.next()
                     && let Some(symbol) = ctx.symbol_table.find_def(immediate.to_ptr().into())
-                    && !Sig::from_func(ctx.db, ctx.document, symbol.ty()).results.is_empty()
+                    && !Sig::from_func(ctx.db, ctx.document, ctx.symbol_table.get_type_node_of(symbol))
+                        .results
+                        .is_empty()
                 {
                     diagnostics.push(Diagnostic {
                         range: immediate.text_range(),
@@ -699,7 +702,7 @@ pub fn check(
                     .symbols
                     .get(&SymbolKey::from(immediates.next()?.to_ptr()))?;
                 let tag_def_symbol = ctx.symbol_table.find_def(tag_ref_symbol.key)?;
-                let tag_sig = Sig::from_func(ctx.db, ctx.document, tag_def_symbol.ty());
+                let tag_sig = Sig::from_func(ctx.db, ctx.document, ctx.symbol_table.get_type_node_of(tag_def_symbol));
                 if !tag_sig.params.is_empty() {
                     diagnostics.push(Diagnostic {
                         range: tag_ref_symbol.key.text_range(),
@@ -892,7 +895,7 @@ fn check_table_ref_type(ctx: &DiagnosticCtx, node: AmberNode) -> Option<Diagnost
         && ctx
             .symbol_table
             .find_def(ref_key)
-            .and_then(|symbol| extract_table_ref_type(ctx.db, &symbol.ty.0))
+            .and_then(|symbol| extract_table_ref_type(ctx.db, ctx.symbol_table.get_type_node_of(symbol).green()))
             .is_some_and(|ty| {
                 !ty.matches(
                     &RefType {
@@ -933,7 +936,7 @@ fn check_return_call_result_type(
         .iter()
         .find(|key| key.text_range().contains_range(instr.text_range()))
         .and_then(|key| ctx.symbol_table.symbols.get(key))?;
-    let expected = Sig::from_func(ctx.db, ctx.document, func.ty()).results;
+    let expected = Sig::from_func(ctx.db, ctx.document, ctx.symbol_table.get_type_node_of(func)).results;
     if actual.len() == expected.len()
         && actual
             .iter()
@@ -962,10 +965,10 @@ fn check_on_clause(ctx: &DiagnosticCtx, immediate: AmberNode, ct_results: &[ValT
         .symbols
         .get(&SymbolKey::from(indexes.next()?.to_ptr()))?;
     let tag_def_symbol = ctx.symbol_table.find_def(tag_ref_symbol.key)?;
-    let tag_sig = Sig::from_func(ctx.db, ctx.document, tag_def_symbol.ty());
+    let tag_sig = Sig::from_func(ctx.db, ctx.document, ctx.symbol_table.get_type_node_of(tag_def_symbol));
     if let Some(label_index) = indexes.next() {
         let block_symbol = ctx.symbol_table.find_def(label_index.to_ptr().into())?;
-        let block_sig = Sig::from_func(ctx.db, ctx.document, block_symbol.ty());
+        let block_sig = Sig::from_func(ctx.db, ctx.document, block_symbol.amber());
         if let Some((
             ValType::Ref(RefType {
                 heap_ty: HeapType::Type(cont_idx),

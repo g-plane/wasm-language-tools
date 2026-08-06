@@ -19,6 +19,7 @@ pub(crate) struct SymbolTable<'db> {
     pub resolved: FxHashMap<SymbolKey, SymbolKey>,
     pub def_poi: FxHashMap<SymbolKey, TextRange>,
     pub modules: FxHashMap<SymbolKey, ModuleDefSymbols>,
+    type_nodes: FxHashMap<SymbolKey, (GreenNode, TextRange)>,
 }
 fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) -> SymbolTable<'db> {
     fn create_module_level_symbol<'db>(
@@ -40,7 +41,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     .next()
                     .map(|token| InternIdent::new(db, token.text())),
             },
-            ty: (node.green().clone(), node.text_range()),
         }
     }
     fn create_ref_symbol<'db>(
@@ -73,7 +73,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 region,
                 kind,
                 idx,
-                ty: (node.green().clone(), node.text_range()),
             })
     }
     fn create_optional_ref_symbol<'db>(
@@ -93,7 +92,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     num: Some(0),
                     name: None,
                 },
-                ty: (fallback_node.green().clone(), fallback_node.text_range()),
             })
     }
     fn create_extern_type_symbol<'db>(
@@ -116,7 +114,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     .next()
                     .map(|token| InternIdent::new(db, token.text())),
             },
-            ty: (ty.green().clone(), ty.text_range()),
         }
     }
     fn search_def<'a, 'db>(
@@ -194,6 +191,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
     let mut resolved = FxHashMap::default();
     let mut def_poi = FxHashMap::default();
     let mut modules = FxHashMap::with_capacity_and_hasher(1, FxBuildHasher);
+    let mut type_nodes = FxHashMap::default();
     let bump = Bump::new();
     root.children().enumerate().for_each(|(module_id, module)| {
         let module_key = module.into();
@@ -211,7 +209,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         .next()
                         .map(|token| InternIdent::new(db, token.text())),
                 },
-                ty: (module.green().clone(), module.text_range()),
             },
         );
         def_poi.insert(module_key, infer_def_poi(module));
@@ -292,7 +289,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                                 Some(name)
                                             },
                                         },
-                                        ty: (node.green().clone(), node.text_range()),
                                     },
                                 );
                                 def_poi.insert(key, ident.text_range());
@@ -312,7 +308,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                                 num: Some(local_idx_gen.pull()),
                                                 name: None,
                                             },
-                                            ty: (val_type.green().clone(), val_type.text_range()),
                                         },
                                     )
                                 }));
@@ -336,7 +331,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                             num: Some(idx),
                                             name: Some(name),
                                         },
-                                        ty: (node.green().clone(), node.text_range()),
                                     },
                                 );
                                 def_poi.insert(key, ident.text_range());
@@ -356,7 +350,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                                 num: Some(local_idx_gen.pull()),
                                                 name: None,
                                             },
-                                            ty: (val_type.green().clone(), val_type.text_range()),
                                         },
                                     )
                                 }));
@@ -405,7 +398,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                             num: Some(idx),
                                             name: Some(name),
                                         },
-                                        ty: (node.green().clone(), node.text_range()),
                                     },
                                 );
                                 def_poi.insert(key, ident.text_range());
@@ -425,7 +417,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                                 num: Some(field_idx_gen.pull()),
                                                 name: None,
                                             },
-                                            ty: (field_type.green().clone(), field_type.text_range()),
                                         },
                                     )
                                 }));
@@ -739,7 +730,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                         .next()
                                         .map(|token| InternIdent::new(db, token.text())),
                                 },
-                                ty: (node.green().clone(), node.text_range()),
                             }) {
                                 def_poi.insert(symbol.key, infer_def_poi(node));
                                 symbols.insert(symbol.key, symbol);
@@ -840,6 +830,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                             create_extern_type_symbol(db, node, idx, SymbolKind::Func, module_key, ty);
                                         funcs.push((symbol.key, symbol.idx.name));
                                         def_poi.insert(symbol.key, poi);
+                                        type_nodes.insert(symbol.key, (ty.green().clone(), ty.text_range()));
                                         symbols.insert(symbol.key, symbol);
                                     }
                                     SyntaxKind::EXTERN_TYPE_GLOBAL => {
@@ -854,6 +845,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                         );
                                         globals.push((symbol.key, symbol.idx.name));
                                         def_poi.insert(symbol.key, poi);
+                                        type_nodes.insert(symbol.key, (ty.green().clone(), ty.text_range()));
                                         symbols.insert(symbol.key, symbol);
                                     }
                                     SyntaxKind::EXTERN_TYPE_MEMORY => {
@@ -868,6 +860,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                         );
                                         memories.push((symbol.key, symbol.idx.name));
                                         def_poi.insert(symbol.key, poi);
+                                        type_nodes.insert(symbol.key, (ty.green().clone(), ty.text_range()));
                                         symbols.insert(symbol.key, symbol);
                                     }
                                     SyntaxKind::EXTERN_TYPE_TABLE => {
@@ -882,6 +875,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                         );
                                         tables.push((symbol.key, symbol.idx.name));
                                         def_poi.insert(symbol.key, poi);
+                                        type_nodes.insert(symbol.key, (ty.green().clone(), ty.text_range()));
                                         symbols.insert(symbol.key, symbol);
                                     }
                                     SyntaxKind::EXTERN_TYPE_TAG => {
@@ -896,6 +890,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                         );
                                         tags.push((symbol.key, symbol.idx.name));
                                         def_poi.insert(symbol.key, poi);
+                                        type_nodes.insert(symbol.key, (ty.green().clone(), ty.text_range()));
                                         symbols.insert(symbol.key, symbol);
                                     }
                                     _ => {}
@@ -1105,6 +1100,7 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
         resolved,
         def_poi,
         modules,
+        type_nodes,
     }
 }
 
@@ -1196,6 +1192,21 @@ impl<'db> SymbolTable<'db> {
             .values()
             .find(|symbol| symbol.kind == SymbolKind::Module && symbol.idx.num == Some(module_id))
     }
+
+    pub fn get_type_node_of(&'db self, symbol: &'db Symbol) -> AmberNode<'db> {
+        std::debug_assert_matches!(
+            symbol.kind,
+            SymbolKind::Func
+                | SymbolKind::GlobalDef
+                | SymbolKind::MemoryDef
+                | SymbolKind::TableDef
+                | SymbolKind::TagDef
+        );
+        self.type_nodes
+            .get(&symbol.key)
+            .map(|(green, range)| AmberNode::new(green, range.start()))
+            .unwrap_or(symbol.amber())
+    }
 }
 #[salsa::tracked]
 impl<'db> SymbolTable<'db> {
@@ -1239,29 +1250,10 @@ pub struct Symbol<'db> {
     pub region: SymbolKey,
     pub kind: SymbolKind,
     pub idx: Idx<'db>,
-    pub ty: (GreenNode, TextRange),
 }
 impl Symbol<'_> {
     pub fn amber(&self) -> AmberNode<'_> {
         AmberNode::new(&self.green, self.key.0.text_range().start())
-    }
-    pub fn ty(&self) -> AmberNode<'_> {
-        debug_assert!(matches!(
-            self.kind,
-            SymbolKind::Func
-                | SymbolKind::Param
-                | SymbolKind::Local
-                | SymbolKind::Type
-                | SymbolKind::GlobalDef
-                | SymbolKind::MemoryDef
-                | SymbolKind::TableDef
-                | SymbolKind::BlockDef
-                | SymbolKind::FieldDef
-                | SymbolKind::TagDef
-                | SymbolKind::DataDef
-                | SymbolKind::ElemDef
-        ));
-        AmberNode::new(&self.ty.0, self.ty.1.start())
     }
 }
 impl PartialEq for Symbol<'_> {

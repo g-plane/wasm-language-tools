@@ -226,18 +226,18 @@ fn create_symbol_hover(
             SymbolKind::TypeUse => symbol_table
                 .find_def(symbol.key)
                 .map(|symbol| create_type_def_hover(db, uri, document, symbol_table, symbol)),
-            SymbolKind::GlobalDef => Some(create_global_def_hover(db, document, symbol)),
+            SymbolKind::GlobalDef => Some(create_global_def_hover(db, document, symbol_table, symbol)),
             SymbolKind::GlobalRef => symbol_table
                 .find_def(symbol.key)
-                .map(|symbol| create_global_def_hover(db, document, symbol)),
-            SymbolKind::MemoryDef => Some(create_memory_def_hover(db, symbol)),
+                .map(|symbol| create_global_def_hover(db, document, symbol_table, symbol)),
+            SymbolKind::MemoryDef => Some(create_memory_def_hover(db, symbol_table, symbol)),
             SymbolKind::MemoryRef => symbol_table
                 .find_def(symbol.key)
-                .map(|symbol| create_memory_def_hover(db, symbol)),
-            SymbolKind::TableDef => Some(create_table_def_hover(db, symbol)),
+                .map(|symbol| create_memory_def_hover(db, symbol_table, symbol)),
+            SymbolKind::TableDef => Some(create_table_def_hover(db, symbol_table, symbol)),
             SymbolKind::TableRef => symbol_table
                 .find_def(symbol.key)
-                .map(|symbol| create_table_def_hover(db, symbol)),
+                .map(|symbol| create_table_def_hover(db, symbol_table, symbol)),
             SymbolKind::BlockDef => Some(create_block_hover(db, symbol, document)),
             SymbolKind::BlockRef => symbol_table
                 .find_def(symbol.key)
@@ -246,10 +246,10 @@ fn create_symbol_hover(
             SymbolKind::FieldRef => symbol_table
                 .find_def(symbol.key)
                 .map(|symbol| create_field_def_hover(db, symbol, document)),
-            SymbolKind::TagDef => Some(create_tag_def_hover(db, symbol, document)),
+            SymbolKind::TagDef => Some(create_tag_def_hover(db, document, symbol_table, symbol)),
             SymbolKind::TagRef => symbol_table
                 .find_def(symbol.key)
-                .map(|symbol| create_tag_def_hover(db, symbol, document)),
+                .map(|symbol| create_tag_def_hover(db, document, symbol_table, symbol)),
             SymbolKind::DataDef => Some(create_data_def_hover(db, symbol)),
             SymbolKind::DataRef => symbol_table
                 .find_def(symbol.key)
@@ -271,7 +271,11 @@ fn create_func_hover(
     let doc = helpers::get_doc_comment(symbol, symbol_table).filter(|doc| !doc.is_empty());
     let mut content = format!(
         "```wat\n{}\n```",
-        types_analyzer::render_func_header(db, symbol.idx.name, NamedSig::from_func(db, document, symbol.ty()))
+        types_analyzer::render_func_header(
+            db,
+            symbol.idx.name,
+            NamedSig::from_func(db, document, symbol_table.get_type_node_of(symbol)),
+        )
     );
     if let Some(doc) = doc {
         content.push_str("\n---\n");
@@ -298,7 +302,7 @@ fn create_param_or_local_hover(db: &dyn salsa::Database, symbol: &Symbol) -> Mar
         content.push(' ');
         content.push_str(name.ident(db));
     }
-    if let Some(ty) = types_analyzer::extract_type(db, &symbol.ty.0) {
+    if let Some(ty) = types_analyzer::extract_type(db, &symbol.green) {
         content.push(' ');
         let _ = write!(content, "{}", ty.render(db));
     }
@@ -309,7 +313,12 @@ fn create_param_or_local_hover(db: &dyn salsa::Database, symbol: &Symbol) -> Mar
     }
 }
 
-fn create_global_def_hover(db: &dyn salsa::Database, document: Document, symbol: &Symbol) -> MarkupContent {
+fn create_global_def_hover(
+    db: &dyn salsa::Database,
+    document: Document,
+    symbol_table: &SymbolTable,
+    symbol: &Symbol,
+) -> MarkupContent {
     let mut content = "(global".to_string();
     if let Some(name) = symbol.idx.name {
         content.push(' ');
@@ -322,7 +331,7 @@ fn create_global_def_hover(db: &dyn salsa::Database, document: Document, symbol:
     if mutable {
         content.push_str(" (mut");
     }
-    if let Some(ty) = types_analyzer::extract_global_type(db, &symbol.ty.0) {
+    if let Some(ty) = types_analyzer::extract_global_type(db, symbol_table.get_type_node_of(symbol).green()) {
         content.push(' ');
         let _ = write!(&mut content, "{}", ty.render(db));
     }
@@ -336,14 +345,14 @@ fn create_global_def_hover(db: &dyn salsa::Database, document: Document, symbol:
     }
 }
 
-fn create_memory_def_hover(db: &dyn salsa::Database, symbol: &Symbol) -> MarkupContent {
+fn create_memory_def_hover(db: &dyn salsa::Database, symbol_table: &SymbolTable, symbol: &Symbol) -> MarkupContent {
     let mut content = "(memory".to_string();
     if let Some(name) = symbol.idx.name {
         content.push(' ');
         content.push_str(name.ident(db));
     }
-    if let Some(limits) = symbol
-        .ty()
+    if let Some(limits) = symbol_table
+        .get_type_node_of(symbol)
         .children_by_kind(SyntaxKind::MEM_TYPE)
         .next()
         .and_then(|mem_type| mem_type.children_by_kind(SyntaxKind::LIMITS).next())
@@ -359,14 +368,14 @@ fn create_memory_def_hover(db: &dyn salsa::Database, symbol: &Symbol) -> MarkupC
     }
 }
 
-fn create_table_def_hover(db: &dyn salsa::Database, symbol: &Symbol) -> MarkupContent {
+fn create_table_def_hover(db: &dyn salsa::Database, symbol_table: &SymbolTable, symbol: &Symbol) -> MarkupContent {
     let mut content = "(table".to_string();
     if let Some(name) = symbol.idx.name {
         content.push(' ');
         content.push_str(name.ident(db));
     }
-    if let Some(limits) = symbol
-        .ty()
+    if let Some(limits) = symbol_table
+        .get_type_node_of(symbol)
         .children_by_kind(SyntaxKind::TABLE_TYPE)
         .next()
         .and_then(|table_type| table_type.children_by_kind(SyntaxKind::LIMITS).next())
@@ -374,7 +383,7 @@ fn create_table_def_hover(db: &dyn salsa::Database, symbol: &Symbol) -> MarkupCo
     {
         let _ = write!(&mut content, " {limits}");
     }
-    if let Some(ref_type) = types_analyzer::extract_table_ref_type(db, &symbol.ty.0) {
+    if let Some(ref_type) = types_analyzer::extract_table_ref_type(db, symbol_table.get_type_node_of(symbol).green()) {
         let _ = write!(content, " {}", ref_type.render(db));
     }
     content.push(')');
@@ -469,7 +478,7 @@ fn create_block_hover(db: &dyn salsa::Database, symbol: &Symbol, document: Docum
         db,
         symbol.key.kind(),
         symbol.idx.name,
-        NamedSig::from_func(db, document, symbol.ty()),
+        NamedSig::from_func(db, document, symbol.amber()),
     );
     MarkupContent {
         kind: MarkupKind::Markdown,
@@ -493,12 +502,17 @@ fn create_field_def_hover(db: &dyn salsa::Database, symbol: &Symbol, document: D
     }
 }
 
-fn create_tag_def_hover(db: &dyn salsa::Database, symbol: &Symbol, document: Document) -> MarkupContent {
+fn create_tag_def_hover(
+    db: &dyn salsa::Database,
+    document: Document,
+    symbol_table: &SymbolTable,
+    symbol: &Symbol,
+) -> MarkupContent {
     let content = types_analyzer::render_header(
         db,
         "tag",
         symbol.idx.name,
-        NamedSig::from_func(db, document, symbol.ty()),
+        NamedSig::from_func(db, document, symbol_table.get_type_node_of(symbol)),
     );
     MarkupContent {
         kind: MarkupKind::Markdown,
