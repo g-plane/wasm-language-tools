@@ -1,6 +1,6 @@
 use crate::{
     LanguageService,
-    binder::{SymbolKey, SymbolKind, SymbolTable},
+    binder::{IdxKind, SymbolKey, SymbolKind, SymbolTable},
     helpers::LineIndexExt,
     idx::InternIdent,
 };
@@ -61,6 +61,7 @@ impl LanguageService {
         } else {
             symbol_table.symbols.get(&SymbolKey::new(&parent))?
         };
+        let idx_kind = IdxKind::from(symbol.kind);
         let text_edits = symbol_table
             .symbols
             .values()
@@ -88,7 +89,7 @@ impl LanguageService {
                 | SymbolKind::ElemRef
                 | SymbolKind::Module => {
                     sym.region == symbol.region
-                        && sym.idx_kind == symbol.idx_kind
+                        && IdxKind::from(sym.kind) == idx_kind
                         && sym.idx.name.is_some_and(|name| name == old_name)
                 }
                 SymbolKind::BlockDef => {

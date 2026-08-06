@@ -40,7 +40,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     .next()
                     .map(|token| InternIdent::new(db, token.text())),
             },
-            idx_kind: kind.into(),
             ty: (node.green().clone(), node.text_range()),
         }
     }
@@ -74,7 +73,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                 region,
                 kind,
                 idx,
-                idx_kind: kind.into(),
                 ty: (node.green().clone(), node.text_range()),
             })
     }
@@ -95,7 +93,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     num: Some(0),
                     name: None,
                 },
-                idx_kind: kind.into(),
                 ty: (fallback_node.green().clone(), fallback_node.text_range()),
             })
     }
@@ -119,7 +116,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                     .next()
                     .map(|token| InternIdent::new(db, token.text())),
             },
-            idx_kind: kind.into(),
             ty: (ty.green().clone(), ty.text_range()),
         }
     }
@@ -215,7 +211,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                         .next()
                         .map(|token| InternIdent::new(db, token.text())),
                 },
-                idx_kind: IdxKind::Module,
                 ty: (module.green().clone(), module.text_range()),
             },
         );
@@ -297,7 +292,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                                 Some(name)
                                             },
                                         },
-                                        idx_kind: IdxKind::Local,
                                         ty: (node.green().clone(), node.text_range()),
                                     },
                                 );
@@ -318,7 +312,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                                 num: Some(local_idx_gen.pull()),
                                                 name: None,
                                             },
-                                            idx_kind: IdxKind::Local,
                                             ty: (val_type.green().clone(), val_type.text_range()),
                                         },
                                     )
@@ -343,7 +336,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                             num: Some(idx),
                                             name: Some(name),
                                         },
-                                        idx_kind: IdxKind::Local,
                                         ty: (node.green().clone(), node.text_range()),
                                     },
                                 );
@@ -364,7 +356,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                                 num: Some(local_idx_gen.pull()),
                                                 name: None,
                                             },
-                                            idx_kind: IdxKind::Local,
                                             ty: (val_type.green().clone(), val_type.text_range()),
                                         },
                                     )
@@ -414,7 +405,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                             num: Some(idx),
                                             name: Some(name),
                                         },
-                                        idx_kind: IdxKind::Field,
                                         ty: (node.green().clone(), node.text_range()),
                                     },
                                 );
@@ -435,7 +425,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                                 num: Some(field_idx_gen.pull()),
                                                 name: None,
                                             },
-                                            idx_kind: IdxKind::Field,
                                             ty: (field_type.green().clone(), field_type.text_range()),
                                         },
                                     )
@@ -750,7 +739,6 @@ fn create_symbol_table<'db>(db: &'db dyn salsa::Database, document: Document) ->
                                         .next()
                                         .map(|token| InternIdent::new(db, token.text())),
                                 },
-                                idx_kind: IdxKind::Block,
                                 ty: (node.green().clone(), node.text_range()),
                             }) {
                                 def_poi.insert(symbol.key, infer_def_poi(node));
@@ -1163,7 +1151,7 @@ impl<'db> SymbolTable<'db> {
         self.symbols.values().filter(move |symbol| {
             if symbol.kind == def_symbol.kind {
                 with_decl && symbol == &def_symbol
-            } else if symbol.idx_kind == def_symbol.idx_kind {
+            } else if IdxKind::from(symbol.kind) == IdxKind::from(def_symbol.kind) {
                 self.resolved
                     .get(&symbol.key)
                     .is_some_and(|def_key| def_key == &def_symbol.key)
@@ -1184,7 +1172,7 @@ impl<'db> SymbolTable<'db> {
             if symbol.kind == ref_symbol.kind {
                 symbol.region == ref_symbol.region
                     && self.resolved.get(&symbol.key).zip(def_key).is_some_and(|(a, b)| a == b)
-            } else if symbol.idx_kind == ref_symbol.idx_kind {
+            } else if IdxKind::from(symbol.kind) == IdxKind::from(ref_symbol.kind) {
                 with_decl && def_key.is_some_and(|def_key| def_key == &symbol.key)
             } else {
                 false
@@ -1251,7 +1239,6 @@ pub struct Symbol<'db> {
     pub region: SymbolKey,
     pub kind: SymbolKind,
     pub idx: Idx<'db>,
-    pub idx_kind: IdxKind,
     pub ty: (GreenNode, TextRange),
 }
 impl Symbol<'_> {

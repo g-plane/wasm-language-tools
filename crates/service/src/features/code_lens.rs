@@ -35,7 +35,7 @@ impl LanguageService {
                         command: None,
                         data: serde_json::to_value(CodeLensData {
                             uri: params.text_document.uri.clone(),
-                            kind: symbol.idx_kind,
+                            kind: IdxKind::from(symbol.kind),
                         })
                         .ok(),
                     })
@@ -59,7 +59,7 @@ impl LanguageService {
         let def_symbol = symbol_table
             .symbols
             .values()
-            .find(|symbol| symbol.idx_kind == data.kind && symbol.key.text_range() == range)?;
+            .find(|symbol| IdxKind::from(symbol.kind) == data.kind && symbol.key.text_range() == range)?;
         let locations = symbol_table
             .find_references_on_def(def_symbol, false)
             .filter_map(|symbol| {

@@ -1,6 +1,6 @@
 use super::{Diagnostic, RelatedInformation};
 use crate::{
-    binder::{SymbolKind, SymbolTable},
+    binder::{IdxKind, SymbolKind, SymbolTable},
     document::Document,
     helpers::{BumpCollectionsExt, BumpHashMap},
     imex,
@@ -38,7 +38,7 @@ pub fn check(
             })
             .fold(BumpHashMap::new_in(bump), |mut map, symbol| {
                 if let Some(name) = symbol.idx.name {
-                    map.entry((name, &symbol.region, symbol.idx_kind))
+                    map.entry((name, &symbol.region, IdxKind::from(symbol.kind)))
                         .or_insert_with(|| BumpVec::with_capacity_in(1, bump))
                         .push(symbol);
                 }
